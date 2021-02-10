@@ -106,7 +106,7 @@ public class TestUtils {
      * This does not wait for potential hooks which will be created.
      */
     public static void waitForClassInstrumentations(Class<?>... clazz) {
-        waitForClassInstrumentations(Arrays.asList(clazz), false, 10, TimeUnit.SECONDS);
+        waitForClassInstrumentations(Arrays.asList(clazz), false, 15, TimeUnit.SECONDS);
     }
 
     /**
@@ -144,13 +144,18 @@ public class TestUtils {
                 }
             });
         } catch (ConditionTimeoutException ex) {
+            int missingClassCount = 0;
             for (Class<?> clazz : clazzes) {
                 Long timeStamp = instrumentationTimeStamp.get(clazz);
                 if (timeStamp == null) {
                     System.out.println(clazz.getName() + " was not instrumented!");
+                    missingClassCount++;
                 }
             }
-            throw ex;
+
+            if (missingClassCount > 0) { // it may be the case that all required classes are loaded now
+                throw ex;
+            }
         }
     }
 

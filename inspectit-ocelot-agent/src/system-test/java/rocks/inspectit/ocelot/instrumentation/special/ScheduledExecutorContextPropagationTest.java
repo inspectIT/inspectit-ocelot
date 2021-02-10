@@ -2,10 +2,9 @@ package rocks.inspectit.ocelot.instrumentation.special;
 
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import io.opencensus.tags.Tag;
+import io.opencensus.tags.Tags;
+import org.junit.jupiter.api.*;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
 import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestCallable;
 import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestRunnable;
@@ -32,7 +31,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
     @BeforeAll
     public static void beforeAll() throws ClassNotFoundException {
         Executors.newSingleThreadScheduledExecutor().schedule(Math::random, 1, TimeUnit.MILLISECONDS);
-        TestUtils.waitForClassInstrumentations(ScheduledThreadPoolExecutor.class);
+        TestUtils.waitForClassInstrumentations(ScheduledThreadPoolExecutor.class, TestRunnable.class, TestCallable.class);
     }
 
     @BeforeEach
@@ -41,6 +40,11 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         // because a thread is started, thus, it is correlated due to the Thread.start correlation
         executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.submit(Math::random).get();
+    }
+
+    @AfterEach
+    public void afterEach() {
+        executorService.shutdown();
     }
 
     @Nested
@@ -72,6 +76,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
 
             Runnable runnable = HelperClasses.getRunnableAsAnonymous(refTags);
+            TestUtils.waitForClassInstrumentations(runnable.getClass());
 
             ScheduledFuture<?> schedule;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
@@ -131,6 +136,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             TagValue tagValue = TagValue.create("test-tag-value");
 
             Callable<Iterator<Tag>> callable = HelperClasses.getCallableAsAnonymous();
+            TestUtils.waitForClassInstrumentations(callable.getClass());
 
             ScheduledFuture<Iterator<Tag>> future;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
@@ -214,6 +220,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
                     interationCount.countDown();
                 }
             };
+            TestUtils.waitForClassInstrumentations(runnable.getClass());
 
             ScheduledFuture future;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
@@ -246,6 +253,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
                 iteratorList.add(iter);
                 interationCount.countDown();
             });
+            TestUtils.waitForClassInstrumentations(runnable.getClass());
 
             ScheduledFuture future;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
@@ -317,6 +325,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
                     interationCount.countDown();
                 }
             };
+            TestUtils.waitForClassInstrumentations(runnable.getClass()); // wait for anonymous class instrumentation
 
             ScheduledFuture future;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {

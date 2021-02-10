@@ -13,7 +13,8 @@ import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationC
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 /**
- * Special sensor for passing the sensor to new threads. This sensor will pass the context when directly using the {@link Thread} class or classes extending it.
+ * Special sensor for passing the sensor to new threads. This sensor will pass the context when directly using the
+ * {@link Thread} class or classes extending it.
  */
 @Component
 public class ThreadStartContextPropagationSensor implements SpecialSensor {
@@ -22,7 +23,7 @@ public class ThreadStartContextPropagationSensor implements SpecialSensor {
 
     @Override
     public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
-        val type = TypeDescription.ForLoadedType.of(clazz);
+        TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
         return settings.getSource().getSpecial().isThreadStartContextPropagation() && CLASSES_MATCHER.matches(type);
     }
 
@@ -47,8 +48,9 @@ public class ThreadStartContextPropagationSensor implements SpecialSensor {
 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.This Thread thiz) {
-//            Instances.contextManager.storeContextForThread(thread);
-            Instances.contextManager.storeContext(thiz, true);
+            if (!Instances.contextManager.insideCorrelation()) {
+                Instances.contextManager.storeContext(thiz, true);
+            }
         }
 
     }
@@ -62,15 +64,11 @@ public class ThreadStartContextPropagationSensor implements SpecialSensor {
 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.This Thread thiz) {
-            // this prevents context restoring in case the run method is called directly
             if (Thread.currentThread() == thiz) {
-//                Instances.contextManager.attachContextToThread(thread);
                 // We don't have to remove the context from the thread once finished because a thread cannot be started
                 // twice, thus, we don't care about the context-tuple
                 Instances.contextManager.attachContext(thiz);
-//                Instances.logTraceCorrelator.applyCorrelationToMDC();
             }
         }
-
     }
 }

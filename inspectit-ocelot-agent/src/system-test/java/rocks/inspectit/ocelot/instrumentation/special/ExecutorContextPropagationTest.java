@@ -2,12 +2,12 @@ package rocks.inspectit.ocelot.instrumentation.special;
 
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import io.opencensus.tags.Tag;
+import io.opencensus.tags.Tags;
+import org.junit.jupiter.api.*;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
 import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestCallable;
+import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestRunnable;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.Arrays;
@@ -28,7 +28,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
     @BeforeAll
     public static void beforeAll() {
-        TestUtils.waitForClassInstrumentations(ThreadPoolExecutor.class);
+        TestUtils.waitForClassInstrumentations(ThreadPoolExecutor.class, TestRunnable.class, TestCallable.class);
     }
 
     @BeforeEach
@@ -37,6 +37,11 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
         // because a thread is started, thus, it is correlated due to the Thread.start correlation
         executorService = Executors.newSingleThreadExecutor();
         executorService.submit(Math::random).get();
+    }
+
+    @AfterEach
+    public void afterEach() {
+        executorService.shutdown();
     }
 
     @Nested
@@ -54,6 +59,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
                 taskFuture = executorService.submit(runnable);
             }
+
             taskFuture.get();
 
             assertThat(refTags.get()).hasSize(1)
@@ -68,6 +74,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
             AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
 
             Runnable runnable = HelperClasses.getRunnableAsAnonymous(refTags);
+            TestUtils.waitForClassInstrumentations(runnable.getClass());
 
             Future<?> taskFuture;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
@@ -140,6 +147,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
                     latch.countDown();
                 }
             };
+            TestUtils.waitForClassInstrumentations(runnable.getClass());
 
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
                 executorService.execute(runnable);
@@ -159,7 +167,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
             AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
             CountDownLatch latch = new CountDownLatch(1);
 
-            Runnable runnable = new HelperClasses.TestRunnable(unused -> {
+            Runnable runnable = new TestRunnable(unused -> {
                 refTags.set(InternalUtils.getTags(Tags.getTagger().getCurrentTagContext()));
                 latch.countDown();
             });
@@ -202,6 +210,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
             TagValue tagValue = TagValue.create("tag_value");
 
             Callable<Iterator<Tag>> callable = HelperClasses.getCallableAsAnonymous();
+            TestUtils.waitForClassInstrumentations(callable.getClass());
 
             Future<Iterator<Tag>> result;
             try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {

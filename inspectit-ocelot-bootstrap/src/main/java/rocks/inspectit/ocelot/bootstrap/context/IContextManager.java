@@ -11,6 +11,9 @@ import java.util.concurrent.Callable;
 public interface IContextManager {
 
     boolean enterCorrelation();
+
+    boolean insideCorrelation();
+
     void exitCorrelation();
 
     void storeContext(Object target, boolean invalidateAfterRestore);
@@ -35,20 +38,6 @@ public interface IContextManager {
      * @return the wrapped callable
      */
     <T> Callable<T> wrap(Callable<T> callable);
-
-    /**
-     * Stores the current context in relation to the given thread.
-     *
-     * @param thread The thread related to the current context.
-     */
-    void storeContextForThread(Thread thread);
-
-    /**
-     * Attaches/restores the context which is stored for the given thread to the given thread.
-     *
-     * @param thread The given thread which context should be restored.
-     */
-    void attachContextToThread(Thread thread);
 
     /**
      * Creates a new context which is not yet active.

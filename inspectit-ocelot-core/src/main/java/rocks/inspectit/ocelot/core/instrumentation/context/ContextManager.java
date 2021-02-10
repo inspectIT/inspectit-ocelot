@@ -7,6 +7,7 @@ import io.opencensus.tags.Tags;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
+import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.ContextTuple;
 import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.core.config.spring.BootstrapInitializerConfiguration;
@@ -59,20 +60,6 @@ public class ContextManager implements IContextManager {
     }
 
     @Override
-    public void storeContextForThread(Thread thread) {
-        storedContexts.put(thread, Context.current());
-    }
-
-    @Override
-    public void attachContextToThread(Thread thread) {
-        Context context = storedContexts.getIfPresent(thread);
-        if (context != null) {
-            storedContexts.invalidate(thread);
-            context.attach();
-        }
-    }
-
-    @Override
     public InspectitContextImpl enterNewContext() {
         return InspectitContextImpl.createFromCurrent(commonTagsManager.getCommonTagValueMap(), configProvider.getCurrentConfig().getPropagationMetaData(), IS_OPEN_CENSUS_ON_BOOTSTRAP);
     }
@@ -90,8 +77,14 @@ public class ContextManager implements IContextManager {
             if (invalidationContext.invalidate) {
                 contextCache.invalidate(target);
             }
+            // restore/attach context to current runtime/thread
             Context previous = invalidationContext.context.attach();
-            return new ContextTupleImpl(previous, invalidationContext.context);
+
+            // once the context is attached, we inject the trace id into the MDCs for log-trace correlation
+            AutoCloseable undoTraceInjection = Instances.logTraceCorrelator.injectTraceIdIntoMdc();
+
+            // data we need once the method exits in order to undo the previous changes
+            return new ContextTupleImpl(previous, invalidationContext.context, undoTraceInjection);
         }
         return null;
     }
@@ -100,6 +93,14 @@ public class ContextManager implements IContextManager {
     public void detachContext(ContextTuple contextTuple) {
         if (contextTuple != null) {
             ContextTupleImpl tuple = (ContextTupleImpl) contextTuple;
+
+            // restore previous MDC content
+            try {
+                tuple.undoTraceInjection.close();
+            } catch (Exception ignored) {
+            }
+
+            // restore previous context
             tuple.current.detach(tuple.previous);
         }
     }
@@ -112,6 +113,11 @@ public class ContextManager implements IContextManager {
             correlationFlag.set(true);
             return true;
         }
+    }
+
+    @Override
+    public boolean insideCorrelation() {
+        return correlationFlag.get();
     }
 
     @Override
@@ -136,5 +142,8 @@ public class ContextManager implements IContextManager {
 
         @NonNull
         private final Context current;
+
+        @NonNull
+        private final AutoCloseable undoTraceInjection;
     }
 }

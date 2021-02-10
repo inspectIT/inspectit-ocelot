@@ -22,6 +22,11 @@ public class NoopContextManager implements IContextManager {
     }
 
     @Override
+    public boolean insideCorrelation() {
+        return false;
+    }
+
+    @Override
     public void exitCorrelation() {
     }
 
@@ -46,14 +51,6 @@ public class NoopContextManager implements IContextManager {
     @Override
     public <T> Callable<T> wrap(Callable<T> callable) {
         return callable;
-    }
-
-    @Override
-    public void storeContextForThread(Thread thread) {
-    }
-
-    @Override
-    public void attachContextToThread(Thread thread) {
     }
 
     @Override

@@ -16,7 +16,7 @@ public final class HelperClasses {
     private HelperClasses() {
     }
 
-    static class TestRunnable implements Runnable {
+    public static class TestRunnable implements Runnable {
 
         private final Consumer<Void> callback;
 
@@ -30,7 +30,7 @@ public final class HelperClasses {
         }
     }
 
-    static class TestCallable<T> implements Callable<T> {
+    public static class TestCallable<T> implements Callable<T> {
 
         private final Function<Void, T> callback;
 

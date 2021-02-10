@@ -51,8 +51,8 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
     }
 
     /**
-     * Advice for wrapping the first method argument - which has to be a {@link Runnable} - into a Runnable for attaching and detaching the current context.
-     * See also {@link io.grpc.Context#wrap(Runnable)}
+     * Advice for wrapping the first method argument - which has to be a {@link Runnable} - into a Runnable for attaching
+     * and detaching the current context. See also {@link io.grpc.Context#wrap(Runnable)}.
      */
     private static class ScheduledExecutorRunnableAdvice {
 
@@ -62,7 +62,7 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
             if (Instances.contextManager.enterCorrelation()) {
-                if (runnable.getClass().isAnonymousClass() || runnable.getClass().getName().contains("$$Lambda$")) {
+                if (runnable.getClass().getName().contains("$$Lambda$")) {
                     runnable = Instances.logTraceCorrelator.wrap(runnable);
                     runnable = Instances.contextManager.wrap(runnable);
                 } else {
@@ -85,8 +85,7 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
             if (Instances.contextManager.enterCorrelation()) {
-                System.out.println("sch. exec. rate run");
-                if (runnable.getClass().isAnonymousClass() || runnable.getClass().getName().contains("$$Lambda$")) {
+                if (runnable.getClass().getName().contains("$$Lambda$")) {
                     runnable = Instances.logTraceCorrelator.wrap(runnable);
                     runnable = Instances.contextManager.wrap(runnable);
                 } else {
@@ -113,7 +112,7 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Callable callable) {
             if (Instances.contextManager.enterCorrelation()) {
-                if (callable.getClass().isAnonymousClass() || callable.getClass().getName().contains("$$Lambda$")) {
+                if (callable.getClass().getName().contains("$$Lambda$")) {
                     callable = Instances.logTraceCorrelator.wrap(callable);
                     callable = Instances.contextManager.wrap(callable);
                 } else {
