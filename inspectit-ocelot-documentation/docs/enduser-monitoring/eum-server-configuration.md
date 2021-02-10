@@ -115,7 +115,7 @@ In contrast to the quantiles, it is possible to drop values of a certain time wi
 Please read the section on [Quantile Views](../metrics/custom-metrics#quantile-views) to get an insight into the data collection. The Smoothed Average View is based on the same principle.
 :::
 
-The actual configurations are extended in the EUM server by the following properties:
+The actual [configurations](../metrics/custom-metrics#configurations) are extended in the EUM server by the following properties:
 |Config Property|Default| Description
 |---|---|---|
 |`aggregation`|`LAST_VALUE`|Specifies how the measurement data is aggregated in this view. Possible values are `LAST_VALUE`, `COUNT`, `SUM`, `HISTOGRAM` `QUANTILES` and `SMOOTHED_AVERAGE`. Except for `QUANTILES` and `SMOOTHED_AVERAGE`, these correspond to the [OpenCensus Aggregations](https://opencensus.io/stats/view/#aggregations).
