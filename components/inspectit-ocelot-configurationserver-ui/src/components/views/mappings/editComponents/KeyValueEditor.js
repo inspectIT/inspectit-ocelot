@@ -37,24 +37,12 @@ class KeyValueEditor extends React.Component {
     dataArray.map((data, index) => assign(data, { index }));
 
     const valueColumnPattern = (rowData) => {
-      const className = rowData.error ? 'error' : 'normal';
+      const className = rowData.hasErrors ? 'error' : 'normal';
       return (
         (
           <div className={className}>
-            <style jsx>
-              {`
-                .error {
-                  color: red;
-                }
-
-                .error-sign {
-                  float: right;
-                  color: red;
-                }
-              `}
-            </style>
             {rowData.value}
-            {rowData.error ? <i className="error-sign pi pi-exclamation-triangle" title="Invalid RegEx pattern!"></i> : <></>}
+            {rowData.hasErrors && <i className="error-sign pi pi-exclamation-triangle" title={rowData.errorMessage}></i>}
           </div>
         ) || (
           <div>
@@ -65,31 +53,45 @@ class KeyValueEditor extends React.Component {
     };
 
     return (
-      <DataTable value={dataArray} scrollable={true} scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'}>
-        <Column
-          columnKey="key"
-          field="key"
-          header="Key"
-          headerStyle={{ fontWeight: 'normal' }}
-          body={(rowData) => rowData.key || <p style={{ color: 'grey' }}>click here to add new key</p>}
-          editor={this.editor}
-        />
-        <Column
-          columnKey="value"
-          field="value"
-          header="Value"
-          headerStyle={{ fontWeight: 'normal' }}
-          body={(rowData) => valueColumnPattern(rowData)}
-          editor={this.editor}
-        />
-        <Column
-          columnKey="buttonRow"
-          body={(rowData) =>
-            rowData.key || rowData.value ? <Button icon="pi pi-trash" onClick={() => this.handleDelete(rowData.index)} /> : ''
-          }
-          style={{ width: '4em' }}
-        />
-      </DataTable>
+      <>
+        <style jsx>
+          {`
+            :global(.error) {
+              color: #f44336;
+            }
+
+            :global(.error-sign) {
+              float: right;
+              font-size: 1.25rem;
+            }
+          `}
+        </style>
+        <DataTable value={dataArray} scrollable={true} scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'}>
+          <Column
+            columnKey="key"
+            field="key"
+            header="Key"
+            headerStyle={{ fontWeight: 'normal' }}
+            body={(rowData) => rowData.key || <p style={{ color: 'grey' }}>click here to add new key</p>}
+            editor={this.editor}
+          />
+          <Column
+            columnKey="value"
+            field="value"
+            header="Value"
+            headerStyle={{ fontWeight: 'normal' }}
+            body={(rowData) => valueColumnPattern(rowData)}
+            editor={this.editor}
+          />
+          <Column
+            columnKey="buttonRow"
+            body={(rowData) =>
+              rowData.key || rowData.value ? <Button icon="pi pi-trash" onClick={() => this.handleDelete(rowData.index)} /> : ''
+            }
+            style={{ width: '4em' }}
+          />
+        </DataTable>
+      </>
     );
   }
 }
