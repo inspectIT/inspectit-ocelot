@@ -108,14 +108,15 @@ These additional fields are the following:
 The Smoothed Average View is currently only available in the EUM server.
 :::
 
-In addition to the [Quantile View](../metrics/custom-metrics#quantile-views), which is already described in the inspectIT Ocelot Java agent configuration, the EUM Server provides a Smoothed Average View.
+In addition to the [Quantile View](../metrics/custom-metrics#quantile-views), which is already described in the inspectIT Ocelot Java agent configuration, 
+the EUM Server provides a Smoothed Average View.
 In contrast to the quantiles, it is possible to drop values of a certain time window. This can be useful to deliberately remove outliers before averaging.
 
 :::note
 Please read the section on [Quantile Views](../metrics/custom-metrics#quantile-views) to get an insight into the data collection. The Smoothed Average View is based on the same principle.
 :::
 
-The actual [configurations](../metrics/custom-metrics#configurations) are extended in the EUM server by the following properties:
+The actual metric [configuration](../metrics/custom-metrics#configurations) are extended in the EUM server by the following properties:
 |Config Property|Default| Description
 |---|---|---|
 |`aggregation`|`LAST_VALUE`|Specifies how the measurement data is aggregated in this view. Possible values are `LAST_VALUE`, `COUNT`, `SUM`, `HISTOGRAM` `QUANTILES` and `SMOOTHED_AVERAGE`. Except for `QUANTILES` and `SMOOTHED_AVERAGE`, these correspond to the [OpenCensus Aggregations](https://opencensus.io/stats/view/#aggregations).
@@ -124,7 +125,8 @@ The actual [configurations](../metrics/custom-metrics#configurations) are extend
 |`time-window`|`${inspectit.metrics.frequency}`| *Required if aggregation is `QUANTILES` or `SMOOTHED_AVERAGE`.* The time window over which the quantiles or the smoothed average are captured.
 |`max-buffered-points`|`16384`| *Required if aggregation is `QUANTILES` or `SMOOTHED_AVERAGE`.* A safety limit defining the maximum number of points to be buffered.
 
-As an example, the following snippet defines a metric with the name `load_time` and a view `loadtime/SMOOTHED_AVERAGE`:
+As an example, the following snippet defines a metric with the name `load_time` and a view `loadtime/smoothed`:
+The configuration has the effect of ordering the values in a 1-minute time window by size and dropping the upper 10 percent before calculating the average.
 
 ```YAML
 inspectit:
@@ -138,14 +140,12 @@ inspectit:
             requirement: NOT_EXISTS
         unit: ms
         views:
-          '[load_time/SMOOTHED_AVERAGE]':
+          '[load_time/smoothed]':
               aggregation: SMOOTHED_AVERAGE
               time-window: 1m
               drop-upper: 0.1
               drop-lower: 0.0
 ```
-
-The `loadtime/SMOOTHED_AVERAGE` view has the effect of ordering the values in a 1-minute time window by size and dropping the upper 10 percent before calculating the average.
 
 ### Value Expressions
 
@@ -372,6 +372,10 @@ inspectit-eum-server:
 
 ## Resource Timings
 
+:::important
+The resource timing processing is enabled by default and can be disabled by setting the property `inspectit-eum-server.resource-timing.enabled` to `false.`
+:::
+
 The EUM server can extract information about the resources timings which are reported as part of the Boomerang beacon field `restiming`.
 The resource timing information is decompressed from the beacon and exposed as part of the `resource_time` metric.
 This metric contains following tags:
@@ -384,10 +388,6 @@ This metric contains following tags:
 
 :::note
 Please note that all [global tags](#global-tags) will be attached as well. Attaching custom tags works in the same way as [defining metrics](#metrics-definition).
-:::
-
-:::important
-The resource timing processing is enabled by default and can be disabled by setting the property `inspectit-eum-server.resource-timing.enabled` to `false.`
 :::
 
 For example, the following configuration causes that the resource timing processing is enabled and will be enriched by a tag called `U_HOST`.

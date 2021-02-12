@@ -626,10 +626,6 @@ When auto-tracing is enabled, inspectIT Ocelot uses a profiler-like approach for
 With auto-tracing, stack traces of threads are collected periodically. Based on these samples, inspectIT Ocelot will reconstruct
 an approximate trace showing where the time was spent.
 
-:::warning Experimental Feature
-This feature is currently experimental and can potentially have a high performance impact. We do not recommend using it for production environments yet!
-:::
-
 Auto-tracing can be enabled on methods which are traced using either the `start-span` or `continue-span` options.
 To enable it you can simply add the `auto-tracing` setting:
 
