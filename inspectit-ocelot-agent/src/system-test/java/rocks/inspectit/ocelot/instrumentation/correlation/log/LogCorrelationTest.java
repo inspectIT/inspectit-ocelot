@@ -56,22 +56,22 @@ public class LogCorrelationTest {
 
         @Test
         void verifyCorrelation() {
-            assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
+            assertMDCContainTraceId(null);
             traced(() -> {
                 String trace = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
                 assertMDCContainTraceId(trace);
             }, 1.0);
-            assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
+            assertMDCContainTraceId(null);
         }
 
         @Test
         void verifyNoCorrelationForUnsampled() {
-            assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
+            assertMDCContainTraceId(null);
             traced(() -> {
                 assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
                 assertMDCContainTraceId(null);
             }, 0.0);
-            assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
+            assertMDCContainTraceId(null);
         }
     }
 
