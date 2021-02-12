@@ -34,16 +34,17 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class ServletApiContextPropagationTest {
 
     public static final int PORT = 9999;
+
     public static final String TEST_PATH = "/test";
+
     public static final String TEST_URL = "http://localhost:" + PORT + TEST_PATH;
 
     private Server server;
 
-
     @BeforeAll
     static void waitForInstrumentation() throws Exception {
         TestUtils.waitForClassInstrumentations(Arrays.asList(TestFilter.class, HttpServlet.class, CloseableHttpClient.class,
-                Class.forName("sun.net.www.protocol.http.HttpURLConnection")), 10, TimeUnit.SECONDS);
+                Class.forName("sun.net.www.protocol.http.HttpURLConnection")), true, 30, TimeUnit.SECONDS);
     }
 
     @BeforeEach
@@ -67,14 +68,15 @@ public class ServletApiContextPropagationTest {
         }
     }
 
-
     public static class TestServlet extends HttpServlet {
 
         public static Map<String, String> lastTags;
-        public static String writerResponse;
-        public static String outputStreamResponse;
-        public static Object upPropagationValue;
 
+        public static String writerResponse;
+
+        public static String outputStreamResponse;
+
+        public static Object upPropagationValue;
 
         public static void reset() {
             lastTags = null;
@@ -123,6 +125,7 @@ public class ServletApiContextPropagationTest {
     public static class TestFilter implements Filter {
 
         public static Map<String, String> lastTags;
+
         public static Map<String, String> overrideTags;
 
         public static void reset() {
@@ -167,15 +170,18 @@ public class ServletApiContextPropagationTest {
             );
             TestServlet.reset();
 
-
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             urlConnection.setRequestMethod("GET");
-            urlConnection.setRequestProperty("Correlation-Context", "down_propagated =  hello world    , something = testPropagationViaServlet");
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
+            ctx.setData("down_propagated", "hello world");
+            ctx.setData("down_propagated_2", "testPropagationViaServlet");
+            ctx.makeActive();
             int code = urlConnection.getResponseCode();
+            ctx.close();
 
             assertThat(code).isEqualTo(200);
             assertThat(TestServlet.lastTags).containsEntry("down_propagated", "hello world");
-            assertThat(TestServlet.lastTags).containsEntry("something", "testPropagationViaServlet");
+            assertThat(TestServlet.lastTags).containsEntry("down_propagated_2", "testPropagationViaServlet");
         }
 
         @Test
@@ -187,20 +193,23 @@ public class ServletApiContextPropagationTest {
             TestServlet.reset();
             TestFilter.reset();
 
-            TestFilter.overrideTags = ImmutableMap.of("something", "overridden!");
-
+            TestFilter.overrideTags = ImmutableMap.of("down_propagated_2", "overridden!");
 
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             urlConnection.setRequestMethod("GET");
-            urlConnection.setRequestProperty("Correlation-Context", "down_propagated =  hello world    , something = testPropagationViaServlet");
+            InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
+            ctx.setData("down_propagated", "hello world");
+            ctx.setData("down_propagated_2", "testPropagationViaServlet");
+            ctx.makeActive();
             int code = urlConnection.getResponseCode();
+            ctx.close();
 
             assertThat(code).isEqualTo(200);
             assertThat(TestFilter.lastTags).containsEntry("down_propagated", "hello world");
-            assertThat(TestFilter.lastTags).containsEntry("something", "testPropagationViaServlet");
+            assertThat(TestFilter.lastTags).containsEntry("down_propagated_2", "testPropagationViaServlet");
 
             assertThat(TestServlet.lastTags).containsEntry("down_propagated", "hello world");
-            assertThat(TestServlet.lastTags).containsEntry("something", "overridden!");
+            assertThat(TestServlet.lastTags).containsEntry("down_propagated_2", "overridden!");
         }
     }
 
@@ -215,14 +224,12 @@ public class ServletApiContextPropagationTest {
             TestServlet.reset();
             TestServlet.upPropagationValue = Math.PI;
 
-
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             urlConnection.setRequestMethod("GET");
             String correlHeader = urlConnection.getHeaderField("Correlation-Context");
 
             assertThat(correlHeader).contains("up_propagated=" + Math.PI + ";type=d");
         }
-
 
         @Test
         void testUpPropagationWithResponseViaWriter() throws Exception {
@@ -232,16 +239,13 @@ public class ServletApiContextPropagationTest {
             TestServlet.upPropagationValue = Math.PI;
             TestServlet.writerResponse = "Hallo Welt!";
 
-
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             urlConnection.setRequestMethod("GET");
             String correlHeader = urlConnection.getHeaderField("Correlation-Context");
 
-
             assertThat(correlHeader).contains("up_propagated=" + Math.PI + ";type=d");
             assertThat(IOUtil.readLines(urlConnection.getInputStream())).containsExactly("Hallo Welt!");
         }
-
 
         @Test
         void testUpPropagationWithResponseViaOutputStream() throws Exception {
@@ -252,11 +256,9 @@ public class ServletApiContextPropagationTest {
             TestServlet.upPropagationValue = Math.PI;
             TestServlet.outputStreamResponse = "Hallo Welt!";
 
-
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             urlConnection.setRequestMethod("GET");
             String correlHeader = urlConnection.getHeaderField("Correlation-Context");
-
 
             assertThat(correlHeader).contains("up_propagated=" + Math.PI + ";type=d");
             assertThat(IOUtil.readLines(urlConnection.getInputStream())).containsExactly("Hallo Welt!");

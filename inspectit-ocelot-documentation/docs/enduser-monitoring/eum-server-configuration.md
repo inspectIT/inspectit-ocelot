@@ -103,13 +103,59 @@ These additional fields are the following:
 | `value-expression` | An expression used to calculate the measure's value from a beacon. |
 | `beacon-requirements` | Requirements which have to be fulfilled by Beacons. Beacons which do not match all requirements will be ignored by this metric definition. |
 
+### Smoothed Average View
+:::note
+The Smoothed Average View is currently only available in the EUM server.
+:::
+
+In addition to the [Quantile View](../metrics/custom-metrics#quantile-views), which is already described in the inspectIT Ocelot Java agent configuration, 
+the EUM Server provides a Smoothed Average View.
+In contrast to the quantiles, it is possible to drop values of a certain time window. This can be useful to deliberately remove outliers before averaging.
+
+:::note
+Please read the section on [Quantile Views](../metrics/custom-metrics#quantile-views) to get an insight into the data collection. The Smoothed Average View is based on the same principle.
+:::
+
+The actual metric [configuration](../metrics/custom-metrics#configurations) are extended in the EUM server by the following properties:
+|Config Property|Default| Description
+|---|---|---|
+|`aggregation`|`LAST_VALUE`|Specifies how the measurement data is aggregated in this view. Possible values are `LAST_VALUE`, `COUNT`, `SUM`, `HISTOGRAM` `QUANTILES` and `SMOOTHED_AVERAGE`. Except for `QUANTILES` and `SMOOTHED_AVERAGE`, these correspond to the [OpenCensus Aggregations](https://opencensus.io/stats/view/#aggregations).
+|`drop-upper`|`0.0`| *Required if aggregation is `SMOOTHED_AVERAGE`.* Specifies the percentage of the highest values to be dropped before calculating the average.
+|`drop-lower`|`0.0`| *Required if aggregation is `SMOOTHED_AVERAGE`.* Specifies the percentage of the lowest values to be dropped before calculating the average.
+|`time-window`|`${inspectit.metrics.frequency}`| *Required if aggregation is `QUANTILES` or `SMOOTHED_AVERAGE`.* The time window over which the quantiles or the smoothed average are captured.
+|`max-buffered-points`|`16384`| *Required if aggregation is `QUANTILES` or `SMOOTHED_AVERAGE`.* A safety limit defining the maximum number of points to be buffered.
+
+As an example, the following snippet defines a metric with the name `load_time` and a view `loadtime/smoothed`:
+The configuration has the effect of ordering the values in a 1-minute time window by size and dropping the upper 10 percent before calculating the average.
+
+```YAML
+inspectit:
+  metrics:
+    definitions:
+      load_time:
+        measure-type: LONG
+        value-expression: "{t_done}"
+        beacon-requirements:
+          - field: rt.quit
+            requirement: NOT_EXISTS
+        unit: ms
+        views:
+          '[load_time/smoothed]':
+              aggregation: SMOOTHED_AVERAGE
+              time-window: 1m
+              drop-upper: 0.1
+              drop-lower: 0.0
+```
+
 ### Value Expressions
 
 The `value-expression` field can be used to specify a field which value is used for the specified metrics.
 In order to reference a field, the following pattern is used: `{FIELD_KEY}`.
 For example, a valid expression, used to extract the value of a field `t_load`, would be `{t_load}`.
 
-> Note that a beacon has to contain all fields referenced by the expression in order to be evaluated and recorded.
+:::note
+Note that a beacon has to contain all fields referenced by the expression in order to be evaluated and recorded.
+:::
 
 Value expressions also support operations for basic arithmetic operations. Thus, to calculate a difference of two beacon fields, the following expression can be used:
 ```YAML
@@ -142,7 +188,15 @@ Using the operations above, complex calculations can be done, for example:
 The `beacon-requirements` field can be used to specify requirements which have to be fulfilled by the beacons in order to be evaluated by a certain metric.
 If any requirement does not fit a beacon, the beacon is ignored by the metric.
 
-Beacon requirements consist of two attributes `field` and `requirement`. `field` specified the beacon's field which is validated using the requirement type specified in `NOT_EXISTS`.
+The following requirements are available:
+
+| Type | Note |
+| --- | --- |
+| `EXISTS` | The targeted field must exist. |
+| `NOT_EXISTS` | The targeted field must not exist. |
+| `HAS_INITIATOR` | The beacon must have one of the specified initiators. |
+
+Firstly, you can specify that the metric expects a field to exist or not exist in the beacon:
 
 ```YAML
   ...
@@ -152,13 +206,22 @@ Beacon requirements consist of two attributes `field` and `requirement`. `field`
         - field: rt.quit
           requirement: NOT_EXISTS
 ```
+In this example, `my-metric` will only be recorded if the field `rt.quit` does not exist in the beacon.
+Alternatively you can use the `requirement` `EXISTS` to make sure the metric is only recorded if the given field is present.
 
-The following requirement types are currently be supported:
+Additionally you can specify that you only want to record the metric if the received beacon has a specific initiator:
 
-| Type | Note |
-| --- | --- |
-| `EXISTS` | The targeted field must exist. |
-| `NOT_EXISTS` | The targeted field must not exist. |
+```YAML
+  ...
+    my-metric:
+      ...
+      beacon-requirements:
+        - initiators: [SPA_SOFT, SPA_HARD]
+          requirement: HAS_INITIATOR
+```
+
+The available initiators are `DOCUMENT` for the initial pageload beacons, `XHR` for Ajax-Beacons and `SPA_SOFT` and `SPA_HARD` for soft and hard SPA navigation beacons.
+The metric will only be recorded for beacons whose `http.initiator` field matches any of the elements provided in the `initiators` list.
 
 ### Additional Beacon Fields
 
@@ -166,7 +229,7 @@ The following requirement types are currently be supported:
 
 The `t_other.*` fields are a special set of fields which are resolved based on the content of the beacon's `t_other` field.
 
-The Boomerage agent allows to set custom-timer data, which represents a arbitrary key-value pair. The key represents the name of the timer and the value the timer's value which may be a duration or any number. This can be used by applications to measure custom durations or events. See the [Boomerang's documentation](https://developer.akamai.com/tools/boomerang/#BOOMR.sendTimer(name,value)) for more information.
+The Boomerang agent allows to set custom-timer data, which represents a arbitrary key-value pair. The key represents the name of the timer and the value the timer's value which may be a duration or any number. This can be used by applications to measure custom durations or events. See the [Boomerang's documentation](https://developer.akamai.com/tools/boomerang/#BOOMR.sendTimer(name,value)) for more information.
 
 When using custom timers, Boomerang combines their values as a comma-separated list and sends them in the `t_other` attribute. For example, a beacon can be structured as follows: `t_other=t_domloaded|437,boomerang|420,boomr_fb|252`
 
@@ -201,28 +264,53 @@ inspectit-eum-server:
         input: u
 ```
 
-Tags configured via `beacon` offer some additional flexibility: In addition to simply copying the input value, it is possible to perform a RegEx replacement.
+Tags configured via `beacon` offer some additional flexibility: In addition to simply copying the input value, 
+it is possible to perform one or multiple regular expression replacements.
 
 **Example:** in case the `u` attribute contains a URL which is: `http://server/user/100`.
-The following configuration can be used to erases the path segment after `/user/` which represents a user ID and replaces it with the constant text `{id}`.
+The following configuration can be used to extract the HTTP-Path from it.
 
 ```YAML
 inspectit-eum-server:
   tags:
     beacon:
-      URL_USER_ERASED: 
+      MY_PATH: 
         input: u
-        regex: "\\/user\\/\d+"
-        replacement: "\\/user\\/{id}"
-        keep-no-match: true
+        replacements:
+         -  pattern:  '^.*\/\/([^\/]*)([^?]*).*$'
+            replacement: "$2"
+            keep-no-match: false
+```
+The `replacements` property defines a list of regular expressions and corresponding replacements to apply.
+They will be applied in the order they are listed.
+For each list element, the `pattern` property defines the regex to use for the replacement.
+All matches of the `pattern` in the input value are replaced with the string defined by `replacement`.
+The `keep-no-match` option of each entry defines what to do if the given input does not match the given regex at any place.
+If it is set to `true`, the previous value is kept unchanged. If it is set to `false`, the given tag won't be created in case no match is found.
+Note that capture groups are supported and can be referenced in the replacement string using `$1`, `$2`, etc. as shown in the example.
+
+The following example extends the previous one by additionally replacing all user-IDs within the path:
+
+
+```YAML
+inspectit-eum-server:
+  tags:
+    beacon:
+      MY_PATH: 
+        input: u
+        replacements:
+         -  pattern:  '^.*\/\/([^\/]*)([^?]*).*$'
+            replacement: "$2"
+            keep-no-match: false
+         -  pattern:  '\/user\/\d+'
+            replacement: '/user/{id}'
 ```
 
-The `regex` property defines the regex to use for the replacement.
-All matches of the `regex` in the input value are replaced with the string defined by `replacement`.
-The `keep-no-match` options defines what to do if the given input does not match the given regex at any place.
-If it is set to `true`, the original value will be kept. If it is set to `false`, the given tag won't be created in case no match is found.
+With these settings, the tag will be extracted from `u` just like in the previous example.
+However, an additional replacement will be applied afterwards causing user-IDs to be erased from the path.
+Note that we did not specify `keep-no-match` for the second replacement. `keep-no-match` default to `true`,
+meaning that the path will be preserved without any changes in case it does not contain any user-IDs.
 
-Note that capture groups are supported and can be referenced in the replacement string using `$1`, `$2`, etc.
 Using this mechanism, the EUM server provides the following tags out of the box:
 
 | Tag | Description |
@@ -284,6 +372,10 @@ inspectit-eum-server:
 
 ## Resource Timings
 
+:::important
+The resource timing processing is enabled by default and can be disabled by setting the property `inspectit-eum-server.resource-timing.enabled` to `false.`
+:::
+
 The EUM server can extract information about the resources timings which are reported as part of the Boomerang beacon field `restiming`.
 The resource timing information is decompressed from the beacon and exposed as part of the `resource_time` metric.
 This metric contains following tags:
@@ -294,7 +386,19 @@ This metric contains following tags:
 | `crossOrigin` | If a resource loading is considered as cross-origin request. See [more information about CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). |
 | `cached` | If a resource was cached and loaded from the browser disk or memory storage. Note that cached tag will only be set for same-origin requests, as some resource timing  metrics are restricted and will not be provided cross-origin unless the Timing-Allow-Origin header permits. |
 
-The resource timing processing is enabled by default and can be disabled by setting the property `inspectit-eum-server.resource-timing.enabled` to `false.`
+:::note
+Please note that all [global tags](#global-tags) will be attached as well. Attaching custom tags works in the same way as [defining metrics](#metrics-definition).
+:::
+
+For example, the following configuration causes that the resource timing processing is enabled and will be enriched by a tag called `U_HOST`.
+
+```YAML
+inspectit-eum-server:
+  resource-timing:
+    enabled: true
+    tags: 
+      U_HOST: true
+```
 
 ## Exporters
 
@@ -313,6 +417,38 @@ The EUM server supports trace data forwarding to the Jaeger exporter.
 The exporter is using the [Jaeger Protobuf via gRPC API](https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable) in order to forward trace data.
 By default, the Jaeger exporter is disabled.
 
+### Beacons
+
+The EUM Server supports that received beacons can be exported or sent to other systems.
+Currently only export via HTTP is supported.
+In this case, the beacons are sent in JSON format.
+This allows the received beacons to be sent to an HTTP endpoint (e.g. Logstash).
+
+The following configuration snippet can be used in the EUM server for enabling beacon exportation via HTTP.
+
+```YAML
+inspectit-eum-server:
+  exporters:
+    beacons:
+      http:
+        # Whether beacons should be exported via HTTP
+        enabled: true
+        # The endpoint to which the beacons are to be sent
+        endpoint-url: https://localhost:8080
+        # The max. amount of threads exporting beacons (min. 1)
+        worker-threads: 2
+        # The maximum number of beacons to be exported using a single HTTP request (min. 1)
+        max-batch-size: 100
+        # The flush interval to export beacons in case the 'max-batch-size' has not been reached (min. 1 second)
+        flush-interval: 5s
+        # When specified, the request will be using this username for Basic authentication
+        username: user
+        # The password used for Basic authentication
+        password: 123
+```
+
+The EUM server uses Basic Authentication for the request if a username is specified. Otherwise no authentication is used.
+
 ## Self-Monitoring
 
 For the purpose of self-monitoring, the EUM server offers a set of metrics that reflect its state.
@@ -321,4 +457,7 @@ Currently, the following self monitoring metrics are available.
 
 | Metric name | Description |
 | --- | --- |
-| `beacons_received` | Counts the number of received beacons | 
+| `inspectit_eum_self_beacons_received_count` | Counts the number of received beacons | 
+| `inspectit_eum_self_beacons_export_count` | Counts the number of beacons exportations | 
+| `inspectit_eum_self_beacons_export_duration_sum` | The total duration needed for beacon exportations | 
+| `inspectit_eum_self_beacons_export_batch_sum` | The number of exported beacons per exportation | 

@@ -15,7 +15,8 @@ export const fetchToken = (username, password) => {
     dispatch({ type: types.FETCH_TOKEN_STARTED });
 
     const auth = {
-      username: username,
+      //The encoding and unescaping here is needed to make sure the username is encoded in UTF-8.
+      username: unescape(encodeURIComponent(username)),
       password: password,
     };
 
@@ -58,7 +59,7 @@ export const renewToken = () => {
       .then(
         axios.spread((...responses) => {
           const token = responses[0].data;
-          const permissions = responses[0].data;
+          const permissions = responses[1].data;
           dispatch({ type: types.RENEW_TOKEN_SUCCESS, payload: { token, permissions } });
         })
       )

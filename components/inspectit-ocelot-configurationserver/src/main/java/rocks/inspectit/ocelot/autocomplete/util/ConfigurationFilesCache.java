@@ -1,36 +1,40 @@
 package rocks.inspectit.ocelot.autocomplete.util;
 
-import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.yaml.snakeyaml.Yaml;
-import rocks.inspectit.ocelot.config.loaders.ConfigFileLoader;
-import rocks.inspectit.ocelot.file.FileChangedEvent;
-import rocks.inspectit.ocelot.file.FileInfo;
+import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ExecutorService;
 
+/**
+ * Caches the workspace revision.
+ */
 @Slf4j
 @Component
 public class ConfigurationFilesCache {
 
-    /**
-     * Predicate to check if a given file path ends with .yml or .yaml.
-     */
-    private static final Predicate<String> HAS_YAML_ENDING = filePath -> filePath.toLowerCase().endsWith(".yml") || filePath.toLowerCase().endsWith(".yaml");
-
     @Autowired
     private FileManager fileManager;
 
-    private Collection<Object> yamlContents;
+    @Autowired
+    private ExecutorService executor;
+
+    /**
+     * The currently active task for reloading the configuration.
+     */
+    private ConfigurationFilesCacheReloadTask activeReloadTask;
+
+    /**
+     * The current parsed contents of all configuration files.
+     */
+    private Collection<Object> parsedContents = Collections.emptyList();
 
     /**
      * Returns the most recently loaded .yaml and .yml files as a list of Objects. Each Object resembles the corresponding
@@ -49,8 +53,8 @@ public class ConfigurationFilesCache {
      *
      * @return A Collection containing all loaded .yaml and .yml files root elements as Maps or Lists.
      */
-    public Collection<Object> getParsedConfigurationFiles() {
-        return yamlContents;
+    public Collection<Object> getParsedContents() {
+        return parsedContents;
     }
 
     /**
@@ -58,69 +62,14 @@ public class ConfigurationFilesCache {
      * "files" folder of the working directory. The files contents are parsed into either nested Lists or Maps.
      */
     @PostConstruct
-    @EventListener(FileChangedEvent.class)
-    public void loadFiles() throws IOException {
-        List<String> filePaths = getAllPaths();
-        yamlContents = Stream.concat(
-                filePaths.stream()
-                        .map(this::loadYamlFile)
-                        .filter(Objects::nonNull),
-                ConfigFileLoader.getDefaultConfigFiles().values().stream()
-                        .map(this::parseYaml)
-        ).collect(Collectors.toList());
-    }
-
-    /**
-     * Takes as String and parses it either into a nested List or Maps.
-     * Literals such as "name:" are parsed as keys for Maps. The respectively following literals are then added as values to this
-     * key.
-     * Literals such as "- a \n - b" are parsed as lists.
-     * All other literals are parsed as scalars and are added as values.
-     *
-     * @param content The String to be parsed.
-     * @return The String parsed into a nested Lists or Map.
-     */
-    private Object parseYaml(String content) {
-        Yaml yaml = new Yaml();
-        return yaml.load(content);
-    }
-
-    /**
-     * This method loads a .yaml or .yml file found in a given path and returns it either as nested List or Map.
-     * The Map/List can either contain a terminal value such as Strings, Lists of elements or Maps. The latter two
-     * of which can each again contain Lists, Maps or terminal values as values.
-     *
-     * @param path path of the file which should be loaded.
-     * @return the file as an Object parsed as described above.
-     */
-    @VisibleForTesting
-    Object loadYamlFile(String path) {
-        Optional<String> src = fileManager.getWorkingDirectory().readConfigurationFile(path);
-
-        return src.map(this::parseYaml).orElseGet(() -> {
-            log.warn("Unable to load file with path {}", path);
-            return null;
-        });
-    }
-
-    /**
-     * Searches in the current directory for files with .yml or .yaml ending. Returns all paths to those files as a
-     * lexicographically ordered List of Strings.
-     *
-     * @return A list of all found paths to .yml or .yaml files.
-     */
-    @VisibleForTesting
-    List<String> getAllPaths() {
-        try {
-            List<FileInfo> fileInfos = fileManager.getWorkingDirectory().listConfigurationFiles("");
-
-            return fileInfos.stream()
-                    .flatMap(file -> file.getAbsoluteFilePaths(""))
-                    .filter(HAS_YAML_ENDING)
-                    .sorted()
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            return new ArrayList<>();
+    @EventListener(WorkspaceChangedEvent.class)
+    public synchronized void loadFiles() {
+        RevisionAccess fileAccess = fileManager.getWorkspaceRevision();
+        if (activeReloadTask != null) {
+            activeReloadTask.cancel();
         }
+        activeReloadTask = new ConfigurationFilesCacheReloadTask(fileAccess, (configs) -> parsedContents = configs);
+        executor.submit(activeReloadTask);
     }
+
 }

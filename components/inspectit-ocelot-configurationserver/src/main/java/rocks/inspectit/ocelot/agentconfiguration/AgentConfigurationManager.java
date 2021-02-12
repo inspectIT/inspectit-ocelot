@@ -9,10 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.file.FileChangedEvent;
+import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
+import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
-import rocks.inspectit.ocelot.mappings.AgentMappingManager;
-import rocks.inspectit.ocelot.mappings.AgentMappingsChangedEvent;
+import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import javax.annotation.PostConstruct;
@@ -39,7 +39,7 @@ public class AgentConfigurationManager {
     InspectitServerSettings config;
 
     @Autowired
-    private AgentMappingManager mappingManager;
+    private AgentMappingSerializer mappingsSerializer;
 
     @Autowired
     private ExecutorService executorService;
@@ -60,18 +60,17 @@ public class AgentConfigurationManager {
     private AgentConfigurationReloadTask reloadTask;
 
     @PostConstruct
-    @VisibleForTesting
     void init() {
         replaceConfigurations(Collections.emptyList());
         reloadConfigurationAsync();
     }
 
-    @EventListener({FileChangedEvent.class, AgentMappingsChangedEvent.class})
+    @EventListener({ConfigurationPromotionEvent.class, WorkspaceChangedEvent.class})
     private synchronized void reloadConfigurationAsync() {
         if (reloadTask != null) {
             reloadTask.cancel();
         }
-        reloadTask = new AgentConfigurationReloadTask(mappingManager.getAgentMappings(), fileManager, this::replaceConfigurations);
+        reloadTask = new AgentConfigurationReloadTask(mappingsSerializer, fileManager, this::replaceConfigurations);
         executorService.submit(reloadTask);
     }
 
@@ -79,6 +78,7 @@ public class AgentConfigurationManager {
      * Fetches the configuration as yaml string given a set of attributes describing the target agent.
      *
      * @param agentAttributes the attributes of the agent for which the configuration shall be queried
+     *
      * @return the configuration for this agent or null if the attributes match no mapping
      */
     public AgentConfiguration getConfiguration(Map<String, String> agentAttributes) {

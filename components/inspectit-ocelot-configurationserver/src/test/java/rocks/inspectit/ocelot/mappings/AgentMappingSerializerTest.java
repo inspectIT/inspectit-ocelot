@@ -1,42 +1,36 @@
 package rocks.inspectit.ocelot.mappings;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
+import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
+import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AgentMappingSerializerTest {
 
-    private static File tempDirectory;
-
-    @InjectMocks
     AgentMappingSerializer serializer;
 
-    @BeforeAll
-    public static void beforeAll() throws IOException {
-        tempDirectory = Files.createTempDirectory("mapper-test").toFile();
-    }
+    @Mock
+    AbstractWorkingDirectoryAccessor fileAccessor;
 
-    @AfterAll
-    public static void afterAll() throws IOException {
-        FileUtils.deleteDirectory(tempDirectory);
-    }
-
-    @AfterEach
-    public void afterEach() throws IOException {
-        FileUtils.cleanDirectory(tempDirectory);
+    @BeforeEach
+    public void setup() {
+        serializer = new AgentMappingSerializer();
+        serializer.postConstruct();
     }
 
     @Nested
@@ -44,18 +38,25 @@ public class AgentMappingSerializerTest {
 
         @Test
         public void successfullyWriteYaml() throws IOException {
-            AgentMapping mapping = AgentMapping.builder().name("mapping").source("/any-source").attribute("key", "val").build();
-            File testFile = new File(tempDirectory, "test.yml");
+            AgentMapping mapping = AgentMapping.builder()
+                    .name("mapping")
+                    .source("/any-source")
+                    .sourceBranch(Branch.LIVE)
+                    .attribute("key", "val")
+                    .build();
 
-            serializer.postConstruct();
-            serializer.writeAgentMappings(Collections.singletonList(mapping), testFile);
+            serializer.writeAgentMappings(Collections.singletonList(mapping), fileAccessor);
 
-            String content = new String(Files.readAllBytes(testFile.toPath()));
-            assertThat(content).isEqualTo("- name: \"mapping\"\n" +
+            ArgumentCaptor<String> writtenFile = ArgumentCaptor.forClass(String.class);
+            verify(fileAccessor).writeAgentMappings(writtenFile.capture());
+
+            assertThat(writtenFile.getValue()).isEqualTo("- name: \"mapping\"\n" +
+                    "  sourceBranch: \"LIVE\"\n"+
                     "  sources:\n" +
                     "  - \"/any-source\"\n" +
                     "  attributes:\n" +
                     "    key: \"val\"\n");
+            verifyNoMoreInteractions(fileAccessor);
         }
     }
 
@@ -63,23 +64,24 @@ public class AgentMappingSerializerTest {
     public class ReadAgentMappings {
 
         @Test
-        public void successfullyReadYaml() throws IOException {
+        public void successfullyReadYaml() {
             String dummyYaml = "- name: \"mapping\"\n" +
+                    "  sourceBranch: \"LIVE\"\n" +
                     "  sources:\n" +
                     "  - \"/any-source\"\n" +
                     "  attributes:\n" +
                     "    key: \"val\"\n";
-            File testFile = new File(tempDirectory, "test.yml");
-            Files.write(testFile.toPath(), dummyYaml.getBytes());
 
-            serializer.postConstruct();
-            List<AgentMapping> result = serializer.readAgentMappings(testFile);
+            doReturn(Optional.of(dummyYaml)).when(fileAccessor).readAgentMappings();
+
+            List<AgentMapping> result = serializer.readAgentMappings(fileAccessor);
 
             assertThat(result).hasSize(1);
             AgentMapping mapping = result.get(0);
             assertThat(mapping.getName()).isEqualTo("mapping");
             assertThat(mapping.getSources()).containsExactly("/any-source");
             assertThat(mapping.getAttributes()).containsEntry("key", "val");
+            assertThat(mapping.getSourceBranch()).isEqualTo(Branch.LIVE);
         }
     }
 }

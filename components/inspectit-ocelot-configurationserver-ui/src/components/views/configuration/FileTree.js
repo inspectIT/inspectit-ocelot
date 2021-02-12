@@ -4,7 +4,6 @@ import { ContextMenu } from 'primereact/contextmenu';
 import { connect } from 'react-redux';
 import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration';
 import { linkPrefix } from '../../../lib/configuration';
-
 import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import { filter } from 'lodash';
 
@@ -113,13 +112,15 @@ class FileTree extends React.Component {
   };
 
   render() {
-    const { className, defaultTree, files, selection, selectedDefaultConfigFile, readOnly } = this.props;
+    const { className, defaultTree, selection, selectedDefaultConfigFile, readOnly, files, selectedVersion } = this.props;
     return (
       <div className="this" onContextMenu={readOnly ? undefined : this.showContextMenu} onKeyDown={readOnly ? undefined : this.onKeyDown}>
         <style jsx>{`
                     .this {
                         overflow: auto;
                         flex-grow: 1;
+                        display: flex;
+                        flex-direction: column;
                     }
                     .this :global(.cm-tree-icon) {
                         width: 1.3rem;
@@ -136,20 +137,31 @@ class FileTree extends React.Component {
                         background: url("${linkPrefix}/static/images/inspectit-ocelot-head_white.svg") center no-repeat;
                         background-size: 1rem 1rem;
                     }
+                    .tree-container {
+                      overflow: auto;
+                    }
+                    .version-banner {
+                      background-color: #ffcc80;
+                      height: 2.45rem;
+                      border-bottom: 1px solid #dddddd;
+                    }
 				`}</style>
-        <ContextMenu model={this.state.contextMenuModel} ref={this.contextMenuRef} />
-        <Tree
-          className={className}
-          filter={true}
-          filterBy="label"
-          value={defaultTree.concat(files)}
-          selectionMode="single"
-          selectionKeys={selection || selectedDefaultConfigFile}
-          onSelectionChange={this.onSelectionChange}
-          onContextMenuSelectionChange={readOnly ? undefined : this.showContextMenu}
-          dragdropScope={readOnly ? undefined : 'config-file-tree'}
-          onDragDrop={readOnly ? undefined : this.onDragDrop}
-        />
+        {selectedVersion && <div className="version-banner" />}
+        <div className="tree-container">
+          <ContextMenu model={this.state.contextMenuModel} ref={this.contextMenuRef} />
+          <Tree
+            className={className}
+            filter={true}
+            filterBy="label"
+            value={defaultTree.concat(files)}
+            selectionMode="single"
+            selectionKeys={selection || selectedDefaultConfigFile}
+            onSelectionChange={this.onSelectionChange}
+            onContextMenuSelectionChange={readOnly ? undefined : this.showContextMenu}
+            dragdropScope={readOnly ? undefined : 'config-file-tree'}
+            onDragDrop={readOnly ? undefined : this.onDragDrop}
+          />
+        </div>
       </div>
     );
   }
@@ -185,7 +197,7 @@ class FileTree extends React.Component {
 }
 
 function mapStateToProps(state) {
-  const { pendingRequests, selection, defaultConfig, selectedDefaultConfigFile } = state.configuration;
+  const { pendingRequests, selection, defaultConfig, selectedDefaultConfigFile, selectedVersion } = state.configuration;
   return {
     files: configurationSelectors.getFileTree(state),
     loading: pendingRequests > 0,
@@ -193,6 +205,7 @@ function mapStateToProps(state) {
     defaultConfig: defaultConfig,
     defaultTree: configurationSelectors.getDefaultConfigTree(state),
     selectedDefaultConfigFile,
+    selectedVersion,
   };
 }
 

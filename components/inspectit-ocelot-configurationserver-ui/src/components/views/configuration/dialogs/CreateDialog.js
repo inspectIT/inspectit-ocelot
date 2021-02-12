@@ -30,6 +30,7 @@ class CreateDialog extends React.Component {
 
     return (
       <Dialog
+        focusOnShow={false}
         style={{ width: '400px' }}
         header={'Create ' + type}
         modal={true}
@@ -68,7 +69,10 @@ class CreateDialog extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (!prevProps.visible && this.props.visible) {
-      this.input.current.element.focus();
+      /**Timeout is needed for .focus() to be triggered correctly. */
+      setTimeout(() => {
+        this.input.current.element.focus();
+      }, 0);
 
       const { filePath } = this.props;
 

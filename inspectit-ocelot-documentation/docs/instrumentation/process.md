@@ -23,7 +23,23 @@ inspectit:
       new-class-discovery-interval: 10s
       # defines how often the new class discovery is performed after a new class has been loaded
       num-class-discovery-trials: 2
+      
+      # defines whether orphan action classes are recycled or new classes should be injected instead
+      recyclingOldActionClasses: true
 ```
 
 In addition, the size of the instrumentation queue can be used as an indicator for the instrumentation progress.
 It is accessible via the [self-monitoring](metrics/self-monitoring.md) of the agent.
+
+InspectIT allows you to perform instrumentation by injecting custom code into your application.
+If your JVM has a `SecurityManager` enabled, you might also want to control the `ProtectionDomain` of these injected classes.
+
+By default, inspectIT will use its own `ProtectionDomain` for injected classes.
+Alternatively, you can make inspectIT to use the `ProtectionDomain` for which the action is being created using the following configuration:
+
+```yaml
+inspectit:
+  instrumentation:
+    internal:
+      use-inspectit-protection-domain: false
+```

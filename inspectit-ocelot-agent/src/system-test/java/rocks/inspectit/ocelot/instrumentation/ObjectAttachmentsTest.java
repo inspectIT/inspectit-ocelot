@@ -14,7 +14,7 @@ public class ObjectAttachmentsTest {
 
     @BeforeAll
     static void waitForInstrumentation() {
-        TestUtils.waitForClassInstrumentation(ObjectAttachmentsTest.class, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(ObjectAttachmentsTest.class, true, 15, TimeUnit.SECONDS);
     }
 
     public void writeAttachments(String obj, String firstAttachment, String secondAttachment) {
@@ -51,7 +51,6 @@ public class ObjectAttachmentsTest {
         );
     }
 
-
     @Test
     void readNullTest() {
         String target = "readNullTest";
@@ -64,7 +63,6 @@ public class ObjectAttachmentsTest {
                 ImmutableMap.of("target", target, "firstVal", ".*", "secondVal", ".*")))
                 .isNull();
     }
-
 
     @Test
     void replacementTest() {

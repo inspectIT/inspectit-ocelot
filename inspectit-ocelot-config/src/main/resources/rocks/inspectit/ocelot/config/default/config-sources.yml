@@ -29,5 +29,5 @@ inspectit:
       frequency: 30s
       # the following attributes will be sent as http query parameters when fetching the configuration
       attributes:
-        service: ${inspectit.service-name}
+        service: ${inspectit.service-name}$%
         id: ${inspectit.env.pid}@${inspectit.env.hostname}

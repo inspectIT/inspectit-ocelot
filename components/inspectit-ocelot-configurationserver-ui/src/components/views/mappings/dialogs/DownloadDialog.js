@@ -26,6 +26,7 @@ class DownloadDialog extends React.Component {
     return (
       <Dialog
         header={'Download Configuration File'}
+        focusOnShow={false}
         modal={true}
         visible={this.props.visible}
         onHide={this.props.onHide}
@@ -75,7 +76,10 @@ class DownloadDialog extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (!prevProps.visible && this.props.visible) {
-      this.downloadButton.current.element.focus();
+      /**Timeout is needed for .focus() to be triggered correctly. */
+      setTimeout(() => {
+        this.downloadButton.current.element.focus();
+      }, 0);
     }
   }
 }

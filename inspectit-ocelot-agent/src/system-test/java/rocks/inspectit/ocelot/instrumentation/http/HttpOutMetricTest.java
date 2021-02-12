@@ -74,7 +74,7 @@ public class HttpOutMetricTest {
 
             TestUtils.waitForClassInstrumentations(Arrays.asList(
                     CloseableHttpClient.class,
-                    Class.forName("org.apache.http.impl.client.InternalHttpClient")),
+                    Class.forName("org.apache.http.impl.client.InternalHttpClient")), true,
                     15, TimeUnit.SECONDS);
         }
 
@@ -102,7 +102,8 @@ public class HttpOutMetricTest {
             tags.put("error", "false");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
@@ -127,12 +128,12 @@ public class HttpOutMetricTest {
             tags.put("error", "true");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
         }
-
 
         @Test
         void testExceptionStatus() throws Exception {
@@ -160,7 +161,8 @@ public class HttpOutMetricTest {
             tags.put("error", "true");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
@@ -172,7 +174,7 @@ public class HttpOutMetricTest {
 
         @BeforeEach
         void setupClient() throws Exception {
-            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), 10, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), true, 30, TimeUnit.SECONDS);
         }
 
         @Test
@@ -197,7 +199,8 @@ public class HttpOutMetricTest {
             tags.put("error", "false");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
@@ -225,7 +228,8 @@ public class HttpOutMetricTest {
             tags.put("error", "true");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
@@ -259,7 +263,8 @@ public class HttpOutMetricTest {
             tags.put("error", "true");
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);

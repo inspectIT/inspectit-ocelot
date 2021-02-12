@@ -35,13 +35,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ApacheHttpClientContextPropagationTest {
 
     public static final int PORT = 9999;
+
     public static final String TEST_URL = "http://localhost:" + PORT + "/test";
+
     private WireMockServer wireMockServer;
 
     private final Map<String, Object> dataToPropagate = new HashMap<>();
 
     private CloseableHttpClient client;
-
 
     @BeforeEach
     void setupAndInstrumentClient() throws Exception {
@@ -55,7 +56,7 @@ public class ApacheHttpClientContextPropagationTest {
         TestUtils.waitForClassInstrumentations(Arrays.asList(
                 Class.forName("org.apache.http.impl.client.InternalHttpClient"),
                 CloseableHttpClient.class,
-                HttpServlet.class), 10, TimeUnit.SECONDS);
+                HttpServlet.class), true, 30, TimeUnit.SECONDS);
     }
 
     @BeforeEach
@@ -104,7 +105,6 @@ public class ApacheHttpClientContextPropagationTest {
 
     }
 
-
     @Nested
     class UpPropagation {
 
@@ -131,8 +131,6 @@ public class ApacheHttpClientContextPropagationTest {
             assertThat(myCtx.getData("up_propagated2")).isEqualTo("Hello World");
         }
 
-
     }
-
 
 }

@@ -11,6 +11,8 @@ import MoveDialog from './dialogs/MoveDialog';
 import FileToolbar from './FileToolbar';
 import FileTree from './FileTree';
 import { enableOcelotAutocompletion } from './OcelotAutocompleter';
+import SearchDialog from './dialogs/SearchDialog';
+import ConfigurationSidebar from './ConfigurationSidebar';
 
 /**
  * The header component of the editor view.
@@ -57,6 +59,7 @@ class ConfigurationView extends React.Component {
     isCreateDirectoryDialogShown: false,
     isMoveDialogShown: false,
     filePath: null,
+    isSearchDialogShown: false,
   };
 
   parsePath = (filePath, defaultConfigFilePath) => {
@@ -84,7 +87,7 @@ class ConfigurationView extends React.Component {
   };
 
   onChange = (value) => {
-    if (!this.props.loading) {
+    if (!this.props.loading && this.props.isLatestVersion) {
       this.props.selectedFileContentsChanged(value);
     }
   };
@@ -109,6 +112,21 @@ class ConfigurationView extends React.Component {
 
   hideMoveDialog = () => this.setState({ isMoveDialogShown: false, filePath: null });
 
+  showSearchDialog = () => this.setState({ isSearchDialogShown: true });
+
+  hideSearchDialog = () => this.setState({ isSearchDialogShown: false });
+
+  /**
+   * Opens the specified file in the specified version. The version is only changed if it differs from the current one.
+   * If no version is specified, the latest version will be selected.
+   */
+  openFile = (filename, versionId = null) => {
+    if (this.props.selectedVersion != versionId) {
+      this.props.selectVersion(versionId, false);
+    }
+    this.props.selectFile(filename);
+  };
+
   render() {
     const {
       selection,
@@ -121,13 +139,16 @@ class ConfigurationView extends React.Component {
       schema,
       showVisualConfigurationView,
       toggleVisualConfigurationView,
-      readOnly,
+      isLatestVersion,
+      canWrite,
     } = this.props;
     const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
 
     const { path, name } = this.parsePath(selection, selectedDefaultConfigFile);
     const icon = 'pi-' + (isDirectory ? 'folder' : 'file');
     const showHeader = !!name;
+
+    const readOnly = !canWrite || !!selectedDefaultConfigFile || !isLatestVersion;
 
     return (
       <div className="this">
@@ -159,11 +180,13 @@ class ConfigurationView extends React.Component {
         `}</style>
         <div className="treeContainer">
           <FileToolbar
+            readOnly={readOnly}
             showDeleteFileDialog={this.showDeleteFileDialog}
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
-            readOnly={readOnly}
+            selectedVersionChange={this.selectedVersionChange}
+            showSearchDialog={this.showSearchDialog}
           />
           <FileTree
             className="fileTree"
@@ -190,20 +213,16 @@ class ConfigurationView extends React.Component {
           notificationIcon="pi-exclamation-triangle"
           notificationText={yamlError}
           loading={loading}
-          readOnly={readOnly || !!selectedDefaultConfigFile}
+          readOnly={readOnly}
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
+          sidebar={<ConfigurationSidebar />}
         >
           {showHeader ? (
-            <EditorHeader
-              icon={icon}
-              path={path}
-              name={name}
-              isContentModified={isContentModified}
-              readOnly={readOnly || !!selectedDefaultConfigFile}
-            />
+            <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} readOnly={readOnly} />
           ) : null}
         </EditorView>
+
         <DeleteDialog visible={this.state.isDeleteFileDialogShown} onHide={this.hideDeleteFileDialog} filePath={this.state.filePath} />
         <CreateDialog
           directoryMode={false}
@@ -218,6 +237,8 @@ class ConfigurationView extends React.Component {
           filePath={this.state.filePath}
         />
         <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} filePath={this.state.filePath} />
+
+        <SearchDialog visible={this.state.isSearchDialogShown} onHide={this.hideSearchDialog} openFile={this.openFile} />
       </div>
     );
   }
@@ -245,22 +266,28 @@ function mapStateToProps(state) {
     selectedDefaultConfigFile,
     schema,
     showVisualConfigurationView,
+    selectedVersion,
+    versions,
   } = state.configuration;
+  const isLatestVersion = selectedVersion === null || selectedVersion === versions[0].id;
   const unsavedFileContent = selection ? configurationSelectors.getSelectedFileUnsavedContents(state) : null;
-  const fileContent = unsavedFileContent !== null ? unsavedFileContent : selectedFileContent;
+  const isContentModified = unsavedFileContent !== null && isLatestVersion;
+  const fileContent = isContentModified ? unsavedFileContent : selectedFileContent;
 
   return {
     updateDate,
     selection,
     isDirectory: configurationSelectors.isSelectionDirectory(state) || !!(selectedDefaultConfigFile && !fileContent),
-    isContentModified: unsavedFileContent !== null,
+    isContentModified,
     fileContent,
     yamlError: getYamlError(fileContent),
     loading: pendingRequests > 0,
     selectedDefaultConfigFile,
     schema,
     showVisualConfigurationView,
-    readOnly: !state.authentication.permissions.write,
+    canWrite: state.authentication.permissions.write,
+    isLatestVersion,
+    selectedVersion,
   };
 }
 
@@ -268,7 +295,10 @@ const mapDispatchToProps = {
   showWarning: notificationActions.showWarningMessage,
   writeFile: configurationActions.writeFile,
   selectedFileContentsChanged: configurationActions.selectedFileContentsChanged,
+  selectVersion: configurationActions.selectVersion,
   toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView,
+  selectFile: configurationActions.selectFile,
+  fetchVersions: configurationActions.fetchVersions,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

@@ -64,6 +64,22 @@ public class TestUtils {
         }
     }
 
+    private static synchronized Map<Class<?>, Object> getHooksMap() {
+        waitForAgentInitialization();
+        try {
+            Object agentInstance = getField(AgentManager.class, "agentInstance").get(null);
+            Object ctx = getField(agentInstance.getClass(), "ctx").get(agentInstance);
+
+            Method getBean = ctx.getClass().getMethod("getBean", String.class);
+            getBean.setAccessible(true);
+            Object hookManager = getBean.invoke(ctx, "hookManager");
+
+            return (Map<Class<?>, Object>) getField(hookManager.getClass(), "hooks").get(hookManager);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     private static synchronized Cache<Class<?>, Object> getInstrumentationCache() {
         if (activeInstrumentations == null) {
             // to prevent race conditions
@@ -88,15 +104,15 @@ public class TestUtils {
     /**
      * See {@link #waitForClassInstrumentations(List, int, TimeUnit)}
      */
-    public static void waitForClassInstrumentation(Class clazz, int duration, TimeUnit timeUnit) {
-        waitForClassInstrumentations(Collections.singletonList(clazz), duration, timeUnit);
+    public static void waitForClassInstrumentation(Class clazz, boolean waitForHooks, int duration, TimeUnit timeUnit) {
+        waitForClassInstrumentations(Collections.singletonList(clazz), waitForHooks, duration, timeUnit);
     }
 
     /**
      * This methods will wait until all specified classes are present in the inspectIT agents activeInstrumentation cache.
      * After the specified time, the method will cause the current test to fail.
      */
-    public static void waitForClassInstrumentations(List<Class> clazzes, int duration, TimeUnit timeUnit) {
+    public static void waitForClassInstrumentations(List<Class> clazzes, boolean waitForHooks, int duration, TimeUnit timeUnit) {
         try {
             await().atMost(duration, timeUnit).ignoreExceptions().untilAsserted(() -> {
                 for (Class clazz : clazzes) {
@@ -105,6 +121,12 @@ public class TestUtils {
                     assertThat(timeStamp).isNotNull();
                 }
             });
+            if (waitForHooks) {
+                await().atMost(duration, timeUnit).until(() -> {
+                    Map<Class<?>, Object> hooks = getHooksMap();
+                    return clazzes.stream().allMatch(hooks::containsKey);
+                });
+            }
         } catch (ConditionTimeoutException ex) {
             for (Class clazz : clazzes) {
                 Long timeStamp = instrumentationTimeStamp.get(clazz);
@@ -112,19 +134,7 @@ public class TestUtils {
                     System.out.println(clazz.getName() + " was not instrumented!");
                 }
             }
-
             throw ex;
-        }
-        for (Class clazz : clazzes) {
-            Long timeStamp = instrumentationTimeStamp.get(clazz);
-            long delta = System.currentTimeMillis() - timeStamp;
-            if (delta < 5000) {
-                try {
-                    //make sure that the instrumentation was performed at least 5 seconds ago.
-                    Thread.sleep(5000 - delta);
-                } catch (Exception e) {
-                }
-            }
         }
     }
 
@@ -136,7 +146,7 @@ public class TestUtils {
         CountDownLatch latch = new CountDownLatch(1);
         DisruptorEventQueue.getInstance().enqueue(latch::countDown);
         try {
-            latch.await(10, TimeUnit.SECONDS);
+            latch.await(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

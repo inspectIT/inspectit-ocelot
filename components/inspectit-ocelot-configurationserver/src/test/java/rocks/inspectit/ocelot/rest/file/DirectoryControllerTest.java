@@ -1,25 +1,22 @@
 package rocks.inspectit.ocelot.rest.file;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.servlet.HandlerMapping;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.swing.text.html.Option;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,26 +26,28 @@ class DirectoryControllerTest {
     private FileManager fileManager;
 
     @Mock
+    private WorkingDirectoryAccessor wdAccessor;
+
+    @Mock
+    private RevisionAccess revisionAccess;
+
+    @Mock
     private WorkingDirectoryAccessor accessor;
 
     @InjectMocks
     private DirectoryController controller;
-
-    @BeforeEach
-    public void beforeEach() {
-        when(fileManager.getWorkingDirectory()).thenReturn(accessor);
-    }
 
     @Nested
     class ListContents {
 
         @Test
         public void nullResult() {
+            when(fileManager.getWorkingDirectory()).thenReturn(accessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
             when(accessor.listConfigurationFiles(any())).thenReturn(Collections.emptyList());
 
-            Collection<FileInfo> result = controller.listContents(request);
+            Collection<FileInfo> result = controller.listContents(null, request);
 
             verify(accessor).listConfigurationFiles("target");
             verifyNoMoreInteractions(accessor);
@@ -57,11 +56,12 @@ class DirectoryControllerTest {
 
         @Test
         public void emptyResult() {
+            when(fileManager.getWorkingDirectory()).thenReturn(accessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
             when(accessor.listConfigurationFiles("target")).thenReturn(Collections.emptyList());
 
-            Collection<FileInfo> result = controller.listContents(request);
+            Collection<FileInfo> result = controller.listContents(null, request);
 
             verify(accessor).listConfigurationFiles("target");
             verifyNoMoreInteractions(accessor);
@@ -70,15 +70,49 @@ class DirectoryControllerTest {
 
         @Test
         public void validResponse() {
+            when(fileManager.getWorkingDirectory()).thenReturn(accessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
             FileInfo fileInfo = mock(FileInfo.class);
             when(accessor.listConfigurationFiles("target")).thenReturn(Collections.singletonList(fileInfo));
 
-            Collection<FileInfo> result = controller.listContents(request);
+            Collection<FileInfo> result = controller.listContents(null, request);
 
+            verify(fileManager).getWorkingDirectory();
             verify(accessor).listConfigurationFiles("target");
-            verifyNoMoreInteractions(accessor);
+            verifyNoMoreInteractions(fileManager, accessor);
+            assertThat(result).containsExactly(fileInfo);
+        }
+
+        @Test
+        public void listLiveVersion() {
+            when(fileManager.getLiveRevision()).thenReturn(revisionAccess);
+            HttpServletRequest request = mock(HttpServletRequest.class);
+            when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
+            FileInfo fileInfo = mock(FileInfo.class);
+            when(revisionAccess.listConfigurationFiles("target")).thenReturn(Collections.singletonList(fileInfo));
+
+            Collection<FileInfo> result = controller.listContents("live", request);
+
+            verify(fileManager).getLiveRevision();
+            verify(revisionAccess).listConfigurationFiles("target");
+            verifyNoMoreInteractions(fileManager, revisionAccess);
+            assertThat(result).containsExactly(fileInfo);
+        }
+
+        @Test
+        public void idResponse() {
+            when(fileManager.getCommitWithId("123")).thenReturn(revisionAccess);
+            HttpServletRequest request = mock(HttpServletRequest.class);
+            when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
+            FileInfo fileInfo = mock(FileInfo.class);
+            when(revisionAccess.listConfigurationFiles("target")).thenReturn(Collections.singletonList(fileInfo));
+
+            Collection<FileInfo> result = controller.listContents("123", request);
+
+            verify(fileManager).getCommitWithId("123");
+            verify(revisionAccess).listConfigurationFiles("target");
+            verifyNoMoreInteractions(fileManager, revisionAccess);
             assertThat(result).containsExactly(fileInfo);
         }
     }
@@ -88,13 +122,14 @@ class DirectoryControllerTest {
 
         @Test
         public void successful() throws IOException {
+            when(fileManager.getWorkingDirectory()).thenReturn(wdAccessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
 
             controller.createNewDirectory(request);
 
-            verify(accessor).createConfigurationDirectory("target");
-            verifyNoMoreInteractions(accessor);
+            verify(wdAccessor).createConfigurationDirectory("target");
+            verifyNoMoreInteractions(wdAccessor);
         }
     }
 
@@ -103,13 +138,14 @@ class DirectoryControllerTest {
 
         @Test
         public void successful() throws IOException {
+            when(fileManager.getWorkingDirectory()).thenReturn(wdAccessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
 
             controller.deleteDirectory(request);
 
-            verify(accessor).deleteConfiguration("target");
-            verifyNoMoreInteractions(accessor);
+            verify(wdAccessor).deleteConfiguration("target");
+            verifyNoMoreInteractions(wdAccessor);
         }
     }
 }

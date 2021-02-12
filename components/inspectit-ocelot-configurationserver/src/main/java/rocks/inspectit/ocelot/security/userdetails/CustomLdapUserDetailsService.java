@@ -1,52 +1,45 @@
 package rocks.inspectit.ocelot.security.userdetails;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ldap.core.DirContextOperations;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.ldap.search.LdapUserSearch;
 import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
-import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.conditional.ConditionalOnLdap;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
-import java.util.Collection;
-
 /**
  * The user details service used for authentication against the configured LDAP system.
  */
 @Component
+@Order(1) // ensure that this service has a higher priority than the LocalUserDetailsService, thus is called first
 @ConditionalOnLdap
 public class CustomLdapUserDetailsService extends LdapUserDetailsService {
 
-    private static class MappingLdapAuthoritiesPopulator implements LdapAuthoritiesPopulator {
+    private InspectitServerSettings settings;
 
-        private CustomUserAuthoritiesMapper customUserAuthoritiesMapper;
+    @Autowired
+    public CustomLdapUserDetailsService(LdapUserSearch ldapUserSearch, DefaultLdapAuthoritiesPopulator ldapAuthoritiesPopulator, InspectitServerSettings settings) {
+        super(ldapUserSearch, ldapAuthoritiesPopulator);
+        this.settings = settings;
 
-        private DefaultLdapAuthoritiesPopulator delegate;
-
-        private MappingLdapAuthoritiesPopulator(DefaultLdapAuthoritiesPopulator populator, InspectitServerSettings serverSettings) {
-            customUserAuthoritiesMapper = new CustomUserAuthoritiesMapper(serverSettings);
-            delegate = populator;
-        }
-
-        @Override
-        public Collection<? extends GrantedAuthority> getGrantedAuthorities(DirContextOperations userData, String username) {
-            return customUserAuthoritiesMapper.mapAuthorities(delegate.getGrantedAuthorities(userData, username));
-        }
+        setUserDetailsMapper(new CustomLdapUserDetailsMapper(settings.getSecurity().getLdap()));
     }
 
     /**
-     * Constructor.
-     *
-     * @param search         created via {@link rocks.inspectit.ocelot.security.config.SecurityBeanConfiguration}
-     * @param populator      created via {@link rocks.inspectit.ocelot.security.config.SecurityBeanConfiguration}
-     * @param serverSettings the settings used for deriving roles
+     * Loads {@link UserDetails} by a username. See {@link UserDetailsService#loadUserByUsername(String)}.
+     * <p>
+     * If LDAP authentication is disabled, this method will always throw a {@link UsernameNotFoundException}.
      */
-    @Autowired
-    public CustomLdapUserDetailsService(LdapUserSearch search, DefaultLdapAuthoritiesPopulator populator, InspectitServerSettings serverSettings) {
-        super(search, new MappingLdapAuthoritiesPopulator(populator, serverSettings));
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        if (!settings.getSecurity().isLdapAuthentication()) {
+            throw new UsernameNotFoundException(username);
+        }
+        return super.loadUserByUsername(username);
     }
-
 }

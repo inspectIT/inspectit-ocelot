@@ -43,10 +43,26 @@ As a result, log messages, generated within an exported trace, will be prefixed 
 09:39:53.014 [main] INFO  test.TestMain TRACE[612772355048a0b21662ed3bc07a6326] - Hello logback!
 ```
 
-> Note that the trace ID is only available when the log statement is within a trace which is sampled, otherwise the trace-id is empty.
+:::note
+Note that the trace ID is only available when the log statement is within a trace which is sampled, otherwise the trace-id is empty.
+:::
 
 You can change the key under which the trace-id is placed in the MDC using the property `inspectit.tracing.log-correlation.trace-id-mdc-injection.key`.
 
+By default, the trace-id will be inserted into all MDCs. If required, you can selectively exclude the supported libraries using the following flags:
+```yaml
+inspectit:
+  tracing:
+    log-correlation:
+      trace-id-mdc-injection:
+        slf4j-enabled: true  # Set to "false" to disable slf4J-Support
+        log4j1-enabled: true # Set to "false" to disable Log4J Version 1 Support
+        log4j2-enabled: true # Set to "false" to disable Log4J Version 2 Support
+        jboss-logmanager-enabled: true # Set to "false" to disable JBoss Logmanager support
+```
+    
+        
+        
 ## Automatical Trace ID Injection
 
 :::warning Experimental Feature
@@ -60,7 +76,7 @@ Currently, the following logging APIs and Facades are supported:
 * `Log4J Version 1`
 * `Log4J Version 2`
 
-The automatical trace ID injection is disabled by default. You can enable it using the following configuration snippet:
+The automatic trace ID injection is disabled by default. You can enable it using the following configuration snippet:
 ```yaml
 inspectit:
   tracing:

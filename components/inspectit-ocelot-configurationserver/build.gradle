@@ -8,6 +8,7 @@ buildscript {
 }
 
 plugins {
+    id("com.github.node-gradle.node") version "2.2.1"
     id "com.moowork.node" version "1.3.1"
     id 'com.palantir.docker' version "0.21.0"
 }
@@ -105,8 +106,8 @@ test {
 }
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.4'
-    annotationProcessor 'org.projectlombok:lombok:1.18.4'
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
 }
 
 dependencies {
@@ -120,7 +121,9 @@ dependencies {
             "org.springframework.ldap:spring-ldap-core",
             "org.springframework.security:spring-security-ldap",
             'org.springframework.boot:spring-boot-starter-actuator',
-            
+
+            'org.apache.httpcomponents:httpclient:4.5.12', //Required for PATCH-Requests
+
             "org.xerial:sqlite-jdbc:3.28.0",
             "com.github.gwenn:sqlite-dialect:0.1.0",
 
@@ -134,7 +137,8 @@ dependencies {
             "commons-io:commons-io:2.6",
             "org.apache.commons:commons-lang3:3.+",
             "org.flywaydb:flyway-core",
-            
+            "org.eclipse.jgit:org.eclipse.jgit:5.7.0.202003110725-r",
+
             "io.opencensus:opencensus-impl:${openCensusVersion}"
     )
     testImplementation(
@@ -152,7 +156,7 @@ task copyServerJar(type: Copy) {
     dependsOn bootJarWithFrontend
     from("${buildDir}/libs/inspectit-ocelot-configurationserver-${version}.jar")
     into("${buildDir}/docker-jar")
-    rename ("inspectit-ocelot-configurationserver-${version}\\.jar",
+    rename("inspectit-ocelot-configurationserver-${version}\\.jar",
             'inspectit-ocelot-configurationserver.jar')
 }
 

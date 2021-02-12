@@ -3,14 +3,18 @@ package rocks.inspectit.ocelot.core.instrumentation.injection;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.objenesis.instantiator.util.ClassDefinitionUtils;
+import org.springframework.objenesis.instantiator.util.DefineClassHelper;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.ProtectionDomain;
 import java.util.*;
 
 /**
@@ -31,8 +35,15 @@ public class ClassInjector {
     @Autowired
     private JigsawModuleInstrumenter moduleManager;
 
+    @Autowired
+    private InspectitEnvironment inspectitEnv;
+
     private InjectionClassLoader bootstrapChildLoader = new InjectionClassLoader();
 
+    /**
+     * The protection domain of the inspectIT Classloader.
+     */
+    private static final ProtectionDomain INSPECTIT_PROTECTION_DOMAIN;
 
     private Random nameGenerationRandom = new Random();
 
@@ -61,6 +72,13 @@ public class ClassInjector {
      */
     private Set<InjectedClassReference> activeReferences = new HashSet<>();
 
+    static {
+        //Taken from spring ClassDefinitionUtils
+        ClassInjector.class.getClass();
+        INSPECTIT_PROTECTION_DOMAIN =
+                AccessController.doPrivileged((PrivilegedAction<ProtectionDomain>) ClassInjector.class::getProtectionDomain);
+    }
+
     /**
      * Injects a custom class into a target classloader.
      * A unique name for the target class is automatically generated.
@@ -76,7 +94,9 @@ public class ClassInjector {
      *                                 This means that as described for {@link Instrumentation#redefineClasses(ClassDefinition...)}, the classes must have the same methods (including their signatures), fields and all modifieres must be the same.
      * @param neighborClass            a class which resides in the classloader to which the class shall be injected.
      * @param byteCodeGenerator        the bytecode of the class to inject
+     *
      * @return the class which has been injected
+     *
      * @throws Exception if an exception occurred during the injection or during the invocation of byteCodeGenerator, this exception is passed through
      */
     public synchronized InjectedClass<?> inject(String classStructureIdentifier, Class<?> neighborClass, ByteCodeProvider byteCodeGenerator) throws Exception {
@@ -112,13 +132,22 @@ public class ClassInjector {
     }
 
     private Class<?> injectClass(Class<?> neighborClass, String className, byte[] byteCode) throws Exception {
+        ProtectionDomain protectionDomain = resolveProtectionDomain(neighborClass);
         ClassLoader loader = neighborClass.getClassLoader();
         if (loader == null) {
             //for bootstrap classes the standard injection does not work properly
-            //however it also is not necessary as a reference to the bootstrap loader won't cause a memoryleak anyway
-            return bootstrapChildLoader.defineNewClass(className, byteCode);
+            //however it also is not necessary as a reference to the bootstrap loader won't cause a memory leak anyway
+            return bootstrapChildLoader.defineNewClass(className, byteCode, protectionDomain);
         } else {
-            return ClassDefinitionUtils.defineClass(className, byteCode, neighborClass, loader);
+            return DefineClassHelper.defineClass(className, byteCode, 0, byteCode.length, neighborClass, loader, protectionDomain);
+        }
+    }
+
+    private ProtectionDomain resolveProtectionDomain(Class<?> neighborClass) {
+        if (inspectitEnv.getCurrentConfig().getInstrumentation().getInternal().isUseInspectitProtectionDomain()) {
+            return INSPECTIT_PROTECTION_DOMAIN;
+        } else {
+            return neighborClass.getProtectionDomain();
         }
     }
 
@@ -159,6 +188,9 @@ public class ClassInjector {
     }
 
     private Optional<Class<?>> tryReusingClassInLoader(String classStructureIdentifier, ClassLoader loader) {
+        if (!inspectitEnv.getCurrentConfig().getInstrumentation().getInternal().isRecyclingOldActionClasses()) {
+            return Optional.empty();
+        }
         if (loader == null) {
             loader = bootstrapChildLoader;
         }
@@ -192,12 +224,15 @@ public class ClassInjector {
 
     @FunctionalInterface
     public interface ByteCodeProvider {
+
         /**
          * The function providing the bytecode which shall be injected.
          * The name is provided by the caller which (a) ensures that it is unique and (b) that the class gets put in a package in which classes can be injected.
          *
          * @param className the name of the class to use in the bytecode.
+         *
          * @return the bytecode to use
+         *
          * @throws Exception if something went wrong during the bytecode generation, this exception is passed through by {@link #inject(String, Class, ByteCodeProvider)}
          */
         byte[] generateBytecode(String className) throws Exception;
@@ -210,6 +245,7 @@ public class ClassInjector {
     private static class InjectedClassReference extends WeakReference<InjectedClass<?>> {
 
         private final WeakReference<Class> injectedClassObject;
+
         private final String classStructureIdentifier;
 
         public InjectedClassReference(String classStructureIdentifier, InjectedClass<?> referent, Class<?> targetClass, ReferenceQueue<? super InjectedClass<?>> q) {
@@ -221,8 +257,8 @@ public class ClassInjector {
 
     private static class InjectionClassLoader extends ClassLoader {
 
-        public Class<?> defineNewClass(String className, byte[] code) throws Exception {
-            super.defineClass(className, code, 0, code.length);
+        public Class<?> defineNewClass(String className, byte[] code, ProtectionDomain protectionDomain) throws Exception {
+            super.defineClass(className, code, 0, code.length, protectionDomain);
             return Class.forName(className, false, this);
         }
     }

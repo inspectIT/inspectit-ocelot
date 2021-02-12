@@ -45,4 +45,16 @@ public class InternalSettings {
      */
     private int numClassDiscoveryTrials;
 
+    /**
+     * "Actions" are defined by injecting classes into existing classloaders.
+     * When a security manager is enabled, it is important that these classes have a {@link java.security.ProtectionDomain}
+     * configured. Depending on the security needs, this can be either the PD of inspectit or of a neighbor-class in the Classloader.
+     */
+    private boolean useInspectitProtectionDomain;
+
+    /**
+     * Defines whether orphan action classes are recycled or new classes should be injected instead.
+     */
+    private boolean recyclingOldActionClasses = true;
+
 }

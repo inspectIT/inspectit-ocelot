@@ -29,9 +29,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class HttpRemoteTracingTest extends TraceTestBase {
 
-
     public static final int PORT = 9999;
+
     public static final String TEST_PATH = "/test";
+
     public static final String TEST_URL = "http://localhost:" + PORT + TEST_PATH;
 
     private static Server server;
@@ -53,7 +54,6 @@ public class HttpRemoteTracingTest extends TraceTestBase {
     static void cleanup() throws Exception {
         server.stop();
     }
-
 
     public static class TracingServlet extends HttpServlet {
 
@@ -84,9 +84,9 @@ public class HttpRemoteTracingTest extends TraceTestBase {
         @Test
         void testPropagationViaServlet() throws Exception {
 
-            TestUtils.waitForClassInstrumentation(HttpUrlConnectionTest.class, 15, TimeUnit.SECONDS);
-            TestUtils.waitForClassInstrumentation(TracingServlet.class, 15, TimeUnit.SECONDS);
-            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), 10, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(HttpUrlConnectionTest.class, true, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(TracingServlet.class, true, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), true, 30, TimeUnit.SECONDS);
 
             clientSpan();
 
@@ -108,7 +108,6 @@ public class HttpRemoteTracingTest extends TraceTestBase {
         }
 
     }
-
 
     @Nested
     class ApacheClientConnectionTest {
@@ -136,7 +135,7 @@ public class HttpRemoteTracingTest extends TraceTestBase {
                     CloseableHttpClient.class,
                     Class.forName("org.apache.http.impl.client.InternalHttpClient"),
                     ApacheClientConnectionTest.class,
-                    TracingServlet.class), 15, TimeUnit.SECONDS);
+                    TracingServlet.class), true, 15, TimeUnit.SECONDS);
             clientSpan();
 
             assertTraceExported((spans) ->

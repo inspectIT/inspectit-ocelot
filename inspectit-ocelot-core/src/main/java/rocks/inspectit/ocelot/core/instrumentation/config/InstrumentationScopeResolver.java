@@ -38,30 +38,35 @@ public class InstrumentationScopeResolver {
     public Map<String, InstrumentationScope> resolve(InstrumentationSettings source) {
         Map<String, InstrumentationScope> scopeMap = new HashMap<>();
 
-        for (Map.Entry<String, InstrumentationScopeSettings> scopeEntry : source.getScopes().entrySet()) {
-            InstrumentationScopeSettings scopeSettings = scopeEntry.getValue();
+        for (String scopeName : source.getScopes().keySet()) {
+            log.debug("Processing scope '{}'.", scopeName);
 
-            log.debug("Processing scope '{}'.", scopeEntry.getKey());
-
-            InstrumentationScope scope = resolveScope(scopeSettings);
+            resolveScope(scopeName, source.getScopes(), scopeMap);
 
             if (log.isDebugEnabled()) {
-                log.debug("|> Type scope: {}", scope.getTypeMatcher().toString());
-                log.debug("|> Method scope: {}", scope.getMethodMatcher().toString());
+                log.debug("|> Type scope: {}", scopeMap.get(scopeName).getTypeMatcher().toString());
+                log.debug("|> Method scope: {}", scopeMap.get(scopeName).getMethodMatcher().toString());
             }
 
-            scopeMap.put(scopeEntry.getKey(), scope);
         }
 
         return scopeMap;
     }
 
     /**
-     * Resolving the {@link InstrumentationScope} for the given parameters.
+     * Resolving the {@link InstrumentationScope} for the given parameters and extending the {@param cache} map.
      *
-     * @return The resolve {@link InstrumentationScope}.
+     * @param name of scope to be resolved
+     * @param settings a map containing the {@link InstrumentationSettings} scopes
+     * @param cache a map containing the resolved scopes, which will be extended
      */
-    private InstrumentationScope resolveScope(InstrumentationScopeSettings scopeSettings) {
+    private void resolveScope(String name, Map<String, InstrumentationScopeSettings> settings, Map<String, InstrumentationScope> cache) {
+
+        if(cache.containsKey(name)){
+            return;
+        }
+
+        InstrumentationScopeSettings scopeSettings = settings.get(name);
         ElementMatcher.Junction<TypeDescription> typeMatcher = buildTypeMatcher(scopeSettings);
         ElementMatcher.Junction<MethodDescription> methodMatcher = buildMethodMatcher(scopeSettings, typeMatcher);
 
@@ -72,10 +77,21 @@ public class InstrumentationScopeResolver {
             methodMatcher = any();
         }
 
-        //we ensure that we only match types which contain at least one matched method
+        // resolving of the specified excluded scopes
+        for(Map.Entry<String, Boolean> entry:scopeSettings.getExclude().entrySet()){
+            if(entry.getValue()) {
+                String excludeScopeName = entry.getKey();
+                resolveScope(excludeScopeName, settings, cache);
+
+                InstrumentationScope excludeScope = cache.get(excludeScopeName);
+                methodMatcher = methodMatcher.and(not(isDeclaredBy(excludeScope.getTypeMatcher()).and(excludeScope.getMethodMatcher())));
+            }
+        }
+
+        // we ensure that we only match types which contain at least one matched method
         typeMatcher = typeMatcher.and(declaresMethod(methodMatcher));
 
-        return new InstrumentationScope(typeMatcher, methodMatcher);
+        cache.put(name, new InstrumentationScope(typeMatcher, methodMatcher));
     }
 
     /**
