@@ -1,10 +1,9 @@
-package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
+package rocks.inspectit.ocelot.core.instrumentation.correlation.log;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.bootstrap.correlation.MdcAccessor;
 import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
-import rocks.inspectit.ocelot.core.instrumentation.correlation.log.InjectionScope;
 
 @Slf4j
 @AllArgsConstructor

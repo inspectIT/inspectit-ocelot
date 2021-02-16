@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.bootstrap.correlation.MdcAccessor;
 import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.DelegationMdcAccessor;
 
 import java.lang.reflect.Method;
 
@@ -38,7 +39,7 @@ public class Slf4JMdcAdapter implements MdcAdapter {
         return new DelegationMdcAccessor(mdcAccessor) {
             @Override
             public boolean isEnabled(TraceIdMDCInjectionSettings settings) {
-                return false;
+                return settings.isSlf4jEnabled();
             }
         };
     }

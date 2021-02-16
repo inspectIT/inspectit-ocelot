@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 
 import rocks.inspectit.ocelot.bootstrap.correlation.MdcAccessor;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.DelegationMdcAccessor;
 
 import java.lang.reflect.Method;
 

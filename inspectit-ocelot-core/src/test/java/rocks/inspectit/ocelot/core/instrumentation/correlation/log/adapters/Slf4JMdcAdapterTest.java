@@ -11,17 +11,15 @@ import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.DelegationMdcAccessor;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class JBossLogmanagerMdcAdapterTest {
+public class Slf4JMdcAdapterTest {
 
-    // dummy MDC class - representing 'org.jboss.logmanager.MDC'
-    public static class JBOSS_MDC {
+    // dummy MDC class - representing 'org.slf4j.MDC'
+    public static class Slf4J_MDC {
         public static String get(String key) {
             return null;
         }
@@ -34,16 +32,16 @@ public class JBossLogmanagerMdcAdapterTest {
     }
 
     @InjectMocks
-    private JBossLogmanagerMdcAdapter adapter;
+    private Slf4JMdcAdapter adapter;
 
     @Nested
     public class GetGetMethod {
 
         @Test
         public void findGetMethod() throws NoSuchMethodException {
-            Method method = adapter.getGetMethod(JBOSS_MDC.class);
+            Method method = adapter.getGetMethod(Slf4J_MDC.class);
 
-            assertThat(method).isEqualTo(JBOSS_MDC.class.getMethod("get", String.class));
+            assertThat(method).isEqualTo(Slf4J_MDC.class.getMethod("get", String.class));
         }
     }
 
@@ -52,9 +50,9 @@ public class JBossLogmanagerMdcAdapterTest {
 
         @Test
         public void findGetMethod() throws NoSuchMethodException {
-            Method method = adapter.getPutMethod(JBOSS_MDC.class);
+            Method method = adapter.getPutMethod(Slf4J_MDC.class);
 
-            assertThat(method).isEqualTo(JBOSS_MDC.class.getMethod("put", String.class, String.class));
+            assertThat(method).isEqualTo(Slf4J_MDC.class.getMethod("put", String.class, String.class));
         }
     }
 
@@ -63,9 +61,9 @@ public class JBossLogmanagerMdcAdapterTest {
 
         @Test
         public void findGetMethod() throws NoSuchMethodException {
-            Method method = adapter.getRemoveMethod(JBOSS_MDC.class);
+            Method method = adapter.getRemoveMethod(Slf4J_MDC.class);
 
-            assertThat(method).isEqualTo(JBOSS_MDC.class.getMethod("remove", String.class));
+            assertThat(method).isEqualTo(Slf4J_MDC.class.getMethod("remove", String.class));
         }
     }
 
@@ -80,7 +78,7 @@ public class JBossLogmanagerMdcAdapterTest {
 
         @Test
         public void isEnabled() {
-            when(settings.isJbossLogmanagerEnabled()).thenReturn(true);
+            when(settings.isSlf4jEnabled()).thenReturn(true);
 
             DelegationMdcAccessor delegationAccessor = adapter.wrap(accessor);
 
@@ -91,7 +89,7 @@ public class JBossLogmanagerMdcAdapterTest {
 
         @Test
         public void isDisabled() {
-            when(settings.isJbossLogmanagerEnabled()).thenReturn(false);
+            when(settings.isSlf4jEnabled()).thenReturn(false);
 
             DelegationMdcAccessor delegationAccessor = adapter.wrap(accessor);
 
@@ -100,5 +98,4 @@ public class JBossLogmanagerMdcAdapterTest {
             assertThat(result).isFalse();
         }
     }
-
 }

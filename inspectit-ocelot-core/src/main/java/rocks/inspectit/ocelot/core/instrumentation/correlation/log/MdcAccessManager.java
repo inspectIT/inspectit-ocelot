@@ -35,16 +35,17 @@ public class MdcAccessManager implements IClassDiscoveryListener {
 
     private Map<String, MdcAdapter> mdcAdapters = new HashMap<>();
 
-    private Map<Class<?>, DelegationMdcAccessor> availableMdcAccessors = new WeakHashMap();
+    @VisibleForTesting
+    Map<Class<?>, DelegationMdcAccessor> availableMdcAccessors = new WeakHashMap();
 
     /**
      * weak!
      */
-    private Collection<DelegationMdcAccessor> activeMdcAccessors = Collections.emptySet();
-
     @VisibleForTesting
+    Collection<DelegationMdcAccessor> activeMdcAccessors = Collections.emptySet();
+
     @PostConstruct
-    void registerAdapters() {
+    public void registerAdapters() {
         mdcAdapters.put(Slf4JMdcAdapter.MDC_CLASS, new Slf4JMdcAdapter());
         mdcAdapters.put(Log4J2MdcAdapter.MDC_CLASS, new Log4J2MdcAdapter());
         mdcAdapters.put(Log4J1MdcAdapter.MDC_CLASS, new Log4J1MdcAdapter());
@@ -110,7 +111,6 @@ public class MdcAccessManager implements IClassDiscoveryListener {
                 .getLoaded();
     }
 
-    @VisibleForTesting
     @EventListener(InspectitConfigChangedEvent.class)
     public synchronized void updateActiveMdcAccessors() {
         InspectitConfig config = environment.getCurrentConfig();
