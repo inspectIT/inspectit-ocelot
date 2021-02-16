@@ -2,7 +2,6 @@ package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MDCAccess;
 
 import java.util.HashMap;
 import java.util.Map;

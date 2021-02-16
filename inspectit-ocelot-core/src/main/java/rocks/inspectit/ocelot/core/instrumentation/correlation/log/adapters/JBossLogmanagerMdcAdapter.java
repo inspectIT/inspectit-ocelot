@@ -41,21 +41,4 @@ public class JBossLogmanagerMdcAdapter implements MdcAdapter {
             }
         };
     }
-
-//    public static class JBossDelegationMdcAccessor extends DelegationMdcAccessor {
-//
-//        public JBossDelegationMdcAccessor(MdcAccessor mdcAccessor) {
-//            super(mdcAccessor);
-//        }
-//
-//        @Override
-//        public boolean isEnabled(TraceIdMDCInjectionSettings settings) {
-//            return false;
-//        }
-//    }
-
-//    @Override
-//    public boolean isEnabledForConfig(TraceIdMDCInjectionSettings settings) {
-//        return settings.isJbossLogmanagerEnabled();
-//    }
 }

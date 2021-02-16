@@ -8,12 +8,13 @@ import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopTraceIdInjector;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopHookManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopObjectAttachments;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachmentsImpl;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.LogTraceCorrelatorImpl;
-import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MDCAccess;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MdcAccessManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import javax.annotation.PreDestroy;
@@ -44,10 +45,11 @@ public class BootstrapInitializerConfiguration {
     }
 
     @Bean(LogTraceCorrelatorImpl.BEAN_NAME)
-    public LogTraceCorrelatorImpl getLogTraceCorrelator(MDCAccess access, InspectitEnvironment env) {
-        String key = env.getCurrentConfig().getTracing().getLogCorrelation().getTraceIdMdcInjection().getKey();
-        LogTraceCorrelatorImpl correlator = new LogTraceCorrelatorImpl(access, key);
-        return correlator;
+    public LogTraceCorrelatorImpl getLogTraceCorrelator(MdcAccessManager mdcAccessManager, InspectitEnvironment environment) {
+        InspectitConfig configuration = environment.getCurrentConfig();
+        String traceIdKey = configuration.getTracing().getLogCorrelation().getTraceIdMdcInjection().getKey();
+
+        return new LogTraceCorrelatorImpl(mdcAccessManager, traceIdKey);
     }
 
     @PreDestroy

@@ -42,20 +42,4 @@ public class Slf4JMdcAdapter implements MdcAdapter {
             }
         };
     }
-
-//    public static class Slf4JDelegationMdcAccessor extends DelegationMdcAccessor {
-//
-//        public Slf4JDelegationMdcAccessor(MdcAccessor mdcAccessor) {
-//            super(mdcAccessor);
-//        }
-//
-//        @Override
-//        public boolean isEnabled(TraceIdMDCInjectionSettings settings) {
-//            return false;
-//        }
-//    }
-//    @Override
-//    public boolean isEnabledForConfig(TraceIdMDCInjectionSettings settings) {
-//        return settings.isSlf4jEnabled();
-//    }
 }

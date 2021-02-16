@@ -67,42 +67,6 @@ public class MdcAccessManager implements IClassDiscoveryListener {
         };
     }
 
-//
-//    private RevertTraceInjection put(MdcAccessor mdcAccessor, String key, String value) {
-//        Method put = putMethod.get();
-//        Method get = getMethod.get();
-//        Method remove = removeMethod.get();
-//
-//        if (put == null || get == null || remove == null) {
-//            return MDCAccess.Undo.NOOP; //the MDC has been garbage collected
-//        }
-//
-//        try {
-//
-//            Object previous = get.invoke(null, key);
-//            if (value != null) {
-//                put.invoke(null, key, value);
-//            } else {
-//                remove.invoke(null, key);
-//            }
-//
-//            return () -> {
-//                try {
-//                    if (previous != null) {
-//                        put.invoke(null, key, previous);
-//                    } else {
-//                        remove.invoke(null, key);
-//                    }
-//                } catch (Throwable e) {
-//                    log.error("Could not reset MDC", e);
-//                }
-//            };
-//        } catch (Throwable e) {
-//            log.error("Could not write to MDC", e);
-//            return MDCAccess.Undo.NOOP;
-//        }
-//    }
-
     @Override
     public void onNewClassesDiscovered(Set<Class<?>> newClasses) {
         newClasses.stream()
@@ -120,19 +84,6 @@ public class MdcAccessManager implements IClassDiscoveryListener {
 
                         availableMdcAccessors.put(clazz, mdcAdapter.wrap(accessor));
 
-//                        Method get = clazz.getMethod("get", String.class);
-//
-//                        log.info("get: " + accessor.get("key"));
-//                        accessor.put("key", "val");
-//                        log.info("get: " + accessor.get("key"));
-//                        log.info("get direct: " + get.invoke(null, "key"));
-//                        accessor.remove("key");
-//                        log.info("get: " + accessor.get("key"));
-//
-//                        try (AutoCloseable c = accessor.inject("test", "va")){
-//                            log.info("get: " + accessor.get("test"));
-//                        }
-//                        log.info("get: " + accessor.get("test"));
                         updateActiveMdcAccessors();
                     } catch (Throwable t) {
                         log.error("Error creating log-correlation MDC adapter for class {}", clazz.getName(), t);

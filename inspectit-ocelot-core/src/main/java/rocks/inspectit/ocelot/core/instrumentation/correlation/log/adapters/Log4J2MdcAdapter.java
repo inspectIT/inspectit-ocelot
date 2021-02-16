@@ -41,21 +41,4 @@ public class Log4J2MdcAdapter implements MdcAdapter {
             }
         };
     }
-
-//    public static class Log4J2DelegationMdcAccessor extends DelegationMdcAccessor {
-//
-//        public Log4J2DelegationMdcAccessor(MdcAccessor mdcAccessor) {
-//            super(mdcAccessor);
-//        }
-//
-//        @Override
-//        public boolean isEnabled(TraceIdMDCInjectionSettings settings) {
-//            return false;
-//        }
-//    }
-
-//    @Override
-//    public boolean isEnabledForConfig(TraceIdMDCInjectionSettings settings) {
-//        return settings.isLog4j2Enabled();
-//    }
 }

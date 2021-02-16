@@ -1,8 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 
 import rocks.inspectit.ocelot.bootstrap.correlation.MdcAccessor;
-import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
-import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MDCAccess;
 
 import java.lang.reflect.Method;
 
@@ -27,8 +25,6 @@ public interface MdcAdapter {
     Method getPutMethod(Class<?> mdcClazz) throws NoSuchMethodException;
 
     Method getRemoveMethod(Class<?> mdcClazz) throws NoSuchMethodException;
-
-//    Class<? extends MdcAccessor> getAccessorClass();
 
     DelegationMdcAccessor wrap(MdcAccessor mdcAccessor);
 

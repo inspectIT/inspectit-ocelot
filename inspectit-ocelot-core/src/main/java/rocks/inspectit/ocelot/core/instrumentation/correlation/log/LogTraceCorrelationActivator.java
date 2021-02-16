@@ -20,18 +20,16 @@ import javax.annotation.PostConstruct;
 public class LogTraceCorrelationActivator {
 
     @Autowired
-    private InspectitEnvironment environment;
-
-    @Autowired
     private LogTraceCorrelatorImpl correlatorImpl;
 
     @PostConstruct
-    @EventListener(InspectitConfigChangedEvent.class)
-    void update() {
-        InspectitConfig config = environment.getCurrentConfig();
-        TraceIdMDCInjectionSettings logCorrelation = config.getTracing().getLogCorrelation().getTraceIdMdcInjection();
-        if (logCorrelation.isEnabled()) {
-            correlatorImpl.setTraceIdKey(logCorrelation.getKey());
+    @EventListener
+    public void update(InspectitConfigChangedEvent event) {
+        InspectitConfig configuration = event.getNewConfig();
+        TraceIdMDCInjectionSettings correlationSettings = configuration.getTracing().getLogCorrelation().getTraceIdMdcInjection();
+
+        if (correlationSettings.isEnabled()) {
+            correlatorImpl.setTraceIdKey(correlationSettings.getKey());
             Instances.logTraceCorrelator = correlatorImpl;
         } else {
             Instances.logTraceCorrelator = NoopLogTraceCorrelator.INSTANCE;
