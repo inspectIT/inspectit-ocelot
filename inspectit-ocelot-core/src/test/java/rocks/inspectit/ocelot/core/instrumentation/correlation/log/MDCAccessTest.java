@@ -12,7 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.MDCAdapter;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters.MdcAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,13 +34,13 @@ public class MDCAccessTest {
     MDCAccess access;
 
     @Mock
-    MDCAdapter adapterA;
+    MdcAdapter adapterA;
 
     @Mock
-    MDCAdapter adapterB;
+    MdcAdapter adapterB;
 
     @Mock
-    MDCAdapter adapterC;
+    MdcAdapter adapterC;
 
     @BeforeEach
     void reset() {

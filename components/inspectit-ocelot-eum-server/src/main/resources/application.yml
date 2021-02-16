@@ -108,6 +108,16 @@ inspectit-eum-server:
           - keep-no-match: false
             pattern: "^.*\\/\\/([^\\/]*)([^?]*).*$"
             replacement: "$2"
+
+TAG_NAME:
+  input: beacon_attr
+  to-lower-case: true
+
+TAG_NAME:
+  input: beacon_attr
+  transformation:
+    to-lower-case: ${applicationis} = "kobra"
+
     define-as-global:
       - URL
       - OS

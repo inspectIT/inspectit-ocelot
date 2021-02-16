@@ -11,7 +11,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AbstractStaticMapMDCAdapterTest {
+public class AbstractStaticMapMdcAdapterTest {
 
     public static class DummyMDC {
 

@@ -1,11 +1,34 @@
 package rocks.inspectit.ocelot.bootstrap.correlation;
 
-public interface MdcAccessor {
+import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
 
-    String get(String key);
+public abstract class MdcAccessor implements DoNotInstrumentMarker {
 
-    void put(String key, String value);
+    public interface InjectionScope extends AutoCloseable {
 
-    void remove(String key);
+        /**
+         * A no-operation instance.
+         */
+        InjectionScope NOOP = () -> {
+        };
 
+        @Override
+        void close();
+    }
+
+    public abstract Object get(String key);
+
+    public abstract void put(String key, Object value);
+
+    public abstract void remove(String key);
+
+    public abstract boolean isEnabled();
+
+    public InjectionScope inject(String key, String value) {
+        put(key, value);
+
+        return () -> {
+            remove(key);
+        };
+    }
 }

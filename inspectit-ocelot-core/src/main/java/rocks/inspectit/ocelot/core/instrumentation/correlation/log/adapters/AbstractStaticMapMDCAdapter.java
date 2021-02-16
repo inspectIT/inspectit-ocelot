@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
  * Implementation for all MDCs in form of a static Map which offer a put, get and remove method.
  */
 @Slf4j
-public abstract class AbstractStaticMapMDCAdapter implements MDCAdapter {
+public abstract class AbstractStaticMapMDCAdapter implements MdcAdapter {
 
     /**
      * Reference to the put(key,value) method.
@@ -38,6 +38,9 @@ public abstract class AbstractStaticMapMDCAdapter implements MDCAdapter {
         putMethod = put;
         getMethod = get;
         removeMethod = remove;
+    }
+
+    public AbstractStaticMapMDCAdapter() {
     }
 
     @Override

@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class JBossLogmanagerMDCAdapterTest {
+public class JBossLogmanagerMdcAdapterTest {
 
     private static class DummyMDC {
 
@@ -34,7 +34,7 @@ public class JBossLogmanagerMDCAdapterTest {
         @Test
         void verifyMDCAccess() {
             DummyMDC.put("my_key", "default");
-            JBossLogmanagerMDCAdapter adapter = JBossLogmanagerMDCAdapter.get(DummyMDC.class);
+            JBossLogmanagerMdcAdapter adapter = JBossLogmanagerMdcAdapter.get(DummyMDC.class);
 
             MDCAccess.Undo undo = adapter.set("my_key", "overridden");
             assertThat(DummyMDC.get("my_key")).isEqualTo("overridden");

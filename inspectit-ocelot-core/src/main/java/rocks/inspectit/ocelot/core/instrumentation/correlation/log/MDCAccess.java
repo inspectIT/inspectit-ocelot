@@ -47,30 +47,30 @@ public class MDCAccess implements IClassDiscoveryListener {
     /**
      * Maps class names of MDC classes to their corresponding adapter factory methods.
      */
-    private final Map<String, Function<Class<?>, ? extends MDCAdapter>> mdcAdapterBuilders = new HashMap<>();
+    private final Map<String, Function<Class<?>, ? extends MdcAdapter>> mdcAdapterBuilders = new HashMap<>();
 
     /**
      * Holds references to all MDC Adapters for all classes found on the classpath.
      */
     @VisibleForTesting
-    WeakHashMap<Class<?>, MDCAdapter> availableAdapters = new WeakHashMap<>();
+    WeakHashMap<Class<?>, MdcAdapter> availableAdapters = new WeakHashMap<>();
 
     /**
      * Holds references to all MDC Adapters which are enabled.
      * The adapters are weakly referenced because their livetime is controlled by {@link #availableAdapters}.
      */
     @VisibleForTesting
-    Set<MDCAdapter> enabledAdapters = Collections.emptySet();
+    Set<MdcAdapter> enabledAdapters = Collections.emptySet();
 
     /**
      * Registers all implemented log api MDC adapters.
      */
     @PostConstruct
     void registerAdapters() {
-        mdcAdapterBuilders.put(Slf4jMDCAdapter.MDC_CLASS, Slf4jMDCAdapter::get);
-        mdcAdapterBuilders.put(Log4J2MDCAdapter.THREAD_CONTEXT_CLASS, Log4J2MDCAdapter::get);
-        mdcAdapterBuilders.put(Log4J1MDCAdapter.MDC_CLASS, Log4J1MDCAdapter::get);
-        mdcAdapterBuilders.put(JBossLogmanagerMDCAdapter.MDC_CLASS, JBossLogmanagerMDCAdapter::get);
+        mdcAdapterBuilders.put(Slf4JMdcAdapter.MDC_CLASS, Slf4JMdcAdapter::get);
+        mdcAdapterBuilders.put(Log4J2MdcAdapter.MDC_CLASS, Log4J2MdcAdapter::get);
+        mdcAdapterBuilders.put(Log4J1MdcAdapter.MDC_CLASS, Log4J1MdcAdapter::get);
+        mdcAdapterBuilders.put(JBossLogmanagerMdcAdapter.MDC_CLASS, JBossLogmanagerMdcAdapter::get);
     }
 
     /**
@@ -84,7 +84,7 @@ public class MDCAccess implements IClassDiscoveryListener {
      */
     public Undo put(String key, String value) {
         List<Undo> undos = new ArrayList<>();
-        for (MDCAdapter adapter : enabledAdapters) {
+        for (MdcAdapter adapter : enabledAdapters) {
             undos.add(adapter.set(key, value));
         }
         return () -> {
@@ -104,7 +104,7 @@ public class MDCAccess implements IClassDiscoveryListener {
                 .forEach(clazz -> {
                     try {
                         log.debug("Found MDC implementation for log correlation: {}", clazz.getName());
-                        MDCAdapter adapter = mdcAdapterBuilders.get(clazz.getName()).apply(clazz);
+                        MdcAdapter adapter = mdcAdapterBuilders.get(clazz.getName()).apply(clazz);
                         availableAdapters.put(clazz, adapter);
                         updateEnabledAdaptersSet();
                     } catch (Throwable t) {

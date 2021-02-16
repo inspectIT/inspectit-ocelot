@@ -3,10 +3,12 @@ package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MDCAccess;
 
+import java.lang.reflect.Method;
+
 /**
  * Interface for all adapters for accessing the MDC of a given logging library.
  */
-public interface MDCAdapter {
+public interface MdcAdapter {
 
     /**
      * Writes a given entry to the MDC.
@@ -18,6 +20,14 @@ public interface MDCAdapter {
      * @return a {@link Undo} which reverts the change performed by this method call.
      */
     MDCAccess.Undo set(String key, String value);
+
+    String getMDCClassName();
+
+    Method getGetMethod(Class<?> mdcClazz) throws NoSuchMethodException;
+
+    Method getPutMethod(Class<?> mdcClazz) throws NoSuchMethodException;
+
+    Method getRemoveMethod(Class<?> mdcClazz) throws NoSuchMethodException;
 
     /**
      * Checks if this Adapter is enabled based on the given configuration.
