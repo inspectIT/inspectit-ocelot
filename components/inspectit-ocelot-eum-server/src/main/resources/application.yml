@@ -124,6 +124,8 @@ inspectit-eum-server:
         enabled: true
         # the export interval of the metrics
         export-interval: 15s
+        # the http url of influx (e.g. http://localhost:8086)
+        url: "http://localhost:8086"
         # the database to write to
         database: "inspectit"
         # the retention policy to write to
