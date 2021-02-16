@@ -117,61 +117,92 @@ inspectit-eum-server:
   exporters:
     metrics:
       prometheus:
+        # Determines whether the prometheus exporter is enabled.
         enabled: true
+
+        # The host of the prometheus server.
         host: localhost
+
+        # The port of the prometheus server.
         port: 8888
+
       influx:
+        # Determines whether the influx exporter is enabled.
         enabled: true
-        # the export interval of the metrics
+
+        # the export interval of the metrics.
         export-interval: 15s
-        # the http url of influx (e.g. http://localhost:8086)
-        url: "http://localhost:8086"
-        # the database to write to
+
+        # The http url of influx.
+        # If this property is not set, the influx-exporter will not be started.
+        # url: "http://localhost:8086"
+
+        # The database to write to.
+        # If this property is not set, the influx-exporter will not be started.
         database: "inspectit"
-        # the retention policy to write to
+
+        # The retention policy to write to.
+        # If this property is not set, the influx-exporter will not be started.
         retention-policy: "autogen"
-        # If true, the specified database will be created with the autogen retention policy
+
+        # If true, the specified database will be created with the autogen retention policy.
         create-database: true
+
         # If disabled, the raw values of each counter will be written to the InfluxDB on each export.
         # When enabled, only the change of the counter in comparison to the previous export will be written.
         # This difference will only be written if the counter has changed (=the difference is non-zero).
         # This can greatly reduce the total data written to influx and makes writing queries easier.
         counters-as-differences: true
+
         # The size of the buffer for failed batches.
         # E.g. if the exportInterval is 15s and the buffer-size is 4, the export will keep up to one minute of data in memory.
         buffer-size: 40
+
     tracing:
       jaeger:
-        # if jaeger exporter for the OT received spans is enabled
+        # If jaeger exporter for the OT received spans is enabled.
         enabled: true
-        # location of the jaeger gRPC API
-        # either a valid NameResolver-compliant URI, or an authority string
-        grpc:
-        # service name for all exported spans
+
+        # location of the jaeger gRPC API.
+        # either a valid NameResolver-compliant URI, or an authority string.
+        # If this property is not set, the jaeger-exporter will not be started.
+        # grpc: localhost:14250
+
+        # service name for all exported spans.
         service-name: browser-js
+
     beacons:
       http:
-        # Whether beacons should be exported via HTTP
+        # Whether beacons should be exported via HTTP.
         enabled: false
-        # The endpoint to which the beacons are to be sent
+
+        # The endpoint to which the beacons are to be sent.
         endpoint-url: http://localhost:8080
-        # The max. amount of threads exporting beacons (min. 1)
+
+        # The max. amount of threads exporting beacons (min. 1).
         worker-threads: 2
-        # The maximum number of beacons to be exported using a single HTTP request (min. 1)
+
+        # The maximum number of beacons to be exported using a single HTTP request (min. 1).
         max-batch-size: 100
-        # The flush interval to export beacons in case the 'max-batch-size' has not been reached (min. 1 second)
+
+        # The flush interval to export beacons in case the 'max-batch-size' has not been reached (min. 1 second).
         flush-interval: 5s
-        # When specified, the request will be using this username for Basic authentication
-        username:
-        # The password used for Basic authentication
-        password: 
+
+        # When specified, the request will be using this username for Basic authentication.
+        # username:
+
+        # The password used for Basic authentication.
+        # password:
 
   # settings for the EUM server's self-monitoring
   self-monitoring:
+
     # whether self-monitoring is enabled
     enabled: true
+
     # the prefix used for the self-monitoring metrics
     metricPrefix: "inspectit-eum/self/"
+
     # definitions of the self-monitoring metrics
     metrics:
       # counts the amount of received EUM beacons
