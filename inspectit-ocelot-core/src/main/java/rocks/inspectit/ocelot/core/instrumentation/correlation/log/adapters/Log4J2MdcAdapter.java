@@ -1,8 +1,8 @@
 package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 
 import lombok.extern.slf4j.Slf4j;
+import rocks.inspectit.ocelot.bootstrap.correlation.MdcAccessor;
 import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
-import rocks.inspectit.ocelot.core.utils.WeakMethodReference;
 
 import java.lang.reflect.Method;
 
@@ -10,43 +10,12 @@ import java.lang.reflect.Method;
  * Provides access to Log4j2s ThreadContext.
  */
 @Slf4j
-public class Log4J2MdcAdapter extends AbstractStaticMapMDCAdapter {
+public class Log4J2MdcAdapter implements MdcAdapter {
 
     /**
      * The name of the MDC class of Log4j2.
      */
     public static final String MDC_CLASS = "org.apache.logging.log4j.ThreadContext";
-
-    private Log4J2MdcAdapter(WeakMethodReference put, WeakMethodReference get, WeakMethodReference remove) {
-        super(put, get, remove);
-    }
-
-    public Log4J2MdcAdapter() {
-    }
-
-    /**
-     * Creates an Adapater given a ThreadContext class.
-     *
-     * @param mdcClazz the org.apache.logging.log4j.ThreadContext class
-     *
-     * @return and adapter for setting values on the given thread context.
-     */
-    public static Log4J2MdcAdapter get(Class<?> mdcClazz) {
-        try {
-            WeakMethodReference put = WeakMethodReference.create(mdcClazz, "put", String.class, String.class);
-            WeakMethodReference get = WeakMethodReference.create(mdcClazz, "get", String.class);
-            WeakMethodReference remove = WeakMethodReference.create(mdcClazz, "remove", String.class);
-            return new Log4J2MdcAdapter(put, get, remove);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("ThreadContext class did not contain expected methods", e);
-        }
-    }
-
-
-    @Override
-    public String getMDCClassName() {
-        return "org.apache.logging.log4j.ThreadContext";
-    }
 
     @Override
     public Method getGetMethod(Class<?> mdcClass) throws NoSuchMethodException {
@@ -64,7 +33,29 @@ public class Log4J2MdcAdapter extends AbstractStaticMapMDCAdapter {
     }
 
     @Override
-    public boolean isEnabledForConfig(TraceIdMDCInjectionSettings settings) {
-        return settings.isLog4j2Enabled();
+    public DelegationMdcAccessor wrap(MdcAccessor mdcAccessor) {
+        return new DelegationMdcAccessor(mdcAccessor) {
+            @Override
+            public boolean isEnabled(TraceIdMDCInjectionSettings settings) {
+                return false;
+            }
+        };
     }
+
+//    public static class Log4J2DelegationMdcAccessor extends DelegationMdcAccessor {
+//
+//        public Log4J2DelegationMdcAccessor(MdcAccessor mdcAccessor) {
+//            super(mdcAccessor);
+//        }
+//
+//        @Override
+//        public boolean isEnabled(TraceIdMDCInjectionSettings settings) {
+//            return false;
+//        }
+//    }
+
+//    @Override
+//    public boolean isEnabledForConfig(TraceIdMDCInjectionSettings settings) {
+//        return settings.isLog4j2Enabled();
+//    }
 }

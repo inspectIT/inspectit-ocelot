@@ -67,10 +67,10 @@ public class MDCAccess implements IClassDiscoveryListener {
      */
     @PostConstruct
     void registerAdapters() {
-        mdcAdapterBuilders.put(Slf4JMdcAdapter.MDC_CLASS, Slf4JMdcAdapter::get);
-        mdcAdapterBuilders.put(Log4J2MdcAdapter.MDC_CLASS, Log4J2MdcAdapter::get);
-        mdcAdapterBuilders.put(Log4J1MdcAdapter.MDC_CLASS, Log4J1MdcAdapter::get);
-        mdcAdapterBuilders.put(JBossLogmanagerMdcAdapter.MDC_CLASS, JBossLogmanagerMdcAdapter::get);
+//        mdcAdapterBuilders.put(Slf4JMdcAdapter.MDC_CLASS, Slf4JMdcAdapter::get);
+//        mdcAdapterBuilders.put(Log4J2MdcAdapter.MDC_CLASS, Log4J2MdcAdapter::get);
+//        mdcAdapterBuilders.put(Log4J1MdcAdapter.MDC_CLASS, Log4J1MdcAdapter::get);
+//        mdcAdapterBuilders.put(JBossLogmanagerMdcAdapter.MDC_CLASS, JBossLogmanagerMdcAdapter::get);
     }
 
     /**
@@ -85,7 +85,7 @@ public class MDCAccess implements IClassDiscoveryListener {
     public Undo put(String key, String value) {
         List<Undo> undos = new ArrayList<>();
         for (MdcAdapter adapter : enabledAdapters) {
-            undos.add(adapter.set(key, value));
+//            undos.add(adapter.set(key, value));
         }
         return () -> {
             //iterate in reverse order in case of inter-dependencies
@@ -116,10 +116,10 @@ public class MDCAccess implements IClassDiscoveryListener {
     @EventListener(InspectitConfigChangedEvent.class)
     @VisibleForTesting
     synchronized void updateEnabledAdaptersSet() {
-        TraceIdMDCInjectionSettings settings =
-                inspectitEnv.getCurrentConfig().getTracing().getLogCorrelation().getTraceIdMdcInjection();
-        enabledAdapters = availableAdapters.values().stream()
-                .filter(adapter -> adapter.isEnabledForConfig(settings))
-                .collect(Collectors.toCollection(() -> Collections.newSetFromMap(new WeakHashMap<>())));
+//        TraceIdMDCInjectionSettings settings =
+//                inspectitEnv.getCurrentConfig().getTracing().getLogCorrelation().getTraceIdMdcInjection();
+//        enabledAdapters = availableAdapters.values().stream()
+//                .filter(adapter -> adapter.isEnabledForConfig(settings))
+//                .collect(Collectors.toCollection(() -> Collections.newSetFromMap(new WeakHashMap<>())));
     }
 }
