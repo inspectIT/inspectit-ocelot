@@ -41,6 +41,18 @@ class KeyValueEditor extends React.Component {
       return (
         (
           <div className={className}>
+            <style jsx>
+              {`
+                .error {
+                  color: #f44336;
+                }
+
+                .error-sign {
+                  float: right;
+                  font-size: 1.25rem;
+                }
+              `}
+            </style>
             {rowData.value}
             {rowData.hasErrors && <i className="error-sign pi pi-exclamation-triangle" title={rowData.errorMessage}></i>}
           </div>
@@ -53,45 +65,31 @@ class KeyValueEditor extends React.Component {
     };
 
     return (
-      <>
-        <style jsx>
-          {`
-            :global(.error) {
-              color: #f44336;
-            }
-
-            :global(.error-sign) {
-              float: right;
-              font-size: 1.25rem;
-            }
-          `}
-        </style>
-        <DataTable value={dataArray} scrollable={true} scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'}>
-          <Column
-            columnKey="key"
-            field="key"
-            header="Key"
-            headerStyle={{ fontWeight: 'normal' }}
-            body={(rowData) => rowData.key || <p style={{ color: 'grey' }}>click here to add new key</p>}
-            editor={this.editor}
-          />
-          <Column
-            columnKey="value"
-            field="value"
-            header="Value"
-            headerStyle={{ fontWeight: 'normal' }}
-            body={(rowData) => valueColumnPattern(rowData)}
-            editor={this.editor}
-          />
-          <Column
-            columnKey="buttonRow"
-            body={(rowData) =>
-              rowData.key || rowData.value ? <Button icon="pi pi-trash" onClick={() => this.handleDelete(rowData.index)} /> : ''
-            }
-            style={{ width: '4em' }}
-          />
-        </DataTable>
-      </>
+      <DataTable value={dataArray} scrollable={true} scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'}>
+        <Column
+          columnKey="key"
+          field="key"
+          header="Key"
+          headerStyle={{ fontWeight: 'normal' }}
+          body={(rowData) => rowData.key || <p style={{ color: 'grey' }}>click here to add new key</p>}
+          editor={this.editor}
+        />
+        <Column
+          columnKey="value"
+          field="value"
+          header="Value"
+          headerStyle={{ fontWeight: 'normal' }}
+          body={(rowData) => valueColumnPattern(rowData)}
+          editor={this.editor}
+        />
+        <Column
+          columnKey="buttonRow"
+          body={(rowData) =>
+            rowData.key || rowData.value ? <Button icon="pi pi-trash" onClick={() => this.handleDelete(rowData.index)} /> : ''
+          }
+          style={{ width: '4em' }}
+        />
+      </DataTable>
     );
   }
 }
