@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
+import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
@@ -43,39 +44,6 @@ import java.util.stream.Stream;
 public class ResourceTimingBeaconRecorder implements BeaconRecorder {
 
     /**
-     * Name of the metric
-     */
-    public static final String RESOURCE_TIME_METRIC_NAME = "resource_time";
-
-    /**
-     * Metric definition for the resource timing metric.
-     */
-    private static final MetricDefinitionSettings RESOURCE_TIME;
-
-    static {
-        Map<String, Boolean> tags = new HashMap<>();
-        tags.put("initiatorType", true);
-        tags.put("cached", true);
-        tags.put("crossOrigin", true);
-
-        RESOURCE_TIME = MetricDefinitionSettings.builder()
-                .type(MetricDefinitionSettings.MeasureType.DOUBLE)
-                .description("Response end time of the resource loading")
-                .unit("ms")
-                .view(RESOURCE_TIME_METRIC_NAME + "/SUM", ViewDefinitionSettings.builder()
-                        .tags(tags)
-                        .aggregation(ViewDefinitionSettings.Aggregation.SUM)
-                        .build()
-                )
-                .view(RESOURCE_TIME_METRIC_NAME + "/COUNT", ViewDefinitionSettings.builder()
-                        .tags(tags)
-                        .aggregation(ViewDefinitionSettings.Aggregation.COUNT)
-                        .build()
-                )
-                .build();
-    }
-
-    /**
      * Object mapper used to read the resource timing
      */
     @Autowired
@@ -87,11 +55,46 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
     @Autowired
     private final MeasuresAndViewsManager measuresAndViewsManager;
 
+    @Autowired
+    private final EumServerConfiguration configuration;
+
+    /**
+     * Name of the metric
+     */
+    public final String RESOURCE_TIME_METRIC_NAME = "resource_time";
+
+    /**
+     * Metric definition for the resource timing metric.
+     */
+    private MetricDefinitionSettings RESOURCE_TIME;
+
     /**
      * Init metric(s).
      */
     @PostConstruct
     public void initMetric() {
+        Map<String, Boolean> tags = new HashMap<>();
+        if (configuration.getResourceTiming().getTags() != null) {
+            tags.putAll(configuration.getResourceTiming().getTags());
+        }
+        tags.put("initiatorType", true);
+        tags.put("cached", true);
+        tags.put("crossOrigin", true);
+
+        RESOURCE_TIME = MetricDefinitionSettings.builder()
+                .type(MetricDefinitionSettings.MeasureType.DOUBLE)
+                .description("Response end time of the resource loading")
+                .unit("ms")
+                .view(RESOURCE_TIME_METRIC_NAME + "/SUM", ViewDefinitionSettings.builder()
+                        .tags(tags)
+                        .aggregation(ViewDefinitionSettings.Aggregation.SUM)
+                        .build())
+                .view(RESOURCE_TIME_METRIC_NAME + "/COUNT", ViewDefinitionSettings.builder()
+                        .tags(tags)
+                        .aggregation(ViewDefinitionSettings.Aggregation.COUNT)
+                        .build())
+                .build();
+
         measuresAndViewsManager.updateMetrics(RESOURCE_TIME_METRIC_NAME, RESOURCE_TIME);
     }
 
@@ -137,6 +140,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      * Takes Boomerang resource timing JSON and returns stream of found {@link ResourceTimingEntry}s.
      *
      * @param resourceTiming json
+     *
      * @return stream
      */
     private Stream<ResourceTimingEntry> decodeResourceTimings(String resourceTiming) {
@@ -158,6 +162,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      * Helper to construct map of resource URLs to resource timing details.
      *
      * @param node root node
+     *
      * @return Map where keys are resource URLs and values are the Boomerang compressed resource timing string.
      */
     private Map<String, String> flattenUrlTrie(JsonNode node) {
@@ -175,7 +180,9 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
             // note the | (pipe) keys
             // if a resource's URL is a prefix of another resource, then it terminates with a pipe symbol (|).
             Function<String, String> pipeResolver = (s) -> "|".equals(s) ? "" : s;
-            node.fields().forEachRemaining(entry -> this.findAllTimingValuesAsText(entry.getValue(), foundSoFar, prefix + pipeResolver.apply(entry.getKey())));
+            node.fields()
+                    .forEachRemaining(entry -> this.findAllTimingValuesAsText(entry.getValue(), foundSoFar, prefix + pipeResolver
+                            .apply(entry.getKey())));
         }
     }
 
@@ -187,6 +194,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      *
      * @param url   URL of the loaded resource.
      * @param value Boomerang compressed resource timing string for a single entry
+     *
      * @return
      */
     private Stream<ResourceTimingEntry> resolveResourceTimingStringValue(String url, String value) {
@@ -196,7 +204,9 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
                     String[] split = possibleMultipleValue.split("\\|");
                     return Arrays.stream(split);
                 })
-                .flatMap(singeValue -> ResourceTimingEntry.from(url, singeValue).map(Stream::of).orElseGet(Stream::empty));
+                .flatMap(singeValue -> ResourceTimingEntry.from(url, singeValue)
+                        .map(Stream::of)
+                        .orElseGet(Stream::empty));
     }
 
     /**
@@ -204,7 +214,9 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      *
      * @param u1 first url
      * @param u2 second url
+     *
      * @return Returns true if two urls are considered as same-origin
+     *
      * @see org.springframework.web.util.WebUtils#isSameOrigin(HttpRequest)
      * @see 'https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy'
      */
@@ -212,9 +224,9 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         UriComponents uriComponents1 = UriComponentsBuilder.fromUriString(u1).build();
         UriComponents uriComponents2 = UriComponentsBuilder.fromUriString(u2).build();
 
-        return Objects.equals(uriComponents1.getScheme(), uriComponents2.getScheme()) &&
-                Objects.equals(uriComponents1.getHost(), uriComponents2.getHost()) &&
-                getPort(uriComponents1.getScheme(), uriComponents1.getPort()) == getPort(uriComponents2.getScheme(), uriComponents2.getPort());
+        return Objects.equals(uriComponents1.getScheme(), uriComponents2.getScheme()) && Objects.equals(uriComponents1.getHost(), uriComponents2
+                .getHost()) && getPort(uriComponents1.getScheme(), uriComponents1.getPort()) == getPort(uriComponents2.getScheme(), uriComponents2
+                .getPort());
     }
 
     private static int getPort(@Nullable String scheme, int port) {
@@ -259,15 +271,14 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
         }
 
         private Optional<Integer> getTiming(int index) {
-            return Optional.ofNullable(timings)
-                    .filter(t -> t.length - 1 >= index)
-                    .map(t -> t[index]);
+            return Optional.ofNullable(timings).filter(t -> t.length - 1 >= index).map(t -> t[index]);
         }
 
         /**
          * Cached resources only have 2 timing values if considered as same-origin requests.
          *
          * @param sameOrigin If this is considered as same origin resource loading
+         *
          * @return If cached or not.
          */
         public boolean isCached(boolean sameOrigin) {
@@ -315,8 +326,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
                         .url(url)
                         .initiatorType((initiatorType))
                         .timings(timings)
-                        .build()
-                );
+                        .build());
             } catch (Exception e) {
                 // in case of any exception return the empty result here
                 log.warn("Unable to create a resource timing entry for the URL {} with the Boomerang value {}.", url, value);
@@ -332,26 +342,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
      * @see 'https://developer.akamai.com/tools/boomerang/docs/BOOMR.plugins.ResourceTiming.html'
      */
     public enum InitiatorType {
-        OTHER('0'),
-        IMG('1'),
-        LINK('2'),
-        SCRIPT('3'),
-        CSS('4'),
-        XML_HTTP_REQUEST('5'),
-        HTML('6'),
-        IMAGE('7'),
-        BEACON('8'),
-        FETCH('9'),
-        IFRAME('a'),
-        BODY('b'),
-        INPUT('c'),
-        OBJECT('d'),
-        VIDEO('e'),
-        AUDIO('f'),
-        SOURCE('g'),
-        TRACK('h'),
-        EMBED('i'),
-        EVENT_SOURCE('j');
+        OTHER('0'), IMG('1'), LINK('2'), SCRIPT('3'), CSS('4'), XML_HTTP_REQUEST('5'), HTML('6'), IMAGE('7'), BEACON('8'), FETCH('9'), IFRAME('a'), BODY('b'), INPUT('c'), OBJECT('d'), VIDEO('e'), AUDIO('f'), SOURCE('g'), TRACK('h'), EMBED('i'), EVENT_SOURCE('j');
 
         private char identifier;
 
@@ -363,6 +354,7 @@ public class ResourceTimingBeaconRecorder implements BeaconRecorder {
          * Returns the {@link InitiatorType} represented by this char. If not found {@link #OTHER} is returned.
          *
          * @param c identifier
+         *
          * @return {@link InitiatorType}
          */
         public static InitiatorType from(char c) {
