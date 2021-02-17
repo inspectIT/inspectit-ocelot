@@ -24,9 +24,9 @@ public class LogCorrelationTest {
         MDC.get("test");
         org.apache.log4j.MDC.get("test");
         ThreadContext.get("test");
-        TestUtils.waitForClassInstrumentation(LogCorrelationTest.class, true, 15, TimeUnit.SECONDS);
-        TestUtils.waitForClassInstrumentations(Arrays.asList(Thread.class, AbstractExecutorService.class, ScheduledThreadPoolExecutor.class),
-                false, 15, TimeUnit.SECONDS);
+
+        TestUtils.waitForClassInstrumentations(Thread.class, AbstractExecutorService.class, ScheduledThreadPoolExecutor.class, LogCorrelationTest.class);
+        TestUtils.waitForClassHooks(LogCorrelationTest.class);
     }
 
     /**
