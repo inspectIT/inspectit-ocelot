@@ -120,10 +120,10 @@ inspectit-eum-server:
         # Determines whether the prometheus exporter is enabled.
         enabled: true
 
-        # The host of the prometheus server.
+        # The host of the prometheus HTTP endpoint.
         host: localhost
 
-        # The port of the prometheus server.
+        # The port of the prometheus HTTP endpoint.
         port: 8888
 
       influx:
@@ -140,6 +140,12 @@ inspectit-eum-server:
         # The database to write to.
         # If this property is not set, the influx-exporter will not be started.
         database: "inspectit"
+
+        # The username to be used to connect to the influxDB.
+        # username:
+
+        # The password to be used to connect to the influxDB.
+        # password:
 
         # The retention policy to write to.
         # If this property is not set, the influx-exporter will not be started.
@@ -163,8 +169,8 @@ inspectit-eum-server:
         # If jaeger exporter for the OT received spans is enabled.
         enabled: true
 
-        # location of the jaeger gRPC API.
-        # either a valid NameResolver-compliant URI, or an authority string.
+        # Location of the jaeger gRPC API.
+        # Either a valid NameResolver-compliant URI, or an authority string.
         # If this property is not set, the jaeger-exporter will not be started.
         # grpc: localhost:14250
 
