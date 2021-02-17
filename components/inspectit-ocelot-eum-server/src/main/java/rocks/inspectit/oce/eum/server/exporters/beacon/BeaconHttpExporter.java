@@ -17,7 +17,7 @@ import java.util.concurrent.*;
  */
 @Component
 @Slf4j
-@ConditionalOnProperty(value = "inspectit-eum-server.beacons.http.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "inspectit-eum-server.exporters.beacons.http.enabled", havingValue = "true")
 public class BeaconHttpExporter {
 
     /**
