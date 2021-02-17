@@ -46,6 +46,11 @@ public class TraceExportersConfiguration {
         JaegerExporterSettings jaegerExporterSettings = configuration.getExporters().getTracing().getJaeger();
 
         ManagedChannel channel = ManagedChannelBuilder.forTarget(jaegerExporterSettings.getGrpc()).usePlaintext().build();
+        if(!StringUtils.isEmpty(jaegerExporterSettings.getUrl()) && StringUtils.isEmpty(jaegerExporterSettings.getGrpc())) {
+            log.info("Starting Jaeger Exporter on url '{}'", jaegerExporterSettings.getUrl());
+        } else {
+            log.info("Starting Jaeger Exporter on grpc '{}'", jaegerExporterSettings.getGrpc());
+        }
         return JaegerGrpcSpanExporter.newBuilder()
                 .setChannel(channel)
                 .setServiceName(jaegerExporterSettings.getServiceName())

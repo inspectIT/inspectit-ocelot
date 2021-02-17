@@ -12,6 +12,7 @@ public class JaegerExporterSettings {
     /**
      * The URL of the Jaeger server.
      */
+    @Deprecated
     private String url;
 
     /**
