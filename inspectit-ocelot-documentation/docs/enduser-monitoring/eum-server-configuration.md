@@ -451,6 +451,10 @@ The EUM server uses Basic Authentication for the request if a username is specif
 
 ## Self-Monitoring
 
+:::important
+Self-Monitoring is enabled by default and can be disabled by setting the property `inspectit-eum-server.self-monitoring.enabled` to `false.`
+:::
+
 For the purpose of self-monitoring, the EUM server offers a set of metrics that reflect its state.
 These metrics are exposed using its Prometheus endpoint which also is used for the EUM beacon data.
 Currently, the following self monitoring metrics are available.
