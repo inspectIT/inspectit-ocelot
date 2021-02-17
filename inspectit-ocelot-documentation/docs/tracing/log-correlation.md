@@ -43,7 +43,9 @@ As a result, log messages, generated within an exported trace, will be prefixed 
 09:39:53.014 [main] INFO  test.TestMain TRACE[612772355048a0b21662ed3bc07a6326] - Hello logback!
 ```
 
-> Note that the trace ID is only available when the log statement is within a trace which is sampled, otherwise the trace-id is empty.
+:::note
+Note that the trace ID is only available when the log statement is within a trace which is sampled, otherwise the trace-id is empty.
+:::
 
 You can change the key under which the trace-id is placed in the MDC using the property `inspectit.tracing.log-correlation.trace-id-mdc-injection.key`.
 
