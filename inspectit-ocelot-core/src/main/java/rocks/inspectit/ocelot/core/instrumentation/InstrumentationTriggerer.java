@@ -28,6 +28,7 @@ import rocks.inspectit.ocelot.core.service.BatchJobExecutorService;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -140,10 +141,10 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
      * Processes a given amount of classes from {@link #pendingClasses}.
      * For the classes where it is required a retransform is triggered.
      * In addition for each class the hooks are updated.
-     * package-private for testing.
      *
      * @param batchSize the number of classes to take from {@link #pendingClasses} and to retransform per batch
      */
+    @VisibleForTesting
     void checkClassesForConfigurationUpdates(BatchSize batchSize) {
         List<Class<?>> classesToRetransform = new ArrayList<>(getBatchOfClassesToRetransform(batchSize));
 

@@ -5,6 +5,7 @@ import io.opencensus.trace.Tracing;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.AbstractMessageFactory;
+import org.apache.logging.log4j.message.MessageFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
@@ -21,7 +22,7 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
     @BeforeAll
     public static void waitForInstrumentation() {
-        TestUtils.waitForClassInstrumentation(AbstractMessageFactory.class, false, 15, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentations(AbstractMessageFactory.class, MessageFactory.class);
     }
 
     @Test

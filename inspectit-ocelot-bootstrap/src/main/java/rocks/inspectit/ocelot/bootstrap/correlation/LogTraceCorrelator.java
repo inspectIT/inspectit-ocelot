@@ -45,5 +45,5 @@ public interface LogTraceCorrelator {
      *
      * @return a closeable which undos the correlation changes.
      */
-    AutoCloseable applyCorrelationToMDC();
+    AutoCloseable injectTraceIdIntoMdc();
 }
