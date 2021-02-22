@@ -25,7 +25,7 @@ public class NoopLogTraceCorrelator implements LogTraceCorrelator {
     }
 
     @Override
-    public AutoCloseable applyCorrelationToMDC() {
+    public AutoCloseable injectTraceIdIntoMdc() {
         return () -> {
         };
     }

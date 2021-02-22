@@ -60,7 +60,7 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
     @Override
     public Runnable wrap(Runnable runnable) {
         return () -> {
-            try (InjectionScope scope = applyCorrelationToMDC()) {
+            try (InjectionScope scope = injectTraceIdIntoMdc()) {
                 runnable.run();
             }
         };
@@ -69,14 +69,14 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
     @Override
     public <T> Callable<T> wrap(Callable<T> callable) {
         return () -> {
-            try (InjectionScope scope = applyCorrelationToMDC()) {
+            try (InjectionScope scope = injectTraceIdIntoMdc()) {
                 return callable.call();
             }
         };
     }
 
     @Override
-    public InjectionScope applyCorrelationToMDC() {
+    public InjectionScope injectTraceIdIntoMdc() {
         return injectTraceContextInMdc(tracer.getCurrentSpan().getContext());
     }
 }
