@@ -38,4 +38,7 @@ In addition you should use asynchronous injection as described in the [Boomerang
 #Tracing
 By default, Boomerang only collects metrics. In order to collect traces you can either write your own scripts using [OpenTracing](https://opentracing.io/) 
 or use the [OpenTelemtry Plugin for Boomerang](https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin).
+To use the [OpenTelemtry Plugin for Boomerang](https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin) 
+you only need to `include the boomerang-opentelemetry.js` file in boomerang.
+You can also configure the plugin youself:
 
