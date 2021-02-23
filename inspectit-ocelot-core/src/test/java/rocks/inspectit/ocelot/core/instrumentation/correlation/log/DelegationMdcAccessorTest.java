@@ -4,14 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.bootstrap.correlation.MdcAccessor;
 import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class DelegationMdcAccessorTest {
@@ -26,10 +22,10 @@ public class DelegationMdcAccessorTest {
 
     @BeforeEach
     public void beforeEach() {
-        MdcAccessor fakeAccessor = new FakeMdcAccessor();
-        fakeAccessor.put(EXISTING_KEY, EXISTING_VALUE);
+        FakeMdc fakeMdc = new FakeMdc();
+        fakeMdc.put(EXISTING_KEY, EXISTING_VALUE);
 
-        delegationAccessor = new DelegationMdcAccessor(fakeAccessor) {
+        delegationAccessor = new DelegationMdcAccessor(fakeMdc::put, fakeMdc::get, fakeMdc::remove) {
             @Override
             public boolean isEnabled(TraceIdMDCInjectionSettings settings) {
                 return false;

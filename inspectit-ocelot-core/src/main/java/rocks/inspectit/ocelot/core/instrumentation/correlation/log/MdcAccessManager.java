@@ -3,15 +3,11 @@ package rocks.inspectit.ocelot.core.instrumentation.correlation.log;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.MethodCall;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
-import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.bootstrap.correlation.MdcAccessor;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
@@ -26,6 +22,9 @@ import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
@@ -40,10 +39,10 @@ public class MdcAccessManager implements IClassDiscoveryListener {
     @Autowired
     private ClassInjector classInjector;
 
-    private Map<String, MdcAdapter> mdcAdapters = new HashMap<>();
+    private final Map<String, MdcAdapter> mdcAdapters = new HashMap<>();
 
     @VisibleForTesting
-    Map<Class<?>, DelegationMdcAccessor> availableMdcAccessors = new WeakHashMap();
+    Map<Class<?>, DelegationMdcAccessor> availableMdcAccessors = new WeakHashMap<>();
 
     /**
      * weak!
@@ -57,6 +56,7 @@ public class MdcAccessManager implements IClassDiscoveryListener {
         mdcAdapters.put(Log4J2MdcAdapter.MDC_CLASS, new Log4J2MdcAdapter());
         mdcAdapters.put(Log4J1MdcAdapter.MDC_CLASS, new Log4J1MdcAdapter());
         mdcAdapters.put(JBossLogmanagerMdcAdapter.MDC_CLASS, new JBossLogmanagerMdcAdapter());
+        mdcAdapters.put(TestMdcAdapter.MDC_CLASS, new TestMdcAdapter());
     }
 
     public InjectionScope injectValue(String key, String value) {
@@ -87,10 +87,9 @@ public class MdcAccessManager implements IClassDiscoveryListener {
 
                         MdcAdapter mdcAdapter = mdcAdapters.get(clazz.getName());
 
-                        Class<? extends MdcAccessor> accessorClass = injectAccessorClass(mdcAdapter, clazz);
-                        MdcAccessor accessor = accessorClass.newInstance();
+                        DelegationMdcAccessor mdcAccessor = createAccessor(mdcAdapter, clazz);
 
-                        availableMdcAccessors.put(clazz, mdcAdapter.wrap(accessor));
+                        availableMdcAccessors.put(clazz, mdcAccessor);
 
                         updateActiveMdcAccessors();
                     } catch (Throwable t) {
@@ -99,22 +98,40 @@ public class MdcAccessManager implements IClassDiscoveryListener {
                 });
     }
 
-    private Class<? extends MdcAccessor> injectAccessorClass(MdcAdapter mdcAdapter, Class<?> mdcClass) throws Exception {
+    private DelegationMdcAccessor createAccessor(MdcAdapter mdcAdapter, Class<?> mdcClass) throws Exception {
         Method getMethod = mdcAdapter.getGetMethod(mdcClass);
         Method putMethod = mdcAdapter.getPutMethod(mdcClass);
         Method removeMethod = mdcAdapter.getRemoveMethod(mdcClass);
 
-        ClassInjector.ByteCodeProvider byteCodeProvider = className -> new ByteBuddy()
-                .subclass(MdcAccessor.class)
+        // put
+        ClassInjector.ByteCodeProvider bcpPutMethod = createByteCodeProvide(BiConsumer.class, "accept", putMethod);
+        Class<? extends BiConsumer<String, Object>> putConsumerClass = injectClass("mdc_bi_consumer", mdcClass, bcpPutMethod);
+        BiConsumer<String, Object> putConsumer = putConsumerClass.newInstance();
+
+        // get
+        ClassInjector.ByteCodeProvider bcpGetMethod = createByteCodeProvide(Function.class, "apply", getMethod);
+        Class<? extends Function<String, Object>> getFunctionClass = injectClass("mdc_function", mdcClass, bcpGetMethod);
+        Function<String, Object> getFunction = getFunctionClass.newInstance();
+
+        // remove
+        ClassInjector.ByteCodeProvider bcpRemoveMethod = createByteCodeProvide(Consumer.class, "accept", removeMethod);
+        Class<? extends Consumer<String>> removeConsumerClass = injectClass("mdc_consumer", mdcClass, bcpRemoveMethod);
+        Consumer<String> removeConsumer = removeConsumerClass.newInstance();
+
+        return mdcAdapter.wrap(putConsumer, getFunction, removeConsumer);
+    }
+
+    private ClassInjector.ByteCodeProvider createByteCodeProvide(Class<?> type, String sourceMethodName, Method targetMethod) {
+        return className -> new ByteBuddy()
+                .subclass(type)
                 .name(className)
-                .method(named("get")).intercept(MethodCall.invoke(getMethod).withAllArguments().withAssigner(Assigner.DEFAULT, Assigner.Typing.DYNAMIC))
-                .method(named("put")).intercept(MethodCall.invoke(putMethod).withAllArguments().withAssigner(Assigner.DEFAULT, Assigner.Typing.DYNAMIC))
-                .method(named("remove")).intercept(MethodCall.invoke(removeMethod).withAllArguments().withAssigner(Assigner.DEFAULT, Assigner.Typing.DYNAMIC))
+                .method(named(sourceMethodName)).intercept(MethodCall.invoke(targetMethod).withAllArguments().withAssigner(Assigner.DEFAULT, Assigner.Typing.DYNAMIC))
                 .make()
                 .getBytes();
+    }
 
-        // We use our own injection class due to the security manager handling
-        InjectedClass<? extends MdcAccessor> injectedClass = (InjectedClass<? extends MdcAccessor>) classInjector.inject("mdc_accessor", mdcClass, byteCodeProvider);
+    private <T> Class<? extends T> injectClass(String structureIdentifier, Class<?> mdcClass, ClassInjector.ByteCodeProvider byteCodeProvider) throws Exception {
+        InjectedClass<? extends T> injectedClass = (InjectedClass<? extends T>) classInjector.inject(structureIdentifier, mdcClass, byteCodeProvider, false);
         return injectedClass.getInjectedClassObject().get();
     }
 
@@ -123,8 +140,15 @@ public class MdcAccessManager implements IClassDiscoveryListener {
         InspectitConfig config = environment.getCurrentConfig();
         TraceIdMDCInjectionSettings settings = config.getTracing().getLogCorrelation().getTraceIdMdcInjection();
 
-        activeMdcAccessors = availableMdcAccessors.values().stream()
+//        Collection<DelegationMdcAccessor> previousAccessors = this.activeMdcAccessors;
+
+        this.activeMdcAccessors = this.availableMdcAccessors.values().stream()
                 .filter(mdcAccessor -> mdcAccessor.isEnabled(settings))
                 .collect(Collectors.toCollection(() -> Collections.newSetFromMap(new WeakHashMap<>())));
+//
+//        previousAccessors.keySet().stream()
+//                .filter(className -> !this.activeMdcAccessors.contains(className))
+//                .distinct()
+//                .forEach(className -> log.info("Disabled log-correlation for class: {}", className));
     }
 }

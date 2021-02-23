@@ -2,30 +2,34 @@ package rocks.inspectit.ocelot.core.instrumentation.correlation.log;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import rocks.inspectit.ocelot.bootstrap.correlation.MdcAccessor;
 import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
+
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Slf4j
 @AllArgsConstructor
-public abstract class DelegationMdcAccessor extends MdcAccessor {
+public abstract class DelegationMdcAccessor {
 
-    private final MdcAccessor mdcAccessor;
+    private final BiConsumer<String, Object> putMethod;
+
+    private final Function<String, Object> getMethod;
+
+    private final Consumer<String> removeMethod;
 
     public abstract boolean isEnabled(TraceIdMDCInjectionSettings settings);
 
-    @Override
     public Object get(String key) {
-        return mdcAccessor.get(key);
+        return getMethod.apply(key);
     }
 
-    @Override
     public void put(String key, Object value) {
-        mdcAccessor.put(key, value);
+        putMethod.accept(key, value);
     }
 
-    @Override
     public void remove(String key) {
-        mdcAccessor.remove(key);
+        removeMethod.accept(key);
     }
 
     public InjectionScope inject(String key, String value) {

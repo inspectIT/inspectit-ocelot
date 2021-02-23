@@ -9,10 +9,16 @@ import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestCallable
 import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestRunnable;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,8 +30,50 @@ public class LogCorrelationTest {
 
     private ScheduledExecutorService scheduledExecutorService;
 
+    private static Function<String, String> getTestMdc;
+
+    static class TestClassLoader1 extends ClassLoader {
+
+        @Override
+        public Class<?> loadClass(String name) throws ClassNotFoundException {
+            if (name.equals("rocks.inspectit.ocelot.bootstrap.correlation.MdcAccessor")) {
+                throw new ClassNotFoundException();
+            }
+
+            if (!name.startsWith("rocks.inspectit.ocelot.instrumentation.correlation.log.TestMdc")) {
+                return super.loadClass(name);
+            }
+
+            System.out.println("Load " + name);
+
+            try {
+                String replace = name.replace(".", "/");
+                InputStream in = ClassLoader.getSystemResourceAsStream(replace + ".class");
+                byte[] a = new byte[10000];
+                int len = in.read(a);
+                in.close();
+                return defineClass(name, a, 0, len);
+            } catch (IOException e) {
+                throw new ClassNotFoundException();
+            }
+        }
+    }
+
     @BeforeAll
-    private static void beforeAll() throws InterruptedException {
+    private static void beforeAll() throws Exception {
+        Class<?> testMdcClass = new TestClassLoader1().loadClass("rocks.inspectit.ocelot.instrumentation.correlation.log.TestMdc");
+        final Method getMethod = testMdcClass.getMethod("get", String.class);
+
+        getTestMdc = (key) -> {
+            try {
+                return (String) getMethod.invoke(null, key);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
+
+        testMdcClass.getMethod("reset").invoke(null);
+
         //load the MDC classes
         MDC.get("test");
         org.apache.log4j.MDC.get("test");
@@ -72,10 +120,12 @@ public class LogCorrelationTest {
             assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
             assertThat(org.apache.logging.log4j.ThreadContext.get(MDC_KEY)).isNull();
             assertThat(org.apache.log4j.MDC.get(MDC_KEY)).isNull();
+            assertThat(getTestMdc.apply(MDC_KEY)).isNull();
         } else {
             assertThat(org.slf4j.MDC.get(MDC_KEY)).isEqualTo(expected);
             assertThat(org.apache.logging.log4j.ThreadContext.get(MDC_KEY)).isEqualTo(expected);
             assertThat(org.apache.log4j.MDC.get(MDC_KEY)).isEqualTo(expected);
+            assertThat(getTestMdc.apply(MDC_KEY)).isEqualTo(expected);
         }
     }
 

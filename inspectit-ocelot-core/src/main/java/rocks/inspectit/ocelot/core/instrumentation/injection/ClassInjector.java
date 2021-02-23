@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.instrumentation.injection;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import net.bytebuddy.ByteBuddy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.objenesis.instantiator.util.DefineClassHelper;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,9 @@ import java.lang.instrument.Instrumentation;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
@@ -94,15 +98,21 @@ public class ClassInjector {
      *                                 This means that as described for {@link Instrumentation#redefineClasses(ClassDefinition...)}, the classes must have the same methods (including their signatures), fields and all modifieres must be the same.
      * @param neighborClass            a class which resides in the classloader to which the class shall be injected.
      * @param byteCodeGenerator        the bytecode of the class to inject
-     *
      * @return the class which has been injected
-     *
      * @throws Exception if an exception occurred during the injection or during the invocation of byteCodeGenerator, this exception is passed through
      */
     public synchronized InjectedClass<?> inject(String classStructureIdentifier, Class<?> neighborClass, ByteCodeProvider byteCodeGenerator) throws Exception {
+        return inject(classStructureIdentifier, neighborClass, byteCodeGenerator, true);
+    }
 
-        //check if we can reuse an existing class instead of injecting a new one
-        Optional<Class<?>> classToReuse = tryReusingClassInLoader(classStructureIdentifier, neighborClass.getClassLoader());
+    public synchronized InjectedClass<?> inject(String classStructureIdentifier, Class<?> neighborClass, ByteCodeProvider byteCodeGenerator, boolean tryClassReuse) throws Exception {
+        Optional<Class<?>> classToReuse;
+        if (tryClassReuse) {
+            //check if we can reuse an existing class instead of injecting a new one
+            classToReuse = tryReusingClassInLoader(classStructureIdentifier, neighborClass.getClassLoader());
+        } else {
+            classToReuse = Optional.empty();
+        }
 
         try {
             String className = classToReuse.map(Class::getName).orElse(getUniqueNameInSamePackage(neighborClass));
@@ -230,9 +240,7 @@ public class ClassInjector {
          * The name is provided by the caller which (a) ensures that it is unique and (b) that the class gets put in a package in which classes can be injected.
          *
          * @param className the name of the class to use in the bytecode.
-         *
          * @return the bytecode to use
-         *
          * @throws Exception if something went wrong during the bytecode generation, this exception is passed through by {@link #inject(String, Class, ByteCodeProvider)}
          */
         byte[] generateBytecode(String className) throws Exception;

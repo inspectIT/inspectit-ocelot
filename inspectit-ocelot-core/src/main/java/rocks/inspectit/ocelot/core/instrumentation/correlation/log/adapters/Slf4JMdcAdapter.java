@@ -1,11 +1,13 @@
 package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 
 import lombok.extern.slf4j.Slf4j;
-import rocks.inspectit.ocelot.bootstrap.correlation.MdcAccessor;
 import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.DelegationMdcAccessor;
 
 import java.lang.reflect.Method;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Adapter for accessing the slf4j MDC class using reflection.
@@ -35,8 +37,8 @@ public class Slf4JMdcAdapter implements MdcAdapter {
     }
 
     @Override
-    public DelegationMdcAccessor wrap(MdcAccessor mdcAccessor) {
-        return new DelegationMdcAccessor(mdcAccessor) {
+    public DelegationMdcAccessor wrap(BiConsumer<String, Object> putConsumer, Function<String, Object> getFunction, Consumer<String> removeConsumer) {
+        return new DelegationMdcAccessor(putConsumer, getFunction, removeConsumer) {
             @Override
             public boolean isEnabled(TraceIdMDCInjectionSettings settings) {
                 return settings.isSlf4jEnabled();

@@ -10,15 +10,16 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Provides access to Log4j1s ThreadContext.
+ * Adapter for accessing the slf4j MDC class using reflection.
+ * As Logback natively uses this MDC class it automatically includes logback support.
  */
 @Slf4j
-public class Log4J1MdcAdapter implements MdcAdapter {
+public class TestMdcAdapter implements MdcAdapter {
 
     /**
-     * The name of the MDC class of Log4j1.
+     * The name of the SLF4J (and logback) MDC class
      */
-    public static final String MDC_CLASS = "org.apache.log4j.MDC";
+    public static final String MDC_CLASS = "rocks.inspectit.ocelot.instrumentation.correlation.log.TestMdc";
 
     @Override
     public Method getGetMethod(Class<?> mdcClass) throws NoSuchMethodException {
@@ -27,7 +28,7 @@ public class Log4J1MdcAdapter implements MdcAdapter {
 
     @Override
     public Method getPutMethod(Class<?> mdcClass) throws NoSuchMethodException {
-        return mdcClass.getMethod("put", String.class, Object.class);
+        return mdcClass.getMethod("put", String.class, String.class);
     }
 
     @Override
@@ -40,7 +41,7 @@ public class Log4J1MdcAdapter implements MdcAdapter {
         return new DelegationMdcAccessor(putConsumer, getFunction, removeConsumer) {
             @Override
             public boolean isEnabled(TraceIdMDCInjectionSettings settings) {
-                return settings.isLog4j1Enabled();
+                return true;
             }
         };
     }
