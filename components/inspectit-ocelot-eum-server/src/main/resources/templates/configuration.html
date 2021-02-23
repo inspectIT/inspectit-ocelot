@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>EUM-Server Config Editor</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link th:href="@{/node_modules/bootstrap/dist/css/bootstrap.css}" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #editor {
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            bottom: 20%;
+            left: 10%;
+        }
+
+        .header-container{
+            background: #de6f00;
+            color: #fff;
+            min-height: 50px;
+            padding: 8px 0;
+            position: fixed;
+            width: 100%;
+            z-index: 9999;
+            transform: translateZ(0);
+         }
+
+         .title-wrapper {
+            margin-left: 10%;
+         }
+
+         .button-wrapper {
+            position: absolute;
+            top: 82%;
+            right: 10%;
+            bottom: 20%;
+            left: 10%;
+         }
+
+         .button-left {
+            width: 10%;
+            margin-right: 2%;
+         }
+
+         .button-right {
+            width: 10%;
+            margin-left: 2%;
+            float: right;
+         }
+    </style>
+
+</head>
+<body class="text-justify">
+<div class="header-container">
+    <div class = "title-wrapper">
+        <h1>EUM-Server Config Editor</h1>
+    </div>
+</div>
+
+<div id="editor"></div>
+
+<div class="button-wrapper">
+    <button type="button" class="btn btn-success button-left">Save</button>
+    <button type="button" class="btn btn-info button-left">Apply</button>
+    <button type="button" class="btn btn-danger button-right">Reset</button>
+</div>
+<script th:src="@{/node_modules/ace-builds/src-noconflict/ace.js}" type="text/javascript" charset="utf-8"></script>
+<script th:src="@{/node_modules/bootstrap/dist/js/bootstrap.js}" type="text/javascript" charset="utf-8"></script>
+<script id="editorScript">
+        const editor = ace.edit("editor");
+        editor.setTheme("ace/theme/cobalt");
+        editor.session.setMode("ace/mode/yaml");
+</script>
+</body>
+</html>
