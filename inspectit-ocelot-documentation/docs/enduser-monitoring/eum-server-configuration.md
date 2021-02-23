@@ -431,34 +431,34 @@ inspectit-eum-server:
 The InfluxDB exporter is disabled by default and can be enabled by setting the URL
 via `inspectit-eum-server.exporters.metrics.influx.url`.
 
-The following configuration snippet shows the default configuration of the influx-exporter:
+The following configuration snippet shows the default configuration of the InfluxDB exporter:
 ```YAML
 inspectit-eum-server:
   exporters:
     metrics:
       influx:
-        # Determines whether the influx exporter is enabled.
+        # Determines whether the InfluxDB exporter is enabled.
         enabled: true
 
         # the export interval of the metrics.
         export-interval: 15s
 
         # The http url of influx.
-        # If this property is not set, the influx-exporter will not be started.
+        # If this property is not set, the InfluxDB exporter will not be started.
         # url: "http://localhost:8086"
 
         # The database to write to.
-        # If this property is not set, the influx-exporter will not be started.
+        # If this property is not set, the InfluxDB exporter will not be started.
         database: "inspectit"
 
-        # The username to be used to connect to the influxDB.
+        # The username to be used to connect to the InfluxDB.
         # username:
 
-        # The password to be used to connect to the influxDB.
+        # The password to be used to connect to the InfluxDB.
         # password:
 
         # The retention policy to write to.
-        # If this property is not set, the influx-exporter will not be started.
+        # If this property is not set, the InfluxDB exporter will not be started.
         retention-policy: "autogen"
 
         # If true, the specified database will be created with the autogen retention policy.
@@ -467,7 +467,7 @@ inspectit-eum-server:
         # If disabled, the raw values of each counter will be written to the InfluxDB on each export.
         # When enabled, only the change of the counter in comparison to the previous export will be written.
         # This difference will only be written if the counter has changed (=the difference is non-zero).
-        # This can greatly reduce the total data written to influx and makes writing queries easier.
+        # This can greatly reduce the total data written to InfluxDB and makes writing queries easier.
         counters-as-differences: true
 
         # The size of the buffer for failed batches.
@@ -477,11 +477,20 @@ inspectit-eum-server:
 
 ### Tracing
 
+:::info
+In order to make tracing work, additional dependencies need to be [installed](https://inspectit.github.io/inspectit-ocelot/docs/enduser-monitoring/install-eum-agent#tracing)!
+:::
+
 The EUM server supports trace data forwarding to the Jaeger exporter.
 The exporter is using the [Jaeger Protobuf via gRPC API](https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable) in order to forward trace data.
-By default, the Jaeger exporter is disabled.
+By default, the Jaeger exporter is enabled, but it is not active since the grpc-property is not set.
+
+:::info
+The grpc property needs to be set without protocol (e.g. localhost:14250)!
+:::
 
 The following configuration snippet shows the default configuration of the jaeger-exporter:
+
 ```YAML
 inspectit-eum-server:
   exporters:
