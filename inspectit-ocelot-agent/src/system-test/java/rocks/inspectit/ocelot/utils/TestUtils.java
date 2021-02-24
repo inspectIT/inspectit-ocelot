@@ -102,9 +102,24 @@ public class TestUtils {
     }
 
     /**
-     * See {@link #waitForClassInstrumentations(List, int, TimeUnit)}
+     * Waits until all specified classes were instrumented.
+     * This does not wait for potential hooks which will be created.
      */
-    public static void waitForClassInstrumentation(Class clazz, boolean waitForHooks, int duration, TimeUnit timeUnit) {
+    public static void waitForClassInstrumentations(Class<?>... clazz) {
+        waitForClassInstrumentations(Arrays.asList(clazz), false, 15, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Waits until a hook for each of the given classes exist.
+     */
+    public static void waitForClassHooks(Class<?>... clazz) {
+        waitForClassHooks(Arrays.asList(clazz), 10, TimeUnit.SECONDS);
+    }
+
+    /**
+     * See {@link #waitForClassInstrumentations(List, boolean, int, TimeUnit)}
+     */
+    public static void waitForClassInstrumentation(Class<?> clazz, boolean waitForHooks, int duration, TimeUnit timeUnit) {
         waitForClassInstrumentations(Collections.singletonList(clazz), waitForHooks, duration, timeUnit);
     }
 
@@ -112,26 +127,52 @@ public class TestUtils {
      * This methods will wait until all specified classes are present in the inspectIT agents activeInstrumentation cache.
      * After the specified time, the method will cause the current test to fail.
      */
-    public static void waitForClassInstrumentations(List<Class> clazzes, boolean waitForHooks, int duration, TimeUnit timeUnit) {
+    public static void waitForClassInstrumentations(List<Class<?>> clazzes, boolean waitForHooks, int duration, TimeUnit timeUnit) {
+        waitForClassInstrumentations(clazzes, duration, timeUnit);
+        if (waitForHooks) {
+            waitForClassHooks(clazzes, duration, timeUnit);
+        }
+    }
+
+    public static void waitForClassInstrumentations(List<Class<?>> clazzes, int duration, TimeUnit timeUnit) {
         try {
             await().atMost(duration, timeUnit).ignoreExceptions().untilAsserted(() -> {
-                for (Class clazz : clazzes) {
+                for (Class<?> clazz : clazzes) {
                     sink = Class.forName(clazz.getName(), true, clazz.getClassLoader());
                     Long timeStamp = instrumentationTimeStamp.get(clazz);
                     assertThat(timeStamp).isNotNull();
                 }
             });
-            if (waitForHooks) {
-                await().atMost(duration, timeUnit).until(() -> {
-                    Map<Class<?>, Object> hooks = getHooksMap();
-                    return clazzes.stream().allMatch(hooks::containsKey);
-                });
-            }
         } catch (ConditionTimeoutException ex) {
-            for (Class clazz : clazzes) {
+            int missingClassCount = 0;
+            for (Class<?> clazz : clazzes) {
                 Long timeStamp = instrumentationTimeStamp.get(clazz);
                 if (timeStamp == null) {
                     System.out.println(clazz.getName() + " was not instrumented!");
+                    missingClassCount++;
+                }
+            }
+
+            if (missingClassCount > 0) { // it may be the case that all required classes are loaded now
+                throw ex;
+            }
+        }
+    }
+
+    /**
+     * Waits a certain amount of time until a hook exists for each given class.
+     */
+    public static void waitForClassHooks(List<Class<?>> clazzes, int duration, TimeUnit timeUnit) {
+        try {
+            await().atMost(duration, timeUnit).until(() -> {
+                Map<Class<?>, Object> hooks = getHooksMap();
+                return clazzes.stream().allMatch(hooks::containsKey);
+            });
+        } catch (ConditionTimeoutException ex) {
+            Map<Class<?>, Object> hooksMap = getHooksMap();
+            for (Class<?> clazz : clazzes) {
+                if (!hooksMap.containsKey(clazz)) {
+                    System.out.println("No hooks were created for class " + clazz.getName());
                 }
             }
             throw ex;
@@ -185,7 +226,6 @@ public class TestUtils {
      *
      * @param viewName the name of the views
      * @param tags     the expected tag values
-     *
      * @return the found aggregation data, null otherwise
      */
     public static AggregationData getDataForView(String viewName, Map<String, String> tags) {
