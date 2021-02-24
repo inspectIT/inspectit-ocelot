@@ -39,8 +39,8 @@ class KeyValueEditor extends React.Component {
 
     const valueColumnPattern = (rowData) => {
       const className = classNames({
-        'error': rowData.hasErrors,
-        'regex': true
+        error: rowData.hasErrors,
+        regex: true,
       });
       return (
         (
