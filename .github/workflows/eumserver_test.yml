@@ -27,5 +27,5 @@ jobs:
         run: ../../gradlew assemble
         working-directory: ${{env.working-directory}}
       - name: test
-        run: ../../gradlew test
+        run: ../../gradlew -i test
         working-directory: ${{env.working-directory}}
