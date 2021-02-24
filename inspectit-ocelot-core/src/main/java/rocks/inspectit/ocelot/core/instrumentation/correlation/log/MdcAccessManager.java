@@ -131,7 +131,7 @@ public class MdcAccessManager implements IClassDiscoveryListener {
 
     /**
      * Creates a new {@link MdcAccessor} for interacting with the MDC represented by the given class and adapter. The
-     * accessor's function and consumers for accessing the MDC will be represented by custom classes which are injected
+     * accessor's function and consumers for accessing the MDC will be represented by generated classes which are injected
      * into the MDC's class loader.
      *
      * @param mdcAdapter the adapter specifying the MDC's GET, PUT and REMOVE methods

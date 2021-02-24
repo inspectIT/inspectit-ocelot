@@ -105,6 +105,12 @@ public class ClassInjector {
         return inject(classStructureIdentifier, neighborClass, byteCodeGenerator, true);
     }
 
+    /**
+     * Same as {@link #inject(String, Class, ByteCodeProvider, boolean)}. Using this method, it can be specified whether
+     * orphan classes should be reused if possible or not.
+     *
+     * @param tryClassReuse whether orphan classes should be reused
+     */
     public synchronized InjectedClass<?> inject(String classStructureIdentifier, Class<?> neighborClass, ByteCodeProvider byteCodeGenerator, boolean tryClassReuse) throws Exception {
         Optional<Class<?>> classToReuse;
         if (tryClassReuse) {
