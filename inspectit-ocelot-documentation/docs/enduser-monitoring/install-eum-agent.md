@@ -32,9 +32,11 @@ The list of available plugins can be found [here](http://akamai.github.io/boomer
 Note that this approach is not recommended for production use as the scripts are not minified and are loaded synchronously.
 :::
 
-Boomerang recommends that you use a [minified JS containing all your plugins](https://developer.akamai.com/tools/boomerang/docs/tutorial-building.html#asynchronously). 
-In addition you should use asynchronous injection as described in the [Boomerang documentation](https://developer.akamai.com/tools/boomerang/docs/index.html).
+Boomerang recommends that you use a [minified JS containing all your plugins](https://developer.akamai.com/tools/boomerang/docs/tutorial-building.html#asynchronously).
+In addition to that you should use asynchronous injection as described in the [Boomerang documentation](https://developer.akamai.com/tools/boomerang/docs/index.html).
 
-:::tip
-For automatic collection of the EUM traces have a look on the [Boomerang OpenTelemetry plugin](https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin).
-:::
+#Tracing
+Boomerang itself can only collect metrics. You can write your own scripts to collect traces using [OpenTracing](https://opentracing.io/) or
+use the [OpenTelemetry Plugin for Boomerang](https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin).
+The [OpenTelemetry Plugin for Boomerang](https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin) collects traces
+automatically without the need to manually define scripts.

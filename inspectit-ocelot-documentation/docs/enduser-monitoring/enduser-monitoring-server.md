@@ -23,5 +23,5 @@ The collected traces are propagated to the any registered trace exporter.
 Currently, the EUM server supports only [Jaeger](https://www.jaegertracing.io/) as the trace exporter (using the [Protobuf via gRPC](https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable) API).
 
 :::tip
-If you already use Boomerang to collect the EUM metrics, you can automatically collect traces as using the [Boomerang OpenTelemetry plugin](https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin).
+If you already use Boomerang to collect the EUM metrics, you can automatically collect traces by using the [Boomerang OpenTelemetry plugin](https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin).
 :::

@@ -408,14 +408,105 @@ The EUM server comes with the same Prometheus and InfluxDB exporter as the Ocelo
 The exporter's configurations options are the same as for the [agent](metrics/metric-exporters.md).
 However, they are located under the `inspectit-eum-server.exporters.metrics` configuration path.
 
+#### Prometheus
 By default, the prometheus exporter is enabled and available on port `8888`.
-The InfluxDB exporter is disabled by default and can be enabled by setting the URL via `inspectit-eum-server.exporters.metrics.influx.url`.
+
+The following configuration snippet shows the default configuration of the prometheus-exporter:
+```YAML
+inspectit-eum-server:
+  exporters:
+    metrics:
+      prometheus:
+        # Determines whether the prometheus exporter is enabled.
+        enabled: true
+
+        # The host of the prometheus HTTP endpoint.
+        host: localhost
+
+        # The port of the prometheus HTTP endpoint.
+        port: 8888
+```
+
+#### InfluxDB
+The InfluxDB exporter is disabled by default and can be enabled by setting the URL
+via `inspectit-eum-server.exporters.metrics.influx.url`.
+
+The following configuration snippet shows the default configuration of the InfluxDB exporter:
+```YAML
+inspectit-eum-server:
+  exporters:
+    metrics:
+      influx:
+        # Determines whether the InfluxDB exporter is enabled.
+        enabled: true
+
+        # the export interval of the metrics.
+        export-interval: 15s
+
+        # The http url of influx.
+        # If this property is not set, the InfluxDB exporter will not be started.
+        # url: "http://localhost:8086"
+
+        # The database to write to.
+        # If this property is not set, the InfluxDB exporter will not be started.
+        database: "inspectit"
+
+        # The username to be used to connect to the InfluxDB.
+        # username:
+
+        # The password to be used to connect to the InfluxDB.
+        # password:
+
+        # The retention policy to write to.
+        # If this property is not set, the InfluxDB exporter will not be started.
+        retention-policy: "autogen"
+
+        # If true, the specified database will be created with the autogen retention policy.
+        create-database: true
+
+        # If disabled, the raw values of each counter will be written to the InfluxDB on each export.
+        # When enabled, only the change of the counter in comparison to the previous export will be written.
+        # This difference will only be written if the counter has changed (=the difference is non-zero).
+        # This can greatly reduce the total data written to InfluxDB and makes writing queries easier.
+        counters-as-differences: true
+
+        # The size of the buffer for failed batches.
+        # E.g. if the exportInterval is 15s and the buffer-size is 4, the export will keep up to one minute of data in memory.
+        buffer-size: 40
+```
 
 ### Tracing
 
+:::info
+In order to make tracing work, additional dependencies need to be [installed](https://inspectit.github.io/inspectit-ocelot/docs/enduser-monitoring/install-eum-agent#tracing)!
+:::
+
 The EUM server supports trace data forwarding to the Jaeger exporter.
 The exporter is using the [Jaeger Protobuf via gRPC API](https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable) in order to forward trace data.
-By default, the Jaeger exporter is disabled.
+By default, the Jaeger exporter is enabled, but it is not active since the grpc-property is not set.
+
+:::info
+The grpc property needs to be set without protocol (e.g. localhost:14250)!
+:::
+
+The following configuration snippet shows the default configuration of the jaeger-exporter:
+
+```YAML
+inspectit-eum-server:
+  exporters:
+    tracing:
+      jaeger:
+      # If jaeger exporter for the OT received spans is enabled.
+      enabled: true
+
+      # Location of the jaeger gRPC API.
+      # Either a valid NameResolver-compliant URI, or an authority string.
+      # If this property is not set, the jaeger-exporter will not be started.
+      # grpc: localhost:14250
+
+      # service name for all exported spans.
+      service-name: browser-js
+```
 
 ### Beacons
 
