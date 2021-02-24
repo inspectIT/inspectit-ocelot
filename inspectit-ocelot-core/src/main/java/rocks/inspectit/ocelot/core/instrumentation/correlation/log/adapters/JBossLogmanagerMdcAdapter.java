@@ -1,8 +1,9 @@
 package rocks.inspectit.ocelot.core.instrumentation.correlation.log.adapters;
 
 import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
-import rocks.inspectit.ocelot.core.instrumentation.correlation.log.DelegationMdcAccessor;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MdcAccessor;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -36,8 +37,8 @@ public class JBossLogmanagerMdcAdapter implements MdcAdapter {
     }
 
     @Override
-    public DelegationMdcAccessor wrap(BiConsumer<String, Object> putConsumer, Function<String, Object> getFunction, Consumer<String> removeConsumer) {
-        return new DelegationMdcAccessor(putConsumer, getFunction, removeConsumer) {
+    public MdcAccessor createAccessor(WeakReference<Class<?>> mdcClass, BiConsumer<String, Object> putConsumer, Function<String, Object> getFunction, Consumer<String> removeConsumer) {
+        return new MdcAccessor(mdcClass, putConsumer, getFunction, removeConsumer) {
             @Override
             public boolean isEnabled(TraceIdMDCInjectionSettings settings) {
                 return settings.isJbossLogmanagerEnabled();

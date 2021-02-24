@@ -3,7 +3,7 @@ package rocks.inspectit.ocelot.instrumentation.correlation.log;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestMdc {
+public class DummyMdc {
 
     private static ThreadLocal<Map<String, String>> mapThreadLocal = ThreadLocal.withInitial(HashMap::new);
 

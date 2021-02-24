@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
-import rocks.inspectit.ocelot.core.instrumentation.correlation.log.DelegationMdcAccessor;
+import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MdcAccessor;
 
 import java.lang.reflect.Method;
 import java.util.function.BiConsumer;
@@ -88,7 +88,7 @@ public class Log4J2MdcAdapterTest {
         public void isEnabled() {
             when(settings.isLog4j2Enabled()).thenReturn(true);
 
-            DelegationMdcAccessor delegationAccessor = adapter.wrap(putConsumer, getFunction, removeConsumer);
+            MdcAccessor delegationAccessor = adapter.createAccessor(null, putConsumer, getFunction, removeConsumer);
 
             boolean result = delegationAccessor.isEnabled(settings);
 
@@ -99,7 +99,7 @@ public class Log4J2MdcAdapterTest {
         public void isDisabled() {
             when(settings.isLog4j2Enabled()).thenReturn(false);
 
-            DelegationMdcAccessor delegationAccessor = adapter.wrap(putConsumer, getFunction, removeConsumer);
+            MdcAccessor delegationAccessor = adapter.createAccessor(null, putConsumer, getFunction, removeConsumer);
 
             boolean result = delegationAccessor.isEnabled(settings);
 

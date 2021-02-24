@@ -11,14 +11,11 @@ import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Deque;
-import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,15 +29,20 @@ public class LogCorrelationTest {
 
     private static Function<String, String> getTestMdc;
 
-    static class TestClassLoader1 extends ClassLoader {
+    /**
+     * Simulates the case where a class loader is isolated (e.g. in JBoss module system) and does not have access
+     * to the ocelot bootstrap classes.
+     */
+    static class IsolatedMdcClassLoader extends ClassLoader {
 
         @Override
         public Class<?> loadClass(String name) throws ClassNotFoundException {
-            if (name.equals("rocks.inspectit.ocelot.bootstrap.correlation.MdcAccessor")) {
+            if (name.startsWith("rocks.inspectit.ocelot.bootstrap")) {
                 throw new ClassNotFoundException();
             }
 
-            if (!name.startsWith("rocks.inspectit.ocelot.instrumentation.correlation.log.TestMdc")) {
+            // only this class should be loaded, otherwise we delegate the loading to the parent
+            if (!name.startsWith("org.slf4j.MDC")) {
                 return super.loadClass(name);
             }
 
@@ -61,7 +63,7 @@ public class LogCorrelationTest {
 
     @BeforeAll
     private static void beforeAll() throws Exception {
-        Class<?> testMdcClass = new TestClassLoader1().loadClass("rocks.inspectit.ocelot.instrumentation.correlation.log.TestMdc");
+        Class<?> testMdcClass = new IsolatedMdcClassLoader().loadClass("org.slf4j.MDC");
         final Method getMethod = testMdcClass.getMethod("get", String.class);
 
         getTestMdc = (key) -> {
@@ -72,7 +74,6 @@ public class LogCorrelationTest {
             }
         };
 
-        testMdcClass.getMethod("reset").invoke(null);
 
         //load the MDC classes
         MDC.get("test");

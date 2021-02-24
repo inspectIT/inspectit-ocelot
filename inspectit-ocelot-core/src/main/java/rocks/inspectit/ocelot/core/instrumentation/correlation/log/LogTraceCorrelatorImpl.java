@@ -24,6 +24,9 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
 
     public static final String BEAN_NAME = "logTraceCorrelator";
 
+    /**
+     * Accessor for the MDCs.
+     */
     private MdcAccessManager mdcAccess;
 
     @Setter
@@ -48,6 +51,12 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
         }
     }
 
+    /**
+     * Injects the given span context into all configured MDCs.
+     *
+     * @param context the context to inject
+     * @return an {@link InjectionScope} to revert the injection and restore the initial state of the MDC
+     */
     private InjectionScope injectTraceContextInMdc(SpanContext context) {
         if (context.getTraceId().isValid() && context.getTraceOptions().isSampled()) {
             log.trace("Adding trace correlation information to MDC.");

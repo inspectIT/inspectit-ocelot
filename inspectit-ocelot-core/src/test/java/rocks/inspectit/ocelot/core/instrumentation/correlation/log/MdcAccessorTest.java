@@ -7,12 +7,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.tracing.TraceIdMDCInjectionSettings;
 
+import java.lang.ref.WeakReference;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class DelegationMdcAccessorTest {
+public class MdcAccessorTest {
 
-    private DelegationMdcAccessor delegationAccessor;
+    private MdcAccessor delegationAccessor;
 
     private final String EXISTING_KEY = "KEY_EXIST";
 
@@ -25,7 +27,7 @@ public class DelegationMdcAccessorTest {
         FakeMdc fakeMdc = new FakeMdc();
         fakeMdc.put(EXISTING_KEY, EXISTING_VALUE);
 
-        delegationAccessor = new DelegationMdcAccessor(fakeMdc::put, fakeMdc::get, fakeMdc::remove) {
+        delegationAccessor = new MdcAccessor(new WeakReference<>(FakeMdc.class), fakeMdc::put, fakeMdc::get, fakeMdc::remove) {
             @Override
             public boolean isEnabled(TraceIdMDCInjectionSettings settings) {
                 return false;

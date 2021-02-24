@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,13 +29,13 @@ public class MdcAccessManagerTest {
     private InspectitEnvironment environment;
 
     @Mock
-    private DelegationMdcAccessor mdcAccessorOne;
+    private MdcAccessor mdcAccessorOne;
 
     @Mock
-    private DelegationMdcAccessor mdcAccessorTwo;
+    private MdcAccessor mdcAccessorTwo;
 
     @Mock
-    private DelegationMdcAccessor mdcAccessorThree;
+    private MdcAccessor mdcAccessorThree;
 
     @Nested
     public class InjectValue {
@@ -90,10 +91,20 @@ public class MdcAccessManagerTest {
             when(mdcAccessorOne.isEnabled(any())).thenReturn(true);
             when(mdcAccessorTwo.isEnabled(any())).thenReturn(false);
             when(mdcAccessorThree.isEnabled(any())).thenReturn(true);
+            when(mdcAccessorOne.getTargetMdcClass()).thenReturn(new WeakReference<>(Byte.class));
+            when(mdcAccessorThree.getTargetMdcClass()).thenReturn(new WeakReference<>(Integer.class));
 
+            // activate
             manager.updateActiveMdcAccessors();
 
             assertThat(manager.activeMdcAccessors).containsOnly(mdcAccessorOne, mdcAccessorThree);
+
+            when(mdcAccessorThree.isEnabled(any())).thenReturn(false);
+
+            // deactivate
+            manager.updateActiveMdcAccessors();
+
+            assertThat(manager.activeMdcAccessors).containsOnly(mdcAccessorOne);
         }
     }
 }
