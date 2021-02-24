@@ -433,12 +433,101 @@ This metric contains following tags:</p>
 <p>The EUM server comes with the same Prometheus and InfluxDB exporter as the Ocelot agent.
 The exporter's configurations options are the same as for the <a href="/inspectit-ocelot/docs/next/metrics/metric-exporters">agent</a>.
 However, they are located under the <code>inspectit-eum-server.exporters.metrics</code> configuration path.</p>
-<p>By default, the prometheus exporter is enabled and available on port <code>8888</code>.
-The InfluxDB exporter is disabled by default and can be enabled by setting the URL via <code>inspectit-eum-server.exporters.metrics.influx.url</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="prometheus"></a><a href="#prometheus" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Prometheus</h4>
+<p>By default, the prometheus exporter is enabled and available on port <code>8888</code>.</p>
+<p>The following configuration snippet shows the default configuration of the prometheus-exporter:</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-eum-server:</span>
+  <span class="hljs-attr">exporters:</span>
+    <span class="hljs-attr">metrics:</span>
+      <span class="hljs-attr">prometheus:</span>
+        <span class="hljs-comment"># Determines whether the prometheus exporter is enabled.</span>
+        <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span>
+
+        <span class="hljs-comment"># The host of the prometheus HTTP endpoint.</span>
+        <span class="hljs-attr">host:</span> <span class="hljs-string">localhost</span>
+
+        <span class="hljs-comment"># The port of the prometheus HTTP endpoint.</span>
+        <span class="hljs-attr">port:</span> <span class="hljs-number">8888</span>
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="influxdb"></a><a href="#influxdb" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>InfluxDB</h4>
+<p>The InfluxDB exporter is disabled by default and can be enabled by setting the URL
+via <code>inspectit-eum-server.exporters.metrics.influx.url</code>.</p>
+<p>The following configuration snippet shows the default configuration of the InfluxDB exporter:</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-eum-server:</span>
+  <span class="hljs-attr">exporters:</span>
+    <span class="hljs-attr">metrics:</span>
+      <span class="hljs-attr">influx:</span>
+        <span class="hljs-comment"># Determines whether the InfluxDB exporter is enabled.</span>
+        <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span>
+
+        <span class="hljs-comment"># the export interval of the metrics.</span>
+        <span class="hljs-attr">export-interval:</span> <span class="hljs-string">15s</span>
+
+        <span class="hljs-comment"># The http url of influx.</span>
+        <span class="hljs-comment"># If this property is not set, the InfluxDB exporter will not be started.</span>
+        <span class="hljs-comment"># url: "http://localhost:8086"</span>
+
+        <span class="hljs-comment"># The database to write to.</span>
+        <span class="hljs-comment"># If this property is not set, the InfluxDB exporter will not be started.</span>
+        <span class="hljs-attr">database:</span> <span class="hljs-string">"inspectit"</span>
+
+        <span class="hljs-comment"># The username to be used to connect to the InfluxDB.</span>
+        <span class="hljs-comment"># username:</span>
+
+        <span class="hljs-comment"># The password to be used to connect to the InfluxDB.</span>
+        <span class="hljs-comment"># password:</span>
+
+        <span class="hljs-comment"># The retention policy to write to.</span>
+        <span class="hljs-comment"># If this property is not set, the InfluxDB exporter will not be started.</span>
+        <span class="hljs-attr">retention-policy:</span> <span class="hljs-string">"autogen"</span>
+
+        <span class="hljs-comment"># If true, the specified database will be created with the autogen retention policy.</span>
+        <span class="hljs-attr">create-database:</span> <span class="hljs-literal">true</span>
+
+        <span class="hljs-comment"># If disabled, the raw values of each counter will be written to the InfluxDB on each export.</span>
+        <span class="hljs-comment"># When enabled, only the change of the counter in comparison to the previous export will be written.</span>
+        <span class="hljs-comment"># This difference will only be written if the counter has changed (=the difference is non-zero).</span>
+        <span class="hljs-comment"># This can greatly reduce the total data written to InfluxDB and makes writing queries easier.</span>
+        <span class="hljs-attr">counters-as-differences:</span> <span class="hljs-literal">true</span>
+
+        <span class="hljs-comment"># The size of the buffer for failed batches.</span>
+        <span class="hljs-comment"># E.g. if the exportInterval is 15s and the buffer-size is 4, the export will keep up to one minute of data in memory.</span>
+        <span class="hljs-attr">buffer-size:</span> <span class="hljs-number">40</span>
+</code></pre>
 <h3><a class="anchor" aria-hidden="true" id="tracing"></a><a href="#tracing" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tracing</h3>
-<p>The EUM server supports trace data forwarding to the Jaeger exporter.
+
+    <div class="admonition admonition-info">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"></div> info</h5>
+      </div>
+      <div class="admonition-content">
+    <p>In order to make tracing work, additional dependencies need to be <a href="https://inspectit.github.io/inspectit-ocelot/docs/enduser-monitoring/install-eum-agent#tracing">installed</a>!</p>
+</div></div><p>The EUM server supports trace data forwarding to the Jaeger exporter.
 The exporter is using the <a href="https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable">Jaeger Protobuf via gRPC API</a> in order to forward trace data.
-By default, the Jaeger exporter is disabled.</p>
+By default, the Jaeger exporter is enabled, but it is not active since the grpc-property is not set.</p>
+
+    <div class="admonition admonition-info">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"></div> info</h5>
+      </div>
+      <div class="admonition-content">
+    <p>The grpc property needs to be set without protocol (e.g. localhost:14250)!</p>
+</div></div><p>The following configuration snippet shows the default configuration of the jaeger-exporter:</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit-eum-server:</span>
+  <span class="hljs-attr">exporters:</span>
+    <span class="hljs-attr">tracing:</span>
+      <span class="hljs-attr">jaeger:</span>
+      <span class="hljs-comment"># If jaeger exporter for the OT received spans is enabled.</span>
+      <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span>
+
+      <span class="hljs-comment"># Location of the jaeger gRPC API.</span>
+      <span class="hljs-comment"># Either a valid NameResolver-compliant URI, or an authority string.</span>
+      <span class="hljs-comment"># If this property is not set, the jaeger-exporter will not be started.</span>
+      <span class="hljs-comment"># grpc: localhost:14250</span>
+
+      <span class="hljs-comment"># service name for all exported spans.</span>
+      <span class="hljs-attr">service-name:</span> <span class="hljs-string">browser-js</span>
+</code></pre>
 <h3><a class="anchor" aria-hidden="true" id="beacons"></a><a href="#beacons" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Beacons</h3>
 <p>The EUM Server supports that received beacons can be exported or sent to other systems.
 Currently only export via HTTP is supported.
@@ -487,7 +576,7 @@ Currently, the following self monitoring metrics are available.</p>
 <tr><td><code>inspectit_eum_self_beacons_export_batch_sum</code></td><td>The number of exported beacons per exportation</td></tr>
 </tbody>
 </table>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2021-2-17 by Marius Brill</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/enduser-monitoring/eum-server-setup"><span class="arrow-prev">← </span><span>Server Setup</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/enduser-monitoring/install-eum-agent"><span>Install EUM Agent</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#metrics-definition">Metrics Definition</a><ul class="toc-headings"><li><a href="#smoothed-average-view">Smoothed Average View</a></li><li><a href="#value-expressions">Value Expressions</a></li><li><a href="#beacon-requirements">Beacon Requirements</a></li><li><a href="#additional-beacon-fields">Additional Beacon Fields</a></li></ul></li><li><a href="#tags-definition">Tags Definition</a><ul class="toc-headings"><li><a href="#additional-tags">Additional Tags</a></li><li><a href="#global-tags">Global Tags</a></li></ul></li><li><a href="#resource-timings">Resource Timings</a></li><li><a href="#exporters">Exporters</a><ul class="toc-headings"><li><a href="#metrics">Metrics</a></li><li><a href="#tracing">Tracing</a></li><li><a href="#beacons">Beacons</a></li></ul></li><li><a href="#self-monitoring">Self-Monitoring</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2021 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2021-2-24 by Marius Brill</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/enduser-monitoring/eum-server-setup"><span class="arrow-prev">← </span><span>Server Setup</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/enduser-monitoring/install-eum-agent"><span>Install EUM Agent</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#metrics-definition">Metrics Definition</a><ul class="toc-headings"><li><a href="#smoothed-average-view">Smoothed Average View</a></li><li><a href="#value-expressions">Value Expressions</a></li><li><a href="#beacon-requirements">Beacon Requirements</a></li><li><a href="#additional-beacon-fields">Additional Beacon Fields</a></li></ul></li><li><a href="#tags-definition">Tags Definition</a><ul class="toc-headings"><li><a href="#additional-tags">Additional Tags</a></li><li><a href="#global-tags">Global Tags</a></li></ul></li><li><a href="#resource-timings">Resource Timings</a></li><li><a href="#exporters">Exporters</a><ul class="toc-headings"><li><a href="#metrics">Metrics</a></li><li><a href="#tracing">Tracing</a></li><li><a href="#beacons">Beacons</a></li></ul></li><li><a href="#self-monitoring">Self-Monitoring</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2021 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
