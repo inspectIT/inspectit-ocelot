@@ -3,6 +3,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import classNames from 'classNames';
 
 import { cloneDeep, isEqual, assign } from 'lodash';
 
@@ -36,6 +37,39 @@ class KeyValueEditor extends React.Component {
     dataArray.push({});
     dataArray.map((data, index) => assign(data, { index }));
 
+    const valueColumnPattern = (rowData) => {
+      const className = classNames({
+        error: rowData.hasErrors,
+        regex: true,
+      });
+      return (
+        (
+          <div className={className}>
+            <style jsx>
+              {`
+                .error {
+                  color: #f44336;
+                }
+                .error-sign {
+                  float: right;
+                  font-size: 1.25rem;
+                }
+                .regex {
+                  font-family: monospace;
+                }
+              `}
+            </style>
+            {rowData.value}
+            {rowData.hasErrors && <i className="error-sign pi pi-exclamation-triangle" title={rowData.errorMessage}></i>}
+          </div>
+        ) || (
+          <div>
+            <p style={{ color: 'grey' }}>click here to add new value</p>
+          </div>
+        )
+      );
+    };
+
     return (
       <DataTable value={dataArray} scrollable={true} scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'}>
         <Column
@@ -51,7 +85,7 @@ class KeyValueEditor extends React.Component {
           field="value"
           header="Value"
           headerStyle={{ fontWeight: 'normal' }}
-          body={(rowData) => rowData.value || <p style={{ color: 'grey' }}>click here to add new value</p>}
+          body={(rowData) => valueColumnPattern(rowData)}
           editor={this.editor}
         />
         <Column
