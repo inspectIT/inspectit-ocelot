@@ -3,6 +3,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import classNames from 'classNames';
 
 import { cloneDeep, isEqual, assign } from 'lodash';
 
@@ -37,7 +38,10 @@ class KeyValueEditor extends React.Component {
     dataArray.map((data, index) => assign(data, { index }));
 
     const valueColumnPattern = (rowData) => {
-      const className = rowData.hasErrors ? 'error' : 'normal';
+      const className = classNames({
+        'error': rowData.hasErrors,
+        'regex': true
+      });
       return (
         (
           <div className={className}>
@@ -46,10 +50,12 @@ class KeyValueEditor extends React.Component {
                 .error {
                   color: #f44336;
                 }
-
                 .error-sign {
                   float: right;
                   font-size: 1.25rem;
+                }
+                .regex {
+                  font-family: monospace;
                 }
               `}
             </style>

@@ -142,6 +142,7 @@ class EditMappingDialog extends React.Component {
               maxHeight={`calc(${heightFieldset}px - 3.5em)`}
             />
           </Fieldset>
+          
           <Fieldset legend="Attributes" style={{ paddingTop: 0, height: heightFieldset, overflow: 'hidden' }}>
             <KeyValueEditor
               keyValueArray={attributes}
