@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
  */
 const SelectionInformation = ({ hint }) => {
   return (
-    <div className="p-col">
+    <>
       <style jsx>{`
         .selection-information {
           display: flex;
@@ -19,7 +19,7 @@ const SelectionInformation = ({ hint }) => {
       <div className="selection-information">
         <div>{hint}</div>
       </div>
-    </div>
+    </>
   );
 };
 

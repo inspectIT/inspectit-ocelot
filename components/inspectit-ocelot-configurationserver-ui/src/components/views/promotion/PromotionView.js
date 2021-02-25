@@ -11,6 +11,7 @@ import PromotionApprovalDialog from './dialogs/PromotionApprovalDialog';
 import axios from '../../../lib/axios-api';
 import PromotionConflictDialog from './dialogs/PromotionConflictDialog';
 import _ from 'lodash';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 /**
  * The view for displaying existing promotion files including their modifications.
@@ -50,6 +51,9 @@ const PromotionView = () => {
       canPromote,
     };
   }); // copy of the entries array including the data whether a file is approved or not.
+
+  // initially load data
+  useEffect(() => refreshData(), []);
 
   // updating commit ids in the global state using the latest data
   useEffect(() => {
@@ -123,10 +127,14 @@ const PromotionView = () => {
           .selection-information {
             display: flex;
             flex-grow: 1;
+            flex-direction: column;
             height: 100%;
             align-items: center;
             justify-content: center;
             color: #bbb;
+          }
+          .selection-information > span {
+            margin-bottom: 1rem;
           }
         `}
       </style>
@@ -180,6 +188,13 @@ const PromotionView = () => {
                     <span>Select a file to start.</span>
                   </div>
                 )}
+              </div>
+            </>
+          ) : isLoading ? (
+            <>
+              <div className="selection-information">
+                <span>Loading promotion files...</span>
+                <ProgressSpinner />
               </div>
             </>
           ) : (

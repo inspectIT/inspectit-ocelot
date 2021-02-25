@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.model.exporters.metrics;
 import lombok.Data;
 import org.hibernate.validator.constraints.time.DurationMin;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.time.Duration;
 
@@ -62,4 +63,11 @@ public class InfluxExporterSettings {
      * This can greatly reduce the total data written to influx and makes writing queries easier.
      */
     private boolean countersAsDifferences;
+
+    /**
+     * The size of the buffer for failed batches.
+     * E.g. if the exportInterval is 15s and the buffer-size is 4, the export will keep up to one minute of data in memory.
+     */
+    @Min(1)
+    private int bufferSize;
 }

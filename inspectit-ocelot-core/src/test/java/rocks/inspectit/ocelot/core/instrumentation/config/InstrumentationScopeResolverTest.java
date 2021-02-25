@@ -15,10 +15,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.scope.*;
 import rocks.inspectit.ocelot.core.instrumentation.config.matcher.IsAnnotatedMatcher;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationScope;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,6 +52,17 @@ class InstrumentationScopeResolverTest {
             scopeSettings.setMethods(methodScope);
             scopeSettings.setAdvanced(advancedSettings);
             settings.setScopes(Collections.singletonMap(scopeKey, scopeSettings));
+        }
+
+        private InstrumentationScopeSettings createScopeSettings(String scopeKey, List<ElementDescriptionMatcherSettings> interfaces, ElementDescriptionMatcherSettings superclass, ElementDescriptionMatcherSettings type, List<MethodMatcherSettings> methodScope, AdvancedScopeSettings advancedSettings, Map<String, Boolean> excludeOptions) {
+            InstrumentationScopeSettings scopeSettings = new InstrumentationScopeSettings();
+            scopeSettings.setInterfaces(interfaces);
+            scopeSettings.setSuperclass(superclass);
+            scopeSettings.setType(type);
+            scopeSettings.setMethods(methodScope);
+            scopeSettings.setAdvanced(advancedSettings);
+            scopeSettings.setExclude(excludeOptions);
+            return scopeSettings;
         }
 
         @Test
@@ -107,7 +115,7 @@ class InstrumentationScopeResolverTest {
         @Test
         public void ruleWithEmptyScope() {
             String scopeKey = "scope-key";
-            setRuleSettings("rule-key", true, Collections.singletonMap("scope-key", true));
+            setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             setScopeSettings(scopeKey, null, null, null, null, null);
 
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
@@ -167,6 +175,61 @@ class InstrumentationScopeResolverTest {
                     .containsExactly(
                             named("class.Class").and(declaresMethod(not(isConstructor()).and(named("method")))),
                             not(isConstructor()).and(named("method")));
+        }
+
+        @Test
+        public void ruleWithScope_emptyAdvanced_excluded() {
+            String scopeKeyA = "scope-a";
+            String scopeKeyB = "scope-b";
+
+            Map<String, Boolean> ruleScopes = new HashMap<>();
+            ruleScopes.put(scopeKeyA, true);
+            ruleScopes.put(scopeKeyB, true);
+
+            setRuleSettings("rule-key", true, ruleScopes);
+
+            ElementDescriptionMatcherSettings classMatcherA = new ElementDescriptionMatcherSettings();
+            classMatcherA.setName("class.ClassA");
+            MethodMatcherSettings methodSettingsA = new MethodMatcherSettings();
+            methodSettingsA.setName("methodA");
+
+            ElementDescriptionMatcherSettings classMatcherB = new ElementDescriptionMatcherSettings();
+            classMatcherB.setName("class.ClassB");
+            MethodMatcherSettings methodSettingsB = new MethodMatcherSettings();
+            methodSettingsB.setName("methodB");
+
+            Map<String, Boolean> excludeOptionsA = new HashMap<>();
+            excludeOptionsA.put("scope-b", true);
+            Map<String, Boolean> excludeOptionsB = new HashMap<>();
+            excludeOptionsB.put("scope-a", false);
+
+            Map<String, InstrumentationScopeSettings> scopes = new HashMap<>();
+            scopes.put(scopeKeyA, createScopeSettings(scopeKeyA, null, null, classMatcherA, Collections.singletonList(methodSettingsA), null, excludeOptionsA));
+            scopes.put(scopeKeyB, createScopeSettings(scopeKeyB, null, null, classMatcherB, Collections.singletonList(methodSettingsB), null, excludeOptionsB));
+
+            settings.setScopes(scopes);
+
+            Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
+
+            ElementMatcher.Junction<TypeDescription> typeMatcher = named("class.ClassA");
+
+            ElementMatcher.Junction<MethodDescription> methodMatcher = not(isConstructor())
+                    .and(named("methodA"))
+                    .and(not(isDeclaredBy(named("class.ClassB")
+                            .and(declaresMethod(not(isConstructor())
+                                    .and(named("methodB")))))
+                            .and(not(isConstructor())
+                                    .and(named("methodB")))));
+
+            assertThat(result).containsOnlyKeys(scopeKeyA, scopeKeyB);
+            assertThat(result.get(scopeKeyB))
+                    .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
+                    .containsExactly(
+                            named("class.ClassB").and(declaresMethod(not(isConstructor()).and(named("methodB")))),
+                            not(isConstructor()).and(named("methodB")));
+            assertThat(result.get(scopeKeyA))
+                    .extracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
+                    .containsExactly(typeMatcher.and(declaresMethod(methodMatcher)), methodMatcher);
         }
 
         @Test

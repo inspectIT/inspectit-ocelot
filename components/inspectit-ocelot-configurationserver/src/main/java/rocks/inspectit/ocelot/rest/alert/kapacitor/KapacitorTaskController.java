@@ -25,9 +25,7 @@ public class KapacitorTaskController extends KapacitorBaseController {
     @ApiOperation(value = "Provides a list with basic information about each kapacitor task. Only tasks based on templates will be listed.")
     @GetMapping("/alert/kapacitor/tasks")
     public List<Task> getAllTasks() {
-        ObjectNode response = kapacitor()
-                .getForEntity("/kapacitor/v1/tasks", ObjectNode.class)
-                .getBody();
+        ObjectNode response = kapacitor().getForEntity("/kapacitor/v1/tasks", ObjectNode.class).getBody();
 
         return StreamSupport.stream(response.path("tasks").spliterator(), false)
                 .map(Task::fromKapacitorResponse)
@@ -39,8 +37,7 @@ public class KapacitorTaskController extends KapacitorBaseController {
 
     @GetMapping("/alert/kapacitor/tasks/{taskId}")
     public Task getTask(@PathVariable @ApiParam("The id of the task to query") String taskId) {
-        ObjectNode response = kapacitor()
-                .getForEntity("/kapacitor/v1/tasks/{taskId}", ObjectNode.class, taskId)
+        ObjectNode response = kapacitor().getForEntity("/kapacitor/v1/tasks/{taskId}", ObjectNode.class, taskId)
                 .getBody();
 
         return Task.fromKapacitorResponse(response);
@@ -50,8 +47,7 @@ public class KapacitorTaskController extends KapacitorBaseController {
     @ApiOperation(value = "Inserts a new Kapacitor task")
     @PostMapping("/alert/kapacitor/tasks")
     public Task addTask(@RequestBody Task task) {
-        ObjectNode response = kapacitor()
-                .postForEntity("/kapacitor/v1/tasks", task.toKapacitorRequest(), ObjectNode.class)
+        ObjectNode response = kapacitor().postForEntity("/kapacitor/v1/tasks", task.toKapacitorRequest(), ObjectNode.class)
                 .getBody();
 
         return Task.fromKapacitorResponse(response);
@@ -60,10 +56,9 @@ public class KapacitorTaskController extends KapacitorBaseController {
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Updates one or more settings of a kapacitor task")
     @PatchMapping("/alert/kapacitor/tasks/{taskId}")
-    public Task updateTask(@PathVariable @ApiParam("The id of the task to update") String taskId,
-                           @RequestBody Task task) {
-        ObjectNode response = kapacitor()
-                .patchForObject("/kapacitor/v1/tasks/{taskId}", task.toKapacitorRequest(), ObjectNode.class, taskId);
+    public Task updateTask(@PathVariable @ApiParam("The id of the task to update") String taskId, @RequestBody Task task) {
+        ObjectNode response = kapacitor().patchForObject("/kapacitor/v1/tasks/{taskId}", task.toKapacitorRequest(), ObjectNode.class, taskId);
+        triggerTaskReload(task);
 
         return Task.fromKapacitorResponse(response);
     }
@@ -73,6 +68,19 @@ public class KapacitorTaskController extends KapacitorBaseController {
     @DeleteMapping("/alert/kapacitor/tasks/{taskId}")
     public void removeTask(@PathVariable @ApiParam("The id of the task to delete") String taskId) {
         kapacitorRestTemplate.delete("/kapacitor/v1/tasks/{taskId}", taskId);
+    }
+
+    /**
+     * Required to reload kapacitor tasks during runtime.
+     * A task cannot be reloaded and just doing patch request against the template API - without changing it -
+     * triggers kapacitor to reload the previously changed task.
+     * Note that all tasks created from this template will be reloaded.
+     *
+     * @param task kapacitor task
+     */
+    private void triggerTaskReload(Task task) {
+        String taskTemplateId = task.getTemplate();
+        kapacitor().patchForObject("/kapacitor/v1/templates/{templateID}", task.toKapacitorRequestTemplateUpdate(), ObjectNode.class, taskTemplateId);
     }
 
 }

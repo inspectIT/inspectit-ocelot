@@ -12,6 +12,7 @@ inspectit:
           's_apacheclient_doExecute': true
         tracing:
           start-span: true
+          auto-tracing: false
           kind: CLIENT
           start-span-conditions:
             only-if-true: 'http_is_entry'

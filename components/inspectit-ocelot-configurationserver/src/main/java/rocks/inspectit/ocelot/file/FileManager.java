@@ -2,11 +2,13 @@ package rocks.inspectit.ocelot.file;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.accessor.git.CachingRevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
@@ -16,10 +18,12 @@ import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAcc
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
+import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -54,6 +58,12 @@ public class FileManager {
      */
     private CachingRevisionAccess cachedWorkspaceRevision;
 
+    /**
+     * The currently existing workspace versions. This field may not reflect the versions which actual exist in the
+     * server's repository because it is only refreshed if a user accesses it via the {@link #listWorkspaceVersions()} method.
+     */
+    private List<WorkspaceVersion> workspaceVersions;
+
     @Autowired
     public FileManager(InspectitServerSettings settings, ApplicationEventPublisher eventPublisher, Executor executor) throws GitAPIException {
         Path workingDirectory = Paths.get(settings.getWorkingDirectory()).toAbsolutePath().normalize();
@@ -79,6 +89,17 @@ public class FileManager {
      */
     public AbstractWorkingDirectoryAccessor getWorkingDirectory() {
         return workingDirectoryAccessor;
+    }
+
+    /**
+     * Returns the commit with the given id.
+     *
+     * @param commitId the id of the desired commit
+     * @return the commit object
+     */
+    public RevisionAccess getCommitWithId(String commitId) {
+        ObjectId id = ObjectId.fromString(commitId);
+        return versioningManager.getRevisionById(id);
     }
 
     /**
@@ -115,7 +136,6 @@ public class FileManager {
      * Returns the diff between the current live branch and the current workspace branch.
      *
      * @param includeContent whether the file difference (old and new content) is included
-     *
      * @return the diff between the live and workspace branch
      */
     public WorkspaceDiff getWorkspaceDiff(boolean includeContent) throws IOException, GitAPIException {
@@ -135,5 +155,38 @@ public class FileManager {
         } finally {
             workingDirectoryLock.writeLock().unlock();
         }
+    }
+
+    /**
+     * Can be called to commit external changes to the working directory.
+     * This will cause the workspace revision to be in sync with the file system.
+     * <p>
+     * The changes will be commit as the currently logged in user.
+     */
+    public void commitWorkingDirectory() throws GitAPIException {
+        workingDirectoryLock.writeLock().lock();
+        try {
+            versioningManager.commitAllChanges("Committing external changes.");
+        } finally {
+            workingDirectoryLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * A list of {@link WorkspaceVersion} existing in the workspace branch is returned. In case the workspace branch does
+     * not change, the list is cached in the {@link #workspaceVersions} field to prevent expensive recreation of it.
+     *
+     * @return a list of {@link WorkspaceVersion} existing in the workspace branch.
+     */
+    public List<WorkspaceVersion> listWorkspaceVersions() throws IOException, GitAPIException {
+        if (CollectionUtils.isEmpty(workspaceVersions)) {
+            workspaceVersions = versioningManager.listWorkspaceVersions();
+        } else {
+            String latestId = workspaceVersions.get(0).getId();
+            if (!latestId.equals(getWorkspaceRevision().getRevisionId())) {
+                workspaceVersions = versioningManager.listWorkspaceVersions();
+            }
+        }
+        return workspaceVersions;
     }
 }

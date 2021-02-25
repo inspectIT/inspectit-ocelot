@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.bootstrap.context.noop;
 
+import rocks.inspectit.ocelot.bootstrap.context.ContextTuple;
 import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 
@@ -16,6 +17,33 @@ public class NoopContextManager implements IContextManager {
     }
 
     @Override
+    public boolean enterCorrelation() {
+        return false;
+    }
+
+    @Override
+    public boolean insideCorrelation() {
+        return false;
+    }
+
+    @Override
+    public void exitCorrelation() {
+    }
+
+    @Override
+    public void storeContext(Object target, boolean invalidate) {
+    }
+
+    @Override
+    public ContextTuple attachContext(Object target) {
+        return null;
+    }
+
+    @Override
+    public void detachContext(ContextTuple contextTuple) {
+    }
+
+    @Override
     public Runnable wrap(Runnable runnable) {
         return runnable;
     }
@@ -23,14 +51,6 @@ public class NoopContextManager implements IContextManager {
     @Override
     public <T> Callable<T> wrap(Callable<T> callable) {
         return callable;
-    }
-
-    @Override
-    public void storeContextForThread(Thread thread) {
-    }
-
-    @Override
-    public void attachContextToThread(Thread thread) {
     }
 
     @Override

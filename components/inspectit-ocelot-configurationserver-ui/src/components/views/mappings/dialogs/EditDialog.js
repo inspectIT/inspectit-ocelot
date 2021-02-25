@@ -20,6 +20,7 @@ const defaultState = {
   isNewMapping: true,
   currentMapping: null,
   sourceBranch: 'WORKSPACE',
+  hasErrors: false,
 };
 
 /**
@@ -33,7 +34,24 @@ class EditMappingDialog extends React.Component {
   };
 
   handleChangeAttribute = (newAttributes) => {
-    this.setState({ attributes: newAttributes });
+    const hasInvalidRegexPattern = this.checkRegexPatterns(newAttributes);
+    this.setState({ attributes: newAttributes, hasErrors: hasInvalidRegexPattern });
+  };
+
+  checkRegexPatterns = (attributes) => {
+    var hasErrors = false;
+    for (const attribute of attributes) {
+      try {
+        new RegExp(attribute.value);
+        attribute['hasErrors'] = false;
+        attribute['errorMessage'] = '';
+      } catch (e) {
+        hasErrors = true;
+        attribute['hasErrors'] = true;
+        attribute['errorMessage'] = e.message;
+      }
+    }
+    return hasErrors;
   };
 
   render() {
@@ -81,7 +99,12 @@ class EditMappingDialog extends React.Component {
           style={{ maxWidth: '1100px', minWidth: '650px' }}
           footer={
             <div>
-              <Button label={isNewMapping ? 'Add' : 'Update'} className="p-button-primary" onClick={this.handleSave} />
+              <Button
+                label={isNewMapping ? 'Add' : 'Update'}
+                className="p-button-primary"
+                onClick={this.handleSave}
+                disabled={this.state.hasErrors}
+              />
               <Button label="Cancel" className="p-button-secondary" onClick={this.handleClose} />
             </div>
           }
@@ -119,6 +142,7 @@ class EditMappingDialog extends React.Component {
               maxHeight={`calc(${heightFieldset}px - 3.5em)`}
             />
           </Fieldset>
+
           <Fieldset legend="Attributes" style={{ paddingTop: 0, height: heightFieldset, overflow: 'hidden' }}>
             <KeyValueEditor
               keyValueArray={attributes}

@@ -103,13 +103,59 @@ These additional fields are the following:
 | `value-expression` | An expression used to calculate the measure's value from a beacon. |
 | `beacon-requirements` | Requirements which have to be fulfilled by Beacons. Beacons which do not match all requirements will be ignored by this metric definition. |
 
+### Smoothed Average View
+:::note
+The Smoothed Average View is currently only available in the EUM server.
+:::
+
+In addition to the [Quantile View](../metrics/custom-metrics#quantile-views), which is already described in the inspectIT Ocelot Java agent configuration, 
+the EUM Server provides a Smoothed Average View.
+In contrast to the quantiles, it is possible to drop values of a certain time window. This can be useful to deliberately remove outliers before averaging.
+
+:::note
+Please read the section on [Quantile Views](../metrics/custom-metrics#quantile-views) to get an insight into the data collection. The Smoothed Average View is based on the same principle.
+:::
+
+The actual metric [configuration](../metrics/custom-metrics#configurations) are extended in the EUM server by the following properties:
+|Config Property|Default| Description
+|---|---|---|
+|`aggregation`|`LAST_VALUE`|Specifies how the measurement data is aggregated in this view. Possible values are `LAST_VALUE`, `COUNT`, `SUM`, `HISTOGRAM` `QUANTILES` and `SMOOTHED_AVERAGE`. Except for `QUANTILES` and `SMOOTHED_AVERAGE`, these correspond to the [OpenCensus Aggregations](https://opencensus.io/stats/view/#aggregations).
+|`drop-upper`|`0.0`| *Required if aggregation is `SMOOTHED_AVERAGE`.* Specifies the percentage of the highest values to be dropped before calculating the average.
+|`drop-lower`|`0.0`| *Required if aggregation is `SMOOTHED_AVERAGE`.* Specifies the percentage of the lowest values to be dropped before calculating the average.
+|`time-window`|`${inspectit.metrics.frequency}`| *Required if aggregation is `QUANTILES` or `SMOOTHED_AVERAGE`.* The time window over which the quantiles or the smoothed average are captured.
+|`max-buffered-points`|`16384`| *Required if aggregation is `QUANTILES` or `SMOOTHED_AVERAGE`.* A safety limit defining the maximum number of points to be buffered.
+
+As an example, the following snippet defines a metric with the name `load_time` and a view `loadtime/smoothed`:
+The configuration has the effect of ordering the values in a 1-minute time window by size and dropping the upper 10 percent before calculating the average.
+
+```YAML
+inspectit:
+  metrics:
+    definitions:
+      load_time:
+        measure-type: LONG
+        value-expression: "{t_done}"
+        beacon-requirements:
+          - field: rt.quit
+            requirement: NOT_EXISTS
+        unit: ms
+        views:
+          '[load_time/smoothed]':
+              aggregation: SMOOTHED_AVERAGE
+              time-window: 1m
+              drop-upper: 0.1
+              drop-lower: 0.0
+```
+
 ### Value Expressions
 
 The `value-expression` field can be used to specify a field which value is used for the specified metrics.
 In order to reference a field, the following pattern is used: `{FIELD_KEY}`.
 For example, a valid expression, used to extract the value of a field `t_load`, would be `{t_load}`.
 
-> Note that a beacon has to contain all fields referenced by the expression in order to be evaluated and recorded.
+:::note
+Note that a beacon has to contain all fields referenced by the expression in order to be evaluated and recorded.
+:::
 
 Value expressions also support operations for basic arithmetic operations. Thus, to calculate a difference of two beacon fields, the following expression can be used:
 ```YAML
@@ -142,7 +188,15 @@ Using the operations above, complex calculations can be done, for example:
 The `beacon-requirements` field can be used to specify requirements which have to be fulfilled by the beacons in order to be evaluated by a certain metric.
 If any requirement does not fit a beacon, the beacon is ignored by the metric.
 
-Beacon requirements consist of two attributes `field` and `requirement`. `field` specified the beacon's field which is validated using the requirement type specified in `NOT_EXISTS`.
+The following requirements are available:
+
+| Type | Note |
+| --- | --- |
+| `EXISTS` | The targeted field must exist. |
+| `NOT_EXISTS` | The targeted field must not exist. |
+| `HAS_INITIATOR` | The beacon must have one of the specified initiators. |
+
+Firstly, you can specify that the metric expects a field to exist or not exist in the beacon:
 
 ```YAML
   ...
@@ -152,13 +206,22 @@ Beacon requirements consist of two attributes `field` and `requirement`. `field`
         - field: rt.quit
           requirement: NOT_EXISTS
 ```
+In this example, `my-metric` will only be recorded if the field `rt.quit` does not exist in the beacon.
+Alternatively you can use the `requirement` `EXISTS` to make sure the metric is only recorded if the given field is present.
 
-The following requirement types are currently be supported:
+Additionally you can specify that you only want to record the metric if the received beacon has a specific initiator:
 
-| Type | Note |
-| --- | --- |
-| `EXISTS` | The targeted field must exist. |
-| `NOT_EXISTS` | The targeted field must not exist. |
+```YAML
+  ...
+    my-metric:
+      ...
+      beacon-requirements:
+        - initiators: [SPA_SOFT, SPA_HARD]
+          requirement: HAS_INITIATOR
+```
+
+The available initiators are `DOCUMENT` for the initial pageload beacons, `XHR` for Ajax-Beacons and `SPA_SOFT` and `SPA_HARD` for soft and hard SPA navigation beacons.
+The metric will only be recorded for beacons whose `http.initiator` field matches any of the elements provided in the `initiators` list.
 
 ### Additional Beacon Fields
 
@@ -309,6 +372,10 @@ inspectit-eum-server:
 
 ## Resource Timings
 
+:::important
+The resource timing processing is enabled by default and can be disabled by setting the property `inspectit-eum-server.resource-timing.enabled` to `false.`
+:::
+
 The EUM server can extract information about the resources timings which are reported as part of the Boomerang beacon field `restiming`.
 The resource timing information is decompressed from the beacon and exposed as part of the `resource_time` metric.
 This metric contains following tags:
@@ -319,7 +386,19 @@ This metric contains following tags:
 | `crossOrigin` | If a resource loading is considered as cross-origin request. See [more information about CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). |
 | `cached` | If a resource was cached and loaded from the browser disk or memory storage. Note that cached tag will only be set for same-origin requests, as some resource timing  metrics are restricted and will not be provided cross-origin unless the Timing-Allow-Origin header permits. |
 
-The resource timing processing is enabled by default and can be disabled by setting the property `inspectit-eum-server.resource-timing.enabled` to `false.`
+:::note
+Please note that all [global tags](#global-tags) will be attached as well. Attaching custom tags works in the same way as [defining metrics](#metrics-definition).
+:::
+
+For example, the following configuration causes that the resource timing processing is enabled and will be enriched by a tag called `U_HOST`.
+
+```YAML
+inspectit-eum-server:
+  resource-timing:
+    enabled: true
+    tags: 
+      U_HOST: true
+```
 
 ## Exporters
 
@@ -329,16 +408,143 @@ The EUM server comes with the same Prometheus and InfluxDB exporter as the Ocelo
 The exporter's configurations options are the same as for the [agent](metrics/metric-exporters.md).
 However, they are located under the `inspectit-eum-server.exporters.metrics` configuration path.
 
+#### Prometheus
 By default, the prometheus exporter is enabled and available on port `8888`.
-The InfluxDB exporter is disabled by default and can be enabled by setting the URL via `inspectit-eum-server.exporters.metrics.influx.url`.
+
+The following configuration snippet shows the default configuration of the prometheus-exporter:
+```YAML
+inspectit-eum-server:
+  exporters:
+    metrics:
+      prometheus:
+        # Determines whether the prometheus exporter is enabled.
+        enabled: true
+
+        # The host of the prometheus HTTP endpoint.
+        host: localhost
+
+        # The port of the prometheus HTTP endpoint.
+        port: 8888
+```
+
+#### InfluxDB
+The InfluxDB exporter is disabled by default and can be enabled by setting the URL
+via `inspectit-eum-server.exporters.metrics.influx.url`.
+
+The following configuration snippet shows the default configuration of the InfluxDB exporter:
+```YAML
+inspectit-eum-server:
+  exporters:
+    metrics:
+      influx:
+        # Determines whether the InfluxDB exporter is enabled.
+        enabled: true
+
+        # the export interval of the metrics.
+        export-interval: 15s
+
+        # The http url of influx.
+        # If this property is not set, the InfluxDB exporter will not be started.
+        # url: "http://localhost:8086"
+
+        # The database to write to.
+        # If this property is not set, the InfluxDB exporter will not be started.
+        database: "inspectit"
+
+        # The username to be used to connect to the InfluxDB.
+        # username:
+
+        # The password to be used to connect to the InfluxDB.
+        # password:
+
+        # The retention policy to write to.
+        # If this property is not set, the InfluxDB exporter will not be started.
+        retention-policy: "autogen"
+
+        # If true, the specified database will be created with the autogen retention policy.
+        create-database: true
+
+        # If disabled, the raw values of each counter will be written to the InfluxDB on each export.
+        # When enabled, only the change of the counter in comparison to the previous export will be written.
+        # This difference will only be written if the counter has changed (=the difference is non-zero).
+        # This can greatly reduce the total data written to InfluxDB and makes writing queries easier.
+        counters-as-differences: true
+
+        # The size of the buffer for failed batches.
+        # E.g. if the exportInterval is 15s and the buffer-size is 4, the export will keep up to one minute of data in memory.
+        buffer-size: 40
+```
 
 ### Tracing
 
+:::info
+In order to make tracing work, additional dependencies need to be [installed](https://inspectit.github.io/inspectit-ocelot/docs/enduser-monitoring/install-eum-agent#tracing)!
+:::
+
 The EUM server supports trace data forwarding to the Jaeger exporter.
 The exporter is using the [Jaeger Protobuf via gRPC API](https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable) in order to forward trace data.
-By default, the Jaeger exporter is disabled.
+By default, the Jaeger exporter is enabled, but it is not active since the grpc-property is not set.
+
+:::info
+The grpc property needs to be set without protocol (e.g. localhost:14250)!
+:::
+
+The following configuration snippet shows the default configuration of the jaeger-exporter:
+
+```YAML
+inspectit-eum-server:
+  exporters:
+    tracing:
+      jaeger:
+      # If jaeger exporter for the OT received spans is enabled.
+      enabled: true
+
+      # Location of the jaeger gRPC API.
+      # Either a valid NameResolver-compliant URI, or an authority string.
+      # If this property is not set, the jaeger-exporter will not be started.
+      # grpc: localhost:14250
+
+      # service name for all exported spans.
+      service-name: browser-js
+```
+
+### Beacons
+
+The EUM Server supports that received beacons can be exported or sent to other systems.
+Currently only export via HTTP is supported.
+In this case, the beacons are sent in JSON format.
+This allows the received beacons to be sent to an HTTP endpoint (e.g. Logstash).
+
+The following configuration snippet can be used in the EUM server for enabling beacon exportation via HTTP.
+
+```YAML
+inspectit-eum-server:
+  exporters:
+    beacons:
+      http:
+        # Whether beacons should be exported via HTTP
+        enabled: true
+        # The endpoint to which the beacons are to be sent
+        endpoint-url: https://localhost:8080
+        # The max. amount of threads exporting beacons (min. 1)
+        worker-threads: 2
+        # The maximum number of beacons to be exported using a single HTTP request (min. 1)
+        max-batch-size: 100
+        # The flush interval to export beacons in case the 'max-batch-size' has not been reached (min. 1 second)
+        flush-interval: 5s
+        # When specified, the request will be using this username for Basic authentication
+        username: user
+        # The password used for Basic authentication
+        password: 123
+```
+
+The EUM server uses Basic Authentication for the request if a username is specified. Otherwise no authentication is used.
 
 ## Self-Monitoring
+
+:::important
+Self-Monitoring is enabled by default and can be disabled by setting the property `inspectit-eum-server.self-monitoring.enabled` to `false.`
+:::
 
 For the purpose of self-monitoring, the EUM server offers a set of metrics that reflect its state.
 These metrics are exposed using its Prometheus endpoint which also is used for the EUM beacon data.
@@ -346,4 +552,7 @@ Currently, the following self monitoring metrics are available.
 
 | Metric name | Description |
 | --- | --- |
-| `beacons_received` | Counts the number of received beacons | 
+| `inspectit_eum_self_beacons_received_count` | Counts the number of received beacons | 
+| `inspectit_eum_self_beacons_export_count` | Counts the number of beacons exportations | 
+| `inspectit_eum_self_beacons_export_duration_sum` | The total duration needed for beacon exportations | 
+| `inspectit_eum_self_beacons_export_batch_sum` | The number of exported beacons per exportation | 

@@ -57,17 +57,17 @@ public class SpringTestBase {
         env.addMockAppender();
     }
 
-
     @BeforeEach
     public void clearTrackedLogs() {
         Mockito.reset(env.mockAppender);
+        when(env.mockAppender.getName()).thenReturn("MOCK");
     }
 
     static class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
         /**
-         * This "hack" of a nested class has to be used because there is no other way of passing the soures to customizePropertySources
-         * prior to the call of the superconstructor.
+         * This "hack" of a nested class has to be used because there is no other way of passing the sources to customizePropertySources
+         * prior to the call of the super-constructor.
          */
         List<PropertySource> testPropertySources;
 
@@ -76,7 +76,6 @@ public class SpringTestBase {
             MockPropertySource mockProperties;
 
             Appender<ILoggingEvent> mockAppender = Mockito.mock(Appender.class);
-
 
             public TestInspectitEnvironment(ConfigurableApplicationContext ctx) {
                 super(ctx, Optional.empty());
@@ -95,9 +94,11 @@ public class SpringTestBase {
 
             void addMockAppender() {
                 Logger root = (Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-                if (root.getAppender("MOCK") == null) {
-                    root.addAppender(mockAppender);
+                Appender<ILoggingEvent> appender = root.getAppender("MOCK");
+                if (appender != null) {
+                    root.detachAppender(appender);
                 }
+                root.addAppender(mockAppender);
             }
         }
 
@@ -112,7 +113,8 @@ public class SpringTestBase {
         public void initialize(ConfigurableApplicationContext ctx) {
             ConfigurableEnvironment defaultEnv = ctx.getEnvironment();
 
-            testPropertySources = defaultEnv.getPropertySources().stream()
+            testPropertySources = defaultEnv.getPropertySources()
+                    .stream()
                     .filter(ps -> ps.getName() != StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)
                     .filter(ps -> ps.getName() != StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)
                     .collect(Collectors.toList());
@@ -129,8 +131,7 @@ public class SpringTestBase {
      * @param level the level to compare against.
      */
     public void assertNoLogsOfLevelOrGreater(Level level) {
-        verify(env.mockAppender, times(0)).doAppend(argThat(
-                (le) -> le.getLevel().isGreaterOrEqual(level)));
+        verify(env.mockAppender, times(0)).doAppend(argThat((le) -> le.getLevel().isGreaterOrEqual(level)));
     }
 
     /**
@@ -139,9 +140,7 @@ public class SpringTestBase {
      * @param level the level to compare against.
      */
     public void assertLogsOfLevelOrGreater(Level level) {
-        verify(env.mockAppender, atLeastOnce()).doAppend(argThat(
-                (le) -> le.getLevel().isGreaterOrEqual(level)));
+        verify(env.mockAppender, atLeastOnce()).doAppend(argThat((le) -> le.getLevel().isGreaterOrEqual(level)));
     }
-
 
 }

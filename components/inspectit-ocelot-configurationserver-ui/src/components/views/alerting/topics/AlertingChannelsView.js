@@ -64,9 +64,9 @@ const AlertingChannelsView = ({ topics, updateDate, onRefresh }) => {
     <div className="this">
       <style jsx>{`
         .this {
-          height: 100%;
           display: flex;
           flex-grow: 1;
+          overflow: hidden;
         }
       `}</style>
       <AlertingChannelsTreeContainer

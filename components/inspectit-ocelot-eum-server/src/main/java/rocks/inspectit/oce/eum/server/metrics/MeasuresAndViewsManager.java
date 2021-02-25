@@ -8,10 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.metrics.percentiles.TimeWindowViewManager;
 import rocks.inspectit.oce.eum.server.utils.TagUtils;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +37,9 @@ public class MeasuresAndViewsManager {
 
     @Autowired
     private ViewManager viewManager;
+
+    @Autowired
+    private TimeWindowViewManager timeWindowViewManager;
 
     /**
      * Records the measure.
@@ -60,6 +65,9 @@ public class MeasuresAndViewsManager {
                         .record();
                 break;
         }
+
+        timeWindowViewManager.recordMeasurement(measureName, value.doubleValue(), Tags.getTagger()
+                .getCurrentTagContext());
     }
 
     /**
@@ -67,7 +75,8 @@ public class MeasuresAndViewsManager {
      */
     public void updateMetrics(String name, MetricDefinitionSettings metricDefinition) {
         if (!metrics.containsKey(name)) {
-            MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(name);
+            MetricDefinitionSettings populatedMetricDefinition = metricDefinition.getCopyWithDefaultsPopulated(name, Duration
+                    .ofSeconds(15)); // Default value of 15s will be overridden by configuration.
             Measure measure = createMeasure(name, populatedMetricDefinition);
             metrics.put(name, measure);
             updateViews(name, populatedMetricDefinition);
@@ -77,11 +86,9 @@ public class MeasuresAndViewsManager {
     private Measure createMeasure(String name, MetricDefinitionSettings metricDefinition) {
         switch (metricDefinition.getType()) {
             case LONG:
-                return Measure.MeasureLong.create(name,
-                        metricDefinition.getDescription(), metricDefinition.getUnit());
+                return Measure.MeasureLong.create(name, metricDefinition.getDescription(), metricDefinition.getUnit());
             case DOUBLE:
-                return Measure.MeasureDouble.create(name,
-                        metricDefinition.getDescription(), metricDefinition.getUnit());
+                return Measure.MeasureDouble.create(name, metricDefinition.getDescription(), metricDefinition.getUnit());
             default:
                 throw new RuntimeException("Used measurement type is not supported");
         }
@@ -98,26 +105,60 @@ public class MeasuresAndViewsManager {
             String viewName = viewDefinitionSettingsEntry.getKey();
             ViewDefinitionSettings viewDefinitionSettings = viewDefinitionSettingsEntry.getValue();
             if (viewManager.getAllExportedViews().stream().noneMatch(v -> v.getName().asString().equals(viewName))) {
-                Aggregation aggregation = createAggregation(viewDefinitionSettings);
-                List<TagKey> tagKeys = getTagsForView(viewDefinitionSettings).stream()
-                        .map(TagKey::create)
-                        .collect(Collectors.toList());
-                View view = View.create(View.Name.create(viewName), metricDefinition.getDescription(), metrics.get(metricName), aggregation, tagKeys);
-                viewManager.registerView(view);
+                Measure measure = metrics.get(metricName);
+
+                boolean isRegistered = timeWindowViewManager.isViewRegistered(metricName, viewName);
+                boolean isQuantileAggregation = viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES;
+                boolean isSmoothedAverageAggregation = viewDefinitionSettings.getAggregation() == ViewDefinitionSettings.Aggregation.SMOOTHED_AVERAGE;
+                if (isRegistered || isQuantileAggregation || isSmoothedAverageAggregation) {
+                    addTimeWindowView(measure, viewName, viewDefinitionSettings);
+                } else {
+                    registerNewView(measure, viewName, viewDefinitionSettings);
+                }
             }
         }
+    }
+
+    private void addTimeWindowView(Measure measure, String viewName, ViewDefinitionSettings def) {
+        List<TagKey> viewTags = getTagKeysForView(def);
+        Set<String> tagsAsStrings = viewTags.stream().map(TagKey::getName).collect(Collectors.toSet());
+        if (def.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES) {
+            boolean minEnabled = def.getQuantiles().contains(0.0);
+            boolean maxEnabled = def.getQuantiles().contains(1.0);
+            List<Double> percentilesFiltered = def.getQuantiles()
+                    .stream()
+                    .filter(p -> p > 0 && p < 1)
+                    .collect(Collectors.toList());
+            timeWindowViewManager.createOrUpdatePercentileView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), minEnabled, maxEnabled, percentilesFiltered, def
+                    .getTimeWindow()
+                    .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
+        } else {
+            timeWindowViewManager.createOrUpdateSmoothedAverageView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), def
+                    .getDropUpper(), def.getDropLower(), def.getTimeWindow()
+                    .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
+        }
+
+    }
+
+    private void registerNewView(Measure measure, String viewName, ViewDefinitionSettings def) {
+        Aggregation aggregation = createAggregation(def);
+        List<TagKey> tagKeys = getTagKeysForView(def);
+        View view = View.create(View.Name.create(viewName), def.getDescription(), measure, aggregation, tagKeys);
+        viewManager.registerView(view);
     }
 
     /**
      * Returns all tags, which are exposed for the given metricDefinition
      */
-    private Set<String> getTagsForView(ViewDefinitionSettings viewDefinitionSettings) {
+    private List<TagKey> getTagKeysForView(ViewDefinitionSettings viewDefinitionSettings) {
         Set<String> tags = new HashSet<>(configuration.getTags().getDefineAsGlobal());
-        tags.addAll(viewDefinitionSettings.getTags().entrySet().stream()
+        tags.addAll(viewDefinitionSettings.getTags()
+                .entrySet()
+                .stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList()));
-        return tags;
+        return tags.stream().map(TagKey::create).collect(Collectors.toList());
     }
 
     /**
@@ -127,7 +168,8 @@ public class MeasuresAndViewsManager {
         TagContextBuilder tagContextBuilder = Tags.getTagger().currentBuilder();
 
         for (Map.Entry<String, String> extraTag : configuration.getTags().getExtra().entrySet()) {
-            tagContextBuilder.putLocal(TagKey.create(extraTag.getKey()), TagUtils.createTagValue(extraTag.getValue()));
+            tagContextBuilder.putLocal(TagKey.create(extraTag.getKey()), TagUtils.createTagValue(extraTag.getKey(), extraTag
+                    .getValue()));
         }
 
         return tagContextBuilder;
@@ -144,7 +186,8 @@ public class MeasuresAndViewsManager {
         TagContextBuilder tagContextBuilder = getTagContext();
 
         for (Map.Entry<String, String> customTag : customTags.entrySet()) {
-            tagContextBuilder.putLocal(TagKey.create(customTag.getKey()), TagUtils.createTagValue(customTag.getValue()));
+            tagContextBuilder.putLocal(TagKey.create(customTag.getKey()), TagUtils.createTagValue(customTag.getKey(), customTag
+                    .getValue()));
         }
 
         return tagContextBuilder;

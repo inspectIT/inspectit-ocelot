@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
@@ -7,8 +6,6 @@ import dateformat from 'dateformat';
 import TimeAgo from 'react-timeago';
 import { map } from 'lodash';
 import classnames from 'classnames';
-
-import ConfigurationDownload from '../mappings/ConfigurationDownload';
 import { linkPrefix } from '../../../lib/configuration';
 
 const timeFormatter = (time, unit, suffix) => {
@@ -39,7 +36,6 @@ class AgentMappingCell extends React.Component {
       data: { mappingName, attributes },
     } = this.props;
     const { showAttributes } = this.state;
-
     let name;
     let classname;
     if (mappingName) {
@@ -98,13 +94,12 @@ class AgentMappingCell extends React.Component {
  * The table listing all agent statuses
  */
 class StatusTable extends React.Component {
-  configDownload = React.createRef();
-
-  downloadConfiguration = (attributes) => {
-    this.configDownload.download(attributes);
+  state = {
+    configurationValue: '',
   };
 
   nameTemplate = (rowData) => {
+    const { onShowConfiguration } = this.props;
     const {
       metaInformation,
       attributes,
@@ -113,21 +108,21 @@ class StatusTable extends React.Component {
 
     let name = '-';
     let agentIdElement;
+    let agentId = null;
     if (metaInformation) {
       if (service) {
         name = service;
       }
-      const agentId = metaInformation.agentId;
+      agentId = metaInformation.agentId;
       agentIdElement = <span style={{ color: 'gray' }}>({agentId})</span>;
     }
-
     return (
       <div className="this">
         <style jsx>{`
           .this {
             position: relative;
           }
-          .this :global(.download-button) {
+          .this :global(.config-info-button) {
             width: 1.2rem;
             height: 1.2rem;
             position: absolute;
@@ -139,10 +134,11 @@ class StatusTable extends React.Component {
         `}</style>
         {name} {agentIdElement}
         <Button
-          className="download-button"
-          icon="pi pi-download"
-          onClick={() => this.configDownload.download(attributes)}
-          tooltip="Click here to download the configuration file for this agent"
+          className="config-info-button"
+          icon="pi pi-cog"
+          onClick={() => onShowConfiguration(agentId, attributes)}
+          tooltip="Show Configuration"
+          tooltipOptions={{ showDelay: 500 }}
         />
       </div>
     );
@@ -254,9 +250,21 @@ class StatusTable extends React.Component {
     }
   };
 
+  getMappingFilter = ({ mappingName, attributes }) => {
+    const filterArray = map(attributes, (value, key) => key + ': ' + value);
+    filterArray.push(mappingName);
+    return filterArray;
+  };
+
+  showConfigurationDialog = (attribute) => {
+    this.setState({
+      attributes: attribute,
+    });
+    this.props.setAgentConfigurationShown(true);
+  };
+
   render() {
     const { data: agents } = this.props;
-
     const agentValues = map(agents, (agent) => {
       return {
         ...agent,
@@ -310,12 +318,10 @@ class StatusTable extends React.Component {
             sortable
             style={{ width: '175px' }}
           />
-          <Column header="Agent Mapping" field="mappingFilter" body={this.agentMappingTemplate} sortable />
           <Column header="Source Branch" field="sourceBranch" body={this.sourceBranchTemplate} style={{ width: '150px' }} sortable />
+          <Column header="Agent Mapping" field="mappingFilter" body={this.agentMappingTemplate} sortable />
           <Column header="Last Fetch" field="lastConfigFetch" body={this.lastFetchTemplate} sortable style={{ width: '200px' }} />
         </DataTable>
-
-        <ConfigurationDownload onRef={(ref) => (this.configDownload = ref)} />
       </div>
     );
   }

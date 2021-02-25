@@ -36,6 +36,23 @@ const movePathIfRequired = (path, moveHistory) => {
 };
 
 const configurationReducer = createReducer(initialState)({
+  [types.FETCH_VERSIONS_STARTED]: (state) => {
+    return {
+      ...incrementPendingRequests(state),
+    };
+  },
+  [types.FETCH_VERSIONS_FAILURE]: (state) => {
+    return {
+      ...decrementPendingRequests(state),
+    };
+  },
+  [types.FETCH_VERSIONS_SUCCESS]: (state, action) => {
+    const { versions } = action.payload;
+    return {
+      ...decrementPendingRequests(state),
+      versions,
+    };
+  },
   [types.FETCH_FILES_STARTED]: (state) => {
     return {
       ...incrementPendingRequests(state),
@@ -118,8 +135,9 @@ const configurationReducer = createReducer(initialState)({
   },
   [types.MOVE_FAILURE]: decrementPendingRequests,
   [types.SELECTED_FILE_CONTENTS_CHANGED]: (state, action) => {
-    const { selection } = state;
-    if (selection) {
+    const { selection, selectedVersion, versions } = state;
+
+    if (selection && (selectedVersion === null || selectedVersion === versions[0].id)) {
       const { selectedFileContent, unsavedFileContents } = state;
       const { content } = action.payload;
       const newUnsavedFileContents = { ...unsavedFileContents };
@@ -129,7 +147,6 @@ const configurationReducer = createReducer(initialState)({
       } else {
         newUnsavedFileContents[selection] = content;
       }
-
       return {
         ...state,
         unsavedFileContents: newUnsavedFileContents,
@@ -137,6 +154,13 @@ const configurationReducer = createReducer(initialState)({
     } else {
       return state;
     }
+  },
+  [types.SELECT_VERSION]: (state, action) => {
+    const { version } = action.payload;
+    return {
+      ...state,
+      selectedVersion: version,
+    };
   },
   [types.FETCH_DEFAULT_CONFIG_STARTED]: incrementPendingRequests,
   [types.FETCH_DEFAULT_CONFIG_SUCCESS]: (state, action) => {
@@ -165,10 +189,18 @@ const configurationReducer = createReducer(initialState)({
     };
   },
   [types.FETCH_SCHEMA_FAILURE]: decrementPendingRequests,
+
   [types.TOGGLE_VISUAL_CONFIGURATION_VIEW]: (state) => {
     return {
       ...state,
       showVisualConfigurationView: !state.showVisualConfigurationView,
+    };
+  },
+
+  [types.TOGGLE_HISTORY_VIEW]: (state) => {
+    return {
+      ...state,
+      showHistoryView: !state.showHistoryView,
     };
   },
 });

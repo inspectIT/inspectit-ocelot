@@ -1,0 +1,22 @@
+
+inspectit:
+  tracing:
+    auto-tracing:
+      frequency: 10ms
+  instrumentation:
+
+    scopes:
+      AutoTracingTest-instrumentMe:
+        type:
+          name: AutoTracingTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: instrumentMe
+
+    rules:
+      AutoTracingTest-instrumentMe:
+        scopes:
+          AutoTracingTest-instrumentMe: true
+        tracing:
+          start-span: true
+          auto-tracing: true

@@ -4,6 +4,11 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.grpc.Context;
 import io.opencensus.tags.Tags;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.Value;
+import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.bootstrap.context.ContextTuple;
 import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.core.config.spring.BootstrapInitializerConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
@@ -32,7 +37,13 @@ public class ContextManager implements IContextManager {
     /**
      * Cache for storing the context objects.
      */
-    private final Cache<Thread, Context> storedContexts = CacheBuilder.newBuilder().weakKeys().build();
+    private final Cache<Object, InvalidationContext> contextCache = CacheBuilder.newBuilder().weakKeys().build();
+
+    /**
+     * Flag for marking if a context correlation is in progress. See {@link rocks.inspectit.ocelot.core.instrumentation.special.ExecutorContextPropagationSensor}
+     * for more details.
+     */
+    private final ThreadLocal<Boolean> correlationFlag = ThreadLocal.withInitial(() -> false);
 
     public ContextManager(CommonTagsManager commonTagsManager, InstrumentationConfigurationResolver configProvider) {
         this.commonTagsManager = commonTagsManager;
@@ -50,22 +61,108 @@ public class ContextManager implements IContextManager {
     }
 
     @Override
-    public void storeContextForThread(Thread thread) {
-        storedContexts.put(thread, Context.current());
-    }
-
-    @Override
-    public void attachContextToThread(Thread thread) {
-        Context context = storedContexts.getIfPresent(thread);
-        if (context != null) {
-            storedContexts.invalidate(thread);
-            context.attach();
-        }
-    }
-
-    @Override
     public InspectitContextImpl enterNewContext() {
         return InspectitContextImpl.createFromCurrent(commonTagsManager.getCommonTagValueMap(), configProvider.getCurrentConfig().getPropagationMetaData(), IS_OPEN_CENSUS_ON_BOOTSTRAP);
     }
 
+    @Override
+    public void storeContext(Object target, boolean invalidateAfterRestoring) {
+        InvalidationContext invalidationContext = new InvalidationContext(invalidateAfterRestoring, Context.current());
+        contextCache.put(target, invalidationContext);
+    }
+
+    @Override
+    public ContextTuple attachContext(Object target) {
+        InvalidationContext invalidationContext = contextCache.getIfPresent(target);
+        if (invalidationContext != null) {
+            if (invalidationContext.invalidate) {
+                contextCache.invalidate(target);
+            }
+            // restore/attach context to current runtime/thread
+            Context previous = invalidationContext.context.attach();
+
+            // once the context is attached, we inject the trace id into the MDCs for log-trace correlation
+            AutoCloseable undoTraceInjection = Instances.logTraceCorrelator.injectTraceIdIntoMdc();
+
+            // data we need once the method exits in order to undo the previous changes
+            return new ContextTupleImpl(previous, invalidationContext.context, undoTraceInjection);
+        }
+        return null;
+    }
+
+    @Override
+    public void detachContext(ContextTuple contextTuple) {
+        if (contextTuple != null) {
+            ContextTupleImpl tuple = (ContextTupleImpl) contextTuple;
+
+            // restore previous MDC content
+            try {
+                tuple.undoTraceInjection.close();
+            } catch (Exception ignored) {
+            }
+
+            // restore previous context
+            tuple.current.detach(tuple.previous);
+        }
+    }
+
+    @Override
+    public boolean enterCorrelation() {
+        if (correlationFlag.get()) {
+            return false;
+        } else {
+            correlationFlag.set(true);
+            return true;
+        }
+    }
+
+    @Override
+    public boolean insideCorrelation() {
+        return correlationFlag.get();
+    }
+
+    @Override
+    public void exitCorrelation() {
+        correlationFlag.set(false);
+    }
+
+    /**
+     * Container class for storing contexts in the {@link #contextCache}.
+     */
+    @AllArgsConstructor
+    private class InvalidationContext {
+
+        /**
+         * Whether the context should be removed from the context cache after it has been restored.
+         */
+        private final boolean invalidate;
+
+        @NonNull
+        private final Context context;
+    }
+
+    /**
+     * {@link ContextTuple} implementation used by {@link #detachContext(ContextTuple)} for detaching a context.
+     */
+    @AllArgsConstructor
+    private class ContextTupleImpl implements ContextTuple {
+
+        /**
+         * The previous context.
+         */
+        @NonNull
+        private final Context previous;
+
+        /**
+         * The context which has been attached.
+         */
+        @NonNull
+        private final Context current;
+
+        /**
+         * {@link AutoCloseable} for undoing the trace id injection into the logging MDCs.
+         */
+        @NonNull
+        private final AutoCloseable undoTraceInjection;
+    }
 }

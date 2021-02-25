@@ -7,6 +7,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.beacon.processor.CompositeBeaconProcessor;
+import rocks.inspectit.oce.eum.server.exporters.beacon.BeaconHttpExporter;
 import rocks.inspectit.oce.eum.server.metrics.BeaconMetricManager;
 import rocks.inspectit.oce.eum.server.metrics.SelfMonitoringMetricManager;
 
@@ -25,6 +26,9 @@ public class BeaconController {
 
     @Autowired
     private SelfMonitoringMetricManager selfMonitoringService;
+
+    @Autowired(required = false)
+    private BeaconHttpExporter beaconHttpExporter;
 
     @ExceptionHandler({Exception.class})
     public void handleException(Exception exception) {
@@ -48,10 +52,18 @@ public class BeaconController {
      * Processes the incoming beacon data.
      *
      * @param beaconData the received EUM data
+     *
      * @return the response used as result for the request
      */
     private ResponseEntity<Object> processBeacon(MultiValueMap<String, String> beaconData) {
         Beacon beacon = beaconProcessor.process(Beacon.of(beaconData.toSingleValueMap()));
+
+        // export beacon
+        if (beaconHttpExporter != null) {
+            beaconHttpExporter.export(beacon);
+        }
+
+        // record metrics based on beacon data
         boolean successful = beaconMetricManager.processBeacon(beacon);
 
         selfMonitoringService.record("beacons_received", 1, Collections.singletonMap("is_error", String.valueOf(!successful)));

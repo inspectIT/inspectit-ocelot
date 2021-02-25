@@ -16,9 +16,9 @@ const AlertingRulesView = ({ updateDate, topics, rules, templates, onRefresh }) 
     <>
       <style jsx>{`
         .this {
-          height: 100%;
           display: flex;
           flex-grow: 1;
+          overflow: hidden;
         }
       `}</style>
 

@@ -34,9 +34,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class HttpServiceOutMetricTest {
 
     public static final int PORT = 9999;
+
     public static final String TEST_PATH = "/test";
+
     public static final String TEST_URL = "http://localhost:" + PORT + TEST_PATH;
+
     public static final String SERVICE_NAME = "systemtest"; //configured in agent-overwrites.yml
+
     private WireMockServer wireMockServer;
 
     public static String targetName;
@@ -52,7 +56,7 @@ public class HttpServiceOutMetricTest {
                         .withBody("body")
                         .withStatus(200)));
 
-        TestUtils.waitForClassInstrumentation(HttpServlet.class, 10, TimeUnit.SECONDS);
+        TestUtils.waitForClassInstrumentation(HttpServlet.class, true, 30, TimeUnit.SECONDS);
     }
 
     @AfterEach
@@ -72,7 +76,7 @@ public class HttpServiceOutMetricTest {
 
             TestUtils.waitForClassInstrumentations(Arrays.asList(
                     CloseableHttpClient.class,
-                    Class.forName("org.apache.http.impl.client.InternalHttpClient")), 10, TimeUnit.SECONDS);
+                    Class.forName("org.apache.http.impl.client.InternalHttpClient")), true, 30, TimeUnit.SECONDS);
 
             InternalInspectitContext serviceOverride = Instances.contextManager.enterNewContext();
             serviceOverride.setData("service", "apache_sg_test");
@@ -89,13 +93,13 @@ public class HttpServiceOutMetricTest {
             tags.put("target_service", SERVICE_NAME);
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
         }
     }
-
 
     @Nested
     class HttpUrlConnection {
@@ -104,7 +108,7 @@ public class HttpServiceOutMetricTest {
         void testInternalCallRecording() throws Exception {
             targetName = "urlconn_test";
 
-            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), 10, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), true, 30, TimeUnit.SECONDS);
 
             InternalInspectitContext serviceOverride = Instances.contextManager.enterNewContext();
             serviceOverride.setData("service", "httpurlconn_sg_test");
@@ -121,12 +125,12 @@ public class HttpServiceOutMetricTest {
             tags.put("target_service", SERVICE_NAME);
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags)).getSum();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags))
+                    .getSum();
 
             assertThat(cnt).isEqualTo(1);
             assertThat(respSum).isGreaterThan(0);
         }
     }
-
 
 }

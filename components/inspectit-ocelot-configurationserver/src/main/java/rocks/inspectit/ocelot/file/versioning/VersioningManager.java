@@ -30,6 +30,7 @@ import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
+import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -37,6 +38,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * This manager handles the interaction with the versioned (Git) representation of the working directory.
@@ -185,7 +187,7 @@ public class VersioningManager {
         stageFiles();
 
         if (commitFiles(author, message, true)) {
-            eventPublisher.publishEvent(new WorkspaceChangedEvent(this));
+            eventPublisher.publishEvent(new WorkspaceChangedEvent(this, getWorkspaceRevision()));
         }
     }
 
@@ -691,7 +693,7 @@ public class VersioningManager {
             // checkout workspace branch
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
 
-            eventPublisher.publishEvent(new ConfigurationPromotionEvent(this));
+            eventPublisher.publishEvent(new ConfigurationPromotionEvent(this, getLiveRevision()));
         }
     }
 
@@ -725,5 +727,18 @@ public class VersioningManager {
         } else {
             return AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/" + file;
         }
+    }
+
+    /**
+     * @return returning a list of {@link WorkspaceVersion} existing in the workspace branch.
+     */
+    public List<WorkspaceVersion> listWorkspaceVersions() throws IOException, GitAPIException {
+        ObjectId branch = git.getRepository().resolve("refs/heads/" + Branch.WORKSPACE.getBranchName());
+
+        Iterable<RevCommit> workspaceCommits = git.log().add(branch).call();
+
+        return StreamSupport.stream(workspaceCommits.spliterator(), false)
+                .map(WorkspaceVersion::of)
+                .collect(Collectors.toList());
     }
 }

@@ -36,10 +36,4 @@ public class ContextManagerPerfTest {
         blackhole.consume(myContextManager.wrap(() -> "test"));
     }
 
-    @Benchmark
-    public void storeAndAttachContext() {
-        myContextManager.storeContextForThread(thread);
-        myContextManager.attachContextToThread(thread);
-    }
-
 }
