@@ -67,7 +67,7 @@ The agent works with different JRE distributions including Oracle, openJDK, Azul
 <h2><a class="anchor" aria-hidden="true" id="adding-the-agent-to-a-jvm"></a><a href="#adding-the-agent-to-a-jvm" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding the Agent to a JVM</h2>
 <p>The best option for using the inspectIT Ocelot is to include it to the start of the JVM by using the <code>-javaagent</code> command-line option.
 This way the agent will be initialized before your application starts.</p>
-<pre><code class="hljs css language-bash">$ java -javaagent:<span class="hljs-string">"/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar"</span> -jar my-java-program.jar
+<pre><code class="hljs css language-bash">$ java -javaagent:<span class="hljs-string">"/path/to/inspectit-ocelot-agent-1.8.0.jar"</span> -jar my-java-program.jar
 </code></pre>
 <blockquote>
 <p>Some application servers have dedicated scripts that are used to launch the actual JVM that runs the application. In such cases, you must alter the start-up scripts in order to instrument the correct JVM.</p>
@@ -76,10 +76,10 @@ This way the agent will be initialized before your application starts.</p>
 <p>inspectIT Ocelot also supports attaching the agent to an already running JVM.
 In such a scenario the collection of metrics and traces will start from the point of the attachment.</p>
 <p>The attaching can easily be done using the agent itself and executing the following command:</p>
-<pre><code class="hljs css language-bash">$ java -jar inspectit-ocelot-agent-{inspectit-ocelot-version}.jar &lt;PID&gt; [&lt;AGENT_ARGUMENTS&gt;]
+<pre><code class="hljs css language-bash">$ java -jar inspectit-ocelot-agent-1.8.0.jar &lt;PID&gt; [&lt;AGENT_ARGUMENTS&gt;]
 </code></pre>
 <p>In the following example, we are attaching the agent to the JVM process <code>1337</code> and passing some <a href="/inspectit-ocelot/docs/next/configuration/configuration-sources#java-agent-arguments">additional arguments</a> to it:</p>
-<pre><code class="hljs css language-bash">$ java -jar inspectit-ocelot-agent-{inspectit-ocelot-version}.jar 1337 <span class="hljs-string">'{inspectit:{service-name:"my-agent"}}'</span>
+<pre><code class="hljs css language-bash">$ java -jar inspectit-ocelot-agent-1.8.0.jar 1337 <span class="hljs-string">'{inspectit:{service-name:"my-agent"}}'</span>
 </code></pre>
 <blockquote>
 <p>The agent is internally using the utility <a href="https://github.com/apangin/jattach">jattach</a> for attaching itself to a running JVM.</p>
@@ -89,7 +89,7 @@ In such a scenario the collection of metrics and traces will start from the poin
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="attaching-using-jattach"></a><a href="#attaching-using-jattach" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Attaching Using jattach</h3>
 <p>Another way of attaching the agent to a running JVM is to use the utility <a href="https://github.com/apangin/jattach">jattach</a>:</p>
-<pre><code class="hljs css language-bash">$ ./jattach.sh &lt;PID&gt; load instrument <span class="hljs-literal">false</span> /path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar=<span class="hljs-string">'{"inspectit.service-name" : "MyService"}'</span>
+<pre><code class="hljs css language-bash">$ ./jattach.sh &lt;PID&gt; load instrument <span class="hljs-literal">false</span> /path/to/inspectit-ocelot-agent-1.8.0.jar=<span class="hljs-string">'{"inspectit.service-name" : "MyService"}'</span>
 </code></pre>
 <p>In this example we're also passing <a href="/inspectit-ocelot/docs/next/configuration/configuration-sources#java-agent-arguments">JSON arguments</a> to the agent in order to configure its service name.</p>
 <blockquote>
