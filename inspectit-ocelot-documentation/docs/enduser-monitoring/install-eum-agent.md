@@ -35,7 +35,7 @@ Note that this approach is not recommended for production use as the scripts are
 Boomerang recommends that you use a [minified JS containing all your plugins](https://developer.akamai.com/tools/boomerang/docs/tutorial-building.html#asynchronously).
 In addition to that you should use asynchronous injection as described in the [Boomerang documentation](https://developer.akamai.com/tools/boomerang/docs/index.html).
 
-#Tracing
+# Tracing
 Boomerang itself can only collect metrics. You can write your own scripts to collect traces using [OpenTracing](https://opentracing.io/) or
 use the [OpenTelemetry Plugin for Boomerang](https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin).
 The [OpenTelemetry Plugin for Boomerang](https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin) collects traces
