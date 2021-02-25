@@ -334,10 +334,9 @@ class TreeTableEditor extends React.Component {
           />
         );
       case schemaType.ENUM:
-        if (!this.state.enumOptions.length || this.state.oldNode.key != node.key) {
+        if (this.state.oldNode.key != node.key) {
           this.fetchDropdownOptions(node.key, type);
-          this.setState({ oldNode: node });
-          this.setState({ enumOptions: [] });
+          this.setState({ oldNode: node, enumOptions: [] });
         }
         return (
           <EnumEditor
