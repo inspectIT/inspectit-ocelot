@@ -6,27 +6,44 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'rocks.inspectit.oce'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
-task downloadBoomerangZipFile() {
-    ext.dest = new File(buildDir, "boomerang-source-${boomerangVersion}.zip")
+version = "$buildVersion"
+
+task downloadBoomerangjs() {
+    logger.info('Downloading Boomerangjs version {}.', boomerangVersion)
+    ext.dest = new File(buildDir, "boomerang-source-${boomerangVersion}.tgz")
     outputs.files(ext.dest)
     doLast {
         def f = ext.dest
-        new URL("https://github.com/akamai/boomerang/archive/${boomerangVersion}.zip")
+        new URL("https://registry.npmjs.org/boomerangjs/-/boomerangjs-${boomerangVersion}.tgz")
                 .withInputStream { i -> f.withOutputStream { it << i } }
     }
 }
 
-task downloadAndUnzipBoomerang(dependsOn: downloadBoomerangZipFile, type: Copy) {
-    from zipTree(downloadBoomerangZipFile.dest)
-    into project.buildDir
+task deleteBoomerangjs(type: Delete) {
+    delete new File(project.buildDir, "boomerangjs-${boomerangVersion}")
+}
+
+task downloadAndExtractBoomerang(dependsOn: [deleteBoomerangjs, downloadBoomerangjs], type: Copy) {
+    from tarTree(downloadBoomerangjs.dest)
+    into new File(project.buildDir, "boomerangjs-${boomerangVersion}")
     filter { line -> line.replaceAll('%boomerang_version%', "${boomerangVersion}") }
 }
 
+task generateVersionFile {
+    ext.versionFile = new File(project.buildDir, "eum-version.info")
+    doLast {
+        def currentDate = new Date().toString()
+        ext.versionFile.withWriter('UTF-8') { writer ->
+            writer << "$version\n$currentDate\n$boomerangVersion"
+        }
+    }
+}
+
 bootJar {
-    dependsOn downloadAndUnzipBoomerang
+    dependsOn generateVersionFile
+    dependsOn downloadAndExtractBoomerang
 
     archivesBaseName = 'inspectit-ocelot-eum-server'
     version = "${buildVersion}"
@@ -35,7 +52,11 @@ bootJar {
         attributes 'Start-Class': 'rocks.inspectit.oce.eum.server.EUMServerApplication'
     }
 
-    from("$buildDir/boomerang-${boomerangVersion}") {
+    // include version file
+    from generateVersionFile.versionFile
+
+    // include boomerang
+    from("$buildDir/boomerangjs-${boomerangVersion}/package") {
         include "plugins/*.js"
         include "boomerang.js"
         into "static/boomerang"
