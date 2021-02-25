@@ -18,13 +18,16 @@ import java.util.function.Supplier;
  * This class does not place itself in {@link rocks.inspectit.ocelot.bootstrap.Instances} by itself,
  * this is done by the {@link LogTraceCorrelationActivator}.
  */
-@AllArgsConstructor
 @Slf4j
+@AllArgsConstructor
 public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
 
     public static final String BEAN_NAME = "logTraceCorrelator";
 
-    private MDCAccess mdc;
+    /**
+     * Accessor for the MDCs.
+     */
+    private MdcAccessManager mdcAccess;
 
     @Setter
     private String traceIdKey;
@@ -40,27 +43,33 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
         if (oldId.equals(newId) || !newContext.isValid() || !newContext.getTraceOptions().isSampled()) {
             return spanScope;
         } else {
-            AutoCloseable undoMdcChanges = applyCorrelationForTraceContext(newContext);
+            InjectionScope injectionScope = injectTraceContextInMdc(newContext);
             return () -> {
-                undoMdcChanges.close();
+                injectionScope.close();
                 spanScope.close();
             };
         }
     }
 
-    private MDCAccess.Undo applyCorrelationForTraceContext(SpanContext context) {
+    /**
+     * Injects the given span context into all configured MDCs.
+     *
+     * @param context the context to inject
+     * @return an {@link InjectionScope} to revert the injection and restore the initial state of the MDC
+     */
+    private InjectionScope injectTraceContextInMdc(SpanContext context) {
         if (context.getTraceId().isValid() && context.getTraceOptions().isSampled()) {
-            log.trace("Adding trace correlation information to MDC");
-            return mdc.put(traceIdKey, context.getTraceId().toLowerBase16());
+            log.trace("Adding trace correlation information to MDC.");
+            return mdcAccess.injectValue(traceIdKey, context.getTraceId().toLowerBase16());
         } else {
-            return mdc.put(traceIdKey, null);
+            return mdcAccess.injectValue(traceIdKey, null);
         }
     }
 
     @Override
     public Runnable wrap(Runnable runnable) {
         return () -> {
-            try (MDCAccess.Undo scope = injectTraceIdIntoMdc()) {
+            try (InjectionScope scope = injectTraceIdIntoMdc()) {
                 runnable.run();
             }
         };
@@ -69,14 +78,16 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
     @Override
     public <T> Callable<T> wrap(Callable<T> callable) {
         return () -> {
-            try (MDCAccess.Undo scope = injectTraceIdIntoMdc()) {
+            try (InjectionScope scope = injectTraceIdIntoMdc()) {
                 return callable.call();
             }
         };
     }
 
     @Override
-    public MDCAccess.Undo injectTraceIdIntoMdc() {
-        return applyCorrelationForTraceContext(tracer.getCurrentSpan().getContext());
+    public InjectionScope injectTraceIdIntoMdc() {
+        return injectTraceContextInMdc(tracer.getCurrentSpan().getContext());
     }
 }
+
+

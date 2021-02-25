@@ -27,11 +27,12 @@ public class LogTraceCorrelationActivator {
 
     @PostConstruct
     @EventListener(InspectitConfigChangedEvent.class)
-    void update() {
-        InspectitConfig config = environment.getCurrentConfig();
-        TraceIdMDCInjectionSettings logCorrelation = config.getTracing().getLogCorrelation().getTraceIdMdcInjection();
-        if (logCorrelation.isEnabled()) {
-            correlatorImpl.setTraceIdKey(logCorrelation.getKey());
+    public void update() {
+        InspectitConfig configuration = environment.getCurrentConfig();
+        TraceIdMDCInjectionSettings correlationSettings = configuration.getTracing().getLogCorrelation().getTraceIdMdcInjection();
+
+        if (correlationSettings.isEnabled()) {
+            correlatorImpl.setTraceIdKey(correlationSettings.getKey());
             Instances.logTraceCorrelator = correlatorImpl;
         } else {
             Instances.logTraceCorrelator = NoopLogTraceCorrelator.INSTANCE;

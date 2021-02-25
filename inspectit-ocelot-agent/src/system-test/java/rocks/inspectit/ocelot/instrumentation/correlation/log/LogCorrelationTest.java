@@ -9,10 +9,13 @@ import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestCallable
 import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestRunnable;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.Deque;
-import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,8 +27,54 @@ public class LogCorrelationTest {
 
     private ScheduledExecutorService scheduledExecutorService;
 
+    private static Function<String, String> getTestMdc;
+
+    /**
+     * Simulates the case where a class loader is isolated (e.g. in JBoss module system) and does not have access
+     * to the ocelot bootstrap classes.
+     */
+    static class IsolatedMdcClassLoader extends ClassLoader {
+
+        @Override
+        public Class<?> loadClass(String name) throws ClassNotFoundException {
+            if (name.startsWith("rocks.inspectit.ocelot.bootstrap")) {
+                throw new ClassNotFoundException();
+            }
+
+            // only this class should be loaded, otherwise we delegate the loading to the parent
+            if (!name.startsWith("org.slf4j.MDC")) {
+                return super.loadClass(name);
+            }
+
+            System.out.println("Load " + name);
+
+            try {
+                String replace = name.replace(".", "/");
+                InputStream in = ClassLoader.getSystemResourceAsStream(replace + ".class");
+                byte[] a = new byte[10000];
+                int len = in.read(a);
+                in.close();
+                return defineClass(name, a, 0, len);
+            } catch (IOException e) {
+                throw new ClassNotFoundException();
+            }
+        }
+    }
+
     @BeforeAll
-    private static void beforeAll() throws InterruptedException {
+    private static void beforeAll() throws Exception {
+        Class<?> testMdcClass = new IsolatedMdcClassLoader().loadClass("org.slf4j.MDC");
+        final Method getMethod = testMdcClass.getMethod("get", String.class);
+
+        getTestMdc = (key) -> {
+            try {
+                return (String) getMethod.invoke(null, key);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
+
+
         //load the MDC classes
         MDC.get("test");
         org.apache.log4j.MDC.get("test");
@@ -72,10 +121,12 @@ public class LogCorrelationTest {
             assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
             assertThat(org.apache.logging.log4j.ThreadContext.get(MDC_KEY)).isNull();
             assertThat(org.apache.log4j.MDC.get(MDC_KEY)).isNull();
+            assertThat(getTestMdc.apply(MDC_KEY)).isNull();
         } else {
             assertThat(org.slf4j.MDC.get(MDC_KEY)).isEqualTo(expected);
             assertThat(org.apache.logging.log4j.ThreadContext.get(MDC_KEY)).isEqualTo(expected);
             assertThat(org.apache.log4j.MDC.get(MDC_KEY)).isEqualTo(expected);
+            assertThat(getTestMdc.apply(MDC_KEY)).isEqualTo(expected);
         }
     }
 
@@ -100,22 +151,22 @@ public class LogCorrelationTest {
 
         @Test
         void verifyCorrelation() {
-            assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
+            assertMDCContainTraceId(null);
             traced(() -> {
                 String currentTraceId = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
                 assertMDCContainTraceId(currentTraceId);
             }, 1.0);
-            assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
+            assertMDCContainTraceId(null);
         }
 
         @Test
         void verifyNoCorrelationForUnsampled() {
-            assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
+            assertMDCContainTraceId(null);
             traced(() -> {
                 assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
                 assertMDCContainTraceId(null);
             }, 0.0);
-            assertThat(org.slf4j.MDC.get(MDC_KEY)).isNull();
+            assertMDCContainTraceId(null);
         }
     }
 

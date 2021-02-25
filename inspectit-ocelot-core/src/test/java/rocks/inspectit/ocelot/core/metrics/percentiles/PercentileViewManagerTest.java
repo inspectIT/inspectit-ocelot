@@ -21,10 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -464,8 +461,8 @@ public class PercentileViewManagerTest {
     class RecordMeasurementWorker {
 
         @Test
-        void recordMeasurementQueue() throws InterruptedException {
-            viewManager = new PercentileViewManager(System::nanoTime);
+        void recordMeasurementQueue() throws InterruptedException, ExecutionException {
+            viewManager = new PercentileViewManager(System::currentTimeMillis);
             viewManager.createOrUpdateView("my/measure", "my/view", "ms", "foo", true, false, Collections.emptyList(), 1, Collections
                     .emptyList(), 100);
 
@@ -481,24 +478,32 @@ public class PercentileViewManagerTest {
                 }
             };
 
-            CountDownLatch countDownLatch = new CountDownLatch(threadCount);
             ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+            List<Future<?>> futures = new ArrayList<>();
 
             for (int i = 0; i < threadCount; i++) {
-                executorService.submit(() -> {
-                    for (int j = 0; j < recordCount; j++) {
-                        viewManager.recordMeasurement("my/measure", 2);
+                Future<?> task = executorService.submit(() -> {
+                    try {
+                        for (int j = 0; j < recordCount; j++) {
+                            viewManager.recordMeasurement("my/measure", 2);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    countDownLatch.countDown();
                 });
+                futures.add(task);
             }
 
-            countDownLatch.await();
+            // waiting for all threads to finish
+            for (Future<?> future : futures) {
+                future.get();
+            }
+
             executorService.shutdown();
 
             assertThat(testRecordsQueue).isNotEmpty().hasSize(valueCount);
             while (testRecordsQueue.size() > 1) {
-                assertThat(testRecordsQueue.take()).isLessThan(testRecordsQueue.peek());
+                assertThat(testRecordsQueue.take()).isLessThanOrEqualTo(testRecordsQueue.peek());
             }
         }
     }
