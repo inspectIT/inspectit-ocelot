@@ -428,10 +428,9 @@ inspectit-eum-server:
 ```
 
 #### InfluxDB
-The InfluxDB exporter is disabled by default and can be enabled by setting the URL
-via `inspectit-eum-server.exporters.metrics.influx.url`.
+By default, the InfluxDB exporter is enabled, but it is not active since the url-property is not set. The property can be set via `inspectit-eum-server.exporters.metrics.influx.url`.
 
-The following configuration snippet shows the default configuration of the InfluxDB exporter:
+The following configuration snippet makes the InfluxDB Exporter send every 15 seconds metrics to an InfluxDB available under `localhost:8086` to the database `inspectit`:
 ```YAML
 inspectit-eum-server:
   exporters:
@@ -445,7 +444,7 @@ inspectit-eum-server:
 
         # The http url of influx.
         # If this property is not set, the InfluxDB exporter will not be started.
-        # url: "http://localhost:8086"
+        url: "http://localhost:8086"
 
         # The database to write to.
         # If this property is not set, the InfluxDB exporter will not be started.
@@ -477,7 +476,7 @@ inspectit-eum-server:
 
 ### Tracing
 
-:::info
+:::note
 In order to make tracing work, additional dependencies need to be [installed](https://inspectit.github.io/inspectit-ocelot/docs/enduser-monitoring/install-eum-agent#tracing)!
 :::
 
@@ -485,11 +484,7 @@ The EUM server supports trace data forwarding to the Jaeger exporter.
 The exporter is using the [Jaeger Protobuf via gRPC API](https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable) in order to forward trace data.
 By default, the Jaeger exporter is enabled, but it is not active since the grpc-property is not set.
 
-:::info
-The grpc property needs to be set without protocol (e.g. localhost:14250)!
-:::
-
-The following configuration snippet shows the default configuration of the jaeger-exporter:
+The following configuration snippet makes the Jaeger exporter send traces to a Jaeger instance avialable under `localhost:14250`.
 
 ```YAML
 inspectit-eum-server:
@@ -502,11 +497,15 @@ inspectit-eum-server:
       # Location of the jaeger gRPC API.
       # Either a valid NameResolver-compliant URI, or an authority string.
       # If this property is not set, the jaeger-exporter will not be started.
-      # grpc: localhost:14250
+      grpc: localhost:14250
 
       # service name for all exported spans.
       service-name: browser-js
 ```
+
+:::note
+The grpc property needs to be set without protocol (e.g. localhost:14250)!
+:::
 
 ### Beacons
 
