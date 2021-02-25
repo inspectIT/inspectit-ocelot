@@ -3,7 +3,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import classNames from 'classNames';
+import classNames from 'classnames';
 
 import { cloneDeep, isEqual, assign } from 'lodash';
 
