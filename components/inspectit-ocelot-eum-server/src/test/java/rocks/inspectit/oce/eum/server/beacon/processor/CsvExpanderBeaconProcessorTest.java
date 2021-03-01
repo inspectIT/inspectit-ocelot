@@ -101,5 +101,14 @@ class CsvExpanderBeaconProcessorTest {
 
             assertThat(result.toMap()).containsOnly(entry("rt.bmr", "123,bar,321"), entry("rt.bmr.0", "123"), entry("rt.bmr.2", "321"), entry("rt.bmr.sum", "444"));
         }
+
+        @Test
+        public void rtBmrMultipleValuesWithTwoInvalidValues() {
+            Beacon beacon = Beacon.of(Collections.singletonMap("rt.bmr", "123,bar,321,foo"));
+
+            Beacon result = processor.process(beacon);
+
+            assertThat(result.toMap()).containsOnly(entry("rt.bmr", "123,bar,321,foo"), entry("rt.bmr.0", "123"), entry("rt.bmr.2", "321"), entry("rt.bmr.sum", "444"));
+        }
     }
 }
