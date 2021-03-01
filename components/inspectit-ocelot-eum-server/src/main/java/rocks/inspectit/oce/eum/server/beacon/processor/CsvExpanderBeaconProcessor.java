@@ -45,7 +45,9 @@ public class CsvExpanderBeaconProcessor implements BeaconProcessor {
                     isSum = true;
                     beacon = beacon.merge(Collections.singletonMap(resultKey, attributes[i]));
                 } catch (Exception e) {
-                    log.error("Error parsing the value <'{}'>: invalid number.", attributes[i]);
+                    if (!String.valueOf(attributes[i]).isEmpty()) {
+                        log.debug("Error parsing the value <'{}'>: invalid number.", attributes[i]);
+                    }
                 }
             }
             if (isSum) {
