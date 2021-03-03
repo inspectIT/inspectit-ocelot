@@ -31,9 +31,16 @@
             transform: translateZ(0);
          }
 
-         .title-wrapper {
-            margin-left: 10%;
-         }
+        .title-image-wrapper {
+           display:inline-block;
+           margin-right:20px;
+           vertical-align: middle;
+        }
+
+        .title-wrapper {
+           display:inline-block;
+           vertical-align: middle;
+        }
 
          .button-wrapper {
             position: absolute;
@@ -44,12 +51,12 @@
          }
 
          .button-left {
-            width: 10%;
+            width: 100px;
             margin-right: 2%;
          }
 
          .button-right {
-            width: 10%;
+            width: 140px;
             margin-left: 2%;
             float: right;
          }
@@ -72,19 +79,33 @@
                     console.warn('Could not fetch configuration file.', error);
                 });
         }
-    </script>
-    <script>
+
+        const getDefaultConfigFile = () => {
+            axios
+                .get('/configuration/default')
+                .then((response) => {
+                const configFile = response.data;
+                    if (configFile) {
+                        editor.setValue(configFile)
+                    }
+                })
+                .catch((error) => {
+                    console.warn('Could not fetch configuration file.', error);
+                });
+        }
+
         const updateConfigFile = () => {
             const file = editor.getValue();
-            console.log(file);
+            const headers = {
+                'Content-Type': 'application/json'
+            }
             axios
-                .post('/configuration/file', file)
+                .post('/configuration/file', {content: file})
                 .catch((error) => {
                     console.warn('Could not update configuration file.', error);
                 });
         }
-    </script>
-    <script>
+
         const applyConfig = () => {
             axios
                 .post('/configuration/apply')
@@ -94,7 +115,10 @@
         }
     </script>
     <div class="header-container">
-        <div class = "title-wrapper">
+        <div class="title-image-wrapper">
+            <img th:src="@{/images/ocelot_head_sil_logo.svg}"/>
+        </div>
+        <div class="title-wrapper">
             <h1>EUM-Server Config Editor</h1>
         </div>
     </div>
@@ -104,7 +128,8 @@
     <div class="button-wrapper">
         <button type="button" class="btn btn-success button-left" onclick="updateConfigFile()">Save</button>
         <button type="button" class="btn btn-info button-left" onclick="applyConfig()">Apply</button>
-        <button type="button" class="btn btn-danger button-right" onclick="getConfigFile()">Reset</button>
+        <button type="button" class="btn btn-warning button-right" onclick="getConfigFile()">Load last saved</button>
+        <button type="button" class="btn btn-warning button-right" onclick="getDefaultConfigFile()">Load default</button>
     </div>
     <script th:src="@{/node_modules/ace-builds/src-noconflict/ace.js}" type="text/javascript" charset="utf-8"></script>
     <script th:src="@{/node_modules/bootstrap/dist/js/bootstrap.js}" type="text/javascript" charset="utf-8"></script>
