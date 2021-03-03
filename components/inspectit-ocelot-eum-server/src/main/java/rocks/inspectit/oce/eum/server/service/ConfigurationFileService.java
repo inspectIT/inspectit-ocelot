@@ -1,4 +1,5 @@
 package rocks.inspectit.oce.eum.server.service;
+import org.msgpack.core.annotations.VisibleForTesting;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -19,17 +20,19 @@ public class ConfigurationFileService {
     /**
      * File encoding to be used by all read and write accesses.
      */
-    static final String FILE_ENCODING = "UTF-8";
+    private static final String FILE_ENCODING = "UTF-8";
 
     /**
      * Default file path which is used when no file path was given at server startup.
      */
+    @VisibleForTesting
     static final String DEFAULT_FILE_PATH = "./application.yml";
 
     /**
      * Actual file path used. If a path is present at spring.config.location, this path is used.
      * Otherwise DEFAULT_FILE_PATH is used.
      */
+    @VisibleForTesting
     String filePath;
 
     /**
@@ -44,10 +47,10 @@ public class ConfigurationFileService {
             filePath = pathProperty.substring("file:".length());
         } else {
             filePath = DEFAULT_FILE_PATH;
-        }
-        File defaultFile = new File(filePath);
-        if(defaultFile.createNewFile()) {
-            saveFile(getDefaultConfig());
+            File defaultFile = getFileObject();
+            if(defaultFile.createNewFile()) {
+                saveFile(getDefaultConfig());
+            }
         }
     }
 
@@ -70,8 +73,7 @@ public class ConfigurationFileService {
         StringBuilder config = new StringBuilder();
         
         try {
-            File fileObject = new File(filePath);
-            fileScanner = new Scanner(fileObject);
+            fileScanner = getFileScanner();
             while (fileScanner.hasNextLine()) {
                 config.append(fileScanner.nextLine()).append("\n");
             }
@@ -79,7 +81,6 @@ public class ConfigurationFileService {
             e.printStackTrace();
         } finally {
             if(fileScanner != null) {
-
                 fileScanner.close();
             }
         }
@@ -96,8 +97,7 @@ public class ConfigurationFileService {
     public String getDefaultConfig() {
         StringBuilder config = new StringBuilder();
 
-        InputStream in = getClass().getResourceAsStream("/application.yml");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        BufferedReader reader = getDefaultFileReader();
 
         try {
             for(String line = reader.readLine(); line != null; line = reader.readLine()) {
@@ -114,6 +114,23 @@ public class ConfigurationFileService {
         }
 
         return config.toString();
+    }
+
+    @VisibleForTesting
+    File getFileObject() {
+        return new File(filePath);
+    }
+
+    @VisibleForTesting
+    BufferedReader getDefaultFileReader() {
+        InputStream in = getClass().getResourceAsStream("/application.yml");
+        return new BufferedReader(new InputStreamReader(in));
+    }
+
+    @VisibleForTesting
+    Scanner getFileScanner() throws FileNotFoundException {
+        File fileObject = getFileObject();
+        return new Scanner(fileObject);
     }
 
 }
