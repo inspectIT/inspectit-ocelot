@@ -1,5 +1,7 @@
 package rocks.inspectit.oce.eum.server.service;
 
+import org.springframework.stereotype.Component;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -9,6 +11,7 @@ import java.util.List;
  * This class provides functionality to restart the current Java application with all parameters it was initially
  * started with.
  */
+@Component
 public class RestartService {
 
     /**

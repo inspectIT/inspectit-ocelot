@@ -25,7 +25,7 @@ public class ConfigurationFileController {
     private ObjectMapper objectMapper;
 
     @Autowired
-    ConfigurationFileService configFileService;
+    private ConfigurationFileService configFileService;
 
     /**
      * Returns the current configuration file's content as String.
@@ -52,14 +52,14 @@ public class ConfigurationFileController {
      *                String resembling the new content of the configuration file.
      */
     @PostMapping("file")
-    public void saveConfigurationFile( @RequestBody String content) throws IOException {
-            String fileContent;
-            if (content == null) {
-                fileContent = "";
-            } else {
-                FileData data = objectMapper.readValue(content, FileData.class);
-                fileContent = data.getContent();
-            }
+    public void saveConfigurationFile(@RequestBody String content) throws IOException {
+        String fileContent;
+        if (content == null) {
+            fileContent = "";
+        } else {
+            FileData data = objectMapper.readValue(content, FileData.class);
+            fileContent = data.getContent();
+        }
         configFileService.saveFile(fileContent);
     }
 
