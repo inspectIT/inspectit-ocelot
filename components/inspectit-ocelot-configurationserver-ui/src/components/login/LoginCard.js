@@ -20,7 +20,7 @@ class LoginCard extends React.Component {
 
   componentDidMount = () => {
     this.inputNameRef.current.element.focus();
-  }
+  };
 
   doLogin = () => {
     this.props.fetchToken(this.state.username, this.state.password);
