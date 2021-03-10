@@ -13,20 +13,19 @@ import java.util.Collections;
 import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class CsvExpanderBeaconProcessorTest {
+class BmrBeaconProcessorTest {
 
     @InjectMocks
-    private CsvExpanderBeaconProcessor processor;
+    private BmrBeaconProcessor processor;
 
     @Nested
     public class Process {
 
-        private final String[] keyNames = Arrays.stream(CsvExpanderBeaconProcessor.VALUE_NAMES)
-                .sequential()
-                .map(s -> CsvExpanderBeaconProcessor.ATTRIBUTE_KEY + "." + s)
+        private final String[] keyNames = Arrays.stream(BmrBeaconProcessor.VALUE_NAMES)
+                .map(valueName -> BmrBeaconProcessor.ATTRIBUTE_KEY + "." + valueName)
                 .toArray(String[]::new);
 
-        private final Integer maxExpectedSize = keyNames.length + 1;
+        private final int maxExpectedSize = keyNames.length + 1;
 
         @Test
         public void noRtBmrAttribute() {

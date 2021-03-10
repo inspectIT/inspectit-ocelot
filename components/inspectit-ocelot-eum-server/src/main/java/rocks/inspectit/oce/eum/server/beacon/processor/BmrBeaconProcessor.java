@@ -9,16 +9,17 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 
 import java.util.Collections;
+import java.util.HashMap;
 
 /**
  * Processor to expand comma separated values. The expanded values will be available at a new attribute
  * indexed key in the beacon.
  * <p>
- * Example: The attribute <code>rt.bmr=37,5</code> will result in <code>rt.bmr.0: 37</code>, <code>rt.bmr.1: 5</code>
+ * Example: The attribute <code>rt.bmr=37,5</code> will result in <code>rt.bmr.startTime: 37</code>, <code>rt.bmr.responseEnd: 5</code>
  */
 @Slf4j
 @Component
-public class CsvExpanderBeaconProcessor implements BeaconProcessor {
+public class BmrBeaconProcessor implements BeaconProcessor {
 
     /**
      * The target key of the attribute to expand.
@@ -40,6 +41,7 @@ public class CsvExpanderBeaconProcessor implements BeaconProcessor {
     @Override
     public Beacon process(Beacon beacon) {
         String targetAttribute = beacon.get(ATTRIBUTE_KEY);
+        HashMap<String, String> bmrAttributes = new HashMap<>();
 
         if (StringUtils.isNoneBlank(targetAttribute)) {
             String[] attributes = targetAttribute.split(GROUP_SEPARATOR);
@@ -47,14 +49,20 @@ public class CsvExpanderBeaconProcessor implements BeaconProcessor {
             for (int i = 0; i < VALUE_NAMES.length; i++) {
                 String resultKey = ATTRIBUTE_KEY + "." + VALUE_NAMES[i];
 
-                String value = (i < attributes.length && !StringUtils.isBlank(attributes[i])) ? attributes[i] : "0";
+                String value;
+                if (i >= attributes.length || StringUtils.isBlank(attributes[i])) {
+                    value = "0";
+                } else {
+                    value = attributes[i];
+                }
 
                 if (NumberUtils.isCreatable(value)) {
-                    beacon = beacon.merge(Collections.singletonMap(resultKey, value));
+                    bmrAttributes.put(resultKey, value);
                 } else {
                     log.trace("Error parsing the value <'{}'>: invalid number.", attributes[i]);
                 }
             }
+            beacon = beacon.merge(bmrAttributes);
         }
         return beacon;
     }
