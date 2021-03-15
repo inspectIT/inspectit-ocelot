@@ -1,0 +1,144 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>EUM-Server Config Editor</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link th:href="@{/node_modules/bootstrap/dist/css/bootstrap.css}" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #editor {
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            bottom: 20%;
+            left: 10%;
+        }
+
+        .header-container{
+            background: #de6f00;
+            color: #fff;
+            min-height: 50px;
+            padding: 8px 0;
+            position: fixed;
+            width: 100%;
+            z-index: 9999;
+            transform: translateZ(0);
+         }
+
+        .title-image-wrapper {
+           display:inline-block;
+           margin-right:20px;
+           vertical-align: middle;
+        }
+
+        .title-wrapper {
+           display:inline-block;
+           vertical-align: middle;
+        }
+
+         .button-wrapper {
+            position: absolute;
+            top: 82%;
+            right: 10%;
+            bottom: 20%;
+            left: 10%;
+         }
+
+         .button-left {
+            width: 100px;
+            margin-right: 2%;
+         }
+
+         .button-right {
+            width: 140px;
+            margin-left: 2%;
+            float: right;
+         }
+    </style>
+
+</head>
+
+<body class="text-justify">
+    <script>
+        const getConfigFile = () => {
+            axios
+                .get('/configuration/file')
+                .then((response) => {
+                const configFile = response.data;
+                    if (configFile) {
+                        editor.setValue(configFile)
+                    }
+                })
+                .catch((error) => {
+                    console.warn('Could not fetch configuration file.', error);
+                });
+        }
+
+        const getDefaultConfigFile = () => {
+            axios
+                .get('/configuration/default')
+                .then((response) => {
+                const configFile = response.data;
+                    if (configFile) {
+                        editor.setValue(configFile)
+                    }
+                })
+                .catch((error) => {
+                    console.warn('Could not fetch configuration file.', error);
+                });
+        }
+
+        const updateConfigFile = () => {
+            const file = editor.getValue();
+            const headers = {
+                'Content-Type': 'application/json'
+            }
+            axios
+                .post('/configuration/file', {content: file})
+                .catch((error) => {
+                    console.warn('Could not update configuration file.', error);
+                });
+        }
+
+        const applyConfig = () => {
+            axios
+                .post('/configuration/apply')
+                .catch((error) => {
+                    console.warn('Could not apply configuration file.', error);
+                });
+        }
+    </script>
+    <div class="header-container">
+        <div class="title-image-wrapper">
+            <img th:src="@{/images/ocelot_head_sil_logo.svg}"/>
+        </div>
+        <div class="title-wrapper">
+            <h1>EUM-Server Config Editor</h1>
+        </div>
+    </div>
+
+    <div id="editor"></div>
+
+    <div class="button-wrapper">
+        <button type="button" class="btn btn-success button-left" onclick="updateConfigFile()">Save</button>
+        <button type="button" class="btn btn-info button-left" onclick="applyConfig()">Apply</button>
+        <button type="button" class="btn btn-warning button-right" onclick="getConfigFile()">Load last saved</button>
+        <button type="button" class="btn btn-warning button-right" onclick="getDefaultConfigFile()">Load default</button>
+    </div>
+    <script th:src="@{/node_modules/ace-builds/src-noconflict/ace.js}" type="text/javascript" charset="utf-8"></script>
+    <script th:src="@{/node_modules/bootstrap/dist/js/bootstrap.js}" type="text/javascript" charset="utf-8"></script>
+    <script th:src="@{/node_modules/axios/dist/axios.js}" type="text/javascript" charset="utf-8"></script>
+    <script id="editorScript">
+        const editor = ace.edit("editor");
+        editor.setTheme("ace/theme/cobalt");
+        editor.session.setMode("ace/mode/yaml");
+        getConfigFile();
+    </script>
+</body>
+</html>
