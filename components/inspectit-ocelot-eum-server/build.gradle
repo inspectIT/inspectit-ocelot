@@ -78,6 +78,7 @@ dependencies {
             "org.springframework.boot:spring-boot-starter-web",
             'org.springframework.boot:spring-boot-starter-actuator',
             "org.springframework.security:spring-security-web:5.1.5.RELEASE",
+            "org.springframework.boot:spring-boot-starter-thymeleaf",
 
             "io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
 
