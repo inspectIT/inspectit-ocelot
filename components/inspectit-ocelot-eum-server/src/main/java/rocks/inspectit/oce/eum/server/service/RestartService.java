@@ -40,7 +40,7 @@ public class RestartService {
                 }
             }
             // init the command to execute, add the vm args
-            final StringBuffer cmd = new StringBuffer("\"" + java + "\" " + vmArgsOneLine);
+            final StringBuffer cmd = new StringBuffer(java + " " + vmArgsOneLine);
 
             // program main and program arguments
             String[] mainCommand = System.getProperty(SUN_JAVA_COMMAND).split(" ");
