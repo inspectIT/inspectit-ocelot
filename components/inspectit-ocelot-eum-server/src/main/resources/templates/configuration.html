@@ -60,11 +60,42 @@
             margin-left: 2%;
             float: right;
          }
+
+         .success {
+             background-color: rgba(0,128,0, 0.5);
+             border: none;
+        }
+
+        .error {
+            background-color: rgba(205,0,0, 0.5);
+            border: none;
+        }
+
+        .toast-header {
+            border: none;
+            background-color: rgba(167, 134, 134, 0);
+            color: #505050;
+        }
+
+        .title-image {
+             width: 66px;
+             height: 58.46px;
+        }
+
     </style>
 
 </head>
 
 <body class="text-justify">
+    <script th:src="@{/node_modules/jquery/dist/jquery.js}" type="text/javascript"></script>
+    <script th:src="@{/node_modules/ace-builds/src-noconflict/ace.js}" type="text/javascript" charset="utf-8"></script>
+    <script th:src="@{/node_modules/bootstrap/dist/js/bootstrap.bundle.js}" type="text/javascript" charset="utf-8"></script>
+    <script th:src="@{/node_modules/axios/dist/axios.js}" type="text/javascript" charset="utf-8"></script>
+    <script>
+        $(document).ready(function(){
+            $(".toast").toast('show');
+        });
+    </script>
     <script>
         const getConfigFile = () => {
             axios
@@ -73,10 +104,11 @@
                 const configFile = response.data;
                     if (configFile) {
                         editor.setValue(configFile)
+                        successNotificaiton("Configuration loaded!")
                     }
                 })
                 .catch((error) => {
-                    console.warn('Could not fetch configuration file.', error);
+                    failNotificaiton("Could not fetch configuration file.");
                 });
         }
 
@@ -84,13 +116,14 @@
             axios
                 .get('/configuration/default')
                 .then((response) => {
-                const configFile = response.data;
-                    if (configFile) {
-                        editor.setValue(configFile)
-                    }
-                })
+                    const configFile = response.data;
+                        if (configFile) {
+                            editor.setValue(configFile)
+                            successNotificaiton("Default configuration loaded!")
+                        }
+                    })
                 .catch((error) => {
-                    console.warn('Could not fetch configuration file.', error);
+                    failNotificaiton("Could not fetch default configuration file.");
                 });
         }
 
@@ -101,25 +134,59 @@
             }
             axios
                 .post('/configuration/file', {content: file})
+                .then(successNotificaiton("Configuration updated!"))
                 .catch((error) => {
-                    console.warn('Could not update configuration file.', error);
+                    failNotificaiton("Could not update configuration file.");
                 });
         }
 
         const applyConfig = () => {
             axios
                 .post('/configuration/apply')
+                .then(successNotificaiton("Server is restarting!"))
                 .catch((error) => {
-                    console.warn('Could not apply configuration file.', error);
+                    failNotificaiton("Could not apply configuration file.");
                 });
         }
+
+        const successNotificaiton = (message) => {
+            document.getElementById("toast-title").innerHTML = "Success!";
+            document.getElementById("toast-body").innerHTML = message;
+            document.getElementById("toast-wrapper").classList.remove('success');
+            document.getElementById("toast-wrapper").classList.remove('error');
+            document.getElementById("toast-wrapper").classList.add('success');
+
+            $(".toast").toast('show');
+        }
+
+        const failNotificaiton = (message) => {
+            document.getElementById("toast-title").innerHTML = "Error!";
+            document.getElementById("toast-body").innerHTML = message;
+            document.getElementById("toast-wrapper").classList.remove('success');
+            document.getElementById("toast-wrapper").classList.remove('error');
+            document.getElementById("toast-wrapper").classList.add('error');
+            $(".toast").toast('show');
+        }
     </script>
+
     <div class="header-container">
         <div class="title-image-wrapper">
-            <img th:src="@{/images/ocelot_head_sil_logo.svg}"/>
+            <img class = "title-image" th:src="@{/images/ocelot_head_sil_logo.svg}"/>
         </div>
         <div class="title-wrapper">
             <h1>EUM-Server Config Editor</h1>
+        </div>
+    </div>
+
+    <div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 200px;">
+        <div class="toast" style="position: absolute; top: 75px; right: 0;" id="toast-wrapper" data-delay="3000">
+            <div class="toast-header">
+                <strong class="mr-auto" id="toast-title"></strong>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="toast-body" id="toast-body"></div>
         </div>
     </div>
 
@@ -131,9 +198,7 @@
         <button type="button" class="btn btn-warning button-right" onclick="getConfigFile()">Load last saved</button>
         <button type="button" class="btn btn-warning button-right" onclick="getDefaultConfigFile()">Load default</button>
     </div>
-    <script th:src="@{/node_modules/ace-builds/src-noconflict/ace.js}" type="text/javascript" charset="utf-8"></script>
-    <script th:src="@{/node_modules/bootstrap/dist/js/bootstrap.js}" type="text/javascript" charset="utf-8"></script>
-    <script th:src="@{/node_modules/axios/dist/axios.js}" type="text/javascript" charset="utf-8"></script>
+
     <script id="editorScript">
         const editor = ace.edit("editor");
         editor.setTheme("ace/theme/cobalt");
