@@ -16,6 +16,12 @@ class LoginCard extends React.Component {
     password: '',
   };
 
+  inputNameRef = React.createRef();
+
+  componentDidMount = () => {
+    this.inputNameRef.current.element.focus();
+  };
+
   doLogin = () => {
     this.props.fetchToken(this.state.username, this.state.password);
   };
@@ -57,6 +63,7 @@ class LoginCard extends React.Component {
             <i className="pi pi-user"></i>
           </span>
           <InputText
+            ref={this.inputNameRef}
             placeholder="Username"
             style={fullWidthStyle}
             onKeyPress={this.onKeyPress}
