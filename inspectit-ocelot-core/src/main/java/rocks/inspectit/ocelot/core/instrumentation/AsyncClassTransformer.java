@@ -205,7 +205,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
 
                 //Make a ByteBuddy builder based on the input bytecode
                 ClassFileLocator byteCodeClassFileLocator = ClassFileLocator.Simple.of(type.getName(), originalByteCode);
-                DynamicType.Builder<?> builder = builder = new ByteBuddy().redefine(type, byteCodeClassFileLocator);
+                DynamicType.Builder<?> builder = new ByteBuddy().redefine(type, byteCodeClassFileLocator);
 
                 //Apply the actual instrumentation onto the builders
                 for (SpecialSensor specialSensor : classConf.getActiveSpecialSensors()) {
