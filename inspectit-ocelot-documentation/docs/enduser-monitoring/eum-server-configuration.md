@@ -244,24 +244,38 @@ A `t_other` field containing `t_domloaded|437,boomr_fb|252` will produce the fol
 
 #### RT.BMR.*
 
-The `rt.bmr.*` fields are resolved based on the content of the beacon's `rt.bmr` field. See the [Boomerang's documentation](https://developer.akamai.com/tools/boomerang/docs/BOOMR.plugins.RT.html) for more information.
+The `rt.bmr.*` fields are resolved based on the content of the beacon's `rt.bmr` field.
+See the [Boomerang's documentation](https://developer.akamai.com/tools/boomerang/docs/BOOMR.plugins.RT.html) for more information.
 
-The `rt.bmr` field contains the following resource timing information for boomerang itself:
+The `rt.bmr` parameter consists of a comma-separated list with the following resource timing information for Boomerang itself:
 
-`[startTime, responseEnd, responseStart, requestStart, connectEnd, secureConnectionStart, connectStart, domainLookupEnd, domainLookupStart, redirectEnd, redirectStart]`
+- `startTime`
+- `responseEnd`
+- `responseStart`
+- `requestStart`
+- `connectEnd`
+- `secureConnectionStart`
+- `connectStart`
+- `domainLookupEnd`
+- `domainLookupStart`
+- `redirectEnd`
+- `redirectStart`
 
 ##### Example
 
 A `rt.bmr` field containing `123,477,,1` will produce the following results:
 
-* `rt.bmr.startTime` = `123`
-* `rt.bmr.responseEnd` = `477`
-* `rt.bmr.responseStart` = `0`
-* `rt.bmr.requestStart` = `1`
+- `rt.bmr.startTime` = `123`
+- `rt.bmr.responseEnd` = `477`
+- `rt.bmr.responseStart` = `0`
+- `rt.bmr.requestStart` = `1`
 
-All non-existing values will be produced with zero:
 
-* `rt.bmr.*`= `0`
+- `rt.bmr.connectEnd` = `0` _*_
+- `rt.bmr.secureConnectionStart` = `0` _*_
+- ...
+
+_\* All values which does not exist in the parameter will be populated with zero!_
 
 ## Tags Definition
 

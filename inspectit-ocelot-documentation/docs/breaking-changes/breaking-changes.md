@@ -5,22 +5,24 @@ title: Breaking Changes
 
 ## Breaking changes in 1.9
 
-### Naming changes of the rt.bmr beacon
+### Naming Changes of the `rt.bmr.*` Beacon Properties
 
-In the current release, the rt.bmr beacon list is parsed into new key-value pairs with the naming `rt.bmr.index`, index being the position in the list. These indices are changed to qualified names:
+In the current release, the existing `rt.bmr` beacon parameter is parsed into new key-value pairs with the naming `rt.bmr.index`, where `index` represents the element's position in the beacon parameter.
+These indices are changed to qualified names:
 
-- rt.bmr.0 -> rt.bmr.startTime
-- rt.bmr.1 -> rt.bmr.responseEnd
-- rt.bmr.2 -> rt.bmr.responseStart
-- rt.bmr.3 -> rt.bmr.requestStart
-- rt.bmr.4 -> rt.bmr.connectEnd
-- rt.bmr.5 -> rt.bmr.secureConnectionStart
-- rt.bmr.6 -> rt.bmr.connectStart
-- rt.bmr.7 -> rt.bmr.domainLookupEnd
-- rt.bmr.8 -> rt.bmr.domainLookupStart
-- rt.bmr.9 -> rt.bmr.redirectEnd
-- rt.bmr.10 -> rt.bmr.redirectStart
-
+| Deprecated Name | New Name |
+| --- | --- | 
+|`rt.bmr.0`| `rt.bmr.startTime`|
+|`rt.bmr.1`| `rt.bmr.responseEnd`|
+|`rt.bmr.2`| `rt.bmr.responseStart`|
+|`rt.bmr.3`| `rt.bmr.requestStart`|
+|`rt.bmr.4`| `rt.bmr.connectEnd`|
+|`rt.bmr.5`| `rt.bmr.secureConnectionStart`|
+|`rt.bmr.6`| `rt.bmr.connectStart`|
+|`rt.bmr.7`| `rt.bmr.respdomainLookupEndonseEnd`|
+|`rt.bmr.8`| `rt.bmr.domainLookupStart`|
+|`rt.bmr.9`| `rt.bmr.redirectEnd`|
+|`rt.bmr.10`| `rt.bmr.redirectStart`|
 
 ## Breaking changes in 1.8.1
 
