@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import io.opencensus.common.Scope;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -28,7 +29,7 @@ import rocks.inspectit.ocelot.core.service.BatchJobExecutorService;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -105,7 +106,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
         for (Class<?> clazz : newClasses) {
             pendingClasses.put(clazz, Boolean.TRUE);
         }
-        selfMonitorQueueSize();
+        recordPendingClassesQueueSize();
     }
 
     @EventListener
@@ -117,7 +118,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
         //and we considered it up-to-date at the same time
         //for this reason we have to recheck every class after it has been instrumented
         pendingClasses.put(clazz, Boolean.TRUE);
-        selfMonitorQueueSize();
+        recordPendingClassesQueueSize();
     }
 
     @EventListener
@@ -134,7 +135,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
         for (Class<?> clazz : instrumentation.getAllLoadedClasses()) {
             pendingClasses.put(clazz, Boolean.TRUE);
         }
-        selfMonitorQueueSize();
+        recordPendingClassesQueueSize();
     }
 
     /**
@@ -148,17 +149,37 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
     void checkClassesForConfigurationUpdates(BatchSize batchSize) {
         List<Class<?>> classesToRetransform = new ArrayList<>(getBatchOfClassesToRetransform(batchSize));
 
-        try (val sm = selfMonitoring.withDurationSelfMonitoring("instrumentation-retransformation")) {
-            val watch = Stopwatch.createStarted();
+        try (Scope sm = selfMonitoring.withDurationSelfMonitoring("instrumentation-retransformation")) {
+            Stopwatch watch = Stopwatch.createStarted();
             if (!classesToRetransform.isEmpty()) {
                 try {
                     instrumentation.retransformClasses(classesToRetransform.toArray(new Class<?>[]{}));
                     log.debug("Retransformed {} classes in {} ms", classesToRetransform.size(), watch.elapsed(TimeUnit.MILLISECONDS));
                 } catch (Throwable e) {
-                    if (classesToRetransform.size() == 1) {
+                    log.warn("Error retransforming batch of classes, retrying classes one by one.");
+                    boolean singleBatch = classesToRetransform.size() == 1;
+
+                    classesToRetransform.removeIf(clazz -> {
+                        try {
+                            // this will fail if dependency classes are missing
+                            Field[] fields = clazz.getDeclaredFields();
+                            return false;
+                        } catch (Throwable throwable) {
+                            if (throwable instanceof NoClassDefFoundError) {
+                                // this can happen, when classes are lazy loaded which dependencies are not existing.
+                                // see ticket https://github.com/inspectIT/inspectit-ocelot/issues/512
+                                log.warn("Class {} will not be instrumented because it cannot be loaded. This can happen if dependencies are not existing.", clazz.getName());
+                                return true;
+                            } else {
+                                // we'll try the instrumentation once more
+                                return false;
+                            }
+                        }
+                    });
+
+                    if (singleBatch && classesToRetransform.size() == 1) {
                         log.error("Error retransforming class '{}'", classesToRetransform.get(0).getName(), e);
-                    } else {
-                        log.error("Error retransforming batch of classes, retrying classes one by one.", e);
+                    } else if (!classesToRetransform.isEmpty()) {
                         for (Class<?> clazz : classesToRetransform) {
                             try {
                                 instrumentation.retransformClasses(clazz);
@@ -170,7 +191,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
                 }
             }
         }
-        selfMonitorQueueSize();
+        recordPendingClassesQueueSize();
     }
 
     /**
@@ -266,7 +287,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
 
     @EventListener(classes = {InspectitConfigChangedEvent.class},
             condition = "!#root.event.oldConfig.selfMonitoring.enabled")
-    private void selfMonitorQueueSize() {
+    private void recordPendingClassesQueueSize() {
         selfMonitoring.recordMeasurement("instrumentation-queue-size", pendingClasses.size());
     }
 
