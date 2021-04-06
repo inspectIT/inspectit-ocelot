@@ -128,11 +128,11 @@ public class PrometheusExporterServiceIntTest {
 
         sendBeacon(beacon);
 
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+        await().atMost(30, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
             HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
             ResponseHandler responseHandler = new BasicResponseHandler();
-            assertThat(responseHandler.handleResponse(response).toString())
-                    .contains("page_ready_time_SUM{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",} 12.0");
+            assertThat(responseHandler.handleResponse(response)
+                    .toString()).contains("page_ready_time_SUM{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",} 12.0");
         });
     }
 }
