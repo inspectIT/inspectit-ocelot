@@ -14,7 +14,7 @@ on:
       - '!components/inspectit-ocelot-eum-server/README.md'
 jobs:
   test:
-    name: Assemble & Test
+    name: Run EUM-Server Test
     runs-on: ubuntu-latest
     env:
       working-directory: ./components/inspectit-ocelot-eum-server
@@ -23,9 +23,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: assemble
-        run: ../../gradlew assemble
-        working-directory: ${{env.working-directory}}
       - name: test
-        run: ../../gradlew test
+        run: ../../gradlew -i test
         working-directory: ${{env.working-directory}}
