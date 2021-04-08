@@ -24,5 +24,5 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: test
-        run: ../../gradlew -i test
+        run: ../../gradlew test
         working-directory: ${{env.working-directory}}

@@ -63,7 +63,7 @@ public class PrometheusExporterServiceIntTest {
 
         @Override
         public void initialize(ConfigurableApplicationContext applicationContext) {
-            PROMETHEUS_PORT = SocketUtils.findAvailableTcpPort();
+            PROMETHEUS_PORT = SocketUtils.findAvailableTcpPort(20000);
             TestPropertyValues.of(String.format("inspectit-eum-server.exporters.metrics.prometheus.port=%d", PROMETHEUS_PORT))
                     .applyTo(applicationContext);
         }
