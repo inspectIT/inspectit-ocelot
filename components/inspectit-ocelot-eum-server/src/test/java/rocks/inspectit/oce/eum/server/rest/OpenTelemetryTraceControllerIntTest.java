@@ -17,7 +17,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import rocks.inspectit.oce.eum.server.utils.ResetMetricsTestExecutionListener;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -29,7 +31,8 @@ import static org.mockito.Mockito.verify;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
 @DirtiesContext
-class OpenTelemetryTraceControllerIntTest {
+@TestExecutionListeners(listeners = ResetMetricsTestExecutionListener.class)
+public class OpenTelemetryTraceControllerIntTest {
 
     @Autowired
     TestRestTemplate restTemplate;

@@ -12,16 +12,19 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import rocks.inspectit.oce.eum.server.utils.ResetMetricsTestExecutionListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = JaegerExporterIntTest.EnvInitializer.class)
 @Testcontainers(disabledWithoutDocker = true)
+@TestExecutionListeners(listeners = ResetMetricsTestExecutionListener.class)
 public class JaegerExporterIntTest {
 
     @LocalServerPort
