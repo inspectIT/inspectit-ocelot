@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.eum.server.exporters;
 
+import io.prometheus.client.CollectorRegistry;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ResponseHandler;
@@ -11,6 +12,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +70,11 @@ public class PrometheusExporterServiceIntTest {
     protected MockMvc mockMvc;
 
     private static CloseableHttpClient httpClient;
+
+    @BeforeAll
+    public static void beforeClass() {
+        CollectorRegistry.defaultRegistry.clear();
+    }
 
     @BeforeEach
     public void initClient() {
