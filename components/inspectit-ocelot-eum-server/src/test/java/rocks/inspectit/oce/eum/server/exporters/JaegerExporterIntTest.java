@@ -33,23 +33,25 @@ public class JaegerExporterIntTest {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final int QUERY_PORT = 16686;
+
     private static final int COLLECTOR_PORT = 14250;
+
     private static final int HEALTH_PORT = 14269;
+
     public static final String SERVICE_NAME = "E2E-test";
 
     @Container
-    public static GenericContainer<?> jaegerContainer =
-            new GenericContainer<>("ghcr.io/open-telemetry/java-test-containers:jaeger")
-                    .withExposedPorts(COLLECTOR_PORT, QUERY_PORT, HEALTH_PORT)
-                    .waitingFor(Wait.forHttp("/").forPort(HEALTH_PORT));
+    public static GenericContainer<?> jaegerContainer = new GenericContainer<>("ghcr.io/open-telemetry/java-test-containers:jaeger")
+            .withExposedPorts(COLLECTOR_PORT, QUERY_PORT, HEALTH_PORT)
+            .waitingFor(Wait.forHttp("/").forPort(HEALTH_PORT));
 
     static class EnvInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
         @Override
         public void initialize(ConfigurableApplicationContext applicationContext) {
-            TestPropertyValues.of(
-                    String.format("inspectit-eum-server.exporters.tracing.jaeger.grpc=%s:%d", jaegerContainer.getHost(), jaegerContainer.getMappedPort(COLLECTOR_PORT)),
-                    "inspectit-eum-server.exporters.tracing.jaeger.service-name=" + JaegerExporterIntTest.SERVICE_NAME
-            ).applyTo(applicationContext);
+            TestPropertyValues.of(String.format("inspectit-eum-server.exporters.tracing.jaeger.grpc=%s:%d", jaegerContainer
+                    .getHost(), jaegerContainer.getMappedPort(COLLECTOR_PORT)), "inspectit-eum-server.exporters.tracing.jaeger.service-name=" + JaegerExporterIntTest.SERVICE_NAME)
+                    .applyTo(applicationContext);
         }
     }
 
@@ -90,8 +92,7 @@ public class JaegerExporterIntTest {
 
     private boolean assertJaegerHaveTrace() {
         try {
-            String url = String.format("http://%s:%d/api/traces?service=%s",
-                    jaegerContainer.getHost(), jaegerContainer.getMappedPort(QUERY_PORT), SERVICE_NAME);
+            String url = String.format("http://%s:%d/api/traces?service=%s", jaegerContainer.getHost(), jaegerContainer.getMappedPort(QUERY_PORT), SERVICE_NAME);
 
             ResponseEntity<String> result = restTemplate.getForEntity(url, String.class);
 

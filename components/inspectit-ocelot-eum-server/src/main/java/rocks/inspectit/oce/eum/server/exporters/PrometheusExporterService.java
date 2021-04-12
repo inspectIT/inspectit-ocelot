@@ -2,6 +2,7 @@ package rocks.inspectit.oce.eum.server.exporters;
 
 import io.opencensus.exporter.stats.prometheus.PrometheusStatsCollector;
 import io.opencensus.exporter.stats.prometheus.PrometheusStatsConfiguration;
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.HTTPServer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -11,8 +12,6 @@ import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
-import static io.prometheus.client.CollectorRegistry.defaultRegistry;
 
 /**
  * Service for the Prometheus OpenCensus exporters.
@@ -38,11 +37,11 @@ public class PrometheusExporterService {
                 String host = config.getHost();
                 int port = config.getPort();
                 log.info("Starting Prometheus Exporter on {}:{}", host, port);
-                PrometheusStatsCollector.createAndRegister(PrometheusStatsConfiguration.builder().setRegistry(defaultRegistry).build());
+                PrometheusStatsCollector.createAndRegister(PrometheusStatsConfiguration.builder().setRegistry(CollectorRegistry.defaultRegistry).build());
                 prometheusClient = new HTTPServer(host, port, true);
             } catch (Exception e) {
                 log.error("Error Starting Prometheus HTTP Endpoint!", e);
-                defaultRegistry.clear();
+                CollectorRegistry.defaultRegistry.clear();
             }
         }
     }
@@ -53,7 +52,7 @@ public class PrometheusExporterService {
         log.info("Stopping Prometheus Exporter");
         if (prometheusClient != null) {
             prometheusClient.stop();
-            defaultRegistry.clear();
+            CollectorRegistry.defaultRegistry.clear();
         }
         return true;
     }

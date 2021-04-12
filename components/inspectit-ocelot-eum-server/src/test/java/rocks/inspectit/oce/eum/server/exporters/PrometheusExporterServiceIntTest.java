@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.eum.server.exporters;
 
+import io.prometheus.client.CollectorRegistry;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ResponseHandler;
@@ -11,14 +12,19 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.SocketUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext
+@ContextConfiguration(initializers = PrometheusExporterServiceIntTest.EnvInitializer.class)
 public class PrometheusExporterServiceIntTest {
 
     private static String URL_KEY = "u";
@@ -47,31 +53,47 @@ public class PrometheusExporterServiceIntTest {
 
     private static String FAKE_BEACON_KEY_NAME = "does_not_exist";
 
+    private static int PROMETHEUS_PORT;
+
+    static class EnvInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext applicationContext) {
+            PROMETHEUS_PORT = SocketUtils.findAvailableTcpPort(20000);
+            TestPropertyValues.of(String.format("inspectit-eum-server.exporters.metrics.prometheus.port=%d", PROMETHEUS_PORT))
+                    .applyTo(applicationContext);
+        }
+    }
+
     @Autowired
     protected MockMvc mockMvc;
 
-    private static CloseableHttpClient testClient;
+    private static CloseableHttpClient httpClient;
+
+    @BeforeAll
+    public static void beforeClass() {
+        CollectorRegistry.defaultRegistry.clear();
+    }
 
     @BeforeEach
     public void initClient() {
         HttpClientBuilder builder = HttpClientBuilder.create();
-        testClient = builder.build();
+        httpClient = builder.build();
     }
 
     /**
-     * Sends beacon to mocked endpoint /beacon
-     *
-     * @param beacon
-     *
-     * @throws Exception
+     * Sends a beacon to the mocked endpoint.
      */
     private void sendBeacon(Map<String, String> beacon) throws Exception {
         List<NameValuePair> params = beacon.entrySet()
                 .stream()
                 .map(entry -> new BasicNameValuePair(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
-        mockMvc.perform(post("/beacon").contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .content(EntityUtils.toString(new UrlEncodedFormEntity(params)))).andExpect(status().isOk());
+
+        String beaconEntity = EntityUtils.toString(new UrlEncodedFormEntity(params));
+
+        mockMvc.perform(post("/beacon").contentType(MediaType.APPLICATION_FORM_URLENCODED).content(beaconEntity))
+                .andExpect(status().isOk());
     }
 
     private Map<String, String> getBasicBeacon() {
@@ -80,20 +102,17 @@ public class PrometheusExporterServiceIntTest {
         return beacon;
     }
 
-    void assertGet200(String url) throws Exception {
-        int statusCode = testClient.execute(new HttpGet(url)).getStatusLine().getStatusCode();
-
-        assertThat(statusCode).isEqualTo(200);
-    }
-
     @AfterEach
     public void closeClient() throws Exception {
-        testClient.close();
+        httpClient.close();
     }
 
     @Test
     public void testDefaultSettings() throws Exception {
-        assertGet200("http://localhost:8888/metrics");
+        HttpGet httpGet = new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics");
+        int statusCode = httpClient.execute(httpGet).getStatusLine().getStatusCode();
+
+        assertThat(statusCode).isEqualTo(200);
     }
 
     /**
@@ -108,8 +127,8 @@ public class PrometheusExporterServiceIntTest {
 
         sendBeacon(beacon);
 
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
-            HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
+        await().atMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
+            HttpResponse response = httpClient.execute(new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics)"));
             ResponseHandler responseHandler = new BasicResponseHandler();
             assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
             assertThat(responseHandler.handleResponse(response).toString()).doesNotContain("Fake Value");
@@ -128,11 +147,11 @@ public class PrometheusExporterServiceIntTest {
 
         sendBeacon(beacon);
 
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
-            HttpResponse response = testClient.execute(new HttpGet("http://localhost:8888/metrics)"));
+        await().atMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
+            HttpResponse response = httpClient.execute(new HttpGet("http://localhost:" + PROMETHEUS_PORT + "/metrics)"));
             ResponseHandler responseHandler = new BasicResponseHandler();
-            assertThat(responseHandler.handleResponse(response).toString())
-                    .contains("page_ready_time_SUM{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",} 12.0");
+            assertThat(responseHandler.handleResponse(response)
+                    .toString()).contains("page_ready_time_SUM{COUNTRY_CODE=\"\",OS=\"\",URL=\"http://test.com/login\",} 12.0");
         });
     }
 }
