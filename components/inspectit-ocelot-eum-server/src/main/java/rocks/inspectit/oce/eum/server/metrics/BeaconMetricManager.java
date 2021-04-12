@@ -15,9 +15,8 @@ import rocks.inspectit.oce.eum.server.configuration.model.BeaconRequirement;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.utils.TagUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.annotation.PostConstruct;
+import java.util.*;
 
 /**
  * Central component, which is responsible for writing beacon entries as OpenCensus views.
@@ -35,10 +34,26 @@ public class BeaconMetricManager {
     @Autowired(required = false)
     private List<BeaconRecorder> beaconRecorders;
 
+    private Map<String, String> usedExtraTags = new HashMap<>();
+
+    private Set<String> usedBeaconTagKeys = new HashSet<>();
+
     /**
      * Maps metric definitions to expressions.
      */
     private Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new HashMap<>();
+
+    @PostConstruct
+    public void processUsedTags() {
+        for (String tagContext : measuresAndViewsManager.getTagContextList()) {
+            if (configuration.getTags().getExtra().containsKey(tagContext)) {
+                usedExtraTags.put(tagContext, configuration.getTags().getExtra().get(tagContext));
+            }
+            if (configuration.getTags().getBeacon().containsKey(tagContext)) {
+                usedBeaconTagKeys.add(tagContext);
+            }
+        }
+    }
 
     /**
      * Processes boomerang beacon
@@ -108,8 +123,9 @@ public class BeaconMetricManager {
      * @param beacon Used to resolve tag values, which refer to a beacon entry
      */
     private TagContextBuilder getTagContextForBeacon(Beacon beacon) {
-        TagContextBuilder tagContextBuilder = measuresAndViewsManager.getTagContext();
-        for (String key : configuration.getTags().getBeacon().keySet()) {
+        processUsedTags();
+        TagContextBuilder tagContextBuilder = measuresAndViewsManager.getTagContext(usedExtraTags);
+        for (String key : usedBeaconTagKeys) {
             if (beacon.contains(key)) {
                 tagContextBuilder.putLocal(TagKey.create(key), TagUtils.createTagValue(key, beacon.get(key)));
             }
