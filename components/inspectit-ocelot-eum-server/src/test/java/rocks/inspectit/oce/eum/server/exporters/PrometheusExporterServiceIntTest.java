@@ -46,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration(initializers = PrometheusExporterServiceIntTest.EnvInitializer.class)
+@DirtiesContext
 @TestExecutionListeners(listeners = ResetMetricsTestExecutionListener.class)
 public class PrometheusExporterServiceIntTest {
 
