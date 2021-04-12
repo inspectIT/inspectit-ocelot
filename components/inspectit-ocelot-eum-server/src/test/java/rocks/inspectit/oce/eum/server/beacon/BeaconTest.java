@@ -16,17 +16,33 @@ class BeaconTest {
 
         private Beacon beacon;
 
+        private Beacon beaconWithHeader;
+
+        private String headerPrefix = "client.header";
+
         @BeforeEach
         private void before() {
-            HashMap<String, String> map = new HashMap<>();
-            map.put("first", "1");
-            map.put("second", "2");
-            beacon = Beacon.of(map);
+            HashMap<String, String> beaconMap = new HashMap<>();
+            beaconMap.put("first", "1");
+            beaconMap.put("second", "2");
+            beacon = Beacon.of(beaconMap);
+
+            HashMap<String, String> headerMap = new HashMap<>();
+            headerMap.put("firstHeader", "1");
+            headerMap.put("secondHeader", "2");
+            beaconWithHeader = Beacon.of(beaconMap, headerMap);
         }
 
         @Test
-        public void containsField() {
+        public void beaconContainsField() {
             boolean result = beacon.contains("first");
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void beaconWithHeaderContainsField() {
+            boolean result = beaconWithHeader.contains(headerPrefix + ".firstHeader");
 
             assertThat(result).isTrue();
         }
@@ -43,36 +59,83 @@ class BeaconTest {
         }
 
         @Test
-        public void containsFields() {
+        public void mergeWithHeader() {
+            HashMap<String, String> map = new HashMap<>();
+            map.put("first", "3");
+            map.put("third", "4");
+            Beacon beacon1 = Beacon.of(map);
+            beaconWithHeader = Beacon.merge(beaconWithHeader, beacon1);
+            assertThat(beaconWithHeader.contains(Arrays.asList("first", "second", "third", headerPrefix + ".firstHeader", headerPrefix + ".secondHeader")))
+                    .isTrue();
+            assertThat(beaconWithHeader.get("first")).isEqualTo("3");
+        }
+
+        @Test
+        public void beaconContainsFields() {
             boolean result = beacon.contains("first", "second");
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void doesNotContainField() {
+        public void beaconWithHeaderContainsFields() {
+            boolean result = beaconWithHeader.contains("first", "second", headerPrefix + ".firstHeader", headerPrefix + ".secondHeader");
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void beaconDoesNotContainField() {
             boolean result = beacon.contains("third");
 
             assertThat(result).isFalse();
         }
 
         @Test
-        public void doesNotContainFields() {
+        public void beaconWithHeaderDoesNotContainField() {
+            boolean result = beaconWithHeader.contains(headerPrefix + ".thirdHeader");
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void beaconDoesNotContainFields() {
             boolean result = beacon.contains("first", "third");
 
             assertThat(result).isFalse();
         }
 
         @Test
-        public void containsFieldsAsList() {
+        public void beaconWithHeaderDoesNotContainFields() {
+            boolean result = beaconWithHeader.contains(headerPrefix + ".firstHeader", headerPrefix + ".thirdHeader");
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void beaconContainsFieldsAsList() {
             boolean result = beacon.contains(Arrays.asList("first", "second"));
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void doesNotContainFieldsAsList() {
+        public void beaconWithHeaderContainsFieldsAsList() {
+            boolean result = beaconWithHeader.contains(Arrays.asList("first", "second", headerPrefix + ".firstHeader", headerPrefix + ".secondHeader"));
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        public void beaconDoesNotContainFieldsAsList() {
             boolean result = beacon.contains(Arrays.asList("first", "third"));
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        public void beaconWithHeaderDoesNotContainFieldsAsList() {
+            boolean result = beaconWithHeader.contains(Arrays.asList(headerPrefix + ".firstHeader", headerPrefix + ".thirdHeader"));
 
             assertThat(result).isFalse();
         }

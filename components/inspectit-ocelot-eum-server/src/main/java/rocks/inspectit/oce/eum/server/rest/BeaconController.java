@@ -2,6 +2,7 @@ package rocks.inspectit.oce.eum.server.rest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -38,14 +39,14 @@ public class BeaconController {
 
     @CrossOrigin
     @PostMapping("beacon")
-    public ResponseEntity beaconPost(@RequestBody MultiValueMap<String, String> formData) {
-        return processBeacon(formData);
+    public ResponseEntity beaconPost(@RequestBody MultiValueMap<String, String> formData, @RequestHeader MultiValueMap<String, String> clientHeader) {
+        return processBeacon(formData, clientHeader);
     }
 
     @CrossOrigin
     @GetMapping("beacon")
-    public ResponseEntity beaconGet(@RequestParam MultiValueMap<String, String> requestParams) {
-        return processBeacon(requestParams);
+    public ResponseEntity beaconGet(@RequestParam MultiValueMap<String, String> requestParams, @RequestHeader MultiValueMap<String, String> clientHeader) {
+        return processBeacon(requestParams, clientHeader);
     }
 
     /**
@@ -55,8 +56,8 @@ public class BeaconController {
      *
      * @return the response used as result for the request
      */
-    private ResponseEntity<Object> processBeacon(MultiValueMap<String, String> beaconData) {
-        Beacon beacon = beaconProcessor.process(Beacon.of(beaconData.toSingleValueMap()));
+    private ResponseEntity<Object> processBeacon(MultiValueMap<String, String> beaconData, MultiValueMap<String, String> clientHeaderData) {
+        Beacon beacon = beaconProcessor.process(Beacon.of(beaconData.toSingleValueMap(), clientHeaderData.toSingleValueMap()));
 
         // export beacon
         if (beaconHttpExporter != null) {

@@ -42,6 +42,8 @@ class BeaconControllerTest {
     @Mock
     private BeaconHttpExporter beaconHttpExporter;
 
+    private String headerPrefix = "client.header";
+
     @Nested
     public class BeaconPost {
 
@@ -50,10 +52,13 @@ class BeaconControllerTest {
             when(beaconProcessor.process(any())).then(i -> i.getArguments()[0]);
             when(beaconMetricManager.processBeacon(any())).thenReturn(true);
 
-            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-            map.add("key", "value");
+            MultiValueMap<String, String> beaconMap = new LinkedMultiValueMap<>();
+            beaconMap.add("beaconKey", "beaconValue");
 
-            ResponseEntity result = controller.beaconPost(map);
+            MultiValueMap<String, String> headerMap = new LinkedMultiValueMap<>();
+            headerMap.add("headerKey", "headerValue");
+
+            ResponseEntity result = controller.beaconPost(beaconMap, headerMap);
 
             ArgumentCaptor<Beacon> beaconCaptor = ArgumentCaptor.forClass(Beacon.class);
             verify(beaconMetricManager).processBeacon(beaconCaptor.capture());
@@ -62,9 +67,9 @@ class BeaconControllerTest {
             verifyNoMoreInteractions(beaconMetricManager, beaconProcessor, selfMonitoringService);
 
             assertThat(result).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
-            assertThat(beaconCaptor.getValue().toMap())
-                    .hasSize(1)
-                    .containsEntry("key", "value");
+            assertThat(beaconCaptor.getValue().toMap()).hasSize(2)
+                    .containsEntry("beaconKey", "beaconValue")
+                    .containsEntry(headerPrefix + ".headerKey", "headerValue");
         }
 
         @Test
@@ -72,9 +77,10 @@ class BeaconControllerTest {
             when(beaconProcessor.process(any())).then(i -> i.getArguments()[0]);
             when(beaconMetricManager.processBeacon(any())).thenReturn(false);
 
-            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+            MultiValueMap<String, String> beaconMap = new LinkedMultiValueMap<>();
+            MultiValueMap<String, String> headerMap = new LinkedMultiValueMap<>();
 
-            ResponseEntity result = controller.beaconPost(map);
+            ResponseEntity result = controller.beaconPost(beaconMap, headerMap);
 
             verify(beaconMetricManager).processBeacon(any());
             verify(beaconProcessor).process(any());
@@ -94,10 +100,13 @@ class BeaconControllerTest {
             when(beaconProcessor.process(any())).then(i -> i.getArguments()[0]);
             when(beaconMetricManager.processBeacon(any())).thenReturn(true);
 
-            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-            map.add("key", "value");
+            MultiValueMap<String, String> beaconMap = new LinkedMultiValueMap<>();
+            beaconMap.add("beaconKey", "beaconValue");
 
-            ResponseEntity result = controller.beaconGet(map);
+            MultiValueMap<String, String> headerMap = new LinkedMultiValueMap<>();
+            headerMap.add("headerKey", "headerValue");
+
+            ResponseEntity result = controller.beaconGet(beaconMap, headerMap);
 
             ArgumentCaptor<Beacon> beaconCaptor = ArgumentCaptor.forClass(Beacon.class);
             verify(beaconMetricManager).processBeacon(beaconCaptor.capture());
@@ -106,9 +115,9 @@ class BeaconControllerTest {
             verifyNoMoreInteractions(beaconMetricManager, beaconProcessor, selfMonitoringService);
 
             assertThat(result).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
-            assertThat(beaconCaptor.getValue().toMap())
-                    .hasSize(1)
-                    .containsEntry("key", "value");
+            assertThat(beaconCaptor.getValue().toMap()).hasSize(2)
+                    .containsEntry("beaconKey", "beaconValue")
+                    .containsEntry(headerPrefix + ".headerKey", "headerValue");
         }
 
         @Test
@@ -116,9 +125,10 @@ class BeaconControllerTest {
             when(beaconProcessor.process(any())).then(i -> i.getArguments()[0]);
             when(beaconMetricManager.processBeacon(any())).thenReturn(false);
 
-            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+            MultiValueMap<String, String> beaconMap = new LinkedMultiValueMap<>();
+            MultiValueMap<String, String> headerMap = new LinkedMultiValueMap<>();
 
-            ResponseEntity result = controller.beaconGet(map);
+            ResponseEntity result = controller.beaconGet(beaconMap, headerMap);
 
             verify(beaconMetricManager).processBeacon(any());
             verify(beaconProcessor).process(any());

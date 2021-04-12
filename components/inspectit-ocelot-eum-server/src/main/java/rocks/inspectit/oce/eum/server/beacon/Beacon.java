@@ -30,6 +30,20 @@ public class Beacon {
     }
 
     /**
+     * Creates a {@link Beacon} instance based on the given map.
+     *
+     * @param beaconMap       map which is used as base for the created {@link Beacon}
+     * @param clientHeaderMap client header map which is used for the created {@link Beacon}
+     *
+     * @return a new {@link Beacon} instance
+     */
+    public static Beacon of(Map<String, String> beaconMap, Map<String, String> clientHeaderMap) {
+        clientHeaderMap.forEach((key, value) -> beaconMap.put("client.header." + key, value));
+        HashMap<String, String> map = new HashMap<>(beaconMap);
+        return new Beacon(map);
+    }
+
+    /**
      * Merges two {@link Beacon}s. Existing values of beacon1 will be overwritten by values of beacon2.
      *
      * @param beacon1 The first Beacon
