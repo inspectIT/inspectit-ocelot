@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import rocks.inspectit.oce.eum.server.utils.ResetMetricsTestExecutionListener;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -30,8 +29,6 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
-@DirtiesContext
-@TestExecutionListeners(listeners = ResetMetricsTestExecutionListener.class)
 public class OpenTelemetryTraceControllerIntTest {
 
     @Autowired
@@ -73,18 +70,17 @@ public class OpenTelemetryTraceControllerIntTest {
                 assertThat(result.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 
                 verify(spanExporter).export(spanCaptor.capture());
-                assertThat(spanCaptor.getValue()).hasSize(2)
-                        .allSatisfy(data -> {
-                            assertThat(data.getTraceId()).isNotNull();
-                            assertThat(data.getSpanId()).isNotNull();
-                            assertThat(data.getKind()).isNotNull();
-                            assertThat(data.getName()).isNotNull();
-                            assertThat(data.getStartEpochNanos()).isGreaterThan(0);
-                            assertThat(data.getEndEpochNanos()).isGreaterThan(0);
-                            assertThat(data.getHasEnded()).isTrue();
-                            assertThat(data.getAttributes()).isNotEmpty();
-                            assertThat(data.getTimedEvents()).isNotEmpty();
-                        });
+                assertThat(spanCaptor.getValue()).hasSize(2).allSatisfy(data -> {
+                    assertThat(data.getTraceId()).isNotNull();
+                    assertThat(data.getSpanId()).isNotNull();
+                    assertThat(data.getKind()).isNotNull();
+                    assertThat(data.getName()).isNotNull();
+                    assertThat(data.getStartEpochNanos()).isGreaterThan(0);
+                    assertThat(data.getEndEpochNanos()).isGreaterThan(0);
+                    assertThat(data.getHasEnded()).isTrue();
+                    assertThat(data.getAttributes()).isNotEmpty();
+                    assertThat(data.getTimedEvents()).isNotEmpty();
+                });
             }
         }
 

@@ -22,12 +22,9 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.SocketUtils;
-import rocks.inspectit.oce.eum.server.utils.ResetMetricsTestExecutionListener;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,8 +43,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration(initializers = PrometheusExporterServiceIntTest.EnvInitializer.class)
-@DirtiesContext
-@TestExecutionListeners(listeners = ResetMetricsTestExecutionListener.class)
 public class PrometheusExporterServiceIntTest {
 
     private static String URL_KEY = "u";
@@ -74,6 +69,11 @@ public class PrometheusExporterServiceIntTest {
     protected MockMvc mockMvc;
 
     private static CloseableHttpClient httpClient;
+
+    @BeforeAll
+    public static void beforeClass() {
+        CollectorRegistry.defaultRegistry.clear();
+    }
 
     @BeforeEach
     public void initClient() {
