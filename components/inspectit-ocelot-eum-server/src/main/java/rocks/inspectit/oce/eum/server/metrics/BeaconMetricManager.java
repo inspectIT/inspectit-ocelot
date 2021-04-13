@@ -5,6 +5,7 @@ import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.oce.eum.server.arithmetic.RawExpression;
@@ -13,9 +14,9 @@ import rocks.inspectit.oce.eum.server.beacon.recorder.BeaconRecorder;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconRequirement;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.events.RegisteredTagsEvent;
 import rocks.inspectit.oce.eum.server.utils.TagUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 /**
@@ -34,25 +35,25 @@ public class BeaconMetricManager {
     @Autowired(required = false)
     private List<BeaconRecorder> beaconRecorders;
 
-    private Map<String, String> usedExtraTags = new HashMap<>();
-
-    private Set<String> usedBeaconTagKeys = new HashSet<>();
+    /**
+     * Set of all registered beacon tags
+     */
+    private Set<String> registeredBeaconTags = new HashSet<>();
 
     /**
      * Maps metric definitions to expressions.
      */
     private Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new HashMap<>();
 
-    @PostConstruct
-    public void processUsedTags() {
-        for (String tagContext : measuresAndViewsManager.getTagContextList()) {
-            if (configuration.getTags().getExtra().containsKey(tagContext)) {
-                usedExtraTags.put(tagContext, configuration.getTags().getExtra().get(tagContext));
-            }
+    @EventListener
+    public void processUsedTags(RegisteredTagsEvent registeredTagsEvent) {
+        Set<String> temp = new HashSet<>();
+        for (String tagContext : registeredTagsEvent.getRegisteredTags()) { // todo: Java Stream to filter out none used beacon tags and tests
             if (configuration.getTags().getBeacon().containsKey(tagContext)) {
-                usedBeaconTagKeys.add(tagContext);
+                temp.add(tagContext);
             }
         }
+        registeredBeaconTags = temp;
     }
 
     /**
@@ -123,9 +124,8 @@ public class BeaconMetricManager {
      * @param beacon Used to resolve tag values, which refer to a beacon entry
      */
     private TagContextBuilder getTagContextForBeacon(Beacon beacon) {
-        processUsedTags();
-        TagContextBuilder tagContextBuilder = measuresAndViewsManager.getTagContext(usedExtraTags);
-        for (String key : usedBeaconTagKeys) {
+        TagContextBuilder tagContextBuilder = measuresAndViewsManager.getTagContext();
+        for (String key : registeredBeaconTags) {
             if (beacon.contains(key)) {
                 tagContextBuilder.putLocal(TagKey.create(key), TagUtils.createTagValue(key, beacon.get(key)));
             }

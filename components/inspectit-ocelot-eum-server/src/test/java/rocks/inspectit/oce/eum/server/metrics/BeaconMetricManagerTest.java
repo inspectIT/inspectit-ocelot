@@ -76,7 +76,7 @@ public class BeaconMetricManagerTest {
 
         @BeforeEach
         public void setupMocks() {
-            when(measuresAndViewsManager.getTagContext(Mockito.any())).thenReturn(Tags.getTagger().emptyBuilder());
+            when(measuresAndViewsManager.getTagContext()).thenReturn(Tags.getTagger().emptyBuilder());
         }
 
         @Test

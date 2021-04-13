@@ -4,12 +4,12 @@ import io.opencensus.stats.*;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.Tags;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.msgpack.core.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.events.RegisteredTagsEvent;
 import rocks.inspectit.oce.eum.server.metrics.percentiles.TimeWindowViewManager;
 import rocks.inspectit.oce.eum.server.utils.TagUtils;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
@@ -43,8 +43,18 @@ public class MeasuresAndViewsManager {
     @Autowired
     private TimeWindowViewManager timeWindowViewManager;
 
-    @Getter
-    private Set<String> tagContextList = new HashSet<>();
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    /**
+     * Set of all registered tags
+     */
+    private Set<String> registeredTags = new HashSet<>();
+
+    /**
+     * Set of all registered extra tags
+     */
+    private Set<String> registeredExtraTags = new HashSet<>();
 
     /**
      * Records the measure.
@@ -163,12 +173,40 @@ public class MeasuresAndViewsManager {
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList()));
-        addToTagContextList(tags);
+        processRegisteredTags(tags);
         return tags.stream().map(TagKey::create).collect(Collectors.toList());
     }
 
-    private void addToTagContextList(Set<String> tags) {
-        tagContextList.addAll(tags);
+    /**
+     * Publish all registered tags as event, if the getTagKeysForView method is called and verify the registered extra tags.
+     *
+     * @param tags the registered tags
+     */
+    private void processRegisteredTags(Set<String> tags) {
+        registeredTags.addAll(tags);
+        RegisteredTagsEvent registeredTagsEvent = new RegisteredTagsEvent(this, registeredTags);
+        applicationEventPublisher.publishEvent(registeredTagsEvent);
+
+        for (String tag : tags) {
+            if (configuration.getTags().getExtra().containsKey(tag)) {
+                registeredExtraTags.add(tag);
+            }
+        }
+    }
+
+    /**
+     * Builds TagContext.
+     */
+    public TagContextBuilder getTagContext() {
+        TagContextBuilder tagContextBuilder = Tags.getTagger().currentBuilder();
+
+        for (String registeredExtraTag : registeredExtraTags) {
+            tagContextBuilder.putLocal(TagKey.create(registeredExtraTag), TagUtils.createTagValue(registeredExtraTag, configuration
+                    .getTags()
+                    .getExtra()
+                    .get(registeredExtraTag)));
+        }
+        return tagContextBuilder;
     }
 
     /**
@@ -179,7 +217,7 @@ public class MeasuresAndViewsManager {
      * @return {@link TagContextBuilder} which contains the custom and global (extra) tags
      */
     public TagContextBuilder getTagContext(Map<String, String> customTags) {
-        TagContextBuilder tagContextBuilder = Tags.getTagger().currentBuilder();
+        TagContextBuilder tagContextBuilder = getTagContext();
 
         for (Map.Entry<String, String> customTag : customTags.entrySet()) {
             tagContextBuilder.putLocal(TagKey.create(customTag.getKey()), TagUtils.createTagValue(customTag.getKey(), customTag
