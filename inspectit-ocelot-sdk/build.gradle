@@ -1,13 +1,12 @@
 
 apply plugin: 'java'
-apply plugin: "maven" //for publishing to the local maven repository
+apply plugin: 'maven' // for publishing to the local maven repository
 
 repositories {
     mavenLocal()
 }
 
-group = "rocks.inspectit.ocelot"
-
+group = 'rocks.inspectit.ocelot'
 sourceCompatibility = 1.8
 
 dependencies {
