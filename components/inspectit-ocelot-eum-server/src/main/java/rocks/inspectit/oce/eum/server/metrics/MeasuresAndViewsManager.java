@@ -1,9 +1,11 @@
 package rocks.inspectit.oce.eum.server.metrics;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.stats.*;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.Tags;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -54,6 +56,7 @@ public class MeasuresAndViewsManager {
     /**
      * Set of all registered extra tags
      */
+    @Getter
     private Set<String> registeredExtraTags = new HashSet<>();
 
     /**
@@ -182,7 +185,8 @@ public class MeasuresAndViewsManager {
      *
      * @param tags the registered tags
      */
-    private void processRegisteredTags(Set<String> tags) {
+    @VisibleForTesting
+    public void processRegisteredTags(Set<String> tags) {
         registeredTags.addAll(tags);
         RegisteredTagsEvent registeredTagsEvent = new RegisteredTagsEvent(this, registeredTags);
         applicationEventPublisher.publishEvent(registeredTagsEvent);

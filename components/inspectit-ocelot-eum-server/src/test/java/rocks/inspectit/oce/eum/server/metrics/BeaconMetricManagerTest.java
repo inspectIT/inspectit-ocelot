@@ -13,7 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.beacon.recorder.BeaconRecorder;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.BeaconTagSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.events.RegisteredTagsEvent;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import java.util.*;
@@ -30,7 +32,7 @@ public class BeaconMetricManagerTest {
     @InjectMocks
     BeaconMetricManager beaconMetricManager;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     EumServerConfiguration configuration;
 
     @Mock
@@ -44,6 +46,24 @@ public class BeaconMetricManagerTest {
 
     @Spy
     List<BeaconRecorder> beaconRecorders = ImmutableList.of(mock(BeaconRecorder.class));
+
+    private final Set<String> registeredTags = new HashSet<>(Arrays.asList("first", "second", "third"));
+
+    @Nested
+    class ProcessUsedTags {
+
+        @BeforeEach
+        void setupMocks() {
+            when(configuration.getTags()
+                    .getBeacon()).thenReturn(Collections.singletonMap("first", new BeaconTagSettings()));
+        }
+
+        @Test
+        void processOneUsedTag() {
+            beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
+            assertThat(beaconMetricManager.getRegisteredBeaconTags()).isEqualTo(Collections.singleton("first"));
+        }
+    }
 
     @Nested
     class ProcessBeacon {

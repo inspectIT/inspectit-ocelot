@@ -3,6 +3,7 @@ package rocks.inspectit.oce.eum.server.metrics;
 import io.opencensus.common.Scope;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -38,6 +39,7 @@ public class BeaconMetricManager {
     /**
      * Set of all registered beacon tags
      */
+    @Getter
     private Set<String> registeredBeaconTags = new HashSet<>();
 
     /**
@@ -48,7 +50,7 @@ public class BeaconMetricManager {
     @EventListener
     public void processUsedTags(RegisteredTagsEvent registeredTagsEvent) {
         Set<String> temp = new HashSet<>();
-        for (String tagContext : registeredTagsEvent.getRegisteredTags()) { // todo: Java Stream to filter out none used beacon tags and tests
+        for (String tagContext : registeredTagsEvent.getRegisteredTags()) {
             if (configuration.getTags().getBeacon().containsKey(tagContext)) {
                 temp.add(tagContext);
             }
