@@ -47,7 +47,7 @@ As a result, log messages, generated within an exported trace, will be prefixed 
 Note that the trace ID is only available when the log statement is within a trace which is sampled, otherwise the trace-id is empty.
 :::
 
-As already mentioned, by default the TraceID is inserted into the MDC under the key "traceid". However, this key can also be configured individually, which can be achieved with the following configuration:
+As already mentioned, by default the TraceID is inserted into the MDC under the key `"traceid"`. However, this key can also be configured individually, which can be achieved with the following configuration:
 ```yaml
 inspectit:
   tracing:
@@ -56,7 +56,7 @@ inspectit:
         key: "traceid" # the key which is used to store the trace id in the MDC
 ```
 
-By default, the trace-id will be inserted into all MDCs. If required, you can selectively exclude the supported libraries using the following flags:
+By default, the TraceID will be inserted into all MDCs. If required, you can selectively exclude the supported libraries using the following flags:
 ```yaml
 inspectit:
   tracing:
