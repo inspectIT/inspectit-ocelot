@@ -242,6 +242,18 @@ A `t_other` field containing `t_domloaded|437,boomr_fb|252` will produce the fol
 * `t_other.t_domloaded` = `437`
 * `t_other.boomr_fb` = `252`
 
+#### CLIENT.HEADER.*
+
+The `client.header.*` fields are resolved based on the headers of the beacons request.
+Each header will be available at a new attribute with the `client.header` prefix in the beacon.
+
+##### Example
+
+The headers `Accept-Encoding: gzip,deflate` and `Connection: keep-alive` will produce the follwing results:
+
+- `client.header.Accept-Encoding: gzip,deflate`
+- `client.header.Connection: keep-alive`
+
 #### RT.BMR.*
 
 The `rt.bmr.*` fields are resolved based on the content of the beacon's `rt.bmr` field.
