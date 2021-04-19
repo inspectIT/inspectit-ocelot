@@ -1,14 +1,12 @@
 package rocks.inspectit.oce.eum.server.beacon.processor;
 
 import com.google.common.annotations.VisibleForTesting;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 
-import java.util.Collections;
 import java.util.HashMap;
 
 /**
