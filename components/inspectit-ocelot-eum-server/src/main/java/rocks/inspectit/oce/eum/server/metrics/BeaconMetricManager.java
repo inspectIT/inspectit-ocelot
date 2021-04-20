@@ -1,10 +1,13 @@
 package rocks.inspectit.oce.eum.server.metrics;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.common.Scope;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.oce.eum.server.arithmetic.RawExpression;
@@ -12,12 +15,13 @@ import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.beacon.recorder.BeaconRecorder;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconRequirement;
+import rocks.inspectit.oce.eum.server.configuration.model.BeaconTagSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.oce.eum.server.events.RegisteredTagsEvent;
 import rocks.inspectit.oce.eum.server.utils.TagUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Central component, which is responsible for writing beacon entries as OpenCensus views.
@@ -36,9 +40,25 @@ public class BeaconMetricManager {
     private List<BeaconRecorder> beaconRecorders;
 
     /**
+     * Set of all registered beacon tags
+     */
+    @VisibleForTesting
+    Set<String> registeredBeaconTags = Collections.emptySet();
+
+    /**
      * Maps metric definitions to expressions.
      */
-    private Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new HashMap<>();
+    private final Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new HashMap<>();
+
+    @EventListener
+    public void processUsedTags(RegisteredTagsEvent registeredTagsEvent) {
+        Map<String, BeaconTagSettings> beaconTagSettings = configuration.getTags().getBeacon();
+
+        registeredBeaconTags = registeredTagsEvent.getRegisteredTags()
+                .stream()
+                .filter(beaconTagSettings::containsKey)
+                .collect(Collectors.toSet());
+    }
 
     /**
      * Processes boomerang beacon
@@ -109,7 +129,7 @@ public class BeaconMetricManager {
      */
     private TagContextBuilder getTagContextForBeacon(Beacon beacon) {
         TagContextBuilder tagContextBuilder = measuresAndViewsManager.getTagContext();
-        for (String key : configuration.getTags().getBeacon().keySet()) {
+        for (String key : registeredBeaconTags) {
             if (beacon.contains(key)) {
                 tagContextBuilder.putLocal(TagKey.create(key), TagUtils.createTagValue(key, beacon.get(key)));
             }

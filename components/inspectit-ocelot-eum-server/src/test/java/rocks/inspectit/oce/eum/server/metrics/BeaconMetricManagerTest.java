@@ -1,24 +1,23 @@
 package rocks.inspectit.oce.eum.server.metrics;
 
 import com.google.common.collect.ImmutableList;
-import io.opencensus.stats.MeasureMap;
+import com.google.common.collect.ImmutableMap;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.stats.ViewManager;
 import io.opencensus.tags.Tags;
+import org.apache.commons.math3.ml.neuralnet.MapUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.beacon.recorder.BeaconRecorder;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
+import rocks.inspectit.oce.eum.server.configuration.model.BeaconTagSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.oce.eum.server.configuration.model.EumTagsSettings;
+import rocks.inspectit.oce.eum.server.events.RegisteredTagsEvent;
 import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
 
 import java.util.*;
@@ -35,14 +34,11 @@ public class BeaconMetricManagerTest {
     @InjectMocks
     BeaconMetricManager beaconMetricManager;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     EumServerConfiguration configuration;
 
     @Mock
     MeasuresAndViewsManager measuresAndViewsManager;
-
-    @Mock
-    EumTagsSettings tagSettings;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     StatsRecorder statsRecorder;
@@ -50,13 +46,43 @@ public class BeaconMetricManagerTest {
     @Mock
     ViewManager viewManager;
 
-    @Mock
-    MeasureMap measureMap;
-
     @Spy
-    List<BeaconRecorder> beaconRecorders = ImmutableList.of(
-            mock(BeaconRecorder.class)
-    );
+    List<BeaconRecorder> beaconRecorders = ImmutableList.of(mock(BeaconRecorder.class));
+
+    private final Set<String> registeredTags = new HashSet<>(Arrays.asList("first", "second", "third"));
+
+    @Nested
+    class ProcessUsedTags {
+
+        @Test
+        void processOneUsedTag() {
+            Map<String, BeaconTagSettings> beaconSettings = Collections.singletonMap("first", new BeaconTagSettings());
+            when(configuration.getTags().getBeacon()).thenReturn(beaconSettings);
+
+            beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
+
+            assertThat(beaconMetricManager.registeredBeaconTags).containsExactly("first");
+        }
+
+        @Test
+        void processMultipleUsedTags() {
+            Map<String, BeaconTagSettings> beaconSettings = ImmutableMap.of("first", new BeaconTagSettings(), "third", new BeaconTagSettings());
+            when(configuration.getTags().getBeacon()).thenReturn(beaconSettings);
+
+            beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
+
+            assertThat(beaconMetricManager.registeredBeaconTags).containsExactlyInAnyOrder("first", "third");
+        }
+
+        @Test
+        void processNoTags() {
+            when(configuration.getTags().getBeacon()).thenReturn(Collections.emptyMap());
+
+            beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
+
+            assertThat(beaconMetricManager.registeredBeaconTags).isEmpty();
+        }
+    }
 
     @Nested
     class ProcessBeacon {
@@ -65,7 +91,8 @@ public class BeaconMetricManagerTest {
 
         @BeforeEach
         void setupConfiguration() {
-            ViewDefinitionSettings view = ViewDefinitionSettings.builder().bucketBoundaries(Arrays.asList(0d, 1d))
+            ViewDefinitionSettings view = ViewDefinitionSettings.builder()
+                    .bucketBoundaries(Arrays.asList(0d, 1d))
                     .aggregation(ViewDefinitionSettings.Aggregation.HISTOGRAM)
                     .tag("TAG_1", true)
                     .tag("TAG_2", true)
@@ -73,8 +100,7 @@ public class BeaconMetricManagerTest {
             Map<String, ViewDefinitionSettings> views = new HashMap<>();
             views.put("Dummy metric name/HISTOGRAM", view);
 
-            BeaconMetricDefinitionSettings dummyMetricDefinition = BeaconMetricDefinitionSettings
-                    .beaconMetricBuilder()
+            BeaconMetricDefinitionSettings dummyMetricDefinition = BeaconMetricDefinitionSettings.beaconMetricBuilder()
                     .valueExpression("{dummy_beacon_field}")
                     .description("Dummy description")
                     .type(rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings.MeasureType.DOUBLE)
@@ -89,8 +115,6 @@ public class BeaconMetricManagerTest {
 
         @BeforeEach
         public void setupMocks() {
-            when(configuration.getTags()).thenReturn(tagSettings);
-            when(tagSettings.getBeacon()).thenReturn(Collections.emptyMap());
             when(measuresAndViewsManager.getTagContext()).thenReturn(Tags.getTagger().emptyBuilder());
         }
 
