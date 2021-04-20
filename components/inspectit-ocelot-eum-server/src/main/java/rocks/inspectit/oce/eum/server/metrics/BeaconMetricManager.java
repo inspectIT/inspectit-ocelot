@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.eum.server.metrics;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.common.Scope;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
@@ -14,11 +15,13 @@ import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.beacon.recorder.BeaconRecorder;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconMetricDefinitionSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconRequirement;
+import rocks.inspectit.oce.eum.server.configuration.model.BeaconTagSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.events.RegisteredTagsEvent;
 import rocks.inspectit.oce.eum.server.utils.TagUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Central component, which is responsible for writing beacon entries as OpenCensus views.
@@ -39,23 +42,22 @@ public class BeaconMetricManager {
     /**
      * Set of all registered beacon tags
      */
-    @Getter
-    private Set<String> registeredBeaconTags = new HashSet<>();
+    @VisibleForTesting
+    Set<String> registeredBeaconTags = Collections.emptySet();
 
     /**
      * Maps metric definitions to expressions.
      */
-    private Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new HashMap<>();
+    private final Map<BeaconMetricDefinitionSettings, RawExpression> expressionCache = new HashMap<>();
 
     @EventListener
     public void processUsedTags(RegisteredTagsEvent registeredTagsEvent) {
-        Set<String> temp = new HashSet<>();
-        for (String tagContext : registeredTagsEvent.getRegisteredTags()) {
-            if (configuration.getTags().getBeacon().containsKey(tagContext)) {
-                temp.add(tagContext);
-            }
-        }
-        registeredBeaconTags = temp;
+        Map<String, BeaconTagSettings> beaconTagSettings = configuration.getTags().getBeacon();
+
+        registeredBeaconTags = registeredTagsEvent.getRegisteredTags()
+                .stream()
+                .filter(beaconTagSettings::containsKey)
+                .collect(Collectors.toSet());
     }
 
     /**

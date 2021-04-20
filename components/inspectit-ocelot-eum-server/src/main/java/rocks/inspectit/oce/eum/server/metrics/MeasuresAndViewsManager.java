@@ -5,6 +5,7 @@ import io.opencensus.stats.*;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.Tags;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +57,8 @@ public class MeasuresAndViewsManager {
     /**
      * Set of all registered extra tags
      */
-    @Getter
-    private Set<String> registeredExtraTags = new HashSet<>();
+    @VisibleForTesting
+    Set<String> registeredExtraTags = Collections.emptySet();
 
     /**
      * Records the measure.
@@ -176,7 +177,9 @@ public class MeasuresAndViewsManager {
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList()));
+
         processRegisteredTags(tags);
+
         return tags.stream().map(TagKey::create).collect(Collectors.toList());
     }
 
@@ -186,16 +189,15 @@ public class MeasuresAndViewsManager {
      * @param tags the registered tags
      */
     @VisibleForTesting
-    public void processRegisteredTags(Set<String> tags) {
+    void processRegisteredTags(Set<String> tags) {
         registeredTags.addAll(tags);
+
         RegisteredTagsEvent registeredTagsEvent = new RegisteredTagsEvent(this, registeredTags);
         applicationEventPublisher.publishEvent(registeredTagsEvent);
 
-        for (String tag : tags) {
-            if (configuration.getTags().getExtra().containsKey(tag)) {
-                registeredExtraTags.add(tag);
-            }
-        }
+        registeredExtraTags = registeredTags.stream()
+                .filter(configuration.getTags().getExtra()::containsKey)
+                .collect(Collectors.toSet());
     }
 
     /**

@@ -1,9 +1,11 @@
 package rocks.inspectit.oce.eum.server.metrics;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.stats.ViewManager;
 import io.opencensus.tags.Tags;
+import org.apache.commons.math3.ml.neuralnet.MapUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -52,16 +54,33 @@ public class BeaconMetricManagerTest {
     @Nested
     class ProcessUsedTags {
 
-        @BeforeEach
-        void setupMocks() {
-            when(configuration.getTags()
-                    .getBeacon()).thenReturn(Collections.singletonMap("first", new BeaconTagSettings()));
+        @Test
+        void processOneUsedTag() {
+            Map<String, BeaconTagSettings> beaconSettings = Collections.singletonMap("first", new BeaconTagSettings());
+            when(configuration.getTags().getBeacon()).thenReturn(beaconSettings);
+
+            beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
+
+            assertThat(beaconMetricManager.registeredBeaconTags).containsExactly("first");
         }
 
         @Test
-        void processOneUsedTag() {
+        void processMultipleUsedTags() {
+            Map<String, BeaconTagSettings> beaconSettings = ImmutableMap.of("first", new BeaconTagSettings(), "third", new BeaconTagSettings());
+            when(configuration.getTags().getBeacon()).thenReturn(beaconSettings);
+
             beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
-            assertThat(beaconMetricManager.getRegisteredBeaconTags()).isEqualTo(Collections.singleton("first"));
+
+            assertThat(beaconMetricManager.registeredBeaconTags).containsExactlyInAnyOrder("first", "third");
+        }
+
+        @Test
+        void processNoTags() {
+            when(configuration.getTags().getBeacon()).thenReturn(Collections.emptyMap());
+
+            beaconMetricManager.processUsedTags(new RegisteredTagsEvent(this, registeredTags));
+
+            assertThat(beaconMetricManager.registeredBeaconTags).isEmpty();
         }
     }
 
