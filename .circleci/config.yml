@@ -116,7 +116,7 @@ jobs:
   # Deploy pre-release documentation
   deploy-master-documentation:
     docker:
-      - image: circleci/node:8.11.1
+      - image: cimg/node:15.0.1
     working_directory: ~/inspectit
     steps:
       - attach_repo
@@ -132,7 +132,7 @@ jobs:
   # Deploy pre-release documentation
   deploy-release-documentation:
     docker:
-      - image: circleci/node:8.11.1
+      - image: cimg/node:15.0.1
     working_directory: ~/inspectit
     steps:
       - run:
