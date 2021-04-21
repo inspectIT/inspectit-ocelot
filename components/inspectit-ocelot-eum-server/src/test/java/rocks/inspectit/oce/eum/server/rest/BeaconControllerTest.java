@@ -62,9 +62,7 @@ class BeaconControllerTest {
             verifyNoMoreInteractions(beaconMetricManager, beaconProcessor, selfMonitoringService);
 
             assertThat(result).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
-            assertThat(beaconCaptor.getValue().toMap())
-                    .hasSize(1)
-                    .containsEntry("key", "value");
+            assertThat(beaconCaptor.getValue().toMap()).hasSize(1).containsEntry("key", "value");
         }
 
         @Test
@@ -106,9 +104,7 @@ class BeaconControllerTest {
             verifyNoMoreInteractions(beaconMetricManager, beaconProcessor, selfMonitoringService);
 
             assertThat(result).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
-            assertThat(beaconCaptor.getValue().toMap())
-                    .hasSize(1)
-                    .containsEntry("key", "value");
+            assertThat(beaconCaptor.getValue().toMap()).hasSize(1).containsEntry("key", "value");
         }
 
         @Test
