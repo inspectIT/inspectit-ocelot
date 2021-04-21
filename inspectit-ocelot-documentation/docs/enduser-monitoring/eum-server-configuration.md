@@ -246,13 +246,15 @@ A `t_other` field containing `t_domloaded|437,boomr_fb|252` will produce the fol
 
 The `client.header.*` fields are resolved based on the headers of the beacons request.
 Each header will be available at a new attribute with the `client.header` prefix in the beacon.
+Note: the capitalisation of the header name is preserved!
 
 ##### Example
 
-The headers `Accept-Encoding: gzip,deflate` and `Connection: keep-alive` will produce the follwing results:
+Assuming the request for sending a beacon to the EUM server contains the header `Accept-Encoding: gzip,deflate` and `Connection: keep-alive`.
+In this case, the following beacon properties will be generated and accessible via the configuration:
 
-- `client.header.Accept-Encoding: gzip,deflate`
-- `client.header.Connection: keep-alive`
+- `client.header.Accept-Encoding` with value `gzip,deflate`
+- `client.header.Connection` with value `keep-alive`
 
 #### RT.BMR.*
 

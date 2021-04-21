@@ -25,14 +25,15 @@ public class ClientHeaderBeaconProcessor implements BeaconProcessor {
 
     private final String HEADER_PREFIX = "client.header.";
 
+    /**
+     * Supplier for accessing the current request.
+     */
     @VisibleForTesting
-    public Supplier<HttpServletRequest> requestSupplier = this::getCurrentRequest;
+    Supplier<HttpServletRequest> requestSupplier = this::getCurrentRequest;
 
     @Override
     public Beacon process(Beacon beacon) {
-
         HttpServletRequest request = requestSupplier.get();
-
         if (request == null) {
             return beacon;
         }
@@ -43,15 +44,16 @@ public class ClientHeaderBeaconProcessor implements BeaconProcessor {
                         .getHeaders(header)))));
 
         return beacon.merge(requestHeaders);
-
     }
 
-    public HttpServletRequest getCurrentRequest() {
+    /**
+     * @return Returns the current {@link HttpServletRequest} or <code>null</code> in case no request exists.
+     */
+    private HttpServletRequest getCurrentRequest() {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (requestAttributes == null) {
             return null;
         }
         return requestAttributes.getRequest();
-
     }
 }
