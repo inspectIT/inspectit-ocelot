@@ -34,7 +34,7 @@ public class OpenTelemetryTraceControllerIntTest {
     @Autowired
     TestRestTemplate restTemplate;
 
-    @Value("classpath:ot-export-trace-v0.7.0.json")
+    @Value("classpath:ot-trace-v0.18.2.json")
     private Resource resource;
 
     @MockBean
@@ -77,9 +77,9 @@ public class OpenTelemetryTraceControllerIntTest {
                     assertThat(data.getName()).isNotNull();
                     assertThat(data.getStartEpochNanos()).isGreaterThan(0);
                     assertThat(data.getEndEpochNanos()).isGreaterThan(0);
-                    assertThat(data.getHasEnded()).isTrue();
-                    assertThat(data.getAttributes()).isNotEmpty();
-                    assertThat(data.getTimedEvents()).isNotEmpty();
+                    assertThat(data.hasEnded()).isTrue();
+                    assertThat(data.getAttributes().isEmpty()).isFalse();
+                    assertThat(data.getEvents()).isNotEmpty();
                 });
             }
         }

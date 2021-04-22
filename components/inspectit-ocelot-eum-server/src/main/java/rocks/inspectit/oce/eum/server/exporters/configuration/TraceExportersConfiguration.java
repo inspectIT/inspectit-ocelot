@@ -2,7 +2,7 @@ package rocks.inspectit.oce.eum.server.exporters.configuration;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.opentelemetry.exporters.jaeger.JaegerGrpcSpanExporter;
+import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +51,11 @@ public class TraceExportersConfiguration {
         } else {
             log.info("Starting Jaeger Exporter on grpc '{}'", jaegerExporterSettings.getGrpc());
         }
-        return JaegerGrpcSpanExporter.newBuilder()
+
+        System.setProperty("otel.resource.attributes", "service.name=" + jaegerExporterSettings.getServiceName());
+
+        return JaegerGrpcSpanExporter.builder()
                 .setChannel(channel)
-                .setServiceName(jaegerExporterSettings.getServiceName())
                 .build();
     }
 

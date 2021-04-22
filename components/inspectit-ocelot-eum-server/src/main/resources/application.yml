@@ -118,7 +118,7 @@ inspectit-eum-server:
     metrics:
       prometheus:
         # Determines whether the prometheus exporter is enabled.
-        enabled: true
+        enabled: false
 
         # The host of the prometheus HTTP endpoint.
         host: localhost
@@ -172,7 +172,7 @@ inspectit-eum-server:
         # Location of the jaeger gRPC API.
         # Either a valid NameResolver-compliant URI, or an authority string.
         # If this property is not set, the jaeger-exporter will not be started.
-        # grpc: localhost:14250
+        grpc: localhost:14250
 
         # service name for all exported spans.
         service-name: browser-js

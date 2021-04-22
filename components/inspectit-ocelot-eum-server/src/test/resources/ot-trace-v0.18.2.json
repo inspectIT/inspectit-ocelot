@@ -1,0 +1,185 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "my-application"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "webjs"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "0.18.2"
+            }
+          }
+        ],
+        "droppedAttributesCount": 0
+      },
+      "instrumentationLibrarySpans": [
+        {
+          "spans": [
+            {
+              "traceId": "b55a8f1765b7de5d040b25a55562c366",
+              "spanId": "aab55d7188f58f97",
+              "parentSpanId": "435541dffacb0fb9",
+              "name": "HTTP GET",
+              "kind": 3,
+              "startTimeUnixNano": 1619085815600309000,
+              "endTimeUnixNano": 1619085815912679000,
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://localhost:1337?command=three"
+                  }
+                },
+                {
+                  "key": "http.response_content_length",
+                  "value": {
+                    "intValue": 657
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": 200
+                  }
+                },
+                {
+                  "key": "http.status_text",
+                  "value": {
+                    "stringValue": "OK"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "localhost:1337"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36"
+                  }
+                }
+              ],
+              "droppedAttributesCount": 0,
+              "events": [
+                {
+                  "timeUnixNano": 1619085815600354000,
+                  "name": "open",
+                  "attributes": [],
+                  "droppedAttributesCount": 0
+                },
+                {
+                  "timeUnixNano": 1619085815600929000,
+                  "name": "send",
+                  "attributes": [],
+                  "droppedAttributesCount": 0
+                },
+                {
+                  "timeUnixNano": 1619085815601704000,
+                  "name": "fetchStart",
+                  "attributes": [],
+                  "droppedAttributesCount": 0
+                },
+                {
+                  "timeUnixNano": 1619085815603619000,
+                  "name": "domainLookupStart",
+                  "attributes": [],
+                  "droppedAttributesCount": 0
+                },
+                {
+                  "timeUnixNano": 1619085815603624000,
+                  "name": "domainLookupEnd",
+                  "attributes": [],
+                  "droppedAttributesCount": 0
+                },
+                {
+                  "timeUnixNano": 1619085815603624000,
+                  "name": "connectStart",
+                  "attributes": [],
+                  "droppedAttributesCount": 0
+                },
+                {
+                  "timeUnixNano": 1619085808586344000,
+                  "name": "secureConnectionStart",
+                  "attributes": [],
+                  "droppedAttributesCount": 0
+                },
+                {
+                  "timeUnixNano": 1619085815904579000,
+                  "name": "connectEnd",
+                  "attributes": [],
+                  "droppedAttributesCount": 0
+                },
+                {
+                  "timeUnixNano": 1619085815904639000,
+                  "name": "requestStart",
+                  "attributes": [],
+                  "droppedAttributesCount": 0
+                },
+                {
+                  "timeUnixNano": 1619085815909794000,
+                  "name": "responseStart",
+                  "attributes": [],
+                  "droppedAttributesCount": 0
+                },
+                {
+                  "timeUnixNano": 1619085815911829000,
+                  "name": "responseEnd",
+                  "attributes": [],
+                  "droppedAttributesCount": 0
+                },
+                {
+                  "timeUnixNano": 1619085815912679000,
+                  "name": "loaded",
+                  "attributes": [],
+                  "droppedAttributesCount": 0
+                }
+              ],
+              "droppedEventsCount": 0,
+              "status": {
+                "code": 0
+              },
+              "links": [],
+              "droppedLinksCount": 0
+            }
+          ],
+          "instrumentationLibrary": {
+            "name": "@opentelemetry/instrumentation-xml-http-request",
+            "version": "0.18.2"
+          }
+        }
+      ]
+    }
+  ]
+}
