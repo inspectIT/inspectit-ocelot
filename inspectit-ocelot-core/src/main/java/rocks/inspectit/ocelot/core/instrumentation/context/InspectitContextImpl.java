@@ -75,10 +75,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     /**
      * We only allow "data" of the following types to be used as tags
      */
-    private static final Set<Class<?>> ALLOWED_TAG_TYPES = new HashSet<>(Arrays.asList(
-            String.class, Character.class, Long.class, Integer.class, Short.class, Byte.class,
-            Double.class, Float.class, Boolean.class
-    ));
+    private static final Set<Class<?>> ALLOWED_TAG_TYPES = new HashSet<>(Arrays.asList(String.class, Character.class, Long.class, Integer.class, Short.class, Byte.class, Double.class, Float.class, Boolean.class));
 
     static final Context.Key<InspectitContextImpl> INSPECTIT_KEY = Context.key("inspectit-context");
 
@@ -208,6 +205,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * @param commonTags                         the common tags used to populate the data if this is a root context
      * @param defaultPropagation                 the data propagation settings to use if this is a root context. Otherwise the parent context's settings will be inherited.
      * @param interactWithApplicationTagContexts if true, data from the currently active {@link TagContext} will be inherited and makeActive will publish the data as a TagContext
+     *
      * @return the newly created context
      */
     public static InspectitContextImpl createFromCurrent(Map<String, String> commonTags, PropagationMetaData defaultPropagation, boolean interactWithApplicationTagContexts) {
@@ -224,7 +222,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
 
         return result;
     }
-
 
     public void setSpanScope(AutoCloseable spanScope) {
         currentSpanScope = spanScope;
@@ -315,8 +312,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * inherit the {@link #postEntryPhaseDownPropagatedData} from its parent.
      */
     private boolean isInDifferentThreadThanParentOrIsParentClosed() {
-        return parent != null &&
-                (parent.openingThread != openingThread || !parent.isInActiveOrExitPhase());
+        return parent != null && (parent.openingThread != openingThread || !parent.isInActiveOrExitPhase());
     }
 
     /**
@@ -330,14 +326,13 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     public Scope enterFullTagScope() {
         TagContextBuilder builder = Tags.getTagger().emptyBuilder();
-        dataTagsStream()
-                .forEach(e -> builder.putLocal(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getValue().toString())));
+        dataTagsStream().forEach(e -> builder.putLocal(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getKey()
+                .toString(), e.getValue().toString())));
         return builder.buildScoped();
     }
 
     private Stream<Map.Entry<String, Object>> dataTagsStream() {
-        return getDataAsStream()
-                .filter(e -> propagation.isTag(e.getKey()))
+        return getDataAsStream().filter(e -> propagation.isTag(e.getKey()))
                 .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()));
     }
 
@@ -346,6 +341,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * set via {@link #setData(String, Object)} or changed due to an up-propagation.
      *
      * @param key the name of the data to query
+     *
      * @return the data element which is related to the given key or `null` if it doesn't exist
      */
     @Override
@@ -370,7 +366,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
     public void setData(String key, Object value) {
         dataOverwrites.put(key, value);
     }
-
 
     /**
      * Closes this context.
@@ -431,18 +426,14 @@ public class InspectitContextImpl implements InternalInspectitContext {
                 spanContext = null;
             }
         }
-        return ContextPropagationUtil.buildPropagationHeaderMap(
-                getDataAsStream()
-                        .filter(e -> propagation.isPropagatedDownGlobally(e.getKey())),
-                spanContext
-        );
+        return ContextPropagationUtil.buildPropagationHeaderMap(getDataAsStream().filter(e -> propagation.isPropagatedDownGlobally(e
+                .getKey())), spanContext);
     }
 
     @Override
     public Map<String, String> getUpPropagationHeaders() {
-        return ContextPropagationUtil.buildPropagationHeaderMap(
-                getDataAsStream()
-                        .filter(e -> propagation.isPropagatedUpGlobally(e.getKey())));
+        return ContextPropagationUtil.buildPropagationHeaderMap(getDataAsStream().filter(e -> propagation.isPropagatedUpGlobally(e
+                .getKey())));
     }
 
     @Override
@@ -510,6 +501,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      *
      * @param tagKey          the key of the found tag
      * @param existingBuilder an existing builder to which the settings shall be added. If it is null, a builder is created using copy() on {@link #propagation}.
+     *
      * @return exisitingBuilder or the newly created builder if it was null.
      */
     private PropagationMetaData.Builder configureTagPropagation(String tagKey, PropagationMetaData.Builder existingBuilder) {
@@ -529,10 +521,11 @@ public class InspectitContextImpl implements InternalInspectitContext {
     }
 
     private Stream<Map.Entry<String, Object>> getDataAsStream() {
-        return Stream.concat(
-                postEntryPhaseDownPropagatedData.entrySet().stream().filter(e -> !dataOverwrites.containsKey(e.getKey())),
-                dataOverwrites.entrySet().stream().filter(e -> e.getValue() != null)
-        );
+        return Stream.concat(postEntryPhaseDownPropagatedData.entrySet()
+                .stream()
+                .filter(e -> !dataOverwrites.containsKey(e.getKey())), dataOverwrites.entrySet()
+                .stream()
+                .filter(e -> e.getValue() != null));
     }
 
     private Map<String, Object> getOrComputeActivePhaseDownPropagatedData() {
@@ -561,10 +554,13 @@ public class InspectitContextImpl implements InternalInspectitContext {
     }
 
     private Iterator<Tag> getPostEntryPhaseTags() {
-        return postEntryPhaseDownPropagatedData.entrySet().stream()
+        return postEntryPhaseDownPropagatedData.entrySet()
+                .stream()
                 .filter(e -> propagation.isTag(e.getKey()))
                 .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()))
-                .map(e -> Tag.create(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getValue().toString()), TagMetadata.create(TagMetadata.TagTtl.UNLIMITED_PROPAGATION)))
+                .map(e -> Tag.create(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getKey()
+                        .toString(), e.getValue()
+                        .toString()), TagMetadata.create(TagMetadata.TagTtl.UNLIMITED_PROPAGATION)))
                 .iterator();
     }
 
