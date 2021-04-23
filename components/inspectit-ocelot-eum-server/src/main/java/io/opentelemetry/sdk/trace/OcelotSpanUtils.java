@@ -17,6 +17,7 @@ import io.opentelemetry.sdk.internal.SystemClock;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class OcelotSpanUtils {
 
     /**
@@ -78,54 +80,59 @@ public class OcelotSpanUtils {
      * @return the created {@link SpanData} instance
      */
     public static SpanData createSpanData(Span protoSpan, Resource resource, InstrumentationLibraryInfo instrumentationLibraryInfo) {
-        String traceId = toIdString(protoSpan.getTraceId());
-        String spanId = toIdString(protoSpan.getSpanId());
-        String parentSpanId = toIdString(protoSpan.getParentSpanId());
+        try {
+            String traceId = toIdString(protoSpan.getTraceId());
+            String spanId = toIdString(protoSpan.getSpanId());
+            String parentSpanId = toIdString(protoSpan.getParentSpanId());
 
-        SpanContext spanContext = createSpanContext(traceId, spanId);
-        SpanContext parentSpanContext = createSpanContext(traceId, parentSpanId);
+            SpanContext spanContext = createSpanContext(traceId, spanId);
+            SpanContext parentSpanContext = createSpanContext(traceId, parentSpanId);
 
-        // span data
-        String name = protoSpan.getName();
-        long startTime = protoSpan.getStartTimeUnixNano();
-        SpanLimits spanLimits = SpanLimits.getDefault();
-        int totalRecordedLinks = protoSpan.getLinksCount() + protoSpan.getDroppedLinksCount();
-        SpanKind spanKind = toSpanKind(protoSpan.getKind());
-        List<LinkData> links = toLinkData(protoSpan.getLinksList());
+            // span data
+            String name = protoSpan.getName();
+            long startTime = protoSpan.getStartTimeUnixNano();
+            SpanLimits spanLimits = SpanLimits.getDefault();
+            int totalRecordedLinks = protoSpan.getLinksCount() + protoSpan.getDroppedLinksCount();
+            SpanKind spanKind = toSpanKind(protoSpan.getKind());
+            List<LinkData> links = toLinkData(protoSpan.getLinksList());
 
-        // convert attributes map to AttributesMap
-        Attributes spanAttributes = toAttributes(protoSpan.getAttributesList());
-        Map<AttributeKey<?>, Object> attributesMap = spanAttributes.asMap();
-        AttributesMap spanAttributesMap = new AttributesMap(attributesMap.size());
-        spanAttributesMap.putAll(attributesMap);
+            // convert attributes map to AttributesMap
+            Attributes spanAttributes = toAttributes(protoSpan.getAttributesList());
+            Map<AttributeKey<?>, Object> attributesMap = spanAttributes.asMap();
+            AttributesMap spanAttributesMap = new AttributesMap(attributesMap.size());
+            spanAttributesMap.putAll(attributesMap);
 
-        // creating the actual span
-        RecordEventsReadableSpan span = RecordEventsReadableSpan.startSpan(spanContext, name, instrumentationLibraryInfo, spanKind, parentSpanContext, NOOP_CONTEXT, spanLimits, NOOP_SPAN_PROCESSOR, SystemClock
-                .getInstance(), resource, spanAttributesMap, links, totalRecordedLinks, startTime);
+            // creating the actual span
+            RecordEventsReadableSpan span = RecordEventsReadableSpan.startSpan(spanContext, name, instrumentationLibraryInfo, spanKind, parentSpanContext, NOOP_CONTEXT, spanLimits, NOOP_SPAN_PROCESSOR, SystemClock
+                    .getInstance(), resource, spanAttributesMap, links, totalRecordedLinks, startTime);
 
-        // add events to the span - and filter events which occurred before the actual span
-        protoSpan.getEventsList()
-                .stream()
-                .filter(event -> event.getTimeUnixNano() >= span.getStartEpochNanos())
-                .forEach(event -> {
-                    Attributes attributes = toAttributes(event.getAttributesList());
-                    span.addEvent(event.getName(), attributes, event.getTimeUnixNano(), TimeUnit.NANOSECONDS);
-                });
+            // add events to the span - and filter events which occurred before the actual span
+            protoSpan.getEventsList()
+                    .stream()
+                    .filter(event -> event.getTimeUnixNano() >= span.getStartEpochNanos())
+                    .forEach(event -> {
+                        Attributes attributes = toAttributes(event.getAttributesList());
+                        span.addEvent(event.getName(), attributes, event.getTimeUnixNano(), TimeUnit.NANOSECONDS);
+                    });
 
-        // the span's status code
-        Status status = protoSpan.getStatus();
-        StatusCode statusCode = toStatusCode(status.getCode());
-        if (statusCode != null) {
-            span.setStatus(statusCode, status.getMessage());
+            // the span's status code
+            Status status = protoSpan.getStatus();
+            StatusCode statusCode = toStatusCode(status.getCode());
+            if (statusCode != null) {
+                span.setStatus(statusCode, status.getMessage());
+            }
+
+            // set end time if available
+            long endTime = protoSpan.getEndTimeUnixNano();
+            if (endTime > 0) {
+                span.end(endTime, TimeUnit.NANOSECONDS);
+            }
+
+            return span.toSpanData();
+        } catch (Exception e) {
+            log.warn("Error converting OT proto span {} to span data.", protoSpan, e);
+            return null;
         }
-
-        // set end time if available
-        long endTime = protoSpan.getEndTimeUnixNano();
-        if (endTime > 0) {
-            span.end(endTime, TimeUnit.NANOSECONDS);
-        }
-
-        return span.toSpanData();
     }
 
     /**
