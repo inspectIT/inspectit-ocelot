@@ -28,6 +28,10 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class for creating {@link SpanData} instances from {@link Span} ones. This class is in the OpenTelemetry package
+ * because it requires access to package-local classes, e.g. {@link RecordEventsReadableSpan}.
+ */
 @Slf4j
 public class OcelotSpanUtils {
 
