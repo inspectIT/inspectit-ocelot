@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class OpenTelemetryProtoConverterTest {
 
-    public static final String TRACE_REQUEST_FILE = "/ot-trace-large-v0.18.2.json";
+    public static final String TRACE_REQUEST_FILE = "/ot-trace-small-v0.18.2.json";
 
     @InjectMocks
     OpenTelemetryProtoConverter converter;
