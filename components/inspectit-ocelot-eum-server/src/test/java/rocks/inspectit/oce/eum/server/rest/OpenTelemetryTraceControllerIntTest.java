@@ -16,8 +16,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.InputStreamReader;
@@ -34,7 +32,7 @@ public class OpenTelemetryTraceControllerIntTest {
     @Autowired
     TestRestTemplate restTemplate;
 
-    @Value("classpath:ot-trace-v0.18.2.json")
+    @Value("classpath:ot-trace-small-v0.18.2.json")
     private Resource resource;
 
     @MockBean

@@ -14,6 +14,7 @@ import io.opentelemetry.sdk.trace.data.LinkData;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class OcelotRERSProxy {
 
@@ -50,14 +51,20 @@ public class OcelotRERSProxy {
         }
     };
 
-    public static RecordEventsReadableSpan create(SpanContext context, String name, InstrumentationLibraryInfo instrumentationLibraryInfo, SpanKind kind, @Nullable SpanContext parentSpanContext, SpanLimits spanLimits, Resource resource, Attributes attributes, List<LinkData> links, int totalRecordedLinks, long startEpochNanos) {
+    public static RecordEventsReadableSpan create(SpanContext context, String name, InstrumentationLibraryInfo instrumentationLibraryInfo, SpanKind kind, @Nullable SpanContext parentSpanContext, SpanLimits spanLimits, Resource resource, Attributes attributes, List<LinkData> links, int totalRecordedLinks, long startEpochNanos, long endTime) {
+        // convert attributes map to AttributesMap
         Map<AttributeKey<?>, Object> map = attributes.asMap();
-
         AttributesMap attributesMap = new AttributesMap(map.size());
         attributesMap.putAll(map);
 
-        return RecordEventsReadableSpan.startSpan(context, name, instrumentationLibraryInfo, kind, parentSpanContext, NOOP_CONTEXT, spanLimits, NOOP_SPAN_PROCESSOR, SystemClock
+        // create span
+        RecordEventsReadableSpan span = RecordEventsReadableSpan.startSpan(context, name, instrumentationLibraryInfo, kind, parentSpanContext, NOOP_CONTEXT, spanLimits, NOOP_SPAN_PROCESSOR, SystemClock
                 .getInstance(), resource, attributesMap, links, totalRecordedLinks, startEpochNanos);
+
+        // set end time
+        span.end(endTime, TimeUnit.NANOSECONDS);
+
+        return span;
     }
 
 }

@@ -14,20 +14,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class OpenTelemetryProtoConverterTest {
 
-    public static final String TRACE_REQUEST_FILE = "/ot-trace-v0.18.2.json";
+    public static final String TRACE_REQUEST_FILE = "/ot-trace-small-v0.18.2.json";
 
     @InjectMocks
     OpenTelemetryProtoConverter converter;
