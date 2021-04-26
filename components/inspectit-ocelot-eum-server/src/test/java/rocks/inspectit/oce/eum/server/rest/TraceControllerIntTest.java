@@ -27,12 +27,12 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
-public class OpenTelemetryTraceControllerIntTest {
+public class TraceControllerIntTest {
 
     @Autowired
     TestRestTemplate restTemplate;
 
-    @Value("classpath:ot-trace-small-v0.18.2.json")
+    @Value("classpath:ot-trace-large-v0.18.2.json")
     private Resource resource;
 
     @MockBean
@@ -81,7 +81,5 @@ public class OpenTelemetryTraceControllerIntTest {
                 });
             }
         }
-
     }
-
 }

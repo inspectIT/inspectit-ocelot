@@ -24,7 +24,7 @@ import java.util.List;
 
 @RestController()
 @Slf4j
-public class OpenTelemetryTraceController {
+public class TraceController {
 
     @Autowired
     private OpenTelemetryProtoConverter converter;

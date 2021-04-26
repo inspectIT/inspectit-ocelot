@@ -1,5 +1,6 @@
 package io.opentelemetry.sdk.trace;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
 import com.google.protobuf.ByteString;
 import io.opentelemetry.api.common.AttributeKey;
@@ -92,6 +93,11 @@ public class OcelotSpanUtils {
             SpanContext spanContext = createSpanContext(traceId, spanId);
             SpanContext parentSpanContext = createSpanContext(traceId, parentSpanId);
 
+            // only create spans with valid context
+            if (!spanContext.isValid()) {
+                return null;
+            }
+
             // span data
             String name = protoSpan.getName();
             long startTime = protoSpan.getStartTimeUnixNano();
@@ -142,7 +148,8 @@ public class OcelotSpanUtils {
     /**
      * @return Creates a {@link SpanContext} based on the given IDs.
      */
-    private static SpanContext createSpanContext(String traceId, String spanId) {
+    @VisibleForTesting
+    static SpanContext createSpanContext(String traceId, String spanId) {
         //TODO - TraceState and TraceFlags are currently not supported by this class!
         if (StringUtils.isEmpty(spanId)) {
             return SpanContext.getInvalid();
@@ -153,7 +160,8 @@ public class OcelotSpanUtils {
     /**
      * @return Returns the {@link StatusCode} which relates to the given {@link Status.StatusCode}.
      */
-    private static StatusCode toStatusCode(Status.StatusCode code) {
+    @VisibleForTesting
+    static StatusCode toStatusCode(Status.StatusCode code) {
         switch (code) {
             case STATUS_CODE_UNSET:
                 return StatusCode.UNSET;
