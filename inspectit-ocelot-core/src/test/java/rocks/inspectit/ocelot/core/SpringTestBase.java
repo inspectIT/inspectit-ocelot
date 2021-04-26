@@ -60,7 +60,7 @@ public class SpringTestBase {
     @BeforeEach
     public void clearTrackedLogs() {
         Mockito.reset(env.mockAppender);
-        when(env.mockAppender.getName()).thenReturn("MOCK");
+        doReturn("MOCK").when(env.mockAppender).getName();
     }
 
     static class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
