@@ -21,12 +21,6 @@ public class AgentCommandManager {
         agentCommandMap = new ConcurrentHashMap<>();
     }
 
-    /**
-     * Takes a String resembling the id of an agent aswell as an instance of {@link AgentCommand} and saves it.
-     * The command is ignored if the id is null.
-     * @param agentID The id of the agent.
-     * @param command The command the agent should execute.
-     */
     public void addCommand(String agentID, AgentCommand command) {
         if(agentID !=null && command != null) {
             if (!this.agentCommandMap.containsKey(agentID)) {

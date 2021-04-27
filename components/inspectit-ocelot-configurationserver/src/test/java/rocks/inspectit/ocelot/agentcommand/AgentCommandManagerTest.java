@@ -1,9 +1,9 @@
 package rocks.inspectit.ocelot.agentcommand;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.LinkedList;
@@ -16,12 +16,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class AgentCommandManagerTest {
 
+    @InjectMocks
     AgentCommandManager agentCommandManager;
-
-    @BeforeEach
-    public void init(){
-        agentCommandManager = new AgentCommandManager();
-    }
 
     @Nested
     class AddCommand {
