@@ -1,6 +1,7 @@
 package rocks.inspectit.oce.eum.server.rest;
 
 import com.google.common.io.CharStreams;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import org.junit.jupiter.api.Nested;
@@ -68,16 +69,18 @@ public class TraceControllerIntTest {
                 assertThat(result.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 
                 verify(spanExporter).export(spanCaptor.capture());
-                assertThat(spanCaptor.getValue()).hasSize(2).allSatisfy(data -> {
-                    assertThat(data.getTraceId()).isNotNull();
-                    assertThat(data.getSpanId()).isNotNull();
-                    assertThat(data.getKind()).isNotNull();
-                    assertThat(data.getName()).isNotNull();
-                    assertThat(data.getStartEpochNanos()).isGreaterThan(0);
-                    assertThat(data.getEndEpochNanos()).isGreaterThan(0);
+                assertThat(spanCaptor.getValue()).hasSize(1).allSatisfy(data -> {
+                    assertThat(data.getTraceId()).isEqualTo("03c2a546267d1e90d70269bdc02babef");
+                    assertThat(data.getSpanId()).isEqualTo("c29e6dd2a1e1e7ae");
+                    assertThat(data.getParentSpanId()).isEqualTo("915c20356ab50086");
+                    assertThat(data.getKind()).isEqualTo(SpanKind.CLIENT);
+                    assertThat(data.getName()).isEqualTo("HTTP GET");
+                    assertThat(data.getStartEpochNanos()).isEqualTo(1619166153906575000L);
+                    assertThat(data.getEndEpochNanos()).isEqualTo(1619166154225390000L);
                     assertThat(data.hasEnded()).isTrue();
-                    assertThat(data.getAttributes().isEmpty()).isFalse();
-                    assertThat(data.getEvents()).isNotEmpty();
+                    assertThat(data.getAttributes().asMap()).hasSize(3);
+                    assertThat(data.getEvents()).hasSize(1);
+                    assertThat(data.getLinks()).isEmpty();
                 });
             }
         }
