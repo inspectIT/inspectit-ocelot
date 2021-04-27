@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.rest.agent;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,10 +9,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import rocks.inspectit.ocelot.agentcommand.AgentCallbackManager;
-import rocks.inspectit.ocelot.agentcommand.AgentCommand;
-import rocks.inspectit.ocelot.agentcommand.AgentCommandManager;
-import rocks.inspectit.ocelot.agentcommand.AgentResponse;
+import rocks.inspectit.ocelot.agentcommunication.AgentCallbackManager;
+import rocks.inspectit.ocelot.commons.models.AgentCommand;
+import rocks.inspectit.ocelot.agentcommunication.AgentCommandManager;
+import rocks.inspectit.ocelot.commons.models.AgentResponse;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
@@ -93,52 +92,34 @@ public class AgentControllerTest {
     public class FetchNewCommand {
 
         @Test
-        public void noIdInHeader() throws JsonProcessingException, ExecutionException {
-            AgentCommand expectedCommand = AgentCommand.getEmptyCommand();
-            String expectedJson = new ObjectMapper().writer()
-                    .withDefaultPrettyPrinter()
-                    .writeValueAsString(expectedCommand);
-
-            ResponseEntity<String> result = controller.fetchNewCommand(new HashMap<>(), null);
-
-            assertThat(result.getBody()).isEqualTo(expectedJson);
-        }
-
-        @Test
-        public void commandAvailable() throws JsonProcessingException, ExecutionException {
+        public void agentWithoutResponse() throws JsonProcessingException, ExecutionException {
             HashMap<String, String> headers = new HashMap<>();
             String agentTestId = "test-id";
             headers.put("x-ocelot-agent-id", agentTestId);
-            AgentCommand testCommand = AgentCommand.getEmptyCommand();
-            String expectedJson = new ObjectMapper().writer()
-                    .withDefaultPrettyPrinter()
-                    .writeValueAsString(testCommand);
-            doReturn(testCommand).when(agentCommandManager).getCommand(agentTestId);
+            AgentCommand expectedCommand = AgentCommand.getEmptyCommand();
+            doReturn(expectedCommand).when(agentCommandManager).getCommand(agentTestId);
 
-            ResponseEntity<String> result = controller.fetchNewCommand(headers, null);
+            ResponseEntity<AgentCommand> result = controller.fetchNewCommand(headers, null);
 
-            assertThat(result.getBody()).isEqualTo(expectedJson);
+            assertThat(result.getBody()).isEqualTo(expectedCommand);
             verify(agentCommandManager).getCommand(agentTestId);
         }
 
         @Test
-        public void hasResponse() throws JsonProcessingException, ExecutionException {
+        public void agentHasResponse() throws JsonProcessingException, ExecutionException {
             HashMap<String, String> headers = new HashMap<>();
             String agentTestId = "test-id";
             headers.put("x-ocelot-agent-id", agentTestId);
-            AgentCommand testCommand = new AgentCommand(null, agentTestId, null, null);
-            String expectedJson = new ObjectMapper().writer()
-                    .withDefaultPrettyPrinter()
-                    .writeValueAsString(testCommand);
-            doReturn(testCommand).when(agentCommandManager).getCommand(agentTestId);
+            AgentCommand expectedCommand = new AgentCommand(null, agentTestId, null, null);
+            doReturn(expectedCommand).when(agentCommandManager).getCommand(agentTestId);
             AgentResponse mockResponse = mock(AgentResponse.class);
             UUID mockID = UUID.randomUUID();
             doReturn(mockID).when(mockResponse).getCommandId();
             doNothing().when(agentCallbackManager).runNextCommandWithId(agentTestId, mockID);
 
-            ResponseEntity<String> result = controller.fetchNewCommand(headers, mockResponse);
+            ResponseEntity<AgentCommand> result = controller.fetchNewCommand(headers, mockResponse);
 
-            assertThat(result.getBody()).isEqualTo(expectedJson);
+            assertThat(result.getBody()).isEqualTo(expectedCommand);
             verify(agentCommandManager).getCommand(agentTestId);
             verify(agentCallbackManager).runNextCommandWithId(agentTestId, mockID);
         }

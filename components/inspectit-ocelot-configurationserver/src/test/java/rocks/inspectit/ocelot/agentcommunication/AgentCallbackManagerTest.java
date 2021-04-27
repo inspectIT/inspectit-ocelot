@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.agentcommand;
+package rocks.inspectit.ocelot.agentcommunication;
 
 import com.google.common.cache.LoadingCache;
 import org.junit.jupiter.api.Nested;
@@ -33,7 +33,7 @@ public class AgentCallbackManagerTest {
 
             agentCallbackManager.addCallbackCommand(agentId, id, mockThread);
 
-            Map<String, LinkedList<Thread>> agentCallBackMap = agentCallbackManager.agentCallBackMap.asMap();
+            Map<String, LinkedList<Thread>> agentCallBackMap = agentCallbackManager.agentCallBackCache.asMap();
             assertThat(agentCallBackMap).hasSize(1);
             LinkedList<Thread> list = agentCallBackMap.get(expectedId);
             assertThat(list).hasSize(1);
@@ -46,7 +46,7 @@ public class AgentCallbackManagerTest {
 
             agentCallbackManager.addCallbackCommand(null, null, mockThread);
 
-            Map<String, LinkedList<Thread>> agentCallBackMap = agentCallbackManager.agentCallBackMap.asMap();
+            Map<String, LinkedList<Thread>> agentCallBackMap = agentCallbackManager.agentCallBackCache.asMap();
             assertThat(agentCallBackMap).hasSize(0);
         }
     }
@@ -58,7 +58,7 @@ public class AgentCallbackManagerTest {
         public void hasCommand() throws ExecutionException {
             Thread mockCommandThread = mock(Thread.class);
             UUID id = UUID.randomUUID();
-            agentCallbackManager.agentCallBackMap.get(id.toString()).push(mockCommandThread);
+            agentCallbackManager.agentCallBackCache.get(id.toString()).push(mockCommandThread);
 
             agentCallbackManager.runNextCommandWithId("", id);
 
@@ -66,17 +66,17 @@ public class AgentCallbackManagerTest {
             verify(mockCommandThread).start();
 
             //Verify that the command was removed from the map.
-            Map<String, LinkedList<Thread>> map = agentCallbackManager.agentCallBackMap.asMap();
+            Map<String, LinkedList<Thread>> map = agentCallbackManager.agentCallBackCache.asMap();
             assertThat(map).isEmpty();
         }
 
         @Test
         public void ignoresNullParams() throws ExecutionException {
-            agentCallbackManager.agentCallBackMap = mock(LoadingCache.class);
+            agentCallbackManager.agentCallBackCache = mock(LoadingCache.class);
 
             agentCallbackManager.runNextCommandWithId(null, null);
 
-            verifyZeroInteractions(agentCallbackManager.agentCallBackMap);
+            verifyZeroInteractions(agentCallbackManager.agentCallBackCache);
         }
 
     }

@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.agentcommand;
+package rocks.inspectit.ocelot.commons.models;
 
 /**
  * Contains all types of AgentCommands which are currently supported.

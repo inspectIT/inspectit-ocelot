@@ -1,11 +1,9 @@
-package rocks.inspectit.ocelot.agentcommand;
+package rocks.inspectit.ocelot.commons.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -13,6 +11,7 @@ import java.util.UUID;
  */
 @Data
 @Getter
+@AllArgsConstructor
 public class AgentResponse {
 
     public static AgentResponse emptyResponse;
@@ -22,11 +21,6 @@ public class AgentResponse {
             emptyResponse = new AgentResponse(null, null);
         }
         return emptyResponse;
-    }
-
-    public AgentResponse(@JsonProperty("commandId") UUID commandId, @JsonProperty("payload") Object payload) {
-        this.commandId = commandId;
-        this.payload = payload;
     }
 
     /**

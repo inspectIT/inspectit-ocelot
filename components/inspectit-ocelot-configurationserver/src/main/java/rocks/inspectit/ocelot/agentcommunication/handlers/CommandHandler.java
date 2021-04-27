@@ -1,10 +1,11 @@
-package rocks.inspectit.ocelot.agentcommand;
+package rocks.inspectit.ocelot.agentcommunication.handlers;
 
 import org.springframework.web.context.request.async.DeferredResult;
+import rocks.inspectit.ocelot.commons.models.AgentCommand;
 
 import java.util.concurrent.ExecutionException;
 
-public interface AgentCommandHandler {
+public interface CommandHandler {
 
     /**
      * Takes an instance of {@link AgentCommand} and executes it.

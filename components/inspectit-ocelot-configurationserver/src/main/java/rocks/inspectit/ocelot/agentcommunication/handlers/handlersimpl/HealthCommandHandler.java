@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.agentcommand.agentcommandhandlerimpl;
+package rocks.inspectit.ocelot.agentcommunication.handlers.handlersimpl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,7 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
-import rocks.inspectit.ocelot.agentcommand.*;
+import rocks.inspectit.ocelot.agentcommunication.*;
+import rocks.inspectit.ocelot.agentcommunication.handlers.CommandHandler;
+import rocks.inspectit.ocelot.commons.models.AgentCommand;
+import rocks.inspectit.ocelot.commons.models.AgentCommandType;
 
 import java.util.concurrent.ExecutionException;
 
@@ -15,7 +18,7 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 @Component
-public class AgentHealthCommandHandler implements AgentCommandHandler {
+public class HealthCommandHandler implements CommandHandler {
 
     /**
      * The type of command this handler is responsible for.

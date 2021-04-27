@@ -12,10 +12,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
-import rocks.inspectit.ocelot.agentcommand.*;
+import rocks.inspectit.ocelot.agentcommunication.*;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
+import rocks.inspectit.ocelot.commons.models.AgentCommand;
+import rocks.inspectit.ocelot.commons.models.AgentCommandType;
+import rocks.inspectit.ocelot.commons.models.AgentResponse;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
@@ -75,10 +78,10 @@ public class AgentController extends AbstractBaseController {
      *
      * @param headers the standard request headers of the agent. Must at least contain the key x-ocelot-agent-id.
      *
-     * @return Returns either a ResponseEntity with the next command as payload or an emtpy payload.
+     * @return Returns either a ResponseEntity with the next command as payload or an empty payload.
      */
     @PostMapping(value = "agent/command", produces = "application/json")
-    public ResponseEntity<String> fetchNewCommand(@RequestHeader Map<String, String> headers, @RequestBody AgentResponse response) throws JsonProcessingException, ExecutionException {
+    public ResponseEntity<AgentCommand> fetchNewCommand(@RequestHeader Map<String, String> headers, @RequestBody AgentResponse response) throws ExecutionException {
         String agentID = headers.get("x-ocelot-agent-id");
         UUID commandID = null;
         if (response != null) {
@@ -90,12 +93,7 @@ public class AgentController extends AbstractBaseController {
         }
 
         AgentCommand agentCommand = agentCommandManager.getCommand(agentID);
-        String agentCommandJson = objectWriter.writeValueAsString(AgentCommand.getEmptyCommand());
-        if (agentCommand != null) {
-            agentCommandJson = objectWriter.writeValueAsString(agentCommand);
-        }
-
-        return ResponseEntity.ok().eTag(String.valueOf(agentCommandJson.hashCode())).body(agentCommandJson);
+        return ResponseEntity.ok().body(agentCommand);
     }
 
     /**
