@@ -81,7 +81,7 @@ public class AgentController extends AbstractBaseController {
     public ResponseEntity<String> fetchNewCommand(@RequestHeader Map<String, String> headers, @RequestBody AgentResponse response) throws JsonProcessingException, ExecutionException {
         String agentID = headers.get("x-ocelot-agent-id");
         UUID commandID = null;
-        if (!AgentResponse.getEmptyResponse().equals(response)) {
+        if (response != null) {
             commandID = response.getCommandId();
         }
 

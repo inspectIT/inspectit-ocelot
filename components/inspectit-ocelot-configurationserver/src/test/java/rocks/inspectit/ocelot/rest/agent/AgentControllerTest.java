@@ -94,9 +94,14 @@ public class AgentControllerTest {
 
         @Test
         public void noIdInHeader() throws JsonProcessingException, ExecutionException {
+            AgentCommand expectedCommand = AgentCommand.getEmptyCommand();
+            String expectedJson = new ObjectMapper().writer()
+                    .withDefaultPrettyPrinter()
+                    .writeValueAsString(expectedCommand);
+
             ResponseEntity<String> result = controller.fetchNewCommand(new HashMap<>(), null);
 
-            assertThat(result.getBody()).isEqualTo("");
+            assertThat(result.getBody()).isEqualTo(expectedJson);
         }
 
         @Test
@@ -104,7 +109,7 @@ public class AgentControllerTest {
             HashMap<String, String> headers = new HashMap<>();
             String agentTestId = "test-id";
             headers.put("x-ocelot-agent-id", agentTestId);
-            AgentCommand testCommand = new AgentCommand(null, agentTestId, null, null);
+            AgentCommand testCommand = AgentCommand.getEmptyCommand();
             String expectedJson = new ObjectMapper().writer()
                     .withDefaultPrettyPrinter()
                     .writeValueAsString(testCommand);
