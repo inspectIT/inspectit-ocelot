@@ -29,6 +29,11 @@ public class HttpConfigSettings {
     private URL url;
 
     /**
+     * The URL for fetching agent commands.
+     */
+    private URL commandUrl;
+
+    /**
      * If specified, the agent will persist the last fetched configuration to the given file.
      * When the JVM restarts and the config server is not reachable
      */
