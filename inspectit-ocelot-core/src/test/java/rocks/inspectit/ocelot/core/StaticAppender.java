@@ -3,8 +3,8 @@ package rocks.inspectit.ocelot.core;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Logback appender which store log events for all existing log levels.
@@ -14,7 +14,7 @@ public class StaticAppender extends AppenderBase<ILoggingEvent> {
     /**
      * List that holds the log events.
      */
-    static List<ILoggingEvent> events = new ArrayList<>();
+    private static final List<ILoggingEvent> events = new CopyOnWriteArrayList<>();
 
     static final StaticAppender APPENDER = new StaticAppender();
 
