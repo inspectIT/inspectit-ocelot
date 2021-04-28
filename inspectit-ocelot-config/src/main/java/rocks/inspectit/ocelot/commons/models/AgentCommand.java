@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.commons.models;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @Data
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class AgentCommand {
 
     public static AgentCommand emptyCommand;

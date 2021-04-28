@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.commons.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
@@ -10,16 +10,13 @@ import java.util.UUID;
  * Represents a command to be executed by an inspectIT agent.
  */
 @Data
-@Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class AgentResponse {
 
-    public static AgentResponse emptyResponse;
+    public static final AgentResponse emptyResponse = new AgentResponse(null, null);
 
     public static AgentResponse getEmptyResponse() {
-        if (emptyResponse == null) {
-            emptyResponse = new AgentResponse(null, null);
-        }
         return emptyResponse;
     }
 
