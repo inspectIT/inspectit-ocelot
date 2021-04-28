@@ -3,24 +3,25 @@ package rocks.inspectit.ocelot.commons.models;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Represents a command to be executed by an inspecIT agent.
+ * Represents a command to be executed by an inspectIT agent.
  */
 @Data
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class AgentCommand {
 
-    public static AgentCommand emptyCommand;
+    public static final AgentCommand emptyCommand = new AgentCommand(null, null, null, null);
+
+    ;
 
     public static AgentCommand getEmptyCommand() {
-        if (emptyCommand == null) {
-            emptyCommand = new AgentCommand(null, null, null, null);
-        }
         return emptyCommand;
     }
 
