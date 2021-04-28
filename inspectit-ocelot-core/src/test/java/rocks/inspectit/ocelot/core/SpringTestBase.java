@@ -28,6 +28,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.mockito.Mockito.*;
 
 /**
@@ -54,13 +56,12 @@ public class SpringTestBase {
      */
     public void updateProperties(Consumer<MockPropertySource> propsCustomizer) {
         env.updatePropertySources((propsList) -> propsCustomizer.accept(env.mockProperties));
-        env.addMockAppender();
+        env.addAppender();
     }
 
     @BeforeEach
     public void clearTrackedLogs() {
-        Mockito.reset(env.mockAppender);
-        doReturn("MOCK").when(env.mockAppender).getName();
+        StaticAppender.clearEvents();
     }
 
     static class TestContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -75,12 +76,9 @@ public class SpringTestBase {
 
             MockPropertySource mockProperties;
 
-            Appender<ILoggingEvent> mockAppender = Mockito.mock(Appender.class);
-
             public TestInspectitEnvironment(ConfigurableApplicationContext ctx) {
                 super(ctx, Optional.empty());
-                when(mockAppender.getName()).thenReturn("MOCK");
-                addMockAppender();
+                addAppender();
             }
 
             @Override
@@ -92,13 +90,14 @@ public class SpringTestBase {
                 super.configurePropertySources(cmdArgs);
             }
 
-            void addMockAppender() {
+            private synchronized void addAppender() {
                 Logger root = (Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-                Appender<ILoggingEvent> appender = root.getAppender("MOCK");
-                if (appender != null) {
-                    root.detachAppender(appender);
+
+                Appender<ILoggingEvent> appender = root.getAppender(StaticAppender.APPENDER_NAME);
+                if (appender == null) {
+                    StaticAppender.APPENDER.start();
+                    root.addAppender(StaticAppender.APPENDER);
                 }
-                root.addAppender(mockAppender);
             }
         }
 
@@ -121,7 +120,6 @@ public class SpringTestBase {
 
             new TestInspectitEnvironment(ctx);
             ctx.addBeanFactoryPostProcessor(fac -> fac.registerSingleton("instrumentation", initInstrumentationMock()));
-
         }
     }
 
@@ -131,7 +129,8 @@ public class SpringTestBase {
      * @param level the level to compare against.
      */
     public void assertNoLogsOfLevelOrGreater(Level level) {
-        verify(env.mockAppender, times(0)).doAppend(argThat((le) -> le.getLevel().isGreaterOrEqual(level)));
+        assertThat(StaticAppender.getEvents()).extracting(ILoggingEvent::getLevel)
+                .noneMatch(le -> le.isGreaterOrEqual(level));
     }
 
     /**
@@ -140,7 +139,8 @@ public class SpringTestBase {
      * @param level the level to compare against.
      */
     public void assertLogsOfLevelOrGreater(Level level) {
-        verify(env.mockAppender, atLeastOnce()).doAppend(argThat((le) -> le.getLevel().isGreaterOrEqual(level)));
+        assertThat(StaticAppender.getEvents()).extracting(ILoggingEvent::getLevel)
+                .anyMatch(le -> le.isGreaterOrEqual(level));
     }
 
 }
