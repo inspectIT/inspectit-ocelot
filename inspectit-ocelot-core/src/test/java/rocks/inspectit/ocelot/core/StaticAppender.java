@@ -6,12 +6,21 @@ import ch.qos.logback.core.AppenderBase;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Logback appender which store log events for all existing log levels.
+ */
 public class StaticAppender extends AppenderBase<ILoggingEvent> {
 
+    /**
+     * List that holds the log events.
+     */
     static List<ILoggingEvent> events = new ArrayList<>();
 
     static final StaticAppender APPENDER = new StaticAppender();
 
+    /**
+     * Name of the appender.
+     */
     static final String APPENDER_NAME = "static-appender";
 
     private StaticAppender() {
