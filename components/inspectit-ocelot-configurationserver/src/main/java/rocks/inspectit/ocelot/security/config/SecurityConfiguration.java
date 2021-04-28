@@ -55,16 +55,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(
-                "/v2/api-docs",
-                "/configuration/**",
-                "/csrf",
-                "/",
-                "/ui/**",
-                "/actuator/**",
-                "/swagger*/**",
-                "/webjars/**",
-                "/api/v1/agent/configuration");
+        web.ignoring()
+                .antMatchers("/v2/api-docs", "/configuration/**", "/csrf", "/", "/ui/**", "/actuator/**", "/swagger*/**", "/webjars/**", "/api/v1/agent/configuration", "/api/v1/agent/command");
     }
 
     @Override
