@@ -79,8 +79,8 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
             for (MemoryPoolMXBean memoryPoolBean : ManagementFactory.getPlatformMXBeans(MemoryPoolMXBean.class)) {
                 String area = MemoryType.HEAP.equals(memoryPoolBean.getType()) ? "heap" : "nonheap";
                 TagContext tags = tagger.currentBuilder()
-                        .putLocal(idTagKey, TagUtils.createTagValue(memoryPoolBean.getName()))
-                        .putLocal(areaTagKey, TagUtils.createTagValue(area))
+                        .putLocal(idTagKey, TagUtils.createTagValue(idTagKey.getName(), memoryPoolBean.getName()))
+                        .putLocal(areaTagKey, TagUtils.createTagValue(areaTagKey.getName(), area))
                         .build();
 
                 if (usedEnabled) {
@@ -110,7 +110,7 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
         if (bufferCountEnabled || bufferUsedEnabled || bufferCapacityEnabled) {
             for (BufferPoolMXBean bufferPoolBean : ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class)) {
                 TagContext tags = tagger.currentBuilder()
-                        .putLocal(idTagKey, TagUtils.createTagValue(bufferPoolBean.getName()))
+                        .putLocal(idTagKey, TagUtils.createTagValue(idTagKey.getName(), bufferPoolBean.getName()))
                         .build();
 
                 if (bufferCountEnabled) {
