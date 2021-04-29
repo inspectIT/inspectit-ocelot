@@ -14,18 +14,23 @@ import io.opentelemetry.sdk.trace.data.EventData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.data.StatusData;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Map;
 
 import static io.opentelemetry.api.common.AttributeKey.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OpenTelemetryProtoConverterTest {
@@ -87,12 +92,8 @@ class OpenTelemetryProtoConverterTest {
             assertThat(libraryInfo.getVersion()).isBlank();
 
             io.opentelemetry.sdk.resources.Resource resource = spanData.getResource();
-            assertThat(resource.getAttributes().asMap()).containsExactly(
-                    entry(stringKey("service.name"), "my-application"),
-                    entry(stringKey("telemetry.sdk.language"), "webjs"),
-                    entry(stringKey("telemetry.sdk.name"), "opentelemetry"),
-                    entry(stringKey("telemetry.sdk.version"), "0.18.2")
-            );
+            assertThat(resource.getAttributes()
+                    .asMap()).containsExactly(entry(stringKey("service.name"), "my-application"), entry(stringKey("telemetry.sdk.language"), "webjs"), entry(stringKey("telemetry.sdk.name"), "opentelemetry"), entry(stringKey("telemetry.sdk.version"), "0.18.2"));
         }
 
         @Test
@@ -113,11 +114,8 @@ class OpenTelemetryProtoConverterTest {
             assertThat(spanData.getStartEpochNanos()).isEqualTo(1619166153906575000L);
             assertThat(spanData.getEndEpochNanos()).isEqualTo(1619166154225390000L);
             assertThat(spanData.hasEnded()).isTrue();
-            assertThat(spanData.getAttributes().asMap()).containsOnly(
-                    entry(stringKey("http.method"), "GET"),
-                    entry(longKey("http.response_content_length"), 665L),
-                    entry(booleanKey("is.true"), true)
-            );
+            assertThat(spanData.getAttributes()
+                    .asMap()).containsOnly(entry(stringKey("http.method"), "GET"), entry(longKey("http.response_content_length"), 665L), entry(booleanKey("is.true"), true));
 
             assertThat(spanData.getTotalRecordedEvents()).isEqualTo(1);
             assertThat(spanData.getEvents()).hasSize(1);
@@ -126,9 +124,7 @@ class OpenTelemetryProtoConverterTest {
             assertThat(event.getEpochNanos()).isEqualTo(1619166153906635000L);
             assertThat(event.getDroppedAttributesCount()).isEqualTo(0);
             assertThat(event.getTotalAttributeCount()).isEqualTo(1);
-            assertThat(event.getAttributes().asMap()).containsOnly(
-                    entry(stringKey("event.name"), "test-name")
-            );
+            assertThat(event.getAttributes().asMap()).containsOnly(entry(stringKey("event.name"), "test-name"));
 
             assertThat(spanData.getStatus()).isEqualTo(StatusData.ok());
             assertThat(spanData.getLinks()).isEmpty();
@@ -139,12 +135,8 @@ class OpenTelemetryProtoConverterTest {
             assertThat(libraryInfo.getVersion()).isEqualTo("0.18.2");
 
             io.opentelemetry.sdk.resources.Resource resource = spanData.getResource();
-            assertThat(resource.getAttributes().asMap()).containsExactly(
-                    entry(stringKey("service.name"), "my-application"),
-                    entry(stringKey("telemetry.sdk.language"), "webjs"),
-                    entry(stringKey("telemetry.sdk.name"), "opentelemetry"),
-                    entry(stringKey("telemetry.sdk.version"), "0.18.2")
-            );
+            assertThat(resource.getAttributes()
+                    .asMap()).containsExactly(entry(stringKey("service.name"), "my-application"), entry(stringKey("telemetry.sdk.language"), "webjs"), entry(stringKey("telemetry.sdk.name"), "opentelemetry"), entry(stringKey("telemetry.sdk.version"), "0.18.2"));
             //@formatter:on
         }
 
@@ -167,49 +159,42 @@ class OpenTelemetryProtoConverterTest {
 
     }
 
-    //    @Nested
-    //    class ToOtTraceId {
-    //
-    //        @Test
-    //        public void notEnoughBytes() {
-    //            byte[] bytes = new byte[15];
-    //
-    //            Optional<TraceId> traceId = OpenTelemetryProtoConverter.toOtTraceId(ByteString.copyFrom(bytes));
-    //
-    //            assertThat(traceId).isEmpty();
-    //        }
-    //
-    //    }
-    //
-    //    @Nested
-    //    class ToOtSpanId {
-    //
-    //        @Test
-    //        public void notEnoughBytes() {
-    //            byte[] bytes = new byte[7];
-    //
-    //            Optional<SpanId> traceId = OpenTelemetryProtoConverter.toOtSpanId(ByteString.copyFrom(bytes));
-    //
-    //            assertThat(traceId).isEmpty();
-    //        }
-    //
-    //    }
-    //
-    //    @Nested
-    //    class ToOtSpanKind {
-    //
-    //        @Test
-    //        public void states() {
-    //            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.INTERNAL)).isEqualTo(Kind.INTERNAL);
-    //            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.CLIENT)).isEqualTo(Kind.CLIENT);
-    //            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.SERVER)).isEqualTo(Kind.SERVER);
-    //            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.PRODUCER)).isEqualTo(Kind.PRODUCER);
-    //            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.CONSUMER)).isEqualTo(Kind.CONSUMER);
-    //            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.UNRECOGNIZED)).isEqualTo(Kind.INTERNAL);
-    //            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.SPAN_KIND_UNSPECIFIED)).isEqualTo(Kind.INTERNAL);
-    //
-    //        }
-    //
-    //    }
+    @Nested
+    class AnonymizeIpAddress {
 
+        @Mock
+        private HttpServletRequest mockRequest;
+
+        @BeforeEach
+        private void beforeEach() {
+            converter.requestSupplier = () -> mockRequest;
+        }
+
+        @Test
+        public void ipv4_singleDigit() {
+            when(mockRequest.getRemoteAddr()).thenReturn("127.1.1.1");
+
+            Map<String, String> result = converter.getCustomSpanAttributes();
+
+            assertThat(result).containsExactly(entry("client.ip", "127.1.1.0"));
+        }
+
+        @Test
+        public void ipv4_multipleDigits() {
+            when(mockRequest.getRemoteAddr()).thenReturn("127.1.1.254");
+
+            Map<String, String> result = converter.getCustomSpanAttributes();
+
+            assertThat(result).containsExactly(entry("client.ip", "127.1.1.0"));
+        }
+
+        @Test
+        public void ipv6_mask() {
+            when(mockRequest.getRemoteAddr()).thenReturn("1:2:3:4:5:6:7:8");
+
+            Map<String, String> result = converter.getCustomSpanAttributes();
+
+            assertThat(result).containsExactly(entry("client.ip", "1:2:3:4:5:0:0:0"));
+        }
+    }
 }

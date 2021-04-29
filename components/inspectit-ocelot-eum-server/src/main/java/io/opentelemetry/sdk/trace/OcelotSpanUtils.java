@@ -81,10 +81,11 @@ public class OcelotSpanUtils {
      * @param protoSpan                  the protobuf representation of the span
      * @param resource                   the span's resources
      * @param instrumentationLibraryInfo the information of the tracing library
+     * @param customSpanAttributes       additional attributes which should be added to each span
      *
      * @return the created {@link SpanData} instance
      */
-    public static SpanData createSpanData(Span protoSpan, Resource resource, InstrumentationLibraryInfo instrumentationLibraryInfo) {
+    public static SpanData createSpanData(Span protoSpan, Resource resource, InstrumentationLibraryInfo instrumentationLibraryInfo, Map<String, String> customSpanAttributes) {
         try {
             String traceId = toIdString(protoSpan.getTraceId());
             String spanId = toIdString(protoSpan.getSpanId());
@@ -107,7 +108,7 @@ public class OcelotSpanUtils {
             List<LinkData> links = toLinkData(protoSpan.getLinksList());
 
             // convert attributes map to AttributesMap
-            Attributes spanAttributes = toAttributes(protoSpan.getAttributesList());
+            Attributes spanAttributes = toAttributes(protoSpan.getAttributesList(), customSpanAttributes);
             Map<AttributeKey<?>, Object> attributesMap = spanAttributes.asMap();
             AttributesMap spanAttributesMap = new AttributesMap(attributesMap.size());
             spanAttributesMap.putAll(attributesMap);
@@ -210,34 +211,53 @@ public class OcelotSpanUtils {
      * @return Converts a {@link KeyValue} list into an {@link Attributes} instance.
      */
     public static Attributes toAttributes(List<KeyValue> attributesList) {
-        if (CollectionUtils.isEmpty(attributesList)) {
+        return toAttributes(attributesList, Collections.emptyMap());
+    }
+
+    /**
+     * Creates an {@link Attributes} instance based on the content of the given list and map. The elements in the given
+     * map may override the attributes of the {@link KeyValue} list!
+     *
+     * @param attributesList   a list of {@link KeyValue} instances
+     * @param customAttributes a map with additional elements which should be added to the attributes instance
+     *
+     * @return the created {@link Attributes} instance
+     */
+    public static Attributes toAttributes(List<KeyValue> attributesList, Map<String, String> customAttributes) {
+        if (CollectionUtils.isEmpty(attributesList) && CollectionUtils.isEmpty(customAttributes)) {
             return Attributes.empty();
         }
 
         AttributesBuilder builder = Attributes.builder();
 
-        for (KeyValue attribute : attributesList) {
-            AttributeKey attributeKey = toAttributeKey(attribute);
-            if (attributeKey != null) {
-                AnyValue value = attribute.getValue();
-                switch (attribute.getValue().getValueCase()) {
-                    case STRING_VALUE:
-                        builder.put(attributeKey, value.getStringValue());
-                        break;
-                    case BOOL_VALUE:
-                        builder.put(attributeKey, value.getBoolValue());
-                        break;
-                    case INT_VALUE:
-                        builder.put(attributeKey, value.getIntValue());
-                        break;
-                    case DOUBLE_VALUE:
-                        builder.put(attributeKey, value.getDoubleValue());
-                        break;
-                    case ARRAY_VALUE:
-                        builder.put(attributeKey, value.getArrayValue());
-                        break;
+        if (!CollectionUtils.isEmpty(attributesList)) {
+            for (KeyValue attribute : attributesList) {
+                AttributeKey attributeKey = toAttributeKey(attribute);
+                if (attributeKey != null) {
+                    AnyValue value = attribute.getValue();
+                    switch (attribute.getValue().getValueCase()) {
+                        case STRING_VALUE:
+                            builder.put(attributeKey, value.getStringValue());
+                            break;
+                        case BOOL_VALUE:
+                            builder.put(attributeKey, value.getBoolValue());
+                            break;
+                        case INT_VALUE:
+                            builder.put(attributeKey, value.getIntValue());
+                            break;
+                        case DOUBLE_VALUE:
+                            builder.put(attributeKey, value.getDoubleValue());
+                            break;
+                        case ARRAY_VALUE:
+                            builder.put(attributeKey, value.getArrayValue());
+                            break;
+                    }
                 }
             }
+        }
+
+        if (!CollectionUtils.isEmpty(customAttributes)) {
+            customAttributes.forEach((key, value) -> builder.put(AttributeKey.stringKey(key), value));
         }
 
         return builder.build();
