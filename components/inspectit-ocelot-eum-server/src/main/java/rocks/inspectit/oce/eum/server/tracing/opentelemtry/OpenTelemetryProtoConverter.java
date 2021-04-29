@@ -12,7 +12,9 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.OcelotSpanUtils;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.utils.RequestUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +25,9 @@ import java.util.stream.Stream;
 @Component
 @Slf4j
 public class OpenTelemetryProtoConverter {
+
+    @Autowired
+    private EumServerConfiguration configuration;
 
     @VisibleForTesting
     Supplier<HttpServletRequest> requestSupplier = RequestUtils::getCurrentRequest;
@@ -76,7 +81,11 @@ public class OpenTelemetryProtoConverter {
             return Collections.emptyMap();
         }
 
-        String clientIp = anonymizeIpAddress(request.getRemoteAddr());
+        String clientIp = request.getRemoteAddr();
+
+        if (configuration.getExporters().getTracing().isMaskSpanIpAddresses()) {
+            clientIp = anonymizeIpAddress(clientIp);
+        }
 
         return ImmutableMap.of("client.ip", clientIp);
     }

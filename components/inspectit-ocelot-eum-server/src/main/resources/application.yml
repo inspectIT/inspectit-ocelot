@@ -165,6 +165,9 @@ inspectit-eum-server:
         buffer-size: 40
 
     tracing:
+      # Specifies whether client IP addresses which are added to spans should be masked.
+      mask-span-ip-addresses: true
+
       jaeger:
         # If jaeger exporter for the OT received spans is enabled.
         enabled: true

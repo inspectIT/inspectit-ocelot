@@ -18,9 +18,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
@@ -40,7 +42,10 @@ class OpenTelemetryProtoConverterTest {
     public static final String TRACE_REQUEST_FILE_LARGE = "/ot-trace-large-v0.18.2.json";
 
     @InjectMocks
-    OpenTelemetryProtoConverter converter;
+    private OpenTelemetryProtoConverter converter;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private EumServerConfiguration configuration;
 
     private ExportTraceServiceRequest getSmallTestRequest() throws Exception {
         return getTestRequest(TRACE_REQUEST_FILE_SMALL);
@@ -172,6 +177,7 @@ class OpenTelemetryProtoConverterTest {
 
         @Test
         public void ipv4_singleDigit() {
+            when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(true);
             when(mockRequest.getRemoteAddr()).thenReturn("127.1.1.1");
 
             Map<String, String> result = converter.getCustomSpanAttributes();
@@ -181,6 +187,7 @@ class OpenTelemetryProtoConverterTest {
 
         @Test
         public void ipv4_multipleDigits() {
+            when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(true);
             when(mockRequest.getRemoteAddr()).thenReturn("127.1.1.254");
 
             Map<String, String> result = converter.getCustomSpanAttributes();
@@ -189,12 +196,33 @@ class OpenTelemetryProtoConverterTest {
         }
 
         @Test
+        public void ipv4_noMasking() {
+            when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(false);
+            when(mockRequest.getRemoteAddr()).thenReturn("127.1.1.1");
+
+            Map<String, String> result = converter.getCustomSpanAttributes();
+
+            assertThat(result).containsExactly(entry("client.ip", "127.1.1.1"));
+        }
+
+        @Test
         public void ipv6_mask() {
+            when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(true);
             when(mockRequest.getRemoteAddr()).thenReturn("1:2:3:4:5:6:7:8");
 
             Map<String, String> result = converter.getCustomSpanAttributes();
 
             assertThat(result).containsExactly(entry("client.ip", "1:2:3:4:5:0:0:0"));
+        }
+
+        @Test
+        public void ipv6_noMasking() {
+            when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(false);
+            when(mockRequest.getRemoteAddr()).thenReturn("1:2:3:4:5:6:7:8");
+
+            Map<String, String> result = converter.getCustomSpanAttributes();
+
+            assertThat(result).containsExactly(entry("client.ip", "1:2:3:4:5:6:7:8"));
         }
     }
 }
