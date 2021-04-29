@@ -1,0 +1,96 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "my-application"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "webjs"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "0.18.2"
+            }
+          }
+        ],
+        "droppedAttributesCount": 0
+      },
+      "instrumentationLibrarySpans": [
+        {
+          "spans": [
+            {
+              "traceId": "03c2a546267d1e90d70269bdc02babef",
+              "spanId": "c29e6dd2a1e1e7ae",
+              "parentSpanId": "915c20356ab50086",
+              "name": "HTTP GET",
+              "kind": 3,
+              "startTimeUnixNano": 1619166153906575000,
+              "endTimeUnixNano": 1619166154225390000,
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.response_content_length",
+                  "value": {
+                    "intValue": 665
+                  }
+                },
+                {
+                  "key": "is.true",
+                  "value": {
+                    "boolValue": true
+                  }
+                }
+              ],
+              "droppedAttributesCount": 2,
+              "events": [
+                {
+                  "timeUnixNano": 1619166153906635000,
+                  "name": "open",
+                  "attributes": [
+                    {
+                      "key": "event.name",
+                      "value": {
+                        "stringValue": "test-name"
+                      }
+                    }
+                  ],
+                  "droppedAttributesCount": 0
+                }
+              ],
+              "droppedEventsCount": 2,
+              "status": {
+                "code": 1
+              },
+              "links": [],
+              "droppedLinksCount": 2
+            }
+          ],
+          "instrumentationLibrary": {
+            "name": "@opentelemetry/instrumentation-xml-http-request",
+            "version": "0.18.2"
+          }
+        }
+      ]
+    }
+  ]
+}

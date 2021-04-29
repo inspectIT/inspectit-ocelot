@@ -5,6 +5,15 @@ title: Breaking Changes
 
 ## Breaking changes in 1.9
 
+### Upgraded OpenTelemetry of the EUM Server
+
+The EUM server provides the functionality to receive OpenTelemetry spans and forward them to a tracing backend.
+
+Until now, an early alpha version of OpenTelemetry was used for this purpose, which has now been upgraded to the current, stable version.
+As a result, spans from OpenTelemetry libraries older than version `0.9` are no longer compatible and can no longer be processed.
+
+This also means that third-party applications are no longer compatible with the EUM server that did not use OpenTelemetry in version `0.9` or higher, for example like the [Boomerang-OpenTelemetry plugin](https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin) in version `0.7.0`.
+
 ### Naming Changes of the `rt.bmr.*` Beacon Properties
 
 In the current release, the existing `rt.bmr` beacon parameter is parsed into new key-value pairs with the naming `rt.bmr.index`, where `index` represents the element's position in the beacon parameter.

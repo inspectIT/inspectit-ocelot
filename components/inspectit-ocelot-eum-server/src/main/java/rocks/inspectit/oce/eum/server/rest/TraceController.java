@@ -18,12 +18,13 @@ import org.springframework.web.server.ResponseStatusException;
 import rocks.inspectit.oce.eum.server.tracing.opentelemtry.OpenTelemetryProtoConverter;
 
 import javax.validation.constraints.NotBlank;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 
 @RestController()
 @Slf4j
-public class OpenTelemetryTraceController {
+public class TraceController {
 
     @Autowired
     private OpenTelemetryProtoConverter converter;
