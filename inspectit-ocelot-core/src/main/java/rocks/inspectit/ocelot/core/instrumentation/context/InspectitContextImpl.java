@@ -326,8 +326,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     public Scope enterFullTagScope() {
         TagContextBuilder builder = Tags.getTagger().emptyBuilder();
-        dataTagsStream().forEach(e -> builder.putLocal(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getKey()
-                .toString(), e.getValue().toString())));
+        dataTagsStream().forEach(e -> builder.putLocal(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getKey(), e.getValue()
+                .toString())));
         return builder.buildScoped();
     }
 
@@ -558,8 +558,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
                 .stream()
                 .filter(e -> propagation.isTag(e.getKey()))
                 .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()))
-                .map(e -> Tag.create(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getKey()
-                        .toString(), e.getValue()
+                .map(e -> Tag.create(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getKey(), e.getValue()
                         .toString()), TagMetadata.create(TagMetadata.TagTtl.UNLIMITED_PROPAGATION)))
                 .iterator();
     }
