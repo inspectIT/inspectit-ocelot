@@ -143,4 +143,14 @@ public class SpringTestBase {
                 .anyMatch(le -> le.isGreaterOrEqual(level));
     }
 
+    /**
+     * Asserts that count of specific log output is equal to the given integer
+     *
+     * @param count the number to compare against.
+     */
+    public void assertLogCount(String logMessage, Integer count) {
+        assertThat(StaticAppender.getEvents()).filteredOn(event -> event.getMessage().contains(logMessage))
+                .hasSize(count);
+    }
+
 }
