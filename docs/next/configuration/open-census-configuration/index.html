@@ -65,11 +65,11 @@ Following these rules will make sure that there are no run-time problems in your
 Furthermore, a correct configuration will make it possible to combine metrics and traces that you manually collect using the OpenCensus instrumentation library with the ones collected by the inspectIT Ocelot agent.</p>
 <ol>
 <li><p>Make sure you are using the same version of OpenCensus as inspectIT Ocelot.</p>
-<p>The inspectIT Ocelot agent in version {inspectit-ocelot-version} internally uses OpenCensus in version {opencensus-version}. Please adapt any OpenCensus dependency in your application to this version to avoid run-time conflicts.</p>
+<p>The inspectIT Ocelot agent in version 1.9.0 internally uses OpenCensus in version 0.22.1.ocelot.1. Please adapt any OpenCensus dependency in your application to this version to avoid run-time conflicts.</p>
 <pre><code class="hljs css language-XML"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>io.opencensus<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>opencensus-api<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>{opencensus-version}<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.22.1.ocelot.1<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
 </code></pre></li>
 <li><p>Set the JVM property <code>inspectit.publishOpenCensusToBootstrap</code> to <code>true</code>.</p>
