@@ -18,7 +18,6 @@ public class TagUtilsTest extends SpringTestBase {
     public void createTagValue_tooLong() {
         assertThat(TagUtils.createTagValue("my-tag-key", "this-value-is-over-255-characters-long ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"))
                 .isEqualTo(TagValue.create("<invalid>"));
-        assertLogsOfCount("Error creating value for tag", 1);
     }
 
     @Test
@@ -31,7 +30,8 @@ public class TagUtilsTest extends SpringTestBase {
         for (int i = 0; i < 11; i++) {
             TagUtils.createTagValue("my-tag-key", "non-printable-character-\u007f");
         }
-        assertLogsOfCount("Error creating value for tag", 10);
+        assertLogsOfLevelOrGreater(Level.WARN);
+        assertLogCount("Error creating value for tag", 10);
     }
 
 }

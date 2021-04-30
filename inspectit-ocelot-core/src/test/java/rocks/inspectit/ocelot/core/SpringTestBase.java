@@ -148,7 +148,7 @@ public class SpringTestBase {
      *
      * @param count the number to compare against.
      */
-    public void assertLogsOfCount(String logMessage, Integer count) {
+    public void assertLogCount(String logMessage, Integer count) {
         assertThat(StaticAppender.getEvents()).filteredOn(event -> event.getMessage().contains(logMessage))
                 .hasSize(count);
     }
