@@ -4,6 +4,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.validation.annotation.Validated;
 import rocks.inspectit.ocelot.config.model.exporters.ExportersSettings;
+import rocks.inspectit.ocelot.config.model.exporters.trace.TraceExportersSettings;
+
+import javax.validation.Valid;
 
 /**
  * Extended exporter settings.
@@ -18,4 +21,9 @@ public class EumExportersSettings extends ExportersSettings {
      */
     private BeaconExporterSettings beacons;
 
+    /**
+     * Exporter settings for trace exporters.
+     */
+    @Valid
+    private EumTraceExportersSettings tracing;
 }

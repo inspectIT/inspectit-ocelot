@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
+import rocks.inspectit.oce.eum.server.utils.RequestUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
@@ -29,7 +30,7 @@ public class ClientHeaderBeaconProcessor implements BeaconProcessor {
      * Supplier for accessing the current request.
      */
     @VisibleForTesting
-    Supplier<HttpServletRequest> requestSupplier = this::getCurrentRequest;
+    Supplier<HttpServletRequest> requestSupplier = RequestUtils::getCurrentRequest;
 
     @Override
     public Beacon process(Beacon beacon) {
@@ -44,16 +45,5 @@ public class ClientHeaderBeaconProcessor implements BeaconProcessor {
                         .getHeaders(header)))));
 
         return beacon.merge(requestHeaders);
-    }
-
-    /**
-     * @return Returns the current {@link HttpServletRequest} or <code>null</code> in case no request exists.
-     */
-    private HttpServletRequest getCurrentRequest() {
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (requestAttributes == null) {
-            return null;
-        }
-        return requestAttributes.getRequest();
     }
 }

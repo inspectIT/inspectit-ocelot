@@ -526,12 +526,15 @@ inspectit-eum-server:
 ### Tracing
 
 :::note
-In order to make tracing work, additional dependencies need to be [installed](https://inspectit.github.io/inspectit-ocelot/docs/enduser-monitoring/install-eum-agent#tracing)!
+In case Boomerang is used as EUM agent, 
+Note that if you use Boomerang as your EUM agent, it will not capture traces by default.
+To capture traces with Boomerang, a special tracing plugin must be used.
+More information can be found in the chapter on [installing the EUM agent](https://inspectit.github.io/inspectit-ocelot/docs/enduser-monitoring/install-eum-agent#tracing).
 :::
 
 The EUM server supports trace data forwarding to the Jaeger exporter.
 The exporter is using the [Jaeger Protobuf via gRPC API](https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable) in order to forward trace data.
-By default, the Jaeger exporter is enabled, but it is not active since the grpc-property is not set.
+By default, the Jaeger exporter is enabled, but it is not active since the `grpc` property is not set.
 
 The following configuration snippet makes the Jaeger exporter send traces to a Jaeger instance avialable under `localhost:14250`.
 
@@ -553,8 +556,33 @@ inspectit-eum-server:
 ```
 
 :::note
-The grpc property needs to be set without protocol (e.g. localhost:14250)!
+The GRPC property needs to be set without protocol (e.g. `localhost:14250`)!
 :::
+
+#### Additional Span Attributes
+
+The EUM server is able to enrich a received span with additional attributes.
+Currently, the following attributes are added to **each** span.
+
+| Attribute | Description |
+| --- | --- |
+| `client.ip` | The sender IP address of the request that sent the spans. This address can be anonymised if required by data protection rules. See [Masking Client IP Addresses](#masking-client-ip-addresses). |
+
+##### Masking Client IP Addresses
+
+The attribute `client.ip` is added to each span, which contains the sender IP address of the request with which the span was sent.
+This IP address can be anonymised with the following configuration:
+
+```YAML
+inspectit-eum-server:
+  exporters:
+    tracing:
+      # Specifies whether client IP addresses which are added to spans should be masked.
+      mask-span-ip-addresses: true
+```
+
+If the `mask-span-ip-addresses` setting is set to `true`, the last 8 bits are set to `0` for IPv4 addresses.
+For IPv6 addresses, the last 48 bits are set to `0`.
 
 ### Beacons
 

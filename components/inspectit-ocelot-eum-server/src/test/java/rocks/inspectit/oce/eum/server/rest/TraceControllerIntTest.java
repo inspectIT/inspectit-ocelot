@@ -1,6 +1,7 @@
 package rocks.inspectit.oce.eum.server.rest;
 
 import com.google.common.io.CharStreams;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -78,7 +79,8 @@ public class TraceControllerIntTest {
                     assertThat(data.getStartEpochNanos()).isEqualTo(1619166153906575000L);
                     assertThat(data.getEndEpochNanos()).isEqualTo(1619166154225390000L);
                     assertThat(data.hasEnded()).isTrue();
-                    assertThat(data.getAttributes().asMap()).hasSize(3);
+                    assertThat(data.getAttributes().asMap().keySet()).extracting(AttributeKey::getKey)
+                            .containsExactlyInAnyOrder("client.ip", "http.response_content_length", "is.true", "http.method");
                     assertThat(data.getEvents()).hasSize(1);
                     assertThat(data.getLinks()).isEmpty();
                 });
