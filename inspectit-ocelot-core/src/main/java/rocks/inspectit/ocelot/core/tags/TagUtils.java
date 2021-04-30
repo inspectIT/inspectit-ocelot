@@ -7,7 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class TagUtils {
 
-    private static boolean isWarningPrinted = false;
+    private static int printedWarningCounter = 0;
+
+    private static int maxWarningPrints = 10;
+
+    private static long lastWarningTime = 0;
+
+    private static int waitingTimeInMinutes = 10;
 
     private TagUtils() {
         // empty private default constructor for util class
@@ -35,9 +41,16 @@ public final class TagUtils {
     }
 
     private static void printWarningOnce(String tagKey, String value) {
-        if (!isWarningPrinted) {
+        if (printedWarningCounter < maxWarningPrints) {
             log.warn("Error creating value for tag <{}>: illegal tag value <{}> converted to <invalid>", tagKey, value);
-            isWarningPrinted = true;
+            printedWarningCounter++;
+            if (printedWarningCounter == maxWarningPrints) {
+                lastWarningTime = System.currentTimeMillis();
+            }
+        } else if ((lastWarningTime - System.currentTimeMillis()) < waitingTimeInMinutes * 60000) {
+            printedWarningCounter = 0;
+            printWarningOnce(tagKey, value);
         }
+        return;
     }
 }
