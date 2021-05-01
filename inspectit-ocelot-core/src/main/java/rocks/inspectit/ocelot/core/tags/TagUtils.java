@@ -47,7 +47,7 @@ public final class TagUtils {
             if (printedWarningCounter == maxWarningPrints) {
                 lastWarningTime = System.currentTimeMillis();
             }
-        } else if ((lastWarningTime - System.currentTimeMillis()) < waitingTimeInMinutes * 60000) {
+        } else if ((lastWarningTime - System.currentTimeMillis()) > waitingTimeInMinutes * 60000) {
             printedWarningCounter = 0;
             printWarningOnce(tagKey, value);
         }
