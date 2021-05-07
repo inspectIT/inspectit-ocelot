@@ -27,6 +27,8 @@ public class TagUtilsTest extends SpringTestBase {
 
     @Test
     public void multipleCreateTagValue_nonPrintableCharacter() {
+        TagUtils.printedWarningCounter = 0;
+
         for (int i = 0; i < 11; i++) {
             TagUtils.createTagValue("my-tag-key", "non-printable-character-\u007f");
         }
@@ -34,4 +36,17 @@ public class TagUtilsTest extends SpringTestBase {
         assertLogCount("Error creating value for tag", 10);
     }
 
+    @Test
+    public void multipleCreateTagValue_moreThan10Minutes() {
+        TagUtils.printedWarningCounter = 0;
+
+        for (int i = 0; i < 11; i++) {
+            TagUtils.createTagValue("my-tag-key", "non-printable-character-\u007f");
+        }
+        
+        TagUtils.lastWarningTime = TagUtils.lastWarningTime - 610000;
+        TagUtils.createTagValue("my-tag-key", "non-printable-character-\u007f");
+
+        assertLogCount("Error creating value for tag", 11);
+    }
 }

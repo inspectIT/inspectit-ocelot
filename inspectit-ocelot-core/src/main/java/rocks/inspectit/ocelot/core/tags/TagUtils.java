@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.tags;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.internal.StringUtils;
 import io.opencensus.tags.TagValue;
 import lombok.extern.slf4j.Slf4j;
@@ -7,13 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class TagUtils {
 
-    private static int printedWarningCounter = 0;
+    @VisibleForTesting
+    static int printedWarningCounter = 0;
 
-    private static int maxWarningPrints = 10;
+    private final static int maxWarningPrints = 10;
 
-    private static long lastWarningTime = 0;
+    @VisibleForTesting
+    static long lastWarningTime = 0;
 
-    private static int waitingTimeInMinutes = 10;
+    private final static int waitingTimeInMilliSeconds = 600000;
 
     private TagUtils() {
         // empty private default constructor for util class
@@ -32,7 +35,7 @@ public final class TagUtils {
         if (isTagValueValid(value)) {
             return TagValue.create(value);
         }
-        printWarningOnce(tagKey, value);
+        printWarning(tagKey, value);
         return TagValue.create("<invalid>");
     }
 
@@ -40,16 +43,18 @@ public final class TagUtils {
         return value.length() <= TagValue.MAX_LENGTH && StringUtils.isPrintableString(value);
     }
 
-    private static void printWarningOnce(String tagKey, String value) {
+    private static void printWarning(String tagKey, String value) {
         if (printedWarningCounter < maxWarningPrints) {
             log.warn("Error creating value for tag <{}>: illegal tag value <{}> converted to <invalid>", tagKey, value);
+
             printedWarningCounter++;
             if (printedWarningCounter == maxWarningPrints) {
                 lastWarningTime = System.currentTimeMillis();
             }
-        } else if ((lastWarningTime - System.currentTimeMillis()) > waitingTimeInMinutes * 60000) {
+            
+        } else if ((System.currentTimeMillis() - lastWarningTime) > waitingTimeInMilliSeconds) {
             printedWarningCounter = 0;
-            printWarningOnce(tagKey, value);
+            printWarning(tagKey, value);
         }
         return;
     }
