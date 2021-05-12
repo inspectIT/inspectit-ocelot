@@ -1,5 +1,6 @@
 package rocks.inspectit.oce.eum.server.utils;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.internal.StringUtils;
 import io.opencensus.tags.TagValue;
 import lombok.extern.slf4j.Slf4j;
@@ -7,7 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class TagUtils {
 
-    private static boolean isWarningPrinted = false;
+    @VisibleForTesting
+    static int printedWarningCounter = 0;
+
+    @VisibleForTesting
+    static long lastWarningTime = 0;
+
+    private final static int maxWarningPrints = 10;
+
+    private final static int waitingTimeInMilliSeconds = 600000;
 
     private TagUtils() {
         // empty private default constructor for util class
@@ -17,16 +26,16 @@ public final class TagUtils {
      * Constructs a {@code io.opencensus.tags.TagValue} from the given string.
      * If String is not valid an <code>&lt;invalid&gt;</code> TagName is created.
      *
-     * @param tagKey the tag name
+     * @param tagKey the tag key
      * @param value  the tag value
      *
-     * @return the created TagValue with 'value' or '&lt;invalid&gt;'
+     * @return the created TagValue with 'v' or '&lt;invalid&gt;'
      */
     public static TagValue createTagValue(String tagKey, String value) {
         if (isTagValueValid(value)) {
             return TagValue.create(value);
         }
-        printWarningOnce(tagKey, value);
+        printWarning(tagKey, value);
         return TagValue.create("<invalid>");
     }
 
@@ -34,11 +43,18 @@ public final class TagUtils {
         return value.length() <= TagValue.MAX_LENGTH && StringUtils.isPrintableString(value);
     }
 
-    private static void printWarningOnce(String tagKey, String value) {
-        if (!isWarningPrinted) {
+    private static void printWarning(String tagKey, String value) {
+        if (printedWarningCounter < maxWarningPrints) {
             log.warn("Error creating value for tag <{}>: illegal tag value <{}> converted to <invalid>", tagKey, value);
-            isWarningPrinted = true;
+
+            printedWarningCounter++;
+            if (printedWarningCounter == maxWarningPrints) {
+                lastWarningTime = System.currentTimeMillis();
+            }
+
+        } else if ((System.currentTimeMillis() - lastWarningTime) > waitingTimeInMilliSeconds) {
+            printedWarningCounter = 0;
+            printWarning(tagKey, value);
         }
     }
-
 }

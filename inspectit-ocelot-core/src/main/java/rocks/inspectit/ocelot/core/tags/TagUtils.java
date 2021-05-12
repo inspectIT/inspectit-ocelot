@@ -11,10 +11,10 @@ public final class TagUtils {
     @VisibleForTesting
     static int printedWarningCounter = 0;
 
-    private final static int maxWarningPrints = 10;
-
     @VisibleForTesting
     static long lastWarningTime = 0;
+
+    private final static int maxWarningPrints = 10;
 
     private final static int waitingTimeInMilliSeconds = 600000;
 
@@ -51,11 +51,10 @@ public final class TagUtils {
             if (printedWarningCounter == maxWarningPrints) {
                 lastWarningTime = System.currentTimeMillis();
             }
-            
+
         } else if ((System.currentTimeMillis() - lastWarningTime) > waitingTimeInMilliSeconds) {
             printedWarningCounter = 0;
             printWarning(tagKey, value);
         }
-        return;
     }
 }
