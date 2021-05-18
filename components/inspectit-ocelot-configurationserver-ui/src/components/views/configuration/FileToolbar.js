@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { configurationActions } from '../../../redux/ducks/configuration';
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
+import { SplitButton } from 'primereact/splitbutton';
 
 /**
  * The toolbar used in the configuration view's file tree.
@@ -47,14 +48,21 @@ const FileToolbar = ({
           margin-left: 0.25rem;
         }
       `}</style>
+
       <Toolbar>
         <div className="p-toolbar-group-left">
-          <Button
+          <SplitButton
             disabled={readOnly || loading}
             tooltip="New file"
             icon="pi pi-file"
             tooltipOptions={tooltipOptions}
-            onClick={() => showCreateFileDialog(selection)}
+            onClick={() => showCreateFileDialog(selection, false)}
+            model={[
+              {
+                label: 'Method Configuration',
+                command: () => showCreateFileDialog(selection, true),
+              },
+            ]}
           />
           <Button
             disabled={readOnly || loading}

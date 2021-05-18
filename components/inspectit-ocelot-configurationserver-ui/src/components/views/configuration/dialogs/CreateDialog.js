@@ -124,6 +124,8 @@ class CreateDialog extends React.Component {
     const fullPath = this.getAbsolutePath(this.state.filename);
     if (this.props.directoryMode) {
       this.props.createDirectory(fullPath, true, true);
+    } else if (this.props.createMethodConfiguration) {
+      this.props.writeFile(fullPath, '# type: method-configuration', true, true);
     } else {
       this.props.writeFile(fullPath, '', true, true);
     }

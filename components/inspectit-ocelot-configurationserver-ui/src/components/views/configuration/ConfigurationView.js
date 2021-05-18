@@ -56,6 +56,7 @@ class ConfigurationView extends React.Component {
   state = {
     isDeleteFileDialogShown: false,
     isCreateFileDialogShown: false,
+    isCreateMethodConfiguration: false,
     isCreateDirectoryDialogShown: false,
     isMoveDialogShown: false,
     filePath: null,
@@ -100,7 +101,7 @@ class ConfigurationView extends React.Component {
 
   hideDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: false, filePath: null });
 
-  showCreateFileDialog = (filePath) => this.setState({ isCreateFileDialogShown: true, filePath });
+  showCreateFileDialog = (filePath, isCreateMethodConfiguration) => this.setState({ isCreateFileDialogShown: true, isCreateMethodConfiguration: isCreateMethodConfiguration, filePath });
 
   hideCreateFileDialog = () => this.setState({ isCreateFileDialogShown: false, filePath: null });
 
@@ -229,6 +230,7 @@ class ConfigurationView extends React.Component {
           visible={this.state.isCreateFileDialogShown}
           onHide={this.hideCreateFileDialog}
           filePath={this.state.filePath}
+          createMethodConfiguration={this.state.isCreateMethodConfiguration}
         />
         <CreateDialog
           directoryMode={true}
