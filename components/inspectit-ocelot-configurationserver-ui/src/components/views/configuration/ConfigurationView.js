@@ -101,7 +101,8 @@ class ConfigurationView extends React.Component {
 
   hideDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: false, filePath: null });
 
-  showCreateFileDialog = (filePath, isCreateMethodConfiguration) => this.setState({ isCreateFileDialogShown: true, isCreateMethodConfiguration: isCreateMethodConfiguration, filePath });
+  showCreateFileDialog = (filePath, isCreateMethodConfiguration) =>
+    this.setState({ isCreateFileDialogShown: true, isCreateMethodConfiguration: isCreateMethodConfiguration, filePath });
 
   hideCreateFileDialog = () => this.setState({ isCreateFileDialogShown: false, filePath: null });
 
