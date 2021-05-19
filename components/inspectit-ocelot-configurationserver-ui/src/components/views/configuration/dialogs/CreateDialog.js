@@ -125,7 +125,12 @@ class CreateDialog extends React.Component {
     if (this.props.directoryMode) {
       this.props.createDirectory(fullPath, true, true);
     } else if (this.props.createMethodConfiguration) {
-      this.props.writeFile(fullPath, '# type: method-configuration', true, true);
+      this.props.writeFile(
+        fullPath,
+        '# type: method-configuration\n{"inspectit": {"instrumentation": {"scopes": {}, "rules": {"r_trace": {"include": {"r_trace_method": true}, "scopes": null}, "r_measure": {"include": {"r_method_metric": true}, "scopes": null}}}}}',
+        true,
+        true
+      );
     } else {
       this.props.writeFile(fullPath, '', true, true);
     }
