@@ -41,7 +41,7 @@ const FileToolbar = ({
           border-bottom: 1px solid #ddd;
         }
 
-        .this :global(.p-toolbar-group-left) :global(.p-button) {
+        .this :global(.p-toolbar-group-left > *) {
           margin-right: 0.25rem;
         }
         .this :global(.p-toolbar-group-right) :global(.p-button) {
