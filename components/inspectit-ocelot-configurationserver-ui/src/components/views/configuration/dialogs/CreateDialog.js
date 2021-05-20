@@ -7,6 +7,9 @@ import { Message } from 'primereact/message';
 import { InputText } from 'primereact/inputtext';
 import { configurationUtils, configurationActions } from '../../../../redux/ducks/configuration';
 
+/** Data */
+import methodConfigurationContentJSON from '../../../../data/method-configuration.json';
+
 /**
  * Dialog for creating a new file or directory.
  * The file/folder is placed relative to the currently selected one.
@@ -122,15 +125,11 @@ class CreateDialog extends React.Component {
 
   createFileOrFolder = () => {
     const fullPath = this.getAbsolutePath(this.state.filename);
-    if (this.props.directoryMode) {
+
+    if (this.props.dmethodConfigurationContentirectoryMode) {
       this.props.createDirectory(fullPath, true, true);
     } else if (this.props.createMethodConfiguration) {
-      this.props.writeFile(
-        fullPath,
-        '# type: method-configuration\n{"inspectit": {"instrumentation": {"scopes": {}, "rules": {"r_trace": {"include": {"r_trace_method": true}, "scopes": null}, "r_measure": {"include": {"r_method_metric": true}, "scopes": null}}}}}',
-        true,
-        true
-      );
+      this.props.writeFile(fullPath, '# type: method-configuration\n' + JSON.stringify(methodConfigurationContentJSON), true, true);
     } else {
       this.props.writeFile(fullPath, '', true, true);
     }
