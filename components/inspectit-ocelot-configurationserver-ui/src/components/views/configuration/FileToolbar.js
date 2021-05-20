@@ -60,6 +60,7 @@ const FileToolbar = ({
             model={[
               {
                 label: 'Method Configuration',
+                icon: 'pi pi-cog',
                 command: () => showCreateFileDialog(selection, true),
               },
             ]}
