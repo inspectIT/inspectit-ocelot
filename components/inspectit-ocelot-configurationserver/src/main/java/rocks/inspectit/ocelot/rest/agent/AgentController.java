@@ -1,8 +1,5 @@
 package rocks.inspectit.ocelot.rest.agent;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +13,12 @@ import rocks.inspectit.ocelot.agentcommunication.*;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
-import rocks.inspectit.ocelot.commons.models.AgentCommand;
-import rocks.inspectit.ocelot.commons.models.AgentCommandType;
-import rocks.inspectit.ocelot.commons.models.AgentResponse;
+import rocks.inspectit.ocelot.commons.models.command.Command;
+import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
+import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -44,12 +40,10 @@ public class AgentController extends AbstractBaseController {
     private AgentCommandManager agentCommandManager;
 
     @Autowired
-    private AgentCommandDelegator agentCommandDelegator;
+    private AgentCommandDispatcher commandDispatcher;
 
     @Autowired
     private AgentCallbackManager agentCallbackManager;
-
-    private ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
     /**
      * Returns the {@link InspectitConfig} for the agent with the given name.
@@ -81,7 +75,7 @@ public class AgentController extends AbstractBaseController {
      * @return Returns either a ResponseEntity with the next command as payload or an empty payload.
      */
     @PostMapping(value = "agent/command", produces = "application/json")
-    public ResponseEntity<AgentCommand> fetchNewCommand(@RequestHeader Map<String, String> headers, @RequestBody AgentResponse response) throws ExecutionException {
+    public ResponseEntity<Command> fetchNewCommand(@RequestHeader Map<String, String> headers, @RequestBody CommandResponse response) throws ExecutionException {
         String agentID = headers.get("x-ocelot-agent-id");
         UUID commandID = null;
         if (response != null) {
@@ -89,29 +83,23 @@ public class AgentController extends AbstractBaseController {
         }
 
         if (ObjectUtils.allNotNull(agentID, commandID)) {
-            agentCallbackManager.runNextCommandWithId(agentID, commandID);
+            agentCallbackManager.handleCommandResponse(commandID, response);
         }
 
-        AgentCommand agentCommand = agentCommandManager.getCommand(agentID);
-        return ResponseEntity.ok().body(agentCommand);
+        Command command = agentCommandManager.getCommand(agentID);
+        return ResponseEntity.ok().body(command);
     }
 
     /**
-     * Creates a health-check command for an agent with the given id.
+     * Creates a {@link PingCommand} for an agent with the given id.
      *
-     * @param headers the standard request headers. Must at least contain the key x-ocelot-agent-id.
+     * @param agentId The id of the agent to be pinged.
      *
-     * @return Returns either "Agent alive" if the agent with the given id is reachable or "Agent not reachable" if it
-     * is not.
+     * @return Returns OK if the Agent is reachable and Timeout if it is not.
      */
-    @PostMapping(value = "agent/health", produces = "text/plain")
-    public ResponseEntity<?> getHealth(@RequestHeader Map<String, String> headers) throws ExecutionException {
-        String agentID = headers.get("x-ocelot-agent-id");
-        UUID uuid = UUID.randomUUID();
-
-        AgentCommand command = new AgentCommand(AgentCommandType.GET_HEALTH, agentID, uuid, Collections.emptyList());
-        DeferredResult<?> deferredResult = agentCommandDelegator.runCommand(command);
-
-        return (ResponseEntity<?>) deferredResult.getResult();
+    @GetMapping(value = "agent/health/**", produces = "text/plain")
+    public DeferredResult<ResponseEntity<?>> getHealth(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
+        PingCommand command = new PingCommand();
+        return commandDispatcher.runCommand(agentId, command);
     }
 }

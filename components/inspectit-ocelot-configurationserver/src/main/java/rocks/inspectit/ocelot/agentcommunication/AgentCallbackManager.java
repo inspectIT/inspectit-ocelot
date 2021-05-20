@@ -4,73 +4,86 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.async.DeferredResult;
+import rocks.inspectit.ocelot.agentcommunication.handlers.CommandHandler;
+import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 
-import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Manages the callbacks for asynchronous requests between the agent and the frontend.
- * Each callback is represented by an instance of Thread and can be mapped by a combination of the UUID of the
- * request and the respective agent id.
+ * Each callback is represented by an instance of {@link DeferredResult} and can be mapped by a UUID of the respective command.
  */
 @Component
 public class AgentCallbackManager {
 
+    @Autowired
     @VisibleForTesting
-    LoadingCache<String, LinkedList<Thread>> agentCallBackCache;
+    List<CommandHandler> handlers;
+
+    @VisibleForTesting
+    LoadingCache<UUID, DeferredResult<ResponseEntity<?>>> resultCache;
 
     public AgentCallbackManager() {
-        agentCallBackCache = CacheBuilder.newBuilder()
-                .maximumSize(1000)
+        resultCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(2, TimeUnit.MINUTES)
-                .build(new CacheLoader<String, LinkedList<Thread>>() {
+                .build(new CacheLoader<UUID, DeferredResult<ResponseEntity<?>>>() {
                     @Override
-                    public LinkedList<Thread> load(String key) {
-                        return new LinkedList<>();
+                    public DeferredResult<ResponseEntity<?>> load(UUID key) {
+                        return null;
                     }
                 });
     }
 
     /**
-     * Takes a String resembling the id of an agent as well as UUID resembling the id of the command and a Thread. Saves the Thread
-     * with the agentID and the UUID instance as keys.
+     * Takes an instance of {@link java.util.UUID} and an instance of {@link org.springframework.web.context.request.async.DeferredResult}
+     * and adds it to the internal result cache. Throws an exception when the given commandID is null. Does nothing if
+     * the given commandResponse is null.
      *
-     * @param agentID       The agent this command is meant for.
-     * @param commandID     The id of the command.
-     * @param commandThread The code to be executed when the corresponding agent sends a request to the server.
+     * @param commandID       An instance of {@link java.util.UUID} which represents the UUID of a existing command.
+     * @param commandResponse The instance of {@link org.springframework.web.context.request.async.DeferredResult} to which
+     *                        the result of the command should be written.
+     *
+     * @throws IllegalArgumentException when the given command id is null.
      */
-    public void addCallbackCommand(String agentID, UUID commandID, Thread commandThread) throws ExecutionException {
-        if (ObjectUtils.allNotNull(agentID, commandID, commandThread)) {
-            String identifier = agentID + commandID.toString();
-            LinkedList<Thread> agentCallBackList = agentCallBackCache.get(identifier);
-            agentCallBackList.push(commandThread);
+    public void addCommandCallback(UUID commandID, DeferredResult<ResponseEntity<?>> commandResponse) {
+        if (commandID == null) {
+            throw new IllegalArgumentException("The given command id may never be null!");
+        }
+        if (commandResponse != null) {
+            resultCache.put(commandID, commandResponse);
         }
     }
 
     /**
-     * Takes a String resembling the id of an agent as well as UUID resembling the id of the command.
-     * Runs the command next in line for this combination of UUID and agent id.
+     * Takes an instance of {@link java.util.UUID} as well as an instance of {@link CommandResponse}. Delegates
+     * the {@link DeferredResult} saved for the given commandID and the given response to the responsible implementation
+     * of {@link CommandHandler}.
      *
-     * @param agentID   The agent this command is meant for.
-     * @param commandID The id of the command to be executed.
+     * @param commandID The UUID of the command the given response is linked to.
+     * @param response  The response which should be handled.
      */
-    public void runNextCommandWithId(String agentID, UUID commandID) throws ExecutionException {
-        if (ObjectUtils.allNotNull(agentID, commandID)) {
+    public void handleCommandResponse(UUID commandID, CommandResponse response) throws ExecutionException {
+        if (commandID == null) {
+            throw new IllegalArgumentException("The given command id may never be null!");
+        }
+        DeferredResult<ResponseEntity<?>> result = resultCache.get(commandID);
 
-            String identifier = agentID + commandID.toString();
+        if (result != null) {
+            resultCache.invalidate(commandID);
 
-            LinkedList<Thread> agentCallBackList = agentCallBackCache.get(identifier);
-            Thread command = agentCallBackList.pop();
-            if (command != null) {
-                command.start();
-            }
-            if (agentCallBackList.isEmpty()) {
-                agentCallBackCache.invalidate(identifier);
+            for (CommandHandler handler : handlers) {
+                if (handler.canHandle(response)) {
+                    handler.handleResponse(response, result);
+                }
             }
         }
+
     }
 }

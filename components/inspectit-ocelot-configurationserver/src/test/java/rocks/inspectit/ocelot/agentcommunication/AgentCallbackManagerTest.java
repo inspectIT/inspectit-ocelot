@@ -6,8 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.context.request.async.DeferredResult;
+import rocks.inspectit.ocelot.agentcommunication.handlers.CommandHandler;
+import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -25,29 +30,36 @@ public class AgentCallbackManagerTest {
     class AddCallbackCommand {
 
         @Test
-        public void addCallbackCommand() throws ExecutionException {
-            Thread mockThread = mock(Thread.class);
-            String agentId = "test-agent";
+        public void addCallbackCommand() {
             UUID id = UUID.randomUUID();
-            String expectedId = agentId + id.toString();
+            DeferredResult<ResponseEntity<?>> testResult = new DeferredResult<>();
 
-            agentCallbackManager.addCallbackCommand(agentId, id, mockThread);
+            agentCallbackManager.addCommandCallback(id, testResult);
 
-            Map<String, LinkedList<Thread>> agentCallBackMap = agentCallbackManager.agentCallBackCache.asMap();
-            assertThat(agentCallBackMap).hasSize(1);
-            LinkedList<Thread> list = agentCallBackMap.get(expectedId);
-            assertThat(list).hasSize(1);
-            assertThat(list).contains(mockThread);
+            Map<UUID, DeferredResult<ResponseEntity<?>>> resultCacheMap = agentCallbackManager.resultCache.asMap();
+            assertThat(resultCacheMap).containsOnlyKeys(id);
+            assertThat(resultCacheMap.get(id)).isEqualTo(testResult);
         }
 
         @Test
-        public void ignoresNullParams() throws ExecutionException {
-            Thread mockThread = mock(Thread.class);
+        public void ignoresNullParams() {
+            UUID id = UUID.randomUUID();
 
-            agentCallbackManager.addCallbackCommand(null, null, mockThread);
+            agentCallbackManager.addCommandCallback(id, null);
 
-            Map<String, LinkedList<Thread>> agentCallBackMap = agentCallbackManager.agentCallBackCache.asMap();
+            Map<UUID, DeferredResult<ResponseEntity<?>>> agentCallBackMap = agentCallbackManager.resultCache.asMap();
             assertThat(agentCallBackMap).hasSize(0);
+        }
+
+        @Test
+        public void throwsExceptionOnNullId() {
+            DeferredResult<ResponseEntity<?>> testResult = new DeferredResult<>();
+
+            try {
+                agentCallbackManager.addCommandCallback(null, testResult);
+            } catch (IllegalArgumentException e) {
+                assertThat(e.getMessage()).isEqualTo("The given command id may never be null!");
+            }
         }
     }
 
@@ -56,28 +68,34 @@ public class AgentCallbackManagerTest {
 
         @Test
         public void hasCommand() throws ExecutionException {
-            Thread mockCommandThread = mock(Thread.class);
+            DeferredResult<ResponseEntity<?>> testResult = new DeferredResult<>();
             UUID id = UUID.randomUUID();
-            agentCallbackManager.agentCallBackCache.get(id.toString()).push(mockCommandThread);
+            agentCallbackManager.resultCache.put(id, testResult);
+            CommandResponse response = mock(CommandResponse.class);
+            CommandHandler mockHandler = mock(CommandHandler.class);
+            when(mockHandler.canHandle(response)).thenReturn(true);
+            List<CommandHandler> handlerList = new ArrayList<>();
+            handlerList.add(mockHandler);
+            agentCallbackManager.handlers = handlerList;
 
-            agentCallbackManager.runNextCommandWithId("", id);
-
-            //Verify that the command was started.
-            verify(mockCommandThread).start();
+            agentCallbackManager.handleCommandResponse(id, response);
 
             //Verify that the command was removed from the map.
-            Map<String, LinkedList<Thread>> map = agentCallbackManager.agentCallBackCache.asMap();
+            Map<UUID, DeferredResult<ResponseEntity<?>>> map = agentCallbackManager.resultCache.asMap();
             assertThat(map).isEmpty();
+            verify(mockHandler).handleResponse(response, testResult);
         }
 
         @Test
-        public void ignoresNullParams() throws ExecutionException {
-            agentCallbackManager.agentCallBackCache = mock(LoadingCache.class);
+        public void commandIdNull() throws ExecutionException {
+            agentCallbackManager.resultCache = mock(LoadingCache.class);
 
-            agentCallbackManager.runNextCommandWithId(null, null);
-
-            verifyZeroInteractions(agentCallbackManager.agentCallBackCache);
+            try {
+                agentCallbackManager.handleCommandResponse(null, null);
+            } catch (IllegalArgumentException e) {
+                assertThat(e.getMessage()).isEqualTo("The given command id may never be null!");
+            }
+            verifyZeroInteractions(agentCallbackManager.resultCache);
         }
-
     }
 }

@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.rest.agent;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,12 +9,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.agentcommunication.AgentCallbackManager;
-import rocks.inspectit.ocelot.commons.models.AgentCommand;
 import rocks.inspectit.ocelot.agentcommunication.AgentCommandManager;
-import rocks.inspectit.ocelot.commons.models.AgentResponse;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
+import rocks.inspectit.ocelot.commons.models.command.Command;
+import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
+import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,7 +47,7 @@ public class AgentControllerTest {
     public class FetchConfiguration {
 
         @Test
-        public void noMappingFound() throws Exception {
+        public void noMappingFound() {
             doReturn(null).when(configManager).getConfiguration(anyMap());
 
             HashMap<String, String> attributes = new HashMap<>();
@@ -58,7 +58,7 @@ public class AgentControllerTest {
         }
 
         @Test
-        public void mappingFound() throws Exception {
+        public void mappingFound() {
             AgentConfiguration config = AgentConfiguration.builder().configYaml("foo : bar").build();
             doReturn(config).when(configManager).getConfiguration(anyMap());
 
@@ -70,9 +70,8 @@ public class AgentControllerTest {
             verify(statusManager).notifyAgentConfigurationFetched(same(attributes), eq(Collections.emptyMap()), same(config));
         }
 
-
         @Test
-        public void etagPresent() throws Exception {
+        public void etagPresent() {
             AgentConfiguration config = AgentConfiguration.builder().configYaml("foo : bar").build();
             doReturn(config).when(configManager).getConfiguration(anyMap());
 
@@ -92,36 +91,37 @@ public class AgentControllerTest {
     public class FetchNewCommand {
 
         @Test
-        public void agentWithoutResponse() throws JsonProcessingException, ExecutionException {
+        public void agentWithoutResponse() throws ExecutionException {
             HashMap<String, String> headers = new HashMap<>();
             String agentTestId = "test-id";
             headers.put("x-ocelot-agent-id", agentTestId);
-            AgentCommand expectedCommand = AgentCommand.getEmptyCommand();
+            Command expectedCommand = null;
             doReturn(expectedCommand).when(agentCommandManager).getCommand(agentTestId);
 
-            ResponseEntity<AgentCommand> result = controller.fetchNewCommand(headers, null);
+            ResponseEntity<Command> result = controller.fetchNewCommand(headers, null);
 
             assertThat(result.getBody()).isEqualTo(expectedCommand);
             verify(agentCommandManager).getCommand(agentTestId);
         }
 
         @Test
-        public void agentHasResponse() throws JsonProcessingException, ExecutionException {
+        public void agentHasResponse() throws ExecutionException {
             HashMap<String, String> headers = new HashMap<>();
             String agentTestId = "test-id";
             headers.put("x-ocelot-agent-id", agentTestId);
-            AgentCommand expectedCommand = new AgentCommand(null, agentTestId, null, null);
+            Command expectedCommand = new PingCommand();
+            UUID mockID = expectedCommand.getCommandId();
             doReturn(expectedCommand).when(agentCommandManager).getCommand(agentTestId);
-            AgentResponse mockResponse = mock(AgentResponse.class);
-            UUID mockID = UUID.randomUUID();
-            doReturn(mockID).when(mockResponse).getCommandId();
-            doNothing().when(agentCallbackManager).runNextCommandWithId(agentTestId, mockID);
+            CommandResponse mockResponse = mock(CommandResponse.class);
 
-            ResponseEntity<AgentCommand> result = controller.fetchNewCommand(headers, mockResponse);
+            doReturn(mockID).when(mockResponse).getCommandId();
+            doNothing().when(agentCallbackManager).handleCommandResponse(expectedCommand.getCommandId(), mockResponse);
+
+            ResponseEntity<Command> result = controller.fetchNewCommand(headers, mockResponse);
 
             assertThat(result.getBody()).isEqualTo(expectedCommand);
             verify(agentCommandManager).getCommand(agentTestId);
-            verify(agentCallbackManager).runNextCommandWithId(agentTestId, mockID);
+            verify(agentCallbackManager).handleCommandResponse(mockID, mockResponse);
         }
     }
 }

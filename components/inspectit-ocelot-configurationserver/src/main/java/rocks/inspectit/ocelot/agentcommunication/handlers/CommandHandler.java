@@ -1,19 +1,47 @@
 package rocks.inspectit.ocelot.agentcommunication.handlers;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
-import rocks.inspectit.ocelot.commons.models.AgentCommand;
-
-import java.util.concurrent.ExecutionException;
+import rocks.inspectit.ocelot.commons.models.command.Command;
+import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 
 public interface CommandHandler {
 
     /**
-     * Takes an instance of {@link AgentCommand} and executes it.
+     * Checks if this handler handles a given command. Returns true if this is the case.
      *
-     * @param agentCommand the AgentCommand to be Executed.
+     * @param command The command which should be checked.
      *
-     * @return An instance of DeferredResult containing the result of the command.
+     * @return True if the command is handled by this handler.
      */
-    DeferredResult<?> handleCommand(AgentCommand agentCommand) throws ExecutionException;
+    boolean canHandle(Command command);
 
+    /**
+     * Checks if this handler handles a given CommandResponse, Returns true if this is the case.
+     *
+     * @param response The response which should be checked.
+     *
+     * @return True if the response is handled by this handler.
+     */
+    boolean canHandle(CommandResponse response);
+
+    /**
+     * Takes an instance of {@link Command} as well as a String resembling the id of the agent the command is meant for.
+     * Prepares an instance of {@link DeferredResult} for this command.
+     *
+     * @param agentId The id of the agent the command is meant for.
+     * @param command The command to be Executed.
+     *
+     * @return An instance of {@link DeferredResult} which is prepared as defined by the handler.
+     */
+    DeferredResult<ResponseEntity<?>> prepareResponse(String agentId, Command command);
+
+    /**
+     * Takes an instance of {@link CommandResponse} aswell as an instance of {@link DeferredResult} and handles
+     * the given parameters as implemented by the handler.
+     *
+     * @param response The {@link CommandResponse} to be handled.
+     * @param result   The {@link DeferredResult} the response should be written in.
+     */
+    void handleResponse(CommandResponse response, DeferredResult<ResponseEntity<?>> result);
 }

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.commons.models.AgentCommand;
+import rocks.inspectit.ocelot.commons.models.command.Command;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -27,25 +27,27 @@ public class AgentCommandManagerTest {
 
         @Test
         public void addCommandNewAgent() throws ExecutionException {
-            AgentCommand mockAgentCommand = mock(AgentCommand.class);
+            Command mockAgentCommand = mock(Command.class);
             String agentId = "test-agent";
 
             agentCommandManager.addCommand(agentId, mockAgentCommand);
 
-            Map<String, LinkedList<AgentCommand>> result = agentCommandManager.agentCommandCache.asMap();
+            Map<String, LinkedList<Command>> result = agentCommandManager.agentCommandCache.asMap();
             assertThat(result).containsOnlyKeys(agentId);
-            List<AgentCommand> commandList = result.get(agentId);
+            List<Command> commandList = result.get(agentId);
             assertThat(commandList).containsExactly(mockAgentCommand);
         }
 
         @Test
-        public void ignoresNullId() throws ExecutionException {
-            AgentCommand mockAgentCommand = mock(AgentCommand.class);
+        public void throwsExeptionOnNullId() throws ExecutionException {
+            Command mockAgentCommand = mock(Command.class);
 
-            agentCommandManager.addCommand(null, mockAgentCommand);
+            try {
+                agentCommandManager.addCommand(null, mockAgentCommand);
+            } catch (IllegalArgumentException e) {
+                assertThat(e.getMessage()).isEqualTo("Agent id may never be null!");
+            }
 
-            Map<String, LinkedList<AgentCommand>> result = agentCommandManager.agentCommandCache.asMap();
-            assertThat(result).isEmpty();
         }
 
         @Test
@@ -54,7 +56,7 @@ public class AgentCommandManagerTest {
 
             agentCommandManager.addCommand(agentId, null);
 
-            Map<String, LinkedList<AgentCommand>> result = agentCommandManager.agentCommandCache.asMap();
+            Map<String, LinkedList<Command>> result = agentCommandManager.agentCommandCache.asMap();
             assertThat(result).isEmpty();
         }
     }
@@ -66,20 +68,20 @@ public class AgentCommandManagerTest {
         public void noCommandPresent() throws ExecutionException {
             String agentId = "test-agent";
 
-            AgentCommand result = agentCommandManager.getCommand(agentId);
+            Command result = agentCommandManager.getCommand(agentId);
 
-            assertThat(result).isEqualTo(AgentCommand.getEmptyCommand());
+            assertThat(result).isEqualTo(null);
         }
 
         @Test
         public void commandPresent() throws ExecutionException {
-            AgentCommand mockAgentCommand = mock(AgentCommand.class);
+            Command mockAgentCommand = mock(Command.class);
             String agentId = "test-agent";
-            LinkedList<AgentCommand> list = new LinkedList<>();
+            LinkedList<Command> list = new LinkedList<>();
             list.add(mockAgentCommand);
             agentCommandManager.agentCommandCache.put(agentId, list);
 
-            AgentCommand result = agentCommandManager.getCommand(agentId);
+            Command result = agentCommandManager.getCommand(agentId);
 
             assertThat(result).isEqualTo(mockAgentCommand);
             assertThat(agentCommandManager.agentCommandCache.asMap()).isEmpty();
@@ -87,15 +89,15 @@ public class AgentCommandManagerTest {
 
         @Test
         public void commandOfDifferentAgentPresent() throws ExecutionException {
-            AgentCommand mockAgentCommand = mock(AgentCommand.class);
+            Command mockAgentCommand = mock(Command.class);
             String agentId = "not-the-test-agent";
-            LinkedList<AgentCommand> list = new LinkedList<>();
+            LinkedList<Command> list = new LinkedList<>();
             list.add(mockAgentCommand);
             agentCommandManager.agentCommandCache.put(agentId, list);
 
-            AgentCommand result = agentCommandManager.getCommand("test-agent");
+            Command result = agentCommandManager.getCommand("test-agent");
 
-            assertThat(result).isEqualTo(AgentCommand.getEmptyCommand());
+            assertThat(result).isEqualTo(null);
             assertThat(agentCommandManager.agentCommandCache.asMap()).containsOnlyKeys(agentId);
         }
     }
