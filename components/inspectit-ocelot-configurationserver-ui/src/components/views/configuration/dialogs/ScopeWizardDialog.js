@@ -64,10 +64,8 @@ class ScopeWizardDialog extends React.Component {
   };
 
   render() {
-    const heightClassFieldset = window.innerHeight * 0.15;
+    const heightClassFieldset = window.innerHeight * 0.08;
     const heightMethodFieldset = window.innerHeight * 0.55;
-
-    const widthArgumentFields = window.innerWidth * 0.6;
 
     const tooltipOptions = {
       showDelay: 500,
@@ -180,6 +178,12 @@ class ScopeWizardDialog extends React.Component {
                   placeholder="Select a Matcher Type"
                 />
                 <InputText className="in-name" />
+                <Button
+                  tooltip="Class Browser"
+                  icon="pi pi-search"
+                  tooltipOptions={tooltipOptions}
+                  onClick={() => alert('Todo: Open Class Browser')} //showClassBrowserDialog()}
+                />
               </div>
             </Fieldset>
 
