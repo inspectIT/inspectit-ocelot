@@ -21,6 +21,7 @@ class ScopeWizardDialog extends React.Component {
       selectedMethodMatchers: [],
       isConstructor: 'false',
       isSelectedParameter: false,
+      parameterInput: '',
       parameterList: [],
     };
   }
@@ -58,12 +59,15 @@ class ScopeWizardDialog extends React.Component {
   };
 
   addParameter = () => {
-    this.setState({ parameterList: [...this.state.parameterList, { parameter: '' }] });
+    this.setState({ parameterList: [...this.state.parameterList, { parameter: this.state.parameterInput }] });
+    this.setState({ parameterInput: '' });
   };
 
   render() {
     const heightClassFieldset = window.innerHeight * 0.15;
     const heightMethodFieldset = window.innerHeight * 0.55;
+
+    const widthArgumentFields = window.innerWidth * 0.6;
 
     const tooltipOptions = {
       showDelay: 500,
@@ -104,29 +108,44 @@ class ScopeWizardDialog extends React.Component {
       <>
         <style jsx>{`
           .this :global(.p-dialog-content) {
-            height: 75vh;
             border-left: 1px solid #ddd;
             border-right: 1px solid #ddd;
           }
+
           .row-center {
             display: flex;
             align-items: center;
           }
+
           .fill {
             flex-grow: 1;
           }
+
           .meta-row label {
             margin-right: 2rem;
           }
+
           .meta-row label:not(:first-child) {
             margin-left: 0.5rem;
           }
+
+          .meta-row .inner-label {
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
+          }
+
           .row-margin {
-            margin-top: 1rem;
+            margin-top: 0.5rem;
           }
-          .this :global(.dd-branch) {
-            width: 10rem;
+
+          .argument-fields-height {
+            margin-top: 0.5rem;
           }
+
+          .this :global(.method-matcher-dropdown) {
+            width: 14rem;
+          }
+
           .this :global(.in-name) {
             width: 100%;
           }
@@ -143,8 +162,8 @@ class ScopeWizardDialog extends React.Component {
             footer={footer}
             focusOnShow={false}
           >
-            <Fieldset legend="Class Matcher" style={{ paddingTop: 0, height: heightClassFieldset, overflow: 'hidden' }}>
-              <div className="row-center meta-row fill">
+            <Fieldset legend="Class Matcher" style={{ paddingTop: 0, height: heightClassFieldset }}>
+              <div className="row-center row-margin meta-row fill">
                 <Dropdown
                   className="class-matcher-dropdown"
                   value={this.state.matcher}
@@ -152,7 +171,7 @@ class ScopeWizardDialog extends React.Component {
                   onChange={(e) => this.setState({ matcher: e.value })}
                   placeholder="Select a Class Matcher"
                 />
-                <span className="p-text">which</span>
+                <label className="inner-label" htmlFor="which">which</label>
                 <Dropdown
                   className="class-matcher-type-dropdown"
                   value={this.state.classMatcherType}
@@ -160,12 +179,12 @@ class ScopeWizardDialog extends React.Component {
                   onChange={(e) => this.setState({ classMatcherType: e.value })}
                   placeholder="Select a Matcher Type"
                 />
-                <InputText className="class-matcher-input" />
+                <InputText className="in-name" />
               </div>
             </Fieldset>
 
             <Fieldset legend="Method Matcher" style={{ paddingTop: 0, height: heightMethodFieldset }}>
-              <div className="row-margin row-center meta-row">
+              <div className="row-center row-margin meta-row">
                 {methodVisibility.map((methodMatcher) => {
                   return (
                     <div key={methodMatcher.key} className="p-field-checkbox">
@@ -211,7 +230,7 @@ class ScopeWizardDialog extends React.Component {
                   onChange={(e) => this.setState({ methodMatcherType: e.value })}
                   placeholder="Select a Matcher Type"
                 />
-                <InputText className="method-matcher-input" />
+                <InputText className="in-name" />
               </div>
               <div className="p-field-checkbox row-center row-margin fill">
                 <Checkbox
@@ -227,13 +246,8 @@ class ScopeWizardDialog extends React.Component {
                 <Fieldset legend="Method Arguments" style={{ paddingTop: 0, overflow: 'hidden' }}>
                   {this.state.parameterList.map((parameter, i) => {
                     return (
-                      <div key={i} className="box row-margin">
-                        <InputText
-                          name="parameter"
-                          placeholder="Enter a parameter"
-                          value={parameter.parameter}
-                          onChange={(e) => this.handleParameterChange(e, i)}
-                        />
+                      <div key={i} className="row-center meta-row argument-fields-height ">
+                        <InputText className="in-name" disabled name="parameter" value={parameter.parameter} />
                         <Button
                           tooltip="Remove Parameter"
                           icon="pi pi-fw pi-trash"
@@ -243,7 +257,16 @@ class ScopeWizardDialog extends React.Component {
                       </div>
                     );
                   })}
-                  <div className="addButton row-margin">
+                  <div
+                    className="row-center meta-row argument-fields-height"
+                    style={{ marginBottom: '0.5em' }}
+                  >
+                    <InputText
+                      name="parameter"
+                      className="in-name"
+                      value={this.state.parameterInput}
+                      onChange={(e) => this.setState({ parameterInput: e.target.value })}
+                    />
                     <Button
                       tooltip="Add Parameter"
                       icon="pi pi-plus"
