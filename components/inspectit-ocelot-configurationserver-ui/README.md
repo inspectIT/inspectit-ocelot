@@ -20,6 +20,15 @@ yarn dev
 
 The development server can be reached at [http://localhost:3000](http://localhost:3000).
 
+#### Storybook
+
+The project also contains [Storybook](https://storybook.js.org/) which supports the development of components by providing an isolated sandbox UI for testing these components.
+
+Storybook can be started using the following command
+```bash
+yarn storybook
+```
+
 ### Exporting
 
 The frontend can be built and exported using the following command - the `build` task is included in the `export` task.
