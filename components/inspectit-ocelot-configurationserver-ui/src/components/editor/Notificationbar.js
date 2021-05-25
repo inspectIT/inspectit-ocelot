@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * Notificationbar used in the editor view to show notifications.
@@ -30,5 +31,17 @@ const Notificationbar = ({ isError, icon, text }) => (
     </div>
   </>
 );
+
+Notificationbar.propTypes = {
+  isError: PropTypes.bool,
+  icon: PropTypes.string,
+  text: PropTypes.string,
+};
+
+Notificationbar.defaultProps = {
+  isError: false,
+  icon: null,
+  text: null,
+};
 
 export default Notificationbar;

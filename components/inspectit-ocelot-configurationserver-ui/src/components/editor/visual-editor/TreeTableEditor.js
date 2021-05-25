@@ -10,7 +10,7 @@ import { TreeTable } from 'primereact/treetable';
 import { Dropdown } from 'primereact/dropdown';
 import PropTypes from 'prop-types';
 import React from 'react';
-import axios from '../../lib/axios-api';
+import axios from '../../../lib/axios-api';
 
 // helper for a schema property type constants
 const schemaType = {

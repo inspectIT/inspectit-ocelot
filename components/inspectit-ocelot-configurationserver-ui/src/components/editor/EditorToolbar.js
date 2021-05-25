@@ -1,11 +1,10 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 
 /**
  * The toolbar used within the editor view.
- *
- * onPropsSplit = (propsSplit: boolean, propsSplitHotizontal: boolean)
  */
 const EditorToolbar = ({
   enableButtons,
@@ -60,5 +59,31 @@ const EditorToolbar = ({
     </Toolbar>
   </div>
 );
+
+EditorToolbar.propTypes = {
+  enableButtons: PropTypes.bool,
+  isRefreshing: PropTypes.bool,
+  canSave: PropTypes.bool,
+  visualConfig: PropTypes.bool,
+  children: PropTypes.node,
+  onSave: PropTypes.func,
+  onSearch: PropTypes.func,
+  onHelp: PropTypes.func,
+  onRefresh: PropTypes.func,
+  onVisualConfigChange: PropTypes.func,
+};
+
+EditorToolbar.defaultProps = {
+  enableButtons: true,
+  isRefreshing: false,
+  canSave: true,
+  visualConfig: false,
+  children: null,
+  onSave: () => {},
+  onSearch: () => {},
+  onHelp: () => {},
+  onRefresh: () => {},
+  onVisualConfigChange: () => {},
+};
 
 export default EditorToolbar;

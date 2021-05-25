@@ -5,12 +5,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
 import Notificationbar from './Notificationbar';
-import YamlParser from './YamlParser';
+import YamlParser from './visual-editor/YamlParser';
 import SelectionInformation from './SelectionInformation';
 import { configurationSelectors, configurationActions } from '../../redux/ducks/configuration';
 
-const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
-const TreeTableEditor = dynamic(() => import('./TreeTableEditor'), { ssr: false });
+const AceEditor = dynamic(() => import('./yaml-editor/AceEditor'), { ssr: false });
+const TreeTableEditor = dynamic(() => import('./visual-editor/TreeTableEditor'), { ssr: false });
 
 /**
  * Editor view consisting of the AceEditor and a toolbar.
