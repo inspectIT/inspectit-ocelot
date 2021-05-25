@@ -29,3 +29,11 @@ export const DEFAULT_CONFIG_TREE_KEY = '/$%$%$%$%Ocelot-default-key';
  * The maximum amount of version elements fetched from the config server.
  */
 export const VERSION_LIMIT = 100;
+
+/**
+ * The supported configuration types.
+ */
+export const CONFIGURATION_TYPES = {
+  YAML: 0,
+  METHOD_CONFIGURATION: 1,
+};
