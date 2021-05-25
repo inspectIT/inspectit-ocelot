@@ -1,3 +1,6 @@
+/** Templates */
+import methodConfigurationTemplate from './templates/method-configuration.json';
+
 /**
  * Various constants used by the application.
  */
@@ -29,3 +32,17 @@ export const DEFAULT_CONFIG_TREE_KEY = '/$%$%$%$%Ocelot-default-key';
  * The maximum amount of version elements fetched from the config server.
  */
 export const VERSION_LIMIT = 100;
+
+/**
+ * Different file types with its content.
+ */
+export const FILE_TYPES = {
+  NORMAL: {
+    name: '',
+    content: '',
+  },
+  METHOD_CONFIGURATION: {
+    name: 'method-configuration',
+    content: methodConfigurationTemplate,
+  },
+};

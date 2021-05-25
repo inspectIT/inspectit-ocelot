@@ -14,6 +14,9 @@ import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import SearchDialog from './dialogs/SearchDialog';
 import ConfigurationSidebar from './ConfigurationSidebar';
 
+/** Data */
+import { FILE_TYPES } from '../../../data/constants';
+
 /**
  * The header component of the editor view.
  */
@@ -56,7 +59,7 @@ class ConfigurationView extends React.Component {
   state = {
     isDeleteFileDialogShown: false,
     isCreateFileDialogShown: false,
-    isCreateMethodConfiguration: false,
+    fileType: FILE_TYPES.NORMAL,
     isCreateDirectoryDialogShown: false,
     isMoveDialogShown: false,
     filePath: null,
@@ -101,8 +104,7 @@ class ConfigurationView extends React.Component {
 
   hideDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: false, filePath: null });
 
-  showCreateFileDialog = (filePath, isCreateMethodConfiguration) =>
-    this.setState({ isCreateFileDialogShown: true, isCreateMethodConfiguration: isCreateMethodConfiguration, filePath });
+  showCreateFileDialog = (filePath, fileType) => this.setState({ isCreateFileDialogShown: true, fileType: fileType, filePath });
 
   hideCreateFileDialog = () => this.setState({ isCreateFileDialogShown: false, filePath: null });
 
@@ -231,7 +233,7 @@ class ConfigurationView extends React.Component {
           visible={this.state.isCreateFileDialogShown}
           onHide={this.hideCreateFileDialog}
           filePath={this.state.filePath}
-          createMethodConfiguration={this.state.isCreateMethodConfiguration}
+          fileType={this.state.fileType}
         />
         <CreateDialog
           directoryMode={true}
