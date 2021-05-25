@@ -6,7 +6,7 @@ import { Button } from 'primereact/button';
 import { SplitButton } from 'primereact/splitbutton';
 
 /** Data */
-import { FILE_TYPES } from '../../../data/constants';
+import { CONFIGURATION_TYPES } from '../../../data/constants';
 
 /**
  * The toolbar used in the configuration view's file tree.
@@ -59,12 +59,12 @@ const FileToolbar = ({
             tooltip="New file"
             icon="pi pi-file"
             tooltipOptions={tooltipOptions}
-            onClick={() => showCreateFileDialog(selection, FILE_TYPES.NORMAL)}
+            onClick={() => showCreateFileDialog(selection, CONFIGURATION_TYPES.YAML)}
             model={[
               {
                 label: 'Method Configuration',
                 icon: 'pi pi-cog',
-                command: () => showCreateFileDialog(selection, FILE_TYPES.METHOD_CONFIGURATION),
+                command: () => showCreateFileDialog(selection, CONFIGURATION_TYPES.METHOD_CONFIGURATION),
               },
             ]}
           />

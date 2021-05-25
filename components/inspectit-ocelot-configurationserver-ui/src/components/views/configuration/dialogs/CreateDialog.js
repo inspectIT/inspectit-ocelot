@@ -9,7 +9,7 @@ import { configurationUtils, configurationActions } from '../../../../redux/duck
 import PropTypes from 'prop-types';
 
 /** Data */
-import { FILE_TYPES } from '../../../../data/constants';
+import { CONFIGURATION_TYPES } from '../../../../data/constants';
 
 /**
  * Dialog for creating a new file or directory.
@@ -30,14 +30,15 @@ class CreateDialog extends React.Component {
   }
 
   render() {
-    const type = this.props.directoryMode ? 'Folder' : 'File';
-    const fileTypeName = this.props.fileType.name;
+    const { directoryMode, configurationType } = this.props;
+
+    const dialogMessage = directoryMode ? 'Folder' : configurationType.name + ' File';
 
     return (
       <Dialog
         focusOnShow={false}
         style={{ width: '400px' }}
-        header={'Create ' + fileTypeName + ' ' + type}
+        header={'Create ' + dialogMessage}
         modal={true}
         visible={this.props.visible}
         onHide={this.props.onHide}
@@ -50,7 +51,7 @@ class CreateDialog extends React.Component {
         }
       >
         <div style={{ width: '100%', paddingBottom: '0.5em' }}>
-          Create a {fileTypeName} {type.toLowerCase()} in <b>{this.state.parentDirectoryName}</b>:
+          Create a {dialogMessage.toLowerCase()} in <b>{this.state.parentDirectoryName}</b>:
         </div>
         <div className="p-inputgroup" style={{ width: '100%' }}>
           <InputText
@@ -58,7 +59,7 @@ class CreateDialog extends React.Component {
             style={{ width: '100%' }}
             onKeyPress={this.onKeyPress}
             value={this.state.filename}
-            placeholder={type + ' Name'}
+            placeholder={dialogMessage + ' Name'}
             onChange={(e) => this.filenameChanged(e.target.value)}
           />
           {!this.props.directoryMode && <span className="p-inputgroup-addon">.yml</span>}
@@ -126,20 +127,21 @@ class CreateDialog extends React.Component {
   };
 
   createFileOrFolder = () => {
+    const { configurationType, createDirectory, directoryMode, writeFile, onHide } = this.props;
     const fullPath = this.getAbsolutePath(this.state.filename);
 
-    if (this.props.directoryMode) {
-      this.props.createDirectory(fullPath, true, true);
+    if (directoryMode) {
+      createDirectory(fullPath, true, true);
     } else {
       let content = '';
-      if (this.props.fileType !== FILE_TYPES.NORMAL) {
-        const fileHeader = '# {"type": "' + this.props.fileType.name + '"}\n';
-        const fileContent = JSON.stringify(this.props.fileType.content);
+      if (configurationType !== CONFIGURATION_TYPES.YAML) {
+        const fileHeader = '# {"type": "' + configurationType.name + '"}\n';
+        const fileContent = JSON.stringify(configurationType.template);
         content = fileHeader + fileContent;
       }
-      this.props.writeFile(fullPath, content, true, true);
+      writeFile(fullPath, content, true, true);
     }
-    this.props.onHide();
+    onHide();
   };
 
   /**
@@ -183,14 +185,19 @@ CreateDialog.propTypes = {
   visible: PropTypes.bool,
   /** Callback on dialog hide */
   onHide: PropTypes.func,
-  /** Contains file type name and content */
-  fileType: PropTypes.object,
+  /** Contains configuration type name and content */
+  configurationType: PropTypes.object,
+
+  createDirectory: PropTypes.func,
+  writeFile: PropTypes.func,
 };
 
 CreateDialog.defaultProps = {
   visible: true,
   onHide: () => {},
-  fileType: FILE_TYPES.NORMAL,
+  createDirectory: () => {},
+  writeFile: () => {},
+  configurationType: CONFIGURATION_TYPES.YAML,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(CreateDialog);

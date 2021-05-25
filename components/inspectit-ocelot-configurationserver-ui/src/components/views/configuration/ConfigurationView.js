@@ -15,7 +15,7 @@ import SearchDialog from './dialogs/SearchDialog';
 import ConfigurationSidebar from './ConfigurationSidebar';
 
 /** Data */
-import { FILE_TYPES } from '../../../data/constants';
+import { CONFIGURATION_TYPES } from '../../../data/constants';
 
 /**
  * The header component of the editor view.
@@ -58,9 +58,9 @@ const EditorHeader = ({ icon, path, name, isContentModified, readOnly }) => (
 class ConfigurationView extends React.Component {
   state = {
     isDeleteFileDialogShown: false,
-    isCreateFileDialogShown: false,
-    fileType: FILE_TYPES.NORMAL,
-    isCreateDirectoryDialogShown: false,
+    isCreateDialogShown: false,
+    isDirectoryMode: false,
+    configurationType: CONFIGURATION_TYPES.YAML,
     isMoveDialogShown: false,
     filePath: null,
     isSearchDialogShown: false,
@@ -104,13 +104,13 @@ class ConfigurationView extends React.Component {
 
   hideDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: false, filePath: null });
 
-  showCreateFileDialog = (filePath, fileType) => this.setState({ isCreateFileDialogShown: true, fileType: fileType, filePath });
+  showCreateFileDialog = (filePath, configurationType) =>
+    this.setState({ isCreateDialogShown: true, isDirectoryMode: false, configurationType: configurationType, filePath });
 
-  hideCreateFileDialog = () => this.setState({ isCreateFileDialogShown: false, filePath: null });
+  hideCreateDialog = () => this.setState({ isCreateDialogShown: false, isDirectoryMode: false, filePath: null });
 
-  showCreateDirectoryDialog = (filePath) => this.setState({ isCreateDirectoryDialogShown: true, filePath });
-
-  hideCreateDirectoryDialog = () => this.setState({ isCreateDirectoryDialogShown: false, filePath: null });
+  showCreateDirectoryDialog = (filePath) =>
+    this.setState({ isCreateDialogShown: true, isDirectoryMode: true, configurationType: CONFIGURATION_TYPES.YAML, filePath });
 
   showMoveDialog = (filePath) => this.setState({ isMoveDialogShown: true, filePath });
 
@@ -229,17 +229,11 @@ class ConfigurationView extends React.Component {
 
         <DeleteDialog visible={this.state.isDeleteFileDialogShown} onHide={this.hideDeleteFileDialog} filePath={this.state.filePath} />
         <CreateDialog
-          directoryMode={false}
-          visible={this.state.isCreateFileDialogShown}
-          onHide={this.hideCreateFileDialog}
+          directoryMode={this.state.isDirectoryMode}
+          visible={this.state.isCreateDialogShown}
+          onHide={this.hideCreateDialog}
           filePath={this.state.filePath}
-          fileType={this.state.fileType}
-        />
-        <CreateDialog
-          directoryMode={true}
-          visible={this.state.isCreateDirectoryDialogShown}
-          onHide={this.hideCreateDirectoryDialog}
-          filePath={this.state.filePath}
+          configurationType={this.state.configurationType}
         />
         <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} filePath={this.state.filePath} />
 

@@ -36,13 +36,13 @@ export const VERSION_LIMIT = 100;
 /**
  * Different file types with its content.
  */
-export const FILE_TYPES = {
-  NORMAL: {
+export const CONFIGURATION_TYPES = {
+  YAML: {
     name: '',
-    content: '',
+    template: '',
   },
   METHOD_CONFIGURATION: {
-    name: 'method-configuration',
-    content: methodConfigurationTemplate,
+    name: 'Method-Configuration',
+    template: methodConfigurationTemplate,
   },
 };
