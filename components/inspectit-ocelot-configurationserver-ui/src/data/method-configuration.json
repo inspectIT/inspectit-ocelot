@@ -1,0 +1,21 @@
+{
+  "inspectit": {
+    "instrumentation": {
+      "scopes": {},
+      "rules": {
+        "r_trace": {
+          "include": {
+            "r_trace_method": true
+          },
+          "scopes": null
+        },
+        "r_measure": {
+          "include": {
+            "r_method_metric": true
+          },
+          "scopes": null
+        }
+      }
+    }
+  }
+}
