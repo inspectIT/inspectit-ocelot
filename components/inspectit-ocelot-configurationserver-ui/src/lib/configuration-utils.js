@@ -4,6 +4,12 @@ import { CONFIGURATION_TYPES } from '../data/constants';
  * Returns the type of the specified configuration. In case the configuration is null or empty
  * YAML will be returned.
  *
+ * Example: the following configuration will result in type "METHOD_CONFIGURATION"
+ * > # {"type": "METHOD_CONFIGURATION"}
+ * > inspectit:
+ * >   config:
+ * >     ...
+ *
  * @param {string} yamlConfiguration
  */
 export const getConfigurationType = (yamlConfiguration) => {
