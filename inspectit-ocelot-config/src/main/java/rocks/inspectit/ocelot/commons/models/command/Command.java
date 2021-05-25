@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.commons.models.command;
 
 import lombok.*;
-import rocks.inspectit.ocelot.commons.models.command.impl.EmptyCommand;
 
 import java.util.UUID;
 
