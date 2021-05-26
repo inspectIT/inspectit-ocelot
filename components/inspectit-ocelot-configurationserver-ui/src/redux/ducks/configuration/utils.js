@@ -3,7 +3,7 @@ import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 
 /**
  * Returns the file object for the given path.
- * If the file does not ecist, null is returned.
+ * If the file does not exist, null is returned.
  *
  * @param {*} rootFiles the list of the files within the root directory
  * @param {*} path the path of the file to get

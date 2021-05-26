@@ -1,0 +1,18 @@
+{
+  "inspectit": {
+    "instrumentation": {
+      "rules": {
+        "r_method_configuration_trace": {
+          "include": {
+            "r_trace_method": true
+          }
+        },
+        "r_method_configuration_duration": {
+          "include": {
+            "r_method_metric": true
+          }
+        }
+      }
+    }
+  }
+}
