@@ -102,7 +102,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   /**
    * Providing the template body for the scope's control buttons.
    */
-  const scopeEditBodyTemplate = ({ name }) => {
+  const scopeEditBodyTemplate = () => {
     return (
       <div align="right">
         <Button icon="pi pi-pencil" style={{ marginRight: '0.5rem' }} />
