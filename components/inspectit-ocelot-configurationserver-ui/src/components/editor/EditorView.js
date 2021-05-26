@@ -60,7 +60,7 @@ const EditorView = ({
   let editorContent;
 
   if (configurationType == CONFIGURATION_TYPES.METHOD_CONFIGURATION) {
-    editorContent = <MethodConfigurationEditor />;
+    editorContent = <MethodConfigurationEditor yamlConfiguration={value} />;
   } else if (configurationType == CONFIGURATION_TYPES.YAML && showVisualConfigurationView) {
     editorContent = (
       <YamlParser yamlConfig={value} onUpdate={onChange}>
