@@ -1,9 +1,8 @@
 package rocks.inspectit.ocelot.agentcommunication;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,6 @@ import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,17 +26,12 @@ public class AgentCallbackManager {
     List<CommandHandler> handlers;
 
     @VisibleForTesting
-    LoadingCache<UUID, DeferredResult<ResponseEntity<?>>> resultCache;
+    Cache<UUID, DeferredResult<ResponseEntity<?>>> resultCache;
 
     public AgentCallbackManager() {
         resultCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(2, TimeUnit.MINUTES)
-                .build(new CacheLoader<UUID, DeferredResult<ResponseEntity<?>>>() {
-                    @Override
-                    public DeferredResult<ResponseEntity<?>> load(UUID key) {
-                        return null;
-                    }
-                });
+                .build();
     }
 
     /**
@@ -69,11 +62,12 @@ public class AgentCallbackManager {
      * @param commandID The UUID of the command the given response is linked to.
      * @param response  The response which should be handled.
      */
-    public void handleCommandResponse(UUID commandID, CommandResponse response) throws ExecutionException {
+    public void handleCommandResponse(UUID commandID, CommandResponse response) {
         if (commandID == null) {
             throw new IllegalArgumentException("The given command id may never be null!");
         }
-        DeferredResult<ResponseEntity<?>> result = resultCache.get(commandID);
+
+        DeferredResult<ResponseEntity<?>> result = resultCache.getIfPresent(commandID);
 
         if (result != null) {
             resultCache.invalidate(commandID);

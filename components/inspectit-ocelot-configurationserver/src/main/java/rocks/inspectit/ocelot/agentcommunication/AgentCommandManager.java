@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 
 import java.util.LinkedList;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -65,7 +64,7 @@ public class AgentCommandManager {
         LinkedList<Command> commandQueue = agentCommandCache.get(agentId);
         if (commandQueue.isEmpty()) {
             agentCommandCache.invalidate(agentId);
-            return null; //Command.getEmptyCommand();
+            return null;
         }
 
         Command command = commandQueue.pop();
