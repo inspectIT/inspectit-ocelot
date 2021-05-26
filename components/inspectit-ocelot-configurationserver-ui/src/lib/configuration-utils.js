@@ -1,4 +1,5 @@
 import { CONFIGURATION_TYPES } from '../data/constants';
+import _ from 'lodash';
 
 /**
  * Returns the type of the specified configuration. In case the configuration is null or empty
@@ -29,9 +30,7 @@ export const getConfigurationType = (yamlConfiguration) => {
   const jsonString = headerLine.substring(1);
   try {
     const { type } = JSON.parse(jsonString);
-    const fileType = CONFIGURATION_TYPES[type];
-
-    return fileType ? fileType : CONFIGURATION_TYPES.YAML;
+    return _.find(CONFIGURATION_TYPES, { name: type }, CONFIGURATION_TYPES.YAML);
   } catch (error) {
     // YAML type in case the first comment is no JSON object
     return CONFIGURATION_TYPES.YAML;
