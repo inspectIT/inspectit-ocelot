@@ -1,10 +1,12 @@
 package rocks.inspectit.ocelot.core.command;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -14,24 +16,29 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
+import rocks.inspectit.ocelot.commons.models.command.Command;
+import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
-import rocks.inspectit.ocelot.commons.models.AgentCommand;
-import rocks.inspectit.ocelot.commons.models.AgentCommandType;
-import rocks.inspectit.ocelot.commons.models.AgentResponse;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 @Slf4j
+@Component
 public class HttpCommandHandler {
 
-    private final ObjectMapper objectMapper;
+
+    @VisibleForTesting
+    @Autowired
+    CommandDelegator commandDelegator;
+
+    private final ObjectMapper objectMapper = new ObjectMapper().enableDefaultTyping();
 
     /**
      * The prefix which is used for the meta information HTTP headers.
@@ -54,15 +61,27 @@ public class HttpCommandHandler {
      */
     private final int DISCOVERY_TIMEOUT_DURATION = 100000;
 
+    /**
+     * Counts how many times the request for a new {@link Command} have been repeated.
+     */
     private int repeatCounter = 0;
 
     /**
-     * Constructor.
-     *
-     * @param currentSettings the settings used to fetch the configuration
+     * Defines the maximum amount of repeats for a new {@link Command}.
      */
-    public HttpCommandHandler(HttpConfigSettings currentSettings) {
-        objectMapper = new ObjectMapper();
+    private int maxRepeats = 3;
+
+    /**
+     * If true, the request for fetching a {@link Command} is immediately repeated.
+     */
+    private boolean repeat = false;
+
+    /**
+     * Used to update the current settings.
+     *
+     * @param currentSettings the settings used to fetch the configuration.
+     */
+    public void updateSettings(HttpConfigSettings currentSettings) {
         this.currentSettings = currentSettings;
     }
 
@@ -73,49 +92,41 @@ public class HttpCommandHandler {
      */
     private HttpClient createHttpClient(int timeOut) {
         RequestConfig.Builder configBuilder = RequestConfig.custom();
-
-        if (currentSettings.getConnectionTimeout() != null) {
-            configBuilder = configBuilder.setConnectTimeout(timeOut);
-        }
-        if (currentSettings.getSocketTimeout() != null) {
-            int socketTimeout = (int) currentSettings.getSocketTimeout().toMillis();
-            configBuilder = configBuilder.setSocketTimeout(socketTimeout);
-        }
-
+        configBuilder = configBuilder.setSocketTimeout(timeOut);
         RequestConfig config = configBuilder.build();
 
         return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
     }
 
     /**
-     * Fetches an AgentCommand by sending an empty payload. Uses the DEFAULT_TIMEOUT_DURATION as timeout value.
+     * Fetches a {@link Command} by sending an empty payload. Uses the DEFAULT_TIMEOUT_DURATION as timeout value.
      *
      * @return returns false if the request was send and true if it could not be send.
      */
     public boolean fetchCommand() throws UnsupportedEncodingException, JsonProcessingException {
-        return fetchCommand(AgentResponse.getEmptyResponse());
+        return fetchCommand(null);
     }
 
     /**
-     * Fetches an AgentCommand by sending the given parameter as payload. Uses the DEFAULT_TIMEOUT_DURATION as timeout value.
+     * Fetches a {@link Command} by sending the given parameter as payload. Uses the DEFAULT_TIMEOUT_DURATION as timeout value.
      *
      * @param payload The payload to be send.
      *
      * @return returns false if the request was send and true if it could not be send.
      */
-    private boolean fetchCommand(AgentResponse payload) throws UnsupportedEncodingException, JsonProcessingException {
+    private boolean fetchCommand(CommandResponse payload) throws UnsupportedEncodingException, JsonProcessingException {
         return fetchCommand(payload, DEFAULT_TIMEOUT_DURATION);
     }
 
     /**
-     * Fetches an AgentCommand by sending the given parameter as payload and uses the given int as timeout.
+     * Fetches a {@link Command} by sending the given {@link CommandResponse} as payload and uses the given timeout-int as timeout.
      *
      * @param payload The payload to be send.
      * @param timeout The timeout to be used for the request.
      *
      * @return returns false if the request was send and true if it could not be send.
      */
-    private boolean fetchCommand(AgentResponse payload, int timeout) throws JsonProcessingException, UnsupportedEncodingException {
+    private boolean fetchCommand(CommandResponse payload, int timeout) throws JsonProcessingException, UnsupportedEncodingException {
         HttpPost httpPost;
         try {
             URI uri = this.currentSettings.getCommandUrl().toURI();
@@ -127,9 +138,8 @@ public class HttpCommandHandler {
         }
 
         setAgentMetaHeaders(httpPost);
-        Gson gson = new Gson();
 
-        StringEntity payloadEntity = new StringEntity(gson.toJson(payload));
+        StringEntity payloadEntity = new StringEntity(objectMapper.writeValueAsString(payload));
         httpPost.setEntity(payloadEntity);
         httpPost.setHeader("Content-Type", "application/json");
         boolean isError = true;
@@ -164,8 +174,8 @@ public class HttpCommandHandler {
     }
 
     /**
-     * Takes a HttpResponse as a parameter and processes it. If the response contains a AgentCommand, the
-     * the command is executed. The return value is
+     * Takes a HttpResponse as a parameter and processes it. If the response contains an instance of {@link Command}, the
+     * the command is executed and the respective {@link CommandResponse} is returned.
      *
      * @param response The response to be send as payload.
      */
@@ -173,46 +183,33 @@ public class HttpCommandHandler {
         int statusCode = response.getStatusLine().getStatusCode();
 
         if (statusCode == HttpStatus.SC_OK) {
+            HttpEntity responseEntity = response.getEntity();
+            InputStream content = responseEntity.getContent();
+            Command command = null;
             try {
-                HttpEntity responseContent = response.getEntity();
-                InputStream content = responseContent.getContent();
-                AgentCommand agentCommand = objectMapper.readValue(content, AgentCommand.class);
+                command = objectMapper.readValue(content,  Command.class);
+            }catch(MismatchedInputException e) {
+                log.info("Empty command received!");
+            }
 
-                if (AgentCommand.getEmptyCommand().equals(agentCommand)) {
-                    log.info("Empty command received!");
-                    if (repeatCounter < 3) {
-                        repeatCounter++;
-                        fetchCommand(AgentResponse.getEmptyResponse(), DISCOVERY_TIMEOUT_DURATION);
-                    }
+            if (command == null) {
+                if (repeat && repeatCounter < maxRepeats) {
+                    repeatCounter++;
+                    fetchCommand(null, DISCOVERY_TIMEOUT_DURATION);
                 } else {
-                    Object commandResult = executeCommand(agentCommand);
-
-                    AgentResponse agentResponse = new AgentResponse(agentCommand.getCommandId(), commandResult);
-                    repeatCounter = 0;
-                    fetchCommand(agentResponse, DISCOVERY_TIMEOUT_DURATION);
+                    repeat = false;
                 }
-            } catch (IOException | UnsupportedOperationException e) {
-                log.error("An error occurred while fetching a new command: " + e.getMessage());
+            } else {
+                CommandResponse commandResult = commandDelegator.delegate(command);
+
+                repeatCounter = 0;
+                repeat = true;
+                fetchCommand(commandResult, DISCOVERY_TIMEOUT_DURATION);
             }
 
         } else {
             throw new IOException("Server returned an unexpected status code: " + statusCode);
         }
-    }
-
-    /**
-     * Executes a given command and returns the commands return value.
-     *
-     * @param agentCommand The command to be executed.
-     *
-     * @return The return value of the command.
-     */
-    private Object executeCommand(AgentCommand agentCommand) {
-        if (agentCommand.getCommandType() == AgentCommandType.GET_HEALTH) {
-            return "OK";
-        }
-        return null;
-
     }
 
 }

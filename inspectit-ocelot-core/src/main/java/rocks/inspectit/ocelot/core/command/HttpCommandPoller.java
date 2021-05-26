@@ -20,9 +20,6 @@ import java.util.concurrent.TimeUnit;
 public class HttpCommandPoller extends DynamicallyActivatableService implements Runnable {
 
     @Autowired
-    private InspectitEnvironment env;
-
-    @Autowired
     private ScheduledExecutorService executor;
 
     /**
@@ -33,6 +30,7 @@ public class HttpCommandPoller extends DynamicallyActivatableService implements 
     /**
      * The state of the used HTTP property source configuration.
      */
+    @Autowired
     private HttpCommandHandler commandHandler;
 
     @VisibleForTesting
@@ -53,7 +51,7 @@ public class HttpCommandPoller extends DynamicallyActivatableService implements 
 
         HttpConfigSettings httpSettings = configuration.getConfig().getHttp();
 
-        commandHandler = new HttpCommandHandler(httpSettings);
+        commandHandler.updateSettings(httpSettings);
 
         pollerFuture = executor.scheduleWithFixedDelay(this, DEFAULT_POLLING_INTERVAL_MS, DEFAULT_POLLING_INTERVAL_MS, TimeUnit.MILLISECONDS);
 
@@ -71,7 +69,8 @@ public class HttpCommandPoller extends DynamicallyActivatableService implements 
 
     @Override
     public void run() {
-        log.debug("Updating HTTP property source.");
+
+        log.debug("Updating HTTP command property source.");
         try {
             commandHandler.fetchCommand();
         } catch (UnsupportedEncodingException e) {

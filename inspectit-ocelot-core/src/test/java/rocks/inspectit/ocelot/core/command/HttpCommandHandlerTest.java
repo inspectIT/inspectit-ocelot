@@ -12,22 +12,19 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.commons.models.AgentCommand;
-import rocks.inspectit.ocelot.commons.models.AgentCommandType;
-import rocks.inspectit.ocelot.commons.models.AgentResponse;
+import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
+import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
+import rocks.inspectit.ocelot.commons.models.command.response.impl.PingResponse;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
-import rocks.inspectit.ocelot.core.command.HttpCommandHandler;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -35,6 +32,8 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class HttpCommandHandlerTest {
@@ -59,6 +58,7 @@ public class HttpCommandHandlerTest {
 
         handler.currentSettings = httpSettings;
         objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
+
     }
 
     @AfterEach
@@ -76,7 +76,7 @@ public class HttpCommandHandlerTest {
 
             boolean updateResult = handler.fetchCommand();
 
-            assertTrue(updateResult);
+            assertFalse(updateResult);
             List<ServeEvent> requests = mockServer.getServeEvents().getRequests();
             assertThat(requests).hasSize(1);
             List<String> headerKeys = requests.get(0)
@@ -91,11 +91,16 @@ public class HttpCommandHandlerTest {
         }
 
         @Test
-        public void healthCommandSend() throws IOException {
-            RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
-            AgentCommand command = new AgentCommand(AgentCommandType.GET_HEALTH, runtime.getName(), UUID.randomUUID(), null);
+        public void pingCommandSend() throws IOException {
+            PingCommand command = new PingCommand();
             String commandJson = objectWriter.writeValueAsString(command);
-            String emptyCommandJson = objectWriter.writeValueAsString(AgentCommand.getEmptyCommand());
+            String emptyCommandJson = objectWriter.writeValueAsString(null);
+
+            PingResponse response = new PingResponse(command.getCommandId(),true);
+            CommandDelegator mockCommandDelegator = mock(CommandDelegator.class);
+            when(mockCommandDelegator.delegate(Mockito.any())).thenReturn(response);
+
+            handler.commandDelegator = mockCommandDelegator;
 
             // 2 Requests which worked + 3 from discovery mode.
             int expectedRequestSize = 5;
@@ -129,27 +134,26 @@ public class HttpCommandHandlerTest {
             assertThat(headerKeys).containsOnly("X-OCELOT-AGENT-ID", "X-OCELOT-AGENT-VERSION", "X-OCELOT-JAVA-VERSION", "X-OCELOT-VM-NAME", "X-OCELOT-VM-VENDOR", "X-OCELOT-START-TIME");
 
             ObjectMapper mapper = new ObjectMapper();
-            AgentResponse response0 = mapper.readValue(requests.get(0)
+            CommandResponse response0 = mapper.readValue(requests.get(0)
                     .getRequest()
-                    .getBodyAsString(), AgentResponse.class);
-            AgentResponse response1 = mapper.readValue(requests.get(1)
+                    .getBodyAsString(), CommandResponse.class);
+            CommandResponse response1 = mapper.readValue(requests.get(1)
                     .getRequest()
-                    .getBodyAsString(), AgentResponse.class);
-            AgentResponse response2 = mapper.readValue(requests.get(2)
+                    .getBodyAsString(), CommandResponse.class);
+            CommandResponse response2 = mapper.readValue(requests.get(2)
                     .getRequest()
-                    .getBodyAsString(), AgentResponse.class);
-            AgentResponse response3 = mapper.readValue(requests.get(3)
+                    .getBodyAsString(), CommandResponse.class);
+            CommandResponse response3 = mapper.readValue(requests.get(3)
                     .getRequest()
-                    .getBodyAsString(), AgentResponse.class);
-            AgentResponse response4 = mapper.readValue(requests.get(4)
+                    .getBodyAsString(), CommandResponse.class);
+            CommandResponse response4 = mapper.readValue(requests.get(4)
                     .getRequest()
-                    .getBodyAsString(), AgentResponse.class);
+                    .getBodyAsString(), CommandResponse.class);
             assertEquals(command.getCommandId(), response3.getCommandId());
-            assertEquals("OK", response3.getPayload());
-            assertEquals(AgentResponse.getEmptyResponse(), response0);
-            assertEquals(AgentResponse.getEmptyResponse(), response1);
-            assertEquals(AgentResponse.getEmptyResponse(), response2);
-            assertEquals(AgentResponse.getEmptyResponse(), response4);
+            assertNull(response0);
+            assertNull(response1);
+            assertNull(response2);
+            assertNull(response4);
 
         }
 
