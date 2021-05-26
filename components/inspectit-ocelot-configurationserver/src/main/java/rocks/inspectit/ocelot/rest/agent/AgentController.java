@@ -75,7 +75,7 @@ public class AgentController extends AbstractBaseController {
      * @return Returns either a ResponseEntity with the next command as payload or an empty payload.
      */
     @PostMapping(value = "agent/command", produces = "application/json")
-    public ResponseEntity<Command> fetchNewCommand(@RequestHeader Map<String, String> headers, @RequestBody CommandResponse response) throws ExecutionException {
+    public ResponseEntity<Command> fetchNewCommand(@RequestHeader Map<String, String> headers, @RequestBody(required=false) CommandResponse response) throws ExecutionException {
         String agentID = headers.get("x-ocelot-agent-id");
         UUID commandID = null;
         if (response != null) {
