@@ -3,6 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { configurationActions } from '../../../redux/ducks/configuration';
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
+import { SplitButton } from 'primereact/splitbutton';
+
+/** Data */
+import { CONFIGURATION_TYPES } from '../../../data/constants';
 
 /**
  * The toolbar used in the configuration view's file tree.
@@ -40,21 +44,29 @@ const FileToolbar = ({
           border-bottom: 1px solid #ddd;
         }
 
-        .this :global(.p-toolbar-group-left) :global(.p-button) {
+        .this :global(.p-toolbar-group-left > *) {
           margin-right: 0.25rem;
         }
-        .this :global(.p-toolbar-group-right) :global(.p-button) {
+        .this :global(.p-toolbar-group-right > *) {
           margin-left: 0.25rem;
         }
       `}</style>
+
       <Toolbar>
         <div className="p-toolbar-group-left">
-          <Button
+          <SplitButton
             disabled={readOnly || loading}
             tooltip="New file"
             icon="pi pi-file"
             tooltipOptions={tooltipOptions}
-            onClick={() => showCreateFileDialog(selection)}
+            onClick={() => showCreateFileDialog(selection, CONFIGURATION_TYPES.YAML)}
+            model={[
+              {
+                label: 'Method Configuration',
+                icon: 'pi pi-cog',
+                command: () => showCreateFileDialog(selection, CONFIGURATION_TYPES.METHOD_CONFIGURATION),
+              },
+            ]}
           />
           <Button
             disabled={readOnly || loading}

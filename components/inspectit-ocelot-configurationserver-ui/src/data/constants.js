@@ -1,3 +1,6 @@
+/** Templates */
+import methodConfigurationTemplate from './templates/method-configuration.json';
+
 /**
  * Various constants used by the application.
  */
@@ -34,6 +37,12 @@ export const VERSION_LIMIT = 100;
  * The supported configuration types.
  */
 export const CONFIGURATION_TYPES = {
-  YAML: 0,
-  METHOD_CONFIGURATION: 1,
+  YAML: {
+    name: '',
+    template: '',
+  },
+  METHOD_CONFIGURATION: {
+    name: 'Method-Configuration',
+    template: methodConfigurationTemplate,
+  },
 };
