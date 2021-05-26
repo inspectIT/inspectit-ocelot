@@ -5,12 +5,15 @@ import { useSelector, useDispatch } from 'react-redux';
 import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
 import Notificationbar from './Notificationbar';
-import YamlParser from './YamlParser';
+import YamlParser from './visual-editor/YamlParser';
 import SelectionInformation from './SelectionInformation';
 import { configurationSelectors, configurationActions } from '../../redux/ducks/configuration';
+import { getConfigurationType } from '../../lib/configuration-utils';
+import { CONFIGURATION_TYPES } from '../../data/constants';
+import MethodConfigurationEditor from './method-configuration-editor/MethodConfigurationEditor';
 
-const AceEditor = dynamic(() => import('./AceEditor'), { ssr: false });
-const TreeTableEditor = dynamic(() => import('./TreeTableEditor'), { ssr: false });
+const AceEditor = dynamic(() => import('./yaml-editor/AceEditor'), { ssr: false });
+const TreeTableEditor = dynamic(() => import('./visual-editor/TreeTableEditor'), { ssr: false });
 
 /**
  * Editor view consisting of the AceEditor and a toolbar.
@@ -48,10 +51,41 @@ const EditorView = ({
 
   // derived variables
   const isLiveSelected = currentVersion === 'live';
+  const configurationType = getConfigurationType(value);
 
   const selectlatestVersion = () => {
     dispatch(configurationActions.selectVersion(null));
   };
+
+  let editorContent;
+
+  if (configurationType == CONFIGURATION_TYPES.METHOD_CONFIGURATION) {
+    editorContent = <MethodConfigurationEditor />;
+  } else if (configurationType == CONFIGURATION_TYPES.YAML && showVisualConfigurationView) {
+    editorContent = (
+      <YamlParser yamlConfig={value} onUpdate={onChange}>
+        {(onUpdate, config) => (
+          <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
+        )}
+      </YamlParser>
+    );
+  } else {
+    editorContent = (
+      <AceEditor
+        editorRef={(editor) => (editorRef.current = editor)}
+        onCreate={onCreate}
+        mode="yaml"
+        theme="cobalt"
+        options={editorConfig}
+        value={value}
+        onChange={onChange}
+        history-view
+        canSave={canSave}
+        onSave={onSave}
+        readOnly={readOnly}
+      />
+    );
+  }
 
   return (
     <div className="this">
@@ -77,10 +111,6 @@ const EditorView = ({
           flex-direction: column;
         }
         .editor-container {
-          position: relative;
-          flex-grow: 1;
-        }
-        .visual-editor-container {
           position: relative;
           flex-grow: 1;
         }
@@ -134,6 +164,7 @@ const EditorView = ({
           onHelp={() => editorRef.current.showShortcuts()}
           visualConfig={showVisualConfigurationView}
           onVisualConfigChange={onToggleVisualConfigurationView}
+          showOnlySave={configurationType === CONFIGURATION_TYPES.METHOD_CONFIGURATION}
         >
           {children}
         </EditorToolbar>
@@ -161,32 +192,7 @@ const EditorView = ({
             </div>
           )}
 
-          {showEditor && !showVisualConfigurationView && (
-            <div className="editor-container">
-              <AceEditor
-                editorRef={(editor) => (editorRef.current = editor)}
-                onCreate={onCreate}
-                mode="yaml"
-                theme="cobalt"
-                options={editorConfig}
-                value={value}
-                onChange={onChange}
-                history-view
-                canSave={canSave}
-                onSave={onSave}
-                readOnly={readOnly}
-              />
-            </div>
-          )}
-          {showEditor && showVisualConfigurationView && (
-            <div className="visual-editor-container">
-              <YamlParser yamlConfig={value} onUpdate={onChange}>
-                {(onUpdate, config) => (
-                  <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
-                )}
-              </YamlParser>
-            </div>
-          )}
+          {showEditor && <div className="editor-container">{editorContent}</div>}
           {!showEditor && <SelectionInformation hint={hint} />}
         </div>
 

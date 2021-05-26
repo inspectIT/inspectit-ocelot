@@ -34,7 +34,7 @@ export const DEFAULT_CONFIG_TREE_KEY = '/$%$%$%$%Ocelot-default-key';
 export const VERSION_LIMIT = 100;
 
 /**
- * Different file types with its content.
+ * The supported configuration types.
  */
 export const CONFIGURATION_TYPES = {
   YAML: {
