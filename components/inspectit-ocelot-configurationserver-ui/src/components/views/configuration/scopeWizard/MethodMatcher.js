@@ -1,113 +1,217 @@
 import { Fieldset } from 'primereact/fieldset';
-import { matcherTypes, methodVisibility, tooltipOptions } from './ScopeWizardConstants';
 import { Checkbox } from 'primereact/checkbox';
 import { RadioButton } from 'primereact/radiobutton';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import React from 'react';
+import PropTypes from 'prop-types';
 
-const MethodMatcher = ({
-  onMethodMatcherChange,
-  selectedMethodMatchers,
-  setSelectedMethodMatchers,
-  setIsConstructor,
-  isConstructor,
-  methodMatcherType,
-  setMethodMatcherType,
-  isSelectedParameter,
-  setIsSelectedParameter,
-  parameterList,
-  removeParameter,
-  addParameter,
-  parameterInput,
-  setParameterInput,
-}) => {
-  let heightMethodFieldset = window.innerHeight * 0.55;
+/** data */
+import { matcherTypes, methodVisibility, tooltipOptions } from './ScopeWizardConstants';
+
+const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
+  const setState = (stateArgument, value) => {
+    const currentMethodMatcher = {
+      ...methodMatcher,
+      [stateArgument]: value,
+    };
+
+    onMethodMatcherChange(currentMethodMatcher);
+  };
+
+  const onMethodVisibilityChange = (e, selectedMethodVisibilities) => {
+    const currentSelectedMethodVisibilities = selectedMethodVisibilities;
+
+    if (e.checked) {
+      currentSelectedMethodVisibilities.push(e.value);
+    } else {
+      for (let i = 0; i < currentSelectedMethodVisibilities.length; i++) {
+        const currentSelectedMethodVisibility = currentSelectedMethodVisibilities[i];
+
+        if (currentSelectedMethodVisibility.key === e.value.key) {
+          currentSelectedMethodVisibilities.splice(i, 1);
+          break;
+        }
+      }
+    }
+
+    setState('selectedMethodVisibilities', currentSelectedMethodVisibilities);
+  };
+
+  const handleParameterChange = (e, index) => {
+    const currentParameterList = methodMatcher.parameterList;
+    currentParameterList[index].parameter = e.target.value;
+
+    setState('parameterList', currentParameterList);
+  };
+
+  const removeParameter = (index) => {
+    const currentParameterList = methodMatcher.parameterList;
+    currentParameterList.splice(index, 1);
+
+    setState('parameterList', currentParameterList);
+  };
+
+  const addParameter = () => {
+    const currentParameterList = methodMatcher.parameterList;
+    currentParameterList.push({ parameter: methodMatcher.parameterInput });
+
+    setState('parameterList', currentParameterList);
+    setState('parameterInput', '');
+  };
 
   return (
-    <Fieldset legend="Method Matcher" style={{ paddingTop: 0, height: heightMethodFieldset }}>
-      <div className="row-center row-margin meta-row">
-        {methodVisibility.map((methodMatcher) => {
-          return (
-            <div key={methodMatcher.key} className="p-field-checkbox">
-              <Checkbox
-                inputId={methodMatcher.key}
-                name="methodMatcher"
-                value={methodMatcher}
-                onChange={(e) => onMethodMatcherChange(e, selectedMethodMatchers, setSelectedMethodMatchers)}
-                checked={selectedMethodMatchers.some((item) => item.key === methodMatcher.key)}
-              />
-              <label htmlFor={methodMatcher.key}>{methodMatcher.name}</label>
-            </div>
-          );
-        })}
-      </div>
-      <div className="method-matcher-radio row-center meta-row">
-        <div className="p-field-radiobutton">
-          <RadioButton
-            inputId="methodName"
-            name="methodName"
-            value="false"
-            onChange={(e) => setIsConstructor(e.value)}
-            checked={isConstructor === 'false'}
-          />
-          <label htmlFor="methodName">Method name</label>
-        </div>
-        <div className="p-field-radiobutton">
-          <RadioButton
-            inputId="constructor"
-            name="constructor"
-            value="true"
-            onChange={(e) => setIsConstructor(e.value)}
-            checked={isConstructor === 'true'}
-          />
-          <label htmlFor="constructor">Constructor</label>
-        </div>
-      </div>
-      <div className="row-center meta-row fill">
-        <Dropdown
-          className="method-matcher-dropdown"
-          value={methodMatcherType}
-          options={matcherTypes}
-          onChange={(e) => setMethodMatcherType(e.value)}
-          placeholder="Select a Matcher Type"
-        />
-        <InputText className="in-name" />
-      </div>
-      <div className="p-field-checkbox row-center row-margin fill">
-        <Checkbox
-          inputId="selected-parameters"
-          name="selectedParameters"
-          value={isSelectedParameter}
-          onChange={(e) => setIsSelectedParameter(e.checked)}
-          checked={isSelectedParameter}
-        />
-        <label htmlFor={'onlyWithSelectedParameters'}>Only with selected Parameters</label>
-      </div>
-      <div className="parameterInputFields">
-        <Fieldset legend="Method Arguments" style={{ paddingTop: 0, overflow: 'hidden' }}>
-          {parameterList.map((parameter, i) => {
+    <>
+      <style jsx>{`
+        .this :global(.p-dialog-content) {
+          border-left: 1px solid #ddd;
+          border-right: 1px solid #ddd;
+        }
+
+        .row-center {
+          display: flex;
+          align-items: center;
+        }
+
+        .fill {
+          flex-grow: 1;
+        }
+
+        .meta-row label {
+          margin-right: 2rem;
+        }
+
+        .meta-row label:not(:first-child) {
+          margin-left: 0.5rem;
+        }
+
+        .meta-row .inner-label {
+          margin-left: 0.5rem;
+          margin-right: 0.5rem;
+        }
+
+        .row-margin {
+          margin-top: 0.5rem;
+        }
+
+        .argument-fields-height {
+          margin-top: 0.5rem;
+        }
+
+        .this :global(.method-matcher-dropdown) {
+          width: 14rem;
+        }
+
+        .this :global(.in-name) {
+          width: 100%;
+        }
+      `}</style>
+
+      <Fieldset legend="Method Matcher" style={{ paddingTop: 0, paddingBottom: '1rem' }}>
+        <div className="row-center row-margin meta-row">
+          {methodVisibility.map((methodVisible) => {
             return (
-              <div key={i} className="row-center meta-row argument-fields-height ">
-                <InputText className="in-name" disabled name="parameter" value={parameter.parameter} />
-                <Button
-                  tooltip="Remove Parameter"
-                  icon="pi pi-fw pi-trash"
-                  tooltipOptions={tooltipOptions}
-                  onClick={() => removeParameter(i)}
+              <div key={methodVisible.key} className="p-field-checkbox">
+                <Checkbox
+                  inputId={methodVisible.key}
+                  name="methodVisible"
+                  value={methodVisible}
+                  onChange={(e) => onMethodVisibilityChange(e, methodMatcher.selectedMethodVisibilities)}
+                  checked={methodMatcher.selectedMethodVisibilities.some((item) => item.key === methodVisible.key)}
                 />
+                <label htmlFor={methodVisible.key}>{methodVisible.name}</label>
               </div>
             );
           })}
-          <div className="row-center meta-row argument-fields-height" style={{ marginBottom: '0.5em' }}>
-            <InputText name="parameter" className="in-name" value={parameterInput} onChange={(e) => setParameterInput(e.target.value)} />
-            <Button tooltip="Add Parameter" icon="pi pi-plus" tooltipOptions={tooltipOptions} onClick={(e) => addParameter(e)} />
+        </div>
+        <div className="method-matcher-radio row-center meta-row">
+          <div className="p-field-radiobutton">
+            <RadioButton
+              inputId="methodName"
+              name="methodName"
+              value="false"
+              onChange={(e) => setState('isConstructor', e.value)}
+              checked={methodMatcher.isConstructor === 'false'}
+            />
+            <label htmlFor="methodName">Method name</label>
           </div>
-        </Fieldset>
-      </div>
-    </Fieldset>
+          <div className="p-field-radiobutton">
+            <RadioButton
+              inputId="constructor"
+              name="constructor"
+              value="true"
+              onChange={(e) => setState('isConstructor', e.value)}
+              checked={methodMatcher.isConstructor === 'true'}
+            />
+            <label htmlFor="constructor">Constructor</label>
+          </div>
+        </div>
+        <div className="row-center meta-row fill">
+          <Dropdown
+            className="method-matcher-dropdown"
+            value={methodMatcher.methodMatcherType}
+            options={matcherTypes}
+            onChange={(e) => setState('methodMatcherType', e.value)}
+            placeholder="Select a Matcher Type"
+          />
+          <InputText className="in-name" />
+        </div>
+        <div className="p-field-checkbox row-center row-margin fill">
+          <Checkbox
+            inputId="selected-parameters"
+            name="selectedParameters"
+            value={methodMatcher.isSelectedParameter}
+            onChange={(e) => setState('isSelectedParameter', e.checked)}
+            checked={methodMatcher.isSelectedParameter}
+          />
+          <label htmlFor={'onlyWithSelectedParameters'}>Only with specified arguments:</label>
+        </div>
+        <div className="parameterInputFields">
+          <Fieldset legend="Method Arguments" style={{ paddingTop: 0, overflowY: 'auto', height: '15rem' }}>
+            {methodMatcher.parameterList.map((parameter, i) => {
+              return (
+                <div key={i} className="row-center meta-row argument-fields-height ">
+                  <InputText
+                    className="in-name"
+                    name="parameter"
+                    value={parameter.parameter}
+                    onChange={(e) => handleParameterChange(e, i)}
+                  />
+                  <Button
+                    tooltip="Remove Parameter"
+                    icon="pi pi-fw pi-trash"
+                    tooltipOptions={tooltipOptions}
+                    onClick={() => removeParameter(i)}
+                  />
+                </div>
+              );
+            })}
+            <div className="row-center meta-row argument-fields-height" style={{ marginBottom: '0.5em' }}>
+              <InputText
+                name="parameter"
+                className="in-name"
+                value={methodMatcher.parameterInput}
+                onChange={(e) => setState('parameterInput', e.target.value)}
+              />
+              <Button tooltip="Add Parameter" icon="pi pi-plus" tooltipOptions={tooltipOptions} onClick={(e) => addParameter(e)} />
+            </div>
+          </Fieldset>
+        </div>
+      </Fieldset>
+    </>
   );
+};
+
+MethodMatcher.propTypes = {
+  /** Class Matcher state */
+  methodMatcher: PropTypes.object,
+  /** Callback on class matcher change */
+  onMethodMatcherChange: PropTypes.func,
+};
+
+MethodMatcher.defaultProps = {
+  onMethodMatcherChange: () => {},
 };
 
 export default MethodMatcher;

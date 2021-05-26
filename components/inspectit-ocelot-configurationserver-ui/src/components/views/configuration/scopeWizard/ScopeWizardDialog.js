@@ -5,13 +5,16 @@ import PropTypes from 'prop-types';
 import ClassMatcher from './ClassMatcher';
 import MethodMatcher from './MethodMatcher';
 
+/** data */
+import { methodVisibility } from './ScopeWizardConstants';
+
 /**
  * The scope wizard dialog itself.
  */
 const ScopeWizardDialog = ({ visible, onHide }) => {
   const [classMatcher, setClassMatcher] = useState({ currentClassMatcher: '', classMatcherType: '', className: '' });
   const [methodMatcher, setMethodMatcher] = useState({
-    selectedMethodMatchers: [],
+    selectedMethodVisibilities: methodVisibility,
     methodMatcherType: '',
     isConstructor: 'false',
     isSelectedParameter: false,
@@ -19,39 +22,6 @@ const ScopeWizardDialog = ({ visible, onHide }) => {
     parameterList: [],
     methodName: '',
   });
-
-  const onMethodMatcherChange = (e, selectedMethodMatchers, setSelectedMethodMatchers) => {
-    if (e.checked) {
-      selectedMethodMatchers.push(e.value);
-    } else {
-      for (let i = 0; i < selectedMethodMatchers.length; i++) {
-        const selectedMethodMatcher = selectedMethodMatchers[i];
-
-        if (selectedMethodMatcher.key === e.value.key) {
-          selectedMethodMatchers.splice(i, 1);
-          break;
-        }
-      }
-    }
-    setSelectedMethodMatchers(selectedMethodMatchers);
-  };
-
-  const handleParameterChange = (e, index) => {
-    const parameterList = this.state.parameterList;
-    parameterList[index].parameter = e.target.value;
-    this.setState(parameterList);
-  };
-
-  const removeParameter = (index) => {
-    const parameterList = this.state.parameterList;
-    parameterList.splice(index, 1);
-    this.setState(parameterList);
-  };
-
-  const addParameter = () => {
-    this.setState({ parameterList: [...this.state.parameterList, { parameter: this.state.parameterInput }] });
-    this.setState({ parameterInput: '' });
-  };
 
   // the dialogs footer
   const footer = (
@@ -120,23 +90,7 @@ const ScopeWizardDialog = ({ visible, onHide }) => {
           focusOnShow={false}
         >
           <ClassMatcher classMatcher={classMatcher} onClassMatcherChange={setClassMatcher} />
-
-          {/*<MethodMatcher*/}
-          {/*  onMethodMatcherChange={this.onMethodMatcherChange}*/}
-          {/*  selectedMethodMatchers={this.state.selectedMethodMatchers}*/}
-          {/*  setSelectedMethodMatchers={this.setSelectedMethodMatchers}*/}
-          {/*  setIsConstructor={this.setIsConstructor}*/}
-          {/*  isConstructor={this.state.isConstructor}*/}
-          {/*  methodMatcherType={this.state.methodMatcherType}*/}
-          {/*  setMethodMatcherType={this.setMethodMatcherType}*/}
-          {/*  isSelectedParameter={this.state.isSelectedParameter}*/}
-          {/*  setIsSelectedParameter={this.setIsSelectedParameter}*/}
-          {/*  parameterList={this.state.parameterList}*/}
-          {/*  removeParameter={this.removeParameter}*/}
-          {/*  addParameter={this.addParameter}*/}
-          {/*  parameterInput={this.state.parameterInput}*/}
-          {/*  setParameterInput={this.setParameterInput}*/}
-          {/*/>*/}
+          <MethodMatcher methodMatcher={methodMatcher} onMethodMatcherChange={setMethodMatcher} />
         </Dialog>
       </div>
     </>

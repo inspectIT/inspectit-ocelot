@@ -9,7 +9,14 @@ import PropTypes from 'prop-types';
 import { classMatchers, matcherTypes, tooltipOptions } from './ScopeWizardConstants';
 
 const ClassMatcher = ({ classMatcher, onClassMatcherChange }) => {
-  let heightClassFieldset = window.innerHeight * 0.15;
+  const setState = (stateArgument, value) => {
+    const currentClassMatcher = {
+      ...classMatcher,
+      [stateArgument]: value,
+    };
+
+    onClassMatcherChange(currentClassMatcher);
+  };
 
   return (
     <>
@@ -58,13 +65,13 @@ const ClassMatcher = ({ classMatcher, onClassMatcherChange }) => {
         }
       `}</style>
 
-      <Fieldset legend="Class Matcher" style={{ paddingTop: 0, height: heightClassFieldset }}>
+      <Fieldset legend="Class Matcher" style={{ paddingTop: 0, paddingBottom: '1rem' }}>
         <div className="row-center row-margin meta-row fill">
           <Dropdown
             className="class-matcher-dropdown"
             value={classMatcher.currentClassMatcher}
             options={classMatchers}
-            onChange={(e) => onClassMatcherChange({ currentClassMatcher: e.value })}
+            onChange={(e) => setState('currentClassMatcher', e.value)}
             placeholder="Select a Class Matcher"
           />
           <label className="inner-label" htmlFor="which">
@@ -74,10 +81,10 @@ const ClassMatcher = ({ classMatcher, onClassMatcherChange }) => {
             className="class-matcher-type-dropdown"
             value={classMatcher.classMatcherType}
             options={matcherTypes}
-            onChange={(e) => onClassMatcherChange({ classMatcherType: e.value })}
+            onChange={(e) => setState('classMatcherType', e.value)}
             placeholder="Select a Matcher Type"
           />
-          <InputText className="in-name" onChange={(e) => onClassMatcherChange({ className: e.target.value })} />
+          <InputText className="in-name" value={classMatcher.className} onChange={(e) => setState('className', e.target.value)} />
           <Button
             tooltip="Class Browser"
             icon="pi pi-search"
