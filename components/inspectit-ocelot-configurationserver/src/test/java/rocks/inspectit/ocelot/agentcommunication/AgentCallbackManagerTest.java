@@ -67,7 +67,7 @@ public class AgentCallbackManagerTest {
     class RunNextCommandWithId {
 
         @Test
-        public void hasCommand() throws ExecutionException {
+        public void hasCommand() {
             DeferredResult<ResponseEntity<?>> testResult = new DeferredResult<>();
             UUID id = UUID.randomUUID();
             agentCallbackManager.resultCache.put(id, testResult);
@@ -87,7 +87,7 @@ public class AgentCallbackManagerTest {
         }
 
         @Test
-        public void commandIdNull() throws ExecutionException {
+        public void commandIdNull() {
             agentCallbackManager.resultCache = mock(LoadingCache.class);
 
             try {
