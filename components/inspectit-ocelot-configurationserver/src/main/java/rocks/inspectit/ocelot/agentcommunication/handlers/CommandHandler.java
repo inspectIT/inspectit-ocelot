@@ -37,7 +37,7 @@ public interface CommandHandler {
     DeferredResult<ResponseEntity<?>> prepareResponse(String agentId, Command command);
 
     /**
-     * Takes an instance of {@link CommandResponse} aswell as an instance of {@link DeferredResult} and handles
+     * Takes an instance of {@link CommandResponse} as well as an instance of {@link DeferredResult} and handles
      * the given parameters as implemented by the handler.
      *
      * @param response The {@link CommandResponse} to be handled.

@@ -54,7 +54,7 @@ public class AgentCommandManager {
     /**
      * Takes a String resembling the id of an agent and returns a command. The commands are ordered by the fifo-principle.
      * The command is then deleted from the queue.
-     * Returns an empty AgentCommand if the agentID is null or if there are no commands to return.
+     * Returns null if the agentId is null or if there are no commands to return.
      *
      * @param agentId The ID of the agent for which the command should to be returned.
      *

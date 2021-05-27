@@ -35,42 +35,41 @@ public class AgentCallbackManager {
     }
 
     /**
-     * Takes an instance of {@link java.util.UUID} and an instance of {@link org.springframework.web.context.request.async.DeferredResult}
-     * and adds it to the internal result cache. Throws an exception when the given commandID is null. Does nothing if
-     * the given commandResponse is null.
+     * Takes an instance of {@link UUID} and an instance of {@link DeferredResult}
+     * and adds it to the internal result cache. Throws an {@link IllegalArgumentException} when the given commandId is
+     * null. Does nothing if the given commandResponse is null.
      *
-     * @param commandID       An instance of {@link java.util.UUID} which represents the UUID of a existing command.
-     * @param commandResponse The instance of {@link org.springframework.web.context.request.async.DeferredResult} to which
-     *                        the result of the command should be written.
+     * @param commandId       An instance of {@link UUID} which represents the UUID of a existing command.
+     * @param commandResponse The instance of {@link DeferredResult} to which the result of the command should be written.
      *
      * @throws IllegalArgumentException when the given command id is null.
      */
-    public void addCommandCallback(UUID commandID, DeferredResult<ResponseEntity<?>> commandResponse) {
-        if (commandID == null) {
+    public void addCommandCallback(UUID commandId, DeferredResult<ResponseEntity<?>> commandResponse) {
+        if (commandId == null) {
             throw new IllegalArgumentException("The given command id may never be null!");
         }
         if (commandResponse != null) {
-            resultCache.put(commandID, commandResponse);
+            resultCache.put(commandId, commandResponse);
         }
     }
 
     /**
-     * Takes an instance of {@link java.util.UUID} as well as an instance of {@link CommandResponse}. Delegates
-     * the {@link DeferredResult} saved for the given commandID and the given response to the responsible implementation
+     * Takes an instance of {@link UUID} as well as an instance of {@link CommandResponse}. Delegates
+     * the {@link DeferredResult} saved for the given commandId and the given response to the responsible implementation
      * of {@link CommandHandler}.
      *
-     * @param commandID The UUID of the command the given response is linked to.
+     * @param commandId The UUID of the command the given response is linked to.
      * @param response  The response which should be handled.
      */
-    public void handleCommandResponse(UUID commandID, CommandResponse response) {
-        if (commandID == null) {
+    public void handleCommandResponse(UUID commandId, CommandResponse response) {
+        if (commandId == null) {
             throw new IllegalArgumentException("The given command id may never be null!");
         }
 
-        DeferredResult<ResponseEntity<?>> result = resultCache.getIfPresent(commandID);
+        DeferredResult<ResponseEntity<?>> result = resultCache.getIfPresent(commandId);
 
         if (result != null) {
-            resultCache.invalidate(commandID);
+            resultCache.invalidate(commandId);
 
             for (CommandHandler handler : handlers) {
                 if (handler.canHandle(response)) {
