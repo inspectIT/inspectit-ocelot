@@ -2,6 +2,7 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 import ClassMatcher from './ClassMatcher';
 import MethodMatcher from './MethodMatcher';
 
@@ -14,7 +15,7 @@ import { methodVisibility } from './ScopeWizardConstants';
 const ScopeWizardDialog = ({ visible, onHide }) => {
   const [classMatcher, setClassMatcher] = useState({ currentClassMatcher: '', classMatcherType: '', className: '' });
   const [methodMatcher, setMethodMatcher] = useState({
-    selectedMethodVisibilities: methodVisibility,
+    selectedMethodVisibilities: _.clone(methodVisibility),
     methodMatcherType: '',
     isConstructor: 'false',
     isSelectedParameter: false,

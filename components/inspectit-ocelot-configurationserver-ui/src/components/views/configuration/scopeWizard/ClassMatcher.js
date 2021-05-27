@@ -21,16 +21,12 @@ const ClassMatcher = ({ classMatcher, onClassMatcherChange }) => {
   return (
     <>
       <style jsx>{`
-        .this :global(.p-dialog-content) {
-          border-left: 1px solid #ddd;
-          border-right: 1px solid #ddd;
-        }
-
         .row-center {
           display: flex;
           align-items: center;
         }
 
+        .row-center :global(.fill),
         .fill {
           flex-grow: 1;
         }
@@ -52,23 +48,15 @@ const ClassMatcher = ({ classMatcher, onClassMatcherChange }) => {
           margin-top: 0.5rem;
         }
 
-        .argument-fields-height {
-          margin-top: 0.5rem;
-        }
-
-        .this :global(.method-matcher-dropdown) {
-          width: 14rem;
-        }
-
-        .this :global(.in-name) {
+        .in-name {
           width: 100%;
         }
       `}</style>
 
       <Fieldset legend="Class Matcher" style={{ paddingTop: 0, paddingBottom: '1rem' }}>
-        <div className="row-center row-margin meta-row fill">
+        <div className="row-center row-margin meta-row">
           <Dropdown
-            className="class-matcher-dropdown"
+            style={{ width: '12rem' }}
             value={classMatcher.currentClassMatcher}
             options={classMatchers}
             onChange={(e) => setState('currentClassMatcher', e.value)}
@@ -78,19 +66,21 @@ const ClassMatcher = ({ classMatcher, onClassMatcherChange }) => {
             which
           </label>
           <Dropdown
-            className="class-matcher-type-dropdown"
+            style={{ width: '14rem' }}
             value={classMatcher.classMatcherType}
             options={matcherTypes}
             onChange={(e) => setState('classMatcherType', e.value)}
             placeholder="Select a Matcher Type"
           />
-          <InputText className="in-name" value={classMatcher.className} onChange={(e) => setState('className', e.target.value)} />
-          <Button
-            tooltip="Class Browser"
-            icon="pi pi-search"
-            tooltipOptions={tooltipOptions}
-            onClick={() => alert('Todo: Open Class Browser')} //showClassBrowserDialog()}
-          />
+          <div className="p-inputgroup fill">
+            <InputText className="fill" value={classMatcher.className} onChange={(e) => setState('className', e.target.value)} />
+            <Button
+              tooltip="Class Browser"
+              icon="pi pi-search"
+              tooltipOptions={tooltipOptions}
+              onClick={() => alert('Todo: Open Class Browser')} //showClassBrowserDialog()}
+            />
+          </div>
         </div>
       </Fieldset>
     </>
