@@ -12,5 +12,5 @@ const Template = (args) => <ErrorInformation {...args} />;
 export const Default = Template.bind({});
 Default.args = {
   text: 'Hello World.',
-  error: new Error('Whoops!')
+  error: new Error('Whoops!'),
 };

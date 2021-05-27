@@ -205,7 +205,9 @@ const EditorView = ({
         )}
       </div>
 
-      {notificationText && configurationType == CONFIGURATION_TYPES.YAML ? <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} /> : null}
+      {notificationText && configurationType == CONFIGURATION_TYPES.YAML ? (
+        <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} />
+      ) : null}
     </div>
   );
 };
