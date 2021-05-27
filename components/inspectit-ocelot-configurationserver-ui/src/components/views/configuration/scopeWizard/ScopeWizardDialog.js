@@ -17,7 +17,7 @@ const ScopeWizardDialog = ({ visible, onHide }) => {
   const [methodMatcher, setMethodMatcher] = useState({
     selectedMethodVisibilities: _.clone(methodVisibility),
     methodMatcherType: '',
-    isConstructor: 'false',
+    isConstructor: false,
     isSelectedParameter: false,
     parameterInput: '',
     parameterList: [],

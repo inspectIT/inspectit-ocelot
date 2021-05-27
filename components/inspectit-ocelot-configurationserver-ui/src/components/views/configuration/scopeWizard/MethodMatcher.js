@@ -8,7 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 /** data */
-import { matcherTypes, methodVisibility, tooltipOptions } from './ScopeWizardConstants';
+import { TOOLTIP_OPTIONS } from '../../../../data/constants';
+import { matcherTypes, methodVisibility } from './ScopeWizardConstants';
 
 const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
   const disableArguments = !methodMatcher.isSelectedParameter;
@@ -76,6 +77,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
           align-items: center;
         }
 
+        .row-center :global(.fill),
         .fill {
           flex-grow: 1;
         }
@@ -84,20 +86,16 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
           margin-right: 2rem;
         }
 
+        .meta-row .start-label {
+          margin-right: 0.5rem;
+        }
+
         .row-margin {
           margin-top: 0.5rem;
         }
 
         .argument-fields-height {
           margin-top: 0.5rem;
-        }
-
-        .this :global(.method-matcher-dropdown) {
-          width: 14rem;
-        }
-
-        .this :global(.in-name) {
-          width: 100%;
         }
       `}</style>
 
@@ -118,14 +116,14 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
             );
           })}
         </div>
-        <div className="method-matcher-radio row-center meta-row">
+        <div className="row-center meta-row">
           <div className="p-field-radiobutton">
             <RadioButton
               inputId="methodName"
               name="methodName"
-              value="false"
+              value={false}
               onChange={(e) => setState('isConstructor', e.value)}
-              checked={methodMatcher.isConstructor === 'false'}
+              checked={methodMatcher.isConstructor === false}
             />
             <label htmlFor="methodName">Method name</label>
           </div>
@@ -133,22 +131,35 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
             <RadioButton
               inputId="constructor"
               name="constructor"
-              value="true"
+              tooltip="Specifies whether the target method is a constructor. If this value is true, the name attribute will not be used!"
+              tooltipOptions={TOOLTIP_OPTIONS}
+              value={true}
               onChange={(e) => setState('isConstructor', e.value)}
-              checked={methodMatcher.isConstructor === 'true'}
+              checked={methodMatcher.isConstructor === true}
             />
             <label htmlFor="constructor">Constructor</label>
           </div>
         </div>
-        <div className="row-center meta-row fill">
+        <div className="row-center row-margin meta-row">
+          <label className="start-label" htmlFor="Method which">
+            Method which
+          </label>
           <Dropdown
-            className="method-matcher-dropdown"
+            disabled={methodMatcher.isConstructor}
+            style={{ width: '14rem' }}
             value={methodMatcher.methodMatcherType}
             options={matcherTypes}
             onChange={(e) => setState('methodMatcherType', e.value)}
             placeholder="Select a Matcher Type"
           />
-          <InputText className="in-name" />
+          <InputText
+            disabled={methodMatcher.isConstructor}
+            className="fill"
+            style={{ marginLeft: '0.5rem' }}
+            placeholder="Method Name"
+            tooltip="The name or pattern which is used to match against the fully qualified class or interface name."
+            tooltipOptions={TOOLTIP_OPTIONS}
+          />
         </div>
         <div className="p-field-checkbox row-center row-margin fill" style={{ paddingTop: '1rem' }}>
           <Checkbox
@@ -169,36 +180,37 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
                   <span className="p-inputgroup-addon">{i + 1}</span>
                   <InputText
                     disabled={disableArguments}
-                    className="in-name"
+                    className="fill"
                     name="parameter"
                     value={parameter.parameter}
-                    tooltip={i + 1 + '. argument'}
-                    tooltipOptions={tooltipOptions}
                     onChange={(e) => handleParameterChange(e, i)}
                   />
                   <Button
                     disabled={disableArguments}
-                    tooltip="Remove Parameter"
+                    tooltip="Remove Argument"
                     icon="pi pi-fw pi-trash"
-                    tooltipOptions={tooltipOptions}
+                    tooltipOptions={TOOLTIP_OPTIONS}
                     onClick={() => removeParameter(i)}
                   />
                 </div>
               );
             })}
-            <div className="p-inputgroup in-name row-center meta-row argument-fields-height" style={{ marginBottom: '0.5em' }}>
+            <div className="p-inputgroup row-center meta-row argument-fields-height" style={{ marginBottom: '0.5em' }}>
               <InputText
                 disabled={disableArguments}
                 name="parameter"
-                className="in-name"
+                className="fill"
                 value={methodMatcher.parameterInput}
+                tooltip="A fully qualified class name representing the method argument"
+                tooltipOptions={TOOLTIP_OPTIONS}
                 onChange={(e) => setState('parameterInput', e.target.value)}
+                placeholder="Argument"
               />
               <Button
                 disabled={disableArguments}
-                tooltip="Add Parameter"
+                tooltip="Add Argument"
                 icon="pi pi-plus"
-                tooltipOptions={tooltipOptions}
+                tooltipOptions={TOOLTIP_OPTIONS}
                 onClick={(e) => addParameter(e)}
               />
             </div>

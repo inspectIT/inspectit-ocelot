@@ -6,7 +6,6 @@ import MethodMatcher from './MethodMatcher';
 /** data */
 import { methodVisibility } from './ScopeWizardConstants';
 
-
 export default {
   title: 'Components/Views/Configuration/ScopeWizard/MethodMatcher',
   component: MethodMatcher,

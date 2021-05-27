@@ -1,8 +1,3 @@
-export const tooltipOptions = {
-  showDelay: 500,
-  position: 'top',
-};
-
 export const classMatchers = [
   { label: 'Class', value: 'class' },
   { label: 'Superclass', value: 'superClass' },
@@ -10,14 +5,14 @@ export const classMatchers = [
 ];
 
 export const matcherTypes = [
-  { label: 'EQUALS_FULLY', value: 'equalsFully' },
-  { label: 'MATCHES', value: 'matches' },
-  { label: 'STARTS_WITH', value: 'startsWith' },
-  { label: 'STARTS_WITH_IGNORE_CASE', value: 'startsWithIgnoreCase' },
-  { label: 'CONTAINS', value: 'contains' },
-  { label: 'CONTAINS_IGNORE_CASE', value: 'containsIgnoreCase' },
-  { label: 'ENDS_WITH', value: 'endsWith' },
-  { label: 'ENDS_WITH_IGNORE_CASE', value: 'endsWithIgnoreCase' },
+  { label: 'equals', value: 'EQUALS_FULLY' },
+  { label: 'matches', value: 'MATCHES' },
+  { label: 'starts with', value: 'STARTS_WITH' },
+  { label: 'starts with (case-insensitive)', value: 'STARTS_WITH_IGNORE_CASE' },
+  { label: 'contains', value: 'CONTAINS' },
+  { label: 'contains (case-insensitive)', value: 'CONTAINS_IGNORE_CASE' },
+  { label: 'ends with', value: 'ENDS_WITH' },
+  { label: 'ends with (case-insensitive)', value: 'ENDS_WITH_IGNORE_CASE' },
 ];
 
 export const methodVisibility = [

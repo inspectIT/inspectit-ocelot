@@ -6,7 +6,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 /** data */
-import { classMatchers, matcherTypes, tooltipOptions } from './ScopeWizardConstants';
+import { TOOLTIP_OPTIONS } from '../../../../data/constants';
+import { classMatchers, matcherTypes } from './ScopeWizardConstants';
 
 const ClassMatcher = ({ classMatcher, onClassMatcherChange }) => {
   const setState = (stateArgument, value) => {
@@ -44,12 +45,12 @@ const ClassMatcher = ({ classMatcher, onClassMatcherChange }) => {
           margin-right: 0.5rem;
         }
 
-        .row-margin {
-          margin-top: 0.5rem;
+        .meta-row .input-text {
+          margin-left: 0.5rem;
         }
 
-        .in-name {
-          width: 100%;
+        .row-margin {
+          margin-top: 0.5rem;
         }
       `}</style>
 
@@ -72,12 +73,19 @@ const ClassMatcher = ({ classMatcher, onClassMatcherChange }) => {
             onChange={(e) => setState('classMatcherType', e.value)}
             placeholder="Select a Matcher Type"
           />
-          <div className="p-inputgroup fill">
-            <InputText className="fill" value={classMatcher.className} onChange={(e) => setState('className', e.target.value)} />
+          <div className="p-inputgroup input-text fill">
+            <InputText
+              className="fill"
+              value={classMatcher.className}
+              onChange={(e) => setState('className', e.target.value)}
+              placeholder="Class or Interface Name"
+              tooltip="The name or pattern which is used to match against the fully qualified class or interface name."
+              tooltipOptions={TOOLTIP_OPTIONS}
+            />
             <Button
               tooltip="Class Browser"
               icon="pi pi-search"
-              tooltipOptions={tooltipOptions}
+              tooltipOptions={TOOLTIP_OPTIONS}
               onClick={() => alert('Todo: Open Class Browser')} //showClassBrowserDialog()}
             />
           </div>
