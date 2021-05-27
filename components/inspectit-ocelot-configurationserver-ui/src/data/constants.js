@@ -46,3 +46,11 @@ export const CONFIGURATION_TYPES = {
     template: methodConfigurationTemplate,
   },
 };
+
+/**
+ * Shared options for all tooltips.
+ */
+export const TOOLTIP_OPTIONS = {
+  showDelay: 1000,
+  position: 'top',
+};

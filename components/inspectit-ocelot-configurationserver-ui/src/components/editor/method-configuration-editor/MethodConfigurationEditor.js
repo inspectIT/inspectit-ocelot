@@ -8,6 +8,7 @@ import yaml from 'js-yaml';
 import _ from 'lodash';
 import SelectionInformation from '../SelectionInformation';
 import ErrorInformation from '../ErrorInformation';
+import { TOOLTIP_OPTIONS } from '../../../data/constants';
 
 /**
  * GUI editor for creating method/configurations.
@@ -109,11 +110,15 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
    * Providing the template body for the scope's control buttons.
    */
   const scopeEditBodyTemplate = () => {
-    const tooltipOptions = { showDelay: 1000, position: 'top' };
     return (
       <div align="right">
-        <Button icon="pi pi-pencil" style={{ marginRight: '0.5rem' }} tooltip="Edit Method Configuration" tooltipOptions={tooltipOptions} />
-        <Button icon="pi pi-trash" tooltip="Remove Method Configuration" tooltipOptions={tooltipOptions} />
+        <Button
+          icon="pi pi-pencil"
+          style={{ marginRight: '0.5rem' }}
+          tooltip="Edit Method Configuration"
+          tooltipOptions={TOOLTIP_OPTIONS}
+        />
+        <Button icon="pi pi-trash" tooltip="Remove Method Configuration" tooltipOptions={TOOLTIP_OPTIONS} />
       </div>
     );
   };
