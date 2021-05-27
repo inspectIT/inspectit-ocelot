@@ -6,9 +6,11 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
+import rocks.inspectit.oce.eum.server.metrics.SelfMonitoringMetricManager;
 
 import java.util.List;
 
@@ -18,11 +20,12 @@ class CompositeBeaconProcessorTest {
     @InjectMocks
     private CompositeBeaconProcessor processor;
 
+    @Mock
+    private SelfMonitoringMetricManager selfMonitoring;
+
     @Spy
-    private List<BeaconProcessor> processorList = ImmutableList.of(
-            beacon -> beacon.merge(ImmutableMap.of("key2", "value2")),
-            beacon -> beacon.merge(ImmutableMap.of("key1", "value2"))
-    );
+    private List<BeaconProcessor> processorList = ImmutableList.of(beacon -> beacon.merge(ImmutableMap.of("key2", "value2")), beacon -> beacon
+            .merge(ImmutableMap.of("key1", "value2")));
 
     @Test
     public void test() {

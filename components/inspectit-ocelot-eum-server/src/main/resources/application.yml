@@ -252,6 +252,21 @@ inspectit-eum-server:
               exporter: true
               is_error: true
 
+      beacons_processor:
+        measure-type: LONG
+        unit: amount
+        views:
+          # the amount of beacon processors
+          '[inspectit-eum/self/beacons_processor/count]':
+            aggregation: COUNT
+            tags:
+              beacon_processor: true
+          # the export duration
+          '[inspectit-eum/self/beacons_processor/duration/sum]':
+            aggregation: SUM
+            tags:
+              beacon_processor: true
+
   # settings for exposing resource timing metrics
   resource-timing:
     enabled: true
