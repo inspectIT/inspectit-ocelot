@@ -17,3 +17,8 @@ Default.args = {
 
 export const Empty = Template.bind({});
 Empty.args = {};
+
+export const InvalidConfiguration = Template.bind({});
+InvalidConfiguration.args = {
+    yamlConfiguration: "# {\"type\": \"Method-Configuration\"}\ninspectit: INVALID\n    thread-pool-size: 5"
+};

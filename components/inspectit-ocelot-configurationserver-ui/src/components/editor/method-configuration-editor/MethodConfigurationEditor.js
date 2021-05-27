@@ -7,6 +7,7 @@ import { Button } from 'primereact/button';
 import yaml from 'js-yaml';
 import _ from 'lodash';
 import SelectionInformation from '../SelectionInformation';
+import ErrorInformation from '../ErrorInformation';
 
 /**
  * GUI editor for creating method/configurations.
@@ -16,37 +17,42 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   const [scopes, setScopes] = useState([]);
   const [expandedRows, setExpandedRows] = useState([]);
   const [scopeStates, setScopeStates] = useState({});
+  const [configurationError, setConfigurationError] = useState(null);
 
   // derrived variables
   const scopesExist = scopes.length > 0;
 
   useEffect(() => {
     // parse configuration
-    const configuration = yaml.safeLoad(yamlConfiguration);
+    try {
+      const configuration = yaml.safeLoad(yamlConfiguration);
 
-    // collect existing scopes from the configuration
-    const scopeObjects = _.get(configuration, 'inspectit.instrumentation.scopes');
-    const currentScopes = _.map(scopeObjects, (value, key) => {
-      const { type, superclass, interfaces } = value;
-      return {
-        typeKey: JSON.stringify(type) + '|' + JSON.stringify(superclass) + '|' + JSON.stringify(interfaces),
-        name: key,
-        scope: value,
-      };
-    });
-    setScopes(currentScopes);
+      // collect existing scopes from the configuration
+      const scopeObjects = _.get(configuration, 'inspectit.instrumentation.scopes');
+      const currentScopes = _.map(scopeObjects, (value, key) => {
+        const { type, superclass, interfaces } = value;
+        return {
+          typeKey: JSON.stringify(type) + '|' + JSON.stringify(superclass) + '|' + JSON.stringify(interfaces),
+          name: key,
+          scope: value,
+        };
+      });
+      setScopes(currentScopes);
 
-    // expand all rows by default
-    const initialExpandedRows = _.reduce(
-      currentScopes,
-      (result, { typeKey }) => {
-        result[typeKey] = true;
-        return result;
-      },
-      {}
-    );
-    setExpandedRows(initialExpandedRows);
-  }, []);
+      // expand all rows by default
+      const initialExpandedRows = _.reduce(
+        currentScopes,
+        (result, { typeKey }) => {
+          result[typeKey] = true;
+          return result;
+        },
+        {}
+      );
+      setExpandedRows(initialExpandedRows);
+    } catch (error) {
+      setConfigurationError(error);
+    }
+  }, [yamlConfiguration]);
 
   /**
    * Sets the scope state attribute with the specified name of the scope with the given
@@ -103,10 +109,11 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
    * Providing the template body for the scope's control buttons.
    */
   const scopeEditBodyTemplate = () => {
+    const tooltipOptions = { showDelay: 1000, position: 'top' };
     return (
       <div align="right">
-        <Button icon="pi pi-pencil" style={{ marginRight: '0.5rem' }} />
-        <Button icon="pi pi-trash" />
+        <Button icon="pi pi-pencil" style={{ marginRight: '0.5rem' }} tooltip="Edit Method Configuration" tooltipOptions={tooltipOptions} />
+        <Button icon="pi pi-trash" tooltip="Remove Method Configuration" tooltipOptions={tooltipOptions} />
       </div>
     );
   };
@@ -152,7 +159,9 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
         }
       `}</style>
       <div className="this">
-        {scopesExist ? (
+        {configurationError ? (
+          <ErrorInformation text="Invalid YAML Configuration" error={configurationError} />
+        ) : scopesExist ? (
           <DataTable
             value={scopes}
             rowHover
