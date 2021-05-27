@@ -1,14 +1,14 @@
 package rocks.inspectit.ocelot.commons.models.command.response.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class PingResponse extends CommandResponse {
 
     boolean alive;
