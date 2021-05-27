@@ -1,9 +1,13 @@
 package rocks.inspectit.ocelot.commons.models.command.impl;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 
-@Value
+@Data
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class PingCommand extends Command {
 
 }
