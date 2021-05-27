@@ -12,7 +12,7 @@ import { methodVisibility } from './ScopeWizardConstants';
 /**
  * The scope wizard dialog itself.
  */
-const ScopeWizardDialog = ({ visible, onHide }) => {
+const ScopeWizardDialog = ({ visible, onHide, onScopeWizardApply }) => {
   const [classMatcher, setClassMatcher] = useState({ currentClassMatcher: '', classMatcherType: '', className: '' });
   const [methodMatcher, setMethodMatcher] = useState({
     selectedMethodVisibilities: _.clone(methodVisibility),
@@ -27,7 +27,7 @@ const ScopeWizardDialog = ({ visible, onHide }) => {
   // the dialogs footer
   const footer = (
     <div>
-      <Button label="Add" />
+      <Button label="Add" onClick={() => onScopeWizardApply(classMatcher, methodMatcher)} />
       <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
     </div>
   );
@@ -103,11 +103,14 @@ ScopeWizardDialog.propTypes = {
   visible: PropTypes.bool,
   /** Callback on dialog hide */
   onHide: PropTypes.func,
+  /** Callback on dialog apply */
+  onScopeWizardApply: PropTypes.func,
 };
 
 ScopeWizardDialog.defaultProps = {
   visible: true,
   onHide: () => {},
+  onScopeWizardApply: () => {},
 };
 
 export default ScopeWizardDialog;

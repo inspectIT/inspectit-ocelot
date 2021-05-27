@@ -9,12 +9,7 @@ export default {
 
 const Template = (args) => <ClassMatcher {...args} />;
 
-export const IsShown = Template.bind({});
-IsShown.args = {
+export const Default = Template.bind({});
+Default.args = {
   classMatcher: { currentClassMatcher: '', classMatcherType: '', className: '' },
 };
-
-// export const IsHidden = Template.bind({});
-// IsHidden.args = {
-//   visible: false,
-// };

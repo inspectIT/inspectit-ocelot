@@ -13,8 +13,8 @@ export default {
 
 const Template = (args) => <MethodMatcher {...args} />;
 
-export const IsShown = Template.bind({});
-IsShown.args = {
+export const Default = Template.bind({});
+Default.args = {
   methodMatcher: {
     selectedMethodVisibilities: _.clone(methodVisibility),
     methodMatcherType: '',
