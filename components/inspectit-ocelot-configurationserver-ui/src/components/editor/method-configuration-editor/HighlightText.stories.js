@@ -13,3 +13,9 @@ export const Default = Template.bind({});
 Default.args = {
     value: "Hello World!"
 };
+
+export const Blue = Template.bind({});
+Blue.args = {
+    value: "Hello World!",
+    theme: "blue"
+};
