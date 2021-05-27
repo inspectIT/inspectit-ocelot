@@ -27,7 +27,7 @@ const ScopeWizardDialog = ({ visible, onHide, onScopeWizardApply }) => {
   // the dialogs footer
   const footer = (
     <div>
-      <Button label="Add" onClick={() => onScopeWizardApply(classMatcher, methodMatcher)} />
+      <Button label="Apply" onClick={() => onScopeWizardApply(classMatcher, methodMatcher)} />
       <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
     </div>
   );
