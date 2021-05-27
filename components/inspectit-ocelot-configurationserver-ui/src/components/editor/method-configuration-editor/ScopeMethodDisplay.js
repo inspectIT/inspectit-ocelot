@@ -67,7 +67,7 @@ const ScopeMethodDisplay = ({ scope }) => {
       const visibilities = _.join(visibility, ' OR ');
       visibilityDescriptor = (
         <>
-          with visibility of <HighlightText value={visibilities} theme="green" />
+          with visibilities of <HighlightText value={visibilities} theme="green" />
         </>
       );
     }
