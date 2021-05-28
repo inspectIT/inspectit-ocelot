@@ -28,6 +28,7 @@ const EditorView = ({
   onChange,
   onCreate,
   onSave,
+  showConfigurationDialog,
   showConvertWarning,
   isRefreshing,
   enableButtons,
@@ -161,6 +162,7 @@ const EditorView = ({
           onRefresh={onRefresh}
           isRefreshing={isRefreshing}
           onSave={onSave}
+          onShowYaml={showConfigurationDialog}
           onConvert={showConvertWarning}
           onSearch={() => editorRef.current.executeCommand('find')}
           onHelp={() => editorRef.current.showShortcuts()}
@@ -225,6 +227,8 @@ EditorView.propTypes = {
   hint: PropTypes.string,
   /** Callback which is triggered when the save button is pressed. */
   onSave: PropTypes.func,
+  /** Whether the configuration file should be shown or hidden */
+  showConfigurationDialog: PropTypes.bool,
   /** Callback which is triggered when the convert button is pressed. */
   showConvertWarning: PropTypes.func,
   /** Callback which is executed when the refresh button is pressed. The refresh button is only shown if this callback is specified. */
@@ -259,6 +263,7 @@ EditorView.defaultProps = {
   canSave: true,
   loading: false,
   showVisualConfigurationView: false,
+  showConfigurationDialog: false,
 };
 
 export default EditorView;

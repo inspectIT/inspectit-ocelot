@@ -13,6 +13,7 @@ import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import SearchDialog from './dialogs/SearchDialog';
 import ConvertDialog from '../../common/dialogs/ConvertDialog';
 import ConfigurationSidebar from './ConfigurationSidebar';
+import AgentConfigurationDialog from '../status/dialogs/AgentConfigurationDialog';
 
 /** Data */
 import { CONFIGURATION_TYPES, DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
@@ -64,6 +65,7 @@ class ConfigurationView extends React.Component {
     isMoveDialogShown: false,
     filePath: null,
     isSearchDialogShown: false,
+    isConfigurationDialogShown: false,
     isConvertDialogShown: false,
   };
 
@@ -132,6 +134,10 @@ class ConfigurationView extends React.Component {
   showSearchDialog = () => this.setState({ isSearchDialogShown: true });
 
   hideSearchDialog = () => this.setState({ isSearchDialogShown: false });
+
+  showConfigurationDialog = () => this.setState({ isConfigurationDialogShown: true });
+
+  hideConfigurationDialog = () => this.setState({ isConfigurationDialogShown: false });
 
   showConvertDialog = () => this.setState({ isConvertDialogShown: true });
 
@@ -225,6 +231,7 @@ class ConfigurationView extends React.Component {
           schema={schema}
           hint={'Select a file to start editing.'}
           onSave={this.onSave}
+          showConfigurationDialog={this.showConfigurationDialog}
           showConvertWarning={this.showConvertDialog}
           enableButtons={showEditor && !loading}
           onCreate={enableOcelotAutocompletion}
@@ -256,6 +263,14 @@ class ConfigurationView extends React.Component {
         <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} filePath={this.state.filePath} />
 
         <SearchDialog visible={this.state.isSearchDialogShown} onHide={this.hideSearchDialog} openFile={this.openFile} />
+
+        <AgentConfigurationDialog
+          visible={this.state.isConfigurationDialogShown}
+          onHide={this.hideConfigurationDialog}
+          configurationValue={this.props.fileContent}
+          fileName={path + name}
+          loading={this.props.loading}
+        />
 
         <ConvertDialog
           visible={this.state.isConvertDialogShown}

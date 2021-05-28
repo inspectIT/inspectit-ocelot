@@ -14,6 +14,7 @@ const EditorToolbar = ({
   enableButtons,
   onSave,
   onConvert,
+  onShowYaml,
   onSearch,
   onHelp,
   onRefresh,
@@ -88,7 +89,7 @@ const EditorToolbar = ({
             label="Show YAML"
             tooltip="Show YAML"
             tooltipOptions={TOOLTIP_OPTIONS}
-            // onClick={}
+            onClick={onShowYaml}
             model={[
               {
                 label: 'Convert',
@@ -119,6 +120,7 @@ EditorToolbar.propTypes = {
   children: PropTypes.node,
   onSave: PropTypes.func,
   onConvert: PropTypes.func,
+  onShowYaml: PropTypes.func,
   onSearch: PropTypes.func,
   onHelp: PropTypes.func,
   onRefresh: PropTypes.func,
@@ -134,6 +136,7 @@ EditorToolbar.defaultProps = {
   children: null,
   onSave: () => {},
   onConvert: () => {},
+  onShowYaml: () => {},
   onSearch: () => {},
   onHelp: () => {},
   onRefresh: null,
