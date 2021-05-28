@@ -89,6 +89,12 @@ class ConfigurationView extends React.Component {
     this.props.writeFile(selection, fileContent, false);
   };
 
+  convertEditor = () => {
+    const { selection, fileContent } = this.props;
+    const contentWithoutHeader = fileContent.split('\n').pop();
+    this.props.writeFile(selection, contentWithoutHeader);
+  };
+
   onChange = (value) => {
     if (!this.props.loading && this.props.isLatestVersion) {
       this.props.selectedFileContentsChanged(value);
@@ -207,6 +213,7 @@ class ConfigurationView extends React.Component {
           schema={schema}
           hint={'Select a file to start editing.'}
           onSave={this.onSave}
+          convertEditor={this.convertEditor}
           enableButtons={showEditor && !loading}
           onCreate={enableOcelotAutocompletion}
           onChange={this.onChange}
