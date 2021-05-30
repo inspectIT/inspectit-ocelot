@@ -48,8 +48,13 @@ public class LogbackInitializer {
      */
     static final String INSPECTIT_LOG_FILE_PATTERN = "INSPECTIT_LOG_FILE_PATTERN";
 
+    /**
+     * Allow disabling the console log before the log system is initialized
+     */
+    static final String INSPECTIT_LOGGING_CONSOLE_ENABLED = "INSPECTIT_LOGGING_CONSOLE_ENABLED";
+
     // flags for the filters
-    static boolean consoleEnabled = true;
+    static boolean consoleEnabled = Boolean.parseBoolean(System.getenv(INSPECTIT_LOGGING_CONSOLE_ENABLED) == null ? "true" : System.getenv(INSPECTIT_LOGGING_CONSOLE_ENABLED));
     static boolean fileEnabled = true;
     static boolean selfMonitoringEnabled = true;
 
