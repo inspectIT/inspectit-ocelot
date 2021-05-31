@@ -12,6 +12,10 @@ import java.util.List;
 @Component
 public class CommandDelegator {
 
+    /**
+     * List of implementations of {@link CommandExecutor}. This list is used to choose the matching {@link CommandExecutor}
+     * for a given instance of {@link Command}.
+     */
     @Autowired
     List<CommandExecutor> executors;
 

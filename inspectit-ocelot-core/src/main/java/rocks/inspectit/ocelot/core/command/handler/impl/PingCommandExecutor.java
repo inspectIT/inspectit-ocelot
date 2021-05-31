@@ -31,7 +31,7 @@ public class PingCommandExecutor implements CommandExecutor {
     @Override
     public CommandResponse execute(Command command) {
         if(!canExecute(command)){
-            throw new IllegalArgumentException("Unable to execute given command!");
+            throw new IllegalArgumentException("PingCommandExecutor can only handle commands of type PingCommand.");
         }
         return new PingResponse(command.getCommandId(), true);
     }

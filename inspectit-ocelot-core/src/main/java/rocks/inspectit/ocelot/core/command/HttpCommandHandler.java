@@ -1,8 +1,5 @@
 package rocks.inspectit.ocelot.core.command;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -33,7 +30,9 @@ import java.net.URISyntaxException;
 @Component
 public class HttpCommandHandler {
 
-
+    /**
+     * Used to delegate recieved {@link Command} objects to their respective implementation of {@link rocks.inspectit.ocelot.core.command.handler.CommandExecutor}.
+     */
     @VisibleForTesting
     @Autowired
     CommandDelegator commandDelegator;
@@ -59,7 +58,7 @@ public class HttpCommandHandler {
     /**
      * The timeout duration in milliseconds when in discovery mode.
      */
-    private final int DISCOVERY_TIMEOUT_DURATION = 100000;
+    private int discoveryTimeoutDuration;
 
     /**
      * Counts how many times the request for a new {@link Command} have been repeated.
@@ -83,6 +82,7 @@ public class HttpCommandHandler {
      */
     public void updateSettings(HttpConfigSettings currentSettings) {
         this.currentSettings = currentSettings;
+        this.discoveryTimeoutDuration = currentSettings.getDiscoveryTimeOutDuration();
     }
 
     /**
@@ -160,7 +160,7 @@ public class HttpCommandHandler {
      * Injects all the agent's meta information headers, which should be send when fetching a new configuration,
      * into the given request request.
      *
-     * @param httpPost the request to inject the meat information headers
+     * @param httpPost the request to inject the meta information headers
      */
     private void setAgentMetaHeaders(HttpPost httpPost) {
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
@@ -195,7 +195,7 @@ public class HttpCommandHandler {
             if (command == null) {
                 if (repeat && repeatCounter < maxRepeats) {
                     repeatCounter++;
-                    fetchCommand(null, DISCOVERY_TIMEOUT_DURATION);
+                    fetchCommand(null, discoveryTimeoutDuration);
                 } else {
                     repeat = false;
                 }
@@ -204,7 +204,7 @@ public class HttpCommandHandler {
 
                 repeatCounter = 0;
                 repeat = true;
-                fetchCommand(commandResult, DISCOVERY_TIMEOUT_DURATION);
+                fetchCommand(commandResult, discoveryTimeoutDuration);
             }
 
         } else {
