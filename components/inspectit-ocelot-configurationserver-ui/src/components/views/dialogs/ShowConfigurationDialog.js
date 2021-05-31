@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 /**
  * Dialog shows the agent configuration.
  */
-const AgentConfigurationDialog = ({ visible, onHide, configurationValue, error, loading, agentName, fileName }) => {
+const ShowConfigurationDialog = ({ visible, onHide, configurationValue, error, loading, agentName, fileName }) => {
   const downloadFilename = 'agent-config' + (agentName ? '_' + agentName.replace(/[^a-z0-9-]/gi, '_').toLowerCase() : '') + '.yml';
 
   // downloading the agent configuration
@@ -18,9 +18,11 @@ const AgentConfigurationDialog = ({ visible, onHide, configurationValue, error, 
     return window.URL.createObjectURL(blob);
   };
 
-  const dialogHeader = agentName
-    ? 'Agent Configuration' + (agentName ? " of Agent '" + agentName + "'" : '')
-    : 'Configuration' + (fileName ? " of File '" + fileName + "'" : '');
+  const agentHeader = 'Agent Configuration' + (agentName ? " of Agent '" + agentName + "'" : '');
+
+  const fileHeader = 'Configuration' + (fileName ? " of File '" + fileName + "'" : '');
+
+  const dialogHeader = agentName ? agentHeader : fileHeader;
 
   return (
     <>
@@ -61,7 +63,7 @@ const AgentConfigurationDialog = ({ visible, onHide, configurationValue, error, 
   );
 };
 
-AgentConfigurationDialog.propTypes = {
+ShowConfigurationDialog.propTypes = {
   /** The content of the configuration */
   configurationValue: PropTypes.string,
   /** Whether a error is thrown */
@@ -78,10 +80,10 @@ AgentConfigurationDialog.propTypes = {
   fileName: PropTypes.string,
 };
 
-AgentConfigurationDialog.defaultProps = {
+ShowConfigurationDialog.defaultProps = {
   error: false,
   visible: true,
   onHide: () => {},
 };
 
-export default AgentConfigurationDialog;
+export default ShowConfigurationDialog;

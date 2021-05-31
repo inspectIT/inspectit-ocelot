@@ -13,7 +13,7 @@ import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import SearchDialog from './dialogs/SearchDialog';
 import ConvertDialog from '../../common/dialogs/ConvertDialog';
 import ConfigurationSidebar from './ConfigurationSidebar';
-import AgentConfigurationDialog from '../status/dialogs/AgentConfigurationDialog';
+import ShowConfigurationDialog from '../dialogs/ShowConfigurationDialog';
 
 /** Data */
 import { CONFIGURATION_TYPES, DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
@@ -264,7 +264,7 @@ class ConfigurationView extends React.Component {
 
         <SearchDialog visible={this.state.isSearchDialogShown} onHide={this.hideSearchDialog} openFile={this.openFile} />
 
-        <AgentConfigurationDialog
+        <ShowConfigurationDialog
           visible={this.state.isConfigurationDialogShown}
           onHide={this.hideConfigurationDialog}
           configurationValue={this.props.fileContent}
