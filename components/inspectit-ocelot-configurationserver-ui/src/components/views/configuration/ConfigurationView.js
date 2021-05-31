@@ -15,6 +15,7 @@ import ConfigurationSidebar from './ConfigurationSidebar';
 
 /** Data */
 import { CONFIGURATION_TYPES, DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
+import ConvertDialog from '../../common/dialogs/ConvertDialog';
 
 /**
  * The header component of the editor view.
@@ -63,6 +64,7 @@ class ConfigurationView extends React.Component {
     isMoveDialogShown: false,
     filePath: null,
     isSearchDialogShown: false,
+    isConvertDialogShown: false,
   };
 
   parsePath = (filePath, defaultConfigFilePath) => {
@@ -124,6 +126,10 @@ class ConfigurationView extends React.Component {
   showSearchDialog = () => this.setState({ isSearchDialogShown: true });
 
   hideSearchDialog = () => this.setState({ isSearchDialogShown: false });
+
+  showConvertDialog = () => this.setState({ isConvertDialogShown: true });
+
+  hideConvertDialog = () => this.setState({ isConvertDialogShown: false });
 
   /**
    * Opens the specified file in the specified version. The version is only changed if it differs from the current one.
@@ -213,7 +219,7 @@ class ConfigurationView extends React.Component {
           schema={schema}
           hint={'Select a file to start editing.'}
           onSave={this.onSave}
-          convertEditor={this.convertEditor}
+          showConvertWarning={this.showConvertDialog}
           enableButtons={showEditor && !loading}
           onCreate={enableOcelotAutocompletion}
           onChange={this.onChange}
@@ -244,6 +250,14 @@ class ConfigurationView extends React.Component {
         <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} filePath={this.state.filePath} />
 
         <SearchDialog visible={this.state.isSearchDialogShown} onHide={this.hideSearchDialog} openFile={this.openFile} />
+
+        <ConvertDialog
+          visible={this.state.isConvertDialogShown}
+          onHide={this.hideConvertDialog}
+          name={path + name}
+          text="Warning"
+          onSuccess={this.convertEditor}
+        />
       </div>
     );
   }

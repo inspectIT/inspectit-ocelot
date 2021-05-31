@@ -36,8 +36,8 @@ IsLoading.args = {
   children: <div>Child Component</div>,
 };
 
-export const OnlySaveButton = Template.bind({});
-OnlySaveButton.args = {
+export const MethodConfigurationButtons = Template.bind({});
+MethodConfigurationButtons.args = {
   showMethodConfiguration: true,
   children: <div>Child Component</div>,
 };
