@@ -5,6 +5,9 @@ import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 
 import java.util.UUID;
 
+/**
+ * Represents a Ping-Response. An agent returns a Ping-Response with alive set to true if the agent is available.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
