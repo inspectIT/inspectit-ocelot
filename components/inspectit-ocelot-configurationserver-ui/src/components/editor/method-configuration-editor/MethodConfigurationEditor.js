@@ -9,6 +9,8 @@ import _ from 'lodash';
 import SelectionInformation from '../SelectionInformation';
 import ErrorInformation from '../ErrorInformation';
 import { TOOLTIP_OPTIONS } from '../../../data/constants';
+import { selectedFileContentsChanged } from '../../../redux/ducks/configuration/actions';
+import { useDispatch } from 'react-redux';
 
 /**
  * GUI editor for creating method/configurations.
@@ -17,17 +19,16 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   // state variables
   const [scopes, setScopes] = useState([]);
   const [expandedRows, setExpandedRows] = useState([]);
-  const [scopeStates, setScopeStates] = useState({});
   const [configurationError, setConfigurationError] = useState(null);
+
+  const configuration = yaml.safeLoad(yamlConfiguration);
+  const dispatch = useDispatch();
 
   // derrived variables
   const scopesExist = scopes.length > 0;
-
   useEffect(() => {
     // parse configuration
     try {
-      const configuration = yaml.safeLoad(yamlConfiguration);
-
       // collect existing scopes from the configuration
       const scopeObjects = _.get(configuration, 'inspectit.instrumentation.scopes');
       const currentScopes = _.map(scopeObjects, (value, key) => {
@@ -56,22 +57,14 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   }, [yamlConfiguration]);
 
   /**
-   * Sets the scope state attribute with the specified name of the scope with the given
-   * name to the provided value.
-   *
-   * @param {*} scopeName the scope's name
-   * @param {*} attribute the attribute to set
-   * @param {*} value the desired value
+   * Updates the current configuration file. Changes the given path to the given value.
+   * 
+   * @param {*} objectPath The path of the value which should be changed.
+   * @param {*} value The value to be set under the given objectPath.
    */
-  const setScopeStateAttribute = (scopeName, attribute, value) => {
-    const scopeState = _.get(scopeStates, scopeName, {});
-    setScopeStates({
-      ...scopeStates,
-      [scopeName]: {
-        ...scopeState,
-        [attribute]: value,
-      },
-    });
+  const updateConfigurationFile = (objectPath, value) => {
+    _.set(configuration, objectPath, value)
+    dispatch(selectedFileContentsChanged('# {"type": "Method-Configuration"} \n' + yaml.dump(configuration)))
   };
 
   /**
@@ -94,13 +87,14 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
    * @param {*} stateAttribute  the attribute name to set
    */
   const scopeStateBodyTemplate = (scopeName, stateAttribute) => {
-    const scopeState = _.get(scopeStates, scopeName, {});
+    const objectPath = 'inspectit.instrumentation.rules.' + stateAttribute + '.scopes.' + scopeName
+    const ruleState = _.get(configuration, objectPath)
 
     return (
       <InputSwitch
-        checked={scopeState[stateAttribute]}
+        checked={ruleState}
         onChange={(e) => {
-          setScopeStateAttribute(scopeName, stateAttribute, e.value);
+          updateConfigurationFile(objectPath, e.value);
         }}
       />
     );
@@ -118,11 +112,11 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
           tooltip="Edit Method Configuration"
           tooltipOptions={TOOLTIP_OPTIONS}
         />
-        <Button icon="pi pi-trash" tooltip="Remove Method Configuration" tooltipOptions={TOOLTIP_OPTIONS} />
+        <Button icon="pi pi-trash" tooltip="Remove Method Configuration" tooltipOptions={TOOLTIP_OPTIONS}/>
       </div>
     );
   };
-
+  
   return (
     <>
       <style jsx>{`
@@ -182,9 +176,9 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
             rowGroupMode="subheader"
           >
             <Column body={scopeDescriptionBodyTemplate} header="Target" />
-            <Column body={({ name }) => scopeStateBodyTemplate(name, 'tracing')} header="Trace" style={{ width: '6rem' }}></Column>
-            <Column body={({ name }) => scopeStateBodyTemplate(name, 'measure')} header="Measure" style={{ width: '6rem' }}></Column>
-            <Column body={scopeEditBodyTemplate} style={{ width: '8rem' }}></Column>
+            <Column body={({ name }) => scopeStateBodyTemplate(name, 'r_method_configuration_trace')} header="Trace" style={{ width: '6rem' }}></Column>
+            <Column body={({ name }) => scopeStateBodyTemplate(name, 'r_method_configuration_duration')} header="Measure" style={{ width: '6rem' }}></Column>
+            <Column body={() => scopeEditBodyTemplate()} style={{ width: '8rem' }}></Column>
           </DataTable>
         ) : (
           <SelectionInformation hint="The configuration is empty." />
