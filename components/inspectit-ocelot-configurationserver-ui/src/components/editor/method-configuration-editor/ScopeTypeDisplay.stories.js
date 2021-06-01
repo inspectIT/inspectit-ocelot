@@ -11,15 +11,24 @@ const Template = (args) => <ScopeTypeDisplay {...args} />;
 
 export const ShowSuperclass = Template.bind({});
 ShowSuperclass.args = {
-  scope: { superclass: { name: 'java.net.HttpURLConnection', "MATCHER-MODE": "ENDS_WITH_IGNORE_CASE" }, methods: [{ name: 'getInputStream', arguments: [] }] },
+  scope: {
+    superclass: { name: 'java.net.HttpURLConnection', 'MATCHER-MODE': 'ENDS_WITH_IGNORE_CASE' },
+    methods: [{ name: 'getInputStream', arguments: [] }],
+  },
 };
 
 export const ShowType = Template.bind({});
 ShowType.args = {
-  scope: { type: { name: 'org.apache.http.impl.client.CloseableHttpClient', "Matcher-Mode": "MATCHES" }, methods: [{ name: 'getInputStream', arguments: [] }] },
+  scope: {
+    type: { name: 'org.apache.http.impl.client.CloseableHttpClient', 'Matcher-Mode': 'MATCHES' },
+    methods: [{ name: 'getInputStream', arguments: [] }],
+  },
 };
 
 export const ShowInterface = Template.bind({});
 ShowInterface.args = {
-  scope: { interfaces: [{ name: 'org.apache.http.impl.client.CloseableHttpClient' }], methods: [{ name: 'getInputStream', arguments: [] }] },
+  scope: {
+    interfaces: [{ name: 'org.apache.http.impl.client.CloseableHttpClient' }],
+    methods: [{ name: 'getInputStream', arguments: [] }],
+  },
 };

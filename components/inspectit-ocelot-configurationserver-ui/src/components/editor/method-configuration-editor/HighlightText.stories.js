@@ -11,23 +11,23 @@ const Template = (args) => <HighlightText {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {
-    value: "Hello World!"
+  value: 'Hello World!',
 };
 
 export const Blue = Template.bind({});
 Blue.args = {
-    value: "Hello World!",
-    theme: "blue"
+  value: 'Hello World!',
+  theme: 'blue',
 };
 
 export const Yellow = Template.bind({});
 Yellow.args = {
-    value: "Hello World!",
-    theme: "yellow"
+  value: 'Hello World!',
+  theme: 'yellow',
 };
 
 export const Green = Template.bind({});
 Green.args = {
-    value: "Hello World!",
-    theme: "green"
+  value: 'Hello World!',
+  theme: 'green',
 };
