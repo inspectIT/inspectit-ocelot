@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 
 const AVAILABLE_THEMES = ['gray', 'blue', 'yellow', 'green'];
 
+/**
+ * Component for showing a highlighted text element.
+ */
 const HighlightText = ({ value, theme }) => {
   const themeClass = AVAILABLE_THEMES.includes(theme) ? theme : AVAILABLE_THEMES[0];
 
@@ -38,7 +41,9 @@ const HighlightText = ({ value, theme }) => {
 };
 
 HighlightText.propTypes = {
+  /** The text to show. */
   value: PropTypes.string,
+  /** The color theme to use */
   theme: PropTypes.oneOf(AVAILABLE_THEMES),
 };
 

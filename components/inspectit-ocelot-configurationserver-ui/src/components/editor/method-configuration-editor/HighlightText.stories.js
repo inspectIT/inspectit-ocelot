@@ -19,3 +19,15 @@ Blue.args = {
     value: "Hello World!",
     theme: "blue"
 };
+
+export const Yellow = Template.bind({});
+Yellow.args = {
+    value: "Hello World!",
+    theme: "yellow"
+};
+
+export const Green = Template.bind({});
+Green.args = {
+    value: "Hello World!",
+    theme: "green"
+};

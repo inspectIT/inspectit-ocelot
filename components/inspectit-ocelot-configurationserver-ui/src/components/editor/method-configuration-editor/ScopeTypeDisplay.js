@@ -2,45 +2,36 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import HighlightText from './HighlightText';
 import _ from 'lodash';
+import { MATCHER_MODE_DESCRIPTION_S } from './constants';
 
-const MATCHER_MODE_DESCRIPTION = {
-  EQUALS_FULLY: 'equals',
-  EQUALS_FULLY_IGNORE_CASE: 'equals (case-insensitive)',
-  STARTS_WITH: 'starts with',
-  STARTS_WITH_IGNORE_CASE: 'starts with (case-insensitive)',
-  ENDS_WITH: 'ends with',
-  ENDS_WITH_IGNORE_CASE: 'ends with (case-insensitive)',
-  CONTAINS: 'contains',
-  CONTAINS_IGNORE_CASE: 'contains (case-insensitive)',
-  MATCHES: 'matches',
-};
-
+/**
+ * Component for displaying the type matchers of given scope in a nice representation.
+ */
 const ScopeTypeDisplay = ({ scope }) => {
   const { type, superclass, interfaces } = scope;
 
-  let target;
+  let targetMatcher;
   let typeDescriptor;
   if (type) {
-    target = type;
+    targetMatcher = type;
     typeDescriptor = <HighlightText value="Classes" />;
   } else if (superclass) {
-    target = superclass;
+    targetMatcher = superclass;
     typeDescriptor = <HighlightText value="Classes with a superclass" />;
   } else if (interfaces && interfaces.length == 1) {
-    target = interfaces[0];
+    targetMatcher = interfaces[0];
     typeDescriptor = <HighlightText value="Classes implementing an interface" />;
   } else {
-    //TODO
-    throw new Error();
+    // Scopes with multiple type matchers are currently not supported.
+    throw new Error('Scopes using multiple type matchers are currently not supported.');
   }
 
-  const { name } = target;
+  const { name } = targetMatcher;
 
-  const matcherMode = _.find(target, (_value, key) => {
+  const matcherMode = _.find(targetMatcher, (_value, key) => {
     return key.toLowerCase() === 'matcher-mode';
   });
-
-  const matcherText = _.get(MATCHER_MODE_DESCRIPTION, matcherMode, MATCHER_MODE_DESCRIPTION.EQUALS_FULLY);
+  const matcherText = _.get(MATCHER_MODE_DESCRIPTION_S, matcherMode, MATCHER_MODE_DESCRIPTION_S.EQUALS_FULLY);
 
   return (
     <span className="p-component">
@@ -50,6 +41,7 @@ const ScopeTypeDisplay = ({ scope }) => {
 };
 
 ScopeTypeDisplay.propTypes = {
+  /** The scopes to visualize. */
   scope: PropTypes.object,
 };
 
