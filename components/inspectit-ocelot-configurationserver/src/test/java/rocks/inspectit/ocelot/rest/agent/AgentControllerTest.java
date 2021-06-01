@@ -88,39 +88,39 @@ public class AgentControllerTest {
     }
 
     @Nested
-    public class FetchNewCommand {
+    public class FetchCommand {
 
         @Test
-        public void agentWithoutResponse() throws ExecutionException {
+        public void agentWithoutResponse() {
             HashMap<String, String> headers = new HashMap<>();
             String agentTestId = "test-id";
             headers.put("x-ocelot-agent-id", agentTestId);
             Command expectedCommand = null;
-            doReturn(expectedCommand).when(agentCommandManager).getCommand(agentTestId);
+            doReturn(expectedCommand).when(agentCommandManager).getCommand(agentTestId, false);
 
-            ResponseEntity<Command> result = controller.fetchNewCommand(headers, null);
+            ResponseEntity<Command> result = controller.fetchCommand(headers, false, null);
 
             assertThat(result.getBody()).isEqualTo(expectedCommand);
-            verify(agentCommandManager).getCommand(agentTestId);
+            verify(agentCommandManager).getCommand(agentTestId, false);
         }
 
         @Test
-        public void agentHasResponse() throws ExecutionException {
+        public void agentHasResponse() {
             HashMap<String, String> headers = new HashMap<>();
             String agentTestId = "test-id";
             headers.put("x-ocelot-agent-id", agentTestId);
             Command expectedCommand = new PingCommand();
             UUID mockID = expectedCommand.getCommandId();
-            doReturn(expectedCommand).when(agentCommandManager).getCommand(agentTestId);
+            doReturn(expectedCommand).when(agentCommandManager).getCommand(agentTestId, false);
             CommandResponse mockResponse = mock(CommandResponse.class);
 
             doReturn(mockID).when(mockResponse).getCommandId();
             doNothing().when(agentCallbackManager).handleCommandResponse(expectedCommand.getCommandId(), mockResponse);
 
-            ResponseEntity<Command> result = controller.fetchNewCommand(headers, mockResponse);
+            ResponseEntity<Command> result = controller.fetchCommand(headers, false, mockResponse);
 
             assertThat(result.getBody()).isEqualTo(expectedCommand);
-            verify(agentCommandManager).getCommand(agentTestId);
+            verify(agentCommandManager).getCommand(agentTestId, false);
             verify(agentCallbackManager).handleCommandResponse(mockID, mockResponse);
         }
     }

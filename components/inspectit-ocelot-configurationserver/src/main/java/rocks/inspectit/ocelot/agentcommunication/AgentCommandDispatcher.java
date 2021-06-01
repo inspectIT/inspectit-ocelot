@@ -33,22 +33,17 @@ public class AgentCommandDispatcher {
      *
      * @param agentId The id of the agent for which the command should be executed.
      * @param command The command to be executed.
-     * @throws IllegalStateException If no handler for the given command-type is present or a handler returned null.
      *
      * @return The handlers return value.
+     *
+     * @throws IllegalStateException If no handler for the given command-type is present or a handler returned null.
      */
-    public DeferredResult<ResponseEntity<?>> runCommand(String agentId, Command command) throws ExecutionException {
-        DeferredResult<ResponseEntity<?>> result = null;
+    public DeferredResult<ResponseEntity<?>> dispatchCommand(String agentId, Command command) throws ExecutionException {
+        CommandHandler handler = getCommandHandler(command);
 
-        for (CommandHandler handler : handlers) {
-            if (handler.canHandle(command)) {
-                result = handler.prepareResponse(agentId, command);
-            }
-        }
-
+        DeferredResult<ResponseEntity<?>> result = handler.prepareResponse(agentId, command);
         if (result == null) {
-            throw new IllegalStateException(String.format("Handler returned invalid response value null or no handler exists for %s", command
-                    .getClass()));
+            throw new IllegalStateException("Handler returned invalid command response");
         }
 
         callbackManager.addCommandCallback(command.getCommandId(), result);
@@ -57,4 +52,19 @@ public class AgentCommandDispatcher {
         return result;
     }
 
+    /**
+     * Returns a command handler which can handle the given command.
+     *
+     * @param command the command to handle
+     *
+     * @return the handler for handling the given command
+     */
+    private CommandHandler getCommandHandler(Command command) {
+        for (CommandHandler handler : handlers) {
+            if (handler.canHandle(command)) {
+                return handler;
+            }
+        }
+        throw new IllegalStateException("Unsupported command of type " + command.getClass());
+    }
 }

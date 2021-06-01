@@ -3,23 +3,32 @@ package rocks.inspectit.ocelot.agentcommunication;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.handlers.CommandHandler;
 import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
+import javax.annotation.PostConstruct;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Manages the callbacks for asynchronous requests between the agent and the frontend.
  * Each callback is represented by an instance of {@link DeferredResult} and can be mapped by a UUID of the respective command.
  */
 @Component
-public class AgentCallbackManager {
+public class AgentCallbackManager implements RemovalListener<UUID, DeferredResult<ResponseEntity<?>>> {
+
+    @Autowired
+    private InspectitServerSettings configuration;
 
     @Autowired
     @VisibleForTesting
@@ -28,10 +37,24 @@ public class AgentCallbackManager {
     @VisibleForTesting
     Cache<UUID, DeferredResult<ResponseEntity<?>>> resultCache;
 
-    public AgentCallbackManager() {
+    @PostConstruct
+    public void postConstruct() {
+        Duration responseTimeout = configuration.getAgentCommand().getResponseTimeout();
+        long responseTimeoutMs = responseTimeout.toMillis();
+
         resultCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(2, TimeUnit.MINUTES)
+                .expireAfterWrite(responseTimeoutMs, TimeUnit.MILLISECONDS)
+                .removalListener(this) // done so that deferred results which time out throw a timeout exception
                 .build();
+    }
+
+    @Override
+    public void onRemoval(RemovalNotification<UUID, DeferredResult<ResponseEntity<?>>> resultEntity) {
+        if (resultEntity.wasEvicted()) {
+            DeferredResult<ResponseEntity<?>> result = resultEntity.getValue();
+            TimeoutException exception = new TimeoutException(resultEntity.getCause().toString());
+            result.setErrorResult(exception);
+        }
     }
 
     /**
@@ -46,7 +69,7 @@ public class AgentCallbackManager {
      */
     public void addCommandCallback(UUID commandId, DeferredResult<ResponseEntity<?>> commandResponse) {
         if (commandId == null) {
-            throw new IllegalArgumentException("The given command id may never be null!");
+            throw new IllegalArgumentException("The given command id must not be null!");
         }
         if (commandResponse != null) {
             resultCache.put(commandId, commandResponse);
@@ -63,7 +86,7 @@ public class AgentCallbackManager {
      */
     public void handleCommandResponse(UUID commandId, CommandResponse response) {
         if (commandId == null) {
-            throw new IllegalArgumentException("The given command id may never be null!");
+            throw new IllegalArgumentException("The given command id must not be null!");
         }
 
         DeferredResult<ResponseEntity<?>> result = resultCache.getIfPresent(commandId);

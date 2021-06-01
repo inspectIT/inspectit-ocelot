@@ -75,19 +75,22 @@ public class AgentController extends AbstractBaseController {
      * @return Returns either a ResponseEntity with the next command as payload or an empty payload.
      */
     @PostMapping(value = "agent/command", produces = "application/json")
-    public ResponseEntity<Command> fetchNewCommand(@RequestHeader Map<String, String> headers, @RequestBody(required=false) CommandResponse response) throws ExecutionException {
-        String agentID = headers.get("x-ocelot-agent-id");
-        UUID commandID = null;
+    public ResponseEntity<Command> fetchCommand(@RequestHeader Map<String, String> headers, @RequestParam(required = false) boolean waitForCommand, @RequestBody(required = false) CommandResponse response) {
+        String agentId = headers.get("x-ocelot-agent-id");
+        if (agentId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
         if (response != null) {
-            commandID = response.getCommandId();
+            UUID commandID = response.getCommandId();
+
+            if (ObjectUtils.allNotNull(agentId, commandID)) {
+                agentCallbackManager.handleCommandResponse(commandID, response);
+            }
         }
 
-        if (ObjectUtils.allNotNull(agentID, commandID)) {
-            agentCallbackManager.handleCommandResponse(commandID, response);
-        }
-
-        Command command = agentCommandManager.getCommand(agentID);
-        return ResponseEntity.ok().body(command);
+        Command nextCommand = agentCommandManager.getCommand(agentId, waitForCommand);
+        return ResponseEntity.ok().body(nextCommand);
     }
 
     /**
@@ -97,9 +100,9 @@ public class AgentController extends AbstractBaseController {
      *
      * @return Returns OK if the Agent is reachable and Timeout if it is not.
      */
-    @GetMapping(value = "agent/health/**", produces = "text/plain")
-    public DeferredResult<ResponseEntity<?>> getHealth(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
+    @GetMapping(value = "agent/ping/**", produces = "text/plain")
+    public DeferredResult<ResponseEntity<?>> ping(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
         PingCommand command = new PingCommand();
-        return commandDispatcher.runCommand(agentId, command);
+        return commandDispatcher.dispatchCommand(agentId, command);
     }
 }
