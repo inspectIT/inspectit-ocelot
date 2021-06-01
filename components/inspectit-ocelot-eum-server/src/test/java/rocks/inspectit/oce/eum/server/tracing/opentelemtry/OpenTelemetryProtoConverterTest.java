@@ -1,142 +1,160 @@
 package rocks.inspectit.oce.eum.server.tracing.opentelemtry;
 
-import com.google.protobuf.ByteString;
-import io.opentelemetry.common.AttributeValue;
+import com.google.protobuf.util.JsonFormat;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
-import io.opentelemetry.proto.common.v1.AttributeKeyValue;
 import io.opentelemetry.proto.common.v1.InstrumentationLibrary;
 import io.opentelemetry.proto.resource.v1.Resource;
 import io.opentelemetry.proto.trace.v1.InstrumentationLibrarySpans;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import io.opentelemetry.proto.trace.v1.Span;
-import io.opentelemetry.proto.trace.v1.Status;
+import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
+import io.opentelemetry.sdk.trace.data.EventData;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.trace.Span.Kind;
-import io.opentelemetry.trace.SpanId;
-import io.opentelemetry.trace.TraceId;
+import io.opentelemetry.sdk.trace.data.StatusData;
+import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 
-import java.nio.ByteBuffer;
+import javax.servlet.http.HttpServletRequest;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static io.opentelemetry.api.common.AttributeKey.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OpenTelemetryProtoConverterTest {
 
+    public static final String TRACE_REQUEST_FILE_SMALL = "/ot-trace-small-v0.18.2.json";
+
+    public static final String TRACE_REQUEST_FILE_LARGE = "/ot-trace-large-v0.18.2.json";
+
     @InjectMocks
-    OpenTelemetryProtoConverter converter;
+    private OpenTelemetryProtoConverter converter;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private EumServerConfiguration configuration;
+
+    private ExportTraceServiceRequest getSmallTestRequest() throws Exception {
+        return getTestRequest(TRACE_REQUEST_FILE_SMALL);
+    }
+
+    private ExportTraceServiceRequest getLargeTestRequest() throws Exception {
+        return getTestRequest(TRACE_REQUEST_FILE_LARGE);
+    }
+
+    private ExportTraceServiceRequest getTestRequest(String file) throws Exception {
+        InputStream resource = this.getClass().getResourceAsStream(file);
+        String traceRequestJson = IOUtils.toString(resource, StandardCharsets.UTF_8);
+
+        ExportTraceServiceRequest.Builder requestBuilder = ExportTraceServiceRequest.newBuilder();
+        JsonFormat.parser().merge(traceRequestJson, requestBuilder);
+        return requestBuilder.build();
+    }
 
     @Nested
     class Convert {
 
         @Test
-        public void happyPath() {
-            final long time = System.nanoTime();
-            ByteBuffer traceIdBuffer = ByteBuffer.allocate(2 * Long.BYTES);
-            traceIdBuffer.putLong(1);
-            traceIdBuffer.putLong(2);
-            ByteBuffer spanIdBuffer = ByteBuffer.allocate(Long.BYTES);
-            spanIdBuffer.putLong(3);
+        public void convertSmallRequest() throws Exception {
+            ExportTraceServiceRequest request = getSmallTestRequest();
 
-            ExportTraceServiceRequest data = ExportTraceServiceRequest.newBuilder()
-                    .addResourceSpans(ResourceSpans.newBuilder()
-                            .setResource(Resource.newBuilder()
-                                    .addAttributes(AttributeKeyValue.newBuilder()
-                                            .setType(AttributeKeyValue.ValueType.DOUBLE)
-                                            .setKey("resource-key")
-                                            .setDoubleValue(11.2d)
-                                            .build()
-                                    )
-                                    .build()
-                            )
-                            .addInstrumentationLibrarySpans(InstrumentationLibrarySpans.newBuilder()
-                                    .setInstrumentationLibrary(InstrumentationLibrary.newBuilder()
-                                            .setName("test-inst")
-                                            .setVersion("0.1.0")
-                                            .build()
-                                    )
-                                    .addSpans(Span.newBuilder()
-                                            .setTraceId(ByteString.copyFrom(traceIdBuffer.array()))
-                                            .setSpanId(ByteString.copyFrom(spanIdBuffer.array()))
-                                            .setName("test")
-                                            .setKind(Span.SpanKind.CONSUMER)
-                                            .setStartTimeUnixNano(time)
-                                            .setEndTimeUnixNano(time + 1L)
-                                            .setStatus(Status.newBuilder().setCodeValue(Status.StatusCode.Aborted_VALUE).setMessage("status-desc").build())
-                                            .addAttributes(AttributeKeyValue.newBuilder()
-                                                    .setType(AttributeKeyValue.ValueType.INT)
-                                                    .setKey("a1")
-                                                    .setIntValue(11)
-                                                    .build()
-                                            )
-                                            .setDroppedAttributesCount(1)
-                                            .addEvents(Span.Event.newBuilder().setName("e1").setTimeUnixNano(time + 2).build())
-                                            .addEvents(Span.Event.newBuilder().setName("e2").setTimeUnixNano(time + 3).build())
-                                            .setDroppedEventsCount(2)
-                                            .setDroppedLinksCount(3)
-                                            .build())
-                                    .build()
-                            )
-                            .build()
-                    )
-                    .build();
+            Collection<SpanData> result = converter.convert(request);
 
-            Collection<SpanData> result = converter.convert(data);
+            assertThat(result).hasSize(1);
+            SpanData spanData = result.iterator().next();
 
-            assertThat(result).hasOnlyOneElementSatisfying(spanData -> {
-                assertThat(spanData.getResource().getAttributes()).hasSize(1)
-                        .containsEntry("resource-key", AttributeValue.doubleAttributeValue(11.2d));
-                assertThat(spanData.getInstrumentationLibraryInfo().getName()).isEqualTo("test-inst");
-                assertThat(spanData.getInstrumentationLibraryInfo().getVersion()).isEqualTo("0.1.0");
-                assertThat(spanData.getTraceId()).isEqualTo(new TraceId(1, 2));
-                assertThat(spanData.getSpanId()).isEqualTo(new SpanId(3));
-                assertThat(spanData.getKind()).isEqualTo(Kind.CONSUMER);
-                assertThat(spanData.getStartEpochNanos()).isEqualTo(time);
-                assertThat(spanData.getEndEpochNanos()).isEqualTo(time + 1);
-                assertThat(spanData.getEndEpochNanos()).isEqualTo(time + 1);
-                assertThat(spanData.getHasEnded()).isEqualTo(true);
-                assertThat(spanData.getHasRemoteParent()).isEqualTo(false);
-                assertThat(spanData.getStatus()).isEqualTo(io.opentelemetry.trace.Status.ABORTED.withDescription("status-desc"));
-                assertThat(spanData.getAttributes()).hasSize(1)
-                        .containsEntry("a1", AttributeValue.longAttributeValue(11));
-                assertThat(spanData.getTotalAttributeCount()).isEqualTo(2);
-                assertThat(spanData.getTimedEvents()).hasSize(2)
-                        .anySatisfy(event -> {
-                            assertThat(event.getName()).isEqualTo("e1");
-                            assertThat(event.getEpochNanos()).isEqualTo(time + 2);
-                            assertThat(event.getAttributes()).isEmpty();
-                            assertThat(event.getTotalAttributeCount()).isZero();
-                        })
-                        .anySatisfy(event -> {
-                            assertThat(event.getName()).isEqualTo("e2");
-                            assertThat(event.getEpochNanos()).isEqualTo(time + 3);
-                            assertThat(event.getAttributes()).isEmpty();
-                            assertThat(event.getTotalAttributeCount()).isZero();
-                        });
-                assertThat(spanData.getTotalRecordedEvents()).isEqualTo(4);
-                assertThat(spanData.getTotalRecordedLinks()).isEqualTo(3);
-            });
+            assertThat(spanData.getTraceId()).isEqualTo("5f3d4ba1b6330649b4f84df35e1eab36");
+            assertThat(spanData.getSpanId()).isEqualTo("3d6356351f8377ef");
+            assertThat(spanData.getParentSpanId()).isEqualTo("0000000000000000");
+            assertThat(spanData.getName()).isEqualTo("doSomething");
+            assertThat(spanData.getKind()).isEqualTo(SpanKind.INTERNAL);
+            assertThat(spanData.getStartEpochNanos()).isEqualTo(1619160764591125000L);
+            assertThat(spanData.getEndEpochNanos()).isEqualTo(1619160764608015000L);
+            assertThat(spanData.hasEnded()).isTrue();
+            assertThat(spanData.getAttributes().isEmpty()).isTrue();
+            assertThat(spanData.getTotalAttributeCount()).isEqualTo(0);
+            assertThat(spanData.getEvents()).isEmpty();
+            assertThat(spanData.getTotalRecordedEvents()).isEqualTo(0);
+            assertThat(spanData.getStatus()).isEqualTo(StatusData.unset());
+            assertThat(spanData.getLinks()).isEmpty();
+            assertThat(spanData.getTotalRecordedLinks()).isEqualTo(0);
+
+            InstrumentationLibraryInfo libraryInfo = spanData.getInstrumentationLibraryInfo();
+            assertThat(libraryInfo.getName()).isEqualTo("my-library-name");
+            assertThat(libraryInfo.getVersion()).isBlank();
+
+            io.opentelemetry.sdk.resources.Resource resource = spanData.getResource();
+            assertThat(resource.getAttributes()
+                    .asMap()).containsExactly(entry(stringKey("service.name"), "my-application"), entry(stringKey("telemetry.sdk.language"), "webjs"), entry(stringKey("telemetry.sdk.name"), "opentelemetry"), entry(stringKey("telemetry.sdk.version"), "0.18.2"));
+        }
+
+        @Test
+        public void convertLargeRequest() throws Exception {
+            ExportTraceServiceRequest request = getLargeTestRequest();
+
+            Collection<SpanData> result = converter.convert(request);
+
+            assertThat(result).hasSize(1);
+            SpanData spanData = result.iterator().next();
+
+            //@formatter:off
+            assertThat(spanData.getTraceId()).isEqualTo("03c2a546267d1e90d70269bdc02babef");
+            assertThat(spanData.getSpanId()).isEqualTo("c29e6dd2a1e1e7ae");
+            assertThat(spanData.getParentSpanId()).isEqualTo("915c20356ab50086");
+            assertThat(spanData.getName()).isEqualTo("HTTP GET");
+            assertThat(spanData.getKind()).isEqualTo(SpanKind.CLIENT);
+            assertThat(spanData.getStartEpochNanos()).isEqualTo(1619166153906575000L);
+            assertThat(spanData.getEndEpochNanos()).isEqualTo(1619166154225390000L);
+            assertThat(spanData.hasEnded()).isTrue();
+            assertThat(spanData.getAttributes()
+                    .asMap()).containsOnly(entry(stringKey("http.method"), "GET"), entry(longKey("http.response_content_length"), 665L), entry(booleanKey("is.true"), true));
+
+            assertThat(spanData.getTotalRecordedEvents()).isEqualTo(1);
+            assertThat(spanData.getEvents()).hasSize(1);
+            EventData event = spanData.getEvents().get(0);
+            assertThat(event.getName()).isEqualTo("open");
+            assertThat(event.getEpochNanos()).isEqualTo(1619166153906635000L);
+            assertThat(event.getDroppedAttributesCount()).isEqualTo(0);
+            assertThat(event.getTotalAttributeCount()).isEqualTo(1);
+            assertThat(event.getAttributes().asMap()).containsOnly(entry(stringKey("event.name"), "test-name"));
+
+            assertThat(spanData.getStatus()).isEqualTo(StatusData.ok());
+            assertThat(spanData.getLinks()).isEmpty();
+            assertThat(spanData.getTotalRecordedLinks()).isEqualTo(2);
+
+            InstrumentationLibraryInfo libraryInfo = spanData.getInstrumentationLibraryInfo();
+            assertThat(libraryInfo.getName()).isEqualTo("@opentelemetry/instrumentation-xml-http-request");
+            assertThat(libraryInfo.getVersion()).isEqualTo("0.18.2");
+
+            io.opentelemetry.sdk.resources.Resource resource = spanData.getResource();
+            assertThat(resource.getAttributes()
+                    .asMap()).containsExactly(entry(stringKey("service.name"), "my-application"), entry(stringKey("telemetry.sdk.language"), "webjs"), entry(stringKey("telemetry.sdk.name"), "opentelemetry"), entry(stringKey("telemetry.sdk.version"), "0.18.2"));
+            //@formatter:on
         }
 
         @Test
         public void emptyIgnored() {
-
             ExportTraceServiceRequest data = ExportTraceServiceRequest.newBuilder()
                     .addResourceSpans(ResourceSpans.newBuilder()
                             .setResource(Resource.newBuilder().build())
                             .addInstrumentationLibrarySpans(InstrumentationLibrarySpans.newBuilder()
                                     .setInstrumentationLibrary(InstrumentationLibrary.newBuilder().build())
                                     .addSpans(Span.newBuilder().build())
-                                    .build()
-                            )
-                            .build()
-                    )
+                                    .build())
+                            .build())
                     .build();
 
             Collection<SpanData> result = converter.convert(data);
@@ -147,48 +165,64 @@ class OpenTelemetryProtoConverterTest {
     }
 
     @Nested
-    class ToOtTraceId {
+    class AnonymizeIpAddress {
 
-        @Test
-        public void notEnoughBytes() {
-            byte[] bytes = new byte[15];
+        @Mock
+        private HttpServletRequest mockRequest;
 
-            Optional<TraceId> traceId = OpenTelemetryProtoConverter.toOtTraceId(ByteString.copyFrom(bytes));
-
-            assertThat(traceId).isEmpty();
+        @BeforeEach
+        private void beforeEach() {
+            converter.requestSupplier = () -> mockRequest;
         }
 
-    }
-
-    @Nested
-    class ToOtSpanId {
-
         @Test
-        public void notEnoughBytes() {
-            byte[] bytes = new byte[7];
+        public void ipv4_singleDigit() {
+            when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(true);
+            when(mockRequest.getRemoteAddr()).thenReturn("127.1.1.1");
 
-            Optional<SpanId> traceId = OpenTelemetryProtoConverter.toOtSpanId(ByteString.copyFrom(bytes));
+            Map<String, String> result = converter.getCustomSpanAttributes();
 
-            assertThat(traceId).isEmpty();
+            assertThat(result).containsExactly(entry("client.ip", "127.1.1.0"));
         }
 
-    }
-
-    @Nested
-    class ToOtSpanKind {
-
         @Test
-        public void states() {
-            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.INTERNAL)).isEqualTo(Kind.INTERNAL);
-            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.CLIENT)).isEqualTo(Kind.CLIENT);
-            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.SERVER)).isEqualTo(Kind.SERVER);
-            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.PRODUCER)).isEqualTo(Kind.PRODUCER);
-            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.CONSUMER)).isEqualTo(Kind.CONSUMER);
-            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.UNRECOGNIZED)).isEqualTo(Kind.INTERNAL);
-            assertThat(OpenTelemetryProtoConverter.toOtSpanKind(Span.SpanKind.SPAN_KIND_UNSPECIFIED)).isEqualTo(Kind.INTERNAL);
+        public void ipv4_multipleDigits() {
+            when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(true);
+            when(mockRequest.getRemoteAddr()).thenReturn("127.1.1.254");
 
+            Map<String, String> result = converter.getCustomSpanAttributes();
+
+            assertThat(result).containsExactly(entry("client.ip", "127.1.1.0"));
         }
 
-    }
+        @Test
+        public void ipv4_noMasking() {
+            when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(false);
+            when(mockRequest.getRemoteAddr()).thenReturn("127.1.1.1");
 
+            Map<String, String> result = converter.getCustomSpanAttributes();
+
+            assertThat(result).containsExactly(entry("client.ip", "127.1.1.1"));
+        }
+
+        @Test
+        public void ipv6_mask() {
+            when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(true);
+            when(mockRequest.getRemoteAddr()).thenReturn("1:2:3:4:5:6:7:8");
+
+            Map<String, String> result = converter.getCustomSpanAttributes();
+
+            assertThat(result).containsExactly(entry("client.ip", "1:2:3:4:5:0:0:0"));
+        }
+
+        @Test
+        public void ipv6_noMasking() {
+            when(configuration.getExporters().getTracing().isMaskSpanIpAddresses()).thenReturn(false);
+            when(mockRequest.getRemoteAddr()).thenReturn("1:2:3:4:5:6:7:8");
+
+            Map<String, String> result = converter.getCustomSpanAttributes();
+
+            assertThat(result).containsExactly(entry("client.ip", "1:2:3:4:5:6:7:8"));
+        }
+    }
 }

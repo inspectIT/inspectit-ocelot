@@ -1,11 +1,10 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 
 /**
  * The toolbar used within the editor view.
- *
- * onPropsSplit = (propsSplit: boolean, propsSplitHotizontal: boolean)
  */
 const EditorToolbar = ({
   enableButtons,
@@ -18,6 +17,7 @@ const EditorToolbar = ({
   visualConfig,
   onVisualConfigChange,
   children,
+  showOnlySave,
 }) => (
   <div className="this">
     <style jsx>
@@ -40,16 +40,18 @@ const EditorToolbar = ({
     <Toolbar>
       <div className="p-toolbar-group-left">{children}</div>
       <div className="p-toolbar-group-right button-not-active">
-        <Button
-          disabled={!enableButtons}
-          icon="pi pi-table"
-          className={!visualConfig && 'p-button-outlined'}
-          onClick={onVisualConfigChange}
-        />
-        {onRefresh && (
+        {!showOnlySave && (
+          <Button
+            disabled={!enableButtons}
+            icon="pi pi-table"
+            className={!visualConfig && 'p-button-outlined'}
+            onClick={onVisualConfigChange}
+          />
+        )}
+        {!showOnlySave && onRefresh && (
           <Button disabled={!enableButtons || isRefreshing} icon={'pi pi-refresh' + (isRefreshing ? ' pi-spin' : '')} onClick={onRefresh} />
         )}
-        {!visualConfig && (
+        {!showOnlySave && !visualConfig && (
           <>
             <Button disabled={!enableButtons} icon="pi pi-question" onClick={onHelp} />
             <Button disabled={!enableButtons} icon="pi pi-search" onClick={onSearch} />
@@ -60,5 +62,33 @@ const EditorToolbar = ({
     </Toolbar>
   </div>
 );
+
+EditorToolbar.propTypes = {
+  enableButtons: PropTypes.bool,
+  isRefreshing: PropTypes.bool,
+  canSave: PropTypes.bool,
+  visualConfig: PropTypes.bool,
+  showOnlySave: PropTypes.bool,
+  children: PropTypes.node,
+  onSave: PropTypes.func,
+  onSearch: PropTypes.func,
+  onHelp: PropTypes.func,
+  onRefresh: PropTypes.func,
+  onVisualConfigChange: PropTypes.func,
+};
+
+EditorToolbar.defaultProps = {
+  enableButtons: true,
+  isRefreshing: false,
+  canSave: true,
+  visualConfig: false,
+  showOnlySave: false,
+  children: null,
+  onSave: () => {},
+  onSearch: () => {},
+  onHelp: () => {},
+  onRefresh: null,
+  onVisualConfigChange: () => {},
+};
 
 export default EditorToolbar;

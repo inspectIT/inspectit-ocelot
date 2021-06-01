@@ -1,3 +1,6 @@
+/** Templates */
+import methodConfigurationTemplate from './templates/method-configuration.json';
+
 /**
  * Various constants used by the application.
  */
@@ -29,3 +32,25 @@ export const DEFAULT_CONFIG_TREE_KEY = '/$%$%$%$%Ocelot-default-key';
  * The maximum amount of version elements fetched from the config server.
  */
 export const VERSION_LIMIT = 100;
+
+/**
+ * The supported configuration types.
+ */
+export const CONFIGURATION_TYPES = {
+  YAML: {
+    name: '',
+    template: '',
+  },
+  METHOD_CONFIGURATION: {
+    name: 'Method-Configuration',
+    template: methodConfigurationTemplate,
+  },
+};
+
+/**
+ * Shared options for all tooltips.
+ */
+export const TOOLTIP_OPTIONS = {
+  showDelay: 1000,
+  position: 'top',
+};
