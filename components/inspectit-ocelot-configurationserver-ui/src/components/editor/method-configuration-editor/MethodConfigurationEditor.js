@@ -29,6 +29,9 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   const [configurationError, setConfigurationError] = useState(null);
   const [configuration, setConfiguration] = useState([]);
 
+  const configuration = yaml.safeLoad(yamlConfiguration);
+  const dispatch = useDispatch();
+
   // derrived variables
   const scopesExist = scopes.length > 0;
 
@@ -92,6 +95,18 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   };
 
   /**
+   * Deletes the scope with the given name from the configuration model.
+   *
+   * @param {*} scopeName The name of the scope to be deleted.
+   */
+  const deleteScope = (scopeName) => {
+    delete configuration['inspectit']['instrumentation']['scopes'][scopeName];
+    delete configuration['inspectit']['instrumentation']['rules']['r_method_configuration_trace']['scopes'][scopeName];
+    delete configuration['inspectit']['instrumentation']['rules']['r_method_configuration_duration']['scopes'][scopeName];
+    dispatch(selectedFileContentsChanged('# {"type": "Method-Configuration"} \n' + yaml.dump(configuration)));
+  };
+
+  /**
    * Providing the template body for the row group header.
    */
   const rowGroupHeaderTemplate = ({ typeKey }) => {
@@ -127,7 +142,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   /**
    * Providing the template body for the scope's control buttons.
    */
-  const scopeEditBodyTemplate = () => {
+  const scopeEditBodyTemplate = (scopeName) => {
     return (
       <div align="right">
         <Button
@@ -136,7 +151,14 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
           tooltip="Edit Method Configuration"
           tooltipOptions={TOOLTIP_OPTIONS}
         />
-        <Button icon="pi pi-trash" tooltip="Remove Method Configuration" tooltipOptions={TOOLTIP_OPTIONS} />
+        <Button
+          icon="pi pi-trash"
+          tooltip="Remove Method Configuration"
+          tooltipOptions={TOOLTIP_OPTIONS}
+          onClick={() => {
+            deleteScope(scopeName);
+          }}
+        />
       </div>
     );
   };
