@@ -58,13 +58,13 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
 
   /**
    * Updates the current configuration file. Changes the given path to the given value.
-   * 
+   *
    * @param {*} objectPath The path of the value which should be changed.
    * @param {*} value The value to be set under the given objectPath.
    */
   const updateConfigurationFile = (objectPath, value) => {
-    _.set(configuration, objectPath, value)
-    dispatch(selectedFileContentsChanged('# {"type": "Method-Configuration"} \n' + yaml.dump(configuration)))
+    _.set(configuration, objectPath, value);
+    dispatch(selectedFileContentsChanged('# {"type": "Method-Configuration"} \n' + yaml.dump(configuration)));
   };
 
   /**
@@ -87,8 +87,8 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
    * @param {*} stateAttribute  the attribute name to set
    */
   const scopeStateBodyTemplate = (scopeName, stateAttribute) => {
-    const objectPath = 'inspectit.instrumentation.rules.' + stateAttribute + '.scopes.' + scopeName
-    const ruleState = _.get(configuration, objectPath)
+    const objectPath = 'inspectit.instrumentation.rules.' + stateAttribute + '.scopes.' + scopeName;
+    const ruleState = _.get(configuration, objectPath);
 
     return (
       <InputSwitch
@@ -112,11 +112,11 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
           tooltip="Edit Method Configuration"
           tooltipOptions={TOOLTIP_OPTIONS}
         />
-        <Button icon="pi pi-trash" tooltip="Remove Method Configuration" tooltipOptions={TOOLTIP_OPTIONS}/>
+        <Button icon="pi pi-trash" tooltip="Remove Method Configuration" tooltipOptions={TOOLTIP_OPTIONS} />
       </div>
     );
   };
-  
+
   return (
     <>
       <style jsx>{`
@@ -176,8 +176,16 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
             rowGroupMode="subheader"
           >
             <Column body={scopeDescriptionBodyTemplate} header="Target" />
-            <Column body={({ name }) => scopeStateBodyTemplate(name, 'r_method_configuration_trace')} header="Trace" style={{ width: '6rem' }}></Column>
-            <Column body={({ name }) => scopeStateBodyTemplate(name, 'r_method_configuration_duration')} header="Measure" style={{ width: '6rem' }}></Column>
+            <Column
+              body={({ name }) => scopeStateBodyTemplate(name, 'r_method_configuration_trace')}
+              header="Trace"
+              style={{ width: '6rem' }}
+            ></Column>
+            <Column
+              body={({ name }) => scopeStateBodyTemplate(name, 'r_method_configuration_duration')}
+              header="Measure"
+              style={{ width: '6rem' }}
+            ></Column>
             <Column body={() => scopeEditBodyTemplate()} style={{ width: '8rem' }}></Column>
           </DataTable>
         ) : (
