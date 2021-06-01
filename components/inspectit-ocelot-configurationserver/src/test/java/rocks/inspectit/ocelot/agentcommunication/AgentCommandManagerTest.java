@@ -1,12 +1,17 @@
 package rocks.inspectit.ocelot.agentcommunication;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.commons.models.command.Command;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
@@ -22,6 +27,17 @@ public class AgentCommandManagerTest {
 
     @InjectMocks
     AgentCommandManager agentCommandManager;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    InspectitServerSettings configuration;
+
+    @BeforeEach
+    public void beforeEach() {
+        when(configuration.getAgentCommand().getCommandTimeout()).thenReturn(Duration.ofSeconds(5));
+        when(configuration.getAgentCommand().getCommandQueueSize()).thenReturn(10);
+
+        agentCommandManager.postConstruct();
+    }
 
     @Nested
     class AddCommand {

@@ -1,16 +1,21 @@
 package rocks.inspectit.ocelot.agentcommunication;
 
 import com.google.common.cache.LoadingCache;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.handlers.CommandHandler;
 import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +23,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +31,16 @@ public class AgentCallbackManagerTest {
 
     @InjectMocks
     AgentCallbackManager agentCallbackManager;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    InspectitServerSettings configuration;
+
+    @BeforeEach
+    public void beforeEach() {
+        when(configuration.getAgentCommand().getResponseTimeout()).thenReturn(Duration.ofSeconds(5));
+
+        agentCallbackManager.postConstruct();
+    }
 
     @Nested
     class AddCallbackCommand {
@@ -55,11 +71,8 @@ public class AgentCallbackManagerTest {
         public void throwsExceptionOnNullId() {
             DeferredResult<ResponseEntity<?>> testResult = new DeferredResult<>();
 
-            try {
-                agentCallbackManager.addCommandCallback(null, testResult);
-            } catch (IllegalArgumentException e) {
-                assertThat(e.getMessage()).isEqualTo("The given command id may never be null!");
-            }
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> agentCallbackManager.addCommandCallback(null, testResult))
+                    .withMessage("The given command id must not be null!");
         }
     }
 
@@ -90,12 +103,8 @@ public class AgentCallbackManagerTest {
         public void commandIdNull() {
             agentCallbackManager.resultCache = mock(LoadingCache.class);
 
-            try {
-                agentCallbackManager.handleCommandResponse(null, null);
-            } catch (IllegalArgumentException e) {
-                assertThat(e.getMessage()).isEqualTo("The given command id may never be null!");
-            }
-            verifyZeroInteractions(agentCallbackManager.resultCache);
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> agentCallbackManager.handleCommandResponse(null, null))
+                    .withMessage("The given command id must not be null!");
         }
     }
 }
