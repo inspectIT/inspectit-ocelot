@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 
 /** data */
 import { TOOLTIP_OPTIONS } from '../../../../data/constants';
-import { matcherTypes, methodVisibility } from './ScopeWizardConstants';
+import { MATCHER_TYPES, METHOD_VISIBILITY } from './ScopeWizardConstants';
 
 const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
   const disableArguments = !methodMatcher.isSelectedParameter;
@@ -32,14 +32,14 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
       for (let i = 0; i < currentSelectedMethodVisibilities.length; i++) {
         const currentSelectedMethodVisibility = currentSelectedMethodVisibilities[i];
 
-        if (currentSelectedMethodVisibility.key === e.value.key) {
+        if (currentSelectedMethodVisibility === e.value) {
           currentSelectedMethodVisibilities.splice(i, 1);
           break;
         }
       }
     }
 
-    setState('selectedMethodVisibilities', currentSelectedMethodVisibilities);
+    setState('visibilities', currentSelectedMethodVisibilities);
   };
 
   const handleParameterChange = (e, index) => {
@@ -97,21 +97,29 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
         .argument-fields-height {
           margin-top: 0.5rem;
         }
+        .parameterInputFields {
+          display: flex;
+          flex-direction: column;
+          min-height: 15rem;
+          max-height: 15rem;
+          padding-top: 0;
+          overflow-y: auto;
+        }
       `}</style>
 
       <Fieldset legend="Method Matcher" style={{ paddingTop: 0, paddingBottom: '1rem' }}>
         <div className="row-center row-margin meta-row">
-          {methodVisibility.map((methodVisible) => {
+          {METHOD_VISIBILITY.map((methodVisible) => {
             return (
-              <div key={methodVisible.key} className="p-field-checkbox">
+              <div key={methodVisible} className="p-field-checkbox">
                 <Checkbox
-                  inputId={methodVisible.key}
+                  inputId={methodVisible}
                   name="methodVisible"
                   value={methodVisible}
-                  onChange={(e) => onMethodVisibilityChange(e, methodMatcher.selectedMethodVisibilities)}
-                  checked={methodMatcher.selectedMethodVisibilities.some((item) => item.key === methodVisible.key)}
+                  onChange={(e) => onMethodVisibilityChange(e, methodMatcher.visibilities)}
+                  checked={methodMatcher.visibilities.some((item) => item === methodVisible)}
                 />
-                <label htmlFor={methodVisible.key}>{methodVisible.name}</label>
+                <label htmlFor={methodVisible}>{methodVisible.toLowerCase()}</label>
               </div>
             );
           })}
@@ -142,14 +150,14 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
         </div>
         <div className="row-center row-margin meta-row">
           <label className="start-label" htmlFor="Method which">
-            Method which
+            Method which name
           </label>
           <Dropdown
             disabled={methodMatcher.isConstructor}
             style={{ width: '14rem' }}
-            value={methodMatcher.methodMatcherType}
-            options={matcherTypes}
-            onChange={(e) => setState('methodMatcherType', e.value)}
+            value={methodMatcher.matcherType}
+            options={MATCHER_TYPES}
+            onChange={(e) => setState('matcherType', e.value)}
             placeholder="Select a Matcher Type"
           />
           <InputText
@@ -172,48 +180,46 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
           <label htmlFor={'onlyWithSelectedParameters'}>Only with specified arguments:</label>
         </div>
         <div className="parameterInputFields">
-          <div style={{ paddingTop: 0, overflowY: 'auto', height: '15rem' }}>
-            <label>Method Arguments</label>
-            {methodMatcher.parameterList.map((parameter, i) => {
-              return (
-                <div key={i} className="p-inputgroup row-center meta-row argument-fields-height">
-                  <span className="p-inputgroup-addon">{i + 1}</span>
-                  <InputText
-                    disabled={disableArguments}
-                    className="fill"
-                    name="parameter"
-                    value={parameter.parameter}
-                    onChange={(e) => handleParameterChange(e, i)}
-                  />
-                  <Button
-                    disabled={disableArguments}
-                    tooltip="Remove Argument"
-                    icon="pi pi-fw pi-trash"
-                    tooltipOptions={TOOLTIP_OPTIONS}
-                    onClick={() => removeParameter(i)}
-                  />
-                </div>
-              );
-            })}
-            <div className="p-inputgroup row-center meta-row argument-fields-height" style={{ marginBottom: '0.5em' }}>
-              <InputText
-                disabled={disableArguments}
-                name="parameter"
-                className="fill"
-                value={methodMatcher.parameterInput}
-                tooltip="A fully qualified class name representing the method argument"
-                tooltipOptions={TOOLTIP_OPTIONS}
-                onChange={(e) => setState('parameterInput', e.target.value)}
-                placeholder="Argument"
-              />
-              <Button
-                disabled={disableArguments}
-                tooltip="Add Argument"
-                icon="pi pi-plus"
-                tooltipOptions={TOOLTIP_OPTIONS}
-                onClick={(e) => addParameter(e)}
-              />
-            </div>
+          <label>Method Arguments</label>
+          {methodMatcher.parameterList.map((parameter, i) => {
+            return (
+              <div key={i} className="p-inputgroup row-center meta-row argument-fields-height">
+                <span className="p-inputgroup-addon">{i + 1}</span>
+                <InputText
+                  disabled={disableArguments}
+                  className="fill"
+                  name="parameter"
+                  value={parameter.parameter}
+                  onChange={(e) => handleParameterChange(e, i)}
+                />
+                <Button
+                  disabled={disableArguments}
+                  tooltip="Remove Argument"
+                  icon="pi pi-fw pi-trash"
+                  tooltipOptions={TOOLTIP_OPTIONS}
+                  onClick={() => removeParameter(i)}
+                />
+              </div>
+            );
+          })}
+          <div className="p-inputgroup row-center meta-row argument-fields-height" style={{ marginBottom: '0.5em' }}>
+            <InputText
+              disabled={disableArguments}
+              name="parameter"
+              className="fill"
+              value={methodMatcher.parameterInput}
+              tooltip="A fully qualified class name representing the method argument"
+              tooltipOptions={TOOLTIP_OPTIONS}
+              onChange={(e) => setState('parameterInput', e.target.value)}
+              placeholder="Argument Full-Qualified Class Name"
+            />
+            <Button
+              disabled={disableArguments}
+              tooltip="Add Argument"
+              icon="pi pi-plus"
+              tooltipOptions={TOOLTIP_OPTIONS}
+              onClick={(e) => addParameter(e)}
+            />
           </div>
         </div>
       </Fieldset>

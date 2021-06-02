@@ -7,27 +7,31 @@ import ClassMatcher from './ClassMatcher';
 import MethodMatcher from './MethodMatcher';
 
 /** data */
-import { methodVisibility } from './ScopeWizardConstants';
+import { METHOD_VISIBILITY } from './ScopeWizardConstants';
 
 /**
  * The scope wizard dialog itself.
  */
-const ScopeWizardDialog = ({ visible, onHide, onScopeWizardApply }) => {
-  const [classMatcher, setClassMatcher] = useState({ currentClassMatcher: '', classMatcherType: '', className: '' });
+const ScopeWizardDialog = ({ visible, onHide, onApply }) => {
+  const [classMatcher, setClassMatcher] = useState({ type: 'class', matcherType: 'EQUALS_FULLY', name: null });
   const [methodMatcher, setMethodMatcher] = useState({
-    selectedMethodVisibilities: _.clone(methodVisibility),
-    methodMatcherType: '',
+    visibilities: _.clone(METHOD_VISIBILITY),
+    matcherType: null,
     isConstructor: false,
     isSelectedParameter: false,
-    parameterInput: '',
+    parameterInput: null,
     parameterList: [],
-    methodName: '',
+    name: null,
   });
+
+  const showClassBrowser = () => {
+    return alert('Todo: Open Class Browser');
+  };
 
   // the dialogs footer
   const footer = (
     <div>
-      <Button label="Apply" onClick={() => onScopeWizardApply(classMatcher, methodMatcher)} />
+      <Button label="Apply" onClick={() => onApply(classMatcher, methodMatcher)} />
       <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
     </div>
   );
@@ -90,7 +94,7 @@ const ScopeWizardDialog = ({ visible, onHide, onScopeWizardApply }) => {
           footer={footer}
           focusOnShow={false}
         >
-          <ClassMatcher classMatcher={classMatcher} onClassMatcherChange={setClassMatcher} />
+          <ClassMatcher classMatcher={classMatcher} onClassMatcherChange={setClassMatcher} onShowClassBrowser={showClassBrowser} />
           <MethodMatcher methodMatcher={methodMatcher} onMethodMatcherChange={setMethodMatcher} />
         </Dialog>
       </div>
@@ -104,13 +108,13 @@ ScopeWizardDialog.propTypes = {
   /** Callback on dialog hide */
   onHide: PropTypes.func,
   /** Callback on dialog apply */
-  onScopeWizardApply: PropTypes.func,
+  onApply: PropTypes.func,
 };
 
 ScopeWizardDialog.defaultProps = {
   visible: true,
   onHide: () => {},
-  onScopeWizardApply: () => {},
+  onApply: () => {},
 };
 
 export default ScopeWizardDialog;

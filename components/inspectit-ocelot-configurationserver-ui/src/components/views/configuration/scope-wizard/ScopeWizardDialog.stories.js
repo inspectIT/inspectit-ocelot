@@ -3,7 +3,7 @@ import React from 'react';
 import ScopeWizardDialog from './ScopeWizardDialog';
 
 export default {
-  title: 'Components/Views/Configuration/ScopeWizard/ScopeWizardDialog',
+  title: 'Components/Views/Configuration/Scope-Wizard/ScopeWizardDialog',
   component: ScopeWizardDialog,
 };
 
