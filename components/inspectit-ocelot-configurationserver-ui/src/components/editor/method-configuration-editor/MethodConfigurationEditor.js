@@ -9,6 +9,8 @@ import _ from 'lodash';
 import SelectionInformation from '../SelectionInformation';
 import ErrorInformation from '../ErrorInformation';
 import { TOOLTIP_OPTIONS } from '../../../data/constants';
+import ScopeTypeDisplay from './ScopeTypeDisplay';
+import ScopeMethodDisplay from './ScopeMethodDisplay';
 import { selectedFileContentsChanged } from '../../../redux/ducks/configuration/actions';
 import { useDispatch } from 'react-redux';
 
@@ -122,15 +124,15 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   /**
    * Providing the template body for the row group header.
    */
-  const rowGroupHeaderTemplate = ({ typeKey }) => {
-    return 'Target: ' + typeKey;
+  const rowGroupHeaderTemplate = ({ scope }) => {
+    return <ScopeTypeDisplay scope={scope} />;
   };
 
   /**
    * Providing the template body for the scopes.
    */
   const scopeDescriptionBodyTemplate = ({ scope }) => {
-    return JSON.stringify(scope);
+    return <ScopeMethodDisplay scope={scope} />;
   };
 
   /**
@@ -194,7 +196,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
           border: none;
         }
 
-        .this :global(.p-datatable tr) {
+        .this :global(.p-datatable tr.p-rowgroup-header) {
           border-top: 1px solid #e7e7e7;
         }
 
@@ -202,8 +204,17 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
           padding: 1rem 0.5rem;
         }
 
+        .this :global(.p-datatable tr.p-rowgroup-footer) {
+          height: 1rem;
+        }
+
         .this :global(.p-datatable-row td:first-of-type) {
-          padding-left: 2.25rem;
+          padding-left: 2.5rem;
+          line-height: 1.4rem;
+        }
+        .this :global(.p-datatable-row td) {
+          padding-top: 0.15rem;
+          padding-bottom: 0.15rem;
         }
 
         /* prevent different backgrounds for even and odd row numbers*/
