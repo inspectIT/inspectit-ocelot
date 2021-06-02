@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes(value = {
-        @JsonSubTypes.Type(name = "ping-command", value = PingCommand.class),
+        @JsonSubTypes.Type(name = "ping", value = PingCommand.class),
 })
 public abstract class Command {
 

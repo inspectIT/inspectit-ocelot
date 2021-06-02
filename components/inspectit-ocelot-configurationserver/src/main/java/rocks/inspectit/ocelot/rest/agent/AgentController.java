@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
-import rocks.inspectit.ocelot.agentcommunication.*;
+import rocks.inspectit.ocelot.agentcommunication.AgentCallbackManager;
+import rocks.inspectit.ocelot.agentcommunication.AgentCommandDispatcher;
+import rocks.inspectit.ocelot.agentcommunication.AgentCommandManager;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
@@ -38,9 +40,6 @@ public class AgentController extends AbstractBaseController {
 
     @Autowired
     private AgentCommandManager agentCommandManager;
-
-    @Autowired
-    private AgentCommandDispatcher commandDispatcher;
 
     @Autowired
     private AgentCallbackManager agentCallbackManager;
@@ -75,7 +74,7 @@ public class AgentController extends AbstractBaseController {
      * @return Returns either a ResponseEntity with the next command as payload or an empty payload.
      */
     @PostMapping(value = "agent/command", produces = "application/json")
-    public ResponseEntity<Command> fetchCommand(@RequestHeader Map<String, String> headers, @RequestParam(required = false) boolean waitForCommand, @RequestBody(required = false) CommandResponse response) {
+    public ResponseEntity<Command> fetchCommand(@RequestHeader Map<String, String> headers, @RequestParam(required = false, name = "wait-for-command") boolean waitForCommand, @RequestBody(required = false) CommandResponse response) {
         String agentId = headers.get("x-ocelot-agent-id");
         if (agentId == null) {
             return ResponseEntity.badRequest().build();
@@ -90,19 +89,11 @@ public class AgentController extends AbstractBaseController {
         }
 
         Command nextCommand = agentCommandManager.getCommand(agentId, waitForCommand);
-        return ResponseEntity.ok().body(nextCommand);
-    }
 
-    /**
-     * Creates a {@link PingCommand} for an agent with the given id.
-     *
-     * @param agentId The id of the agent to be pinged.
-     *
-     * @return Returns OK if the Agent is reachable and Timeout if it is not.
-     */
-    @GetMapping(value = "agent/ping/**", produces = "text/plain")
-    public DeferredResult<ResponseEntity<?>> ping(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
-        PingCommand command = new PingCommand();
-        return commandDispatcher.dispatchCommand(agentId, command);
+        if (nextCommand == null) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok().body(nextCommand);
+        }
     }
 }
