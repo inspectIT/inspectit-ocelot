@@ -69,7 +69,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
 
   /**
    * Updates the currently selected configuration file with the given YAML.
-   * 
+   *
    * @param {*} newConfiguration the new configuration
    */
   const updateConfiguration = (newConfiguration) => {
