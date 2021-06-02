@@ -12,59 +12,83 @@ import { TOOLTIP_OPTIONS } from '../../../data/constants';
 import { selectedFileContentsChanged } from '../../../redux/ducks/configuration/actions';
 import { useDispatch } from 'react-redux';
 
+const SCOPE_STATES_RULES = {
+  TRACING: 'r_method_configuration_trace',
+  MEASURING: 'r_method_configuration_duration',
+};
+
 /**
  * GUI editor for creating method/configurations.
  */
 const MethodConfigurationEditor = ({ yamlConfiguration }) => {
+  const dispatch = useDispatch();
+
   // state variables
   const [scopes, setScopes] = useState([]);
   const [expandedRows, setExpandedRows] = useState([]);
   const [configurationError, setConfigurationError] = useState(null);
-
-  const configuration = yaml.safeLoad(yamlConfiguration);
-  const dispatch = useDispatch();
+  const [configuration, setConfiguration] = useState([]);
 
   // derrived variables
   const scopesExist = scopes.length > 0;
+
   useEffect(() => {
     // parse configuration
     try {
-      // collect existing scopes from the configuration
-      const scopeObjects = _.get(configuration, 'inspectit.instrumentation.scopes');
-      const currentScopes = _.map(scopeObjects, (value, key) => {
-        const { type, superclass, interfaces } = value;
-        return {
-          typeKey: JSON.stringify(type) + '|' + JSON.stringify(superclass) + '|' + JSON.stringify(interfaces),
-          name: key,
-          scope: value,
-        };
-      });
-      setScopes(currentScopes);
-
-      // expand all rows by default
-      const initialExpandedRows = _.reduce(
-        currentScopes,
-        (result, { typeKey }) => {
-          result[typeKey] = true;
-          return result;
-        },
-        {}
-      );
-      setExpandedRows(initialExpandedRows);
+      setConfiguration(yaml.safeLoad(yamlConfiguration));
     } catch (error) {
       setConfigurationError(error);
+      setConfiguration(null);
     }
   }, [yamlConfiguration]);
+
+  useEffect(() => {
+    // collect existing scopes from the configuration
+    const scopeObjects = _.get(configuration, 'inspectit.instrumentation.scopes');
+    const currentScopes = _.map(scopeObjects, (value, key) => {
+      const { type, superclass, interfaces } = value;
+      return {
+        typeKey: JSON.stringify(type) + '|' + JSON.stringify(superclass) + '|' + JSON.stringify(interfaces),
+        name: key,
+        scope: value,
+      };
+    });
+    setScopes(currentScopes);
+
+    // expand all rows by default
+    const initialExpandedRows = _.reduce(
+      currentScopes,
+      (result, { typeKey }) => {
+        result[typeKey] = true;
+        return result;
+      },
+      {}
+    );
+    setExpandedRows(initialExpandedRows);
+  }, [configuration]);
 
   /**
    * Updates the current configuration file. Changes the given path to the given value.
    *
-   * @param {*} objectPath The path of the value which should be changed.
+   * @param {*} ruleScopePath The path to the scope inside a specific rule which should be changed.
    * @param {*} value The value to be set under the given objectPath.
    */
-  const updateConfigurationFile = (objectPath, value) => {
-    _.set(configuration, objectPath, value);
-    dispatch(selectedFileContentsChanged('# {"type": "Method-Configuration"} \n' + yaml.dump(configuration)));
+  const updateConfigurationFile = (ruleScopePath, value) => {
+    try {
+      const cloneConfiguration = _.cloneDeep(configuration);
+
+      if (value === false) {
+        _.unset(cloneConfiguration, ruleScopePath, value);
+      } else {
+        _.set(cloneConfiguration, ruleScopePath, value);
+      }
+
+      const updatedYamlConfiguration = '# {"type": "Method-Configuration"}\n' + yaml.dump(cloneConfiguration);
+
+      dispatch(selectedFileContentsChanged(updatedYamlConfiguration));
+    } catch (error) {
+      console.error('Configuration could not been updated.', error);
+    }
   };
 
   /**
@@ -84,17 +108,17 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   /**
    * Providing a generic body template for a scopes state variables (tracing, measuring, ...).
    * @param {*} scopeName the name of the target scope
-   * @param {*} stateAttribute  the attribute name to set
+   * @param {*} stateRule  the rule to update
    */
-  const scopeStateBodyTemplate = (scopeName, stateAttribute) => {
-    const objectPath = 'inspectit.instrumentation.rules.' + stateAttribute + '.scopes.' + scopeName;
-    const ruleState = _.get(configuration, objectPath);
+  const scopeStateBodyTemplate = (scopeName, stateRule) => {
+    const ruleScopePath = 'inspectit.instrumentation.rules.' + stateRule + '.scopes.' + scopeName;
+    const ruleState = _.get(configuration, ruleScopePath);
 
     return (
       <InputSwitch
         checked={ruleState}
         onChange={(e) => {
-          updateConfigurationFile(objectPath, e.value);
+          updateConfigurationFile(ruleScopePath, e.value);
         }}
       />
     );
@@ -177,12 +201,12 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
           >
             <Column body={scopeDescriptionBodyTemplate} header="Target" />
             <Column
-              body={({ name }) => scopeStateBodyTemplate(name, 'r_method_configuration_trace')}
+              body={({ name }) => scopeStateBodyTemplate(name, SCOPE_STATES_RULES.TRACING)}
               header="Trace"
               style={{ width: '6rem' }}
             ></Column>
             <Column
-              body={({ name }) => scopeStateBodyTemplate(name, 'r_method_configuration_duration')}
+              body={({ name }) => scopeStateBodyTemplate(name, SCOPE_STATES_RULES.MEASURING)}
               header="Measure"
               style={{ width: '6rem' }}
             ></Column>
