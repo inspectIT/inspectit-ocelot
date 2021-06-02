@@ -49,6 +49,16 @@ inspectit-config-server:
     # If enabled, non-admin users cannot promote their own changes.
     # The writing of the configuration and the promotion needs to be done by two separate persons.
     four-eyes-promotion: false
+  # settings for the agent commands
+  agent-command:
+    # after this time, commands which have not been fetched will be removed
+    command-timeout: 2m
+    # timeout how long a command will wait for a response from the agent
+    response-timeout: 30s
+    # the size of each agents' command queue
+    command-queue-size: 100
+    # the max. time an agent is allowed to wait for a new command
+    agent-polling-timeout: 30s
 
 # ACTUATOR PROPERTIES
 management:

@@ -69,4 +69,11 @@ public class InspectitServerSettings {
     @Valid
     @Builder.Default
     private SecuritySettings security = SecuritySettings.builder().build();
+
+    /**
+     * Settings for the agent communication features.
+     */
+    @Valid
+    @Builder.Default
+    private AgentCommandSettings agentCommand = AgentCommandSettings.builder().build();
 }
