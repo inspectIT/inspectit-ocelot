@@ -11,6 +11,7 @@ import ErrorInformation from '../ErrorInformation';
 import { TOOLTIP_OPTIONS } from '../../../data/constants';
 import ScopeTypeDisplay from './ScopeTypeDisplay';
 import ScopeMethodDisplay from './ScopeMethodDisplay';
+import MethodConfigurationEditorFooter from './MethodConfigurationEditorFooter';
 import { selectedFileContentsChanged } from '../../../redux/ducks/configuration/actions';
 import { useDispatch } from 'react-redux';
 
@@ -228,39 +229,42 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
         }
       `}</style>
       <div className="this">
-        {configurationError ? (
-          <ErrorInformation text="Invalid YAML Configuration" error={configurationError} />
-        ) : scopesExist ? (
-          <DataTable
-            value={scopes}
-            rowHover
-            dataKey="typeKey"
-            sortField="typeKey"
-            sortOrder={1}
-            groupField="typeKey"
-            expandableRowGroups={true}
-            expandedRows={expandedRows}
-            onRowToggle={(e) => setExpandedRows(e.data)}
-            rowGroupHeaderTemplate={rowGroupHeaderTemplate}
-            rowGroupFooterTemplate={() => <></>}
-            rowGroupMode="subheader"
-          >
-            <Column body={scopeDescriptionBodyTemplate} header="Target" />
-            <Column
-              body={({ name }) => scopeStateBodyTemplate(name, SCOPE_STATES_RULES.TRACING)}
-              header="Trace"
-              style={{ width: '6rem' }}
-            ></Column>
-            <Column
-              body={({ name }) => scopeStateBodyTemplate(name, SCOPE_STATES_RULES.MEASURING)}
-              header="Measure"
-              style={{ width: '6rem' }}
-            ></Column>
-            <Column body={({ name }) => scopeEditBodyTemplate(name)} style={{ width: '8rem' }}></Column>
-          </DataTable>
-        ) : (
-          <SelectionInformation hint="The configuration is empty." />
-        )}
+        <div className="this">
+          {configurationError ? (
+            <ErrorInformation text="Invalid YAML Configuration" error={configurationError} />
+          ) : scopesExist ? (
+            <DataTable
+              value={scopes}
+              rowHover
+              dataKey="typeKey"
+              sortField="typeKey"
+              sortOrder={1}
+              groupField="typeKey"
+              expandableRowGroups={true}
+              expandedRows={expandedRows}
+              onRowToggle={(e) => setExpandedRows(e.data)}
+              rowGroupHeaderTemplate={rowGroupHeaderTemplate}
+              rowGroupFooterTemplate={() => <></>}
+              rowGroupMode="subheader"
+            >
+              <Column body={scopeDescriptionBodyTemplate} header="Target" />
+              <Column
+                body={({ name }) => scopeStateBodyTemplate(name, SCOPE_STATES_RULES.TRACING)}
+                header="Trace"
+                style={{ width: '6rem' }}
+              />
+              <Column
+                body={({ name }) => scopeStateBodyTemplate(name, SCOPE_STATES_RULES.MEASURING)}
+                header="Measure"
+                style={{ width: '6rem' }}
+              />
+              <Column body={({ name }) => scopeEditBodyTemplate(name)} style={{ width: '8rem' }} />
+            </DataTable>
+          ) : (
+            <SelectionInformation hint="The configuration is empty." />
+          )}
+        </div>
+        {!configurationError && <MethodConfigurationEditorFooter />}
       </div>
     </>
   );
