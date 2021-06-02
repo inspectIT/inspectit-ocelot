@@ -9,14 +9,14 @@ import PropTypes from 'prop-types';
 import { TOOLTIP_OPTIONS } from '../../../../data/constants';
 import { TYPE_MATCHERS, MATCHER_TYPES } from './ScopeWizardConstants';
 
-const ClassMatcher = ({ classMatcher, onClassMatcherChange, onShowClassBrowser }) => {
+const TypeMatcher = ({ typeMatcher, onTypeMatcherChange, onShowClassBrowser }) => {
   const setState = (stateArgument, value) => {
-    const currentClassMatcher = {
-      ...classMatcher,
+    const currentTypeMatcher = {
+      ...typeMatcher,
       [stateArgument]: value,
     };
 
-    onClassMatcherChange(currentClassMatcher);
+    onTypeMatcherChange(currentTypeMatcher);
   };
 
   return (
@@ -55,24 +55,24 @@ const ClassMatcher = ({ classMatcher, onClassMatcherChange, onShowClassBrowser }
         <div className="row-center">
           <Dropdown
             style={{ width: '7rem' }}
-            value={classMatcher.type}
+            value={typeMatcher.type}
             options={TYPE_MATCHERS}
-            onChange={(e) => setState('currentClassMatcher', e.value)}
+            onChange={(e) => setState('type', e.value)}
           />
           <label className="inner-label" htmlFor="which">
             which name
           </label>
           <Dropdown
             style={{ width: '14rem' }}
-            value={classMatcher.matcherType}
+            value={typeMatcher.matcherType}
             options={MATCHER_TYPES}
-            onChange={(e) => setState('classMatcherType', e.value)}
+            onChange={(e) => setState('matcherType', e.value)}
           />
           <div className="p-inputgroup input-text fill">
             <InputText
               className="fill"
-              value={classMatcher.name}
-              onChange={(e) => setState('className', e.target.value)}
+              value={typeMatcher.name}
+              onChange={(e) => setState('name', e.target.value)}
               placeholder="Name Pattern"
               tooltip="The name or pattern which is used to match against the fully qualified class or interface name."
               tooltipOptions={TOOLTIP_OPTIONS}
@@ -85,18 +85,18 @@ const ClassMatcher = ({ classMatcher, onClassMatcherChange, onShowClassBrowser }
   );
 };
 
-ClassMatcher.propTypes = {
+TypeMatcher.propTypes = {
   /** Class Matcher state */
-  classMatcher: PropTypes.object,
+  typeMatcher: PropTypes.object,
   /** Callback on class matcher change */
-  onClassMatcherChange: PropTypes.func,
+  onTypeMatcherChange: PropTypes.func,
   /** Callback for show class browser */
   onShowClassBrowser: PropTypes.func,
 };
 
-ClassMatcher.defaultProps = {
-  onClassMatcherChange: () => {},
+TypeMatcher.defaultProps = {
+  onTypeMatcherChange: () => {},
   onShowClassBrowser: () => {},
 };
 
-export default ClassMatcher;
+export default TypeMatcher;

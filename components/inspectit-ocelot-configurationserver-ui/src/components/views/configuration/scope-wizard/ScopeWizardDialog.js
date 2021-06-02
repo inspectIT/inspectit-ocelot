@@ -3,7 +3,7 @@ import { Dialog } from 'primereact/dialog';
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import ClassMatcher from './ClassMatcher';
+import TypeMatcher from './TypeMatcher';
 import MethodMatcher from './MethodMatcher';
 
 /** data */
@@ -13,7 +13,7 @@ import { METHOD_VISIBILITY } from './ScopeWizardConstants';
  * The scope wizard dialog itself.
  */
 const ScopeWizardDialog = ({ visible, onHide, onApply }) => {
-  const [classMatcher, setClassMatcher] = useState({ type: 'class', matcherType: 'EQUALS_FULLY', name: null });
+  const [typeMatcher, setTypeMatcher] = useState({ type: 'class', matcherType: 'EQUALS_FULLY', name: null });
   const [methodMatcher, setMethodMatcher] = useState({
     visibilities: _.clone(METHOD_VISIBILITY),
     matcherType: null,
@@ -31,7 +31,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply }) => {
   // the dialogs footer
   const footer = (
     <div>
-      <Button label="Apply" onClick={() => onApply(classMatcher, methodMatcher)} />
+      <Button label="Apply" onClick={() => onApply(typeMatcher, methodMatcher)} />
       <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
     </div>
   );
@@ -94,7 +94,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply }) => {
           footer={footer}
           focusOnShow={false}
         >
-          <ClassMatcher classMatcher={classMatcher} onClassMatcherChange={setClassMatcher} onShowClassBrowser={showClassBrowser} />
+          <TypeMatcher typeMatcher={typeMatcher} onTypeMatcherChange={setTypeMatcher} onShowClassBrowser={showClassBrowser} />
           <MethodMatcher methodMatcher={methodMatcher} onMethodMatcherChange={setMethodMatcher} />
         </Dialog>
       </div>

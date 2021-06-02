@@ -100,8 +100,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
         .parameterInputFields {
           display: flex;
           flex-direction: column;
-          min-height: 15rem;
-          max-height: 15rem;
+          height: 15rem;
           padding-top: 0;
           overflow-y: auto;
         }
