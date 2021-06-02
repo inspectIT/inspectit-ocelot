@@ -68,27 +68,55 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   }, [configuration]);
 
   /**
+   * Updates the currently selected configuration file with the given YAML.
+   *
+   * @param {*} newConfiguration the new configuration
+   */
+  const updateConfiguration = (newConfiguration) => {
+    try {
+      const updatedYamlConfiguration = '# {"type": "Method-Configuration"}\n' + yaml.dump(newConfiguration);
+
+      dispatch(selectedFileContentsChanged(updatedYamlConfiguration));
+    } catch (error) {
+      console.error('Configuration could not been updated.', error);
+    }
+  };
+
+  /**
    * Updates the current configuration file. Changes the given path to the given value.
    *
    * @param {*} ruleScopePath The path to the scope inside a specific rule which should be changed.
    * @param {*} value The value to be set under the given objectPath.
    */
   const updateConfigurationFile = (ruleScopePath, value) => {
-    try {
-      const cloneConfiguration = _.cloneDeep(configuration);
+    const cloneConfiguration = _.cloneDeep(configuration);
 
-      if (value === false) {
-        _.unset(cloneConfiguration, ruleScopePath, value);
-      } else {
-        _.set(cloneConfiguration, ruleScopePath, value);
-      }
-
-      const updatedYamlConfiguration = '# {"type": "Method-Configuration"}\n' + yaml.dump(cloneConfiguration);
-
-      dispatch(selectedFileContentsChanged(updatedYamlConfiguration));
-    } catch (error) {
-      console.error('Configuration could not been updated.', error);
+    if (value === false) {
+      _.unset(cloneConfiguration, ruleScopePath, value);
+    } else {
+      _.set(cloneConfiguration, ruleScopePath, value);
     }
+
+    updateConfiguration(cloneConfiguration);
+  };
+
+  /**
+   * Deletes the scope with the given name from the configuration model.
+   *
+   * @param {*} scopeName The name of the scope to be deleted.
+   */
+  const deleteScope = (scopeName) => {
+    const cloneConfiguration = _.cloneDeep(configuration);
+
+    // remove scope
+    _.unset(cloneConfiguration, 'inspectit.instrumentation.scopes.' + scopeName);
+
+    // remove scope from all rules
+    _.values(SCOPE_STATES_RULES).forEach((ruleName) => {
+      _.unset(cloneConfiguration, 'inspectit.instrumentation.rules.' + ruleName + '.scopes.' + scopeName);
+    });
+
+    updateConfiguration(cloneConfiguration);
   };
 
   /**
@@ -127,7 +155,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   /**
    * Providing the template body for the scope's control buttons.
    */
-  const scopeEditBodyTemplate = () => {
+  const scopeEditBodyTemplate = (scopeName) => {
     return (
       <div align="right">
         <Button
@@ -136,7 +164,14 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
           tooltip="Edit Method Configuration"
           tooltipOptions={TOOLTIP_OPTIONS}
         />
-        <Button icon="pi pi-trash" tooltip="Remove Method Configuration" tooltipOptions={TOOLTIP_OPTIONS} />
+        <Button
+          icon="pi pi-trash"
+          tooltip="Remove Method Configuration"
+          tooltipOptions={TOOLTIP_OPTIONS}
+          onClick={() => {
+            deleteScope(scopeName);
+          }}
+        />
       </div>
     );
   };
@@ -210,7 +245,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
               header="Measure"
               style={{ width: '6rem' }}
             ></Column>
-            <Column body={() => scopeEditBodyTemplate()} style={{ width: '8rem' }}></Column>
+            <Column body={({ name }) => scopeEditBodyTemplate(name)} style={{ width: '8rem' }}></Column>
           </DataTable>
         ) : (
           <SelectionInformation hint="The configuration is empty." />
