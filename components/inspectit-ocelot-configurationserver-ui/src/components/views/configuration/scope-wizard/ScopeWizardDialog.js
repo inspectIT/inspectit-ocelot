@@ -7,7 +7,7 @@ import TypeMatcher from './TypeMatcher';
 import MethodMatcher from './MethodMatcher';
 
 /** data */
-import { METHOD_VISIBILITY } from './ScopeWizardConstants';
+import { DEFAULT_VISIBILITIES } from '../../../editor/method-configuration-editor/constants';
 
 /**
  * The scope wizard dialog itself.
@@ -15,7 +15,7 @@ import { METHOD_VISIBILITY } from './ScopeWizardConstants';
 const ScopeWizardDialog = ({ visible, onHide, onApply }) => {
   const [typeMatcher, setTypeMatcher] = useState({ type: 'class', matcherType: 'EQUALS_FULLY', name: null });
   const [methodMatcher, setMethodMatcher] = useState({
-    visibilities: _.clone(METHOD_VISIBILITY),
+    visibilities: _.clone(DEFAULT_VISIBILITIES),
     matcherType: null,
     isConstructor: false,
     isSelectedParameter: false,

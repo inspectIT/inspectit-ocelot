@@ -4,12 +4,25 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import React from 'react';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 
 /** data */
 import { TOOLTIP_OPTIONS } from '../../../../data/constants';
-import { TYPE_MATCHERS, MATCHER_TYPES } from './ScopeWizardConstants';
+import { MATCHER_MODE_DESCRIPTION_S } from '../../../editor/method-configuration-editor/constants';
 
 const TypeMatcher = ({ typeMatcher, onTypeMatcherChange, onShowClassBrowser }) => {
+  /** Possible Types */
+  const types = [
+    { label: 'Class', value: 'class' },
+    { label: 'Superclass', value: 'superclass' },
+    { label: 'Interface', value: 'interface' },
+  ];
+
+  /** Possible Matcher Types*/
+  const matcherTypes = _.map(MATCHER_MODE_DESCRIPTION_S, (key, value) => {
+    return { label: key, value };
+  });
+
   const setState = (stateArgument, value) => {
     const currentTypeMatcher = {
       ...typeMatcher,
@@ -53,19 +66,14 @@ const TypeMatcher = ({ typeMatcher, onTypeMatcherChange, onShowClassBrowser }) =
 
       <Fieldset legend="Type Matcher" style={{ paddingTop: 0, paddingBottom: '1rem' }}>
         <div className="row-center">
-          <Dropdown
-            style={{ width: '7rem' }}
-            value={typeMatcher.type}
-            options={TYPE_MATCHERS}
-            onChange={(e) => setState('type', e.value)}
-          />
+          <Dropdown style={{ width: '7rem' }} value={typeMatcher.type} options={types} onChange={(e) => setState('type', e.value)} />
           <label className="inner-label" htmlFor="which">
             which name
           </label>
           <Dropdown
             style={{ width: '14rem' }}
             value={typeMatcher.matcherType}
-            options={MATCHER_TYPES}
+            options={matcherTypes}
             onChange={(e) => setState('matcherType', e.value)}
           />
           <div className="p-inputgroup input-text fill">

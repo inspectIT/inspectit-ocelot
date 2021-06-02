@@ -6,13 +6,19 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import React from 'react';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 
 /** data */
 import { TOOLTIP_OPTIONS } from '../../../../data/constants';
-import { MATCHER_TYPES, METHOD_VISIBILITY } from './ScopeWizardConstants';
+import { MATCHER_MODE_DESCRIPTION_S, DEFAULT_VISIBILITIES } from '../../../editor/method-configuration-editor/constants';
 
 const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
   const disableArguments = !methodMatcher.isSelectedParameter;
+
+  /** Possible Matcher Types*/
+  const matcherTypes = _.map(MATCHER_MODE_DESCRIPTION_S, (key, value) => {
+    return { label: key, value };
+  });
 
   const setState = (stateArgument, value) => {
     const currentMethodMatcher = {
@@ -108,7 +114,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
 
       <Fieldset legend="Method Matcher" style={{ paddingTop: 0, paddingBottom: '1rem' }}>
         <div className="row-center row-margin meta-row">
-          {METHOD_VISIBILITY.map((methodVisible) => {
+          {DEFAULT_VISIBILITIES.map((methodVisible) => {
             return (
               <div key={methodVisible} className="p-field-checkbox">
                 <Checkbox
@@ -155,7 +161,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
             disabled={methodMatcher.isConstructor}
             style={{ width: '14rem' }}
             value={methodMatcher.matcherType}
-            options={MATCHER_TYPES}
+            options={matcherTypes}
             onChange={(e) => setState('matcherType', e.value)}
             placeholder="Select a Matcher Type"
           />

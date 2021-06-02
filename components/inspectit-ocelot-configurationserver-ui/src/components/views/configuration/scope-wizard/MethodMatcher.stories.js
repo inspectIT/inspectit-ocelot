@@ -4,7 +4,7 @@ import _ from 'lodash';
 import MethodMatcher from './MethodMatcher';
 
 /** data */
-import { METHOD_VISIBILITY } from './ScopeWizardConstants';
+import { DEFAULT_VISIBILITIES } from '../../../editor/method-configuration-editor/constants';
 
 export default {
   title: 'Components/Views/Configuration/Scope-Wizard/MethodMatcher',
@@ -16,7 +16,7 @@ const Template = (args) => <MethodMatcher {...args} />;
 export const Default = Template.bind({});
 Default.args = {
   methodMatcher: {
-    visibilities: _.clone(METHOD_VISIBILITY),
+    visibilities: _.clone(DEFAULT_VISIBILITIES),
     matcherType: null,
     isConstructor: 'false',
     isSelectedParameter: false,
@@ -29,7 +29,7 @@ Default.args = {
 export const MethodName = Template.bind({});
 MethodName.args = {
   methodMatcher: {
-    visibilities: _.clone(METHOD_VISIBILITY),
+    visibilities: _.clone(DEFAULT_VISIBILITIES),
     matcherType: 'EQUALS_FULLY',
     isConstructor: false,
     isSelectedParameter: true,
@@ -42,7 +42,7 @@ MethodName.args = {
 export const Constructor = Template.bind({});
 Constructor.args = {
   methodMatcher: {
-    visibilities: _.clone(METHOD_VISIBILITY),
+    visibilities: _.clone(DEFAULT_VISIBILITIES),
     matcherType: null,
     isConstructor: true,
     isSelectedParameter: false,
