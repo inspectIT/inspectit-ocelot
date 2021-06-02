@@ -1,7 +1,6 @@
 import yaml from 'js-yaml';
 import React from 'react';
 import { connect } from 'react-redux';
-import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration';
 import { notificationActions } from '../../../redux/ducks/notification';
 import EditorView from '../../editor/EditorView';
@@ -15,7 +14,7 @@ import SearchDialog from './dialogs/SearchDialog';
 import ConfigurationSidebar from './ConfigurationSidebar';
 
 /** Data */
-import { CONFIGURATION_TYPES } from '../../../data/constants';
+import { CONFIGURATION_TYPES, DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 
 /**
  * The header component of the editor view.
