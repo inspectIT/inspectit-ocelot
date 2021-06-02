@@ -24,5 +24,5 @@ export const MATCHER_MODE_DESCRIPTION_S = {
   MATCHES: 'matches',
 };
 
-/** Default visibilites for methods. */
+/** Default visibilities for methods. */
 export const DEFAULT_VISIBILITIES = ['PUBLIC', 'PROTECTED', 'PACKAGE', 'PRIVATE'];
