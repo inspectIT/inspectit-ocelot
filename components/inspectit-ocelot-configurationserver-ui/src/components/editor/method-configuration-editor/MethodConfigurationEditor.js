@@ -29,9 +29,6 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   const [configurationError, setConfigurationError] = useState(null);
   const [configuration, setConfiguration] = useState([]);
 
-  const configuration = yaml.safeLoad(yamlConfiguration);
-  const dispatch = useDispatch();
-
   // derrived variables
   const scopesExist = scopes.length > 0;
 
@@ -71,22 +68,13 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   }, [configuration]);
 
   /**
-   * Updates the current configuration file. Changes the given path to the given value.
-   *
-   * @param {*} ruleScopePath The path to the scope inside a specific rule which should be changed.
-   * @param {*} value The value to be set under the given objectPath.
+   * Updates the currently selected configuration file with the given YAML.
+   * 
+   * @param {*} newConfiguration the new configuration
    */
-  const updateConfigurationFile = (ruleScopePath, value) => {
+  const updateConfiguration = (newConfiguration) => {
     try {
-      const cloneConfiguration = _.cloneDeep(configuration);
-
-      if (value === false) {
-        _.unset(cloneConfiguration, ruleScopePath, value);
-      } else {
-        _.set(cloneConfiguration, ruleScopePath, value);
-      }
-
-      const updatedYamlConfiguration = '# {"type": "Method-Configuration"}\n' + yaml.dump(cloneConfiguration);
+      const updatedYamlConfiguration = '# {"type": "Method-Configuration"}\n' + yaml.dump(newConfiguration);
 
       dispatch(selectedFileContentsChanged(updatedYamlConfiguration));
     } catch (error) {
@@ -95,15 +83,40 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   };
 
   /**
+   * Updates the current configuration file. Changes the given path to the given value.
+   *
+   * @param {*} ruleScopePath The path to the scope inside a specific rule which should be changed.
+   * @param {*} value The value to be set under the given objectPath.
+   */
+  const updateConfigurationFile = (ruleScopePath, value) => {
+    const cloneConfiguration = _.cloneDeep(configuration);
+
+    if (value === false) {
+      _.unset(cloneConfiguration, ruleScopePath, value);
+    } else {
+      _.set(cloneConfiguration, ruleScopePath, value);
+    }
+
+    updateConfiguration(cloneConfiguration);
+  };
+
+  /**
    * Deletes the scope with the given name from the configuration model.
    *
    * @param {*} scopeName The name of the scope to be deleted.
    */
   const deleteScope = (scopeName) => {
-    delete configuration['inspectit']['instrumentation']['scopes'][scopeName];
-    delete configuration['inspectit']['instrumentation']['rules']['r_method_configuration_trace']['scopes'][scopeName];
-    delete configuration['inspectit']['instrumentation']['rules']['r_method_configuration_duration']['scopes'][scopeName];
-    dispatch(selectedFileContentsChanged('# {"type": "Method-Configuration"} \n' + yaml.dump(configuration)));
+    const cloneConfiguration = _.cloneDeep(configuration);
+
+    // remove scope
+    _.unset(cloneConfiguration, 'inspectit.instrumentation.scopes.' + scopeName);
+
+    // remove scope from all rules
+    _.values(SCOPE_STATES_RULES).forEach((ruleName) => {
+      _.unset(cloneConfiguration, 'inspectit.instrumentation.rules.' + ruleName + '.scopes.' + scopeName);
+    });
+
+    updateConfiguration(cloneConfiguration);
   };
 
   /**
@@ -232,7 +245,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
               header="Measure"
               style={{ width: '6rem' }}
             ></Column>
-            <Column body={() => scopeEditBodyTemplate()} style={{ width: '8rem' }}></Column>
+            <Column body={({ name }) => scopeEditBodyTemplate(name)} style={{ width: '8rem' }}></Column>
           </DataTable>
         ) : (
           <SelectionInformation hint="The configuration is empty." />
