@@ -6,8 +6,7 @@ import lombok.EqualsAndHashCode;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 
 /**
- * Represents a Ping-Command. Ping commands are used by the health-check endpoint of the config-server to check if the
- * recieving agent is alive.
+ * Represents a Ping-Command. Ping commands are used to check if the receiving agent does exist.
  */
 @Data
 @AllArgsConstructor
