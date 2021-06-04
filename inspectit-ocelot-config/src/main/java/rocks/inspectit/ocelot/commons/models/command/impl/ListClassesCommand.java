@@ -6,6 +6,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 
+/**
+ * Command for requesting a list of available classes and methods.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
