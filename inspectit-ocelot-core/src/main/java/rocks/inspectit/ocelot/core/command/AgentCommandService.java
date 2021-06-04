@@ -33,7 +33,7 @@ public class AgentCommandService extends DynamicallyActivatableService implement
     private ScheduledFuture<?> handlerFuture;
 
     public AgentCommandService() {
-        super("agent-commands");
+        super("agentCommands");
     }
 
     @Override
