@@ -6,7 +6,7 @@ import { Button } from 'primereact/button';
 import { SplitButton } from 'primereact/splitbutton';
 
 /** Data */
-import { CONFIGURATION_TYPES } from '../../../data/constants';
+import { CONFIGURATION_TYPES, TOOLTIP_OPTIONS } from '../../../data/constants';
 
 /**
  * The toolbar used in the configuration view's file tree.
@@ -27,11 +27,6 @@ const FileToolbar = ({
 
   const reloadFiles = () => {
     dispatch(configurationActions.selectVersion(null));
-  };
-
-  const tooltipOptions = {
-    showDelay: 500,
-    position: 'top',
   };
 
   return (
@@ -58,7 +53,7 @@ const FileToolbar = ({
             disabled={readOnly || loading}
             tooltip="New file"
             icon="pi pi-file"
-            tooltipOptions={tooltipOptions}
+            tooltipOptions={TOOLTIP_OPTIONS}
             onClick={() => showCreateFileDialog(selection, CONFIGURATION_TYPES.YAML)}
             model={[
               {
@@ -72,21 +67,21 @@ const FileToolbar = ({
             disabled={readOnly || loading}
             tooltip="New directory"
             icon="pi pi-folder-open"
-            tooltipOptions={tooltipOptions}
+            tooltipOptions={TOOLTIP_OPTIONS}
             onClick={() => showCreateDirectoryDialog(selection)}
           />
           <Button
             disabled={readOnly || loading || !selection}
             tooltip="Move/Rename file or directory"
             icon="pi pi-pencil"
-            tooltipOptions={tooltipOptions}
+            tooltipOptions={TOOLTIP_OPTIONS}
             onClick={() => showMoveDialog(selection)}
           />
           <Button
             disabled={readOnly || loading || !selection}
             tooltip="Delete file or directory"
             icon="pi pi-trash"
-            tooltipOptions={tooltipOptions}
+            tooltipOptions={TOOLTIP_OPTIONS}
             onClick={() => showDeleteFileDialog(selection)}
           />
         </div>
@@ -96,13 +91,13 @@ const FileToolbar = ({
             onClick={showSearchDialog}
             tooltip="Find in File"
             icon={'pi pi-search'}
-            tooltipOptions={tooltipOptions}
+            tooltipOptions={TOOLTIP_OPTIONS}
           />
           <Button
             onClick={reloadFiles}
             tooltip="Reload"
             icon={'pi pi-refresh' + (loading ? 'pi-spin' : '')}
-            tooltipOptions={tooltipOptions}
+            tooltipOptions={TOOLTIP_OPTIONS}
           />
         </div>
       </Toolbar>
