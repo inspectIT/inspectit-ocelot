@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.ocelot.commons.models.command.response.impl.ListClassesResponse;
 import rocks.inspectit.ocelot.commons.models.command.response.impl.PingResponse;
 
 import java.util.UUID;
@@ -18,6 +19,7 @@ import java.util.UUID;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(value = {
         @JsonSubTypes.Type(name = "ping", value = PingResponse.class),
+        @JsonSubTypes.Type(name = "list-classes", value = ListClassesResponse.class),
 })
 public abstract class CommandResponse {
 
