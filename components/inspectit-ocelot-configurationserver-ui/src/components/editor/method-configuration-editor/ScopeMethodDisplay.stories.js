@@ -46,7 +46,6 @@ AllVisibilities.args = {
   },
 };
 
-
 export const OnlyVisibility = Template.bind({});
 OnlyVisibility.args = {
   scope: {

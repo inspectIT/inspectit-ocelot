@@ -77,11 +77,7 @@ const ScopeMethodDisplay = ({ scope }) => {
         </>
       );
     } else if (!nameDescriptor) {
-      visibilityDescriptor = (
-        <>
-          with any visibility
-        </>
-      );
+      visibilityDescriptor = <>with any visibility</>;
     }
   }
 
