@@ -32,14 +32,24 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
 
   // state variables
   const [scopes, setScopes] = useState([]);
+  const [currentScope, setCurrentScope] = useState(null);
+  const [currentScopeName, setCurrentScopeName] = useState(null);
   const [expandedRows, setExpandedRows] = useState([]);
   const [configurationError, setConfigurationError] = useState(null);
   const [configuration, setConfiguration] = useState([]);
   const [isScopeWizardDialogShown, setIsScopeWizardDialogShown] = useState(false);
 
-  const hideScopeWizardDialog = () => setIsScopeWizardDialogShown(false);
+  const hideScopeWizardDialog = () => {
+    setIsScopeWizardDialogShown(false);
+  };
 
-  // derrived variables
+  const onAdd = () => {
+    setCurrentScope(null);
+    setCurrentScopeName(null);
+    setIsScopeWizardDialogShown(true);
+  };
+
+  // derived variables
   const scopesExist = scopes.length > 0;
 
   useEffect(() => {
@@ -79,6 +89,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
 
   /**
    * Converts the given instrumentation information into a JSON format.
+   *
    * @param {*} scopeName the name of the scope
    * @param {*} typeMatcher the class instrumentation settings
    * @param {*} methodMatcher the method instrumentation settings
@@ -115,7 +126,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
     // prepare Scope
     const scope = { [scopeName]: _.merge(classMatcherScope, { methods: [methodMatcherBody] }) };
     // prepare rule Scope
-    const ruleScope = { scopes: { [scopeName]: false } };
+    const ruleScope = { scopes: { [scopeName]: true } };
 
     // assembling and return configuration
     const configurationTemplate = _.cloneDeep(CONFIGURATION_TYPES.METHOD_CONFIGURATION.template);
@@ -130,12 +141,13 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   /**
    * Callback which is executed when the add scope button is pressed.
    * Writes the scope with the given instrumentation information in the configuration model.
+   *
    * @param {*} typeMatcher the class instrumentation settings
    * @param {*} methodMatcher the method instrumentation settings
    */
   const addScope = (typeMatcher, methodMatcher) => {
     const cloneConfiguration = _.cloneDeep(configuration);
-    const scopeName = ('s_gen_scope_' + uuid()).replaceAll('-', '_');
+    const scopeName = currentScopeName ? currentScopeName : ('s_gen_scope_' + uuid()).replaceAll('-', '_');
     const preparedConfiguration = prepareConfiguration(scopeName, typeMatcher, methodMatcher);
 
     try {
@@ -235,7 +247,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   /**
    * Providing the template body for the scope's control buttons.
    */
-  const scopeEditBodyTemplate = (scopeName) => {
+  const scopeEditBodyTemplate = ({ scope, name }) => {
     return (
       <div align="right">
         <Button
@@ -243,13 +255,18 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
           style={{ marginRight: '0.5rem' }}
           tooltip="Edit Method Configuration"
           tooltipOptions={TOOLTIP_OPTIONS}
+          onClick={() => {
+            setCurrentScope(scope);
+            setCurrentScopeName(name);
+            setIsScopeWizardDialogShown(true);
+          }}
         />
         <Button
           icon="pi pi-trash"
           tooltip="Remove Method Configuration"
           tooltipOptions={TOOLTIP_OPTIONS}
           onClick={() => {
-            deleteScope(scopeName);
+            deleteScope(name);
           }}
         />
       </div>
@@ -335,14 +352,14 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
                 header="Measure"
                 style={{ width: '6rem' }}
               />
-              <Column body={({ name }) => scopeEditBodyTemplate(name)} style={{ width: '8rem' }} />
+              <Column body={scopeEditBodyTemplate} style={{ width: '8rem' }} />
             </DataTable>
           ) : (
             <SelectionInformation hint="The configuration is empty." />
           )}
         </div>
-        {!configurationError && <MethodConfigurationEditorFooter onAdd={setIsScopeWizardDialogShown} />}
-        <ScopeWizardDialog visible={isScopeWizardDialogShown} onHide={hideScopeWizardDialog} onApply={addScope} />
+        {!configurationError && <MethodConfigurationEditorFooter onAdd={onAdd} />}
+        <ScopeWizardDialog visible={isScopeWizardDialogShown} onHide={hideScopeWizardDialog} onApply={addScope} scope={currentScope} />
       </div>
     </>
   );
