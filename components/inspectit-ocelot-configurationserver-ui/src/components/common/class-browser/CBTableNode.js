@@ -1,7 +1,6 @@
 import React from 'react';
-import PropTypes, { string } from 'prop-types';
+import PropTypes from 'prop-types';
 import { RadioButton } from 'primereact/radiobutton';
-import _ from 'lodash';
 
 const CBTableModel = ({ label, type, value, onChange, selectedMethod }) => {
   if (type === 'package') {
@@ -88,7 +87,7 @@ CBTableModel.propTypes = {
 
 CBTableModel.defaultProps = {
   /** Callback when the radion button is selected */
-  onChange: () => {}
+  onChange: () => {},
 };
 
 export default CBTableModel;

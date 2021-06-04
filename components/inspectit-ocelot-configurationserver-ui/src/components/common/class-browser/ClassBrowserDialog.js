@@ -21,7 +21,11 @@ const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
   const classStructure = [
     { name: 'java.lang.String', type: 'class', methods: ['public String toString()', 'public String equals(java.lang.Object)'] },
     { name: 'java.lang.Runnable', type: 'interface', methods: ['public void run()'] },
-    { name: 'org.lang.String', type: 'class', methods: ['public String toString()', 'public String equals(java.lang.Object) public String equals(java.lang.Object)'] },
+    {
+      name: 'org.lang.String',
+      type: 'class',
+      methods: ['public String toString()', 'public String equals(java.lang.Object) public String equals(java.lang.Object)'],
+    },
   ];
 
   const existingAgent = [
