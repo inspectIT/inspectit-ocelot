@@ -11,7 +11,10 @@ import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
 import rocks.inspectit.ocelot.core.instrumentation.NewClassDiscoveryService;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -27,22 +30,27 @@ public class ListClassesCommandExecutor implements CommandExecutor {
 
     @Override
     public CommandResponse execute(Command command) {
-        log.debug("Executing a ListClassesCommand.");
+        log.debug("Executing a ListClassesCommand: {}", command.getCommandId().toString());
 
         Set<Class<?>> setCopy = new HashSet<>(discoveryService.getKnownClasses());
         ListClassesResponse.TypeElement[] result = setCopy.parallelStream().map(clazz -> {
-            String[] methods = Arrays.stream(clazz.getDeclaredMethods())
-                    .map(Method::toGenericString)
-                    .toArray(String[]::new);
+            try {
+                String[] methods = Arrays.stream(clazz.getDeclaredMethods())
+                        .map(Method::toGenericString)
+                        .toArray(String[]::new);
 
-            ListClassesResponse.TypeElement element = new ListClassesResponse.TypeElement();
-            element.setName(clazz.getName());
-            element.setType(clazz.isInterface() ? "interface" : "class");
-            element.setMethods(methods);
-            return element;
-        }).toArray(ListClassesResponse.TypeElement[]::new);
+                ListClassesResponse.TypeElement element = new ListClassesResponse.TypeElement();
+                element.setName(clazz.getName());
+                element.setType(clazz.isInterface() ? "interface" : "class");
+                element.setMethods(methods);
+                return element;
+            } catch (Throwable e) {
+                log.debug("Could not add class to result list: {}", clazz);
+                return null;
+            }
+        }).filter(Objects::nonNull).toArray(ListClassesResponse.TypeElement[]::new);
 
-        System.out.println("-->> done");
+        log.debug("Finished executing ListClassesCommand: {}", command.getCommandId().toString());
 
         ListClassesResponse response = new ListClassesResponse();
         response.setCommandId(command.getCommandId());
