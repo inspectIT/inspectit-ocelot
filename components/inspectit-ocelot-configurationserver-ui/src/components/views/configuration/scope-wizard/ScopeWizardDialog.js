@@ -29,55 +29,58 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
   // Set dialog mode create/edit
   useEffect(() => {
     // Set default state
-    const preparedTypeMatcher = { type: 'type', matcherType: 'EQUALS_FULLY', name: null };
-    const preparedMethodMatcher = {
-      visibilities: _.clone(DEFAULT_VISIBILITIES),
-      matcherType: null,
-      isConstructor: false,
-      isSelectedParameter: false,
-      parameterInput: null,
-      parameterList: [],
-      name: null,
-    };
-    // When edit mode, fill out dialog
-    if (scope) {
-      // set type matcher
-      const { type, superclass, interfaces } = scope;
-      let targetType;
-      let targetMatcher;
+    if (visible) {
+      const preparedTypeMatcher = { type: 'type', matcherType: 'EQUALS_FULLY', name: null };
+      const preparedMethodMatcher = {
+        visibilities: _.clone(DEFAULT_VISIBILITIES),
+        matcherType: null,
+        isConstructor: false,
+        isSelectedParameter: false,
+        parameterInput: null,
+        parameterList: [],
+        name: null,
+      };
+      // When edit mode, fill out dialog
+      if (scope) {
+        // set type matcher
+        const { type, superclass, interfaces } = scope;
+        let targetType;
+        let targetMatcher;
 
-      if (type) {
-        targetType = 'type';
-        targetMatcher = type;
-      } else if (superclass) {
-        targetType = 'superclass';
-        targetMatcher = superclass;
-      } else if (interfaces && interfaces.length === 1) {
-        targetType = 'interfaces';
-        targetMatcher = interfaces[0];
-      } else {
-        // Scopes with multiple type matchers are currently not supported.
-        throw new Error('Scopes using multiple type matchers are currently not supported.');
+        if (type) {
+          targetType = 'type';
+          targetMatcher = type;
+        } else if (superclass) {
+          targetType = 'superclass';
+          targetMatcher = superclass;
+        } else if (interfaces && interfaces.length === 1) {
+          targetType = 'interfaces';
+          targetMatcher = interfaces[0];
+        } else {
+          // Scopes with multiple type matchers are currently not supported.
+          throw new Error('Scopes using multiple type matchers are currently not supported.');
+        }
+
+        preparedTypeMatcher.type = targetType;
+        preparedTypeMatcher.matcherType = _.get(targetMatcher, 'matcher-mode', 'EQUALS_FULLY');
+        preparedTypeMatcher.name = _.get(targetMatcher, 'name', null);
+
+        // set method matcher
+        const { methods } = scope;
+
+        if (methods && methods.length === 1) {
+          const method = methods[0];
+          preparedMethodMatcher.visibilities = _.get(method, 'visibility', _.clone(DEFAULT_VISIBILITIES));
+          preparedMethodMatcher.matcherType = _.get(method, 'matcher-mode', method.name ? 'EQUALS_FULLY' : null);
+          preparedMethodMatcher.isConstructor = _.get(method, 'is-constructor', false);
+          preparedMethodMatcher.isSelectedParameter = _.has(method, 'arguments');
+          preparedMethodMatcher.parameterList = _.get(method, 'arguments', []);
+          preparedMethodMatcher.name = _.get(method, 'name');
+        }
       }
-
-      preparedTypeMatcher.type = targetType;
-      preparedTypeMatcher.matcherType = _.get(targetMatcher, 'matcher-mode', 'EQUALS_FULLY');
-      preparedTypeMatcher.name = _.get(targetMatcher, 'name');
-
-      // set method matcher
-      const { methods } = scope;
-
-      if (methods && methods.length === 1) {
-        preparedMethodMatcher.visibilities = _.get(methods[0], 'visibility', _.clone(DEFAULT_VISIBILITIES));
-        preparedMethodMatcher.matcherType = _.get(methods[0], 'matcher-mode', methods[0].name ? 'EQUALS_FULLY' : null);
-        preparedMethodMatcher.isConstructor = _.get(methods[0], 'is-constructor', false);
-        preparedMethodMatcher.isSelectedParameter = _.has(methods[0], 'arguments');
-        preparedMethodMatcher.parameterList = _.get(methods[0], 'arguments', []);
-        preparedMethodMatcher.name = _.get(methods[0], 'name');
-      }
+      setTypeMatcher(preparedTypeMatcher);
+      setMethodMatcher(preparedMethodMatcher);
     }
-    setTypeMatcher(preparedTypeMatcher);
-    setMethodMatcher(preparedMethodMatcher);
   }, [visible]);
 
   // Enable 'apply' button...

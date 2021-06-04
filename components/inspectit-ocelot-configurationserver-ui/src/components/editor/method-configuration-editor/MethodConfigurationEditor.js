@@ -41,8 +41,12 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
 
   const hideScopeWizardDialog = () => {
     setIsScopeWizardDialogShown(false);
+  };
+
+  const onAdd = () => {
     setCurrentScope(null);
     setCurrentScopeName(null);
+    setIsScopeWizardDialogShown(true);
   };
 
   // derived variables
@@ -354,7 +358,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
             <SelectionInformation hint="The configuration is empty." />
           )}
         </div>
-        {!configurationError && <MethodConfigurationEditorFooter onAdd={setIsScopeWizardDialogShown} />}
+        {!configurationError && <MethodConfigurationEditorFooter onAdd={onAdd} />}
         <ScopeWizardDialog visible={isScopeWizardDialogShown} onHide={hideScopeWizardDialog} onApply={addScope} scope={currentScope} />
       </div>
     </>
