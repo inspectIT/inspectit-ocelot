@@ -50,7 +50,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
 
   const handleParameterChange = (e, index) => {
     const currentParameterList = methodMatcher.parameterList;
-    currentParameterList[index].parameter = e.target.value;
+    currentParameterList[index] = e.target.value;
 
     setState('parameterList', currentParameterList);
   };
@@ -64,7 +64,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
 
   const addParameter = () => {
     const currentParameterList = methodMatcher.parameterList;
-    currentParameterList.push({ parameter: methodMatcher.parameterInput });
+    currentParameterList.push(methodMatcher.parameterInput);
 
     setState('parameterList', currentParameterList);
     setState('parameterInput', '');
@@ -169,6 +169,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
             disabled={methodMatcher.isConstructor}
             className="fill"
             style={{ marginLeft: '0.5rem' }}
+            onChange={(e) => setState('name', e.target.value)}
             placeholder="Method Name"
             tooltip="The name or pattern which is used to match against the fully qualified class or interface name."
             tooltipOptions={TOOLTIP_OPTIONS}
@@ -194,7 +195,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
                   disabled={disableArguments}
                   className="fill"
                   name="parameter"
-                  value={parameter.parameter}
+                  value={parameter}
                   onChange={(e) => handleParameterChange(e, i)}
                 />
                 <Button
