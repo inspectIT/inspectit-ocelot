@@ -75,11 +75,17 @@ public class CommandHandler {
 
             if (commandResponse != null) {
                 // start / continue live mode
-                liveMode = true;
+                if (liveMode) {
+                    log.debug("Extending command live mode timeout.");
+                } else {
+                    log.debug("Switching to command live mode.");
+                    liveMode = true;
+                }
                 liveModeStart = System.currentTimeMillis();
             }
 
             if (liveMode && isLiveModeExpired()) {
+                log.debug("Leaving command live mode.");
                 liveMode = false;
             }
         } while (liveMode || commandResponse != null);
@@ -102,6 +108,10 @@ public class CommandHandler {
      * @return an instance of {@link Command}, or null if the response was empty
      */
     private Command processHttpResponse(HttpResponse response) {
+        if (response == null) {
+            return null;
+        }
+
         int statusCode = response.getStatusLine().getStatusCode();
 
         if (statusCode == HttpStatus.SC_NO_CONTENT) {
