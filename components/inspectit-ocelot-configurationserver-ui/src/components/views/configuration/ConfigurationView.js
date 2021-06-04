@@ -238,8 +238,6 @@ class ConfigurationView extends React.Component {
         <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} filePath={this.state.filePath} />
 
         <SearchDialog visible={this.state.isSearchDialogShown} onHide={this.hideSearchDialog} openFile={this.openFile} />
-
-        <ClassBrowserDialog visible={true} onSelect={console.log} />
       </div>
     );
   }
