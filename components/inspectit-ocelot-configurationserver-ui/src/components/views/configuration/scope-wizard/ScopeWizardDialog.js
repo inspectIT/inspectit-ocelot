@@ -1,6 +1,6 @@
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import TypeMatcher from './TypeMatcher';
@@ -13,7 +13,7 @@ import { DEFAULT_VISIBILITIES } from '../../../editor/method-configuration-edito
  * The scope wizard dialog itself.
  */
 const ScopeWizardDialog = ({ visible, onHide, onApply }) => {
-  const [typeMatcher, setTypeMatcher] = useState({ type: 'class', matcherType: 'EQUALS_FULLY', name: null });
+  const [typeMatcher, setTypeMatcher] = useState({ type: 'type', matcherType: 'EQUALS_FULLY', name: null });
   const [methodMatcher, setMethodMatcher] = useState({
     visibilities: _.clone(DEFAULT_VISIBILITIES),
     matcherType: null,
@@ -24,6 +24,31 @@ const ScopeWizardDialog = ({ visible, onHide, onApply }) => {
     name: null,
   });
 
+  const [isApplyDisabled, setIsApplyDisabled] = useState(true);
+
+  // Enable 'apply' button...
+  useEffect(() => {
+    // ... if class matcher is completely specified
+    if (typeMatcher.type && typeMatcher.matcherType && typeMatcher.name) {
+      setIsApplyDisabled(false);
+
+      // ... if bot method matcher are completely or not at all specified
+      if ((methodMatcher.matcherType && methodMatcher.name) || (!methodMatcher.matcherType && !methodMatcher.name)) {
+        setIsApplyDisabled(false);
+      }
+    }
+
+    // Disable 'apply' button if only one of the method matcher is specified
+    if (!methodMatcher.matcherType ^ !methodMatcher.name) {
+      setIsApplyDisabled(true);
+    }
+
+    // Enable 'apply' button if 'constructor' is specified
+    if (methodMatcher.isConstructor) {
+      setIsApplyDisabled(false);
+    }
+  });
+
   const showClassBrowser = () => {
     return alert('Todo: Open Class Browser');
   };
@@ -31,7 +56,14 @@ const ScopeWizardDialog = ({ visible, onHide, onApply }) => {
   // the dialogs footer
   const footer = (
     <div>
-      <Button label="Apply" onClick={() => onApply(typeMatcher, methodMatcher)} />
+      <Button
+        label="Apply"
+        disabled={isApplyDisabled}
+        onClick={() => {
+          onApply(typeMatcher, methodMatcher);
+          onHide();
+        }}
+      />
       <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
     </div>
   );

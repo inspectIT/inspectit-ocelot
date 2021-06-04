@@ -11,7 +11,7 @@ const Template = (args) => <TypeMatcher {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {
-  typeMatcher: { type: 'class', matcherType: 'EQUALS_FULLY', name: '' },
+  typeMatcher: { type: 'type', matcherType: 'EQUALS_FULLY', name: '' },
 };
 
 export const Prefilled = Template.bind({});

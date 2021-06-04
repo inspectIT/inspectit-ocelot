@@ -13,9 +13,9 @@ import { MATCHER_MODE_DESCRIPTION_S } from '../../../editor/method-configuration
 const TypeMatcher = ({ typeMatcher, onTypeMatcherChange, onShowClassBrowser }) => {
   /** Possible Types */
   const types = [
-    { label: 'Class', value: 'class' },
+    { label: 'Class', value: 'type' },
     { label: 'Superclass', value: 'superclass' },
-    { label: 'Interface', value: 'interface' },
+    { label: 'Interface', value: 'interfaces' },
   ];
 
   /** Possible Matcher Types*/

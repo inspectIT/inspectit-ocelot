@@ -4,15 +4,20 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputSwitch } from 'primereact/inputswitch';
 import { Button } from 'primereact/button';
+import { v4 as uuid } from 'uuid';
 import yaml from 'js-yaml';
 import _ from 'lodash';
 import SelectionInformation from '../SelectionInformation';
 import ErrorInformation from '../ErrorInformation';
-import { TOOLTIP_OPTIONS } from '../../../data/constants';
 import ScopeTypeDisplay from './ScopeTypeDisplay';
 import ScopeMethodDisplay from './ScopeMethodDisplay';
+import MethodConfigurationEditorFooter from './MethodConfigurationEditorFooter';
+import ScopeWizardDialog from '../../views/configuration/scope-wizard/ScopeWizardDialog';
 import { selectedFileContentsChanged } from '../../../redux/ducks/configuration/actions';
 import { useDispatch } from 'react-redux';
+
+/** data */
+import { CONFIGURATION_TYPES, TOOLTIP_OPTIONS } from '../../../data/constants';
 
 const SCOPE_STATES_RULES = {
   TRACING: 'r_method_configuration_trace',
@@ -30,6 +35,9 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   const [expandedRows, setExpandedRows] = useState([]);
   const [configurationError, setConfigurationError] = useState(null);
   const [configuration, setConfiguration] = useState([]);
+  const [isScopeWizardDialogShown, setIsScopeWizardDialogShown] = useState(false);
+
+  const hideScopeWizardDialog = () => setIsScopeWizardDialogShown(false);
 
   // derrived variables
   const scopesExist = scopes.length > 0;
@@ -68,6 +76,76 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
     );
     setExpandedRows(initialExpandedRows);
   }, [configuration]);
+
+  /**
+   * Converts the given instrumentation information into a JSON format.
+   * @param {*} scopeName the name of the scope
+   * @param {*} typeMatcher the class instrumentation settings
+   * @param {*} methodMatcher the method instrumentation settings
+   */
+  const prepareConfiguration = (scopeName, typeMatcher, methodMatcher) => {
+    // Prepare class matcher
+    const type = typeMatcher.type;
+    const classMatcherType = typeMatcher.matcherType;
+    const className = typeMatcher.name;
+
+    if (_.isEmpty(type) || _.isEmpty(classMatcherType) || _.isEmpty(className)) {
+      throw new Error('Type matcher must be fully specified!');
+    }
+
+    const typeMatcherBody = { name: className, 'matcher-mode': classMatcherType };
+    const classMatcherScope = { [type]: type === 'interfaces' ? [typeMatcherBody] : typeMatcherBody };
+
+    // Prepare method matcher
+    const visibilities = methodMatcher.visibilities;
+    const methodMatcherType = methodMatcher.matcherType;
+    const isConstructor = methodMatcher.isConstructor;
+    const withParameter = methodMatcher.isSelectedParameter;
+    const parameters = methodMatcher.parameterList;
+    const methodName = methodMatcher.name;
+
+    const constructorBody = { 'is-constructor': true };
+    const methodNameBody = methodName && methodMatcherType ? { name: methodName, 'matcher-mode': methodMatcherType } : {};
+    const methodMatcherBody = isConstructor ? constructorBody : methodNameBody;
+    methodMatcherBody.visibility = visibilities;
+    if (withParameter) {
+      methodMatcherBody.arguments = parameters;
+    }
+
+    // prepare Scope
+    const scope = { [scopeName]: _.merge(classMatcherScope, { methods: [methodMatcherBody] }) };
+    // prepare rule Scope
+    const ruleScope = { scopes: { [scopeName]: false } };
+
+    // assembling and return configuration
+    const configurationTemplate = _.cloneDeep(CONFIGURATION_TYPES.METHOD_CONFIGURATION.template);
+
+    _.set(configurationTemplate, 'inspectit.instrumentation.scopes', scope);
+    _.set(configurationTemplate, 'inspectit.instrumentation.rules.r_method_configuration_trace', ruleScope);
+    _.set(configurationTemplate, 'inspectit.instrumentation.rules.r_method_configuration_duration', ruleScope);
+
+    return configurationTemplate;
+  };
+
+  /**
+   * Callback which is executed when the add scope button is pressed.
+   * Writes the scope with the given instrumentation information in the configuration model.
+   * @param {*} typeMatcher the class instrumentation settings
+   * @param {*} methodMatcher the method instrumentation settings
+   */
+  const addScope = (typeMatcher, methodMatcher) => {
+    const cloneConfiguration = _.cloneDeep(configuration);
+    const scopeName = ('s_gen_scope_' + uuid()).replaceAll('-', '_');
+    const preparedConfiguration = prepareConfiguration(scopeName, typeMatcher, methodMatcher);
+
+    try {
+      _.merge(cloneConfiguration, preparedConfiguration);
+
+      updateConfiguration(cloneConfiguration);
+    } catch (error) {
+      throw new Error(error);
+    }
+  };
 
   /**
    * Updates the currently selected configuration file with the given YAML.
@@ -228,39 +306,43 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
         }
       `}</style>
       <div className="this">
-        {configurationError ? (
-          <ErrorInformation text="Invalid YAML Configuration" error={configurationError} />
-        ) : scopesExist ? (
-          <DataTable
-            value={scopes}
-            rowHover
-            dataKey="typeKey"
-            sortField="typeKey"
-            sortOrder={1}
-            groupField="typeKey"
-            expandableRowGroups={true}
-            expandedRows={expandedRows}
-            onRowToggle={(e) => setExpandedRows(e.data)}
-            rowGroupHeaderTemplate={rowGroupHeaderTemplate}
-            rowGroupFooterTemplate={() => <></>}
-            rowGroupMode="subheader"
-          >
-            <Column body={scopeDescriptionBodyTemplate} header="Target" />
-            <Column
-              body={({ name }) => scopeStateBodyTemplate(name, SCOPE_STATES_RULES.TRACING)}
-              header="Trace"
-              style={{ width: '6rem' }}
-            ></Column>
-            <Column
-              body={({ name }) => scopeStateBodyTemplate(name, SCOPE_STATES_RULES.MEASURING)}
-              header="Measure"
-              style={{ width: '6rem' }}
-            ></Column>
-            <Column body={({ name }) => scopeEditBodyTemplate(name)} style={{ width: '8rem' }}></Column>
-          </DataTable>
-        ) : (
-          <SelectionInformation hint="The configuration is empty." />
-        )}
+        <div className="this">
+          {configurationError ? (
+            <ErrorInformation text="Invalid YAML Configuration" error={configurationError} />
+          ) : scopesExist ? (
+            <DataTable
+              value={scopes}
+              rowHover
+              dataKey="typeKey"
+              sortField="typeKey"
+              sortOrder={1}
+              groupField="typeKey"
+              expandableRowGroups={true}
+              expandedRows={expandedRows}
+              onRowToggle={(e) => setExpandedRows(e.data)}
+              rowGroupHeaderTemplate={rowGroupHeaderTemplate}
+              rowGroupFooterTemplate={() => <></>}
+              rowGroupMode="subheader"
+            >
+              <Column body={scopeDescriptionBodyTemplate} header="Target" />
+              <Column
+                body={({ name }) => scopeStateBodyTemplate(name, SCOPE_STATES_RULES.TRACING)}
+                header="Trace"
+                style={{ width: '6rem' }}
+              />
+              <Column
+                body={({ name }) => scopeStateBodyTemplate(name, SCOPE_STATES_RULES.MEASURING)}
+                header="Measure"
+                style={{ width: '6rem' }}
+              />
+              <Column body={({ name }) => scopeEditBodyTemplate(name)} style={{ width: '8rem' }} />
+            </DataTable>
+          ) : (
+            <SelectionInformation hint="The configuration is empty." />
+          )}
+        </div>
+        {!configurationError && <MethodConfigurationEditorFooter onAdd={setIsScopeWizardDialogShown} />}
+        <ScopeWizardDialog visible={isScopeWizardDialogShown} onHide={hideScopeWizardDialog} onApply={addScope} />
       </div>
     </>
   );
