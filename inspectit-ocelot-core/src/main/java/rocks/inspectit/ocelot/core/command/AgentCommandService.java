@@ -32,11 +32,6 @@ public class AgentCommandService extends DynamicallyActivatableService implement
      */
     private ScheduledFuture<?> handlerFuture;
 
-//    /**
-//     * Whether the agent is in the live mode.
-//     */
-//    private long liveModeStart = 0L;
-
     public AgentCommandService() {
         super("agent-commands");
     }
@@ -76,36 +71,5 @@ public class AgentCommandService extends DynamicallyActivatableService implement
         } catch (Exception exception) {
             log.error("Error while fetching agent command.", exception);
         }
-
-        //        AgentCommandSettings settings = env.getCurrentConfig().getAgentCommands();
-        //
-        //        boolean inLiveMode = liveModeStart <= 0L;
-        //        boolean keepLiveMode = commandHandler.nextCommand(inLiveMode);
-        //
-        //        boolean immediateExecution;
-        //        if (keepLiveMode) {
-        //            liveModeStart = System.currentTimeMillis();
-        //            immediateExecution = true;
-        //        } else {
-        //            Duration liveModeDuration = settings.getLiveModeDuration();
-        //            boolean liveExpired = System.currentTimeMillis() > liveModeStart + liveModeDuration.toMillis();
-        //
-        //            if (liveExpired) {
-        //                liveModeStart = 0L;
-        //                immediateExecution = false;
-        //            } else {
-        //                immediateExecution = true;
-        //            }
-        //        }
-        //
-        //        if (settings.isEnabled()) {
-        //            if (immediateExecution) {
-        //                pollerFuture = null;
-        //                executor.execute(this);
-        //            } else {
-        //                long pollingIntervalMs = settings.getPollingInterval().toMillis();
-        //                pollerFuture = executor.schedule(this, pollingIntervalMs, TimeUnit.MILLISECONDS);
-        //            }
-        //        }
     }
 }

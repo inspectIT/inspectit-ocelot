@@ -11,9 +11,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import java.time.Duration;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 public class AgentCommandServiceTest {
 
     @InjectMocks
-    private AgentCommandService poller;
+    private AgentCommandService service;
 
     @Mock
     private ScheduledExecutorService executor;
@@ -41,15 +41,12 @@ public class AgentCommandServiceTest {
         @Test
         public void successfullyEnabled() {
             when(configuration.getAgentCommands().getPollingInterval()).thenReturn(Duration.ofSeconds(1));
-            ScheduledFuture futureMock = mock(ScheduledFuture.class);
-            when(executor.scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(futureMock);
 
-            boolean result = poller.doEnable(configuration);
+            boolean result = service.doEnable(configuration);
 
             assertTrue(result);
-            verify(executor).scheduleWithFixedDelay(poller, 1000, 1000, TimeUnit.MILLISECONDS);
-            verify(configuration).getAgentCommands();
-            verifyNoMoreInteractions(executor, configuration);
+            verify(executor).scheduleWithFixedDelay(service, 1000, 1000, TimeUnit.MILLISECONDS);
+            verifyNoMoreInteractions(executor);
         }
 
     }
@@ -59,26 +56,23 @@ public class AgentCommandServiceTest {
 
         @Test
         public void notEnabled() {
-            boolean result = poller.doDisable();
+            boolean result = service.doDisable();
 
             assertTrue(result);
         }
 
         @Test
         public void isEnabled() {
-            InspectitConfig configuration = new InspectitConfig();
-            configuration.setConfig(new ConfigSettings());
-            configuration.getConfig().setHttp(new HttpConfigSettings());
-            configuration.getConfig().getHttp().setFrequency(Duration.ofMillis(5000L));
-            ScheduledFuture future = Mockito.mock(ScheduledFuture.class);
-            when(executor.scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(future);
+            when(configuration.getAgentCommands().getPollingInterval()).thenReturn(Duration.ofSeconds(1));
+            ScheduledFuture futureMock = mock(ScheduledFuture.class);
+            when(executor.scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(futureMock);
 
-            poller.doEnable(configuration);
+            service.doEnable(configuration);
 
-            boolean result = poller.doDisable();
+            boolean result = service.doDisable();
 
             assertTrue(result);
-            verify(future).cancel(true);
+            verify(futureMock).cancel(true);
         }
     }
 
