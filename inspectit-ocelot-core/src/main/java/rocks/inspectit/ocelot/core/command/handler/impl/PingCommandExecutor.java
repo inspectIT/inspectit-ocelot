@@ -7,6 +7,9 @@ import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 import rocks.inspectit.ocelot.commons.models.command.response.impl.PingResponse;
 import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
 
+/**
+ * Executor for executing {@link PingCommand}s.
+ */
 @Component
 public class PingCommandExecutor implements CommandExecutor {
 
@@ -14,6 +17,7 @@ public class PingCommandExecutor implements CommandExecutor {
      * Checks if the given {@link Command} is an instance of {@link PingCommand}.
      *
      * @param command The {@link Command} to be checked.
+     *
      * @return True if the given {@link Command} is an instance of {@link PingCommand}.
      */
     @Override
@@ -26,13 +30,16 @@ public class PingCommandExecutor implements CommandExecutor {
      * or not handled by this implementation.
      *
      * @param command The command to be executed.
+     *
      * @return An instance of {@link PingCommand} with alive set to true and the id of the given command.
      */
     @Override
     public CommandResponse execute(Command command) {
-        if(!canExecute(command)){
-            throw new IllegalArgumentException("PingCommandExecutor can only handle commands of type PingCommand.");
+        if (!canExecute(command)) {
+            String exceptionMessage = "Invalid command type. Executor does not support commands of type " + command.getClass();
+            throw new IllegalArgumentException(exceptionMessage);
         }
-        return new PingResponse(command.getCommandId(), true);
+
+        return PingResponse.builder().commandId(command.getCommandId()).build();
     }
 }

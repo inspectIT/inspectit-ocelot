@@ -1,6 +1,8 @@
 package rocks.inspectit.ocelot.commons.models.command.response.impl;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 
 import java.util.UUID;

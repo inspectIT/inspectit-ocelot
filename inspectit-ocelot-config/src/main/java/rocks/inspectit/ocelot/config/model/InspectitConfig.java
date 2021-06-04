@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.config.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.ocelot.config.model.command.AgentCommandSettings;
 import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
 import rocks.inspectit.ocelot.config.model.env.EnvironmentSettings;
 import rocks.inspectit.ocelot.config.model.exporters.ExportersSettings;
@@ -104,6 +105,12 @@ public class InspectitConfig {
      */
     @Min(1)
     private int threadPoolSize;
+
+    /**
+     * Settings for the agent command feature.
+     */
+    @Valid
+    private AgentCommandSettings agentCommands = new AgentCommandSettings();
 
     /**
      * Can only be specified as JVM-property.

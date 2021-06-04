@@ -2,13 +2,15 @@ package rocks.inspectit.ocelot.core.command;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
 
 import java.util.List;
 
+/**
+ * This component redirects commands to the respective {@link CommandExecutor} instance.
+ */
 @Component
 public class CommandDelegator {
 
@@ -17,7 +19,7 @@ public class CommandDelegator {
      * for a given instance of {@link Command}.
      */
     @Autowired
-    List<CommandExecutor> executors;
+    private List<CommandExecutor> executors;
 
     /**
      * Delegates a given command to the responsible {@link CommandDelegator} and returns the respective return value.
@@ -27,8 +29,8 @@ public class CommandDelegator {
      * @return The return value of the command.
      */
     public CommandResponse delegate(Command command) {
-        for(CommandExecutor executor: executors){
-            if(executor.canExecute(command)) {
+        for (CommandExecutor executor : executors) {
+            if (executor.canExecute(command)) {
                 return executor.execute(command);
             }
         }

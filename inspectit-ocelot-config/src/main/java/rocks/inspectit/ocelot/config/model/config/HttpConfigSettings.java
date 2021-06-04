@@ -29,16 +29,6 @@ public class HttpConfigSettings {
     private URL url;
 
     /**
-     * The URL for fetching agent commands.
-     */
-    private URL commandUrl;
-
-    /**
-     * The Timeout Duration used when the agent is in discovery mode.
-     */
-    private int discoveryTimeOutDuration;
-
-    /**
      * If specified, the agent will persist the last fetched configuration to the given file.
      * When the JVM restarts and the config server is not reachable
      */
