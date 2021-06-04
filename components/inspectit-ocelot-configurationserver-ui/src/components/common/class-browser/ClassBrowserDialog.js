@@ -33,7 +33,7 @@ const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
   // fetching the search results
   const [{ data: searchResult, isLoading: isSearching }, executeSearch] = useFetchData('/command/list/classes', {
     query: searchQuery,
-    "agent-id": selectedAgent,
+    'agent-id': selectedAgent,
   });
 
   // derived variables

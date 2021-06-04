@@ -3,23 +3,31 @@ package rocks.inspectit.ocelot.agentcommunication.handlers.impl;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
 import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+
+import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class PingCommandHandlerTest {
 
     @InjectMocks
     PingCommandHandler pingCommandHandler;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private InspectitServerSettings configuration;
 
     @Nested
     class PrepareResponse {
@@ -39,6 +47,7 @@ public class PingCommandHandlerTest {
 
         @Test
         public void preparesResponse() {
+            when(configuration.getAgentCommand().getResponseTimeout()).thenReturn(Duration.ofMinutes(1));
             PingCommand command = new PingCommand();
             String agentId = "test-id";
 
