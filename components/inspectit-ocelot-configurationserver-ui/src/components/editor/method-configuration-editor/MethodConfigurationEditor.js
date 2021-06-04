@@ -143,7 +143,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
    */
   const addScope = (typeMatcher, methodMatcher) => {
     const cloneConfiguration = _.cloneDeep(configuration);
-    const scopeName = ('s_gen_scope_' + uuid()).replaceAll('-', '_');
+    const scopeName = currentScopeName ? currentScopeName : ('s_gen_scope_' + uuid()).replaceAll('-', '_');
     const preparedConfiguration = prepareConfiguration(scopeName, typeMatcher, methodMatcher);
 
     try {
@@ -355,7 +355,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
           )}
         </div>
         {!configurationError && <MethodConfigurationEditorFooter onAdd={setIsScopeWizardDialogShown} />}
-        <ScopeWizardDialog visible={isScopeWizardDialogShown} onHide={hideScopeWizardDialog} onApply={writeScope} scope={currentScope} />
+        <ScopeWizardDialog visible={isScopeWizardDialogShown} onHide={hideScopeWizardDialog} onApply={addScope} scope={currentScope} />
       </div>
     </>
   );

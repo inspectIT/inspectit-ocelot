@@ -25,11 +25,22 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
   });
 
   const [isApplyDisabled, setIsApplyDisabled] = useState(true);
-  const [isEditMode, setIsEditMode] = useState(true);
 
-  // Fill out dialog, if scope is not null
+  // Set dialog mode create/edit
   useEffect(() => {
-    if (isEditMode && scope) {
+    // Set default state
+    const preparedTypeMatcher = { type: 'type', matcherType: 'EQUALS_FULLY', name: null };
+    const preparedMethodMatcher = {
+      visibilities: _.clone(DEFAULT_VISIBILITIES),
+      matcherType: null,
+      isConstructor: false,
+      isSelectedParameter: false,
+      parameterInput: null,
+      parameterList: [],
+      name: null,
+    };
+    // When edit mode, fill out dialog
+    if (scope) {
       // set type matcher
       const { type, superclass, interfaces } = scope;
       let targetType;
@@ -49,33 +60,25 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
         throw new Error('Scopes using multiple type matchers are currently not supported.');
       }
 
-      const preparedTypeMatcher = {
-        type: targetType,
-        matcherType: targetMatcher['matcher-mode'] ? targetMatcher['matcher-mode'] : 'EQUALS_FULLY',
-        name: targetMatcher.name ? targetMatcher.name : null,
-      };
-      setTypeMatcher(preparedTypeMatcher);
+      preparedTypeMatcher.type = targetType;
+      preparedTypeMatcher.matcherType = _.get(targetMatcher, 'matcher-mode', 'EQUALS_FULLY');
+      preparedTypeMatcher.name = _.get(targetMatcher, 'name');
 
       // set method matcher
       const { methods } = scope;
 
       if (methods && methods.length === 1) {
-        const preparedMethodMatcher = {
-          visibilities: methods[0].visibility ? methods[0].visibility : _.clone(DEFAULT_VISIBILITIES),
-          matcherType: methods[0]['matcher-mode'] ? methods[0]['matcher-mode'] : methods[0].name ? 'EQUALS_FULLY' : null,
-          isConstructor: methods[0]['is-constructor'] ? methods[0]['is-constructor'] : false,
-          isSelectedParameter: _.has(methods[0], 'arguments'),
-          parameterInput: null,
-          parameterList: methods[0].arguments ? methods[0].arguments : [],
-          name: methods[0].name ? methods[0].name : null,
-        };
-        setMethodMatcher(preparedMethodMatcher);
+        preparedMethodMatcher.visibilities = _.get(methods[0], 'visibility', _.clone(DEFAULT_VISIBILITIES));
+        preparedMethodMatcher.matcherType = _.get(methods[0], 'matcher-mode', methods[0].name ? 'EQUALS_FULLY' : null);
+        preparedMethodMatcher.isConstructor = _.get(methods[0], 'is-constructor', false);
+        preparedMethodMatcher.isSelectedParameter = _.has(methods[0], 'arguments');
+        preparedMethodMatcher.parameterList = _.get(methods[0], 'arguments', []);
+        preparedMethodMatcher.name = _.get(methods[0], 'name');
       }
-
-      // exit prefill mode
-      setIsEditMode(false);
     }
-  });
+    setTypeMatcher(preparedTypeMatcher);
+    setMethodMatcher(preparedMethodMatcher);
+  }, [visible]);
 
   // Enable 'apply' button...
   useEffect(() => {
@@ -100,25 +103,6 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
     }
   });
 
-  const resetState = () => {
-    setTypeMatcher({ type: 'type', matcherType: 'EQUALS_FULLY', name: null });
-    setMethodMatcher({
-      visibilities: _.clone(DEFAULT_VISIBILITIES),
-      matcherType: null,
-      isConstructor: false,
-      isSelectedParameter: false,
-      parameterInput: null,
-      parameterList: [],
-      name: null,
-    });
-  };
-
-  const exitDialog = () => {
-    resetState();
-    setIsEditMode(true);
-    onHide();
-  };
-
   const showClassBrowser = () => {
     return alert('Todo: Open Class Browser');
   };
@@ -131,10 +115,10 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
         disabled={isApplyDisabled}
         onClick={() => {
           onApply(typeMatcher, methodMatcher);
-          exitDialog();
+          onHide();
         }}
       />
-      <Button label="Cancel" className="p-button-secondary" onClick={exitDialog} />
+      <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
     </div>
   );
 
@@ -191,7 +175,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
           header="Define Selection"
           visible={visible}
           style={{ width: '50rem', minWidth: '50rem' }}
-          onHide={exitDialog}
+          onHide={onHide}
           blockScroll
           footer={footer}
           focusOnShow={false}
