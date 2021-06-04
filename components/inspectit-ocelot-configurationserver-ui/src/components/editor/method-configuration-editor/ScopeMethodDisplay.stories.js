@@ -46,6 +46,14 @@ AllVisibilities.args = {
   },
 };
 
+export const OnlyVisibility = Template.bind({});
+OnlyVisibility.args = {
+  scope: {
+    interfaces: [{ name: 'org.apache.http.impl.client.CloseableHttpClient' }],
+    methods: [{ visibility: ['PUBLIC', 'PRIVATE', 'PROTECTED', 'PACKAGE'] }],
+  },
+};
+
 export const WithArguments = Template.bind({});
 WithArguments.args = {
   scope: {

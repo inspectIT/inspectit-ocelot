@@ -9,22 +9,75 @@ import MethodMatcher from './MethodMatcher';
 /** data */
 import { DEFAULT_VISIBILITIES } from '../../../editor/method-configuration-editor/constants';
 
+const DEFAULT_TYPE_MATCHER_STATE = { type: 'type', matcherType: 'EQUALS_FULLY', name: '' };
+
+const DEFAULT_METHOD_MATCHER_STATE = {
+  visibilities: _.clone(DEFAULT_VISIBILITIES),
+  matcherType: null,
+  isConstructor: false,
+  isSelectedParameter: false,
+  parameterInput: null,
+  parameterList: [],
+  name: '',
+};
+
 /**
  * The scope wizard dialog itself.
  */
-const ScopeWizardDialog = ({ visible, onHide, onApply }) => {
-  const [typeMatcher, setTypeMatcher] = useState({ type: 'type', matcherType: 'EQUALS_FULLY', name: null });
-  const [methodMatcher, setMethodMatcher] = useState({
-    visibilities: _.clone(DEFAULT_VISIBILITIES),
-    matcherType: null,
-    isConstructor: false,
-    isSelectedParameter: false,
-    parameterInput: null,
-    parameterList: [],
-    name: null,
-  });
+const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
+  const [typeMatcher, setTypeMatcher] = useState({ ...DEFAULT_TYPE_MATCHER_STATE });
+  const [methodMatcher, setMethodMatcher] = useState({ ...DEFAULT_METHOD_MATCHER_STATE });
 
   const [isApplyDisabled, setIsApplyDisabled] = useState(true);
+
+  // Set dialog mode create/edit
+  useEffect(() => {
+    // Set default state
+    if (visible) {
+      const preparedTypeMatcher = { ...DEFAULT_TYPE_MATCHER_STATE };
+      const preparedMethodMatcher = { ...DEFAULT_METHOD_MATCHER_STATE };
+      // When edit mode, fill out dialog
+      if (scope) {
+        // set type matcher
+        const { type, superclass, interfaces } = scope;
+        let targetType;
+        let targetMatcher;
+
+        if (type) {
+          targetType = 'type';
+          targetMatcher = type;
+        } else if (superclass) {
+          targetType = 'superclass';
+          targetMatcher = superclass;
+        } else if (interfaces && interfaces.length === 1) {
+          targetType = 'interfaces';
+          targetMatcher = interfaces[0];
+        } else {
+          // Scopes with multiple type matchers are currently not supported.
+          throw new Error('Scopes using multiple type matchers are currently not supported.');
+        }
+
+        preparedTypeMatcher.type = targetType;
+        preparedTypeMatcher.matcherType = _.get(targetMatcher, 'matcher-mode', 'EQUALS_FULLY');
+        preparedTypeMatcher.name = _.get(targetMatcher, 'name', '');
+
+        // set method matcher
+        const { methods } = scope;
+
+        if (methods && methods.length === 1) {
+          const method = methods[0];
+          preparedMethodMatcher.visibilities = _.get(method, 'visibility', _.clone(DEFAULT_VISIBILITIES));
+          preparedMethodMatcher.matcherType = _.get(method, 'matcher-mode', method.name ? 'EQUALS_FULLY' : null);
+          preparedMethodMatcher.isConstructor = _.get(method, 'is-constructor', false);
+          preparedMethodMatcher.isSelectedParameter = _.has(method, 'arguments');
+          preparedMethodMatcher.parameterList = _.get(method, 'arguments', []);
+          preparedMethodMatcher.name = _.get(method, 'name', '');
+        }
+      }
+      setTypeMatcher(preparedTypeMatcher);
+      setMethodMatcher(preparedMethodMatcher);
+    }
+  }, [visible]);
 
   // Enable 'apply' button...
   useEffect(() => {
@@ -141,12 +194,15 @@ ScopeWizardDialog.propTypes = {
   onHide: PropTypes.func,
   /** Callback on dialog apply */
   onApply: PropTypes.func,
+  /** JSON model of the scope when in edit mode */
+  scope: PropTypes.object,
 };
 
 ScopeWizardDialog.defaultProps = {
   visible: true,
   onHide: () => {},
   onApply: () => {},
+  scope: null,
 };
 
 export default ScopeWizardDialog;
