@@ -100,3 +100,19 @@ inspectit:
 
   # defines how many threads inspectIT may start for its internal tasks
   thread-pool-size: 2
+
+  # settings for the agent commands and communication
+  agent-commands:
+    # whether agent commands are enabled or not
+    enabled: false
+    # the URL for fetching agent commands - e.g.: http://localhost:8090/api/v1/agent/command
+    url: http://localhost:8090/api/v1/agent/command
+    # the timeout duration used when the agent is in discovery mode. Defining how long the agent
+    # will wait for new commands.
+    live-socket-timeout: 30s
+    # the timeout duration used for requests when the agent is in normal mode
+    socket-timeout: 5s
+    # the used interval for polling commands
+    polling-interval: 15s
+    # how long the agent will staying in the live mode, before falling back to the normal mode
+    live-mode-duration: 2m

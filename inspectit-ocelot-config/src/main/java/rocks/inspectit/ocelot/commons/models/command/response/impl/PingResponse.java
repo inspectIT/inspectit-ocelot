@@ -1,12 +1,14 @@
 package rocks.inspectit.ocelot.commons.models.command.response.impl;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 
 import java.util.UUID;
 
 /**
- * Represents a Ping-Response. An agent returns a Ping-Response with alive set to true if the agent is available.
+ * Represents a response to the {@link rocks.inspectit.ocelot.commons.models.command.impl.PingCommand}.
  */
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
