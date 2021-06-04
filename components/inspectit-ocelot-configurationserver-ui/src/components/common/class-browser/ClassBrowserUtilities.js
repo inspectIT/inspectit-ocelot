@@ -56,6 +56,31 @@ export const transformClassStructureToTableModel = (result, { name, type, method
       key: name + ': ' + method,
       label: method,
       type: 'method',
+      parent: {
+        name,
+        type,
+      },
     });
   });
+};
+
+export const transformAgentStatuses = (agentStatuses) => {
+  const result = [];
+
+  _.forEach(agentStatuses, ({ metaInformation, attributes: { service } }) => {
+    const entry = {};
+
+    if (!service || !metaInformation) {
+      // skip (old) agents without service name
+      return;
+    }
+    const { agentId } = metaInformation;
+
+    entry.label = service + ' (' + agentId + ')';
+    entry.value = agentId;
+
+    result.push(entry);
+  });
+
+  return result;
 };

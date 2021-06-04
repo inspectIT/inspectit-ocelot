@@ -1,56 +1,89 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Tree } from 'primereact/tree';
+import { ProgressBar } from 'primereact/progressbar';
 import CBTableNode from './CBTableNode';
 import _ from 'lodash';
-import { transformClassStructureToTableModel } from './ClassBrowserUtilities';
+import { transformClassStructureToTableModel, transformAgentStatuses } from './ClassBrowserUtilities';
+import { agentStatusActions } from '../../../redux/ducks/agent-status';
+import useFetchData from '../../../hooks/use-fetch-data';
 
 /**
  * The class browser dialog.
  */
 const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
+  const dispatch = useDispatch();
+
+  // state variables
   const [selectedAgent, setSelectedAgent] = useState(null);
+  const [selectedMethodKey, setSelectedMethodKey] = useState(null);
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [treeModel, setTreeModel] = useState([]);
 
-  const classStructure = [
-    { name: 'java.lang.String', type: 'class', methods: ['public String toString()', 'public String equals(java.lang.Object)'] },
-    { name: 'java.lang.Runnable', type: 'interface', methods: ['public void run()'] },
-    {
-      name: 'org.lang.String',
-      type: 'class',
-      methods: ['public String toString()', 'public String equals(java.lang.Object) public String equals(java.lang.Object)'],
-    },
-  ];
+  // global state variables
+  const agentStatuses = useSelector((state) => state.agentStatus.agents);
+  const loadingAgents = useSelector((state) => state.agentStatus.pendingRequests) > 0;
 
-  const existingAgent = [
-    { label: 'InspectIT Agent (11360@NB171217MO)', value: '11360@NB171217MO' },
-    { label: 'InspectIT Agent (21360@NB171217MO)', value: '21360@NB171217MO' },
-    { label: 'InspectIT Agent (31360@NB171217MO)', value: '31360@NB171217MO' },
-  ];
+  // fetching the search results
+  const [{ data: searchResult, isLoading: isSearching }, executeSearch] = useFetchData('https://ocelot-test.free.beeceptor.com/search', {
+    query: searchQuery,
+    agent: selectedAgent,
+  });
+
+  // derived variables
+  const existingAgents = !loadingAgents ? transformAgentStatuses(agentStatuses) : [];
+  const hasData = !!searchResult && !_.isEmpty(searchResult);
+
+  // refreshing the agents list
+  const refreshAgents = () => {
+    // fetch agents
+    if (!loadingAgents) {
+      dispatch(agentStatusActions.fetchStatus());
+    }
+  };
+
+  // loading the agents once the dialog is shown
+  useEffect(() => {
+    if (visible) {
+      refreshAgents();
+    }
+  }, [visible]);
 
   // generate table model
   useEffect(() => {
     const result = [];
-    _.each(classStructure, (classElement) => transformClassStructureToTableModel(result, classElement));
+    _.each(searchResult, (classElement) => transformClassStructureToTableModel(result, classElement));
     setTreeModel(result);
-  }, []);
+
+    setSelectedMethod(null);
+    setSelectedMethodKey(null);
+  }, [searchResult]);
+
+  // when the selection of the currelty selected method changes
+  const onSelectionChange = ({ value, label, parent }) => {
+    setSelectedMethodKey(value);
+    setSelectedMethod({ label, parent });
+  };
 
   // the dialogs footer
   const footer = (
     <div>
-      <Button label="Select" onClick={() => onSelect()} disabled={!selectedMethod} />
+      <Button label="Select" onClick={() => onSelect(selectedMethod)} disabled={!selectedMethod || isSearching} />
       <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
     </div>
   );
 
-  const tableNodeTemplate = ({ label, type, key }) => {
-    return <CBTableNode label={label} type={type} value={key} onChange={setSelectedMethod} selectedMethod={selectedMethod} />;
+  // the template for the tree nodes
+  const tableNodeTemplate = ({ label, type, key, parent }) => {
+    return (
+      <CBTableNode label={label} type={type} value={key} onChange={onSelectionChange} selectedMethod={selectedMethodKey} parent={parent} />
+    );
   };
 
   return (
@@ -59,6 +92,10 @@ const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
         .content {
           display: flex;
           flex-direction: column;
+        }
+
+        .agent-box :global(.p-dropdown) {
+          flex-grow: 1;
         }
 
         .search-box {
@@ -75,7 +112,8 @@ const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
           margin-top: 0.5rem;
         }
         .content :global(.p-tree-container) {
-          height: 20rem;
+          min-height: 20rem;
+          height: 40vh;
         }
         .content :global(.p-treenode-content) {
           display: flex;
@@ -86,33 +124,66 @@ const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
           display: flex;
           overflow: hidden;
         }
+
+        .select-agent-hint {
+          height: 40vh;
+          margin-top: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: gray;
+        }
       `}</style>
 
       <Dialog
         className="class-browser-dialog"
         header="Class Browser"
         visible={visible}
-        style={{ width: '40rem' }}
+        style={{ width: '50rem' }}
         onHide={onHide}
         blockScroll
         footer={footer}
       >
         <div className="content">
-          <Dropdown
-            value={selectedAgent}
-            options={existingAgent}
-            onChange={(e) => {
-              setSelectedAgent(e.value);
-            }}
-            placeholder="Select an Agent"
-          />
-
-          <div className="search-box p-inputgroup">
-            <InputText value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="org.example.MyClass" />
-            <Button label="Search" />
+          <div className="agent-box p-inputgroup">
+            <span className="p-inputgroup-addon">Agent</span>
+            <Dropdown
+              value={selectedAgent}
+              options={existingAgents}
+              onChange={(e) => {
+                setSelectedAgent(e.value);
+              }}
+              placeholder="Select an Agent"
+              disabled={loadingAgents || isSearching}
+            />
+            <Button
+              icon={'pi pi-refresh' + (loadingAgents ? ' pi-spin' : '')}
+              onClick={refreshAgents}
+              disabled={loadingAgents || isSearching}
+            />
           </div>
 
-          <Tree value={treeModel} nodeTemplate={tableNodeTemplate} />
+          <ProgressBar mode="indeterminate" style={{ height: '4px', visibility: loadingAgents ? '' : 'hidden' }} />
+
+          <div className="search-box p-inputgroup">
+            <InputText
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="org.example.MyClass"
+              disabled={loadingAgents || !selectedAgent || isSearching}
+            />
+            <Button label="Search" disabled={loadingAgents || !selectedAgent || isSearching} onClick={executeSearch} />
+          </div>
+
+          <ProgressBar mode="indeterminate" style={{ height: '4px', visibility: isSearching ? '' : 'hidden' }} />
+
+          {!selectedAgent || !hasData ? (
+            <div className="select-agent-hint">
+              <span>{!selectedAgent ? 'Please select an agent.' : 'The search did not return any results.'}</span>
+            </div>
+          ) : (
+            <Tree value={treeModel} nodeTemplate={tableNodeTemplate} />
+          )}
         </div>
       </Dialog>
     </>
@@ -131,7 +202,7 @@ ClassBrowserDialog.propTypes = {
 ClassBrowserDialog.defaultProps = {
   visible: true,
   onHide: () => {},
-  onApply: () => {},
+  onSelect: () => {},
 };
 
 export default ClassBrowserDialog;
