@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.AgentCommandDispatcher;
+import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
@@ -30,10 +31,15 @@ public class AgentCommandController extends AbstractBaseController {
      *
      * @return Returns OK if the Agent is reachable and Timeout if it is not.
      */
-    @GetMapping(value = "command/ping/**")
+    @GetMapping(value = "command/ping")
     public DeferredResult<ResponseEntity<?>> ping(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
         PingCommand command = new PingCommand();
         return commandDispatcher.dispatchCommand(agentId, command);
     }
 
+    @GetMapping(value = "command/list/classes")
+    public DeferredResult<ResponseEntity<?>> listClasses(@RequestParam(value = "agent-id") String agentId, @RequestParam(value = "query") String query) throws ExecutionException {
+        ListClassesCommand listClassesCommand = new ListClassesCommand(query);
+        return commandDispatcher.dispatchCommand(agentId, listClassesCommand);
+    }
 }

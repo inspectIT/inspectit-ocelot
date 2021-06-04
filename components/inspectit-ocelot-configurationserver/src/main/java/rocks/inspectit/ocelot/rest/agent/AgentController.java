@@ -44,6 +44,11 @@ public class AgentController extends AbstractBaseController {
     @Autowired
     private AgentCallbackManager agentCallbackManager;
 
+    @ExceptionHandler
+    public void e(Exception e) {
+        e.printStackTrace();
+    }
+
     /**
      * Returns the {@link InspectitConfig} for the agent with the given name.
      * Uses text/plain as mime type to ensure that the configuration is presented nicely when opened in a browser

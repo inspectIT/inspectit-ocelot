@@ -65,6 +65,7 @@ const CBTableModel = ({ label, type, value, onChange, selectedMethod, parent }) 
             margin-right: 0.5rem;
             font-family: monospace;
             line-height: 1rem;
+            flex-shrink: 0;
           }
           span {
             flex-grow: 1;

@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation;
 
 import com.google.common.base.Stopwatch;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ public class NewClassDiscoveryService implements IClassDefinitionListener {
     @Autowired
     List<IClassDiscoveryListener> listeners;
 
+    @Getter
     private Set<Class<?>> knownClasses = Collections.newSetFromMap(new WeakHashMap<>());
 
     private volatile boolean isShuttingDown = false;

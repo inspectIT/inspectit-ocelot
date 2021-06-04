@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.agentcommunication.handlers.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,9 @@ import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
 import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
 import rocks.inspectit.ocelot.commons.models.command.response.impl.PingResponse;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+
+import java.time.Duration;
 
 /**
  * Handler for the Agent Health check command.
@@ -17,6 +21,9 @@ import rocks.inspectit.ocelot.commons.models.command.response.impl.PingResponse;
 @Slf4j
 @Component
 public class PingCommandHandler implements CommandHandler {
+
+    @Autowired
+    private InspectitServerSettings configuration;
 
     /**
      * Checks if the given {@link Command} is an instance of {@link PingCommand}.
@@ -56,7 +63,8 @@ public class PingCommandHandler implements CommandHandler {
         if (!canHandle(command)) {
             throw new IllegalArgumentException("PingCommandHandler can only handle commands of type PingCommand.");
         }
-        DeferredResult<ResponseEntity<?>> deferredResult = new DeferredResult<>(31000L);
+        Duration responseTimeout = configuration.getAgentCommand().getResponseTimeout();
+        DeferredResult<ResponseEntity<?>> deferredResult = new DeferredResult<>(responseTimeout.toMillis());
 
         deferredResult.onTimeout(() -> ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build());
 
