@@ -105,13 +105,21 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
     }
   });
 
+  /**
+   * Shows the class browser dialog.
+   */
   const showClassBrowser = () => {
     setClassBrowserVisible(true);
   };
 
+  /**
+   * Callback for the class browsers. This function is called when the user applies a method selection in the class browser.
+   */
   const selectMethod = ({ signature, parent: { type, name } }) => {
+    // set type
     setTypeMatcher({ type: type === 'class' ? 'type' : 'interfaces', matcherType: 'EQUALS_FULLY', name: name });
 
+    // extract method details
     const methodRegex = /(public|private|protected)?.*\s(\S+)\((.*)\)/;
     const match = methodRegex.exec(signature);
 
@@ -119,6 +127,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
     const visibility = match[1] ? match[1].toUpperCase() : 'PACKAGE';
     const parameters = match[3].split(', ');
 
+    // set method
     setMethodMatcher({
       visibilities: [visibility],
       matcherType: 'EQUALS_FULLY',
