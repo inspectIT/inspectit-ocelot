@@ -12,7 +12,7 @@ import { DEFAULT_VISIBILITIES } from '../../../editor/method-configuration-edito
 /**
  * The scope wizard dialog itself.
  */
-const ScopeWizardDialog = ({ visible, onHide, onApply }) => {
+const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
   const [typeMatcher, setTypeMatcher] = useState({ type: 'type', matcherType: 'EQUALS_FULLY', name: null });
   const [methodMatcher, setMethodMatcher] = useState({
     visibilities: _.clone(DEFAULT_VISIBILITIES),
@@ -25,6 +25,56 @@ const ScopeWizardDialog = ({ visible, onHide, onApply }) => {
   });
 
   const [isApplyDisabled, setIsApplyDisabled] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(true);
+
+  // Fill out dialog, if scope is not null
+  useEffect(() => {
+    if (isEditMode && scope) {
+      // set type matcher
+      const { type, superclass, interfaces } = scope;
+      let targetType;
+      let targetMatcher;
+
+      if (type) {
+        targetType = 'type';
+        targetMatcher = type;
+      } else if (superclass) {
+        targetType = 'superclass';
+        targetMatcher = superclass;
+      } else if (interfaces && interfaces.length === 1) {
+        targetType = 'interfaces';
+        targetMatcher = interfaces[0];
+      } else {
+        // Scopes with multiple type matchers are currently not supported.
+        throw new Error('Scopes using multiple type matchers are currently not supported.');
+      }
+
+      const preparedTypeMatcher = {
+        type: targetType,
+        matcherType: targetMatcher['matcher-mode'] ? targetMatcher['matcher-mode'] : 'EQUALS_FULLY',
+        name: targetMatcher.name ? targetMatcher.name : null,
+      };
+      setTypeMatcher(preparedTypeMatcher);
+
+      // set method matcher
+      const { methods } = scope;
+
+      if (methods && methods.length === 1) {
+        const preparedMethodMatcher = {
+          visibilities: methods[0].visibility ? methods[0].visibility : _.clone(DEFAULT_VISIBILITIES),
+          matcherType: methods[0]['matcher-mode'] ? methods[0]['matcher-mode'] : null,
+          isConstructor: methods[0]['is-constructor'] ? methods[0]['is-constructor'] : false,
+          isSelectedParameter: _.has(methods[0], 'arguments'),
+          parameterInput: null,
+          parameterList: methods[0].arguments ? methods[0].arguments : [],
+          name: methods[0].name ? methods[0].name : null,
+        };
+        setMethodMatcher(preparedMethodMatcher);
+      }
+      // exit prefill mode
+      setIsEditMode(false);
+    }
+  });
 
   // Enable 'apply' button...
   useEffect(() => {
