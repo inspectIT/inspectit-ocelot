@@ -62,7 +62,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
       if (methods && methods.length === 1) {
         const preparedMethodMatcher = {
           visibilities: methods[0].visibility ? methods[0].visibility : _.clone(DEFAULT_VISIBILITIES),
-          matcherType: methods[0]['matcher-mode'] ? methods[0]['matcher-mode'] : null,
+          matcherType: methods[0]['matcher-mode'] ? methods[0]['matcher-mode'] : methods[0].name ? 'EQUALS_FULLY' : null,
           isConstructor: methods[0]['is-constructor'] ? methods[0]['is-constructor'] : false,
           isSelectedParameter: _.has(methods[0], 'arguments'),
           parameterInput: null,
@@ -71,6 +71,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
         };
         setMethodMatcher(preparedMethodMatcher);
       }
+
       // exit prefill mode
       setIsEditMode(false);
     }
@@ -99,6 +100,25 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
     }
   });
 
+  const resetState = () => {
+    setTypeMatcher({ type: 'type', matcherType: 'EQUALS_FULLY', name: null });
+    setMethodMatcher({
+      visibilities: _.clone(DEFAULT_VISIBILITIES),
+      matcherType: null,
+      isConstructor: false,
+      isSelectedParameter: false,
+      parameterInput: null,
+      parameterList: [],
+      name: null,
+    });
+  };
+
+  const exitDialog = () => {
+    resetState();
+    setIsEditMode(true);
+    onHide();
+  };
+
   const showClassBrowser = () => {
     return alert('Todo: Open Class Browser');
   };
@@ -111,10 +131,10 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
         disabled={isApplyDisabled}
         onClick={() => {
           onApply(typeMatcher, methodMatcher);
-          onHide();
+          exitDialog();
         }}
       />
-      <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
+      <Button label="Cancel" className="p-button-secondary" onClick={exitDialog} />
     </div>
   );
 
@@ -171,7 +191,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
           header="Define Selection"
           visible={visible}
           style={{ width: '50rem', minWidth: '50rem' }}
-          onHide={onHide}
+          onHide={exitDialog}
           blockScroll
           footer={footer}
           focusOnShow={false}
@@ -191,12 +211,15 @@ ScopeWizardDialog.propTypes = {
   onHide: PropTypes.func,
   /** Callback on dialog apply */
   onApply: PropTypes.func,
+  /** JSON model of the scope when in edit mode */
+  scope: PropTypes.object,
 };
 
 ScopeWizardDialog.defaultProps = {
   visible: true,
   onHide: () => {},
   onApply: () => {},
+  scope: null,
 };
 
 export default ScopeWizardDialog;

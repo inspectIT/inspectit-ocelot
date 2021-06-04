@@ -169,6 +169,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
             disabled={methodMatcher.isConstructor}
             className="fill"
             style={{ marginLeft: '0.5rem' }}
+            value={methodMatcher.name}
             onChange={(e) => setState('name', e.target.value)}
             placeholder="Method Name"
             tooltip="The name or pattern which is used to match against the fully qualified class or interface name."

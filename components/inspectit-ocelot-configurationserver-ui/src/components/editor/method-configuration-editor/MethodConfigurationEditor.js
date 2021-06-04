@@ -17,7 +17,7 @@ import { selectedFileContentsChanged } from '../../../redux/ducks/configuration/
 import { useDispatch } from 'react-redux';
 
 /** data */
-import { CONFIGURATION_TYPES, TOOLTIP_OPTIONS } from "../../../data/constants";
+import { CONFIGURATION_TYPES, TOOLTIP_OPTIONS } from '../../../data/constants';
 
 const SCOPE_STATES_RULES = {
   TRACING: 'r_method_configuration_trace',
@@ -33,6 +33,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   // state variables
   const [scopes, setScopes] = useState([]);
   const [currentScope, setCurrentScope] = useState(null);
+  const [currentScopeName, setCurrentScopeName] = useState(null);
   const [expandedRows, setExpandedRows] = useState([]);
   const [configurationError, setConfigurationError] = useState(null);
   const [configuration, setConfiguration] = useState([]);
@@ -41,6 +42,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   const hideScopeWizardDialog = () => {
     setIsScopeWizardDialogShown(false);
     setCurrentScope(null);
+    setCurrentScopeName(null);
   };
 
   // derived variables
@@ -251,6 +253,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
           tooltipOptions={TOOLTIP_OPTIONS}
           onClick={() => {
             setCurrentScope(scope);
+            setCurrentScopeName(name);
             setIsScopeWizardDialogShown(true);
           }}
         />
