@@ -68,7 +68,7 @@ const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
   // when the selection of the currelty selected method changes
   const onSelectionChange = ({ value, label, parent }) => {
     setSelectedMethodKey(value);
-    setSelectedMethod({ label, parent });
+    setSelectedMethod({ signature: label, parent });
   };
 
   // the dialogs footer

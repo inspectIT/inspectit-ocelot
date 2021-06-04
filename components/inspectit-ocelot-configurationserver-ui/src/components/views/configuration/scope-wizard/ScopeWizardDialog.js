@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import TypeMatcher from './TypeMatcher';
 import MethodMatcher from './MethodMatcher';
+import ClassBrowserDialog from '../../../common/class-browser/ClassBrowserDialog';
 
 /** data */
 import { DEFAULT_VISIBILITIES } from '../../../editor/method-configuration-editor/constants';
@@ -29,6 +30,8 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
   const [methodMatcher, setMethodMatcher] = useState({ ...DEFAULT_METHOD_MATCHER_STATE });
 
   const [isApplyDisabled, setIsApplyDisabled] = useState(true);
+
+  const [isClassBrowserVisible, setClassBrowserVisible] = useState(false);
 
   // Set dialog mode create/edit
   useEffect(() => {
@@ -103,7 +106,30 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
   });
 
   const showClassBrowser = () => {
-    return alert('Todo: Open Class Browser');
+    setClassBrowserVisible(true);
+  };
+
+  const selectMethod = ({ signature, parent: { type, name } }) => {
+    setTypeMatcher({ type: type === 'class' ? 'type' : 'interfaces', matcherType: 'EQUALS_FULLY', name: name });
+
+    const methodRegex = /(public|private|protected)?.*\s(\S+)\((.*)\)/;
+    const match = methodRegex.exec(signature);
+
+    const methodName = match[2];
+    const visibility = match[1] ? match[1].toUpperCase() : 'PACKAGE';
+    const parameters = match[3].split(', ');
+
+    setMethodMatcher({
+      visibilities: [visibility],
+      matcherType: 'EQUALS_FULLY',
+      isConstructor: false,
+      isSelectedParameter: true,
+      parameterInput: null,
+      parameterList: parameters,
+      name: methodName,
+    });
+
+    setClassBrowserVisible(false);
   };
 
   // the dialogs footer
@@ -182,6 +208,8 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
           <TypeMatcher typeMatcher={typeMatcher} onTypeMatcherChange={setTypeMatcher} onShowClassBrowser={showClassBrowser} />
           <MethodMatcher methodMatcher={methodMatcher} onMethodMatcherChange={setMethodMatcher} />
         </Dialog>
+
+        <ClassBrowserDialog visible={isClassBrowserVisible} onSelect={selectMethod} onHide={() => setClassBrowserVisible(false)} />
       </div>
     </>
   );
