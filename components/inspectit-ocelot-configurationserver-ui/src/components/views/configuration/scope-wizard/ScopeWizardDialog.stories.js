@@ -26,8 +26,6 @@ EditMode.args = {
   visible: true,
   scope: {
     type: { name: 'myClass', 'matcher-mode': 'EQUALS_FULLY' },
-    methods: [
-      { name: 'myMethod', 'matcher-mode': 'MATCHES', visibility: ['PROTECTED', 'PRIVATE'], arguments: ['firstArg', 'secondArg'] },
-    ],
+    methods: [{ name: 'myMethod', 'matcher-mode': 'MATCHES', visibility: ['PROTECTED', 'PRIVATE'], arguments: ['firstArg', 'secondArg'] }],
   },
 };
