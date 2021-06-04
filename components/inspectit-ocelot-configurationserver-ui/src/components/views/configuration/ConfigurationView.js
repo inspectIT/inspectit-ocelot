@@ -12,7 +12,6 @@ import FileTree from './FileTree';
 import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import SearchDialog from './dialogs/SearchDialog';
 import ConfigurationSidebar from './ConfigurationSidebar';
-import ClassBrowserDialog from '../../common/class-browser/ClassBrowserDialog';
 
 /** Data */
 import { CONFIGURATION_TYPES, DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';

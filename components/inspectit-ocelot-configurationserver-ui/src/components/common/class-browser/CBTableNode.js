@@ -35,10 +35,12 @@ const CBTableModel = ({ label, type, value, onChange, selectedMethod, parent }) 
       const method = {
         value,
         label,
-        parent
+        parent,
       };
 
-      selectionButton = <RadioButton value={value} onChange={() => onChange(method)} checked={selectedMethod === value} style={{marginRight: "0.5rem"}} />;
+      selectionButton = (
+        <RadioButton value={value} onChange={() => onChange(method)} checked={selectedMethod === value} style={{ marginRight: '0.5rem' }} />
+      );
     }
 
     return (
