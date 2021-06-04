@@ -4,6 +4,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputSwitch } from 'primereact/inputswitch';
 import { Button } from 'primereact/button';
+import { v4 as uuid } from 'uuid';
 import yaml from 'js-yaml';
 import _ from 'lodash';
 import SelectionInformation from '../SelectionInformation';
@@ -89,11 +90,11 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
     const className = typeMatcher.name;
 
     if (_.isEmpty(type) || _.isEmpty(classMatcherType) || _.isEmpty(className)) {
-      throw new Error('Class matcher must be fully specified!');
+      throw new Error('Type matcher must be fully specified!');
     }
 
     const typeMatcherBody = { name: className, 'matcher-mode': classMatcherType };
-    let classMatcherScope = { [type]: type === 'interfaces' ? [typeMatcherBody] : typeMatcherBody };
+    const classMatcherScope = { [type]: type === 'interfaces' ? [typeMatcherBody] : typeMatcherBody };
 
     // Prepare method matcher
     const visibilities = methodMatcher.visibilities;
@@ -102,10 +103,6 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
     const withParameter = methodMatcher.isSelectedParameter;
     const parameters = methodMatcher.parameterList;
     const methodName = methodMatcher.name;
-
-    if (_.isEmpty(methodMatcherType) ^ _.isEmpty(methodName)) {
-      throw new Error('Either the methodMatcherType AND methodName must be specified, or neither of them!');
-    }
 
     const constructorBody = { 'is-constructor': true };
     const methodNameBody = methodName && methodMatcherType ? { name: methodName, 'matcher-mode': methodMatcherType } : {};
@@ -136,9 +133,9 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
    * @param {*} typeMatcher the class instrumentation settings
    * @param {*} methodMatcher the method instrumentation settings
    */
-  const writeScope = (typeMatcher, methodMatcher) => {
+  const addScope = (typeMatcher, methodMatcher) => {
     const cloneConfiguration = _.cloneDeep(configuration);
-    const scopeName = _.uniqueId('s_number');
+    const scopeName = ('s_gen_scope_' + uuid()).replaceAll('-', '_');
     const preparedConfiguration = prepareConfiguration(scopeName, typeMatcher, methodMatcher);
 
     try {
@@ -345,7 +342,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
           )}
         </div>
         {!configurationError && <MethodConfigurationEditorFooter onAdd={setIsScopeWizardDialogShown} />}
-        <ScopeWizardDialog visible={isScopeWizardDialogShown} onHide={hideScopeWizardDialog} onApply={writeScope} />
+        <ScopeWizardDialog visible={isScopeWizardDialogShown} onHide={hideScopeWizardDialog} onApply={addScope} />
       </div>
     </>
   );
