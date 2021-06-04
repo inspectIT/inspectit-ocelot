@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { RadioButton } from 'primereact/radiobutton';
 
-const CBTableModel = ({ label, type, value, onChange, selectedMethod }) => {
+const CBTableModel = ({ label, type, value, onChange, selectedMethod, parent }) => {
   if (type === 'package') {
     return (
       <>
@@ -32,7 +32,13 @@ const CBTableModel = ({ label, type, value, onChange, selectedMethod }) => {
       typeIcon = 'm';
       typeClass = 'theme-method';
 
-      selectionButton = <RadioButton value={value} onChange={(e) => onChange(e.value)} checked={selectedMethod === value} />;
+      const method = {
+        value,
+        label,
+        parent
+      };
+
+      selectionButton = <RadioButton value={value} onChange={() => onChange(method)} checked={selectedMethod === value} style={{marginRight: "0.5rem"}} />;
     }
 
     return (
