@@ -60,6 +60,9 @@ const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
     const result = [];
     _.each(searchResult, (classElement) => transformClassStructureToTableModel(result, classElement));
     setTreeModel(result);
+
+    setSelectedMethod(null);
+    setSelectedMethodKey(null);
   }, [searchResult]);
 
   // when the selection of the currelty selected method changes
