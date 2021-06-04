@@ -31,9 +31,9 @@ const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
   const loadingAgents = useSelector((state) => state.agentStatus.pendingRequests) > 0;
 
   // fetching the search results
-  const [{ data: searchResult, isLoading: isSearching }, executeSearch] = useFetchData('https://ocelot-test.free.beeceptor.com/search', {
+  const [{ data: searchResult, isLoading: isSearching }, executeSearch] = useFetchData('/command/list/classes', {
     query: searchQuery,
-    agent: selectedAgent,
+    "agent-id": selectedAgent,
   });
 
   // derived variables
@@ -132,6 +132,10 @@ const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
           align-items: center;
           justify-content: center;
           color: gray;
+        }
+
+        .content :global(.p-hidden-accessible) {
+          display: none;
         }
       `}</style>
 

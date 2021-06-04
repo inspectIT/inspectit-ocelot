@@ -1,6 +1,7 @@
 import yaml from 'js-yaml';
 import React from 'react';
 import { connect } from 'react-redux';
+import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration';
 import { notificationActions } from '../../../redux/ducks/notification';
 import EditorView from '../../editor/EditorView';
@@ -12,9 +13,10 @@ import FileTree from './FileTree';
 import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import SearchDialog from './dialogs/SearchDialog';
 import ConfigurationSidebar from './ConfigurationSidebar';
+import ClassBrowserDialog from '../../common/class-browser/ClassBrowserDialog';
 
 /** Data */
-import { CONFIGURATION_TYPES, DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
+import { CONFIGURATION_TYPES } from '../../../data/constants';
 
 /**
  * The header component of the editor view.
@@ -237,6 +239,8 @@ class ConfigurationView extends React.Component {
         <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} filePath={this.state.filePath} />
 
         <SearchDialog visible={this.state.isSearchDialogShown} onHide={this.hideSearchDialog} openFile={this.openFile} />
+
+        <ClassBrowserDialog visible={true} onSelect={console.log} />
       </div>
     );
   }

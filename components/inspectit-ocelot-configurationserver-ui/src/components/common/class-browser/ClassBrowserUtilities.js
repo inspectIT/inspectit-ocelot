@@ -40,28 +40,39 @@ export const transformClassStructureToTableModel = (result, { name, type, method
     targetNode = target;
   });
 
-  // add type
-  const typeNode = {
-    key: name,
-    label: className,
-    type,
-    children: [],
-    selectable: false,
-  };
-  targetNode.children.push(typeNode);
+  let typeTarget;
+  if (targetNode === result) {
+    typeTarget = targetNode;
+  } else {
+    typeTarget = targetNode.children;
+  }
 
-  // add methods
-  methods.forEach((method) => {
-    typeNode.children.push({
-      key: name + ': ' + method,
-      label: method,
-      type: 'method',
-      parent: {
-        name,
-        type,
-      },
+  // only if it does not already exist
+  if (!_.find(typeTarget, { key: name })) {
+    // add type
+    const typeNode = {
+      key: name,
+      label: className,
+      type,
+      children: [],
+      selectable: false,
+    };
+
+    typeTarget.push(typeNode);
+
+    // add methods
+    methods.forEach((method) => {
+      typeNode.children.push({
+        key: name + ': ' + method,
+        label: method,
+        type: 'method',
+        parent: {
+          name,
+          type,
+        },
+      });
     });
-  });
+  }
 };
 
 export const transformAgentStatuses = (agentStatuses) => {
