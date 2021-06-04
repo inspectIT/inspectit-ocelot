@@ -76,6 +76,12 @@ const ScopeMethodDisplay = ({ scope }) => {
           with visibilities of <HighlightText value={visibilities} theme="green" />
         </>
       );
+    } else if (!nameDescriptor) {
+      visibilityDescriptor = (
+        <>
+          with any visibility
+        </>
+      );
     }
   }
 

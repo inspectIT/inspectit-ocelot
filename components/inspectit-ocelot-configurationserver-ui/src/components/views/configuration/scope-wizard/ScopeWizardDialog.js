@@ -9,20 +9,24 @@ import MethodMatcher from './MethodMatcher';
 /** data */
 import { DEFAULT_VISIBILITIES } from '../../../editor/method-configuration-editor/constants';
 
+const DEFAULT_TYPE_MATCHER_STATE = { type: 'type', matcherType: 'EQUALS_FULLY', name: '' };
+
+const DEFAULT_METHOD_MATCHER_STATE = {
+  visibilities: _.clone(DEFAULT_VISIBILITIES),
+  matcherType: null,
+  isConstructor: false,
+  isSelectedParameter: false,
+  parameterInput: null,
+  parameterList: [],
+  name: '',
+};
+
 /**
  * The scope wizard dialog itself.
  */
 const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
-  const [typeMatcher, setTypeMatcher] = useState({ type: 'type', matcherType: 'EQUALS_FULLY', name: null });
-  const [methodMatcher, setMethodMatcher] = useState({
-    visibilities: _.clone(DEFAULT_VISIBILITIES),
-    matcherType: null,
-    isConstructor: false,
-    isSelectedParameter: false,
-    parameterInput: null,
-    parameterList: [],
-    name: null,
-  });
+  const [typeMatcher, setTypeMatcher] = useState({ ...DEFAULT_TYPE_MATCHER_STATE });
+  const [methodMatcher, setMethodMatcher] = useState({ ...DEFAULT_METHOD_MATCHER_STATE });
 
   const [isApplyDisabled, setIsApplyDisabled] = useState(true);
 
@@ -30,16 +34,8 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
   useEffect(() => {
     // Set default state
     if (visible) {
-      const preparedTypeMatcher = { type: 'type', matcherType: 'EQUALS_FULLY', name: null };
-      const preparedMethodMatcher = {
-        visibilities: _.clone(DEFAULT_VISIBILITIES),
-        matcherType: null,
-        isConstructor: false,
-        isSelectedParameter: false,
-        parameterInput: null,
-        parameterList: [],
-        name: null,
-      };
+      const preparedTypeMatcher = { ...DEFAULT_TYPE_MATCHER_STATE };
+      const preparedMethodMatcher = { ...DEFAULT_METHOD_MATCHER_STATE };
       // When edit mode, fill out dialog
       if (scope) {
         // set type matcher
@@ -63,7 +59,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
 
         preparedTypeMatcher.type = targetType;
         preparedTypeMatcher.matcherType = _.get(targetMatcher, 'matcher-mode', 'EQUALS_FULLY');
-        preparedTypeMatcher.name = _.get(targetMatcher, 'name', null);
+        preparedTypeMatcher.name = _.get(targetMatcher, 'name', '');
 
         // set method matcher
         const { methods } = scope;
@@ -75,7 +71,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
           preparedMethodMatcher.isConstructor = _.get(method, 'is-constructor', false);
           preparedMethodMatcher.isSelectedParameter = _.has(method, 'arguments');
           preparedMethodMatcher.parameterList = _.get(method, 'arguments', []);
-          preparedMethodMatcher.name = _.get(method, 'name');
+          preparedMethodMatcher.name = _.get(method, 'name', '');
         }
       }
       setTypeMatcher(preparedTypeMatcher);
