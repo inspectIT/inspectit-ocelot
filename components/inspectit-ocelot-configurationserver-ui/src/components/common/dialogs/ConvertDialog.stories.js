@@ -3,7 +3,7 @@ import React from 'react';
 import ConvertDialog from './ConvertDialog';
 
 export default {
-  title: 'Components/Editor/Dialogs/ConvertDialog',
+  title: 'Components/Common/Dialogs/ConvertDialog',
   component: ConvertDialog,
 };
 

@@ -11,11 +11,11 @@ import FileToolbar from './FileToolbar';
 import FileTree from './FileTree';
 import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import SearchDialog from './dialogs/SearchDialog';
+import ConvertDialog from '../../common/dialogs/ConvertDialog';
 import ConfigurationSidebar from './ConfigurationSidebar';
 
 /** Data */
 import { CONFIGURATION_TYPES, DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
-import ConvertDialog from '../../common/dialogs/ConvertDialog';
 
 /**
  * The header component of the editor view.
@@ -93,8 +93,14 @@ class ConfigurationView extends React.Component {
 
   convertEditor = () => {
     const { selection, fileContent } = this.props;
-    const contentWithoutHeader = fileContent.split('\n').pop();
-    this.props.writeFile(selection, contentWithoutHeader);
+    const configuration = yaml.load(fileContent);
+
+    try {
+      const updatedYamlConfiguration = yaml.dump(configuration);
+      this.props.writeFile(selection, updatedYamlConfiguration, false);
+    } catch (error) {
+      console.error('Configuration could not been updated.', error);
+    }
   };
 
   onChange = (value) => {

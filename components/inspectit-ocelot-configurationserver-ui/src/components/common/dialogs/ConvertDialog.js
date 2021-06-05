@@ -27,7 +27,7 @@ const ConvertDialog = ({ name, visible, onHide, text, onSuccess }) => {
             label="Proceed"
             ref={proceedButton}
             onClick={() => {
-              onSuccess(name);
+              onSuccess();
               onHide();
             }}
           />
