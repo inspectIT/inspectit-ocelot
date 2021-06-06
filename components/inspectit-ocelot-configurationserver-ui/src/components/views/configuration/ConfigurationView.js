@@ -11,7 +11,9 @@ import FileToolbar from './FileToolbar';
 import FileTree from './FileTree';
 import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import SearchDialog from './dialogs/SearchDialog';
+import ConvertDialog from '../../common/dialogs/ConvertDialog';
 import ConfigurationSidebar from './ConfigurationSidebar';
+import ShowConfigurationDialog from '../dialogs/ShowConfigurationDialog';
 
 /** Data */
 import { CONFIGURATION_TYPES, DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
@@ -63,6 +65,8 @@ class ConfigurationView extends React.Component {
     isMoveDialogShown: false,
     filePath: null,
     isSearchDialogShown: false,
+    isConfigurationDialogShown: false,
+    isConvertDialogShown: false,
   };
 
   parsePath = (filePath, defaultConfigFilePath) => {
@@ -85,8 +89,21 @@ class ConfigurationView extends React.Component {
   };
 
   onSave = () => {
-    const { selection, fileContent } = this.props;
-    this.props.writeFile(selection, fileContent, false);
+    const { selection, fileContent, writeFile } = this.props;
+    writeFile(selection, fileContent, false);
+  };
+
+  convertEditor = () => {
+    const { selection, fileContent, writeFile } = this.props;
+
+    try {
+      // load-and-dump is done to remove comments etc.
+      const configuration = yaml.load(fileContent);
+      const updatedYamlConfiguration = yaml.dump(configuration);
+      writeFile(selection, updatedYamlConfiguration, false);
+    } catch (error) {
+      console.error('Configuration could not been updated.', error);
+    }
   };
 
   onChange = (value) => {
@@ -118,6 +135,14 @@ class ConfigurationView extends React.Component {
   showSearchDialog = () => this.setState({ isSearchDialogShown: true });
 
   hideSearchDialog = () => this.setState({ isSearchDialogShown: false });
+
+  showConfigurationDialog = () => this.setState({ isConfigurationDialogShown: true });
+
+  hideConfigurationDialog = () => this.setState({ isConfigurationDialogShown: false });
+
+  showConvertDialog = () => this.setState({ isConvertDialogShown: true });
+
+  hideConvertDialog = () => this.setState({ isConvertDialogShown: false });
 
   /**
    * Opens the specified file in the specified version. The version is only changed if it differs from the current one.
@@ -152,6 +177,8 @@ class ConfigurationView extends React.Component {
     const showHeader = !!name;
 
     const readOnly = !canWrite || !!selectedDefaultConfigFile || !isLatestVersion;
+
+    const fileContentWithoutFirstLine = fileContent ? fileContent.split('\n').slice(1).join('\n') : '';
 
     return (
       <div className="this">
@@ -207,6 +234,8 @@ class ConfigurationView extends React.Component {
           schema={schema}
           hint={'Select a file to start editing.'}
           onSave={this.onSave}
+          showConfigurationDialog={this.showConfigurationDialog}
+          showConvertWarning={this.showConvertDialog}
           enableButtons={showEditor && !loading}
           onCreate={enableOcelotAutocompletion}
           onChange={this.onChange}
@@ -237,6 +266,22 @@ class ConfigurationView extends React.Component {
         <MoveDialog visible={this.state.isMoveDialogShown} onHide={this.hideMoveDialog} filePath={this.state.filePath} />
 
         <SearchDialog visible={this.state.isSearchDialogShown} onHide={this.hideSearchDialog} openFile={this.openFile} />
+
+        <ShowConfigurationDialog
+          visible={this.state.isConfigurationDialogShown}
+          onHide={this.hideConfigurationDialog}
+          configurationValue={fileContentWithoutFirstLine}
+          fileName={path + name}
+          loading={this.props.loading}
+        />
+
+        <ConvertDialog
+          visible={this.state.isConvertDialogShown}
+          onHide={this.hideConvertDialog}
+          name={path + name}
+          text="Warning"
+          onSuccess={this.convertEditor}
+        />
       </div>
     );
   }

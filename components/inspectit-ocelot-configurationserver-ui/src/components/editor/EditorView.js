@@ -28,6 +28,8 @@ const EditorView = ({
   onChange,
   onCreate,
   onSave,
+  showConfigurationDialog,
+  showConvertWarning,
   isRefreshing,
   enableButtons,
   isErrorNotification,
@@ -160,11 +162,13 @@ const EditorView = ({
           onRefresh={onRefresh}
           isRefreshing={isRefreshing}
           onSave={onSave}
+          onShowYaml={showConfigurationDialog}
+          onConvert={showConvertWarning}
           onSearch={() => editorRef.current.executeCommand('find')}
           onHelp={() => editorRef.current.showShortcuts()}
           visualConfig={showVisualConfigurationView}
           onVisualConfigChange={onToggleVisualConfigurationView}
-          showOnlySave={configurationType === CONFIGURATION_TYPES.METHOD_CONFIGURATION}
+          showMethodConfiguration={configurationType === CONFIGURATION_TYPES.METHOD_CONFIGURATION}
         >
           {children}
         </EditorToolbar>
@@ -223,6 +227,10 @@ EditorView.propTypes = {
   hint: PropTypes.string,
   /** Callback which is triggered when the save button is pressed. */
   onSave: PropTypes.func,
+  /** Callback which is triggered when the show yaml button is pressed. */
+  showConfigurationDialog: PropTypes.func,
+  /** Callback which is triggered when the convert button is pressed. */
+  showConvertWarning: PropTypes.func,
   /** Callback which is executed when the refresh button is pressed. The refresh button is only shown if this callback is specified. */
   onRefresh: PropTypes.func,
   /** If true, the refresh button is disabled and showing a spinner. */

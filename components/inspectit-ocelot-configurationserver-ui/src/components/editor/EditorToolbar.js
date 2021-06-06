@@ -2,6 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
+import { SplitButton } from 'primereact/splitbutton';
+
+/** data */
+import { TOOLTIP_OPTIONS } from '../../data/constants';
 
 /**
  * The toolbar used within the editor view.
@@ -9,6 +13,8 @@ import { Toolbar } from 'primereact/toolbar';
 const EditorToolbar = ({
   enableButtons,
   onSave,
+  onConvert,
+  onShowYaml,
   onSearch,
   onHelp,
   onRefresh,
@@ -17,7 +23,7 @@ const EditorToolbar = ({
   visualConfig,
   onVisualConfigChange,
   children,
-  showOnlySave,
+  showMethodConfiguration,
 }) => (
   <div className="this">
     <style jsx>
@@ -40,24 +46,66 @@ const EditorToolbar = ({
     <Toolbar>
       <div className="p-toolbar-group-left">{children}</div>
       <div className="p-toolbar-group-right button-not-active">
-        {!showOnlySave && (
+        {!showMethodConfiguration && (
           <Button
             disabled={!enableButtons}
             icon="pi pi-table"
             className={!visualConfig && 'p-button-outlined'}
             onClick={onVisualConfigChange}
+            tooltip="Show Table View"
+            tooltipOptions={TOOLTIP_OPTIONS}
           />
         )}
-        {!showOnlySave && onRefresh && (
-          <Button disabled={!enableButtons || isRefreshing} icon={'pi pi-refresh' + (isRefreshing ? ' pi-spin' : '')} onClick={onRefresh} />
+        {!showMethodConfiguration && onRefresh && (
+          <Button
+            disabled={!enableButtons || isRefreshing}
+            icon={'pi pi-refresh' + (isRefreshing ? ' pi-spin' : '')}
+            onClick={onRefresh}
+            tooltip="Refresh File"
+            tooltipOptions={TOOLTIP_OPTIONS}
+          />
         )}
-        {!showOnlySave && !visualConfig && (
+        {!showMethodConfiguration && !visualConfig && (
           <>
-            <Button disabled={!enableButtons} icon="pi pi-question" onClick={onHelp} />
-            <Button disabled={!enableButtons} icon="pi pi-search" onClick={onSearch} />
+            <Button
+              disabled={!enableButtons}
+              icon="pi pi-question"
+              onClick={onHelp}
+              tooltip="Show Keyboard Shortcuts"
+              tooltipOptions={TOOLTIP_OPTIONS}
+            />
+            <Button
+              disabled={!enableButtons}
+              icon="pi pi-search"
+              onClick={onSearch}
+              tooltip="Search in File"
+              tooltipOptions={TOOLTIP_OPTIONS}
+            />
           </>
         )}
-        <Button disabled={!enableButtons || !canSave} onClick={onSave} label="Save" icon="pi pi-save" />
+        {showMethodConfiguration && (
+          <SplitButton
+            disabled={!enableButtons}
+            label="Show as YAML"
+            tooltipOptions={TOOLTIP_OPTIONS}
+            onClick={onShowYaml}
+            model={[
+              {
+                label: 'Convert to YAML',
+                icon: 'pi pi-images',
+                command: () => onConvert(),
+              },
+            ]}
+          />
+        )}
+        <Button
+          disabled={!enableButtons || !canSave}
+          onClick={onSave}
+          label="Save"
+          icon="pi pi-save"
+          tooltip="Save File"
+          tooltipOptions={TOOLTIP_OPTIONS}
+        />
       </div>
     </Toolbar>
   </div>
@@ -68,9 +116,11 @@ EditorToolbar.propTypes = {
   isRefreshing: PropTypes.bool,
   canSave: PropTypes.bool,
   visualConfig: PropTypes.bool,
-  showOnlySave: PropTypes.bool,
+  showMethodConfiguration: PropTypes.bool,
   children: PropTypes.node,
   onSave: PropTypes.func,
+  onConvert: PropTypes.func,
+  onShowYaml: PropTypes.func,
   onSearch: PropTypes.func,
   onHelp: PropTypes.func,
   onRefresh: PropTypes.func,
@@ -82,9 +132,11 @@ EditorToolbar.defaultProps = {
   isRefreshing: false,
   canSave: true,
   visualConfig: false,
-  showOnlySave: false,
+  showMethodConfiguration: false,
   children: null,
   onSave: () => {},
+  onConvert: () => {},
+  onShowYaml: () => {},
   onSearch: () => {},
   onHelp: () => {},
   onRefresh: null,

@@ -4,7 +4,7 @@ import { agentStatusActions } from '../../../redux/ducks/agent-status';
 import StatusTable from './StatusTable';
 import StatusToolbar from './StatusToolbar';
 import StatusFooterToolbar from './StatusFooterToolbar';
-import AgentConfigurationDialog from './dialogs/AgentConfigurationDialog';
+import ShowConfigurationDialog from '../dialogs/ShowConfigurationDialog';
 import axios from '../../../lib/axios-api';
 import { map, isEqual } from 'lodash';
 
@@ -174,7 +174,7 @@ class StatusView extends React.Component {
           <div>
             <StatusFooterToolbar fullData={agents} filteredData={filteredAgents} />
           </div>
-          <AgentConfigurationDialog
+          <ShowConfigurationDialog
             visible={isAgentConfigurationShown}
             onHide={() => this.setAgentConfigurationShown(false)}
             configurationValue={configurationValue}

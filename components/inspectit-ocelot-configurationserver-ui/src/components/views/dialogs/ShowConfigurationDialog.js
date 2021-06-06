@@ -4,10 +4,12 @@ import { Button } from 'primereact/button';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { tomorrowNightBlue } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 import { ProgressBar } from 'primereact/progressbar';
+import PropTypes from 'prop-types';
+
 /**
  * Dialog shows the agent configuration.
  */
-const AgentConfigurationDialog = ({ visible, onHide, configurationValue, error, loading, agentName }) => {
+const ShowConfigurationDialog = ({ visible, onHide, configurationValue, error, loading, agentName, fileName }) => {
   const downloadFilename = 'agent-config' + (agentName ? '_' + agentName.replace(/[^a-z0-9-]/gi, '_').toLowerCase() : '') + '.yml';
 
   // downloading the agent configuration
@@ -15,6 +17,12 @@ const AgentConfigurationDialog = ({ visible, onHide, configurationValue, error, 
     const blob = new Blob([configurationValue], { type: 'text/x-yaml' });
     return window.URL.createObjectURL(blob);
   };
+
+  const agentHeader = 'Agent Configuration' + (agentName ? " of Agent '" + agentName + "'" : '');
+
+  const fileHeader = 'Configuration' + (fileName ? " of File '" + fileName + "'" : '');
+
+  const dialogHeader = agentName ? agentHeader : fileHeader;
 
   return (
     <>
@@ -28,7 +36,7 @@ const AgentConfigurationDialog = ({ visible, onHide, configurationValue, error, 
       </style>
       <Dialog
         style={{ width: '50vw', overflow: 'auto' }}
-        header={'Agent Configuration' + (agentName ? " of Agent '" + agentName + "'" : '')}
+        header={dialogHeader}
         modal={true}
         visible={visible}
         onHide={onHide}
@@ -55,4 +63,27 @@ const AgentConfigurationDialog = ({ visible, onHide, configurationValue, error, 
   );
 };
 
-export default AgentConfigurationDialog;
+ShowConfigurationDialog.propTypes = {
+  /** The content of the configuration */
+  configurationValue: PropTypes.string,
+  /** Whether a error is thrown */
+  error: PropTypes.bool,
+  /** Whether the dialog is visible */
+  visible: PropTypes.bool,
+  /** Whether the file is loading */
+  loading: PropTypes.bool,
+  /** Callback on dialog hide */
+  onHide: PropTypes.func,
+  /** The agent name of the configuration */
+  agentName: PropTypes.string,
+  /** The file name of the configuration */
+  fileName: PropTypes.string,
+};
+
+ShowConfigurationDialog.defaultProps = {
+  error: false,
+  visible: true,
+  onHide: () => {},
+};
+
+export default ShowConfigurationDialog;
