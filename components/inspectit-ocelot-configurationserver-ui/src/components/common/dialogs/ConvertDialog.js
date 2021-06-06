@@ -21,11 +21,13 @@ const ConvertDialog = ({ name, visible, onHide, text, onSuccess }) => {
       modal={true}
       visible={visible}
       onHide={onHide}
+      style={{ maxWidth: '45rem' }}
       footer={
         <div>
           <Button
             label="Proceed"
             ref={proceedButton}
+            className="p-button-danger"
             onClick={() => {
               onSuccess();
               onHide();
@@ -35,16 +37,10 @@ const ConvertDialog = ({ name, visible, onHide, text, onSuccess }) => {
         </div>
       }
     >
-      <h2 style={{ color: '#FFA900' }}> Warning </h2>
-      <span>
-        The file <b>&quot;{name}&quot;</b> will be converted to an editor-file!
-      </span>
-
-      <br />
-
-      <span>
-        <b>This process cannot be reverted!</b>
-      </span>
+      <p>
+        The UI-based editor will be removed from file <b>&quot;{name}&quot;</b> and it will be converted into a YAML configuration file!
+        This process <b>cannot</b> be reverted!
+      </p>
     </Dialog>
   );
 };

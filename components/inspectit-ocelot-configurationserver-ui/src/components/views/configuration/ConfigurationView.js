@@ -89,17 +89,18 @@ class ConfigurationView extends React.Component {
   };
 
   onSave = () => {
-    const { selection, fileContent } = this.props;
-    this.props.writeFile(selection, fileContent, false);
+    const { selection, fileContent, writeFile } = this.props;
+    writeFile(selection, fileContent, false);
   };
 
   convertEditor = () => {
-    const { selection, fileContent } = this.props;
-    const configuration = yaml.load(fileContent);
+    const { selection, fileContent, writeFile } = this.props;
 
     try {
+      // load-and-dump is done to remove comments etc.
+      const configuration = yaml.load(fileContent);
       const updatedYamlConfiguration = yaml.dump(configuration);
-      this.props.writeFile(selection, updatedYamlConfiguration, false);
+      writeFile(selection, updatedYamlConfiguration, false);
     } catch (error) {
       console.error('Configuration could not been updated.', error);
     }
@@ -176,6 +177,8 @@ class ConfigurationView extends React.Component {
     const showHeader = !!name;
 
     const readOnly = !canWrite || !!selectedDefaultConfigFile || !isLatestVersion;
+
+    const fileContentWithoutFirstLine = fileContent ? fileContent.split('\n').slice(1).join('\n') : '';
 
     return (
       <div className="this">
@@ -267,7 +270,7 @@ class ConfigurationView extends React.Component {
         <ShowConfigurationDialog
           visible={this.state.isConfigurationDialogShown}
           onHide={this.hideConfigurationDialog}
-          configurationValue={this.props.fileContent}
+          configurationValue={fileContentWithoutFirstLine}
           fileName={path + name}
           loading={this.props.loading}
         />

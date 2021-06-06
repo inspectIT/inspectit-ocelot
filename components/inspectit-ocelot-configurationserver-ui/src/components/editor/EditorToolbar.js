@@ -86,13 +86,13 @@ const EditorToolbar = ({
         {showMethodConfiguration && (
           <SplitButton
             disabled={!enableButtons}
-            label="Show YAML"
-            tooltip="Show YAML"
+            label="Show as YAML"
             tooltipOptions={TOOLTIP_OPTIONS}
             onClick={onShowYaml}
             model={[
               {
-                label: 'Convert',
+                label: 'Convert to YAML',
+                icon: 'pi pi-images',
                 command: () => onConvert(),
               },
             ]}

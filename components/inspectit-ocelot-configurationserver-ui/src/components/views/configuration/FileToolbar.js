@@ -45,6 +45,10 @@ const FileToolbar = ({
         .this :global(.p-toolbar-group-right > *) {
           margin-left: 0.25rem;
         }
+
+        .this :global(.p-toolbar-group-left .p-menu) {
+          width: 15rem;
+        }
       `}</style>
 
       <Toolbar>

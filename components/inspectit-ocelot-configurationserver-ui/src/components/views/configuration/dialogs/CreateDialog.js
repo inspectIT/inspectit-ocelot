@@ -7,6 +7,7 @@ import { Message } from 'primereact/message';
 import { InputText } from 'primereact/inputtext';
 import { configurationUtils, configurationActions } from '../../../../redux/ducks/configuration';
 import PropTypes from 'prop-types';
+import yaml from 'js-yaml';
 
 /** Data */
 import { CONFIGURATION_TYPES } from '../../../../data/constants';
@@ -136,7 +137,7 @@ class CreateDialog extends React.Component {
       let content = '';
       if (configurationType !== CONFIGURATION_TYPES.YAML) {
         const fileHeader = '# {"type": "' + configurationType.name + '"}\n';
-        const fileContent = JSON.stringify(configurationType.template);
+        const fileContent = yaml.dump(configurationType.template);
         content = fileHeader + fileContent;
       }
       writeFile(fullPath, content, true, true);
