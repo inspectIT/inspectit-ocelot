@@ -19,7 +19,8 @@ github_changelog_generator \
   --since-tag ${LAST_RELEASE_TAG} \
   --no-author \
   --no-unreleased \
-  --header-label "## Changelog"
+  --header-label "## Changelog" \
+  --max-issues 500
 
 sed -i -e '3,5d' CHANGELOG.md
 sed -i '$ d' CHANGELOG.md
