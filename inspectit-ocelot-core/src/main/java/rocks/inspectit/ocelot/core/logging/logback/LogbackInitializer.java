@@ -55,15 +55,16 @@ public class LogbackInitializer {
      */
     static final String INSPECTIT_LOGGING_CONSOLE_ENABLED = "INSPECTIT_LOGGING_CONSOLE_ENABLED";
 
-    // flags for the filters
-    static boolean consoleEnabled = isConsoleInitiallyEnabled();
-
-    static boolean fileEnabled = true;
-
-    static boolean selfMonitoringEnabled = true;
-
+    /**
+     * {@link #consoleEnabled} is depending on this function, thus, the field order is important.
+     */
     @VisibleForTesting
     static Function<String, String> getEnvironment = System::getenv;
+
+    // flags for the filters
+    static boolean consoleEnabled = isConsoleInitiallyEnabled();
+    static boolean fileEnabled = true;
+    static boolean selfMonitoringEnabled = true;
 
     public static void initDefaultLogging() {
         initLogging(null);
