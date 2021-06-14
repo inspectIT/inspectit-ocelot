@@ -6,6 +6,7 @@ import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.util.StatusPrinter;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -15,6 +16,7 @@ import rocks.inspectit.ocelot.config.model.logging.LoggingSettings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Main logback initializer. Method {@link #initLogging(InspectitConfig)} can be called whenever inspectIT configuration is changed in order to update the logging settings.
@@ -48,11 +50,21 @@ public class LogbackInitializer {
      */
     static final String INSPECTIT_LOG_FILE_PATTERN = "INSPECTIT_LOG_FILE_PATTERN";
 
+    /**
+     * Allow disabling the console log before the log system is initialized.
+     */
+    static final String INSPECTIT_LOGGING_CONSOLE_ENABLED = "INSPECTIT_LOGGING_CONSOLE_ENABLED";
+
+    /**
+     * {@link #consoleEnabled} is depending on this function, thus, the field order is important.
+     */
+    @VisibleForTesting
+    static Function<String, String> getEnvironment = System::getenv;
+
     // flags for the filters
-    static boolean consoleEnabled = true;
+    static boolean consoleEnabled = isConsoleInitiallyEnabled();
     static boolean fileEnabled = true;
     static boolean selfMonitoringEnabled = true;
-
 
     public static void initDefaultLogging() {
         initLogging(null);
@@ -80,6 +92,20 @@ public class LogbackInitializer {
             // StatusPrinter will handle this
         }
         StatusPrinter.printInCaseOfErrorsOrWarnings(context);
+    }
+
+    @VisibleForTesting
+    static boolean isConsoleInitiallyEnabled() {
+        String enabledFlag = System.getProperty(INSPECTIT_LOGGING_CONSOLE_ENABLED);
+        if (enabledFlag == null) {
+            enabledFlag = getEnvironment.apply(INSPECTIT_LOGGING_CONSOLE_ENABLED);
+        }
+
+        if (enabledFlag == null) {
+            return true;
+        } else {
+            return Boolean.parseBoolean(enabledFlag);
+        }
     }
 
     private static InputStream getConfigFileInputStream(InspectitConfig config) {
@@ -143,12 +169,12 @@ public class LogbackInitializer {
         }
     }
 
-
     /**
      * Sets system property if value is not null and report if the set was done.
      *
      * @param name  property name
      * @param value property value
+     *
      * @return if set was done
      */
     private static boolean setSystemProperty(String name, String value) {
@@ -163,6 +189,7 @@ public class LogbackInitializer {
      * Clears system property and report if the clear was done.
      *
      * @param name property name
+     *
      * @return true if property was set and then cleared
      */
     private static boolean clearSystemProperty(String name) {
