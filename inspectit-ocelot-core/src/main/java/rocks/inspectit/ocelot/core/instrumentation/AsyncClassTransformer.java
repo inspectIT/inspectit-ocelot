@@ -93,7 +93,6 @@ public class AsyncClassTransformer implements ClassFileTransformer {
      */
     Cache<Class<?>, Boolean> instrumentedClasses = CacheBuilder.newBuilder().weakKeys().build();
 
-
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] bytecode) throws IllegalClassFormatException {
         if (classBeingRedefined == null) { // class is not loaded yet! we only redefine only loaded classes to prevent blocking
@@ -107,7 +106,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
             log.debug("Skipping instrumentation of {} as bootstrap classes were not made available yet for the class", className);
             return bytecode; //leave the class unchanged for now
         } else {
-            return applyInstrumentation(classBeingRedefined, bytecode);
+            return instrumentBytecode(classBeingRedefined, bytecode);
         }
     }
 
@@ -187,53 +186,52 @@ public class AsyncClassTransformer implements ClassFileTransformer {
         }
     }
 
-    private byte[] applyInstrumentation(Class<?> classBeingRedefined, byte[] originalByteCode) {
+    private byte[] instrumentBytecode(Class<?> targetClass, byte[] bytecode) {
         try {
             //load the type description and the desired instrumentation
-            TypeDescription type = TypeDescription.ForLoadedType.of(classBeingRedefined);
-            ClassInstrumentationConfiguration classConf = updateAndGetActiveConfiguration(classBeingRedefined, type);
+            TypeDescription type = TypeDescription.ForLoadedType.of(targetClass);
+            ClassInstrumentationConfiguration classConf = updateAndGetActiveConfiguration(targetClass, type);
 
-            byte[] resultBytes;
+            byte[] instrumentedBytecode;
             if (classConf.isNoInstrumentation()) {
-                // we do not want to instrument this -> we return the original byte code
-                resultBytes = originalByteCode;
+                // we do not want to instrument this class -> we return the original bytecode
+                instrumentedBytecode = bytecode;
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Redefining class: {}", type.getName());
                 }
-                moduleManager.openModule(classBeingRedefined);
+                moduleManager.openModule(targetClass);
 
-                //Make a ByteBuddy builder based on the input bytecode
-                ClassFileLocator byteCodeClassFileLocator = ClassFileLocator.Simple.of(type.getName(), originalByteCode);
-                DynamicType.Builder<?> builder = new ByteBuddy().redefine(type, byteCodeClassFileLocator);
+                // Make a ByteBuddy builder based on the input bytecode
+                ClassFileLocator bytecodeClassFileLocator = ClassFileLocator.Simple.of(type.getName(), bytecode);
+                DynamicType.Builder<?> builder = new ByteBuddy().redefine(type, bytecodeClassFileLocator);
 
-                //Apply the actual instrumentation onto the builders
+                // Apply the actual instrumentation onto the builders
                 for (SpecialSensor specialSensor : classConf.getActiveSpecialSensors()) {
-                    builder = specialSensor.instrument(classBeingRedefined, classConf.getActiveConfiguration(), builder);
+                    builder = specialSensor.instrument(targetClass, classConf.getActiveConfiguration(), builder);
                 }
 
                 // Apply the instrumentation hook
-                ElementMatcher.Junction<MethodDescription> methodMatcher = getCombinedMethodMatcher(classBeingRedefined, classConf);
+                ElementMatcher.Junction<MethodDescription> methodMatcher = getCombinedMethodMatcher(targetClass, classConf);
                 if (methodMatcher != null) {
                     builder = DispatchHookAdvices.adviceOn(builder, methodMatcher);
                 }
 
-                //"Compile" the builder to bytecode
+                // "Compile" the builder to bytecode
                 DynamicType.Unloaded<?> instrumentedClass = builder.make();
-                resultBytes = instrumentedClass.getBytes();
+                instrumentedBytecode = instrumentedClass.getBytes();
             }
 
-            //Notify listeners that this class has been instrumented (or deinstrumented)
-            val event = new ClassInstrumentedEvent(this, classBeingRedefined, type, classConf);
-
             if (!shuttingDown) {
+                //Notify listeners that this class has been instrumented (or deinstrumented)
+                val event = new ClassInstrumentedEvent(this, targetClass, type, classConf);
                 ctx.publishEvent(event);
             }
 
-            return resultBytes;
-        } catch (Exception e) {
-            log.error("Error generating instrumented bytecode", e);
-            return originalByteCode;
+            return instrumentedBytecode;
+        } catch (Throwable e) {
+            log.warn("Could not instrument class '{}' due to an error during bytecode generation.", targetClass.getName(), e);
+            return bytecode;
         }
     }
 
@@ -271,6 +269,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
      *
      * @param classBeingRedefined the class to check for
      * @param type                the classes type description
+     *
      * @return
      */
     private ClassInstrumentationConfiguration updateAndGetActiveConfiguration(Class<?> classBeingRedefined, TypeDescription type) {
@@ -294,9 +293,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
         return classConf;
     }
 
-
-    @EventListener(classes = {InspectitConfigChangedEvent.class},
-            condition = "!#root.event.oldConfig.selfMonitoring.enabled")
+    @EventListener(classes = {InspectitConfigChangedEvent.class}, condition = "!#root.event.oldConfig.selfMonitoring.enabled")
     private void selfMonitorInstrumentedClassesCount() {
         selfMonitoring.recordMeasurement("instrumented-classes", instrumentedClasses.size());
     }
