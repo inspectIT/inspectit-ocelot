@@ -94,8 +94,8 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
       }
     }
 
-    // Disable 'apply' button if only one of the method matcher is specified
-    if (!methodMatcher.matcherType ^ !methodMatcher.name) {
+    // Disable 'apply' button if method name is specified but no matcher-type
+    if (methodMatcher.name && !methodMatcher.matcherType) {
       setIsApplyDisabled(true);
     }
 
