@@ -17,7 +17,7 @@ import { selectedFileContentsChanged } from '../../../redux/ducks/configuration/
 import { useDispatch } from 'react-redux';
 
 /** data */
-import { CONFIGURATION_TYPES, TOOLTIP_OPTIONS } from '../../../data/constants';
+import { TOOLTIP_OPTIONS } from '../../../data/constants';
 
 const SCOPE_STATES_RULES = {
   TRACING: 'r_method_configuration_trace',
