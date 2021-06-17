@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.command;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -11,10 +12,13 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.command.AgentCommandSettings;
+import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import java.io.UnsupportedEncodingException;
@@ -49,6 +53,12 @@ public class HttpCommandFetcher {
      * Http client used in the live mode (longer timeouts).
      */
     private HttpClient liveHttpClient;
+
+    /**
+     * The URI for fetching commands.
+     */
+    @Setter
+    private URI commandUri;
 
     /**
      * Returns the {@link HttpClient} which is used for fetching commands.
@@ -87,12 +97,10 @@ public class HttpCommandFetcher {
      *
      * @return returns null if any error occurred before/while sending the request.
      */
-    public HttpResponse fetchCommand(CommandResponse commandResponse, boolean waitForCommand)  {
+    public HttpResponse fetchCommand(CommandResponse commandResponse, boolean waitForCommand) {
         HttpPost httpPost;
         try {
-            AgentCommandSettings settings = environment.getCurrentConfig().getAgentCommands();
-
-            URIBuilder uriBuilder = new URIBuilder(settings.getUrl().toURI());
+            URIBuilder uriBuilder = new URIBuilder(commandUri);
             if (waitForCommand) {
                 uriBuilder.addParameter("wait-for-command", "true");
             }
@@ -123,7 +131,7 @@ public class HttpCommandFetcher {
         try {
             return getHttpClient(waitForCommand).execute(httpPost);
         } catch (Exception e) {
-            log.error("An error occurred while fetching a new command: " + e.getMessage());
+            log.error("An error occurred while fetching an agent command.", e);
         } finally {
             httpPost.releaseConnection();
         }

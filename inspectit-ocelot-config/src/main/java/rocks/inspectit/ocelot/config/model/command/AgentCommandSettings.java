@@ -21,6 +21,11 @@ public class AgentCommandSettings {
     private URL url;
 
     /**
+     * Whether the agent commands URL should be derived from the HTTP configuration URL.
+     */
+    private boolean deriveFromHttpConfigUrl = false;
+
+    /**
      * The timeout duration used for requests  when the agent is in discovery mode. Defining how long the agent will wait for
      * new commands.
      */

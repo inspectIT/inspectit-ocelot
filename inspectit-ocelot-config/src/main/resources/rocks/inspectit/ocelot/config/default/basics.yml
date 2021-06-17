@@ -106,7 +106,9 @@ inspectit:
     # whether agent commands are enabled or not
     enabled: false
     # the URL for fetching agent commands - e.g.: http://localhost:8090/api/v1/agent/command
-    url: http://localhost:8090/api/v1/agent/command
+    url:
+    # whether the agent commands URL should be derived from the HTTP configuration URL
+    derive-from-http-config-url: false
     # the timeout duration used when the agent is in discovery mode. Defining how long the agent
     # will wait for new commands.
     live-socket-timeout: 30s
