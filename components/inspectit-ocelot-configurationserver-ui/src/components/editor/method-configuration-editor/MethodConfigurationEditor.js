@@ -17,7 +17,7 @@ import { selectedFileContentsChanged } from '../../../redux/ducks/configuration/
 import { useDispatch } from 'react-redux';
 
 /** data */
-import { CONFIGURATION_TYPES, TOOLTIP_OPTIONS } from '../../../data/constants';
+import { TOOLTIP_OPTIONS } from '../../../data/constants';
 
 const SCOPE_STATES_RULES = {
   TRACING: 'r_method_configuration_trace',
@@ -90,11 +90,10 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   /**
    * Converts the given instrumentation information into a JSON format.
    *
-   * @param {*} scopeName the name of the scope
    * @param {*} typeMatcher the class instrumentation settings
    * @param {*} methodMatcher the method instrumentation settings
    */
-  const prepareConfiguration = (scopeName, typeMatcher, methodMatcher) => {
+  const prepareScope = (typeMatcher, methodMatcher) => {
     // Prepare class matcher
     const type = typeMatcher.type;
     const classMatcherType = typeMatcher.matcherType;
@@ -121,21 +120,13 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
     methodMatcherBody.visibility = visibilities;
     if (withParameter) {
       methodMatcherBody.arguments = parameters;
+    } else {
+      _.unset(methodMatcherBody, 'arguments');
     }
 
     // prepare Scope
-    const scope = { [scopeName]: _.merge(classMatcherScope, { methods: [methodMatcherBody] }) };
-    // prepare rule Scope
-    const ruleScope = { scopes: { [scopeName]: true } };
-
-    // assembling and return configuration
-    const configurationTemplate = _.cloneDeep(CONFIGURATION_TYPES.METHOD_CONFIGURATION.template);
-
-    _.set(configurationTemplate, 'inspectit.instrumentation.scopes', scope);
-    _.set(configurationTemplate, 'inspectit.instrumentation.rules.r_method_configuration_trace', ruleScope);
-    _.set(configurationTemplate, 'inspectit.instrumentation.rules.r_method_configuration_duration', ruleScope);
-
-    return configurationTemplate;
+    const scope = _.merge(classMatcherScope, { methods: [methodMatcherBody] });
+    return scope;
   };
 
   /**
@@ -148,10 +139,12 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   const addScope = (typeMatcher, methodMatcher) => {
     const cloneConfiguration = _.cloneDeep(configuration);
     const scopeName = currentScopeName ? currentScopeName : ('s_gen_scope_' + uuid()).replaceAll('-', '_');
-    const preparedConfiguration = prepareConfiguration(scopeName, typeMatcher, methodMatcher);
+    const preparedScope = prepareScope(typeMatcher, methodMatcher);
 
     try {
-      _.merge(cloneConfiguration, preparedConfiguration);
+      _.set(cloneConfiguration, ['inspectit', 'instrumentation', 'scopes', scopeName], preparedScope);
+      _.set(cloneConfiguration, ['inspectit', 'instrumentation', 'rules', 'r_method_configuration_trace', 'scopes', scopeName], true);
+      _.set(cloneConfiguration, ['inspectit', 'instrumentation', 'rules', 'r_method_configuration_duration', 'scopes', scopeName], true);
 
       updateConfiguration(cloneConfiguration);
     } catch (error) {
