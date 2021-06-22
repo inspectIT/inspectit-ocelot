@@ -27,6 +27,7 @@ public class MoveController extends FileBaseController {
 
         AbstractWorkingDirectoryAccessor fileAccessor = fileManager.getWorkingDirectory();
         fileAccessor.moveConfiguration(source, target);
+        directoryCache.invalidate("working");
     }
 
     private String removeLeadingSlash(String path) {

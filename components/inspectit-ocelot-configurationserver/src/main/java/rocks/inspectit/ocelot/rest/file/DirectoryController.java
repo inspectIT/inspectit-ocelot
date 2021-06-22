@@ -6,13 +6,13 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileInfo;
-import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Controller for managing the configurations.
@@ -23,17 +23,10 @@ public class DirectoryController extends FileBaseController {
     @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of the contents of a given directory. In addition, the branch can be specified which will be used as basis for the listing.")
     @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path to the directory whose contents shall be read.")
     @GetMapping(value = "directories/**")
-    public Collection<FileInfo> listContents(@ApiParam("The id of the version which should be listed. If it is empty, the lastest workspace version is used. Can be 'live' fir listing the latest live version.") @RequestParam(value = "version", required = false) String commitId, HttpServletRequest request) {
+    public Collection<FileInfo> listContents(@ApiParam("The id of the version which should be listed. If it is empty, the lastest workspace version is used. Can be 'live' for listing the latest live version.") @RequestParam(value = "version", required = false) String commitId, HttpServletRequest request) throws ExecutionException {
         String path = RequestUtil.getRequestSubPath(request);
-
-        if (commitId == null) {
-            // Is used to display empty directories.
-            return fileManager.getWorkingDirectory().listConfigurationFiles(path);
-        } else if (commitId.equals("live")) {
-            return fileManager.getLiveRevision().listConfigurationFiles(path);
-        } else {
-            return fileManager.getCommitWithId(commitId).listConfigurationFiles(path);
-        }
+        String directory = commitId == null ? "working": commitId;
+        return directoryCache.get(directory, path);
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
@@ -43,6 +36,7 @@ public class DirectoryController extends FileBaseController {
     public void createNewDirectory(HttpServletRequest request) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
         fileManager.getWorkingDirectory().createConfigurationDirectory(path);
+        directoryCache.invalidate("working");
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
@@ -52,6 +46,7 @@ public class DirectoryController extends FileBaseController {
     public void deleteDirectory(HttpServletRequest request) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
         fileManager.getWorkingDirectory().deleteConfiguration(path);
+        directoryCache.invalidate("working");
     }
 
 }

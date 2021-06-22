@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.error.ApiError;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
+import rocks.inspectit.ocelot.file.DirectoryCache;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
@@ -35,6 +36,9 @@ public class PromotionController extends AbstractBaseController {
 
     @Autowired
     private FileManager fileManager;
+
+    @Autowired
+    private DirectoryCache directoryCache;
 
     @ExceptionHandler({SelfPromotionNotAllowedException.class})
     public ResponseEntity<Object> handleSelfPromotion(Exception exception) {
@@ -66,6 +70,7 @@ public class PromotionController extends AbstractBaseController {
         }
         try {
             fileManager.promoteConfiguration(promotion, allowSelfPromotion);
+            directoryCache.invalidate("live");
             return ResponseEntity.ok().build();
         } catch (ConcurrentModificationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
