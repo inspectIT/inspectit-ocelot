@@ -80,7 +80,7 @@ dependencies {
             "rocks.inspectit:opencensus-influxdb-exporter:1.2",
             
             // bytecode manipulation
-            "net.bytebuddy:byte-buddy:1.11.2"
+            "net.bytebuddy:byte-buddy:1.11.5"
     )
 
     testImplementation(
