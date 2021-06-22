@@ -91,3 +91,13 @@ This setting takes the URL defined under `inspectit.config.http.url` as a basis.
 This setting has a higher priority than manually specifying the URL.
 If an agent command URL is configured and the `derive-from-http-config-url` option is enabled, the URL is ignored if it is possible to derive the agent command URL based on the HTTP configuration URL.
 
+### Additional Configuration Options
+
+The agent command feature can be more precisely configured to the needs with the following optional parameters which are defined bellow the property `inspectit.agent-commands`:
+
+| Property | Default Value | Description |
+| --- | --- | --- |
+| <nobr>`live-socket-timeout`</nobr> | `30s` | The timeout duration used when the agent is in discovery mode. Defining how long the agent will wait for new commands. |
+| `socket-timeout` | `5s` | The timeout duration used for requests when the agent is in normal mode. |
+| `polling-interval` | `15s` | The used interval for polling agent commands. |
+| `live-mode-duration` | `2m` | How long the agent will staying in the live mode, before falling back to the normal mode. |
