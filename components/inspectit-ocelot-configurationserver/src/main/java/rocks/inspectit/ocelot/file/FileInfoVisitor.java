@@ -2,15 +2,14 @@ package rocks.inspectit.ocelot.file;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * FileVisitor for walking a file tree and creating a {@link FileInfo} representation of it.
@@ -22,6 +21,8 @@ public class FileInfoVisitor implements FileVisitor<Path> {
      * The directory stack. The latest directory is the current one.
      */
     private Stack<FileInfo> directoryStack = new Stack<>();
+
+    private final String UI_FILE_IDENTIFIER = "# {\"type\": \"Method-Configuration\"";
 
     /**
      * The {@link FileInfo} which represents the starting directory of the walk.
@@ -49,16 +50,29 @@ public class FileInfoVisitor implements FileVisitor<Path> {
     }
 
     @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws FileNotFoundException {
         // adding each file to the current directory
         FileInfo fileInfo = FileInfo.builder()
                 .name(file.getFileName().toString())
-                .type(FileInfo.Type.FILE)
+                .type(resolveFileType(file.toFile()))
                 .build();
 
         directoryStack.peek().addChild(fileInfo);
 
         return FileVisitResult.CONTINUE;
+    }
+
+    /**
+     * Checks if a given File is a ui-file by checking the first line of the file starts with the String provided in
+     * UI_FILE_IDENTIFIER.
+     * @param file The File instance which should be checked.
+     * @return {@link FileInfo.Type}.UI_FILE if the given file is a ui-file. Otherwise {@link FileInfo.Type}.FILE is returned.
+     */
+    private FileInfo.Type resolveFileType(File file) throws FileNotFoundException {
+        Scanner fileScanner = new Scanner(file);
+        String firstLine = fileScanner.nextLine();
+        fileScanner.close();
+        return firstLine.startsWith(UI_FILE_IDENTIFIER) ? FileInfo.Type.UI_FILE: FileInfo.Type.FILE;
     }
 
     @Override
