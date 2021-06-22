@@ -70,7 +70,10 @@ public class FileInfoVisitor implements FileVisitor<Path> {
      */
     private FileInfo.Type resolveFileType(File file) throws FileNotFoundException {
         Scanner fileScanner = new Scanner(file);
-        String firstLine = fileScanner.nextLine();
+        String firstLine = "";
+        if(fileScanner.hasNext()) {
+            firstLine = fileScanner.nextLine();
+        }
         fileScanner.close();
         return firstLine.startsWith(UI_FILE_IDENTIFIER) ? FileInfo.Type.UI_FILE: FileInfo.Type.FILE;
     }
