@@ -67,7 +67,13 @@ const EditorView = ({
     editorContent = (
       <YamlParser yamlConfig={value} onUpdate={onChange}>
         {(onUpdate, config) => (
-          <TreeTableEditor config={config} schema={schema} loading={loading} readOnly={readOnly} onUpdate={onUpdate} />
+          <TreeTableEditor
+            config={config || { inspectit: null }}
+            schema={schema}
+            loading={loading}
+            readOnly={readOnly}
+            onUpdate={onUpdate}
+          />
         )}
       </YamlParser>
     );
