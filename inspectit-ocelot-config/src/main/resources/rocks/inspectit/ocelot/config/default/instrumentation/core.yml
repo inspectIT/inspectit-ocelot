@@ -35,7 +35,7 @@ inspectit:
       use-inspectit-protection-domain: true
 
       # defines whether orphan action classes are recycled or new classes should be injected instead
-      recyclingOldActionClasses: true
+      recycling-old-action-classes: true
 
     data:
       # used for storing a received remote span id

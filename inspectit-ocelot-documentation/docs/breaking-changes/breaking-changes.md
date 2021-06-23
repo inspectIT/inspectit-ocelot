@@ -3,7 +3,17 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
-## Breaking changes in 1.9
+## Breaking changes in 1.10.1
+
+There are no breaking changes for version 1.10.1.
+
+
+## Breaking changes in 1.10.0
+
+There are no breaking changes for version 1.10.0.
+
+
+## Breaking changes in 1.9.0
 
 ### Upgraded OpenTelemetry of the EUM Server
 

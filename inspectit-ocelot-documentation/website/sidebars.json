@@ -11,7 +11,8 @@
       "configuration/external-configuration-sources",
       "configuration/logging-configuration",
       "configuration/open-census-configuration",
-      "configuration/plugin-configuration"
+      "configuration/plugin-configuration",
+      "configuration/agent-command-configuration"
     ],
     "Metrics": [
       "metrics/metrics",
