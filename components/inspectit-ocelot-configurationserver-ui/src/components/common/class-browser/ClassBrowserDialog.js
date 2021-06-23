@@ -7,6 +7,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Tree } from 'primereact/tree';
 import { ProgressBar } from 'primereact/progressbar';
+import TimeAgo from 'react-timeago';
 import CBTableNode from './CBTableNode';
 import _ from 'lodash';
 import { transformClassStructureToTableModel, transformAgentStatuses } from './ClassBrowserUtilities';
@@ -86,6 +87,35 @@ const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
     );
   };
 
+  /** Provides the item template for the agent dropdown */
+  const agentItemTemplate = ({ value: agentId, service, lastConfigFetch }) => {
+    return (
+      <>
+        <style jsx>{`
+          div {
+            display: flex;
+          }
+          .agent-id {
+            color: gray;
+            font-style: italic;
+            margin-left: 0.5rem;
+          }
+          .time {
+            flex-grow: 1;
+            text-align: right;
+          }
+        `}</style>
+        <div>
+          <span>{service}</span>
+          <span className="agent-id">({agentId})</span>
+          <span className="time">
+            <TimeAgo date={lastConfigFetch} formatter={(time, unit, suffix) => time + ' ' + unit + ' ' + suffix} live={false} />
+          </span>
+        </div>
+      </>
+    );
+  };
+
   return (
     <>
       <style jsx>{`
@@ -96,6 +126,9 @@ const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
 
         .agent-box :global(.p-dropdown) {
           flex-grow: 1;
+        }
+        .agent-box :global(.p-dropdown-filter-container) {
+          width: 100%;
         }
 
         .search-box {
@@ -158,6 +191,10 @@ const ClassBrowserDialog = ({ visible, onHide, onSelect }) => {
                 setSelectedAgent(e.value);
               }}
               placeholder="Select an Agent"
+              filter={true}
+              filterPlaceholder="Filter Agents"
+              filterBy="label,value"
+              itemTemplate={agentItemTemplate}
               disabled={loadingAgents || isSearching}
             />
             <Button
