@@ -113,7 +113,7 @@ public class AgentCommandService extends DynamicallyActivatableService implement
                 urlBase += ":" + port;
             }
 
-            return URI.create(urlBase + "/api/v1/agent/command");
+            return URI.create(urlBase + settings.getAgentCommandPath());
         } else {
             return settings.getUrl().toURI();
         }

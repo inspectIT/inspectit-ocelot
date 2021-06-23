@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.command;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -119,6 +120,7 @@ public class AgentCommandServiceTest {
                     .getHttp()
                     .getUrl()).thenReturn(new URL("http://example.org:8090/api/endpoint"));
             when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
+            when(configuration.getAgentCommands().getAgentCommandPath()).thenReturn("/api/v1/agent/command");
             URI result = service.getCommandUri(configuration);
 
             assertThat(result.toString()).isEqualTo("http://example.org:8090/api/v1/agent/command");
@@ -128,9 +130,10 @@ public class AgentCommandServiceTest {
         public void deriveUrlWithoutPort() throws Exception {
             when(configuration.getConfig().getHttp().getUrl()).thenReturn(new URL("http://example.org/api/endpoint"));
             when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
+            when(configuration.getAgentCommands().getAgentCommandPath()).thenReturn("/api/command");
             URI result = service.getCommandUri(configuration);
 
-            assertThat(result.toString()).isEqualTo("http://example.org/api/v1/agent/command");
+            assertThat(result.toString()).isEqualTo("http://example.org/api/command");
         }
 
         @Test
@@ -138,9 +141,10 @@ public class AgentCommandServiceTest {
             lenient().when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://example.org"));
             when(configuration.getConfig().getHttp().getUrl()).thenReturn(new URL("http://example.org/api/endpoint"));
             when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
+            when(configuration.getAgentCommands().getAgentCommandPath()).thenReturn("/api/command");
             URI result = service.getCommandUri(configuration);
 
-            assertThat(result.toString()).isEqualTo("http://example.org/api/v1/agent/command");
+            assertThat(result.toString()).isEqualTo("http://example.org/api/command");
         }
     }
 }

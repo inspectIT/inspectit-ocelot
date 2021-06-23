@@ -109,6 +109,8 @@ inspectit:
     url:
     # whether the agent commands URL should be derived from the HTTP configuration URL
     derive-from-http-config-url: false
+    # path which is used for the agent command URL in case it is derived from the HTTP configuration URL
+    agent-command-path: "/api/v1/agent/command"
     # the timeout duration used when the agent is in discovery mode. Defining how long the agent
     # will wait for new commands.
     live-socket-timeout: 30s
