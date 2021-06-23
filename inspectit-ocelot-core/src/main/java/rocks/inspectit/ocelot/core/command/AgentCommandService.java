@@ -58,11 +58,11 @@ public class AgentCommandService extends DynamicallyActivatableService implement
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        log.info("Starting agent command polling service.");
-
         try {
             URI commandUri = getCommandUri(configuration);
             commandFetcher.setCommandUri(commandUri);
+
+            log.info("Starting agent command polling service with URL: {}", commandUri);
         } catch (Exception e) {
             log.error("Could not enable the agent command polling service.", e);
             return false;
