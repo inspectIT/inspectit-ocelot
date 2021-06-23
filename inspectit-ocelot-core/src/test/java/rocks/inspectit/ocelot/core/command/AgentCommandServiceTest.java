@@ -54,6 +54,7 @@ public class AgentCommandServiceTest {
             lenient().when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://inspectit.rocks"));
             when(configuration.getConfig().getHttp().getUrl()).thenReturn(new URL("http://example.org/api/endpoint"));
             when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
+            when(configuration.getAgentCommands().getAgentCommandPath()).thenReturn("/api/v1/agent/command");
 
             boolean result = service.doEnable(configuration);
 
