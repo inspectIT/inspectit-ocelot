@@ -91,6 +91,16 @@ This setting takes the URL defined under `inspectit.config.http.url` as a basis.
 This setting has a higher priority than manually specifying the URL.
 If an agent command URL is configured and the `derive-from-http-config-url` option is enabled, the URL is ignored if it is possible to derive the agent command URL based on the HTTP configuration URL.
 
+To generate the agent command URL, only the information regarding protocol, host and port is used from the URL of the HTTP configuration. 
+By default, `/api/v1/agent/command` is used as the path of the URL.
+However, this can be adjusted using the following configuration, for example in the case that the configuration server is operated behind a reverse proxy and the URLs are not accessible under their actual name:
+
+```YAML
+inspectit:
+  agent-commands:
+    agent-command-path: "/proxy/command"
+```
+
 ### Additional Configuration Options
 
 The agent command feature can be more precisely configured to the needs with the following optional parameters which are defined bellow the property `inspectit.agent-commands`:
