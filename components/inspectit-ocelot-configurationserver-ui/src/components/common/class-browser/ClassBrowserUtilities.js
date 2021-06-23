@@ -78,7 +78,7 @@ export const transformClassStructureToTableModel = (result, { name, type, method
 export const transformAgentStatuses = (agentStatuses) => {
   const result = [];
 
-  _.forEach(agentStatuses, ({ metaInformation, attributes: { service } }) => {
+  _.forEach(agentStatuses, ({ metaInformation, attributes: { service }, lastConfigFetch }) => {
     const entry = {};
 
     if (!service || !metaInformation) {
@@ -89,9 +89,11 @@ export const transformAgentStatuses = (agentStatuses) => {
 
     entry.label = service + ' (' + agentId + ')';
     entry.value = agentId;
+    entry.service = service;
+    entry.lastConfigFetch = lastConfigFetch;
 
     result.push(entry);
   });
 
-  return result;
+  return _.sortBy(result, ['service', 'lastConfigFetch']);
 };
