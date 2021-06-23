@@ -126,8 +126,8 @@ public class CommandHandler {
                 log.error("Exception during agent command deserialization.", exception);
             }
         } else {
-            log.warn("Couldn't successfully fetch an agent command. Server returned {}, {} ", response.getStatusLine()
-                    .getStatusCode(), response.getStatusLine().getReasonPhrase());
+            throw new IllegalStateException("Couldn't successfully fetch an agent command. Server returned " + response.getStatusLine()
+                    .getStatusCode());
         }
         return null;
     }
