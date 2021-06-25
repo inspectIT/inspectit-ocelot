@@ -9,8 +9,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.handlers.CommandHandler;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
-import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
-import rocks.inspectit.ocelot.commons.models.command.response.impl.PingResponse;
+import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.time.Duration;
@@ -38,15 +37,15 @@ public class PingCommandHandler implements CommandHandler {
     }
 
     /**
-     * Checks if the given {@link CommandResponse} is an instance of {@link PingResponse}.
+     * Checks if the given {@link CommandResponse} is an instance of {@link PingCommand.Response}.
      *
      * @param response The response which should be checked.
      *
-     * @return True if the given response is an instance of {@link PingResponse}.
+     * @return True if the given response is an instance of {@link PingCommand.Response}.
      */
     @Override
     public boolean canHandle(CommandResponse response) {
-        return response instanceof PingResponse;
+        return response instanceof PingCommand.Response;
     }
 
     /**
