@@ -217,12 +217,14 @@ export const writeFile = (file, content, fetchFilesOnSuccess, selectFileOnSucces
 
         if (fetchFilesOnSuccess) {
           if (selectFileOnSuccess) {
-            dispatch('/' + filePath);
+            dispatch(fetchFiles('/' + filePath));
           } else {
             dispatch(fetchFiles());
           }
+        } else {
+          // this will only be done when files are modified
+          dispatch(notificationActions.showSuccessMessage('Configuration Saved', 'The configuration has been successfully saved.'));
         }
-        dispatch(notificationActions.showSuccessMessage('Configuration Saved', 'The configuration has been successfully saved.'));
       })
       .catch(() => {
         dispatch({ type: types.WRITE_FILE_FAILURE });
