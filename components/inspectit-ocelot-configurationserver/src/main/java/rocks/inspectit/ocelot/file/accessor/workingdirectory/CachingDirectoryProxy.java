@@ -54,6 +54,13 @@ public class CachingDirectoryProxy extends AbstractWorkingDirectoryAccessor{
                 });
     }
 
+    /**
+     * Invalidates the current cache.
+     */
+    public void invalidate(){
+        workspaceCache.invalidateAll();
+    }
+
     @Override
     protected String verifyPath(String relativeBasePath, String path) throws IllegalArgumentException {
         return autoCommitWorkingDirectoryProxy.verifyPath(relativeBasePath, path);
