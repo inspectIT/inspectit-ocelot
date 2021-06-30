@@ -22,8 +22,8 @@ public class FileInfo {
         DIRECTORY,
         @JsonProperty("file")
         FILE,
-        @JsonProperty("uiFile")
-        UI_FILE
+        @JsonProperty("ui-method-configuration")
+        UI_METHOD_CONFIGURATION
     }
 
     private Type type;

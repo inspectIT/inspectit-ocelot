@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import rocks.inspectit.ocelot.file.DirectoryCache;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
@@ -24,9 +23,6 @@ public class FileBaseController extends AbstractBaseController {
 
     @Autowired
     protected FileManager fileManager;
-
-    @Autowired
-    protected DirectoryCache directoryCache;
 
     @ExceptionHandler({NoSuchFileException.class, FileNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)

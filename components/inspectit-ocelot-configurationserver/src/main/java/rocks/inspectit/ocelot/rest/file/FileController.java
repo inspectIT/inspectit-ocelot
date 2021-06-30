@@ -47,7 +47,6 @@ public class FileController extends FileBaseController {
         }
 
         fileManager.getWorkingDirectory().writeConfigurationFile(path, fileContent);
-        directoryCache.invalidate("working");
     }
 
     @ApiOperation(value = "Read a file", notes = "Returns the contents of the given file.")
@@ -93,7 +92,6 @@ public class FileController extends FileBaseController {
         String path = RequestUtil.getRequestSubPath(request);
 
         fileManager.getWorkingDirectory().deleteConfiguration(path);
-        directoryCache.invalidate("working");
     }
 
     @ApiOperation(value = "Search the given query in all present files.", notes = "Searches the given query in all present files. " + "Searches for as many matches as defined by the limit parameter. If the the limit is set " + "to -1, the query is searched for all occurrences in all files. All found matches are " + "returned in a list of SearchResult instances. Each of these instances contains the " + "following variables:" + "<p>" + "<b>file:</b> a String resembling the name of the file the match was found in." + "<p>" + "<b>firstLine:</b> the first line of the found match. Only retrieved if retrieveFirstLine is true " + "<p>" + "<b>startLine:</b> the number of the line in this file where the found match starts as " + "integer." + "<p>" + "<b>endLine:</b> the number of the line in this file where the found match ends as integer." + "<p>" + "<b>startColumn:</b> the number of the column where the found found match starts as " + "integer." + "<p>" + "<b>endColumn:</b> the number of the column where the found match ends as integer.")

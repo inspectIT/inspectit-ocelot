@@ -1,10 +1,15 @@
 package rocks.inspectit.ocelot.file;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.EnumUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Path;
@@ -21,8 +26,6 @@ public class FileInfoVisitor implements FileVisitor<Path> {
      * The directory stack. The latest directory is the current one.
      */
     private Stack<FileInfo> directoryStack = new Stack<>();
-
-    private final String UI_FILE_IDENTIFIER = "# {\"type\": \"Method-Configuration\"";
 
     /**
      * The {@link FileInfo} which represents the starting directory of the walk.
@@ -63,19 +66,36 @@ public class FileInfoVisitor implements FileVisitor<Path> {
     }
 
     /**
-     * Checks if a given File is a ui-file by checking the first line of the file starts with the String provided in
-     * UI_FILE_IDENTIFIER.
+     * Resolves the type of a file by reading the JSON in the first line of the file and resolving the type to a value
+     * of {@link FileInfo.Type}. If no JSON is present or an error occurs during the resolving the type, FILE is used
+     * as fallback.
+     *
      * @param file The File instance which should be checked.
      * @return {@link FileInfo.Type}.UI_FILE if the given file is a ui-file. Otherwise {@link FileInfo.Type}.FILE is returned.
      */
     private FileInfo.Type resolveFileType(File file) throws FileNotFoundException {
         Scanner fileScanner = new Scanner(file);
-        String firstLine = "";
+        FileInfo.Type fileType = FileInfo.Type.FILE;
+
         if(fileScanner.hasNext()) {
-            firstLine = fileScanner.nextLine();
+            Type type = new TypeToken<Map<String, String>>(){}.getType();
+            //Remove comment-character from line.
+            String firstLine = fileScanner.nextLine().replace("#", "");
+
+            try {
+                Map<String, String> jsonMap = new Gson().fromJson(firstLine, type);
+                //Build a String from the type-value which corresponds to the Enum-Naming scheme.
+                String typeString = "UI_" + jsonMap.get("type").toUpperCase().replace("-", "_");
+                if(EnumUtils.isValidEnum(FileInfo.Type.class, typeString)){
+                    fileType = FileInfo.Type.valueOf(typeString);
+                }
+
+            } catch (JsonSyntaxException ignored){}
+
         }
+
         fileScanner.close();
-        return firstLine.startsWith(UI_FILE_IDENTIFIER) ? FileInfo.Type.UI_FILE: FileInfo.Type.FILE;
+        return fileType;
     }
 
     @Override

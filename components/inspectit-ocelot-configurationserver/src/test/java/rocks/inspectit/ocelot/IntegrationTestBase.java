@@ -19,7 +19,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.file.DirectoryCache;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
@@ -65,9 +64,6 @@ public class IntegrationTestBase {
     @Autowired
     protected FileManager fileManager;
 
-    @Autowired
-    protected DirectoryCache directoryCache;
-
     /**
      * Authenticated restTemplate;
      */
@@ -94,9 +90,6 @@ public class IntegrationTestBase {
         // init the version manager
         VersioningManager versioningManager = (VersioningManager) ReflectionTestUtils.getField(fileManager, "versioningManager");
         versioningManager.initialize();
-
-        //Reset directory cache
-        directoryCache.postConstruct();
     }
 
     @AfterEach

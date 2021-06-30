@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.file.DirectoryCache;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.FileMoveDescription;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
@@ -22,9 +21,6 @@ public class MoveControllerTest {
 
     @Mock
     AbstractWorkingDirectoryAccessor fileAccessor;
-
-    @Mock
-    DirectoryCache directoryCache;
 
     @InjectMocks
     MoveController controller;
@@ -43,8 +39,7 @@ public class MoveControllerTest {
 
             verify(fileManager).getWorkingDirectory();
             verify(fileAccessor).moveConfiguration(eq("src"), eq("dest"));
-            verify(directoryCache).invalidate("working");
-            verifyNoMoreInteractions(fileManager, fileAccessor, directoryCache);
+            verifyNoMoreInteractions(fileManager, fileAccessor);
         }
 
         @Test
@@ -58,8 +53,7 @@ public class MoveControllerTest {
 
             verify(fileManager).getWorkingDirectory();
             verify(fileAccessor).moveConfiguration(eq("src"), eq("dest"));
-            verify(directoryCache).invalidate("working");
-            verifyNoMoreInteractions(fileManager, fileAccessor, directoryCache);
+            verifyNoMoreInteractions(fileManager, fileAccessor);
         }
 
     }
