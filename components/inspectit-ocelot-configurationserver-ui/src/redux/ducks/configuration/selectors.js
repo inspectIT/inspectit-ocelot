@@ -1,9 +1,30 @@
 import { createSelector } from 'reselect';
-import { map, find } from 'lodash';
+import { map, find, get } from 'lodash';
 import { getFile, isDirectory } from './utils';
 import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 
 const configurationSelector = (state) => state.configuration;
+
+/**
+ * Contains the mapping for file-types to primeface-icons. The icon with the key "_default" should be used if no other key applies.
+ */
+const filetypeIconMapping = {
+  directory: 'pi-folder',
+  file: 'pi-file',
+  'ui-method-configuration': 'pi-cog',
+  _default: 'pi-file',
+};
+
+/**
+ *
+ * Takes a String representing a filetype and resolves it by using the filetypeIconMapping.
+ *
+ * @param {*} type The type to ne resolved as string
+ * @returns The string-representation of the corresponding icon.
+ */
+const resolveFileTypeToIcon = (type) => {
+  return 'pi pi-fw ' + get(filetypeIconMapping, type, filetypeIconMapping['_default']);
+};
 
 /**
  * The logic to determine whether the given version is the latest one. The front-end assumes, that
@@ -42,7 +63,7 @@ const _asTreeNode = (parentKey, node, unsavedFileContents, isLatest) => {
     return {
       key,
       label: labelValue,
-      icon: 'pi pi-fw pi-folder',
+      icon: resolveFileTypeToIcon(type),
       children: map(node.children, (child) => _asTreeNode(key + '/', child, unsavedFileContents, isLatest)),
     };
   } else {
@@ -50,7 +71,7 @@ const _asTreeNode = (parentKey, node, unsavedFileContents, isLatest) => {
     return {
       key,
       label: labelValue,
-      icon: 'pi pi-fw pi-file',
+      icon: resolveFileTypeToIcon(type),
     };
   }
 };
