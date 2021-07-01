@@ -3,8 +3,7 @@ package rocks.inspectit.ocelot.core.command.handler.impl;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
-import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
-import rocks.inspectit.ocelot.commons.models.command.response.impl.PingResponse;
+import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
 
 /**
@@ -40,6 +39,6 @@ public class PingCommandExecutor implements CommandExecutor {
             throw new IllegalArgumentException(exceptionMessage);
         }
 
-        return PingResponse.builder().commandId(command.getCommandId()).build();
+        return new PingCommand.Response(command.getCommandId());
     }
 }

@@ -5,8 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
-import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
-import rocks.inspectit.ocelot.commons.models.command.response.impl.ListClassesResponse;
+import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
 import rocks.inspectit.ocelot.core.instrumentation.NewClassDiscoveryService;
 
@@ -96,7 +95,7 @@ public class ListClassesCommandExecutor implements CommandExecutor {
         log.debug("Executing a ListClassesCommand: {}", lcCommand.getCommandId().toString());
 
         Set<Class<?>> setCopy = new HashSet<>(discoveryService.getKnownClasses());
-        ListClassesResponse.TypeElement[] result = setCopy.parallelStream()
+        ListClassesCommand.Response.TypeElement[] result = setCopy.parallelStream()
                 .filter(clazz -> clazz.getName().contains(filter))
                 .filter(this::includeClass)
                 .map(clazz -> {
@@ -106,7 +105,7 @@ public class ListClassesCommandExecutor implements CommandExecutor {
                                 .filter(Objects::nonNull)
                                 .toArray(String[]::new);
 
-                        ListClassesResponse.TypeElement element = new ListClassesResponse.TypeElement();
+                        ListClassesCommand.Response.TypeElement element = new ListClassesCommand.Response.TypeElement();
                         element.setName(clazz.getName());
                         element.setType(clazz.isInterface() ? "interface" : "class");
                         element.setMethods(methods);
@@ -117,11 +116,11 @@ public class ListClassesCommandExecutor implements CommandExecutor {
                     }
                 })
                 .filter(Objects::nonNull)
-                .toArray(ListClassesResponse.TypeElement[]::new);
+                .toArray(ListClassesCommand.Response.TypeElement[]::new);
 
         log.debug("Finished executing ListClassesCommand: {}", lcCommand.getCommandId().toString());
 
-        ListClassesResponse response = new ListClassesResponse();
+        ListClassesCommand.Response response = new ListClassesCommand.Response();
         response.setCommandId(lcCommand.getCommandId());
         response.setResult(result);
         return response;

@@ -8,8 +8,7 @@ import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
-import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
-import rocks.inspectit.ocelot.commons.models.command.response.impl.PingResponse;
+import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +62,7 @@ public class AgentControllerIntTest extends IntegrationTestBase {
             assertThat(command).isNotNull();
 
             // send the command response
-            PingResponse response = PingResponse.builder().commandId(command.getCommandId()).build();
+            PingCommand.Response response = new PingCommand.Response(command.getCommandId());
             fetchCommand("drogon ", response, false);
         }).start();
 
