@@ -14,7 +14,7 @@ const incrementPendingRequests = (state) => {
 const decrementPendingRequests = (state) => {
   return {
     ...state,
-    pendingRequests: state.pendingRequests - 1,
+    pendingRequests: Math.max(0, state.pendingRequests - 1),
   };
 };
 
