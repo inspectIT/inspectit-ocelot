@@ -1,6 +1,7 @@
 ---
-id: Breaking Changes
+id: version-1.10.1-Breaking Changes
 title: Breaking Changes
+original_id: Breaking Changes
 ---
 
 ## Breaking changes in 1.10.1

@@ -1,12 +1,12 @@
-package rocks.inspectit.ocelot.commons.models.command.response;
+package rocks.inspectit.ocelot.commons.models.command;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import rocks.inspectit.ocelot.commons.models.command.response.impl.ListClassesResponse;
-import rocks.inspectit.ocelot.commons.models.command.response.impl.PingResponse;
+import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
+import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
 
 import java.util.UUID;
 
@@ -18,8 +18,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(value = {
-        @JsonSubTypes.Type(name = "ping", value = PingResponse.class),
-        @JsonSubTypes.Type(name = "list-classes", value = ListClassesResponse.class),
+        @JsonSubTypes.Type(name = PingCommand.TYPE_IDENTIFIER, value = PingCommand.Response.class),
+        @JsonSubTypes.Type(name = ListClassesCommand.TYPE_IDENTIFIER, value = ListClassesCommand.Response.class),
 })
 public abstract class CommandResponse {
 

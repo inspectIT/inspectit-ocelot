@@ -20,7 +20,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
     return { label: key, value };
   });
 
-  const setState = (stateArgument, value) => {
+  const updateMatcher = (stateArgument, value) => {
     const currentMethodMatcher = {
       ...methodMatcher,
       [stateArgument]: value,
@@ -45,29 +45,29 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
       }
     }
 
-    setState('visibilities', currentSelectedMethodVisibilities);
+    updateMatcher('visibilities', currentSelectedMethodVisibilities);
   };
 
   const handleParameterChange = (e, index) => {
     const currentParameterList = methodMatcher.parameterList;
     currentParameterList[index] = e.target.value;
 
-    setState('parameterList', currentParameterList);
+    updateMatcher('parameterList', currentParameterList);
   };
 
   const removeParameter = (index) => {
     const currentParameterList = methodMatcher.parameterList;
     currentParameterList.splice(index, 1);
 
-    setState('parameterList', currentParameterList);
+    updateMatcher('parameterList', currentParameterList);
   };
 
   const addParameter = () => {
     const currentParameterList = methodMatcher.parameterList;
     currentParameterList.push(methodMatcher.parameterInput);
 
-    setState('parameterList', currentParameterList);
-    setState('parameterInput', '');
+    updateMatcher('parameterList', currentParameterList);
+    updateMatcher('parameterInput', '');
   };
 
   return (
@@ -135,7 +135,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
               inputId="methodName"
               name="methodName"
               value={false}
-              onChange={(e) => setState('isConstructor', e.value)}
+              onChange={(e) => updateMatcher('isConstructor', e.value)}
               checked={methodMatcher.isConstructor === false}
             />
             <label htmlFor="methodName">Method name</label>
@@ -147,7 +147,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
               tooltip="Specifies whether the target method is a constructor. If this value is true, the name attribute will not be used!"
               tooltipOptions={TOOLTIP_OPTIONS}
               value={true}
-              onChange={(e) => setState('isConstructor', e.value)}
+              onChange={(e) => updateMatcher('isConstructor', e.value)}
               checked={methodMatcher.isConstructor === true}
             />
             <label htmlFor="constructor">Constructor</label>
@@ -162,7 +162,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
             style={{ width: '14rem' }}
             value={methodMatcher.matcherType}
             options={matcherTypes}
-            onChange={(e) => setState('matcherType', e.value)}
+            onChange={(e) => updateMatcher('matcherType', e.value)}
             placeholder="Select a Matcher Type"
           />
           <InputText
@@ -170,7 +170,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
             className="fill"
             style={{ marginLeft: '0.5rem' }}
             value={methodMatcher.name}
-            onChange={(e) => setState('name', e.target.value)}
+            onChange={(e) => updateMatcher('name', e.target.value)}
             placeholder="Method Name"
             tooltip="The name or pattern which is used to match against the fully qualified class or interface name."
             tooltipOptions={TOOLTIP_OPTIONS}
@@ -181,7 +181,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
             inputId="selected-parameters"
             name="selectedParameters"
             value={methodMatcher.isSelectedParameter}
-            onChange={(e) => setState('isSelectedParameter', e.checked)}
+            onChange={(e) => updateMatcher('isSelectedParameter', e.checked)}
             checked={methodMatcher.isSelectedParameter}
           />
           <label htmlFor={'onlyWithSelectedParameters'}>Only with specified arguments:</label>
@@ -214,10 +214,10 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
               disabled={disableArguments}
               name="parameter"
               className="fill"
-              value={methodMatcher.parameterInput}
+              value={methodMatcher.parameterInput || ''}
               tooltip="A fully qualified class name representing the method argument"
               tooltipOptions={TOOLTIP_OPTIONS}
-              onChange={(e) => setState('parameterInput', e.target.value)}
+              onChange={(e) => updateMatcher('parameterInput', e.target.value)}
               placeholder="Argument Full-Qualified Class Name"
             />
             <Button

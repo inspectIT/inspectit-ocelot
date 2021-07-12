@@ -94,8 +94,8 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
       }
     }
 
-    // Disable 'apply' button if only one of the method matcher is specified
-    if (!methodMatcher.matcherType ^ !methodMatcher.name) {
+    // Disable 'apply' button if method name is specified but no matcher-type
+    if (methodMatcher.name && !methodMatcher.matcherType) {
       setIsApplyDisabled(true);
     }
 
@@ -125,7 +125,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
 
     const methodName = match[2];
     const visibility = match[1] ? match[1].toUpperCase() : 'PACKAGE';
-    const parameters = match[3].split(', ');
+    const parameters = match[3].split(', ').filter((value) => !!value);
 
     // set method
     setMethodMatcher({
@@ -133,7 +133,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
       matcherType: 'EQUALS_FULLY',
       isConstructor: false,
       isSelectedParameter: true,
-      parameterInput: null,
+      parameterInput: '',
       parameterList: parameters,
       name: methodName,
     });

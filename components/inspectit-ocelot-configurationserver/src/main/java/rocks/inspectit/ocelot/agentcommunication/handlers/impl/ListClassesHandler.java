@@ -9,8 +9,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.handlers.CommandHandler;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
-import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
-import rocks.inspectit.ocelot.commons.models.command.response.impl.ListClassesResponse;
+import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.time.Duration;
@@ -29,7 +28,7 @@ public class ListClassesHandler implements CommandHandler {
 
     @Override
     public boolean canHandle(CommandResponse response) {
-        return response instanceof ListClassesResponse;
+        return response instanceof ListClassesCommand.Response;
     }
 
     @Override
@@ -48,7 +47,7 @@ public class ListClassesHandler implements CommandHandler {
 
     @Override
     public void handleResponse(CommandResponse response, DeferredResult<ResponseEntity<?>> result) {
-        ListClassesResponse classesResponse = (ListClassesResponse) response;
+        ListClassesCommand.Response classesResponse = (ListClassesCommand.Response) response;
         result.setResult(ResponseEntity.ok().body(classesResponse.getResult()));
     }
 }

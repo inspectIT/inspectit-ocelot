@@ -7,8 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
-import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
-import rocks.inspectit.ocelot.commons.models.command.response.impl.PingResponse;
+import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,7 +56,7 @@ public class PingCommandExecutorTest {
 
             CommandResponse response = executor.execute(command);
 
-            assertTrue(response instanceof PingResponse);
+            assertTrue(response instanceof PingCommand.Response);
             assertEquals(response.getCommandId(), command.getCommandId());
         }
     }

@@ -9,7 +9,7 @@ import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
+import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.config.model.command.AgentCommandSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
@@ -126,8 +126,8 @@ public class CommandHandler {
                 log.error("Exception during agent command deserialization.", exception);
             }
         } else {
-            log.warn("Couldn't successfully fetch an agent command. Server returned {}, {} ", response.getStatusLine()
-                    .getStatusCode(), response.getStatusLine().getReasonPhrase());
+            throw new IllegalStateException("Couldn't successfully fetch an agent command. Server returned " + response.getStatusLine()
+                    .getStatusCode());
         }
         return null;
     }

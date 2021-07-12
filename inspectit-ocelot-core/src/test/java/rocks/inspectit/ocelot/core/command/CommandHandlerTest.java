@@ -10,11 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.TestPropertySource;
-import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
-import rocks.inspectit.ocelot.commons.models.command.response.CommandResponse;
-import rocks.inspectit.ocelot.commons.models.command.response.impl.PingResponse;
+import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import java.io.IOException;
@@ -71,7 +68,7 @@ public class CommandHandlerTest {
         public void pingCommandSend() throws IOException {
             when(environment.getCurrentConfig().getAgentCommands().getLiveModeDuration()).thenReturn(Duration.ZERO);
             PingCommand command = new PingCommand();
-            PingResponse pingResponse = PingResponse.builder().build();
+            PingCommand.Response pingResponse = new PingCommand.Response();
             StatusLine statusLine = mock(StatusLine.class);
             when(statusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK, HttpStatus.SC_NO_CONTENT);
             when(httpResponse.getStatusLine()).thenReturn(statusLine);
