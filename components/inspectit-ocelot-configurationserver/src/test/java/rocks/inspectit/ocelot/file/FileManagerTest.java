@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
-import rocks.inspectit.ocelot.file.accessor.workingdirectory.AutoCommitWorkingDirectoryProxy;
+import rocks.inspectit.ocelot.file.accessor.workingdirectory.CachingWorkingDirectoryAccessor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -28,7 +28,7 @@ public class FileManagerTest {
 
             AbstractWorkingDirectoryAccessor result = manager.getWorkingDirectory();
 
-            assertThat(result).isInstanceOf(AutoCommitWorkingDirectoryProxy.class);
+            assertThat(result).isInstanceOf(CachingWorkingDirectoryAccessor.class);
         }
     }
 }

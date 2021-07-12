@@ -14,6 +14,7 @@ import rocks.inspectit.ocelot.file.accessor.git.CachingRevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AutoCommitWorkingDirectoryProxy;
+import rocks.inspectit.ocelot.file.accessor.workingdirectory.CachingWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
@@ -79,7 +80,8 @@ public class FileManager {
         versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, asyncPublisher, settings.getMailSuffix());
         versioningManager.initialize();
 
-        workingDirectoryAccessor = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);
+        AutoCommitWorkingDirectoryProxy autoCommitWDProxy = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);
+        workingDirectoryAccessor = new CachingWorkingDirectoryAccessor(autoCommitWDProxy);
     }
 
     /**
@@ -95,6 +97,7 @@ public class FileManager {
      * Returns the commit with the given id.
      *
      * @param commitId the id of the desired commit
+     *
      * @return the commit object
      */
     public RevisionAccess getCommitWithId(String commitId) {
@@ -136,6 +139,7 @@ public class FileManager {
      * Returns the diff between the current live branch and the current workspace branch.
      *
      * @param includeContent whether the file difference (old and new content) is included
+     *
      * @return the diff between the live and workspace branch
      */
     public WorkspaceDiff getWorkspaceDiff(boolean includeContent) throws IOException, GitAPIException {
