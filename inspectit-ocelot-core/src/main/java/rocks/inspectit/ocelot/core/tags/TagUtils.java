@@ -8,21 +8,31 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class TagUtils {
 
-    //Counter for the number of warnings that have already been printed
+    /**
+     * Counter for the number of warnings that have already been printed
+     */
     @VisibleForTesting
     static int printedWarningCounter = 0;
 
-    //The time in ms when the last warning was printed
+    /**
+     * The time in ms when the last warning was printed
+     */
     @VisibleForTesting
     static long lastWarningTime = 0;
 
-    //The number of maximum warnings that are to be printed
+    /**
+     * The number of maximum warnings that are to be printed
+     */
     private final static int MAX_WARNING_PRINTS = 10;
 
-    //The duration in ms that needs to pass, if MAX_WARNING_PRINTS has been reached
+    /**
+     * The duration in ms that needs to pass, if MAX_WARNING_PRINTS has been reached
+     */
     private final static int WAITING_TIME_IN_MILLI_SECONDS = 600_000;
 
-    //Boolean that indicates whether the user gets a message that further logs are suppressed
+    /**
+     * Boolean that indicates whether the user gets a message that further logs are suppressed
+     */
     private static boolean PRINT_FURTHER_MESSAGE = true;
 
     private TagUtils() {
