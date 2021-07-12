@@ -29,8 +29,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 /**
  * Base class for all tests.
@@ -141,6 +140,16 @@ public class SpringTestBase {
     public void assertLogsOfLevelOrGreater(Level level) {
         assertThat(StaticAppender.getEvents()).extracting(ILoggingEvent::getLevel)
                 .anyMatch(le -> le.isGreaterOrEqual(level));
+    }
+
+    /**
+     * Asserts that count of specific log output is equal to the given integer
+     *
+     * @param count the number to compare against.
+     */
+    public void assertLogCount(String logMessage, int count) {
+        assertThat(StaticAppender.getEvents()).filteredOn(event -> event.getMessage().contains(logMessage))
+                .hasSize(count);
     }
 
 }
