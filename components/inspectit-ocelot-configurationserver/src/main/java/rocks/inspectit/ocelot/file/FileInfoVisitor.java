@@ -5,9 +5,11 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.FileVisitResult;
@@ -23,15 +25,24 @@ import java.util.*;
 public class FileInfoVisitor implements FileVisitor<Path> {
 
     /**
+     * Type used by Gson for deserializing.
+     */
+    private static final Type TYPE_MAP = new TypeToken<Map<String, String>>() {
+    }.getType();
+
+    /**
      * The directory stack. The latest directory is the current one.
      */
-    private Stack<FileInfo> directoryStack = new Stack<>();
+    private final Stack<FileInfo> directoryStack = new Stack<>();
 
     /**
      * The {@link FileInfo} which represents the starting directory of the walk.
      */
     private FileInfo rootDirectory;
 
+    /**
+     * Gson instance for JSON deserialization.
+     */
     private final Gson gson = new Gson();
 
     @Override
@@ -55,7 +66,7 @@ public class FileInfoVisitor implements FileVisitor<Path> {
     }
 
     @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws FileNotFoundException {
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         // adding each file to the current directory
         FileInfo fileInfo = FileInfo.builder()
                 .name(file.getFileName().toString())
@@ -73,30 +84,38 @@ public class FileInfoVisitor implements FileVisitor<Path> {
      * as fallback.
      *
      * @param file The File instance which should be checked.
+     *
      * @return {@link FileInfo.Type}.UI_FILE if the given file is a ui-file. Otherwise {@link FileInfo.Type}.FILE is returned.
      */
-    private FileInfo.Type resolveFileType(File file) throws FileNotFoundException {
-        Scanner fileScanner = new Scanner(file);
-        FileInfo.Type fileType = FileInfo.Type.FILE;
+    private FileInfo.Type resolveFileType(File file) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String firstLine = reader.readLine();
 
-        if(fileScanner.hasNext()) {
-            Type type = new TypeToken<Map<String, String>>(){}.getType();
-            //Remove comment-character from line.
-            String firstLine = fileScanner.nextLine().trim().substring(1);
+            if (firstLine == null) {
+                return FileInfo.Type.FILE;
+            } else {
+                firstLine = firstLine.trim();
+            }
 
-            try {
-                Map<String, String> jsonMap = gson.fromJson(firstLine, type);
-                //Build a String from the type-value which corresponds to the Enum-Naming scheme.
-                String typeString = "UI_" + jsonMap.get("type").toUpperCase().replace("-", "_");
-                if(EnumUtils.isValidEnum(FileInfo.Type.class, typeString)){
-                    fileType = FileInfo.Type.valueOf(typeString);
+            FileInfo.Type fileType = FileInfo.Type.FILE;
+            if (StringUtils.length(firstLine) > 1) {
+                // Remove comment-character from line. In case the line has a different format, we assume it was
+                // done by the use, so we don't care whether it can parsed or not.
+                String rawJson = firstLine.substring(1);
+
+                try {
+                    Map<String, String> jsonMap = gson.fromJson(rawJson, TYPE_MAP);
+                    // Build a String from the type-value which corresponds to the Enum-Naming scheme.
+                    String typeString = "UI_" + jsonMap.get("type").toUpperCase().replace("-", "_");
+                    if (EnumUtils.isValidEnum(FileInfo.Type.class, typeString)) {
+                        fileType = FileInfo.Type.valueOf(typeString);
+                    }
+                } catch (JsonSyntaxException ignored) {
                 }
-            } catch (JsonSyntaxException ignored){}
+            }
 
+            return fileType;
         }
-
-        fileScanner.close();
-        return fileType;
     }
 
     @Override

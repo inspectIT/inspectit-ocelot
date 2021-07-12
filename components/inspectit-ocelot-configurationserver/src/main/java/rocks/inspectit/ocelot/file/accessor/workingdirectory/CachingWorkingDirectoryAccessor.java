@@ -21,12 +21,13 @@ import java.util.concurrent.TimeUnit;
  * These operations are: writeFile, createDirectory, move, delete.
  */
 @Slf4j
-public class CachingWorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor{
+public class CachingWorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
     /**
      * Timeout used for the LoadingCache.
      */
     private static final Duration TIMEOUT_DURATION = Duration.ofDays(1);
+
     /**
      * Size used for the LoadingCache.
      */
@@ -59,13 +60,8 @@ public class CachingWorkingDirectoryAccessor extends AbstractWorkingDirectoryAcc
     /**
      * Invalidates the current cache.
      */
-    public void invalidateCache(){
+    public void invalidateCache() {
         workspaceCache.invalidateAll();
-    }
-
-    @Override
-    protected String verifyPath(String relativeBasePath, String path) throws IllegalArgumentException {
-        return null;
     }
 
     @Override
@@ -110,47 +106,51 @@ public class CachingWorkingDirectoryAccessor extends AbstractWorkingDirectoryAcc
     }
 
     /**
-     *  Forwards the call via Delegate to workingDirectoryAccessor.
+     * Not used because the call is delegated via {@link Delegate} to the {@link #workingDirectoryAccessor}.
      */
     @Override
-    protected void writeFile(String path, String content) throws IOException {
-
+    protected String verifyPath(String relativeBasePath, String path) throws IllegalArgumentException {
+        return null;
     }
 
     /**
-     *  Forwards the call via Delegate to workingDirectoryAccessor.
+     * Not used because the call is delegated via {@link Delegate} to the {@link #workingDirectoryAccessor}.
      */
     @Override
-    protected void createDirectory(String path) throws IOException {
-
+    protected void writeFile(String path, String content) {
     }
 
     /**
-     *  Forwards the call via Delegate to workingDirectoryAccessor.
+     * Not used because the call is delegated via {@link Delegate} to the {@link #workingDirectoryAccessor}.
+     */
+    @Override
+    protected void createDirectory(String path) {
+    }
+
+    /**
+     * Not used because the call is delegated via {@link Delegate} to the {@link #workingDirectoryAccessor}.
      */
     @Override
     protected void move(String sourcePath, String targetPath) throws IOException {
-
     }
 
     /**
-     *  Forwards the call via Delegate to workingDirectoryAccessor.
+     * Not used because the call is delegated via {@link Delegate} to the {@link #workingDirectoryAccessor}.
      */
     @Override
     protected void delete(String path) throws IOException {
-
     }
 
     /**
-     *  Forwards the call via Delegate to workingDirectoryAccessor.
+     * Not used because the call is delegated via {@link Delegate} to the {@link #workingDirectoryAccessor}.
      */
     @Override
-    protected byte[] readFile(String path) throws IOException {
+    protected byte[] readFile(String path) {
         return new byte[0];
     }
 
     /**
-     *  Forwards the call via Delegate to workingDirectoryAccessor.
+     * Not used because the call is delegated via {@link Delegate} to the {@link #workingDirectoryAccessor}.
      */
     @Override
     protected List<FileInfo> listFiles(String path) {
@@ -158,7 +158,7 @@ public class CachingWorkingDirectoryAccessor extends AbstractWorkingDirectoryAcc
     }
 
     /**
-     *  Forwards the call via Delegate to workingDirectoryAccessor.
+     * Not used because the call is delegated via {@link Delegate} to the {@link #workingDirectoryAccessor}.
      */
     @Override
     protected boolean exists(String path) {
@@ -166,7 +166,7 @@ public class CachingWorkingDirectoryAccessor extends AbstractWorkingDirectoryAcc
     }
 
     /**
-     *  Forwards the call via Delegate to workingDirectoryAccessor.
+     * Not used because the call is delegated via {@link Delegate} to the {@link #workingDirectoryAccessor}.
      */
     @Override
     protected boolean isDirectory(String path) {
@@ -177,6 +177,7 @@ public class CachingWorkingDirectoryAccessor extends AbstractWorkingDirectoryAcc
      * Excluded methods that Lombok will not implement.
      */
     private abstract static class ExcludedListMethods {
+
         public abstract List<FileInfo> listConfigurationFiles(String path);
 
         public abstract void writeAgentMappings(String content) throws IOException;

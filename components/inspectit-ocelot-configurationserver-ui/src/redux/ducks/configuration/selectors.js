@@ -9,10 +9,10 @@ const configurationSelector = (state) => state.configuration;
  * Contains the mapping for file-types to primeface-icons. The icon with the key "_default" should be used if no other key applies.
  */
 const filetypeIconMapping = {
+  _default: 'pi-file',
   directory: 'pi-folder',
   file: 'pi-file',
   'ui-method-configuration': 'pi-cog',
-  _default: 'pi-file',
 };
 
 /**

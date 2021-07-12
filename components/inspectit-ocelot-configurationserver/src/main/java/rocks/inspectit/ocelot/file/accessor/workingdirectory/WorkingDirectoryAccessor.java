@@ -92,7 +92,6 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
             }
 
             FileInfoVisitor fileInfoVisitor = new FileInfoVisitor();
-
             Files.walkFileTree(targetPath, fileInfoVisitor);
 
             return fileInfoVisitor.getFileInfos();

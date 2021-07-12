@@ -80,8 +80,8 @@ public class FileManager {
         versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, asyncPublisher, settings.getMailSuffix());
         versioningManager.initialize();
 
-        AutoCommitWorkingDirectoryProxy acwdp = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);
-        workingDirectoryAccessor = new CachingWorkingDirectoryAccessor(acwdp);
+        AutoCommitWorkingDirectoryProxy autoCommitWDProxy = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);
+        workingDirectoryAccessor = new CachingWorkingDirectoryAccessor(autoCommitWDProxy);
     }
 
     /**
