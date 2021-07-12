@@ -21,7 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
-import rocks.inspectit.ocelot.file.accessor.workingdirectory.CachingDirectoryProxy;
+import rocks.inspectit.ocelot.file.accessor.workingdirectory.CachingWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
@@ -91,7 +91,7 @@ public class IntegrationTestBase {
         VersioningManager versioningManager = (VersioningManager) ReflectionTestUtils.getField(fileManager, "versioningManager");
         versioningManager.initialize();
 
-        ((CachingDirectoryProxy) fileManager.getWorkingDirectory()).invalidate();
+        ((CachingWorkingDirectoryAccessor) fileManager.getWorkingDirectory()).invalidateCache();
 
 
     }

@@ -19,40 +19,40 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CachingDirectoryProxyTest {
+public class CachingWorkingDirectoryAccessorTest {
 
     @InjectMocks
-    CachingDirectoryProxy directoryCache;
+    CachingWorkingDirectoryAccessor directoryCache;
 
     @Mock
     AutoCommitWorkingDirectoryProxy autoCommitWorkingDirectoryProxy;
 
     @Nested
-    class ListFiles {
+    class ListConfigurationFiles {
 
         @Test
         void emptyResult() {
-            doReturn(Collections.emptyList()).when(autoCommitWorkingDirectoryProxy).listFiles(any());
+            doReturn(Collections.emptyList()).when(autoCommitWorkingDirectoryProxy).listConfigurationFiles(any());
 
-            List<FileInfo> result = directoryCache.listFiles("");
+            List<FileInfo> result = directoryCache.listConfigurationFiles("");
 
             assertThat(result.isEmpty());
             assertThat(directoryCache.workspaceCache.asMap().size()).isEqualTo(1);
-            verify(autoCommitWorkingDirectoryProxy).listFiles("");
+            verify(autoCommitWorkingDirectoryProxy).listConfigurationFiles("");
             verifyNoMoreInteractions(autoCommitWorkingDirectoryProxy);
         }
 
         @Test
         void resultAlreadyCached() {
-            doReturn(Collections.emptyList()).when(autoCommitWorkingDirectoryProxy).listFiles(any());
+            doReturn(Collections.emptyList()).when(autoCommitWorkingDirectoryProxy).listConfigurationFiles(any());
 
             //first call for caching
-            directoryCache.listFiles("");
-            List<FileInfo> result = directoryCache.listFiles("");
+            directoryCache.listConfigurationFiles("");
+            List<FileInfo> result = directoryCache.listConfigurationFiles("");
 
             assertThat(result.isEmpty());
             assertThat(directoryCache.workspaceCache.asMap().size()).isEqualTo(1);
-            verify(autoCommitWorkingDirectoryProxy).listFiles("");
+            verify(autoCommitWorkingDirectoryProxy).listConfigurationFiles("");
             verifyNoMoreInteractions(autoCommitWorkingDirectoryProxy);
         }
 
@@ -62,22 +62,39 @@ public class CachingDirectoryProxyTest {
             when(mockCache.get(any())).thenThrow(ExecutionException.class);
             directoryCache.workspaceCache = mockCache;
 
-            List<FileInfo> result = directoryCache.listFiles("");
+            List<FileInfo> result = directoryCache.listConfigurationFiles("");
 
             assertThat(result.isEmpty());
         }
     }
 
     @Nested
-    class WriteFile {
+    class WriteAgentMappings {
 
         @Test
         void invalidates() throws IOException {
-            doNothing().when(autoCommitWorkingDirectoryProxy).writeFile(any(), any());
+            doNothing().when(autoCommitWorkingDirectoryProxy).writeAgentMappings(any());
             LoadingCache<String, List<FileInfo>> mockCache = mock(LoadingCache.class);
             directoryCache.workspaceCache = mockCache;
 
-            directoryCache.writeFile("","");
+            directoryCache.writeAgentMappings("");
+
+            verify(mockCache).invalidateAll();
+            verifyNoMoreInteractions(mockCache);
+        }
+    }
+
+
+    @Nested
+    class WriteConfigurationFile {
+
+        @Test
+        void invalidates() throws IOException {
+            doNothing().when(autoCommitWorkingDirectoryProxy).writeConfigurationFile(any(), any());
+            LoadingCache<String, List<FileInfo>> mockCache = mock(LoadingCache.class);
+            directoryCache.workspaceCache = mockCache;
+
+            directoryCache.writeConfigurationFile("","");
 
             verify(mockCache).invalidateAll();
             verifyNoMoreInteractions(mockCache);
@@ -85,15 +102,15 @@ public class CachingDirectoryProxyTest {
     }
 
     @Nested
-    class CreateDirectory {
+    class CreateConfigurationDirectory {
 
         @Test
         void invalidates() throws IOException {
-            doNothing().when(autoCommitWorkingDirectoryProxy).createDirectory(any());
+            doNothing().when(autoCommitWorkingDirectoryProxy).createConfigurationDirectory(any());
             LoadingCache<String, List<FileInfo>> mockCache = mock(LoadingCache.class);
             directoryCache.workspaceCache = mockCache;
 
-            directoryCache.createDirectory("");
+            directoryCache.createConfigurationDirectory("");
 
             verify(mockCache).invalidateAll();
             verifyNoMoreInteractions(mockCache);
@@ -101,15 +118,15 @@ public class CachingDirectoryProxyTest {
     }
 
     @Nested
-    class Move {
+    class MoveConfiguration {
 
         @Test
         void invalidates() throws IOException {
-            doNothing().when(autoCommitWorkingDirectoryProxy).move(any(), any());
+            doNothing().when(autoCommitWorkingDirectoryProxy).moveConfiguration(any(), any());
             LoadingCache<String, List<FileInfo>> mockCache = mock(LoadingCache.class);
             directoryCache.workspaceCache = mockCache;
 
-            directoryCache.move("", "");
+            directoryCache.moveConfiguration("", "");
 
             verify(mockCache).invalidateAll();
             verifyNoMoreInteractions(mockCache);
@@ -117,15 +134,15 @@ public class CachingDirectoryProxyTest {
     }
 
     @Nested
-    class Delete {
+    class DeleteConfiguration {
 
         @Test
         void invalidates() throws IOException {
-            doNothing().when(autoCommitWorkingDirectoryProxy).delete(any());
+            doNothing().when(autoCommitWorkingDirectoryProxy).deleteConfiguration(any());
             LoadingCache<String, List<FileInfo>> mockCache = mock(LoadingCache.class);
             directoryCache.workspaceCache = mockCache;
 
-            directoryCache.delete("");
+            directoryCache.deleteConfiguration("");
 
             verify(mockCache).invalidateAll();
             verifyNoMoreInteractions(mockCache);

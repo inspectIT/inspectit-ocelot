@@ -14,7 +14,7 @@ import rocks.inspectit.ocelot.file.accessor.git.CachingRevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AutoCommitWorkingDirectoryProxy;
-import rocks.inspectit.ocelot.file.accessor.workingdirectory.CachingDirectoryProxy;
+import rocks.inspectit.ocelot.file.accessor.workingdirectory.CachingWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
@@ -81,7 +81,7 @@ public class FileManager {
         versioningManager.initialize();
 
         AutoCommitWorkingDirectoryProxy acwdp = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);
-        workingDirectoryAccessor = new CachingDirectoryProxy(acwdp);
+        workingDirectoryAccessor = new CachingWorkingDirectoryAccessor(acwdp);
     }
 
     /**

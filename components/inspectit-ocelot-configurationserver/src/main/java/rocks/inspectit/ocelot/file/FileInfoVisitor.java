@@ -32,6 +32,8 @@ public class FileInfoVisitor implements FileVisitor<Path> {
      */
     private FileInfo rootDirectory;
 
+    private final Gson gson = new Gson();
+
     @Override
     public FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attrs) {
         FileInfo currentDirectory = FileInfo.builder()
@@ -80,16 +82,15 @@ public class FileInfoVisitor implements FileVisitor<Path> {
         if(fileScanner.hasNext()) {
             Type type = new TypeToken<Map<String, String>>(){}.getType();
             //Remove comment-character from line.
-            String firstLine = fileScanner.nextLine().replace("#", "");
+            String firstLine = fileScanner.nextLine().trim().substring(1);
 
             try {
-                Map<String, String> jsonMap = new Gson().fromJson(firstLine, type);
+                Map<String, String> jsonMap = gson.fromJson(firstLine, type);
                 //Build a String from the type-value which corresponds to the Enum-Naming scheme.
                 String typeString = "UI_" + jsonMap.get("type").toUpperCase().replace("-", "_");
                 if(EnumUtils.isValidEnum(FileInfo.Type.class, typeString)){
                     fileType = FileInfo.Type.valueOf(typeString);
                 }
-
             } catch (JsonSyntaxException ignored){}
 
         }
