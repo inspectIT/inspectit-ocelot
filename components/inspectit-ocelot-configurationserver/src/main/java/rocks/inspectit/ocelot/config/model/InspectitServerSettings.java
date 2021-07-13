@@ -76,4 +76,8 @@ public class InspectitServerSettings {
     @Valid
     @Builder.Default
     private AgentCommandSettings agentCommand = AgentCommandSettings.builder().build();
+
+    @Valid
+    @Builder.Default
+    private RemoteConfigurationsSettings remoteConfigurations = RemoteConfigurationsSettings.builder().build();
 }

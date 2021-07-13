@@ -60,6 +60,17 @@ inspectit-config-server:
     # the max. time an agent is allowed to wait for a new command
     agent-polling-timeout: 30s
 
+  remote-configurations:
+    enabled: true
+    remote-name: remote-configuration
+    git-repository-uri: git@github.com:mariusoe/config-push.git
+    source-branch:
+    target-branch: rm-live-2
+    authentication-type: PPK
+    username: mariusoe
+    password: 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
+    private-key-file: C:/Users/mo/.ssh/id_rsa
+
 # ACTUATOR PROPERTIES
 management:
   # Whether to enable or disable all endpoints by default.

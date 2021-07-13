@@ -2,25 +2,30 @@ package rocks.inspectit.ocelot.file.versioning;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.util.FS;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.util.CollectionUtils;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
+import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings.AuthenticationType;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
@@ -33,6 +38,7 @@ import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.*;
@@ -54,9 +60,9 @@ public class VersioningManager {
     static final PersonIdent GIT_SYSTEM_AUTHOR = new PersonIdent("System", "info@inspectit.rocks");
 
     /**
-     * The mail suffix used to generate mail addresses for internal users.
+     * The server's settings.
      */
-    private String mailSuffix;
+    private InspectitServerSettings settings;
 
     /**
      * Path of the current working directory.
@@ -90,13 +96,13 @@ public class VersioningManager {
      * @param workingDirectory       the working directory to use
      * @param authenticationSupplier the supplier to user for accessing the current user
      * @param eventPublisher         the event publisher to use
-     * @param mailSuffix             The mail suffix used to generate mail addresses for internal users.
+     * @param settings               the server's settings
      */
-    public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier, ApplicationEventPublisher eventPublisher, String mailSuffix) {
+    public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier, ApplicationEventPublisher eventPublisher, InspectitServerSettings settings) {
         this.workingDirectory = workingDirectory;
         this.authenticationSupplier = authenticationSupplier;
         this.eventPublisher = eventPublisher;
-        this.mailSuffix = mailSuffix;
+        this.settings = settings;
     }
 
     /**
@@ -133,6 +139,103 @@ public class VersioningManager {
             stageFiles();
             commitFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
         }
+
+        String remoteName = settings.getRemoteConfigurations().getRemoteName();
+        if (settings.getRemoteConfigurations().isEnabled() && !hasConfigurationRemote()) {
+            log.info("No configuration remote repository is configured for the local Git repository, thus, adding '{}'.", remoteName);
+            initializeRemote();
+        } else {
+            log.debug("Remote '{}' for remote configurations exists.", remoteName);
+            updateRemote();
+        }
+
+        pushBranch();
+    }
+
+    private void initializeRemote() {
+        try {
+            RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+            RemoteAddCommand remoteAddCommand = git.remoteAdd();
+            remoteAddCommand.setName(remoteSettings.getRemoteName());
+            remoteAddCommand.setUri(new URIish(remoteSettings.getGitRepositoryUri().toString()));
+            remoteAddCommand.call();
+        } catch (GitAPIException | URISyntaxException e) {
+            log.error("Could not initialize configuration remotes.", e);
+        }
+    }
+
+    private void updateRemote() {
+        try {
+            RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+            RemoteSetUrlCommand setUrlCommand = git.remoteSetUrl();
+            setUrlCommand.setRemoteName(remoteSettings.getRemoteName());
+            setUrlCommand.setRemoteUri(new URIish(remoteSettings.getGitRepositoryUri().toString()));
+            setUrlCommand.call();
+        } catch (GitAPIException | URISyntaxException e) {
+            log.error("Could not initialize configuration remotes.", e);
+        }
+    }
+
+    private boolean hasConfigurationRemote() {
+        try {
+            List<RemoteConfig> remotes = git.remoteList().call();
+            String remoteName = settings.getRemoteConfigurations().getRemoteName();
+            return remotes.stream().anyMatch(remote -> remote.getName().equals(remoteName));
+        } catch (GitAPIException e) {
+            return false;
+        }
+    }
+
+    private void pushBranch() {
+        try {
+            RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+            String remoteName = remoteSettings.getRemoteName();
+
+            RefSpec refSpec = new RefSpec(Branch.WORKSPACE.getBranchName() + ":refs/heads/" + remoteSettings.getTargetBranch());
+
+            PushCommand push = git.push();
+
+            AuthenticationType authenticationType = remoteSettings.getAuthenticationType();
+
+            if (authenticationType == AuthenticationType.PASSWORD) {
+                authenticatePassword(push);
+            } else if (authenticationType == AuthenticationType.PPK) {
+                authenticatePpk(push);
+            }
+
+            push.setRemote(remoteName);
+            push.setRefSpecs(refSpec);
+            push.call();
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
+        System.exit(0);
+    }
+
+    private void authenticatePassword(PushCommand push) {
+        String username = settings.getRemoteConfigurations().getUsername();
+        String password = settings.getRemoteConfigurations().getPassword();
+        UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
+        push.setCredentialsProvider(credentialsProvider);
+    }
+
+    private void authenticatePpk(PushCommand push) {
+        SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
+            @Override
+            protected JSch createDefaultJSch(FS fs) throws JSchException {
+                JSch defaultJSch = super.createDefaultJSch(fs);
+                defaultJSch.addIdentity(settings.getRemoteConfigurations().getPrivateKeyFile());
+                return defaultJSch;
+            }
+
+            @Override
+            protected void configure(OpenSshConfig.Host hc, Session session) {
+            }
+        };
+        push.setTransportConfigCallback(transport -> {
+            SshTransport sshTransport = (SshTransport) transport;
+            sshTransport.setSshSessionFactory(sshSessionFactory);
+        });
     }
 
     /**
@@ -290,7 +393,7 @@ public class VersioningManager {
             if (authentication.getPrincipal() instanceof InetOrgPerson) {
                 mail = ((InetOrgPerson) authentication.getPrincipal()).getMail();
             } else {
-                mail = username + mailSuffix;
+                mail = username + settings.getMailSuffix();
             }
             return new PersonIdent(username, mail);
         } else {

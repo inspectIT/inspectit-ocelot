@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.test.util.ReflectionTestUtils;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileTestBase;
@@ -61,8 +62,9 @@ class VersioningManagerTest extends FileTestBase {
         authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
         eventPublisher = mock(ApplicationEventPublisher.class);
+        InspectitServerSettings settings = InspectitServerSettings.builder().mailSuffix("test.com").build();
 
-        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher, "test.com");
+        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher, settings);
 
         System.out.println("Test data in: " + tempDirectory.toString());
     }
@@ -728,21 +730,21 @@ class VersioningManagerTest extends FileTestBase {
         @Test
         void systemUserOnSystemOperationUsed() {
             VersioningManager vm = new VersioningManager(Paths.get(""), () -> null, (event) -> {
-            }, "@test.com");
+            }, InspectitServerSettings.builder().mailSuffix("@test.com").build());
             assertThat(vm.getCurrentAuthor()).isEqualTo(VersioningManager.GIT_SYSTEM_AUTHOR);
         }
 
         @Test
         void activeUserUsed() {
             VersioningManager vm = new VersioningManager(Paths.get(""), () -> authentication, (event) -> {
-            }, "@test.com");
+            }, InspectitServerSettings.builder().mailSuffix("@test.com").build());
             assertThat(vm.getCurrentAuthor().getName()).isEqualTo(authentication.getName());
         }
 
         @Test
         void mailCreatedFromConfig() {
             VersioningManager vm = new VersioningManager(Paths.get(""), () -> authentication, (event) -> {
-            }, "@test.com");
+            }, InspectitServerSettings.builder().mailSuffix("@test.com").build());
             assertThat(vm.getCurrentAuthor().getEmailAddress()).isEqualTo(authentication.getName() + "@" + "test.com");
         }
 
@@ -753,7 +755,7 @@ class VersioningManagerTest extends FileTestBase {
             when(authentication.getPrincipal()).thenReturn(mockInetOrgPerson);
 
             VersioningManager vm = new VersioningManager(Paths.get(""), () -> authentication, (event) -> {
-            }, "@test.com");
+            }, InspectitServerSettings.builder().mailSuffix("@test.com").build());
 
             assertThat(vm.getCurrentAuthor().getEmailAddress()).isEqualTo("foo@bar.com");
         }
