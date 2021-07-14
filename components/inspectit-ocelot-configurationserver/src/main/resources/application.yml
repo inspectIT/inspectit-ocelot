@@ -59,17 +59,28 @@ inspectit-config-server:
     command-queue-size: 100
     # the max. time an agent is allowed to wait for a new command
     agent-polling-timeout: 30s
-
+  # Settings for connecting the configuration server to remote Git repositories.
   remote-configurations:
-    enabled: true
+    # Whether remote Git repositories should be used for configuration management.
+    enabled: false
+    # The name of the remote ref in the local Git repository.
     remote-name: remote-configuration
+    # The URI to the remote Git repository.
     git-repository-uri: git@github.com:mariusoe/config-push.git
-    source-branch:
-    target-branch: rm-live-2
-    authentication-type: PPK
-    username: mariusoe
-    password: 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
-    private-key-file: C:/Users/mo/.ssh/id_rsa
+    # The branch name on the remote Git repository which will be used to fetch workspace-configurations from.
+    source-branch: rm-workspace
+    # The branch name on the remote Git repository which will be used to push live-configurations to.
+    target-branch: rm-live
+    # The type of authentication to use. Possible values: NONE, PASSWORD, PPK
+    authentication-type: NONE
+    # The username for accessing the remote repository. Only used in case of PASSWORD authentication.
+    username:
+    # The password for accessing the remote repository. Only used in case of PASSWORD authentication.
+    password:
+    # Additional private key to use for SSH authentication. The server will automatically load the known hosts and private
+    # keys from the default locations (identity, id_rsa and id_dsa) in the user’s .ssh directory. Only used in case of
+    # PPK authentication.
+    private-key-file:
 
 # ACTUATOR PROPERTIES
 management:
