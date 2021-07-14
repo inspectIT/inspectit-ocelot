@@ -10,9 +10,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
 
@@ -24,8 +21,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class RemoteConfigurationManagerTest {
 
@@ -123,6 +118,5 @@ public class RemoteConfigurationManagerTest {
             List<Ref> refs = gitRemote.branchList().call();
             assertThat(refs).extracting(Ref::getName).containsExactly("refs/heads/different-branch");
         }
-
     }
 }

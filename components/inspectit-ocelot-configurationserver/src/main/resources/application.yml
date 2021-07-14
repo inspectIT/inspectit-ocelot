@@ -65,8 +65,8 @@ inspectit-config-server:
     enabled: false
     # The name of the remote ref in the local Git repository.
     remote-name: remote-configuration
-    # The URI to the remote Git repository.
-    git-repository-uri: git@github.com:mariusoe/config-push.git
+    # The URI to the remote Git repository. Examples: https://github.com/user/repo.git, git@github.com:user/repo.git
+    git-repository-uri:
     # The branch name on the remote Git repository which will be used to fetch workspace-configurations from.
     source-branch: rm-workspace
     # The branch name on the remote Git repository which will be used to push live-configurations to.
