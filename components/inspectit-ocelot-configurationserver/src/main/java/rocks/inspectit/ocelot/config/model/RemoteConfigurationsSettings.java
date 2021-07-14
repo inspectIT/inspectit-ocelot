@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.transport.URIish;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
@@ -42,30 +44,32 @@ public class RemoteConfigurationsSettings {
         NONE, PASSWORD, PPK;
     }
 
+    @AssertFalse
+    public boolean isRemoteNameBlank() {
+        return enabled && StringUtils.isBlank(remoteName);
+    }
+
     @AssertTrue(message = "The URI of the remote Git must be specified!")
     public boolean isGitRepositoryUriNotNull() {
         return !enabled || gitRepositoryUri != null;
     }
 
-    @AssertTrue
-    public boolean isValidAuthentication() {
+    @AssertFalse(message = "Authentication method 'PPK' can only be used with an SSH connection.")
+    public boolean isHttpWithPpk() {
         if (!enabled) {
-            return true;
+            return false;
         }
+
         String scheme = gitRepositoryUri.getScheme();
-        if (scheme == null || scheme.equals("ssh")) {
-            return true;
-        } else {
-            return authenticationType != AuthenticationType.PPK;
-        }
+        return !(scheme == null || scheme.equals("ssh")) && authenticationType == AuthenticationType.PPK;
     }
 
     @AssertFalse(message = "SSH using password authentication is not supported.")
     public boolean isSshWithPassword() {
         if (!enabled) {
-            return true;
+            return false;
         }
-        
+
         String scheme = gitRepositoryUri.getScheme();
         return (scheme == null || scheme.equals("ssh")) && authenticationType == AuthenticationType.PASSWORD;
     }
