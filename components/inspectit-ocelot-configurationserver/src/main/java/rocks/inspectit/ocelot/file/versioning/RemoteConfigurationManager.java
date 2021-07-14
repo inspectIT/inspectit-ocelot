@@ -7,14 +7,20 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings.AuthenticationType;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -191,5 +197,35 @@ public class RemoteConfigurationManager {
             SshTransport sshTransport = (SshTransport) transport;
             sshTransport.setSshSessionFactory(sshSessionFactory);
         });
+    }
+
+    public void pullBranch(Branch workspace) throws GitAPIException, IOException {
+        fetchSourceBranch();
+
+        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+
+        String ref = "refs/heads/" + remoteSettings.getSourceBranch();
+        ObjectId sourceCommitId = git.getRepository().resolve(ref);
+
+        // create (start) an empty merge-commit
+        git.merge()
+                .include(sourceCommitId)
+                .setCommit(false)
+                .setFastForward(MergeCommand.FastForwardMode.NO_FF)
+                .setStrategy(MergeStrategy.OURS)
+                .call();
+
+        System.out.println();
+    }
+
+    public void fetchSourceBranch() throws GitAPIException {
+        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+
+        log.info("Fetching '{}' from configuration remote.", remoteSettings.getSourceBranch());
+
+        FetchResult fetchResult = git.fetch()
+                .setRemote(remoteSettings.getRemoteName())
+                .setRefSpecs("refs/heads/" + remoteSettings.getSourceBranch() + ":refs/heads/" + remoteSettings.getSourceBranch())
+                .call();
     }
 }

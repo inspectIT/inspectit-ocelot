@@ -37,6 +37,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -151,6 +152,15 @@ public class VersioningManager {
                 remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getTargetRepository());
             }
         }
+
+        remoteConfigurationManager.fetchSourceBranch();
+        try {
+            mergeSourceBranch(); //TODO
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.exit(0);
     }
 
     /**
@@ -681,7 +691,7 @@ public class VersioningManager {
             // checkout live branch
             git.checkout().setName(Branch.LIVE.getBranchName()).call();
 
-            // create an empty merge-commit
+            // create (start) an empty merge-commit
             git.merge()
                     .include(workspaceCommitId)
                     .setCommit(false)
@@ -764,5 +774,67 @@ public class VersioningManager {
         return StreamSupport.stream(workspaceCommits.spliterator(), false)
                 .map(WorkspaceVersion::of)
                 .collect(Collectors.toList());
+    }
+
+    private void mergeSourceBranch() throws IOException, GitAPIException {
+        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+
+        Repository repository = git.getRepository();
+        ObjectId oldCommitId = repository.exactRef("refs/heads/" + Branch.WORKSPACE.getBranchName()).getObjectId();
+        ObjectId newCommitId = repository.exactRef("refs/heads/" + remoteSettings.getSourceBranch()).getObjectId();
+
+        WorkspaceDiff diff = getWorkspaceDiff(false, oldCommitId, newCommitId);
+
+        if (diff.getEntries().isEmpty()) {
+            log.info("There is nothing to merge from the source configuration branch into the current workspace branch.");
+            return;
+        }
+
+        // collect diff files
+        List<String> removeFiles = diff.getEntries()
+                .stream()
+                .filter(entry -> entry.getType() == DiffEntry.ChangeType.DELETE)
+                .map(SimpleDiffEntry::getFile)
+                .map(this::prefixRelativeFile)
+                .collect(Collectors.toList());
+
+        List<String> checkoutFiles = diff.getEntries()
+                .stream()
+                .filter(entry -> entry.getType() != DiffEntry.ChangeType.DELETE)
+                .map(SimpleDiffEntry::getFile)
+                .map(this::prefixRelativeFile)
+                .collect(Collectors.toList());
+
+        // create (start) an empty merge-commit
+        git.merge()
+                .include(newCommitId)
+                .setCommit(false)
+                .setFastForward(MergeCommand.FastForwardMode.NO_FF)
+                .setStrategy(MergeStrategy.OURS)
+                .call();
+
+        // remove all deleted files
+        if (!removeFiles.isEmpty()) {
+            RmCommand rmCommand = git.rm();
+            removeFiles.forEach(rmCommand::addFilepattern);
+            rmCommand.call();
+        }
+        // checkout added and modified files
+        if (!checkoutFiles.isEmpty()) {
+            git.checkout()
+                    .setStartPoint("refs/heads/" + remoteSettings.getSourceBranch())
+                    .addPaths(checkoutFiles)
+                    .call();
+        }
+
+        // adding changed files
+        AddCommand addCommand = git.add();
+        Stream.concat(removeFiles.stream(), checkoutFiles.stream()).forEach(addCommand::addFilepattern);
+        addCommand.call();
+
+        // commit changes
+        commitFiles(GIT_SYSTEM_AUTHOR, "Merging remote configuration source branch", false);
+
+        System.out.println();
     }
 }
