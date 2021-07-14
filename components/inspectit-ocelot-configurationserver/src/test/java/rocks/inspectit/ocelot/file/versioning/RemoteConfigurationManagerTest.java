@@ -50,7 +50,7 @@ public class RemoteConfigurationManagerTest {
                 .enabled(true)
                 .remoteName("test-remote")
                 .targetBranch("target-branch")
-                .gitRepositoryUri(new URIish(tempDirectoryRemote.toString() + "/.git"))
+                .gitRepositoryUri(tempDirectoryRemote.toString() + "/.git")
                 .build();
 
         settings = InspectitServerSettings.builder().remoteConfigurations(remoteSettings).build();

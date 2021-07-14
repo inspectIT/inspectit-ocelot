@@ -6,10 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.transport.URIish;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import rocks.inspectit.ocelot.config.validation.RemoteConfigurationsConstraint;
 
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.net.URISyntaxException;
 
 /**
  * Settings for connecting the configuration server to remote Git repositories.
@@ -18,6 +22,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@RemoteConfigurationsConstraint
 public class RemoteConfigurationsSettings {
 
     /**
@@ -36,21 +41,24 @@ public class RemoteConfigurationsSettings {
     /**
      * The name of the remote ref in the local Git repository.
      */
+    @NotBlank
     private String remoteName;
 
     /**
      * The URI to the remote Git repository.
      */
-    private URIish gitRepositoryUri;
+    private String gitRepositoryUri;
 
     /**
      * The branch name on the remote Git repository which will be used to fetch workspace-configurations from.
      */
+    @NotBlank
     private String sourceBranch;
 
     /**
      * The branch name on the remote Git repository which will be used to push live-configurations to.
      */
+    @NotBlank
     private String targetBranch;
 
     /**
@@ -75,33 +83,14 @@ public class RemoteConfigurationsSettings {
      */
     private String privateKeyFile;
 
-    @AssertFalse
-    public boolean isRemoteNameBlank() {
-        return enabled && StringUtils.isBlank(remoteName);
-    }
-
-    @AssertTrue(message = "The URI of the remote Git must be specified!")
-    public boolean isGitRepositoryUriNotNull() {
-        return !enabled || gitRepositoryUri != null;
-    }
-
-    @AssertFalse(message = "Authentication method 'PPK' can only be used with an SSH connection.")
-    public boolean isHttpWithPpk() {
-        if (!enabled) {
-            return false;
+    /**
+     * @return Returns the repository URI as an {@link URIish}.
+     */
+    public URIish getGitRepositoryUriAsUriisch() {
+        try {
+            return new URIish(gitRepositoryUri);
+        } catch (URISyntaxException e) {
+            return null;
         }
-
-        String scheme = gitRepositoryUri.getScheme();
-        return !(scheme == null || scheme.equals("ssh")) && authenticationType == AuthenticationType.PPK;
-    }
-
-    @AssertFalse(message = "SSH using password authentication is not supported.")
-    public boolean isSshWithPassword() {
-        if (!enabled) {
-            return false;
-        }
-
-        String scheme = gitRepositoryUri.getScheme();
-        return (scheme == null || scheme.equals("ssh")) && authenticationType == AuthenticationType.PASSWORD;
     }
 }

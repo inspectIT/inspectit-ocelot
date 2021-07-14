@@ -4,6 +4,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
@@ -14,6 +15,8 @@ import org.eclipse.jgit.util.FS;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -43,12 +46,15 @@ public class RemoteConfigurationManager {
 
         if (!hasConfigurationRemote()) {
             log.info("No configuration remote repository is configured for the local Git repository, thus, adding '{}'.", remoteName);
-            git.remoteAdd().setName(remoteSettings.getRemoteName()).setUri(remoteSettings.getGitRepositoryUri()).call();
+            git.remoteAdd()
+                    .setName(remoteSettings.getRemoteName())
+                    .setUri(remoteSettings.getGitRepositoryUriAsUriisch())
+                    .call();
         } else {
             log.debug("Remote '{}' for remote configurations exists and will be updated.", remoteName);
             git.remoteSetUrl()
                     .setRemoteName(remoteSettings.getRemoteName())
-                    .setRemoteUri(remoteSettings.getGitRepositoryUri())
+                    .setRemoteUri(remoteSettings.getGitRepositoryUriAsUriisch())
                     .call();
         }
     }
