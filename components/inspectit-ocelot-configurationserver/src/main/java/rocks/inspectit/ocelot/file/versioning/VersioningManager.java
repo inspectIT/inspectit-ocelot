@@ -833,7 +833,7 @@ public class VersioningManager {
         addCommand.call();
 
         // commit changes
-        commitFiles(GIT_SYSTEM_AUTHOR, "Merging remote configuration source branch", false);
+        git.commit().setMessage("Merging remote configuration source branch").setAuthor(GIT_SYSTEM_AUTHOR).call();
 
         System.out.println();
     }
