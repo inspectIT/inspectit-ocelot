@@ -118,7 +118,7 @@ public class VersioningManager {
             log.info("Working directory is not managed by Git. Initializing Git repository and staging and committing all existing file.");
 
             stageFiles();
-            commitFiles(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", false);
+            commitAllFiles(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", false);
 
             if (getCommitCount() <= 0) {
                 // creating an empty commit
@@ -136,7 +136,7 @@ public class VersioningManager {
             log.info("Changes in the configuration or agent mapping files have been detected and will be committed to the repository.");
 
             stageFiles();
-            commitFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
+            commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
         }
 
         RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
@@ -160,7 +160,7 @@ public class VersioningManager {
             e.printStackTrace();
         }
 
-        System.exit(0);
+//        System.exit(0);
     }
 
     /**
@@ -182,7 +182,7 @@ public class VersioningManager {
         log.info("Staging and committing of external changes to the configuration files or agent mappings");
 
         stageFiles();
-        commitFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes", false);
+        commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes", false);
     }
 
     private boolean isWorkspaceBranch() {
@@ -214,13 +214,13 @@ public class VersioningManager {
 
         stageFiles();
 
-        if (commitFiles(author, message, true)) {
+        if (commitAllFiles(author, message, true)) {
             eventPublisher.publishEvent(new WorkspaceChangedEvent(this, getWorkspaceRevision()));
         }
     }
 
     /**
-     * Commits the staged files using the given author and message. Consecutive of the same user within {@link #amendTimeout}
+     * Commits ALL files using the given author and message. Consecutive of the same user within {@link #amendTimeout}
      * milliseconds will be amended if specified.
      *
      * @param author     the author to use
@@ -229,7 +229,7 @@ public class VersioningManager {
      *
      * @return true, if a commit was created. False, if there was no change to commit.
      */
-    private boolean commitFiles(PersonIdent author, String message, boolean allowAmend) throws GitAPIException {
+    private boolean commitAllFiles(PersonIdent author, String message, boolean allowAmend) throws GitAPIException {
         if (isClean()) {
             log.debug("Repository is in clean state, thus, committing will be skipped.");
             return false;
@@ -646,12 +646,26 @@ public class VersioningManager {
     /**
      * Promoting the configuration files according to the specified {@link ConfigurationPromotion} definition.
      *
-     * @param promotion the promotion definition
+     * @param promotion          the promotion definition
+     * @param allowSelfPromotion whether users can promote their own files
      */
     public void promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion) throws GitAPIException {
+        promoteConfiguration(promotion, allowSelfPromotion, getCurrentAuthor());
+    }
+
+    /**
+     * Promoting the configuration files according to the specified {@link ConfigurationPromotion} definition.
+     *
+     * @param promotion          the promotion definition
+     * @param allowSelfPromotion whether users can promote their own files
+     * @param author             the author used for the resulting promotion commit
+     */
+    public void promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion, PersonIdent author) throws GitAPIException {
         if (promotion == null || CollectionUtils.isEmpty(promotion.getFiles())) {
             throw new IllegalArgumentException("ConfigurationPromotion must not be null and has to promote at least one file!");
         }
+
+        log.info("User '{}' promotes {} configuration files.", author.getName(), promotion.getFiles().size());
 
         try {
             ObjectId liveCommitId = ObjectId.fromString(promotion.getLiveCommitId());
@@ -713,11 +727,13 @@ public class VersioningManager {
             }
 
             // commit changes
-            commitFiles(getCurrentAuthor(), promotion.getCommitMessage(), false);
+            commitAllFiles(author, promotion.getCommitMessage(), false);
 
         } catch (IOException | GitAPIException ex) {
             throw new PromotionFailedException("Configuration promotion has failed.", ex);
         } finally {
+            log.info("Configuration promotion was successful.");
+
             // checkout workspace branch
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
 
@@ -777,6 +793,8 @@ public class VersioningManager {
     }
 
     private void mergeSourceBranch() throws IOException, GitAPIException {
+        log.info("Merging remote configurations into the workspace.");
+
         RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
 
         Repository repository = git.getRepository();
@@ -835,6 +853,18 @@ public class VersioningManager {
         // commit changes
         git.commit().setMessage("Merging remote configuration source branch").setAuthor(GIT_SYSTEM_AUTHOR).call();
 
+        // promote
+        log.info("Auto-promotion of synchronized configuration files.");
+        List<String> diffFiles = diff.getEntries().stream().map(SimpleDiffEntry::getFile).collect(Collectors.toList());
+
+        ConfigurationPromotion promotion = new ConfigurationPromotion();
+        promotion.setCommitMessage("Auto-promotion due to workspace remote synchronization.");
+        promotion.setWorkspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName());
+        promotion.setLiveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName());
+        promotion.setFiles(diffFiles);
+
         System.out.println();
+
+        promoteConfiguration(promotion, false, GIT_SYSTEM_AUTHOR);
     }
 }
