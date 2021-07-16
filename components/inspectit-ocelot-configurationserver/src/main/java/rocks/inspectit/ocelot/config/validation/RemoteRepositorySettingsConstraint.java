@@ -5,10 +5,10 @@ import javax.validation.Payload;
 import java.lang.annotation.*;
 
 @Documented
-@Constraint(validatedBy = RemoteConfigurationsValidator.class)
+@Constraint(validatedBy = RemoteRepositorySettingsValidator.class)
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RemoteConfigurationsConstraint {
+public @interface RemoteRepositorySettingsConstraint {
 
     String message() default "Invalid remote configuration settings.";
 

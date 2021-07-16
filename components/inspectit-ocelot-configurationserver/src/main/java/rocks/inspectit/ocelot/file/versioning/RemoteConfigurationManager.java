@@ -14,6 +14,8 @@ import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
+import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
+import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings.AuthenticationType;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -41,20 +43,37 @@ public class RemoteConfigurationManager {
      * created or, in case it already exists, updated.
      */
     public void updateRemoteRefs() throws GitAPIException {
-        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
-        String remoteName = remoteSettings.getRemoteName();
 
-        if (!hasConfigurationRemote()) {
-            log.info("No configuration remote repository is configured for the local Git repository, thus, adding '{}'.", remoteName);
+        RemoteRepositorySettings sourceRepository = settings.getRemoteConfigurations().getSourceRepository();
+        if (sourceRepository != null) {
+            updateRemoteRef(sourceRepository);
+        }
+
+        RemoteRepositorySettings targetRepository = settings.getRemoteConfigurations().getTargetRepository();
+        if (targetRepository != null) {
+            updateRemoteRef(targetRepository);
+        }
+    }
+
+    /**
+     * Adds or updates a remote ref for the given {@link RemoteRepositorySettings}.
+     *
+     * @param repositorySettings the settings representing the ref to add
+     */
+    private void updateRemoteRef(RemoteRepositorySettings repositorySettings) throws GitAPIException {
+        if (!hasConfigurationRemote(repositorySettings)) {
+            log.info("Remote ref '{}' for remote configurations does not exists in the local Git, so it will be added.", repositorySettings
+                    .getRemoteName());
             git.remoteAdd()
-                    .setName(remoteSettings.getRemoteName())
-                    .setUri(remoteSettings.getGitRepositoryUriAsUriisch())
+                    .setName(repositorySettings.getRemoteName())
+                    .setUri(repositorySettings.getGitRepositoryUri())
                     .call();
         } else {
-            log.debug("Remote '{}' for remote configurations exists and will be updated.", remoteName);
+            log.debug("Remote ref '{}' for remote configurations exists in the local Git and will be updated.", repositorySettings
+                    .getRemoteName());
             git.remoteSetUrl()
-                    .setRemoteName(remoteSettings.getRemoteName())
-                    .setRemoteUri(remoteSettings.getGitRepositoryUriAsUriisch())
+                    .setRemoteName(repositorySettings.getRemoteName())
+                    .setRemoteUri(repositorySettings.getGitRepositoryUri())
                     .call();
         }
     }
@@ -62,11 +81,10 @@ public class RemoteConfigurationManager {
     /**
      * @return Returns whether the remote ref for the configuration remote does already exist.
      */
-    private boolean hasConfigurationRemote() {
-        String remoteName = settings.getRemoteConfigurations().getRemoteName();
+    private boolean hasConfigurationRemote(RemoteRepositorySettings repositorySettings) {
         try {
             List<RemoteConfig> remotes = git.remoteList().call();
-            return remotes.stream().anyMatch(remote -> remote.getName().equals(remoteName));
+            return remotes.stream().anyMatch(remote -> remote.getName().equals(repositorySettings.getRemoteName()));
         } catch (GitAPIException e) {
             return false;
         }
@@ -76,35 +94,42 @@ public class RemoteConfigurationManager {
      * Pushes a specific local branch to the configured configuration remote ref using the specified branch name.
      *
      * @param localBranch      the local branch to push
-     * @param remoteBranchName the name of the branch on the remote
+     * @param targetRepository the settings for the repository to push to
      */
-    public void pushBranch(Branch localBranch, String remoteBranchName) throws GitAPIException {
-        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
-        String remoteName = remoteSettings.getRemoteName();
+    public void pushBranch(Branch localBranch, RemoteRepositorySettings targetRepository) throws GitAPIException {
+        if (targetRepository == null) {
+            throw new IllegalArgumentException("The repository settings must not be null.");
+        }
 
-        RefSpec refSpec = new RefSpec(localBranch.getBranchName() + ":refs/heads/" + remoteBranchName);
+        RefSpec refSpec = new RefSpec(localBranch.getBranchName() + ":refs/heads/" + targetRepository.getBranchName());
 
-        PushCommand pushCommand = git.push().setRemote(remoteName).setRefSpecs(refSpec);
+        log.info("Pushing to remote '{}' [{}] with refspec '{}'. Using force-push: {}", targetRepository.getRemoteName(), targetRepository
+                .getGitRepositoryUri(), refSpec.toString(), targetRepository.isUseForcePush());
 
-        if (remoteSettings.getAuthenticationType() == RemoteConfigurationsSettings.AuthenticationType.PASSWORD) {
-            authenticatePassword(pushCommand);
-        } else if (remoteSettings.getAuthenticationType() == RemoteConfigurationsSettings.AuthenticationType.PPK) {
-            authenticatePpk(pushCommand);
+        PushCommand pushCommand = git.push()
+                .setRemote(targetRepository.getRemoteName())
+                .setRefSpecs(refSpec)
+                .setForce(targetRepository.isUseForcePush());
+
+        if (targetRepository.getAuthenticationType() == AuthenticationType.PASSWORD) {
+            authenticatePassword(pushCommand, targetRepository);
+        } else if (targetRepository.getAuthenticationType() == AuthenticationType.PPK) {
+            authenticatePpk(pushCommand, targetRepository);
         }
 
         Iterable<PushResult> pushResults = pushCommand.call();
         PushResult pushResult = pushResults.iterator().next();
 
         if (pushResult == null) {
-            log.warn("Pushing of localBranch {} may have failed. No push-result available.", localBranch);
+            log.warn("Pushing of local branch '{}' may have failed. No push-result available.", localBranch);
         } else {
-            RemoteRefUpdate remoteUpdate = pushResult.getRemoteUpdate("refs/heads/" + remoteBranchName);
+            RemoteRefUpdate remoteUpdate = pushResult.getRemoteUpdate("refs/heads/" + targetRepository.getBranchName());
             RemoteRefUpdate.Status status = remoteUpdate.getStatus();
 
             if (status == RemoteRefUpdate.Status.OK || status == RemoteRefUpdate.Status.UP_TO_DATE) {
-                log.info("Pushing to remote repository was successful: {}", status);
+                log.info("Pushing to remote repository '{}' was successful: {}", targetRepository.getRemoteName(), status);
             } else {
-                log.error("Pushing to remote repository has been failed: {}", status);
+                log.error("Pushing to remote repository '{}' has been failed: {}", targetRepository.getRemoteName(), status);
             }
         }
     }
@@ -112,27 +137,29 @@ public class RemoteConfigurationManager {
     /**
      * Injects a {@link CredentialsProvider} for executing a user-password authentication. This is used for HTTP(s)-remotes.
      *
-     * @param push the push command to authenticate
+     * @param pushCommand      the push command to authenticate
+     * @param targetRepository the settings for the repository to push to
      */
-    private void authenticatePassword(PushCommand push) {
-        String username = settings.getRemoteConfigurations().getUsername();
-        String password = settings.getRemoteConfigurations().getPassword();
+    private void authenticatePassword(PushCommand pushCommand, RemoteRepositorySettings targetRepository) {
+        String username = targetRepository.getUsername();
+        String password = targetRepository.getPassword();
         UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
-        push.setCredentialsProvider(credentialsProvider);
+        pushCommand.setCredentialsProvider(credentialsProvider);
     }
 
     /**
      * Injects a session factory for creating SSH sessions. This allows the usage of private keys for connection authentication.
      *
-     * @param push the push command to authenticate
+     * @param pushCommand      the push command to authenticate
+     * @param targetRepository the settings for the repository to push to
      */
-    private void authenticatePpk(PushCommand push) {
+    private void authenticatePpk(PushCommand pushCommand, RemoteRepositorySettings targetRepository) {
         SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
             @Override
             protected JSch createDefaultJSch(FS fs) throws JSchException {
                 JSch defaultJSch = super.createDefaultJSch(fs);
 
-                String privateKeyFile = settings.getRemoteConfigurations().getPrivateKeyFile();
+                String privateKeyFile = targetRepository.getPrivateKeyFile();
                 if (StringUtils.isNotBlank(privateKeyFile)) {
                     defaultJSch.addIdentity(privateKeyFile);
                 }
@@ -145,7 +172,7 @@ public class RemoteConfigurationManager {
             }
         };
 
-        push.setTransportConfigCallback(transport -> {
+        pushCommand.setTransportConfigCallback(transport -> {
             SshTransport sshTransport = (SshTransport) transport;
             sshTransport.setSshSessionFactory(sshSessionFactory);
         });

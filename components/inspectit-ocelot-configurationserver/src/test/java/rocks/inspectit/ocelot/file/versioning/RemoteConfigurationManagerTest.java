@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
+import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,11 +47,15 @@ public class RemoteConfigurationManagerTest {
         gitLocal = Git.init().setDirectory(tempDirectoryLocal.toFile()).call();
         gitRemote = Git.init().setDirectory(tempDirectoryRemote.toFile()).call();
 
+        RemoteRepositorySettings targetRepository = RemoteRepositorySettings.builder()
+                .remoteName("target-remote")
+                .branchName("target-branch")
+                .gitRepositoryUri(new URIish(tempDirectoryRemote.toString() + "/.git"))
+                .build();
+
         remoteSettings = RemoteConfigurationsSettings.builder()
                 .enabled(true)
-                .remoteName("test-remote")
-                .targetBranch("target-branch")
-                .gitRepositoryUri(tempDirectoryRemote.toString() + "/.git")
+                .targetRepository(targetRepository)
                 .build();
 
         settings = InspectitServerSettings.builder().remoteConfigurations(remoteSettings).build();
@@ -74,13 +79,13 @@ public class RemoteConfigurationManagerTest {
             manager.updateRemoteRefs();
 
             assertThat(gitLocal.remoteList().call()).extracting(RemoteConfig::getName)
-                    .containsExactly(remoteSettings.getRemoteName());
+                    .containsExactly(remoteSettings.getTargetRepository().getRemoteName());
         }
 
         @Test
         public void updateRef() throws GitAPIException, URISyntaxException {
             gitLocal.remoteAdd()
-                    .setName(remoteSettings.getRemoteName())
+                    .setName(remoteSettings.getTargetRepository().getRemoteName())
                     .setUri(new URIish("https://example.org"))
                     .call();
 
@@ -91,7 +96,7 @@ public class RemoteConfigurationManagerTest {
             List<RemoteConfig> remotes = gitLocal.remoteList().call();
             assertThat(remotes).hasSize(1);
             RemoteConfig remote = remotes.get(0);
-            assertThat(remote.getName()).isEqualTo(remoteSettings.getRemoteName());
+            assertThat(remote.getName()).isEqualTo(remoteSettings.getTargetRepository().getRemoteName());
             assertThat(remote.getURIs()).element(0)
                     .extracting(URIish::toString)
                     .isEqualTo(new URIish(tempDirectoryRemote.toString() + "/.git").toString());
@@ -113,10 +118,10 @@ public class RemoteConfigurationManagerTest {
             manager = new RemoteConfigurationManager(settings, gitLocal);
             manager.updateRemoteRefs();
 
-            manager.pushBranch(Branch.WORKSPACE, "different-branch");
+            manager.pushBranch(Branch.WORKSPACE, settings.getRemoteConfigurations().getTargetRepository());
 
             List<Ref> refs = gitRemote.branchList().call();
-            assertThat(refs).extracting(Ref::getName).containsExactly("refs/heads/different-branch");
+            assertThat(refs).extracting(Ref::getName).containsExactly("refs/heads/target-branch");
         }
     }
 }

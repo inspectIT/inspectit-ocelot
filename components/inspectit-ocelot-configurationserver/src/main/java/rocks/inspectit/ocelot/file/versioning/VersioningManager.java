@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
@@ -137,13 +138,18 @@ public class VersioningManager {
             commitFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
         }
 
-        if (settings.getRemoteConfigurations().isEnabled()) {
-            // update remote refs in case they are configured
+        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+        if (remoteSettings != null && remoteSettings.isEnabled()) {
+            // init RemoteConfigurationManager
             remoteConfigurationManager = new RemoteConfigurationManager(settings, git);
+
+            // update remote refs in case they are configured
             remoteConfigurationManager.updateRemoteRefs();
 
             // push the current state during startup
-            remoteConfigurationManager.pushBranch(Branch.LIVE, settings.getRemoteConfigurations().getTargetBranch());
+            if (remoteSettings.isPushAtStartup() && remoteSettings.getTargetRepository() != null) {
+                remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getTargetRepository());
+            }
         }
     }
 
@@ -706,9 +712,9 @@ public class VersioningManager {
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
 
             // optionally: push to remote
-            if (remoteConfigurationManager != null) {
-                remoteConfigurationManager.pushBranch(Branch.LIVE, settings.getRemoteConfigurations()
-                        .getTargetBranch());
+            RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+            if (remoteConfigurationManager != null && remoteSettings.getTargetRepository() != null) {
+                remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getTargetRepository());
             }
 
             eventPublisher.publishEvent(new ConfigurationPromotionEvent(this, getLiveRevision()));

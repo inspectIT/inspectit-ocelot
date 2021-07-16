@@ -4,16 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.transport.URIish;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import rocks.inspectit.ocelot.config.validation.RemoteConfigurationsConstraint;
 
-import javax.validation.constraints.AssertFalse;
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.net.URISyntaxException;
+import javax.validation.Valid;
 
 /**
  * Settings for connecting the configuration server to remote Git repositories.
@@ -22,15 +14,7 @@ import java.net.URISyntaxException;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@RemoteConfigurationsConstraint
 public class RemoteConfigurationsSettings {
-
-    /**
-     * Supported authentication types.
-     */
-    public enum AuthenticationType {
-        NONE, PASSWORD, PPK;
-    }
 
     /**
      * Whether remote Git repositories should be used for configuration management.
@@ -39,58 +23,20 @@ public class RemoteConfigurationsSettings {
     private boolean enabled = false;
 
     /**
-     * The name of the remote ref in the local Git repository.
-     */
-    @NotBlank
-    private String remoteName;
-
-    /**
-     * The URI to the remote Git repository.
-     */
-    private String gitRepositoryUri;
-
-    /**
-     * The branch name on the remote Git repository which will be used to fetch workspace-configurations from.
-     */
-    @NotBlank
-    private String sourceBranch;
-
-    /**
-     * The branch name on the remote Git repository which will be used to push live-configurations to.
-     */
-    @NotBlank
-    private String targetBranch;
-
-    /**
-     * The type of authentication to use.
+     * Whether the current live branch should be pushed during startup.
      */
     @Builder.Default
-    @NotNull
-    private AuthenticationType authenticationType = AuthenticationType.NONE;
+    private boolean pushAtStartup = true;
 
     /**
-     * The username for accessing the remote repository. Only used in case of PASSWORD authentication.
+     * The remote Git repository which will be used to fetch workspace-configurations from.
      */
-    private String username;
+    @Valid
+    private RemoteRepositorySettings sourceRepository;
 
     /**
-     * The password for accessing the remote repository. Only used in case of PASSWORD authentication.
+     * The remote Git repository which will be used to push live-configurations to.
      */
-    private String password;
-
-    /**
-     * The private key to use for SSH authentication. Only used in case of PPK authentication.
-     */
-    private String privateKeyFile;
-
-    /**
-     * @return Returns the repository URI as an {@link URIish}.
-     */
-    public URIish getGitRepositoryUriAsUriisch() {
-        try {
-            return new URIish(gitRepositoryUri);
-        } catch (URISyntaxException e) {
-            return null;
-        }
-    }
+    @Valid
+    private RemoteRepositorySettings targetRepository;
 }
