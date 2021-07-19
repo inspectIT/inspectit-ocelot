@@ -199,33 +199,26 @@ public class RemoteConfigurationManager {
         });
     }
 
-    public void pullBranch(Branch workspace) throws GitAPIException, IOException {
-        fetchSourceBranch();
-
-        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
-
-        String ref = "refs/heads/" + remoteSettings.getSourceBranch();
-        ObjectId sourceCommitId = git.getRepository().resolve(ref);
-
-        // create (start) an empty merge-commit
-        git.merge()
-                .include(sourceCommitId)
-                .setCommit(false)
-                .setFastForward(MergeCommand.FastForwardMode.NO_FF)
-                .setStrategy(MergeStrategy.OURS)
-                .call();
-
-        System.out.println();
-    }
-
-    public void fetchSourceBranch() throws GitAPIException {
-        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
-
-        log.info("Fetching '{}' from configuration remote.", remoteSettings.getSourceBranch());
+    /**
+     * Fetches the branch represented by the given {@link RemoteRepositorySettings}.
+     *
+     * @param sourceRepository the definition of the remote repository and branch
+     */
+    public void fetchSourceBranch(RemoteRepositorySettings sourceRepository) throws GitAPIException {
+        log.info("Fetching branch '{}' from configuration remote '{}'.", sourceRepository.getBranchName(), sourceRepository
+                .getRemoteName());
 
         FetchResult fetchResult = git.fetch()
-                .setRemote(remoteSettings.getRemoteName())
-                .setRefSpecs("refs/heads/" + remoteSettings.getSourceBranch() + ":refs/heads/" + remoteSettings.getSourceBranch())
+                .setRemote(sourceRepository.getRemoteName())
+                .setRefSpecs("refs/heads/" + sourceRepository.getBranchName() + ":refs/heads/" + sourceRepository.getBranchName())
                 .call();
+
+        if (fetchResult.getTrackingRefUpdates().isEmpty()) {
+            log.info("No change has been fetched.");
+        } else {
+            for (TrackingRefUpdate refUpdate : fetchResult.getTrackingRefUpdates()) {
+                log.info("Fetching from '{}' ended with result: {}", refUpdate.getRemoteName(), refUpdate.getResult());
+            }
+        }
     }
 }

@@ -20,6 +20,7 @@ import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
+import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
@@ -46,6 +47,11 @@ import java.util.stream.StreamSupport;
  */
 @Slf4j
 public class VersioningManager {
+
+    /**
+     * The tag name used for marking which commit has been used for the last remote sync.
+     */
+    private static final String SOURCE_SYNC_TAG_NAME = "ocelot-sync-base";
 
     /**
      * Git user used for system commits.
@@ -109,7 +115,7 @@ public class VersioningManager {
      * Git directory does not exist, it will be created. Modified files will be automatically commited to the
      * workspace branch.
      */
-    public synchronized void initialize() throws GitAPIException {
+    public synchronized void initialize() throws GitAPIException, IOException {
         boolean hasGit = isGitRepository();
 
         git = Git.init().setDirectory(workingDirectory.toFile()).call();
@@ -151,16 +157,13 @@ public class VersioningManager {
             if (remoteSettings.isPushAtStartup() && remoteSettings.getTargetRepository() != null) {
                 remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getTargetRepository());
             }
-        }
 
-        remoteConfigurationManager.fetchSourceBranch();
-        try {
-            mergeSourceBranch(); //TODO
-        } catch (IOException e) {
-            e.printStackTrace();
+            // fetch and merge the remote source into the local workspace
+            if (remoteSettings.isPullAtStartup() && remoteSettings.getSourceRepository() != null) {
+                remoteConfigurationManager.fetchSourceBranch(settings.getRemoteConfigurations().getSourceRepository());
+                mergeSourceBranch();
+            }
         }
-
-//        System.exit(0);
     }
 
     /**
@@ -792,79 +795,115 @@ public class VersioningManager {
                 .collect(Collectors.toList());
     }
 
-    private void mergeSourceBranch() throws IOException, GitAPIException {
+    private void mergeSourceBranch() throws GitAPIException, IOException {
         log.info("Merging remote configurations into the workspace.");
 
-        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+        RemoteRepositorySettings sourceRepository = settings.getRemoteConfigurations().getSourceRepository();
 
-        Repository repository = git.getRepository();
-        ObjectId oldCommitId = repository.exactRef("refs/heads/" + Branch.WORKSPACE.getBranchName()).getObjectId();
-        ObjectId newCommitId = repository.exactRef("refs/heads/" + remoteSettings.getSourceBranch()).getObjectId();
-
-        WorkspaceDiff diff = getWorkspaceDiff(false, oldCommitId, newCommitId);
-
-        if (diff.getEntries().isEmpty()) {
-            log.info("There is nothing to merge from the source configuration branch into the current workspace branch.");
-            return;
+        if (settings.getRemoteConfigurations() == null) {
+            throw new IllegalStateException("Source repository settings must not be null.");
         }
 
-        // collect diff files
-        List<String> removeFiles = diff.getEntries()
-                .stream()
-                .filter(entry -> entry.getType() == DiffEntry.ChangeType.DELETE)
-                .map(SimpleDiffEntry::getFile)
-                .map(this::prefixRelativeFile)
-                .collect(Collectors.toList());
+        List<Ref> tagRefs = git.tagList().call();
+        Optional<Ref> syncTagRef = tagRefs.stream()
+                .filter(tagRef -> tagRef.getName().equals("refs/tags/" + SOURCE_SYNC_TAG_NAME))
+                .findFirst();
 
-        List<String> checkoutFiles = diff.getEntries()
-                .stream()
-                .filter(entry -> entry.getType() != DiffEntry.ChangeType.DELETE)
-                .map(SimpleDiffEntry::getFile)
-                .map(this::prefixRelativeFile)
-                .collect(Collectors.toList());
+        if (syncTagRef.isPresent()) {
+            Repository repository = git.getRepository();
+            ObjectId diffBase = syncTagRef.get().getObjectId();
+            ObjectId diffTarget = repository.exactRef("refs/heads/" + sourceRepository.getBranchName()).getObjectId();
 
-        // create (start) an empty merge-commit
-        git.merge()
-                .include(newCommitId)
-                .setCommit(false)
-                .setFastForward(MergeCommand.FastForwardMode.NO_FF)
-                .setStrategy(MergeStrategy.OURS)
-                .call();
+            WorkspaceDiff diff = getWorkspaceDiff(false, diffBase, diffTarget);
 
-        // remove all deleted files
-        if (!removeFiles.isEmpty()) {
-            RmCommand rmCommand = git.rm();
-            removeFiles.forEach(rmCommand::addFilepattern);
-            rmCommand.call();
-        }
-        // checkout added and modified files
-        if (!checkoutFiles.isEmpty()) {
-            git.checkout()
-                    .setStartPoint("refs/heads/" + remoteSettings.getSourceBranch())
-                    .addPaths(checkoutFiles)
+            if (diff.getEntries().isEmpty()) {
+                log.info("There is nothing to merge from the source configuration branch into the current workspace branch.");
+                return;
+            }
+
+            // collect diff files
+            List<String> removeFiles = diff.getEntries()
+                    .stream()
+                    .filter(entry -> entry.getType() == DiffEntry.ChangeType.DELETE)
+                    .map(SimpleDiffEntry::getFile)
+                    .map(this::prefixRelativeFile)
+                    .collect(Collectors.toList());
+
+            List<String> checkoutFiles = diff.getEntries()
+                    .stream()
+                    .filter(entry -> entry.getType() != DiffEntry.ChangeType.DELETE)
+                    .map(SimpleDiffEntry::getFile)
+                    .map(this::prefixRelativeFile)
+                    .collect(Collectors.toList());
+
+            // create (start) an empty merge-commit
+            git.merge()
+                    .include(diffTarget)
+                    .setCommit(false)
+                    .setFastForward(MergeCommand.FastForwardMode.NO_FF)
+                    .setStrategy(MergeStrategy.OURS)
                     .call();
+
+            // remove all deleted files
+            if (!removeFiles.isEmpty()) {
+                RmCommand rmCommand = git.rm();
+                removeFiles.forEach(rmCommand::addFilepattern);
+                rmCommand.call();
+            }
+            // checkout added and modified files
+            if (!checkoutFiles.isEmpty()) {
+                git.checkout()
+                        .setStartPoint("refs/heads/" + sourceRepository.getBranchName())
+                        .addPaths(checkoutFiles)
+                        .call();
+            }
+
+            // adding changed files
+            AddCommand addCommand = git.add();
+            Stream.concat(removeFiles.stream(), checkoutFiles.stream()).forEach(addCommand::addFilepattern);
+            addCommand.call();
+
+            // commit changes
+            git.commit().setMessage("Merging remote configuration source branch").setAuthor(GIT_SYSTEM_AUTHOR).call();
+
+            // tag diff target as new sync base
+            RevCommit diffBaseCommit = getCommit(diffTarget);
+            updateSynchronizationTag(diffBaseCommit);
+
+            // promote
+            log.info("Auto-promotion of synchronized configuration files.");
+            List<String> diffFiles = diff.getEntries()
+                    .stream()
+                    .map(SimpleDiffEntry::getFile)
+                    .collect(Collectors.toList());
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setCommitMessage("Auto-promotion due to workspace remote synchronization.");
+            promotion.setWorkspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName());
+            promotion.setLiveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName());
+            promotion.setFiles(diffFiles);
+
+            promoteConfiguration(promotion, false, GIT_SYSTEM_AUTHOR);
+        } else {
+            log.info("Synchronization marker has not been found, thus adding it to the latest commit on the configuration remote.");
+            Repository repository = git.getRepository();
+            ObjectId diffTarget = repository.exactRef("refs/heads/" + sourceRepository.getBranchName()).getObjectId();
+            RevCommit commit = getCommit(diffTarget);
+
+            if (commit != null) {
+                updateSynchronizationTag(commit);
+            }
         }
+    }
 
-        // adding changed files
-        AddCommand addCommand = git.add();
-        Stream.concat(removeFiles.stream(), checkoutFiles.stream()).forEach(addCommand::addFilepattern);
-        addCommand.call();
-
-        // commit changes
-        git.commit().setMessage("Merging remote configuration source branch").setAuthor(GIT_SYSTEM_AUTHOR).call();
-
-        // promote
-        log.info("Auto-promotion of synchronized configuration files.");
-        List<String> diffFiles = diff.getEntries().stream().map(SimpleDiffEntry::getFile).collect(Collectors.toList());
-
-        ConfigurationPromotion promotion = new ConfigurationPromotion();
-        promotion.setCommitMessage("Auto-promotion due to workspace remote synchronization.");
-        promotion.setWorkspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName());
-        promotion.setLiveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName());
-        promotion.setFiles(diffFiles);
-
-        System.out.println();
-
-        promoteConfiguration(promotion, false, GIT_SYSTEM_AUTHOR);
+    /**
+     * Sets the synchronization tag ({@link #SOURCE_SYNC_TAG_NAME}) to the specified commit. In case the tag already
+     * exists, it will be updated.
+     *
+     * @param commit the commit to set the tag to
+     */
+    private void updateSynchronizationTag(RevCommit commit) throws GitAPIException {
+        log.debug("Adding synchronization tag to commit {}.", commit.getName());
+        git.tag().setName(SOURCE_SYNC_TAG_NAME).setObjectId(commit).setForceUpdate(true).call();
     }
 }

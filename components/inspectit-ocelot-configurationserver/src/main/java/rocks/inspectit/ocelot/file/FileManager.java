@@ -66,7 +66,7 @@ public class FileManager {
     private List<WorkspaceVersion> workspaceVersions;
 
     @Autowired
-    public FileManager(InspectitServerSettings settings, ApplicationEventPublisher eventPublisher, Executor executor) throws GitAPIException {
+    public FileManager(InspectitServerSettings settings, ApplicationEventPublisher eventPublisher, Executor executor) throws GitAPIException, IOException {
         Path workingDirectory = Paths.get(settings.getWorkingDirectory()).toAbsolutePath().normalize();
 
         // We use an asynchronous event publishing mechanism to make sure that Event-Listeners do not accidentally get hold of locks

@@ -80,7 +80,7 @@ class VersioningManagerTest extends FileTestBase {
     class Init {
 
         @Test
-        public void initAndStageFiles() throws GitAPIException {
+        public void initAndStageFiles() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
 
             boolean before = Files.exists(tempDirectory.resolve(".git"));
@@ -98,7 +98,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void multipleCalls() throws GitAPIException {
+        public void multipleCalls() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
 
             boolean initFirst = Files.exists(tempDirectory.resolve(".git"));
@@ -124,7 +124,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void externalChanges() throws GitAPIException {
+        public void externalChanges() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
 
             boolean initFirst = Files.exists(tempDirectory.resolve(".git"));
@@ -157,7 +157,7 @@ class VersioningManagerTest extends FileTestBase {
     class CommitAllChanges {
 
         @Test
-        public void commitFile() throws GitAPIException {
+        public void commitFile() throws GitAPIException, IOException {
             versioningManager.initialize();
             assertThat(versioningManager.getCommitCount()).isOne();
 
@@ -173,7 +173,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void amendCommit() throws GitAPIException {
+        public void amendCommit() throws GitAPIException, IOException {
             versioningManager.initialize();
             assertThat(versioningManager.getCommitCount()).isOne();
 
@@ -193,7 +193,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void noAmendAfterTimeout() throws GitAPIException {
+        public void noAmendAfterTimeout() throws GitAPIException, IOException {
             versioningManager.initialize();
             versioningManager.setAmendTimeout(-2000);
             assertThat(versioningManager.getCommitCount()).isOne();
@@ -214,7 +214,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void noChanges() throws GitAPIException {
+        public void noChanges() throws GitAPIException, IOException {
             versioningManager.initialize();
             versioningManager.setAmendTimeout(-2000);
 
@@ -233,7 +233,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void invalidState() throws GitAPIException {
+        public void invalidState() throws GitAPIException, IOException {
             versioningManager.initialize();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
@@ -255,7 +255,7 @@ class VersioningManagerTest extends FileTestBase {
     class IsClean {
 
         @Test
-        public void cleanRepository() throws GitAPIException {
+        public void cleanRepository() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
             versioningManager.initialize();
 
@@ -265,7 +265,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void modificationChanges() throws GitAPIException {
+        public void modificationChanges() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             versioningManager.initialize();
 
@@ -280,7 +280,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void untrackedChanges() throws GitAPIException {
+        public void untrackedChanges() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             versioningManager.initialize();
 
@@ -295,7 +295,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void ignoredFile() throws GitAPIException {
+        public void ignoredFile() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, "ignored-file");
             versioningManager.initialize();
 
@@ -324,7 +324,7 @@ class VersioningManagerTest extends FileTestBase {
     class GetLatestCommit {
 
         @Test
-        public void emptyCommit() throws GitAPIException {
+        public void emptyCommit() throws GitAPIException, IOException {
             versioningManager.initialize();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
@@ -336,7 +336,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void commitExists() throws GitAPIException {
+        public void commitExists() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
             versioningManager.initialize();
 
@@ -348,7 +348,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void getLatestCommit() throws GitAPIException {
+        public void getLatestCommit() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
@@ -361,7 +361,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void getLatestCommitFromLive() throws GitAPIException {
+        public void getLatestCommitFromLive() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
@@ -655,7 +655,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void selfPromotionProtectionEnabled() throws GitAPIException {
+        public void selfPromotionProtectionEnabled() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
@@ -682,7 +682,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void selfPromotionPrevented() throws GitAPIException {
+        public void selfPromotionPrevented() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
@@ -994,7 +994,7 @@ class VersioningManagerTest extends FileTestBase {
         private String prevCommitId;
 
         @BeforeEach
-        private void createCommits() throws GitAPIException {
+        private void createCommits() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=1", AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_b.yml=1");
             versioningManager.initialize();
             prevCommitId = versioningManager.getWorkspaceRevision().getRevisionId();
@@ -1012,8 +1012,7 @@ class VersioningManagerTest extends FileTestBase {
 
             assertThat(result).flatExtracting(WorkspaceVersion::getMessage)
                     .containsExactly("second commit", "Staging and committing of external changes", "Initializing Git repository using existing working directory");
-            assertThat(result).flatExtracting(WorkspaceVersion::getAuthor)
-                    .containsExactly("user", "System", "System");
+            assertThat(result).flatExtracting(WorkspaceVersion::getAuthor).containsExactly("user", "System", "System");
 
         }
 
