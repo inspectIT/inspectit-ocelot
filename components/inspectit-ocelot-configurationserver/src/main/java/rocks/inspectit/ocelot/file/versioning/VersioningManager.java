@@ -874,20 +874,23 @@ public class VersioningManager {
             RevCommit diffBaseCommit = getCommit(diffTarget);
             updateSynchronizationTag(diffBaseCommit);
 
-            // promote
-            log.info("Auto-promotion of synchronized configuration files.");
-            List<String> diffFiles = diff.getEntries()
-                    .stream()
-                    .map(SimpleDiffEntry::getFile)
-                    .collect(Collectors.toList());
+            if (settings.getRemoteConfigurations().isAutoPromotion()) {
+                // promote
+                log.info("Auto-promotion of synchronized configuration files.");
+                List<String> diffFiles = diff.getEntries()
+                        .stream()
+                        .map(SimpleDiffEntry::getFile)
+                        .collect(Collectors.toList());
 
-            ConfigurationPromotion promotion = new ConfigurationPromotion();
-            promotion.setCommitMessage("Auto-promotion due to workspace remote synchronization.");
-            promotion.setWorkspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName());
-            promotion.setLiveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName());
-            promotion.setFiles(diffFiles);
+                ConfigurationPromotion promotion = ConfigurationPromotion.builder()
+                        .commitMessage("Auto-promotion due to workspace remote synchronization.")
+                        .workspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName())
+                        .liveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName())
+                        .files(diffFiles)
+                        .build();
 
-            promoteConfiguration(promotion, false, GIT_SYSTEM_AUTHOR);
+                promoteConfiguration(promotion, false, GIT_SYSTEM_AUTHOR);
+            }
         } else {
             log.info("Synchronization marker has not been found, thus adding it to the latest commit on the configuration remote.");
             Repository repository = git.getRepository();
@@ -907,6 +910,9 @@ public class VersioningManager {
      * @param commit the commit to set the tag to
      */
     private void updateSynchronizationTag(RevCommit commit) throws GitAPIException {
+        if (commit == null) {
+            throw new IllegalArgumentException("Target commit must not be null");
+        }
         log.debug("Adding synchronization tag to commit {}.", commit.getName());
         git.tag().setName(SOURCE_SYNC_TAG_NAME).setObjectId(commit).setForceUpdate(true).call();
     }

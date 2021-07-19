@@ -35,6 +35,13 @@ public class RemoteConfigurationsSettings {
     private boolean pullAtStartup = false;
 
     /**
+     * Whether synchronized files should be promoted automatically, after they have been fetched from the configuration
+     * remote.
+     */
+    @Builder.Default
+    private boolean autoPromotion = true;
+
+    /**
      * The remote Git repository which will be used to fetch workspace-configurations from.
      */
     @Valid
