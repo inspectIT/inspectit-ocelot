@@ -663,7 +663,7 @@ public class VersioningManager {
      * @param allowSelfPromotion whether users can promote their own files
      * @param author             the author used for the resulting promotion commit
      */
-    public void promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion, PersonIdent author) throws GitAPIException {
+    public synchronized void promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion, PersonIdent author) throws GitAPIException {
         if (promotion == null || CollectionUtils.isEmpty(promotion.getFiles())) {
             throw new IllegalArgumentException("ConfigurationPromotion must not be null and has to promote at least one file!");
         }
@@ -795,14 +795,18 @@ public class VersioningManager {
                 .collect(Collectors.toList());
     }
 
-    private void mergeSourceBranch() throws GitAPIException, IOException {
+    /**
+     * Merges the configured configurations remote source branch into the local workspace branch.
+     */
+    @VisibleForTesting
+    synchronized void mergeSourceBranch() throws GitAPIException, IOException {
         log.info("Merging remote configurations into the workspace.");
-
-        RemoteRepositorySettings sourceRepository = settings.getRemoteConfigurations().getSourceRepository();
 
         if (settings.getRemoteConfigurations() == null) {
             throw new IllegalStateException("Source repository settings must not be null.");
         }
+
+        RemoteRepositorySettings sourceRepository = settings.getRemoteConfigurations().getSourceRepository();
 
         List<Ref> tagRefs = git.tagList().call();
         Optional<Ref> syncTagRef = tagRefs.stream()

@@ -32,7 +32,7 @@ public class RemoteConfigurationsSettings {
      * Whether the remote source branch should be fetched and merged into the current workspace branch during startup.
      */
     @Builder.Default
-    private boolean pullAtStartup = true;
+    private boolean pullAtStartup = false;
 
     /**
      * The remote Git repository which will be used to fetch workspace-configurations from.
