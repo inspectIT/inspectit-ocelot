@@ -4,7 +4,6 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
@@ -13,12 +12,9 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings.AuthenticationType;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -97,6 +93,24 @@ public class RemoteConfigurationManager {
      * @param targetRepository the settings for the repository to push to
      */
     public void pushBranch(Branch localBranch, RemoteRepositorySettings targetRepository) throws GitAPIException {
+        RemoteRefUpdate.Status pushStatus = push(localBranch, targetRepository, false);
+
+        if (pushStatus == RemoteRefUpdate.Status.REJECTED_NONFASTFORWARD && targetRepository.isUseForcePush()) {
+            log.warn("Fast-Forward push was rejected. Pushing the commit will be forced, now!");
+            push(localBranch, targetRepository, true);
+        }
+    }
+
+    /**
+     * Pushes a specific local branch to the configured configuration remote ref using the specified branch name.
+     *
+     * @param localBranch      the local branch to push
+     * @param targetRepository the settings for the repository to push to
+     * @param useForcePush     whether the push command should be forced
+     *
+     * @return the result status of the push command
+     */
+    private RemoteRefUpdate.Status push(Branch localBranch, RemoteRepositorySettings targetRepository, boolean useForcePush) throws GitAPIException {
         if (targetRepository == null) {
             throw new IllegalArgumentException("The repository settings must not be null.");
         }
@@ -104,12 +118,12 @@ public class RemoteConfigurationManager {
         RefSpec refSpec = new RefSpec(localBranch.getBranchName() + ":refs/heads/" + targetRepository.getBranchName());
 
         log.info("Pushing to remote '{}' [{}] with refspec '{}'. Using force-push: {}", targetRepository.getRemoteName(), targetRepository
-                .getGitRepositoryUri(), refSpec.toString(), targetRepository.isUseForcePush());
+                .getGitRepositoryUri(), refSpec.toString(), useForcePush);
 
         PushCommand pushCommand = git.push()
                 .setRemote(targetRepository.getRemoteName())
                 .setRefSpecs(refSpec)
-                .setForce(targetRepository.isUseForcePush());
+                .setForce(useForcePush);
 
         if (targetRepository.getAuthenticationType() == AuthenticationType.PASSWORD) {
             authenticatePassword(pushCommand, targetRepository);
@@ -122,6 +136,7 @@ public class RemoteConfigurationManager {
 
         if (pushResult == null) {
             log.warn("Pushing of local branch '{}' may have failed. No push-result available.", localBranch);
+            return null;
         } else {
             RemoteRefUpdate remoteUpdate = pushResult.getRemoteUpdate("refs/heads/" + targetRepository.getBranchName());
             RemoteRefUpdate.Status status = remoteUpdate.getStatus();
@@ -131,14 +146,12 @@ public class RemoteConfigurationManager {
             } else {
                 log.error("Pushing to remote repository '{}' has been failed: {}", targetRepository.getRemoteName(), status);
             }
+            return status;
         }
     }
 
     /**
      * Injects a {@link CredentialsProvider} for executing a user-password authentication. This is used for HTTP(s)-remotes.
-     *
-     * @param pushCommand      the push command to authenticate
-     * @param targetRepository the settings for the repository to push to
      */
     private void authenticatePassword(PushCommand pushCommand, RemoteRepositorySettings targetRepository) {
         String username = targetRepository.getUsername();
