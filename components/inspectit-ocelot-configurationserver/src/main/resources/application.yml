@@ -50,6 +50,11 @@ inspectit-config-server:
     # If enabled, non-admin users cannot promote their own changes.
     # The writing of the configuration and the promotion needs to be done by two separate persons.
     four-eyes-promotion: false
+    # If enabled, all authorized and unauthorized accesses attempts to secured endpoints will be logged.
+    access-log: true
+    # Valid tokens which can be used to authorize calls against the '/api/v1/hooks/**' endpoints.
+    # webhook-tokens:
+    #  - 'your_hopefully_very_secure_token'
 
   # settings for the agent commands
   agent-command:

@@ -775,6 +775,28 @@ public class VersioningManager {
     }
 
     /**
+     * Synchronizes the local workspace branch with the configured remote configuration source. The synchronization
+     * is only done in case it is configured and enabled. In this case, the configured remote will be fetched and its
+     * branch merged into the local workspace. Optionally, the modifications are promoted into the live branch.
+     *
+     * @return true in case the synchronization has been done.
+     */
+    public synchronized boolean pullSourceBranch() throws GitAPIException, IOException {
+        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+
+        if (remoteSettings == null || !remoteSettings.isEnabled() || remoteSettings.getSourceRepository() == null) {
+            log.info("Remote configuration source will not be pulled because it is not specified or disabled.");
+            return false;
+        }
+
+        // fetch and merge the remote source into the local workspace
+        remoteConfigurationManager.fetchSourceBranch(remoteSettings.getSourceRepository());
+        mergeSourceBranch();
+
+        return true;
+    }
+
+    /**
      * Merges the configured configurations remote source branch into the local workspace branch.
      */
     @VisibleForTesting

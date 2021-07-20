@@ -193,4 +193,12 @@ public class FileManager {
         }
         return workspaceVersions;
     }
+
+    /**
+     * Synchronizes the local working directory with a configured remote configuration source.
+     */
+    public void synchronizeWorkspace() throws GitAPIException, IOException {
+        log.info("Synchronizing configuration workspace by pulling in remote configuration source.");
+        versioningManager.pullSourceBranch();
+    }
 }

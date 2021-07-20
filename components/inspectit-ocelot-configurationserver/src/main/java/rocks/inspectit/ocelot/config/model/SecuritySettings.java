@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.Valid;
 import javax.validation.constraints.AssertFalse;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Security settings of the configuration server.
@@ -41,6 +43,12 @@ public class SecuritySettings {
      */
     @Builder.Default
     private boolean fourEyesPromotion = false;
+
+    /**
+     * Valid tokens which can be used to authorize calls against the '/api/v1/hooks/**' endpoints.
+     */
+    @Builder.Default
+    private List<String> webhookTokens = Collections.emptyList();
 
     /**
      * Verify that LDAP settings exist if LDAP is enabled.
