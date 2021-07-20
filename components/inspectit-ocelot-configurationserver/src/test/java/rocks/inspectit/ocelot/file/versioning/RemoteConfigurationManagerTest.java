@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class RemoteConfigurationManagerTest {
 
@@ -63,6 +64,9 @@ public class RemoteConfigurationManagerTest {
 
     @AfterEach
     public void afterEach() throws IOException {
+        gitLocal.close();
+        gitRemote.close();
+
         FileUtils.deleteDirectory(tempDirectoryLocal.toFile());
         FileUtils.deleteDirectory(tempDirectoryRemote.toFile());
     }
@@ -122,6 +126,44 @@ public class RemoteConfigurationManagerTest {
 
             List<Ref> refs = gitRemote.branchList().call();
             assertThat(refs).extracting(Ref::getName).containsExactly("refs/heads/target-branch");
+        }
+    }
+
+    @Nested
+    public class FetchSourceBranch {
+
+        @Test
+        public void successful() throws GitAPIException, URISyntaxException {
+            RemoteRepositorySettings sourceRepository = RemoteRepositorySettings.builder()
+                    .remoteName("source-remote")
+                    .branchName("branch")
+                    .gitRepositoryUri(new URIish(tempDirectoryRemote.toString() + "/.git"))
+                    .build();
+            remoteSettings.setSourceRepository(sourceRepository);
+
+            manager = new RemoteConfigurationManager(settings, gitLocal);
+            manager.updateRemoteRefs();
+
+            gitRemote.commit().setAllowEmpty(true).setMessage("init").call();
+            gitRemote.branchCreate().setName("branch").call();
+
+            manager.fetchSourceBranch(sourceRepository);
+        }
+
+        @Test
+        public void sourceBranchMissing() throws GitAPIException, URISyntaxException {
+            RemoteRepositorySettings sourceRepository = RemoteRepositorySettings.builder()
+                    .remoteName("source-remote")
+                    .branchName("branch")
+                    .gitRepositoryUri(new URIish(tempDirectoryRemote.toString() + "/.git"))
+                    .build();
+            remoteSettings.setSourceRepository(sourceRepository);
+
+            manager = new RemoteConfigurationManager(settings, gitLocal);
+            manager.updateRemoteRefs();
+
+            assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> manager.fetchSourceBranch(sourceRepository))
+                    .withMessage("Specified configuration source branch 'branch' does not exists on remote 'source-remote'.");
         }
     }
 }

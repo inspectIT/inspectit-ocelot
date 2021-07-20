@@ -5,7 +5,10 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevObject;
+import org.eclipse.jgit.transport.URIish;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -15,6 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
+import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileTestBase;
@@ -25,8 +30,11 @@ import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,6 +58,8 @@ class VersioningManagerTest extends FileTestBase {
 
     private ApplicationEventPublisher eventPublisher;
 
+    private InspectitServerSettings settings;
+
     @BeforeEach
     public void beforeEach() throws IOException {
         if (TEST_DIRECTORY == null) {
@@ -62,7 +72,8 @@ class VersioningManagerTest extends FileTestBase {
         authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
         eventPublisher = mock(ApplicationEventPublisher.class);
-        InspectitServerSettings settings = InspectitServerSettings.builder().mailSuffix("test.com").build();
+        settings = mock(InspectitServerSettings.class);
+        when(settings.getMailSuffix()).thenReturn("test.com");
 
         versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher, settings);
 
@@ -71,6 +82,11 @@ class VersioningManagerTest extends FileTestBase {
 
     @AfterEach
     public void afterEach() throws IOException {
+        Git git = (Git) ReflectionTestUtils.getField(versioningManager, "git");
+        if (git != null) {
+            git.close();
+        }
+
         if (TEST_DIRECTORY == null) {
             FileUtils.deleteDirectory(tempDirectory.toFile());
         }
@@ -80,7 +96,7 @@ class VersioningManagerTest extends FileTestBase {
     class Init {
 
         @Test
-        public void initAndStageFiles() throws GitAPIException {
+        public void initAndStageFiles() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
 
             boolean before = Files.exists(tempDirectory.resolve(".git"));
@@ -98,7 +114,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void multipleCalls() throws GitAPIException {
+        public void multipleCalls() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
 
             boolean initFirst = Files.exists(tempDirectory.resolve(".git"));
@@ -124,7 +140,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void externalChanges() throws GitAPIException {
+        public void externalChanges() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
 
             boolean initFirst = Files.exists(tempDirectory.resolve(".git"));
@@ -157,7 +173,7 @@ class VersioningManagerTest extends FileTestBase {
     class CommitAllChanges {
 
         @Test
-        public void commitFile() throws GitAPIException {
+        public void commitFile() throws GitAPIException, IOException {
             versioningManager.initialize();
             assertThat(versioningManager.getCommitCount()).isOne();
 
@@ -173,7 +189,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void amendCommit() throws GitAPIException {
+        public void amendCommit() throws GitAPIException, IOException {
             versioningManager.initialize();
             assertThat(versioningManager.getCommitCount()).isOne();
 
@@ -193,7 +209,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void noAmendAfterTimeout() throws GitAPIException {
+        public void noAmendAfterTimeout() throws GitAPIException, IOException {
             versioningManager.initialize();
             versioningManager.setAmendTimeout(-2000);
             assertThat(versioningManager.getCommitCount()).isOne();
@@ -214,7 +230,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void noChanges() throws GitAPIException {
+        public void noChanges() throws GitAPIException, IOException {
             versioningManager.initialize();
             versioningManager.setAmendTimeout(-2000);
 
@@ -233,7 +249,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void invalidState() throws GitAPIException {
+        public void invalidState() throws GitAPIException, IOException {
             versioningManager.initialize();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
@@ -255,7 +271,7 @@ class VersioningManagerTest extends FileTestBase {
     class IsClean {
 
         @Test
-        public void cleanRepository() throws GitAPIException {
+        public void cleanRepository() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
             versioningManager.initialize();
 
@@ -265,7 +281,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void modificationChanges() throws GitAPIException {
+        public void modificationChanges() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             versioningManager.initialize();
 
@@ -280,7 +296,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void untrackedChanges() throws GitAPIException {
+        public void untrackedChanges() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             versioningManager.initialize();
 
@@ -295,7 +311,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void ignoredFile() throws GitAPIException {
+        public void ignoredFile() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, "ignored-file");
             versioningManager.initialize();
 
@@ -324,7 +340,7 @@ class VersioningManagerTest extends FileTestBase {
     class GetLatestCommit {
 
         @Test
-        public void emptyCommit() throws GitAPIException {
+        public void emptyCommit() throws GitAPIException, IOException {
             versioningManager.initialize();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
@@ -336,7 +352,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void commitExists() throws GitAPIException {
+        public void commitExists() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
             versioningManager.initialize();
 
@@ -348,7 +364,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void getLatestCommit() throws GitAPIException {
+        public void getLatestCommit() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
@@ -361,7 +377,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void getLatestCommitFromLive() throws GitAPIException {
+        public void getLatestCommitFromLive() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
@@ -655,7 +671,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void selfPromotionProtectionEnabled() throws GitAPIException {
+        public void selfPromotionProtectionEnabled() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
@@ -682,7 +698,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void selfPromotionPrevented() throws GitAPIException {
+        public void selfPromotionPrevented() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
@@ -994,7 +1010,7 @@ class VersioningManagerTest extends FileTestBase {
         private String prevCommitId;
 
         @BeforeEach
-        private void createCommits() throws GitAPIException {
+        private void createCommits() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=1", AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_b.yml=1");
             versioningManager.initialize();
             prevCommitId = versioningManager.getWorkspaceRevision().getRevisionId();
@@ -1012,10 +1028,160 @@ class VersioningManagerTest extends FileTestBase {
 
             assertThat(result).flatExtracting(WorkspaceVersion::getMessage)
                     .containsExactly("second commit", "Staging and committing of external changes", "Initializing Git repository using existing working directory");
-            assertThat(result).flatExtracting(WorkspaceVersion::getAuthor)
-                    .containsExactly("user", "System", "System");
+            assertThat(result).flatExtracting(WorkspaceVersion::getAuthor).containsExactly("user", "System", "System");
+        }
+    }
 
+    @Nested
+    class MergeSourceBranch {
+
+        private Path directoryOne;
+
+        private Path directoryTwo;
+
+        private Git repositoryOne;
+
+        private Git repositoryTwo;
+
+        @BeforeEach
+        private void createRepository() throws IOException, GitAPIException {
+            directoryOne = Files.createTempDirectory("git-test-remote");
+            directoryTwo = Files.createTempDirectory("git-test-remote");
+
+            repositoryOne = Git.init().setDirectory(directoryOne.toFile()).call();
+            repositoryTwo = Git.init().setDirectory(directoryTwo.toFile()).call();
         }
 
+        @AfterEach
+        private void afterEach() throws IOException {
+            repositoryOne.close();
+            repositoryTwo.close();
+
+            FileUtils.deleteDirectory(directoryOne.toFile());
+            FileUtils.deleteDirectory(directoryTwo.toFile());
+        }
+
+        @Test
+        public void missingRemoteConfiguration() {
+            assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> versioningManager.mergeSourceBranch())
+                    .withMessage("The remote configuration settings must not be null.");
+        }
+
+        @Test
+        public void missingSourceRepository() {
+            when(settings.getRemoteConfigurations()).thenReturn(mock(RemoteConfigurationsSettings.class));
+
+            assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> versioningManager.mergeSourceBranch())
+                    .withMessage("Source repository settings must not be null.");
+        }
+
+        @Test
+        public void syncTagMissing() throws URISyntaxException, GitAPIException, IOException {
+            RemoteRepositorySettings repositorySettings = RemoteRepositorySettings.builder()
+                    .branchName("branch")
+                    .remoteName("remote")
+                    .gitRepositoryUri(new URIish(directoryTwo.toString() + "/.git"))
+                    .build();
+            RemoteConfigurationsSettings configurationsSettings = RemoteConfigurationsSettings.builder()
+                    .enabled(true)
+                    .sourceRepository(repositorySettings)
+                    .build();
+            when(settings.getRemoteConfigurations()).thenReturn(configurationsSettings);
+
+            // prepare Git
+            repositoryTwo.commit().setAllowEmpty(true).setMessage("init").call();
+            repositoryTwo.branchCreate().setName("branch").call();
+
+            // initialize Git
+            versioningManager.initialize();
+            Git git = (Git) ReflectionTestUtils.getField(versioningManager, "git");
+
+            // fetch "remote" branches
+            RemoteConfigurationManager remoteConfigurationManager = (RemoteConfigurationManager) ReflectionTestUtils.getField(versioningManager, "remoteConfigurationManager");
+            remoteConfigurationManager.fetchSourceBranch(repositorySettings);
+
+            // ////////////////////////
+            // get state before
+            Optional<RevCommit> before = versioningManager.getLatestCommit(Branch.WORKSPACE);
+            List<Ref> tagsBefore = git.tagList().call();
+
+            // merge
+            versioningManager.mergeSourceBranch();
+
+            // ////////////////////////
+            // get state after
+            Optional<RevCommit> after = versioningManager.getLatestCommit(Branch.WORKSPACE);
+            List<Ref> tagsAfter = git.tagList().call();
+
+            ObjectId branchCommitId = git.branchList().setContains("branch").call().get(0).getObjectId();
+            RevCommit branchCommit = versioningManager.getCommit(branchCommitId);
+            RevCommit tagCommit = versioningManager.getCommit(tagsAfter.get(0).getObjectId());
+
+            // assert result
+            assertThat(before.get()).isEqualTo(after.get());
+            assertThat(tagsBefore).isEmpty();
+            assertThat(tagsAfter).extracting(Ref::getName).containsExactly("refs/tags/ocelot-sync-base");
+            assertThat(tagCommit).isEqualTo(branchCommit);
+        }
+
+        @Test
+        public void mergeBranch() throws URISyntaxException, GitAPIException, IOException {
+            RemoteRepositorySettings repositorySettings = RemoteRepositorySettings.builder()
+                    .branchName("branch")
+                    .remoteName("remote")
+                    .gitRepositoryUri(new URIish(directoryTwo.toString() + "/.git"))
+                    .build();
+            RemoteConfigurationsSettings configurationsSettings = RemoteConfigurationsSettings.builder()
+                    .enabled(true)
+                    .pullAtStartup(true)
+                    .sourceRepository(repositorySettings)
+                    .build();
+            when(settings.getRemoteConfigurations()).thenReturn(configurationsSettings);
+
+            // prepare Git
+            repositoryTwo.commit().setAllowEmpty(true).setMessage("init").call();
+            repositoryTwo.branchCreate().setName("branch").call();
+            repositoryTwo.checkout().setName("branch").call();
+
+            // initialize Git
+            versioningManager.initialize();
+            Git git = (Git) ReflectionTestUtils.getField(versioningManager, "git");
+
+            // add some new files to the remote
+            File fileDirectory = new File(directoryTwo.toFile(), AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
+            fileDirectory.mkdirs();
+            new File(fileDirectory, "dummy.txt").createNewFile();
+            repositoryTwo.add().addFilepattern(".").call();
+            repositoryTwo.commit().setMessage("dummy").call();
+
+            // fetch "remote" branches
+            RemoteConfigurationManager remoteConfigurationManager = (RemoteConfigurationManager) ReflectionTestUtils.getField(versioningManager, "remoteConfigurationManager");
+            remoteConfigurationManager.fetchSourceBranch(repositorySettings);
+
+            // ////////////////////////
+            // get state before
+            ObjectId commitIdBefore = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId();
+            ObjectId liveIdBefore = versioningManager.getLatestCommit(Branch.LIVE).get().getId();
+            ObjectId tagCommitIdBefore = versioningManager.getCommit(git.tagList().call().get(0).getObjectId()).getId();
+
+            // merge
+            versioningManager.mergeSourceBranch();
+
+            // ////////////////////////
+            // get state after
+            RevCommit commitAfter = versioningManager.getLatestCommit(Branch.WORKSPACE).get();
+            RevCommit liveCommit = versioningManager.getLatestCommit(Branch.LIVE).get();
+            ObjectId tagCommitIdAfter = versioningManager.getCommit(git.tagList().call().get(0).getObjectId()).getId();
+            ObjectId branchCommitId = git.getRepository().exactRef("refs/heads/branch").getObjectId();
+
+            // assert result
+            assertThat(commitIdBefore).isNotEqualTo(commitAfter.getId()); // workspace got a new commit
+            assertThat(tagCommitIdBefore).isNotEqualTo(tagCommitIdAfter); // the tag has been moved to a different commit
+            assertThat(branchCommitId).isEqualTo(tagCommitIdAfter);  // the tag was set to the latest commit on the "branch" remote
+            assertThat(commitAfter.getParents()).extracting(RevObject::getId) // the latest workspace commit has two parent commits: the old one and the latest commit on "branch" (=tagged commit)
+                    .containsExactlyInAnyOrder(commitIdBefore, tagCommitIdAfter);
+            assertThat(liveCommit.getParents()).extracting(RevObject::getId) // the latest live commit has two parent commits: the old live one and the latest workspace one
+                    .containsExactlyInAnyOrder(liveIdBefore, commitAfter.getId());
+        }
     }
 }

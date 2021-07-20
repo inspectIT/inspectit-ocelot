@@ -10,6 +10,8 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.CachingWorkingDirectoryAccessor;
 
+import java.io.IOException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -20,7 +22,7 @@ public class FileManagerTest {
     class GetWorkingDirectory {
 
         @Test
-        public void getAccessor() throws GitAPIException {
+        public void getAccessor() throws GitAPIException, IOException {
             InspectitServerSettings settings = new InspectitServerSettings();
             settings.setWorkingDirectory("/test");
             ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
