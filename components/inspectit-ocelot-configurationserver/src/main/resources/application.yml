@@ -65,7 +65,7 @@ inspectit-config-server:
   # Settings for connecting the configuration server to remote Git repositories.
   remote-configurations:
     # Whether remote Git repositories should be used for configuration management.
-    enabled: true
+    enabled: false
     # Whether the current live branch should be pushed during startup.
     push-at-startup: true
     ## The remote Git repository which will be used to fetch workspace-configurations from.

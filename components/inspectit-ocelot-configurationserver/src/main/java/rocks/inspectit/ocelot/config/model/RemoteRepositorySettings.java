@@ -37,7 +37,8 @@ public class RemoteRepositorySettings {
     private URIish gitRepositoryUri;
 
     /**
-     * The branch name on the remote Git repository which will be used to fetch workspace-configurations from.
+     * The branch name on the remote Git repository which will be used (e.g. to fetch workspace-configurations from or
+     * to push the live-configurations to).
      */
     @NotBlank
     private String branchName;
