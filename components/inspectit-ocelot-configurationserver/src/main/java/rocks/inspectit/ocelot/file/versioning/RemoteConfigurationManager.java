@@ -7,21 +7,18 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.merge.MergeStrategy;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings.AuthenticationType;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Encapsulating the logic for interacting with the remote configuration repository.
@@ -207,6 +204,16 @@ public class RemoteConfigurationManager {
     public void fetchSourceBranch(RemoteRepositorySettings sourceRepository) throws GitAPIException {
         log.info("Fetching branch '{}' from configuration remote '{}'.", sourceRepository.getBranchName(), sourceRepository
                 .getRemoteName());
+
+        Collection<Ref> refs = git.lsRemote().setRemote(sourceRepository.getRemoteName()).call();
+        Optional<Ref> sourceBanch = refs.stream()
+                .filter(ref -> ref.getName().equals("refs/heads/" + sourceRepository.getBranchName()))
+                .findAny();
+
+        if (!sourceBanch.isPresent()) {
+            throw new IllegalStateException(String.format("Specified configuration source branch '%s' does not exists on remote '%s'.", sourceRepository
+                    .getBranchName(), sourceRepository.getRemoteName()));
+        }
 
         FetchResult fetchResult = git.fetch()
                 .setRemote(sourceRepository.getRemoteName())

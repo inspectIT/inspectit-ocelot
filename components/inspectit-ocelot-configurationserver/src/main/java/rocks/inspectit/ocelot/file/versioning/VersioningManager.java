@@ -352,7 +352,8 @@ public class VersioningManager {
      *
      * @return the commit object or null if the commit could not be loaded
      */
-    private RevCommit getCommit(ObjectId commitId) {
+    @VisibleForTesting
+    RevCommit getCommit(ObjectId commitId) {
         try {
             if (commitId == null) {
                 return null;
@@ -803,10 +804,14 @@ public class VersioningManager {
         log.info("Merging remote configurations into the workspace.");
 
         if (settings.getRemoteConfigurations() == null) {
-            throw new IllegalStateException("Source repository settings must not be null.");
+            throw new IllegalStateException("The remote configuration settings must not be null.");
         }
 
         RemoteRepositorySettings sourceRepository = settings.getRemoteConfigurations().getSourceRepository();
+
+        if (sourceRepository == null) {
+            throw new IllegalStateException("Source repository settings must not be null.");
+        }
 
         List<Ref> tagRefs = git.tagList().call();
         Optional<Ref> syncTagRef = tagRefs.stream()
@@ -815,7 +820,7 @@ public class VersioningManager {
 
         if (syncTagRef.isPresent()) {
             Repository repository = git.getRepository();
-            ObjectId diffBase = syncTagRef.get().getObjectId();
+            ObjectId diffBase = getCommit(syncTagRef.get().getObjectId());
             ObjectId diffTarget = repository.exactRef("refs/heads/" + sourceRepository.getBranchName()).getObjectId();
 
             WorkspaceDiff diff = getWorkspaceDiff(false, diffBase, diffTarget);
