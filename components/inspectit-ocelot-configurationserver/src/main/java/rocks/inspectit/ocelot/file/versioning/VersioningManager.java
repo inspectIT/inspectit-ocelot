@@ -7,10 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -21,6 +18,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.util.CollectionUtils;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
@@ -54,9 +53,9 @@ public class VersioningManager {
     static final PersonIdent GIT_SYSTEM_AUTHOR = new PersonIdent("System", "info@inspectit.rocks");
 
     /**
-     * The mail suffix used to generate mail addresses for internal users.
+     * The server's settings.
      */
-    private String mailSuffix;
+    private InspectitServerSettings settings;
 
     /**
      * Path of the current working directory.
@@ -85,18 +84,23 @@ public class VersioningManager {
     private long amendTimeout = Duration.ofMinutes(10).toMillis();
 
     /**
+     * Remote configuration manager for interacting with the remote repository for configuration files.
+     */
+    private RemoteConfigurationManager remoteConfigurationManager;
+
+    /**
      * Constructor.
      *
      * @param workingDirectory       the working directory to use
      * @param authenticationSupplier the supplier to user for accessing the current user
      * @param eventPublisher         the event publisher to use
-     * @param mailSuffix             The mail suffix used to generate mail addresses for internal users.
+     * @param settings               the server's settings
      */
-    public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier, ApplicationEventPublisher eventPublisher, String mailSuffix) {
+    public VersioningManager(Path workingDirectory, Supplier<Authentication> authenticationSupplier, ApplicationEventPublisher eventPublisher, InspectitServerSettings settings) {
         this.workingDirectory = workingDirectory;
         this.authenticationSupplier = authenticationSupplier;
         this.eventPublisher = eventPublisher;
-        this.mailSuffix = mailSuffix;
+        this.settings = settings;
     }
 
     /**
@@ -132,6 +136,20 @@ public class VersioningManager {
 
             stageFiles();
             commitFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
+        }
+
+        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+        if (remoteSettings != null && remoteSettings.isEnabled()) {
+            // init RemoteConfigurationManager
+            remoteConfigurationManager = new RemoteConfigurationManager(settings, git);
+
+            // update remote refs in case they are configured
+            remoteConfigurationManager.updateRemoteRefs();
+
+            // push the current state during startup
+            if (remoteSettings.isPushAtStartup() && remoteSettings.getTargetRepository() != null) {
+                remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getTargetRepository());
+            }
         }
     }
 
@@ -290,7 +308,7 @@ public class VersioningManager {
             if (authentication.getPrincipal() instanceof InetOrgPerson) {
                 mail = ((InetOrgPerson) authentication.getPrincipal()).getMail();
             } else {
-                mail = username + mailSuffix;
+                mail = username + settings.getMailSuffix();
             }
             return new PersonIdent(username, mail);
         } else {
@@ -692,6 +710,12 @@ public class VersioningManager {
         } finally {
             // checkout workspace branch
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
+
+            // optionally: push to remote
+            RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+            if (remoteConfigurationManager != null && remoteSettings.getTargetRepository() != null) {
+                remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getTargetRepository());
+            }
 
             eventPublisher.publishEvent(new ConfigurationPromotionEvent(this, getLiveRevision()));
         }

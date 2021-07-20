@@ -77,7 +77,7 @@ public class FileManager {
                 .writeLock(), workingDirectory);
 
         Supplier<Authentication> authenticationSupplier = () -> SecurityContextHolder.getContext().getAuthentication();
-        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, asyncPublisher, settings.getMailSuffix());
+        versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, asyncPublisher, settings);
         versioningManager.initialize();
 
         AutoCommitWorkingDirectoryProxy autoCommitWDProxy = new AutoCommitWorkingDirectoryProxy(workingDirectoryLock.writeLock(), workingDirectoryAccessorImpl, versioningManager);

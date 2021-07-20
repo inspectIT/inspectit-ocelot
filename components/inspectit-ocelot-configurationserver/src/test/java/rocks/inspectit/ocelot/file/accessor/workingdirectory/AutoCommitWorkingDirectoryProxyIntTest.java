@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileTestBase;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
@@ -51,7 +52,9 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("user");
-        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher, "@test.com");
+        InspectitServerSettings settings = InspectitServerSettings.builder().mailSuffix("@test.com").build();
+
+        versioningManager = new VersioningManager(tempDirectory, () -> authentication, eventPublisher, settings);
         versioningManager.initialize();
 
         accessor = new AutoCommitWorkingDirectoryProxy(writeLock, workingDirectoryAccessor, versioningManager);

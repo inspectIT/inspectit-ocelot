@@ -76,4 +76,11 @@ public class InspectitServerSettings {
     @Valid
     @Builder.Default
     private AgentCommandSettings agentCommand = AgentCommandSettings.builder().build();
+
+    /**
+     * Settings for connecting the configuration server to remote Git repositories.
+     */
+    @Valid
+    @Builder.Default
+    private RemoteConfigurationsSettings remoteConfigurations = RemoteConfigurationsSettings.builder().build();
 }

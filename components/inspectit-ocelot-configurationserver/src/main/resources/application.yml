@@ -41,6 +41,7 @@ inspectit-config-server:
   max-agents: 10000
   # If an agent didn't fetched its configuration for this duration, it is forgotten and evicted from all caches
   agent-eviction-delay: 1h
+
   # security settings
   security:
     # Whether LDAP authentication should be used
@@ -49,6 +50,7 @@ inspectit-config-server:
     # If enabled, non-admin users cannot promote their own changes.
     # The writing of the configuration and the promotion needs to be done by two separate persons.
     four-eyes-promotion: false
+
   # settings for the agent commands
   agent-command:
     # after this time, commands which have not been fetched will be removed
@@ -59,6 +61,51 @@ inspectit-config-server:
     command-queue-size: 100
     # the max. time an agent is allowed to wait for a new command
     agent-polling-timeout: 30s
+
+  # Settings for connecting the configuration server to remote Git repositories.
+  remote-configurations:
+    # Whether remote Git repositories should be used for configuration management.
+    enabled: false
+    # Whether the current live branch should be pushed during startup.
+    push-at-startup: true
+    ## The remote Git repository which will be used to fetch workspace-configurations from.
+    #source-repository:
+      ## The name of the remote ref in the local Git repository.
+      #remote-name: source-remote-configuration
+      ## The URI to the remote Git repository. Examples: https://github.com/user/repo.git, git@github.com:user/repo.git
+      #git-repository-uri:
+      ## The branch name on the remote Git repository.
+      #branchName: remote-workspace
+      ## The type of authentication to use. Possible values: NONE, PASSWORD, PPK
+      #authentication-type: NONE
+      ## The username for accessing the remote repository. Only used in case of PASSWORD authentication.
+      #username:
+      ## The password for accessing the remote repository. Only used in case of PASSWORD authentication.
+      #password:
+      ## Additional private key to use for SSH authentication. The server will automatically load the known hosts and private
+      ## keys from the default locations (identity, id_rsa and id_dsa) in the user’s .ssh directory. Only used in case of
+      ## PPK authentication.
+      #private-key-file:
+    ## The remote Git repository which will be used to push live-configurations to.
+    #target-repository:
+      ## The name of the remote ref in the local Git repository.
+      #remote-name: target-remote-configuration
+      ## The URI to the remote Git repository. Examples: https://github.com/user/repo.git, git@github.com:user/repo.git
+      #git-repository-uri:
+      ## The branch name on the remote Git repository.
+      #branchName: remote-live
+      ## Whether force push should used for pushing to this remote.
+      #use-force-push: true
+      ## The type of authentication to use. Possible values: NONE, PASSWORD, PPK
+      #authentication-type: NONE
+      ## The username for accessing the remote repository. Only used in case of PASSWORD authentication.
+      #username:
+      ## The password for accessing the remote repository. Only used in case of PASSWORD authentication.
+      #password:
+      ## Additional private key to use for SSH authentication. The server will automatically load the known hosts and private
+      ## keys from the default locations (identity, id_rsa and id_dsa) in the user’s .ssh directory. Only used in case of
+      ## PPK authentication.
+      #private-key-file:
 
 # ACTUATOR PROPERTIES
 management:
