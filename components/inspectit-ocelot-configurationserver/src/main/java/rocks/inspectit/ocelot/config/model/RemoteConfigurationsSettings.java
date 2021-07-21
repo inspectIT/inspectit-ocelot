@@ -35,6 +35,13 @@ public class RemoteConfigurationsSettings {
     private boolean pullAtStartup = false;
 
     /**
+     * Defines whether the configuration files of the configuration source repository should be pulled on the initial
+     * configuration synchronization. The initial synchronization is not related to the {@link #pullAtStartup} property!
+     */
+    @Builder.Default
+    private boolean initialConfigurationSync = false;
+
+    /**
      * Whether synchronized files should be promoted automatically, after they have been fetched from the configuration
      * remote.
      */

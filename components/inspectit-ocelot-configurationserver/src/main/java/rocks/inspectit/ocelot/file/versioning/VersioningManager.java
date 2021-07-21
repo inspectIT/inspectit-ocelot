@@ -217,7 +217,7 @@ public class VersioningManager {
 
         stageFiles();
 
-        if (commitAllFiles(author, message, true)) {
+        if (commitAllFiles(author, message, author != GIT_SYSTEM_AUTHOR)) {
             eventPublisher.publishEvent(new WorkspaceChangedEvent(this, getWorkspaceRevision()));
         }
     }
@@ -709,30 +709,8 @@ public class VersioningManager {
             // checkout live branch
             git.checkout().setName(Branch.LIVE.getBranchName()).call();
 
-            // create (start) an empty merge-commit
-            git.merge()
-                    .include(workspaceCommitId)
-                    .setCommit(false)
-                    .setFastForward(MergeCommand.FastForwardMode.NO_FF)
-                    .setStrategy(MergeStrategy.OURS)
-                    .call();
-
-            // remove all deleted files
-            if (!removeFiles.isEmpty()) {
-                RmCommand rmCommand = git.rm();
-                removeFiles.forEach(rmCommand::addFilepattern);
-                rmCommand.call();
-            }
-            // checkout added and modified files
-            if (!checkoutFiles.isEmpty()) {
-                CheckoutCommand checkoutCommand = git.checkout().setStartPoint(promotion.getWorkspaceCommitId());
-                checkoutFiles.forEach(checkoutCommand::addPath);
-                checkoutCommand.call();
-            }
-
-            // commit changes
-            commitAllFiles(author, promotion.getCommitMessage(), false);
-
+            // merge target commit into current branch
+            mergeFiles(workspaceCommitId, checkoutFiles, removeFiles, promotion.getCommitMessage(), getCurrentAuthor());
         } catch (IOException | GitAPIException ex) {
             throw new PromotionFailedException("Configuration promotion has failed.", ex);
         } finally {
@@ -803,109 +781,145 @@ public class VersioningManager {
     synchronized void mergeSourceBranch() throws GitAPIException, IOException {
         log.info("Merging remote configurations into the workspace.");
 
-        if (settings.getRemoteConfigurations() == null) {
+        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+        if (remoteSettings == null) {
             throw new IllegalStateException("The remote configuration settings must not be null.");
         }
-
-        RemoteRepositorySettings sourceRepository = settings.getRemoteConfigurations().getSourceRepository();
-
+        RemoteRepositorySettings sourceRepository = remoteSettings.getSourceRepository();
         if (sourceRepository == null) {
             throw new IllegalStateException("Source repository settings must not be null.");
         }
 
+        // get ref of synchronization tag
         List<Ref> tagRefs = git.tagList().call();
         Optional<Ref> syncTagRef = tagRefs.stream()
                 .filter(tagRef -> tagRef.getName().equals("refs/tags/" + SOURCE_SYNC_TAG_NAME))
                 .findFirst();
 
+        // get ref of the configuration source branch
+        Repository repository = git.getRepository();
+        ObjectId diffTarget = repository.exactRef("refs/heads/" + sourceRepository.getBranchName()).getObjectId();
+
         if (syncTagRef.isPresent()) {
-            Repository repository = git.getRepository();
+            // merge the diff between the tag and the source branch head
             ObjectId diffBase = getCommit(syncTagRef.get().getObjectId());
-            ObjectId diffTarget = repository.exactRef("refs/heads/" + sourceRepository.getBranchName()).getObjectId();
-
-            WorkspaceDiff diff = getWorkspaceDiff(false, diffBase, diffTarget);
-
-            if (diff.getEntries().isEmpty()) {
-                log.info("There is nothing to merge from the source configuration branch into the current workspace branch.");
-                return;
+            mergeBranch(diffBase, diffTarget, true, "Merging remote configuration source branch");
+        } else if (remoteSettings.isInitialConfigurationSync()) {
+            // in case this options is set, we merge the diff between the workspace and the source branch head.
+            // we don't remove files in this case!
+            log.info("Synchronization marker has not been found. Executing an initial configuration synchronization.");
+            Optional<RevCommit> workspaceCommit = getLatestCommit(Branch.WORKSPACE);
+            if (workspaceCommit.isPresent()) {
+                mergeBranch(workspaceCommit.get(), diffTarget, false, "Initial configuration synchronization");
+            } else {
+                log.error("Cannot merge configuration source into local workspace because the workspace branch has no commits.");
             }
+        } else {
+            // otherwise, nothing will be merged
+            log.info("Synchronization marker has not been found, thus adding it to the latest commit on the configuration remote.");
+        }
 
-            // collect diff files
-            List<String> removeFiles = diff.getEntries()
+        // updating synchronization tag and setting it
+        RevCommit commit = getCommit(diffTarget);
+        if (commit != null && (!syncTagRef.isPresent() || syncTagRef.get().getObjectId() != commit)) {
+            updateSynchronizationTag(commit);
+        }
+    }
+
+    /**
+     * Merges the diff between the {@code baseObject} and {@code targetObject} into the currently checked out branch.
+     *
+     * @param baseObject    the object (commit, ref, ...) which is used as basis for the diff calculation
+     * @param targetObject  the object (commit, ref, ...) which is used as target (the desired state) for the diff calculation
+     * @param removeFiles   whether files which are removed in the diff should actually be removed
+     * @param commitMessage the message used for the resulting commit
+     */
+    private void mergeBranch(ObjectId baseObject, ObjectId targetObject, boolean removeFiles, String commitMessage) throws IOException, GitAPIException {
+        // getting the diff of the base and target commit
+        WorkspaceDiff diff = getWorkspaceDiff(false, baseObject, targetObject);
+        if (diff.getEntries().isEmpty()) {
+            log.info("There is nothing to merge from the source configuration branch into the current workspace branch.");
+            return;
+        }
+
+        // collect diff files
+        List<String> fileToRemove = Collections.emptyList();
+        if (removeFiles) {
+            fileToRemove = diff.getEntries()
                     .stream()
                     .filter(entry -> entry.getType() == DiffEntry.ChangeType.DELETE)
                     .map(SimpleDiffEntry::getFile)
                     .map(this::prefixRelativeFile)
                     .collect(Collectors.toList());
+        }
 
-            List<String> checkoutFiles = diff.getEntries()
+        List<String> checkoutFiles = diff.getEntries()
+                .stream()
+                .filter(entry -> entry.getType() != DiffEntry.ChangeType.DELETE)
+                .map(SimpleDiffEntry::getFile)
+                .map(this::prefixRelativeFile)
+                .collect(Collectors.toList());
+
+        // merge target commit into current branch
+        mergeFiles(targetObject, checkoutFiles, fileToRemove, commitMessage, GIT_SYSTEM_AUTHOR);
+
+        // promote if enabled
+        if (settings.getRemoteConfigurations().isAutoPromotion()) {
+            log.info("Auto-promotion of synchronized configuration files.");
+            List<String> diffFiles = diff.getEntries()
                     .stream()
-                    .filter(entry -> entry.getType() != DiffEntry.ChangeType.DELETE)
                     .map(SimpleDiffEntry::getFile)
-                    .map(this::prefixRelativeFile)
                     .collect(Collectors.toList());
 
-            // create (start) an empty merge-commit
-            git.merge()
-                    .include(diffTarget)
-                    .setCommit(false)
-                    .setFastForward(MergeCommand.FastForwardMode.NO_FF)
-                    .setStrategy(MergeStrategy.OURS)
-                    .call();
+            ConfigurationPromotion promotion = ConfigurationPromotion.builder()
+                    .commitMessage("Auto-promotion due to workspace remote synchronization.")
+                    .workspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName())
+                    .liveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName())
+                    .files(diffFiles)
+                    .build();
 
-            // remove all deleted files
-            if (!removeFiles.isEmpty()) {
-                RmCommand rmCommand = git.rm();
-                removeFiles.forEach(rmCommand::addFilepattern);
-                rmCommand.call();
-            }
-            // checkout added and modified files
-            if (!checkoutFiles.isEmpty()) {
-                git.checkout()
-                        .setStartPoint("refs/heads/" + sourceRepository.getBranchName())
-                        .addPaths(checkoutFiles)
-                        .call();
-            }
-
-            // adding changed files
-            AddCommand addCommand = git.add();
-            Stream.concat(removeFiles.stream(), checkoutFiles.stream()).forEach(addCommand::addFilepattern);
-            addCommand.call();
-
-            // commit changes
-            git.commit().setMessage("Merging remote configuration source branch").setAuthor(GIT_SYSTEM_AUTHOR).call();
-
-            // tag diff target as new sync base
-            RevCommit diffBaseCommit = getCommit(diffTarget);
-            updateSynchronizationTag(diffBaseCommit);
-
-            if (settings.getRemoteConfigurations().isAutoPromotion()) {
-                // promote
-                log.info("Auto-promotion of synchronized configuration files.");
-                List<String> diffFiles = diff.getEntries()
-                        .stream()
-                        .map(SimpleDiffEntry::getFile)
-                        .collect(Collectors.toList());
-
-                ConfigurationPromotion promotion = ConfigurationPromotion.builder()
-                        .commitMessage("Auto-promotion due to workspace remote synchronization.")
-                        .workspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName())
-                        .liveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName())
-                        .files(diffFiles)
-                        .build();
-
-                promoteConfiguration(promotion, false, GIT_SYSTEM_AUTHOR);
-            }
-        } else {
-            log.info("Synchronization marker has not been found, thus adding it to the latest commit on the configuration remote.");
-            Repository repository = git.getRepository();
-            ObjectId diffTarget = repository.exactRef("refs/heads/" + sourceRepository.getBranchName()).getObjectId();
-            RevCommit commit = getCommit(diffTarget);
-
-            if (commit != null) {
-                updateSynchronizationTag(commit);
-            }
+            promoteConfiguration(promotion, false, GIT_SYSTEM_AUTHOR);
         }
+    }
+
+    /**
+     * Merges the {@code checkoutFiles} files from the {@code targetCommit} into the currently checked out branch. Files
+     * contained in the {@code removeFiles} will be removed. The {@code targetCommit} will be set as a parent of the
+     * resulting commit.
+     *
+     * @param targetCommit  the commit containing the desired files
+     * @param checkoutFiles the files which should be taken from the {@code targetCommit}
+     * @param removeFiles   the files which will be removed
+     * @param commitMessage the message for the resulting commit
+     * @param commitAuthor  the author of the resulting commit
+     */
+    private void mergeFiles(ObjectId targetCommit, List<String> checkoutFiles, List<String> removeFiles, String commitMessage, PersonIdent commitAuthor) throws GitAPIException, IOException {
+        // create (start) an empty merge-commit
+        git.merge()
+                .include(targetCommit)
+                .setCommit(false)
+                .setFastForward(MergeCommand.FastForwardMode.NO_FF)
+                .setStrategy(MergeStrategy.OURS)
+                .call();
+
+        // remove all deleted files
+        if (!removeFiles.isEmpty()) {
+            RmCommand rmCommand = git.rm();
+            removeFiles.forEach(rmCommand::addFilepattern);
+            rmCommand.call();
+        }
+        // checkout added and modified files
+        if (!checkoutFiles.isEmpty()) {
+            git.checkout().setStartPoint(targetCommit.name()).addPaths(checkoutFiles).call();
+        }
+
+        // adding changed files
+        AddCommand addCommand = git.add();
+        Stream.concat(removeFiles.stream(), checkoutFiles.stream()).forEach(addCommand::addFilepattern);
+        addCommand.call();
+
+        // commit changes
+        git.commit().setMessage(commitMessage).setAuthor(commitAuthor).call();
     }
 
     /**
