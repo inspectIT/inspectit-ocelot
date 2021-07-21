@@ -710,7 +710,7 @@ public class VersioningManager {
             git.checkout().setName(Branch.LIVE.getBranchName()).call();
 
             // merge target commit into current branch
-            mergeFiles(workspaceCommitId, checkoutFiles, removeFiles, promotion.getCommitMessage(), getCurrentAuthor());
+            mergeFiles(workspaceCommitId, checkoutFiles, removeFiles, promotion.getCommitMessage(), author);
         } catch (IOException | GitAPIException ex) {
             throw new PromotionFailedException("Configuration promotion has failed.", ex);
         } finally {
@@ -878,7 +878,7 @@ public class VersioningManager {
                     .files(diffFiles)
                     .build();
 
-            promoteConfiguration(promotion, false, GIT_SYSTEM_AUTHOR);
+            promoteConfiguration(promotion, true, GIT_SYSTEM_AUTHOR);
         }
     }
 

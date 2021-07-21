@@ -73,7 +73,7 @@ inspectit-config-server:
     # Defines whether the configuration files of the configuration source repository should be pulled on the initial
     # configuration synchronization. The initial synchronization is not related to the 'pull-at-startup' property!
     # Read the documentation for detailed information on this property!
-    initial-configuration-sync: true
+    initial-configuration-sync: false
     # Whether synchronized files should be promoted automatically, after they have been fetched from the
     # configuration remote.
     auto-promotion: true
