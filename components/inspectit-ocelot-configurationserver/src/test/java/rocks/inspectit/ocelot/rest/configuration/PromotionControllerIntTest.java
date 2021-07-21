@@ -62,7 +62,7 @@ class PromotionControllerIntTest extends IntegrationTestBase {
             ResponseEntity<String> result = authRest.exchange("/api/v1/configuration/promote", HttpMethod.POST, new HttpEntity<>(promotion), String.class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(result.getBody()).isEqualTo("{\"result\":\"SYNCHRONIZATION_FAILED\"}");
+            assertThat(result.getBody()).isEqualTo("{\"result\":\"OK\"}");
         }
 
         @Test
