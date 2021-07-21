@@ -16,6 +16,7 @@ import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDire
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AutoCommitWorkingDirectoryProxy;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.CachingWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
+import rocks.inspectit.ocelot.file.versioning.PromotionResult;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
@@ -151,11 +152,14 @@ public class FileManager {
      *
      * @param promotion          the definition what to promote
      * @param allowSelfPromotion if true, the current user will be allowed to promote his own changes.
+     *
+     * @return Additional information of the promotion in case the promotion was successful. This might contain additional
+     * information about warning or errors which did not affected the promotion itself.
      */
-    public void promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion) throws GitAPIException {
+    public PromotionResult promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion) throws GitAPIException {
         workingDirectoryLock.writeLock().lock();
         try {
-            versioningManager.promoteConfiguration(promotion, allowSelfPromotion);
+            return versioningManager.promoteConfiguration(promotion, allowSelfPromotion);
         } finally {
             workingDirectoryLock.writeLock().unlock();
         }
