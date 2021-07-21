@@ -59,9 +59,10 @@ class PromotionControllerIntTest extends IntegrationTestBase {
             promotion.setWorkspaceCommitId(diff.getBody().getWorkspaceCommitId());
             promotion.setCommitMessage("test");
 
-            ResponseEntity<Void> result = authRest.exchange("/api/v1/configuration/promote", HttpMethod.POST, new HttpEntity<>(promotion), Void.class);
+            ResponseEntity<String> result = authRest.exchange("/api/v1/configuration/promote", HttpMethod.POST, new HttpEntity<>(promotion), String.class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(result.getBody()).isEqualTo("{\"result\":\"SYNCHRONIZATION_FAILED\"}");
         }
 
         @Test
@@ -113,6 +114,26 @@ class PromotionControllerIntTest extends IntegrationTestBase {
             ResponseEntity<Void> result = authRest.exchange("/api/v1/configuration/promote", HttpMethod.POST, new HttpEntity<>(promotion), Void.class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
+
+        @Test
+        public void conflictingPromotion() {
+            authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
+
+            ResponseEntity<WorkspaceDiff> diff = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setFiles(Collections.singletonList("/src/file.yml"));
+            promotion.setLiveCommitId(diff.getBody().getLiveCommitId());
+            promotion.setWorkspaceCommitId(diff.getBody().getWorkspaceCommitId());
+            promotion.setCommitMessage("test");
+
+            authRest.exchange("/api/v1/configuration/promote", HttpMethod.POST, new HttpEntity<>(promotion), String.class);
+
+            // conflicting promotion
+            ResponseEntity<String> result = authRest.exchange("/api/v1/configuration/promote", HttpMethod.POST, new HttpEntity<>(promotion), String.class);
+
+            assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         }
     }
 }
