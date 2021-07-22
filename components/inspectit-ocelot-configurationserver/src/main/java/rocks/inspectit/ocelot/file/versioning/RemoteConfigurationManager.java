@@ -93,9 +93,11 @@ public class RemoteConfigurationManager {
      * Pushes a specific local branch to the configured configuration remote ref using the specified branch name. Here
      * the first push attempt is not forced. In case the push attempt is rejected because it cannot be performed
      * fast-forward, it will be forced if configured.
-     *  @param localBranch      the local branch to push
+     *
+     * @param localBranch      the local branch to push
      * @param targetRepository the settings for the repository to push to
-     * @return
+     *
+     * @return the result of the push command
      */
     public RemoteRefUpdate.Status pushBranch(Branch localBranch, RemoteRepositorySettings targetRepository) throws GitAPIException {
         RemoteRefUpdate.Status pushStatus = push(localBranch, targetRepository, false);
