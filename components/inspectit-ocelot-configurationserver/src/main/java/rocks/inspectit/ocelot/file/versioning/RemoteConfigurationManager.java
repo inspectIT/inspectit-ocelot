@@ -96,14 +96,18 @@ public class RemoteConfigurationManager {
      *
      * @param localBranch      the local branch to push
      * @param targetRepository the settings for the repository to push to
+     *
+     * @return the result of the push command
      */
-    public void pushBranch(Branch localBranch, RemoteRepositorySettings targetRepository) throws GitAPIException {
+    public RemoteRefUpdate.Status pushBranch(Branch localBranch, RemoteRepositorySettings targetRepository) throws GitAPIException {
         RemoteRefUpdate.Status pushStatus = push(localBranch, targetRepository, false);
 
         if (pushStatus == RemoteRefUpdate.Status.REJECTED_NONFASTFORWARD && targetRepository.isUseForcePush()) {
             log.warn("Fast-Forward push was rejected. Pushing the commit will be forced, now!");
-            push(localBranch, targetRepository, true);
+            pushStatus = push(localBranch, targetRepository, true);
         }
+
+        return pushStatus;
     }
 
     /**

@@ -10,6 +10,7 @@ import useFetchData from '../../../hooks/use-fetch-data';
 import PromotionApprovalDialog from './dialogs/PromotionApprovalDialog';
 import axios from '../../../lib/axios-api';
 import PromotionConflictDialog from './dialogs/PromotionConflictDialog';
+import WarningDialog from '../../common/dialogs/WarningDialog';
 import _ from 'lodash';
 import { ProgressSpinner } from 'primereact/progressspinner';
 
@@ -23,6 +24,8 @@ const PromotionView = () => {
   const [currentSelection, setCurrentSelection] = useState(null); // the current selected file name
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
   const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [showWarningDialog, setShowWarningDialog] = useState(false);
+  const [promotionResult, setPromotionResult] = useState(null);
   const [isPromoting, setIsPromoting] = useState(false);
 
   // global state variables
@@ -87,7 +90,12 @@ const PromotionView = () => {
     setIsPromoting(true);
 
     try {
-      await axios.post('/configuration/promote', payload);
+      const { data } = await axios.post('/configuration/promote', payload);
+
+      if (data.result && data.result != 'OK') {
+        setShowWarningDialog(true);
+        setPromotionResult(data.result);
+      }
 
       dispatch(
         notificationActions.showSuccessMessage('Configuration Promoted', 'The approved configurations have been successfully promoted.')
@@ -136,6 +144,9 @@ const PromotionView = () => {
           .selection-information > span {
             margin-bottom: 1rem;
           }
+          .promotion-result {
+            font-family: monospace;
+          }
         `}
       </style>
 
@@ -148,6 +159,17 @@ const PromotionView = () => {
       />
 
       <PromotionConflictDialog visible={showConflictDialog} onHide={() => setShowConflictDialog(false)} onRefresh={refreshData} />
+
+      <WarningDialog visible={showWarningDialog} onHide={() => setShowWarningDialog(false)}>
+        <p>
+          The promotion was successful, but there was an associated problem.
+          <br />
+          Please contact your administrator if there are any further problems.
+        </p>
+        <p>
+          Result: <span className="promotion-result">{promotionResult}</span>
+        </p>
+      </WarningDialog>
 
       <div className="this">
         <div className="fixed-toolbar">
