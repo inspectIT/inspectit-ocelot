@@ -27,18 +27,18 @@ public class CompositeBeaconProcessor implements BeaconProcessor {
     @Override
     public Beacon process(Beacon beacon) {
         for (BeaconProcessor beaconProcessor : processorList) {
-            boolean is_error = false;
+            boolean isError = false;
             Stopwatch stopwatch = Stopwatch.createStarted();
             try {
                 beacon = beacon.merge(beaconProcessor.process(beacon));
             } catch (Exception e) {
                 log.error("BeaconProcessor <{}> encountered an Exception! Ignoring the processor!", beaconProcessor.getClass()
                         .getName(), e);
-                is_error = true;
+                isError = true;
             }
             stopwatch.stop();
             ImmutableMap<String, String> tagMap = ImmutableMap.of("beacon_processor", beaconProcessor.getClass()
-                    .getSimpleName(), "is_error", String.valueOf(is_error));
+                    .getSimpleName(), "isError", String.valueOf(isError));
             selfMonitoring.record("beacons_processor", stopwatch.elapsed(TimeUnit.MILLISECONDS), tagMap);
         }
         return beacon;

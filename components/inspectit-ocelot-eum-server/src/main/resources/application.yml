@@ -261,11 +261,13 @@ inspectit-eum-server:
             aggregation: COUNT
             tags:
               beacon_processor: true
+              is_error: true
           # the export duration
           '[inspectit-eum/self/beacons_processor/duration/sum]':
             aggregation: SUM
             tags:
               beacon_processor: true
+              is_error: true
 
   # settings for exposing resource timing metrics
   resource-timing:
