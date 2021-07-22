@@ -85,11 +85,11 @@ inspectit-config-server:
     ## The remote Git repository which will be used to fetch workspace-configurations from.
     #pull-repository:
       ## The name of the remote ref in the local Git repository.
-      #remote-name: source-remote-configuration
+      #remote-name: pull-remote-configuration
       ## The URI to the remote Git repository. Examples: https://github.com/user/repo.git, git@github.com:user/repo.git
       #git-repository-uri:
       ## The branch name on the remote Git repository.
-      #branchName: remote-workspace
+      #branch-name: remote-workspace
       ## The type of authentication to use. Possible values: NONE, PASSWORD, PPK
       #authentication-type: NONE
       ## The username for accessing the remote repository. Only used in case of PASSWORD authentication.
@@ -103,11 +103,11 @@ inspectit-config-server:
     ## The remote Git repository which will be used to push live-configurations to.
     #push-repository:
       ## The name of the remote ref in the local Git repository.
-      #remote-name: target-remote-configuration
+      #remote-name: push-remote-configuration
       ## The URI to the remote Git repository. Examples: https://github.com/user/repo.git, git@github.com:user/repo.git
       #git-repository-uri:
       ## The branch name on the remote Git repository.
-      #branchName: remote-live
+      #branch-name: remote-live
       ## Whether force push should used for pushing to this remote.
       #use-force-push: true
       ## The type of authentication to use. Possible values: NONE, PASSWORD, PPK

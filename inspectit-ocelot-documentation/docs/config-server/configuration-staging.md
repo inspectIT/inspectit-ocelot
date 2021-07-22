@@ -125,4 +125,29 @@ $ curl http://localhost:8090/api/v1/hook/synchronize-workspace?token=secret_toke
 
 ## Configuration Properties
 
+:::important
+All configuration server properties mentioned below refer to being set under the **`inspectit-config-server.remote-configurations`** key!
+:::
+
+| Property | Default | Note |
+| --- | --- | --- |
+| `enabled` | `false` | The name of the agent mapping. |
+| `push-at-startup` | `true` | A list of paths. All configuration files matching this list (Directories are resolved recursively) will be merged together and returned to matching agents. |
+| `pull-at-startup` | `false` | A map of attributes. This map is used to determine whether an agent will match this agent mapping, thus, get its configuration. |
+| <nobr>`initial-configuration-sync`</nobr> | `false` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
+| `auto-promotion` | `true` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
+| `pull-repository` | `null` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
+| `push-repository` | `null` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
+
 ### Repository Configuration
+
+| Property | Default | Note |
+| --- | --- | --- |
+| `remote-name` | `[pull/push]-remote-configuration` | The name of the agent mapping. |
+| `git-repository-uri` | `null` | A list of paths. All configuration files matching this list (Directories are resolved recursively) will be merged together and returned to matching agents. |
+| `branch-name` | `remote-[workspace/live]` | A map of attributes. This map is used to determine whether an agent will match this agent mapping, thus, get its configuration. |
+| `use-force-push` | `true` | A map of attributes. This map is used to determine whether an agent will match this agent mapping, thus, get its configuration. |
+| <nobr>`authentication-type`</nobr> | `NONE` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
+| `username` | `null` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
+| `password` | `null` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
+| `private-key-file` | `null` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
