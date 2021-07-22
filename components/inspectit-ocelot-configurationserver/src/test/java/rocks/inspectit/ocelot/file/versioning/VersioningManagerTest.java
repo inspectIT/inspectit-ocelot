@@ -1084,7 +1084,7 @@ class VersioningManagerTest extends FileTestBase {
                     .build();
             RemoteConfigurationsSettings configurationsSettings = RemoteConfigurationsSettings.builder()
                     .enabled(true)
-                    .sourceRepository(repositorySettings)
+                    .pullRepository(repositorySettings)
                     .build();
             when(settings.getRemoteConfigurations()).thenReturn(configurationsSettings);
 
@@ -1134,7 +1134,7 @@ class VersioningManagerTest extends FileTestBase {
             RemoteConfigurationsSettings configurationsSettings = RemoteConfigurationsSettings.builder()
                     .enabled(true)
                     .pullAtStartup(true)
-                    .sourceRepository(repositorySettings)
+                    .pullRepository(repositorySettings)
                     .build();
             when(settings.getRemoteConfigurations()).thenReturn(configurationsSettings);
 

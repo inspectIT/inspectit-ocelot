@@ -52,11 +52,11 @@ public class RemoteConfigurationsSettings {
      * The remote Git repository which will be used to fetch workspace-configurations from.
      */
     @Valid
-    private RemoteRepositorySettings sourceRepository;
+    private RemoteRepositorySettings pullRepository;
 
     /**
      * The remote Git repository which will be used to push live-configurations to.
      */
     @Valid
-    private RemoteRepositorySettings targetRepository;
+    private RemoteRepositorySettings pushRepository;
 }

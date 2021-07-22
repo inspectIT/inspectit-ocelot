@@ -56,7 +56,7 @@ public class RemoteConfigurationManagerTest {
 
         remoteSettings = RemoteConfigurationsSettings.builder()
                 .enabled(true)
-                .targetRepository(targetRepository)
+                .pushRepository(targetRepository)
                 .build();
 
         settings = InspectitServerSettings.builder().remoteConfigurations(remoteSettings).build();
@@ -83,13 +83,13 @@ public class RemoteConfigurationManagerTest {
             manager.updateRemoteRefs();
 
             assertThat(gitLocal.remoteList().call()).extracting(RemoteConfig::getName)
-                    .containsExactly(remoteSettings.getTargetRepository().getRemoteName());
+                    .containsExactly(remoteSettings.getPushRepository().getRemoteName());
         }
 
         @Test
         public void updateRef() throws GitAPIException, URISyntaxException {
             gitLocal.remoteAdd()
-                    .setName(remoteSettings.getTargetRepository().getRemoteName())
+                    .setName(remoteSettings.getPushRepository().getRemoteName())
                     .setUri(new URIish("https://example.org"))
                     .call();
 
@@ -100,7 +100,7 @@ public class RemoteConfigurationManagerTest {
             List<RemoteConfig> remotes = gitLocal.remoteList().call();
             assertThat(remotes).hasSize(1);
             RemoteConfig remote = remotes.get(0);
-            assertThat(remote.getName()).isEqualTo(remoteSettings.getTargetRepository().getRemoteName());
+            assertThat(remote.getName()).isEqualTo(remoteSettings.getPushRepository().getRemoteName());
             assertThat(remote.getURIs()).element(0)
                     .extracting(URIish::toString)
                     .isEqualTo(new URIish(tempDirectoryRemote.toString() + "/.git").toString());
@@ -122,7 +122,7 @@ public class RemoteConfigurationManagerTest {
             manager = new RemoteConfigurationManager(settings, gitLocal);
             manager.updateRemoteRefs();
 
-            manager.pushBranch(Branch.WORKSPACE, settings.getRemoteConfigurations().getTargetRepository());
+            manager.pushBranch(Branch.WORKSPACE, settings.getRemoteConfigurations().getPushRepository());
 
             List<Ref> refs = gitRemote.branchList().call();
             assertThat(refs).extracting(Ref::getName).containsExactly("refs/heads/target-branch");
@@ -139,7 +139,7 @@ public class RemoteConfigurationManagerTest {
                     .branchName("branch")
                     .gitRepositoryUri(new URIish(tempDirectoryRemote.toString() + "/.git"))
                     .build();
-            remoteSettings.setSourceRepository(sourceRepository);
+            remoteSettings.setPullRepository(sourceRepository);
 
             manager = new RemoteConfigurationManager(settings, gitLocal);
             manager.updateRemoteRefs();
@@ -157,7 +157,7 @@ public class RemoteConfigurationManagerTest {
                     .branchName("branch")
                     .gitRepositoryUri(new URIish(tempDirectoryRemote.toString() + "/.git"))
                     .build();
-            remoteSettings.setSourceRepository(sourceRepository);
+            remoteSettings.setPullRepository(sourceRepository);
 
             manager = new RemoteConfigurationManager(settings, gitLocal);
             manager.updateRemoteRefs();

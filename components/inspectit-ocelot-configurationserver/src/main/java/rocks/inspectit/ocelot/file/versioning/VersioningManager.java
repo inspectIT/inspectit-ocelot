@@ -155,13 +155,13 @@ public class VersioningManager {
             remoteConfigurationManager.updateRemoteRefs();
 
             // push the current state during startup
-            if (remoteSettings.isPushAtStartup() && remoteSettings.getTargetRepository() != null) {
-                remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getTargetRepository());
+            if (remoteSettings.isPushAtStartup() && remoteSettings.getPushRepository() != null) {
+                remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getPushRepository());
             }
 
             // fetch and merge the remote source into the local workspace
-            if (remoteSettings.isPullAtStartup() && remoteSettings.getSourceRepository() != null) {
-                remoteConfigurationManager.fetchSourceBranch(settings.getRemoteConfigurations().getSourceRepository());
+            if (remoteSettings.isPullAtStartup() && remoteSettings.getPullRepository() != null) {
+                remoteConfigurationManager.fetchSourceBranch(settings.getRemoteConfigurations().getPullRepository());
                 mergeSourceBranch();
             }
         }
@@ -723,8 +723,8 @@ public class VersioningManager {
 
             // optionally: push to remote
             RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
-            if (remoteConfigurationManager != null && remoteSettings.getTargetRepository() != null) {
-                RemoteRefUpdate.Status status = remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getTargetRepository());
+            if (remoteConfigurationManager != null && remoteSettings.getPushRepository() != null) {
+                RemoteRefUpdate.Status status = remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getPushRepository());
                 if (status != RemoteRefUpdate.Status.OK && status != RemoteRefUpdate.Status.UP_TO_DATE) {
                     result = PromotionResult.SYNCHRONIZATION_FAILED;
                 }
@@ -798,13 +798,13 @@ public class VersioningManager {
     public synchronized boolean pullSourceBranch() throws GitAPIException, IOException {
         RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
 
-        if (remoteSettings == null || !remoteSettings.isEnabled() || remoteSettings.getSourceRepository() == null) {
+        if (remoteSettings == null || !remoteSettings.isEnabled() || remoteSettings.getPullRepository() == null) {
             log.info("Remote configuration source will not be pulled because it is not specified or disabled.");
             return false;
         }
 
         // fetch and merge the remote source into the local workspace
-        remoteConfigurationManager.fetchSourceBranch(remoteSettings.getSourceRepository());
+        remoteConfigurationManager.fetchSourceBranch(remoteSettings.getPullRepository());
         mergeSourceBranch();
 
         return true;
@@ -821,7 +821,7 @@ public class VersioningManager {
         if (remoteSettings == null) {
             throw new IllegalStateException("The remote configuration settings must not be null.");
         }
-        RemoteRepositorySettings sourceRepository = remoteSettings.getSourceRepository();
+        RemoteRepositorySettings sourceRepository = remoteSettings.getPullRepository();
         if (sourceRepository == null) {
             throw new IllegalStateException("Source repository settings must not be null.");
         }

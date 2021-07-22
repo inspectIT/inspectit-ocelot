@@ -43,12 +43,12 @@ public class RemoteConfigurationManager {
      */
     public void updateRemoteRefs() throws GitAPIException {
 
-        RemoteRepositorySettings sourceRepository = settings.getRemoteConfigurations().getSourceRepository();
+        RemoteRepositorySettings sourceRepository = settings.getRemoteConfigurations().getPullRepository();
         if (sourceRepository != null) {
             updateRemoteRef(sourceRepository);
         }
 
-        RemoteRepositorySettings targetRepository = settings.getRemoteConfigurations().getTargetRepository();
+        RemoteRepositorySettings targetRepository = settings.getRemoteConfigurations().getPushRepository();
         if (targetRepository != null) {
             updateRemoteRef(targetRepository);
         }
