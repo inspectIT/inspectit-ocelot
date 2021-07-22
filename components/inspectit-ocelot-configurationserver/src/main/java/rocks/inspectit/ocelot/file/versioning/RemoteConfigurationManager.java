@@ -9,13 +9,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings.AuthenticationType;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Encapsulating the logic for interacting with the remote configuration repository.
@@ -191,5 +194,38 @@ public class RemoteConfigurationManager {
             SshTransport sshTransport = (SshTransport) transport;
             sshTransport.setSshSessionFactory(sshSessionFactory);
         });
+    }
+
+    /**
+     * Fetches the branch represented by the given {@link RemoteRepositorySettings}.
+     *
+     * @param sourceRepository the definition of the remote repository and branch
+     */
+    public void fetchSourceBranch(RemoteRepositorySettings sourceRepository) throws GitAPIException {
+        log.info("Fetching branch '{}' from configuration remote '{}'.", sourceRepository.getBranchName(), sourceRepository
+                .getRemoteName());
+
+        Collection<Ref> refs = git.lsRemote().setRemote(sourceRepository.getRemoteName()).call();
+        Optional<Ref> sourceBanch = refs.stream()
+                .filter(ref -> ref.getName().equals("refs/heads/" + sourceRepository.getBranchName()))
+                .findAny();
+
+        if (!sourceBanch.isPresent()) {
+            throw new IllegalStateException(String.format("Specified configuration source branch '%s' does not exists on remote '%s'.", sourceRepository
+                    .getBranchName(), sourceRepository.getRemoteName()));
+        }
+
+        FetchResult fetchResult = git.fetch()
+                .setRemote(sourceRepository.getRemoteName())
+                .setRefSpecs("refs/heads/" + sourceRepository.getBranchName() + ":refs/heads/" + sourceRepository.getBranchName())
+                .call();
+
+        if (fetchResult.getTrackingRefUpdates().isEmpty()) {
+            log.info("No change has been fetched.");
+        } else {
+            for (TrackingRefUpdate refUpdate : fetchResult.getTrackingRefUpdates()) {
+                log.info("Fetching from '{}' ended with result: {}", refUpdate.getRemoteName(), refUpdate.getResult());
+            }
+        }
     }
 }

@@ -68,6 +68,15 @@ inspectit-config-server:
     enabled: false
     # Whether the current live branch should be pushed during startup.
     push-at-startup: true
+    # Whether the remote source branch should be fetched and merged into the current workspace branch during startup.
+    pull-at-startup: false
+    # Defines whether the configuration files of the configuration source repository should be pulled on the initial
+    # configuration synchronization. The initial synchronization is not related to the 'pull-at-startup' property!
+    # Read the documentation for detailed information on this property!
+    initial-configuration-sync: false
+    # Whether synchronized files should be promoted automatically, after they have been fetched from the
+    # configuration remote.
+    auto-promotion: true
     ## The remote Git repository which will be used to fetch workspace-configurations from.
     #source-repository:
       ## The name of the remote ref in the local Git repository.
