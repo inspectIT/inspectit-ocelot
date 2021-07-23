@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,6 +99,11 @@ public class IntegrationTestBase {
 
     @AfterEach
     void afterEach() throws IOException {
+        // close the git
+        VersioningManager versioningManager = (VersioningManager) ReflectionTestUtils.getField(fileManager, "versioningManager");
+        Git git = (Git) ReflectionTestUtils.getField(versioningManager, "git");
+        git.close();
+
         FileUtils.cleanDirectory(new File(settings.getWorkingDirectory()));
     }
 }

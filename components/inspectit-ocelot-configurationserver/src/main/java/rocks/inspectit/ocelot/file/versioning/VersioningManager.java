@@ -12,6 +12,7 @@ import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.springframework.context.ApplicationEventPublisher;
@@ -154,13 +155,13 @@ public class VersioningManager {
             remoteConfigurationManager.updateRemoteRefs();
 
             // push the current state during startup
-            if (remoteSettings.isPushAtStartup() && remoteSettings.getTargetRepository() != null) {
-                remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getTargetRepository());
+            if (remoteSettings.isPushAtStartup() && remoteSettings.getPushRepository() != null) {
+                remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getPushRepository());
             }
 
             // fetch and merge the remote source into the local workspace
-            if (remoteSettings.isPullAtStartup() && remoteSettings.getSourceRepository() != null) {
-                remoteConfigurationManager.fetchSourceBranch(settings.getRemoteConfigurations().getSourceRepository());
+            if (remoteSettings.isPullAtStartup() && remoteSettings.getPullRepository() != null) {
+                remoteConfigurationManager.fetchSourceBranch(settings.getRemoteConfigurations().getPullRepository());
                 mergeSourceBranch();
             }
         }
@@ -652,9 +653,16 @@ public class VersioningManager {
      *
      * @param promotion          the promotion definition
      * @param allowSelfPromotion whether users can promote their own files
+     *
+     * @return Additional information of the promotion in case the promotion was successful. This might contain additional
+     * information about warning or errors which did not affected the promotion itself.
+     *
+     * @throws SelfPromotionNotAllowedException in case the user tries to promote its own files but it is prohibited
+     * @throws ConcurrentModificationException  in case there was a commit on the live branch in the mean time
+     * @throws PromotionFailedException         in case the promotion has been failed
      */
-    public void promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion) throws GitAPIException {
-        promoteConfiguration(promotion, allowSelfPromotion, getCurrentAuthor());
+    public PromotionResult promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion) throws GitAPIException {
+        return promoteConfiguration(promotion, allowSelfPromotion, getCurrentAuthor());
     }
 
     /**
@@ -664,13 +672,14 @@ public class VersioningManager {
      * @param allowSelfPromotion whether users can promote their own files
      * @param author             the author used for the resulting promotion commit
      */
-    public synchronized void promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion, PersonIdent author) throws GitAPIException {
+    public synchronized PromotionResult promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion, PersonIdent author) throws GitAPIException {
         if (promotion == null || CollectionUtils.isEmpty(promotion.getFiles())) {
             throw new IllegalArgumentException("ConfigurationPromotion must not be null and has to promote at least one file!");
         }
 
         log.info("User '{}' promotes {} configuration files.", author.getName(), promotion.getFiles().size());
 
+        PromotionResult result = PromotionResult.OK;
         try {
             ObjectId liveCommitId = ObjectId.fromString(promotion.getLiveCommitId());
             ObjectId workspaceCommitId = ObjectId.fromString(promotion.getWorkspaceCommitId());
@@ -711,6 +720,15 @@ public class VersioningManager {
 
             // merge target commit into current branch
             mergeFiles(workspaceCommitId, checkoutFiles, removeFiles, promotion.getCommitMessage(), author);
+
+            // optionally: push to remote
+            RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+            if (remoteConfigurationManager != null && remoteSettings.getPushRepository() != null) {
+                RemoteRefUpdate.Status status = remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getPushRepository());
+                if (status != RemoteRefUpdate.Status.OK && status != RemoteRefUpdate.Status.UP_TO_DATE) {
+                    result = PromotionResult.SYNCHRONIZATION_FAILED;
+                }
+            }
         } catch (IOException | GitAPIException ex) {
             throw new PromotionFailedException("Configuration promotion has failed.", ex);
         } finally {
@@ -719,14 +737,10 @@ public class VersioningManager {
             // checkout workspace branch
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
 
-            // optionally: push to remote
-            RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
-            if (remoteConfigurationManager != null && remoteSettings.getTargetRepository() != null) {
-                remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getTargetRepository());
-            }
-
             eventPublisher.publishEvent(new ConfigurationPromotionEvent(this, getLiveRevision()));
         }
+
+        return result;
     }
 
     private boolean containsSelfPromotion(ConfigurationPromotion promotion, WorkspaceDiff diff) {
@@ -775,6 +789,28 @@ public class VersioningManager {
     }
 
     /**
+     * Synchronizes the local workspace branch with the configured remote configuration source. The synchronization
+     * is only done in case it is configured and enabled. In this case, the configured remote will be fetched and its
+     * branch merged into the local workspace. Optionally, the modifications are promoted into the live branch.
+     *
+     * @return true in case the synchronization has been done.
+     */
+    public synchronized boolean pullSourceBranch() throws GitAPIException, IOException {
+        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+
+        if (remoteSettings == null || !remoteSettings.isEnabled() || remoteSettings.getPullRepository() == null) {
+            log.info("Remote configuration source will not be pulled because it is not specified or disabled.");
+            return false;
+        }
+
+        // fetch and merge the remote source into the local workspace
+        remoteConfigurationManager.fetchSourceBranch(remoteSettings.getPullRepository());
+        mergeSourceBranch();
+
+        return true;
+    }
+
+    /**
      * Merges the configured configurations remote source branch into the local workspace branch.
      */
     @VisibleForTesting
@@ -785,7 +821,7 @@ public class VersioningManager {
         if (remoteSettings == null) {
             throw new IllegalStateException("The remote configuration settings must not be null.");
         }
-        RemoteRepositorySettings sourceRepository = remoteSettings.getSourceRepository();
+        RemoteRepositorySettings sourceRepository = remoteSettings.getPullRepository();
         if (sourceRepository == null) {
             throw new IllegalStateException("Source repository settings must not be null.");
         }
