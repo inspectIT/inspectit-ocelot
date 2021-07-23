@@ -121,9 +121,15 @@ $ curl http://localhost:8090/api/v1/hook/synchronize-workspace?token=secret_toke
 
 ## Chaining Multiple Configuration Servers
 
+Using the feature that remote Git repositories can be connected to pull and push configuration files, it is now also possible to link multiple configuration servers together.
+This can be used, if several configuration servers are in use, which receive the respective configuration files of the previous server.
+This is very useful, if e.g. several system stages exist, which used separate configuration servers.
+
 ![Configuration Server Chaining using remote Git repository](assets/staging-chain.png)
 
-## Configuration Properties
+In order to do this, the configured push and pull branch can be set to the same remote Git repository respectively branch.
+
+## Available Configuration Properties
 
 :::important
 All configuration server properties mentioned below refer to being set under the **`inspectit-config-server.remote-configurations`** key!
@@ -131,23 +137,23 @@ All configuration server properties mentioned below refer to being set under the
 
 | Property | Default | Note |
 | --- | --- | --- |
-| `enabled` | `false` | The name of the agent mapping. |
-| `push-at-startup` | `true` | A list of paths. All configuration files matching this list (Directories are resolved recursively) will be merged together and returned to matching agents. |
-| `pull-at-startup` | `false` | A map of attributes. This map is used to determine whether an agent will match this agent mapping, thus, get its configuration. |
-| <nobr>`initial-configuration-sync`</nobr> | `false` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
-| `auto-promotion` | `true` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
-| `pull-repository` | `null` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
-| `push-repository` | `null` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
+| `enabled` | `false` | Whether this feature is enabled and remote Git repositories should be used for configuration management. |
+| `push-at-startup` | `true` | Whether the current live branch should be pushed during startup. |
+| `pull-at-startup` | `false` | Whether the remote source branch should be fetched and merged into the current workspace branch during startup. |
+| <nobr>`initial-configuration-sync`</nobr> | `false` | Defines whether the configuration files of the configuration source repository should be pulled on the initial configuration synchronization. The initial synchronization is not related to the `pull-at-startup` property! Read the documentation for detailed information on this property! |
+| `auto-promotion` | `true` | Whether synchronized files should be promoted automatically, after they have been fetched from the configuration remote. |
+| `pull-repository` | `null` | The remote Git repository which will be used to fetch workspace-configurations from.<br>See [Repository Configuration](#repository-configuration). |
+| `push-repository` | `null` | The remote Git repository which will be used to push live-configurations to.<br>See [Repository Configuration](#repository-configuration). |
 
 ### Repository Configuration
 
 | Property | Default | Note |
 | --- | --- | --- |
-| `remote-name` | `[pull/push]-remote-configuration` | The name of the agent mapping. |
-| `git-repository-uri` | `null` | A list of paths. All configuration files matching this list (Directories are resolved recursively) will be merged together and returned to matching agents. |
-| `branch-name` | `remote-[workspace/live]` | A map of attributes. This map is used to determine whether an agent will match this agent mapping, thus, get its configuration. |
-| `use-force-push` | `true` | A map of attributes. This map is used to determine whether an agent will match this agent mapping, thus, get its configuration. |
-| <nobr>`authentication-type`</nobr> | `NONE` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
-| `username` | `null` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
-| `password` | `null` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
-| `private-key-file` | `null` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
+| `remote-name` | `[pull/push]-remote-configuration` | The name of the remote ref in the local Git repository. |
+| `git-repository-uri` | `null` | The URI to the remote Git repository. Examples: `https://github.com/user/repo.git`, `git@github.com:user/repo.git` |
+| `branch-name` | `remote-[workspace/live]` | The branch name on the remote Git repository. |
+| `use-force-push` | `true` | Whether force push should used for pushing to this remote. This is only available for the `push-repository` property. |
+| <nobr>`authentication-type`</nobr> | `NONE` | The type of authentication to use. Possible values: `NONE`, `PASSWORD`, `PPK`. |
+| `username` | `null` | The username for accessing the remote repository. Only used in case of `PASSWORD` authentication. |
+| `password` | `null` | The password for accessing the remote repository. Only used in case of `PASSWORD` authentication. |
+| `private-key-file` | `null` | Additional private key to use for SSH authentication. The server will automatically load the known hosts and private keys from the default locations (identity, id_rsa and id_dsa) in the user’s `.ssh` directory. Only used in case of `PPK` authentication. |
