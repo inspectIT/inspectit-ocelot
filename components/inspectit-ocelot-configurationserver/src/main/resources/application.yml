@@ -72,7 +72,7 @@ inspectit-config-server:
     # Whether remote Git repositories should be used for configuration management.
     enabled: false
     # Whether the current live branch should be pushed during startup.
-    push-at-startup: true
+    push-at-startup: false
     # Whether the remote source branch should be fetched and merged into the current workspace branch during startup.
     pull-at-startup: false
     # Defines whether the configuration files of the configuration source repository should be pulled on the initial

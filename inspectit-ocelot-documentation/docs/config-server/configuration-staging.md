@@ -50,6 +50,10 @@ By default, the configuration server will not synchronize on startup. However, t
 
 #### Initial Synchronization
 
+:::warning
+Note that this setting may lead to **overwriting existing configurations**. You should only activate this option if you know what you are doing.
+:::
+
 When the configuration server performs a synchronization for the **very first time** (for example, because the server has been upgraded and this feature is now available), **no files are pulled** by default.
 Only changes that happen from now on will also be synchronized.
 This is done so that configuration files are not accidentally overwritten and lost.
@@ -64,14 +68,14 @@ This option is useful if, for example, a new instance of a configuration server 
 ### Auto-Promotion of Configuration Files
 
 When the configuration server pulls configuration files, they will be put into the `WORKSPACE` branch.
-By default, the server **automatically performs a promotion** *(3)* of the pulled files after a successful pull, so that the `WORKSPACE` and the `LIVE` branch are up-to-date.
+By default, the server **automatically performs a promotion** of the pulled files after a successful pull, so that the `WORKSPACE` and the `LIVE` branch are up-to-date.
 However, this function can be disabled with the `auto-promotion` property.
 If this option is disabled, the server will not perform an automatic promotion and the `LIVE` branch will remain untouched.
 
 ### Pushing Configuration Files
 
 The configuration server can be configured to send the `LIVE` branch respectively files that are promoted to it to a remote Git repository.
-Depending on the configuration, this can be done when the **server is started** (enabled by default) or when a **configuration file promotion** is done.
+Depending on the configuration, this can be done when the **server is started** (disabled by default) or when a **configuration file promotion** is done.
 
 In order for this to work, a remote Git repository must be configured and the appropriate branch specified.
 This can be configured using the `push-repository` property.
@@ -79,10 +83,14 @@ Please refer to the [Repository Configuration section](#repository-configuration
 
 ![Configuration Files Staging Workflow](assets/staging-push.png)
 
-If pushing of the configuration files is triggered (3), the configuration server pushes the files to the configured remote Git repository.
+If pushing of the configuration files is triggered *(2)*, the configuration server pushes the files to the configured remote Git repository.
 It is important to note that the sending is **forced by default**, but this can be disabled with the `push-repository.use-force-push` option.
 Even if this option is enabled, the server will always try an unforced push first.
 Since this can cause a commit to be lost in the remote repository due to the forced push, it is recommended that only a single configuration server can push to the target branch.
+
+:::warning
+Note that by default, pushing the branch is **forced**, which could inadvertently overwrite data.
+:::
 
 This process can also be triggered by an automatic promotion due to pulling configuration files from a remote Git repository.
 
@@ -113,10 +121,10 @@ inspectit-config-server:
 
 #### Example
 
-Assuming the configuration server is started locally on the default port `8090` and a token `secret_token` has been set up for webhook access, this can be triggered with the following CURL command.
+Assuming the configuration server is started locally on the default port `8090` and a token `very_secure_token` has been set up for webhook access, this can be triggered with the following CURL command.
 
 ```bash
-$ curl http://localhost:8090/api/v1/hook/synchronize-workspace?token=secret_token
+$ curl http://localhost:8090/api/v1/hook/synchronize-workspace?token=very_secure_token
 ```
 
 ## Chaining Multiple Configuration Servers
@@ -138,9 +146,9 @@ All configuration server properties mentioned below refer to being set under the
 | Property | Default | Note |
 | --- | --- | --- |
 | `enabled` | `false` | Whether this feature is enabled and remote Git repositories should be used for configuration management. |
-| `push-at-startup` | `true` | Whether the current live branch should be pushed during startup. |
+| `push-at-startup` | `false` | Whether the current live branch should be pushed during startup. |
 | `pull-at-startup` | `false` | Whether the remote source branch should be fetched and merged into the current workspace branch during startup. |
-| <nobr>`initial-configuration-sync`</nobr> | `false` | Defines whether the configuration files of the configuration source repository should be pulled on the initial configuration synchronization. The initial synchronization is not related to the `pull-at-startup` property! Read the documentation for detailed information on this property! |
+| <nobr>`initial-configuration-sync`</nobr> | `false` | Defines whether the configuration files of the configuration source repository should be pulled on the initial configuration synchronization. The initial synchronization is not related to the `pull-at-startup` property!<br>[Read the documentation](#initial-synchronization) for detailed information on this property! |
 | `auto-promotion` | `true` | Whether synchronized files should be promoted automatically, after they have been fetched from the configuration remote. |
 | `pull-repository` | `null` | The remote Git repository which will be used to fetch workspace-configurations from.<br>See [Repository Configuration](#repository-configuration). |
 | `push-repository` | `null` | The remote Git repository which will be used to push live-configurations to.<br>See [Repository Configuration](#repository-configuration). |

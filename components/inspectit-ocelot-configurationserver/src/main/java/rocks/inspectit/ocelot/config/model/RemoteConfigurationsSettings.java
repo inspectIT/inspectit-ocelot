@@ -26,7 +26,7 @@ public class RemoteConfigurationsSettings {
      * Whether the current live branch should be pushed during startup.
      */
     @Builder.Default
-    private boolean pushAtStartup = true;
+    private boolean pushAtStartup = false;
 
     /**
      * Whether the remote source branch should be fetched and merged into the current workspace branch during startup.
