@@ -1,14 +1,15 @@
 package rocks.inspectit.oce.eum.server.beacon;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import lombok.extern.slf4j.Slf4j;
-
-import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Container for beacons send by the EUM agent.

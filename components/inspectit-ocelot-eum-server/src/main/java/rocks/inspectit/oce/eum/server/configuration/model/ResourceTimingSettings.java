@@ -1,7 +1,6 @@
 package rocks.inspectit.oce.eum.server.configuration.model;
 
 import lombok.Data;
-import lombok.Singular;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotBlank;
