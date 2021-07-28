@@ -215,16 +215,10 @@ public class InvocationResolver {
     }
 
     private static boolean stackTraceElementsEqual(StackTraceElement first, StackTraceElement parentOfFirst, StackTraceElement second, StackTraceElement parentOfSecond) {
-        if (!Objects.equals(first.getMethodName(), second.getMethodName())) {
-            return false;
-        }
-        if (!Objects.equals(first.getClassName(), second.getClassName())) {
-            return false;
-        }
-        if (!Objects.equals(parentOfFirst.getFileName(), parentOfSecond.getFileName())) {
-            return false;
-        }
-        if (parentOfFirst.getLineNumber() != parentOfSecond.getLineNumber()) {
+        if (!Objects.equals(first.getMethodName(), second.getMethodName())
+                || !Objects.equals(first.getClassName(), second.getClassName())
+                || !Objects.equals(parentOfFirst.getFileName(), parentOfSecond.getFileName())
+                || parentOfFirst.getLineNumber() != parentOfSecond.getLineNumber()) {
             return false;
         }
         return true;

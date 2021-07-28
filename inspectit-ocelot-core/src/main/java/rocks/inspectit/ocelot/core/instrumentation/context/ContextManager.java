@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
+import static java.lang.Boolean.TRUE;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.grpc.Context;
@@ -108,7 +110,7 @@ public class ContextManager implements IContextManager {
 
     @Override
     public boolean enterCorrelation() {
-        if (correlationFlag.get()) {
+        if (TRUE.equals(correlationFlag.get())) {
             return false;
         } else {
             correlationFlag.set(true);

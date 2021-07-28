@@ -139,14 +139,11 @@ public class Invocation {
      * @return true, if this invocaiton should be hidden when exported.
      */
     public boolean isHidden() {
-        if (sampledMethod == null) {
-            return false;
-        }
-        //must have exactly one child
-        if (firstChild == null || firstChild != lastChild) {
-            return false;
-        }
-        if (firstChild.start != start || firstChild.end != end) {
+        if (sampledMethod == null
+            || firstChild == null
+            || firstChild != lastChild //must have exactly one child
+            || firstChild.start != start
+            || firstChild.end != end) {
             return false;
         }
         return true;

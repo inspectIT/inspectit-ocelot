@@ -134,15 +134,12 @@ public class PropertyPathHelper {
     public boolean isBean(Type type) {
         if (type instanceof Class<?>) {
             Class<?> clazz = (Class<?>) type;
-            if (Collection.class.isAssignableFrom(clazz)) {
+            if (Collection.class.isAssignableFrom(clazz)
+                    || Map.class.isAssignableFrom(clazz)
+                    || isTerminal(clazz)) {
                 return false;
-            } else if (Map.class.isAssignableFrom(clazz)) {
-                return false;
-            } else if (isTerminal(clazz)) {
-                return false;
-            } else {
-                return true;
             }
+            return true;
         }
         return false;
     }

@@ -35,9 +35,8 @@ public class AgentMain {
      */
     public static void main(String[] args) {
         boolean error = false;
-        if (args.length != 1 && args.length != 2) {
-            error = true;
-        } else if (!args[0].matches("\\d+")) {
+        if ((args.length != 1 && args.length != 2)
+                || !args[0].matches("\\d+")) {
             error = true;
         }
 

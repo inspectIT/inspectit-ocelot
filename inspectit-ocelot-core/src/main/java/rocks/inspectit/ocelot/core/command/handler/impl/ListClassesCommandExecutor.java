@@ -134,12 +134,10 @@ public class ListClassesCommandExecutor implements CommandExecutor {
      * @return true if it should be contained in the result
      */
     private boolean includeClass(Class<?> clazz) {
-        if (clazz.getName().contains("$$Lambda")) {
+        if (clazz.getName().contains("$$Lambda")
+                || clazz.getName().startsWith("[")) {
             return false;
-        } else if (clazz.getName().startsWith("[")) {
-            return false;
-        } else {
-            return true;
         }
+        return true;
     }
 }
