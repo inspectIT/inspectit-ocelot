@@ -444,7 +444,7 @@ public class VersioningManager {
         List<SimpleDiffEntry> simpleDiffEntries = diffEntries.stream()
                 .map(SimpleDiffEntry::of)
                 .filter(entry -> entry.getFile().startsWith(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))
-                .peek(entry -> {
+                .forEach(entry -> {
                     String shortenFile = entry.getFile()
                             .substring(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER.length());
                     entry.setFile(shortenFile);
