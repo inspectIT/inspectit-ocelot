@@ -154,7 +154,7 @@ public class CachingWorkingDirectoryAccessor extends AbstractWorkingDirectoryAcc
      */
     @Override
     protected List<FileInfo> listFiles(String path) {
-        return null;
+        return Collections.emptyList();
     }
 
     /**

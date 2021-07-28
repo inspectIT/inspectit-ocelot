@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.rest.alert.kapacitor.model.Template;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -29,6 +30,9 @@ public class KapacitorTemplateController extends KapacitorBaseController {
                 .getForEntity("/kapacitor/v1/templates", ObjectNode.class)
                 .getBody();
 
+        if (response == null) {
+            Collections.emptyList();
+        }
         return StreamSupport.stream(response.path("templates").spliterator(), false)
                 .map(Template::fromKapacitorResponse)
                 .collect(Collectors.toList());

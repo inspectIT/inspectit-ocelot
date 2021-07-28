@@ -173,7 +173,7 @@ public class InspectitEnvironment extends StandardEnvironment {
 
         loadCmdLineArgumentsPropertySource(cmdLineArgs, propsList);
         PropertySource defaultSettings;
-        Optional<ConfigSettings> appliedConfigSettings = null;
+        Optional<ConfigSettings> appliedConfigSettings = Optional.empty();
         try {
             defaultSettings = loadAgentResourceYaml(DEFAULT_CONFIG_PROPERTYSOURCE_NAME, ConfigFileLoader.getDefaultResources());
         } catch (IOException e) {
