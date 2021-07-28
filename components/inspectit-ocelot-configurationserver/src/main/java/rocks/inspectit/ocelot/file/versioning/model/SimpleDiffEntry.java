@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.file.versioning.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.eclipse.jgit.diff.DiffEntry;
+import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +35,20 @@ public class SimpleDiffEntry {
         }
 
         return simpleEntry;
+    }
+
+    /**
+     * Shortens the {@link SimpleDiffEntry} name.
+     *
+     * @param entry to use as basis
+     *
+     * @return the same {@link SimpleDiffEntry} object
+     */
+    public static SimpleDiffEntry shortenName(final SimpleDiffEntry entry) {
+        String shortenFile = entry.getFile()
+                .substring(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER.length());
+        entry.setFile(shortenFile);
+        return entry;
     }
 
     /**
