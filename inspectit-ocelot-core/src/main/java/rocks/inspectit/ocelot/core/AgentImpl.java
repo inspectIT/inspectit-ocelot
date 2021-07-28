@@ -63,7 +63,7 @@ public class AgentImpl implements IAgent {
     public void start(String cmdArgs, Instrumentation instrumentation) {
         ClassLoader classloader = AgentImpl.class.getClassLoader();
 
-        LOGGER.info("Starting inspectIT Ocelot Agent...", getVersion());
+        LOGGER.info("Starting inspectIT Ocelot Agent...");
         LOGGER.info("\tVersion: {}", getVersion());
         LOGGER.info("\tBuild Date: {}", getBuildDate());
         logOpenCensusClassLoader();

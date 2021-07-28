@@ -18,6 +18,8 @@ public class AppStartupRunner implements ApplicationRunner {
      */
     private static final String SERVER_VERSION_INFORMATION_FILE = "/eum-version.info";
 
+    private static final String UNKNOWN = "UNKNOWN";
+
     /**
      * The server's version.
      */
@@ -54,9 +56,9 @@ public class AppStartupRunner implements ApplicationRunner {
             bommerangjsVersion = reader.readLine();
         } catch (Exception e) {
             log.warn("Could not read server version information file.");
-            serverVersion = "UNKNOWN";
-            serverBuildDate = "UNKNOWN";
-            bommerangjsVersion = "UNKNOWN";
+            serverVersion = UNKNOWN;
+            serverBuildDate = UNKNOWN;
+            bommerangjsVersion = UNKNOWN;
         }
     }
 }

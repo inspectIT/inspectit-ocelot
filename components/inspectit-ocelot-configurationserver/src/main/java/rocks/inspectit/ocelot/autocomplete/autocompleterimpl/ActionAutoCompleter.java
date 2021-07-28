@@ -1,5 +1,12 @@
 package rocks.inspectit.ocelot.autocomplete.autocompleterimpl;
 
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.INSPECTIT;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.INSTRUMENTATION;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.RULES;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.ACTION_S;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.ACTION;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.STAR;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.autocomplete.AutoCompleter;
@@ -8,6 +15,7 @@ import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,18 +25,18 @@ import java.util.List;
 @Component
 public class ActionAutoCompleter implements AutoCompleter {
 
-    private static List<String> ACTION_DECLARATION_PATH = Arrays.asList("inspectit", "instrumentation", "actions");
+    private static final List<String> ACTION_DECLARATION_PATH = Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, ACTION_S));
 
-    private static List<List<String>> ACTION_USAGE_PATHS = Arrays.asList(
+    private static final List<List<String>> ACTION_USAGE_PATHS = Collections.unmodifiableList(Arrays.asList(
             ACTION_DECLARATION_PATH,
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "entry", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "exit", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preEntry", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postEntry", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "preExit", "*", "action"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "postExit", "*", "action")
-    );
+            Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, RULES, STAR, "preEntry", STAR, ACTION)),
+            Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, RULES, STAR, "entry", STAR, ACTION)),
+            Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, RULES, STAR, "exit", STAR, ACTION)),
+            Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, RULES, STAR, "preEntry", STAR, ACTION)),
+            Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, RULES, STAR, "postEntry", STAR, ACTION)),
+            Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, RULES, STAR, "preExit", STAR, ACTION)),
+            Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, RULES, STAR, "postExit", STAR, ACTION))
+            ));
 
     @Autowired
     private ConfigurationQueryHelper configurationQueryHelper;

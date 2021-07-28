@@ -198,7 +198,7 @@ public class RevisionAccess extends AbstractFileAccessor {
         Path path = Paths.get(relativePath).normalize();
 
         if (StringUtils.isBlank(relativeBasePath)) {
-            return path.toString().replaceAll("\\\\", "/");
+            return path.toString().replace("\\\\", "/");
         }
 
         Path basePath = Paths.get(relativeBasePath).normalize();
@@ -208,7 +208,7 @@ public class RevisionAccess extends AbstractFileAccessor {
             throw new IllegalArgumentException("User path escapes the base path: " + relativePath);
         }
 
-        return resolvedPath.toString().replaceAll("\\\\", "/");
+        return resolvedPath.toString().replace("\\\\", "/");
     }
 
     @Override

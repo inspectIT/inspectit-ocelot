@@ -26,6 +26,8 @@ import java.util.Optional;
 @AllArgsConstructor
 public class RemoteConfigurationManager {
 
+    private static final String REFS_HEAD = "refs/heads/";
+
     /**
      * The current server settings.
      */
@@ -141,7 +143,7 @@ public class RemoteConfigurationManager {
             log.warn("Pushing of local branch '{}' may have failed. No push-result available.", localBranch);
             return null;
         } else {
-            RemoteRefUpdate remoteUpdate = pushResult.getRemoteUpdate("refs/heads/" + targetRepository.getBranchName());
+            RemoteRefUpdate remoteUpdate = pushResult.getRemoteUpdate(REFS_HEAD + targetRepository.getBranchName());
             RemoteRefUpdate.Status status = remoteUpdate.getStatus();
 
             if (status == RemoteRefUpdate.Status.OK || status == RemoteRefUpdate.Status.UP_TO_DATE) {
@@ -168,7 +170,7 @@ public class RemoteConfigurationManager {
         Collection<Ref> refs = lsRemoteCommand.call();
 
         Optional<Ref> sourceBranch = refs.stream()
-                .filter(ref -> ref.getName().equals("refs/heads/" + sourceRepository.getBranchName()))
+                .filter(ref -> ref.getName().equals(REFS_HEAD + sourceRepository.getBranchName()))
                 .findAny();
 
         if (!sourceBranch.isPresent()) {
@@ -178,7 +180,7 @@ public class RemoteConfigurationManager {
 
         FetchCommand fetchCommand = git.fetch()
                 .setRemote(sourceRepository.getRemoteName())
-                .setRefSpecs("refs/heads/" + sourceRepository.getBranchName() + ":refs/heads/" + sourceRepository.getBranchName());
+                .setRefSpecs(REFS_HEAD + sourceRepository.getBranchName() + ":refs/heads/" + sourceRepository.getBranchName());
         authenticateCommand(fetchCommand, sourceRepository);
 
         FetchResult fetchResult = fetchCommand.call();

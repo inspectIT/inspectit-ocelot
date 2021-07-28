@@ -49,6 +49,8 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 @Component
 public class ScheduledExecutorContextPropagationSensor implements SpecialSensor {
 
+    private static final String LAMBDA = "$$Lambda$";
+
     private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = isSubTypeOf(ScheduledExecutorService.class);
 
     @Override
@@ -81,7 +83,7 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
             if (Instances.contextManager.enterCorrelation()) {
-                if (runnable.getClass().getName().contains("$$Lambda$")) {
+                if (runnable.getClass().getName().contains(LAMBDA)) {
                     // order is important because the log-correlator requires the restored context, thus, have to be
                     // called after the context wrapper (needs to be nested by it)
                     runnable = Instances.logTraceCorrelator.wrap(runnable);
@@ -110,7 +112,7 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
             if (Instances.contextManager.enterCorrelation()) {
-                if (runnable.getClass().getName().contains("$$Lambda$")) {
+                if (runnable.getClass().getName().contains(LAMBDA)) {
                     // order is important because the log-correlator requires the restored context, thus, have to be
                     // called after the context wrapper (needs to be nested by it)
                     runnable = Instances.logTraceCorrelator.wrap(runnable);
@@ -138,7 +140,7 @@ public class ScheduledExecutorContextPropagationSensor implements SpecialSensor 
         @Advice.OnMethodEnter
         public static void onMethodEnter(@Advice.Argument(value = 0, readOnly = false) Callable callable) {
             if (Instances.contextManager.enterCorrelation()) {
-                if (callable.getClass().getName().contains("$$Lambda$")) {
+                if (callable.getClass().getName().contains(LAMBDA)) {
                     // order is important because the log-correlator requires the restored context, thus, have to be
                     // called after the context wrapper (needs to be nested by it)
                     callable = Instances.logTraceCorrelator.wrap(callable);

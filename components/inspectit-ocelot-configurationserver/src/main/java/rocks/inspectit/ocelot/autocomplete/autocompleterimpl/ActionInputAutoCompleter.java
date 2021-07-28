@@ -1,5 +1,11 @@
 package rocks.inspectit.ocelot.autocomplete.autocompleterimpl;
 
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.INSPECTIT;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.INSTRUMENTATION;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.RULES;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.ACTION_S;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.STAR;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.autocomplete.AutoCompleter;
@@ -25,33 +31,34 @@ public class ActionInputAutoCompleter implements AutoCompleter {
 
     private final static String ACTION_PLACEHOLDER = "ACTION_PLACEHOLDER";
 
-    private final static List<String> ACTION_OPTIONS = Arrays.asList(
+    private final static List<String> ACTION_OPTIONS = Collections.unmodifiableList(Arrays.asList(
             "entry",
             "exit",
             "preEntry",
             "postEntry",
             "preExit",
             "postExit"
-    );
+    ));
 
-    private final static List<String> INPUT_OPTIONS = Arrays.asList("data-input", "constant-input");
+    private final static List<String> INPUT_OPTIONS = Collections.unmodifiableList(Arrays.asList("data-input", "constant-input"));
 
-    private final static List<String> ACTION_INPUT_DECLARATION_PATH = Arrays.asList(
-            "inspectit",
-            "instrumentation",
-            "actions",
+    private final static List<String> ACTION_INPUT_DECLARATION_PATH = Collections.unmodifiableList(Arrays.asList(
+            INSPECTIT,
+            INSTRUMENTATION,
+            ACTION_S,
             ACTION_PLACEHOLDER,
             "input"
-    );
+    ));
 
-    private final static List<String> ACTION_INPUT_DEFAULT_USAGE_PATH = Arrays.asList(
-            "inspectit",
-            "instrumentation",
-            "rules",
-            "*",
+    private final static List<String> ACTION_INPUT_DEFAULT_USAGE_PATH = Collections.unmodifiableList(Arrays.asList(
+            INSPECTIT,
+            INSTRUMENTATION,
+            RULES,
+            STAR,
             SECTION_PLACEHOLDER,
-            "*",
-            INPUT_PLACEHOLDER);
+            STAR,
+            INPUT_PLACEHOLDER
+    ));
 
     private static List<List<String>> actionInputUsagePaths;
 

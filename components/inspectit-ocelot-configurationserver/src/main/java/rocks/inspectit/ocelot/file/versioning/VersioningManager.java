@@ -49,6 +49,10 @@ import java.util.stream.StreamSupport;
 @Slf4j
 public class VersioningManager {
 
+    private static final String EXPECTED_PARENT_EXIST = "Expected parent to exist";
+
+    private static final String REFS_HEAD = "refs/heads/";
+
     /**
      * The tag name used for marking which commit has been used for the last remote sync.
      */
@@ -192,7 +196,7 @@ public class VersioningManager {
     private boolean isWorkspaceBranch() {
         try {
             String fullBranch = git.getRepository().getFullBranch();
-            String workspaceRef = "refs/heads/" + Branch.WORKSPACE.getBranchName();
+            String workspaceRef = REFS_HEAD + Branch.WORKSPACE.getBranchName();
             return workspaceRef.equals(fullBranch);
         } catch (IOException e) {
             throw new RuntimeException("Exception while accessing Git workspace repository.", e);
@@ -335,7 +339,7 @@ public class VersioningManager {
      */
     public Optional<RevCommit> getLatestCommit(Branch targetBranch) {
         try {
-            String ref = "refs/heads/" + targetBranch.getBranchName();
+            String ref = REFS_HEAD + targetBranch.getBranchName();
             ObjectId commitId = git.getRepository().resolve(ref);
             RevCommit commit = getCommit(commitId);
             return Optional.ofNullable(commit);
@@ -413,8 +417,8 @@ public class VersioningManager {
      */
     public WorkspaceDiff getWorkspaceDiff(boolean includeFileContent) throws IOException, GitAPIException {
         Repository repository = git.getRepository();
-        ObjectId oldCommitId = repository.exactRef("refs/heads/" + Branch.LIVE.getBranchName()).getObjectId();
-        ObjectId newCommitId = repository.exactRef("refs/heads/" + Branch.WORKSPACE.getBranchName()).getObjectId();
+        ObjectId oldCommitId = repository.exactRef(REFS_HEAD + Branch.LIVE.getBranchName()).getObjectId();
+        ObjectId newCommitId = repository.exactRef(REFS_HEAD + Branch.WORKSPACE.getBranchName()).getObjectId();
 
         return getWorkspaceDiff(includeFileContent, oldCommitId, newCommitId);
     }
@@ -514,7 +518,7 @@ public class VersioningManager {
                 break; //THe file has been added, no need to take previous changes into account
             }
             newRevision = newRevision.getPreviousRevision()
-                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
             if (newRevision.configurationFileExists(file) && newRevision.readConfigurationFile(file)
                     .get()
                     .equals(baseContent)) {
@@ -542,7 +546,7 @@ public class VersioningManager {
                 authors.add(newRevision.getAuthorName());
             }
             newRevision = newRevision.getPreviousRevision()
-                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
         }
         authors.add(newRevision.getAuthorName()); //Also add the name of the person who added the file
         return authors;
@@ -575,7 +579,7 @@ public class VersioningManager {
             }
             previous = newRevision;
             newRevision = newRevision.getPreviousRevision()
-                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
         }
         return previous.getAuthorName(); //in case an amend happened, this will be the correct user
     }
@@ -594,7 +598,7 @@ public class VersioningManager {
     private RevisionAccess findLastChangingRevision(String file, RevisionAccess baseRevision) {
         while (!baseRevision.isConfigurationFileAdded(file) && !baseRevision.isConfigurationFileModified(file)) {
             baseRevision = baseRevision.getPreviousRevision()
-                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
         }
         return baseRevision;
     }
@@ -685,7 +689,7 @@ public class VersioningManager {
             ObjectId workspaceCommitId = ObjectId.fromString(promotion.getWorkspaceCommitId());
 
             ObjectId currentLiveBranchId = git.getRepository()
-                    .exactRef("refs/heads/" + Branch.LIVE.getBranchName())
+                    .exactRef(REFS_HEAD + Branch.LIVE.getBranchName())
                     .getObjectId();
 
             if (!liveCommitId.equals(currentLiveBranchId)) {
@@ -779,7 +783,7 @@ public class VersioningManager {
      * @return returning a list of {@link WorkspaceVersion} existing in the workspace branch.
      */
     public List<WorkspaceVersion> listWorkspaceVersions() throws IOException, GitAPIException {
-        ObjectId branch = git.getRepository().resolve("refs/heads/" + Branch.WORKSPACE.getBranchName());
+        ObjectId branch = git.getRepository().resolve(REFS_HEAD + Branch.WORKSPACE.getBranchName());
 
         Iterable<RevCommit> workspaceCommits = git.log().add(branch).call();
 
@@ -834,7 +838,7 @@ public class VersioningManager {
 
         // get ref of the configuration source branch
         Repository repository = git.getRepository();
-        ObjectId diffTarget = repository.exactRef("refs/heads/" + sourceRepository.getBranchName()).getObjectId();
+        ObjectId diffTarget = repository.exactRef(REFS_HEAD + sourceRepository.getBranchName()).getObjectId();
 
         if (syncTagRef.isPresent()) {
             // merge the diff between the tag and the source branch head

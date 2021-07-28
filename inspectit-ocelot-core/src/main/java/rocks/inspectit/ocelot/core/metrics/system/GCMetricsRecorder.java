@@ -39,7 +39,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
 
     private static final String PAUSE_METRIC_NAME = "pause";
 
-    private static final String PAUSE_METRIC_FULL_NAME = METRIC_NAME_PREFIX + "pause";
+    private static final String PAUSE_METRIC_FULL_NAME = METRIC_NAME_PREFIX + PAUSE_METRIC_NAME;
 
     private static final String MEMORY_PROMOTED_METRIC_NAME = "memory.promoted";
 

@@ -32,6 +32,8 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     private static final String PROCESS_USAGE_METRIC_FULL_NAME = "process/cpu/usage";
 
+    private static final String METRIC_UNAVAILABLE = "Unable to locate '{}' on operation system bean. Metric \" {} \" is unavailable.";
+
     private static final List<String> OPERATING_SYSTEM_BEAN_CLASS_NAMES = Arrays.asList(
             "com.sun.management.OperatingSystemMXBean", // HotSpot
             "com.ibm.lang.management.OperatingSystemMXBean" // J9
@@ -54,20 +56,22 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
     @Override
     protected void init() {
         super.init();
+        final String METH_SYS_CPU_LOAD = "getSystemCpuLoad";
+        final String METH_PROC_CPU_LOAD = "getProcessCpuLoad";
         runtime = Runtime.getRuntime();
         operatingSystemBean = ManagementFactory.getOperatingSystemMXBean();
-        systemCpuUsage = findOSBeanMethod("getSystemCpuLoad");
-        processCpuUsage = findOSBeanMethod("getProcessCpuLoad");
+        systemCpuUsage = findOSBeanMethod(METH_SYS_CPU_LOAD);
+        processCpuUsage = findOSBeanMethod(METH_PROC_CPU_LOAD);
         //returns negative values if unavailable
         averageLoadAvailable = operatingSystemBean.getSystemLoadAverage() >= 0;
         if (!systemCpuUsage.isPresent()) {
-            log.info("Unable to locate 'getSystemCpuLoad' on operation system bean. Metric " + SYSTEM_USAGE_METRIC_FULL_NAME + " is unavailable.");
+            log.info(METRIC_UNAVAILABLE, METH_SYS_CPU_LOAD, SYSTEM_USAGE_METRIC_FULL_NAME);
         }
         if (!systemCpuUsage.isPresent()) {
-            log.info("Unable to locate 'getProcessCpuLoad' on operation system bean. Metric " + PROCESS_USAGE_METRIC_FULL_NAME + " is unavailable.");
+            log.info(METRIC_UNAVAILABLE, METH_PROC_CPU_LOAD, PROCESS_USAGE_METRIC_FULL_NAME);
         }
         if (!averageLoadAvailable) {
-            log.info("'getAverageLoad()' is not available on this system. Metric " + AVERAGE_LOAD_METRIC_FULL_NAME + " is unavailable.");
+            log.info(METRIC_UNAVAILABLE, "getAverageLoad", AVERAGE_LOAD_METRIC_FULL_NAME);
         }
 
     }

@@ -24,6 +24,10 @@ import java.util.stream.Stream;
 @EqualsAndHashCode(callSuper = true)
 public class ActionCallSettings extends ConditionalActionSettings {
 
+    private static final String PARAMETER_ACTION = "action";
+    private static final String PARAMETER_VAR = "var";
+    private static final String PARAMETER_TYPE = "type";
+
     /**
      * The name of the action.
      * References the defined actions in {@link InstrumentationSettings#getActions()}.
@@ -60,7 +64,7 @@ public class ActionCallSettings extends ConditionalActionSettings {
         val actionConf = container.getActions().get(action);
         if (actionConf == null) {
             vios.message("Action with name '{action}' does not exist!")
-                    .parameter("action", action)
+                    .parameter(PARAMETER_ACTION, action)
                     .buildAndPublish();
         } else {
             checkAllInputsAssigned(actionConf, vios);
@@ -78,7 +82,7 @@ public class ActionCallSettings extends ConditionalActionSettings {
                 .filter(dataInput::containsKey)
                 .forEach(varName -> vios
                         .message("Multiple assignments are given to same variable '{var}'!")
-                        .parameter("var", varName)
+                        .parameter(PARAMETER_VAR, varName)
                         .buildAndPublish());
     }
 
@@ -89,8 +93,8 @@ public class ActionCallSettings extends ConditionalActionSettings {
                 .filter(varName -> !dataInput.containsKey(varName))
                 .forEach(varName -> vios
                         .message("Parameter '{var}' of action '{action}' is not assigned!")
-                        .parameter("var", varName)
-                        .parameter("action", action)
+                        .parameter(PARAMETER_VAR, varName)
+                        .parameter(PARAMETER_ACTION, action)
                         .buildAndPublish());
     }
 
@@ -99,7 +103,7 @@ public class ActionCallSettings extends ConditionalActionSettings {
                 .filter(GenericActionSettings::isSpecialVariable)
                 .forEach(varName -> vios
                         .message("Assigned parameter '{var}' is a special variable and must not be assigned manually!")
-                        .parameter("var", varName)
+                        .parameter(PARAMETER_VAR, varName)
                         .buildAndPublish());
     }
 
@@ -108,8 +112,8 @@ public class ActionCallSettings extends ConditionalActionSettings {
                 .filter(varName -> !actionConf.getInput().containsKey(varName))
                 .forEach(varName -> vios
                         .message("Assigned parameter '{var}' does not exist as input for action '{action}'!")
-                        .parameter("var", varName)
-                        .parameter("action", action)
+                        .parameter(PARAMETER_VAR, varName)
+                        .parameter(PARAMETER_ACTION, action)
                         .buildAndPublish());
     }
 
@@ -120,9 +124,9 @@ public class ActionCallSettings extends ConditionalActionSettings {
                 if (value == null) {
                     if (AutoboxingHelper.isPrimitiveType(type)) {
                         vios.message("The input '{var}' of '{action}' cannot be 'null' as it is a primitive ('{type}')!")
-                                .parameter("var", varName)
-                                .parameter("action", action)
-                                .parameter("type", type)
+                                .parameter(PARAMETER_VAR, varName)
+                                .parameter(PARAMETER_ACTION, action)
+                                .parameter(PARAMETER_TYPE, type)
                                 .buildAndPublish();
                     }
                 } else {
@@ -138,9 +142,9 @@ public class ActionCallSettings extends ConditionalActionSettings {
             typeClass = AutoboxingHelper.getWrapperClass(type);
             if (value instanceof String && ((String) value).isEmpty()) {
                 vios.message("The input '{var}' of '{action}' cannot be empty as it is a primitive or wrapper type ('{type}')!")
-                        .parameter("var", varName)
-                        .parameter("action", action)
-                        .parameter("type", type)
+                        .parameter(PARAMETER_VAR, varName)
+                        .parameter(PARAMETER_ACTION, action)
+                        .parameter(PARAMETER_TYPE, type)
                         .buildAndPublish();
             }
         } else {
@@ -148,9 +152,9 @@ public class ActionCallSettings extends ConditionalActionSettings {
         }
         if (typeClass == null) {
             vios.message("The input '{var}' of '{action}' cannot be specified as a non-null constant value, as it has the unknown type '{type}'!")
-                    .parameter("var", varName)
-                    .parameter("action", action)
-                    .parameter("type", type)
+                    .parameter(PARAMETER_VAR, varName)
+                    .parameter(PARAMETER_ACTION, action)
+                    .parameter(PARAMETER_TYPE, type)
                     .buildAndPublish();
         } else {
             try {
@@ -158,9 +162,9 @@ public class ActionCallSettings extends ConditionalActionSettings {
             } catch (Exception e) {
                 vios.message("The given value '{value}' for input '{var}' of '{action}' cannot be converted to '{type}': {errorMsg}")
                         .parameter("value", value)
-                        .parameter("var", varName)
-                        .parameter("action", action)
-                        .parameter("type", type)
+                        .parameter(PARAMETER_VAR, varName)
+                        .parameter(PARAMETER_ACTION, action)
+                        .parameter(PARAMETER_TYPE, type)
                         .parameter("errorMsg", e.getMessage())
                         .buildAndPublish();
             }

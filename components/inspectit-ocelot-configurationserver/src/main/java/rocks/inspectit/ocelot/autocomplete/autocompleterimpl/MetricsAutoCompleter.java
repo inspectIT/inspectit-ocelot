@@ -1,5 +1,12 @@
 package rocks.inspectit.ocelot.autocomplete.autocompleterimpl;
 
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.INSPECTIT;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.INSTRUMENTATION;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.RULES;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.METRIC_S;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.METRIC;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.STAR;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.autocomplete.AutoCompleter;
@@ -24,16 +31,16 @@ public class MetricsAutoCompleter implements AutoCompleter {
     /**
      * The path under which metric names are defined.
      */
-    private final static List<String> METRICS_DECLARATION_PATH = Arrays.asList("inspectit", "metrics", "definitions");
+    private final static List<String> METRICS_DECLARATION_PATH = Collections.unmodifiableList(Arrays.asList(INSPECTIT, METRIC_S, "definitions"));
 
     /**
      * All paths under which metric names are used.
      */
-    private static final List<List<String>> RULE_SUGGESTION_PATHS = Arrays.asList(
+    private static final List<List<String>> RULE_SUGGESTION_PATHS = Collections.unmodifiableList(Arrays.asList(
             METRICS_DECLARATION_PATH,
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "metrics"),
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "metrics", "*", "metric")
-    );
+            Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, RULES, STAR, METRIC_S)),
+            Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, RULES, STAR, METRIC_S, STAR, METRIC))
+    ));
 
     /**
      * Checks if the given path leads to a metric Attribute, e.g. "inspectit.instrumentation.rules.*.metrics" and returns

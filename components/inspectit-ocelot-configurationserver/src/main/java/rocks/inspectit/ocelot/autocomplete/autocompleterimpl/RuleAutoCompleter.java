@@ -1,5 +1,10 @@
 package rocks.inspectit.ocelot.autocomplete.autocompleterimpl;
 
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.INSPECTIT;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.INSTRUMENTATION;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.RULES;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.STAR;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.autocomplete.AutoCompleter;
@@ -23,15 +28,17 @@ public class RuleAutoCompleter implements AutoCompleter {
     /**
      * The path under which rule names are defined.
      */
-    private static final List<String> RULE_DEFINITION_PATH = Arrays.asList("inspectit", "instrumentation", "rules");
+    private static final List<String> RULE_DEFINITION_PATH = Collections.unmodifiableList(Arrays.asList(
+            INSPECTIT, INSTRUMENTATION, RULES
+    ));
 
     /**
      * All paths under which rule names are used.
      */
-    private static final List<List<String>> RULE_SUGGESTION_PATHS = Arrays.asList(
+    private static final List<List<String>> RULE_SUGGESTION_PATHS = Collections.unmodifiableList(Arrays.asList(
             RULE_DEFINITION_PATH,
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "include")
-    );
+            Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, RULES, STAR, "include"))
+    ));
 
     /**
      * Checks if the given path leads to a rule Attribute, e.g. "inspectit.instrumentation.rules" and returns

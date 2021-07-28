@@ -1,5 +1,11 @@
 package rocks.inspectit.ocelot.autocomplete.autocompleterimpl;
 
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.INSPECTIT;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.INSTRUMENTATION;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.SCOPES;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.RULES;
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.STAR;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,13 +25,13 @@ import java.util.List;
 @Component
 public class ScopeAutoCompleter implements AutoCompleter {
 
-    private final static List<String> SCOPE_DECLARATION_PATH = Arrays.asList("inspectit", "instrumentation", "scopes");
+    private final static List<String> SCOPE_DECLARATION_PATH = Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, SCOPES));
 
-    private final static List<List<String>> SCOPE_USAGE_PATHS = Arrays.asList(
+    private final static List<List<String>> SCOPE_USAGE_PATHS = Collections.unmodifiableList(Arrays.asList(
             SCOPE_DECLARATION_PATH,
-            Arrays.asList("inspectit", "instrumentation", "rules", "*", "scopes"),
-            Arrays.asList("inspectit", "instrumentation", "scopes", "*", "exclude")
-    );
+            Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, RULES, STAR, SCOPES)),
+            Collections.unmodifiableList(Arrays.asList(INSPECTIT, INSTRUMENTATION, SCOPES, STAR, "exclude"))
+    ));
 
     @Autowired
     private ConfigurationQueryHelper configurationQueryHelper;
