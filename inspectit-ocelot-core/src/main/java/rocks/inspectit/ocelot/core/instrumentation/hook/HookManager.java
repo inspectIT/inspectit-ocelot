@@ -160,7 +160,7 @@ public class HookManager {
         private Optional<MethodHook> getCurrentHook(Class<?> declaringClass, String methodSignature) {
             Map<String, MethodHook> methodHooks = newHooks.get(declaringClass);
             return Optional.ofNullable(methodHooks)
-                    .map(hooks -> hooks.get(methodSignature));
+                    .map(myHooks -> myHooks.get(methodSignature));
         }
 
         private void setHook(Class<?> declaringClass, String methodSignature, MethodHook newHook) {

@@ -28,9 +28,6 @@ import java.util.stream.Collectors;
 public class ConfigurationDirectoriesPoller extends DynamicallyActivatableService {
 
     @Autowired
-    InspectitEnvironment env;
-
-    @Autowired
     ScheduledExecutorService executor;
 
     private ScheduledFuture<?> pollingTask = null;

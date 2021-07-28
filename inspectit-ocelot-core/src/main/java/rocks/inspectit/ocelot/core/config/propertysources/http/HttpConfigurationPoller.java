@@ -20,9 +20,6 @@ import java.util.concurrent.TimeUnit;
 public class HttpConfigurationPoller extends DynamicallyActivatableService implements Runnable {
 
     @Autowired
-    private InspectitEnvironment env;
-
-    @Autowired
     private ScheduledExecutorService executor;
 
     /**

@@ -82,8 +82,8 @@ public class AgentConfigurationManager {
      * @return the configuration for this agent or null if the attributes match no mapping
      */
     public AgentConfiguration getConfiguration(Map<String, String> agentAttributes) {
-        AgentConfiguration config = attributesToConfigurationCache.getUnchecked(agentAttributes);
-        return config == NO_MATCHING_MAPPING ? null : config;
+        AgentConfiguration myConfig = attributesToConfigurationCache.getUnchecked(agentAttributes);
+        return myConfig == NO_MATCHING_MAPPING ? null : myConfig;
     }
 
     /**

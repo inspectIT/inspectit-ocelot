@@ -241,10 +241,10 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * @return the remote parent SpanContext received via down-propagation, null if none was received.
      */
     public SpanContext getAndClearCurrentRemoteSpanContext() {
-        Object parent = getData(REMOTE_PARENT_SPAN_CONTEXT_KEY);
-        if (parent instanceof SpanContext) {
+        Object myParent = getData(REMOTE_PARENT_SPAN_CONTEXT_KEY);
+        if (myParent instanceof SpanContext) {
             setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, null);
-            return (SpanContext) parent;
+            return (SpanContext) myParent;
         } else {
             return null;
         }

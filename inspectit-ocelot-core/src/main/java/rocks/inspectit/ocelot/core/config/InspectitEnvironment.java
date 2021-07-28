@@ -245,8 +245,8 @@ public class InspectitEnvironment extends StandardEnvironment {
             log.error("Error loading the configuration '{}'.", prefix, e);
             return Optional.empty();
         }
-        Validator validator = getValidator();
-        val violations = validator.validate(newConfig);
+        Validator myValidator = getValidator();
+        val violations = myValidator.validate(newConfig);
         if (violations.isEmpty()) {
             return Optional.of(newConfig);
         } else {
