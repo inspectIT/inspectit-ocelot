@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class StackTraceTest {
 
     @Nested
-    static class Cleanup {
+    class Cleanup {
 
         @Test
         void verifyStackTopCleaned() {

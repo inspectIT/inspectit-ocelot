@@ -36,7 +36,7 @@ public class CachingWorkingDirectoryAccessorTest {
 
             List<FileInfo> result = directoryCache.listConfigurationFiles("");
 
-            assertThat(result.isEmpty());
+            assertThat(result.isEmpty()).isTrue();
             assertThat(directoryCache.workspaceCache.asMap().size()).isEqualTo(1);
             verify(autoCommitWorkingDirectoryProxy).listConfigurationFiles("");
             verifyNoMoreInteractions(autoCommitWorkingDirectoryProxy);
@@ -50,7 +50,7 @@ public class CachingWorkingDirectoryAccessorTest {
             directoryCache.listConfigurationFiles("");
             List<FileInfo> result = directoryCache.listConfigurationFiles("");
 
-            assertThat(result.isEmpty());
+            assertThat(result.isEmpty()).isTrue();
             assertThat(directoryCache.workspaceCache.asMap().size()).isEqualTo(1);
             verify(autoCommitWorkingDirectoryProxy).listConfigurationFiles("");
             verifyNoMoreInteractions(autoCommitWorkingDirectoryProxy);
@@ -64,7 +64,7 @@ public class CachingWorkingDirectoryAccessorTest {
 
             List<FileInfo> result = directoryCache.listConfigurationFiles("");
 
-            assertThat(result.isEmpty());
+            assertThat(result.isEmpty()).isTrue();
         }
     }
 
