@@ -222,7 +222,7 @@ public class SampledTrace {
             hiddenParents.add(parent);
             parent = parent.getParent();
         }
-        if (hiddenParents.size() > 0) {
+        if (!hiddenParents.isEmpty()) {
             Collections.reverse(hiddenParents);
             String parents = hiddenParents.stream()
                     .map(inv -> inv.getSampledMethod().toString())

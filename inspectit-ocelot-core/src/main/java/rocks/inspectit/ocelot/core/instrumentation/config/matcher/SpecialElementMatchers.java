@@ -87,7 +87,7 @@ public class SpecialElementMatchers {
     public static <T extends MethodDescription> ElementMatcher.Junction<T> argumentsAre(List<String> arguments) {
         if (arguments == null) {
             return null;
-        } else if (arguments.size() == 0) {
+        } else if (arguments.isEmpty()) {
             return takesArguments(0);
         } else {
             MatcherChainBuilder<T> builder = new MatcherChainBuilder<>();

@@ -156,7 +156,7 @@ public class AsyncClassTransformer implements ClassFileTransformer {
             }
             removeInstrumentationForBatch(batchClasses);
         }
-        if (instrumentedClassLoaders.size() > 0) {
+        if (!instrumentedClassLoaders.isEmpty()) {
             removeInstrumentationForBatch(new ArrayList<>(instrumentedClassLoaders));
         }
     }
