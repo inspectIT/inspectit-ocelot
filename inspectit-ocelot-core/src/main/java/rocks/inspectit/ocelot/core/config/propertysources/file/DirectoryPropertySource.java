@@ -83,25 +83,35 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
     }
 
     private List<ChildFilePropertySource> loadContentsToPropertySources() {
-        Stream<Path> files;
+        Stream<Path> files = null;
+        List<ChildFilePropertySource> fileSources = Collections.emptyList();
         try {
             files = Files.walk(rootDir).filter(p -> !p.toFile().isDirectory());
-        } catch (IOException e) {
-            logger.error("Unable to access config dir", e);
-            return Collections.emptyList();
-        }
         //alphabetical order, last loaded file wins
-        List<ChildFilePropertySource> fileSources = new ArrayList<>();
+        List<ChildFilePropertySource> tempList = new ArrayList<>();
         files.sorted(Comparator.comparing(Path::toString, String.CASE_INSENSITIVE_ORDER))
                 .forEachOrdered(file -> {
                     if (doesFileHaveEnding(file, PROPERTIES_ENDINGS)) {
-                        loadProperties(file, PropertyUtils::readPropertyFiles).ifPresent(fileSources::add);
+                        loadProperties(file, PropertyUtils::readPropertyFiles).ifPresent(tempList::add);
                     } else if (doesFileHaveEnding(file, YAML_ENDINGS)) {
-                        loadProperties(file, PropertyUtils::readYamlFiles).ifPresent(fileSources::add);
+                        loadProperties(file, PropertyUtils::readYamlFiles).ifPresent(tempList::add);
                     } else if (doesFileHaveEnding(file, JSON_ENDINGS)) {
-                        loadProperties(file, PropertyUtils::readJsonFile).ifPresent(fileSources::add);
+                        loadProperties(file, PropertyUtils::readJsonFile).ifPresent(tempList::add);
                     }
                 });
+        fileSources = tempList; // all or nothing
+        } catch (IOException e) {
+            logger.error("Unable to access config dir", e);
+        } finally {
+            if (files != null) {
+                try {
+                    files.close();
+                } catch (Exception e2) {
+                    logger.error("Error closing file stream", e2);
+                }
+            }
+        }
+
         return fileSources;
     }
 

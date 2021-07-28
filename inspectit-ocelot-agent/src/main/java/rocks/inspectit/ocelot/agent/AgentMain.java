@@ -17,6 +17,7 @@ import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.util.jar.JarFile;
 
+
 /**
  * Entry point of the agent.
  *
@@ -77,12 +78,21 @@ public class AgentMain {
     }
 
     private static void startAgent(String agentArgs, Instrumentation inst, boolean includeOpencensusInInspectitLoader) {
+        InspectITClassLoader icl = null;
         try {
-            InspectITClassLoader icl = initializeInspectitLoader(inst, includeOpencensusInInspectitLoader);
+            icl = initializeInspectitLoader(inst, includeOpencensusInInspectitLoader);
             AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
         } catch (Exception e) {
             System.err.println("Error starting inspectIT Agent!");
             e.printStackTrace();
+        } finally {
+            if (icl != null) {
+                try {
+                    icl.close();
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                }
+            }
         }
     }
 

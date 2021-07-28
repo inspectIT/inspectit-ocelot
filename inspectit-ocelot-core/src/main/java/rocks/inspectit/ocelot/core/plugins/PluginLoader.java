@@ -124,14 +124,15 @@ public class PluginLoader {
     private void loadPluginJar(File pluginFile, Properties defaultConfigurations) throws Exception {
         List<String> list = getAnnotatedClasses(new JarFile(pluginFile));
         if (!list.isEmpty()) {
-            PluginClassLoader pluginLoader = new PluginClassLoader(pluginFile.toURI().toURL());
-            list.forEach(cl -> {
-                try {
-                    initializePlugin(Class.forName(cl, true, pluginLoader), defaultConfigurations);
-                } catch (ClassNotFoundException e) {
-                    log.error("Unable to load class: {}!", cl);
-                }
-            });
+            try (final PluginClassLoader pluginLoader = new PluginClassLoader(pluginFile.toURI().toURL())) {
+                list.forEach(cl -> {
+                    try {
+                        initializePlugin(Class.forName(cl, true, pluginLoader), defaultConfigurations);
+                    } catch (ClassNotFoundException e) {
+                        log.error("Unable to load class: {}!", cl);
+                    }
+                });
+            }
         }
     }
 
