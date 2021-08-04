@@ -73,8 +73,8 @@ public class MethodReflectionInformation {
 
 
     public String getMethodFQN() {
-        val declaringClass = Optional.ofNullable(getDeclaringClass());
-        return declaringClass.map(Class::getName).orElse("<garbage-collected>") + "." + getName();
+        val myDeclaringClass = Optional.ofNullable(getDeclaringClass());
+        return myDeclaringClass.map(Class::getName).orElse("<garbage-collected>") + "." + getName();
     }
 
 }
