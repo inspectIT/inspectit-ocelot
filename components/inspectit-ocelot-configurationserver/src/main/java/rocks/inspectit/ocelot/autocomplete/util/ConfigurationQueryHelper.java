@@ -54,7 +54,7 @@ public class ConfigurationQueryHelper {
             return extractKeysFromMap((Map) o, mapPath);
         }
         if (o instanceof String) {
-            if (mapPath.size() == 0) {
+            if (mapPath.isEmpty()) {
                 return Collections.singletonList((String) o);
             }
             return Collections.emptyList();
@@ -89,7 +89,7 @@ public class ConfigurationQueryHelper {
      * @return a list of strings containing the attributes that could found in the mapPath.
      */
     private List<String> extractKeysFromList(List<?> list, List<String> mapPath) {
-        if (mapPath.size() == 0) {
+        if (mapPath.isEmpty()) {
             return toStringList(list);
         }
         String currentLiteral = mapPath.get(0);
@@ -128,7 +128,7 @@ public class ConfigurationQueryHelper {
      * @return a list of strings containing the attributes that could found in the mapPath.
      */
     private List<String> extractKeysFromMap(Map<?, ?> map, List<String> mapPath) {
-        if (mapPath.size() == 0) {
+        if (mapPath.isEmpty()) {
             return toStringList(((Map) map).keySet());
         }
         String currentLiteral = mapPath.get(0);

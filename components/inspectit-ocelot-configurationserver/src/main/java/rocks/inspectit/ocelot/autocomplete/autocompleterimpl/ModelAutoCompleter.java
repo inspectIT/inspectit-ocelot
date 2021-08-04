@@ -23,7 +23,7 @@ public class ModelAutoCompleter implements AutoCompleter {
     public List<String> getSuggestions(List<String> path) {
         if (CollectionUtils.isEmpty(path) || (path.size() == 1 && path.get(0).equals(""))) {
             return Collections.singletonList("inspectit");
-        } else if (path.size() >= 1 && !path.get(0).equals("inspectit")) {
+        } else if (!path.isEmpty() && !path.get(0).equals("inspectit")) {
             return Collections.emptyList();
         }
         return collectProperties(path.subList(1, path.size()));
