@@ -1,7 +1,5 @@
 package rocks.inspectit.ocelot.core.privacy.obfuscation.impl;
 
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.IObfuscatory;
 
 /**

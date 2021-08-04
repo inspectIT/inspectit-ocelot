@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.rest.configuration;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
