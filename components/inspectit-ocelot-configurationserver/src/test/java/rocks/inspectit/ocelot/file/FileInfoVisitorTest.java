@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.file;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -8,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,9 +20,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class FileInfoVisitorTest {
 
+    private List<Path> testFiles;
+
+    @BeforeEach
+    public void beforeEach() {
+        testFiles = new LinkedList<>();
+    }
+
+    @AfterEach
+    public void afterEach() throws IOException {
+        for (Path file : testFiles) {
+            Files.delete(file);
+        }
+    }
+
     private Path createTestFile(String test) throws IOException {
         Path tempFile = Files.createTempFile("ocelot", ".yml");
         Files.write(tempFile, test.getBytes(StandardCharsets.UTF_8));
+        testFiles.add(tempFile);
         return tempFile;
     }
 
@@ -35,8 +54,6 @@ public class FileInfoVisitorTest {
 
             List<FileInfo> result = visitor.getFileInfos();
 
-            Files.delete(testFile);
-
             assertThat(result).hasSize(1)
                     .extracting(FileInfo::getName, FileInfo::getType)
                     .contains(tuple(testFile.getFileName().toString(), FileInfo.Type.FILE));
@@ -51,8 +68,6 @@ public class FileInfoVisitorTest {
             visitor.visitFile(testFile, null);
 
             List<FileInfo> result = visitor.getFileInfos();
-
-            Files.delete(testFile);
 
             assertThat(result).hasSize(1)
                     .extracting(FileInfo::getName, FileInfo::getType)
@@ -69,8 +84,6 @@ public class FileInfoVisitorTest {
 
             List<FileInfo> result = visitor.getFileInfos();
 
-            Files.delete(testFile);
-
             assertThat(result).hasSize(1)
                     .extracting(FileInfo::getName, FileInfo::getType)
                     .contains(tuple(testFile.getFileName().toString(), FileInfo.Type.FILE));
@@ -85,8 +98,6 @@ public class FileInfoVisitorTest {
             visitor.visitFile(testFile, null);
 
             List<FileInfo> result = visitor.getFileInfos();
-
-            Files.delete(testFile);
 
             assertThat(result).hasSize(1)
                     .extracting(FileInfo::getName, FileInfo::getType)
