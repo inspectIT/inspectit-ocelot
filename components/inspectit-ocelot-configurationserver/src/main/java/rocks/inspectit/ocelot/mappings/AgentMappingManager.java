@@ -61,7 +61,7 @@ public class AgentMappingManager {
      *
      * @return A list of {@link AgentMapping}
      */
-    public List<AgentMapping> getAgentMappings() {
+    public synchronized List<AgentMapping> getAgentMappings() {
         return serializer.readAgentMappings(fileManager.getWorkspaceRevision());
     }
 
