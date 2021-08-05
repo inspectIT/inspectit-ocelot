@@ -5,6 +5,7 @@ import lombok.Getter;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.TraceEvent;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * After a trace is reconstructed from a lsit of {@link TraceEvent},
@@ -170,6 +171,9 @@ public class Invocation {
 
         @Override
         public Invocation next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
             Invocation next = current;
             current = current.nextSibling;
             return next;
