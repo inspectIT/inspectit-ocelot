@@ -105,9 +105,10 @@ public class FileInfoVisitor implements FileVisitor<Path> {
 
                 try {
                     Map<String, String> jsonMap = gson.fromJson(rawJson, TYPE_MAP);
-                    if (jsonMap == null) {
+                    if (jsonMap == null || !jsonMap.containsKey("type")) {
                         return fileType;
                     }
+
                     // Build a String from the type-value which corresponds to the Enum-Naming scheme.
                     String typeString = "UI_" + jsonMap.get("type").toUpperCase().replace("-", "_");
                     if (EnumUtils.isValidEnum(FileInfo.Type.class, typeString)) {
