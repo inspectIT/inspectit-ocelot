@@ -41,7 +41,9 @@ public class TraceController {
     @CrossOrigin
     @PostMapping("spans")
     public ResponseEntity<Void> spans(@RequestBody @NotBlank String data) {
-        Stopwatch stopwatch = Stopwatch.createUnstarted();
+        boolean isError = false;
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        int spanSize = -1;
 
         // if we have no exporter return ok, ignore data
         if (CollectionUtils.isEmpty(spanExporters)) {
@@ -54,30 +56,30 @@ public class TraceController {
             JsonFormat.parser().merge(data, requestBuilder);
             ExportTraceServiceRequest request = requestBuilder.build();
 
-            stopwatch.start();
-
-            // then convert using out converter
+            // then convert using our converter
             Collection<SpanData> spans = converter.convert(request);
+            spanSize = spans.size();
 
             // export data in each exporter
             spanExporters.forEach(exporter -> exporter.export(spans));
-
-            stopwatch.stop();
-            ImmutableMap<String, String> tagMap = ImmutableMap.of("trace_controller", "trace_controller", "is_error", String
-                    .valueOf(false));
-            selfMonitoring.record("trace_controller_duration", stopwatch.elapsed(TimeUnit.MILLISECONDS), tagMap);
-            selfMonitoring.record("trace_controller_span_size", spans.size(), tagMap);
 
             // return accepted
             return ResponseEntity.accepted().build();
 
             // in case of exception send proper response back
         } catch (InvalidProtocolBufferException e) {
+            isError = true;
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OpenTelemetry data corrupted.", e);
         } catch (Exception e) {
+            isError = true;
             // catch any exception in order to log
             log.warn("Exception thrown processing OpenTelemetry trace service request with post data=[{}].", data, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, null, e);
+        } finally {
+            stopwatch.stop();
+            ImmutableMap<String, String> tagMap = ImmutableMap.of("is_error", String.valueOf(isError));
+            selfMonitoring.record("trace_controller_duration", stopwatch.elapsed(TimeUnit.MILLISECONDS), tagMap);
+            selfMonitoring.record("trace_controller_span_size", spanSize, tagMap);
         }
     }
 
