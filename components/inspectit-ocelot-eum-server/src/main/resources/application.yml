@@ -283,15 +283,16 @@ inspectit-eum-server:
             aggregation: SUM
             tags:
               is_error: true
-        trace_controller_span_size:
-          measure-type: LONG
-          unit: amount
-          views:
-            # the amount of elements in a single export execution
-            '[inspectit-eum/self/trace_controller_span_size/sum]':
-              aggregation: SUM
-              tags:
-                is_error: true
+
+      trace_controller_span_size:
+        measure-type: LONG
+        unit: amount
+        views:
+          # the amount of elements in a single export execution
+          '[inspectit-eum/self/trace_controller_span_size/sum]':
+            aggregation: SUM
+            tags:
+              is_error: true
 
   # settings for exposing resource timing metrics
   resource-timing:
