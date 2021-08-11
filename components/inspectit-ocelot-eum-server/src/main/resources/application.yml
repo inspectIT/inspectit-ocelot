@@ -269,27 +269,27 @@ inspectit-eum-server:
               beacon_processor: true
               is_error: true
 
-      trace_controller_duration:
+      traces_received:
         measure-type: LONG
         unit: amount
         views:
-          # the amount of beacon processors
-          '[inspectit-eum/self/trace_controller_duration/count]':
+          # the number of received traces
+          '[inspectit-eum/self/traces_received/count]':
             aggregation: COUNT
             tags:
               is_error: true
           # the export duration
-          '[inspectit-eum/self/trace_controller_duration/sum]':
+          '[inspectit-eum/self/traces_received/duration/sum]':
             aggregation: SUM
             tags:
               is_error: true
 
-      trace_controller_span_size:
+      traces_span_size:
         measure-type: LONG
         unit: amount
         views:
           # the amount of elements in a single export execution
-          '[inspectit-eum/self/trace_controller_span_size/sum]':
+          '[inspectit-eum/self/traces_span_size/sum]':
             aggregation: SUM
             tags:
               is_error: true

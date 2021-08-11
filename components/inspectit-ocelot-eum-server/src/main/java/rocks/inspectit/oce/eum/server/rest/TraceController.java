@@ -78,8 +78,8 @@ public class TraceController {
         } finally {
             stopwatch.stop();
             ImmutableMap<String, String> tagMap = ImmutableMap.of("is_error", String.valueOf(isError));
-            selfMonitoring.record("trace_controller_duration", stopwatch.elapsed(TimeUnit.MILLISECONDS), tagMap);
-            selfMonitoring.record("trace_controller_span_size", spanSize, tagMap);
+            selfMonitoring.record("traces_received", stopwatch.elapsed(TimeUnit.MILLISECONDS), tagMap);
+            selfMonitoring.record("traces_span_size", spanSize, tagMap);
         }
     }
 
