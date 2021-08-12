@@ -269,6 +269,31 @@ inspectit-eum-server:
               beacon_processor: true
               is_error: true
 
+      traces_received:
+        measure-type: LONG
+        unit: amount
+        views:
+          # the number of received traces
+          '[inspectit-eum/self/traces_received/count]':
+            aggregation: COUNT
+            tags:
+              is_error: true
+          # the export duration
+          '[inspectit-eum/self/traces_received/duration/sum]':
+            aggregation: SUM
+            tags:
+              is_error: true
+
+      traces_span_size:
+        measure-type: LONG
+        unit: amount
+        views:
+          # the amount of elements in a single export execution
+          '[inspectit-eum/self/traces_span_size/sum]':
+            aggregation: SUM
+            tags:
+              is_error: true
+
   # settings for exposing resource timing metrics
   resource-timing:
     enabled: true

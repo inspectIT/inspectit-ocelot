@@ -634,3 +634,6 @@ Currently, the following self monitoring metrics are available.
 | `inspectit_eum_self_beacons_export_batch_sum` | The number of exported beacons per export | 
 | `inspectit_eum_self_beacons_processor_count` | Counts the number of processed beacons | 
 | `inspectit_eum_self_beacons_processor_duration_sum` | The total duration needed for beacon processing | 
+| `inspectit_eum_self_traces_received_count` | Counts the number of received traces | 
+| `inspectit_eum_self_traces_received_duration_sum` | The total duration needed for trace exports | 
+| `inspectit_eum_self_traces_span_size_sum` | The number of exported spans per trace | 
