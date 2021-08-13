@@ -6,8 +6,7 @@ import com.jcraft.jsch.Session;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.*;
@@ -133,12 +132,7 @@ public class RemoteConfigurationManager {
                 .setRemote(targetRepository.getRemoteName())
                 .setRefSpecs(refSpec)
                 .setForce(useForcePush);
-
-        if (targetRepository.getAuthenticationType() == AuthenticationType.PASSWORD) {
-            authenticatePassword(pushCommand, targetRepository);
-        } else if (targetRepository.getAuthenticationType() == AuthenticationType.PPK) {
-            authenticatePpk(pushCommand, targetRepository);
-        }
+        authenticate(pushCommand, targetRepository);
 
         Iterable<PushResult> pushResults = pushCommand.call();
         PushResult pushResult = pushResults.iterator().next();
@@ -160,28 +154,70 @@ public class RemoteConfigurationManager {
     }
 
     /**
-     * Injects a {@link CredentialsProvider} for executing a user-password authentication. This is used for HTTP(s)-remotes.
+     * Fetches the branch represented by the given {@link RemoteRepositorySettings}.
+     *
+     * @param sourceRepository the definition of the remote repository and branch
      */
-    private void authenticatePassword(PushCommand pushCommand, RemoteRepositorySettings targetRepository) {
-        String username = targetRepository.getUsername();
-        String password = targetRepository.getPassword();
+    public void fetchSourceBranch(RemoteRepositorySettings sourceRepository) throws GitAPIException {
+        log.info("Fetching branch '{}' from configuration remote '{}'.", sourceRepository.getBranchName(), sourceRepository
+                .getRemoteName());
+
+        LsRemoteCommand lsRemoteCommand = git.lsRemote().setRemote(sourceRepository.getRemoteName());
+        authenticate(lsRemoteCommand, sourceRepository);
+
+        Collection<Ref> refs = lsRemoteCommand.call();
+
+        Optional<Ref> sourceBranch = refs.stream()
+                .filter(ref -> ref.getName().equals("refs/heads/" + sourceRepository.getBranchName()))
+                .findAny();
+
+        if (!sourceBranch.isPresent()) {
+            throw new IllegalStateException(String.format("Specified configuration source branch '%s' does not exists on remote '%s'.", sourceRepository
+                    .getBranchName(), sourceRepository.getRemoteName()));
+        }
+
+        FetchCommand fetchCommand = git.fetch()
+                .setRemote(sourceRepository.getRemoteName())
+                .setRefSpecs("refs/heads/" + sourceRepository.getBranchName() + ":refs/heads/" + sourceRepository.getBranchName());
+        authenticate(fetchCommand, sourceRepository);
+
+        FetchResult fetchResult = fetchCommand.call();
+
+        if (fetchResult.getTrackingRefUpdates().isEmpty()) {
+            log.info("No change has been fetched.");
+        } else {
+            for (TrackingRefUpdate refUpdate : fetchResult.getTrackingRefUpdates()) {
+                log.info("Fetching from '{}' ended with result: {}", refUpdate.getRemoteName(), refUpdate.getResult());
+            }
+        }
+    }
+
+    /**
+     * Injects a {@link CredentialsProvider} for executing a user-password authentication. This is used for HTTP(s)-remotes.
+     *
+     * @param command          the command to authenticate
+     * @param remoteRepository the settings for the repository
+     */
+    private void authenticatePassword(TransportCommand<?, ?> command, RemoteRepositorySettings remoteRepository) {
+        String username = remoteRepository.getUsername();
+        String password = remoteRepository.getPassword();
         UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
-        pushCommand.setCredentialsProvider(credentialsProvider);
+        command.setCredentialsProvider(credentialsProvider);
     }
 
     /**
      * Injects a session factory for creating SSH sessions. This allows the usage of private keys for connection authentication.
      *
-     * @param pushCommand      the push command to authenticate
-     * @param targetRepository the settings for the repository to push to
+     * @param command          the command to authenticate
+     * @param remoteRepository the settings for the repository
      */
-    private void authenticatePpk(PushCommand pushCommand, RemoteRepositorySettings targetRepository) {
+    private void authenticatePpk(TransportCommand<?, ?> command, RemoteRepositorySettings remoteRepository) {
         SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
             @Override
             protected JSch createDefaultJSch(FS fs) throws JSchException {
                 JSch defaultJSch = super.createDefaultJSch(fs);
 
-                String privateKeyFile = targetRepository.getPrivateKeyFile();
+                String privateKeyFile = remoteRepository.getPrivateKeyFile();
                 if (StringUtils.isNotBlank(privateKeyFile)) {
                     defaultJSch.addIdentity(privateKeyFile);
                 }
@@ -194,42 +230,23 @@ public class RemoteConfigurationManager {
             }
         };
 
-        pushCommand.setTransportConfigCallback(transport -> {
+        command.setTransportConfigCallback(transport -> {
             SshTransport sshTransport = (SshTransport) transport;
             sshTransport.setSshSessionFactory(sshSessionFactory);
         });
     }
 
     /**
-     * Fetches the branch represented by the given {@link RemoteRepositorySettings}.
+     * Decides what type of authentication is performed.
      *
-     * @param sourceRepository the definition of the remote repository and branch
+     * @param command          the command to authenticate
+     * @param remoteRepository the settings for the repository
      */
-    public void fetchSourceBranch(RemoteRepositorySettings sourceRepository) throws GitAPIException {
-        log.info("Fetching branch '{}' from configuration remote '{}'.", sourceRepository.getBranchName(), sourceRepository
-                .getRemoteName());
-
-        Collection<Ref> refs = git.lsRemote().setRemote(sourceRepository.getRemoteName()).call();
-        Optional<Ref> sourceBanch = refs.stream()
-                .filter(ref -> ref.getName().equals("refs/heads/" + sourceRepository.getBranchName()))
-                .findAny();
-
-        if (!sourceBanch.isPresent()) {
-            throw new IllegalStateException(String.format("Specified configuration source branch '%s' does not exists on remote '%s'.", sourceRepository
-                    .getBranchName(), sourceRepository.getRemoteName()));
-        }
-
-        FetchResult fetchResult = git.fetch()
-                .setRemote(sourceRepository.getRemoteName())
-                .setRefSpecs("refs/heads/" + sourceRepository.getBranchName() + ":refs/heads/" + sourceRepository.getBranchName())
-                .call();
-
-        if (fetchResult.getTrackingRefUpdates().isEmpty()) {
-            log.info("No change has been fetched.");
-        } else {
-            for (TrackingRefUpdate refUpdate : fetchResult.getTrackingRefUpdates()) {
-                log.info("Fetching from '{}' ended with result: {}", refUpdate.getRemoteName(), refUpdate.getResult());
-            }
+    private void authenticate(TransportCommand<?, ?> command, RemoteRepositorySettings remoteRepository) {
+        if (remoteRepository.getAuthenticationType() == AuthenticationType.PASSWORD) {
+            authenticatePassword(command, remoteRepository);
+        } else if (remoteRepository.getAuthenticationType() == AuthenticationType.PPK) {
+            authenticatePpk(command, remoteRepository);
         }
     }
 }
