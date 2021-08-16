@@ -237,7 +237,7 @@ public class RemoteConfigurationManager {
     }
 
     /**
-     * Authenticates the given command with a password or PPK authentication, depending on the given remote repository setting.
+     * Authenticates the given command with a password or PPK authentication, depending on the given {@link RemoteRepositorySettings}.
      *
      * @param command          the command to authenticate
      * @param remoteRepository the settings for the repository
