@@ -132,7 +132,7 @@ public class RemoteConfigurationManager {
                 .setRemote(targetRepository.getRemoteName())
                 .setRefSpecs(refSpec)
                 .setForce(useForcePush);
-        authenticate(pushCommand, targetRepository);
+        authenticateCommand(pushCommand, targetRepository);
 
         Iterable<PushResult> pushResults = pushCommand.call();
         PushResult pushResult = pushResults.iterator().next();
@@ -163,7 +163,7 @@ public class RemoteConfigurationManager {
                 .getRemoteName());
 
         LsRemoteCommand lsRemoteCommand = git.lsRemote().setRemote(sourceRepository.getRemoteName());
-        authenticate(lsRemoteCommand, sourceRepository);
+        authenticateCommand(lsRemoteCommand, sourceRepository);
 
         Collection<Ref> refs = lsRemoteCommand.call();
 
@@ -179,7 +179,7 @@ public class RemoteConfigurationManager {
         FetchCommand fetchCommand = git.fetch()
                 .setRemote(sourceRepository.getRemoteName())
                 .setRefSpecs("refs/heads/" + sourceRepository.getBranchName() + ":refs/heads/" + sourceRepository.getBranchName());
-        authenticate(fetchCommand, sourceRepository);
+        authenticateCommand(fetchCommand, sourceRepository);
 
         FetchResult fetchResult = fetchCommand.call();
 
@@ -237,12 +237,12 @@ public class RemoteConfigurationManager {
     }
 
     /**
-     * Decides what type of authentication is performed.
+     * Authenticates the given command with a password or PPK authentication, depending on the given remote repository setting.
      *
      * @param command          the command to authenticate
      * @param remoteRepository the settings for the repository
      */
-    private void authenticate(TransportCommand<?, ?> command, RemoteRepositorySettings remoteRepository) {
+    private void authenticateCommand(TransportCommand<?, ?> command, RemoteRepositorySettings remoteRepository) {
         if (remoteRepository.getAuthenticationType() == AuthenticationType.PASSWORD) {
             authenticatePassword(command, remoteRepository);
         } else if (remoteRepository.getAuthenticationType() == AuthenticationType.PPK) {
