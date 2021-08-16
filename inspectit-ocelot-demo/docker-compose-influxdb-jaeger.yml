@@ -4,7 +4,7 @@ services:
   #Ocelot
   ## Serves as a collector for traces
   agent:
-    image: inspectit/inspectit-ocelot-agent:1.11.1
+    image: inspectit/inspectit-ocelot-agent:${INSPECTIT_OCELOT_VERSION}
     container_name: agent
     mem_limit: 128M
     volumes:
@@ -12,7 +12,7 @@ services:
 
   ## Fetches the configuration
   ocelot-config-server:
-    image: inspectit/inspectit-ocelot-configurationserver:1.11.1
+    image: inspectit/inspectit-ocelot-configurationserver:${INSPECTIT_OCELOT_VERSION}
     container_name: ocelot-config-server
     mem_limit: 256M
     environment:
@@ -26,14 +26,14 @@ services:
   #Jaeger
   ## Collects and visualizes traces
   jaeger:
-    image: jaegertracing/all-in-one:1.6
+    image: jaegertracing/all-in-one:1.25.0
     container_name: jaeger
     ports:
       - 16686:16686
 
   #Petclinic
   config-server:
-    image: inspectit/spring-petclinic-config-server:inspectit-oce-demo-1.0
+    image: inspectit/spring-petclinic-config-server:${INSPECTIT_PETCLINIC_VERSION}
     container_name: config-server
     environment:
       - INSPECTIT_SERVICE_NAME=config-server
@@ -52,7 +52,7 @@ services:
      - 8888:8888
 
   discovery-server:
-    image: inspectit/spring-petclinic-discovery-server:inspectit-oce-demo-1.0
+    image: inspectit/spring-petclinic-discovery-server:${INSPECTIT_PETCLINIC_VERSION}
     container_name: discovery-server
     environment:
       - INSPECTIT_SERVICE_NAME=discovery-server
@@ -72,7 +72,7 @@ services:
      - 8761:8761
 
   customers-service:
-    image: inspectit/spring-petclinic-customers-service:inspectit-oce-demo-1.0
+    image: inspectit/spring-petclinic-customers-service:${INSPECTIT_PETCLINIC_VERSION}
     container_name: customers-service
     environment:
       - INSPECTIT_SERVICE_NAME=customers-service
@@ -93,7 +93,7 @@ services:
       - 8081:8081
 
   visits-service:
-    image: inspectit/spring-petclinic-visits-service:inspectit-oce-demo-1.0
+    image: inspectit/spring-petclinic-visits-service:${INSPECTIT_PETCLINIC_VERSION}
     container_name: visits-service
     environment:
       - INSPECTIT_SERVICE_NAME=visits-service
@@ -114,7 +114,7 @@ services:
      - 8082:8082
 
   vets-service:
-    image: inspectit/spring-petclinic-vets-service:inspectit-oce-demo-1.0
+    image: inspectit/spring-petclinic-vets-service:${INSPECTIT_PETCLINIC_VERSION}
     container_name: vets-service
     environment:
       - INSPECTIT_SERVICE_NAME=vets-service
@@ -135,7 +135,7 @@ services:
      - 8083:8083
 
   api-gateway:
-    image: inspectit/spring-petclinic-api-gateway:inspectit-oce-demo-1.0
+    image: inspectit/spring-petclinic-api-gateway:${INSPECTIT_PETCLINIC_VERSION}
     container_name: api-gateway
     environment:
       - INSPECTIT_SERVICE_NAME=api-gateway
@@ -155,15 +155,6 @@ services:
     ports:
      - 8080:8080
 
-  tracing-server:
-    image: openzipkin/zipkin
-    container_name: tracing-server
-    mem_limit: 512M
-    environment:
-    - JAVA_OPTS=-XX:+UnlockExperimentalVMOptions -Djava.security.egd=file:/dev/./urandom
-    ports:
-     - 9411:9411
-
   admin-server:
     image: inspectit/spring-petclinic-admin-server:inspectit-oce-demo-1.0
     container_name: admin-server
@@ -181,7 +172,7 @@ services:
   #InfluxDB
   ## Time Series Database
   influxdb:
-    image: influxdb:1.7.1
+    image: influxdb:1.8
     container_name: influxdb
     environment:
       - INFLUXDB_HTTP_FLUX_ENABLED=true
@@ -196,11 +187,12 @@ services:
   #Grafana
   ## Dashboarding
   grafana:
-    image: inspectit/grafana:servicegraph-v4.0.2
+    image: grafana/grafana:8.0.6
     container_name: grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=demo
       - GF_PATHS_PROVISIONING=/usr/share/grafana/custom/
+      - GF_INSTALL_PLUGINS=https://github.com/NovatecConsulting/novatec-service-dependency-graph-panel/releases/download/v4.0.2/novatec-sdg-panel.zip;novatec-sdg-panel
     volumes:
       - ./grafana/provisioning/influxdb:/usr/share/grafana/custom/
     ports:
