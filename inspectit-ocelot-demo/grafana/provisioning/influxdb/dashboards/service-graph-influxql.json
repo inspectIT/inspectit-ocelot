@@ -16,26 +16,11 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 5,
-  "iteration": 1588835926422,
+  "id": 3,
+  "iteration": 1628674705667,
   "links": [],
   "panels": [
     {
-      "dataMapping": {
-        "errorRateColumn": "error-rate",
-        "errorRateOutgoingColumn": "error-rate-out",
-        "extOrigin": "origin_external",
-        "extTarget": "target_external",
-        "requestRateColumn": "in_count",
-        "requestRateExternalColumn": "request-rate-external",
-        "requestRateOutgoingColumn": "out_count",
-        "responseTimeColumn": "in_responsetime",
-        "responseTimeExternalColumn": "response-time-external",
-        "responseTimeOutgoingColumn": "out_responsetime",
-        "sourceComponentPrefix": "origin_",
-        "targetComponentPrefix": "target_",
-        "type": "protocol"
-      },
       "datasource": "LocalInflux",
       "gridPos": {
         "h": 20,
@@ -45,83 +30,122 @@
       },
       "id": 4,
       "links": [],
-      "sdgSettings": {
-        "externalIcons": [
-          {
-            "icon": "web",
-            "type": "web"
-          },
-          {
-            "icon": "message",
-            "type": "jms"
-          },
-          {
-            "icon": "database",
-            "type": "jdbc"
-          },
-          {
-            "icon": "http",
-            "type": "http"
-          }
-        ],
-        "filterEmptyConnections": true,
-        "layout": "ltrTree",
-        "maxVolume": 10000,
-        "showConnectionStats": true,
-        "sumTimings": false
-      },
-      "sdgStyle": {
-        "dangerColor": "rgb(184, 36, 36)",
-        "healthyColor": "rgb(87, 148, 242)"
-      },
-      "settings": {
-        "animate": true,
+      "options": {
+        "aggregationType": "service",
+        "baselineRtUpper": "threshold",
         "dataMapping": {
-          "errorRateColumn": "in_errors",
-          "errorRateOutgoingColumn": "out_errors",
-          "extOrigin": "origin_external",
-          "extTarget": "target_external",
+          "aggregationType": "service",
+          "baselineRtUpper": "threshold",
+          "errorRateColumn": "error_in",
+          "errorRateOutgoingColumn": "error_out",
+          "extOrigin": "",
+          "extTarget": "",
           "requestRateColumn": "in_count",
           "requestRateOutgoingColumn": "out_count",
-          "responseTimeColumn": "in_responsetime",
-          "responseTimeOutgoingColumn": "out_responsetime",
-          "sourceComponentPrefix": "origin_",
-          "targetComponentPrefix": "target_",
-          "type": "protocol"
+          "responseTimeColumn": "in_timesum",
+          "responseTimeOutgoingColumn": "out_timesum",
+          "showDummyData": false,
+          "sourceColumn": "origin_service",
+          "targetColumn": "target_service",
+          "type": ""
         },
         "drillDownLink": "",
-        "externalIcons": [
+        "dummyDataSwitch": {
+          "aggregationType": "service",
+          "baselineRtUpper": "threshold",
+          "errorRateColumn": "error-rate",
+          "errorRateOutgoingColumn": "error-rate-out",
+          "extOrigin": "external_origin",
+          "extTarget": "external_target",
+          "requestRateColumn": "request-rate",
+          "requestRateOutgoingColumn": "request-rate-out",
+          "responseTimeColumn": "response-time",
+          "responseTimeOutgoingColumn": "response-time-out",
+          "showDummyData": false,
+          "sourceColumn": "origin_service",
+          "targetColumn": "target_service",
+          "type": "type"
+        },
+        "errorRateColumn": "error-rate",
+        "errorRateOutgoingColumn": "error-rate-out",
+        "externalIconMapping": [
           {
-            "$$hashKey": "object:822",
             "filename": "web",
-            "name": "web"
+            "pattern": "web"
           },
           {
-            "$$hashKey": "object:823",
             "filename": "message",
-            "name": "jms"
+            "pattern": "jms"
           },
           {
-            "$$hashKey": "object:824",
             "filename": "database",
-            "name": "jdbc"
+            "pattern": "jdbc"
           },
           {
-            "$$hashKey": "object:825",
             "filename": "http",
-            "name": "http"
+            "pattern": "http"
           }
         ],
+        "externalIcons": [
+          {
+            "filename": "web",
+            "pattern": "web"
+          },
+          {
+            "filename": "message",
+            "pattern": "jms"
+          },
+          {
+            "filename": "database",
+            "pattern": "jdbc"
+          },
+          {
+            "filename": "http",
+            "pattern": "http"
+          }
+        ],
+        "externalOrigin": "external_origin",
+        "externalTarget": "external_target",
         "filterEmptyConnections": true,
+        "iconMapping": [
+          {
+            "filename": "java",
+            "pattern": "java"
+          },
+          {
+            "filename": "star_trek",
+            "pattern": "spok|star trek"
+          }
+        ],
+        "icons": [
+          {
+            "filename": "java",
+            "pattern": "java"
+          },
+          {
+            "filename": "star_trek",
+            "pattern": "spok|star trek"
+          }
+        ],
+        "requestRateColumn": "request-rate",
+        "requestRateOutgoingColumn": "request-rate-out",
+        "responseTime": "response-time",
+        "responseTimeOutgoingColumn": "response-time-out",
+        "showBaselines": false,
         "showConnectionStats": true,
         "showDebugInformation": false,
-        "showDummyData": false,
+        "sourceComponentPrefix": "origin_service",
         "style": {
-          "dangerColor": "rgb(184, 36, 36)",
-          "healthyColor": "rgb(87, 148, 242)"
+          "dangerColor": "rgb(196, 22, 42)",
+          "healthyColor": "rgb(87, 148, 242)",
+          "noDataColor": "rgb(123, 123, 138)"
         },
-        "sumTimings": false
+        "sumTimings": true,
+        "targetComponentPrefix": "target_service",
+        "timeFormat": "m",
+        "type": "type"
       },
+      "pluginVersion": "4.0.2",
       "targets": [
         {
           "alias": "in_count",
@@ -357,11 +381,11 @@
         }
       ],
       "title": "Service Graph",
-      "type": "novatec-service-dependency-graph-panel"
+      "type": "novatec-sdg-panel"
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 22,
+  "schemaVersion": 30,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -373,6 +397,8 @@
           "text": "service",
           "value": "service"
         },
+        "description": null,
+        "error": null,
         "hide": 2,
         "includeAll": false,
         "label": "",
@@ -392,15 +418,20 @@
       {
         "allValue": ".*",
         "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "LocalInflux",
         "definition": "SHOW TAG VALUES WITH KEY=\"service\"",
+        "description": null,
+        "error": null,
         "hide": 0,
         "includeAll": true,
-        "index": -1,
         "label": "Service",
         "multi": true,
         "name": "service",
@@ -411,7 +442,6 @@
         "skipUrlSync": false,
         "sort": 1,
         "tagValuesQuery": "",
-        "tags": [],
         "tagsQuery": "",
         "type": "query",
         "useTags": false
@@ -450,8 +480,5 @@
   "timezone": "",
   "title": "Service Graph",
   "uid": "Kx4wbZRZk",
-  "variables": {
-    "list": []
-  },
-  "version": 2
+  "version": 1
 }
