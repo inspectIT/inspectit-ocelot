@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
   #Ocelot
@@ -6,7 +6,10 @@ services:
   agent:
     image: inspectit/inspectit-ocelot-agent:${INSPECTIT_OCELOT_VERSION}
     container_name: agent
-    mem_limit: 128M
+    deploy:
+      resources:
+        limits:
+          memory: 128M
     volumes:
       - agent-vol:/agent
 
@@ -14,7 +17,10 @@ services:
   ocelot-config-server:
     image: inspectit/inspectit-ocelot-configurationserver:${INSPECTIT_OCELOT_VERSION}
     container_name: ocelot-config-server
-    mem_limit: 256M
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     environment:
       - INSPECTIT_CONFIG_SERVER_WORKING_DIRECTORY=/configuration-server
       - INSPECTIT_CONFIG_SERVER_DEFAULT_USER_PASSWORD=demo
@@ -33,7 +39,10 @@ services:
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
       - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-    mem_limit: 512M
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     depends_on:
       - agent
       - ocelot-config-server
@@ -52,12 +61,15 @@ services:
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
       - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-    mem_limit: 512M
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     depends_on:
       - agent
       - ocelot-config-server
       - config-server
-    entrypoint: ["./dockerize","-wait=tcp://config-server:8888","-timeout=60s","--","java", "-javaagent:/agent/inspectit-ocelot-agent.jar", "org.springframework.boot.loader.JarLauncher"]
+    entrypoint: ["./dockerize","-wait=tcp://config-server:8888","-timeout=120s","--","java", "-javaagent:/agent/inspectit-ocelot-agent.jar", "org.springframework.boot.loader.JarLauncher"]
     volumes:
       - agent-vol:/agent
     ports:
@@ -72,13 +84,16 @@ services:
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
       - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-    mem_limit: 512M
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     depends_on:
       - agent
       - ocelot-config-server
       - config-server
       - discovery-server
-    entrypoint: ["./dockerize","-wait=tcp://discovery-server:8761","-timeout=60s","--","java", "-javaagent:/agent/inspectit-ocelot-agent.jar", "org.springframework.boot.loader.JarLauncher"]
+    entrypoint: ["./dockerize","-wait=tcp://discovery-server:8761","-timeout=120s","--","java", "-javaagent:/agent/inspectit-ocelot-agent.jar", "org.springframework.boot.loader.JarLauncher"]
     volumes:
       - agent-vol:/agent
     ports:
@@ -93,13 +108,16 @@ services:
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
       - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-    mem_limit: 512M
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     depends_on:
       - agent
       - ocelot-config-server
       - config-server
       - discovery-server
-    entrypoint: ["./dockerize","-wait=tcp://discovery-server:8761","-timeout=60s","--","java", "-javaagent:/agent/inspectit-ocelot-agent.jar", "org.springframework.boot.loader.JarLauncher"]
+    entrypoint: ["./dockerize","-wait=tcp://discovery-server:8761","-timeout=120s","--","java", "-javaagent:/agent/inspectit-ocelot-agent.jar", "org.springframework.boot.loader.JarLauncher"]
     volumes:
       - agent-vol:/agent
     ports:
@@ -114,13 +132,16 @@ services:
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
       - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-    mem_limit: 512M
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     depends_on:
       - agent
       - ocelot-config-server
       - config-server
       - discovery-server
-    entrypoint: ["./dockerize","-wait=tcp://discovery-server:8761","-timeout=60s","--","java", "-javaagent:/agent/inspectit-ocelot-agent.jar", "org.springframework.boot.loader.JarLauncher"]
+    entrypoint: ["./dockerize","-wait=tcp://discovery-server:8761","-timeout=120s","--","java", "-javaagent:/agent/inspectit-ocelot-agent.jar", "org.springframework.boot.loader.JarLauncher"]
     volumes:
       - agent-vol:/agent
     ports:
@@ -135,13 +156,16 @@ services:
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
       - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-    mem_limit: 512M
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     depends_on:
       - agent
       - ocelot-config-server
       - config-server
       - discovery-server
-    entrypoint: ["./dockerize","-wait=tcp://discovery-server:8761","-timeout=60s","--","java", "-javaagent:/agent/inspectit-ocelot-agent.jar", "org.springframework.boot.loader.JarLauncher"]
+    entrypoint: ["./dockerize","-wait=tcp://discovery-server:8761","-timeout=120s","--","java", "-javaagent:/agent/inspectit-ocelot-agent.jar", "org.springframework.boot.loader.JarLauncher"]
     volumes:
       - agent-vol:/agent
     ports:
@@ -162,7 +186,10 @@ services:
       - INFLUXDB_HTTP_FLUX_ENABLED=true
       - INFLUXDB_HTTP_LOG_ENABLED=false
       - INFLUXDB_DATA_QUERY_LOG_ENABLED=false
-    mem_limit: 512M
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     volumes:
       - ./influx:/docker-entrypoint-initdb.d
     ports:
