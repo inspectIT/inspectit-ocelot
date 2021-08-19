@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  #Ocelot
+  #  Ocelot
   ## Serves as a collector for traces
   agent:
     image: inspectit/inspectit-ocelot-agent:${INSPECTIT_OCELOT_VERSION}
@@ -13,7 +13,7 @@ services:
     volumes:
       - agent-vol:/agent
 
-  ## Fetches the configuration
+  ##  Fetches the configuration
   ocelot-config-server:
     image: inspectit/inspectit-ocelot-configurationserver:${INSPECTIT_OCELOT_VERSION}
     container_name: ocelot-config-server
@@ -29,7 +29,7 @@ services:
     ports:
       - 8090:8090
 
-  #Petclinic
+  #  Petclinic
   config-server:
     image: inspectit/spring-petclinic-config-server:${INSPECTIT_PETCLINIC_VERSION}
     container_name: config-server
@@ -177,13 +177,15 @@ services:
       - 8080:8080
       - 9094:9094
 
+  #  Monitoring Backend
+
+  #  Load Generator
   ## Artificial load on Demo
   load:
     image: inspectit/spring-petclinic-load:1.0
     container_name: load-generator
-    hostname: load-generator
 
-  #Wavefront
+  #  Wavefront
   ## Time Series Database & Monitoring & Dashboarding
   wfproxy:
     image: wavefronthq/proxy:latest
@@ -196,7 +198,7 @@ services:
       - 2879:2878
       - 9411:9411
 
-  #Telegraf
+  #  Telegraf
   ## Monitoring Agent for Wavefront
   telegraf:
     image: telegraf:1.19.2

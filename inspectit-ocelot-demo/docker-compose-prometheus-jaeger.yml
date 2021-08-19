@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  #Ocelot
+  #  Ocelot
   ## Serves as a collector for traces
   agent:
     image: inspectit/inspectit-ocelot-agent:${INSPECTIT_OCELOT_VERSION}
@@ -13,7 +13,7 @@ services:
     volumes:
       - agent-vol:/agent
 
-  ## Fetches the configuration
+  ##  Fetches the configuration
   ocelot-config-server:
     image: inspectit/inspectit-ocelot-configurationserver:${INSPECTIT_OCELOT_VERSION}
     container_name: ocelot-config-server
@@ -29,7 +29,7 @@ services:
     ports:
       - 8090:8090
 
-  #Petclinic
+  #  Petclinic
   config-server:
     image: inspectit/spring-petclinic-config-server:${INSPECTIT_PETCLINIC_VERSION}
     container_name: config-server
@@ -171,13 +171,15 @@ services:
       - 8080:8080
       - 9094:9094
 
+  #  Monitoring Backend
+
+  #  Load Generator
   ## Artificial load on Demo
   load:
     image: inspectit/spring-petclinic-load:1.0
     container_name: load-generator
-    hostname: load-generator
 
-  #Prometheus
+  #  Prometheus
   ## Time Series Database & Monitoring
   prometheus:
     image: prom/prometheus:v2.29.1
@@ -187,7 +189,7 @@ services:
     ports:
       - 9090:9090
 
-  #Jaeger
+  #  Jaeger
   ## Collects and visualizes traces
   jaeger:
     image: jaegertracing/all-in-one:1.25.0
@@ -195,7 +197,7 @@ services:
     ports:
       - 16686:16686
 
-  #Grafana
+  #  Grafana
   ## Dashboarding
   grafana:
     image: grafana/grafana:8.0.6
