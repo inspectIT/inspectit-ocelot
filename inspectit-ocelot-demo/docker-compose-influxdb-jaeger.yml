@@ -80,6 +80,7 @@ services:
   customers-service:
     image: inspectit/spring-petclinic-customers-service:${INSPECTIT_PETCLINIC_VERSION}
     container_name: customers-service
+    hostname: customers-service
     environment:
       - INSPECTIT_SERVICE_NAME=customers-service
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
@@ -104,6 +105,7 @@ services:
   visits-service:
     image: inspectit/spring-petclinic-visits-service:${INSPECTIT_PETCLINIC_VERSION}
     container_name: visits-service
+    hostname: visits-service
     environment:
       - INSPECTIT_SERVICE_NAME=visits-service
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
@@ -128,6 +130,7 @@ services:
   vets-service:
     image: inspectit/spring-petclinic-vets-service:${INSPECTIT_PETCLINIC_VERSION}
     container_name: vets-service
+    hostname: vers-service
     environment:
       - INSPECTIT_SERVICE_NAME=vets-service
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration

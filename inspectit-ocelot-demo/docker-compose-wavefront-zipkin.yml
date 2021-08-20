@@ -33,6 +33,7 @@ services:
   config-server:
     image: inspectit/spring-petclinic-config-server:${INSPECTIT_PETCLINIC_VERSION}
     container_name: config-server
+    hostname: config-server
     environment:
       - INSPECTIT_SERVICE_NAME=config-server
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
@@ -56,6 +57,7 @@ services:
   discovery-server:
     image: inspectit/spring-petclinic-discovery-server:${INSPECTIT_PETCLINIC_VERSION}
     container_name: discovery-server
+    hostname: discovery-server
     environment:
       - INSPECTIT_SERVICE_NAME=discovery-server
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
@@ -80,6 +82,7 @@ services:
   customers-service:
     image: inspectit/spring-petclinic-customers-service:${INSPECTIT_PETCLINIC_VERSION}
     container_name: customers-service
+    hostname: customers-service
     environment:
       - INSPECTIT_SERVICE_NAME=customers-service
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
@@ -105,6 +108,7 @@ services:
   visits-service:
     image: inspectit/spring-petclinic-visits-service:${INSPECTIT_PETCLINIC_VERSION}
     container_name: visits-service
+    hostname: visits-service
     environment:
       - INSPECTIT_SERVICE_NAME=visits-service
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
@@ -130,6 +134,7 @@ services:
   vets-service:
     image: inspectit/spring-petclinic-vets-service:${INSPECTIT_PETCLINIC_VERSION}
     container_name: vets-service
+    hostname: vets-service
     environment:
       - INSPECTIT_SERVICE_NAME=vets-service
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
@@ -155,6 +160,7 @@ services:
   api-gateway:
     image: inspectit/spring-petclinic-api-gateway:${INSPECTIT_PETCLINIC_VERSION}
     container_name: api-gateway
+    hostname: api-gateway
     environment:
       - INSPECTIT_SERVICE_NAME=api-gateway
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
@@ -184,6 +190,7 @@ services:
   load:
     image: inspectit/spring-petclinic-load:1.0
     container_name: load-generator
+    hostname: load-generator
 
   #  Wavefront
   ## Time Series Database & Monitoring & Dashboarding
