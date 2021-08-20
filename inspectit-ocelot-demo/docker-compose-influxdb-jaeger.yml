@@ -130,7 +130,7 @@ services:
   vets-service:
     image: inspectit/spring-petclinic-vets-service:${INSPECTIT_PETCLINIC_VERSION}
     container_name: vets-service
-    hostname: vers-service
+    hostname: vets-service
     environment:
       - INSPECTIT_SERVICE_NAME=vets-service
       - INSPECTIT_CONFIG_HTTP_URL=http://ocelot-config-server:8090/api/v1/agent/configuration
