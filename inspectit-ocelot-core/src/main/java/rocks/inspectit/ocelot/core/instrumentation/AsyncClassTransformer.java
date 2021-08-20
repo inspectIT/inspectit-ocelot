@@ -11,6 +11,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -102,7 +103,8 @@ public class AsyncClassTransformer implements ClassFileTransformer {
         }
 
         //retransforms can be triggered by other agents where the classloader delegation has not been applied yet
-        if (!classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(loader, configResolver.getCurrentConfig()).isEmpty()) {
+        if (!classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(loader, configResolver.getCurrentConfig())
+                .isEmpty()) {
             log.debug("Skipping instrumentation of {} as bootstrap classes were not made available yet for the class", className);
             return bytecode; //leave the class unchanged for now
         } else {
@@ -204,7 +206,10 @@ public class AsyncClassTransformer implements ClassFileTransformer {
 
                 // Make a ByteBuddy builder based on the input bytecode
                 ClassFileLocator bytecodeClassFileLocator = ClassFileLocator.Simple.of(type.getName(), bytecode);
-                DynamicType.Builder<?> builder = new ByteBuddy().redefine(type, bytecodeClassFileLocator);
+                // See https://github.com/raphw/byte-buddy/issues/1095 and https://github.com/raphw/byte-buddy/issues/1040
+                // why we are using the different method graph and decorate function here
+                DynamicType.Builder<?> builder = new ByteBuddy().with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE)
+                        .decorate(type, bytecodeClassFileLocator);
 
                 // Apply the actual instrumentation onto the builders
                 for (SpecialSensor specialSensor : classConf.getActiveSpecialSensors()) {
