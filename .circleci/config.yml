@@ -104,6 +104,17 @@ jobs:
             BODY=$(cat ~/inspectit/changelog/release_body.md)
             ghr -t ${GITHUB_TOKEN} -u inspectIT -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -n "Version ${CIRCLE_TAG}" -b "${BODY}" ${VERSION} ~/inspectit/artifacts/
 
+  # Publish docker images
+  publish_docker_images:
+    docker:
+    - image: circleci/openjdk:8-jdk
+    working_directory: ~/inspectit
+    steps:
+      - attach_repo
+      - run: cd repo && ./gradlew dockerTag -PbuildVersion=${CIRCLE_TAG}
+      - run: docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+      - run: docker push
+
   publish_dashboards_to_marketplace:
     docker:
       - image: circleci/openjdk:8-jdk
@@ -229,3 +240,8 @@ workflows:
           requires:
             - build_release_artifacts
             - generate_changelog
+      - publish_docker_images:
+          filters:
+            <<: *filter_release
+          requires:
+            - publish_github_release
