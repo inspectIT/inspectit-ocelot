@@ -16,26 +16,11 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 5,
-  "iteration": 1588833980796,
+  "id": 4,
+  "iteration": 1629203833400,
   "links": [],
   "panels": [
     {
-      "dataMapping": {
-        "errorRateColumn": "error-rate",
-        "errorRateOutgoingColumn": "error-rate-out",
-        "extOrigin": "origin_external",
-        "extTarget": "target_external",
-        "requestRateColumn": "Value #A",
-        "requestRateExternalColumn": "",
-        "requestRateOutgoingColumn": "Value #B",
-        "responseTimeColumn": "Value #C",
-        "responseTimeExternalColumn": "",
-        "responseTimeOutgoingColumn": "Value #D",
-        "sourceComponentPrefix": "origin_",
-        "targetComponentPrefix": "target_",
-        "type": "protocol"
-      },
       "datasource": "LocalPrometheus",
       "gridPos": {
         "h": 19,
@@ -45,83 +30,122 @@
       },
       "id": 2,
       "links": [],
-      "sdgSettings": {
-        "externalIcons": [
-          {
-            "icon": "web",
-            "type": "web"
-          },
-          {
-            "icon": "message",
-            "type": "jms"
-          },
-          {
-            "icon": "database",
-            "type": "jdbc"
-          },
-          {
-            "icon": "http",
-            "type": "http"
-          }
-        ],
-        "filterEmptyConnections": true,
-        "layout": "ltrTree",
-        "maxVolume": "100000",
-        "showConnectionStats": true,
-        "sumTimings": true
-      },
-      "sdgStyle": {
-        "dangerColor": "rgb(184, 36, 36)",
-        "healthyColor": "rgb(87, 148, 242)"
-      },
-      "settings": {
-        "animate": true,
+      "options": {
+        "aggregationType": "service",
+        "baselineRtUpper": "threshold",
         "dataMapping": {
-          "errorRateColumn": "Value #E",
-          "errorRateOutgoingColumn": "Value #F",
-          "extOrigin": "origin_external",
-          "extTarget": "target_external",
-          "requestRateColumn": "Value #A",
-          "requestRateOutgoingColumn": "Value #B",
-          "responseTimeColumn": "Value #C",
-          "responseTimeOutgoingColumn": "Value #D",
-          "sourceComponentPrefix": "origin_",
-          "targetComponentPrefix": "target_",
-          "type": "protocol"
+          "aggregationType": "service",
+          "baselineRtUpper": "threshold",
+          "errorRateColumn": "error_in",
+          "errorRateOutgoingColumn": "error_out",
+          "extOrigin": "",
+          "extTarget": "",
+          "requestRateColumn": "in_count",
+          "requestRateOutgoingColumn": "out_count",
+          "responseTimeColumn": "in_timesum",
+          "responseTimeOutgoingColumn": "out_timesum",
+          "showDummyData": true,
+          "sourceColumn": "origin_service",
+          "targetColumn": "target_service",
+          "type": ""
         },
         "drillDownLink": "",
-        "externalIcons": [
+        "dummyDataSwitch": {
+          "aggregationType": "service",
+          "baselineRtUpper": "threshold",
+          "errorRateColumn": "error-rate",
+          "errorRateOutgoingColumn": "error-rate-out",
+          "extOrigin": "external_origin",
+          "extTarget": "external_target",
+          "requestRateColumn": "request-rate",
+          "requestRateOutgoingColumn": "request-rate-out",
+          "responseTimeColumn": "response-time",
+          "responseTimeOutgoingColumn": "response-time-out",
+          "showDummyData": false,
+          "sourceColumn": "origin_service",
+          "targetColumn": "target_service",
+          "type": "type"
+        },
+        "errorRateColumn": "error-rate",
+        "errorRateOutgoingColumn": "error-rate-out",
+        "externalIconMapping": [
           {
-            "$$hashKey": "object:1411",
             "filename": "web",
-            "name": "web"
+            "pattern": "web"
           },
           {
-            "$$hashKey": "object:1412",
             "filename": "message",
-            "name": "jms"
+            "pattern": "jms"
           },
           {
-            "$$hashKey": "object:1413",
             "filename": "database",
-            "name": "jdbc"
+            "pattern": "jdbc"
           },
           {
-            "$$hashKey": "object:1414",
             "filename": "http",
-            "name": "http"
+            "pattern": "http"
           }
         ],
+        "externalIcons": [
+          {
+            "filename": "web",
+            "pattern": "web"
+          },
+          {
+            "filename": "message",
+            "pattern": "jms"
+          },
+          {
+            "filename": "database",
+            "pattern": "jdbc"
+          },
+          {
+            "filename": "http",
+            "pattern": "http"
+          }
+        ],
+        "externalOrigin": "external_origin",
+        "externalTarget": "external_target",
         "filterEmptyConnections": true,
+        "iconMapping": [
+          {
+            "filename": "java",
+            "pattern": "java"
+          },
+          {
+            "filename": "star_trek",
+            "pattern": "spok|star trek"
+          }
+        ],
+        "icons": [
+          {
+            "filename": "java",
+            "pattern": "java"
+          },
+          {
+            "filename": "star_trek",
+            "pattern": "spok|star trek"
+          }
+        ],
+        "requestRateColumn": "request-rate",
+        "requestRateOutgoingColumn": "request-rate-out",
+        "responseTime": "response-time",
+        "responseTimeOutgoingColumn": "response-time-out",
+        "showBaselines": false,
         "showConnectionStats": true,
         "showDebugInformation": false,
-        "showDummyData": false,
+        "sourceComponentPrefix": "origin_service",
         "style": {
-          "dangerColor": "rgb(184, 36, 36)",
-          "healthyColor": "rgb(87, 148, 242)"
+          "dangerColor": "rgb(196, 22, 42)",
+          "healthyColor": "rgb(87, 148, 242)",
+          "noDataColor": "rgb(123, 123, 138)"
         },
-        "sumTimings": true
+        "sumTimings": true,
+        "targetComponentPrefix": "target_service",
+        "timeFormat": "m",
+        "type": "type"
       },
+      "pluginVersion": "4.0.2",
       "targets": [
         {
           "expr": "sum(increase(service_in_count{service=~\"$service\"}[$__range]) or increase(service_in_count{origin_service=~\"$service\"}[$__range]) >= 0) by (service,origin_service,origin_external,protocol) > 0",
@@ -177,11 +201,11 @@
         }
       ],
       "title": "Service Graph",
-      "type": "novatec-service-dependency-graph-panel"
+      "type": "novatec-sdg-panel"
     }
   ],
-  "refresh": "30s",
-  "schemaVersion": 22,
+  "refresh": "",
+  "schemaVersion": 30,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -192,6 +216,8 @@
           "text": "service",
           "value": "service"
         },
+        "description": null,
+        "error": null,
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -211,27 +237,33 @@
       {
         "allValue": ".*",
         "current": {
-          "text": "All",
+          "selected": true,
+          "text": [
+            "All"
+          ],
           "value": [
             "$__all"
           ]
         },
         "datasource": "LocalPrometheus",
         "definition": "label_values(service)",
+        "description": null,
+        "error": null,
         "hide": 0,
         "includeAll": true,
-        "index": -1,
         "label": "Services",
         "multi": true,
         "name": "service",
         "options": [],
-        "query": "label_values(service)",
+        "query": {
+          "query": "label_values(service)",
+          "refId": "LocalPrometheus-service-Variable-Query"
+        },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
-        "tags": [],
         "tagsQuery": "",
         "type": "query",
         "useTags": false
@@ -270,8 +302,5 @@
   "timezone": "",
   "title": "Service Graph",
   "uid": "FlzDnieiz",
-  "variables": {
-    "list": []
-  },
   "version": 1
 }
