@@ -16,8 +16,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 3,
-  "iteration": 1628674705667,
+  "iteration": 1629379201350,
   "links": [],
   "panels": [
     {
@@ -387,7 +386,9 @@
   "refresh": "30s",
   "schemaVersion": 30,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "agent"
+  ],
   "templating": {
     "list": [
       {
