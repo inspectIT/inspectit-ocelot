@@ -19,7 +19,7 @@ Traces are exported to Jaeger.
 [See section below for detailed information](#prometheus-and-jaeger-scenario).
 
 * File: `docker-compose-prometheus-jaeger.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=prometheus-server%2Cjaeger-collector&dashboarding=grafana&visualization=jaeger-query)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=prometheus-server,jaeger-collector&visualization=jaeger-query&dashboarding=grafana&usedges=inspectit-ocelot-agent:prometheus-server,inspectit-ocelot-agent:jaeger-collector,jaeger-query:grafana&showCommercial=false&showFormats=false)
 
 ![Demo scenario using Prometheus and Jaeger](assets/demo-landscape-prometheus-jaeger.png)
 
@@ -30,7 +30,7 @@ Traces are exported to Jaeger.
 [See section below for detailed information](#influxdb-and-jaeger-scenario).
 
 * File: `docker-compose-influxdb-jaeger.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=jaeger-collector&storage=influx-db&visualization=jaeger-query&dashboarding=grafana&alerting=grafana&showCommercial=false&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=jaeger-collector&storage=influx-db&visualization=jaeger-query&dashboarding=grafana&alerting=grafana&usedges=jaeger-query:grafana,inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:jaeger-collector&showCommercial=false&showFormats=false)
 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-jaeger.png)
 
@@ -41,7 +41,7 @@ Traces are exported to Zipkin.
 [See section below for detailed information](#influxdb-and-zipkin-scenario).
 
 * File: `docker-compose-influxdb-zipkin.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&storage=influx-db&dashboarding=grafana&alerting=grafana&collector=zipkin-server&visualization=zipkin-server)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=zipkin-server&storage=influx-db&visualization=zipkin-server&dashboarding=grafana&alerting=grafana&usedges=inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:zipkin-server&showCommercial=false&showFormats=false)
 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-zipkin.png)
 
@@ -117,7 +117,7 @@ In this scenario the following components are preconfigured and used for monitor
 
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
 - *InfluxDB:* Stores metric data exported by OpenCensus as time series.
-- *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [Flux](https://docs.influxdata.com/flux) is used to query the data from InfluxDB.
+- *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [InfluxQL](https://docs.influxdata.com/influxdb/v1.8/query_language/) is used to query the data from InfluxDB.
 - *Jaeger:* Jaeger is used to store and query all recorded traces.
 
 You can access Grafana through http://localhost:3001 and the configuration server via http://localhost:8090.
@@ -131,7 +131,7 @@ In this scenario the following components are preconfigured and used for monitor
 
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
 - *InfluxDB:* Stores metric data exported by OpenCensus as time series.
-- *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [Flux](https://docs.influxdata.com/flux) is used to query the data from InfluxDB.
+- *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [InfluxQL](https://docs.influxdata.com/influxdb/v1.8/query_language/) is used to query the data from InfluxDB.
 - *Zipkin:* Zipkin is used to store and query all recorded traces.
 
 You can access Grafana through http://localhost:3001 and the configuration server via http://localhost:8090.
@@ -176,3 +176,8 @@ The demo starts the following services, of which each is instrumented with an in
 - *visits-service*
 - *vets-service*
 - *api-gateway*
+
+
+## Load Test
+
+All demo scenarios launch with a load test written in [artillery](https://artillery.io/) that simulates user behavior. For 10 minutes approximately every 3 seconds a new virtual user is created which either looks up a random owner from the database or edits the pet type of an existing animal. Therefore no real user interaction with the PetClinic is needed.
