@@ -28,7 +28,7 @@
       },
       "id": 123126,
       "options": {
-        "content": "<div style=\"background-color: red; width:100%; vertical-align:middle;\">\r\n\t<div style=\"background-color: blue; display: inline-block; vertical-align:middle;\">\r\n    \t<img style=\"margin: 15px\" src=\"https://inspectit.rocks/static/ocelot_logo.svg\">\r\n    </div>\r\n\t<div style=\"background-color: yellow; display: inline-block;\">\r\n    \t<h1>Welcome to InspectIT Ocelot</h1>\r\n    </div>\r\n  \t<div style=\"background-color: green; display: inline-block; float:right; vertical-align:middle;\">\r\n\t\t<div style=\"display: inline-block; vertical-align:middle;\">\r\n    \t\t<h3> Need Help?</h3>\r\n    \t</div>\r\n\t\t<div style=\"background-color: orange; display: inline-block;vertical-align:middle;\">\r\n    \t\t<a href=\"https://inspectit.github.io/inspectit-ocelot/docs/doc1\">Documentation</a>\r\n    \t</div>\r\n    </div>\r\n</div>",
+        "content": "<body>\r\n<div style=\"display: flex; flex-direction: row; align-items: center; background-image: url('https://inspectit.rocks/static/hero.svg'), linear-gradient(155deg,#101010 50%,#6d3a00)\">\r\n\t<img style=\"margin: 15px;\" src=\"https://inspectit.rocks/static/ocelot_logo.svg\">\r\n    <h1 style=\"flex-grow: 1;\">Welcome to InspectIT Ocelot</h1>\r\n    <h3 style=\"margin-right: 15px; color: white\">Need Help?</h3>\r\n\t<a style=\"color:white; margin-right: 15px;\"href=\"https://inspectit.github.io/inspectit-ocelot/docs/doc1\">Documentation</a>\r\n</div>\r\n</body>\t",
         "mode": "html"
       },
       "pluginVersion": "8.0.6",
@@ -38,39 +38,15 @@
           "refId": "A"
         }
       ],
+      "transparent": true,
       "type": "text"
     },
     {
       "datasource": null,
       "gridPos": {
-        "h": 15,
+        "h": 9,
         "w": 12,
         "x": 0,
-        "y": 5
-      },
-      "id": 3,
-      "links": [],
-      "options": {
-        "folderId": 0,
-        "maxItems": 30,
-        "query": "",
-        "showHeadings": false,
-        "showRecentlyViewed": false,
-        "showSearch": true,
-        "showStarred": false,
-        "tags": []
-      },
-      "pluginVersion": "8.0.6",
-      "tags": [],
-      "title": "EUM",
-      "type": "dashlist"
-    },
-    {
-      "datasource": null,
-      "gridPos": {
-        "h": 15,
-        "w": 12,
-        "x": 12,
         "y": 5
       },
       "id": 123124,
@@ -88,6 +64,31 @@
       "pluginVersion": "8.0.6",
       "tags": [],
       "title": "Agent",
+      "type": "dashlist"
+    },
+    {
+      "datasource": null,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "id": 3,
+      "links": [],
+      "options": {
+        "folderId": 0,
+        "maxItems": 30,
+        "query": "",
+        "showHeadings": false,
+        "showRecentlyViewed": false,
+        "showSearch": true,
+        "showStarred": false,
+        "tags": []
+      },
+      "pluginVersion": "8.0.6",
+      "tags": [],
+      "title": "EUM",
       "type": "dashlist"
     }
   ],
