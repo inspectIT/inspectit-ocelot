@@ -28,7 +28,7 @@
       },
       "id": 123126,
       "options": {
-        "content": "<body>\r\n<div style=\"display: flex; flex-direction: row; align-items: center; background-image: url('https://inspectit.rocks/static/hero.svg'), linear-gradient(155deg,#101010 50%,#6d3a00)\">\r\n\t<img style=\"margin: 15px;\" src=\"https://inspectit.rocks/static/ocelot_logo.svg\">\r\n    <h1 style=\"flex-grow: 1;\">Welcome to InspectIT Ocelot</h1>\r\n    <h3 style=\"margin-right: 15px; color: white\">Need Help?</h3>\r\n\t<a style=\"color:white; margin-right: 15px;\"href=\"https://inspectit.github.io/inspectit-ocelot/docs/doc1\">Documentation</a>\r\n</div>\r\n</body>\t",
+        "content": "<body>\r\n\t<div style=\"display: flex; flex-direction: row; align-items: center; background-image: url('https://inspectit.rocks/static/hero.svg'), linear-gradient(155deg,#101010 50%,#6d3a00)\">\r\n\t\t<img style=\"margin: 15px;\" src=\"https://inspectit.rocks/static/ocelot_logo.svg\">\r\n\t\t<h1 style=\"flex-grow: 1;\">Welcome to InspectIT Ocelot</h1>\r\n\t\t<h3 style=\"margin-right: 15px; color: white\">Need Help?</h3>\r\n\t\t<a style=\"color:white; margin-right: 15px;\"href=\"https://inspectit.github.io/inspectit-ocelot/docs/doc1\">Ocelot Documentation</a>\r\n\t\t<a style=\"color: white; margin-right: 15px;\"href=\"https://openapm.io/\">Open APM Landscape</a>\r\n\t\t<a style=\"color: white; margin-right: 15px;\"href=\"mailto:Alexander.Haferland@novatec-gmbh.de\" target=\"_blank\">Contact us</a>\r\n\t</div>\r\n</body>\t",
         "mode": "html"
       },
       "pluginVersion": "8.0.6",
