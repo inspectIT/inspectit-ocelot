@@ -62,8 +62,9 @@ The demo consists of two different scenarios, whereby we would like to emphasize
 
 All you have to do is to download the [demo archive](https://github.com/inspectIT/inspectit-ocelot/releases/latest) and start it with docker-compose:
 
-* `$ docker-compose -f docker-compose-influxdb-zipkin.yml up`
 * `$ docker-compose -f docker-compose-prometheus-jaeger.yml up`
+* `$ docker-compose -f docker-compose-influxdb-jaeger.yml up`
+* `$ docker-compose -f docker-compose-influxdb-zipkin.yml up`
 
 Check out the [documentation's demo section](https://inspectit.github.io/inspectit-ocelot/docs/getting-started/docker-examples) for detailed information on each scenario.
 

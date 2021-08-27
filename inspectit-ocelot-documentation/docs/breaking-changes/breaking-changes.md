@@ -2,6 +2,20 @@
 id: Breaking Changes
 title: Breaking Changes
 ---
+## Breaking changes in 1.12.0
+
+There are no breaking changes for version 1.12.0.
+
+
+## Breaking changes in 1.11.1
+
+There are no breaking changes for version 1.11.1.
+
+
+## Breaking changes in 1.11.0
+
+There are no breaking changes for version 1.11.0.
+
 
 ## Breaking changes in 1.10.1
 
