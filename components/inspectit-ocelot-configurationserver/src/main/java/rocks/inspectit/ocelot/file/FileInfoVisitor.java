@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
@@ -46,7 +47,11 @@ public class FileInfoVisitor implements FileVisitor<Path> {
     private final Gson gson = new Gson();
 
     @Override
-    public FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attrs) {
+    public FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attrs) throws IOException {
+        if (Files.isHidden(directory)) {
+            return FileVisitResult.SKIP_SUBTREE;
+        }
+
         FileInfo currentDirectory = FileInfo.builder()
                 .name(directory.getFileName().toString())
                 .type(FileInfo.Type.DIRECTORY)
@@ -67,6 +72,19 @@ public class FileInfoVisitor implements FileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        if (Files.isSymbolicLink(file)) {
+            if (Files.exists(file) && !Files.isDirectory(file)) { // .exists() follows sym link
+                FileInfo fileInfo = FileInfo.builder()
+                        .name(file.getFileName().toString())
+                        .type(resolveFileType(file.toRealPath().toFile()))
+                        .build();
+
+                directoryStack.peek().addChild(fileInfo);
+            }
+
+            return FileVisitResult.CONTINUE;
+        }
+
         // adding each file to the current directory
         FileInfo fileInfo = FileInfo.builder()
                 .name(file.getFileName().toString())
