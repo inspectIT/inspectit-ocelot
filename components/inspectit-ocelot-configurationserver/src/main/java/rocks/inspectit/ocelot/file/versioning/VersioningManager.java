@@ -840,11 +840,13 @@ public class VersioningManager {
         if (syncTagRef.isPresent()) {
             // merge the diff between the tag and the source branch head
             ObjectId diffBase = getCommit(syncTagRef.get().getObjectId());
+            rebaseLiveBranch(diffTarget, false);
             mergeBranch(diffBase, diffTarget, true, "Merging remote configuration source branch");
         } else if (remoteSettings.isInitialConfigurationSync()) {
             // in case this options is set, we merge the diff between the workspace and the source branch head.
             // we don't remove files in this case!
             log.info("Synchronization marker has not been found. Executing an initial configuration synchronization.");
+            rebaseLiveBranch(diffTarget, true);
             Optional<RevCommit> workspaceCommit = getLatestCommit(Branch.WORKSPACE);
             if (workspaceCommit.isPresent()) {
                 mergeBranch(workspaceCommit.get(), diffTarget, false, "Initial configuration synchronization");
@@ -861,6 +863,43 @@ public class VersioningManager {
         if (commit != null && (!syncTagRef.isPresent() || syncTagRef.get().getObjectId() != commit)) {
             updateSynchronizationTag(commit);
         }
+    }
+
+    /**
+     * Rebases the LIVE branch on a {@code targetObject}.
+     *
+     * @param targetObject the object (commit, ref, ...) which is used as target (the desired state) for the rebase
+     * @param useTheirs    whether the rebase should use the state of {@code targetObject} in case of merge conflicts
+     */
+    private void rebaseLiveBranch(ObjectId targetObject, boolean useTheirs) throws GitAPIException {
+        if (settings.getRemoteConfigurations().isAutoPromotion()) {
+            try {
+                git.checkout().setName(Branch.LIVE.getBranchName()).call();
+                RebaseCommand rebaseCommand = git.rebase().setUpstream(targetObject).setPreserveMerges(false);
+
+                if (useTheirs) {
+                    rebaseCommand.setStrategy(MergeStrategy.THEIRS);
+                }
+
+                RebaseResult rebaseResult = rebaseCommand.call();
+
+                if (!rebaseResult.getStatus().isSuccessful()) {
+                    log.error("Rebase on source branch failed with status {}! Aborting rebase. Failures are: {}", rebaseResult
+                            .getStatus(), formatFailingPaths(rebaseResult));
+                    git.rebase().setOperation(RebaseCommand.Operation.ABORT).call();
+                }
+            } finally {
+                git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
+            }
+        }
+    }
+
+    private String formatFailingPaths(RebaseResult result) {
+        return result.getFailingPaths()
+                .entrySet()
+                .stream()
+                .map(e -> e.getKey() + ": " + e.getValue())
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 
     /**
@@ -899,24 +938,6 @@ public class VersioningManager {
 
         // merge target commit into current branch
         mergeFiles(targetObject, checkoutFiles, fileToRemove, commitMessage, GIT_SYSTEM_AUTHOR);
-
-        // promote if enabled
-        if (settings.getRemoteConfigurations().isAutoPromotion()) {
-            log.info("Auto-promotion of synchronized configuration files.");
-            List<String> diffFiles = diff.getEntries()
-                    .stream()
-                    .map(SimpleDiffEntry::getFile)
-                    .collect(Collectors.toList());
-
-            ConfigurationPromotion promotion = ConfigurationPromotion.builder()
-                    .commitMessage("Auto-promotion due to workspace remote synchronization.")
-                    .workspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName())
-                    .liveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName())
-                    .files(diffFiles)
-                    .build();
-
-            promoteConfiguration(promotion, true, GIT_SYSTEM_AUTHOR);
-        }
     }
 
     /**
