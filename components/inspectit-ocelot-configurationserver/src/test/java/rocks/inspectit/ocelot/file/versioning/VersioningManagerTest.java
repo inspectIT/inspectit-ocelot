@@ -1180,8 +1180,9 @@ class VersioningManagerTest extends FileTestBase {
             assertThat(branchCommitId).isEqualTo(tagCommitIdAfter);  // the tag was set to the latest commit on the "branch" remote
             assertThat(commitAfter.getParents()).extracting(RevObject::getId) // the latest workspace commit has two parent commits: the old one and the latest commit on "branch" (=tagged commit)
                     .containsExactlyInAnyOrder(commitIdBefore, tagCommitIdAfter);
-            assertThat(liveCommit.getParents()).extracting(RevObject::getId) // the latest live commit has two parent commits: the old live one and the latest workspace one
-                    .containsExactlyInAnyOrder(liveIdBefore, commitAfter.getId());
+            assertThat(liveCommit.getId()).isEqualTo(branchCommitId); // the live branch has been rebased on the source branch, i.e., its latest commit is the same as source
+            assertThat(liveCommit.getParents()).extracting(RevObject::getId) // also the parent of the latest live commit should equal source (which is the previous tag)
+                    .containsExactlyInAnyOrder(tagCommitIdBefore);
         }
     }
 }
