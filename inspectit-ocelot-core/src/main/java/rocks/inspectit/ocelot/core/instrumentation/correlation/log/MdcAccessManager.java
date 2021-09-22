@@ -191,7 +191,7 @@ public class MdcAccessManager implements IClassDiscoveryListener {
      */
     private <T> Class<? extends T> injectClass(String structureIdentifier, Class<?> neighbour, ClassInjector.ByteCodeProvider byteCodeProvider) throws Exception {
         InjectedClass<? extends T> injectedClass = (InjectedClass<? extends T>) classInjector.inject(structureIdentifier, neighbour, byteCodeProvider, false);
-        return injectedClass.getInjectedClassObject().get();
+        return injectedClass.getInjectedClassObject().orElse(null);
     }
 
     @EventListener(InspectitConfigChangedEvent.class)

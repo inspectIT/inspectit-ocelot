@@ -10,6 +10,7 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.rest.alert.kapacitor.model.Task;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -27,6 +28,9 @@ public class KapacitorTaskController extends KapacitorBaseController {
     public List<Task> getAllTasks() {
         ObjectNode response = kapacitor().getForEntity("/kapacitor/v1/tasks", ObjectNode.class).getBody();
 
+        if (response == null) {
+            return Collections.emptyList();
+        }
         return StreamSupport.stream(response.path("tasks").spliterator(), false)
                 .map(Task::fromKapacitorResponse)
                 .filter(task -> task.getTemplate() != null)
