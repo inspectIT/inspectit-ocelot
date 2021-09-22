@@ -149,10 +149,8 @@ public class PluginLoader {
 
         while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
-            if (isClass(entry)) {
-                if (isOcelotPlugin(pluginJar.getInputStream(entry))) {
-                    list.add(resolveClassName(entry));
-                }
+            if (isClass(entry) && isOcelotPlugin(pluginJar.getInputStream(entry))) {
+                list.add(resolveClassName(entry));
             }
         }
         return list;

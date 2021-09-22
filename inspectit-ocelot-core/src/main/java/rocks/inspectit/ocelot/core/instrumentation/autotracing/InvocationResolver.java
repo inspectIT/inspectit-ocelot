@@ -58,8 +58,7 @@ public class InvocationResolver {
                 MethodExitEvent exitEvent = (MethodExitEvent) events.get(offset + duration);
                 //only consider events between start and end of the method
                 List<TraceEvent> methodEvents = events.subList(offset, offset + duration + 1);
-                Optional<TraceEvent> firstWithStackTrace = methodEvents
-                        .stream()
+                Optional<TraceEvent> firstWithStackTrace = methodEvents.stream()
                         .filter(event -> event.getStackTraceElementAt(startDepth) != null) //find an element which has a stack trace
                         .findFirst();
                 if (firstWithStackTrace.isPresent()) {
@@ -95,8 +94,8 @@ public class InvocationResolver {
     }
 
     private static boolean isSameMethod(StackTraceElement stackTraceElement, MethodEntryEvent entryEvent) {
-        return entryEvent.getClassName().equals(stackTraceElement.getClassName())
-                && entryEvent.getMethodName().equals(stackTraceElement.getMethodName());
+        return entryEvent.getClassName().equals(stackTraceElement.getClassName()) && entryEvent.getMethodName()
+                .equals(stackTraceElement.getMethodName());
     }
 
     /**
@@ -215,19 +214,12 @@ public class InvocationResolver {
     }
 
     private static boolean stackTraceElementsEqual(StackTraceElement first, StackTraceElement parentOfFirst, StackTraceElement second, StackTraceElement parentOfSecond) {
-        if (!Objects.equals(first.getMethodName(), second.getMethodName())) {
-            return false;
-        }
-        if (!Objects.equals(first.getClassName(), second.getClassName())) {
-            return false;
-        }
-        if (!Objects.equals(parentOfFirst.getFileName(), parentOfSecond.getFileName())) {
-            return false;
-        }
-        if (parentOfFirst.getLineNumber() != parentOfSecond.getLineNumber()) {
-            return false;
-        }
-        return true;
+        // @formatter:off
+        return Objects.equals(first.getMethodName(), second.getMethodName())
+                && Objects.equals(first.getClassName(), second.getClassName())
+                && Objects.equals(parentOfFirst.getFileName(), parentOfSecond.getFileName())
+                && parentOfFirst.getLineNumber() == parentOfSecond.getLineNumber();
+        // @formatter:on
     }
 
     private static int findMethodExitEvent(List<TraceEvent> events, int methodEntryIndex) {

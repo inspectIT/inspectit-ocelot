@@ -133,24 +133,17 @@ public class Invocation {
     /**
      * To preserve clarity of exported traces, we "hide" certain invocations, meaning that they will not be exported.
      * We hide invocation which fullfill all of the following conditions:
-     * - the invocation was generated based on stack trace samples (and NOT via instrumentation!)
-     * - the invocation has exactly one child-invocation
-     * - the start and end of the invocation matches it's only child
+     * - the invocation was generated based on stack trace samples (and NOT via instrumentation!) (A)
+     * - the invocation has exactly one child-invocation (B)
+     * - the start and end of the invocation matches it's only child (C)
      *
      * @return true, if this invocaiton should be hidden when exported.
      */
     public boolean isHidden() {
-        if (sampledMethod == null) {
-            return false;
-        }
-        //must have exactly one child
-        if (firstChild == null || firstChild != lastChild) {
-            return false;
-        }
-        if (firstChild.start != start || firstChild.end != end) {
-            return false;
-        }
-        return true;
+        return !(sampledMethod == null // A
+                || firstChild == null || firstChild != lastChild // B
+                || firstChild.start != start || firstChild.end != end //C
+        );
     }
 
     /**

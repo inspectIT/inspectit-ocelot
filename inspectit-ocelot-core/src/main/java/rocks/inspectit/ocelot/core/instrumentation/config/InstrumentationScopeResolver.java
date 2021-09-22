@@ -1,5 +1,8 @@
 package rocks.inspectit.ocelot.core.instrumentation.config;
 
+import static java.lang.Boolean.TRUE;
+import static java.lang.Boolean.FALSE;
+
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -79,7 +82,7 @@ public class InstrumentationScopeResolver {
 
         // resolving of the specified excluded scopes
         for(Map.Entry<String, Boolean> entry:scopeSettings.getExclude().entrySet()){
-            if(entry.getValue()) {
+            if(TRUE.equals(entry.getValue())) {
                 String excludeScopeName = entry.getKey();
                 resolveScope(excludeScopeName, settings, cache);
 
@@ -176,7 +179,7 @@ public class InstrumentationScopeResolver {
         innerBuilder.and(SpecialElementMatchers.argumentsAre(matcherSettings.getArguments()));
         innerBuilder.and(SpecialElementMatchers.annotatedWith(matcherSettings.getAnnotations()));
 
-        if (!matcherSettings.getIsConstructor()) {
+        if (FALSE.equals(matcherSettings.getIsConstructor())) {
             innerBuilder.and(SpecialElementMatchers.nameIs(matcherSettings));
 
             if (matcherSettings.getIsSynchronized() != null) {
