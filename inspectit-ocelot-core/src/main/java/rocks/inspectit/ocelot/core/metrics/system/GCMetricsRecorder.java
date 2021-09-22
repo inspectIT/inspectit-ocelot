@@ -201,10 +201,8 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
             long youngAfter = after.get(youngGenPoolName).getUsed();
             long delta = youngBefore - youngGenSizeAfter;
             youngGenSizeAfter = youngAfter;
-            if (delta > 0L
-                    && config.getEnabled().getOrDefault(MEMORY_ALLOCATED_METRIC_NAME, false)) {
-                    recordAllocatedBytes(delta);
-                }
+            if (delta > 0L && config.getEnabled().getOrDefault(MEMORY_ALLOCATED_METRIC_NAME, false)) {
+                recordAllocatedBytes(delta);
             }
         }
     }

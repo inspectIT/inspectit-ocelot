@@ -34,11 +34,7 @@ public class AgentMain {
      * @param args the pid of a JVM
      */
     public static void main(String[] args) {
-        boolean error = false;
-        if ((args.length != 1 && args.length != 2)
-                || !args[0].matches("\\d+")) {
-            error = true;
-        }
+        boolean error = (args.length != 1 && args.length != 2) || !args[0].matches("\\d+");
 
         if (error) {
             System.err.println("Please specify the PID of the JVM you want the agent attach to.\nNote: you can pass properties to the agent represented as a JSON string!\n\nUsage: <PID> [AGENT_PROPERTIES]");
