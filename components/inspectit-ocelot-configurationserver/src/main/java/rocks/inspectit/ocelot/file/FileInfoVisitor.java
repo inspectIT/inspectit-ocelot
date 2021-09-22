@@ -71,24 +71,25 @@ public class FileInfoVisitor implements FileVisitor<Path> {
     }
 
     @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        if (Files.isSymbolicLink(file)) {
-            if (Files.exists(file) && !Files.isDirectory(file)) { // .exists() follows sym link
-                FileInfo fileInfo = FileInfo.builder()
-                        .name(file.getFileName().toString())
-                        .type(resolveFileType(file.toRealPath().toFile()))
-                        .build();
+    public FileVisitResult visitFile(Path filePath, BasicFileAttributes attrs) throws IOException {
+        boolean isSymLink = Files.isSymbolicLink(filePath);
 
-                directoryStack.peek().addChild(fileInfo);
-            }
-
+        // skip broken sym links or linked directories
+        if (isSymLink && (!Files.exists(filePath) || Files.isDirectory(filePath))) {
             return FileVisitResult.CONTINUE;
+        }
+
+        File file;
+        if (isSymLink) {
+            file = filePath.toRealPath().toFile();
+        } else {
+            file = filePath.toFile();
         }
 
         // adding each file to the current directory
         FileInfo fileInfo = FileInfo.builder()
-                .name(file.getFileName().toString())
-                .type(resolveFileType(file.toFile()))
+                .name(filePath.getFileName().toString())
+                .type(resolveFileType(file))
                 .build();
 
         directoryStack.peek().addChild(fileInfo);
