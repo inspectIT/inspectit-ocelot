@@ -38,20 +38,6 @@ public class SimpleDiffEntry {
     }
 
     /**
-     * Shortens the {@link SimpleDiffEntry} name.
-     *
-     * @param entry to use as basis
-     *
-     * @return the same {@link SimpleDiffEntry} object
-     */
-    public static SimpleDiffEntry shortenName(final SimpleDiffEntry entry) {
-        String shortenFile = entry.getFile()
-                .substring(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER.length());
-        entry.setFile(shortenFile);
-        return entry;
-    }
-
-    /**
      * The filename, including its path. Example: /directory/file.yml
      */
     @NonNull
@@ -80,4 +66,15 @@ public class SimpleDiffEntry {
      */
     @Builder.Default
     private List<String> authors = Collections.emptyList();
+
+    /**
+     * Shortens the filename of this instance based on {@link AbstractFileAccessor#CONFIGURATION_FILES_SUBFOLDER}.
+     * The shortened name is the original name without the subfolder prefix.
+     *
+     * @return the same {@link SimpleDiffEntry} object
+     */
+    public SimpleDiffEntry shortenName() {
+        file = file.substring(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER.length());
+        return this;
+    }
 }
