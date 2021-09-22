@@ -33,8 +33,9 @@ public class KapacitorTopicController extends KapacitorBaseController {
                 .getBody();
 
         if (response == null) {
-            return java.util.Collections.emptyList();
+            return Collections.emptyList();
         }
+
         return StreamSupport.stream(response.path("topics").spliterator(), false)
                 .map(Topic::fromKapacitorResponse)
                 .collect(Collectors.toList());
@@ -48,8 +49,9 @@ public class KapacitorTopicController extends KapacitorBaseController {
                 .getBody();
 
         if (response == null) {
-            return java.util.Collections.emptyList();
+            return Collections.emptyList();
         }
+
         return StreamSupport.stream(response.path("handlers").spliterator(), false)
                 .map(Handler::fromKapacitorResponse)
                 .collect(Collectors.toList());

@@ -153,7 +153,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
                 .getCopyWithDefaultsPopulated(metricName);
 
         measureManager.addOrUpdateAndCacheMeasureWithViews(metricName, definitionSettingsWithLastValueView);
-        return measureManager.getMeasureDouble(metricName).isPresent() ? measureManager.getMeasureDouble(metricName).get() : null;
+        return measureManager.getMeasureDouble(metricName).orElse(null);
     }
 
     /**

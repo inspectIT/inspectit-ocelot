@@ -31,8 +31,9 @@ public class KapacitorTemplateController extends KapacitorBaseController {
                 .getBody();
 
         if (response == null) {
-            Collections.emptyList();
+            return Collections.emptyList();
         }
+
         return StreamSupport.stream(response.path("templates").spliterator(), false)
                 .map(Template::fromKapacitorResponse)
                 .collect(Collectors.toList());
