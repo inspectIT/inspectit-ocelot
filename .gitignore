@@ -4,6 +4,7 @@
 *.log
 *.zip
 *.swp
+.DS_STORE
 
 ### STS ###
 .apt_generated
