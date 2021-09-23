@@ -840,13 +840,12 @@ public class VersioningManager {
         if (syncTagRef.isPresent()) {
             // merge the diff between the tag and the source branch head
             ObjectId diffBase = getCommit(syncTagRef.get().getObjectId());
-            rebaseLiveBranch(diffTarget, false);
             mergeBranch(diffBase, diffTarget, true, "Merging remote configuration source branch");
         } else if (remoteSettings.isInitialConfigurationSync()) {
             // in case this options is set, we merge the diff between the workspace and the source branch head.
             // we don't remove files in this case!
             log.info("Synchronization marker has not been found. Executing an initial configuration synchronization.");
-            rebaseLiveBranch(diffTarget, true);
+            syncLiveAndTargetBranches();
             Optional<RevCommit> workspaceCommit = getLatestCommit(Branch.WORKSPACE);
             if (workspaceCommit.isPresent()) {
                 mergeBranch(workspaceCommit.get(), diffTarget, false, "Initial configuration synchronization");
@@ -866,31 +865,37 @@ public class VersioningManager {
     }
 
     /**
-     * Rebases the LIVE branch on a {@code targetObject}.
-     *
-     * @param targetObject the object (commit, ref, ...) which is used as target (the desired state) for the rebase
-     * @param useTheirs    whether the rebase should use the state of {@code targetObject} in case of merge conflicts
+     * Synchronizes (i.e., rebases) the live branch on the <b>target</b> branch.
+     * This will allow for pushing to the target without force.
      */
-    private void rebaseLiveBranch(ObjectId targetObject, boolean useTheirs) throws GitAPIException {
-        if (settings.getRemoteConfigurations().isAutoPromotion()) {
-            try {
-                git.checkout().setName(Branch.LIVE.getBranchName()).call();
-                RebaseCommand rebaseCommand = git.rebase().setUpstream(targetObject).setPreserveMerges(false);
+    private void syncLiveAndTargetBranches() throws GitAPIException, IOException {
+        RemoteRepositorySettings targetRepository = settings.getRemoteConfigurations().getPullRepository();
+        if (targetRepository == null) {
+            log.info("No target repository specified. Thus, not synchronizing live and target branches.");
+            return;
+        }
 
-                if (useTheirs) {
-                    rebaseCommand.setStrategy(MergeStrategy.THEIRS);
-                }
+        log.info("Rebasing live branch on target branch");
+        remoteConfigurationManager.fetchSourceBranch(targetRepository);
 
-                RebaseResult rebaseResult = rebaseCommand.call();
+        Repository repository = git.getRepository();
+        ObjectId diffTarget = repository.exactRef("refs/heads/" + targetRepository.getBranchName()).getObjectId();
 
-                if (!rebaseResult.getStatus().isSuccessful()) {
-                    log.error("Rebase on source branch failed with status {}! Aborting rebase. Failures are: {}", rebaseResult
-                            .getStatus(), formatFailingPaths(rebaseResult));
-                    git.rebase().setOperation(RebaseCommand.Operation.ABORT).call();
-                }
-            } finally {
-                git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
+        try {
+            git.checkout().setName(Branch.LIVE.getBranchName()).call();
+            RebaseCommand rebaseCommand = git.rebase().setUpstream(diffTarget);
+
+            RebaseResult rebaseResult = rebaseCommand.call();
+
+            if (rebaseResult.getStatus().isSuccessful()) {
+                log.info("Live branch is successfully rebased on target branch. Pushing can now be done without force.");
+            } else {
+                log.error("Rebase on target branch failed with status {}! Aborting rebase. Failures are: {}", rebaseResult
+                        .getStatus(), formatFailingPaths(rebaseResult));
+                git.rebase().setOperation(RebaseCommand.Operation.ABORT).call();
             }
+        } finally {
+            git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
         }
     }
 
@@ -938,6 +943,25 @@ public class VersioningManager {
 
         // merge target commit into current branch
         mergeFiles(targetObject, checkoutFiles, fileToRemove, commitMessage, GIT_SYSTEM_AUTHOR);
+
+        // promote if enabled
+        if (settings.getRemoteConfigurations().isAutoPromotion()) {
+            log.info("Auto-promotion of synchronized configuration files.");
+            List<String> diffFiles = diff.getEntries()
+                    .stream()
+                    .map(SimpleDiffEntry::getFile)
+                    .collect(Collectors.toList());
+
+            ConfigurationPromotion promotion = ConfigurationPromotion.builder()
+                    .commitMessage("Auto-promotion due to workspace remote synchronization.")
+                    .workspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName())
+                    .liveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName())
+                    .files(diffFiles)
+                    .build();
+
+            promoteConfiguration(promotion, true, GIT_SYSTEM_AUTHOR);
+        }
+
     }
 
     /**
