@@ -9,6 +9,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
@@ -97,43 +98,30 @@ public class RevisionAccess extends AbstractFileAccessor {
     }
 
     /**
-     * Walks the history backwards to the a revision (A) which is a parent of this revision (B) and another given revision (C).
-     * This method will return a revision which minimizes MAX(distance(A,B), distance(A,C)).
-     * <p>
-     * Such a common ancestor should exist for all commits, because all branches originate from the root commit of the repo.
+     * Searches the common ancestor (merge-base) of the commit represented by this accessor and the given other one.
+     * We don't do a BFS anymore, because we don't want to follow merge links.
      *
      * @param other the other revision to find a common ancestor with
      *
      * @return the Revision which is a parent of both revisions.
      */
     public RevisionAccess getCommonAncestor(RevisionAccess other) {
-        // unfortunately RevFilter.MERGE_BASE does not return the best ancestor,
-        // therefore we perform a BFS ourselves.
-        Set<String> ownVisited = new HashSet<>();
-        Set<String> otherVisited = new HashSet<>();
-        Deque<Node> openList = new ArrayDeque<>();
-        openList.addLast(new Node(true, this));
-        openList.addLast(new Node(false, other));
-        while (!openList.isEmpty()) {
-            Node current = openList.removeFirst();
-            String id = current.revAccess.getRevisionId();
-            if (current.isReachableFromOwn) {
-                if (otherVisited.contains(id)) {
-                    return current.revAccess;
-                }
-                ownVisited.add(id);
-            } else {
-                if (ownVisited.contains(id)) {
-                    return current.revAccess;
-                }
-                otherVisited.add(id);
+        try {
+            RevWalk walk = new RevWalk(repository);
+            walk.setRevFilter(RevFilter.MERGE_BASE);
+            // RevCommits need to be produced by the same RevWalk instance otherwise it can't compare them
+            walk.markStart(walk.parseCommit(this.revCommit.toObjectId()));
+            walk.markStart(walk.parseCommit(other.revCommit.toObjectId()));
+            RevCommit mergeBase = walk.next();
+
+            if (mergeBase == null) {
+                throw new IllegalStateException("No common ancestor!");
             }
-            for (int i = 0; i < current.revAccess.revCommit.getParentCount(); i++) {
-                RevCommit parent = current.revAccess.revCommit.getParent(i);
-                openList.addLast(new Node(current.isReachableFromOwn, new RevisionAccess(repository, parent)));
-            }
+
+            return new RevisionAccess(repository, mergeBase, true);
+        } catch (Exception e) {
+            throw new IllegalStateException("Error while searching a common ancestor!", e);
         }
-        throw new IllegalStateException("No common ancestor!");
     }
 
     /**
@@ -167,9 +155,9 @@ public class RevisionAccess extends AbstractFileAccessor {
         if (!parent.isPresent() || !parent.get().configurationFileExists(path)) {
             return false;
         }
-        String currentContent = readConfigurationFile(path)
-                .orElseThrow(() -> new IllegalStateException("Expected file to exist"));
-        String previousContent = parent.get().readConfigurationFile(path)
+        String currentContent = readConfigurationFile(path).orElseThrow(() -> new IllegalStateException("Expected file to exist"));
+        String previousContent = parent.get()
+                .readConfigurationFile(path)
                 .orElseThrow(() -> new IllegalStateException("Expected file to exist"));
         return !currentContent.equals(previousContent);
     }
@@ -312,9 +300,7 @@ public class RevisionAccess extends AbstractFileAccessor {
                 List<FileInfo> nestedFiles = new ArrayList<>();
                 hasNext = collectFiles(treeWalk, nestedFiles);
 
-                fileBuilder
-                        .type(FileInfo.Type.DIRECTORY)
-                        .children(nestedFiles);
+                fileBuilder.type(FileInfo.Type.DIRECTORY).children(nestedFiles);
             } else {
                 fileBuilder.type(FileInfo.Type.FILE);
                 hasNext = treeWalk.next();
