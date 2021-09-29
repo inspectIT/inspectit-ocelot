@@ -59,6 +59,7 @@ class InstrumentationConfigurationResolverTest {
         lenient().when(settings.getIgnoredBootstrapPackages()).thenReturn(Collections.emptyMap());
         lenient().when(settings.getIgnoredPackages()).thenReturn(Collections.emptyMap());
         lenient().when(settings.isExcludeLambdas()).thenReturn(true);
+        lenient().when(settings.isEnabled()).thenReturn(true);
 
         config = InstrumentationConfiguration.builder().source(settings).build();
     }
@@ -114,6 +115,20 @@ class InstrumentationConfigurationResolverTest {
                     .containsExactly(ElementMatchers.nameEndsWithIgnoreCase("object"), ElementMatchers.any());
         }
 
+        @Test
+        public void disabledInstrumentation() throws IllegalAccessException {
+            lenient().when(settings.isEnabled()).thenReturn(false);
+
+            InstrumentationScope scope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any());
+            InstrumentationRule rule = InstrumentationRule.builder().name("name").scope(scope).build();
+            config = InstrumentationConfiguration.builder().source(settings).rule(rule).build();
+            FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
+
+            ClassInstrumentationConfiguration result = resolver.getClassInstrumentationConfiguration(Object.class);
+
+            assertThat(result).isNotNull();
+            assertThat(result).isSameAs(ClassInstrumentationConfiguration.NO_INSTRUMENTATION);
+        }
     }
 
 
