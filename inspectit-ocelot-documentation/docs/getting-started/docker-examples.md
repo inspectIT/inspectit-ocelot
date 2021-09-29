@@ -104,7 +104,7 @@ In this scenario the following components are preconfigured and used for monitor
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent.
 - *Jaeger:* Jaeger is used to store and query all recorded traces.
 
-You can access Grafana through http://localhost:3001 and the configuration server via http://localhost:8090.
+You can access Grafana through http://localhost:3000 and the configuration server via http://localhost:8090.
 The traces can be viewed in Jaeger on http://localhost:16686.
 
 Prometheus can be accessed through http://localhost:9090.
@@ -120,7 +120,7 @@ In this scenario the following components are preconfigured and used for monitor
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [InfluxQL](https://docs.influxdata.com/influxdb/v1.8/query_language/) is used to query the data from InfluxDB.
 - *Jaeger:* Jaeger is used to store and query all recorded traces.
 
-You can access Grafana through http://localhost:3001 and the configuration server via http://localhost:8090.
+You can access Grafana through http://localhost:3000 and the configuration server via http://localhost:8090.
 The traces can be viewed in Jaeger on http://localhost:16686.
 
 
@@ -134,7 +134,7 @@ In this scenario the following components are preconfigured and used for monitor
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [InfluxQL](https://docs.influxdata.com/influxdb/v1.8/query_language/) is used to query the data from InfluxDB.
 - *Zipkin:* Zipkin is used to store and query all recorded traces.
 
-You can access Grafana through http://localhost:3001 and the configuration server via http://localhost:8090.
+You can access Grafana through http://localhost:3000 and the configuration server via http://localhost:8090.
 The traces can be viewed in Zipkin on http://localhost:9411.
 
 

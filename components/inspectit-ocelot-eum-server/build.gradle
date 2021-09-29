@@ -41,9 +41,21 @@ task generateVersionFile {
     }
 }
 
+task downloadOpenTelemetryPlugin() {
+    ext.dest = new File(buildDir, "boomerang-opentelemetry.js")
+    outputs.files(ext.dest)
+    doLast {
+        def f = ext.dest
+        new URL("https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin/releases/download/0.19.0-1/boomerang-opentelemetry.js")
+                .withInputStream { i -> f.withOutputStream { it << i } }
+    }
+
+}
+
 bootJar {
     dependsOn generateVersionFile
     dependsOn downloadAndExtractBoomerang
+    dependsOn downloadOpenTelemetryPlugin
 
     archivesBaseName = 'inspectit-ocelot-eum-server'
     version = "${buildVersion}"
@@ -59,6 +71,12 @@ bootJar {
     from("$buildDir/boomerangjs-${boomerangVersion}/package") {
         include "plugins/*.js"
         include "boomerang.js"
+        into "static/boomerang"
+    }
+
+    //include boomerang opentelemetry
+    from("$buildDir") {
+        include "boomerang-opentelemetry.js"
         into "static/boomerang"
     }
 }

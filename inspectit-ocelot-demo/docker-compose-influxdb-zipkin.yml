@@ -28,7 +28,7 @@ services:
       - ./configuration-server:/configuration-server
     ports:
       - 8090:8090
-      
+
   #  Petclinic
   config-server:
     image: inspectit/spring-petclinic-config-server:${INSPECTIT_PETCLINIC_VERSION}
@@ -226,7 +226,7 @@ services:
       - ./grafana/provisioning/influxdb:/usr/share/grafana/custom/
       - ./grafana/provisioning/home-dashboard/home.json:/usr/share/grafana/public/dashboards/home.json
     ports:
-      - 3001:3000
+      - 3000:3000
 
 volumes:
   agent-vol:
