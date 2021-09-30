@@ -49,6 +49,9 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 @Component
 public class ScheduledExecutorContextPropagationSensor implements SpecialSensor {
 
+    /**
+     * Identifier for lambda classes.
+     */
     private static final String LAMBDA = "$$Lambda$";
 
     private static final ElementMatcher<TypeDescription> CLASSES_MATCHER = isSubTypeOf(ScheduledExecutorService.class);

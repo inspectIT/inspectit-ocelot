@@ -1,34 +1,25 @@
 package rocks.inspectit.ocelot.autocomplete.autocompleterimpl;
 
 /**
- * Constants for the completer.
- *
+ * Constants used by the auto-completer.
  */
-class Constants {
+interface Constants {
 
-    static final String SCOPES = "scopes";
+    String INSPECTIT = "inspectit";
 
-    static final String INSPECTIT = "inspectit";
+    String INSTRUMENTATION = "instrumentation";
 
-    static final String INSTRUMENTATION = "instrumentation";
+    String METRIC = "metric";
 
-    static final String METRIC_S = "metrics"; // plural
+    String METRICS = "metrics";
 
-    static final String METRIC = "metric"; // single
+    String ACTION = "action";
 
-    static final String ACTION = "action"; // single
+    String RULES = "rules";
 
-    static final String ACTION_S = "actions"; //plural
+    String SCOPES = "scopes";
 
-    static final String RULES = "rules";
+    String ACTIONS = "actions";
 
-    static final String STAR = "*";
-
-    /**
-     * No instance.
-     */
-    private Constants() {
-        throw new IllegalStateException("No instance");
-    }
-
+    String STAR = "*";
 }

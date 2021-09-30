@@ -32,7 +32,7 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     private static final String PROCESS_USAGE_METRIC_FULL_NAME = "process/cpu/usage";
 
-    private static final String METRIC_UNAVAILABLE = "Unable to locate '{}' on operation system bean. Metric \" {} \" is unavailable.";
+    private static final String METRIC_UNAVAILABLE = "Metric '{}' will not be recorded because '{}' is unavailable.";
 
     private static final List<String> OPERATING_SYSTEM_BEAN_CLASS_NAMES = Arrays.asList(
             "com.sun.management.OperatingSystemMXBean", // HotSpot
@@ -65,13 +65,13 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
         //returns negative values if unavailable
         averageLoadAvailable = operatingSystemBean.getSystemLoadAverage() >= 0;
         if (!systemCpuUsage.isPresent()) {
-            log.info(METRIC_UNAVAILABLE, METH_SYS_CPU_LOAD, SYSTEM_USAGE_METRIC_FULL_NAME);
+            log.info(METRIC_UNAVAILABLE, SYSTEM_USAGE_METRIC_FULL_NAME, METH_SYS_CPU_LOAD);
         }
         if (!systemCpuUsage.isPresent()) {
-            log.info(METRIC_UNAVAILABLE, METH_PROC_CPU_LOAD, PROCESS_USAGE_METRIC_FULL_NAME);
+            log.info(METRIC_UNAVAILABLE, PROCESS_USAGE_METRIC_FULL_NAME, METH_PROC_CPU_LOAD);
         }
         if (!averageLoadAvailable) {
-            log.info(METRIC_UNAVAILABLE, "getAverageLoad", AVERAGE_LOAD_METRIC_FULL_NAME);
+            log.info(METRIC_UNAVAILABLE, AVERAGE_LOAD_METRIC_FULL_NAME, "getAverageLoad");
         }
 
     }

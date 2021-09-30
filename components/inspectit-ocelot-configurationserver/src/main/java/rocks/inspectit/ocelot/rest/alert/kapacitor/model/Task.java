@@ -26,11 +26,16 @@ import java.util.List;
 public class Task {
 
     private static final String VALUE = "value";
+
     private static final String STRING = "string";
+
     private static final String TEMPLATE_ID = "template-id";
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * The task's id.
+     */
     String id;
 
     /**

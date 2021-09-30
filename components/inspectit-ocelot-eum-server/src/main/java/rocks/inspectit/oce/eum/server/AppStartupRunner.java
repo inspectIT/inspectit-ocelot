@@ -14,11 +14,14 @@ import java.io.InputStreamReader;
 public class AppStartupRunner implements ApplicationRunner {
 
     /**
-     * The file used to load the servers's version.
+     * Version string of unknown versions.
+     */
+    private static final String UNKNOWN = "UNKNOWN";
+
+    /**
+     * The file used to load the server's version.
      */
     private static final String SERVER_VERSION_INFORMATION_FILE = "/eum-version.info";
-
-    private static final String UNKNOWN = "UNKNOWN";
 
     /**
      * The server's version.

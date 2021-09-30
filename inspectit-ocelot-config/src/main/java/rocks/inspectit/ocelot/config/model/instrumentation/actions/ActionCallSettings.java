@@ -25,7 +25,9 @@ import java.util.stream.Stream;
 public class ActionCallSettings extends ConditionalActionSettings {
 
     private static final String PARAMETER_ACTION = "action";
+
     private static final String PARAMETER_VAR = "var";
+
     private static final String PARAMETER_TYPE = "type";
 
     /**
@@ -80,19 +82,19 @@ public class ActionCallSettings extends ConditionalActionSettings {
                 .distinct()
                 .filter(constantInput::containsKey)
                 .filter(dataInput::containsKey)
-                .forEach(varName -> vios
-                        .message("Multiple assignments are given to same variable '{var}'!")
+                .forEach(varName -> vios.message("Multiple assignments are given to same variable '{var}'!")
                         .parameter(PARAMETER_VAR, varName)
                         .buildAndPublish());
     }
 
     private void checkAllInputsAssigned(GenericActionSettings actionConf, ViolationBuilder vios) {
-        actionConf.getInput().keySet().stream()
+        actionConf.getInput()
+                .keySet()
+                .stream()
                 .filter(varName -> !GenericActionSettings.isSpecialVariable(varName))
                 .filter(varName -> !constantInput.containsKey(varName))
                 .filter(varName -> !dataInput.containsKey(varName))
-                .forEach(varName -> vios
-                        .message("Parameter '{var}' of action '{action}' is not assigned!")
+                .forEach(varName -> vios.message("Parameter '{var}' of action '{action}' is not assigned!")
                         .parameter(PARAMETER_VAR, varName)
                         .parameter(PARAMETER_ACTION, action)
                         .buildAndPublish());
@@ -101,8 +103,7 @@ public class ActionCallSettings extends ConditionalActionSettings {
     private void checkNoSpecialInputsAssigned(ViolationBuilder vios) {
         Stream.concat(constantInput.keySet().stream(), dataInput.keySet().stream())
                 .filter(GenericActionSettings::isSpecialVariable)
-                .forEach(varName -> vios
-                        .message("Assigned parameter '{var}' is a special variable and must not be assigned manually!")
+                .forEach(varName -> vios.message("Assigned parameter '{var}' is a special variable and must not be assigned manually!")
                         .parameter(PARAMETER_VAR, varName)
                         .buildAndPublish());
     }
@@ -110,8 +111,7 @@ public class ActionCallSettings extends ConditionalActionSettings {
     private void checkNoNonExistingInputsAssigned(GenericActionSettings actionConf, ViolationBuilder vios) {
         Stream.concat(constantInput.keySet().stream(), dataInput.keySet().stream())
                 .filter(varName -> !actionConf.getInput().containsKey(varName))
-                .forEach(varName -> vios
-                        .message("Assigned parameter '{var}' does not exist as input for action '{action}'!")
+                .forEach(varName -> vios.message("Assigned parameter '{var}' does not exist as input for action '{action}'!")
                         .parameter(PARAMETER_VAR, varName)
                         .parameter(PARAMETER_ACTION, action)
                         .buildAndPublish());
