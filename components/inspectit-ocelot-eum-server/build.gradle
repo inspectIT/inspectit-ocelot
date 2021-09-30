@@ -46,7 +46,7 @@ task downloadOpenTelemetryPlugin() {
     outputs.files(ext.dest)
     doLast {
         def f = ext.dest
-        new URL("https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin/releases/download/0.19.0-1/boomerang-opentelemetry.js")
+        new URL("https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin/releases/download/$openTelemetryVersion/boomerang-opentelemetry.js")
                 .withInputStream { i -> f.withOutputStream { it << i } }
     }
 
