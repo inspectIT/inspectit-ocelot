@@ -126,8 +126,21 @@ public class VersioningManager {
 
         git = Git.init().setDirectory(workingDirectory.toFile()).call();
 
+        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+        fetchRemoteBranches();
+
         if (!hasGit) {
             log.info("Working directory is not managed by Git. Initializing Git repository and staging and committing all existing file.");
+
+            boolean hasPushRepository = remoteSettings.getPushRepository() != null;
+
+            if (hasPushRepository) {
+                // TODO: checkout target branch and rebase current branch on it (stash before?)
+                // TODO: throw exception if checkout/rebase doesn't work due to conflicts with the local files
+                // TODO: (if !pullEqualsPush() || !remoteSettings.isAutoPromotion() || !local was empty):
+                // pullEqualsPush() && remoteSettings.isAutoPromotion()
+                //       stash local changes -> remove files and agent mappings -> stash pop
+            }
 
             stageFiles();
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", false);
@@ -151,7 +164,6 @@ public class VersioningManager {
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
         }
 
-        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
         if (remoteSettings != null && remoteSettings.isEnabled()) {
             // init RemoteConfigurationManager
             remoteConfigurationManager = new RemoteConfigurationManager(settings, git);
@@ -170,6 +182,14 @@ public class VersioningManager {
                 mergeSourceBranch();
             }
         }
+    }
+
+    private void fetchRemoteBranches() {
+        // TODO
+    }
+
+    private boolean pullEqualsPush() {
+        // TODO: check if latest commits are the same (and both repos exist)
     }
 
     /**
@@ -845,7 +865,6 @@ public class VersioningManager {
             // in case this options is set, we merge the diff between the workspace and the source branch head.
             // we don't remove files in this case!
             log.info("Synchronization marker has not been found. Executing an initial configuration synchronization.");
-            syncLiveAndTargetBranches();
             Optional<RevCommit> workspaceCommit = getLatestCommit(Branch.WORKSPACE);
             if (workspaceCommit.isPresent()) {
                 mergeBranch(workspaceCommit.get(), diffTarget, false, "Initial configuration synchronization");
@@ -865,37 +884,59 @@ public class VersioningManager {
     }
 
     /**
-     * Synchronizes (i.e., rebases) the live branch on the <b>target</b> branch.
+     * Synchronizes (i.e., rebases) the workspace and live branches on the <b>target</b> branch.
      * This will allow for pushing to the target without force.
      */
-    private void syncLiveAndTargetBranches() throws GitAPIException, IOException {
-        RemoteRepositorySettings targetRepository = settings.getRemoteConfigurations().getPullRepository();
+    private void syncWithTargetBranch() throws GitAPIException, IOException {
+        RemoteRepositorySettings targetRepository = settings.getRemoteConfigurations().getPushRepository();
         if (targetRepository == null) {
             log.info("No target repository specified. Thus, not synchronizing live and target branches.");
             return;
         }
 
-        log.info("Rebasing live branch on target branch");
         remoteConfigurationManager.fetchSourceBranch(targetRepository);
 
         Repository repository = git.getRepository();
-        ObjectId diffTarget = repository.exactRef("refs/heads/" + targetRepository.getBranchName()).getObjectId();
+        ObjectId rebaseTarget = repository.exactRef("refs/heads/" + targetRepository.getBranchName()).getObjectId();
+
+        RebaseResult liveRebaseResult = rebaseBranch(Branch.LIVE, rebaseTarget);
+        rebaseBranch(Branch.WORKSPACE, rebaseTarget);
+
+        if (liveRebaseResult.getStatus().isSuccessful()) {
+            log.info("Live and target branches are synchronized. Pushing can now be done without force.");
+        }
+    }
+
+    /**
+     * Rebases a branch on a defined target.
+     *
+     * @param branch       the branch that should be rebased
+     * @param rebaseTarget the target to rebase on
+     *
+     * @return the result/status of the rebase
+     */
+    private RebaseResult rebaseBranch(Branch branch, ObjectId rebaseTarget) throws GitAPIException, IOException {
+        log.info("Rebasing {} branch on target branch", branch.getBranchName());
+
+        String currentBranch = git.getRepository().getBranch();
 
         try {
-            git.checkout().setName(Branch.LIVE.getBranchName()).call();
-            RebaseCommand rebaseCommand = git.rebase().setUpstream(diffTarget);
+            git.checkout().setName(branch.getBranchName()).call();
+            RebaseCommand rebaseCommand = git.rebase().setUpstream(rebaseTarget);
 
             RebaseResult rebaseResult = rebaseCommand.call();
 
             if (rebaseResult.getStatus().isSuccessful()) {
-                log.info("Live branch is successfully rebased on target branch. Pushing can now be done without force.");
+                log.info("{} branch is successfully rebased on target branch", branch.getBranchName());
             } else {
                 log.error("Rebase on target branch failed with status {}! Aborting rebase. Failures are: {}", rebaseResult
                         .getStatus(), formatFailingPaths(rebaseResult));
                 git.rebase().setOperation(RebaseCommand.Operation.ABORT).call();
             }
+
+            return rebaseResult;
         } finally {
-            git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
+            git.checkout().setName(currentBranch).call();
         }
     }
 
