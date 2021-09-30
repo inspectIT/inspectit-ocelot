@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.rest.alert.kapacitor;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import rocks.inspectit.ocelot.rest.alert.kapacitor.model.Handler;
 import rocks.inspectit.ocelot.rest.alert.kapacitor.model.Topic;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -30,6 +32,10 @@ public class KapacitorTopicController extends KapacitorBaseController {
                 .getForEntity("/kapacitor/v1/alerts/topics", ObjectNode.class)
                 .getBody();
 
+        if (response == null) {
+            return Collections.emptyList();
+        }
+
         return StreamSupport.stream(response.path("topics").spliterator(), false)
                 .map(Topic::fromKapacitorResponse)
                 .collect(Collectors.toList());
@@ -41,6 +47,10 @@ public class KapacitorTopicController extends KapacitorBaseController {
         ObjectNode response = kapacitor()
                 .getForEntity("/kapacitor/v1/alerts/topics/{topicId}/handlers", ObjectNode.class, topicId)
                 .getBody();
+
+        if (response == null) {
+            return Collections.emptyList();
+        }
 
         return StreamSupport.stream(response.path("handlers").spliterator(), false)
                 .map(Handler::fromKapacitorResponse)

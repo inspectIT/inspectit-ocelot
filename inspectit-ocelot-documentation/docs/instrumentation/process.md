@@ -3,7 +3,8 @@ id: process
 title: Instrumentation Process
 ---
 
-The approach inspectIT Ocelot takes for instrumenting is fundamentally different from the approach of most other JVM instrumentation agents. InspectIT Ocelot does *not* instrument classes when they are loaded, the instrumentation is performed purely asynchronous in the background.
+The approach inspectIT Ocelot takes for instrumenting is fundamentally different from the approach of most other JVM instrumentation agents.
+InspectIT Ocelot does *not* instrument classes when they are loaded, the instrumentation is performed purely asynchronous in the background.
 
 In this background task inspectIT Ocelot essentially looks at every loaded class and performs an instrumentation if required by the active configuration. Hereby, the agent manages the classes he has to analyze in a queue. This queue is processed in batches to ensure that no CPU resources are blocked if they are required by the instrumented application. The batching is configurable using the `internal` settings:
 

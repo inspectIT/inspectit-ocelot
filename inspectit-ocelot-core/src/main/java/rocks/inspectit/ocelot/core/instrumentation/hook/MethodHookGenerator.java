@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
+import static java.lang.Boolean.TRUE;
+
 import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.trace.Sampler;
 import io.opencensus.trace.samplers.Samplers;
@@ -98,12 +100,12 @@ public class MethodHookGenerator {
     }
 
     private List<IHookAction> buildTracingEntryActions(RuleTracingSettings tracing) {
-        if (tracing.getStartSpan() || tracing.getContinueSpan() != null) {
+        if (TRUE.equals(tracing.getStartSpan()) || tracing.getContinueSpan() != null) {
 
             val actionBuilder = ContinueOrStartSpanAction.builder();
             actionBuilder.commonTagsToAttributesManager(commonTagsToAttributesManager);
 
-            if (tracing.getStartSpan()) {
+            if (TRUE.equals(tracing.getStartSpan())) {
                 VariableAccessor name = Optional.ofNullable(tracing.getName())
                         .map(variableAccessorFactory::getVariableAccessor).orElse(null);
                 actionBuilder
@@ -139,7 +141,7 @@ public class MethodHookGenerator {
 
     private void configureAutoTracing(RuleTracingSettings tracing, ContinueOrStartSpanAction.ContinueOrStartSpanActionBuilder actionBuilder) {
         if (tracing.getAutoTracing() != null) {
-            if (tracing.getAutoTracing()) {
+            if (TRUE.equals(tracing.getAutoTracing())) {
                 actionBuilder.autoTrace(StackTraceSampler.Mode.ENABLE);
             } else {
                 actionBuilder.autoTrace(StackTraceSampler.Mode.DISABLE);
@@ -184,7 +186,7 @@ public class MethodHookGenerator {
                 result.add(actionWithConditions);
             }
 
-            if (tracing.getEndSpan()) {
+            if (TRUE.equals(tracing.getEndSpan())) {
                 val endSpanAction = new EndSpanAction(ConditionalHookAction.getAsPredicate(tracing.getEndSpanConditions(), variableAccessorFactory));
                 result.add(endSpanAction);
             }

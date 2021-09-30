@@ -448,11 +448,7 @@ public class VersioningManager {
         List<SimpleDiffEntry> simpleDiffEntries = diffEntries.stream()
                 .map(SimpleDiffEntry::of)
                 .filter(entry -> entry.getFile().startsWith(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))
-                .peek(entry -> {
-                    String shortenFile = entry.getFile()
-                            .substring(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER.length());
-                    entry.setFile(shortenFile);
-                })
+                .map(SimpleDiffEntry::shortenName)
                 .collect(Collectors.toList());
 
         // the diff entries will get their file difference if specified

@@ -1,6 +1,12 @@
 inspectit:
   # settings regarding the instrumentation performed on the target application
   instrumentation:
+    # Master switch for the instrumentation. Defines whether the agent is instrumenting classes. In case this is
+    # disabled, classes will not be instrumented, thus, any tracing and metric recording will NOT be possible.
+    # Only the instrumentation is affected by this flag.
+    # If this is set to false, it has the same effect as if no rules were defined.
+    enabled: true
+
     # settings for special sensors
     special:
       # enables or disables the instrumentation to ensure context propagation across java.util.concurrent.Executor instances

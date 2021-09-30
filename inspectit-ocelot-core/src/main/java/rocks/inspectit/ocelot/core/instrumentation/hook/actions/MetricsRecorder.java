@@ -42,13 +42,11 @@ public class MetricsRecorder implements IHookAction {
         // then iterate all metrics and enter new scope for metric collection
         for (MetricAccessor metricAccessor : metrics) {
             Object value = metricAccessor.getVariableAccessor().get(context);
-            if (value != null) {
-                if (value instanceof Number) {
-                    // only record metrics where a value is present
-                    // this allows to disable the recording of a metric depending on the results of action executions
-                    TagContext tagContext = getTagContext(context, metricAccessor);
-                    metricsManager.tryRecordingMeasurement(metricAccessor.getName(), (Number) value, tagContext);
-                }
+            if (value instanceof Number) {
+                // only record metrics where a value is present
+                // this allows to disable the recording of a metric depending on the results of action executions
+                TagContext tagContext = getTagContext(context, metricAccessor);
+                metricsManager.tryRecordingMeasurement(metricAccessor.getName(), (Number) value, tagContext);
             }
         }
     }

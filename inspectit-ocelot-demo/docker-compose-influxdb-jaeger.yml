@@ -218,11 +218,13 @@ services:
     image: grafana/grafana:8.0.6
     container_name: grafana
     environment:
+      - GF_PANELS_DISABLE_SANITIZE_HTML=TRUE
       - GF_SECURITY_ADMIN_PASSWORD=demo
       - GF_PATHS_PROVISIONING=/usr/share/grafana/custom/
       - GF_INSTALL_PLUGINS=https://github.com/NovatecConsulting/novatec-service-dependency-graph-panel/releases/download/v4.0.2/novatec-sdg-panel.zip;novatec-sdg-panel
     volumes:
       - ./grafana/provisioning/influxdb:/usr/share/grafana/custom/
+      - ./grafana/provisioning/home-dashboard/home.json:/usr/share/grafana/public/dashboards/home.json
     ports:
       - 3001:3000
 

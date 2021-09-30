@@ -173,7 +173,6 @@ public class InspectitEnvironment extends StandardEnvironment {
 
         loadCmdLineArgumentsPropertySource(cmdLineArgs, propsList);
         PropertySource defaultSettings;
-        Optional<ConfigSettings> appliedConfigSettings = null;
         try {
             defaultSettings = loadAgentResourceYaml(DEFAULT_CONFIG_PROPERTYSOURCE_NAME, ConfigFileLoader.getDefaultResources());
         } catch (IOException e) {
@@ -182,7 +181,7 @@ public class InspectitEnvironment extends StandardEnvironment {
         propsList.addLast(defaultSettings);
         propsList.addLast(new EnvironmentInformationPropertySource(INSPECTIT_ENV_PROPERTYSOURCE_NAME));
 
-        appliedConfigSettings = initializeConfigurationSources(propsList);
+        Optional<ConfigSettings> appliedConfigSettings = initializeConfigurationSources(propsList);
 
         log.info("Registered Configuration Sources:");
         getPropertySources().stream().forEach(ps -> log.info("  {}", ps.getName()));

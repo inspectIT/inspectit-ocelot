@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.core.metrics.jmx;
 
+import static java.lang.Boolean.TRUE;
+
 import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.Measure;
@@ -153,7 +155,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
                 .getCopyWithDefaultsPopulated(metricName);
 
         measureManager.addOrUpdateAndCacheMeasureWithViews(metricName, definitionSettingsWithLastValueView);
-        return measureManager.getMeasureDouble(metricName).get();
+        return measureManager.getMeasureDouble(metricName).orElse(null);
     }
 
     /**
@@ -167,7 +169,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
         if (value instanceof Number) {
             return Optional.of(((Number) value).doubleValue()).filter(d -> d >= 0d);
         } else if (value instanceof Boolean) {
-            return Optional.of(((Boolean) value) ? 1d : 0d);
+            return Optional.of(TRUE.equals(value) ? 1d : 0d);
         } else {
             return Optional.empty();
         }
@@ -214,7 +216,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
             objectNames.forEach((objectNameRepresentation, whitelisted) -> {
                 try {
                     ObjectName objectName = new ObjectName(objectNameRepresentation);
-                    if (whitelisted) {
+                    if (TRUE.equals(whitelisted)) {
                         whitelistedObjectNames.add(objectName);
                     } else {
                         blacklistedObjectNames.add(objectName);
