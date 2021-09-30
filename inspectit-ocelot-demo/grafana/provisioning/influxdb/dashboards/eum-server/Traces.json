@@ -186,7 +186,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Average Processing Times",
+      "title": "Average Processing Time",
       "transformations": [],
       "type": "stat"
     },
