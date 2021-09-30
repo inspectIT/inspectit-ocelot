@@ -18,15 +18,35 @@ import java.util.stream.StreamSupport;
 @RestController
 public class KapacitorTaskController extends KapacitorBaseController {
 
+    /**
+     * URL path of Kapacitor's task endpoint.
+     */
+    private static final String KAPACITOR_PATH_TASKS = "/kapacitor/v1/tasks";
+
+    /**
+     * URL path of Kapacitor's task endpoint for referencing a specific task by its ID.
+     */
+    private static final String KAPACITOR_PATH_TASKS_ID = "/kapacitor/v1/tasks/{taskId}";
+
+    /**
+     * URL path used by the configuration server for providing task management.
+     */
+    private static final String ALERT_PATH_TASKS = "/alert/kapacitor/tasks";
+
+    /**
+     * URL path used by the configuration server for providing task management of a specific task.
+     */
+    private static final String ALERT_PATH_TASKS_ID = "/alert/kapacitor/tasks/{taskId}";
+
     @Autowired
     public KapacitorTaskController(InspectitServerSettings settings) {
         super(settings);
     }
 
     @ApiOperation(value = "Provides a list with basic information about each kapacitor task. Only tasks based on templates will be listed.")
-    @GetMapping("/alert/kapacitor/tasks")
+    @GetMapping(ALERT_PATH_TASKS)
     public List<Task> getAllTasks() {
-        ObjectNode response = kapacitor().getForEntity("/kapacitor/v1/tasks", ObjectNode.class).getBody();
+        ObjectNode response = kapacitor().getForEntity(KAPACITOR_PATH_TASKS, ObjectNode.class).getBody();
 
         if (response == null) {
             return Collections.emptyList();
@@ -39,19 +59,18 @@ public class KapacitorTaskController extends KapacitorBaseController {
 
     @ApiOperation(value = "Provides detailed information about a given kapacitor task")
 
-    @GetMapping("/alert/kapacitor/tasks/{taskId}")
+    @GetMapping(ALERT_PATH_TASKS_ID)
     public Task getTask(@PathVariable @ApiParam("The id of the task to query") String taskId) {
-        ObjectNode response = kapacitor().getForEntity("/kapacitor/v1/tasks/{taskId}", ObjectNode.class, taskId)
-                .getBody();
+        ObjectNode response = kapacitor().getForEntity(KAPACITOR_PATH_TASKS_ID, ObjectNode.class, taskId).getBody();
 
         return Task.fromKapacitorResponse(response);
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Inserts a new Kapacitor task")
-    @PostMapping("/alert/kapacitor/tasks")
+    @PostMapping(ALERT_PATH_TASKS)
     public Task addTask(@RequestBody Task task) {
-        ObjectNode response = kapacitor().postForEntity("/kapacitor/v1/tasks", task.toKapacitorRequest(), ObjectNode.class)
+        ObjectNode response = kapacitor().postForEntity(KAPACITOR_PATH_TASKS, task.toKapacitorRequest(), ObjectNode.class)
                 .getBody();
 
         return Task.fromKapacitorResponse(response);
@@ -59,9 +78,9 @@ public class KapacitorTaskController extends KapacitorBaseController {
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Updates one or more settings of a kapacitor task")
-    @PatchMapping("/alert/kapacitor/tasks/{taskId}")
+    @PatchMapping(ALERT_PATH_TASKS_ID)
     public Task updateTask(@PathVariable @ApiParam("The id of the task to update") String taskId, @RequestBody Task task) {
-        ObjectNode response = kapacitor().patchForObject("/kapacitor/v1/tasks/{taskId}", task.toKapacitorRequest(), ObjectNode.class, taskId);
+        ObjectNode response = kapacitor().patchForObject(KAPACITOR_PATH_TASKS_ID, task.toKapacitorRequest(), ObjectNode.class, taskId);
         triggerTaskReload(task);
 
         return Task.fromKapacitorResponse(response);
@@ -69,9 +88,9 @@ public class KapacitorTaskController extends KapacitorBaseController {
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Removes a task")
-    @DeleteMapping("/alert/kapacitor/tasks/{taskId}")
+    @DeleteMapping(ALERT_PATH_TASKS_ID)
     public void removeTask(@PathVariable @ApiParam("The id of the task to delete") String taskId) {
-        kapacitorRestTemplate.delete("/kapacitor/v1/tasks/{taskId}", taskId);
+        kapacitorRestTemplate.delete(KAPACITOR_PATH_TASKS_ID, taskId);
     }
 
     /**

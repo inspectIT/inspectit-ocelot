@@ -6,7 +6,7 @@ import rocks.inspectit.ocelot.bootstrap.instrumentation.IMethodHook;
 
 public class NoopMethodHook implements IMethodHook {
 
-    public static NoopMethodHook INSTANCE = new NoopMethodHook();
+    public static final NoopMethodHook INSTANCE = new NoopMethodHook();
 
     private NoopMethodHook() {
     }

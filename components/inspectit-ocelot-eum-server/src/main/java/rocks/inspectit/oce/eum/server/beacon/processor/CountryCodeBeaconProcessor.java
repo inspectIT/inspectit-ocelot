@@ -19,7 +19,7 @@ import java.util.Map;
 @Component
 public class CountryCodeBeaconProcessor implements BeaconProcessor {
 
-    public static String TAG_COUNTRY_CODE = "COUNTRY_CODE";
+    public static final String TAG_COUNTRY_CODE = "COUNTRY_CODE";
 
     @Autowired
     private IPUtils ipUtils;

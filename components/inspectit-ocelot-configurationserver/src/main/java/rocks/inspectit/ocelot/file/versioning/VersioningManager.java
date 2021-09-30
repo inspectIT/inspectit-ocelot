@@ -50,6 +50,11 @@ import java.util.stream.StreamSupport;
 public class VersioningManager {
 
     /**
+     * Exception message in case a expected parent does not exist.
+     */
+    private static final String EXPECTED_PARENT_EXIST = "Expected parent to exist";
+
+    /**
      * The tag name used for marking which commit has been used for the last remote sync.
      */
     private static final String SOURCE_SYNC_TAG_NAME = "ocelot-sync-base";
@@ -510,7 +515,7 @@ public class VersioningManager {
                 break; //THe file has been added, no need to take previous changes into account
             }
             newRevision = newRevision.getPreviousRevision()
-                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
             if (newRevision.configurationFileExists(file) && newRevision.readConfigurationFile(file)
                     .get()
                     .equals(baseContent)) {
@@ -538,7 +543,7 @@ public class VersioningManager {
                 authors.add(newRevision.getAuthorName());
             }
             newRevision = newRevision.getPreviousRevision()
-                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
         }
         authors.add(newRevision.getAuthorName()); //Also add the name of the person who added the file
         return authors;
@@ -571,7 +576,7 @@ public class VersioningManager {
             }
             previous = newRevision;
             newRevision = newRevision.getPreviousRevision()
-                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
         }
         return previous.getAuthorName(); //in case an amend happened, this will be the correct user
     }
@@ -590,7 +595,7 @@ public class VersioningManager {
     private RevisionAccess findLastChangingRevision(String file, RevisionAccess baseRevision) {
         while (!baseRevision.isConfigurationFileAdded(file) && !baseRevision.isConfigurationFileModified(file)) {
             baseRevision = baseRevision.getPreviousRevision()
-                    .orElseThrow(() -> new IllegalStateException("Expected parent to exist"));
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
         }
         return baseRevision;
     }

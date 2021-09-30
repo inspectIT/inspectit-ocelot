@@ -60,16 +60,16 @@ public class GenericActionGenerator {
      * Guava seems to not allow null keys.
      * Therefore we just use this object as replacement for the bootstrap loader.
      */
-    private static ClassLoader BOOTSTRAP_LOADER_MARKER = new URLClassLoader(new URL[]{});
+    private static final ClassLoader BOOTSTRAP_LOADER_MARKER = new URLClassLoader(new URL[]{});
 
-    private static String NON_VOID_GENERIC_ACTION_STRUCTURAL_ID = "genericAction";
-    private static String VOID_GENERIC_ACTION_STRUCTURAL_ID = "voidGenericAction";
+    private static final String NON_VOID_GENERIC_ACTION_STRUCTURAL_ID = "genericAction";
+    private static final String VOID_GENERIC_ACTION_STRUCTURAL_ID = "voidGenericAction";
 
-    private static String METHOD_ARGS = "$1";
-    private static String THIZ = "$2";
-    private static String RETURN_VALUE = "$3";
-    private static String THROWN = "$4";
-    private static String ADDITIONAL_ARGS = "$5";
+    private static final String METHOD_ARGS = "$1";
+    private static final String THIZ = "$2";
+    private static final String RETURN_VALUE = "$3";
+    private static final String THROWN = "$4";
+    private static final String ADDITIONAL_ARGS = "$5";
 
     @Autowired
     private ClassInjector classInjector;

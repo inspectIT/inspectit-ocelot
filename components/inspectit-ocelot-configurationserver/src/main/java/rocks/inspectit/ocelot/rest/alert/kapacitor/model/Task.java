@@ -25,8 +25,17 @@ import java.util.List;
 @NoArgsConstructor
 public class Task {
 
+    private static final String VALUE = "value";
+
+    private static final String STRING = "string";
+
+    private static final String TEMPLATE_ID = "template-id";
+
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * The task's id.
+     */
     String id;
 
     /**
@@ -75,10 +84,10 @@ public class Task {
             result.put("status", status);
         }
         if (template != null) {
-            result.put("template-id", template);
+            result.put(TEMPLATE_ID, template);
             TemplateVariable.builder()
                     .name(TemplateVariable.TEMPLATE_REFERENCE_VARIABLE)
-                    .type("string")
+                    .type(STRING)
                     .value(template)
                     .build()
                     .insertIntoKapacitorVars(mapper, varsNode);
@@ -86,7 +95,7 @@ public class Task {
         if (topic != null) {
             TemplateVariable.builder()
                     .name(TemplateVariable.TOPIC_VARIABLE)
-                    .type("string")
+                    .type(STRING)
                     .value(topic)
                     .build()
                     .insertIntoKapacitorVars(mapper, varsNode);
@@ -94,7 +103,7 @@ public class Task {
         if (description != null) {
             TemplateVariable.builder()
                     .name(TemplateVariable.TEMPLATE_DESCRIPTION_VARIABLE)
-                    .type("string")
+                    .type(STRING)
                     .value(description)
                     .build()
                     .insertIntoKapacitorVars(mapper, varsNode);
@@ -132,9 +141,9 @@ public class Task {
         if (task.has("vars")) {
             decodeVariables(task.path("vars"), builder);
         }
-        if (task.has("template-id")) {
+        if (task.has(TEMPLATE_ID)) {
             //override the template setting from the dummy variable with teh actual value if available
-            builder.template(task.get("template-id").asText());
+            builder.template(task.get(TEMPLATE_ID).asText());
         }
         return builder.build();
     }
@@ -151,11 +160,11 @@ public class Task {
             String name = nameIterator.next();
             JsonNode var = variables.path(name);
             if (TemplateVariable.TEMPLATE_DESCRIPTION_VARIABLE.equals(name)) {
-                builder.description(var.path("value").asText());
+                builder.description(var.path(VALUE).asText());
             } else if (TemplateVariable.TOPIC_VARIABLE.equals(name)) {
-                builder.topic(var.path("value").asText());
+                builder.topic(var.path(VALUE).asText());
             } else if (TemplateVariable.TEMPLATE_REFERENCE_VARIABLE.equals(name)) {
-                builder.template(var.path("value").asText());
+                builder.template(var.path(VALUE).asText());
             } else {
                 resultVars.add(TemplateVariable.fromKapacitorResponse(name, var));
             }

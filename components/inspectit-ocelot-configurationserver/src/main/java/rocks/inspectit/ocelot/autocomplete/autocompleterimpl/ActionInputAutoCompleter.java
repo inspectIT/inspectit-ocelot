@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.autocomplete.autocompleterimpl;
 
+import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.autocomplete.AutoCompleter;
@@ -7,10 +8,11 @@ import rocks.inspectit.ocelot.autocomplete.util.ConfigurationQueryHelper;
 import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.*;
 
 /**
  * This AutoCompleter retrieves all inputs for actions which can be found in the present yaml-files. It is triggered by
@@ -25,33 +27,13 @@ public class ActionInputAutoCompleter implements AutoCompleter {
 
     private final static String ACTION_PLACEHOLDER = "ACTION_PLACEHOLDER";
 
-    private final static List<String> ACTION_OPTIONS = Arrays.asList(
-            "entry",
-            "exit",
-            "preEntry",
-            "postEntry",
-            "preExit",
-            "postExit"
-    );
+    private final static List<String> ACTION_OPTIONS = ImmutableList.of("entry", "exit", "preEntry", "postEntry", "preExit", "postExit");
 
-    private final static List<String> INPUT_OPTIONS = Arrays.asList("data-input", "constant-input");
+    private final static List<String> INPUT_OPTIONS = ImmutableList.of("data-input", "constant-input");
 
-    private final static List<String> ACTION_INPUT_DECLARATION_PATH = Arrays.asList(
-            "inspectit",
-            "instrumentation",
-            "actions",
-            ACTION_PLACEHOLDER,
-            "input"
-    );
+    private final static List<String> ACTION_INPUT_DECLARATION_PATH = ImmutableList.of(INSPECTIT, INSTRUMENTATION, ACTIONS, ACTION_PLACEHOLDER, "input");
 
-    private final static List<String> ACTION_INPUT_DEFAULT_USAGE_PATH = Arrays.asList(
-            "inspectit",
-            "instrumentation",
-            "rules",
-            "*",
-            SECTION_PLACEHOLDER,
-            "*",
-            INPUT_PLACEHOLDER);
+    private final static List<String> ACTION_INPUT_DEFAULT_USAGE_PATH = ImmutableList.of(INSPECTIT, INSTRUMENTATION, RULES, STAR, SECTION_PLACEHOLDER, STAR, INPUT_PLACEHOLDER);
 
     private static List<List<String>> actionInputUsagePaths;
 
@@ -87,12 +69,13 @@ public class ActionInputAutoCompleter implements AutoCompleter {
      * Ignores action inputs that start with the String defined in INPUT_FILTER_ONSET.
      *
      * @param path A given path as List. Each String should act as a literal of the path.
+     *
      * @return A List of Strings resembling the declared actions that could be used with the given path.
      */
     @Override
     public List<String> getSuggestions(List<String> path) {
-        if (actionInputUsagePaths.stream().
-                anyMatch(actionUsagePath -> PropertyPathHelper.comparePaths(path, actionUsagePath))) {
+        if (actionInputUsagePaths.stream()
+                .anyMatch(actionUsagePath -> PropertyPathHelper.comparePaths(path, actionUsagePath))) {
             return getActionInputs(path);
         }
         return Collections.emptyList();
@@ -104,6 +87,7 @@ public class ActionInputAutoCompleter implements AutoCompleter {
      * INPUT_FILTER_ONSET.
      *
      * @param path A given path as List. Each String should act as a literal of the path.
+     *
      * @return A List of Strings resembling the declared actions that could be used with the given path.
      */
     private List<String> getActionInputs(List<String> path) {
@@ -123,6 +107,7 @@ public class ActionInputAutoCompleter implements AutoCompleter {
      * ["inspectit","instrumentation","actions","action_B","input"] is returned.
      *
      * @param path A given path as List. Each String should act as a literal of the path.
+     *
      * @return A List containing String Lists. Each of these Lists resemble one path as described.
      */
     private List<List<String>> buildActionPaths(List<String> path) {
@@ -142,6 +127,7 @@ public class ActionInputAutoCompleter implements AutoCompleter {
      * found under "inspectit.instrumentation.rules.my-rule.entry.my-entry-method.action" are returned.
      *
      * @param path A List of Strings resembling a path to a rule-input.
+     *
      * @return The actions declared in this rule.
      */
     private List<String> getActions(List<String> path) {
