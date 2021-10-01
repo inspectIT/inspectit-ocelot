@@ -1180,9 +1180,81 @@ class VersioningManagerTest extends FileTestBase {
             assertThat(branchCommitId).isEqualTo(tagCommitIdAfter);  // the tag was set to the latest commit on the "branch" remote
             assertThat(commitAfter.getParents()).extracting(RevObject::getId) // the latest workspace commit has two parent commits: the old one and the latest commit on "branch" (=tagged commit)
                     .containsExactlyInAnyOrder(commitIdBefore, tagCommitIdAfter);
-            assertThat(liveCommit.getId()).isEqualTo(branchCommitId); // the live branch has been rebased on the source branch, i.e., its latest commit is the same as source
-            assertThat(liveCommit.getParents()).extracting(RevObject::getId) // also the parent of the latest live commit should equal source (which is the previous tag)
-                    .containsExactlyInAnyOrder(tagCommitIdBefore);
+            assertThat(liveCommit.getParents()).extracting(RevObject::getId) // the latest live commit has two parent commits: the old live one and the latest workspace one
+                    .containsExactlyInAnyOrder(liveIdBefore, commitAfter.getId());
+        }
+
+        @Test
+        public void initialConfigurationSync() throws URISyntaxException, GitAPIException, IOException {
+            RemoteRepositorySettings pullRepositorySettings = RemoteRepositorySettings.builder()
+                    .branchName("pull")
+                    .remoteName("pull")
+                    .gitRepositoryUri(new URIish(directoryOne.toString() + "/.git"))
+                    .build();
+            RemoteRepositorySettings pushRepositorySettings = RemoteRepositorySettings.builder()
+                    .branchName("push")
+                    .remoteName("push")
+                    .gitRepositoryUri(new URIish(directoryTwo.toString() + "/.git"))
+                    .useForcePush(false)
+                    .build();
+            RemoteConfigurationsSettings configurationsSettings = RemoteConfigurationsSettings.builder()
+                    .enabled(true)
+                    .pullAtStartup(true)
+                    .initialConfigurationSync(true)
+                    .pullRepository(pullRepositorySettings)
+                    .pushRepository(pushRepositorySettings)
+                    .build();
+            when(settings.getRemoteConfigurations()).thenReturn(configurationsSettings);
+
+            // prepare pull Git
+            repositoryOne.commit().setAllowEmpty(true).setMessage("init pull").call();
+            repositoryOne.branchCreate().setName("pull").call();
+            repositoryOne.checkout().setName("pull").call();
+
+            // prepare push Git
+            addEmptyFile(repositoryTwo, "empty.yml");
+            repositoryTwo.add().addFilepattern("files/empty.yml").call();
+            repositoryTwo.commit().setMessage("init push").call();
+            repositoryTwo.branchCreate().setName("push").call();
+            repositoryTwo.checkout().setName("push").call();
+
+            // initialize Git
+            versioningManager.initialize();
+            Git git = (Git) ReflectionTestUtils.getField(versioningManager, "git");
+
+            // ////////////////////////
+            // check state after initial synchronization
+            ObjectId targetCommitId = repositoryTwo.getRepository().exactRef("refs/heads/push").getObjectId();
+            ObjectId liveCommitId = versioningManager.getLatestCommit(Branch.LIVE).get().getId();
+
+            assertThat(liveCommitId).isEqualTo(targetCommitId); // branches should be synchronized
+
+            // ////////////////////////
+            // add files and push (without force)
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/foobar.yml=content");
+            versioningManager.commitAllChanges("add foobar");
+
+            String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
+            String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setLiveCommitId(liveId);
+            promotion.setWorkspaceCommitId(workspaceId);
+            promotion.setFiles(Arrays.asList("/foobar.yml"));
+
+            PromotionResult promotionResult = versioningManager.promoteConfiguration(promotion, true);
+
+            assertThat(promotionResult).isEqualTo(PromotionResult.OK); // OK means no synchronization error
+        }
+
+        private void addEmptyFile(Git repo, String filename) throws IOException, GitAPIException {
+            Path filesDir = repo.getRepository()
+                    .getWorkTree()
+                    .toPath()
+                    .resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
+            Files.createDirectories(filesDir);
+            Files.createFile(filesDir.resolve(filename));
         }
     }
 }
