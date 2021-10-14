@@ -34,7 +34,6 @@ import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -131,11 +130,13 @@ public class VersioningManager {
         git = Git.init().setDirectory(workingDirectory.toFile()).call();
 
         RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+        boolean hasRemote = remoteSettings != null && remoteSettings.isEnabled();
 
         if (!hasGit) {
             log.info("Working directory is not managed by Git. Initializing Git repository and staging and committing all existing file.");
 
-            if (remoteSettings.getPushRepository() != null) {
+            if (hasRemote && remoteSettings.getPushRepository() != null) {
+                initRemoteConfigurationManager();
                 setCurrentBranchToTarget();
             }
 
@@ -161,12 +162,8 @@ public class VersioningManager {
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
         }
 
-        if (remoteSettings != null && remoteSettings.isEnabled()) {
-            // init RemoteConfigurationManager
-            remoteConfigurationManager = new RemoteConfigurationManager(settings, git);
-
-            // update remote refs in case they are configured
-            remoteConfigurationManager.updateRemoteRefs();
+        if (hasRemote) {
+            initRemoteConfigurationManager();
 
             // push the current state during startup
             if (remoteSettings.isPushAtStartup() && remoteSettings.getPushRepository() != null) {
@@ -178,6 +175,16 @@ public class VersioningManager {
                 remoteConfigurationManager.fetchSourceBranch(settings.getRemoteConfigurations().getPullRepository());
                 mergeSourceBranch();
             }
+        }
+    }
+
+    /**
+     * Inits RemoteConfigurationManager and updates remote refs in case they are configured.
+     */
+    private void initRemoteConfigurationManager() throws GitAPIException {
+        if (remoteConfigurationManager == null) {
+            remoteConfigurationManager = new RemoteConfigurationManager(settings, git);
+            remoteConfigurationManager.updateRemoteRefs();
         }
     }
 
@@ -197,6 +204,7 @@ public class VersioningManager {
 
         boolean localIsEmpty = isWorkdirEmpty();
 
+        log.info("Soft-resetting current branch to '{}'.", targetRepository.getBranchName());
         git.reset()
                 .setRef("refs/heads/" + targetRepository.getBranchName())
                 .setMode(ResetCommand.ResetType.SOFT)
@@ -238,11 +246,13 @@ public class VersioningManager {
     }
 
     private void clearFilesAndAgentMappings() throws IOException {
-        File filesFolder = new File(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
+        Path filesPath = Paths.get(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
         Path agentMappingPath = Paths.get(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
 
-        FileSystemUtils.deleteRecursively(filesFolder);
-        Files.delete(agentMappingPath);
+        if (Files.exists(filesPath)) {
+            FileSystemUtils.deleteRecursively(filesPath.toFile());
+        }
+        Files.deleteIfExists(agentMappingPath);
     }
 
     /**

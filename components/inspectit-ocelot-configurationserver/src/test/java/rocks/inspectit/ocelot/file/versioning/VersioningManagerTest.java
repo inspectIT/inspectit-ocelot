@@ -1184,6 +1184,8 @@ class VersioningManagerTest extends FileTestBase {
                     .containsExactlyInAnyOrder(liveIdBefore, commitAfter.getId());
         }
 
+        // TODO: test initial config sync with source == target
+
         @Test
         public void initialConfigurationSync() throws URISyntaxException, GitAPIException, IOException {
             RemoteRepositorySettings pullRepositorySettings = RemoteRepositorySettings.builder()
@@ -1207,7 +1209,9 @@ class VersioningManagerTest extends FileTestBase {
             when(settings.getRemoteConfigurations()).thenReturn(configurationsSettings);
 
             // prepare pull Git
-            repositoryOne.commit().setAllowEmpty(true).setMessage("init pull").call();
+            addEmptyFile(repositoryOne, "from_pull.yml");
+            repositoryOne.add().addFilepattern("files/from_pull.yml").call();
+            repositoryOne.commit().setMessage("init pull").call();
             repositoryOne.branchCreate().setName("pull").call();
             repositoryOne.checkout().setName("pull").call();
 
@@ -1218,6 +1222,14 @@ class VersioningManagerTest extends FileTestBase {
             repositoryTwo.branchCreate().setName("push").call();
             repositoryTwo.checkout().setName("push").call();
 
+            ObjectId targetCommitIdBeforeInitialization = repositoryTwo.getRepository()
+                    .exactRef("refs/heads/push")
+                    .getObjectId();
+
+            // add local file
+            // TODO: currently fails in RevisionAccess#getCommonAncestor when searching for the deleting author
+            //createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/from_local.yml=existed_before_git_init");
+
             // initialize Git
             versioningManager.initialize();
             Git git = (Git) ReflectionTestUtils.getField(versioningManager, "git");
@@ -1226,8 +1238,16 @@ class VersioningManagerTest extends FileTestBase {
             // check state after initial synchronization
             ObjectId targetCommitId = repositoryTwo.getRepository().exactRef("refs/heads/push").getObjectId();
             ObjectId liveCommitId = versioningManager.getLatestCommit(Branch.LIVE).get().getId();
+            RevisionAccess targetRevision = new RevisionAccess(git.getRepository(), versioningManager.getCommit(targetCommitId));
+            RevisionAccess liveRevision = new RevisionAccess(git.getRepository(), versioningManager.getCommit(liveCommitId));
+            RevisionAccess commonAncestor = targetRevision.getCommonAncestor(liveRevision);
 
-            assertThat(liveCommitId).isEqualTo(targetCommitId); // branches should be synchronized
+            assertThat(Files.list(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))).extracting(Path::getFileName)
+                    .extracting(Path::toString)
+                    .containsExactlyInAnyOrder("from_pull.yml"); // TODO: add from_local.yml
+
+            // TODO: fails, as changes from live have been pushed automatically --> common ancestor is latest commit (is different if there was nothing to push)
+            assertThat(commonAncestor.getRevisionId()).isEqualTo(targetCommitIdBeforeInitialization.getName()); // target and live should have a common ancestor, namely the (formerly) latest commit of target
 
             // ////////////////////////
             // add files and push (without force)
