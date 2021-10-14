@@ -19,6 +19,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.FileSystemUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
@@ -33,8 +34,11 @@ import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.Supplier;
@@ -131,10 +135,8 @@ public class VersioningManager {
         if (!hasGit) {
             log.info("Working directory is not managed by Git. Initializing Git repository and staging and committing all existing file.");
 
-            boolean hasPushRepository = remoteSettings.getPushRepository() != null;
-
-            if (hasPushRepository) {
-                synchronizeLiveAndTargetBranches();
+            if (remoteSettings.getPushRepository() != null) {
+                setCurrentBranchToTarget();
             }
 
             stageFiles();
@@ -179,32 +181,68 @@ public class VersioningManager {
         }
     }
 
-    private void synchronizeLiveAndTargetBranches() throws GitAPIException {
+    private void setCurrentBranchToTarget() throws GitAPIException, IOException {
         log.info("Synchronizing local live branch with target branch of remote push repository.");
 
         RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+        RemoteRepositorySettings sourceRepository = settings.getRemoteConfigurations().getPullRepository();
+        RemoteRepositorySettings targetRepository = settings.getRemoteConfigurations().getPushRepository();
 
         // fetch pull and push repo, as we will need both to compare and synchronize local/pull/push repos
-        if (remoteSettings.getPullRepository() != null) {
-            remoteConfigurationManager.fetchSourceBranch(settings.getRemoteConfigurations().getPullRepository());
-        }
-        if (remoteSettings.getPushRepository() != null) {
-            remoteConfigurationManager.fetchSourceBranch(settings.getRemoteConfigurations().getPushRepository());
+        // push repo is expected to exist
+        remoteConfigurationManager.fetchSourceBranch(targetRepository);
+        if (sourceRepository != null) {
+            remoteConfigurationManager.fetchSourceBranch(sourceRepository);
         }
 
-        boolean localIsEmpty = false; // TODO: check if local workdir is empty
+        boolean localIsEmpty = isWorkdirEmpty();
 
-        // TODO: checkout target branch and soft-reset current branch to it
-        // TODO: throw exception if reset doesn't work due to conflicts with the local files
+        git.reset()
+                .setRef("refs/heads/" + targetRepository.getBranchName())
+                .setMode(ResetCommand.ResetType.SOFT)
+                .call();
 
-        if (!localIsEmpty || !remoteSettings.isInitialConfigurationSync() || !remoteSettings.isAutoPromotion() || !pullEqualsPush()) {
-            // TODO: stash local changes -> remove files and agent mappings -> stash pop
+        if (!localIsEmpty || !remoteSettings.isInitialConfigurationSync() || !remoteSettings.isAutoPromotion() || !areRemotesEqual(sourceRepository, targetRepository)) {
+            log.info("Reverting changes from target branch, to reset current branch to local file state.");
+            RevCommit stash = git.stashCreate().setIncludeUntracked(true).setPerson(GIT_SYSTEM_AUTHOR).call();
+            clearFilesAndAgentMappings();
+            commitAllFiles(GIT_SYSTEM_AUTHOR, "Clear files and agent mappings on startup", false);
+            git.stashApply().setStashRef(stash.getName()).call();
+            git.stashDrop().setStashRef(0).call(); // also remove the stash entry
         }
+
+        log.info("Local changes can now be pushed to the remote target branch without force.");
     }
 
-    private boolean pullEqualsPush() {
-        // TODO: check if latest commits are the same (and both repos exist)
-        // get commit id like this: ObjectId targetId = repository.exactRef("refs/heads/" + targetRepository.getBranchName()).getObjectId();
+    private boolean areRemotesEqual(RemoteRepositorySettings sourceRepository, RemoteRepositorySettings targetRepository) throws IOException {
+        if (sourceRepository == null || targetRepository == null) {
+            return sourceRepository == targetRepository; // true iff both are null
+        }
+
+        Repository repository = git.getRepository();
+
+        ObjectId sourceId = repository.exactRef("refs/heads/" + sourceRepository.getBranchName()).getObjectId();
+        ObjectId targetId = repository.exactRef("refs/heads/" + targetRepository.getBranchName()).getObjectId();
+
+        return ObjectId.isEqual(sourceId, targetId);
+    }
+
+    private boolean isWorkdirEmpty() throws IOException {
+        Path filesPath = Paths.get(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
+        Path agentMappingPath = Paths.get(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
+        boolean filesEmpty = !Files.exists(filesPath) || (Files.isDirectory(filesPath) && Files.list(filesPath)
+                .count() == 0);
+        boolean agentMappingMissing = !Files.exists(agentMappingPath);
+
+        return filesEmpty && agentMappingMissing;
+    }
+
+    private void clearFilesAndAgentMappings() throws IOException {
+        File filesFolder = new File(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
+        Path agentMappingPath = Paths.get(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
+
+        FileSystemUtils.deleteRecursively(filesFolder);
+        Files.delete(agentMappingPath);
     }
 
     /**
