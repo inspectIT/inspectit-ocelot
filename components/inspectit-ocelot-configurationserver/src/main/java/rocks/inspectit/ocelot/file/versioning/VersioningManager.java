@@ -499,11 +499,12 @@ public class VersioningManager {
      * @param includeFileContent whether the file difference (old and new content) is included
      * @param oldCommit          the commit id of the base (old) commit
      * @param newCommit          the commit id of the target (new) commit
+     * @param deletingAuthors    a list of authors to be set for all file deletions, instead of detected authors (required if {@code oldCommit} and {@code newCommit} don't have a common ancestor)
      *
      * @return the diff between the specified branches
      */
     @VisibleForTesting
-    WorkspaceDiff getWorkspaceDiff(boolean includeFileContent, ObjectId oldCommit, ObjectId newCommit) throws IOException, GitAPIException {
+    WorkspaceDiff getWorkspaceDiff(boolean includeFileContent, ObjectId oldCommit, ObjectId newCommit, PersonIdent... deletingAuthors) throws IOException, GitAPIException {
         // the diff works on TreeIterators, we prepare two for the two branches
         AbstractTreeIterator oldTree = prepareTreeParser(oldCommit);
         AbstractTreeIterator newTree = prepareTreeParser(newCommit);
@@ -525,7 +526,18 @@ public class VersioningManager {
 
             simpleDiffEntries.forEach(entry -> fillFileContent(entry, liveRevision, workspaceRevision));
         }
-        simpleDiffEntries.forEach(entry -> fillInAuthors(entry, oldCommit, newCommit));
+
+        List<String> deletingAuthorsAsString = Arrays.stream(deletingAuthors)
+                .map(PersonIdent::getName)
+                .collect(Collectors.toList());
+
+        simpleDiffEntries.forEach(entry -> {
+            if (deletingAuthors.length > 0 && entry.getType() == DiffEntry.ChangeType.DELETE) {
+                entry.setAuthors(deletingAuthorsAsString);
+            } else {
+                fillInAuthors(entry, oldCommit, newCommit);
+            }
+        });
 
         return WorkspaceDiff.builder()
                 .entries(simpleDiffEntries)
@@ -939,7 +951,13 @@ public class VersioningManager {
      */
     private void mergeBranch(ObjectId baseObject, ObjectId targetObject, boolean removeFiles, String commitMessage) throws IOException, GitAPIException {
         // getting the diff of the base and target commit
-        WorkspaceDiff diff = getWorkspaceDiff(false, baseObject, targetObject);
+        WorkspaceDiff diff;
+        if (removeFiles) {
+            diff = getWorkspaceDiff(false, baseObject, targetObject);
+        } else {
+            diff = getWorkspaceDiff(false, baseObject, targetObject, GIT_SYSTEM_AUTHOR);
+        }
+
         if (diff.getEntries().isEmpty()) {
             log.info("There is nothing to merge from the source configuration branch into the current workspace branch.");
             return;
