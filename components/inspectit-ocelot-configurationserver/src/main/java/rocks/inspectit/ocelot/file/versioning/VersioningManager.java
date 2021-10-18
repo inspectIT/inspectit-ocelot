@@ -19,7 +19,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.ldap.userdetails.InetOrgPerson;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.FileSystemUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
@@ -202,22 +201,16 @@ public class VersioningManager {
             remoteConfigurationManager.fetchSourceBranch(sourceRepository);
         }
 
-        boolean localIsEmpty = isWorkdirEmpty();
+        // this is true for a fresh start of a config server instance connected to a remote git for backup
+        // --> prevent unnecessary commits at startup that don't change any files (particularly when frequently restarting in, e.g., Kubernetes)
+        // otherwise, we need to properly merge files from local and two remotes
+        boolean hardReset = isWorkdirEmpty() && remoteSettings.isInitialConfigurationSync() && remoteSettings.isAutoPromotion() && areRemotesEqual(sourceRepository, targetRepository);
 
-        log.info("Soft-resetting current branch to '{}'.", targetRepository.getBranchName());
+        log.info("{}-resetting current branch to '{}'.", (hardReset ? "Hard" : "Soft"), targetRepository.getBranchName());
         git.reset()
                 .setRef("refs/heads/" + targetRepository.getBranchName())
-                .setMode(ResetCommand.ResetType.SOFT)
+                .setMode(hardReset ? ResetCommand.ResetType.HARD : ResetCommand.ResetType.SOFT)
                 .call();
-
-        if (!localIsEmpty || !remoteSettings.isInitialConfigurationSync() || !remoteSettings.isAutoPromotion() || !areRemotesEqual(sourceRepository, targetRepository)) {
-            log.info("Reverting changes from target branch, to reset current branch to local file state.");
-            RevCommit stash = git.stashCreate().setIncludeUntracked(true).setPerson(GIT_SYSTEM_AUTHOR).call();
-            clearFilesAndAgentMappings();
-            commitAllFiles(GIT_SYSTEM_AUTHOR, "Clear files and agent mappings on startup", false);
-            git.stashApply().setStashRef(stash.getName()).call();
-            git.stashDrop().setStashRef(0).call(); // also remove the stash entry
-        }
 
         log.info("Local changes can now be pushed to the remote target branch without force.");
     }
@@ -243,16 +236,6 @@ public class VersioningManager {
         boolean agentMappingMissing = !Files.exists(agentMappingPath);
 
         return filesEmpty && agentMappingMissing;
-    }
-
-    private void clearFilesAndAgentMappings() throws IOException {
-        Path filesPath = Paths.get(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
-        Path agentMappingPath = Paths.get(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
-
-        if (Files.exists(filesPath)) {
-            FileSystemUtils.deleteRecursively(filesPath.toFile());
-        }
-        Files.deleteIfExists(agentMappingPath);
     }
 
     /**
