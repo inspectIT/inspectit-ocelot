@@ -729,6 +729,14 @@ public class VersioningManager {
                 if (status != RemoteRefUpdate.Status.OK && status != RemoteRefUpdate.Status.UP_TO_DATE) {
                     result = PromotionResult.SYNCHRONIZATION_FAILED;
                 }
+
+                if (result != PromotionResult.SYNCHRONIZATION_FAILED && hasOneRemoteForPushAndPull()) {
+                    // as we know we just pushed to the branch we also pull from, update the synchronization tag
+                    // to prevent unnecessary merge commits when restarting the configuration server
+                    remoteConfigurationManager.fetchSourceBranch(settings.getRemoteConfigurations()
+                            .getPullRepository()); // sets local copy of source branch to remote state (equal to live)
+                    updateSynchronizationTag(getLatestCommit(Branch.LIVE).get());
+                }
             }
         } catch (IOException | GitAPIException ex) {
             throw new PromotionFailedException("Configuration promotion has failed.", ex);
@@ -774,6 +782,20 @@ public class VersioningManager {
         } else {
             return AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/" + file;
         }
+    }
+
+    /**
+     * Returns whether remote repos for pulling and pushing are specified and are equal in terms of Git URI and branch name.
+     *
+     * @return {@code true} = has the same repo for push and pull, {@code false} = has two different or no remote repos
+     */
+    private boolean hasOneRemoteForPushAndPull() {
+        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+        RemoteRepositorySettings pullRepository = remoteSettings.getPullRepository();
+        RemoteRepositorySettings pushRepository = remoteSettings.getPushRepository();
+
+        return pullRepository != null && pushRepository != null && Objects.equals(pullRepository.getGitRepositoryUri(), pushRepository
+                .getGitRepositoryUri()) && Objects.equals(pullRepository.getBranchName(), pushRepository.getBranchName());
     }
 
     /**
