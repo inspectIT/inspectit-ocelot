@@ -821,11 +821,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.ADD)
                     .build();
 
-            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
                     .get()
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("creating_user");
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("creating_user");
         }
 
         @Test
@@ -852,11 +852,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.ADD)
                     .build();
 
-            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
                     .get()
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("creating_user", "editing_user");
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("creating_user", "editing_user");
         }
 
         @Test
@@ -895,11 +895,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.MODIFY)
                     .build();
 
-            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
                     .get()
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("creating_user", "second_editing_user");
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("creating_user", "second_editing_user");
         }
 
         @Test
@@ -929,11 +929,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.MODIFY)
                     .build();
 
-            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
                     .get()
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("last_editing_user");
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("last_editing_user");
         }
 
         @Test
@@ -965,11 +965,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.DELETE)
                     .build();
 
-            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
                     .get()
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("deleting_user");
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("deleting_user");
         }
 
         @Test
@@ -996,11 +996,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.DELETE)
                     .build();
 
-            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
                     .get()
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("deleting_user");
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("deleting_user");
         }
     }
 
