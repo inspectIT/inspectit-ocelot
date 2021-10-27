@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,12 +42,7 @@ public class TraceController {
     public ResponseEntity<Void> spans(@RequestBody @NotBlank String data) {
         boolean isError = false;
         Stopwatch stopwatch = Stopwatch.createStarted();
-        int spanSize = -1;
-
-        // if we have no exporter return ok, ignore data
-        if (CollectionUtils.isEmpty(spanExporters)) {
-            return ResponseEntity.ok().build();
-        }
+        int spanSize = 0;
 
         try {
             // use protobuf to convert request string to the open-telemetry proto impl
@@ -79,7 +73,10 @@ public class TraceController {
             stopwatch.stop();
             ImmutableMap<String, String> tagMap = ImmutableMap.of("is_error", String.valueOf(isError));
             selfMonitoring.record("traces_received", stopwatch.elapsed(TimeUnit.MILLISECONDS), tagMap);
-            selfMonitoring.record("traces_span_size", spanSize, tagMap);
+            // check in case no trace exporter was started
+            if (spanSize > 0) {
+                selfMonitoring.record("traces_span_size", spanSize, tagMap);
+            }
         }
     }
 
