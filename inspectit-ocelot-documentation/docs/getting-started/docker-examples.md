@@ -19,7 +19,7 @@ Traces are exported to Jaeger.
 [See section below for detailed information](#prometheus-and-jaeger-scenario).
 
 * File: `docker-compose-prometheus-jaeger.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=prometheus-server,jaeger-collector&visualization=jaeger-query&dashboarding=grafana&usedges=inspectit-ocelot-agent:prometheus-server,inspectit-ocelot-agent:jaeger-collector,jaeger-query:grafana&showCommercial=false&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=prometheus-server,jaeger-collector,inspectit-oce-eum-server&visualization=jaeger-query&dashboarding=grafana&usedges=inspectit-ocelot-agent:prometheus-server,inspectit-ocelot-agent:jaeger-collector,jaeger-query:grafana,inspectit-oce-eum-server:prometheus-server,inspectit-oce-eum-server:jaeger-collector&showCommercial=false&showFormats=false)
 
 ![Demo scenario using Prometheus and Jaeger](assets/demo-landscape-prometheus-jaeger.png)
 
@@ -30,7 +30,7 @@ Traces are exported to Jaeger.
 [See section below for detailed information](#influxdb-and-jaeger-scenario).
 
 * File: `docker-compose-influxdb-jaeger.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=jaeger-collector&storage=influx-db&visualization=jaeger-query&dashboarding=grafana&alerting=grafana&usedges=jaeger-query:grafana,inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:jaeger-collector&showCommercial=false&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=jaeger-collector,inspectit-oce-eum-server&storage=influx-db&visualization=jaeger-query&dashboarding=grafana&alerting=grafana&usedges=jaeger-query:grafana,inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:jaeger-collector,inspectit-ocelot-agent:influxdata-influxdb,inspectit-oce-eum-server:influxdata-influxdb,inspectit-oce-eum-server:jaeger-collector&showCommercial=false&showFormats=false)
 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-jaeger.png)
 
@@ -41,7 +41,7 @@ Traces are exported to Zipkin.
 [See section below for detailed information](#influxdb-and-zipkin-scenario).
 
 * File: `docker-compose-influxdb-zipkin.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=zipkin-server&storage=influx-db&visualization=zipkin-server&dashboarding=grafana&alerting=grafana&usedges=inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:zipkin-server&showCommercial=false&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=zipkin-server,inspectit-oce-eum-server&storage=influx-db&visualization=zipkin-server&dashboarding=grafana&alerting=grafana&usedges=inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:zipkin-server,inspectit-ocelot-agent:influxdata-influxdb,inspectit-oce-eum-server:influxdata-influxdb,inspectit-oce-eum-server:zipkin-server&showCommercial=false&showFormats=false)
 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-zipkin.png)
 
@@ -171,8 +171,8 @@ The InfluxDB and Prometheus demo scenarios include the following predefined Graf
 ### End User Monitoring
 | Name | Description | Screenshot |
 | ---------- | ------- | -------- |
-| Beacons  | Shows metrics for the number of processed beacons and their average processing times | ![](assets/demo-dashboard-servicegraph_small.png) |
-| Trace Controller | Shows metrics for the number of processed traces, the number of spans and the average processing times for the traces| ![](assets/demo-dashboard-http_small.png) |
+| Beacons  | Shows metrics for the number of processed beacons and their average processing times | ![](assets/demo-dashboard-beacons_small.png) |
+| Trace Controller | Shows metrics for the number of processed traces, the number of spans and the average processing times for the traces| ![](assets/demo-dashboard-trace-controller.png) |
 
 ## Changing Agent Configurations
 
