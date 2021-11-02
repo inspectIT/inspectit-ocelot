@@ -138,7 +138,9 @@ public class VersioningManager {
         if (!hasGit) {
             log.info("Working directory is not managed by Git. Initializing Git repository and staging and committing all existing file.");
 
-            if (usingRemoteConfiguration && remoteSettings.getPushRepository() != null) {
+            if (usingRemoteConfiguration && remoteSettings.getPushRepository() != null && remoteConfigurationManager.sourceBranchExistsOnRemote(remoteSettings
+                    .getPushRepository())) {
+                // we will need to push new commits to target branch in this case; thus, make sure it can be done without force
                 setCurrentBranchToTarget();
             }
 
@@ -188,6 +190,21 @@ public class VersioningManager {
         }
     }
 
+    /**
+     * Sets the currently checked-out branch on top of the remote target branch using {@code git reset}.
+     * There are two cases:
+     * In case it can be foreseen that the desired state after initialization is that workspace, live, and both remote
+     * branches (source/target) are all equal, it does a hard reset. This is the case if there are no local files before
+     * the git initialization, initial configuration synchronization and auto promotion are active, and source and target
+     * remote branches have the same latest commit. After calling this method, the local branch will then be equal to
+     * the target/source branches.
+     * <p>
+     * Otherwise, it uses soft reset, resulting in a commit history including the target branch's history and another
+     * commit that resets everything to the state of the local files. Merging of the files from the source branch has to
+     * be done afterwards.
+     * <p>
+     * Expects the target branch to be present (in configuration and remote push repository).
+     */
     private void setCurrentBranchToTarget() throws GitAPIException, IOException {
         log.info("Synchronizing local live branch with target branch of remote push repository.");
 
@@ -218,7 +235,7 @@ public class VersioningManager {
 
     private boolean areRemotesEqual(RemoteRepositorySettings sourceRepository, RemoteRepositorySettings targetRepository) throws IOException {
         if (sourceRepository == null || targetRepository == null) {
-            return sourceRepository == targetRepository; // true if both are null
+            return sourceRepository == targetRepository; // true iff both are null
         }
 
         Repository repository = git.getRepository();
