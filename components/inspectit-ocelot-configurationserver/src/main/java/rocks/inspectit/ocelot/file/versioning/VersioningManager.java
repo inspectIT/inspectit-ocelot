@@ -34,7 +34,9 @@ import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.Supplier;
@@ -126,8 +128,21 @@ public class VersioningManager {
 
         git = Git.init().setDirectory(workingDirectory.toFile()).call();
 
+        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+        boolean usingRemoteConfiguration = remoteSettings != null && remoteSettings.isEnabled();
+
+        if (usingRemoteConfiguration) {
+            initRemoteConfigurationManager();
+        }
+
         if (!hasGit) {
             log.info("Working directory is not managed by Git. Initializing Git repository and staging and committing all existing file.");
+
+            if (usingRemoteConfiguration && remoteSettings.getPushRepository() != null && remoteConfigurationManager.sourceBranchExistsOnRemote(remoteSettings
+                    .getPushRepository())) {
+                // we will need to push new commits to target branch in this case; thus, make sure it can be done without force
+                setCurrentBranchToTarget();
+            }
 
             stageFiles();
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", false);
@@ -151,14 +166,7 @@ public class VersioningManager {
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
         }
 
-        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
-        if (remoteSettings != null && remoteSettings.isEnabled()) {
-            // init RemoteConfigurationManager
-            remoteConfigurationManager = new RemoteConfigurationManager(settings, git);
-
-            // update remote refs in case they are configured
-            remoteConfigurationManager.updateRemoteRefs();
-
+        if (usingRemoteConfiguration) {
             // push the current state during startup
             if (remoteSettings.isPushAtStartup() && remoteSettings.getPushRepository() != null) {
                 remoteConfigurationManager.pushBranch(Branch.LIVE, remoteSettings.getPushRepository());
@@ -170,6 +178,83 @@ public class VersioningManager {
                 mergeSourceBranch();
             }
         }
+    }
+
+    /**
+     * Inits RemoteConfigurationManager and updates remote refs in case they are configured.
+     */
+    private void initRemoteConfigurationManager() throws GitAPIException {
+        if (remoteConfigurationManager == null) {
+            remoteConfigurationManager = new RemoteConfigurationManager(settings, git);
+            remoteConfigurationManager.updateRemoteRefs();
+        }
+    }
+
+    /**
+     * Sets the currently checked-out branch on top of the remote target branch using {@code git reset}.
+     * There are two cases:
+     * In case it can be foreseen that the desired state after initialization is that workspace, live, and both remote
+     * branches (source/target) are all equal, it does a hard reset. This is the case if there are no local files before
+     * the git initialization, initial configuration synchronization and auto promotion are active, and source and target
+     * remote branches have the same latest commit. After calling this method, the local branch will then be equal to
+     * the target/source branches.
+     * <p>
+     * Otherwise, it uses soft reset, resulting in a commit history including the target branch's history and another
+     * commit that resets everything to the state of the local files. Merging of the files from the source branch has to
+     * be done afterwards.
+     * <p>
+     * Expects the target branch to be present (in configuration and remote push repository).
+     */
+    private void setCurrentBranchToTarget() throws GitAPIException, IOException {
+        log.info("Synchronizing local live branch with target branch of remote push repository.");
+
+        RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
+        RemoteRepositorySettings sourceRepository = settings.getRemoteConfigurations().getPullRepository();
+        RemoteRepositorySettings targetRepository = settings.getRemoteConfigurations().getPushRepository();
+
+        // fetch pull and push repo, as we will need both to compare and synchronize local/pull/push repos
+        // push repo is expected to exist
+        remoteConfigurationManager.fetchSourceBranch(targetRepository);
+        if (sourceRepository != null) {
+            remoteConfigurationManager.fetchSourceBranch(sourceRepository);
+        }
+
+        // this is true for a fresh start of a config server instance connected to a remote git for backup
+        // --> prevent unnecessary commits at startup that don't change any files (particularly when frequently restarting in, e.g., Kubernetes)
+        // otherwise, we need to properly merge files from local and two remotes
+        boolean hardReset = isWorkingDirectoryEmpty() && remoteSettings.isInitialConfigurationSync() && remoteSettings.isAutoPromotion() && areRemotesEqual(sourceRepository, targetRepository);
+
+        log.info("{}-resetting current branch to '{}'.", (hardReset ? "Hard" : "Soft"), targetRepository.getBranchName());
+        git.reset()
+                .setRef("refs/heads/" + targetRepository.getBranchName())
+                .setMode(hardReset ? ResetCommand.ResetType.HARD : ResetCommand.ResetType.SOFT)
+                .call();
+
+        log.info("Local changes can now be pushed to the remote target branch without force.");
+    }
+
+    private boolean areRemotesEqual(RemoteRepositorySettings sourceRepository, RemoteRepositorySettings targetRepository) throws IOException {
+        if (sourceRepository == null || targetRepository == null) {
+            return sourceRepository == targetRepository; // true iff both are null
+        }
+
+        Repository repository = git.getRepository();
+
+        ObjectId sourceId = repository.exactRef("refs/heads/" + sourceRepository.getBranchName()).getObjectId();
+        ObjectId targetId = repository.exactRef("refs/heads/" + targetRepository.getBranchName()).getObjectId();
+
+        return ObjectId.isEqual(sourceId, targetId);
+    }
+
+    private boolean isWorkingDirectoryEmpty() throws IOException {
+        Path filesPath = Paths.get(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
+        boolean filesEmpty = !Files.exists(filesPath) || (Files.isDirectory(filesPath) && Files.list(filesPath)
+                .count() == 0);
+
+        Path agentMappingPath = Paths.get(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
+        boolean agentMappingMissing = !Files.exists(agentMappingPath);
+
+        return filesEmpty && agentMappingMissing;
     }
 
     /**
@@ -438,6 +523,20 @@ public class VersioningManager {
      */
     @VisibleForTesting
     WorkspaceDiff getWorkspaceDiff(boolean includeFileContent, ObjectId oldCommit, ObjectId newCommit) throws IOException, GitAPIException {
+        return getWorkspaceDiff(includeFileContent, oldCommit, newCommit, null);
+    }
+
+    /**
+     * See {@link #getWorkspaceDiff(boolean, ObjectId, ObjectId, PersonIdent)}.
+     *
+     * @param includeFileContent whether the file difference (old and new content) is included
+     * @param oldCommit          the commit id of the base (old) commit
+     * @param newCommit          the commit id of the target (new) commit
+     * @param deletingAuthor     the author to be set for all file deletions, instead of detected authors (required if {@code oldCommit} and {@code newCommit} don't have a common ancestor)
+     *
+     * @return the diff between the specified branches
+     */
+    private WorkspaceDiff getWorkspaceDiff(boolean includeFileContent, ObjectId oldCommit, ObjectId newCommit, PersonIdent deletingAuthor) throws IOException, GitAPIException {
         // the diff works on TreeIterators, we prepare two for the two branches
         AbstractTreeIterator oldTree = prepareTreeParser(oldCommit);
         AbstractTreeIterator newTree = prepareTreeParser(newCommit);
@@ -459,7 +558,17 @@ public class VersioningManager {
 
             simpleDiffEntries.forEach(entry -> fillFileContent(entry, liveRevision, workspaceRevision));
         }
-        simpleDiffEntries.forEach(entry -> fillInAuthors(entry, oldCommit, newCommit));
+
+        // fill in the file's authors who did a modification to it
+        simpleDiffEntries.forEach(entry -> {
+            List<String> authors;
+            if (deletingAuthor != null && entry.getType() == DiffEntry.ChangeType.DELETE) {
+                authors = Collections.singletonList(deletingAuthor.getName());
+            } else {
+                authors = getModifyingAuthors(entry, oldCommit, newCommit);
+            }
+            entry.setAuthors(authors);
+        });
 
         return WorkspaceDiff.builder()
                 .entries(simpleDiffEntries)
@@ -469,22 +578,19 @@ public class VersioningManager {
     }
 
     @VisibleForTesting
-    void fillInAuthors(SimpleDiffEntry entry, ObjectId baseCommitId, ObjectId newCommitId) {
+    List<String> getModifyingAuthors(SimpleDiffEntry entry, ObjectId baseCommitId, ObjectId newCommitId) {
         RevCommit baseCommit = getCommit(baseCommitId);
         RevCommit newCommit = getCommit(newCommitId);
         switch (entry.getType()) {
             case ADD:
-                entry.setAuthors(new ArrayList<>(findAuthorsSinceAddition(entry.getFile(), newCommit)));
-                break;
+                return new ArrayList<>(findAuthorsSinceAddition(entry.getFile(), newCommit));
             case MODIFY:
-                entry.setAuthors(new ArrayList<>(findModifyingAuthors(entry.getFile(), baseCommit, newCommit)));
-                break;
+                return new ArrayList<>(findModifyingAuthors(entry.getFile(), baseCommit, newCommit));
             case DELETE:
-                entry.setAuthors(Collections.singletonList(findDeletingAuthor(entry.getFile(), baseCommit, newCommit)));
-                break;
+                return Collections.singletonList(findDeletingAuthor(entry.getFile(), baseCommit, newCommit));
             default:
                 log.warn("Unsupported change type for author lookup encountered: {}", entry.getType());
-                break;
+                return Collections.emptyList();
         }
     }
 
@@ -895,10 +1001,11 @@ public class VersioningManager {
      */
     private void mergeBranch(ObjectId baseObject, ObjectId targetObject, boolean removeFiles, String commitMessage) throws IOException, GitAPIException {
         // getting the diff of the base and target commit
-        WorkspaceDiff diff = getWorkspaceDiff(false, baseObject, targetObject);
-        if (diff.getEntries().isEmpty()) {
-            log.info("There is nothing to merge from the source configuration branch into the current workspace branch.");
-            return;
+        WorkspaceDiff diff;
+        if (removeFiles) {
+            diff = getWorkspaceDiff(false, baseObject, targetObject);
+        } else {
+            diff = getWorkspaceDiff(false, baseObject, targetObject, GIT_SYSTEM_AUTHOR);
         }
 
         // collect diff files
@@ -918,6 +1025,11 @@ public class VersioningManager {
                 .map(SimpleDiffEntry::getFile)
                 .map(this::prefixRelativeFile)
                 .collect(Collectors.toList());
+
+        if (fileToRemove.isEmpty() && checkoutFiles.isEmpty()) {
+            log.info("There is nothing to merge from the source configuration branch into the current workspace branch.");
+            return;
+        }
 
         // merge target commit into current branch
         mergeFiles(targetObject, checkoutFiles, fileToRemove, commitMessage, GIT_SYSTEM_AUTHOR);
@@ -939,6 +1051,7 @@ public class VersioningManager {
 
             promoteConfiguration(promotion, true, GIT_SYSTEM_AUTHOR);
         }
+
     }
 
     /**

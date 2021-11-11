@@ -94,6 +94,12 @@ Note that by default, pushing the branch is **forced**, which could inadvertentl
 
 This process can also be triggered by an automatic promotion due to pulling configuration files from a remote Git repository.
 
+:::note
+When the configuration server initialized its Git repository for the first time, the `LIVE` branch continues the commit history of the specified branch of the push repository.
+As a result, new commits can be pushed unforced, as long as the push repository has no external changes.
+**Only the commit history is adopted**, while the file content remains as before the Git initialization.
+:::
+
 ## Triggering File Pulling Using Webhooks
 
 As already mentioned, pulling configuration files from a remote Git repository can be done at startup of the configuration server, or can be triggered by a webhook.

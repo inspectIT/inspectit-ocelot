@@ -821,11 +821,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.ADD)
                     .build();
 
-            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
                     .get()
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("creating_user");
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("creating_user");
         }
 
         @Test
@@ -852,11 +852,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.ADD)
                     .build();
 
-            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
                     .get()
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("creating_user", "editing_user");
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("creating_user", "editing_user");
         }
 
         @Test
@@ -895,11 +895,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.MODIFY)
                     .build();
 
-            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
                     .get()
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("creating_user", "second_editing_user");
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("creating_user", "second_editing_user");
         }
 
         @Test
@@ -929,11 +929,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.MODIFY)
                     .build();
 
-            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
                     .get()
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("last_editing_user");
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("last_editing_user");
         }
 
         @Test
@@ -965,11 +965,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.DELETE)
                     .build();
 
-            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
                     .get()
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("deleting_user");
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("deleting_user");
         }
 
         @Test
@@ -996,11 +996,11 @@ class VersioningManagerTest extends FileTestBase {
                     .type(DiffEntry.ChangeType.DELETE)
                     .build();
 
-            versioningManager.fillInAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
                     .get()
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
-            assertThat(diff.getAuthors()).containsExactlyInAnyOrder("deleting_user");
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("deleting_user");
         }
     }
 
@@ -1182,6 +1182,129 @@ class VersioningManagerTest extends FileTestBase {
                     .containsExactlyInAnyOrder(commitIdBefore, tagCommitIdAfter);
             assertThat(liveCommit.getParents()).extracting(RevObject::getId) // the latest live commit has two parent commits: the old live one and the latest workspace one
                     .containsExactlyInAnyOrder(liveIdBefore, commitAfter.getId());
+        }
+
+        @Test
+        public void initialConfigurationSyncOneRemote() throws URISyntaxException, GitAPIException, IOException {
+            RemoteRepositorySettings remoteRepositorySettings = RemoteRepositorySettings.builder()
+                    .branchName("remote")
+                    .remoteName("remote")
+                    .gitRepositoryUri(new URIish(directoryOne.toString() + "/.git"))
+                    .useForcePush(false)
+                    .build();
+            RemoteConfigurationsSettings configurationsSettings = RemoteConfigurationsSettings.builder()
+                    .enabled(true)
+                    .pullAtStartup(true)
+                    .initialConfigurationSync(true)
+                    .pullRepository(remoteRepositorySettings)
+                    .pushRepository(remoteRepositorySettings)
+                    .build();
+            when(settings.getRemoteConfigurations()).thenReturn(configurationsSettings);
+
+            // prepare remote Git
+            addEmptyFile(repositoryOne, "from_remote.yml");
+            repositoryOne.add().addFilepattern("files/from_remote.yml").call();
+            repositoryOne.commit().setMessage("init remote").call();
+            repositoryOne.branchCreate().setName("remote").call();
+            repositoryOne.checkout().setName("remote").call();
+
+            ObjectId targetCommitIdBeforeInitialization = repositoryOne.getRepository()
+                    .exactRef("refs/heads/remote")
+                    .getObjectId();
+
+            // initialize Git
+            versioningManager.initialize();
+            Git git = (Git) ReflectionTestUtils.getField(versioningManager, "git");
+
+            // ////////////////////////
+            // check state after initial synchronization
+            ObjectId liveCommitId = versioningManager.getLatestCommit(Branch.LIVE).get().getId();
+
+            assertThat(liveCommitId).isEqualTo(targetCommitIdBeforeInitialization); // live should be set to remote repo
+            assertThat(Files.list(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))).extracting(Path::getFileName)
+                    .extracting(Path::toString)
+                    .containsExactlyInAnyOrder("from_remote.yml"); // should exactly contain content of remote repo
+        }
+
+        @Test
+        public void initialConfigurationSyncTwoRemotes() throws URISyntaxException, GitAPIException, IOException {
+            RemoteRepositorySettings pullRepositorySettings = RemoteRepositorySettings.builder()
+                    .branchName("pull")
+                    .remoteName("pull")
+                    .gitRepositoryUri(new URIish(directoryOne.toString() + "/.git"))
+                    .build();
+            RemoteRepositorySettings pushRepositorySettings = RemoteRepositorySettings.builder()
+                    .branchName("push")
+                    .remoteName("push")
+                    .gitRepositoryUri(new URIish(directoryTwo.toString() + "/.git"))
+                    .useForcePush(false)
+                    .build();
+            RemoteConfigurationsSettings configurationsSettings = RemoteConfigurationsSettings.builder()
+                    .enabled(true)
+                    .pullAtStartup(true)
+                    .initialConfigurationSync(true)
+                    .pullRepository(pullRepositorySettings)
+                    .pushRepository(pushRepositorySettings)
+                    .build();
+            when(settings.getRemoteConfigurations()).thenReturn(configurationsSettings);
+
+            // prepare pull Git
+            addEmptyFile(repositoryOne, "from_pull.yml");
+            repositoryOne.add().addFilepattern("files/from_pull.yml").call();
+            repositoryOne.commit().setMessage("init pull").call();
+            repositoryOne.branchCreate().setName("pull").call();
+            repositoryOne.checkout().setName("pull").call();
+
+            // prepare push Git
+            addEmptyFile(repositoryTwo, "empty.yml");
+            repositoryTwo.add().addFilepattern("files/empty.yml").call();
+            repositoryTwo.commit().setMessage("init push").call();
+            repositoryTwo.branchCreate().setName("push").call();
+            repositoryTwo.checkout().setName("push").call();
+
+            // add local file
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/from_local.yml=existed_before_git_init");
+
+            // initialize Git
+            versioningManager.initialize();
+            Git git = (Git) ReflectionTestUtils.getField(versioningManager, "git");
+
+            // ////////////////////////
+            // check state after initial synchronization
+            ObjectId targetCommitId = repositoryTwo.getRepository().exactRef("refs/heads/push").getObjectId();
+            ObjectId liveCommitId = versioningManager.getLatestCommit(Branch.LIVE).get().getId();
+
+            assertThat(liveCommitId).isEqualTo(targetCommitId); // live and target should be synchronized now (live pushed to target)
+            assertThat(Files.list(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))).extracting(Path::getFileName)
+                    .extracting(Path::toString)
+                    .containsExactlyInAnyOrder("from_pull.yml", "from_local.yml"); // should contain all files from pull repo and local
+
+            // ////////////////////////
+            // add files and push (without force)
+
+            createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/foobar.yml=content");
+            versioningManager.commitAllChanges("add foobar");
+
+            String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
+            String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
+
+            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            promotion.setLiveCommitId(liveId);
+            promotion.setWorkspaceCommitId(workspaceId);
+            promotion.setFiles(Arrays.asList("/foobar.yml"));
+
+            PromotionResult promotionResult = versioningManager.promoteConfiguration(promotion, true);
+
+            assertThat(promotionResult).isEqualTo(PromotionResult.OK); // OK means no synchronization error
+        }
+
+        private void addEmptyFile(Git repo, String filename) throws IOException {
+            Path filesDir = repo.getRepository()
+                    .getWorkTree()
+                    .toPath()
+                    .resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
+            Files.createDirectories(filesDir);
+            Files.createFile(filesDir.resolve(filename));
         }
     }
 }

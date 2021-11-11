@@ -162,16 +162,7 @@ public class RemoteConfigurationManager {
         log.info("Fetching branch '{}' from configuration remote '{}'.", sourceRepository.getBranchName(), sourceRepository
                 .getRemoteName());
 
-        LsRemoteCommand lsRemoteCommand = git.lsRemote().setRemote(sourceRepository.getRemoteName());
-        authenticateCommand(lsRemoteCommand, sourceRepository);
-
-        Collection<Ref> refs = lsRemoteCommand.call();
-
-        Optional<Ref> sourceBranch = refs.stream()
-                .filter(ref -> ref.getName().equals("refs/heads/" + sourceRepository.getBranchName()))
-                .findAny();
-
-        if (!sourceBranch.isPresent()) {
+        if (!sourceBranchExistsOnRemote(sourceRepository)) {
             throw new IllegalStateException(String.format("Specified configuration source branch '%s' does not exists on remote '%s'.", sourceRepository
                     .getBranchName(), sourceRepository.getRemoteName()));
         }
@@ -190,6 +181,26 @@ public class RemoteConfigurationManager {
                 log.info("Fetching from '{}' ended with result: {}", refUpdate.getRemoteName(), refUpdate.getResult());
             }
         }
+    }
+
+    /**
+     * Checks whether the branch represented by the given {@link RemoteRepositorySettings} exists on the remote repository.
+     *
+     * @param sourceRepository the definition of the remote repository and branch
+     *
+     * @return {@code true} if the remote repository has the branch or {@code false} otherwise
+     */
+    public boolean sourceBranchExistsOnRemote(RemoteRepositorySettings sourceRepository) throws GitAPIException {
+        LsRemoteCommand lsRemoteCommand = git.lsRemote().setRemote(sourceRepository.getRemoteName());
+        authenticateCommand(lsRemoteCommand, sourceRepository);
+
+        Collection<Ref> refs = lsRemoteCommand.call();
+
+        Optional<Ref> sourceBranch = refs.stream()
+                .filter(ref -> ref.getName().equals("refs/heads/" + sourceRepository.getBranchName()))
+                .findAny();
+
+        return sourceBranch.isPresent();
     }
 
     /**
