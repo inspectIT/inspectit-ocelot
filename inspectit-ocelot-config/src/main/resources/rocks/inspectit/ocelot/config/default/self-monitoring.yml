@@ -4,6 +4,14 @@ inspectit:
   self-monitoring:
     enabled: true
 
+    # settings regarding the capturing of action related metrics
+    actions:
+      enabled:
+        # if true, the execution time (duration in ms) per action will be recorded
+        execution-time: true
+        # if true, the number of executions per action will be recorded
+        count: true
+
   metrics:
     definitions:
       '[inspectit/self/duration]':
@@ -36,3 +44,23 @@ inspectit:
           '[inspectit/self/logs]':
             aggregation: SUM
             tags: {"level": true}
+
+      '[inspectit/self/actions/execution-time]':
+        enabled: ${inspectit.self-monitoring.actions.enabled.execution-time}
+        type: LONG
+        unit: us
+        description: "the execution time of the action"
+        views:
+          '[inspectit/self/actions/execution-time]':
+            tags:
+              action_name: true
+      '[inspectit/self/actions/count]':
+        enabled: ${inspectit.self-monitoring.actions.enabled.count}
+        type: LONG
+        unit: action executions
+        description: "number of action executions"
+        views:
+          '[inspectit/self/actions/count]':
+            aggregation: SUM
+            tags:
+              action_name: true
