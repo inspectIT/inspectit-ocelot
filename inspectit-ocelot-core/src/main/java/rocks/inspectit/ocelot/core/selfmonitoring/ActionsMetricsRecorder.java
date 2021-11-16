@@ -10,7 +10,6 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Recorder for {@link MethodHook} to record and expose metrics (e.g., number of invocation, execution time) of individual {@link rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction}.
@@ -42,16 +41,6 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
      */
     private static final String ACTION_NAME_KEY = "action_name";
 
-    /**
-     * The map containing the actions' start time in nanoseconds.
-     */
-    private HashMap<String, Long> actionStartTimesNanos = new HashMap<>();
-
-    /**
-     * The map containing the actions' execution counts.
-     */
-    private HashMap<String, Long> actionExecutionCounts = new HashMap<>();
-
     public ActionsMetricsRecorder() {
         // TODO: do metrics need to be enabled in order to take self-monitoring measurements?
         super("metrics.enabled", "selfMonitoring.actions");
@@ -62,7 +51,7 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
      *
      * @param action              The action
      * @param executionTimeMicros The execution time in microseconds
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
+     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
      */
     public void record(IHookAction action, long executionTimeMicros) {
         record(action.getName(), executionTimeMicros);
@@ -73,7 +62,7 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
      *
      * @param actionName          The name of the execution
      * @param executionTimeMicros The execution time in microseconds
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
+     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
      */
     public void record(String actionName, long executionTimeMicros) {
 
@@ -97,13 +86,6 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
         }
 
         // record the execution count increment
-        // TODO: do I need to store the count at all? Or is it sufficient to just record the increment (1)?
-        // -> I think storing only the increment is sufficient as we will define in the self-monitoring.yml file how we aggregate the '/self/action_count' measures
-        if (actionExecutionCounts == null) {
-            actionExecutionCounts = new HashMap<>();
-        }
-        actionExecutionCounts.put(actionName, (actionExecutionCounts.containsKey(actionName) ? actionExecutionCounts.get(actionName) : 0) + 1);
-
         if (actionsSettings.getEnabled().getOrDefault(COUNT_METRIC_NAME, false)) {
             recordMeasurement(COUNT_METRIC_NAME, 1L, customTags);
         }
@@ -163,55 +145,6 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
     @Override
     protected boolean doDisable() {
         log.info("Disabling ActionMetricsRecorder.");
-        // clear the map of actionStartTimes
-        actionStartTimesNanos.clear();
         return true;
-    }
-
-    // probably useless code
-
-    /**
-     * Records the start of the execution of an action.
-     *
-     * @param actionName The name of the action
-     */
-    private void recordStart(String actionName) {
-        // do nothing if disabled
-        if (!isEnabled()) {
-            return;
-        }
-
-        if (actionStartTimesNanos == null) {
-            actionStartTimesNanos = new HashMap<>();
-        }
-
-        actionStartTimesNanos.put(actionName, System.nanoTime());
-    }
-
-    /**
-     * Records the end of the execution of an action.
-     *
-     * @param actionName The name of the action
-     */
-    private void recordEnd(String actionName) {
-        // do nothing if disabled
-        if (!isEnabled()) {
-            return;
-        }
-
-        val actionStartTimeNanos = actionStartTimesNanos.get(actionName);
-        // if the ActionMetricsRecorder has been disabled during the execution of an action, the actionStartTimes has been cleared and no actionStartTime could be retrieved.
-        if (actionStartTimeNanos == null) {
-            return;
-        }
-
-        // compute execution time in microseconds
-        val executionTimeMicros = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - actionStartTimeNanos);
-
-        // remove the action from the start map
-        actionStartTimesNanos.remove(actionName);
-
-        // record the execution time
-        record(actionName, executionTimeMicros);
     }
 }
