@@ -2,8 +2,6 @@ package rocks.inspectit.ocelot.core.selfmonitoring;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import java.util.concurrent.TimeUnit;
@@ -28,24 +26,24 @@ public class ActionScopeImpl implements IActionScope {
     /**
      * The recorder used for recording the metrics of this {@link #action}.
      */
-    private ActionsMetricsRecorder recorder;
+    private ActionMetricsRecorder recorder;
 
     /**
      * Creates and starts a new {@link ActionScopeImpl} for the given {@link IHookAction}
      *
      * @param action   The {@link IHookAction} of this scope
-     * @param recorder The {@link ActionsMetricsRecorder}
+     * @param recorder The {@link ActionMetricsRecorder}
      */
-    public ActionScopeImpl(IHookAction action, ActionsMetricsRecorder recorder) {
+    public ActionScopeImpl(IHookAction action, ActionMetricsRecorder recorder) {
         this(action, recorder, true);
     }
 
     /**
      * @param action    The {@link IHookAction} of this scope
-     * @param recorder  The {@link ActionsMetricsRecorder}
+     * @param recorder  The {@link ActionMetricsRecorder}
      * @param autoStart Whether to automatically start the scope, i.e., setting the {@link #startTimeNanos}
      */
-    public ActionScopeImpl(IHookAction action, ActionsMetricsRecorder recorder, boolean autoStart) {
+    public ActionScopeImpl(IHookAction action, ActionMetricsRecorder recorder, boolean autoStart) {
         this.action = action;
         this.recorder = recorder;
         if (autoStart) {
@@ -67,7 +65,7 @@ public class ActionScopeImpl implements IActionScope {
     @Override
     public void close() {
         // record the action's metrics.
-        val executionTimeMicros = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startTimeNanos);
+        long executionTimeMicros = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - startTimeNanos);
         // log.info("ActionScopeImpl.close. action={}, startTime={}, endTime={}, executionTimeMillis={}", action.getName(), startTimeNanos, System.nanoTime(), executionTimeMillis);
         recorder.record(action, executionTimeMicros);
     }

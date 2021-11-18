@@ -5,6 +5,7 @@ import io.opencensus.tags.TagValue;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.metrics.MetricsSysTestBase;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -19,19 +20,26 @@ public class ActionMetricsRecorderTestAgent extends MetricsSysTestBase {
 
     private static final ViewManager viewManager = Stats.getViewManager();
 
+    public void trigger() {
+        System.out.println("trigger method");
+    }
+
     @Test
     public void testActionsMetricsRecorder() {
         await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
 
-            // TODO fire some fake action
+            // get the views
+            ViewData actionExecutionTimes = viewManager.getView(View.Name.create("inspectit/self/action/execution-time"));
+            ViewData actionExecutionCounts = viewManager.getView(View.Name.create("inspectit/self/action/count"));
 
-            ViewData actionExecutionTimes = viewManager.getView(View.Name.create("inspectit/self/actions/execution-time"));
-            ViewData actionExecutionCounts = viewManager.getView(View.Name.create("inspectit/self/actions/count"));
+            // record some measurements (that have been specified in ActionMetricsRecorderTest.yml)
+            trigger();
 
-            // fake record some measurements
-
+            // verify that execution-time and count has been recorded
             assertThat(actionExecutionTimes).isNotNull();
             assertThat(actionExecutionTimes.getAggregationMap()).isNotNull().isNotEmpty();
+            assertThat(actionExecutionCounts).isNotNull();
+            assertThat(actionExecutionCounts.getAggregationMap()).isNotNull().isNotEmpty();
 
             Map.Entry<List<TagValue>, AggregationData> executionTime = actionExecutionTimes.getAggregationMap()
                     .entrySet()
@@ -39,15 +47,24 @@ public class ActionMetricsRecorderTestAgent extends MetricsSysTestBase {
                     .findFirst()
                     .get();
 
+            Map.Entry<List<TagValue>, AggregationData> executionCount = actionExecutionCounts.getAggregationMap()
+                    .entrySet()
+                    .stream()
+                    .findFirst()
+                    .get();
+
             // ensure that tags are present
             assertThat(executionTime.getKey()).isNotEmpty();
+            assertThat(executionCount.getKey()).isNotEmpty();
 
             System.out.println("print keys");
-            System.out.println(executionTime.getKey().toArray());
+            System.out.println(Arrays.toString(executionTime.getKey().toArray()));
 
             // ensure sanity of values
-            long executionTimeVal = ((AggregationData.LastValueDataLong) executionTime.getValue()).getLastValue();
+            long executionTimeVal = ((AggregationData.SumDataLong) executionTime.getValue()).getSum();
             assertThat(executionTimeVal).isGreaterThan(0);
+            long executionCountVal = ((AggregationData.CountData) executionCount.getValue()).getCount();
+            assertThat(executionCountVal).isGreaterThan(0);
 
         });
     }

@@ -4,15 +4,15 @@ import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IMethodHook;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
+import rocks.inspectit.ocelot.core.selfmonitoring.ActionMetricsRecorder;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
-import rocks.inspectit.ocelot.core.selfmonitoring.ActionsMetricsRecorder;
+import rocks.inspectit.ocelot.core.selfmonitoring.IActionScope;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +68,7 @@ public class MethodHook implements IMethodHook {
     /**
      * The metrics recorder for the {@link IHookAction}
      */
-    private final ActionsMetricsRecorder actionsMetricsRecorder;
+    private final ActionMetricsRecorder actionMetricsRecorder;
 
     /**
      * The factory that creates/spawns new scopes for an {@link IHookAction}
@@ -76,7 +76,7 @@ public class MethodHook implements IMethodHook {
     private final ActionScopeFactory actionScopeFactory;
 
     @Builder
-    public MethodHook(MethodHookConfiguration sourceConfiguration, ContextManager inspectitContextManager, @Singular List<IHookAction> entryActions, @Singular List<IHookAction> exitActions, MethodReflectionInformation methodInformation, ActionsMetricsRecorder actionsMetricsRecorder, ActionScopeFactory actionScopeFactory) {
+    public MethodHook(MethodHookConfiguration sourceConfiguration, ContextManager inspectitContextManager, @Singular List<IHookAction> entryActions, @Singular List<IHookAction> exitActions, MethodReflectionInformation methodInformation, ActionMetricsRecorder actionMetricsRecorder, ActionScopeFactory actionScopeFactory) {
         this.sourceConfiguration = sourceConfiguration;
         this.inspectitContextManager = inspectitContextManager;
         this.entryActions = new ArrayList<>(entryActions);
@@ -84,17 +84,17 @@ public class MethodHook implements IMethodHook {
         this.exitActions = new ArrayList<>(exitActions);
         activeExitActions = new CopyOnWriteArrayList<>(exitActions);
         this.methodInformation = methodInformation;
-        this.actionsMetricsRecorder = actionsMetricsRecorder;
+        this.actionMetricsRecorder = actionMetricsRecorder;
         this.actionScopeFactory = actionScopeFactory;
     }
 
     @Override
     public InternalInspectitContext onEnter(Object[] args, Object thiz) {
-        val inspectitContext = inspectitContextManager.enterNewContext();
-        val executionContext = new IHookAction.ExecutionContext(args, thiz, null, null, this, inspectitContext);
+        InspectitContextImpl inspectitContext = inspectitContextManager.enterNewContext();
+        IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, null, null, this, inspectitContext);
 
-        for (val action : activeEntryActions) {
-            try (val scope = actionScopeFactory.getScope(action)) {
+        for (IHookAction action : activeEntryActions) {
+            try (IActionScope scope = actionScopeFactory.getScope(action)) {
                 action.execute(executionContext);
             } catch (Throwable t) {
                 log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action.getName(), methodInformation.getMethodFQN(), t);
@@ -108,9 +108,9 @@ public class MethodHook implements IMethodHook {
 
     @Override
     public void onExit(Object[] args, Object thiz, Object returnValue, Throwable thrown, InternalInspectitContext context) {
-        val executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, (InspectitContextImpl) context);
-        for (val action : activeExitActions) {
-            try (val scope = actionScopeFactory.getScope(action)) {
+        IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, (InspectitContextImpl) context);
+        for (IHookAction action : activeExitActions) {
+            try (IActionScope scope = actionScopeFactory.getScope(action)) {
                 action.execute(executionContext);
             } catch (Throwable t) {
                 log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action.getName(), methodInformation.getMethodFQN(), t);
@@ -124,7 +124,7 @@ public class MethodHook implements IMethodHook {
      * @return An exact copy of this method hook but with all deactivated actions reactivated.
      */
     public MethodHook getResettedCopy() {
-        return new MethodHook(sourceConfiguration, inspectitContextManager, entryActions, exitActions, methodInformation, actionsMetricsRecorder, actionScopeFactory);
+        return new MethodHook(sourceConfiguration, inspectitContextManager, entryActions, exitActions, methodInformation, actionMetricsRecorder, actionScopeFactory);
     }
 
 }

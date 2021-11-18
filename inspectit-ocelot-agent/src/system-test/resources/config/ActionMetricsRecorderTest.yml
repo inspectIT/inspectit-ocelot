@@ -1,0 +1,28 @@
+# dummy scopes, actions, and rules for the ActionMetricsRecorderTestAgent
+
+inspectit:
+  instrumentation:
+    scopes:
+
+      # the trigger() method in ActionMetricsRecorderTestAgent
+      's_actionmetrics_trigger':
+        type:
+          name: 'rocks.inspectit.ocelot.metrics.selfmonitoring.ActionMetricsRecorderTestAgent'
+        methods:
+          - name: 'trigger'
+
+    actions:
+
+      # simple action to get the full qualified class name
+      'a_trigger_action':
+        input:
+          _class: 'Class'
+        value: '_class.getName()'
+
+    rules:
+      'r_...':
+        scopes:
+          's_actionmetrics_trigger': true
+        entry:
+          'c_dummy':
+            action: 'a_trigger_action'

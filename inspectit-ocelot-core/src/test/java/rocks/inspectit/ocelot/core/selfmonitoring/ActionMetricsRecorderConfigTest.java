@@ -2,7 +2,6 @@ package rocks.inspectit.ocelot.core.selfmonitoring;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
@@ -10,12 +9,12 @@ import rocks.inspectit.ocelot.core.SpringTestBase;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests the configuration for {@link ActionsMetricsRecorder}
+ * Tests the configuration for {@link ActionMetricsRecorder}
  */
 public class ActionMetricsRecorderConfigTest extends SpringTestBase {
 
     @Autowired
-    private ActionsMetricsRecorder recorder;
+    private ActionMetricsRecorder recorder;
 
     @Nested
     class Defaults extends SpringTestBase {
@@ -31,10 +30,10 @@ public class ActionMetricsRecorderConfigTest extends SpringTestBase {
 
         @Test
         @DirtiesContext
-        void checkExecutionTime() {
+        void checkAllEnabled() {
             assertThat(recorder.isEnabled()).isTrue();
             updateProperties((mp) -> {
-                mp.setProperty("inspectit.selfMonitoring.actions.enabled.execution-time", "false");
+                mp.setProperty("inspectit.selfMonitoring.actionMetrics.enabled", "true");
             });
             assertThat(recorder.isEnabled()).isTrue();
         }
@@ -44,8 +43,7 @@ public class ActionMetricsRecorderConfigTest extends SpringTestBase {
         void checkAllDisabled() {
             assertThat(recorder.isEnabled()).isTrue();
             updateProperties((mp) -> {
-                mp.setProperty("inspectit.selfMonitoring.actions.enabled.execution-time", "false");
-                mp.setProperty("inspectit.selfMonitoring.actions.enabled.count", "false");
+                mp.setProperty("inspectit.selfMonitoring.actionMetrics.enabled", "false");
             });
             assertThat(recorder.isEnabled()).isFalse();
         }

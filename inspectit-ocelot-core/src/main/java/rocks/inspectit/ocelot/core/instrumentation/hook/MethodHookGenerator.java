@@ -23,8 +23,8 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
 import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
+import rocks.inspectit.ocelot.core.selfmonitoring.ActionMetricsRecorder;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
-import rocks.inspectit.ocelot.core.selfmonitoring.ActionsMetricsRecorder;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.util.*;
@@ -65,7 +65,7 @@ public class MethodHookGenerator {
     private StackTraceSampler stackTraceSampler;
 
     @Autowired
-    private ActionsMetricsRecorder actionsMetricsRecorder;
+    private ActionMetricsRecorder actionMetricsRecorder;
 
     @Autowired
     private ActionScopeFactory actionScopeFactory;
@@ -104,7 +104,7 @@ public class MethodHookGenerator {
         buildMetricsRecorder(config).ifPresent(builder::exitAction);
         builder.exitActions(buildActionCalls(config.getPostExitActions(), methodInfo));
 
-        builder.actionsMetricsRecorder(actionsMetricsRecorder);
+        builder.actionMetricsRecorder(actionMetricsRecorder);
         builder.actionScopeFactory(actionScopeFactory);
 
         return builder.build();

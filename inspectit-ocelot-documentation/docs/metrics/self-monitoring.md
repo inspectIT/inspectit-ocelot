@@ -15,8 +15,8 @@ The metric is split by the tag containing the component name and also includes a
 |```inspectit/self/duration```|us|The total time spent by inspectIT doing internal tasks, such as configuration loading, instrumenting, etc.The metric contains the tag ```component_name```, specifying in which component the time was spent
 |```inspectit/self/instrumentation-queue-size```|`classes`|InspectIT applies the configured instrumentation by working through a queue of classes it has to analyze and potentially instrument. This metric exposes the current size of this queue. By comparing it against the [total number of loaded classes](metrics/metric-recorders.md#class-loading-metrics), the instrumentation progress can be estimated.
 |```inspectit/self/instrumented-classes```|`classes`|Exposes the total number of classes which are currently instrumented by inspectIT.
-|```inspectit/self/actions/execution-time```|us|The execution time of individual actions. The metric contains the tag `action_name`, specifying the name of the instrumented action.
-|```inspectit/self/actions/count```|`action executions`|The number of executions per action. The metric contains the tag `action_name`, specifying the name of the instrumented action.
+|```inspectit/self/action/execution-time```|us|The execution time of individual actions. The metric contains the tag `action_name`, specifying the name of the instrumented action.
+|```inspectit/self/action/count```|`action executions`|The number of executions per action. The metric contains the tag `action_name`, specifying the name of the instrumented action.
 
 Self monitoring is enabled by default and can be disabled by setting the `inspectit.self-monitoring.enabled` property to `false`.
 

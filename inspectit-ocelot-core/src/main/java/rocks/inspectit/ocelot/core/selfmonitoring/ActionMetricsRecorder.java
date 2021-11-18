@@ -5,6 +5,7 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.selfmonitoring.ActionMetricsSettings;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodHook;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
@@ -16,7 +17,7 @@ import java.util.HashMap;
  */
 @Component
 @Slf4j
-public class ActionsMetricsRecorder extends DynamicallyActivatableService {
+public class ActionMetricsRecorder extends DynamicallyActivatableService {
 
     @Autowired
     private SelfMonitoringService selfMonitoringService;
@@ -24,7 +25,7 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
     /**
      * The prefix of the recorded metrics.
      */
-    private static final String METRIC_NAME_PREFIX = "actions/";
+    private static final String METRIC_NAME_PREFIX = "action/";
 
     /**
      * The metric name for the execution time of an action.
@@ -32,17 +33,12 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
     private static final String EXECUTION_TIME_METRIC_NAME = "execution-time";
 
     /**
-     * The metric name for execution count.
-     */
-    private static final String COUNT_METRIC_NAME = "count";
-
-    /**
      * The key of the action's name used in custom tags.
      */
     private static final String ACTION_NAME_KEY = "action_name";
 
-    public ActionsMetricsRecorder() {
-        super("metrics.enabled", "selfMonitoring.actions");
+    public ActionMetricsRecorder() {
+        super("metrics.enabled", "selfMonitoring.actionMetrics");
     }
 
     /**
@@ -50,7 +46,7 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
      *
      * @param action              The action
      * @param executionTimeMicros The execution time in microseconds
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
+     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
      */
     public void record(IHookAction action, long executionTimeMicros) {
         record(action.getName(), executionTimeMicros);
@@ -61,7 +57,7 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
      *
      * @param actionName          The name of the execution
      * @param executionTimeMicros The execution time in microseconds
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
+     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
      */
     public void record(String actionName, long executionTimeMicros) {
 
@@ -70,24 +66,22 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
             return;
         }
 
-        // log.info("recording action '{}', executionTimeMicros = {}", actionName, executionTimeMicros);
-
-        val actionsSettings = env.getCurrentConfig().getSelfMonitoring().getActions();
+        log.info("recording action '{}', executionTimeMicros = {}", actionName, executionTimeMicros);
 
         // create custom tags
-        val customTags = new HashMap<String, String>() {{
+        HashMap<String, String> customTags = new HashMap<String, String>() {{
             put(ACTION_NAME_KEY, actionName);
         }};
 
         // record the action's execution time if enabled
-        if (actionsSettings.getEnabled().getOrDefault(EXECUTION_TIME_METRIC_NAME, false)) {
-            recordMeasurement(EXECUTION_TIME_METRIC_NAME, executionTimeMicros, customTags);
-        }
+        recordMeasurement(EXECUTION_TIME_METRIC_NAME, executionTimeMicros, customTags);
 
-        // record the execution count increment
-        if (actionsSettings.getEnabled().getOrDefault(COUNT_METRIC_NAME, false)) {
-            recordMeasurement(COUNT_METRIC_NAME, 1L, customTags);
-        }
+        // if we later have different metrics that can be individually turned on or off, we need to check via ActionMetricsSettings what to record.
+
+        // ActionMetricsSettings actionsSettings = env.getCurrentConfig().getSelfMonitoring().getActionMetrics();
+        //        if (actionsSettings.isEnabled()) {
+        //          recordMeasurement(EXECUTION_TIME_METRIC_NAME, executionTimeMicros, customTags);
+        //    }
 
     }
 
@@ -100,11 +94,7 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
      */
     private void recordMeasurement(String actionName, String metricName, long value) {
         // return if the recorder or the metric is disabled
-        if (!isEnabled() || !env.getCurrentConfig()
-                .getSelfMonitoring()
-                .getActions()
-                .getEnabled()
-                .getOrDefault(metricName, false)) {
+        if (!isEnabled()) {
             return;
         }
         // create custom tags
@@ -130,7 +120,7 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
     protected boolean checkEnabledForConfig(InspectitConfig configuration) {
         // check the master switch metrics.enabled, whether self monitoring is enabled and if any metrics in actions.enabled is enabled
         return configuration.getMetrics().isEnabled() && configuration.getSelfMonitoring()
-                .isEnabled() && configuration.getSelfMonitoring().getActions().getEnabled().containsValue(true);
+                .isEnabled() && configuration.getSelfMonitoring().getActionMetrics().isEnabled();
     }
 
     @Override

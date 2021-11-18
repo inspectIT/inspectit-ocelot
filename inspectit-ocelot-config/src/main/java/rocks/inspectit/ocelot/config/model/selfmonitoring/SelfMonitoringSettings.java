@@ -15,10 +15,10 @@ public class SelfMonitoringSettings {
      */
     private boolean enabled;
 
-    /**
+     /**
      * Settings for {@link rocks.inspectit.ocelot.core.selfmonitoring.ActionsMetricsRecorder}
      */
     @Valid
-    private StandardMetricsSettings actions;
+    private ActionMetricsSettings actionMetrics;
 
 }
