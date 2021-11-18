@@ -5,10 +5,12 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import rocks.inspectit.ocelot.core.config.propertysources.http.RawProperties;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -26,6 +28,7 @@ public class PropertyUtils {
      * Reads the given YAML resources into a Properties Object according to Spring rules.
      *
      * @param resources the resources to load
+     *
      * @return the generated Properties object
      */
     public static Properties readYamlFiles(Resource... resources) {
@@ -39,6 +42,7 @@ public class PropertyUtils {
      * Reads the given .properties resources into a Properties Object according to Spring rules.
      *
      * @param resources the resources to load
+     *
      * @return the generated Properties object
      */
     public static Properties readPropertyFiles(Resource... resources) throws IOException {
@@ -77,6 +81,68 @@ public class PropertyUtils {
         } catch (JsonMappingException e) {
             throw new RuntimeException(e); //should not occur as we are mapping to plain maps
         }
+    }
+
+    /**
+     * Reads the given resources (either JSON or YAML) into a {@link Properties} Object according to Spring rules.
+     * The method will first try to parse the resource as JSON. If this fails, it tries to parse YAML.
+     *
+     * @param rawProperties
+     *
+     * @return
+     */
+    public static Properties read(String rawProperties) {
+        try {
+            return PropertyUtils.readJson(rawProperties);
+        } catch (IOException e) {
+            return PropertyUtils.readYaml(rawProperties);
+        }
+    }
+
+    /**
+     * Reads the given resources (either JSON or YAML) into a {@link Properties} Object according to Spring rules.
+     *
+     * @param rawProperties The raw properties String
+     * @param mimeType      The MIME type of the properties string. The MIME type must not be null.
+     *
+     * @return the generated {@link Properties} object
+     *
+     * @throws IOException
+     */
+    public static Properties read(String rawProperties, String mimeType) throws IOException {
+
+        // if the MIME type is 'text/plain' or no MIME type is present, try first to readJson and then readYaml
+        if (mimeType == null || mimeType.isEmpty() || ContentType.TEXT_PLAIN.getMimeType().equalsIgnoreCase(mimeType)) {
+            return read(rawProperties);
+        }
+
+        // otherwise, parse the properties with the appropriate parser
+
+        // JSON
+        if (ContentType.APPLICATION_JSON.getMimeType().equalsIgnoreCase(mimeType)) {
+            return readJson(rawProperties);
+        }
+        // YAML
+        else if ("application/x-yaml".equalsIgnoreCase(mimeType)) {
+            return readYaml(rawProperties);
+        }
+        // other MIME types are not supported.
+        else {
+            throw new IOException("Failed to read properties. MimeType " + mimeType + " is not supported!");
+        }
+    }
+
+    /**
+     * Reads the given resources (either JSON or YAML) into a Properties Object according to Spring rules.
+     *
+     * @param rawConfiguration The raw properties represented as a {@link RawProperties} with String and MIME type
+     *
+     * @return the generated {@link Properties} object
+     *
+     * @throws IOException
+     */
+    public static Properties read(RawProperties rawConfiguration) throws IOException {
+        return read(rawConfiguration.getRawProperties(), rawConfiguration.getMimeType());
     }
 }
 

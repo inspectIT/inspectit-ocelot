@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -11,12 +12,12 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
-import rocks.inspectit.ocelot.bootstrap.IAgent;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
@@ -104,7 +105,7 @@ public class HttpPropertySourceState {
     public HttpPropertySourceState(String name, HttpConfigSettings currentSettings) {
         this.name = name;
         this.currentSettings = currentSettings;
-        this.errorCounter = 0;
+        errorCounter = 0;
         //ensure that currentPropertySource is never null, even if the initial fetching fails
         currentPropertySource = new PropertiesPropertySource(name, new Properties());
     }
@@ -115,10 +116,11 @@ public class HttpPropertySourceState {
      * that the configuration has not be changed the property source will not be updated!
      *
      * @param fallBackToFile if true, the configured persisted configuration will be loaded in case of an error
+     *
      * @return returns true if a new property source has been created, otherwise false.
      */
     public boolean update(boolean fallBackToFile) {
-        String configuration = fetchConfiguration(fallBackToFile);
+        RawProperties configuration = fetchConfiguration(fallBackToFile);
         if (configuration != null) {
             try {
                 Properties properties = parseProperties(configuration);
@@ -128,7 +130,6 @@ public class HttpPropertySourceState {
                 log.error("Could not parse fetched configuration.", e);
             }
         }
-
         return false;
     }
 
@@ -137,6 +138,7 @@ public class HttpPropertySourceState {
      * or YAML document.
      *
      * @param rawProperties the properties in a String representation
+     *
      * @return the parsed {@link Properties} object
      */
     private Properties parseProperties(String rawProperties) {
@@ -148,6 +150,32 @@ public class HttpPropertySourceState {
         } catch (IOException e) {
             return PropertyUtils.readYaml(rawProperties);
         }
+    }
+
+    /**
+     * Parse the given properties represented as {@link RawProperties} into an instance of {@link Properties} using the appropriate parser for the given MIME type.
+     *
+     * @param rawProperties the {@link RawProperties} containing the properties in a String representation and the MIME type
+     *
+     * @return the parsed {@link Properties} object
+     */
+    private Properties parseProperties(RawProperties rawProperties) throws IOException {
+        return parseProperties(rawProperties.getRawProperties(), rawProperties.getMimeType());
+    }
+
+    /**
+     * Parse the given properties string into an instance of {@link Properties} using the appropriate parser for the given MIME type.
+     *
+     * @param rawProperties the properties in a String representation
+     * @param mimeType      the MIME type. Supported MIME types are 'application/json', 'application/x-yaml', and 'text/plain'
+     *
+     * @return the parsed {@link Properties} object
+     */
+    private Properties parseProperties(String rawProperties, String mimeType) throws IOException {
+        if (StringUtils.isBlank(rawProperties)) {
+            return EMPTY_PROPERTIES;
+        }
+        return PropertyUtils.read(rawProperties, mimeType);
     }
 
     /**
@@ -176,10 +204,10 @@ public class HttpPropertySourceState {
      * Fetches the configuration by executing a HTTP request against the configured HTTP endpoint. The request contains
      * the 'If-Modified-Since' header if a previous response returned a 'Last-Modified' header.
      *
-     * @return The requests response body representing the configuration in a JSON format. null is returned if request fails or the
+     * @return The request's response body representing the configuration in a JSON/YAML format and the MIME type. null is returned if request fails or the
      * server returns 304 (not modified).
      */
-    private String fetchConfiguration(boolean fallBackToFile) {
+    private RawProperties fetchConfiguration(boolean fallBackToFile) {
         HttpGet httpGet;
         try {
             URI uri = getEffectiveRequestUri();
@@ -200,10 +228,26 @@ public class HttpPropertySourceState {
         setAgentMetaHeaders(httpGet);
 
         String configuration = null;
+        RawProperties rawProp = null;
         boolean isError = true;
         try {
             HttpResponse response = createHttpClient().execute(httpGet);
+            // try to retrieve the MIME type of the response
+            ContentType contentType = null;
+            String mimeType = null;
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                contentType = ContentType.get(entity);
+                if (contentType != null) {
+                    mimeType = contentType.getMimeType();
+                }
+            }
+            // get the config from the response
             configuration = processHttpResponse(response);
+            rawProp = new RawProperties(configuration, mimeType);
+
+            log.info("entity={}, contentType={}, mimeType={}, config={}", entity, contentType, contentType != null ? contentType.getMimeType() : "null", configuration);
+
             isError = false;
             if (errorCounter != 0) {
                 log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
@@ -219,18 +263,21 @@ public class HttpPropertySourceState {
             httpGet.releaseConnection();
         }
 
-        if (!isError && configuration != null) {
-            writePersistenceFile(configuration);
+        log.info("isError={}, fallbackToFile={}, configuration={}", isError, fallBackToFile, configuration);
+        if (!isError && rawProp != null) {
+            writePersistenceFile(rawProp.getRawProperties());
         } else if (isError && fallBackToFile) {
-            configuration = readPersistenceFile();
+            String conf = readPersistenceFile();
+            rawProp = new RawProperties(conf, ContentType.TEXT_PLAIN.getMimeType());
+            log.info("fallback={}", configuration);
         }
-
-        return configuration;
+        log.info("rawProp={}, \nconfiguration.isBlank={}", rawProp, StringUtils.isBlank(configuration));
+        return rawProp;
     }
 
     /**
-     * Injects all the agent's meta information headers, which should be send when fetching a new configuration,
-     * into the given request request.
+     * Injects all the agent's meta information headers, which should be sent when fetching a new configuration,
+     * into the given request.
      *
      * @param httpGet the request to inject the meat information headers
      */
@@ -263,11 +310,14 @@ public class HttpPropertySourceState {
      * Builds the request URI by combining the base URI with the configured attributes.
      *
      * @return the resulting URI
+     *
      * @throws URISyntaxException if the base URI is malformed
      */
     public URI getEffectiveRequestUri() throws URISyntaxException {
         URIBuilder uriBuilder = new URIBuilder(currentSettings.getUrl().toURI());
-        currentSettings.getAttributes().entrySet().stream()
+        currentSettings.getAttributes()
+                .entrySet()
+                .stream()
                 .filter(pair -> !StringUtils.isEmpty(pair.getValue()))
                 .forEach(pair -> uriBuilder.setParameter(pair.getKey(), pair.getValue()));
         return uriBuilder.build();
@@ -278,7 +328,9 @@ public class HttpPropertySourceState {
      * If the response contains a 'Last-Modified' header, its value will be stored.
      *
      * @param response the HTTP response object
+     *
      * @return the response body or null in case server sends 304 (not modified)
+     *
      * @throws IOException if an error occurs reading the input stream or if the server returned an unexpected status code
      */
     private String processHttpResponse(HttpResponse response) throws IOException {
@@ -361,6 +413,5 @@ public class HttpPropertySourceState {
         }
         return null;
     }
-
 
 }
