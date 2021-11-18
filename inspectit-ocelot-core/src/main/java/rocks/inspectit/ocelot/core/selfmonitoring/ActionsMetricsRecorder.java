@@ -42,7 +42,6 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
     private static final String ACTION_NAME_KEY = "action_name";
 
     public ActionsMetricsRecorder() {
-        // TODO: do metrics need to be enabled in order to take self-monitoring measurements?
         super("metrics.enabled", "selfMonitoring.actions");
     }
 
@@ -51,7 +50,7 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
      *
      * @param action              The action
      * @param executionTimeMicros The execution time in microseconds
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
+     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
      */
     public void record(IHookAction action, long executionTimeMicros) {
         record(action.getName(), executionTimeMicros);
@@ -62,7 +61,7 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
      *
      * @param actionName          The name of the execution
      * @param executionTimeMicros The execution time in microseconds
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
+     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
      */
     public void record(String actionName, long executionTimeMicros) {
 
@@ -129,10 +128,9 @@ public class ActionsMetricsRecorder extends DynamicallyActivatableService {
 
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig configuration) {
-        return configuration.getSelfMonitoring().isEnabled() && configuration.getSelfMonitoring()
-                .getActions()
-                .getEnabled()
-                .containsValue(true);
+        // check the master switch metrics.enabled, whether self monitoring is enabled and if any metrics in actions.enabled is enabled
+        return configuration.getMetrics().isEnabled() && configuration.getSelfMonitoring()
+                .isEnabled() && configuration.getSelfMonitoring().getActions().getEnabled().containsValue(true);
     }
 
     @Override
