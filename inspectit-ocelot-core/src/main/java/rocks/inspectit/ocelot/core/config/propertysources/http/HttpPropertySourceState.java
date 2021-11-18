@@ -244,10 +244,11 @@ public class HttpPropertySourceState {
             }
             // get the config from the response
             configuration = processHttpResponse(response);
-            rawProp = new RawProperties(configuration, mimeType);
-
-            log.info("entity={}, contentType={}, mimeType={}, config={}", entity, contentType, contentType != null ? contentType.getMimeType() : "null", configuration);
-
+            // create raw properties file if the response contains a configuration
+            if (configuration != null) {
+                rawProp = new RawProperties(configuration, mimeType);
+            }
+            // log.info("entity={}, contentType={}, mimeType={}, config={}", entity, contentType, contentType != null ? contentType.getMimeType() : "null", configuration);
             isError = false;
             if (errorCounter != 0) {
                 log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
@@ -263,15 +264,12 @@ public class HttpPropertySourceState {
             httpGet.releaseConnection();
         }
 
-        log.info("isError={}, fallbackToFile={}, configuration={}", isError, fallBackToFile, configuration);
         if (!isError && rawProp != null) {
             writePersistenceFile(rawProp.getRawProperties());
         } else if (isError && fallBackToFile) {
-            String conf = readPersistenceFile();
-            rawProp = new RawProperties(conf, ContentType.TEXT_PLAIN.getMimeType());
-            log.info("fallback={}", configuration);
+            configuration = readPersistenceFile();
+            rawProp = new RawProperties(configuration, ContentType.TEXT_PLAIN.getMimeType());
         }
-        log.info("rawProp={}, \nconfiguration.isBlank={}", rawProp, StringUtils.isBlank(configuration));
         return rawProp;
     }
 
