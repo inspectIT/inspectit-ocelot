@@ -36,7 +36,12 @@ public class SpecialElementMatchers {
         }
 
         String namePattern = settings.getName();
+        // create regex to negate the namePattern for NOT_EQUALS_FULLY
+        String negatedNamePattern = "^(?!" + namePattern + "$).*";
+        // for NOT_EQUALS_FULLY_IGNORE_CASE
+        String negatedNameIgnoreCasePattern= "(?i)"+negatedNamePattern;
 
+        System.out.println("nameIs for " + settings);
         if (StringUtils.isNotEmpty(namePattern)) {
             switch (settings.getMatcherMode()) {
                 case EQUALS_FULLY:
@@ -57,6 +62,10 @@ public class SpecialElementMatchers {
                     return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.CONTAINS_IGNORE_CASE));
                 case MATCHES:
                     return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.MATCHES));
+                case NOT_EQUALS_FULLY:
+                    return new NameMatcher<>(new StringMatcher(negatedNamePattern, StringMatcher.Mode.MATCHES));
+                case NOT_EQUALS_FULLY_IGNORE_CASE:
+                    return new NameMatcher<>(new StringMatcher(negatedNameIgnoreCasePattern, StringMatcher.Mode.MATCHES));
                 default:
                     throw new RuntimeException("Unhandled matcher mode!");
             }
