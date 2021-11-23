@@ -41,7 +41,6 @@ public class SpecialElementMatchers {
         // for NOT_EQUALS_FULLY_IGNORE_CASE
         String negatedNameIgnoreCasePattern= "(?i)"+negatedNamePattern;
 
-        System.out.println("nameIs for " + settings);
         if (StringUtils.isNotEmpty(namePattern)) {
             switch (settings.getMatcherMode()) {
                 case EQUALS_FULLY:
