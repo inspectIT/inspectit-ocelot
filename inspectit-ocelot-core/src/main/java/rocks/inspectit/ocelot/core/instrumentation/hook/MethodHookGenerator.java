@@ -65,9 +65,6 @@ public class MethodHookGenerator {
     private StackTraceSampler stackTraceSampler;
 
     @Autowired
-    private ActionMetricsRecorder actionMetricsRecorder;
-
-    @Autowired
     private ActionScopeFactory actionScopeFactory;
 
     /**
@@ -104,7 +101,6 @@ public class MethodHookGenerator {
         buildMetricsRecorder(config).ifPresent(builder::exitAction);
         builder.exitActions(buildActionCalls(config.getPostExitActions(), methodInfo));
 
-        builder.actionMetricsRecorder(actionMetricsRecorder);
         builder.actionScopeFactory(actionScopeFactory);
 
         return builder.build();

@@ -14,6 +14,7 @@ import rocks.inspectit.ocelot.core.selfmonitoring.ActionMetricsRecorder;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 import rocks.inspectit.ocelot.core.selfmonitoring.IActionScope;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -65,18 +66,15 @@ public class MethodHook implements IMethodHook {
      */
     private final MethodReflectionInformation methodInformation;
 
-    /**
-     * The metrics recorder for the {@link IHookAction}
-     */
-    private final ActionMetricsRecorder actionMetricsRecorder;
 
     /**
      * The factory that creates/spawns new scopes for an {@link IHookAction}
      */
+    @NotNull
     private final ActionScopeFactory actionScopeFactory;
 
     @Builder
-    public MethodHook(MethodHookConfiguration sourceConfiguration, ContextManager inspectitContextManager, @Singular List<IHookAction> entryActions, @Singular List<IHookAction> exitActions, MethodReflectionInformation methodInformation, ActionMetricsRecorder actionMetricsRecorder, ActionScopeFactory actionScopeFactory) {
+    public MethodHook(MethodHookConfiguration sourceConfiguration, ContextManager inspectitContextManager, @Singular List<IHookAction> entryActions, @Singular List<IHookAction> exitActions, MethodReflectionInformation methodInformation, ActionScopeFactory actionScopeFactory) {
         this.sourceConfiguration = sourceConfiguration;
         this.inspectitContextManager = inspectitContextManager;
         this.entryActions = new ArrayList<>(entryActions);
@@ -84,7 +82,9 @@ public class MethodHook implements IMethodHook {
         this.exitActions = new ArrayList<>(exitActions);
         activeExitActions = new CopyOnWriteArrayList<>(exitActions);
         this.methodInformation = methodInformation;
-        this.actionMetricsRecorder = actionMetricsRecorder;
+        if (actionScopeFactory == null) {
+            throw new IllegalArgumentException("ActionScopeFactory must not be null!");
+        }
         this.actionScopeFactory = actionScopeFactory;
     }
 
@@ -124,7 +124,7 @@ public class MethodHook implements IMethodHook {
      * @return An exact copy of this method hook but with all deactivated actions reactivated.
      */
     public MethodHook getResettedCopy() {
-        return new MethodHook(sourceConfiguration, inspectitContextManager, entryActions, exitActions, methodInformation, actionMetricsRecorder, actionScopeFactory);
+        return new MethodHook(sourceConfiguration, inspectitContextManager, entryActions, exitActions, methodInformation, actionScopeFactory);
     }
 
 }

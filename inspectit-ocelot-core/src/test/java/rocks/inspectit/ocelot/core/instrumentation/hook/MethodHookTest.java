@@ -11,6 +11,7 @@ import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
+import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 
 import java.util.Arrays;
 
@@ -29,6 +30,9 @@ public class MethodHookTest {
 
     @Mock
     private MethodReflectionInformation methodInfo;
+
+    @Mock
+    private ActionScopeFactory actionScopeFactory;
 
     @BeforeEach
     void setupContextManagerMock() {
@@ -49,6 +53,7 @@ public class MethodHookTest {
                     .methodInformation(methodInfo)
                     .entryActions(Arrays.asList(first, second, third))
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
+                    .actionScopeFactory(actionScopeFactory)
                     .build();
 
             InternalInspectitContext ctx = hook.onEnter(null, null);
@@ -81,6 +86,7 @@ public class MethodHookTest {
                     .methodInformation(methodInfo)
                     .entryAction(action)
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
+                    .actionScopeFactory(actionScopeFactory)
                     .build();
 
             InternalInspectitContext ctx = hook.onEnter(null, null);
@@ -117,6 +123,7 @@ public class MethodHookTest {
                     .methodInformation(methodInfo)
                     .exitActions(Arrays.asList(first, second, third))
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
+                    .actionScopeFactory(actionScopeFactory)
                     .build();
 
             InternalInspectitContext ctx = hook.onEnter(null, null);
@@ -143,6 +150,7 @@ public class MethodHookTest {
                     .methodInformation(methodInfo)
                     .exitAction(action)
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
+                    .actionScopeFactory(actionScopeFactory)
                     .build();
 
             InternalInspectitContext ctx = hook.onEnter(null, null);
