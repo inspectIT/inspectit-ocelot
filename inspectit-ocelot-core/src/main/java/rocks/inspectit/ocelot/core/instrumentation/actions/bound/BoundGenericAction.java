@@ -57,6 +57,11 @@ public abstract class BoundGenericAction implements IHookAction {
 
     @Override
     public String getName() {
+        return actionName;
+    }
+
+    @Override
+    public String toString() {
         return "Action '" + actionName + "' for call '" + callName + "'";
     }
 
