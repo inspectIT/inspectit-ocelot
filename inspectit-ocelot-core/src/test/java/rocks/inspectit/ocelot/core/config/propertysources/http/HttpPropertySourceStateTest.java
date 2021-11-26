@@ -97,16 +97,20 @@ class HttpPropertySourceStateTest {
             // now verify that the PropertyUtils.java readYaml method has been called and not readJson
             try (MockedStatic<PropertyUtils> theMock = Mockito.mockStatic(PropertyUtils.class)) {
 
-                // mock readYaml
-                theMock.when(() -> PropertyUtils.readYaml(anyString())).thenAnswer(invocation -> result.getSource());
-                // make sure PropertyUtils.read(...) calls the real method
-                theMock.when(() -> PropertyUtils.read(anyString(), anyString())).thenCallRealMethod();
+                // make sure that the used methods in PropertyUtils call actually the real method
+                theMock.when(() -> PropertyUtils.readYaml(anyString())).thenCallRealMethod();
+                theMock.when(() -> PropertyUtils.readYamlFiles(Mockito.any())).thenCallRealMethod();
+                theMock.when(() -> PropertyUtils.read(Mockito.any(RawProperties.class))).thenCallRealMethod();
+                theMock.when(() -> PropertyUtils.read(anyString(), Mockito.any(ContentType.class))).thenCallRealMethod();
 
+                // fetch config
                 updateResult = state.update(false);
-                assertTrue(updateResult);
-                // verify that only read and readYaml have been called (as I mocked readYaml, readYamlFiles will not be called)
-                theMock.verify(() -> PropertyUtils.read(anyString(), anyString()));
+
+                // verify that only read and readYaml, and  readYamlFiles have been called
+                theMock.verify(() -> PropertyUtils.read(Mockito.any(RawProperties.class)));
+                theMock.verify(() -> PropertyUtils.read(anyString(), Mockito.any(ContentType.class)));
                 theMock.verify(() -> PropertyUtils.readYaml(anyString()));
+                theMock.verify(() -> PropertyUtils.readYamlFiles(Mockito.any()));
                 theMock.verifyNoMoreInteractions();
             }
         }
@@ -127,15 +131,23 @@ class HttpPropertySourceStateTest {
             // now verify that the PropertyUtils.java readJson method has been called and not readYaml
             try (MockedStatic<PropertyUtils> theMock = Mockito.mockStatic(PropertyUtils.class)) {
 
-                // mock readJson. We need to mock this method as it contains private methods that cannot be mocked (to call the real method).
+                // mock PropertyUtils.readJson. We need to mock this method as it contains private methods (i.e., readJsonFromStream) that cannot be mocked (to call the real method), see https://stackoverflow.com/questions/8799439/testing-private-method-using-mockito
                 theMock.when(() -> PropertyUtils.readJson(anyString())).thenAnswer(invocation -> result.getSource());
-                // make sure PropertyUtils.read(...) calls the real method
-                theMock.when(() -> PropertyUtils.read(anyString(), anyString())).thenCallRealMethod();
 
+                // make sure that the used methods in PropertyUtils call actually the real method
+
+                // make sure that ProperyUtils.read(RawProperties rawProperties) calls the real method
+                theMock.when(() -> PropertyUtils.read(Mockito.any(RawProperties.class))).thenCallRealMethod();
+                // make sure PropertyUtils.read(String rawProperties, ContentType contentType) calls the real method
+                theMock.when(() -> PropertyUtils.read(anyString(), Mockito.any(ContentType.class)))
+                        .thenCallRealMethod();
+
+                // fetch config
                 updateResult = state.update(false);
-                assertTrue(updateResult);
+
                 // verify that only read and readJson have been called
-                theMock.verify(() -> PropertyUtils.read(anyString(), anyString()));
+                theMock.verify(() -> PropertyUtils.read(Mockito.any(RawProperties.class)));
+                theMock.verify(() -> PropertyUtils.read(anyString(), Mockito.any(ContentType.class)));
                 theMock.verify(() -> PropertyUtils.readJson(anyString()));
                 theMock.verifyNoMoreInteractions();
             }

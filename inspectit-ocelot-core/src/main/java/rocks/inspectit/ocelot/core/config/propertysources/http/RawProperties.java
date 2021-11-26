@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.config.propertysources.http;
 
 import lombok.AllArgsConstructor;
 import lombok.Value;
+import org.apache.http.entity.ContentType;
 
 /**
  * Class representing the raw inspectit configuration content used to parse {@link java.util.Properties}
@@ -16,8 +17,7 @@ public class RawProperties {
     private String rawProperties;
 
     /**
-     * The MIME type of the configuration string
+     * The {@link ContentType} of the configuration string
      */
-    private String mimeType;
-
+    private ContentType contentType;
 }

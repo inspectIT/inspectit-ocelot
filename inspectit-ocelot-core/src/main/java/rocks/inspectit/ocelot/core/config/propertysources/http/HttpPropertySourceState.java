@@ -121,6 +121,7 @@ public class HttpPropertySourceState {
      */
     public boolean update(boolean fallBackToFile) {
         RawProperties configuration = fetchConfiguration(fallBackToFile);
+        log.info("configuration={}", configuration);
         if (configuration != null) {
             try {
                 Properties properties = parseProperties(configuration);
@@ -160,23 +161,11 @@ public class HttpPropertySourceState {
      * @return the parsed {@link Properties} object
      */
     private Properties parseProperties(RawProperties rawProperties) throws IOException {
-        return parseProperties(rawProperties.getRawProperties(), rawProperties.getMimeType());
+        if (StringUtils.isBlank(rawProperties.getRawProperties())) {
+            return EMPTY_PROPERTIES;
+        }return PropertyUtils.read(rawProperties);
     }
 
-    /**
-     * Parse the given properties string into an instance of {@link Properties} using the appropriate parser for the given MIME type.
-     *
-     * @param rawProperties the properties in a String representation
-     * @param mimeType      the MIME type. Supported MIME types are 'application/json', 'application/x-yaml', and 'text/plain'
-     *
-     * @return the parsed {@link Properties} object
-     */
-    private Properties parseProperties(String rawProperties, String mimeType) throws IOException {
-        if (StringUtils.isBlank(rawProperties)) {
-            return EMPTY_PROPERTIES;
-        }
-        return PropertyUtils.read(rawProperties, mimeType);
-    }
 
     /**
      * Creates the {@link HttpClient} which is used for fetching the configuration.
@@ -242,13 +231,13 @@ public class HttpPropertySourceState {
                     mimeType = contentType.getMimeType();
                 }
             }
+
             // get the config from the response
             configuration = processHttpResponse(response);
             // create raw properties file if the response contains a configuration
             if (configuration != null) {
-                rawProp = new RawProperties(configuration, mimeType);
+                rawProp = new RawProperties(configuration, contentType);
             }
-            // log.info("entity={}, contentType={}, mimeType={}, config={}", entity, contentType, contentType != null ? contentType.getMimeType() : "null", configuration);
             isError = false;
             if (errorCounter != 0) {
                 log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
@@ -268,7 +257,7 @@ public class HttpPropertySourceState {
             writePersistenceFile(rawProp.getRawProperties());
         } else if (isError && fallBackToFile) {
             configuration = readPersistenceFile();
-            rawProp = new RawProperties(configuration, ContentType.TEXT_PLAIN.getMimeType());
+            rawProp = new RawProperties(configuration, ContentType.TEXT_PLAIN);
         }
         return rawProp;
     }

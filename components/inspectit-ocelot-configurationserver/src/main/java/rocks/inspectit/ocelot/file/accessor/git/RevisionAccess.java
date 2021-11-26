@@ -18,7 +18,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Accessor to access specific Git revision/commits. Using this class ensures that all operations will be executed
@@ -110,7 +113,7 @@ public class RevisionAccess extends AbstractFileAccessor {
             RevWalk walk = new RevWalk(repository);
             walk.setRevFilter(RevFilter.MERGE_BASE);
             // RevCommits need to be produced by the same RevWalk instance otherwise it can't compare them
-            walk.markStart(walk.parseCommit(this.revCommit.toObjectId()));
+            walk.markStart(walk.parseCommit(revCommit.toObjectId()));
             walk.markStart(walk.parseCommit(other.revCommit.toObjectId()));
             RevCommit mergeBase = walk.next();
 
@@ -196,7 +199,7 @@ public class RevisionAccess extends AbstractFileAccessor {
             throw new IllegalArgumentException("User path escapes the base path: " + relativePath);
         }
 
-        return resolvedPath.toString().replace("\\\\", "/");
+        return resolvedPath.toString().replaceAll("\\\\", "/");
     }
 
     @Override

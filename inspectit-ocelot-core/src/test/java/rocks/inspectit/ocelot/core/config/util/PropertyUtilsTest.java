@@ -60,24 +60,24 @@ public class PropertyUtilsTest {
         @Test
         public void read() throws IOException {
 
-            RawProperties confJ = new RawProperties(json, ContentType.APPLICATION_JSON.getMimeType());
+            RawProperties confJ = new RawProperties(json, ContentType.APPLICATION_JSON);
 
             // test that json is correctly parsed
             Properties resultJ1 = PropertyUtils.read(confJ);
             assertThat(resultJ1).hasSize(6);
             assertThat(resultJ1).containsEntry("arr[0].x", 42);
-            Properties resultJ2 = PropertyUtils.read(json, ContentType.APPLICATION_JSON.getMimeType());
+            Properties resultJ2 = PropertyUtils.read(json, ContentType.APPLICATION_JSON);
             assertThat(resultJ1).isEqualTo(resultJ2);
 
             // test that yaml is correctly parsed
-            RawProperties confY = new RawProperties(yaml, "application/x-yaml");
+            RawProperties confY = new RawProperties(yaml, ContentType.parse("application/x-yaml"));
             Properties resultY = PropertyUtils.read(confY);
             assertThat(resultY).hasSize(2);
             assertThat(resultY).containsEntry("root.sub-child.value", true);
             assertThat(resultY).isEqualTo(PropertyUtils.read(yaml, "application/x-yaml"));
 
             // test MIME type mismatch
-            Assertions.assertThrows(JsonParseException.class, () -> PropertyUtils.read(yaml, ContentType.APPLICATION_JSON.getMimeType()));
+            Assertions.assertThrows(JsonParseException.class, () -> PropertyUtils.read(yaml, ContentType.APPLICATION_JSON));
 
             // TODO: YamlPropertiesFactoryBean can also parse JSON, although only quoted keys are supported.
             Properties resultN = PropertyUtils.read(json, "application/x-yaml");

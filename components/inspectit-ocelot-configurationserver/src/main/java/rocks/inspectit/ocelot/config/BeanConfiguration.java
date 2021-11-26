@@ -24,7 +24,7 @@ public class BeanConfiguration {
     /**
      * Executor service to use for asynchronous tasks.
      *
-     * @param config the applications configuration, gets autowired
+     * @param config the application's configuration, gets autowired
      *
      * @return the executor service
      */
