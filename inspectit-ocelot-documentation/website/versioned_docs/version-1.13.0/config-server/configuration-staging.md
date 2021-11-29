@@ -1,7 +1,8 @@
 ---
-id: configuration-files-staging
+id: version-1.13.0-configuration-files-staging
 title: Configuration Files Staging Using Remote Git
 sidebar_label: Configuration Files Staging
+original_id: configuration-files-staging
 ---
 
 :::tip
