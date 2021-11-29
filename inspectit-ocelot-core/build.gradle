@@ -74,7 +74,7 @@ dependencies {
             "io.opencensus:opencensus-exporter-trace-ocagent:${openCensusVersion}",
             // The following dependecy is required for the OC-exporter to work correctly and must be matched against the grpc version
             // See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
-            'io.netty:netty-tcnative-boringssl-static:2.0.20.Final',
+            "io.netty:netty-tcnative-boringssl-static:${tcnativeVersion}",
 
 
             "rocks.inspectit:opencensus-influxdb-exporter:1.2",
