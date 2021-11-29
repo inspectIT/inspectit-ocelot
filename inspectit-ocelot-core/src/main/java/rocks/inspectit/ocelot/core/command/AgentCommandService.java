@@ -102,7 +102,7 @@ public class AgentCommandService extends DynamicallyActivatableService implement
 
         if (settings.isDeriveFromHttpConfigUrl()) {
             URL url = configuration.getConfig().getHttp().getUrl();
-            if (url == null) {
+            if (url == null || url.getHost() == null) {
                 throw new IllegalStateException("The URL cannot derived from the HTTP configuration URL because it is null.");
             }
 
