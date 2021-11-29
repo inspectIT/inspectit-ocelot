@@ -1,28 +1,22 @@
 package rocks.inspectit.ocelot.core.command;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.model.config.ConfigSettings;
-import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Duration;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -46,7 +40,7 @@ public class AgentCommandServiceTest {
     public class DoEnable {
 
         @Captor
-        private ArgumentCaptor<URI>  uriCaptor;
+        private ArgumentCaptor<URI> uriCaptor;
 
         @Test
         public void successfullyEnabled() throws MalformedURLException {
@@ -74,7 +68,7 @@ public class AgentCommandServiceTest {
             boolean result = service.doDisable();
 
             assertThat(result).isTrue();
-            verifyZeroInteractions(commandFetcher);
+            verifyNoMoreInteractions(commandFetcher);
         }
 
         @Test
@@ -110,7 +104,11 @@ public class AgentCommandServiceTest {
         @Test
         public void deriveUrlWithoutConfigUrl() {
             when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
-
+            // for mockito-inline, we need to make sure that the URL is actually null
+            if (configuration.getConfig().getHttp().getUrl() != null) {
+                when(configuration.getConfig().getHttp().getUrl()).thenReturn(null);
+            }
+            assertThat(configuration.getConfig().getHttp().getUrl()).isNull();
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> service.getCommandUri(configuration))
                     .withMessage("The URL cannot derived from the HTTP configuration URL because it is null.");
         }

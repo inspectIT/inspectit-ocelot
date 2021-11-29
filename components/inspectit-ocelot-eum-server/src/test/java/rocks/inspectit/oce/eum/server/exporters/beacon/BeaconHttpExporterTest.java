@@ -95,7 +95,7 @@ class BeaconHttpExporterTest {
 
             exporter.export(beaconA);
 
-            verifyZeroInteractions(executor);
+            verifyNoMoreInteractions(executor);
         }
 
         @Test
@@ -112,7 +112,7 @@ class BeaconHttpExporterTest {
             exporter.export(beaconA);
 
             assertThat(beaconBuffer).containsExactly(beaconA);
-            verifyZeroInteractions(executor);
+            verifyNoMoreInteractions(executor);
 
             //export second
             exporter.export(beaconB);

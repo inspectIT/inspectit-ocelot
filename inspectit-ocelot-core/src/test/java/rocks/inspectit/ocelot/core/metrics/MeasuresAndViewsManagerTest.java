@@ -133,7 +133,7 @@ public class MeasuresAndViewsManagerTest {
         void tryRecordingNonExistingLongMetric() {
             manager.tryRecordingMeasurement("nonexisting", 42L);
 
-            verifyZeroInteractions(recorder);
+            verifyNoMoreInteractions(recorder);
             verify(percentileViewManager).recordMeasurement("nonexisting", 42.0, Tags.getTagger()
                     .getCurrentTagContext());
         }
@@ -142,7 +142,7 @@ public class MeasuresAndViewsManagerTest {
         void tryRecordingNonExistingDoubleMetric() {
             manager.tryRecordingMeasurement("nonexisting", 42.0);
 
-            verifyZeroInteractions(recorder);
+            verifyNoMoreInteractions(recorder);
             verify(percentileViewManager).recordMeasurement("nonexisting", 42.0, Tags.getTagger()
                     .getCurrentTagContext());
         }
@@ -397,7 +397,7 @@ public class MeasuresAndViewsManagerTest {
                     metricName, "custom-view", "my-unit", "Cool view",
                     true, false, Arrays.asList(0.5), 123, expectedTags, 345);
 
-            verifyZeroInteractions(viewManager);
+            verifyNoMoreInteractions(viewManager);
         }
 
         @Test
@@ -435,7 +435,7 @@ public class MeasuresAndViewsManagerTest {
                     metricName, "custom-view", "my-unit", "Cool view",
                     true, false, Arrays.asList(0.5), 123, expectedTags, 345);
 
-            verifyZeroInteractions(viewManager);
+            verifyNoMoreInteractions(viewManager);
         }
 
         @Test
@@ -457,7 +457,7 @@ public class MeasuresAndViewsManagerTest {
 
             verify(percentileViewManager, times(1)).isViewRegistered("my-metric", "custom-view");
             verifyNoMoreInteractions(percentileViewManager);
-            verifyZeroInteractions(viewManager);
+            verifyNoMoreInteractions(viewManager);
         }
 
         @Test
@@ -477,8 +477,8 @@ public class MeasuresAndViewsManagerTest {
 
             manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), existingViews);
 
-            verifyZeroInteractions(percentileViewManager);
-            verifyZeroInteractions(viewManager);
+            verifyNoMoreInteractions(percentileViewManager);
+            verifyNoMoreInteractions(viewManager);
         }
     }
 

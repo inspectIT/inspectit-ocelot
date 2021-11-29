@@ -50,7 +50,7 @@ public class WriteSpanAttributesTest {
                 action.execute(executionContext);
             }
 
-            verifyZeroInteractions(obfuscatory);
+            verifyNoMoreInteractions(obfuscatory);
         }
 
         @Test
