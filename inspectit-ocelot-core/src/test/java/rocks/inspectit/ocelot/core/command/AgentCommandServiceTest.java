@@ -104,10 +104,8 @@ public class AgentCommandServiceTest {
         @Test
         public void deriveUrlWithoutConfigUrl() {
             when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
-            // for mockito-inline, we need to make sure that the URL is actually null
-            if (configuration.getConfig().getHttp().getUrl() != null) {
-                when(configuration.getConfig().getHttp().getUrl()).thenReturn(null);
-            }
+            when(configuration.getConfig().getHttp().getUrl()).thenReturn(null);
+
             assertThat(configuration.getConfig().getHttp().getUrl()).isNull();
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> service.getCommandUri(configuration))
                     .withMessage("The URL cannot derived from the HTTP configuration URL because it is null.");

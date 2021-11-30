@@ -110,8 +110,7 @@ public class MeasuresAndViewsManagerTest {
             verify(recorder).newMeasureMap();
             verify(measureMap).put(any(Measure.MeasureDouble.class), eq(42.0));
             verify(measureMap).record(eq(Tags.getTagger().getCurrentTagContext()));
-            verifyNoMoreInteractions(recorder);
-            verifyNoMoreInteractions(measureMap);
+            verifyNoMoreInteractions(recorder, measureMap);
             verify(percentileViewManager).recordMeasurement(DOUBLE_METRIC, 42.0, Tags.getTagger()
                     .getCurrentTagContext());
         }
@@ -123,8 +122,7 @@ public class MeasuresAndViewsManagerTest {
             verify(recorder).newMeasureMap();
             verify(measureMap, times(1)).put(any(Measure.MeasureLong.class), eq(42L));
             verify(measureMap).record(eq(Tags.getTagger().getCurrentTagContext()));
-            verifyNoMoreInteractions(recorder);
-            verifyNoMoreInteractions(measureMap);
+            verifyNoMoreInteractions(recorder, measureMap);
             verify(percentileViewManager).recordMeasurement(LONG_METRIC, 42.0, Tags.getTagger()
                     .getCurrentTagContext());
         }
@@ -154,8 +152,7 @@ public class MeasuresAndViewsManagerTest {
             verify(recorder).newMeasureMap();
             verify(measureMap, times(1)).put(any(Measure.MeasureLong.class), eq(42L));
             verify(measureMap).record(eq(Tags.getTagger().getCurrentTagContext()));
-            verifyNoMoreInteractions(recorder);
-            verifyNoMoreInteractions(measureMap);
+            verifyNoMoreInteractions(recorder, measureMap);
             verify(percentileViewManager).recordMeasurement(LONG_METRIC, 42.0, Tags.getTagger()
                     .getCurrentTagContext());
         }
@@ -456,8 +453,7 @@ public class MeasuresAndViewsManagerTest {
             manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
             verify(percentileViewManager, times(1)).isViewRegistered("my-metric", "custom-view");
-            verifyNoMoreInteractions(percentileViewManager);
-            verifyNoMoreInteractions(viewManager);
+            verifyNoMoreInteractions(percentileViewManager, viewManager);
         }
 
         @Test
@@ -477,8 +473,7 @@ public class MeasuresAndViewsManagerTest {
 
             manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), existingViews);
 
-            verifyNoMoreInteractions(percentileViewManager);
-            verifyNoMoreInteractions(viewManager);
+            verifyNoMoreInteractions(percentileViewManager, viewManager);
         }
     }
 

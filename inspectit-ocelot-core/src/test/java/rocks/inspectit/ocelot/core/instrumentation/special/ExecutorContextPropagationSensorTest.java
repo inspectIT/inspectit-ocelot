@@ -50,8 +50,7 @@ public class ExecutorContextPropagationSensorTest {
             invokeTestMethod(mockRunnable);
 
             verify(contextManager).enterCorrelation();
-            verifyNoMoreInteractions(contextManager);
-            verifyNoMoreInteractions(logTraceCorrelator);
+            verifyNoMoreInteractions(contextManager, logTraceCorrelator);
         }
 
         @Test
@@ -85,8 +84,7 @@ public class ExecutorContextPropagationSensorTest {
 
             verify(contextManager).enterCorrelation();
             verify(contextManager).storeContext(mockRunnable, true);
-            verifyNoMoreInteractions(contextManager);
-            verifyNoMoreInteractions(logTraceCorrelator);
+            verifyNoMoreInteractions(contextManager, logTraceCorrelator);
         }
     }
 }

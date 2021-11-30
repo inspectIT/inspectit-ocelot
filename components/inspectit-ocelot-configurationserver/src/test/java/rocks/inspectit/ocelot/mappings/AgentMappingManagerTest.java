@@ -186,8 +186,7 @@ public class AgentMappingManagerTest {
                     .isThrownBy(() -> manager.getAgentMapping(null))
                     .withMessage("The mapping name should not be empty or null.");
 
-            verifyNoMoreInteractions(serializer);
-            verifyNoMoreInteractions(writeAccessor);
+            verifyNoMoreInteractions(serializer, writeAccessor);
         }
 
         @Test
@@ -196,8 +195,7 @@ public class AgentMappingManagerTest {
                     .isThrownBy(() -> manager.getAgentMapping(""))
                     .withMessage("The mapping name should not be empty or null.");
 
-            verifyNoMoreInteractions(serializer);
-            verifyNoMoreInteractions(writeAccessor);
+            verifyNoMoreInteractions(serializer, writeAccessor);
         }
     }
 
