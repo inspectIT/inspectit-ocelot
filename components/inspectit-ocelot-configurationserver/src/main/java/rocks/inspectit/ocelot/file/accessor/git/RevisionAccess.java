@@ -189,7 +189,7 @@ public class RevisionAccess extends AbstractFileAccessor {
         Path path = Paths.get(relativePath).normalize();
 
         if (StringUtils.isBlank(relativeBasePath)) {
-            return path.toString().replace("\\\\", "/");
+            return path.toString().replaceAll("\\\\", "/");
         }
 
         Path basePath = Paths.get(relativeBasePath).normalize();
