@@ -5,21 +5,28 @@ import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import rocks.inspectit.ocelot.core.config.propertysources.http.RawProperties;
 
 import java.io.IOException;
 import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 
 public class PropertyUtilsTest {
+
+    String json = "{\"arr\": [{\"x\":42},{\"y\":7},[\"A\",\"B\"]],nested:{\"name\":\"blub\",\"complex.key\":true}}";
+
+    String yaml = "root:\n  sub-child:\n    value: true\n  second: 42";
 
     @Nested
     public class ReadJson {
 
         @Test
         public void readJson() throws Exception {
-            String json = "{arr: [{x:42},{y:7},[\"A\",\"B\"]],nested:{name:\"blub\",\"complex.key\":true}}";
 
             Properties result = PropertyUtils.readJson(json);
 
@@ -39,9 +46,8 @@ public class PropertyUtilsTest {
 
         @Test
         public void readYaml() {
-            String json = "root:\n  sub-child:\n    value: true\n  second: 42";
 
-            Properties result = PropertyUtils.readYaml(json);
+            Properties result = PropertyUtils.readYaml(yaml);
 
             assertThat(result).hasSize(2);
             assertThat(result).containsEntry("root.sub-child.value", true);
@@ -52,10 +58,6 @@ public class PropertyUtilsTest {
 
     @Nested
     class Read {
-
-        String json = "{\"arr\": [{\"x\":42},{\"y\":7},[\"A\",\"B\"]],nested:{\"name\":\"blub\",\"complex.key\":true}}";
-
-        String yaml = "root:\n  sub-child:\n    value: true\n  second: 42";
 
         @Test
         public void read() throws IOException {
@@ -84,6 +86,37 @@ public class PropertyUtilsTest {
             assertThat(resultJ1).isEqualTo(resultN);
 
         }
+    }
 
+    @Nested
+    class ReadMimeTypeSensitive {
+
+        @Test
+        public void readJsonMimeTypeSensitive() throws IOException {
+            try (MockedStatic<PropertyUtils> theMock = Mockito.mockStatic(PropertyUtils.class, CALLS_REAL_METHODS)) {
+                PropertyUtils.read(new RawProperties(json, ContentType.APPLICATION_JSON));
+
+                // verify that only json-related methods have been called
+                theMock.verify(() -> PropertyUtils.read(Mockito.any(RawProperties.class)));
+                theMock.verify(() -> PropertyUtils.read(anyString(), Mockito.any(ContentType.class)));
+                theMock.verify(() -> PropertyUtils.readJson(anyString()));
+                theMock.verify(() -> PropertyUtils.readJsonFromStream(Mockito.any()));
+                theMock.verifyNoMoreInteractions();
+            }
+        }
+
+        @Test
+        public void readYamlMimeTypeSensitive() throws IOException {
+            try (MockedStatic<PropertyUtils> theMock = Mockito.mockStatic(PropertyUtils.class, CALLS_REAL_METHODS)) {
+                PropertyUtils.read(new RawProperties(yaml, ContentType.parse("application/x-yaml")));
+
+                // verify that only read and readYaml, and  readYamlFiles have been called
+                theMock.verify(() -> PropertyUtils.read(Mockito.any(RawProperties.class)));
+                theMock.verify(() -> PropertyUtils.read(anyString(), Mockito.any(ContentType.class)));
+                theMock.verify(() -> PropertyUtils.readYaml(anyString()));
+                theMock.verify(() -> PropertyUtils.readYamlFiles(Mockito.any()));
+            }
+
+        }
     }
 }

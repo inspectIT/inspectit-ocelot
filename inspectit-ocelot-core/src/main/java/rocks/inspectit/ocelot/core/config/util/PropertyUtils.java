@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
@@ -70,8 +69,7 @@ public class PropertyUtils {
         return readYamlFiles(resource);
     }
 
-    @VisibleForTesting
-    private static Properties readJsonFromStream(InputStream is) throws IOException {
+    static Properties readJsonFromStream(InputStream is) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         try {

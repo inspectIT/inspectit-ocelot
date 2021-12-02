@@ -163,9 +163,9 @@ public class HttpPropertySourceState {
     private Properties parseProperties(RawProperties rawProperties) throws IOException {
         if (StringUtils.isBlank(rawProperties.getRawProperties())) {
             return EMPTY_PROPERTIES;
-        }return PropertyUtils.read(rawProperties);
+        }
+        return PropertyUtils.read(rawProperties);
     }
-
 
     /**
      * Creates the {@link HttpClient} which is used for fetching the configuration.
