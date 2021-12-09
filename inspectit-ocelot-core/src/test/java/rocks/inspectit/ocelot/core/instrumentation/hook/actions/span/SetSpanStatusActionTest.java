@@ -45,7 +45,7 @@ public class SetSpanStatusActionTest {
                 action.execute(executionContext);
             }
 
-            verifyZeroInteractions(span);
+            verifyNoMoreInteractions(span);
         }
 
         @Test
@@ -57,7 +57,7 @@ public class SetSpanStatusActionTest {
                 action.execute(executionContext);
             }
 
-            verifyZeroInteractions(span);
+            verifyNoMoreInteractions(span);
         }
 
 
@@ -84,7 +84,7 @@ public class SetSpanStatusActionTest {
                 action.execute(executionContext);
             }
 
-            verifyZeroInteractions(span);
+            verifyNoMoreInteractions(span);
         }
 
     }

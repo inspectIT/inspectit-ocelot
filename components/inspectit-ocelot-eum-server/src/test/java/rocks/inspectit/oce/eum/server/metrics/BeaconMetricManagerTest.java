@@ -125,7 +125,7 @@ public class BeaconMetricManagerTest {
 
             beaconMetricManager.processBeacon(Beacon.of(beaconMap));
 
-            verifyZeroInteractions(viewManager, statsRecorder);
+            verifyNoMoreInteractions(viewManager, statsRecorder);
         }
 
         @Test
@@ -136,7 +136,7 @@ public class BeaconMetricManagerTest {
 
             beaconMetricManager.processBeacon(Beacon.of(beaconMap));
 
-            verifyZeroInteractions(viewManager, statsRecorder);
+            verifyNoMoreInteractions(viewManager, statsRecorder);
         }
 
         @Test
@@ -152,7 +152,7 @@ public class BeaconMetricManagerTest {
                 verify(beaconRecorder).record(beacon);
                 verifyNoMoreInteractions(beaconRecorder);
             });
-            verifyZeroInteractions(viewManager, statsRecorder);
+            verifyNoMoreInteractions(viewManager, statsRecorder);
         }
 
     }

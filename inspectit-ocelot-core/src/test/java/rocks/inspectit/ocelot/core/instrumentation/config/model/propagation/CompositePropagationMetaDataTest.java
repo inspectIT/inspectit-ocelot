@@ -84,7 +84,7 @@ public class CompositePropagationMetaDataTest {
 
             assertThat(result.isPropagatedDownWithinJVM("my_key")).isFalse();
             assertThat(result.isPropagatedDownGlobally("my_key")).isFalse();
-            verifyZeroInteractions(parent);
+            verifyNoMoreInteractions(parent);
         }
 
         @Test
@@ -95,7 +95,7 @@ public class CompositePropagationMetaDataTest {
 
             assertThat(result.isPropagatedDownWithinJVM("my_key")).isTrue();
             assertThat(result.isPropagatedDownGlobally("my_key")).isFalse();
-            verifyZeroInteractions(parent);
+            verifyNoMoreInteractions(parent);
         }
 
         @Test
@@ -106,7 +106,7 @@ public class CompositePropagationMetaDataTest {
 
             assertThat(result.isPropagatedDownWithinJVM("my_key")).isTrue();
             assertThat(result.isPropagatedDownGlobally("my_key")).isTrue();
-            verifyZeroInteractions(parent);
+            verifyNoMoreInteractions(parent);
         }
 
         @Test
@@ -118,7 +118,7 @@ public class CompositePropagationMetaDataTest {
 
             assertThat(result.isPropagatedDownWithinJVM("my_key")).isFalse();
             assertThat(result.isPropagatedDownGlobally("my_key")).isFalse();
-            verifyZeroInteractions(parent);
+            verifyNoMoreInteractions(parent);
         }
     }
 
@@ -146,7 +146,7 @@ public class CompositePropagationMetaDataTest {
 
             assertThat(result.isPropagatedUpWithinJVM("my_key")).isFalse();
             assertThat(result.isPropagatedUpGlobally("my_key")).isFalse();
-            verifyZeroInteractions(parent);
+            verifyNoMoreInteractions(parent);
         }
 
         @Test
@@ -157,7 +157,7 @@ public class CompositePropagationMetaDataTest {
 
             assertThat(result.isPropagatedUpWithinJVM("my_key")).isTrue();
             assertThat(result.isPropagatedUpGlobally("my_key")).isFalse();
-            verifyZeroInteractions(parent);
+            verifyNoMoreInteractions(parent);
         }
 
         @Test
@@ -168,7 +168,7 @@ public class CompositePropagationMetaDataTest {
 
             assertThat(result.isPropagatedUpWithinJVM("my_key")).isTrue();
             assertThat(result.isPropagatedUpGlobally("my_key")).isTrue();
-            verifyZeroInteractions(parent);
+            verifyNoMoreInteractions(parent);
         }
 
         @Test
@@ -180,7 +180,7 @@ public class CompositePropagationMetaDataTest {
 
             assertThat(result.isPropagatedUpWithinJVM("my_key")).isFalse();
             assertThat(result.isPropagatedUpGlobally("my_key")).isFalse();
-            verifyZeroInteractions(parent);
+            verifyNoMoreInteractions(parent);
         }
     }
 
@@ -204,7 +204,7 @@ public class CompositePropagationMetaDataTest {
                     .build();
 
             assertThat(result.isTag("my_key")).isFalse();
-            verifyZeroInteractions(parent);
+            verifyNoMoreInteractions(parent);
         }
 
         @Test
@@ -214,7 +214,7 @@ public class CompositePropagationMetaDataTest {
                     .build();
 
             assertThat(result.isTag("my_key")).isTrue();
-            verifyZeroInteractions(parent);
+            verifyNoMoreInteractions(parent);
         }
 
         @Test
@@ -225,7 +225,7 @@ public class CompositePropagationMetaDataTest {
                     .build();
 
             assertThat(result.isTag("my_key")).isFalse();
-            verifyZeroInteractions(parent);
+            verifyNoMoreInteractions(parent);
         }
     }
 }

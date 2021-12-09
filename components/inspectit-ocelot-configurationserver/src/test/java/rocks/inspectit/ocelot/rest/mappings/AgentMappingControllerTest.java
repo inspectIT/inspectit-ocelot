@@ -143,7 +143,7 @@ public class AgentMappingControllerTest {
                     .isThrownBy(() -> controller.putMapping("mappingName", agentMapping, "before", "after"))
                     .withMessage("The 'before' and 'after' parameters cannot be used together.");
 
-            verifyZeroInteractions(mappingManager);
+            verifyNoMoreInteractions(mappingManager);
         }
 
         @Test
