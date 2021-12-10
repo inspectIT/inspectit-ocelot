@@ -54,7 +54,7 @@ public class LoggingExporterService extends DynamicallyActivatableService {
 
     /**
      * The {@link SpanProcessor} of the {@link #spanExporter
-     *
+     */
     private SpanProcessor simpleSpanProcessor;
 
     /**
