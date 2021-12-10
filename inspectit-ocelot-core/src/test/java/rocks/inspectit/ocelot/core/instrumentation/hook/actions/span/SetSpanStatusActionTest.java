@@ -5,11 +5,14 @@ import io.opencensus.trace.AttributeValue;
 import io.opencensus.trace.Span;
 import io.opencensus.trace.Status;
 import io.opencensus.trace.Tracing;
+import io.opentelemetry.context.Context;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
@@ -25,12 +28,27 @@ public class SetSpanStatusActionTest {
     @Mock
     InspectitContextImpl ctx;
 
-    @Mock
-    Span span;
+    @Spy
+    // get the current span. This is needed when using the opencensus-shim as mocking the span collides with OTel's implementation (OpenTelemetryNoRecordEventsSpanImpl) of the Span.
+    // we could also alternatively try to mock SpanImpl such as OpenTelemetrySpanImpl, but I was not able to fix NullpointerExceptions in OpenTelemetrySpanBuilderImpl that way
+    Span span = Tracing.getTracer().getCurrentSpan();
 
     @BeforeEach
     void initMocks() {
         doReturn(ctx).when(executionContext).getInspectitContext();
+    }
+
+    /**
+     * Verifies that only {@link io.opentelemetry.api.trace.Span#storeInContext(Context)} has been invoked on the given {@link Span}
+     *
+     * @param span
+     */
+    static void verifyNoMoreMeaningfulInteractions(Span span) {
+        // cast the OC span to an OTel span
+        io.opentelemetry.api.trace.Span otelSpan = (io.opentelemetry.api.trace.Span) span;
+        // verify that only storeInContext has been invoked
+        verify(otelSpan).storeInContext(Mockito.any());
+        verifyNoMoreInteractions(span);
     }
 
     @Nested
@@ -45,7 +63,7 @@ public class SetSpanStatusActionTest {
                 action.execute(executionContext);
             }
 
-            verifyNoMoreInteractions(span);
+            verifyNoMoreMeaningfulInteractions(span);
         }
 
         @Test
@@ -57,9 +75,8 @@ public class SetSpanStatusActionTest {
                 action.execute(executionContext);
             }
 
-            verifyNoMoreInteractions(span);
+            verifyNoMoreMeaningfulInteractions(span);
         }
-
 
         @Test
         void throwableStatus() {
@@ -72,6 +89,9 @@ public class SetSpanStatusActionTest {
 
             verify(span).setStatus(eq(Status.UNKNOWN));
             verify(span).putAttribute(eq("error"), eq(AttributeValue.booleanAttributeValue(true)));
+            // storeInContext will also be called on the OTel span
+            verify((io.opentelemetry.api.trace.Span) (span)).storeInContext(Mockito.any());
+
             verifyNoMoreInteractions(span);
         }
 
@@ -84,7 +104,7 @@ public class SetSpanStatusActionTest {
                 action.execute(executionContext);
             }
 
-            verifyNoMoreInteractions(span);
+            verifyNoMoreMeaningfulInteractions(span);
         }
 
     }
