@@ -4,11 +4,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Settings for the {@link io.opentelemetry.exporter.logging.LoggingMetricExporter}
+ * Settings for the {@link io.opentelemetry.exporter.logging.LoggingSpanExporter}
  */
 @Data
 @NoArgsConstructor
-public class TraceLoggingExporterSettings {
+public class LoggingTraceExporterSettings {
 
     private boolean enabled;
 

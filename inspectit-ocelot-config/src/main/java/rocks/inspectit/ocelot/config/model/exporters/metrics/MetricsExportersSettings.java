@@ -22,5 +22,5 @@ public class MetricsExportersSettings {
     private InfluxExporterSettings influx;
 
     @Valid
-    private MetricLoggingExporterSettings logging;
+    private LoggingMetricsExporterSettings logging;
 }

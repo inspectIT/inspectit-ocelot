@@ -19,5 +19,5 @@ public class TraceExportersSettings {
     private OpenCensusAgentTraceExporterSettings openCensusAgent;
 
     @Valid
-    private TraceLoggingExporterSettings logging;
+    private LoggingTraceExporterSettings logging;
 }

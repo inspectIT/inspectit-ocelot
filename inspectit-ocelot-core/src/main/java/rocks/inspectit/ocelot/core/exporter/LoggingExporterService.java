@@ -23,8 +23,8 @@ import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.model.exporters.metrics.MetricLoggingExporterSettings;
-import rocks.inspectit.ocelot.config.model.exporters.trace.TraceLoggingExporterSettings;
+import rocks.inspectit.ocelot.config.model.exporters.metrics.LoggingMetricsExporterSettings;
+import rocks.inspectit.ocelot.config.model.exporters.trace.LoggingTraceExporterSettings;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 
@@ -110,15 +110,15 @@ public class LoggingExporterService extends DynamicallyActivatableService {
 
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
-        @Valid MetricLoggingExporterSettings metricLogging = conf.getExporters().getMetrics().getLogging();
-        @Valid TraceLoggingExporterSettings traceLogging = conf.getExporters().getTracing().getLogging();
+        @Valid LoggingMetricsExporterSettings metricLogging = conf.getExporters().getMetrics().getLogging();
+        @Valid LoggingTraceExporterSettings traceLogging = conf.getExporters().getTracing().getLogging();
         return (traceLogging.isEnabled() || metricLogging.isEnabled()) && conf.getMetrics().isEnabled();
     }
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        MetricLoggingExporterSettings metricLogging = configuration.getExporters().getMetrics().getLogging();
-        TraceLoggingExporterSettings traceLogging = configuration.getExporters().getTracing().getLogging();
+        LoggingMetricsExporterSettings metricLogging = configuration.getExporters().getMetrics().getLogging();
+        LoggingTraceExporterSettings traceLogging = configuration.getExporters().getTracing().getLogging();
 
         try {
 

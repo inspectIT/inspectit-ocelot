@@ -11,7 +11,7 @@ import java.time.Duration;
  */
 @Data
 @NoArgsConstructor
-public class MetricLoggingExporterSettings {
+public class LoggingMetricsExporterSettings {
 
     private boolean enabled;
 
