@@ -75,7 +75,7 @@ dependencies {
 
             'org.javassist:javassist:3.24.1-GA',
 
-            // OpenCensus exporters
+            // Metrics exporters
             "io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
 
             // we still need the OpenCensus SDK for the metric exporters to work, as the shim only includes opencensus-impl-core
@@ -108,7 +108,7 @@ dependencies {
             // LogCapturer
             "io.github.netmikey.logunit:logunit-jul:1.1.0",
             'org.apache.httpcomponents:httpclient:4.5.6',
-            'org.mockito:mockito-core:2.23.4',
+            "org.mockito:mockito-core:${mockitoVersion}",
             'org.assertj:assertj-core:3.11.1',
             'org.assertj:assertj-guava:3.2.1',
             'org.awaitility:awaitility:3.1.5',
@@ -167,7 +167,6 @@ task generateVersionFile {
     }
 }
 
-// TODO: re-enable once we have excluded OTel
 jar.dependsOn checkDependencyJavaVersions
 jar.dependsOn generateVersionFile
 
