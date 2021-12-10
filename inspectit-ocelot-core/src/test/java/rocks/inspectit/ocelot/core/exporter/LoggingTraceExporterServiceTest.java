@@ -1,13 +1,11 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.github.netmikey.logunit.api.LogCapturer;
-import io.opencensus.stats.*;
 import io.opencensus.trace.Tracing;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.exporter.logging.LoggingMetricExporter;
 import io.opentelemetry.exporter.logging.LoggingSpanExporter;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,20 +13,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Test class for {@link LoggingExporterService}
- */
-public class LoggingExporterServiceTest extends SpringTestBase {
+public class LoggingTraceExporterServiceTest extends SpringTestBase {
 
     public static final String INSTRUMENTATION_NAME = "rocks.inspectit.ocelot.instrumentation";
 
@@ -37,40 +30,18 @@ public class LoggingExporterServiceTest extends SpringTestBase {
     @RegisterExtension
     LogCapturer spanLogs = LogCapturer.create().captureForType(LoggingSpanExporter.class);
 
-    @RegisterExtension
-    LogCapturer metricLogs = LogCapturer.create().captureForType(LoggingMetricExporter.class);
-
-    @SpyBean
     @Autowired
-    LoggingExporterService service;
+    LoggingTraceExporterService service;
 
     @Autowired
     InspectitEnvironment environment;
 
     @BeforeEach
-    private void enableService() {
+    void enableService() {
         localSwitch(true);
-        updateProperties(props -> {
-            props.setProperty("inspectit.exporters.metrics.logging.export-interval", environment.getCurrentConfig()
-                    .getExporters()
-                    .getMetrics()
-                    .getLogging()
-                    .getExportInterval());
-        });
     }
 
     private void localSwitch(boolean enabled) {
-        localSwitchMetrics(enabled);
-        localSwitchTracing(enabled);
-    }
-
-    private void localSwitchMetrics(boolean enabled) {
-        updateProperties(props -> {
-            props.setProperty("inspectit.exporters.metrics.logging.enabled", enabled);
-        });
-    }
-
-    private void localSwitchTracing(boolean enabled) {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.tracing.logging.enabled", enabled);
         });
@@ -80,38 +51,17 @@ public class LoggingExporterServiceTest extends SpringTestBase {
     class EnableDisable {
 
         @Test
-        void testMasterSwitch() throws Exception {
+        void testMasterSwitch() {
             updateProperties(props -> {
-                props.setProperty("inspectit.metrics.enabled", "false");
+                props.setProperty("inspectit.tracing.enabled", "false");
             });
-            // TODO: test service disabled
             assertThat(service.isEnabled()).isFalse();
         }
 
         @Test
-        void testLocalSwitch() throws Exception {
+        void testLocalSwitch() {
             localSwitch(false);
             assertThat(service.isEnabled()).isFalse();
-        }
-
-        @Test
-        void testLoggingTraceExporterSwitch() {
-            assertThat(service.isEnabled()).isTrue();
-            localSwitchTracing(false);
-            assertThat(service.isEnabled()).isTrue();
-            assertThat(environment.getCurrentConfig().getExporters().getTracing().getLogging().isEnabled()).isFalse();
-            localSwitchTracing(true);
-            assertThat(environment.getCurrentConfig().getExporters().getTracing().getLogging().isEnabled()).isTrue();
-        }
-
-        @Test
-        void testLoggingMetricExporterSwitch() {
-            assertThat(service.isEnabled()).isTrue();
-            localSwitchMetrics(false);
-            assertThat(service.isEnabled()).isTrue();
-            assertThat(environment.getCurrentConfig().getExporters().getMetrics().getLogging().isEnabled()).isFalse();
-            localSwitchMetrics(true);
-            assertThat(environment.getCurrentConfig().getExporters().getMetrics().getLogging().isEnabled()).isTrue();
         }
     }
 
@@ -140,8 +90,6 @@ public class LoggingExporterServiceTest extends SpringTestBase {
         @Test
         void testOpenTelemetryTraceLogging() throws InterruptedException {
             assertThat(service.isEnabled()).isTrue();
-            localSwitchMetrics(false);
-            assertThat(environment.getCurrentConfig().getExporters().getTracing().getLogging().isEnabled());
 
             makeSpans();
 
@@ -153,7 +101,7 @@ public class LoggingExporterServiceTest extends SpringTestBase {
             });
 
             // turn off trace exporter
-            localSwitchTracing(false);
+            localSwitch(false);
 
             // wait until everything is flushed
             Thread.sleep(500);
@@ -166,7 +114,7 @@ public class LoggingExporterServiceTest extends SpringTestBase {
             assertThat(spanLogs.size()).isEqualTo(numEvents);
 
             // turn the trace exporter on again
-            localSwitchTracing(true);
+            localSwitch(true);
             Thread.sleep(1000);
             makeSpans();
             // wait until the new spans are exported to the log
@@ -199,7 +147,7 @@ public class LoggingExporterServiceTest extends SpringTestBase {
         @Test
         void testTracerRestart() {
             Tracer tracer = OpenCensusShimUtils.getOpenTelemetryTracerOfOpenTelemetrySpanBuilderImpl();
-            localSwitchTracing(false);
+            localSwitch(false);
             Awaitility.waitAtMost(5, TimeUnit.SECONDS)
                     .pollInterval(1, TimeUnit.SECONDS)
                     .untilAsserted(() -> assertThat(environment.getCurrentConfig()
@@ -207,7 +155,7 @@ public class LoggingExporterServiceTest extends SpringTestBase {
                             .getTracing()
                             .getLogging()
                             .isEnabled()).isFalse());
-            localSwitchTracing(true);
+            localSwitch(true);
             OpenCensusShimUtils.updateOpenTelemetryTracerInOpenTelemetrySpanBuilderImpl();
             Awaitility.waitAtMost(5, TimeUnit.SECONDS)
                     .pollInterval(1, TimeUnit.SECONDS)
@@ -225,10 +173,7 @@ public class LoggingExporterServiceTest extends SpringTestBase {
         @Test
         void testOpenCensusTraceLogging() throws InterruptedException {
             assertThat(service.isEnabled()).isTrue();
-            // turn off metrics to avoid spamming
-            localSwitchMetrics(false);
 
-            System.out.println(getTracer().toString() + " - " + getTracer().hashCode());
             // make some spans
             makeSpans();
 
@@ -239,16 +184,15 @@ public class LoggingExporterServiceTest extends SpringTestBase {
             int numEvents = spanLogs.size();
 
             // turn off tracing exporter
-            localSwitchTracing(false);
+            localSwitch(false);
             // make sure no more spans are recorded
             Thread.sleep(500);
             assertThat(spanLogs.size()).isEqualTo(numEvents);
 
             // turn tracing exporter back on
-            localSwitchTracing(true);
+            localSwitch(true);
             Thread.sleep(500);
 
-            System.out.println(getTracer().toString() + " - " + getTracer().hashCode());
             // make spans
             makeSpans();
             // verify logging of spans
@@ -274,56 +218,5 @@ public class LoggingExporterServiceTest extends SpringTestBase {
             }
         }
 
-        StatsRecorder statsRecorder = Stats.getStatsRecorder();
-
-        @Test
-        void testOpenCensusMetricLogging() throws InterruptedException {
-            // change export interval
-            updateProperties(props -> {
-                props.setProperty("inspectit.exporters.metrics.logging.export-interval", "500ms");
-            });
-            assertThat(service.isEnabled()).isTrue();
-            // shut the trace exporter off
-            localSwitchTracing(false);
-            assertThat(environment.getCurrentConfig().getExporters().getMetrics().getLogging().isEnabled()).isTrue();
-
-            // capture some metrics
-            captureOpenCensusMetrics();
-
-            // wait until the metrics are exported
-            Awaitility.waitAtMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
-                assertThat(metricLogs.getEvents().size()).isGreaterThan(0);
-                // assert that the latest metric is our custom log
-                assertThat(metricLogs.getEvents()
-                        .get(metricLogs.getEvents().size() - 1)
-                        .getArgumentArray()[0].toString()).contains("oc.desc");
-
-            });
-
-            // now turn the exporter off and make sure that no more metrics are exported to the log
-            localSwitchMetrics(false);
-            // wait until everything is flushed
-            Thread.sleep(500);
-            int numEvents = metricLogs.getEvents().size();
-
-            Thread.sleep(environment.getCurrentConfig()
-                    .getExporters()
-                    .getMetrics()
-                    .getLogging()
-                    .getExportInterval()
-                    .toMillis() + 1000);
-            assertThat(metricLogs.getEvents().size()).isEqualTo(numEvents);
-
-        }
-
-        private void captureOpenCensusMetrics() {
-            Measure.MeasureLong measure = Measure.MeasureLong.create("oc.measure", "oc.desc", "oc.unit");
-            Stats.getViewManager()
-                    .registerView(View.create(View.Name.create("oc.sum"), "oc.desc", measure, Aggregation.Count.create(), Collections.emptyList()));
-
-            statsRecorder.newMeasureMap().put(measure, 1).record();
-
-        }
     }
-
 }
