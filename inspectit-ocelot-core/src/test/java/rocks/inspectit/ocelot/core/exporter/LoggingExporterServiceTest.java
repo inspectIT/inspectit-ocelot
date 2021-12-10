@@ -198,7 +198,7 @@ public class LoggingExporterServiceTest extends SpringTestBase {
 
         @Test
         void testTracerRestart() {
-            io.opencensus.trace.Tracer tracer = getTracer();
+            Tracer tracer = OpenCensusShimUtils.getOpenTelemetryTracerOfOpenTelemetrySpanBuilderImpl();
             localSwitchTracing(false);
             Awaitility.waitAtMost(5, TimeUnit.SECONDS)
                     .pollInterval(1, TimeUnit.SECONDS)
@@ -216,7 +216,7 @@ public class LoggingExporterServiceTest extends SpringTestBase {
                             .getTracing()
                             .getLogging()
                             .isEnabled()).isTrue());
-            io.opencensus.trace.Tracer newTracer = getTracer();
+            Tracer newTracer = OpenCensusShimUtils.getOpenTelemetryTracerOfOpenTelemetrySpanBuilderImpl();
 
             assertThat(tracer).isNotSameAs(newTracer);
 
