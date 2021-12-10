@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.agent;
 
+import lombok.AllArgsConstructor;
+import lombok.Value;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 
@@ -15,6 +17,7 @@ import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.util.jar.JarFile;
+import java.util.logging.Logger;
 
 /**
  * Entry point of the agent.
@@ -24,9 +27,16 @@ import java.util.jar.JarFile;
 public class AgentMain {
 
     private static final String INSPECTIT_BOOTSTRAP_JAR_PATH = "/inspectit-ocelot-bootstrap.jar";
+
     private static final String INSPECTIT_CORE_JAR_PATH = "/inspectit-ocelot-core.jar";
-    private static final String OPENCENSUS_FAT_JAR_PATH = "/opencensus-fat.jar";
+
     private static final String PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY = "inspectit.publishOpenCensusToBootstrap";
+
+    private static final String OPEN_TELEMETRY_FAT_JAR_PATH = "/opentelemetry-fat.jar";
+
+    private static final String PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY = "inspectit.publishOpenTelemetryToBootstrap";
+
+    private static Logger LOGGER = Logger.getLogger(AgentMain.class.getName());
 
     /**
      * Main method for attaching the agent itself to a running JVM.
@@ -51,16 +61,22 @@ public class AgentMain {
     }
 
     public static void premain(String agentArgs, Instrumentation inst) {
-        boolean loadOpenCensusToBootstrap = "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY));
+        boolean loadOpenTelemetryJarToBootstrap = null != System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY) ? "true".equalsIgnoreCase(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY) : "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY));
+        // check for deprecated JVM property
+        if (null != System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY)) {
+            LOGGER.warning("You are using the deprecated JVM property '" + PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY + "'. Please use the new JVM property '" + PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY + "'. inspectIT Ocelot has moved from OpenCensus to OpenTelemetry. However, applications using the OpenCensusAPI are still supported through the opentelemetry-opencensus-shim ");
+        }
+        // retrieve and build settings for the telemetry implementation
+        TelemetrySettings telemetrySettings = new TelemetrySettings(TelemetryImplementation.OPEN_TELEMETRY, loadOpenTelemetryJarToBootstrap, PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY);
+
         try {
-            if (loadOpenCensusToBootstrap) {
-                Path ocJarFile = copyResourceToTempJarFile(OPENCENSUS_FAT_JAR_PATH);
-                inst.appendToBootstrapClassLoaderSearch(new JarFile(ocJarFile.toFile()));
+            if (loadOpenTelemetryJarToBootstrap) {
+                Path telJarFile = copyResourceToTempJarFile(OPEN_TELEMETRY_FAT_JAR_PATH);
+                inst.appendToBootstrapClassLoaderSearch(new JarFile(telJarFile.toFile()));
             }
+
             //we make sure that the startup of inspectIT is asynchronous
-            new Thread(() ->
-                    startAgent(agentArgs, inst, !loadOpenCensusToBootstrap)
-            ).start();
+            new Thread(() -> startAgent(agentArgs, inst, !loadOpenTelemetryJarToBootstrap)).start();
         } catch (Exception e) {
             System.err.println("Error starting inspectIT Agent!");
             e.printStackTrace();
@@ -77,13 +93,24 @@ public class AgentMain {
         }
     }
 
+    private static void startAgent(String agentArgs, Instrumentation inst, TelemetrySettings telemetrySettings) {
+        try {
+            InspectITClassLoader icl = initializeInspectitLoader(inst, telemetrySettings);
+            AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
+        } catch (Exception e) {
+            System.err.println("Error starting inspectIT Agent!");
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Loads {@link #INSPECTIT_BOOTSTRAP_JAR_PATH} with the bootstrap classloader and @link {@link #INSPECTIT_CORE_JAR_PATH} with a new inspectIT loader.
      *
      * @return the created inspectIT classloader
+     *
      * @throws IOException
      */
-    private static InspectITClassLoader initializeInspectitLoader(Instrumentation inst, boolean includeOpenCensus) throws IOException {
+    private static InspectITClassLoader initializeInspectitLoader(Instrumentation inst, boolean includeOpenTelemetry) throws IOException {
         Path bootstrapJar = copyResourceToTempJarFile(INSPECTIT_BOOTSTRAP_JAR_PATH);
         inst.appendToBootstrapClassLoaderSearch(new JarFile(bootstrapJar.toFile()));
 
@@ -94,9 +121,36 @@ public class AgentMain {
         Path coreJar = copyResourceToTempJarFile(INSPECTIT_CORE_JAR_PATH);
         InspectITClassLoader icl = new InspectITClassLoader(new URL[]{coreJar.toUri().toURL()});
 
-        if (includeOpenCensus) {
-            Path ocJarFile = copyResourceToTempJarFile(OPENCENSUS_FAT_JAR_PATH);
-            icl.addURL(ocJarFile.toUri().toURL());
+        if (includeOpenTelemetry) {
+            Path otJarFile = copyResourceToTempJarFile(OPEN_TELEMETRY_FAT_JAR_PATH);
+            icl.addURL(otJarFile.toUri().toURL());
+        }
+
+        return icl;
+    }
+
+    /**
+     * Loads {@link #INSPECTIT_BOOTSTRAP_JAR_PATH} with the bootstrap classloader and @link {@link #INSPECTIT_CORE_JAR_PATH} with a new inspectIT loader.
+     *
+     * @return the created inspectIT classloader
+     *
+     * @throws IOException
+     */
+    private static InspectITClassLoader initializeInspectitLoader(Instrumentation inst, TelemetrySettings telemetrySettings) throws IOException {
+        Path bootstrapJar = copyResourceToTempJarFile(INSPECTIT_BOOTSTRAP_JAR_PATH);
+        inst.appendToBootstrapClassLoaderSearch(new JarFile(bootstrapJar.toFile()));
+
+        Instances.BOOTSTRAP_JAR_URL = bootstrapJar.toUri().toURL();
+
+        Instances.AGENT_JAR_URL = AgentMain.class.getProtectionDomain().getCodeSource().getLocation();
+
+        Path coreJar = copyResourceToTempJarFile(INSPECTIT_CORE_JAR_PATH);
+        InspectITClassLoader icl = new InspectITClassLoader(new URL[]{coreJar.toUri().toURL()});
+
+        // add the fat jar of the telemetry if it has not been published to bootstrap already
+        if (!telemetrySettings.isPublishToBootstrap()) {
+            Path telJarFile = copyResourceToTempJarFile(telemetrySettings.getPathToFatJar());
+            icl.addURL(telJarFile.toUri().toURL());
         }
 
         return icl;
@@ -106,7 +160,9 @@ public class AgentMain {
      * Copies the given resource to a new temporary file with the ending ".jar"
      *
      * @param resourcePath the path to the resource
+     *
      * @return the path to the generated jar file
+     *
      * @throws IOException
      */
     private static Path copyResourceToTempJarFile(String resourcePath) throws IOException {
@@ -157,12 +213,41 @@ public class AgentMain {
                 if (javaVersion.startsWith("1.8")) {
                     return null;
                 } else {
-                    return (ClassLoader) ClassLoader.class.getDeclaredMethod("getPlatformClassLoader", new Class[]{}).invoke(null);
+                    return (ClassLoader) ClassLoader.class.getDeclaredMethod("getPlatformClassLoader", new Class[]{})
+                            .invoke(null);
                 }
             } catch (Exception e) {
                 return null;
             }
         }
     }
+
+}
+
+/**
+ * The telemetry implementation for collecting metrics and traces
+ */
+enum TelemetryImplementation {
+    UNKNOWN, OPEN_CENSUS, OPEN_TELEMETRY, COUNT
+}
+
+@Value
+@AllArgsConstructor
+class TelemetrySettings {
+
+    /**
+     * The {@link TelemetryImplementation}
+     */
+    TelemetryImplementation telemetryImplementation;
+
+    /**
+     * Whether the jar of the {@link TelemetryImplementation} should be published/loaded in the bootstrap classloader
+     */
+    boolean publishToBootstrap;
+
+    /**
+     * The path to the fat.jar of the {@link TelemetryImplementation}
+     */
+    String pathToFatJar;
 
 }

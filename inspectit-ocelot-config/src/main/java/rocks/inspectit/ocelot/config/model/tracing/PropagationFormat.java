@@ -18,6 +18,16 @@ public enum PropagationFormat {
     /**
      * Using Datadog headers.
      */
-    DATADOG;
+    DATADOG,
+
+    /**
+     * Using BaggageContext headers, seehttps://www.w3.org/TR/baggage/
+     */
+    W3C_BAGGAGE,
+
+    /**
+     * Using Jaeger HTTP format, see https://www.jaegertracing.io/docs/1.29/client-libraries/#propagation-format
+     */
+    JAEGER;
 
 }

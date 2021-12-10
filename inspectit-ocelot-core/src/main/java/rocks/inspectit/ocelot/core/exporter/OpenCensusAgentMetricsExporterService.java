@@ -1,8 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.opencensus.common.Duration;
-import io.opencensus.exporter.metrics.ocagent.OcAgentMetricsExporter;
-import io.opencensus.exporter.metrics.ocagent.OcAgentMetricsExporterConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -33,12 +31,15 @@ public class OpenCensusAgentMetricsExporterService extends DynamicallyActivatabl
         try {
             OpenCensusAgentMetricsExporterSettings settings = configuration.getExporters().getMetrics().getOpenCensusAgent();
             log.info("Starting OpenCensus Agent Metrics exporter");
+            // TODO: implement OTel equivalent
+            /*
             OcAgentMetricsExporter.createAndRegister(OcAgentMetricsExporterConfiguration.builder()
                     .setExportInterval(Duration.fromMillis(settings.getExportInterval().toMillis()))
                     .setEndPoint(settings.getAddress())
                     .setServiceName(settings.getServiceName())
                     .setUseInsecure(settings.isUseInsecure())
                     .setRetryInterval(Duration.fromMillis(settings.getReconnectionPeriod().toMillis())).build());
+             */
             return true;
         } catch (Throwable t) {
             log.error("Error creating OpenCensus Agent Metrics exporter", t);

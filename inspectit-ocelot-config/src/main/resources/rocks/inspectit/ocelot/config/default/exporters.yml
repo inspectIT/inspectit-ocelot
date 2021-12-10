@@ -49,6 +49,13 @@ inspectit:
         # E.g. if the exportInterval is 15s and the buffer-size is 4, the export will keep up to one minute of data in memory.
         buffer-size: 40
 
+      # settings for the LoggingMetricExporter used in LoggingExporterService
+      logging:
+          enabled: false
+          serviceName: ${inspectit.service-name}
+          # the export interval of the metrics
+          export-interval: ${inspectit.metrics.frequency}
+
     # settings for trace exporters
     tracing:
 
@@ -82,3 +89,8 @@ inspectit:
         service-name: ${inspectit.service-name}
         # the time at which the exporter tries to reconnect to the OpenCensus agent
         reconnection-period: 5s
+
+      # settings for the SpanLoggingExporterService
+      logging:
+          enabled: true
+          service-name: ${inspectit.service-name}

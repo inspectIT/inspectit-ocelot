@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-import io.opencensus.exporter.stats.prometheus.PrometheusStatsCollector;
-import io.opencensus.exporter.stats.prometheus.PrometheusStatsConfiguration;
+
 import io.prometheus.client.exporter.HTTPServer;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -37,7 +36,8 @@ public class PrometheusExporterService extends DynamicallyActivatableService {
             String host = config.getHost();
             int port = config.getPort();
             log.info("Starting Prometheus Exporter on {}:{}", host, port);
-            PrometheusStatsCollector.createAndRegister(PrometheusStatsConfiguration.builder().setRegistry(defaultRegistry).build());
+            // TODO: implement OTel PrometheusStatsCollector
+           //  PrometheusStatsCollector.createAndRegister(PrometheusStatsConfiguration.builder().setRegistry(defaultRegistry).build());
             prometheusClient = new HTTPServer(host, port, true);
         } catch (Exception e) {
             log.error("Error Starting Prometheus HTTP Endpoint!", e);

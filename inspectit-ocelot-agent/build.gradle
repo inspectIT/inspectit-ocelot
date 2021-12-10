@@ -20,7 +20,7 @@ group = 'rocks.inspectit.ocelot'
 sourceCompatibility = 1.8
 
 configurations {
-    opencensus
+    opentelemetry
 }
 
 dependencies {
@@ -28,11 +28,14 @@ dependencies {
             project(':inspectit-ocelot-bootstrap'),
             'org.projectlombok:lombok:1.18.12'
     )
-    opencensus(
-            "io.opencensus:opencensus-impl:${openCensusVersion}"
+
+    opentelemetry(
+        "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
+        "io.opentelemetry:opentelemetry-opencensus-shim:${openTelemetryAlphaVersion}"
     )
+
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
-    testImplementation (
+    testImplementation(
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
             'org.mockito:mockito-junit-jupiter:2.23.0',
             'ch.qos.logback:logback-classic:1.1.3',
@@ -40,11 +43,12 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
 
-task buildOpencensusFatJar(type: Jar) {
-    archiveFileName = "opencensus-fat.jar"
+
+task buildOpenTelemetryFatJar(type: Jar){
+    archiveFileName = "opentelemetry-fat.jar"
     destinationDirectory = file("$buildDir/jarGen")
-    from {
-        configurations.opencensus.collect { it.isDirectory() ? it : zipTree(it) }
+    from{
+        configurations.opentelemetry.collect{it.isDirectory() ? it : zipTree(it) }
     }
 }
 
@@ -57,8 +61,8 @@ jar {
         from file("src/main/resources/META-INF/MANIFEST.MF")
     }
 
-    //include the open-census dependencies as a fat jar
-    dependsOn buildOpencensusFatJar
+    // include the open-telemetry dependencies as a fat jar
+    dependsOn buildOpenTelemetryFatJar
     from "$buildDir/jarGen"
 
     from project(':inspectit-ocelot-bootstrap').jar.outputs
@@ -91,17 +95,18 @@ configurations {
 dependencies {
 
     systemTestCompileOnly(
-            "io.opencensus:opencensus-impl:${openCensusVersion}",
+            "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
+            "io.opentelemetry:opentelemetry-opencensus-shim:${openTelemetryAlphaVersion}",
             project(':inspectit-ocelot-bootstrap')
     )
 
     systemTestImplementation(
             "io.opencensus:opencensus-testing:${openCensusVersion}",
             "io.opencensus:opencensus-api:${openCensusVersion}",
-            
+
             'org.junit.jupiter:junit-jupiter-engine:5.3.1',
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
-            
+
             'org.assertj:assertj-core:3.11.1',
             'org.awaitility:awaitility:3.1.5',
             "com.github.tomakehurst:wiremock:2.25.1",
@@ -109,7 +114,7 @@ dependencies {
             'org.apache.httpcomponents:httpclient:4.5.6',
             'org.eclipse.jetty:jetty-server:9.4.3.v20170317',
             'org.eclipse.jetty:jetty-servlet:9.4.3.v20170317',
-            
+
             'com.h2database:h2:1.4.199',
 
             // for log-correlation tests
@@ -120,8 +125,8 @@ dependencies {
     )
 
     jmh(
-        sourceSets.systemTest.output,
-        project(':inspectit-ocelot-bootstrap')
+            sourceSets.systemTest.output,
+            project(':inspectit-ocelot-bootstrap')
     )
 }
 
@@ -139,22 +144,24 @@ task systemTest {
 
     def javaExecutables = ("${systemTestJavaHomes}")
             .tokenize(File.pathSeparator)
-            .collect { org.apache.tools.ant.taskdefs.condition.Os.isFamily(
-            org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS)
-            ? "${it}/bin/java.exe"
-            : "${it}/bin/java" }
-    .collect { new File(it).getCanonicalPath() }
+            .collect {
+                org.apache.tools.ant.taskdefs.condition.Os.isFamily(
+                        org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS)
+                        ? "${it}/bin/java.exe"
+                        : "${it}/bin/java"
+            }
+            .collect { new File(it).getCanonicalPath() }
             .unique()
 
-    assert javaExecutables.size > 0 :
+    assert javaExecutables.size > 0:
             'No Java executables found for running system tests'
 
     javaExecutables.eachWithIndex { javaExecutable, index ->
         def paths = "${javaExecutable}".tokenize(File.separator)
         def javaName = "${index}"
-        if(paths.size > 3) {
-            javaName =  paths[paths.size - 4] + "_" + paths[paths.size - 3]
-        } else if(paths.length > 2) {
+        if (paths.size > 3) {
+            javaName = paths[paths.size - 4] + "_" + paths[paths.size - 3]
+        } else if (paths.length > 2) {
             javaName = paths[paths.size - 3]
         }
 
@@ -200,14 +207,16 @@ task systemTest {
                     standardOutput = os
                     errorOutput = os
                 }
-                if(!os.toString().contains("\"1.8.")) {
+                if (!os.toString().contains("\"1.8.")) {
                     //Turns the jigsaw warnings into errors, making the system tests fail in case of illegal accesses
                     jvmArgs "--illegal-access=deny"
                 }
 
-                jvmArgs "-Dinspectit.config.file-based.path=$projectDir/src/system-test/resources/config"  // make inspectIT scan the workdir for configs
-                jvmArgs "-Dinspectit.publishOpenCensusToBootstrap=true"  // make inspectIT push OC to the bootstrap
-                jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"  // JaCoCo agent first + bootstrap instrumentation
+                jvmArgs "-Dinspectit.config.file-based.path=$projectDir/src/system-test/resources/config"
+                // make inspectIT scan the workdir for configs
+                jvmArgs "-Dinspectit.publishOpenTelemetryToBootstrap=true"  // make inspectIT push OTel to the bootstrap
+                jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"
+                // JaCoCo agent first + bootstrap instrumentation
                 jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.
                 jacoco.enabled = false  // Don't add the JaCoCo agent again.
 

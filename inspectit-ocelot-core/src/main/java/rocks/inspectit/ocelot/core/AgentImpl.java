@@ -66,7 +66,7 @@ public class AgentImpl implements IAgent {
         LOGGER.info("Starting inspectIT Ocelot Agent...");
         LOGGER.info("\tVersion: {}", getVersion());
         LOGGER.info("\tBuild Date: {}", getBuildDate());
-        logOpenCensusClassLoader();
+        logOpenTelemetryClassLoader();
 
         ctx = new AnnotationConfigApplicationContext();
         ctx.setClassLoader(classloader);
@@ -84,11 +84,11 @@ public class AgentImpl implements IAgent {
         ctx.refresh();
     }
 
-    private void logOpenCensusClassLoader() {
+    private void logOpenTelemetryClassLoader() {
         if (Tags.class.getClassLoader() == AgentImpl.class.getClassLoader()) {
-            LOGGER.info("OpenCensus was loaded in inspectIT classloader");
+            LOGGER.info("OpenTelemetry was loaded in inspectIT classloader");
         } else {
-            LOGGER.info("OpenCensus was loaded in bootstrap classloader");
+            LOGGER.info("OpenTelemetry was loaded in bootstrap classloader");
         }
     }
 
