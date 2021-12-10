@@ -10,6 +10,7 @@ import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.exporter.logging.LoggingMetricExporter;
 import org.awaitility.Awaitility;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,11 @@ public class LoggingMetricsExporterServiceTest extends SpringTestBase {
     @BeforeEach
     void enableService() {
         localSwitch(true);
+    }
+
+    @AfterEach
+    void disableService() {
+        localSwitch(false);
     }
 
     private void localSwitch(boolean enabled) {
@@ -67,7 +73,7 @@ public class LoggingMetricsExporterServiceTest extends SpringTestBase {
     class OpenTelemetryLogging {
 
         @Test
-        void testOpenTelemetryMetricLogging() {
+        void verifyOpenTelemetryMetricsWritten() {
             // change export interval
             updateProperties(props -> {
                 props.setProperty("inspectit.exporters.metrics.logging.export-interval", "500ms");
@@ -104,7 +110,7 @@ public class LoggingMetricsExporterServiceTest extends SpringTestBase {
         StatsRecorder statsRecorder = Stats.getStatsRecorder();
 
         @Test
-        void testOpenCensusMetricLogging() throws InterruptedException {
+        void verifyOpenCensusMetricsWritten() throws InterruptedException {
             // change export interval
             updateProperties(props -> {
                 props.setProperty("inspectit.exporters.metrics.logging.export-interval", "500ms");
@@ -118,9 +124,8 @@ public class LoggingMetricsExporterServiceTest extends SpringTestBase {
             Awaitility.waitAtMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
                 assertThat(metricLogs.getEvents().size()).isGreaterThan(0);
                 // assert that the latest metric is our custom log
-                assertThat(metricLogs.getEvents()
-                        .get(metricLogs.getEvents().size() - 1)
-                        .getArgumentArray()[0].toString()).contains("oc.desc");
+                assertThat(metricLogs.getEvents()).anyMatch(evt -> evt.getArgumentArray() != null && evt.getArgumentArray()[0].toString()
+                        .contains("oc.desc"));
 
             });
 

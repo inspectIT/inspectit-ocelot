@@ -88,7 +88,7 @@ public class LoggingTraceExporterServiceTest extends SpringTestBase {
         }
 
         @Test
-        void testOpenTelemetryTraceLogging() throws InterruptedException {
+        void verifyOpenTelemetryTraceSent() throws InterruptedException {
             assertThat(service.isEnabled()).isTrue();
 
             makeSpans();
@@ -171,7 +171,7 @@ public class LoggingTraceExporterServiceTest extends SpringTestBase {
         }
 
         @Test
-        void testOpenCensusTraceLogging() throws InterruptedException {
+        void verifyOpenCensusTraceSent() throws InterruptedException {
             assertThat(service.isEnabled()).isTrue();
 
             // make some spans
