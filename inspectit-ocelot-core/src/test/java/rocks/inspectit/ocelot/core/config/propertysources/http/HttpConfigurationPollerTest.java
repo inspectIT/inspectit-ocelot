@@ -103,8 +103,7 @@ class HttpConfigurationPollerTest {
             poller.run();
 
             verify(currentState).update(eq(false));
-            verifyNoMoreInteractions(currentState);
-            verifyZeroInteractions(env);
+            verifyNoMoreInteractions(currentState, env);
         }
 
         @Test

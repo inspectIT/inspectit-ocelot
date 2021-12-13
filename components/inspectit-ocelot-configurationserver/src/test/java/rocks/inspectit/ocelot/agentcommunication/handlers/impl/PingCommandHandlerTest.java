@@ -69,7 +69,7 @@ public class PingCommandHandlerTest {
             pingCommandHandler.handleResponse(mockResponse, result);
 
             assertThat(result.getResult()).isEqualTo(ResponseEntity.ok().build());
-            verifyZeroInteractions(mockResponse);
+            verifyNoMoreInteractions(mockResponse);
         }
     }
 

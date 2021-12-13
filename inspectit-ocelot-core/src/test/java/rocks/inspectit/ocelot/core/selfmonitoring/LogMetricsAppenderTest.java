@@ -75,7 +75,7 @@ public class LogMetricsAppenderTest {
             LogMetricsRecorder recorder = Mockito.mock(LogMetricsRecorder.class);
             logMetricsAppender.registerRecorder(recorder);
 
-            verifyZeroInteractions(recorder);
+            verifyNoMoreInteractions(recorder);
 
             logMetricsAppender.append(infoEvent);
             logMetricsAppender.append(infoEvent);

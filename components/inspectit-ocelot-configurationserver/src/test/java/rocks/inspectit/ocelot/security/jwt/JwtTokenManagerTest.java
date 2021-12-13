@@ -120,7 +120,7 @@ class JwtTokenManagerTest {
             assertThatExceptionOfType(JwtException.class)
                     .isThrownBy(() -> manager.authenticateWithToken("this-is-not-a-token"));
 
-            verifyZeroInteractions(userDetailsService);
+            verifyNoMoreInteractions(userDetailsService);
         }
 
         @Test

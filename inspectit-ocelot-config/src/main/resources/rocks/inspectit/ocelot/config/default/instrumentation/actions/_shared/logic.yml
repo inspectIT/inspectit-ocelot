@@ -27,3 +27,19 @@ inspectit:
           'a': 'Boolean'
           'b': 'Boolean'
         value: 'Boolean.valueOf((a != null && a.booleanValue()) || (b != null && b.booleanValue()))'
+
+      # Returns whether the input value is set or represents a true value. The action will return true
+      # in case a true-Boolean or any other object is passed into the input parameter.
+      #
+      # Since: 1.14.0
+      'a_logic_isTrueOrNotNull':
+        input:
+          'value': 'Object'
+        value-body: |
+          if (value instanceof Boolean) {
+            return (Boolean) value;
+          }
+          if (value instanceof String) {
+            return Boolean.valueOf(Boolean.parseBoolean((String) value));
+          }
+          return Boolean.valueOf(value != null);

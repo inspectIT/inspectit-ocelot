@@ -147,7 +147,7 @@ public class AgentMappingManagerTest {
                     .isThrownBy(() -> manager.setAgentMappings(null))
                     .withMessage("The agent mappings should not be null.");
 
-            verifyZeroInteractions(serializer);
+            verifyNoMoreInteractions(serializer);
         }
     }
 
@@ -165,7 +165,7 @@ public class AgentMappingManagerTest {
 
             assertThat(result).isNotEmpty();
             assertThat(result).contains(mappingB);
-            verifyZeroInteractions(writeAccessor);
+            verifyNoMoreInteractions(writeAccessor);
         }
 
         @Test
@@ -177,7 +177,7 @@ public class AgentMappingManagerTest {
             Optional<AgentMapping> result = manager.getAgentMapping("not-existing");
 
             assertThat(result).isEmpty();
-            verifyZeroInteractions(writeAccessor);
+            verifyNoMoreInteractions(writeAccessor);
         }
 
         @Test
@@ -186,8 +186,7 @@ public class AgentMappingManagerTest {
                     .isThrownBy(() -> manager.getAgentMapping(null))
                     .withMessage("The mapping name should not be empty or null.");
 
-            verifyZeroInteractions(serializer);
-            verifyZeroInteractions(writeAccessor);
+            verifyNoMoreInteractions(serializer, writeAccessor);
         }
 
         @Test
@@ -196,8 +195,7 @@ public class AgentMappingManagerTest {
                     .isThrownBy(() -> manager.getAgentMapping(""))
                     .withMessage("The mapping name should not be empty or null.");
 
-            verifyZeroInteractions(serializer);
-            verifyZeroInteractions(writeAccessor);
+            verifyNoMoreInteractions(serializer, writeAccessor);
         }
     }
 
@@ -257,7 +255,7 @@ public class AgentMappingManagerTest {
                     .isThrownBy(() -> manager.deleteAgentMapping(null))
                     .withMessage("The mapping name should not be empty or null.");
 
-            verifyZeroInteractions(serializer);
+            verifyNoMoreInteractions(serializer);
         }
     }
 
@@ -309,7 +307,7 @@ public class AgentMappingManagerTest {
                     .isThrownBy(() -> manager.addAgentMapping(null))
                     .withMessage("The agent mapping should not be null.");
 
-            verifyZeroInteractions(serializer);
+            verifyNoMoreInteractions(serializer);
         }
 
         @Test
@@ -320,7 +318,7 @@ public class AgentMappingManagerTest {
                     .isThrownBy(() -> manager.addAgentMapping(mappingA))
                     .withMessage("The agent mapping's name should not be null or empty.");
 
-            verifyZeroInteractions(serializer);
+            verifyNoMoreInteractions(serializer);
         }
 
         @Test
@@ -331,7 +329,7 @@ public class AgentMappingManagerTest {
                     .isThrownBy(() -> manager.addAgentMapping(mappingA))
                     .withMessage("The agent mapping's name should not be null or empty.");
 
-            verifyZeroInteractions(serializer);
+            verifyNoMoreInteractions(serializer);
         }
 
         @Test
