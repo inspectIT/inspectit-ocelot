@@ -10,12 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
-import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,8 +31,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class HttpPropertySourceStateTest {
@@ -73,35 +70,26 @@ class HttpPropertySourceStateTest {
                     .withBody(config)
                     .withHeader("Content-Type", "application/x-yaml")));
 
-            try (MockedStatic<PropertyUtils> theMock = Mockito.mockStatic(PropertyUtils.class, CALLS_REAL_METHODS)) {
-                boolean updateResult = state.update(false);
-                PropertySource result = state.getCurrentPropertySource();
+            boolean updateResult = state.update(false);
+            PropertySource result = state.getCurrentPropertySource();
 
-                assertTrue(updateResult);
-                assertThat(new File(httpSettings.getPersistenceFile())).hasContent(config);
-                assertThat(result.getProperty("inspectit.service-name")).isEqualTo("test-name");
+            assertTrue(updateResult);
+            assertThat(new File(httpSettings.getPersistenceFile())).hasContent(config);
+            assertThat(result.getProperty("inspectit.service-name")).isEqualTo("test-name");
 
-                List<ServeEvent> requests = mockServer.getServeEvents().getRequests();
-                assertThat(requests).hasSize(1);
+            List<ServeEvent> requests = mockServer.getServeEvents().getRequests();
+            assertThat(requests).hasSize(1);
 
-                List<String> headerKeys = requests.get(0)
-                        .getRequest()
-                        .getHeaders()
-                        .all()
-                        .stream()
-                        .map(MultiValue::key)
-                        .filter(key -> key.startsWith("X-OCELOT-"))
-                        .collect(Collectors.toList());
+            List<String> headerKeys = requests.get(0)
+                    .getRequest()
+                    .getHeaders()
+                    .all()
+                    .stream()
+                    .map(MultiValue::key)
+                    .filter(key -> key.startsWith("X-OCELOT-"))
+                    .collect(Collectors.toList());
 
-                assertThat(headerKeys).containsOnly("X-OCELOT-AGENT-ID", "X-OCELOT-AGENT-VERSION", "X-OCELOT-JAVA-VERSION", "X-OCELOT-VM-NAME", "X-OCELOT-VM-VENDOR", "X-OCELOT-START-TIME");
-
-                // verify that only read and readYaml, and  readYamlFiles have been called
-                theMock.verify(() -> PropertyUtils.read(Mockito.any(RawProperties.class)));
-                theMock.verify(() -> PropertyUtils.read(anyString(), Mockito.any(ContentType.class)));
-                theMock.verify(() -> PropertyUtils.readYaml(anyString()));
-                theMock.verify(() -> PropertyUtils.readYamlFiles(Mockito.any()));
-                theMock.verifyNoMoreInteractions();
-            }
+            assertThat(headerKeys).containsOnly("X-OCELOT-AGENT-ID", "X-OCELOT-AGENT-VERSION", "X-OCELOT-JAVA-VERSION", "X-OCELOT-VM-NAME", "X-OCELOT-VM-VENDOR", "X-OCELOT-START-TIME");
         }
 
         @Test
@@ -110,22 +98,11 @@ class HttpPropertySourceStateTest {
             mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
                     .withBody(json)
                     .withHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType())));
-            // now verify that the PropertyUtils.java readJson method has been called and not readYaml
-            try (MockedStatic<PropertyUtils> theMock = Mockito.mockStatic(PropertyUtils.class, CALLS_REAL_METHODS)) {
-                boolean updateResult = state.update(false);
-                PropertySource result = state.getCurrentPropertySource();
+            boolean updateResult = state.update(false);
+            PropertySource result = state.getCurrentPropertySource();
 
-                assertTrue(updateResult);
-                assertThat(result.getProperty("inspectit.service-name")).isEqualTo("test-name");
-
-                // verify that only read and readJson have been called
-                theMock.verify(() -> PropertyUtils.read(Mockito.any(RawProperties.class)));
-                theMock.verify(() -> PropertyUtils.read(anyString(), Mockito.any(ContentType.class)));
-                theMock.verify(() -> PropertyUtils.readJson(anyString()));
-                // there is one interaction remaining, i.e., readJsonFromStream. As we cannot access the method from this package, we cannot verify that no other methods are called.
-                // thus, we only test that readYaml was not called
-                theMock.verify(() -> PropertyUtils.readYaml(anyString()), never());
-            }
+            assertTrue(updateResult);
+            assertThat(result.getProperty("inspectit.service-name")).isEqualTo("test-name");
         }
 
         @Test
