@@ -110,7 +110,7 @@ class VersioningManagerTest extends FileTestBase {
             assertThat(clean).isTrue();
             assertThat(before).isFalse();
             assertThat(after).isTrue();
-            assertThat(count).isOne();
+            assertThat(count).isEqualTo(2); // Initializing Git repository + committing agent mappings
         }
 
         @Test
@@ -129,14 +129,14 @@ class VersioningManagerTest extends FileTestBase {
             int secondCount = versioningManager.getCommitCount();
             assertThat(initSecond).isTrue();
             assertThat(cleanFirst).isTrue();
-            assertThat(secondCount).isOne();
+            assertThat(secondCount).isEqualTo(2); // Initializing Git repository + committing agent mappings
 
             versioningManager.initialize();
 
             boolean cleanSecond = versioningManager.isClean();
             int thirdCount = versioningManager.getCommitCount();
             assertThat(cleanSecond).isTrue();
-            assertThat(thirdCount).isOne();
+            assertThat(thirdCount).isEqualTo(2);
         }
 
         @Test
@@ -155,7 +155,7 @@ class VersioningManagerTest extends FileTestBase {
             int secondCount = versioningManager.getCommitCount();
             assertThat(initSecond).isTrue();
             assertThat(cleanFirst).isTrue();
-            assertThat(secondCount).isOne();
+            assertThat(secondCount).isEqualTo(2); // Initializing Git repository + committing agent mappings
 
             // edit file
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
@@ -165,7 +165,7 @@ class VersioningManagerTest extends FileTestBase {
             boolean cleanSecond = versioningManager.isClean();
             int thirdCount = versioningManager.getCommitCount();
             assertThat(cleanSecond).isTrue();
-            assertThat(thirdCount).isEqualTo(2);
+            assertThat(thirdCount).isEqualTo(3);
         }
     }
 
