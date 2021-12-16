@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class LoggingTraceExporterServiceTest extends SpringTestBase {
+public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
 
     public static final String INSTRUMENTATION_NAME = "rocks.inspectit.ocelot.instrumentation";
 
@@ -186,12 +186,12 @@ public class LoggingTraceExporterServiceTest extends SpringTestBase {
             // turn off tracing exporter
             localSwitch(false);
             // make sure no more spans are recorded
-            Thread.sleep(500);
+            Awaitility.await().untilAsserted(() -> assertThat(service.isEnabled()).isFalse());
             assertThat(spanLogs.size()).isEqualTo(numEvents);
 
             // turn tracing exporter back on
             localSwitch(true);
-            Thread.sleep(500);
+            Awaitility.await().untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
             // make spans
             makeSpans();

@@ -30,7 +30,7 @@ public class StackTraceSampler {
 
     /**
      * Stack-trace samples require a post-processing before being exported as traces.
-     * This happens asynchronously to the application to minimize the performance impact in a periodicalyl executed task.
+     * This happens asynchronously to the application to minimize the performance impact in a periodically executed task.
      * This value defines the frequency at which the queue is checked.
      */
     public static final int EXPORT_INTERVAL_MILLIS = 200;
@@ -144,7 +144,7 @@ public class StackTraceSampler {
     }
 
     /**
-     * Continues a span but makes it's children stack-trace sampling aware.
+     * Continues a span but makes its children stack-trace sampling aware.
      * <p>
      * If mode is ENABLE and stack trace sampling is not active for the current,
      * this span will generate its children using stack trace sampling.

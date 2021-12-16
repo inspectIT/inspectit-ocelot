@@ -61,20 +61,17 @@ public class AgentMain {
     }
 
     public static void premain(String agentArgs, Instrumentation inst) {
-        boolean loadOpenTelemetryJarToBootstrap = null != System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY) ? "true".equalsIgnoreCase(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY) : "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY));
+        boolean loadOpenTelemetryJarToBootstrap = null != System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY) ? "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY)) : "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY));
         // check for deprecated JVM property
         if (null != System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY)) {
             LOGGER.warning("You are using the deprecated JVM property '" + PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY + "'. Please use the new JVM property '" + PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY + "'. inspectIT Ocelot has moved from OpenCensus to OpenTelemetry. However, applications using the OpenCensusAPI are still supported through the opentelemetry-opencensus-shim ");
         }
-        // retrieve and build settings for the telemetry implementation
-        TelemetrySettings telemetrySettings = new TelemetrySettings(TelemetryImplementation.OPEN_TELEMETRY, loadOpenTelemetryJarToBootstrap, PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY);
 
         try {
             if (loadOpenTelemetryJarToBootstrap) {
                 Path telJarFile = copyResourceToTempJarFile(OPEN_TELEMETRY_FAT_JAR_PATH);
                 inst.appendToBootstrapClassLoaderSearch(new JarFile(telJarFile.toFile()));
             }
-
             //we make sure that the startup of inspectIT is asynchronous
             new Thread(() -> startAgent(agentArgs, inst, !loadOpenTelemetryJarToBootstrap)).start();
         } catch (Exception e) {

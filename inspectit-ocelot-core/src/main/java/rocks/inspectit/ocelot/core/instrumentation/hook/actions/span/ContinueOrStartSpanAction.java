@@ -97,9 +97,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
             Object spanObj = ctx.getData(continueSpanDataKey);
             if (spanObj instanceof Span) {
                 MethodReflectionInformation methodInfo = context.getHook().getMethodInformation();
-                AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() ->
-                        stackTraceSampler.continueSpan((Span) spanObj, methodInfo, autoTrace)
-                );
+                AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> stackTraceSampler.continueSpan((Span) spanObj, methodInfo, autoTrace));
                 ctx.setSpanScope(spanCtx);
                 return true;
             }
@@ -120,13 +118,13 @@ public class ContinueOrStartSpanAction implements IHookAction {
             boolean hasLocalParent = false;
             if (remoteParent == null) {
                 Span currentSpan = Tracing.getTracer().getCurrentSpan();
-                hasLocalParent = currentSpan != BlankSpan.INSTANCE;
+
+                // the span has a local parent if the currentSpan is either not BlankSpan.INSTANCE (when using OC) or does not have a valid context (when using OTel)
+                hasLocalParent = !(currentSpan == BlankSpan.INSTANCE || !currentSpan.getContext().isValid());
             }
 
             Sampler sampler = getSampler(context);
-            AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() ->
-                    stackTraceSampler.createAndEnterSpan(spanName, remoteParent, sampler, spanKind, methodInfo, autoTrace)
-            );
+            AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> stackTraceSampler.createAndEnterSpan(spanName, remoteParent, sampler, spanKind, methodInfo, autoTrace));
             ctx.setSpanScope(spanCtx);
             commonTagsToAttributesManager.writeCommonTags(Tracing.getTracer()
                     .getCurrentSpan(), remoteParent != null, hasLocalParent);

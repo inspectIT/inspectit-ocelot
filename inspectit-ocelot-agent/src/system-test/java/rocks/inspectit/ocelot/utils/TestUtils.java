@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.utils;
 
 import com.google.common.cache.Cache;
+import io.opencensus.impl.internal.DisruptorEventQueue;
 import io.opencensus.metrics.LabelKey;
 import io.opencensus.metrics.LabelValue;
 import io.opencensus.metrics.Metrics;
@@ -10,11 +11,29 @@ import io.opencensus.tags.InternalUtils;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
+import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.context.propagation.TextMapPropagator;
+import io.opentelemetry.exporter.logging.LoggingSpanExporter;
+import io.opentelemetry.extension.trace.propagation.JaegerPropagator;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.awaitility.core.ConditionTimeoutException;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -184,7 +203,7 @@ public class TestUtils {
     public static void waitForOpenCensusQueueToBeProcessed() {
         CountDownLatch latch = new CountDownLatch(1);
         // TODO: re-implement with OTel
-       // DisruptorEventQueue.getInstance().enqueue(latch::countDown);
+        DisruptorEventQueue.getInstance().enqueue(latch::countDown);
         try {
             latch.await(3, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
@@ -284,6 +303,55 @@ public class TestUtils {
                 .findFirst();
         assertThat(series).isNotEmpty();
         return series.get();
+    }
+
+    /**
+     * Initialize {@link io.opentelemetry.api.OpenTelemetry} with a {@link InMemorySpanExporter} so that we can access the exported {@link io.opentelemetry.api.trace.Span}s
+     *
+     * @return The {@link InMemorySpanExporter} that can be used to retrieve exported {@link io.opentelemetry.api.trace.Span}s
+     */
+    public static InMemorySpanExporter initializeOpenTelemetryForSystemTesting() {
+
+
+        System.out.println("initialize");
+        // create an SdkTracerProvider with InMemorySpanExporter and LoggingSpanExporter
+        InMemorySpanExporter spanExporter = InMemorySpanExporter.create();
+
+        SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
+                .setSampler(Sampler.alwaysOn())
+                .addSpanProcessor(BatchSpanProcessor.builder(spanExporter).build())
+                .addSpanProcessor(SimpleSpanProcessor.create(new LoggingSpanExporter()))
+                .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "rocks.inspectit.ocelot.system.test")))
+                .build();
+
+        GlobalOpenTelemetry.resetForTest();
+
+        OpenTelemetrySdk openTelemetry = OpenTelemetrySdk.builder()
+                .setTracerProvider(tracerProvider)
+                .setPropagators(ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), JaegerPropagator.getInstance(), W3CBaggagePropagator.getInstance())))
+                .buildAndRegisterGlobal();
+
+        // set the OTEL_TRACER in OpenTelemetrySpanBuilderImpl via reflection.
+        // this needs to be done in case that another code already registered OTEL and the OTEL_TRACER is pointing to the wrong Tracer
+        try {
+            Field tracerField = null;
+            Tracer tracer = GlobalOpenTelemetry.getTracer("io.opentelemetry.opencensusshim");
+            tracerField = Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl")
+                    .getDeclaredField("OTEL_TRACER");
+            // set static final field
+            tracerField.setAccessible(true);
+            Field modifiers = Field.class.getDeclaredField("modifiers");
+            modifiers.setAccessible(true);
+            modifiers.setInt(tracerField, tracerField.getModifiers() & ~Modifier.FINAL);
+            tracerField.set(null, tracer);
+
+            System.out.println("OTEL_TRACER updated to " + tracer + " (" + openTelemetry.getTracer("io.opentelemetry.opencensusshim") + ")");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Failed to set OTEL_TRACER in OpenTelemetrySpanBuilderImpl");
+        }
+
+        return spanExporter;
     }
 
     private static long getInstrumentationQueueLength() {

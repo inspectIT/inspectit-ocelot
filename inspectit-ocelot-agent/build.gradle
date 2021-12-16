@@ -31,7 +31,8 @@ dependencies {
 
     opentelemetry(
         "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
-        "io.opentelemetry:opentelemetry-opencensus-shim:${openTelemetryAlphaVersion}"
+        "io.opentelemetry:opentelemetry-opencensus-shim:${openTelemetryAlphaVersion}",
+        "io.opencensus:opencensus-impl:${openCensusVersion}",
     )
 
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
@@ -95,14 +96,25 @@ configurations {
 dependencies {
 
     systemTestCompileOnly(
-            "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
-            "io.opentelemetry:opentelemetry-opencensus-shim:${openTelemetryAlphaVersion}",
+            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
+            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
+            "io.opentelemetry:opentelemetry-sdk",
+            "io.opentelemetry:opentelemetry-opencensus-shim",
+            "io.opencensus:opencensus-impl:${openCensusVersion}",
+
+
             project(':inspectit-ocelot-bootstrap')
     )
 
     systemTestImplementation(
             "io.opencensus:opencensus-testing:${openCensusVersion}",
             "io.opencensus:opencensus-api:${openCensusVersion}",
+
+            // for InMemorySpanExporter
+            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
+            "io.opentelemetry:opentelemetry-sdk-testing",
+            "io.opentelemetry:opentelemetry-semconv",
+            "io.opentelemetry:opentelemetry-exporter-logging",
 
             'org.junit.jupiter:junit-jupiter-engine:5.3.1',
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
@@ -214,7 +226,7 @@ task systemTest {
 
                 jvmArgs "-Dinspectit.config.file-based.path=$projectDir/src/system-test/resources/config"
                 // make inspectIT scan the workdir for configs
-                jvmArgs "-Dinspectit.publishOpenTelemetryToBootstrap=true"  // make inspectIT push OTel to the bootstrap
+                jvmArgs "-Dinspectit.publishOpenTelemetryToBootstrap=true"  // make inspectIT push OC to the bootstrap
                 jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"
                 // JaCoCo agent first + bootstrap instrumentation
                 jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.

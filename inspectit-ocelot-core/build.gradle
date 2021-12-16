@@ -102,6 +102,8 @@ dependencies {
             "io.opentelemetry:opentelemetry-sdk",
             "io.opentelemetry:opentelemetry-opencensus-shim",
             "io.opentelemetry:opentelemetry-semconv",
+            "io.opentelemetry:opentelemetry-sdk-testing",
+
             'org.springframework:spring-test:5.1.3.RELEASE',
             // to make use of SpyBean
             "org.springframework.boot:spring-boot-test:2.1.4.RELEASE",
