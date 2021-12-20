@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.documentation.BaseDocSettings;
 import rocks.inspectit.ocelot.config.validation.ViolationBuilder;
 
 import javax.validation.Valid;
@@ -24,6 +25,11 @@ import java.util.*;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class InstrumentationScopeSettings {
+
+    /**
+     * Documentation for Config-Docs generation
+     */
+    private BaseDocSettings _doc;
 
     /**
      * Interfaces which have to be implemented.
