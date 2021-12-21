@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +34,7 @@ public class RuleAutoCompleterTest {
 
             List<String> output = ruleAutoCompleter.getSuggestions(path);
 
-            verifyZeroInteractions(configurationQueryHelper);
+            verifyNoMoreInteractions(configurationQueryHelper);
             assertThat(output).hasSize(0);
         }
 

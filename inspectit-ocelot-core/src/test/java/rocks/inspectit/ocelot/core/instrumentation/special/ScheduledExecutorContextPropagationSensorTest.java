@@ -53,7 +53,7 @@ public class ScheduledExecutorContextPropagationSensorTest {
 
             verify(contextManager).enterCorrelation();
             verifyNoMoreInteractions(contextManager);
-            verifyZeroInteractions(logTraceCorrelator);
+            verifyNoMoreInteractions(logTraceCorrelator);
         }
 
         @Test
@@ -87,7 +87,7 @@ public class ScheduledExecutorContextPropagationSensorTest {
             verify(contextManager).enterCorrelation();
             verify(contextManager).storeContext(mockRunnable, true);
             verifyNoMoreInteractions(contextManager);
-            verifyZeroInteractions(logTraceCorrelator);
+            verifyNoMoreInteractions(logTraceCorrelator);
         }
     }
 
@@ -111,7 +111,7 @@ public class ScheduledExecutorContextPropagationSensorTest {
 
             verify(contextManager).enterCorrelation();
             verifyNoMoreInteractions(contextManager);
-            verifyZeroInteractions(logTraceCorrelator);
+            verifyNoMoreInteractions(logTraceCorrelator);
         }
 
         @Test
@@ -145,7 +145,7 @@ public class ScheduledExecutorContextPropagationSensorTest {
             verify(contextManager).enterCorrelation();
             verify(contextManager).storeContext(mockRunnable, false);
             verifyNoMoreInteractions(contextManager);
-            verifyZeroInteractions(logTraceCorrelator);
+            verifyNoMoreInteractions(logTraceCorrelator);
         }
     }
 
@@ -169,7 +169,7 @@ public class ScheduledExecutorContextPropagationSensorTest {
 
             verify(contextManager).enterCorrelation();
             verifyNoMoreInteractions(contextManager);
-            verifyZeroInteractions(logTraceCorrelator);
+            verifyNoMoreInteractions(logTraceCorrelator);
         }
 
         @Test
@@ -204,7 +204,7 @@ public class ScheduledExecutorContextPropagationSensorTest {
             verify(contextManager).enterCorrelation();
             verify(contextManager).storeContext(mockCallable, true);
             verifyNoMoreInteractions(contextManager);
-            verifyZeroInteractions(logTraceCorrelator);
+            verifyNoMoreInteractions(logTraceCorrelator);
         }
     }
 }

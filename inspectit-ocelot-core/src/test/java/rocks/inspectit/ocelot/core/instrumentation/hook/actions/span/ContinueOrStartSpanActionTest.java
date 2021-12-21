@@ -31,7 +31,7 @@ public class ContinueOrStartSpanActionTest {
                     .getSampler(context);
 
             assertThat(result).isNull();
-            verifyZeroInteractions(context);
+            verifyNoMoreInteractions(context);
         }
 
         @Test
@@ -44,7 +44,7 @@ public class ContinueOrStartSpanActionTest {
                     .getSampler(context);
 
             assertThat(result).isSameAs(sampler);
-            verifyZeroInteractions(context);
+            verifyNoMoreInteractions(context);
         }
 
 

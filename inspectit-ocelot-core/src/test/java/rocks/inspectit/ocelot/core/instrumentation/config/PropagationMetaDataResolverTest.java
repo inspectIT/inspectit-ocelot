@@ -84,7 +84,7 @@ public class PropagationMetaDataResolverTest {
 
             resolver.collectTagsFromMetricDefinitions(Collections.singletonMap("metric", def), mockBuilder);
 
-            verifyZeroInteractions(mockBuilder);
+            verifyNoMoreInteractions(mockBuilder);
         }
 
 
@@ -97,7 +97,7 @@ public class PropagationMetaDataResolverTest {
 
             resolver.collectTagsFromMetricDefinitions(Collections.singletonMap("metric", def), mockBuilder);
 
-            verifyZeroInteractions(mockBuilder);
+            verifyNoMoreInteractions(mockBuilder);
         }
     }
 
