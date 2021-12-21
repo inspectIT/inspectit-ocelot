@@ -87,10 +87,7 @@ public class InstrumentationScopeSettings {
             return true;
         }
         // if type matcher is set to NOT_EQUALS_FULLY or NOT_EQUALS_FULLY_IGNORE_CASE and the safety mechanisms are not disabled, the matcher is NOT narrowing the scope
-        if ((type != null && (type.getMatcherMode() == MatcherMode.NOT_EQUALS_FULLY || type.getMatcherMode() == MatcherMode.NOT_EQUALS_FULLY_IGNORE_CASE))) {
-            return false;
-        }
-        return true;
+        return type == null || (type.getMatcherMode() != MatcherMode.NOT_EQUALS_FULLY && type.getMatcherMode() != MatcherMode.NOT_EQUALS_FULLY_IGNORE_CASE);
     }
 
     /**

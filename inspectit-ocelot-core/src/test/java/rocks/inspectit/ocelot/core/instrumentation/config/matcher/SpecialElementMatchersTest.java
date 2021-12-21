@@ -61,54 +61,55 @@ class SpecialElementMatchersTest {
                 assertThat(result).isNotNull();
             }
         }
+    }
 
-        @Nested
-        public class NotEquals {
+    @Nested
+    public class NotEquals {
 
-            // define some name pattern
-            String namePattern = "rocks.inspectit.ocelot.core.class.method";
+        // define some name pattern
+        String NAME_PATTERN_A = "rocks.inspectit.ocelot.core.class.method";
 
-            String namePatternUpperCase = namePattern.toUpperCase();
+        String NAME_PATTERN_A_UPPERCASE = NAME_PATTERN_A.toUpperCase();
 
-            String otherName = "rocks.inspectit.ocelot.core.class.other";
+        String NAME_PATTERN_B = "rocks.inspectit.ocelot.core.class.other";
 
-            String otherName2 = namePattern + "2";
+        String NAME_PATTERN_C = NAME_PATTERN_A + "2";
 
-            @Test
-            public void notEquals() {
+        @Test
+        public void notEquals() {
+            // create the NameMatcherSettings
+            NameMatcherSettings notEqualsSettings = new NameMatcherSettings();
+            notEqualsSettings.setName(NAME_PATTERN_A);
+            notEqualsSettings.setMatcherMode(MatcherMode.NOT_EQUALS_FULLY);
+            // get the ElementMatcher
+            ElementMatcher.Junction<NamedElement> matcherNotEquals = SpecialElementMatchers.nameIs(notEqualsSettings);
 
-                // create the NameMatcherSettings
-                NameMatcherSettings notEqualsSettings = new NameMatcherSettings();
-                notEqualsSettings.setName(namePattern);
-                notEqualsSettings.setMatcherMode(MatcherMode.NOT_EQUALS_FULLY);
-                // get the ElementMatcher
-                ElementMatcher.Junction<NamedElement> matcherNotEquals = SpecialElementMatchers.nameIs(notEqualsSettings);
+            // make sure that only the original namePattern does not match
+            assertThat(matcherNotEquals.matches(() -> NAME_PATTERN_A)).isFalse();
 
-                // make sure that only the original namePattern does not match
-                assertThat(matcherNotEquals.matches(() -> namePattern)).isFalse();
-                // every other string must match
-                assertThat(matcherNotEquals.matches(() -> namePatternUpperCase)).isTrue();
-                assertThat(matcherNotEquals.matches(() -> otherName)).isTrue();
+            // every other string must match
+            assertThat(matcherNotEquals.matches(() -> NAME_PATTERN_A_UPPERCASE)).isTrue();
+            assertThat(matcherNotEquals.matches(() -> NAME_PATTERN_B)).isTrue();
+            assertThat(matcherNotEquals.matches(() -> NAME_PATTERN_C)).isTrue();
+        }
 
-            }
+        @Test
+        public void notEqualsIgnoreCase() {
 
-            @Test
-            public void notEqualsIgnoreCase() {
+            // create the NameMatcherSettings
+            NameMatcherSettings notEqualsIgnoreCaseSettings = new NameMatcherSettings();
+            notEqualsIgnoreCaseSettings.setName(NAME_PATTERN_A);
+            notEqualsIgnoreCaseSettings.setMatcherMode(MatcherMode.NOT_EQUALS_FULLY_IGNORE_CASE);
 
-                // create the NameMatcherSettings
-                NameMatcherSettings notEqualsIgnoreCaseSettings = new NameMatcherSettings();
-                notEqualsIgnoreCaseSettings.setName(namePattern);
-                notEqualsIgnoreCaseSettings.setMatcherMode(MatcherMode.NOT_EQUALS_FULLY_IGNORE_CASE);
-                // get the ElementMatcher
-                ElementMatcher.Junction<NamedElement> matcherNotEqualsIgnoreCase = SpecialElementMatchers.nameIs(notEqualsIgnoreCaseSettings);
+            // get the ElementMatcher
+            ElementMatcher.Junction<NamedElement> matcherNotEqualsIgnoreCase = SpecialElementMatchers.nameIs(notEqualsIgnoreCaseSettings);
 
-                // namePattern and all case-variants may not match
-                assertThat(matcherNotEqualsIgnoreCase.matches(() -> namePattern)).isFalse();
-                assertThat(matcherNotEqualsIgnoreCase.matches(() -> namePatternUpperCase)).isFalse();
+            // namePattern and all case-variants may not match
+            assertThat(matcherNotEqualsIgnoreCase.matches(() -> NAME_PATTERN_A)).isFalse();
+            assertThat(matcherNotEqualsIgnoreCase.matches(() -> NAME_PATTERN_A_UPPERCASE)).isFalse();
 
-                assertThat(matcherNotEqualsIgnoreCase.matches(() -> otherName)).isTrue();
-                assertThat(matcherNotEqualsIgnoreCase.matches(() -> otherName2)).isTrue();
-            }
+            assertThat(matcherNotEqualsIgnoreCase.matches(() -> NAME_PATTERN_B)).isTrue();
+            assertThat(matcherNotEqualsIgnoreCase.matches(() -> NAME_PATTERN_C)).isTrue();
         }
     }
 

@@ -71,7 +71,7 @@ A type matcher consists of the following attributes:
 |Attribute|Default|Description
 |---|---|---|
 |`name`| -| The name or pattern which is used to match against the fully qualified class or interface name.
-|`matcher-mode`| `#EQUALS_FULLY`| The matching mode. Possible values: `EQUALS_FULLY`, `MATCHES` (see [String.match](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#matches-java.lang.String)), `STARTS_WITH`, `STARTS_WITH_IGNORE_CASE`, `CONTAINS`, `CONTAINS_IGNORE_CASE`, `ENDS_WITH`, `ENDS_WITH_IGNORE_CASE`, `NOT_EQUALS_FULLY`, `NOT_EQUALS_FULLY_IGNORE_CASE`. <br>*Note: `NOT_EQUALS_FULLY` and `NOT_EQUALS_FULLY_IGNORE_CASE` are default disabled for type matchers (but enabled for method matchers) as this will result in too many instrumented classes. To enable these matcher modes for type matcher, use the `disable-safety-mechanisms` advanced settings.* 
+|`matcher-mode`| `#EQUALS_FULLY`| The matching mode. Possible values: `EQUALS_FULLY`, `MATCHES` (see [String.match](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#matches-java.lang.String)), `STARTS_WITH`, `STARTS_WITH_IGNORE_CASE`, `CONTAINS`, `CONTAINS_IGNORE_CASE`, `ENDS_WITH`, `ENDS_WITH_IGNORE_CASE`
 |`annotations`|-| A list of matchers used for matching annotations. Each annotation matcher consists of a `name` and `matcher-mode` which are equivalent to the ones above.
 
 The following example will match against a type which is exactly named `java.util.AbstractList` and is annotated with the annotation `any.Annotation`.
