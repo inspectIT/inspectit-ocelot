@@ -1,4 +1,4 @@
-FROM openjdk:8
-COPY build/libs/inspectit-ocelot-eum-server-SNAPSHOT.jar /inspectit-ocelot-eum-server.jar
-COPY docker/entrypoint.sh  /
+FROM openjdk:11-jre-slim
+COPY inspectit-ocelot-eum-server.jar /
+COPY entrypoint.sh  /
 ENTRYPOINT ["sh", "/entrypoint.sh"]
