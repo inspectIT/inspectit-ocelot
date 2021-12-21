@@ -83,7 +83,7 @@ public class SelfMonitoringMetricManagerTest {
 
             selfMonitoringMetricManager.record("beacons_received", 1);
 
-            verifyZeroInteractions(viewManager, statsRecorder);
+            verifyNoMoreInteractions(viewManager, statsRecorder);
         }
 
         @Test
@@ -92,7 +92,7 @@ public class SelfMonitoringMetricManagerTest {
 
             selfMonitoringMetricManager.record("apples_received", 1);
 
-            verifyZeroInteractions(viewManager, statsRecorder);
+            verifyNoMoreInteractions(viewManager, statsRecorder);
         }
 
         @Test
@@ -103,7 +103,7 @@ public class SelfMonitoringMetricManagerTest {
 
             ArgumentCaptor<MetricDefinitionSettings> mdsCaptor = ArgumentCaptor.forClass(MetricDefinitionSettings.class);
             verify(measuresAndViewsManager).updateMetrics(eq("inspectit-eum/self/beacons_received"), mdsCaptor.capture());
-            verifyZeroInteractions(viewManager, statsRecorder, measureMap);
+            verifyNoMoreInteractions(viewManager, statsRecorder, measureMap);
 
             assertThat(mdsCaptor.getValue().getViews().keySet()).containsExactly("inspectit-eum/self/beacons_received/COUNT");
         }

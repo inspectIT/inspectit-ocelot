@@ -48,7 +48,7 @@ public class LogMetricsIntTest {
         appender.append(createLoggingEvent(Level.INFO, "info_test"));
         appender.append(createLoggingEvent(Level.WARN, "warn_test"));
 
-        verifyZeroInteractions(monitoringService);
+        verifyNoMoreInteractions(monitoringService);
 
         // register recorder and record existing metrics
         LogMetricsAppender.registerRecorder(recorder);

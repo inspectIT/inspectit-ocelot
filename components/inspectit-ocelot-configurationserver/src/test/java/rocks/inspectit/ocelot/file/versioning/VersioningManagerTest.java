@@ -263,7 +263,7 @@ class VersioningManagerTest extends FileTestBase {
             assertThat(versioningManager.getCommitCount()).isOne();
             assertThat(versioningManager.isClean()).isFalse();
 
-            verifyZeroInteractions(eventPublisher);
+            verifyNoMoreInteractions(eventPublisher);
         }
     }
 

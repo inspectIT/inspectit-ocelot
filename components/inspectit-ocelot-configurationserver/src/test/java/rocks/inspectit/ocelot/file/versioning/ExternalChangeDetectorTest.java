@@ -50,7 +50,7 @@ public class ExternalChangeDetectorTest {
         @Test
         public void noChange() {
             detector.checkForUpdates();
-            verifyZeroInteractions(publisher);
+            verifyNoMoreInteractions(publisher);
         }
 
         @Test
@@ -60,7 +60,7 @@ public class ExternalChangeDetectorTest {
 
             detector.checkForUpdates();
 
-            verifyZeroInteractions(publisher);
+            verifyNoMoreInteractions(publisher);
         }
 
         @Test
@@ -82,7 +82,7 @@ public class ExternalChangeDetectorTest {
 
             detector.checkForUpdates();
 
-            verifyZeroInteractions(publisher);
+            verifyNoMoreInteractions(publisher);
         }
 
         @Test
