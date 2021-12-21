@@ -42,7 +42,7 @@ public class TraceController {
     public ResponseEntity<Void> spans(@RequestBody @NotBlank String data) {
         boolean isError = false;
         Stopwatch stopwatch = Stopwatch.createStarted();
-        int spanSize = 0;
+        int spanSize = -1;
 
         try {
             // use protobuf to convert request string to the open-telemetry proto impl
@@ -73,8 +73,7 @@ public class TraceController {
             stopwatch.stop();
             ImmutableMap<String, String> tagMap = ImmutableMap.of("is_error", String.valueOf(isError));
             selfMonitoring.record("traces_received", stopwatch.elapsed(TimeUnit.MILLISECONDS), tagMap);
-            // check in case no trace exporter was started
-            if (spanSize > 0) {
+            if (spanSize >= 0) {
                 selfMonitoring.record("traces_span_size", spanSize, tagMap);
             }
         }
