@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
+  "id": 7,
   "links": [],
   "panels": [
     {
@@ -52,7 +52,7 @@
       "id": 123124,
       "links": [],
       "options": {
-        "folderId": 6,
+        "folderId": 8,
         "maxItems": 30,
         "query": "",
         "showHeadings": false,
@@ -77,7 +77,7 @@
       "id": 3,
       "links": [],
       "options": {
-        "folderId": 0,
+        "folderId": 9,
         "maxItems": 30,
         "query": "",
         "showHeadings": false,

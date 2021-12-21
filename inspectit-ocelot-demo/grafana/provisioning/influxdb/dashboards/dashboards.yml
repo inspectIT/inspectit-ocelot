@@ -17,3 +17,11 @@ providers:
   updateIntervalSeconds: 10 #how often Grafana will scan for changed dashboards
   options:
     path: /usr/share/grafana/custom/dashboards/agent
+- name: 'eum-server'
+  orgId: 1
+  folder: 'eum-server'
+  type: file
+  disableDeletion: false
+  updateIntervalSeconds: 10 #how often Grafana will scan for changed dashboards
+  options:
+    path: /usr/share/grafana/custom/dashboards/eum-server
