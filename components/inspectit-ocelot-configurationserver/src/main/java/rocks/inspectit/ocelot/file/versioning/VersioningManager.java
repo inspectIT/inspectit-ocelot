@@ -34,9 +34,7 @@ import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.Supplier;
@@ -224,8 +222,8 @@ public class VersioningManager {
 
         // this is true for a fresh start of a config server instance connected to a remote git for backup
         // --> prevent unnecessary commits at startup that don't change any files (particularly when frequently restarting in, e.g., Kubernetes)
-        // otherwise, we need to properly merge files from local and two remotes
-        boolean hardReset = isWorkingDirectoryEmpty() && remoteSettings.isInitialConfigurationSync() && remoteSettings.isAutoPromotion() && areRemotesEqual(sourceRepository, targetRepository);
+        // otherwise, we need to properly merge files from two remotes
+        boolean hardReset = remoteSettings.isInitialConfigurationSync() && remoteSettings.isAutoPromotion() && areRemotesEqual(sourceRepository, targetRepository);
 
         log.info("{}-resetting current branch to '{}'.", (hardReset ? "Hard" : "Soft"), targetRepository.getBranchName());
         git.reset()
@@ -247,17 +245,6 @@ public class VersioningManager {
         ObjectId targetId = repository.exactRef("refs/heads/" + targetRepository.getBranchName()).getObjectId();
 
         return ObjectId.isEqual(sourceId, targetId);
-    }
-
-    private boolean isWorkingDirectoryEmpty() throws IOException {
-        Path filesPath = Paths.get(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
-        boolean filesEmpty = !Files.exists(filesPath) || (Files.isDirectory(filesPath) && Files.list(filesPath)
-                .count() == 0);
-
-        Path agentMappingPath = Paths.get(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
-        boolean agentMappingMissing = !Files.exists(agentMappingPath);
-
-        return filesEmpty && agentMappingMissing;
     }
 
     /**
