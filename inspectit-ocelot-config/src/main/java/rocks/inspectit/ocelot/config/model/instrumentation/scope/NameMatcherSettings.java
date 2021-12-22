@@ -40,6 +40,8 @@ public class NameMatcherSettings {
                         || matcherMode == MatcherMode.CONTAINS_IGNORE_CASE
                         || matcherMode == MatcherMode.ENDS_WITH
                         || matcherMode == MatcherMode.ENDS_WITH_IGNORE_CASE
+                        || matcherMode == MatcherMode.NOT_EQUALS_FULLY
+                        || matcherMode == MatcherMode.NOT_EQUALS_FULLY_IGNORE_CASE
         )
         );
     }
