@@ -129,11 +129,19 @@ Thus, the process of determine whether the methods of a class <code>X</code> sho
 </thead>
 <tbody>
 <tr><td><code>name</code></td><td>-</td><td>The name or pattern which is used to match against the fully qualified class or interface name.</td></tr>
-<tr><td><code>matcher-mode</code></td><td><code>EQUALS_FULLY</code></td><td>The matching mode. Possible values: <code>EQUALS_FULLY</code>, <code>MATCHES</code> (see <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#matches-java.lang.String">String.match</a>), <code>STARTS_WITH</code>, <code>STARTS_WITH_IGNORE_CASE</code>, <code>CONTAINS</code>, <code>CONTAINS_IGNORE_CASE</code>, <code>ENDS_WITH</code>, <code>ENDS_WITH_IGNORE_CASE</code></td></tr>
+<tr><td><code>matcher-mode</code></td><td><code>EQUALS_FULLY</code></td><td>The matching mode. Possible values: <code>EQUALS_FULLY</code>, <code>MATCHES</code> (see <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#matches-java.lang.String">String.match</a>), <code>STARTS_WITH</code>, <code>STARTS_WITH_IGNORE_CASE</code>, <code>CONTAINS</code>, <code>CONTAINS_IGNORE_CASE</code>, <code>ENDS_WITH</code>, <code>ENDS_WITH_IGNORE_CASE</code>, <code>NOT_EQUALS_FULLY</code>, <code>NOT_EQUALS_FULLY_IGNORE_CASE</code></td></tr>
 <tr><td><code>annotations</code></td><td>-</td><td>A list of matchers used for matching annotations. Each annotation matcher consists of a <code>name</code> and <code>matcher-mode</code> which are equivalent to the ones above.</td></tr>
 </tbody>
 </table>
-<p>The following example will match against a type which is exactly named <code>java.util.AbstractList</code> and is annotated with the annotation <code>any.Annotation</code>.</p>
+
+    <div class="admonition admonition-caution">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16"><path fill-rule="evenodd" d="M5.05.31c.81 2.17.41 3.38-.52 4.31C3.55 5.67 1.98 6.45.9 7.98c-1.45 2.05-1.7 6.53 3.53 7.7-2.2-1.16-2.67-4.52-.3-6.61-.61 2.03.53 3.33 1.94 2.86 1.39-.47 2.3.53 2.27 1.67-.02.78-.31 1.44-1.13 1.81 3.42-.59 4.78-3.42 4.78-5.56 0-2.84-2.53-3.22-1.25-5.61-1.52.13-2.03 1.13-1.89 2.75.09 1.08-1.02 1.8-1.86 1.33-.67-.41-.66-1.19-.06-1.78C8.18 5.31 8.68 2.45 5.05.32L5.03.3l.02.01z"/></svg></div> caution</h5>
+      </div>
+      <div class="admonition-content">
+    <p><code>NOT_EQUALS_FULLY</code> and <code>NOT_EQUALS_FULLY_IGNORE_CASE</code> are disabled by default for <strong>type matchers</strong> (but enabled for method matchers) as this will result in too many instrumented classes.</p>
+<p>In order to enable these matcher modes for type matchers, use the <code>disable-safety-mechanisms</code> advanced settings.</p>
+</div></div><p>The following example will match against a type which is exactly named <code>java.util.AbstractList</code> and is annotated with the annotation <code>any.Annotation</code>.</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">name:</span> <span class="hljs-string">'java.util.AbstractList'</span>
 <span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
 <span class="hljs-attr">annotations:</span>
@@ -229,7 +237,7 @@ Note: the following configuration contains all possible attributes even though t
             <span class="hljs-attr">exclude:</span>
               <span class="hljs-attr">'s_to_be_exclude':</span> <span class="hljs-literal">true</span>
 </code></pre>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 1/15/2021 by NT-florianernst</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/instrumentation"><span class="arrow-prev">← </span><span>Instrumentation</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/rules"><span>Rules &amp; Actions</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#scope-definition">Scope Definition</a></li><li><a href="#type-matcher">Type Matcher</a></li><li><a href="#method-matcher">Method Matcher</a></li><li><a href="#advanced-settings">Advanced Settings</a></li><li><a href="#example-scope-definition">Example Scope Definition</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2021 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 12/22/2021 by Heiko Holz</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/instrumentation"><span class="arrow-prev">← </span><span>Instrumentation</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/rules"><span>Rules &amp; Actions</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#scope-definition">Scope Definition</a></li><li><a href="#type-matcher">Type Matcher</a></li><li><a href="#method-matcher">Method Matcher</a></li><li><a href="#advanced-settings">Advanced Settings</a></li><li><a href="#example-scope-definition">Example Scope Definition</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2021 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
