@@ -1,10 +1,12 @@
 inspectit:
   instrumentation:
     actions:
-      
-      # Replaces all matches for the provided regex pattern with the given replacement string.
-      # If the input string is null, null is returned.
+
       'a_regex_replaceAll':
+        _doc:
+          _description: |-
+            Replaces all matches for the provided regex pattern with the given replacement string.
+            If the input string is null, null is returned.
         imports:
          - 'java.util'
         input:
@@ -17,19 +19,21 @@ inspectit:
           }
           return string.replaceAll(pattern, replacement);
 
-      # Replaces all matches for all of the provided regex patterns with the given replacement strings.
-      # If the input string is null, null is returned.
-      #
-      # the patterns_and_replacements are expected to be a list of the following form:
-      # constant-input:
-      #   patterns_and_replacements:
-      #    - pattern: <regexA>
-      #      replacement: <replacementA>
-      #    - pattern: <regexB>
-      #      replacement: <replacementA>
-      #
-      # The replacement is executed in the order of the inputs.
       'a_regex_replaceAll_multi':
+        _doc:
+          _description: |-
+            Replaces all matches for all of the provided regex patterns with the given replacement strings.
+            If the input string is null, null is returned.
+            
+            the patterns_and_replacements are expected to be a list of the following form:
+            constant-input:
+              patterns_and_replacements:
+              - pattern: <regexA>
+              replacement: <replacementA>
+              - pattern: <regexB>
+              replacement: <replacementA>
+              
+            The replacement is executed in the order of the inputs.
         imports:
          - 'java.util'
         input:
@@ -48,9 +52,11 @@ inspectit:
           }
           return result;
 
-      # Replaces the provided input string if it fully matches a given regex.
-      # If the input string is null, null is returned.
       'a_regex_replaceMatch':
+        _doc:
+          _description: |-
+            Replaces the provided input string if it fully matches a given regex.
+            If the input string is null, null is returned.
         imports:
          - 'java.util'
          - 'java.util.regex'
@@ -71,20 +77,23 @@ inspectit:
           }
           return string;
 
-      # Scans the provided list of regexes to check if any matches the input string fully.
-      # If a match is found, it is replaced with the provided replacement and returned.
-      # If the input string is null, null is returned.
       #
-      # the patterns_and_replacements are expected to be a list of the following form:
-      # constant-input:
-      #   patterns_and_replacements:
-      #    - pattern: <regexA>
-      #      replacement: <replacementA>
-      #    - pattern: <regexB>
-      #      replacement: <replacementA>
-      #
-      # The replacement is executed in the order of the inputs.    
       'a_regex_replaceMatch_multi':
+        _doc:
+          _description: |-
+            Scans the provided list of regexes to check if any matches the input string fully.
+            If a match is found, it is replaced with the provided replacement and returned.
+            If the input string is null, null is returned.
+            
+            the patterns_and_replacements are expected to be a list of the following form:
+            constant-input:
+              patterns_and_replacements:
+                - pattern: <regexA>
+                  replacement: <replacementA>
+                - pattern: <regexB>
+                  replacement: <replacementA>
+            
+            The replacement is executed in the order of the inputs.
         imports:
          - 'java.util'
          - 'java.util.regex'
@@ -110,9 +119,11 @@ inspectit:
           }
           return result;
 
-      # Replaces the first match for the provided regex pattern with the given replacement string.
-      # If the input string is null, null is returned.    
       'a_regex_replaceFirst':
+        _doc:
+          _description: |-
+            Replaces the first match for the provided regex pattern with the given replacement string.
+            If the input string is null, null is returned.
         imports:
          - 'java.util'
          - 'java.util.regex'
@@ -131,10 +142,12 @@ inspectit:
           }
           return string;
 
-      # Checks if the given input string fully matches the provided regex.
-      # If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
-      # If the input string is null or the input string does not match the regex, null is returned.
       'a_regex_extractMatch':
+        _doc:
+          _description: |-
+            Checks if the given input string fully matches the provided regex.
+            If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
+            If the input string is null or the input string does not match the regex, null is returned.
         imports:
          - 'java.util'
          - 'java.util.regex'
@@ -159,19 +172,21 @@ inspectit:
           }
           return null;
 
-      # Checks if the given input string fully matches any of the provided regexes.
-      # If it does, the result for the matching regex is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
-      # The checking happens in the order of the list, meaning that the replacement for the first matching regex is returned.
-      # If the input string is null or the input string does not match the regex, null is returned. 
-      #
-      # the patterns_and_results are expected to be a list of the following form:
-      # constant-input:
-      #   patterns_and_results:
-      #    - pattern: <regexA>
-      #      result: <resultA>
-      #    - pattern: <regexB>
-      #      result: <resultA>
       'a_regex_extractMatch_multi':
+        _doc:
+          _description: |-
+            Checks if the given input string fully matches any of the provided regexes.
+            If it does, the result for the matching regex is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
+            The checking happens in the order of the list, meaning that the replacement for the first matching regex is returned.
+            If the input string is null or the input string does not match the regex, null is returned. 
+            
+            the patterns_and_results are expected to be a list of the following form:
+            constant-input:
+              patterns_and_results:
+                - pattern: <regexA>
+                  result: <resultA>
+                - pattern: <regexB>
+                  result: <resultA>
         imports:
          - 'java.util'
          - 'java.util.regex'
@@ -200,10 +215,12 @@ inspectit:
           }
           return null;
 
-      # Checks if the given input string has any match for the provided regex.
-      # If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
-      # If the input string is null or the input string does not match the regex, null is returned.    
       'a_regex_extractFirst':
+        _doc:
+          _description: |-
+            Checks if the given input string has any match for the provided regex.
+            If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
+            If the input string is null or the input string does not match the regex, null is returned.
         imports:
          - 'java.util'
          - 'java.util.regex'
@@ -227,20 +244,22 @@ inspectit:
             }
           }
           return null;
-      
-      # Checks if the given input string contains a match for any of the provided regexes.
-      # If it does, the result for the matching regex is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
-      # The checking happens in the order of the list, meaning that the replacement for the first matching regex is returned.
-      # If the input string is null or the input string does not match the regex, null is returned. 
-      #
-      # the patterns_and_results are expected to be a list of the following form:
-      # constant-input:
-      #   patterns_and_results:
-      #    - pattern: <regexA>
-      #      result: <resultA>
-      #    - pattern: <regexB>
-      #      result: <resultA> 
+
       'a_regex_extractFirst_multi':
+        _doc:
+          _description: |-
+            Checks if the given input string contains a match for any of the provided regexes.
+            If it does, the result for the matching regex is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
+            The checking happens in the order of the list, meaning that the replacement for the first matching regex is returned.
+            If the input string is null or the input string does not match the regex, null is returned. 
+            
+            the patterns_and_results are expected to be a list of the following form:
+            constant-input:
+              patterns_and_results:
+                - pattern: <regexA>
+                result: <resultA>
+                - pattern: <regexB>
+                result: <resultA>
         imports:
          - 'java.util'
          - 'java.util.regex'

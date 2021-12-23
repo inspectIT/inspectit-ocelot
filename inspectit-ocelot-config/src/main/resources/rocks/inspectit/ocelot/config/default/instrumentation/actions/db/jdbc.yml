@@ -1,9 +1,10 @@
 inspectit:
   instrumentation:
     actions:
-    
-      # Extracts the name of the JDBC connection for a given statement
+
       'a_jdbc_getUrl':
+        _doc:
+          _description: 'Extracts the name of the JDBC connection for a given statement.'
         imports:
           - 'java.sql'
         input:

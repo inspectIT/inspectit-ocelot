@@ -5,9 +5,10 @@ inspectit:
       # All actions are designed to be applied on CloseableHttpClient.doExecute(HttpHost, HttpRequest, HttpContext)
       # of the Apache HttpClient (https://hc.apache.org/httpcomponents-client-ga/)
       #--------------------------------------------------------------------------------------------------------------
-      
-      # Extracts the target of the request in the form host:port
+
       'a_apacheclient_toHostString':
+        _doc:
+          _description: 'Extracts the target of the request in the form host:port.'
         imports:
           - 'java.net'
           - 'org.apache.http'
@@ -15,8 +16,9 @@ inspectit:
           _arg0: 'HttpHost'
         value: '_arg0.toHostString()'
 
-      # Extracts the target http path
       'a_apacheclient_getPath':
+        _doc:
+          _description: 'Extracts the target http path.'
         imports:
           - 'java.net'
           - 'org.apache.http'
@@ -24,17 +26,20 @@ inspectit:
           _arg1: 'HttpRequest'
         value: 'URI.create(_arg1.getRequestLine().getUri()).getPath()'
 
-      # Extracts the HTTP Method of the request, e.g. GET or POST
       'a_apacheclient_getMethod':
+        _doc:
+          _description: 'Extracts the HTTP Method of the request, e.g. GET or POST.'
         imports:
           - 'org.apache.http'
         input:
           _arg1: 'HttpRequest'
         value: '_arg1.getRequestLine().getMethod()'
 
-      # Extracts the response status in case the request succeeded.
-      # If an exception is thrown instead, it's name is returned (e.g. SocketTimeoutException)
       'a_apacheclient_getStatus':
+        _doc:
+          _description: |-
+            Extracts the response status in case the request succeeded.
+            If an exception is thrown instead, it's name is returned (e.g. SocketTimeoutException).
         imports:
           - 'org.apache.http'
         input:
@@ -47,8 +52,9 @@ inspectit:
             return Integer.valueOf(_returnValue.getStatusLine().getStatusCode());
           }
 
-      # Writes down-propagated context data to the HTTP Headers
       'a_apacheclient_downPropagation':
+        _doc:
+          _description: 'Writes down-propagated context data to the HTTP Headers.'
         is-void: true
         imports:
           - 'java.util'
@@ -64,8 +70,9 @@ inspectit:
             _arg1.setHeader((String) e.getKey(), (String) e.getValue());
           }
 
-      # Reads up-propagated context data from the HTTP Headers
       'a_apacheclient_upPropagation':
+        _doc:
+          _description: 'Reads up-propagated context data from the HTTP Headers.'
         is-void: true
         imports:
           - 'java.util'

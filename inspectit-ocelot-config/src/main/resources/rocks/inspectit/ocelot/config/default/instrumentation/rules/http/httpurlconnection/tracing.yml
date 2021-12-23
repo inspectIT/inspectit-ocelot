@@ -1,9 +1,10 @@
 inspectit:
   instrumentation:
     rules:
-    
-      # Starts a span for an HTTPUrlConnection before down propagation happens.
+
       'r_httpurlconnection_tracing_start':
+        _doc:
+          _description: 'Starts a span for an HTTPUrlConnection before down propagation happens.'
         include:
           'r_httpurlconnection_detect_start': true
           'r_httpurlconnection_extract_request_details': true
@@ -28,10 +29,12 @@ inspectit:
               'value': 'httpurlconnection_span'
             constant-input: 
               'key': 'span'
-              
-      # Continues an already started span for this HTTPUrlConnection via r_httpurlconnection_tracing_start
-      # If no span was started yet, a fresh one is started
+
       'r_httpurlconnection_tracing_end':
+        _doc:
+          _description: |-
+            Continues an already started span for this HTTPUrlConnection via r_httpurlconnection_tracing_start.
+            If no span was started yet, a fresh one is started.
         include:
           'r_http_tracing_span_name_default': true
           'r_http_client_tracing_default_attributes': true
