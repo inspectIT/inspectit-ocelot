@@ -21,7 +21,7 @@ public class ActionMetricsRecorderConfigTest extends SpringTestBase {
 
         @Test
         void checkDefaultEnabled() {
-            assertThat(recorder.isEnabled()).isTrue();
+            assertThat(recorder.isEnabled()).isFalse();
         }
     }
 
@@ -31,9 +31,9 @@ public class ActionMetricsRecorderConfigTest extends SpringTestBase {
         @Test
         @DirtiesContext
         void checkAllEnabled() {
-            assertThat(recorder.isEnabled()).isTrue();
+            assertThat(recorder.isEnabled()).isFalse();
             updateProperties((mp) -> {
-                mp.setProperty("inspectit.selfMonitoring.action-metrics.enabled", "true");
+                mp.setProperty("inspectit.selfMonitoring.actionMetrics.enabled", "true");
             });
             assertThat(recorder.isEnabled()).isTrue();
         }
@@ -41,9 +41,9 @@ public class ActionMetricsRecorderConfigTest extends SpringTestBase {
         @Test
         @DirtiesContext
         void checkAllDisabled() {
-            assertThat(recorder.isEnabled()).isTrue();
+            assertThat(recorder.isEnabled()).isFalse();
             updateProperties((mp) -> {
-                mp.setProperty("inspectit.selfMonitoring.action-metrics.enabled", "false");
+                mp.setProperty("inspectit.selfMonitoring.actionMetrics.enabled", "false");
             });
             assertThat(recorder.isEnabled()).isFalse();
         }
