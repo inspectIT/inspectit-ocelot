@@ -10,7 +10,6 @@ import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfig
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
-import rocks.inspectit.ocelot.core.selfmonitoring.ActionMetricsRecorder;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 import rocks.inspectit.ocelot.core.selfmonitoring.IActionScope;
 
@@ -70,7 +69,6 @@ public class MethodHook implements IMethodHook {
     /**
      * The factory that creates/spawns new scopes for an {@link IHookAction}
      */
-    @NotNull
     private final ActionScopeFactory actionScopeFactory;
 
     @Builder
@@ -94,7 +92,7 @@ public class MethodHook implements IMethodHook {
         IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, null, null, this, inspectitContext);
 
         for (IHookAction action : activeEntryActions) {
-            try (IActionScope scope = actionScopeFactory.getScope(action)) {
+            try (IActionScope scope = actionScopeFactory.createScope(action)) {
                 action.execute(executionContext);
             } catch (Throwable t) {
                 log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
@@ -110,7 +108,7 @@ public class MethodHook implements IMethodHook {
     public void onExit(Object[] args, Object thiz, Object returnValue, Throwable thrown, InternalInspectitContext context) {
         IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, (InspectitContextImpl) context);
         for (IHookAction action : activeExitActions) {
-            try (IActionScope scope = actionScopeFactory.getScope(action)) {
+            try (IActionScope scope = actionScopeFactory.createScope(action)) {
                 action.execute(executionContext);
             } catch (Throwable t) {
                 log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);

@@ -64,6 +64,8 @@ public class MethodHookTest {
             verify(first, times(1)).execute(any());
             verify(second, times(1)).execute(any());
             verify(third, times(1)).execute(any());
+            verify(actionScopeFactory, times(3)).createScope(any());
+            verifyNoMoreInteractions(actionScopeFactory, first, second, third);
 
             hook.onExit(null, null, null, null, ctx);
             verify(context, times(1)).close();
@@ -73,6 +75,8 @@ public class MethodHookTest {
             verify(first, times(2)).execute(any());
             verify(second, times(1)).execute(any());
             verify(third, times(2)).execute(any());
+            verify(actionScopeFactory, times(5)).createScope(any());
+            verifyNoMoreInteractions(actionScopeFactory, first, second, third);
 
             hook.onExit(null, null, null, null, ctx);
         }
@@ -93,11 +97,15 @@ public class MethodHookTest {
             hook.onExit(null, null, null, null, ctx);
 
             verify(action, times(1)).execute(any());
+            verify(actionScopeFactory).createScope(action);
+            verifyNoMoreInteractions(actionScopeFactory, action);
 
             ctx = hook.onEnter(null, null);
             hook.onExit(null, null, null, null, ctx);
 
             verify(action, times(1)).execute(any());
+            verify(actionScopeFactory).createScope(action);
+            verifyNoMoreInteractions(actionScopeFactory, action);
 
             MethodHook copy = hook.getResettedCopy();
 
@@ -105,6 +113,8 @@ public class MethodHookTest {
             copy.onExit(null, null, null, null, ctx);
 
             verify(action, times(2)).execute(any());
+            verify(actionScopeFactory, times(2)).createScope(action);
+            verifyNoMoreInteractions(actionScopeFactory, action);
         }
 
     }
@@ -132,6 +142,8 @@ public class MethodHookTest {
             verify(first, times(1)).execute(any());
             verify(second, times(1)).execute(any());
             verify(third, times(1)).execute(any());
+            verify(actionScopeFactory, times(3)).createScope(any());
+            verifyNoMoreInteractions(actionScopeFactory, first, second, third);
 
             ctx = hook.onEnter(null, null);
             hook.onExit(null, null, null, null, ctx);
@@ -139,6 +151,8 @@ public class MethodHookTest {
             verify(first, times(2)).execute(any());
             verify(second, times(1)).execute(any());
             verify(third, times(2)).execute(any());
+            verify(actionScopeFactory, times(5)).createScope(any());
+            verifyNoMoreInteractions(actionScopeFactory, first, second, third);
         }
 
         @Test
@@ -157,11 +171,15 @@ public class MethodHookTest {
             hook.onExit(null, null, null, null, ctx);
 
             verify(action, times(1)).execute(any());
+            verify(actionScopeFactory).createScope(action);
+            verifyNoMoreInteractions(actionScopeFactory, action);
 
             ctx = hook.onEnter(null, null);
             hook.onExit(null, null, null, null, ctx);
 
             verify(action, times(1)).execute(any());
+            verify(actionScopeFactory).createScope(action);
+            verifyNoMoreInteractions(actionScopeFactory, action);
 
             MethodHook copy = hook.getResettedCopy();
 
@@ -169,6 +187,8 @@ public class MethodHookTest {
             copy.onExit(null, null, null, null, ctx);
 
             verify(action, times(2)).execute(any());
+            verify(actionScopeFactory, times(2)).createScope(action);
+            verifyNoMoreInteractions(actionScopeFactory, action);
         }
 
     }

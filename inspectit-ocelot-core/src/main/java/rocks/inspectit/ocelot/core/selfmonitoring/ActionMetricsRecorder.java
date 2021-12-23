@@ -33,6 +33,11 @@ public class ActionMetricsRecorder extends DynamicallyActivatableService {
     private static final String EXECUTION_TIME_METRIC_NAME = "execution-time";
 
     /**
+     * The measurement name used for recording.
+     */
+    private static final String MEASUREMENT_NAME = METRIC_NAME_PREFIX + EXECUTION_TIME_METRIC_NAME;
+
+    /**
      * The key of the action's name used in custom tags.
      */
     private static final String ACTION_NAME_KEY = "action_name";
@@ -42,26 +47,12 @@ public class ActionMetricsRecorder extends DynamicallyActivatableService {
     }
 
     /**
-     * Records the execution time of an {@link IHookAction}.
-     *
-     * @param action              The action
-     * @param executionTimeMicros The execution time in microseconds
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
-     */
-    public void record(IHookAction action, long executionTimeMicros) {
-        record(action.getName(), executionTimeMicros);
-    }
-
-    /**
      * Records the execution time of an action.
      *
      * @param actionName          The name of the execution
      * @param executionTimeMicros The execution time in microseconds
-     *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           TODO: do we want to record nano, micro or milliseconds? In case of millis, do we want to store long or double?
      */
     public void record(String actionName, long executionTimeMicros) {
-
-        // do nothing if this metrics recorder is not enabled
         if (!isEnabled()) {
             return;
         }
@@ -71,47 +62,8 @@ public class ActionMetricsRecorder extends DynamicallyActivatableService {
             put(ACTION_NAME_KEY, actionName);
         }};
 
-        // record the action's execution time if enabled
-        recordMeasurement(EXECUTION_TIME_METRIC_NAME, executionTimeMicros, customTags);
-
-        // if we later have different metrics that can be individually turned on or off, we need to check via ActionMetricsSettings what to record, e.g.,
-
-        // ActionMetricsSettings actionsSettings = env.getCurrentConfig().getSelfMonitoring().getActionMetrics();
-        //        if (actionsSettings.isEnabled()) {
-        //          recordMeasurement(EXECUTION_TIME_METRIC_NAME, executionTimeMicros, customTags);
-        //    }
-
-    }
-
-    /**
-     * Records the measurement for the specific metric of an action.
-     *
-     * @param actionName The name of the action
-     * @param metricName The name of the metric
-     * @param value      The value to be recorded
-     */
-    private void recordMeasurement(String actionName, String metricName, long value) {
-        // return if the recorder or the metric is disabled
-        if (!isEnabled()) {
-            return;
-        }
-        // create custom tags
-        val customTags = new HashMap<String, String>() {{
-            put(ACTION_NAME_KEY, actionName);
-        }};
-        // record measurement
-        selfMonitoringService.recordMeasurement(METRIC_NAME_PREFIX + metricName, value, customTags);
-    }
-
-    /**
-     * Records the measurement for the metric.
-     *
-     * @param metricName The name of the metric
-     * @param value      The value to be recorded
-     * @param customTags additional tags, which are added to the measurement
-     */
-    private void recordMeasurement(String metricName, long value, HashMap<String, String> customTags) {
-        selfMonitoringService.recordMeasurement(METRIC_NAME_PREFIX + metricName, value, customTags);
+        // record the action's execution time
+        selfMonitoringService.recordMeasurement(MEASUREMENT_NAME, executionTimeMicros, customTags);
     }
 
     @Override
@@ -123,7 +75,6 @@ public class ActionMetricsRecorder extends DynamicallyActivatableService {
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        // TODO: do I need to check whether the InspectitConfig#action settings have been defined at all?
         log.info("Enabling ActionMetricsRecorder.");
         return true;
     }

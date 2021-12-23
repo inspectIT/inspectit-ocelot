@@ -16,7 +16,7 @@ import static org.awaitility.Awaitility.await;
 /**
  * Tests the {@link rocks.inspectit.ocelot.core.selfmonitoring.ActionsMetricsRecorder}
  */
-public class ActionMetricsRecorderTestAgent extends MetricsSysTestBase {
+public class ActionMetricsRecorderSysTest extends MetricsSysTestBase {
 
     private static final ViewManager viewManager = Stats.getViewManager();
 

@@ -13,17 +13,18 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 public class ActionScopeFactory {
 
     @Autowired
-    ActionMetricsRecorder recorder;
+    private ActionMetricsRecorder recorder;
 
     /**
-     * Creates and returns a new {@link IActionScope} for the given {@link IHookAction}. If the {@link ActionMetricsRecorder} is disabled, the {@link NoopActionScope} will be returned.
+     * Creates and returns a new {@link IActionScope} for the given {@link IHookAction}.
+     * If the {@link ActionMetricsRecorder} is disabled, the {@link IActionScope#NOOP_ACTION_SCOPE}  will be returned.
      *
      * @param action The action
      *
-     * @return A new {@link IActionScope} for the given {@link IHookAction}. A {@link NoopActionScope} is returned if the {@link ActionMetricsRecorder} is disabled.
+     * @return A new {@link IActionScope} for the given {@link IHookAction} or {@link IActionScope#NOOP_ACTION_SCOPE} in case {@link ActionMetricsRecorder} is disabled.
      */
-    public IActionScope getScope(IHookAction action) {
-        return recorder.isEnabled() ? new ActionScopeImpl(action, recorder) : NoopActionScope.INSTANCE;
+    public IActionScope createScope(IHookAction action) {
+        return recorder.isEnabled() ? new ActionScopeImpl(action, recorder) : IActionScope.NOOP_ACTION_SCOPE;
     }
 
 }

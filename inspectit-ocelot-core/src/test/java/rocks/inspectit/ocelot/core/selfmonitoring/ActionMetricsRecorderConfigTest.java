@@ -33,7 +33,7 @@ public class ActionMetricsRecorderConfigTest extends SpringTestBase {
         void checkAllEnabled() {
             assertThat(recorder.isEnabled()).isTrue();
             updateProperties((mp) -> {
-                mp.setProperty("inspectit.selfMonitoring.actionMetrics.enabled", "true");
+                mp.setProperty("inspectit.selfMonitoring.action-metrics.enabled", "true");
             });
             assertThat(recorder.isEnabled()).isTrue();
         }
@@ -43,10 +43,9 @@ public class ActionMetricsRecorderConfigTest extends SpringTestBase {
         void checkAllDisabled() {
             assertThat(recorder.isEnabled()).isTrue();
             updateProperties((mp) -> {
-                mp.setProperty("inspectit.selfMonitoring.actionMetrics.enabled", "false");
+                mp.setProperty("inspectit.selfMonitoring.action-metrics.enabled", "false");
             });
             assertThat(recorder.isEnabled()).isFalse();
         }
     }
-
 }
