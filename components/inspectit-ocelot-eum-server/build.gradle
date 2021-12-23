@@ -1,6 +1,7 @@
 plugins {
     id 'org.springframework.boot' version '2.1.4.RELEASE'
     id 'java'
+    id 'com.palantir.docker' version "0.21.0"
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -41,9 +42,21 @@ task generateVersionFile {
     }
 }
 
+task downloadOpenTelemetryPlugin() {
+    ext.dest = new File(buildDir, "boomerang-opentelemetry.js")
+    outputs.files(ext.dest)
+    doLast {
+        def f = ext.dest
+        new URL("https://github.com/NovatecConsulting/boomerang-opentelemetry-plugin/releases/download/$openTelemetryVersion/boomerang-opentelemetry.js")
+                .withInputStream { i -> f.withOutputStream { it << i } }
+    }
+
+}
+
 bootJar {
     dependsOn generateVersionFile
     dependsOn downloadAndExtractBoomerang
+    dependsOn downloadOpenTelemetryPlugin
 
     archivesBaseName = 'inspectit-ocelot-eum-server'
     version = "${buildVersion}"
@@ -59,6 +72,12 @@ bootJar {
     from("$buildDir/boomerangjs-${boomerangVersion}/package") {
         include "plugins/*.js"
         include "boomerang.js"
+        into "static/boomerang"
+    }
+
+    //include boomerang opentelemetry
+    from("$buildDir") {
+        include "boomerang-opentelemetry.js"
         into "static/boomerang"
     }
 }
@@ -113,7 +132,7 @@ dependencies {
             'org.springframework:spring-test:5.1.3.RELEASE',
             'org.apache.httpcomponents:httpclient:4.5.6',
             'commons-io:commons-io:2.6',
-            'org.mockito:mockito-core:2.23.4',
+            "org.mockito:mockito-core:${mockitoVersion}",
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
             'org.awaitility:awaitility:3.1.5',
             'org.mockito:mockito-junit-jupiter:2.23.0',
@@ -123,3 +142,19 @@ dependencies {
 
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.3.1"
 }
+
+task copyServerJar(type: Copy) {
+    dependsOn bootJar
+    from("${buildDir}/libs/inspectit-ocelot-eum-server-${version}.jar")
+    into("${buildDir}/docker-jar")
+    rename("inspectit-ocelot-eum-server-${version}\\.jar",
+            'inspectit-ocelot-eum-server.jar')
+}
+
+docker {
+    name "inspectit/inspectit-ocelot-eum-server"
+    tags "${version}"
+    dockerfile file('docker/Dockerfile')
+    files 'docker/entrypoint.sh', "$buildDir/docker-jar/inspectit-ocelot-eum-server.jar"
+}
+docker.dependsOn copyServerJar

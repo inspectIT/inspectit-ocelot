@@ -72,15 +72,17 @@ dependencies {
             "io.opencensus:opencensus-exporter-metrics-ocagent:${openCensusVersion}",
 
             "io.opencensus:opencensus-exporter-trace-ocagent:${openCensusVersion}",
-            // The following dependecy is required for the OC-exporter to work correctly and must be matched against the grpc version
+            // The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
             // See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
-            'io.netty:netty-tcnative-boringssl-static:2.0.20.Final',
-
+            "io.netty:netty-tcnative-boringssl-static:${tcnativeVersion}",
 
             "rocks.inspectit:opencensus-influxdb-exporter:1.2",
-            
+
             // bytecode manipulation
-            "net.bytebuddy:byte-buddy:1.11.15"
+            "net.bytebuddy:byte-buddy:1.11.15",
+
+            // use older gson version than v2.8.6 (what OC v0.26+ uses), as v2.8.6 does not work with checkDependencyJavaVersions, see https://github.com/google/gson/issues/1627
+            "com.google.code.gson:gson:2.8.5!!"
     )
 
     testImplementation(
@@ -88,7 +90,7 @@ dependencies {
             "io.opencensus:opencensus-impl:${openCensusVersion}",
             'org.springframework:spring-test:5.1.3.RELEASE',
             'org.apache.httpcomponents:httpclient:4.5.6',
-            'org.mockito:mockito-core:2.23.4',
+            "org.mockito:mockito-core:${mockitoVersion}",
             'org.assertj:assertj-core:3.11.1',
             'org.assertj:assertj-guava:3.2.1',
             'org.awaitility:awaitility:3.1.5',

@@ -57,6 +57,10 @@ public class SpecialElementMatchers {
                     return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.CONTAINS_IGNORE_CASE));
                 case MATCHES:
                     return new NameMatcher<>(new StringMatcher(namePattern, StringMatcher.Mode.MATCHES));
+                case NOT_EQUALS_FULLY:
+                    return new NameMatcher<>(not(new StringMatcher(namePattern, StringMatcher.Mode.EQUALS_FULLY)));
+                case NOT_EQUALS_FULLY_IGNORE_CASE:
+                    return new NameMatcher<>(not(new StringMatcher(namePattern, StringMatcher.Mode.EQUALS_FULLY_IGNORE_CASE)));
                 default:
                     throw new RuntimeException("Unhandled matcher mode!");
             }
