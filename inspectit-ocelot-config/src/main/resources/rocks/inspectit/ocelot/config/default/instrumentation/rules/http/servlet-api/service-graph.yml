@@ -1,9 +1,10 @@
 inspectit:
   instrumentation:
     rules:
-      
-      # Enables the propagation of the "origin_service" for the service graph
+
       'r_servletapi_servicegraph_propagation':
+        doc:
+          description: 'Enables the propagation of the "origin_service" for the service graph.'
         include:
           'r_servicegraph_prepare_up_propagation': true
         scopes:
@@ -12,8 +13,9 @@ inspectit:
           's_servletapi_servletresponse_getWriter': true
           's_servletapi_servletresponse_getOutputStream': true
 
-      # Records inbound HTTP calls via the Servlet API in the service graph 
       'r_servletapi_servicegraph_record':
+        doc:
+          description: 'Records inbound HTTP calls via the Servlet API in the service graph.'
         include:
           'r_servicegraph_inbound_record_method': true
           'r_servletapi_detect_entry':
