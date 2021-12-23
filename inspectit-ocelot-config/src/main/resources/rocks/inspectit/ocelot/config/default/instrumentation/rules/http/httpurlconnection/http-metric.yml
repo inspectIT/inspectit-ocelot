@@ -1,9 +1,10 @@
 inspectit:
   instrumentation:
     rules:
-    
-      # Records HTTP calls done via HTTPUrlConnection via the http/out metric
+
       'r_httpurlconnection_http_metric':
+        doc:
+          description: 'Records HTTP calls done via HTTPUrlConnection via the http/out metric.'
         include:
           'r_httpurlconnection_extract_details': true
           'r_httpurlconnection_detect_end': true

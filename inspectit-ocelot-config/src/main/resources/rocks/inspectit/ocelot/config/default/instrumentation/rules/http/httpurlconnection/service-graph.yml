@@ -2,9 +2,10 @@ inspectit:
   instrumentation:
     rules:
     
-      # Reads and writes the service graph correlation information on the context
-      # (e.g. origin_service and target_service)
+      #
       'r_httpurlconnection_servicegraph_propagation':
+        doc:
+          description: 'Reads and writes the service graph correlation information on the context (e.g. origin_service and target_service).'
         include:
           'r_servicegraph_prepare_down_propagation': true
         scopes:
@@ -12,8 +13,9 @@ inspectit:
           's_httpurlconnection_getOutputStream': true
           's_httpurlconnection_getInputStream': true
 
-      # Records an HTTP call done via HTTPUrlConnection as service-call 
       'r_httpurlconnection_servicegraph_record':
+        doc:
+          description: 'Records an HTTP call done via HTTPUrlConnection as service-call.'
         include:
           'r_servicegraph_outbound_record_method': true
           'r_httpurlconnection_detect_end': true

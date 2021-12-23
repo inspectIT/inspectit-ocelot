@@ -4,10 +4,10 @@
 inspectit:
   instrumentation:
     rules:
-      
-      # Marks the first service() or doFilter() calls as entry for which the ServletRequest
-      # is an HTTPServletRequest
+
       'r_servletapi_detect_entry':
+        doc:
+          description: 'Marks the first service() or doFilter() calls as entry for which the ServletRequest is an HTTPServletRequest.'
         pre-entry:
           'is_http_servlet':
             action: 'a_servletrequest_isHttp'
@@ -18,9 +18,10 @@ inspectit:
             constant-input: 
               'marker': 'http_server_entrypoint_marker'
             only-if-true: 'is_http_servlet'
-            
-      # Extracts all http details, such as http_path, http_method, http_status, etc      
+
       'r_servletapi_extract_details':
+        doc:
+          description: 'Extracts all http details, such as http_path, http_method, http_status, etc.'
         include:
           'r_servletapi_detect_entry': true
           'r_http_parametrize_path': true # Used to derive http_path from http_raw_path

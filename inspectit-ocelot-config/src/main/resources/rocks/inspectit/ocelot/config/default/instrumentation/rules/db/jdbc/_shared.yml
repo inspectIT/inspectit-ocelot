@@ -17,18 +17,21 @@ inspectit:
     # # # # # # # # # # # # # # # # # # # # # #
     # Rules Definition
     rules:
-    
-      # Can be included to detect the entry into the first JDBC layer
+
       'r_jdbc_detect_entry':
+        doc:
+          description: 'Can be included to detect the entry into the first JDBC layer.'
         entry:
           'jdbc_is_entry':
             action: 'a_entrypoint_check'
             constant-input: 
               'marker': 'jdbc_entrypoint_marker'
-              
-      # Can be included to extract the url of the JDBC url
-      # Extraction only happens for the first JDBC layer, which might be a JDBC proxy
+
       r_jdbc_extract_url:
+        doc:
+          description: |-
+            Can be included to extract the url of the JDBC url.
+            Extraction only happens for the first JDBC layer, which might be a JDBC proxy.
         include:
           'r_jdbc_detect_entry': true
         entry:
@@ -37,11 +40,13 @@ inspectit:
             only-if-true: 'jdbc_is_entry'
             data-input: 
               'statement': _this
-      
-      # This rule does not provide any functionality but a performance benefit
-      # Driver-specific instrumentations can write 'prepared_sql' which gets up-propagated
-      # This rule limits the up-propagation to the JDBC scope, because propagating it up further is not necessary.
+
       r_jdbc_prepared_sql_stop_propagation:
+        doc:
+          description: |-
+            This rule does not provide any functionality but a performance benefit.
+            Driver-specific instrumentations can write 'prepared_sql' which gets up-propagated.
+            This rule limits the up-propagation to the JDBC scope, because propagating it up further is not necessary.
         include:
           'r_jdbc_detect_entry': true
         scopes:
