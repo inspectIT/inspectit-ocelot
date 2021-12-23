@@ -49,6 +49,8 @@ public class HookManager {
      */
     private volatile Map<Class<?>, Map<String, MethodHook>> hooks = Collections.emptyMap();
 
+    public static ThreadLocal<Boolean> hookGate = ThreadLocal.withInitial(() -> false);
+
     @PostConstruct
     void init() {
         Instances.hookManager = this::getHook;
@@ -64,16 +66,20 @@ public class HookManager {
      *
      * @param clazz           the name of the class to which the method to query the hook for belongs
      * @param methodSignature the signature of the method in the form of name(parametertype,parametertype,..)
+     *
      * @return
      */
     private IMethodHook getHook(Class<?> clazz, String methodSignature) {
-        Map<String, MethodHook> methodHooks = hooks.get(clazz);
-        if (methodHooks != null) {
-            MethodHook hook = methodHooks.get(methodSignature);
-            if (hook != null) {
-                return hook;
+        if (!hookGate.get() ) {
+            Map<String, MethodHook> methodHooks = hooks.get(clazz);
+            if (methodHooks != null) {
+                MethodHook hook = methodHooks.get(methodSignature);
+                if (hook != null) {
+                    return hook;
+                }
             }
         }
+
         return NoopMethodHook.INSTANCE;
     }
 
@@ -87,7 +93,6 @@ public class HookManager {
     public HookUpdate startUpdate() {
         return new HookUpdate();
     }
-
 
     /**
      * A {@link HookUpdate} instance represents a (potential) change to apply to the {@link HookManager}.
@@ -120,7 +125,8 @@ public class HookManager {
                 newHooks = new WeakHashMap<>();
                 for (Map.Entry<Class<?>, Map<String, MethodHook>> existingMethodHooks : hooks.entrySet()) {
                     HashMap<String, MethodHook> newMethodHooks = new HashMap<>();
-                    existingMethodHooks.getValue().forEach((signature, hook) -> newMethodHooks.put(signature, hook.getResettedCopy()));
+                    existingMethodHooks.getValue()
+                            .forEach((signature, hook) -> newMethodHooks.put(signature, hook.getResettedCopy()));
                     newHooks.put(existingMethodHooks.getKey(), newMethodHooks);
                 }
             }
@@ -159,13 +165,11 @@ public class HookManager {
 
         private Optional<MethodHook> getCurrentHook(Class<?> declaringClass, String methodSignature) {
             Map<String, MethodHook> methodHooks = newHooks.get(declaringClass);
-            return Optional.ofNullable(methodHooks)
-                    .map(myHooks -> myHooks.get(methodSignature));
+            return Optional.ofNullable(methodHooks).map(myHooks -> myHooks.get(methodSignature));
         }
 
         private void setHook(Class<?> declaringClass, String methodSignature, MethodHook newHook) {
-            newHooks.computeIfAbsent(declaringClass, (v) -> new HashMap<>())
-                    .put(methodSignature, newHook);
+            newHooks.computeIfAbsent(declaringClass, (v) -> new HashMap<>()).put(methodSignature, newHook);
         }
 
         private void removeHook(Class<?> declaringClass, String methodSignature) {
@@ -193,8 +197,7 @@ public class HookManager {
         private void addOrReplaceHooks(Class<?> clazz, Map<MethodDescription, MethodHookConfiguration> hookConfigs) {
             hookConfigs.forEach((method, newConfig) -> {
                 String signature = CoreUtils.getSignature(method);
-                MethodHookConfiguration oldConfig = getCurrentHook(clazz, signature)
-                        .map(MethodHook::getSourceConfiguration)
+                MethodHookConfiguration oldConfig = getCurrentHook(clazz, signature).map(MethodHook::getSourceConfiguration)
                         .orElse(null);
                 if (!Objects.equals(newConfig, oldConfig)) {
                     if (log.isDebugEnabled()) {

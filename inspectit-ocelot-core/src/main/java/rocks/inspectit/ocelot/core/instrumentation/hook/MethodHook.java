@@ -98,10 +98,12 @@ public class MethodHook implements IMethodHook {
                 log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
                 activeEntryActions.remove(action);
             }
-        }
 
-        inspectitContext.makeActive();
-        return inspectitContext;
+            inspectitContext.makeActive();
+            return inspectitContext;
+        } finally {
+            HookManager.hookGate.set(false);
+        }
     }
 
     @Override
@@ -114,8 +116,10 @@ public class MethodHook implements IMethodHook {
                 log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
                 activeExitActions.remove(action);
             }
+            context.close();
+        } finally {
+            HookManager.hookGate.set(false);
         }
-        context.close();
     }
 
     /**
