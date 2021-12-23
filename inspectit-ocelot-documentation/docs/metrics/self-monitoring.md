@@ -18,6 +18,22 @@ The metric is split by the tag containing the component name and also includes a
 |```inspectit/self/action/execution-time```|us|The execution time of individual actions. The metric contains the tag `action_name`, specifying the name of the instrumented action.
 |```inspectit/self/action/count```|`action executions`|The number of executions per action. The metric contains the tag `action_name`, specifying the name of the instrumented action.
 
-Self monitoring is enabled by default and can be disabled by setting the `inspectit.self-monitoring.enabled` property to `false`.
+Self monitoring is enabled by default (except action metrics) and can be disabled by setting the `inspectit.self-monitoring.enabled` property to `false`.
 
 > Not all components responsible for internal management of inspectIT Ocelot are at the moment reporting the time used for internal tasks. Please take the provided numbers only for a basic reference on overhead and don't assume they are 100% correct. In addition the overhead introduced in application classes through instrumentation is currently also not captured.
+
+### Action Execution Monitoring
+
+Since version `1.14.0`, the inspectIT Ocelot agent is able to record execution metrics of its actions.
+In order to reduce the overhead the agent is producing on the target system, the action execution metrics recording of actions is disabled by default.
+
+The recording of these metrics can be enabled using the following configuration:
+
+```yaml
+inspectit:
+  self-monitoring:
+    action-metrics:
+      enabled: false
+```
+
+Note: the action execution metrics are only recorded in case the self-monitoring metrics are enabled. 

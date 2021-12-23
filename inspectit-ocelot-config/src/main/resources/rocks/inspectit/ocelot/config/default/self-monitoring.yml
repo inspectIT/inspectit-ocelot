@@ -7,7 +7,7 @@ inspectit:
     # settings regarding the capturing of action related metrics
     action-metrics:
       # if true, the execution time (duration in ms) per action will be recorded
-      enabled: true
+      enabled: false
 
   # definitions of existing self-monitoring metrics
   metrics:
