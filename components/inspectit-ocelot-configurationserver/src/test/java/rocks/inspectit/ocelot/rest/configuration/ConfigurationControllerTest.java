@@ -1,5 +1,8 @@
 package rocks.inspectit.ocelot.rest.configuration;
 
+import inspectit.ocelot.configdocsgenerator.ConfigDocsGenerator;
+import inspectit.ocelot.configdocsgenerator.model.ConfigDocumentation;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,11 +15,15 @@ import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.mappings.AgentMappingManager;
+import rocks.inspectit.ocelot.mappings.model.AgentMapping;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigurationControllerTest {
@@ -29,6 +36,12 @@ public class ConfigurationControllerTest {
 
     @Mock
     FileManager fileManager;
+
+    @Mock
+    private AgentMappingManager mappingManager;
+
+    @Mock
+    private ConfigDocsGenerator configDocsGenerator;
 
     @Nested
     public class FetchConfiguration {
@@ -62,6 +75,55 @@ public class ConfigurationControllerTest {
             configurationController.reloadConfiguration();
 
             verify(fileManager).commitWorkingDirectory();
+        }
+    }
+
+    @Nested
+    public class GetConfigDocumentationTest {
+
+        @Test
+        void getConfigDocumentation() {
+
+            String mappingName = "name";
+            AgentMapping agentMapping = AgentMapping.builder().build();
+
+            String configYaml = "yaml";
+            AgentConfiguration agentConfiguration = AgentConfiguration.builder().configYaml(configYaml).build();
+
+            ConfigDocumentation configDocumentationMock = mock(ConfigDocumentation.class);
+
+            when(mappingManager.getAgentMapping(mappingName)).thenReturn(Optional.of(agentMapping));
+            when(agentConfigurationManager.getConfigurationForMapping(agentMapping)).thenReturn(agentConfiguration);
+            when(configDocsGenerator.generateConfigDocs(configYaml)).thenReturn(configDocumentationMock);
+
+            ResponseEntity<Object> result = configurationController.getConfigDocumentation(mappingName);
+
+            verify(mappingManager).getAgentMapping(eq(mappingName));
+            verifyNoMoreInteractions(mappingManager);
+            verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
+            verifyNoMoreInteractions(agentConfigurationManager);
+            verify(configDocsGenerator).generateConfigDocs(eq(configYaml));
+            verifyNoMoreInteractions(configDocsGenerator);
+
+            AssertionsForClassTypes.assertThat(result.getBody()).isSameAs(configDocumentationMock);
+        }
+
+        @Test
+        void getConfigDocumentationMappingNotFound() {
+
+            String mappingName = "name";
+
+            when(mappingManager.getAgentMapping(mappingName)).thenReturn(Optional.empty());
+
+            ResponseEntity<Object> result = configurationController.getConfigDocumentation(mappingName);
+
+            verify(mappingManager).getAgentMapping(eq(mappingName));
+            verifyNoMoreInteractions(mappingManager);
+
+            AssertionsForClassTypes.assertThat(result.getStatusCodeValue()).isEqualTo(404);
+            AssertionsForClassTypes.assertThat(result.getBody())
+                    .isEqualTo(String.format("No AgentMapping found with the name %s.", mappingName));
+
         }
     }
 }
