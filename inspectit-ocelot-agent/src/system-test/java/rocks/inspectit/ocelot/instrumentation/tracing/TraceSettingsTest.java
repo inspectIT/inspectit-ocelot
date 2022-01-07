@@ -1,9 +1,9 @@
 package rocks.inspectit.ocelot.instrumentation.tracing;
 
-import io.opencensus.trace.Status;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.SpanId;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.data.StatusData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -409,7 +409,7 @@ public class TraceSettingsTest extends TraceTestBase {
             //wait for the end marker, this ensures that all sampled spans are also exported
             assertTraceExported((spans) -> assertThat(spans).hasSize(1).anySatisfy((sp) -> {
                 assertThat(sp.getName()).isEqualTo("TraceSettingsTest.withoutErrorStatus");
-                assertThat(sp.getStatus()).isEqualTo(Status.OK);
+                assertThat(sp.getStatus()).isEqualTo(StatusData.unset());
             }));
         }
 
@@ -420,7 +420,7 @@ public class TraceSettingsTest extends TraceTestBase {
             //wait for the end marker, this ensures that all sampled spans are also exported
             assertTraceExported((spans) -> assertThat(spans).hasSize(1).anySatisfy((sp) -> {
                 assertThat(sp.getName()).isEqualTo("TraceSettingsTest.withErrorStatus");
-                assertThat(sp.getStatus()).isEqualTo(Status.OK);
+                assertThat(sp.getStatus()).isEqualTo(StatusData.unset());
             }));
         }
 
@@ -431,7 +431,7 @@ public class TraceSettingsTest extends TraceTestBase {
             //wait for the end marker, this ensures that all sampled spans are also exported
             assertTraceExported((spans) -> assertThat(spans).hasSize(1).anySatisfy((sp) -> {
                 assertThat(sp.getName()).isEqualTo("TraceSettingsTest.withErrorStatus");
-                assertThat(sp.getStatus()).isEqualTo(Status.OK);
+                assertThat(sp.getStatus()).isEqualTo(StatusData.unset());
             }));
         }
 
@@ -442,7 +442,7 @@ public class TraceSettingsTest extends TraceTestBase {
             //wait for the end marker, this ensures that all sampled spans are also exported
             assertTraceExported((spans) -> assertThat(spans).hasSize(1).anySatisfy((sp) -> {
                 assertThat(sp.getName()).isEqualTo("TraceSettingsTest.withErrorStatus");
-                assertThat(sp.getStatus()).isEqualTo(Status.UNKNOWN);
+                assertThat(sp.getStatus()).isEqualTo(StatusData.error());
             }));
         }
     }
