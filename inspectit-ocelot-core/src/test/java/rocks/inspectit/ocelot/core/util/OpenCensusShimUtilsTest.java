@@ -12,7 +12,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class OpenCensusShimUtilsTest extends SpringTestBase {
 
     @Test
-    void testUpdateOpenTelemetryTracerInOpenTelemetrySpanBuilderImpl() throws InterruptedException {
+    void testUpdateOpenTelemetryTracerInOpenTelemetrySpanBuilderImpl() throws ClassNotFoundException, IllegalAccessException {
+
         Tracer tracer = OpenCensusShimUtils.getOpenTelemetryTracerOfOpenTelemetrySpanBuilderImpl();
 
         // reset OTEL

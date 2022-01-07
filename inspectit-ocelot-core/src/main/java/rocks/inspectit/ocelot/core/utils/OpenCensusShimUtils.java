@@ -41,12 +41,9 @@ public class OpenCensusShimUtils {
             tracerField = Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl")
                     .getDeclaredField("OTEL_TRACER");
 
-
             // set static final field
             ReflectionUtils.setFinalStatic(tracerField, tracer);
 
-            // set to the current tracer
-            tracerField.set(null, tracer);
             return true;
         } catch (Exception e) {
             log.error("Failed to set OTEL_TRACER in OpenTelemetrySpanBuilderImpl", e);
@@ -57,11 +54,8 @@ public class OpenCensusShimUtils {
     public static Tracer getOpenTelemetryTracerOfOpenTelemetrySpanBuilderImpl() {
         Field tracerField = null;
         try {
-            tracerField = Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl")
-                    .getDeclaredField("OTEL_TRACER");
             // make the field accessible
-            tracerField.setAccessible(true);
-
+            tracerField = ReflectionUtils.getFinalStaticFieldAndMakeAccessible(Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl"), "OTEL_TRACER", true);
             Tracer tracer = (Tracer) tracerField.get(null);
             return tracer;
         } catch (Exception e) {
