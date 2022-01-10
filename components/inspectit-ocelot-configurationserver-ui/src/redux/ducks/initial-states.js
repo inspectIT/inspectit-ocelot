@@ -57,6 +57,8 @@ const configuration = {
   selectedVersion: null,
   /** Whether the history view should be shown */
   showHistoryView: false,
+  /** Whether the documentation view should be shown */
+  showDocumentationView: false,
 };
 
 const notification = {
