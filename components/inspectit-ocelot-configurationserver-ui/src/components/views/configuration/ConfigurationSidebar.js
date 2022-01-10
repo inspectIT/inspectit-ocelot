@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import HistoryView from './history/HistoryView';
 import { configurationActions } from '../../../redux/ducks/configuration';
+import DocumentationView from "./documentation/DocumentationView";
 
 /**
  * The sidebar of the configuration view.
@@ -11,9 +12,14 @@ const ConfigurationSidebar = () => {
 
   // global state variables
   const showHistoryView = useSelector((state) => state.configuration.showHistoryView);
+  const showDocumentationView = useSelector((state) => state.configuration.showDocumentationView);
 
   const toggleHistoryView = () => {
     dispatch(configurationActions.toggleHistoryView());
+  };
+
+  const toggleDocumentationView = () => {
+    dispatch(configurationActions.toggleDocumentationView());
   };
 
   return (
@@ -28,8 +34,6 @@ const ConfigurationSidebar = () => {
             flex: 0;
             display: flex;
             background-color: #eeeeee;
-          }
-          .content-container {
           }
           .vert-button {
             display: flex;
@@ -48,12 +52,19 @@ const ConfigurationSidebar = () => {
       </style>
 
       <div className="sidebar">
-        <div className="content-container">{showHistoryView && <HistoryView />}</div>
+        <div className="content-container">
+            {showHistoryView && <HistoryView />}
+            {showDocumentationView && <DocumentationView />}
+        </div>
 
         <div>
           <button className={'vert-button p-button p-togglebutton' + (showHistoryView ? 'p-highlight' : '')} onClick={toggleHistoryView}>
             <i className={'pi pi-chevron-' + (showHistoryView ? 'right' : 'left')} />
             <span>Versioning</span>
+          </button>
+          <button className={'vert-button p-button p-togglebutton' + (showDocumentationView ? 'p-highlight' : '')} onClick={toggleDocumentationView}>
+            <i className={'pi pi-chevron-' + (showDocumentationView ? 'right' : 'left')} />
+            <span>Config Docs</span>
           </button>
         </div>
       </div>

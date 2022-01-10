@@ -198,10 +198,27 @@ const configurationReducer = createReducer(initialState)({
   },
 
   [types.TOGGLE_HISTORY_VIEW]: (state) => {
-    return {
+    let newState = {
       ...state,
       showHistoryView: !state.showHistoryView,
-    };
+    }
+    // If HistoryView is being turned on, DocumentationView needs to be turned off.
+    if(!state.showHistoryView){
+      newState["showDocumentationView"] = false;
+    }
+    return newState;
+  },
+
+  [types.TOGGLE_DOCUMENTATION_VIEW]: (state) => {
+    let newState = {
+      ...state,
+      showDocumentationView: !state.showDocumentationView,
+    }
+    // If DocumentationView is being turned on, HistoryView needs to be turned off.
+    if(!state.showDocumentationView){
+      newState["showHistoryView"] = false;
+    }
+    return newState;
   },
 });
 
