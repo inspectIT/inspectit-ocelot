@@ -1,7 +1,5 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
-import static java.lang.Boolean.TRUE;
-
 import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.trace.Sampler;
 import io.opencensus.trace.samplers.Samplers;
@@ -25,10 +23,13 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
 import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
+import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.lang.Boolean.TRUE;
 
 /**
  * This class is responsible for translating {@link MethodHookConfiguration}s
@@ -62,10 +63,13 @@ public class MethodHookGenerator {
     @Autowired
     private StackTraceSampler stackTraceSampler;
 
+    @Autowired
+    private ActionScopeFactory actionScopeFactory;
+
     /**
-     * Builds a executable method hook based on the given configuration.
+     * Builds an executable method hook based on the given configuration.
      *
-     * @param declaringClass teh class defining the method which is being hooked
+     * @param declaringClass the class defining the method which is being hooked
      * @param method         a method descriptor of the hooked method
      * @param config         the configuration to use for building the hook
      *
@@ -96,6 +100,8 @@ public class MethodHookGenerator {
         buildMetricsRecorder(config).ifPresent(builder::exitAction);
         builder.exitActions(buildActionCalls(config.getPostExitActions(), methodInfo));
 
+        builder.actionScopeFactory(actionScopeFactory);
+
         return builder.build();
     }
 
@@ -107,9 +113,9 @@ public class MethodHookGenerator {
 
             if (TRUE.equals(tracing.getStartSpan())) {
                 VariableAccessor name = Optional.ofNullable(tracing.getName())
-                        .map(variableAccessorFactory::getVariableAccessor).orElse(null);
-                actionBuilder
-                        .startSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getStartSpanConditions(), variableAccessorFactory))
+                        .map(variableAccessorFactory::getVariableAccessor)
+                        .orElse(null);
+                actionBuilder.startSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getStartSpanConditions(), variableAccessorFactory))
                         .nameAccessor(name)
                         .spanKind(tracing.getKind());
                 configureSampling(tracing, actionBuilder);
@@ -118,8 +124,7 @@ public class MethodHookGenerator {
             }
 
             if (tracing.getContinueSpan() != null) {
-                actionBuilder
-                        .continueSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getContinueSpanConditions(), variableAccessorFactory))
+                actionBuilder.continueSpanCondition(ConditionalHookAction.getAsPredicate(tracing.getContinueSpanConditions(), variableAccessorFactory))
                         .continueSpanDataKey(tracing.getContinueSpan());
             } else {
                 actionBuilder.continueSpanCondition(ctx -> false);
@@ -219,7 +224,9 @@ public class MethodHookGenerator {
             valueAccessor = variableAccessorFactory.getVariableAccessor(value);
         }
 
-        Map<String, VariableAccessor> tagAccessors = metricSettings.getDataTags().entrySet().stream()
+        Map<String, VariableAccessor> tagAccessors = metricSettings.getDataTags()
+                .entrySet()
+                .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> variableAccessorFactory.getVariableAccessor(entry.getValue())));
 
         return new MetricAccessor(metricSettings.getMetric(), valueAccessor, metricSettings.getConstantTags(), tagAccessors);
@@ -232,8 +239,8 @@ public class MethodHookGenerator {
             try {
                 result.add(actionCallGenerator.generateAndBindGenericAction(methodInfo, call));
             } catch (Exception e) {
-                log.error("Failed to build action {} for data {} on method {}, no value will be assigned",
-                        call.getAction().getName(), call.getName(), methodInfo.getMethodFQN(), e);
+                log.error("Failed to build action {} for data {} on method {}, no value will be assigned", call.getAction()
+                        .getName(), call.getName(), methodInfo.getMethodFQN(), e);
             }
         }
         return result;

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Logback recorder which exposes the the counts to the {@link SelfMonitoringService}
+ * Logback recorder which exposes the counts to the {@link SelfMonitoringService}
  */
 @Component
 public class LogMetricsRecorder {

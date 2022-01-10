@@ -20,6 +20,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.EndSpanActi
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.SetSpanStatusAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.WriteSpanAttributesAction;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
+import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 import rocks.inspectit.ocelot.core.testutils.Dummy;
 
 import java.util.Collections;
@@ -34,6 +35,9 @@ public class MethodHookGeneratorTest {
 
     @Mock
     ContextManager contextManager;
+
+    @Mock
+    ActionScopeFactory actionScopeFactory;
 
     @InjectMocks
     MethodHookGenerator generator;

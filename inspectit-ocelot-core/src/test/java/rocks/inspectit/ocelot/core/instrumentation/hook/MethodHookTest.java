@@ -11,6 +11,7 @@ import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
+import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 
 import java.util.Arrays;
 
@@ -29,6 +30,9 @@ public class MethodHookTest {
 
     @Mock
     private MethodReflectionInformation methodInfo;
+
+    @Mock
+    private ActionScopeFactory actionScopeFactory;
 
     @BeforeEach
     void setupContextManagerMock() {
@@ -49,6 +53,7 @@ public class MethodHookTest {
                     .methodInformation(methodInfo)
                     .entryActions(Arrays.asList(first, second, third))
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
+                    .actionScopeFactory(actionScopeFactory)
                     .build();
 
             InternalInspectitContext ctx = hook.onEnter(null, null);
@@ -59,6 +64,8 @@ public class MethodHookTest {
             verify(first, times(1)).execute(any());
             verify(second, times(1)).execute(any());
             verify(third, times(1)).execute(any());
+            verify(actionScopeFactory, times(3)).createScope(any());
+            verifyNoMoreInteractions(actionScopeFactory, first, second, third);
 
             hook.onExit(null, null, null, null, ctx);
             verify(context, times(1)).close();
@@ -68,6 +75,8 @@ public class MethodHookTest {
             verify(first, times(2)).execute(any());
             verify(second, times(1)).execute(any());
             verify(third, times(2)).execute(any());
+            verify(actionScopeFactory, times(5)).createScope(any());
+            verifyNoMoreInteractions(actionScopeFactory, first, second, third);
 
             hook.onExit(null, null, null, null, ctx);
         }
@@ -81,17 +90,22 @@ public class MethodHookTest {
                     .methodInformation(methodInfo)
                     .entryAction(action)
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
+                    .actionScopeFactory(actionScopeFactory)
                     .build();
 
             InternalInspectitContext ctx = hook.onEnter(null, null);
             hook.onExit(null, null, null, null, ctx);
 
             verify(action, times(1)).execute(any());
+            verify(actionScopeFactory).createScope(action);
+            verifyNoMoreInteractions(actionScopeFactory, action);
 
             ctx = hook.onEnter(null, null);
             hook.onExit(null, null, null, null, ctx);
 
             verify(action, times(1)).execute(any());
+            verify(actionScopeFactory).createScope(action);
+            verifyNoMoreInteractions(actionScopeFactory, action);
 
             MethodHook copy = hook.getResettedCopy();
 
@@ -99,6 +113,8 @@ public class MethodHookTest {
             copy.onExit(null, null, null, null, ctx);
 
             verify(action, times(2)).execute(any());
+            verify(actionScopeFactory, times(2)).createScope(action);
+            verifyNoMoreInteractions(actionScopeFactory, action);
         }
 
     }
@@ -117,6 +133,7 @@ public class MethodHookTest {
                     .methodInformation(methodInfo)
                     .exitActions(Arrays.asList(first, second, third))
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
+                    .actionScopeFactory(actionScopeFactory)
                     .build();
 
             InternalInspectitContext ctx = hook.onEnter(null, null);
@@ -125,6 +142,8 @@ public class MethodHookTest {
             verify(first, times(1)).execute(any());
             verify(second, times(1)).execute(any());
             verify(third, times(1)).execute(any());
+            verify(actionScopeFactory, times(3)).createScope(any());
+            verifyNoMoreInteractions(actionScopeFactory, first, second, third);
 
             ctx = hook.onEnter(null, null);
             hook.onExit(null, null, null, null, ctx);
@@ -132,6 +151,8 @@ public class MethodHookTest {
             verify(first, times(2)).execute(any());
             verify(second, times(1)).execute(any());
             verify(third, times(2)).execute(any());
+            verify(actionScopeFactory, times(5)).createScope(any());
+            verifyNoMoreInteractions(actionScopeFactory, first, second, third);
         }
 
         @Test
@@ -143,17 +164,22 @@ public class MethodHookTest {
                     .methodInformation(methodInfo)
                     .exitAction(action)
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
+                    .actionScopeFactory(actionScopeFactory)
                     .build();
 
             InternalInspectitContext ctx = hook.onEnter(null, null);
             hook.onExit(null, null, null, null, ctx);
 
             verify(action, times(1)).execute(any());
+            verify(actionScopeFactory).createScope(action);
+            verifyNoMoreInteractions(actionScopeFactory, action);
 
             ctx = hook.onEnter(null, null);
             hook.onExit(null, null, null, null, ctx);
 
             verify(action, times(1)).execute(any());
+            verify(actionScopeFactory).createScope(action);
+            verifyNoMoreInteractions(actionScopeFactory, action);
 
             MethodHook copy = hook.getResettedCopy();
 
@@ -161,6 +187,8 @@ public class MethodHookTest {
             copy.onExit(null, null, null, null, ctx);
 
             verify(action, times(2)).execute(any());
+            verify(actionScopeFactory, times(2)).createScope(action);
+            verifyNoMoreInteractions(actionScopeFactory, action);
         }
 
     }

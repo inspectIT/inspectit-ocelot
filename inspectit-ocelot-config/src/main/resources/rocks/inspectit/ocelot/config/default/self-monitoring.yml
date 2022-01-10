@@ -1,9 +1,15 @@
 inspectit:
 
-  # when enabled inspectit reports execution times for metric and trace collection and processing
+  # when enabled inspectIT reports execution times for metric and trace collection and processing
   self-monitoring:
     enabled: true
 
+    # settings regarding the capturing of action related metrics
+    action-metrics:
+      # if true, the execution time (duration in ms) per action will be recorded
+      enabled: false
+
+  # definitions of existing self-monitoring metrics
   metrics:
     definitions:
       '[inspectit/self/duration]':
@@ -36,3 +42,18 @@ inspectit:
           '[inspectit/self/logs]':
             aggregation: SUM
             tags: {"level": true}
+
+      '[inspectit/self/action/execution-time]':
+        enabled: ${inspectit.self-monitoring.action-metrics.enabled}
+        type: LONG
+        unit: us
+        description: "the execution time of the action"
+        views:
+          '[inspectit/self/action/execution-time]':
+            aggregation: SUM
+            tags:
+              action_name: true
+          '[inspectit/self/action/count]':
+            aggregation: COUNT
+            tags:
+              action_name: true
