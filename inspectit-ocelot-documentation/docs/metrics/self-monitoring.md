@@ -33,7 +33,7 @@ The recording of these metrics can be enabled using the following configuration:
 inspectit:
   self-monitoring:
     action-metrics:
-      enabled: false
+      enabled: true
 ```
 
 Note: the action execution metrics are only recorded in case the self-monitoring metrics are enabled. 

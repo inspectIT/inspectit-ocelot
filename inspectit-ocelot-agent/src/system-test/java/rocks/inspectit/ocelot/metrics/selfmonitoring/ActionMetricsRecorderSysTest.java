@@ -20,8 +20,10 @@ public class ActionMetricsRecorderSysTest extends MetricsSysTestBase {
 
     private static final ViewManager viewManager = Stats.getViewManager();
 
+    public static double blackhole;
+
     public void trigger() {
-        System.out.println("trigger method");
+        blackhole = Math.random();
     }
 
     @Test
