@@ -29,9 +29,9 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
     private SdkMeterProvider meterProvider;
 
     /**
-     * The {@link DynamicallyActivatableMetricExporter} for exporting metrics to the log
+     * The {@link LoggingMetricExporter} for exporting metrics to the system log
      */
-    private DynamicallyActivatableMetricExporter<LoggingMetricExporter> metricExporter;
+    private LoggingMetricExporter metricExporter;
 
     /**
      * The {@link PeriodicMetricReader} for reading metrics to the log
@@ -47,7 +47,7 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
         super.init();
 
         // create new metric exporter
-        metricExporter = DynamicallyActivatableMetricExporter.createLoggingExporter();
+        metricExporter = new LoggingMetricExporter();
 
         // close the tracer provider when the JVM is shutting down
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -75,8 +75,6 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
                     .registerMetricReader(OpenCensusMetrics.attachTo(metricReader.newMetricReaderFactory()))
                     .buildAndRegisterGlobal();
 
-            // enable the metric exporter
-            metricExporter.doEnable();
             log.info("Starting LoggingMetricsExporter");
             return true;
         } catch (Exception e) {
@@ -95,7 +93,6 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
                 meterProvider.close();
                 meterProvider = null;
             }
-            metricExporter.doDisable();
             log.info("Stopping LoggingMetricExporter");
             return true;
         } catch (Exception e) {

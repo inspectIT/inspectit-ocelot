@@ -49,14 +49,14 @@ public class LoggingTraceExporterService extends DynamicallyActivatableService {
     private Sampler sampler;
 
     /**
-     * The {@link SpanProcessor} of the {@link #spanExporter
+     * The {@link SpanProcessor} of the {@link #spanExporter}
      */
     private SpanProcessor simpleSpanProcessor;
 
     /**
-     * The {@link DynamicallyActivatableSpanExporter< LoggingSpanExporter >} for exporting the spans to the log
+     * The {@link LoggingSpanExporter} for exporting the spans to the log
      */
-    private DynamicallyActivatableSpanExporter<LoggingSpanExporter> spanExporter;
+    private LoggingSpanExporter spanExporter;
 
     /**
      * The service name {@link Resource}
@@ -72,7 +72,7 @@ public class LoggingTraceExporterService extends DynamicallyActivatableService {
         super.init();
 
         // create span exporter and span processors
-        spanExporter = DynamicallyActivatableSpanExporter.createLoggingSpanExporter();
+        spanExporter = new LoggingSpanExporter();
 
         // close the tracer provider when the JVM is shutting down
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -123,9 +123,6 @@ public class LoggingTraceExporterService extends DynamicallyActivatableService {
             // update OC tracer
             OpenCensusShimUtils.updateOpenTelemetryTracerInOpenTelemetrySpanBuilderImpl();
 
-            // enable span exporter
-            spanExporter.doEnable();
-
             log.info("Starting TraceLoggingSpanExporter");
             return true;
         } catch (Exception e) {
@@ -137,10 +134,6 @@ public class LoggingTraceExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean doDisable() {
         try {
-            // disable the span exporter
-            if (null != spanExporter) {
-                spanExporter.doDisable();
-            }
             // close the tracerProvider
             if (null != tracerProvider) {
                 tracerProvider.forceFlush();
