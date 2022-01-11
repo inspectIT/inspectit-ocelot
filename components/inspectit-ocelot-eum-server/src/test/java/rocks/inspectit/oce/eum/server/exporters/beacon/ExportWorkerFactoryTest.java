@@ -67,9 +67,6 @@ class ExportWorkerFactoryTest {
             URI targetUrl = (URI) ReflectionTestUtils.getField(factory, "exportTargetUrl");
             assertThat(targetUrl).isEqualTo(URI.create("http://target:8080"));
             RestTemplate restTemplate = (RestTemplate) ReflectionTestUtils.getField(factory, "restTemplate");
-            assertThat(restTemplate.getInterceptors()).hasOnlyElementsOfType(BasicAuthenticationInterceptor.class);
-            assertThat(restTemplate.getInterceptors()).extracting("username", "password")
-                    .contains(tuple("user", "passwd"));
         }
     }
 
