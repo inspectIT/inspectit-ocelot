@@ -13,6 +13,9 @@ test {
 
     jvmArgs '-Xmx512m', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:HeapDumpPath=/__w/inspectit-ocelot/inspectit-ocelot/test_heapdump.bin'
 
+    // include custom configurations to potentially speed up tests or change settings in test files
+    jvmArgs "-Dinspectit.config.file-based.path=$projectDir/src/test/resources/config"
+
     testLogging {
         exceptionFormat = 'full'
     }
@@ -84,6 +87,13 @@ dependencies {
             // OpenTelemetry exporters
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-exporter-logging",
+            "io.opentelemetry:opentelemetry-exporter-jaeger",
+            "io.opentelemetry:opentelemetry-exporter-jaeger-thrift",
+            "io.opentelemetry:opentelemetry-exporter-zipkin",
+            "io.opentelemetry:opentelemetry-exporter-otlp",
+
+            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
+            "io.opentelemetry:opentelemetry-exporter-prometheus",
 
             // The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
             // See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
@@ -134,7 +144,9 @@ task checkDependencyJavaVersions {
                     // exclude OpenTelemetry as they guarantee JDK 8 support
                     "opentelemetry",
                     // exclude jackson which is being used by OTel
-                    "jackson"]
+                    "jackson",
+                    // exclude kotlin-stdlib which is being used by opentelemetry-exporter-jaeger-thrift
+                    "kotlin-stdlib"]
 
     def jarCheckPath = "$buildDir/jarCheck"
     outputs.dir jarCheckPath

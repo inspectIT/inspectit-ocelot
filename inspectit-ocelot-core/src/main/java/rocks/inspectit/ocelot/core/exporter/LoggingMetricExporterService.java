@@ -1,18 +1,14 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.exporter.logging.LoggingMetricExporter;
-import io.opentelemetry.opencensusshim.metrics.OpenCensusMetrics;
-import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
-import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.LoggingMetricsExporterSettings;
-import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.validation.Valid;
 
@@ -21,12 +17,8 @@ import javax.validation.Valid;
  */
 @Component
 @Slf4j
-public class LoggingMetricExporterService extends DynamicallyActivatableService {
+public class LoggingMetricExporterService extends DynamicallyActivatableMetricsExporterService {
 
-    /**
-     * The {@link SdkMeterProvider}
-     */
-    private SdkMeterProvider meterProvider;
 
     /**
      * The {@link DynamicallyActivatableMetricExporter} for exporting metrics to the log
@@ -38,10 +30,8 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
      */
     private PeriodicMetricReaderBuilder metricReader;
 
-    /**
-     * The service name {@link Resource}
-     */
-    private Resource serviceNameResource;
+    @Getter
+    MetricReaderFactory metricReaderFactory;
 
     public LoggingMetricExporterService() {
         super("exporters.metrics.logging", "metrics.enabled");
@@ -53,13 +43,6 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
 
         // create new metric exporter
         metricExporter = DynamicallyActivatableMetricExporter.createLoggingExporter();
-
-        // close the tracer provider when the JVM is shutting down
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (null != meterProvider) {
-                meterProvider.shutdown();
-            }
-        }));
     }
 
     @Override
@@ -74,18 +57,19 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
         try {
             // build and register the MeterProvider
             metricReader = PeriodicMetricReader.builder(metricExporter).setInterval(logging.getExportInterval());
-
-            meterProvider = SdkMeterProvider.builder()
-                    .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getServiceName())))
-                    .registerMetricReader(OpenCensusMetrics.attachTo(metricReader.newMetricReaderFactory()))
-                    .buildAndRegisterGlobal();
-
-            // enable the metric exporter
-            metricExporter.doEnable();
-            log.info("Starting LoggingMetricsExporter");
-            return true;
+            metricReaderFactory = metricReader.newMetricReaderFactory();
+            boolean success = openTelemetryController.registerMetricExporterService(this);
+            if (success) {
+                // enable the metric exporter
+                metricExporter.doEnable();
+                log.info("Starting {}", getClass().getSimpleName());
+            } else {
+                log.error("Failed to register {} at {}!", getClass().getSimpleName(), openTelemetryController.getClass()
+                        .getSimpleName());
+            }
+            return success;
         } catch (Exception e) {
-            log.error("Failed to start LoggingMetricExporter", e);
+            log.error("Failed to start " + getClass().getSimpleName(), e);
             return false;
         }
     }
@@ -93,14 +77,9 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
     @Override
     protected boolean doDisable() {
         try {
-            if (null != meterProvider) {
-                // flush all metrics before disabling them
-                meterProvider.forceFlush();
-                meterProvider.shutdown();
-                meterProvider = null;
-            }
             metricExporter.doDisable();
             log.info("Stopping LoggingMetricExporter");
+            openTelemetryController.unregisterMetricExporterService(this);
             return true;
         } catch (Exception e) {
             log.error("Failed to stop LoggingMetricExporter", e);

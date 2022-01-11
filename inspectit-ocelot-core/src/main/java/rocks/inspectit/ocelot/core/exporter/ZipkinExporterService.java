@@ -1,22 +1,32 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-
+import io.opentelemetry.exporter.zipkin.ZipkinSpanExporter;
+import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.trace.ZipkinExporterSettings;
-import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.validation.Valid;
 
 /**
- * Service for the ZipKin OpenCensus exporter.
+ * Service for the {@link ZipkinSpanExporter ZipKin OpenTelemetry exporter}.
  * Can be dynamically started and stopped using the exporters.trace.zipkin.enabled configuration.
  */
 @Component
 @Slf4j
-public class ZipkinExporterService extends DynamicallyActivatableService {
+public class ZipkinExporterService extends DynamicallyActivatableTraceExporterService {
+
+    private ZipkinSpanExporter zipkinSpanExporter;
+
+    private DynamicallyActivatableSpanExporter spanExporter;
+
+    @Getter
+    private SpanProcessor spanProcessor;
 
     public ZipkinExporterService() {
         super("exporters.tracing.zipkin", "tracing.enabled");
@@ -33,11 +43,17 @@ public class ZipkinExporterService extends DynamicallyActivatableService {
         try {
             ZipkinExporterSettings settings = configuration.getExporters().getTracing().getZipkin();
             log.info("Starting Zipkin Exporter with url '{}'", settings.getUrl());
-            // TODO: implement OTel equivalent
-            /*
-            ZipkinTraceExporter.createAndRegister(
-                    ZipkinExporterConfiguration.builder().setV2Url(settings.getUrl()).setServiceName(settings.getServiceName()).build());
-             */
+
+            // create span exporter
+            zipkinSpanExporter = ZipkinSpanExporter.builder().setEndpoint(settings.getUrl()).build();
+            spanExporter = DynamicallyActivatableSpanExporter.create(zipkinSpanExporter);
+            spanExporter.doEnable();
+
+            // create span processor
+            spanProcessor = BatchSpanProcessor.builder(spanExporter).build();
+
+            // register
+            openTelemetryController.registerTraceExporterService(this);
             return true;
         } catch (Throwable t) {
             log.error("Error creating Zipkin exporter", t);
@@ -49,13 +65,19 @@ public class ZipkinExporterService extends DynamicallyActivatableService {
     protected boolean doDisable() {
         log.info("Stopping Zipkin Exporter");
         try {
-            // TODO: implement OTel equivalent
-            /*
-            ZipkinTraceExporter.unregister();
-             */
+            if (null != spanExporter) {
+                spanExporter.doDisable();
+            }
+            // shut down the span processor
+            if (null != spanProcessor) {
+                spanProcessor.shutdown();
+                spanProcessor = null;
+            }
+            openTelemetryController.unregisterTraceExporterService(this);
         } catch (Throwable t) {
             log.error("Error disabling Zipkin exporter", t);
         }
         return true;
     }
+
 }

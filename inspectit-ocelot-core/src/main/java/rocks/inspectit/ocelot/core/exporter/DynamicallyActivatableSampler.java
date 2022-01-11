@@ -48,6 +48,11 @@ public class DynamicallyActivatableSampler implements Sampler {
         return new DynamicallyActivatableSampler(Sampler.parentBased(root));
     }
 
+    /**
+     * Returns a new {@link DynamicallyActivatableSampler} with a {@link io.opentelemetry.sdk.trace.samplers.TraceIdRatioBasedSampler} implementation
+      * @param ratio The desired ratio of sampling. Must be within [0.0, 1.0].
+     * @return A new {@link DynamicallyActivatableSampler} with a {@link io.opentelemetry.sdk.trace.samplers.TraceIdRatioBasedSampler} implementation.
+     */
     public static DynamicallyActivatableSampler createRatio(double ratio) {
         return new DynamicallyActivatableSampler(Sampler.traceIdRatioBased(ratio));
     }

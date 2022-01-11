@@ -1,24 +1,43 @@
 package rocks.inspectit.ocelot.core.exporter;
 
+import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
+import io.opentelemetry.exporter.jaeger.thrift.JaegerThriftSpanExporter;
+import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.trace.JaegerExporterSettings;
-import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.validation.Valid;
 
 /**
- * Service for the Jaeger OpenCensus exporter.
+ * Service for the Jaeger OpenTelemetry exporter.
  * Can be dynamically started and stopped using the exporters.trace.jaeger.enabled configuration.
  */
 @Component
 @Slf4j
-public class JaegerExporterService extends DynamicallyActivatableService {
+public class JaegerExporterService extends DynamicallyActivatableTraceExporterService {
+
+    private JaegerGrpcSpanExporter grpcSpanExporter;
+
+    private JaegerThriftSpanExporter thriftSpanExporter;
+
+    private DynamicallyActivatableSpanExporter spanExporter;
+
+    @Getter
+    private SpanProcessor spanProcessor;
 
     public JaegerExporterService() {
         super("exporters.tracing.jaeger", "tracing.enabled");
+    }
+
+    @Override
+    protected void init() {
+        super.init();
     }
 
     @Override
@@ -39,12 +58,25 @@ public class JaegerExporterService extends DynamicallyActivatableService {
     protected boolean doEnable(InspectitConfig configuration) {
         try {
             JaegerExporterSettings settings = configuration.getExporters().getTracing().getJaeger();
-            log.info("Starting Jaeger Exporter with url '{}'", settings.getUrl());
-            // TODO re-implement with OTel
-            /*
-            JaegerTraceExporter.createAndRegister(
-                    JaegerExporterConfiguration.builder().setThriftEndpoint(settings.getUrl()).setServiceName(settings.getServiceName()).build());
-            */
+
+            log.info("Starting Jaeger Exporter with url '{}' (grpc '{}')", settings.getUrl(), settings.getGrpc());
+
+            // TODO: use getUrl() or getGRPC()?
+            /*grpcSpanExporter = JaegerGrpcSpanExporter.builder()
+                    .setEndpoint(settings.getGrpc() == null ? settings.getUrl() : settings.getGrpc())
+                    .build();*/
+
+            // create span exporter
+            thriftSpanExporter = JaegerThriftSpanExporter.builder().setEndpoint(settings.getUrl()).build();
+            spanExporter = DynamicallyActivatableSpanExporter.create(thriftSpanExporter);
+            spanExporter.doEnable();
+
+            // create span processor
+            spanProcessor = BatchSpanProcessor.builder(spanExporter).build();
+
+            // register
+            openTelemetryController.registerTraceExporterService(this);
+
             return true;
         } catch (Throwable t) {
             log.error("Error creating Jaeger exporter", t);
@@ -57,12 +89,18 @@ public class JaegerExporterService extends DynamicallyActivatableService {
         log.info("Stopping Jaeger Exporter");
         try {
             // TODO: reimplement with OTel
-            /*
-            JaegerTraceExporter.unregister();
-            */
+            if (null != spanExporter) {
+                spanExporter.doDisable();
+            }
+            if (null != spanProcessor) {
+                spanProcessor.shutdown();
+                spanProcessor = null;
+            }
+            openTelemetryController.unregisterTraceExporterService(this);
         } catch (Throwable t) {
             log.error("Error disabling Jaeger exporter", t);
         }
         return true;
     }
+
 }

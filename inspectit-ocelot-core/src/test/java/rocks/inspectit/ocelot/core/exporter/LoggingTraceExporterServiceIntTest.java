@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
@@ -21,6 +22,9 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Test class for {@link LoggingTraceExporterService}
+ */
 public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
 
     public static final String INSTRUMENTATION_NAME = "rocks.inspectit.ocelot.instrumentation";
@@ -33,12 +37,10 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
     @Autowired
     LoggingTraceExporterService service;
 
-    @Autowired
-    InspectitEnvironment environment;
-
     @BeforeEach
     void enableService() {
         localSwitch(true);
+        masterSwitch(true);
     }
 
     private void localSwitch(boolean enabled) {
@@ -47,19 +49,26 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
         });
     }
 
+    private void masterSwitch(boolean enabled) {
+        updateProperties(props -> {
+            props.setProperty("inspectit.tracing.enabled", enabled);
+        });
+    }
+
     @Nested
     class EnableDisable {
 
+        @DirtiesContext
         @Test
         void testMasterSwitch() {
-            updateProperties(props -> {
-                props.setProperty("inspectit.tracing.enabled", "false");
-            });
+            masterSwitch(false);
             assertThat(service.isEnabled()).isFalse();
         }
 
+        @DirtiesContext
         @Test
         void testLocalSwitch() {
+            assertThat(service.isEnabled()).isTrue();
             localSwitch(false);
             assertThat(service.isEnabled()).isFalse();
         }
@@ -87,43 +96,48 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             }
         }
 
+        @DirtiesContext
         @Test
         void verifyOpenTelemetryTraceSent() throws InterruptedException {
             assertThat(service.isEnabled()).isTrue();
 
             makeSpans();
 
-            Awaitility.waitAtMost(5, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
+            Awaitility.waitAtMost(10, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
                 // assert that two traces have been logged
                 assertThat(spanLogs.getEvents()).hasSize(2);
                 // and the last contains our 'childOne'
                 assertThat(spanLogs.getEvents().get(0).getMessage()).contains("openTelemetryChildSpan");
             });
 
-            // turn off trace exporter
-            localSwitch(false);
-
-            // wait until everything is flushed
-            Thread.sleep(500);
-
             // get number of logged events
             int numEvents = spanLogs.size();
 
+            // turn off trace exporter
+            localSwitch(false);
+
+            // wait until the service is shut down
+            Awaitility.waitAtMost(5, TimeUnit.SECONDS)
+                    .pollInterval(1, TimeUnit.SECONDS)
+                    .untilAsserted(() -> assertThat(service.isEnabled()).isFalse());
+
             // make sure no more spans are recorded
-            Thread.sleep(5000);
+            Thread.sleep(5000); // TODO: is there a better way than to sleep?
             assertThat(spanLogs.size()).isEqualTo(numEvents);
 
             // turn the trace exporter on again
             localSwitch(true);
-            Thread.sleep(1000);
+            Awaitility.waitAtMost(1, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
+
             makeSpans();
             // wait until the new spans are exported to the log
-            Awaitility.waitAtMost(5, TimeUnit.SECONDS)
+            Awaitility.waitAtMost(10, TimeUnit.SECONDS)
                     .pollInterval(2, TimeUnit.SECONDS)
                     .untilAsserted(() -> assertThat(spanLogs.size()).isEqualTo(numEvents + 2));
 
         }
 
+        @DirtiesContext
         @Test
         void testLoggingExporterDisabled() throws InterruptedException {
             assertThat(service.isEnabled()).isTrue();
@@ -147,29 +161,22 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
         @Test
         void testTracerRestart() {
             Tracer tracer = OpenCensusShimUtils.getOpenTelemetryTracerOfOpenTelemetrySpanBuilderImpl();
+            // turn of the service
             localSwitch(false);
-            Awaitility.waitAtMost(5, TimeUnit.SECONDS)
-                    .pollInterval(1, TimeUnit.SECONDS)
-                    .untilAsserted(() -> assertThat(environment.getCurrentConfig()
-                            .getExporters()
-                            .getTracing()
-                            .getLogging()
-                            .isEnabled()).isFalse());
+            Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isFalse());
+            // turn the service on again
             localSwitch(true);
-            OpenCensusShimUtils.updateOpenTelemetryTracerInOpenTelemetrySpanBuilderImpl();
-            Awaitility.waitAtMost(5, TimeUnit.SECONDS)
-                    .pollInterval(1, TimeUnit.SECONDS)
-                    .untilAsserted(() -> assertThat(environment.getCurrentConfig()
-                            .getExporters()
-                            .getTracing()
-                            .getLogging()
-                            .isEnabled()).isTrue());
-            Tracer newTracer = OpenCensusShimUtils.getOpenTelemetryTracerOfOpenTelemetrySpanBuilderImpl();
+            Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
+            //OpenCensusShimUtils.updateOpenTelemetryTracerInOpenTelemetrySpanBuilderImpl();
+
+            // make sure the new tracer is different
+            Tracer newTracer = OpenCensusShimUtils.getOpenTelemetryTracerOfOpenTelemetrySpanBuilderImpl();
             assertThat(tracer).isNotSameAs(newTracer);
 
         }
 
+        @DirtiesContext
         @Test
         void verifyOpenCensusTraceSent() throws InterruptedException {
             assertThat(service.isEnabled()).isTrue();
@@ -186,12 +193,12 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             // turn off tracing exporter
             localSwitch(false);
             // make sure no more spans are recorded
-            Awaitility.await().untilAsserted(() -> assertThat(service.isEnabled()).isFalse());
+            Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isFalse());
             assertThat(spanLogs.size()).isEqualTo(numEvents);
 
             // turn tracing exporter back on
             localSwitch(true);
-            Awaitility.await().untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
+            Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
             // make spans
             makeSpans();

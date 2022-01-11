@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
@@ -54,6 +55,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
     @Nested
     class EnableDisable {
 
+        @DirtiesContext
         @Test
         void testMasterSwitch() {
             updateProperties(props -> {
@@ -62,6 +64,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
             assertThat(service.isEnabled()).isFalse();
         }
 
+        @DirtiesContext
         @Test
         void testLocalSwitch() {
             localSwitch(false);
@@ -72,6 +75,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
     @Nested
     class OpenTelemetryLogging {
 
+        @DirtiesContext
         @Test
         void verifyOpenTelemetryMetricsWritten() {
             // change export interval
@@ -109,6 +113,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
 
         StatsRecorder statsRecorder = Stats.getStatsRecorder();
 
+        @DirtiesContext
         @Test
         void verifyOpenCensusMetricsWritten() throws InterruptedException {
             // change export interval

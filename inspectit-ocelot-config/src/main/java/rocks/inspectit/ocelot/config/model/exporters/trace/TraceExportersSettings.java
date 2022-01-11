@@ -20,4 +20,7 @@ public class TraceExportersSettings {
 
     @Valid
     private LoggingTraceExporterSettings logging;
+
+    @Valid
+    private OtlpTraceExporterSettings otlp;
 }
