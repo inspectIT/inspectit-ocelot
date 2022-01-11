@@ -131,8 +131,6 @@ public class HttpRemoteTracingTest extends TraceTestBase {
             TestUtils.waitForClassInstrumentations(Arrays.asList(CloseableHttpClient.class, Class.forName("org.apache.http.impl.client.InternalHttpClient"), ApacheClientConnectionTest.class, TracingServlet.class), true, 15, TimeUnit.SECONDS);
             clientSpan();
 
-            // TODO: these tests fail as the spans are not belonging to the same trace
-
             assertTraceExported((spans) -> assertThat(spans).anySatisfy((sp) -> {
                         assertThat(sp.getName()).endsWith("ApacheClientConnectionTest.clientSpan");
                         assertThat(sp.getKind()).isEqualTo(SpanKind.CLIENT);

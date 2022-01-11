@@ -90,7 +90,7 @@ inspectit:
         # the time at which the exporter tries to reconnect to the OpenCensus agent
         reconnection-period: 5s
 
-      # settings for the SpanLoggingExporterService
+      # settings for the LoggingSpanExporter used in LoggingTraceExporterService
       logging:
           enabled: true
           service-name: ${inspectit.service-name}
