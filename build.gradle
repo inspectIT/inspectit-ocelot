@@ -7,7 +7,7 @@ plugins {
 licenseReport {
     outputDir = "$projectDir/build/licenses"
 
-    renderers = [new TextReportRenderer("THIRD-PARTY-LICENSES.txt")]
+    renderers = [new TextReportRenderer("../../THIRD-PARTY-LICENSES.txt")]
 
 }
 
@@ -17,7 +17,7 @@ allprojects {
         mavenCentral()
         maven {
             name 'Nexus@NT'
-            url "http://repository.novatec-gmbh.de/content/repositories/3rd_party_libs/"
+            url "https://repository.novatec-gmbh.de/content/repositories/3rd_party_libs/"
         }
     }
     apply plugin: 'jacoco'

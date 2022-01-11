@@ -1,5 +1,5 @@
 plugins {
-    id "me.champeau.gradle.jmh" version "0.4.8"
+    id "me.champeau.gradle.jmh" version "0.5.3"
 }
 
 apply plugin: 'java'
@@ -41,7 +41,6 @@ dependencies {
             project(':inspectit-ocelot-config'),
             project(':inspectit-ocelot-sdk'),
 
-            
             // spring releated
             "org.springframework.boot:spring-boot:${springVersion}",
             'org.yaml:snakeyaml:1.30',
@@ -149,6 +148,8 @@ jar.dependsOn checkDependencyJavaVersions
 jar.dependsOn generateVersionFile
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     archiveName = "${project.name}.jar"
 
     // include version file
