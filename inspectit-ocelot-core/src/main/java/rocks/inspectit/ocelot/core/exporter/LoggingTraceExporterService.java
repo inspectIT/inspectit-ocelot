@@ -8,12 +8,14 @@ import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.exporter.logging.LoggingSpanExporter;
+import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import io.opentelemetry.extension.trace.propagation.JaegerPropagator;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -42,9 +44,9 @@ public class LoggingTraceExporterService extends DynamicallyActivatableService {
     private SdkTracerProvider tracerProvider;
 
     /**
-     * The {@link DynamicallyActivatableSampler} for the {@link #tracerProvider}
+     * The {@link io.opentelemetry.sdk.trace.samplers.Sampler} for the {@link #tracerProvider}
      */
-    private DynamicallyActivatableSampler sampler;
+    private Sampler sampler;
 
     /**
      * The {@link SpanProcessor} of the {@link #spanExporter
@@ -100,9 +102,7 @@ public class LoggingTraceExporterService extends DynamicallyActivatableService {
             simpleSpanProcessor = SimpleSpanProcessor.create(spanExporter);
 
             // create sampler
-            sampler = DynamicallyActivatableSampler.createRatio(env.getCurrentConfig()
-                    .getTracing()
-                    .getSampleProbability());
+            sampler = Sampler.traceIdRatioBased(env.getCurrentConfig().getTracing().getSampleProbability());
 
             // create Resource for the service name
             serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, logging.getServiceName()));
@@ -117,9 +117,7 @@ public class LoggingTraceExporterService extends DynamicallyActivatableService {
             // build and register OTel
             openTelemetry = OpenTelemetrySdk.builder()
                     .setTracerProvider(tracerProvider)
-                    .setPropagators(ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), JaegerPropagator.getInstance(), W3CBaggagePropagator.getInstance())))
-                    // TODO: do I also need the W3CBaggagePropagator?
-                    // W3CBaggagePropagator.getInstance()
+                    .setPropagators(ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), JaegerPropagator.getInstance(), W3CBaggagePropagator.getInstance(), B3Propagator.injectingMultiHeaders())))
                     .buildAndRegisterGlobal();
 
             // update OC tracer
@@ -129,7 +127,6 @@ public class LoggingTraceExporterService extends DynamicallyActivatableService {
             spanExporter.doEnable();
 
             log.info("Starting TraceLoggingSpanExporter");
-
             return true;
         } catch (Exception e) {
             log.error("Failed to start TraceLoggingExporter", e);
@@ -141,10 +138,13 @@ public class LoggingTraceExporterService extends DynamicallyActivatableService {
     protected boolean doDisable() {
         try {
             // disable the span exporter
-            if (null != spanExporter && null != tracerProvider) {
+            if (null != spanExporter) {
                 spanExporter.doDisable();
+            }
+            // close the tracerProvider
+            if (null != tracerProvider) {
                 tracerProvider.forceFlush();
-                tracerProvider.shutdown();
+                tracerProvider.close();
                 tracerProvider = null;
             }
             log.info("Stopping TraceLoggingSpanExporter");

@@ -38,11 +38,6 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
      */
     private PeriodicMetricReaderBuilder metricReader;
 
-    /**
-     * The service name {@link Resource}
-     */
-    private Resource serviceNameResource;
-
     public LoggingMetricExporterService() {
         super("exporters.metrics.logging", "metrics.enabled");
     }
@@ -93,10 +88,11 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
     @Override
     protected boolean doDisable() {
         try {
+            // close the meter provider
             if (null != meterProvider) {
                 // flush all metrics before disabling them
                 meterProvider.forceFlush();
-                meterProvider.shutdown();
+                meterProvider.close();
                 meterProvider = null;
             }
             metricExporter.doDisable();
