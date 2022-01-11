@@ -93,11 +93,11 @@ public class HttpRemoteTracingTest extends TraceTestBase {
             assertTraceExported((spans) -> assertThat(spans).anySatisfy((sp) -> {
                         assertThat(sp.getName()).endsWith("HttpUrlConnectionTest.clientSpan");
                         assertThat(sp.getKind()).isEqualTo(SpanKind.CLIENT);
-                        assertThat(sp.getParentSpanId()).isNull();
+                        assertThat(SpanId.isValid(sp.getParentSpanId())).isFalse();
                     }).anySatisfy((sp) -> {
                         assertThat(sp.getName()).endsWith("TracingServlet.myHandler");
                         assertThat(sp.getKind()).isEqualTo(SpanKind.SERVER);
-                        assertThat(sp.getParentSpanId()).isNotNull();
+                        assertThat(SpanId.isValid(sp.getParentSpanId())).isTrue();
                     })
 
             );

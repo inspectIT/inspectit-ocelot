@@ -19,6 +19,7 @@ import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.exporter.logging.LoggingSpanExporter;
+import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import io.opentelemetry.extension.trace.propagation.JaegerPropagator;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
@@ -123,14 +124,14 @@ public class TestUtils {
      * This does not wait for potential hooks which will be created.
      */
     public static void waitForClassInstrumentations(Class<?>... clazz) {
-        waitForClassInstrumentations(Arrays.asList(clazz), false, 15, TimeUnit.SECONDS);
+        waitForClassInstrumentations(Arrays.asList(clazz), false, 15, TimeUnit.MINUTES);
     }
 
     /**
      * Waits until a hook for each of the given classes exist.
      */
     public static void waitForClassHooks(Class<?>... clazz) {
-        waitForClassHooks(Arrays.asList(clazz), 10, TimeUnit.SECONDS);
+        waitForClassHooks(Arrays.asList(clazz), 10, TimeUnit.MINUTES);
     }
 
     /**
@@ -306,20 +307,18 @@ public class TestUtils {
     }
 
     /**
-     * Initialize {@link io.opentelemetry.api.OpenTelemetry} with a {@link InMemorySpanExporter} so that we can access the exported {@link io.opentelemetry.api.trace.Span}s
+     * Initialize {@link io.opentelemetry.api.OpenTelemetry} with a {@link InMemorySpanExporter} so that we can access the exported {@link io.opentelemetry.api.trace.Span Spans}
      *
-     * @return The {@link InMemorySpanExporter} that can be used to retrieve exported {@link io.opentelemetry.api.trace.Span}s
+     * @return The {@link InMemorySpanExporter} that can be used to retrieve exported {@link io.opentelemetry.api.trace.Span Spans}
      */
     public static InMemorySpanExporter initializeOpenTelemetryForSystemTesting() {
 
-
-        System.out.println("initialize");
         // create an SdkTracerProvider with InMemorySpanExporter and LoggingSpanExporter
-        InMemorySpanExporter spanExporter = InMemorySpanExporter.create();
+        InMemorySpanExporter inMemSpanExporter = InMemorySpanExporter.create();
 
         SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
                 .setSampler(Sampler.alwaysOn())
-                .addSpanProcessor(BatchSpanProcessor.builder(spanExporter).build())
+                .addSpanProcessor(BatchSpanProcessor.builder(inMemSpanExporter).build())
                 .addSpanProcessor(SimpleSpanProcessor.create(new LoggingSpanExporter()))
                 .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "rocks.inspectit.ocelot.system.test")))
                 .build();
@@ -328,7 +327,7 @@ public class TestUtils {
 
         OpenTelemetrySdk openTelemetry = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
-                .setPropagators(ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), JaegerPropagator.getInstance(), W3CBaggagePropagator.getInstance())))
+                .setPropagators(ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), JaegerPropagator.getInstance(), W3CBaggagePropagator.getInstance(), B3Propagator.injectingMultiHeaders())))
                 .buildAndRegisterGlobal();
 
         // set the OTEL_TRACER in OpenTelemetrySpanBuilderImpl via reflection.
@@ -351,7 +350,7 @@ public class TestUtils {
             System.err.println("Failed to set OTEL_TRACER in OpenTelemetrySpanBuilderImpl");
         }
 
-        return spanExporter;
+        return inMemSpanExporter;
     }
 
     private static long getInstrumentationQueueLength() {
