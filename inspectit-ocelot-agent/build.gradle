@@ -232,6 +232,10 @@ task systemTest {
                 jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.
                 jacoco.enabled = false  // Don't add the JaCoCo agent again.
 
+                // stricter checker makes sure that {@link Scope}s are closed on the correct thread and
+                // that they are not garbage collected before being closed.
+                jvmArgs "-Dio.opentelemetry.context.enableStrictContext=true"
+
             }
 
             doFirst { logger.lifecycle("Running system tests using ${javaExecutable}.") }
