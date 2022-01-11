@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.utils;
 
-import io.opentelemetry.api.trace.Tracer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -44,31 +43,45 @@ public class ReflectionUtils {
     /**
      * Gets the final static field for the given {@link Class}, makes it accessible
      *
-     * @param clazz     The {@link Class} that contains the final static field
-     * @param fieldName The name of the field
+     * @param clazz       The {@link Class} that contains the final static field
+     * @param fieldName   The name of the field
      * @param removeFinal Whether to remove the {@link Modifier#FINAL} modifier from the field
      *
      * @return
+     *
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
      */
-    public static Field getFinalStaticFieldAndMakeAccessible(Class clazz, String fieldName, boolean removeFinal) {
+
+    public static Field getFinalStaticFieldAndMakeAccessible(Class clazz, String fieldName, boolean removeFinal) throws NoSuchFieldException, IllegalAccessException {
         Field field = null;
-        try {
-            field = clazz.getDeclaredField(fieldName);
 
-            // make field accessible
-            if (removeFinal) {
-                ReflectionUtils.makeFieldAccessibleAndRemoveFinal(field);
-            } else {
-                field.setAccessible(true);
-            }
+        field = clazz.getDeclaredField(fieldName);
 
-            return field;
-
-        } catch (Exception e) {
-            log.error("Failed to get field " + fieldName + " for class " + clazz.getName());
-            return null;
+        // make field accessible
+        if (removeFinal) {
+            ReflectionUtils.makeFieldAccessibleAndRemoveFinal(field);
+        } else {
+            field.setAccessible(true);
         }
+
+        return field;
     }
 
+    /**
+     * Gets the {@link Field} for the given private field of the given {@link Class}
+     *
+     * @param clazz     The {@link Class}
+     * @param fieldName The name of the private field
+     *
+     * @return
+     *
+     * @throws NoSuchFieldException
+     */
+    public static Field getPrivateField(Class clazz, String fieldName) throws NoSuchFieldException {
+        Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field;
+    }
 
 }
