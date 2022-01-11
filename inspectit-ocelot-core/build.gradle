@@ -44,7 +44,7 @@ dependencies {
             
             // spring releated
             "org.springframework.boot:spring-boot:${springVersion}",
-            'org.yaml:snakeyaml:1.23',
+            'org.yaml:snakeyaml:1.30',
             'javax.annotation:javax.annotation-api:1.3.2', //Required for @PostConstruct and @PreDestroy to work in Java9+
 
             // data validation
