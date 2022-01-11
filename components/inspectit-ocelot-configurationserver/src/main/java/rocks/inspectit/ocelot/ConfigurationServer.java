@@ -23,7 +23,7 @@ public class ConfigurationServer {
 
     /**
      * Initializer which ensures that the working directory exists prior to initializing the spring context.
-     * This is required because otherwise the SQLite DB can't create it's database file.
+     * This is required because otherwise the SQLite DB can't create its database file.
      */
     private static final ApplicationContextInitializer<ConfigurableApplicationContext> WORKING_DIRECTORY_INITIALIZER = (ctx) -> {
         InspectitServerSettings settings = Binder

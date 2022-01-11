@@ -36,7 +36,7 @@ jobs:
       - name: assemble
         run: ./gradlew :inspectit-ocelot-core:assemble
       - name: test
-        run: ./gradlew :inspectit-ocelot-core:test --no-daemon -i
+        run: ./gradlew :inspectit-ocelot-core:test --no-daemon
       - name: systemTest
         run: ./gradlew :inspectit-ocelot-agent:systemTest
       - name: codeCoverage if oracle-jdk8

@@ -34,9 +34,7 @@ import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.Supplier;
@@ -144,7 +142,7 @@ public class VersioningManager {
                 setCurrentBranchToTarget();
             }
 
-            stageFiles();
+            stageFiles(false); // the agent mapping file should not be committed to the live branch
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", false);
 
             if (getCommitCount() <= 0) {
@@ -159,10 +157,13 @@ public class VersioningManager {
             // create the branches which will be used
             git.branchRename().setNewName(Branch.WORKSPACE.getBranchName()).call();
             git.branchCreate().setName(Branch.LIVE.getBranchName()).call();
+
+            stageFiles(true);
+            commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing agent mappings during startup", false);
         } else if (!isClean()) {
             log.info("Changes in the configuration or agent mapping files have been detected and will be committed to the repository.");
 
-            stageFiles();
+            stageFiles(true);
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
         }
 
@@ -221,8 +222,8 @@ public class VersioningManager {
 
         // this is true for a fresh start of a config server instance connected to a remote git for backup
         // --> prevent unnecessary commits at startup that don't change any files (particularly when frequently restarting in, e.g., Kubernetes)
-        // otherwise, we need to properly merge files from local and two remotes
-        boolean hardReset = isWorkingDirectoryEmpty() && remoteSettings.isInitialConfigurationSync() && remoteSettings.isAutoPromotion() && areRemotesEqual(sourceRepository, targetRepository);
+        // otherwise, we need to properly merge files from two remotes
+        boolean hardReset = remoteSettings.isInitialConfigurationSync() && remoteSettings.isAutoPromotion() && areRemotesEqual(sourceRepository, targetRepository);
 
         log.info("{}-resetting current branch to '{}'.", (hardReset ? "Hard" : "Soft"), targetRepository.getBranchName());
         git.reset()
@@ -246,17 +247,6 @@ public class VersioningManager {
         return ObjectId.isEqual(sourceId, targetId);
     }
 
-    private boolean isWorkingDirectoryEmpty() throws IOException {
-        Path filesPath = Paths.get(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
-        boolean filesEmpty = !Files.exists(filesPath) || (Files.isDirectory(filesPath) && Files.list(filesPath)
-                .count() == 0);
-
-        Path agentMappingPath = Paths.get(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
-        boolean agentMappingMissing = !Files.exists(agentMappingPath);
-
-        return filesEmpty && agentMappingMissing;
-    }
-
     /**
      * Closes the {@link #git} instance of this manager.
      */
@@ -275,7 +265,7 @@ public class VersioningManager {
         }
         log.info("Staging and committing of external changes to the configuration files or agent mappings");
 
-        stageFiles();
+        stageFiles(true);
         commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes", false);
     }
 
@@ -306,7 +296,7 @@ public class VersioningManager {
 
         PersonIdent author = getCurrentAuthor();
 
-        stageFiles();
+        stageFiles(true);
 
         if (commitAllFiles(author, message, author != GIT_SYSTEM_AUTHOR)) {
             eventPublisher.publishEvent(new WorkspaceChangedEvent(this, getWorkspaceRevision()));
@@ -353,15 +343,20 @@ public class VersioningManager {
     }
 
     /**
-     * Stage all modified/added/removed configuration files and the agent mapping file.
+     * Stage all modified/added/removed configuration files and, if specified, the agent mapping file.
+     *
+     * @param includeAgentMappings Flag indicating whether the agent mapping file should be staged as well
      */
-    private void stageFiles() throws GitAPIException {
-        log.debug("Staging all configuration files and agent mappings.");
+    private void stageFiles(boolean includeAgentMappings) throws GitAPIException {
+        log.debug("Staging all configuration files{}.", includeAgentMappings ? " and agent mappings" : "");
 
-        git.add()
-                .addFilepattern(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER)
-                .addFilepattern(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME)
-                .call();
+        AddCommand addCommand = git.add().addFilepattern(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
+
+        if (includeAgentMappings) {
+            addCommand.addFilepattern(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
+        }
+
+        addCommand.call();
     }
 
     /**

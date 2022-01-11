@@ -46,7 +46,7 @@ public class MetricDefinitionSettings {
     private String description;
 
     /**
-     * Maps view names to their defintions for the measure defined by this {@link MetricDefinitionSettings}.
+     * Maps view names to their definitions for the measure defined by this {@link MetricDefinitionSettings}.
      * If this is null, a default view is created which simply exposes the last value of the metric.
      */
     @Singular
@@ -74,12 +74,9 @@ public class MetricDefinitionSettings {
      */
     public MetricDefinitionSettings getCopyWithDefaultsPopulated(String metricName, Duration defaultTimeWindow) {
         val resultDescription = description == null ? metricName : description;
-        val result = toBuilder()
-                .description(resultDescription)
-                .clearViews();
+        val result = toBuilder().description(resultDescription).clearViews();
         if (!CollectionUtils.isEmpty(views)) {
-            views.forEach((name, def) ->
-                    result.view(name, def.getCopyWithDefaultsPopulated(resultDescription, unit, defaultTimeWindow)));
+            views.forEach((name, def) -> result.view(name, def.getCopyWithDefaultsPopulated(resultDescription, unit, defaultTimeWindow)));
         } else {
             result.view(metricName, ViewDefinitionSettings.builder()
                     .aggregation(ViewDefinitionSettings.Aggregation.LAST_VALUE)

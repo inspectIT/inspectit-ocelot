@@ -78,11 +78,13 @@ public class MetricsSettings {
     private StandardPollingMetricsRecorderSettings memory;
 
     /**
-     * Settings for {@link rocks.inspectit.ocelot.core.metrics.system.JxmMetricsRecorder}
+     * Settings for {@link rocks.inspectit.ocelot.core.metrics.system.JmxMetricsRecorder}
      */
     @Valid
     @NotNull
     private JmxMetricsRecorderSettings jmx;
+
+
 
     @AdditionalValidation
     public void noDuplicateViewNames(ViolationBuilder vios) {

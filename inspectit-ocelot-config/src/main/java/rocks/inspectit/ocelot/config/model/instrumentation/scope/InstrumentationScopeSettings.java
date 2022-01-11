@@ -63,7 +63,7 @@ public class InstrumentationScopeSettings {
     private AdvancedScopeSettings advanced;
 
     /**
-     * Returns whether this scope will is narrowing the target type-scope, thus, is not matching on all types (e.g. using ".*" regular expression).
+     * Returns whether this scope is narrowing the target type-scope, thus, is not matching on all types (e.g. using ".*" regular expression).
      *
      * @return Returns true if the scope is narrowing the target type-scope.
      */
@@ -73,22 +73,35 @@ public class InstrumentationScopeSettings {
             return true;
         }
 
-        return !CollectionUtils.isEmpty(interfaces)
-                || superclass != null
-                || (type != null && !type.isAnyMatcher());
+        return !CollectionUtils.isEmpty(interfaces) || superclass != null || (type != null && !type.isAnyMatcher());
+    }
+
+    /**
+     * Returns whether this scope is using a valid {@link MatcherMode} for the {@link InstrumentationScopeSettings}
+     *
+     * @return Returns true if the {@link MatcherMode} is valid for the target type-scope.
+     */
+    @AssertTrue(message = "The defined scope uses an incompatible matcher mode. The matcher modes 'NOT_EQUALS_FULLY' and 'NOT_EQUALS_FULLY_IGNORE_CASE' are disabled for type matcher as this will result in too many instrumented classes. If you want to enable these matcher modes for type matcher, use the advanced settings 'disableSafetyMechanisms'")
+    public boolean isCompatibleMatcherMode() {
+        if (advanced != null && advanced.isDisableSafetyMechanisms()) {
+            return true;
+        }
+        // if type matcher is set to NOT_EQUALS_FULLY or NOT_EQUALS_FULLY_IGNORE_CASE and the safety mechanisms are not disabled, the matcher is NOT narrowing the scope
+        return type == null || (type.getMatcherMode() != MatcherMode.NOT_EQUALS_FULLY && type.getMatcherMode() != MatcherMode.NOT_EQUALS_FULLY_IGNORE_CASE);
     }
 
     /**
      * Validates this scope, invoked by {@link InstrumentationSettings#performValidation(InspectitConfig, ViolationBuilder)}
      *
-     * @param name          name of the scope, which will be verified
-     * @param container     the root config containing this scope
-     * @param vios          the violation builder
-     * @param verified      a set containing already verified scopes, verified means that this scope is guaranteed to not be part of a cyclic dependency.
+     * @param name      name of the scope, which will be verified
+     * @param container the root config containing this scope
+     * @param vios      the violation builder
+     * @param verified  a set containing already verified scopes, verified means that this scope is guaranteed to not be part of a cyclic dependency.
      */
     public void performValidation(String name, InstrumentationSettings container, ViolationBuilder vios, Set<String> verified) {
         // Verify that the excluded scopes have also been defined.
-        exclude.entrySet().stream()
+        exclude.entrySet()
+                .stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .filter(excludeName -> !container.getScopes().containsKey(excludeName))
@@ -106,18 +119,21 @@ public class InstrumentationScopeSettings {
     /**
      * Verify that there are no cyclic dependencies between the excluded scopes.
      *
-     * @param parentScope the scope, which holds the exclude-scopes
-     * @param scopes map of scopes
-     * @param verified a set containing already verified scopes, verified means that this scope is guaranteed to not be part of a cyclic dependency
+     * @param parentScope   the scope, which holds the exclude-scopes
+     * @param scopes        map of scopes
+     * @param verified      a set containing already verified scopes, verified means that this scope is guaranteed to not be part of a cyclic dependency
      * @param visitedScopes temp list for visited scopes, represents the current path in the depth-first search. The last element in the list must be {@param parentScope}
-     * @param vios the violation output
+     * @param vios          the violation output
      */
     private static void verifyNoCyclicalDependence(String parentScope, Map<String, InstrumentationScopeSettings> scopes, Set<String> verified, List<String> visitedScopes, ViolationBuilder vios) {
-        if(verified.contains(parentScope)){
+        if (verified.contains(parentScope)) {
             return;
         }
 
-        scopes.get(parentScope).getExclude().entrySet().stream()
+        scopes.get(parentScope)
+                .getExclude()
+                .entrySet()
+                .stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .forEach(excludeScope -> {
@@ -127,8 +143,7 @@ public class InstrumentationScopeSettings {
                                 .parameter("scope", parentScope)
                                 .parameter("scopeDependencies", String.join(" -> ", visitedScopes) + " -> " + excludeScope)
                                 .buildAndPublish();
-                    }
-                    else {
+                    } else {
                         visitedScopes.add(excludeScope);
                         if (scopes.containsKey(excludeScope)) {
                             verifyNoCyclicalDependence(excludeScope, scopes, verified, visitedScopes, vios);
