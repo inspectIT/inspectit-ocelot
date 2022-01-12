@@ -237,14 +237,14 @@ public class MeasuresAndViewsManager {
 
     private void updateMeasure(String measureName, Measure measure, MetricDefinitionSettings fullDefinition) {
         if (!fullDefinition.getDescription().equals(measure.getDescription())) {
-            log.info("Cannot update description of measure '{}' because it has been already registered in OpenCensus!", measureName);
+            log.warn("Cannot update description of measure '{}' because it has been already registered in OpenCensus!", measureName);
         }
         if (!fullDefinition.getUnit().equals(measure.getUnit())) {
-            log.info("Cannot update unit of measure '{}' because it has been already registered in OpenCensus!", measureName);
+            log.warn("Cannot update unit of measure '{}' because it has been already registered in OpenCensus!", measureName);
         }
         if ((measure instanceof Measure.MeasureLong && fullDefinition.getType() != MetricDefinitionSettings.MeasureType.LONG)
                 || (measure instanceof Measure.MeasureDouble && fullDefinition.getType() != MetricDefinitionSettings.MeasureType.DOUBLE)) {
-            log.info("Cannot update type of measure '{}' because it has been already registered in OpenCensus!", measureName);
+            log.warn("Cannot update type of measure '{}' because it has been already registered in OpenCensus!", measureName);
         }
     }
 
@@ -273,7 +273,7 @@ public class MeasuresAndViewsManager {
 
     private void addOrUpdatePercentileView(Measure measure, String viewName, ViewDefinitionSettings def) {
         if (def.getAggregation() != ViewDefinitionSettings.Aggregation.QUANTILES) {
-            log.info("Cannot switch aggregation type for View '{}' from QUANTILES to {}", viewName, def.getAggregation());
+            log.warn("Cannot switch aggregation type for View '{}' from QUANTILES to {}", viewName, def.getAggregation());
             return;
         }
         Set<TagKey> viewTags = getTagKeysForView(def);
@@ -303,21 +303,21 @@ public class MeasuresAndViewsManager {
 
     private void updateOpenCensusView(String viewName, ViewDefinitionSettings def, View view) {
         if (!def.getDescription().equals(view.getDescription())) {
-            log.info("Cannot update description of view '{}' because it has been already registered in OpenCensus!", viewName);
+            log.warn("Cannot update description of view '{}' because it has been already registered in OpenCensus!", viewName);
         }
         if (!isAggregationEqual(view.getAggregation(), def)) {
-            log.info("Cannot update aggregation of view '{}' because it has been already registered in OpenCensus!", viewName);
+            log.warn("Cannot update aggregation of view '{}' because it has been already registered in OpenCensus!", viewName);
         }
         Set<TagKey> presentTagKeys = new HashSet<>(view.getColumns());
 
         Set<TagKey> viewTags = getTagKeysForView(def);
         presentTagKeys.stream()
                 .filter(t -> !viewTags.contains(t))
-                .forEach(tag -> log.info("Cannot remove tag '{}' from view '{}' because it has been already registered in OpenCensus!", tag
+                .forEach(tag -> log.warn("Cannot remove tag '{}' from view '{}' because it has been already registered in OpenCensus!", tag
                         .getName(), viewName));
         viewTags.stream()
                 .filter(t -> !presentTagKeys.contains(t))
-                .forEach(tag -> log.info("Cannot add tag '{}' to view '{}' because it has been already registered in OpenCensus!", tag
+                .forEach(tag -> log.warn("Cannot add tag '{}' to view '{}' because it has been already registered in OpenCensus!", tag
                         .getName(), viewName));
     }
 

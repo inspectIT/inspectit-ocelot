@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.service;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
  * This class handles the waiting for changes in the configuration.
  * If relevant changes to the configuration occur, this class ensures that the service is properly restarted.
  */
+@Slf4j
 public abstract class DynamicallyActivatableService {
 
     @Autowired
@@ -103,11 +105,15 @@ public abstract class DynamicallyActivatableService {
     synchronized void checkForUpdates(InspectitConfigChangedEvent ev) {
         boolean affected = false;
         for (Expression exp : configDependencies) {
-            Object oldVal = exp.getValue(ev.getOldConfig());
-            Object newVal = exp.getValue(ev.getNewConfig());
-            boolean isEqual = Objects.equals(oldVal, newVal);
-            if (!isEqual) {
-                affected = true;
+            try {
+                Object oldVal = exp.getValue(ev.getOldConfig());
+                Object newVal = exp.getValue(ev.getNewConfig());
+                boolean isEqual = Objects.equals(oldVal, newVal);
+                if (!isEqual) {
+                    affected = true;
+                }
+            } catch (Exception exception) {
+                log.error("Exception while evaluating configuration dependencies: {}", exception.getMessage());
             }
         }
         if (affected) {
@@ -125,7 +131,7 @@ public abstract class DynamicallyActivatableService {
 
     /**
      * The implementation of this method checks if the service should be enabled given a certain configuration.
-     * When changes to the configuration occur, this method will be used to correctly invoke {@link #doDisable()} and {@link #doEnable()}.
+     * When changes to the configuration occur, this method will be used to correctly invoke {@link #doDisable()} and {@link #doEnable(InspectitConfig)}.
      *
      * @param configuration the configuration to check
      *
