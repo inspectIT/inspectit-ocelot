@@ -37,7 +37,6 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
-import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableSpanExporter;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableTraceExporterService;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
@@ -453,8 +452,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(serviceNameResource);
 
             for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices) {
-                log.info("add metricReader for {} ({})", metricsExportService, metricsExportService.getMetricReaderFactory());
-                builder.registerMetricReader(OpenCensusMetrics.attachTo(metricsExportService.getMetricReaderFactory()));
+                log.info("add metricReader for {} ({})", metricsExportService, metricsExportService.getNewMetricReaderFactory());
+                builder.registerMetricReader(OpenCensusMetrics.attachTo(metricsExportService.getNewMetricReaderFactory()));
             }
 
             SdkMeterProvider sdkMeterProvider = builder.build();
@@ -475,23 +474,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             log.error("Failed to configure MeterProvider", e);
             return false;
         }
-    }
-
-    /**
-     * See {@link rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableSpanExporter#registerHandler(String, DynamicallyActivatableSpanExporter.Handler)}
-     *
-     * @param name           the name of the service
-     * @param name           the name of the service handler. Must be unique for each service.
-     * @param serviceHandler the service handler that is called for each ended sampled {@link io.opentelemetry.api.trace.Span}
-     */
-    public void registerHandler(String name, DynamicallyActivatableSpanExporter.Handler serviceHandler) {
-        // TODO: implement
-    }
-
-    public void unregisterHandler(String name, DynamicallyActivatableSpanExporter.Handler serviceHandler) {
-
-        // TODO: implement
-
     }
 
     /**

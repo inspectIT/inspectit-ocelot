@@ -62,7 +62,7 @@ public class OpenTelemetryImpl implements OpenTelemetry {
     }
 
     /**
-     * Shuts down the currently registered {@link #openTelemetry#getSdkTracerProvider() SdkTracerProvider}
+     * Shuts down the currently registered {@link #openTelemetry#getSdkTracerProvider() SdkTracerProvider} and blocks waiting for it to complete.
      *
      * @return The {@link CompletableResultCode}
      */

@@ -110,7 +110,7 @@ class VersioningManagerTest extends FileTestBase {
             assertThat(clean).isTrue();
             assertThat(before).isFalse();
             assertThat(after).isTrue();
-            assertThat(count).isOne();
+            assertThat(count).isEqualTo(2); // Initializing Git repository + committing agent mappings
         }
 
         @Test
@@ -129,14 +129,14 @@ class VersioningManagerTest extends FileTestBase {
             int secondCount = versioningManager.getCommitCount();
             assertThat(initSecond).isTrue();
             assertThat(cleanFirst).isTrue();
-            assertThat(secondCount).isOne();
+            assertThat(secondCount).isEqualTo(2); // Initializing Git repository + committing agent mappings
 
             versioningManager.initialize();
 
             boolean cleanSecond = versioningManager.isClean();
             int thirdCount = versioningManager.getCommitCount();
             assertThat(cleanSecond).isTrue();
-            assertThat(thirdCount).isOne();
+            assertThat(thirdCount).isEqualTo(2);
         }
 
         @Test
@@ -155,7 +155,7 @@ class VersioningManagerTest extends FileTestBase {
             int secondCount = versioningManager.getCommitCount();
             assertThat(initSecond).isTrue();
             assertThat(cleanFirst).isTrue();
-            assertThat(secondCount).isOne();
+            assertThat(secondCount).isEqualTo(2); // Initializing Git repository + committing agent mappings
 
             // edit file
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
@@ -165,7 +165,7 @@ class VersioningManagerTest extends FileTestBase {
             boolean cleanSecond = versioningManager.isClean();
             int thirdCount = versioningManager.getCommitCount();
             assertThat(cleanSecond).isTrue();
-            assertThat(thirdCount).isEqualTo(2);
+            assertThat(thirdCount).isEqualTo(3);
         }
     }
 
@@ -1185,7 +1185,42 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void initialConfigurationSyncOneRemote() throws URISyntaxException, GitAPIException, IOException {
+        public void initialConfigurationSyncOneRemoteWithoutLocalFiles() throws URISyntaxException, GitAPIException, IOException {
+            // ////////////////////////
+            // test without local files --> should only reset to remote
+            doInitialConfigurationSyncOneRemote(false);
+
+            ObjectId targetCommitIdBeforeInitialization = repositoryOne.getRepository()
+                    .exactRef("refs/heads/remote")
+                    .getObjectId();
+            ObjectId liveCommitId = versioningManager.getLatestCommit(Branch.LIVE).get().getId();
+
+            assertThat(liveCommitId).isEqualTo(targetCommitIdBeforeInitialization); // live should be set to remote repo
+            assertThat(Files.list(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))).extracting(Path::getFileName)
+                    .extracting(Path::toString)
+                    .containsExactlyInAnyOrder("from_remote.yml"); // should exactly contain content of remote repo
+        }
+
+        @Test
+        public void initialConfigurationSyncOneRemoteWithLocalFiles() throws URISyntaxException, GitAPIException, IOException {
+            // ////////////////////////
+            // test with local files --> should overwrite those local files that exist in remote and keep others
+            doInitialConfigurationSyncOneRemote(true);
+
+            ObjectId targetCommitIdBeforeInitialization = repositoryOne.getRepository()
+                    .exactRef("refs/heads/remote")
+                    .getObjectId();
+            RevCommit liveCommit = versioningManager.getLatestCommit(Branch.LIVE).get();
+            ObjectId parentCommitId = liveCommit.getParent(0).getId();
+
+            assertThat(parentCommitId).isEqualTo(targetCommitIdBeforeInitialization); // live should add one commit to remote repo
+            assertThat(Files.list(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))).extracting(Path::getFileName)
+                    .extracting(Path::toString)
+                    .containsExactlyInAnyOrder("from_remote.yml", "from_local.yml"); // should contain content of remote repo + from_local.yml
+            assertThat(new String(Files.readAllBytes(tempDirectory.resolve("files/from_remote.yml")))).isEmpty(); // file from remote should have remote content (empty)
+        }
+
+        private void doInitialConfigurationSyncOneRemote(boolean localFiles) throws URISyntaxException, GitAPIException, IOException {
             RemoteRepositorySettings remoteRepositorySettings = RemoteRepositorySettings.builder()
                     .branchName("remote")
                     .remoteName("remote")
@@ -1208,22 +1243,13 @@ class VersioningManagerTest extends FileTestBase {
             repositoryOne.branchCreate().setName("remote").call();
             repositoryOne.checkout().setName("remote").call();
 
-            ObjectId targetCommitIdBeforeInitialization = repositoryOne.getRepository()
-                    .exactRef("refs/heads/remote")
-                    .getObjectId();
+            if (localFiles) {
+                // add some local files that should (not) be overridden by initial synchronization
+                createTestFiles("files/from_local.yml=local", "files/from_remote.yml=local");
+            }
 
             // initialize Git
             versioningManager.initialize();
-            Git git = (Git) ReflectionTestUtils.getField(versioningManager, "git");
-
-            // ////////////////////////
-            // check state after initial synchronization
-            ObjectId liveCommitId = versioningManager.getLatestCommit(Branch.LIVE).get().getId();
-
-            assertThat(liveCommitId).isEqualTo(targetCommitIdBeforeInitialization); // live should be set to remote repo
-            assertThat(Files.list(tempDirectory.resolve(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))).extracting(Path::getFileName)
-                    .extracting(Path::toString)
-                    .containsExactlyInAnyOrder("from_remote.yml"); // should exactly contain content of remote repo
         }
 
         @Test

@@ -4,7 +4,6 @@ import io.opentelemetry.exporter.logging.LoggingMetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
@@ -19,19 +18,15 @@ import javax.validation.Valid;
 @Slf4j
 public class LoggingMetricExporterService extends DynamicallyActivatableMetricsExporterService {
 
+    /**
+     * The {@link LoggingMetricExporter} for exporting metrics to the log
+     */
+    private LoggingMetricExporter metricExporter;
 
     /**
-     * The {@link DynamicallyActivatableMetricExporter} for exporting metrics to the log
+     * The {@link PeriodicMetricReaderBuilder} for reading metrics to the log
      */
-    private DynamicallyActivatableMetricExporter<LoggingMetricExporter> metricExporter;
-
-    /**
-     * The {@link PeriodicMetricReader} for reading metrics to the log
-     */
-    private PeriodicMetricReaderBuilder metricReader;
-
-    @Getter
-    MetricReaderFactory metricReaderFactory;
+    private PeriodicMetricReaderBuilder metricReaderBuilder;
 
     public LoggingMetricExporterService() {
         super("exporters.metrics.logging", "metrics.enabled");
@@ -42,7 +37,7 @@ public class LoggingMetricExporterService extends DynamicallyActivatableMetricsE
         super.init();
 
         // create new metric exporter
-        metricExporter = DynamicallyActivatableMetricExporter.createLoggingExporter();
+        metricExporter = new LoggingMetricExporter();
     }
 
     @Override
@@ -56,12 +51,9 @@ public class LoggingMetricExporterService extends DynamicallyActivatableMetricsE
         LoggingMetricsExporterSettings logging = configuration.getExporters().getMetrics().getLogging();
         try {
             // build and register the MeterProvider
-            metricReader = PeriodicMetricReader.builder(metricExporter).setInterval(logging.getExportInterval());
-            metricReaderFactory = metricReader.newMetricReaderFactory();
+            metricReaderBuilder = PeriodicMetricReader.builder(metricExporter).setInterval(logging.getExportInterval());
             boolean success = openTelemetryController.registerMetricExporterService(this);
             if (success) {
-                // enable the metric exporter
-                metricExporter.doEnable();
                 log.info("Starting {}", getClass().getSimpleName());
             } else {
                 log.error("Failed to register {} at {}!", getClass().getSimpleName(), openTelemetryController.getClass()
@@ -77,7 +69,6 @@ public class LoggingMetricExporterService extends DynamicallyActivatableMetricsE
     @Override
     protected boolean doDisable() {
         try {
-            metricExporter.doDisable();
             log.info("Stopping LoggingMetricExporter");
             openTelemetryController.unregisterMetricExporterService(this);
             return true;
@@ -85,5 +76,10 @@ public class LoggingMetricExporterService extends DynamicallyActivatableMetricsE
             log.error("Failed to stop LoggingMetricExporter", e);
             return false;
         }
+    }
+
+    @Override
+    public MetricReaderFactory getNewMetricReaderFactory() {
+        return metricReaderBuilder.newMetricReaderFactory();
     }
 }

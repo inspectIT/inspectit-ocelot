@@ -19,17 +19,16 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.awaitility.Awaitility.await;
 
-@TestPropertySource(properties = {
-        "inspectit.exporters.tracing.jaeger.url=http://127.0.0.1:14268/api/traces",
-        "inspectit.exporters.tracing.jaeger.grpc=http://127.0.0.1:14267/api/traces"
-})
+@TestPropertySource(properties = {"inspectit.exporters.tracing.jaeger.url=http://127.0.0.1:14268/api/traces", "inspectit.exporters.tracing.jaeger.grpc=http://127.0.0.1:14267/api/traces"})
 @DirtiesContext
 public class JaegerExporterServiceIntTest extends SpringTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(JaegerExporterServiceIntTest.class);
 
     public static final int JAEGER_PORT = 14268;
+
     public static final String JAEGER_PATH = "/api/traces";
+
     private WireMockServer wireMockServer;
 
     @BeforeEach
@@ -38,8 +37,7 @@ public class JaegerExporterServiceIntTest extends SpringTestBase {
         wireMockServer.start();
         configureFor(wireMockServer.port());
 
-        stubFor(post(urlPathEqualTo(JAEGER_PATH))
-                .willReturn(aResponse().withStatus(200)));
+        stubFor(post(urlPathEqualTo(JAEGER_PATH)).willReturn(aResponse().withStatus(200)));
     }
 
     @AfterEach
@@ -49,10 +47,8 @@ public class JaegerExporterServiceIntTest extends SpringTestBase {
 
     @Test
     void verifyTraceSent() throws InterruptedException {
-        Tracing.getTracer().spanBuilder("jaegerspan")
-                .setSampler(Samplers.alwaysSample())
-                .startSpanAndRun(() -> {
-                });
+        Tracing.getTracer().spanBuilder("jaegerspan").setSampler(Samplers.alwaysSample()).startSpanAndRun(() -> {
+        });
 
         logger.info("Wait for Jaeger to process the span...");
         Thread.sleep(1100L);

@@ -4,7 +4,6 @@ import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
 import io.opentelemetry.exporter.jaeger.thrift.JaegerThriftSpanExporter;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,9 +23,7 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
 
     private JaegerGrpcSpanExporter grpcSpanExporter;
 
-    private JaegerThriftSpanExporter thriftSpanExporter;
-
-    private DynamicallyActivatableSpanExporter spanExporter;
+    private JaegerThriftSpanExporter spanExporter;
 
     @Getter
     private SpanProcessor spanProcessor;
@@ -67,9 +64,7 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
                     .build();*/
 
             // create span exporter
-            thriftSpanExporter = JaegerThriftSpanExporter.builder().setEndpoint(settings.getUrl()).build();
-            spanExporter = DynamicallyActivatableSpanExporter.create(thriftSpanExporter);
-            spanExporter.doEnable();
+            spanExporter = JaegerThriftSpanExporter.builder().setEndpoint(settings.getUrl()).build();
 
             // create span processor
             spanProcessor = BatchSpanProcessor.builder(spanExporter).build();
@@ -88,10 +83,6 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
     protected boolean doDisable() {
         log.info("Stopping Jaeger Exporter");
         try {
-            // TODO: reimplement with OTel
-            if (null != spanExporter) {
-                spanExporter.doDisable();
-            }
             if (null != spanProcessor) {
                 spanProcessor.shutdown();
                 spanProcessor = null;

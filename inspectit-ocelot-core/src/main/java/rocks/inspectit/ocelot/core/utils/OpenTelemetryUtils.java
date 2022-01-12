@@ -29,7 +29,8 @@ public class OpenTelemetryUtils {
     }
 
     /**
-     * {@link SdkMeterProvider#close() Closes} the given {@link SdkMeterProvider} and optionally {@link SdkMeterProvider#forceFlush() force flushes}, and blocks waiting for it to complete.     *
+     * {@link SdkMeterProvider#close() Closes} the given {@link SdkMeterProvider} and optionally {@link SdkMeterProvider#forceFlush() force flushes}, and blocks waiting for it to complete.
+     *
      * @param meterProvider
      * @param forceFlush    Whether to call {@link SdkMeterProvider#forceFlush()}
      *
@@ -40,25 +41,27 @@ public class OpenTelemetryUtils {
         long start = System.nanoTime();
         if (forceFlush) {
             // wait until force flush has succeeded
+            long startFlush = System.nanoTime();
             CompletableResultCode flushResult = meterProvider.forceFlush();
             if (!flushResult.isDone()) {
                 CountDownLatch latch = new CountDownLatch(1);
-                long startFlush = System.nanoTime();
                 flushResult.whenComplete(() -> latch.countDown());
                 try {
                     latch.await(10, TimeUnit.SECONDS);
-                    log.info("time to force flush SdkMeterProvider: {} ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startFlush));
+                    log.info("time to force flush SdkMeterProvider: {} ms", (System.nanoTime() - startFlush) / 1E6);
                 } catch (Throwable t) {
                     log.error("failed to force flush SdkMeterProvider", t);
                     t.printStackTrace();
                     return CompletableResultCode.ofFailure();
                 }
+            } else {
+                log.info("time to force flush SdkMeterProvider: {} ms", (System.nanoTime() - startFlush) / 1E6);
             }
         }
 
-        // close the SdkMeterProvider. This calls shutDown internally.
+        // close the SdkMeterProvider. This calls shutDown internally and waits blocking for it.
         meterProvider.close();
-        log.info("time to stop {}: {} ms", meterProvider, TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
+        log.info("time to stop {}: {} ms", meterProvider, (System.nanoTime() - start) / 1E6);
         return CompletableResultCode.ofSuccess();
     }
 

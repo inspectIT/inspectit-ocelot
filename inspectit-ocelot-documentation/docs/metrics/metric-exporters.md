@@ -10,15 +10,28 @@ If an exporter supports run-time updates it means that it can be enabled/disable
 This way you can, for example, change the endpoint where exporter pushes the metrics without a need to restart the application.
 In order to use run-time updates, you must enable one of the [externalized configuration methods](configuration/external-configuration-sources) that support dynamic updates.
 
-inspectIT Ocelot currently supports the following OpenCensus metrics exporters:
+inspectIT Ocelot currently supports the following OpenTelemetry metrics exporters:
 
 |Exporter |Supports run-time updates| Push / Pull |Enabled by default
 |---|---|---|---|
-|[Prometheus Exporter](#prometheus-exporter)|Yes|Pull|Yes
-|[OpenCensus Agent Exporter](#opencensus-agent-metrics-exporter)|No|Push|Yes
-|[InfluxDB Exporter](#influxdb-exporter)|Yes|Push|Yes
+|[Logging Exporter](#logging-exporter)|Yes|Pull|Yes
+|[~~Prometheus Exporter~~](#prometheus-exporter)|Yes|Pull|Yes
+|[~~InfluxDB Exporter~~](#influxdb-exporter)|Yes|Push|Yes
+
+>**Important note**: Starting with version `1.15.0`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
+Currently, Prometheus and InfluxDB are **not** functional and will be re-implemented in the next version.
+
+## Logging Exporter
+
+The Logging exporter exports the metrics to the console. By default, the exporter is enabled. The following properties are nested properties below the `inspectit.exporters.metrics.logging`:
+
+|Property |Default| Description
+|---|---|---|
+|`.enabled`|`true`|If true, the inspectIT Ocelot agent will try to start the Logging metrics exporter.
+|`.export-interval`|refers to `inspectit.metrics.frequency`|The export interval of the metrics.
 
 ## Prometheus Exporter
+>**Important**: the Prometheus exporter is currently not working
 
 Prometheus exporter exposes the metrics in Prometheus format and is the default metrics exporter set up by inspectIT Ocelot.
 When enabled, inspectIT starts a Prometheus HTTP server in parallel with your application.
@@ -33,27 +46,10 @@ The following properties are nested properties below the `inspectit.exporters.me
 |`.port`|`8888`|The port the Prometheus HTTP server should use.
 
 
-> Don't forget to check [the official OpenCensus Prometheus exporter documentation](https://opencensus.io/exporters/supported-exporters/java/prometheus/).
-
-## OpenCensus Agent Metrics Exporter
-
-Metrics can be additionally exported to the [OpenCensus Agent](https://opencensus.io/service/components/agent/).
-When enabled, all metrics are sent via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address is set to `null`.
-
-The following properties are nested properties below the `inspectit.exporters.metrics.open-census-agent` property:
-
-|Property |Default| Description
-|---|---|---|
-|`.enabled`|`true`|If true, the agent will try to start the OpenCensus Agent Metrics exporter.
-|`.address`|`null`|Address of the open-census agent (e.g. localhost:1234).
-|`.use-insecure`|`false`|If true, SSL is disabled.
-|`.service-name`|refers to `inspectit.service-name`|The service-name which will be used to publish the metrics.
-|<nobr>`.reconnection-period`</nobr>|`5`|The time at which the exporter tries to reconnect to the OpenCensus agent.
-|`.export-interval`|refers to `inspectit.metrics.frequency`|The export interval of the metrics.
-
-> Don't forget to check [the official OpenCensus Agent exporter documentation](https://opencensus.io/exporters/supported-exporters/java/ocagent/).
+> Don't forget to check [the official OpenTelemetry Prometheus exporter documentation](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/prometheus).
 
 ## InfluxDB Exporter
+>**Important**: the InfluxDB exporter is currently not working
 
 If enabled, metrics are pushed at a specified interval directly to a given InfluxDB v1.x instance.
 To enable the InfluxDB Exporters, it is only required to specify the `url`.

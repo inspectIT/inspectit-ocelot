@@ -14,11 +14,11 @@ import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 public abstract class DynamicallyActivatableMetricsExporterService extends DynamicallyActivatableService {
 
     /**
-     * Gets a {@link MetricReaderFactory} for this service.
+     * Gets a new {@link MetricReaderFactory} for this service.
      *
-     * @return
+     * @return A new {@link MetricReaderFactory}
      */
-    public abstract MetricReaderFactory getMetricReaderFactory();
+    public abstract MetricReaderFactory getNewMetricReaderFactory();
 
     /**
      * Constructor.

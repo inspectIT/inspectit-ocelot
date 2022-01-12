@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.core.exporter;
 import io.opentelemetry.exporter.prometheus.PrometheusHttpServer;
 import io.opentelemetry.exporter.prometheus.PrometheusHttpServerBuilder;
 import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Component;
@@ -18,9 +17,6 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 public class PrometheusExporterService extends DynamicallyActivatableMetricsExporterService {
 
     private PrometheusHttpServerBuilder prometheusHttpServerBuilder;
-
-    @Getter
-    private MetricReaderFactory metricReaderFactory;
 
     public PrometheusExporterService() {
         super("exporters.metrics.prometheus", "metrics.enabled");
@@ -40,7 +36,6 @@ public class PrometheusExporterService extends DynamicallyActivatableMetricsExpo
             int port = config.getPort();
             log.info("Starting Prometheus Exporter on {}:{}", host, port);
             prometheusHttpServerBuilder = PrometheusHttpServer.builder().setHost(host).setPort(port);
-            metricReaderFactory = prometheusHttpServerBuilder.newMetricReaderFactory();
             openTelemetryController.registerMetricExporterService(this);
         } catch (Exception e) {
             log.error("Error Starting Prometheus HTTP Endpoint!", e);
@@ -56,4 +51,8 @@ public class PrometheusExporterService extends DynamicallyActivatableMetricsExpo
         return true;
     }
 
+    @Override
+    public MetricReaderFactory getNewMetricReaderFactory() {
+        return prometheusHttpServerBuilder.newMetricReaderFactory();
+    }
 }

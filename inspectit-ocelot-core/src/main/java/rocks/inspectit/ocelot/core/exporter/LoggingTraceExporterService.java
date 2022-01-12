@@ -21,9 +21,9 @@ import javax.validation.Valid;
 public class LoggingTraceExporterService extends DynamicallyActivatableTraceExporterService {
 
     /**
-     * The {@link DynamicallyActivatableSpanExporter< LoggingSpanExporter >} for exporting the spans to the log
+     * The {@link LoggingSpanExporter} for exporting the spans to the log
      */
-    private DynamicallyActivatableSpanExporter<LoggingSpanExporter> spanExporter;
+    private LoggingSpanExporter spanExporter;
 
     @Getter
     private SpanProcessor spanProcessor;
@@ -38,7 +38,7 @@ public class LoggingTraceExporterService extends DynamicallyActivatableTraceExpo
         super.init();
 
         // create span exporter and span processors
-        spanExporter = DynamicallyActivatableSpanExporter.createLoggingSpanExporter();
+        spanExporter = new LoggingSpanExporter();
     }
 
     @Override
@@ -57,9 +57,6 @@ public class LoggingTraceExporterService extends DynamicallyActivatableTraceExpo
             // SpanProcessors are also shut down when the corresponding TracerProvider is shut down. Thus, we need to create the SpanProcessors each time
             spanProcessor = SimpleSpanProcessor.create(spanExporter);
 
-            // enable span exporter
-            spanExporter.doEnable();
-
             boolean success = openTelemetryController.registerTraceExporterService(this);
             if (success) {
                 log.info("Starting {}", getClass().getSimpleName());
@@ -77,10 +74,6 @@ public class LoggingTraceExporterService extends DynamicallyActivatableTraceExpo
     @Override
     protected boolean doDisable() {
         try {
-            // disable the span exporter
-            if (null != spanExporter) {
-                spanExporter.doDisable();
-            }
             // shut down the span processor
             if (null != spanProcessor) {
                 spanProcessor.shutdown();

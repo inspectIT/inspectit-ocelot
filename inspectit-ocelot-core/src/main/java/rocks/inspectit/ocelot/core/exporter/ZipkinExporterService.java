@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.core.exporter;
 import io.opentelemetry.exporter.zipkin.ZipkinSpanExporter;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -21,9 +20,7 @@ import javax.validation.Valid;
 @Slf4j
 public class ZipkinExporterService extends DynamicallyActivatableTraceExporterService {
 
-    private ZipkinSpanExporter zipkinSpanExporter;
-
-    private DynamicallyActivatableSpanExporter spanExporter;
+    private ZipkinSpanExporter spanExporter;
 
     @Getter
     private SpanProcessor spanProcessor;
@@ -45,9 +42,7 @@ public class ZipkinExporterService extends DynamicallyActivatableTraceExporterSe
             log.info("Starting Zipkin Exporter with url '{}'", settings.getUrl());
 
             // create span exporter
-            zipkinSpanExporter = ZipkinSpanExporter.builder().setEndpoint(settings.getUrl()).build();
-            spanExporter = DynamicallyActivatableSpanExporter.create(zipkinSpanExporter);
-            spanExporter.doEnable();
+            spanExporter = ZipkinSpanExporter.builder().setEndpoint(settings.getUrl()).build();
 
             // create span processor
             spanProcessor = BatchSpanProcessor.builder(spanExporter).build();
@@ -65,9 +60,6 @@ public class ZipkinExporterService extends DynamicallyActivatableTraceExporterSe
     protected boolean doDisable() {
         log.info("Stopping Zipkin Exporter");
         try {
-            if (null != spanExporter) {
-                spanExporter.doDisable();
-            }
             // shut down the span processor
             if (null != spanProcessor) {
                 spanProcessor.shutdown();

@@ -19,7 +19,7 @@ Traces are exported to Jaeger.
 [See section below for detailed information](#prometheus-and-jaeger-scenario).
 
 * File: `docker-compose-prometheus-jaeger.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=prometheus-server,jaeger-collector&visualization=jaeger-query&dashboarding=grafana&usedges=inspectit-ocelot-agent:prometheus-server,inspectit-ocelot-agent:jaeger-collector,jaeger-query:grafana&showCommercial=false&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=prometheus-server,jaeger-collector,inspectit-oce-eum-server&visualization=jaeger-query&dashboarding=grafana&usedges=inspectit-ocelot-agent:prometheus-server,inspectit-ocelot-agent:jaeger-collector,jaeger-query:grafana,inspectit-oce-eum-server:prometheus-server,inspectit-oce-eum-server:jaeger-collector&showCommercial=false&showFormats=false)
 
 ![Demo scenario using Prometheus and Jaeger](assets/demo-landscape-prometheus-jaeger.png)
 
@@ -30,7 +30,7 @@ Traces are exported to Jaeger.
 [See section below for detailed information](#influxdb-and-jaeger-scenario).
 
 * File: `docker-compose-influxdb-jaeger.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=jaeger-collector&storage=influx-db&visualization=jaeger-query&dashboarding=grafana&alerting=grafana&usedges=jaeger-query:grafana,inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:jaeger-collector&showCommercial=false&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=jaeger-collector,inspectit-oce-eum-server&storage=influx-db&visualization=jaeger-query&dashboarding=grafana&alerting=grafana&usedges=jaeger-query:grafana,inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:jaeger-collector,inspectit-ocelot-agent:influxdata-influxdb,inspectit-oce-eum-server:influxdata-influxdb,inspectit-oce-eum-server:jaeger-collector&showCommercial=false&showFormats=false)
 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-jaeger.png)
 
@@ -41,7 +41,7 @@ Traces are exported to Zipkin.
 [See section below for detailed information](#influxdb-and-zipkin-scenario).
 
 * File: `docker-compose-influxdb-zipkin.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=zipkin-server&storage=influx-db&visualization=zipkin-server&dashboarding=grafana&alerting=grafana&usedges=inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:zipkin-server&showCommercial=false&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=zipkin-server,inspectit-oce-eum-server&storage=influx-db&visualization=zipkin-server&dashboarding=grafana&alerting=grafana&usedges=inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:zipkin-server,inspectit-ocelot-agent:influxdata-influxdb,inspectit-oce-eum-server:influxdata-influxdb,inspectit-oce-eum-server:zipkin-server&showCommercial=false&showFormats=false)
 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-zipkin.png)
 
@@ -100,15 +100,17 @@ In this scenario the following components are preconfigured and used for monitor
 [![Demo scenario using Prometheus and Jaeger](assets/demo-landscape-prometheus-jaeger.png)](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=prometheus-server%2Cjaeger-collector&dashboarding=grafana&visualization=jaeger-query)
 
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
+- *inspectIT Ocelot EUM server:* Records the user's behaviour or actions while using the demo application.
 - *Prometheus Server:* Gathers metrics exposed by the agent.
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent.
 - *Jaeger:* Jaeger is used to store and query all recorded traces.
-
-You can access Grafana through http://localhost:3001 and the configuration server via http://localhost:8090.
+You can access Grafana through http://localhost:3000 and the configuration server via http://localhost:8090.
 The traces can be viewed in Jaeger on http://localhost:16686.
 
 Prometheus can be accessed through http://localhost:9090.
 
+:::note Currently the EUM-Server dashboards are only supported for the InfluxDB demos. You may use the Explore view in Grafana to view the EUM server metrics.
+:::
 
 ### InfluxDB and Jaeger Scenario
 In this scenario the following components are preconfigured and used for monitoring:
@@ -116,11 +118,12 @@ In this scenario the following components are preconfigured and used for monitor
 [![Demo scenario using InfluxDB and Jaeger](assets/demo-landscape-influxdb-jaeger.png)](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=jaeger-collector&storage=influx-db&visualization=jaeger-query&dashboarding=grafana&alerting=grafana&showCommercial=false&showFormats=false)
 
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
+- *inspectIT Ocelot EUM server:* Records the user's behaviour or actions while using the demo application.
 - *InfluxDB:* Stores metric data exported by OpenCensus as time series.
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [InfluxQL](https://docs.influxdata.com/influxdb/v1.8/query_language/) is used to query the data from InfluxDB.
 - *Jaeger:* Jaeger is used to store and query all recorded traces.
 
-You can access Grafana through http://localhost:3001 and the configuration server via http://localhost:8090.
+You can access Grafana through http://localhost:3000 and the configuration server via http://localhost:8090.
 The traces can be viewed in Jaeger on http://localhost:16686.
 
 
@@ -130,13 +133,16 @@ In this scenario the following components are preconfigured and used for monitor
 [![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-zipkin.png)](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&storage=influx-db&dashboarding=grafana&alerting=grafana&collector=zipkin-server&visualization=zipkin-server)
 
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
+- *inspectIT Ocelot EUM server:* Records the user's behaviour or actions while using the demo application.
 - *InfluxDB:* Stores metric data exported by OpenCensus as time series.
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [InfluxQL](https://docs.influxdata.com/influxdb/v1.8/query_language/) is used to query the data from InfluxDB.
 - *Zipkin:* Zipkin is used to store and query all recorded traces.
 
-You can access Grafana through http://localhost:3001 and the configuration server via http://localhost:8090.
+You can access Grafana through http://localhost:3000 and the configuration server via http://localhost:8090.
 The traces can be viewed in Zipkin on http://localhost:9411.
 
+:::note Currently only the Beacons Dashboard is working for the InfluxDB and Zipkin scenario
+:::
 
 ### Wavefront Demo Scenario
 
@@ -153,6 +159,7 @@ The inspectIT Ocelot Configuration Server can be accessed via http://localhost:8
 ## Demo Grafana Dashboards
 The InfluxDB and Prometheus demo scenarios include the following predefined Grafana Dashboards:
 
+### Agent
 | Name + Grafana Marketplace | Description | Screenshot |
 | -------------- | ------- | -------- |
 | Service Graph [[InfluxDB]](https://grafana.com/dashboards/10142) [[Prometheus]](https://grafana.com/dashboards/10139) | Shows a graph of all instrumented and external services and their interaction. All flows are derived based on live metrics. | ![](assets/demo-dashboard-servicegraph_small.png) |
@@ -161,6 +168,11 @@ The InfluxDB and Prometheus demo scenarios include the following predefined Graf
 | JVM Metrics [[InfluxDB]](https://grafana.com/dashboards/9600) [[Prometheus]](https://grafana.com/dashboards/9598) | Shows JVM metrics related to JVM CPU usage, Memory (Heap and Non-Heap) and Garbage Collection. | ![](assets/demo-dashboard-jvm_small.png) |
 | Self Monitoring [[InfluxDB]](https://grafana.com/dashboards/10143) [[Prometheus]](https://grafana.com/dashboards/10140) | Shows the instrumentation state and progress based on [self monitoring metrics](metrics/self-monitoring.md). | ![](assets/demo-dashboard-selfmonitoring_small.png) |
 
+### End User Monitoring
+| Name | Description | Screenshot |
+| ---------- | ------- | -------- |
+| Beacons  | Shows metrics for the number of processed beacons and their average processing times | ![](assets/demo-dashboard-beacons_small.png) |
+| Trace Controller | Shows metrics for the number of processed traces, the number of spans and the average processing times for the traces| ![](assets/demo-dashboard-trace-controller.png) |
 
 ## Changing Agent Configurations
 

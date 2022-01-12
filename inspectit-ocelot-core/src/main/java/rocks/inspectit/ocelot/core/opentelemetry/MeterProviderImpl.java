@@ -10,28 +10,31 @@ import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 /**
- * Custom implementation of {@link MeterProvider} thats wraps {@link SdkMeterProvider}.
+ * Custom implementation of {@link MeterProvider} that wraps {@link SdkMeterProvider}.
  * This wrapper is used to change {@link #meterProvider} without resetting {@link io.opentelemetry.api.metrics.GlobalMeterProvider#set(MeterProvider)}.
- * For use, create the {@link MeterProviderImpl} and set it once to {@link io.opentelemetry.api.metrics.GlobalMeterProvider#set(MeterProvider)}. If the {@link SdkMeterProvider} changes, simply
+ * For use, create the {@link MeterProviderImpl} and set it once to {@link io.opentelemetry.api.metrics.GlobalMeterProvider#set(MeterProvider)}. If the {@link SdkMeterProvider} changes, simply call {@link #set(SdkMeterProvider)}. If the {@link #meterProvider} was previously set, it will be flushed and closed and blocks waiting for it.
  */
 @Slf4j
 @Builder
 public class MeterProviderImpl implements MeterProvider {
 
+    /**
+     * The {@link SdkMeterProvider} implementation
+     */
     private SdkMeterProvider meterProvider;
 
     @Builder.Default
     private Object lock = new Object();
 
     /**
-     * Registers the {@link SdkMeterProvider}. If an instance of {@link SdkMeterProvider} was already registered, it is {@link SdkMeterProvider#forceFlush() flushed} and {@link SdkMeterProvider#shutdown() shutdown} before the new {@link SdkMeterProvider} is set to {@link #meterProvider}
+     * Registers the {@link SdkMeterProvider}. If an instance of {@link SdkMeterProvider} was already registered, it is {@link SdkMeterProvider#forceFlush() flushed} and {@link SdkMeterProvider#shutdown() shutdown} and blocks waiting for it before the new {@link SdkMeterProvider} is set to {@link #meterProvider}
      *
      * @param meterProvider
      */
     public void set(SdkMeterProvider meterProvider) {
         synchronized (lock) {
             // shut down previous meterProvider if set
-            if (null != this.meterProvider) {
+            if (null != this.meterProvider && this.meterProvider != meterProvider) {
                 log.info("Set new SdkMeterProvider. Shut down previous ({})", meterProvider);
                 OpenTelemetryUtils.stopMeterProvider(this.meterProvider, true);
             }
@@ -50,11 +53,11 @@ public class MeterProviderImpl implements MeterProvider {
     }
 
     /**
-     * Shuts down the currently registered {@link #meterProvider}
+     * Shuts down the currently registered {@link #meterProvider} and blocks waiting for it.
      *
      * @return
      */
-    public synchronized CompletableResultCode shutdown() {
+    public CompletableResultCode shutdown() {
         CompletableResultCode result;
         synchronized (lock) {
             result = OpenTelemetryUtils.stopMeterProvider(meterProvider, true);
@@ -63,15 +66,16 @@ public class MeterProviderImpl implements MeterProvider {
     }
 
     /**
-     * Registers {@link SdkMeterProvider this} to {@link GlobalMeterProvider#set(MeterProvider)}
+     * Registers {@link MeterProvider this} to {@link GlobalMeterProvider#set(MeterProvider)}
      */
     public MeterProvider registerGlobal() {
-        GlobalMeterProvider.set(this.meterProvider);
+        GlobalMeterProvider.set(this);
         return this;
     }
 
     @Override
     public MeterBuilder meterBuilder(String instrumentationName) {
-        return this.meterProvider.meterBuilder(instrumentationName);
+        return meterProvider.meterBuilder(instrumentationName);
     }
+
 }

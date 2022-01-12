@@ -23,9 +23,8 @@ public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporte
     @Getter
     private SpanProcessor spanProcessor;
 
-    private OtlpGrpcSpanExporter otlpSpanExporter;
+    private OtlpGrpcSpanExporter spanExporter;
 
-    private DynamicallyActivatableSpanExporter<OtlpGrpcSpanExporter> spanExporter;
 
     public OtlpTraceExporterService() {
         super("exporters.tracing.otlp", "tracing.enabled");
@@ -44,8 +43,7 @@ public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporte
             log.info("Starting OTLP Trace Exporter with endpoint {}", otlp.getUrl());
 
             // create span exporter
-            otlpSpanExporter = OtlpGrpcSpanExporter.builder().setEndpoint(otlp.getUrl()).build();
-            spanExporter = DynamicallyActivatableSpanExporter.create(otlpSpanExporter);
+            spanExporter = OtlpGrpcSpanExporter.builder().setEndpoint(otlp.getUrl()).build();
 
             // create span processor
             spanProcessor = BatchSpanProcessor.builder(spanExporter).build();
@@ -64,11 +62,6 @@ public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporte
 
         log.info("Stopping OTLP trace exporter");
         try {
-
-            // disable span exporter
-            if (null != spanExporter) {
-                spanExporter.doDisable();
-            }
 
             // shut down span processor
             if (null != spanProcessor) {
