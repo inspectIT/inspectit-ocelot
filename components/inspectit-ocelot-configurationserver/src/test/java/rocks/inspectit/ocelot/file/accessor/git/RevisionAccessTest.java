@@ -58,6 +58,13 @@ class RevisionAccessTest {
                     .isThrownBy(() -> revisionAccess.verifyPath("files", "../test/"))
                     .withMessage("User path escapes the base path: ../test/");
         }
+
+        @Test
+        public void backslashPath() {
+            String result = revisionAccess.verifyPath("files", "test\\skywalker");
+
+            assertThat(result).isEqualTo("files/test/skywalker");
+        }
     }
 
 }
