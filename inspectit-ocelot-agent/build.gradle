@@ -48,6 +48,9 @@ task buildOpencensusFatJar(type: Jar) {
     }
 }
 
+processJmhResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 
 jar {
     destinationDirectory = buildDir
