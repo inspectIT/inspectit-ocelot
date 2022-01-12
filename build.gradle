@@ -7,8 +7,7 @@ plugins {
 licenseReport {
     outputDir = "$projectDir/build/licenses"
 
-    renderers = [new TextReportRenderer("THIRD-PARTY-LICENSES.txt")]
-
+    renderers = [new TextReportRenderer("../../THIRD-PARTY-LICENSES.txt")]
 }
 
 allprojects {
