@@ -51,7 +51,7 @@ dependencies {
             'org.hibernate.validator:hibernate-validator:6.0.13.Final',
 
             // logging
-            'ch.qos.logback:logback-classic:1.2.3',
+            "ch.qos.logback:logback-classic:${logbackVersion}",
 
             // utils
             "org.apache.commons:commons-lang3:3.+",
