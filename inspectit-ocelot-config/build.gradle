@@ -2,8 +2,6 @@ plugins {
     id 'maven-publish'
 }
 
-apply plugin: 'java'
-
 test {
     useJUnitPlatform()
 

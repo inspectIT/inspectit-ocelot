@@ -2,8 +2,6 @@ plugins {
     id "me.champeau.gradle.jmh" version "0.5.3"
 }
 
-apply plugin: 'java'
-
 configurations {
     buildTools
 }

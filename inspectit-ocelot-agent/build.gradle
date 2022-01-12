@@ -3,8 +3,6 @@ plugins {
     id 'maven-publish'
 }
 
-apply plugin: 'java'
-
 evaluationDependsOn(':inspectit-ocelot-bootstrap')
 evaluationDependsOn(':inspectit-ocelot-core')
 
