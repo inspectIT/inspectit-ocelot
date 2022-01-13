@@ -34,7 +34,7 @@ public abstract class DynamicallyActivatableService {
 
     @Autowired
     protected OpenTelemetryControllerImpl openTelemetryController;
-    
+
     private List<Expression> configDependencies;
 
     /**
@@ -162,9 +162,10 @@ public abstract class DynamicallyActivatableService {
 
     /**
      * Gets the name of the {@link DynamicallyActivatableService}
+     *
      * @return The name of the {@link DynamicallyActivatableService}
      */
-    public String getName(){
-        return getClass().getName();
+    public String getName() {
+        return getClass().getSimpleName();
     }
 }

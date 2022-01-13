@@ -9,6 +9,9 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Custom implementation of {@link MeterProvider} that wraps {@link SdkMeterProvider}.
  * This wrapper is used to change {@link #meterProvider} without resetting {@link io.opentelemetry.api.metrics.GlobalMeterProvider#set(MeterProvider)}.
@@ -53,16 +56,41 @@ public class MeterProviderImpl implements MeterProvider {
     }
 
     /**
-     * Shuts down the currently registered {@link #meterProvider} and blocks waiting for it.
+     * Shuts down the currently registered {@link #meterProvider} and blocks waiting for it to complete.
      *
      * @return
      */
-    public CompletableResultCode shutdown() {
+    public CompletableResultCode close() {
         CompletableResultCode result;
         synchronized (lock) {
             result = OpenTelemetryUtils.stopMeterProvider(meterProvider, true);
         }
         return result;
+    }
+
+    /**
+     * Calls {@link SdkMeterProvider#forceFlush() meterProvider.forceFlush}
+     *
+     * @return The resulting {@link CompletableResultCode} completes when all complete.
+     */
+    public CompletableResultCode forceFlush() {
+        return meterProvider.forceFlush();
+    }
+
+    /**
+     * {@link SdkMeterProvider#forceFlush() flushes} the {@link #meterProvider} and waits for it to complete.
+     */
+    public void flush() {
+        CompletableResultCode resultCode = forceFlush();
+        if (!resultCode.isDone()) {
+            CountDownLatch latch = new CountDownLatch(1);
+            resultCode.whenComplete(() -> latch.countDown());
+            try {
+                latch.await(15, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**

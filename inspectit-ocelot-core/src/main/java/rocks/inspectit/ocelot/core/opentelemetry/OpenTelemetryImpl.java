@@ -10,6 +10,9 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Custom implementation of {@link OpenTelemetry} that wraps {@link OpenTelemetrySdk}.
  * This wrapper class is used to change {@link #openTelemetry} without the exception handling of {@link io.opentelemetry.api.GlobalOpenTelemetry#set(OpenTelemetry)}
@@ -66,12 +69,28 @@ public class OpenTelemetryImpl implements OpenTelemetry {
      *
      * @return The {@link CompletableResultCode}
      */
-    public synchronized CompletableResultCode shutdown() {
+    public synchronized CompletableResultCode close() {
         CompletableResultCode result;
         synchronized (lock) {
             result = OpenTelemetryUtils.stopTracerProvider(openTelemetry.getSdkTracerProvider(), true);
         }
         return result;
+    }
+
+    /**
+     * {@link io.opentelemetry.sdk.trace.SdkTracerProvider#forceFlush() flushes} the {@link #openTelemetry} and waits for it to complete.
+     */
+    public void flush() {
+        CompletableResultCode resultCode = openTelemetry.getSdkTracerProvider().forceFlush();
+        if (!resultCode.isDone()) {
+            CountDownLatch latch = new CountDownLatch(1);
+            resultCode.whenComplete(() -> latch.countDown());
+            try {
+                latch.await(15, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**

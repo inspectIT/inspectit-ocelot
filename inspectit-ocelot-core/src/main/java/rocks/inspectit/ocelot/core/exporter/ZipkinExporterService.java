@@ -20,10 +20,8 @@ import javax.validation.Valid;
 @Slf4j
 public class ZipkinExporterService extends DynamicallyActivatableTraceExporterService {
 
-    private ZipkinSpanExporter spanExporter;
-
     @Getter
-    private SpanProcessor spanProcessor;
+    private ZipkinSpanExporter spanExporter;
 
     public ZipkinExporterService() {
         super("exporters.tracing.zipkin", "tracing.enabled");
@@ -44,9 +42,6 @@ public class ZipkinExporterService extends DynamicallyActivatableTraceExporterSe
             // create span exporter
             spanExporter = ZipkinSpanExporter.builder().setEndpoint(settings.getUrl()).build();
 
-            // create span processor
-            spanProcessor = BatchSpanProcessor.builder(spanExporter).build();
-
             // register
             openTelemetryController.registerTraceExporterService(this);
             return true;
@@ -60,12 +55,10 @@ public class ZipkinExporterService extends DynamicallyActivatableTraceExporterSe
     protected boolean doDisable() {
         log.info("Stopping Zipkin Exporter");
         try {
-            // shut down the span processor
-            if (null != spanProcessor) {
-                spanProcessor.shutdown();
-                spanProcessor = null;
-            }
             openTelemetryController.unregisterTraceExporterService(this);
+            if (null != spanExporter) {
+                spanExporter.close();
+            }
         } catch (Throwable t) {
             log.error("Error disabling Zipkin exporter", t);
         }

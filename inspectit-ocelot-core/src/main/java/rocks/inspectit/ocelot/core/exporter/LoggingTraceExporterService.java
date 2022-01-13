@@ -1,15 +1,11 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.opentelemetry.exporter.logging.LoggingSpanExporter;
-import io.opentelemetry.sdk.trace.SpanProcessor;
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.trace.LoggingTraceExporterSettings;
-import rocks.inspectit.ocelot.core.opentelemetry.OpenTelemetryControllerImpl;
 
 import javax.validation.Valid;
 
@@ -23,11 +19,8 @@ public class LoggingTraceExporterService extends DynamicallyActivatableTraceExpo
     /**
      * The {@link LoggingSpanExporter} for exporting the spans to the log
      */
-    private LoggingSpanExporter spanExporter;
-
     @Getter
-    private SpanProcessor spanProcessor;
-
+    private LoggingSpanExporter spanExporter;
 
     public LoggingTraceExporterService() {
         super("exporters.tracing.logging", "tracing.enabled");
@@ -53,10 +46,6 @@ public class LoggingTraceExporterService extends DynamicallyActivatableTraceExpo
         LoggingTraceExporterSettings logging = conf.getExporters().getTracing().getLogging();
         try {
 
-            // create span processors
-            // SpanProcessors are also shut down when the corresponding TracerProvider is shut down. Thus, we need to create the SpanProcessors each time
-            spanProcessor = SimpleSpanProcessor.create(spanExporter);
-
             boolean success = openTelemetryController.registerTraceExporterService(this);
             if (success) {
                 log.info("Starting {}", getClass().getSimpleName());
@@ -74,12 +63,10 @@ public class LoggingTraceExporterService extends DynamicallyActivatableTraceExpo
     @Override
     protected boolean doDisable() {
         try {
-            // shut down the span processor
-            if (null != spanProcessor) {
-                spanProcessor.shutdown();
-                spanProcessor = null;
-            }
             openTelemetryController.unregisterTraceExporterService(this);
+            if (null != spanExporter) {
+                spanExporter.flush();
+            }
             log.info("Stopping TraceLoggingSpanExporter");
             return true;
         } catch (Exception e) {

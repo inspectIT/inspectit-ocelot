@@ -1,8 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
-import io.opentelemetry.sdk.trace.SpanProcessor;
-import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -21,10 +19,7 @@ import javax.validation.Valid;
 public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporterService {
 
     @Getter
-    private SpanProcessor spanProcessor;
-
     private OtlpGrpcSpanExporter spanExporter;
-
 
     public OtlpTraceExporterService() {
         super("exporters.tracing.otlp", "tracing.enabled");
@@ -45,9 +40,6 @@ public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporte
             // create span exporter
             spanExporter = OtlpGrpcSpanExporter.builder().setEndpoint(otlp.getUrl()).build();
 
-            // create span processor
-            spanProcessor = BatchSpanProcessor.builder(spanExporter).build();
-
             // register service
             openTelemetryController.registerTraceExporterService(this);
             return true;
@@ -62,17 +54,12 @@ public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporte
 
         log.info("Stopping OTLP trace exporter");
         try {
-
-            // shut down span processor
-            if (null != spanProcessor) {
-                spanProcessor.shutdown();
-                spanProcessor = null;
-            }
-
             // unregister service
             openTelemetryController.unregisterTraceExporterService(this);
-        }
-        catch (Throwable t){
+            if (null != spanExporter) {
+                spanExporter.close();
+            }
+        } catch (Throwable t) {
             log.error("Error disabling OTLP trace exporter", t);
         }
         return true;

@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.core.SpringTestBase;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -81,7 +81,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             return GlobalOpenTelemetry.getTracer(INSTRUMENTATION_NAME, INSTRUMENTATION_VERSION);
         }
 
-        private void makeSpans() {
+        private void makeSpansAndFlush() {
             // start span and nested span
             Span parentSpan = getTracer().spanBuilder("openTelemetryParentSpan").startSpan();
             try (Scope scope = parentSpan.makeCurrent()) {
@@ -94,6 +94,9 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             } finally {
                 parentSpan.end();
             }
+
+            // flush pending spans
+            Instances.openTelemetryController.flush();
         }
 
         @DirtiesContext
@@ -101,7 +104,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
         void verifyOpenTelemetryTraceSent() throws InterruptedException {
             assertThat(service.isEnabled()).isTrue();
 
-            makeSpans();
+            makeSpansAndFlush();
 
             Awaitility.waitAtMost(10, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
                 // assert that two traces have been logged
@@ -129,7 +132,8 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             localSwitch(true);
             Awaitility.waitAtMost(1, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
-            makeSpans();
+            makeSpansAndFlush();
+
             // wait until the new spans are exported to the log
             Awaitility.waitAtMost(10, TimeUnit.SECONDS)
                     .pollInterval(2, TimeUnit.SECONDS)
@@ -147,7 +151,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
 
             assertThat(service.isEnabled()).isFalse();
 
-            makeSpans();
+            makeSpansAndFlush();
 
             // make sure that no spans were exported
             assertThat(spanLogs.getEvents()).hasSize(0);
@@ -158,31 +162,13 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
     @Nested
     class OpenCensusLogging {
 
-        @Test
-        void testTracerRestart() {
-            Tracer tracer = OpenCensusShimUtils.getOpenTelemetryTracerOfOpenTelemetrySpanBuilderImpl();
-            // turn of the service
-            localSwitch(false);
-            Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isFalse());
-            // turn the service on again
-            localSwitch(true);
-            Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
-
-            //OpenCensusShimUtils.updateOpenTelemetryTracerInOpenTelemetrySpanBuilderImpl();
-
-            // make sure the new tracer is different
-            Tracer newTracer = OpenCensusShimUtils.getOpenTelemetryTracerOfOpenTelemetrySpanBuilderImpl();
-            assertThat(tracer).isNotSameAs(newTracer);
-
-        }
-
         @DirtiesContext
         @Test
         void verifyOpenCensusTraceSent() throws InterruptedException {
             assertThat(service.isEnabled()).isTrue();
 
             // make some spans
-            makeSpans();
+            makeSpansAndFlush();
 
             // assert that both spans are logged
             assertThat(spanLogs.getEvents()).hasSize(2);
@@ -201,7 +187,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
             // make spans
-            makeSpans();
+            makeSpansAndFlush();
             // verify logging of spans
             Awaitility.waitAtMost(10, TimeUnit.SECONDS)
                     .pollInterval(1, TimeUnit.SECONDS)
@@ -212,7 +198,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             return Tracing.getTracer();
         }
 
-        private void makeSpans() {
+        private void makeSpansAndFlush() {
             // get OC tracer and start spans
             io.opencensus.trace.Tracer tracer = getTracer();
 
@@ -223,6 +209,9 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
                     span.addAnnotation("invoking stuff in openCensusChild");
                 }
             }
+
+            // flush pending spans
+            Instances.openTelemetryController.flush();
         }
 
     }

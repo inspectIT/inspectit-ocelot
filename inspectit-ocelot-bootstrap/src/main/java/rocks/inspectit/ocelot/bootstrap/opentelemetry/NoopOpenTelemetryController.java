@@ -5,16 +5,6 @@ public class NoopOpenTelemetryController implements IOpenTelemetryController {
     public static final NoopOpenTelemetryController INSTANCE = new NoopOpenTelemetryController();
 
     @Override
-    public void shutdown() {
-
-    }
-
-    @Override
-    public boolean start() {
-        return true;
-    }
-
-    @Override
     public boolean isConfigured() {
         return false;
     }
@@ -25,12 +15,32 @@ public class NoopOpenTelemetryController implements IOpenTelemetryController {
     }
 
     @Override
+    public boolean start() {
+        return true;
+    }
+
+    @Override
+    public boolean isStopped() {
+        return false;
+    }
+
+    @Override
+    public void shutdown() {
+
+    }
+
+    @Override
+    public void flush() {
+
+    }
+
+    @Override
     public void notifyTracingSettingsChanged() {
 
     }
 
     @Override
     public void notifyMetricsSettingsChanged() {
-        
+
     }
 }

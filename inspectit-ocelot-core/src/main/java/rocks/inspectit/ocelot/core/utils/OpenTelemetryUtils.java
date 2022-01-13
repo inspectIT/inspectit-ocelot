@@ -48,14 +48,14 @@ public class OpenTelemetryUtils {
                 flushResult.whenComplete(() -> latch.countDown());
                 try {
                     latch.await(10, TimeUnit.SECONDS);
-                    log.info("time to force flush SdkMeterProvider: {} ms", (System.nanoTime() - startFlush) / 1E6);
+                    log.info("time to force flush SdkMeterProvider: {} ms", (System.nanoTime() - startFlush) * 1e-6);
                 } catch (Throwable t) {
                     log.error("failed to force flush SdkMeterProvider", t);
                     t.printStackTrace();
                     return CompletableResultCode.ofFailure();
                 }
             } else {
-                log.info("time to force flush SdkMeterProvider: {} ms", (System.nanoTime() - startFlush) / 1E6);
+                log.info("time to force flush SdkMeterProvider: {} ms", (System.nanoTime() - startFlush) * 1e-6);
             }
         }
 
@@ -66,7 +66,7 @@ public class OpenTelemetryUtils {
     }
 
     /**
-     * Stops the given {@link SdkTracerProvider} and blocks waiting for it to complete.
+     * {@link SdkTracerProvider#close() Closes} the given {@link SdkTracerProvider} and blocks waiting for it to complete.
      *
      * @param tracerProvider The {@link SdkTracerProvider} to shut down
      */
@@ -96,7 +96,7 @@ public class OpenTelemetryUtils {
                         e.printStackTrace();
                         return CompletableResultCode.ofFailure();
                     }
-                    log.info("time to force flush {}: {} ms", tracerProvider, TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startFlush));
+                    log.info("time to force flush {}: {} ms", tracerProvider, (System.nanoTime() - startFlush) * 1e-6);
                 }
             }
             tracerProvider.close();

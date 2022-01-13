@@ -31,6 +31,8 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.awaitility.core.ConditionTimeoutException;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
+import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.bootstrap.opentelemetry.NoopOpenTelemetryController;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -313,6 +315,13 @@ public class TestUtils {
      */
     public static InMemorySpanExporter initializeOpenTelemetryForSystemTesting() {
 
+        if (NoopOpenTelemetryController.INSTANCE != Instances.openTelemetryController) {
+            System.out.println("shut down " + Instances.openTelemetryController.getClass().getSimpleName());
+
+            // shut down any previously configured OTELs
+            Instances.openTelemetryController.shutdown();
+            Instances.openTelemetryController = NoopOpenTelemetryController.INSTANCE;
+        }
         // create an SdkTracerProvider with InMemorySpanExporter and LoggingSpanExporter
         InMemorySpanExporter inMemSpanExporter = InMemorySpanExporter.create();
 

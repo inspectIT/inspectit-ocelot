@@ -2,8 +2,6 @@ package rocks.inspectit.ocelot.core.exporter;
 
 import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
 import io.opentelemetry.exporter.jaeger.thrift.JaegerThriftSpanExporter;
-import io.opentelemetry.sdk.trace.SpanProcessor;
-import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,10 +21,8 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
 
     private JaegerGrpcSpanExporter grpcSpanExporter;
 
-    private JaegerThriftSpanExporter spanExporter;
-
     @Getter
-    private SpanProcessor spanProcessor;
+    private JaegerThriftSpanExporter spanExporter;
 
     public JaegerExporterService() {
         super("exporters.tracing.jaeger", "tracing.enabled");
@@ -55,7 +51,6 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
     protected boolean doEnable(InspectitConfig configuration) {
         try {
             JaegerExporterSettings settings = configuration.getExporters().getTracing().getJaeger();
-
             log.info("Starting Jaeger Exporter with url '{}' (grpc '{}')", settings.getUrl(), settings.getGrpc());
 
             // TODO: use getUrl() or getGRPC()?
@@ -65,9 +60,6 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
 
             // create span exporter
             spanExporter = JaegerThriftSpanExporter.builder().setEndpoint(settings.getUrl()).build();
-
-            // create span processor
-            spanProcessor = BatchSpanProcessor.builder(spanExporter).build();
 
             // register
             openTelemetryController.registerTraceExporterService(this);
@@ -83,11 +75,10 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
     protected boolean doDisable() {
         log.info("Stopping Jaeger Exporter");
         try {
-            if (null != spanProcessor) {
-                spanProcessor.shutdown();
-                spanProcessor = null;
-            }
             openTelemetryController.unregisterTraceExporterService(this);
+            if (null != spanExporter) {
+                spanExporter.close();
+            }
         } catch (Throwable t) {
             log.error("Error disabling Jaeger exporter", t);
         }

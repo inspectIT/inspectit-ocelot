@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-import io.opentelemetry.sdk.trace.SpanProcessor;
-import lombok.Getter;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.PrometheusExporterSettings;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
@@ -13,11 +12,11 @@ import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 public abstract class DynamicallyActivatableTraceExporterService extends DynamicallyActivatableService {
 
     /**
-     * Gets the {@link SpanProcessor} used to process {@link io.opentelemetry.api.trace.Span}
+     * Gets the {@link SpanExporter} of this service to export {@link io.opentelemetry.sdk.trace.data.SpanData} to
      *
-     * @return The {@link SpanProcessor} used to process {@link io.opentelemetry.api.trace.Span}
+     * @return The {@link SpanExporter} of this service to export {@link io.opentelemetry.sdk.trace.data.SpanData} to
      */
-    public abstract SpanProcessor getSpanProcessor();
+    public abstract SpanExporter getSpanExporter();
 
     /**
      * Constructor.
@@ -30,6 +29,5 @@ public abstract class DynamicallyActivatableTraceExporterService extends Dynamic
     public DynamicallyActivatableTraceExporterService(String... configDependencies) {
         super(configDependencies);
     }
-
 
 }
