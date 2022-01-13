@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.opentelemetry;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.common.Attributes;
@@ -22,7 +23,9 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -104,18 +107,24 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     /**
      * The registered {@link DynamicallyActivatableTraceExporterService}.
      */
-    private Map<String, DynamicallyActivatableTraceExporterService> registeredTraceExportServices = new ConcurrentHashMap<>();
+    @VisibleForTesting
+    @Getter(AccessLevel.PACKAGE)
+    Map<String, DynamicallyActivatableTraceExporterService> registeredTraceExportServices = new ConcurrentHashMap<>();
 
     /**
      * The registered {@link DynamicallyActivatableMetricsExporterService}.
      */
-    private Map<String, DynamicallyActivatableMetricsExporterService> registeredMetricExporterServices = new ConcurrentHashMap<>();
+    @VisibleForTesting
+    @Getter(AccessLevel.PACKAGE)
+    Map<String, DynamicallyActivatableMetricsExporterService> registeredMetricExporterServices = new ConcurrentHashMap<>();
 
     private Resource serviceNameResource;
 
     /**
      * The {@link OpenTelemetryImpl} that wraps {@link OpenTelemetrySdk}
      */
+    @VisibleForTesting
+    @Getter(AccessLevel.PACKAGE)
     private OpenTelemetryImpl openTelemetry;
 
     /**
@@ -139,9 +148,12 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     /**
      * The {@link DynamicMultiSpanExporter} wrapper that is used to forward all spans to a list of {@link io.opentelemetry.sdk.trace.export.SpanExporter} (one for each {@link DynamicallyActivatableTraceExporterService}
      */
+    @VisibleForTesting
+    @Setter(AccessLevel.PACKAGE)
     private DynamicMultiSpanExporter spanExporter;
 
     @PostConstruct
+    @VisibleForTesting
     void init() {
         // create the service name resource
         serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
@@ -185,8 +197,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      */
     @EventListener(InspectitConfigChangedEvent.class)
     @Order(Ordered.LOWEST_PRECEDENCE)
+    @VisibleForTesting
     // make sure this is called after the individual services have (un)-registered
-    synchronized private boolean configureOpenTelemetry() {
+    synchronized boolean configureOpenTelemetry() {
         log.info("configureOpenTelemetry at timestamp {}", System.currentTimeMillis());
         boolean success = false;
         if (!isConfiguring.compareAndSet(false, true)) {
@@ -213,12 +226,14 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             // configure meter provider (metrics) if not configured or when metrics settings changed
             boolean successConfigureMeterProvider = !(metricSettingsChanged || !configured) ? true : configureMeterProvider(configuration);
 
-            if (successConfigureTracing && successConfigureMeterProvider) {
+            success = successConfigureTracing && successConfigureMeterProvider;
+
+            if (success) {
                 log.info("Successfully configured OpenTelemetry with TracerProvider and MeterProvider");
             } else {
                 log.error("Failed to configure OpenTelemetry. Please scan the logs for detailed failure messages.");
             }
-            success = successConfigureTracing && successConfigureMeterProvider;
+
         }
 
         isConfiguring.set(false);
@@ -300,7 +315,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      *
      * @return Whether {@link #openTelemetry} was successfully configured
      */
-    private synchronized boolean configureTracing(InspectitConfig configuration) {
+    @VisibleForTesting
+    synchronized boolean configureTracing(InspectitConfig configuration) {
         if (!enabled) {
             return true;
         }
@@ -386,7 +402,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      *
      * @return
      */
-    private synchronized boolean configureMeterProvider(InspectitConfig configuration) {
+    @VisibleForTesting
+    synchronized boolean configureMeterProvider(InspectitConfig configuration) {
         if (!enabled) {
             return true;
         }
@@ -468,7 +485,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     private boolean unregisterTraceExporterService(String serviceName) {
         // unregister the service by removing it from the map of registered services and from the spanExporter
         // evaluates to true when a service with the  given name was previously registered
-        if (!(null == registeredTraceExportServices.remove(serviceName) || (spanExporter != null && !spanExporter.unregisterSpanExporter(serviceName)))) {
+        if (null != registeredTraceExportServices.remove(serviceName) & (spanExporter == null || !spanExporter.unregisterSpanExporter(serviceName))) {
             notifyTracingSettingsChanged();
             return true;
         } else {
