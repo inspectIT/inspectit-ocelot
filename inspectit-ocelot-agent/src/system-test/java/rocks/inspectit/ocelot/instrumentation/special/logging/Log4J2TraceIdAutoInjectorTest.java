@@ -8,6 +8,7 @@ import org.apache.logging.log4j.message.AbstractMessageFactory;
 import org.apache.logging.log4j.message.MessageFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
 import rocks.inspectit.ocelot.logging.Log4J2LoggingRecorder;
 import rocks.inspectit.ocelot.utils.TestUtils;
@@ -23,15 +24,15 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
         TestUtils.waitForClassInstrumentations(AbstractMessageFactory.class, MessageFactory.class);
     }
 
-    // TODO: maybe remove this method once the OTelController has been implemented
     @BeforeAll
     public static void initializeOpenTelemetry() {
-        // initialize OTel as we are otherwise not exporting any traces.
-        TestUtils.initializeOpenTelemetryForSystemTesting();
+        TestUtils.waitForOpenTelemetryControllerInitialization();
     }
 
     @Test
     public void logStringAndTraceExists() {
+        System.out.println(String.format("OTEL=%s, tracer=%s", Instances.openTelemetryController.getClass()
+                .getSimpleName(), Tracing.getTracer().getClass().getSimpleName()));
         Log4J2LoggingRecorder.loggingEvents.clear();
         String message = "This is a traced String in {}.";
         String traceId;

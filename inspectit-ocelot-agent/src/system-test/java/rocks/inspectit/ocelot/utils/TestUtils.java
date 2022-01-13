@@ -29,6 +29,7 @@ import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
@@ -232,6 +233,17 @@ public class TestUtils {
             Thread.sleep(200); //to ensure that new-class-discovery has been executed
             waitForOpenCensusQueueToBeProcessed();
             assertThat(getInstrumentationQueueLength()).isZero();
+        });
+    }
+
+    /**
+     * Waits for the initialization of {@link rocks.inspectit.ocelot.core.opentelemetry.OpenTelemetryControllerImpl}, which is then registered to {@link Instances#openTelemetryController}
+     */
+    public static void waitForOpenTelemetryControllerInitialization() {
+        Awaitility.await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+            assertThat(NoopOpenTelemetryController.INSTANCE != Instances.openTelemetryController).isTrue();
+            assertThat(Instances.openTelemetryController.isEnabled()).isTrue();
+            assertThat(Instances.openTelemetryController.isConfigured()).isTrue();
         });
     }
 
