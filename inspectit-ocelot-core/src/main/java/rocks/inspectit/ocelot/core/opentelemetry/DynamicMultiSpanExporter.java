@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.exporter;
+package rocks.inspectit.ocelot.core.opentelemetry;
 
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.SpanProcessor;

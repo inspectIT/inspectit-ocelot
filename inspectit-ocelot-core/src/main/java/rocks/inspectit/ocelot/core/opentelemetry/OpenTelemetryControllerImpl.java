@@ -37,7 +37,6 @@ import rocks.inspectit.ocelot.bootstrap.opentelemetry.IOpenTelemetryController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.exporter.DynamicMultiSpanExporter;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableTraceExporterService;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
@@ -130,6 +129,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     /**
      * The {@link MeterProviderImpl} that wraps {@link SdkMeterProvider}
      */
+    @VisibleForTesting
+    @Getter(AccessLevel.PACKAGE)
     private MeterProviderImpl meterProvider;
 
     @Autowired
@@ -485,7 +486,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     private boolean unregisterTraceExporterService(String serviceName) {
         // unregister the service by removing it from the map of registered services and from the spanExporter
         // evaluates to true when a service with the  given name was previously registered
-        if (null != registeredTraceExportServices.remove(serviceName) & (spanExporter == null || !spanExporter.unregisterSpanExporter(serviceName))) {
+        if (null != registeredTraceExportServices.remove(serviceName) & (spanExporter == null || spanExporter.unregisterSpanExporter(serviceName))) {
             notifyTracingSettingsChanged();
             return true;
         } else {
