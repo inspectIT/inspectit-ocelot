@@ -30,7 +30,8 @@ public class MeterProviderImpl implements MeterProvider {
     private Object lock = new Object();
 
     /**
-     * Registers the {@link SdkMeterProvider}. If an instance of {@link SdkMeterProvider} was already registered, it is {@link SdkMeterProvider#forceFlush() flushed} and {@link SdkMeterProvider#shutdown() shutdown} and blocks waiting for it before the new {@link SdkMeterProvider} is set to {@link #meterProvider}
+     * Registers the {@link SdkMeterProvider}.
+     * If an instance of {@link SdkMeterProvider} was already registered, it is {@link SdkMeterProvider#forceFlush() flushed} and {@link SdkMeterProvider#shutdown() shutdown} and blocks waiting for it to complete before the new {@link SdkMeterProvider} is set to {@link #meterProvider}
      *
      * @param meterProvider
      */
@@ -61,9 +62,13 @@ public class MeterProviderImpl implements MeterProvider {
      * @return
      */
     public CompletableResultCode close() {
-        CompletableResultCode result;
-        synchronized (lock) {
-            result = OpenTelemetryUtils.stopMeterProvider(meterProvider, true);
+        CompletableResultCode result = new CompletableResultCode();
+        if (null != meterProvider) {
+            synchronized (lock) {
+                result = OpenTelemetryUtils.stopMeterProvider(meterProvider, true);
+            }
+        } else {
+            result.succeed();
         }
         return result;
     }
@@ -74,7 +79,7 @@ public class MeterProviderImpl implements MeterProvider {
      * @return The resulting {@link CompletableResultCode} completes when all complete.
      */
     public CompletableResultCode forceFlush() {
-        return meterProvider.forceFlush();
+        return meterProvider != null ? meterProvider.forceFlush() : CompletableResultCode.ofSuccess();
     }
 
     /**
