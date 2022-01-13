@@ -9,6 +9,7 @@ import 'ace-builds/src-noconflict/ext-keybinding_menu';
 //include supported themes and modes here
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-cobalt';
+import InspectitOcelotMode from './InspectitOcelotMode';
 
 const saveCommand = (doSave) => {
   return {
@@ -39,7 +40,6 @@ class AceEditor extends React.Component {
   configureEditor() {
     const { theme, mode, options, readOnly } = this.props;
     this.editor.setTheme('ace/theme/' + theme);
-    this.editor.getSession().setMode('ace/mode/' + mode);
 
     this.editor.session.off('change', this.onChange);
     this.editor.session.on('change', this.onChange);
@@ -68,6 +68,7 @@ class AceEditor extends React.Component {
     }
 
     this.configureEditor();
+    this.editor.getSession().setMode(new InspectitOcelotMode());
     this.updateValue();
   }
 
