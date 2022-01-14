@@ -1,0 +1,238 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Configuration Files Staging Using Remote Git · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content=":::tip"/><meta name="docsearch:version" content="1.13.0"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Configuration Files Staging Using Remote Git · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content=":::tip"/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>1.13.0</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Configuration Server</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Getting Started<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/doc1">Hello World</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/getting-started/quick-start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/getting-started/docker-examples">Demo Application</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/getting-started/installation">Installation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/configuration/configuration-sources">Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/configuration/external-configuration-sources">External Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/configuration/logging-configuration">Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/configuration/open-census-configuration">OpenCensus Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/configuration/plugin-configuration">Plugin Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/configuration/agent-command-configuration">Agent Command Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Metrics<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/metrics/metrics">Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/metrics/metric-recorders">Metrics Recorders</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/metrics/metric-exporters">Metrics Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/metrics/common-tags">Common Tags</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/metrics/custom-metrics">Custom Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/metrics/self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tracing<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/tracing/tracing">Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/tracing/trace-exporters">Trace Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/tracing/log-correlation">Log Correlation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/tracing/privacy">Data Privacy</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/instrumentation/instrumentation">Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/instrumentation/scopes">Scopes</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/instrumentation/rules">Rules &amp; Actions</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/instrumentation/special-sensors">Special Sensors</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/instrumentation/process">Instrumentation Process</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">End User Monitoring<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/enduser-monitoring/enduser-monitoring-server">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/enduser-monitoring/eum-server-setup">Server Setup</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/enduser-monitoring/eum-server-configuration">Server and Metrics Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/enduser-monitoring/install-eum-agent">Install EUM Agent</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration Server<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/config-server/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/config-server/cs-configuration">Server Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/config-server/managing-configurations">Managing Configuration Files</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/config-server/configuration-files-staging">Configuration Files Staging</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/config-server/agent-mappings">Agent Mappings</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/config-server/user-authentication">User Authentication</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/config-server/log-config">Server Logging Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Breaking Changes<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.13.0/breaking-changes/Breaking Changes">Breaking Changes</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectit/inspectit-ocelot-documentation/edit/master/docs/config-server/configuration-staging.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Configuration Files Staging Using Remote Git</h1></header><article><div><span>
+    <div class="admonition admonition-tip">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16"><path fill-rule="evenodd" d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z"/></svg></div> tip</h5>
+      </div>
+      <div class="admonition-content">
+    <p>It is recommended to first familiarize yourself with <a href="/inspectit-ocelot/docs/1.13.0/config-server/managing-configurations">how the configuration server manages configuration</a> files before reading this chapter.</p>
+</div></div><p>Since version <code>1.11.0</code> the Configuration Server offers the possibility that external Git repositories can be connected.
+This allows configuration files to be obtained from an external Git repository and also transferred to it.
+This allows us to secure configuration files (e.g. for creating backups), initialize configuration servers with a specific set of configuration files or chain several configuration servers together.
+The latter can be used, for example, to cover more complex scenarios, such as synchronizing configuration files across multiple system stages.</p>
+
+    <div class="admonition admonition-important">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"/></svg></div> important</h5>
+      </div>
+      <div class="admonition-content">
+    <p>All configuration server properties mentioned below refer to being set under the <code>inspectit-config-server.remote-configurations</code> key!</p>
+</div></div><p>Note that this feature is <strong>disabled by default</strong>.
+It can be enabled by setting the property <code>inspectit-config-server.remote-configurations.enabled</code> to <code>true</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="synchronization-workflow"></a><a href="#synchronization-workflow" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Synchronization Workflow</h2>
+<p>The synchronization of configuration files can be divided into two areas: pulling and pushing configuration files.
+These two options can be used together or separately.
+For example, a configuration server can be set to only pull files from a remote Git repository, but not push any away.</p>
+<p>Using the following diagram, the process and the individual steps will be explained in more detail.</p>
+<p><img src="/inspectit-ocelot/docs/assets/staging-workflow.png" alt="Configuration Files Staging Workflow"></p>
+<h3><a class="anchor" aria-hidden="true" id="pulling-configuration-files"></a><a href="#pulling-configuration-files" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Pulling Configuration Files</h3>
+<p>The configuration server can be set to pull configuration files from a specific branch from a remote Git.
+Depending on the configuration, this can be done when the <strong>server is started</strong> (disabled by default) or <a href="#triggering-file-pulling-using-webhooks"><strong>triggered by a webhook</strong></a>.</p>
+<p>In order for this to work, a remote Git repository must be configured and the appropriate branch specified.
+This can be configured using the <code>pull-repository</code> property.
+Please refer to the <a href="#repository-configuration">Repository Configuration section</a> for more information on how to configure a repository and its branch.</p>
+<p><img src="/inspectit-ocelot/docs/assets/staging-pull.png" alt="Configuration Files Staging Workflow"></p>
+<p>When the synchronization process <em>(1)</em> is triggered, the configuration server obtains all files that have changed (added, modified, deleted) since the last synchronization and puts them into the local <code>WORKSPACE</code> Branch.
+Please note that the <strong>synchronized files overwrite the local files</strong>!
+Changes that were only made locally will be overwritten and lost.
+Files that have been created or changed locally, but were <strong>not included in the changes</strong> made on the remote branch, remain unaffected.</p>
+<p>By default, the configuration server will not synchronize on startup. However, this can be set with the <code>pull-at-startup</code> option.</p>
+<h4><a class="anchor" aria-hidden="true" id="initial-synchronization"></a><a href="#initial-synchronization" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Initial Synchronization</h4>
+
+    <div class="admonition admonition-warning">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></div> warning</h5>
+      </div>
+      <div class="admonition-content">
+    <p>Note that this setting may lead to <strong>overwriting existing configurations</strong>. You should only activate this option if you know what you are doing.</p>
+</div></div><p>When the configuration server performs a synchronization for the <strong>very first time</strong> (for example, because the server has been upgraded and this feature is now available), <strong>no files are pulled</strong> by default.
+Only changes that happen from now on will also be synchronized.
+This is done so that configuration files are not accidentally overwritten and lost.</p>
+<p>This behavior can be changed with the option <code>initial-configuration-sync</code>.
+If this option is set to <code>true</code>, the configuration server pulls all files that are in the remote Git repository at the very first time.
+Please note that only files are added or overwritten.
+No files are deleted!</p>
+<p>This option is useful if, for example, a new instance of a configuration server should be populated with a set of configuration files.</p>
+<h3><a class="anchor" aria-hidden="true" id="auto-promotion-of-configuration-files"></a><a href="#auto-promotion-of-configuration-files" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Auto-Promotion of Configuration Files</h3>
+<p>When the configuration server pulls configuration files, they will be put into the <code>WORKSPACE</code> branch.
+By default, the server <strong>automatically performs a promotion</strong> of the pulled files after a successful pull, so that the <code>WORKSPACE</code> and the <code>LIVE</code> branch are up-to-date.
+However, this function can be disabled with the <code>auto-promotion</code> property.
+If this option is disabled, the server will not perform an automatic promotion and the <code>LIVE</code> branch will remain untouched.</p>
+<h3><a class="anchor" aria-hidden="true" id="pushing-configuration-files"></a><a href="#pushing-configuration-files" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Pushing Configuration Files</h3>
+<p>The configuration server can be configured to send the <code>LIVE</code> branch respectively files that are promoted to it to a remote Git repository.
+Depending on the configuration, this can be done when the <strong>server is started</strong> (disabled by default) or when a <strong>configuration file promotion</strong> is done.</p>
+<p>In order for this to work, a remote Git repository must be configured and the appropriate branch specified.
+This can be configured using the <code>push-repository</code> property.
+Please refer to the <a href="#repository-configuration">Repository Configuration section</a> for more information on how to configure a repository and its branch.</p>
+<p><img src="/inspectit-ocelot/docs/assets/staging-push.png" alt="Configuration Files Staging Workflow"></p>
+<p>If pushing of the configuration files is triggered <em>(2)</em>, the configuration server pushes the files to the configured remote Git repository.
+It is important to note that the sending is <strong>forced by default</strong>, but this can be disabled with the <code>push-repository.use-force-push</code> option.
+Even if this option is enabled, the server will always try an unforced push first.
+Since this can cause a commit to be lost in the remote repository due to the forced push, it is recommended that only a single configuration server can push to the target branch.</p>
+
+    <div class="admonition admonition-warning">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></div> warning</h5>
+      </div>
+      <div class="admonition-content">
+    <p>Note that by default, pushing the branch is <strong>forced</strong>, which could inadvertently overwrite data.</p>
+</div></div><p>This process can also be triggered by an automatic promotion due to pulling configuration files from a remote Git repository.</p>
+
+    <div class="admonition admonition-note">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"/></svg></div> note</h5>
+      </div>
+      <div class="admonition-content">
+    <p>When the configuration server initialized its Git repository for the first time, the <code>LIVE</code> branch continues the commit history of the specified branch of the push repository.
+As a result, new commits can be pushed unforced, as long as the push repository has no external changes.</p>
+<p><strong>Only the commit history is adopted</strong>, while the file content remains as before the Git initialization.</p>
+</div></div><h2><a class="anchor" aria-hidden="true" id="triggering-file-pulling-using-webhooks"></a><a href="#triggering-file-pulling-using-webhooks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Triggering File Pulling Using Webhooks</h2>
+<p>As already mentioned, pulling configuration files from a remote Git repository can be done at startup of the configuration server, or can be triggered by a webhook.
+Triggering this process through a webhook can be handy if you want to trigger a synchronization whenever a change happens on the configured remote branch, for example.</p>
+<p>For this purpose, the configuration server provides the following endpoint, which can be triggered via an HTTP GET request: <code>/api/v1/hook/synchronize-workspace</code>.</p>
+
+    <div class="admonition admonition-note">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"/></svg></div> note</h5>
+      </div>
+      <div class="admonition-content">
+    <p>This endpoint will only work if pulling configuration files from a remote Git repository has been enabled and configured.</p>
+</div></div><p>For security reasons, this endpoint can only be accessed with a predefined token, so that not any arbitrary user can trigger this process.
+This token is included in the request via the query parameter <code>token</code>.</p>
+<p>The tokens can be set up using the following property: <code>inspectit-config-server.security.webhook-tokens</code>.
+It is possible to define several tokens, which can be used if individual tokens have to be deactivated again.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit-config-server:</span>
+  <span class="hljs-attr">security:</span>
+    <span class="hljs-attr">webhook-tokens:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">'very_secure_token'</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">'another_very_secure_token'</span>
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="example"></a><a href="#example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example</h4>
+<p>Assuming the configuration server is started locally on the default port <code>8090</code> and a token <code>very_secure_token</code> has been set up for webhook access, this can be triggered with the following CURL command.</p>
+<pre><code class="hljs css language-bash">$ curl http://localhost:8090/api/v1/hook/synchronize-workspace?token=very_secure_token
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="chaining-multiple-configuration-servers"></a><a href="#chaining-multiple-configuration-servers" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Chaining Multiple Configuration Servers</h2>
+<p>Using the feature that remote Git repositories can be connected to pull and push configuration files, it is now also possible to link multiple configuration servers together.
+This can be used, if several configuration servers are in use, which receive the respective configuration files of the previous server.
+This is very useful, if e.g. several system stages exist, which used separate configuration servers.</p>
+<p><img src="/inspectit-ocelot/docs/assets/staging-chain.png" alt="Configuration Server Chaining using remote Git repository"></p>
+<p>In order to do this, the configured push and pull branch can be set to the same remote Git repository respectively branch.</p>
+<h2><a class="anchor" aria-hidden="true" id="available-configuration-properties"></a><a href="#available-configuration-properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Available Configuration Properties</h2>
+
+    <div class="admonition admonition-important">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"/></svg></div> important</h5>
+      </div>
+      <div class="admonition-content">
+    <p>All configuration server properties mentioned below refer to being set under the <strong><code>inspectit-config-server.remote-configurations</code></strong> key!</p>
+</div></div><table>
+<thead>
+<tr><th>Property</th><th>Default</th><th>Note</th></tr>
+</thead>
+<tbody>
+<tr><td><code>enabled</code></td><td><code>false</code></td><td>Whether this feature is enabled and remote Git repositories should be used for configuration management.</td></tr>
+<tr><td><code>push-at-startup</code></td><td><code>false</code></td><td>Whether the current live branch should be pushed during startup.</td></tr>
+<tr><td><code>pull-at-startup</code></td><td><code>false</code></td><td>Whether the remote source branch should be fetched and merged into the current workspace branch during startup.</td></tr>
+<tr><td><nobr><code>initial-configuration-sync</code></nobr></td><td><code>false</code></td><td>Defines whether the configuration files of the configuration source repository should be pulled on the initial configuration synchronization. The initial synchronization is not related to the <code>pull-at-startup</code> property!<br><a href="#initial-synchronization">Read the documentation</a> for detailed information on this property!</td></tr>
+<tr><td><code>auto-promotion</code></td><td><code>true</code></td><td>Whether synchronized files should be promoted automatically, after they have been fetched from the configuration remote.</td></tr>
+<tr><td><code>pull-repository</code></td><td><code>null</code></td><td>The remote Git repository which will be used to fetch workspace-configurations from.<br>See <a href="#repository-configuration">Repository Configuration</a>.</td></tr>
+<tr><td><code>push-repository</code></td><td><code>null</code></td><td>The remote Git repository which will be used to push live-configurations to.<br>See <a href="#repository-configuration">Repository Configuration</a>.</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="repository-configuration"></a><a href="#repository-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Repository Configuration</h3>
+<table>
+<thead>
+<tr><th>Property</th><th>Default</th><th>Note</th></tr>
+</thead>
+<tbody>
+<tr><td><code>remote-name</code></td><td><code>[pull/push]-remote-configuration</code></td><td>The name of the remote ref in the local Git repository.</td></tr>
+<tr><td><code>git-repository-uri</code></td><td><code>null</code></td><td>The URI to the remote Git repository. Examples: <code>https://github.com/user/repo.git</code>, <code>git@github.com:user/repo.git</code></td></tr>
+<tr><td><code>branch-name</code></td><td><code>remote-[workspace/live]</code></td><td>The branch name on the remote Git repository.</td></tr>
+<tr><td><code>use-force-push</code></td><td><code>true</code></td><td>Whether force push should used for pushing to this remote. This is only available for the <code>push-repository</code> property.</td></tr>
+<tr><td><nobr><code>authentication-type</code></nobr></td><td><code>NONE</code></td><td>The type of authentication to use. Possible values: <code>NONE</code>, <code>PASSWORD</code>, <code>PPK</code>.</td></tr>
+<tr><td><code>username</code></td><td><code>null</code></td><td>The username for accessing the remote repository. Only used in case of <code>PASSWORD</code> authentication.</td></tr>
+<tr><td><code>password</code></td><td><code>null</code></td><td>The password for accessing the remote repository. Only used in case of <code>PASSWORD</code> authentication.</td></tr>
+<tr><td><code>private-key-file</code></td><td><code>null</code></td><td>Additional private key to use for SSH authentication. The server will automatically load the known hosts and private keys from the default locations (identity, id_rsa and id_dsa) in the user’s <code>.ssh</code> directory. Only used in case of <code>PPK</code> authentication.</td></tr>
+</tbody>
+</table>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 11/11/2021 by Henning Schulz</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/1.13.0/config-server/managing-configurations"><span class="arrow-prev">← </span><span>Managing Configuration Files</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/1.13.0/config-server/agent-mappings"><span>Agent Mappings</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#synchronization-workflow">Synchronization Workflow</a><ul class="toc-headings"><li><a href="#pulling-configuration-files">Pulling Configuration Files</a></li><li><a href="#auto-promotion-of-configuration-files">Auto-Promotion of Configuration Files</a></li><li><a href="#pushing-configuration-files">Pushing Configuration Files</a></li></ul></li><li><a href="#triggering-file-pulling-using-webhooks">Triggering File Pulling Using Webhooks</a></li><li><a href="#chaining-multiple-configuration-servers">Chaining Multiple Configuration Servers</a></li><li><a href="#available-configuration-properties">Available Configuration Properties</a><ul class="toc-headings"><li><a href="#repository-configuration">Repository Configuration</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2022 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: 'ce332dcee733a92cefacc3195edd83dd',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:1.13.0"]}
+              });
+            </script></body></html>
