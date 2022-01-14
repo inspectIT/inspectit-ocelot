@@ -83,7 +83,8 @@ public class OpenTelemetryProtoConverter {
 
         String clientIp = request.getRemoteAddr();
 
-        if (configuration.getExporters().getTracing().isMaskSpanIpAddresses()) {
+        if (configuration.getExporters() != null && configuration.getExporters()
+                .getTracing() != null && configuration.getExporters().getTracing().isMaskSpanIpAddresses()) {
             clientIp = anonymizeIpAddress(clientIp);
         }
 
