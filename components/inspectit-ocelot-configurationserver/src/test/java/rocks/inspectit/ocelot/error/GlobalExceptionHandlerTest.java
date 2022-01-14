@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.RequestMapping;
 import rocks.inspectit.ocelot.error.exceptions.NotSupportedWithLdapException;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -44,7 +44,7 @@ class GlobalExceptionHandlerTest {
     public void handleException() throws Exception {
         mockMvc.perform(get("/exception"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value("Unexpected error"))
                 .andExpect(jsonPath("$.debugMessage").value("custom-message"));
     }
@@ -53,7 +53,7 @@ class GlobalExceptionHandlerTest {
     public void handleNotSupportedWithLdapException() throws Exception {
         mockMvc.perform(get("/notSupportedWithLdapException"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value("Endpoint is not supported in the current configuration."))
                 .andExpect(jsonPath("$.debugMessage").value("Endpoint is not supported when LDAP authentication is used."));
     }
