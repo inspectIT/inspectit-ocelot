@@ -58,15 +58,14 @@ bootJar {
     archivesBaseName = 'inspectit-ocelot-configurationserver-noui'
     version = "${buildVersion}"
 
-    manifest {
-        attributes 'Start-Class': "${serverMainClass}".toString()
-    }
+    mainClassName = "${serverMainClass}"
 }
 
 /**
  * Builds the configuration server and the web frontend.
  */
 task bootJarWithFrontend(type: org.springframework.boot.gradle.tasks.bundling.BootJar) {
+    group = "build"
     archivesBaseName = 'inspectit-ocelot-configurationserver'
     version = "${buildVersion}"
 
@@ -74,9 +73,7 @@ task bootJarWithFrontend(type: org.springframework.boot.gradle.tasks.bundling.Bo
         into('static/ui')
     }
 
-    manifest {
-        attributes 'Start-Class': "${serverMainClass}".toString()
-    }
+    mainClassName = "${serverMainClass}"
 
     with bootJar
 }
