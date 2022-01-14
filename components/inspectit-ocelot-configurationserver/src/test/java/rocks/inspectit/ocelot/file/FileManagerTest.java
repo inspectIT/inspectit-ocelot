@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.file;
 
-import org.apache.commons.io.FileUtils;
 import org.assertj.core.util.Files;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.Nested;

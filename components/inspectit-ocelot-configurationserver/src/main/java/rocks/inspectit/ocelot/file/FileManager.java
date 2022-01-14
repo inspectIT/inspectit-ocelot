@@ -43,7 +43,7 @@ public class FileManager {
     /**
      * The accessor used to access the working directory.
      */
-    private AbstractWorkingDirectoryAccessor workingDirectoryAccessor;
+    private CachingWorkingDirectoryAccessor workingDirectoryAccessor;
 
     /**
      * The manager used for Git interactions.
@@ -178,6 +178,7 @@ public class FileManager {
         } finally {
             workingDirectoryLock.writeLock().unlock();
         }
+        workingDirectoryAccessor.invalidateCache();
     }
 
     /**
