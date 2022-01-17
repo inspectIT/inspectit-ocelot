@@ -14,12 +14,11 @@ inspectIT Ocelot currently supports the following OpenTelemetry metrics exporter
 
 |Exporter |Supports run-time updates| Push / Pull |Enabled by default
 |---|---|---|---|
-|[Logging Exporter](#logging-exporter)|Yes|Pull|Yes
-|[~~Prometheus Exporter~~](#prometheus-exporter)|Yes|Pull|Yes
-|[~~InfluxDB Exporter~~](#influxdb-exporter)|Yes|Push|Yes
+|[Logging Exporter](#logging-exporter)|Yes|Pull|No
+|[Prometheus Exporter](#prometheus-exporter)|Yes|Pull|No
+|[InfluxDB Exporter](#influxdb-exporter)|Yes|Push|Yes
 
->**Important note**: Starting with version `1.15.0`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
-Currently, Prometheus and InfluxDB are **not** functional and will be re-implemented in the next version.
+>**Important note**: Starting with version `1.15.0`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported and has been removed.
 
 ## Logging Exporter
 
@@ -31,7 +30,6 @@ The Logging exporter exports the metrics to the console. By default, the exporte
 |`.export-interval`|refers to `inspectit.metrics.frequency`|The export interval of the metrics.
 
 ## Prometheus Exporter
->**Important**: the Prometheus exporter is currently not working
 
 Prometheus exporter exposes the metrics in Prometheus format and is the default metrics exporter set up by inspectIT Ocelot.
 When enabled, inspectIT starts a Prometheus HTTP server in parallel with your application.
@@ -49,7 +47,6 @@ The following properties are nested properties below the `inspectit.exporters.me
 > Don't forget to check [the official OpenTelemetry Prometheus exporter documentation](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/prometheus).
 
 ## InfluxDB Exporter
->**Important**: the InfluxDB exporter is currently not working
 
 If enabled, metrics are pushed at a specified interval directly to a given InfluxDB v1.x instance.
 To enable the InfluxDB Exporters, it is only required to specify the `url`.
@@ -68,8 +65,8 @@ The following properties are nested properties below the `inspectit.exporters.me
 |---|---|---|
 |`.enabled`|`true`|If true, the agent will try to start the Influx exporter, if also the `url` is not empty.
 |`.url`|`null`|The HTTP url of the InfluxDB, e.g. `http://localhost:8086`.
-|`.user`|`null`| The user to use for connecting to the InfluxDB, can be empty if the InfluxDB is configured for unauthorized access.
-|`.password`|`null`|The password to use for connecting to the InfluxDB, can be empty if the InfluxDB is configured for unauthorized access.
+|`.user`|`null`| The user to use for connecting to the InfluxDB, can not be empty.
+|`.password`|`null`|The password to use for connecting to the InfluxDB, can not be empty.
 |`.database`|`inspectit`| The InfluxDB database to which the metrics are pushed.
 |`.retention-policy`|`autogen`| The retention policy of the database to use for writing metrics.
 |`.create-database`|`true`| If enabled, the database defined by the `database` property is automatically created on startup with an `autogen` retention policy if it does not exist yet.

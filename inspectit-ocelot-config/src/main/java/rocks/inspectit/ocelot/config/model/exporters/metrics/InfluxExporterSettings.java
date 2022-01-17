@@ -6,12 +6,15 @@ import org.hibernate.validator.constraints.time.DurationMin;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.time.Duration;
+import java.util.logging.Logger;
 
 /**
  * Settings for the InfluxDB metrics exporter.
  */
 @Data
 public class InfluxExporterSettings {
+
+    private static Logger LOGGER = Logger.getLogger(InfluxExporterSettings.class.getName());
 
     /**
      * If true, the influx exporter will be started (if the DB is not null)

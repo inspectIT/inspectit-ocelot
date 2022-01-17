@@ -20,9 +20,4 @@ public class JaegerExporterSettings {
      */
     private String grpc;
 
-    /**
-     * The service name under which traces are published, defaults to inspectit.service-name;
-     */
-    private String serviceName;
-
 }

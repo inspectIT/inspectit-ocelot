@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +20,7 @@ import javax.validation.Valid;
 public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporterService {
 
     @Getter
-    private OtlpGrpcSpanExporter spanExporter;
+    private SpanExporter spanExporter;
 
     public OtlpTraceExporterService() {
         super("exporters.tracing.otlp", "tracing.enabled");

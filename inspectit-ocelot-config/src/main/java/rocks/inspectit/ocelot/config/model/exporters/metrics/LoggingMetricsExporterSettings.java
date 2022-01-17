@@ -15,8 +15,6 @@ public class LoggingMetricsExporterSettings {
 
     private boolean enabled;
 
-    private String serviceName;
-
     /**
      * Defines how often metrics are pushed to the log.
      */

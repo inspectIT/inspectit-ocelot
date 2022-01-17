@@ -13,9 +13,6 @@ test {
 
     jvmArgs '-Xmx512m', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:HeapDumpPath=/__w/inspectit-ocelot/inspectit-ocelot/test_heapdump.bin'
 
-    // include custom configurations to potentially speed up tests or change settings in test files
-    jvmArgs "-Dinspectit.config.file-based.path=$projectDir/src/test/resources/config"
-
     testLogging {
         exceptionFormat = 'full'
     }

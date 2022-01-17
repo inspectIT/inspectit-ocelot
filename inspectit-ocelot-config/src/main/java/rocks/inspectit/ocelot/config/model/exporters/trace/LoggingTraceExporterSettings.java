@@ -12,6 +12,4 @@ public class LoggingTraceExporterSettings {
 
     private boolean enabled;
 
-    private String serviceName;
-
 }

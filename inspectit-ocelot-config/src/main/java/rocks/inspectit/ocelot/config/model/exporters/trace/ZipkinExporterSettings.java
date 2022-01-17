@@ -14,9 +14,4 @@ public class ZipkinExporterSettings {
      */
     private String url;
 
-    /**
-     * The service name under which traces are published, defaults to inspectit.service-name;
-     */
-    private String serviceName;
-
 }

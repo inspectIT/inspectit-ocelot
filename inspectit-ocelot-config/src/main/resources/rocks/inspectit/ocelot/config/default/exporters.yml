@@ -37,8 +37,7 @@ inspectit:
 
       # settings for the LoggingMetricExporter used in LoggingExporterService
       logging:
-          enabled: true
-          serviceName: ${inspectit.service-name}
+          enabled: false
           # the export interval of the metrics
           export-interval: ${inspectit.metrics.frequency}
 
@@ -51,25 +50,21 @@ inspectit:
         enabled: true
         # the v2 Url under which the ZipKin server can be accessed, e.g. http://127.0.0.1:9411/api/v2/spans
         url: null
-        # the service-name which will be used to publish the spans
-        service-name: ${inspectit.service-name}
-      # settings for the jaeger exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/jaeger)
 
+
+      # settings for the jaeger exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/jaeger)
       jaeger:
         # if true, the agent will try to start the Jaeger trace exporter
         enabled: true
         # the URL under which the jaeger thrift server can be accessed, e.g. http://127.0.0.1:14268/api/traces
         url: null
-        # the service-name which will be used to publish the spans
-        service-name: ${inspectit.service-name}
+
 
       # settings for the LoggingSpanExporter used in LoggingTraceExporterService
       logging:
-          enabled: true
-          service-name: ${inspectit.service-name}
+          enabled: false
 
       # settings for the OtlpGrpcSpanExporter used in OtlpTraceExporterService
       otlp:
           enabled: true
-          service-name: ${inspectit.service-name}
           url: null
