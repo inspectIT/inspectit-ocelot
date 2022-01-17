@@ -21,6 +21,16 @@ You can configure the probability with which a trace ends up being collected via
 E.g. setting the value to `0.1` will result in only 10% of all traces being collected.
 By default, the sample probability is 100%. Note that this global setting only acts as a default value and can be overridden by [individual rules](instrumentation/rules.md#collecting-traces).
 
+### Additional Properties
+
+You can additionally define the following global properties (`inspectit.tracing-property`)
+
+|Property|Default|Description|
+|---|---|---|
+|`max-export-batch-size`|512|The max export batch size for every export, i.e., the maximum number of spans exported by the used `BatchSpanProcessor`|
+|`schedule-delay-millis`|5000|The delay interval between two consecutive exports in milliseconds.
+**Note**: These properties take only effect once when the agent is starting. If you change these properties while the agent is running, they will not take effect until the agent retarted.
+
 ### Common Tags as Attributes
 
 Globally defined [common tags](metrics/common-tags.md) used when recording metrics can also be inserted as attributes in traces.
