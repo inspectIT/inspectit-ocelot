@@ -1,6 +1,0 @@
-inspectit:
-  exporters:
-    metrics:
-      # disable prometheus to speed up the shutdown process of OpenTelemetryControllerImpl
-      prometheus:
-        enabled: false
