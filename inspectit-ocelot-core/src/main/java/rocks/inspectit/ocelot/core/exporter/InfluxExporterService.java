@@ -13,6 +13,7 @@ import rocks.inspectit.opencensus.influx.InfluxExporter;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Uses the {@link InfluxExporter} to directly push metrics into a given InfluxDB version 1.x .
@@ -20,6 +21,18 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class InfluxExporterService extends DynamicallyActivatableService {
+
+    /**
+     * Dummy user for downwards compatibility
+     */
+    public final static String DUMMY_USER = "user";
+
+    /**
+     * Dummy password for downwards compatibility
+     */
+    public final static String DUMMY_PASSWORD = "password";
+
+    private static Logger LOGGER = Logger.getLogger(InfluxExporterService.class.getName());
 
     @Autowired
     private ScheduledExecutorService executor;
@@ -44,24 +57,29 @@ public class InfluxExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         InfluxExporterSettings influx = conf.getExporters().getMetrics().getInflux();
-        return conf.getMetrics().isEnabled()
-                && influx.isEnabled()
-                && !StringUtils.isEmpty(influx.getUrl())
-                && !StringUtils.isEmpty(influx.getDatabase())
-                && !StringUtils.isEmpty(influx.getRetentionPolicy());
+        return conf.getMetrics()
+                .isEnabled() && influx.isEnabled() && !StringUtils.isEmpty(influx.getUrl()) && !StringUtils.isEmpty(influx.getDatabase()) && !StringUtils.isEmpty(influx.getRetentionPolicy());
     }
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         InfluxExporterSettings influx = configuration.getExporters().getMetrics().getInflux();
-        log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx
-                .getUrl());
+        String user = influx.getUser();
+        String password = influx.getPassword();
+
+        // check user and password, which are not allowed to be null as of v1.15.0
+        if (null == user) {
+            user = DUMMY_USER;
+            password = DUMMY_PASSWORD;
+            LOGGER.warning(String.format("You are using the InfluxDB exporter without specifying 'user' and 'password'. Since v1.15.0, 'user' and 'password' are mandatory. Will be using the dummy user '%s' and dummy password '%s'.", DUMMY_USER, DUMMY_PASSWORD));
+        }
+        log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx.getUrl());
         activeExporter = InfluxExporter.builder()
                 .url(influx.getUrl())
                 .database(influx.getDatabase())
                 .retention(influx.getRetentionPolicy())
-                .user(influx.getUser())
-                .password(influx.getPassword())
+                .user(user)
+                .password(password)
                 .createDatabase(influx.isCreateDatabase())
                 .exportDifference(influx.isCountersAsDifferences())
                 .measurementNameProvider(percentileViewManager::getMeasureNameForSeries)

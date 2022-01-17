@@ -16,9 +16,6 @@ public class TraceExportersSettings {
     private ZipkinExporterSettings zipkin;
 
     @Valid
-    private OpenCensusAgentTraceExporterSettings openCensusAgent;
-
-    @Valid
     private LoggingTraceExporterSettings logging;
 
     @Valid
