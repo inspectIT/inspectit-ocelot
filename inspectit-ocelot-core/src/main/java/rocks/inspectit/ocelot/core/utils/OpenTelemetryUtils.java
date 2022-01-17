@@ -48,20 +48,16 @@ public class OpenTelemetryUtils {
                 flushResult.whenComplete(() -> latch.countDown());
                 try {
                     latch.await(10, TimeUnit.SECONDS);
-                    log.info("time to force flush SdkMeterProvider: {} ms", (System.nanoTime() - startFlush) * 1e-6);
                 } catch (Throwable t) {
                     log.error("failed to force flush SdkMeterProvider", t);
                     t.printStackTrace();
                     return CompletableResultCode.ofFailure();
                 }
-            } else {
-                log.info("time to force flush SdkMeterProvider: {} ms", (System.nanoTime() - startFlush) * 1e-6);
             }
         }
 
         // close the SdkMeterProvider. This calls shutDown internally and waits blocking for it.
         meterProvider.close();
-        log.info("time to stop {}: {} ms", meterProvider, (System.nanoTime() - start) / 1E6);
         return CompletableResultCode.ofSuccess();
     }
 
@@ -96,11 +92,9 @@ public class OpenTelemetryUtils {
                         e.printStackTrace();
                         return CompletableResultCode.ofFailure();
                     }
-                    log.info("time to force flush {}: {} ms", tracerProvider, (System.nanoTime() - startFlush) * 1e-6);
                 }
             }
             tracerProvider.close();
-            log.info("time to stop {}: {} ms", tracerProvider, TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
         }
         return CompletableResultCode.ofSuccess();
     }

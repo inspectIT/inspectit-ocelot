@@ -14,9 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.core.SpringTestBase;
-import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -25,6 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test class for {@link LoggingTraceExporterService}
  */
+@TestPropertySource(properties = "inspectit.tracing.max-export-batch-size:2")
+@DirtiesContext
 public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
 
     public static final String INSTRUMENTATION_NAME = "rocks.inspectit.ocelot.instrumentation";
@@ -37,6 +39,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
     @Autowired
     LoggingTraceExporterService service;
 
+    @DirtiesContext
     @BeforeEach
     void enableService() {
         localSwitch(true);

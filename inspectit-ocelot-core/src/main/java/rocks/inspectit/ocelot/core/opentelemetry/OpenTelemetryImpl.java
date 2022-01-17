@@ -56,7 +56,6 @@ public class OpenTelemetryImpl implements OpenTelemetry {
     public void set(OpenTelemetrySdk openTelemetry) {
         synchronized (lock) {
             if (null != openTelemetry) {
-                log.info("Set new OpenTelemetry. Shut down previous ({})", openTelemetry.getClass());
                 // stop previous SdkTracerProvider
                 OpenTelemetryUtils.stopTracerProvider(this.openTelemetry.getSdkTracerProvider());
             }

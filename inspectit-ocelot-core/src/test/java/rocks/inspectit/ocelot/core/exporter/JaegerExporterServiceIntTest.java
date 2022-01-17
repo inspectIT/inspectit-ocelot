@@ -19,7 +19,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.awaitility.Awaitility.await;
 
-@TestPropertySource(properties = {"inspectit.exporters.tracing.jaeger.url=http://127.0.0.1:14268/api/traces", "inspectit.exporters.tracing.jaeger.grpc=http://127.0.0.1:14267/api/traces"})
+@TestPropertySource(properties = {"inspectit.exporters.tracing.jaeger.url=http://127.0.0.1:14268/api/traces", "inspectit.exporters.tracing.jaeger.grpc=http://127.0.0.1:14267/api/traces","inspectit.tracing.max-export-batch-size=1"})
 @DirtiesContext
 public class JaegerExporterServiceIntTest extends SpringTestBase {
 

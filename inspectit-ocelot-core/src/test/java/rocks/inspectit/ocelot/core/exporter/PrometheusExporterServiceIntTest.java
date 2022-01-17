@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 @TestPropertySource(properties = {"inspecit.exporters.metrics.prometheus.enabled=true"})
-
 @DirtiesContext
 public class PrometheusExporterServiceIntTest extends SpringTestBase {
 

@@ -19,7 +19,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.awaitility.Awaitility.await;
 
-@TestPropertySource(properties = {"inspectit.exporters.tracing.zipkin.url=http://127.0.0.1:9411/api/v2/spans"})
+@TestPropertySource(properties = {"inspectit.exporters.tracing.zipkin.url=http://127.0.0.1:9411/api/v2/spans", "inspectit.tracing.max-export-batch-size=1"})
 @DirtiesContext
 public class ZipkinExporterServiceIntTest extends SpringTestBase {
 

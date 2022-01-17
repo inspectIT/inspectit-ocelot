@@ -39,7 +39,6 @@ public class MeterProviderImpl implements MeterProvider {
         synchronized (lock) {
             // shut down previous meterProvider if set
             if (null != this.meterProvider && this.meterProvider != meterProvider) {
-                log.info("Set new SdkMeterProvider. Shut down previous ({})", meterProvider);
                 OpenTelemetryUtils.stopMeterProvider(this.meterProvider, true);
             }
             // set SdkMeterProvider
