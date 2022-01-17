@@ -10,6 +10,9 @@ import 'ace-builds/src-noconflict/ext-keybinding_menu';
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-cobalt';
 import InspectitOcelotMode from './InspectitOcelotMode';
+import axios from "../../../lib/axios-api";
+
+let rulesToGenerate;
 
 const saveCommand = (doSave) => {
   return {
@@ -68,7 +71,16 @@ class AceEditor extends React.Component {
     }
 
     this.configureEditor();
-    this.editor.getSession().setMode(new InspectitOcelotMode());
+
+    // rulesToGenerate is a map whose contents determine what the highlighting rules need to be. The contents are
+    // retrieved over the config-server's REST API. Until the results are returned the standard YAML highlighting mode
+    // is used. When the results have been returned, the mode is set to InspectitOcelotMode.
+    this.editor.getSession().setMode('ace/mode/yaml');
+    axios.get("highlightRulesMap").then(response => {
+      rulesToGenerate = new Map(Object.entries(response.data));
+      this.editor.getSession().setMode(new InspectitOcelotMode());
+    })
+
     this.updateValue();
   }
 
@@ -121,5 +133,8 @@ class AceEditor extends React.Component {
     return value.replace(/\t/g, '  ');
   };
 }
+
+// needed for getting the contents of rulesToGenerate to InspectitOcelotHighlightingRules
+export {rulesToGenerate};
 
 export default AceEditor;
