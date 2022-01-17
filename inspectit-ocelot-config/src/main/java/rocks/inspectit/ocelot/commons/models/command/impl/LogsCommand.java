@@ -7,26 +7,25 @@ import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import java.util.UUID;
 
 /**
- * Represents a Ping-Command. Ping commands are used to check if the receiving agent does exist.
+ * Represents a Logs-Command. Logs commands are used to recieve the logs from a certain agent.
  */
 @Data
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class PingCommand extends Command {
+public class LogsCommand extends Command {
     /**
      * Type identifier for JSON serialization.
      */
-    public static final String TYPE_IDENTIFIER = "ping";
+    public static final String TYPE_IDENTIFIER = "logs";
 
     /**
-     * Represents a response to the {@link rocks.inspectit.ocelot.commons.models.command.impl.PingCommand}.
+     * Represents a response to the {@link rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand}.
      */
+    @Data
     @NoArgsConstructor
+    @AllArgsConstructor
     @EqualsAndHashCode(callSuper = true)
     public static class Response extends CommandResponse {
-
-        public Response(UUID commandId) {
-            super(commandId);
-        }
+        private String result;
     }
 }

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
+import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ import java.util.UUID;
 @JsonSubTypes(value = {
         @JsonSubTypes.Type(name = PingCommand.TYPE_IDENTIFIER, value = PingCommand.class),
         @JsonSubTypes.Type(name = ListClassesCommand.TYPE_IDENTIFIER, value = ListClassesCommand.class),
+        @JsonSubTypes.Type(name = LogsCommand.TYPE_IDENTIFIER, value = LogsCommand.class)
 })
 public abstract class Command {
 
