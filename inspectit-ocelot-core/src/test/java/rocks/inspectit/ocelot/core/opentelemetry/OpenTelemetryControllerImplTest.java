@@ -43,6 +43,8 @@ class OpenTelemetryControllerImplTest {
 
     @BeforeEach
     void initOpenTelemetryController() {
+        // mock max-export-batch-size to avoid exceptions
+        when(env.getCurrentConfig().getTracing().getMaxExportBatchSize()).thenReturn(512);
         openTelemetryController.env = env;
         openTelemetryController.init();
         openTelemetryController.start();
@@ -147,6 +149,44 @@ class OpenTelemetryControllerImplTest {
             assertThat(OpenTelemetry.noop() == GlobalOpenTelemetry.get());
         }
 
+        /**
+         * A noop {@link DynamicallyActivatableTraceExporterService} for testing
+         */
+        class TestTraceExporterService extends DynamicallyActivatableTraceExporterService {
+
+            @Override
+            public SpanExporter getSpanExporter() {
+                try {
+                    Method m = Class.forName("io.opentelemetry.sdk.trace.export.NoopSpanExporter")
+                            .getDeclaredMethod("getInstance");
+                    m.setAccessible(true);
+                    return (SpanExporter) m.invoke(null);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            protected boolean checkEnabledForConfig(InspectitConfig configuration) {
+                return false;
+            }
+
+            @Override
+            protected boolean doEnable(InspectitConfig configuration) {
+                return true;
+            }
+
+            @Override
+            protected boolean doDisable() {
+                return true;
+            }
+
+            @Override
+            public String getName() {
+                return getClass().getSimpleName();
+            }
+        }
     }
 
     @Nested
@@ -229,78 +269,39 @@ class OpenTelemetryControllerImplTest {
             openTelemetryController.shutdown();
             assertThat(null == GlobalMeterProvider.get());
         }
-    }
 
-    /**
-     * A noop {@link DynamicallyActivatableTraceExporterService} for testing
-     */
-    static class TestTraceExporterService extends DynamicallyActivatableTraceExporterService {
+        /**
+         * A noop {@link DynamicallyActivatableMetricsExporterService} for testing
+         */
+        class TestMetricsExporterService extends DynamicallyActivatableMetricsExporterService {
 
-        @Override
-        public SpanExporter getSpanExporter() {
-            try {
-                Method m = Class.forName("io.opentelemetry.sdk.trace.export.NoopSpanExporter")
-                        .getDeclaredMethod("getInstance");
-                m.setAccessible(true);
-                return (SpanExporter) m.invoke(null);
-            } catch (Throwable t) {
-                t.printStackTrace();
-                return null;
+            @Mock
+            MetricExporter metricExporter;
+
+            @Override
+            public MetricReaderFactory getNewMetricReaderFactory() {
+                return PeriodicMetricReader.newMetricReaderFactory(new LoggingMetricExporter());
             }
-        }
 
-        @Override
-        protected boolean checkEnabledForConfig(InspectitConfig configuration) {
-            return false;
-        }
+            @Override
+            protected boolean checkEnabledForConfig(InspectitConfig configuration) {
+                return false;
+            }
 
-        @Override
-        protected boolean doEnable(InspectitConfig configuration) {
-            return true;
-        }
+            @Override
+            protected boolean doEnable(InspectitConfig configuration) {
+                return false;
+            }
 
-        @Override
-        protected boolean doDisable() {
-            return true;
-        }
+            @Override
+            protected boolean doDisable() {
+                return false;
+            }
 
-        @Override
-        public String getName() {
-            return getClass().getSimpleName();
-        }
-    }
-
-    /**
-     * A noop {@link DynamicallyActivatableMetricsExporterService} for testing
-     */
-    static class TestMetricsExporterService extends DynamicallyActivatableMetricsExporterService {
-
-        @Mock
-        MetricExporter metricExporter;
-
-        @Override
-        public MetricReaderFactory getNewMetricReaderFactory() {
-            return PeriodicMetricReader.newMetricReaderFactory(new LoggingMetricExporter());
-        }
-
-        @Override
-        protected boolean checkEnabledForConfig(InspectitConfig configuration) {
-            return false;
-        }
-
-        @Override
-        protected boolean doEnable(InspectitConfig configuration) {
-            return false;
-        }
-
-        @Override
-        protected boolean doDisable() {
-            return false;
-        }
-
-        @Override
-        public String getName() {
-            return "test-metrics-exporter-service";
+            @Override
+            public String getName() {
+                return "test-metrics-exporter-service";
+            }
         }
     }
 
