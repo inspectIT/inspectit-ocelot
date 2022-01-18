@@ -19,5 +19,5 @@ public class TraceExportersSettings {
     private LoggingTraceExporterSettings logging;
 
     @Valid
-    private OtlpTraceExporterSettings otlp;
+    private OtlpGrpcTraceExporterSettings otlpGrpc;
 }

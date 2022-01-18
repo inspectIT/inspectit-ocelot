@@ -64,7 +64,7 @@ inspectit:
       logging:
           enabled: false
 
-      # settings for the OtlpGrpcSpanExporter used in OtlpTraceExporterService
-      otlp:
+      # settings for the OtlpGrpcSpanExporter used in OtlpGrpcTraceExporterService
+      otlp-grpc:
           enabled: true
           url: null

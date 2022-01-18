@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.model.exporters.trace.OtlpTraceExporterSettings;
+import rocks.inspectit.ocelot.config.model.exporters.trace.OtlpGrpcTraceExporterSettings;
 
 import javax.validation.Valid;
 
@@ -17,25 +17,25 @@ import javax.validation.Valid;
  */
 @Component
 @Slf4j
-public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporterService {
+public class OtlpGrpcTraceExporterService extends DynamicallyActivatableTraceExporterService {
 
     @Getter
     private SpanExporter spanExporter;
 
-    public OtlpTraceExporterService() {
-        super("exporters.tracing.otlp", "tracing.enabled");
+    public OtlpGrpcTraceExporterService() {
+        super("exporters.tracing.otlp-grpc", "tracing.enabled");
     }
 
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig configuration) {
-        @Valid OtlpTraceExporterSettings otlp = configuration.getExporters().getTracing().getOtlp();
+        @Valid OtlpGrpcTraceExporterSettings otlp = configuration.getExporters().getTracing().getOtlpGrpc();
         return configuration.getTracing().isEnabled() && !StringUtils.isEmpty(otlp.getUrl()) && otlp.isEnabled();
     }
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         try {
-            OtlpTraceExporterSettings otlp = configuration.getExporters().getTracing().getOtlp();
+            OtlpGrpcTraceExporterSettings otlp = configuration.getExporters().getTracing().getOtlpGrpc();
             log.info("Starting OTLP Trace Exporter with endpoint {}", otlp.getUrl());
 
             // create span exporter
@@ -46,6 +46,9 @@ public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporte
             return true;
         } catch (Throwable t) {
             log.error("Error creating OTLP trace exporter", t);
+            if (true) {
+                throw t;
+            }
             return false;
         }
     }

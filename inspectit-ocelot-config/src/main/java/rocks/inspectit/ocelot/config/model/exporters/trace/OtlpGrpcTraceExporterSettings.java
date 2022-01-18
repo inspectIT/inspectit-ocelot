@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class OtlpTraceExporterSettings {
+public class OtlpGrpcTraceExporterSettings {
 
     private boolean enabled;
 
