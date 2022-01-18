@@ -13,7 +13,7 @@ import javax.validation.Valid;
 
 /**
  * Service for {@link io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter}.
- * Can be dynamically started and stopped using the exporters.trace.otlp.enabled configuration
+ * Can be dynamically started and stopped using the exporters.trace.otlp-grpc.enabled configuration
  */
 @Component
 @Slf4j
@@ -23,7 +23,7 @@ public class OtlpGrpcTraceExporterService extends DynamicallyActivatableTraceExp
     private SpanExporter spanExporter;
 
     public OtlpGrpcTraceExporterService() {
-        super("exporters.tracing.otlp-grpc", "tracing.enabled");
+        super("exporters.tracing.otlpGrpc", "tracing.enabled");
     }
 
     @Override
