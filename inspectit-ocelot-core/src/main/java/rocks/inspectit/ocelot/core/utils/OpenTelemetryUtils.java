@@ -6,6 +6,7 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import lombok.extern.slf4j.Slf4j;
+import rocks.inspectit.ocelot.bootstrap.Instances;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.CountDownLatch;
@@ -113,5 +114,12 @@ public class OpenTelemetryUtils {
             e.printStackTrace();
         }
         return openTelemetry;
+    }
+
+    /**
+     * {@link Instances#openTelemetryController#flush() flushes} all pending spans and metrics waits for it to complete.
+     */
+    public static void flush(){
+        Instances.openTelemetryController.flush();
     }
 }

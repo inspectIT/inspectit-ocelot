@@ -236,7 +236,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     }
 
     /**
-     * Flushes the {@link #openTelemetry} and {@link #meterProvider} and waits for it to complete
+     * Flushes the all pending spans ({@link #openTelemetry}) and metrics ({@link #meterProvider}) and waits for it to complete.
      */
     @Override
     public void flush() {

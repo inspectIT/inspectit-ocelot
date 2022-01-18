@@ -10,8 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.core.SpringTestBase;
-import rocks.inspectit.ocelot.core.testutils.OpenCensusUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +19,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.awaitility.Awaitility.await;
 
-@TestPropertySource(properties = {"inspectit.exporters.tracing.jaeger.url=http://127.0.0.1:14268/api/traces", "inspectit.exporters.tracing.jaeger.grpc=http://127.0.0.1:14267/api/traces","inspectit.tracing.max-export-batch-size=1"})
+@TestPropertySource(properties = {"inspectit.exporters.tracing.jaeger.url=http://127.0.0.1:14268/api/traces", "inspectit.exporters.tracing.jaeger.grpc=http://127.0.0.1:14267/api/traces", "inspectit.tracing.max-export-batch-size=1"})
 @DirtiesContext
 public class JaegerExporterServiceIntTest extends SpringTestBase {
 
@@ -53,7 +53,7 @@ public class JaegerExporterServiceIntTest extends SpringTestBase {
         logger.info("Wait for Jaeger to process the span...");
         Thread.sleep(1100L);
 
-        OpenCensusUtils.flushSpanExporter();
+        Instances.openTelemetryController.flush();
 
         await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
             verify(postRequestedFor(urlPathEqualTo(JAEGER_PATH)));

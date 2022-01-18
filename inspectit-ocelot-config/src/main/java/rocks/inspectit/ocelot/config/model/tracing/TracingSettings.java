@@ -7,7 +7,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.concurrent.TimeUnit;
+import javax.validation.constraints.Positive;
 
 @Data
 @NoArgsConstructor
@@ -65,11 +65,14 @@ public class TracingSettings {
     /**
      * The maximum batch size for every span export. Default value is 512.
      */
+    @Positive
     private int maxExportBatchSize = DEFAULT_MAX_EXPORT_BATCH_SIZE;
 
     static final long DEFAULT_SCHEDULE_DELAY_MILLIS = 5000;
+
     /**
      * Delay interval between two consecutive exports in milliseconds. Default value is 5000ms.
      */
+    @Positive
     private long scheduleDelayMillis = DEFAULT_SCHEDULE_DELAY_MILLIS;
 }
