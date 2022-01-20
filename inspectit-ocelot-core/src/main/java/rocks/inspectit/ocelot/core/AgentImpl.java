@@ -77,7 +77,7 @@ public class AgentImpl implements IAgent {
 
         ctx.registerShutdownHook();
 
-        //Allows to use autowiring to acquire the Instrumentation instance
+        // allows to use autowiring to acquire the Instrumentation instance
         ctx.addBeanFactoryPostProcessor(bf -> bf.registerSingleton("instrumentation", instrumentation));
 
         ctx.register(SpringConfiguration.class);
