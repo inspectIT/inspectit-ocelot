@@ -44,7 +44,7 @@ public class SpringConfiguration {
         return event -> {
             try {
                 log.info("Closing inspectIT class loader.");
-                ((URLClassLoader) AgentImpl.class.getClassLoader()).close();
+                ((URLClassLoader) AgentImpl.INSPECTIT_CLASS_LOADER).close();
             } catch (IOException e) {
                 log.error("Failed closing inspectIT class loader.", e);
             }
