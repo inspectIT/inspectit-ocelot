@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
@@ -29,6 +30,13 @@ import java.util.stream.Collectors;
 @Service
 public class HookManager {
 
+    /**
+     * Thread local flag for marking the current thread that it is currently in the execution/scope of agent actions.
+     * This is used to prevent a endless action recursion in case an instrumented action is invoked within another
+     * action. In that case, the instrumentation has to be suppressed.
+     */
+    public static final ThreadLocal<Boolean> RECURSION_GATE = ThreadLocal.withInitial(() -> false);
+
     @Autowired
     private InstrumentationConfigurationResolver configResolver;
 
@@ -49,8 +57,6 @@ public class HookManager {
      */
     private volatile Map<Class<?>, Map<String, MethodHook>> hooks = Collections.emptyMap();
 
-    public static ThreadLocal<Boolean> hookGate = ThreadLocal.withInitial(() -> false);
-
     @PostConstruct
     void init() {
         Instances.hookManager = this::getHook;
@@ -65,12 +71,13 @@ public class HookManager {
      * Actual implementation for {@link IHookManager#getHook(Class, String)}.
      *
      * @param clazz           the name of the class to which the method to query the hook for belongs
-     * @param methodSignature the signature of the method in the form of name(parametertype,parametertype,..)
+     * @param methodSignature the signature of the method in the form of name(parametertype, parametertype,..)
      *
-     * @return
+     * @return the method hook for the specified method
      */
-    private IMethodHook getHook(Class<?> clazz, String methodSignature) {
-        if (!hookGate.get() ) {
+    @VisibleForTesting
+    IMethodHook getHook(Class<?> clazz, String methodSignature) {
+        if (!RECURSION_GATE.get()) {
             Map<String, MethodHook> methodHooks = hooks.get(clazz);
             if (methodHooks != null) {
                 MethodHook hook = methodHooks.get(methodSignature);

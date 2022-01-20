@@ -13,7 +13,6 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 import rocks.inspectit.ocelot.core.selfmonitoring.IActionScope;
 
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -65,7 +64,6 @@ public class MethodHook implements IMethodHook {
      */
     private final MethodReflectionInformation methodInformation;
 
-
     /**
      * The factory that creates/spawns new scopes for an {@link IHookAction}
      */
@@ -88,37 +86,49 @@ public class MethodHook implements IMethodHook {
 
     @Override
     public InternalInspectitContext onEnter(Object[] args, Object thiz) {
-        InspectitContextImpl inspectitContext = inspectitContextManager.enterNewContext();
-        IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, null, null, this, inspectitContext);
+        try {
+            // flags the thread that it is now in action execution
+            HookManager.RECURSION_GATE.set(true);
 
-        for (IHookAction action : activeEntryActions) {
-            try (IActionScope scope = actionScopeFactory.createScope(action)) {
-                action.execute(executionContext);
-            } catch (Throwable t) {
-                log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
-                activeEntryActions.remove(action);
+            InspectitContextImpl inspectitContext = inspectitContextManager.enterNewContext();
+            IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, null, null, this, inspectitContext);
+
+            for (IHookAction action : activeEntryActions) {
+                try (IActionScope scope = actionScopeFactory.createScope(action)) {
+                    action.execute(executionContext);
+                } catch (Throwable t) {
+                    log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation
+                            .getMethodFQN(), t);
+                    activeEntryActions.remove(action);
+                }
             }
 
             inspectitContext.makeActive();
             return inspectitContext;
         } finally {
-            HookManager.hookGate.set(false);
+            HookManager.RECURSION_GATE.set(false);
         }
     }
 
     @Override
     public void onExit(Object[] args, Object thiz, Object returnValue, Throwable thrown, InternalInspectitContext context) {
-        IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, (InspectitContextImpl) context);
-        for (IHookAction action : activeExitActions) {
-            try (IActionScope scope = actionScopeFactory.createScope(action)) {
-                action.execute(executionContext);
-            } catch (Throwable t) {
-                log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
-                activeExitActions.remove(action);
+        try {
+            // flags the thread that it is now in action execution
+            HookManager.RECURSION_GATE.set(true);
+
+            IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, (InspectitContextImpl) context);
+            for (IHookAction action : activeExitActions) {
+                try (IActionScope scope = actionScopeFactory.createScope(action)) {
+                    action.execute(executionContext);
+                } catch (Throwable t) {
+                    log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation
+                            .getMethodFQN(), t);
+                    activeExitActions.remove(action);
+                }
             }
             context.close();
         } finally {
-            HookManager.hookGate.set(false);
+            HookManager.RECURSION_GATE.set(false);
         }
     }
 
