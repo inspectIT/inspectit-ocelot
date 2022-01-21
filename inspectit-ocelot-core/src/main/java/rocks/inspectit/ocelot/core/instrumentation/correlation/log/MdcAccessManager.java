@@ -106,7 +106,7 @@ public class MdcAccessManager implements IClassDiscoveryListener {
     public void onNewClassesDiscovered(Set<Class<?>> newClasses) {
         newClasses.stream()
                 .filter(clazz -> mdcAdapters.containsKey(clazz.getName()))
-                .filter(clazz -> clazz.getClassLoader() != AgentImpl.INSPECTIT_CLASS_LOADER)
+                .filter(clazz -> clazz.getClassLoader() != AgentImpl.AGENT_CLASS_LOADER)
                 .filter(clazz -> !(clazz.getClassLoader() instanceof DoNotInstrumentMarker))
                 .forEach(clazz -> {
                     try {
