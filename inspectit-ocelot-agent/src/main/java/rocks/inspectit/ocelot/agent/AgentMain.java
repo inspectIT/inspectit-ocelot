@@ -110,6 +110,7 @@ public class AgentMain {
      * Copies the given resource to a new temporary file with the ending ".jar"
      *
      * @param resourcePath the path to the resource
+     * @param prefix the name of the new temporary file
      *
      * @return the path to the generated jar file
      *
