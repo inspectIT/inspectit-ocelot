@@ -32,7 +32,7 @@ public class HookManager {
 
     /**
      * Thread local flag for marking the current thread that it is currently in the execution/scope of agent actions.
-     * This is used to prevent a endless action recursion in case an instrumented action is invoked within another
+     * This is used to prevent an endless action recursion in case an instrumented action is invoked within another
      * action. In that case, the instrumentation has to be suppressed.
      */
     public static final ThreadLocal<Boolean> RECURSION_GATE = ThreadLocal.withInitial(() -> false);
