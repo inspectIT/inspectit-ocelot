@@ -1,7 +1,10 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import ch.qos.logback.classic.Level;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.metrics.MeterProvider;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -16,8 +19,7 @@ import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.io.IOException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.*;
 
 @TestPropertySource(properties = {"inspecit.exporters.metrics.prometheus.enabled=true"})
 @DirtiesContext
@@ -47,12 +49,13 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
     }
 
     void assertGet200(String url) throws Exception {
-        int statusCode = testClient.execute(new HttpGet(url)).getStatusLine().getStatusCode();
-
+        CloseableHttpResponse response = testClient.execute(new HttpGet(url));
+        int statusCode = response.getStatusLine().getStatusCode();
         assertThat(statusCode).isEqualTo(200);
+        response.close();
     }
 
-    void assertUnavailable(String url) throws Exception {
+    void assertUnavailable(String url) {
         Throwable throwable = catchThrowable(() -> testClient.execute(new HttpGet(url))
                 .getStatusLine()
                 .getStatusCode());
@@ -62,6 +65,7 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
 
     /**
      * Sets the switch of 'inspectit.exporters.metrics.prometheus.enabled' to the given value
+     *
      * @param enabled
      */
     void switchPrometheusExporterService(boolean enabled) {
@@ -97,7 +101,7 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
 
     @DirtiesContext
     @Test
-    void testLocalSwitch() throws Exception {
+    void testLocalSwitch() {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.metrics.prometheus.enabled", "false");
         });
@@ -117,4 +121,20 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
         assertNoLogsOfLevelOrGreater(Level.WARN);
     }
 
+    @DirtiesContext
+    @Test
+    void testRestartPrometheus() throws Exception {
+
+        assertGet200("http://localhost:8888/metrics");
+        assertUnavailable("http://localhost:8889/metrics");
+        // disable prometheus
+        updateProperties(props -> {
+            props.setProperty("inspectit.exporters.metrics.prometheus.enabled", "false");
+        });
+        assertUnavailable("http://localhost:8888/metrics");
+        // enable prometheus
+        enableService();
+        assertThat(service.isEnabled()).isTrue();
+        assertGet200("http://localhost:8888/metrics");
+    }
 }

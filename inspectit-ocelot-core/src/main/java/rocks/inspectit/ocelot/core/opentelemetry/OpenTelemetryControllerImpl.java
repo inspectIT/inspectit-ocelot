@@ -4,8 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.GlobalMeterProvider;
-import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.context.propagation.TextMapPropagator;
@@ -13,7 +11,6 @@ import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import io.opentelemetry.extension.trace.propagation.JaegerPropagator;
 import io.opentelemetry.opencensusshim.metrics.OpenCensusMetrics;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
 import io.opentelemetry.sdk.resources.Resource;
@@ -48,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * The implementation of {@link IOpenTelemetryController}. The {@link OpenTelemetryControllerImpl} configures {@link GlobalOpenTelemetry} (tracing) and {@link GlobalMeterProvider} (metrics).
+ * The implementation of {@link IOpenTelemetryController}. The {@link OpenTelemetryControllerImpl} configures {@link GlobalOpenTelemetry}.
  * The individual {@link rocks.inspectit.ocelot.core.service.DynamicallyActivatableService services}, i.e., {@link DynamicallyActivatableMetricsExporterService} and {@link DynamicallyActivatableTraceExporterService}, register to and unregister from {@link OpenTelemetryControllerImpl this}.
  * <b>Important note:</b> {@link #shutdown() shutting down} the {@link OpenTelemetryControllerImpl} is final and cannot be revoked.
  */
@@ -74,7 +71,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     private boolean metricSettingsChanged = false;
 
     /**
-     * whether {@link GlobalOpenTelemetry} and {@link GlobalMeterProvider} have successfully been configured.
+     * whether {@link GlobalOpenTelemetry} has been successfully been configured.
      */
     @Getter
     // TODO: make sure that configured is set accordingly when OTEL is being reconfigured (false while configuring, true after success)
@@ -114,11 +111,18 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     private OpenTelemetryImpl openTelemetry;
 
     /**
-     * The {@link MeterProviderImpl} that wraps {@link SdkMeterProvider}
+     * The currently active {@link SdkMeterProvider}
      */
     @VisibleForTesting
     @Getter(AccessLevel.PACKAGE)
-    private MeterProviderImpl meterProvider;
+    private SdkMeterProvider meterProvider;
+
+    /**
+     * The currently active {@link SdkTracerProvider}
+     */
+    @VisibleForTesting
+    @Getter(AccessLevel.PACKAGE)
+    private SdkTracerProvider tracerProvider;
 
     @Autowired
     InspectitEnvironment env;
@@ -143,11 +147,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @PostConstruct
     @VisibleForTesting
     void init() {
-        // create the service name resource
-        serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
-                .getServiceName()));
-
-        initTracing(env.getCurrentConfig());
+        initOtel(env.getCurrentConfig());
 
         // close the tracer provider when the JVM is shutting down
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
@@ -176,7 +176,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     /**
      * Configures and registers {@link io.opentelemetry.api.OpenTelemetry}, triggered by the {@link rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent} triggered
      * For tracing, the {@link SdkTracerProvider} is reconfigured and updated in the {@link GlobalOpenTelemetry}.
-     * For metrics, the {@link SdkMeterProvider} is reconfigured and updated in the {@link GlobalMeterProvider}
+     * For metrics, the {@link SdkMeterProvider} is reconfigured and updated in the {@link GlobalOpenTelemetry}
      *
      * @return
      */
@@ -188,7 +188,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         if (stopped) {
             return false;
         }
-        boolean success = false;
+        boolean success = true;
         if (!isConfiguring.compareAndSet(false, true)) {
             log.info("Multiple configure calls");
             return true;
@@ -205,13 +205,30 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                     .getSampleProbability()) {
                 tracingSettingsChanged = true;
             }
-            // configure tracing if not configured or when tracing settings changed
-            boolean successConfigureTracing = !(tracingSettingsChanged || !configured) ? true : configureTracing(configuration);
 
-            // configure meter provider (metrics) if not configured or when metrics settings changed
-            boolean successConfigureMeterProvider = !(metricSettingsChanged || !configured) ? true : configureMeterProvider(configuration);
+            if (!configured || metricSettingsChanged || tracingSettingsChanged) {
 
-            success = successConfigureTracing && successConfigureMeterProvider;
+                // configure tracing if not configured or when tracing settings changed
+                SdkTracerProvider sdkTracerProvider = !(tracingSettingsChanged || !configured) ? tracerProvider : configureTracing(configuration);
+
+                // configure meter provider (metrics) if not configured or when metrics settings changed
+                SdkMeterProvider sdkMeterProvider = !(metricSettingsChanged || !configured) ? meterProvider : configureMeterProvider(configuration);
+
+                // only if metrics settings changed or OTEL has not been configured before, we need to rebuild the OpenTelemetrySdk
+                if (metricSettingsChanged || !configured) {
+                    OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
+                            .setTracerProvider(sdkTracerProvider)
+                            .setMeterProvider(sdkMeterProvider)
+                            .setPropagators(ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), JaegerPropagator.getInstance(), W3CBaggagePropagator.getInstance(), B3Propagator.injectingMultiHeaders())))
+                            .build();
+                    // update OTEL
+                    openTelemetry.set(openTelemetrySdk, false, false);
+                }
+                success = null != sdkMeterProvider && null != sdkTracerProvider;
+                // update meterProvider and tracerProvider
+                meterProvider = sdkMeterProvider;
+                tracerProvider = sdkTracerProvider;
+            }
 
             if (success) {
                 log.info("Successfully configured OpenTelemetry with tracing and metrics");
@@ -241,7 +258,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @Override
     public void flush() {
         openTelemetry.flush();
-        meterProvider.flush();
     }
 
     /**
@@ -260,19 +276,14 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         }
         long start = System.nanoTime();
 
-        // close tracing
+        // close OTEL
         if (null != openTelemetry) {
             // note: close calls SdkTracerProvider#shutdown, which calls SpanProcessor#shutdown, which calls SpanExporter#shutdown.
             // thus, the spanProcessor and spanExporter are shut down in this process and cannot be used later
+            // note: also close calls SdkMeterProvider#shutdown, which calls MetricReader#shutdown, which calls MetricExporter#shutdown
             openTelemetry.close();
         }
-        // close metric provider
-        if (null != meterProvider) {
-            long startMeterProviderShutdown = System.nanoTime();
-            // note: close calls SdkMeterProvider#shutdown, which calls MetricReader#shutdown, which calls MetricExporter#shutdown
-            CompletableResultCode shutdownResult = meterProvider.close();
-        }
-        GlobalMeterProvider.set(null);
+
         GlobalOpenTelemetry.resetForTest();
         configured = false;
         enabled = false;
@@ -301,35 +312,27 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     }
 
     /**
-     * Initializes tracing components, i.e., {@link #openTelemetry}, {@link #spanExporter}, {@link #spanProcessor}, {@link #sampler} and {@link SdkTracerProvider}
+     * Initializes tracer and meter provider components, i.e., {@link #openTelemetry}, {@link #spanExporter}, {@link #spanProcessor}, {@link #sampler}, {@link SdkTracerProvider}, and {@link SdkMeterProvider}
      *
      * @param configuration
      */
     @VisibleForTesting
-    void initTracing(InspectitConfig configuration) {
-        double sampleProbability = configuration.getTracing().getSampleProbability();
+    void initOtel(InspectitConfig configuration) {
 
-        // set up sampler
-        sampler = new DynamicSampler(sampleProbability);
+        // create the service name resource
+        serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
+                .getServiceName()));
 
-        // set up spanProcessor and spanExporter
-        spanExporter = new DynamicMultiSpanExporter();
-        spanProcessor = BatchSpanProcessor.builder(spanExporter)
-                .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
-                .setScheduleDelay(configuration.getTracing().getScheduleDelayMillis(), TimeUnit.MILLISECONDS)
-                .build();
-        // build TracerProvider
-        SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
-                .setSampler(sampler)
-                .setResource(serviceNameResource)
-                .addSpanProcessor(spanProcessor);
+        // build new SdkTracerProvider
+        tracerProvider = buildSdkTracerProvider(configuration);
 
-        // build the SdkTracerProvider
-        SdkTracerProvider tracerProvider = builder.build();
+        // build new SdkMeterProvider
+        meterProvider = SdkMeterProvider.builder().setResource(serviceNameResource).build();
 
         // build OTEL
         OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
+                .setMeterProvider(meterProvider)
                 .setPropagators(ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), JaegerPropagator.getInstance(), W3CBaggagePropagator.getInstance(), B3Propagator.injectingMultiHeaders())))
                 .build();
 
@@ -355,37 +358,72 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      *
      * @param configuration
      *
-     * @return Whether {@link #openTelemetry} was successfully configured
+     * @return The updated {@link SdkTracerProvider} or null if the configuration failed.
      */
     @VisibleForTesting
-    synchronized boolean configureTracing(InspectitConfig configuration) {
+    synchronized SdkTracerProvider configureTracing(InspectitConfig configuration) {
         if (!enabled || stopped) {
-            return true;
+            return null;
         }
         try {
             // update sample probability
             sampler.setSampleProbability(configuration.getTracing().getSampleProbability());
-            return true;
+            return tracerProvider;
+
         } catch (Exception e) {
             log.error("Failed to configure OpenTelemetry Tracing", e);
-            return false;
+            return null;
         }
     }
 
     /**
-     * Configures the {@link SdkMeterProvider} and registers it as the {@link GlobalMeterProvider} via {@link GlobalMeterProvider#set(MeterProvider)}
+     * Builds a new {@link SdkTracerProvider} based on the given {@link InspectitConfig}
      *
      * @param configuration
      *
-     * @return
+     * @return A new {@link SdkTracerProvider}
+     */
+    private synchronized SdkTracerProvider buildSdkTracerProvider(InspectitConfig configuration) {
+        double sampleProbability = configuration.getTracing().getSampleProbability();
+
+        // set up sampler
+        sampler = new DynamicSampler(sampleProbability);
+
+        // set up spanProcessor and spanExporter
+        spanExporter = DynamicMultiSpanExporter.create();
+        spanProcessor = BatchSpanProcessor.builder(spanExporter)
+                .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
+                .setScheduleDelay(configuration.getTracing().getScheduleDelayMillis(), TimeUnit.MILLISECONDS)
+                .build();
+        // build TracerProvider
+        SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
+                .setSampler(sampler)
+                .setResource(serviceNameResource)
+                .addSpanProcessor(spanProcessor);
+
+        return builder.build();
+    }
+
+    /**
+     * Configures the {@link SdkMeterProvider}
+     *
+     * @param configuration
+     *
+     * @return The updated {@link SdkMeterProvider} or null if the configuration failed.
      */
     @VisibleForTesting
-    synchronized boolean configureMeterProvider(InspectitConfig configuration) {
-        if (!enabled) {
-            return true;
+    synchronized SdkMeterProvider configureMeterProvider(InspectitConfig configuration) {
+        if (!enabled || stopped) {
+            return null;
         }
         try {
 
+            // stop the previously registered MeterProvider
+            if (null != meterProvider) {
+                long start = System.nanoTime();
+                OpenTelemetryUtils.stopMeterProvider(meterProvider, true);
+                log.info("time to stopMeterProvider: {} ms", (System.nanoTime() - start) / 1000000);
+            }
             // build new SdkMeterProvider
             SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(serviceNameResource);
 
@@ -396,21 +434,11 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
             SdkMeterProvider sdkMeterProvider = builder.build();
 
-            // if the MeterProviderImpl is null, build and register it
-            if (null == meterProvider) {
-                meterProvider = MeterProviderImpl.builder().meterProvider(sdkMeterProvider).build();
-                meterProvider.registerGlobal();
-            }
-            // otherwise, just update the internally used SdkMeterProvider
-            else {
-                meterProvider.set(sdkMeterProvider);
-            }
-
-            return true;
+            return sdkMeterProvider;
 
         } catch (Exception e) {
             log.error("Failed to configure MeterProvider", e);
-            return false;
+            return null;
         }
     }
 
@@ -537,5 +565,4 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     public boolean unregisterMetricExporterService(DynamicallyActivatableMetricsExporterService service) {
         return unregisterMetricExporterService(service.getName());
     }
-
 }

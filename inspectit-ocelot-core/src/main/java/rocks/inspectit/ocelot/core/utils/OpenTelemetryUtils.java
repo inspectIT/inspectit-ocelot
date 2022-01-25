@@ -39,10 +39,8 @@ public class OpenTelemetryUtils {
      */
     public static CompletableResultCode stopMeterProvider(SdkMeterProvider meterProvider, boolean forceFlush) {
         // force flush if applicable
-        long start = System.nanoTime();
         if (forceFlush) {
             // wait until force flush has succeeded
-            long startFlush = System.nanoTime();
             CompletableResultCode flushResult = meterProvider.forceFlush();
             if (!flushResult.isDone()) {
                 CountDownLatch latch = new CountDownLatch(1);

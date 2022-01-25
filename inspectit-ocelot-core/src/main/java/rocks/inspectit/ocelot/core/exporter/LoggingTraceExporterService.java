@@ -31,7 +31,7 @@ public class LoggingTraceExporterService extends DynamicallyActivatableTraceExpo
         super.init();
 
         // create span exporter and span processors
-        spanExporter = new LoggingSpanExporter();
+        spanExporter = LoggingSpanExporter.create();
     }
 
     @Override

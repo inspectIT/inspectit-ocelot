@@ -22,6 +22,14 @@ import java.util.function.Function;
 public class DynamicMultiSpanExporter implements SpanExporter {
 
     /**
+     * Returns a new {@link DynamicMultiSpanExporter}
+     * @return
+     */
+    public static DynamicMultiSpanExporter create(){
+        return new DynamicMultiSpanExporter();
+    }
+
+    /**
      * The {@link SpanExporter}s that all received spans are forwarded to.
      */
     private Map<String, SpanExporter> spanExporters = new ConcurrentHashMap<>();

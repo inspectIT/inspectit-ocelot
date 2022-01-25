@@ -2,10 +2,9 @@ package rocks.inspectit.ocelot.core.exporter;
 
 import io.github.netmikey.logunit.api.LogCapturer;
 import io.opencensus.stats.*;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.BoundLongCounter;
-import io.opentelemetry.api.metrics.GlobalMeterProvider;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.exporter.logging.LoggingMetricExporter;
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
@@ -39,6 +39,10 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
     @BeforeEach
     void enableService() {
         localSwitch(true);
+        Awaitility.await()
+                .atMost(15, TimeUnit.SECONDS)
+                .pollInterval(1, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertThat(Instances.openTelemetryController.isConfigured()).isTrue());
     }
 
     @AfterEach
@@ -86,7 +90,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
             assertThat(service.isEnabled()).isTrue();
 
             // get the meter and create a counter
-            Meter meter = GlobalMeterProvider.get()
+            Meter meter = GlobalOpenTelemetry.getMeterProvider()
                     .meterBuilder("rocks.inspectit.ocelot")
                     .setInstrumentationVersion("0.0.1")
                     .build();
@@ -94,10 +98,11 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
                     .setDescription("Processed jobs")
                     .setUnit("1")
                     .build();
-            BoundLongCounter workCounter = counter.bind(Attributes.of(AttributeKey.stringKey("Key"), "SomeWork"));
 
             // record counter
-            workCounter.add(1);
+            counter.add(1, Attributes.of(AttributeKey.stringKey("Key"), "SomeWork"));
+
+            Instances.openTelemetryController.flush();
 
             // verify that the metric has been exported to the log
             Awaitility.waitAtMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {

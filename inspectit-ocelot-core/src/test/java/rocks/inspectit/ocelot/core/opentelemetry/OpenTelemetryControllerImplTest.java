@@ -2,31 +2,41 @@ package rocks.inspectit.ocelot.core.opentelemetry;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.metrics.GlobalMeterProvider;
 import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.api.trace.TracerProvider;
 import io.opentelemetry.exporter.logging.LoggingMetricExporter;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.awaitility.Awaitility;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableTraceExporterService;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.*;
 
 /**
@@ -130,7 +140,8 @@ class OpenTelemetryControllerImplTest {
 
         @Test
         void testConfigureTracing() {
-            TracerProvider tracerProvider = GlobalOpenTelemetry.getTracerProvider();
+            TracerProvider globalTracerProvider = GlobalOpenTelemetry.getTracerProvider();
+            MeterProvider globalMeterProvider = GlobalOpenTelemetry.getMeterProvider();
             // register test service
             registerTestTraceExporterServiceAndVerify(true);
             // configure OTEL
@@ -140,7 +151,8 @@ class OpenTelemetryControllerImplTest {
             verify(openTelemetryController, times(0)).configureMeterProvider(any(InspectitConfig.class));
 
             // verify that the tracer provider does not change after tracing has been (re-)configured
-            assertThat(tracerProvider).isEqualTo(tracerProvider);
+            assertThat(globalTracerProvider).isSameAs(GlobalOpenTelemetry.getTracerProvider());
+            assertThat(globalMeterProvider).isSameAs(GlobalOpenTelemetry.getMeterProvider());
         }
 
         @Test
@@ -246,9 +258,12 @@ class OpenTelemetryControllerImplTest {
 
         @Test
         void testConfigureMetrics() {
-            MeterProviderImpl meterProviderImpl = openTelemetryController.getMeterProvider();
+            MeterProvider globalMeterProvider = GlobalOpenTelemetry.getMeterProvider();
+            TracerProvider globalTracerProvider = GlobalOpenTelemetry.getTracerProvider();
 
-            MeterProvider globalMeterProvider = GlobalMeterProvider.get();
+            SdkMeterProvider meterProvider = openTelemetryController.getMeterProvider();
+            SdkTracerProvider tracerProvider = openTelemetryController.getTracerProvider();
+
             // register some service
             registerTestMetricExporterServiceAndVerify(true);
             // configure OTEL
@@ -258,16 +273,18 @@ class OpenTelemetryControllerImplTest {
             verify(openTelemetryController, times(1)).configureMeterProvider(any(InspectitConfig.class));
             verify(openTelemetryController, times(0)).configureTracing(any(InspectitConfig.class));
 
-            // (global) meter provider should not have changed during configuration
-            assertThat(openTelemetryController.getMeterProvider()).isSameAs(meterProviderImpl);
-            assertThat(GlobalMeterProvider.get()).isSameAs(globalMeterProvider);
-
+            // the meter provider should have changed, but the tracer provider not
+            assertThat(openTelemetryController.getMeterProvider()).isNotSameAs(meterProvider);
+            assertThat(globalMeterProvider).isNotSameAs(GlobalOpenTelemetry.getMeterProvider());
+            assertThat(openTelemetryController.getTracerProvider()).isSameAs(tracerProvider);
+            // the global tracer provider should have changed as we have rebuilt the OpenTelemetrySdk, which then creates a new ObfuscatedTracerProvider
+            assertThat(globalTracerProvider).isNotSameAs(GlobalOpenTelemetry.getTracerProvider());
         }
 
         @Test
         void testShutdown() {
             openTelemetryController.shutdown();
-            assertThat(null == GlobalMeterProvider.get());
+            assertThat(null == GlobalOpenTelemetry.getMeterProvider());
         }
 
         /**
@@ -302,6 +319,85 @@ class OpenTelemetryControllerImplTest {
             public String getName() {
                 return "test-metrics-exporter-service";
             }
+        }
+    }
+
+    /**
+     * Test changes in MetricsExporterSettings, which will lead to {@link SdkMeterProvider} being rebuilt and re-registered to {@link OpenTelemetryImpl}
+     */
+    @Nested
+    static class ChangeMetrics extends SpringTestBase {
+
+        @Autowired
+        OpenTelemetryControllerImpl openTelemetryController;
+
+        private static CloseableHttpClient testClient;
+
+        @BeforeAll
+        private static void initTestClient() {
+            RequestConfig.Builder requestBuilder = RequestConfig.custom();
+            requestBuilder = requestBuilder.setConnectTimeout(1000);
+            requestBuilder = requestBuilder.setConnectionRequestTimeout(1000);
+
+            HttpClientBuilder builder = HttpClientBuilder.create();
+            builder.setDefaultRequestConfig(requestBuilder.build());
+            testClient = builder.build();
+        }
+
+        @AfterAll
+        static void closeClient() throws Exception {
+            testClient.close();
+        }
+
+        void assertGet200(String url) throws Exception {
+            CloseableHttpResponse response = testClient.execute(new HttpGet(url));
+            int statusCode = response.getStatusLine().getStatusCode();
+            assertThat(statusCode).isEqualTo(200);
+            response.close();
+        }
+
+        void assertUnavailable(String url) {
+            Throwable throwable = catchThrowable(() -> testClient.execute(new HttpGet(url))
+                    .getStatusLine()
+                    .getStatusCode());
+
+            assertThat(throwable).isInstanceOf(IOException.class);
+        }
+
+        @Test
+        void testChangeMetricsExporterServices() throws Exception {
+
+            SdkMeterProvider sdkMeterProvider = openTelemetryController.getMeterProvider();
+            // enable prometheus and logging
+            updateProperties(properties -> {
+                properties.setProperty("inspectit.exporters.metrics.prometheus.enabled", true);
+                properties.setProperty("inspectit.exporters.metrics.logging.enabled", true);
+            });
+            // wait until the OpenTelemetryController has been reconfigured
+            SdkMeterProvider newSdkMeterProvider = openTelemetryController.getMeterProvider();
+            // meter provider should have changed
+            assertThat(sdkMeterProvider).isNotSameAs(newSdkMeterProvider);
+            // Prometheus should be running
+            assertGet200("http://localhost:8888/metrics");
+
+            // disable prometheus
+            updateProperties(properties -> {
+                properties.setProperty("inspectit.exporters.metrics.prometheus.enabled", false);
+            });
+            assertUnavailable("http://localhost:8888/metrics");
+
+            // wait until the SdkMeterProvider has been rebuilt
+            Awaitility.await()
+                    .atMost(15, TimeUnit.SECONDS)
+                    .pollInterval(1, TimeUnit.SECONDS)
+                    .untilAsserted(() -> assertThat(newSdkMeterProvider).isNotSameAs(openTelemetryController.getMeterProvider()));
+
+            // enable prometheus
+            updateProperties(properties -> {
+                properties.setProperty("inspectit.exporters.metrics.prometheus.enabled", true);
+            });
+            assertGet200("http://localhost:8888/metrics");
+
         }
     }
 
