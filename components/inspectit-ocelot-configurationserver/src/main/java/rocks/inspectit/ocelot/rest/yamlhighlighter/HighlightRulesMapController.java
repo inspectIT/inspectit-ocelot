@@ -7,6 +7,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
 import java.lang.reflect.*;
@@ -73,6 +74,9 @@ public class HighlightRulesMapController extends AbstractBaseController {
                     innerMap.put("object-attributes", generateMap(field.getType()));
                 }
 
+            } else if(currentClass.equals(GenericActionSettings.class) &&
+                    (field.getName().equals("value") || field.getName().equals("valueBody"))){
+                innerMap.put("type", "java");
             } else {
 
                 innerMap.put("type", "text");
