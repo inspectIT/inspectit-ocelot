@@ -12,7 +12,7 @@ import rocks.inspectit.ocelot.config.model.exporters.trace.JaegerExporterSetting
 import javax.validation.Valid;
 
 /**
- * Service for the Jaeger OpenTelemetry exporter.
+ * Service for the {@link JaegerThriftSpanExporter}.
  * Can be dynamically started and stopped using the exporters.trace.jaeger.enabled configuration.
  */
 @Component
@@ -51,12 +51,7 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
     protected boolean doEnable(InspectitConfig configuration) {
         try {
             JaegerExporterSettings settings = configuration.getExporters().getTracing().getJaeger();
-            log.info("Starting Jaeger Exporter with url '{}' (grpc '{}')", settings.getUrl(), settings.getGrpc());
-
-            // TODO: use getUrl() or getGRPC()?
-            /*grpcSpanExporter = JaegerGrpcSpanExporter.builder()
-                    .setEndpoint(settings.getGrpc() == null ? settings.getUrl() : settings.getGrpc())
-                    .build();*/
+            log.info("Starting Jaeger Thrift Exporter with url '{}' (grpc '{}')", settings.getUrl(), settings.getGrpc());
 
             // create span exporter
             spanExporter = JaegerThriftSpanExporter.builder().setEndpoint(settings.getUrl()).build();
@@ -73,14 +68,14 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
 
     @Override
     protected boolean doDisable() {
-        log.info("Stopping Jaeger Exporter");
+        log.info("Stopping Jaeger Thrift Exporter");
         try {
             openTelemetryController.unregisterTraceExporterService(this);
             if (null != spanExporter) {
                 spanExporter.close();
             }
         } catch (Throwable t) {
-            log.error("Error disabling Jaeger exporter", t);
+            log.error("Error disabling Jaeger Thrift Exporter", t);
         }
         return true;
     }

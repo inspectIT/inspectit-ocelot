@@ -74,7 +74,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      * whether {@link GlobalOpenTelemetry} has been successfully been configured.
      */
     @Getter
-    // TODO: make sure that configured is set accordingly when OTEL is being reconfigured (false while configuring, true after success)
     private boolean configured = false;
 
     /**
@@ -261,7 +260,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     }
 
     /**
-     * Shuts down the {@link OpenTelemetryControllerImpl} by calling {@link OpenTelemetryImpl#close()} and {@link MeterProviderImpl#close()} and waits for it to complete.
+     * Shuts down the {@link OpenTelemetryControllerImpl} by calling {@link OpenTelemetryImpl#close()} and waits for it to complete.
      * The shutdown is final, i.e., once this {@link OpenTelemetryImpl} is shutdown, it cannot be re-enabled!
      * <p>
      * Only use this method for testing or when the JVM is shutting down.
@@ -324,7 +323,21 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                 .getServiceName()));
 
         // build new SdkTracerProvider
-        tracerProvider = buildSdkTracerProvider(configuration);
+        double sampleProbability = configuration.getTracing().getSampleProbability();
+        // set up sampler
+        sampler = new DynamicSampler(sampleProbability);
+        // set up spanProcessor and spanExporter
+        spanExporter = DynamicMultiSpanExporter.create();
+        spanProcessor = BatchSpanProcessor.builder(spanExporter)
+                .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
+                .setScheduleDelay(configuration.getTracing().getScheduleDelayMillis(), TimeUnit.MILLISECONDS)
+                .build();
+        // build TracerProvider
+        SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
+                .setSampler(sampler)
+                .setResource(serviceNameResource)
+                .addSpanProcessor(spanProcessor);
+        tracerProvider = builder.build();
 
         // build new SdkMeterProvider
         meterProvider = SdkMeterProvider.builder().setResource(serviceNameResource).build();
@@ -344,13 +357,14 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         if (null != OpenTelemetryUtils.getGlobalOpenTelemetry()) {
             log.info("reset {}", GlobalOpenTelemetry.get().getClass().getName());
             GlobalOpenTelemetry.resetForTest();
+            // update the OTEL_TRACER field in OpenTelemetrySpanBuilderImpl in case that it was already set
+            OpenCensusShimUtils.updateOpenTelemetryTracerInOpenTelemetrySpanBuilderImpl();
         }
 
         // set GlobalOpenTelemetry
         openTelemetry.registerGlobal();
 
-        // update the OTEL_TRACER field in OpenTelemetrySpanBuilderImpl in case that it was already set
-        OpenCensusShimUtils.updateOpenTelemetryTracerInOpenTelemetrySpanBuilderImpl();
+
     }
 
     /**
@@ -374,34 +388,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             log.error("Failed to configure OpenTelemetry Tracing", e);
             return null;
         }
-    }
-
-    /**
-     * Builds a new {@link SdkTracerProvider} based on the given {@link InspectitConfig}
-     *
-     * @param configuration
-     *
-     * @return A new {@link SdkTracerProvider}
-     */
-    private synchronized SdkTracerProvider buildSdkTracerProvider(InspectitConfig configuration) {
-        double sampleProbability = configuration.getTracing().getSampleProbability();
-
-        // set up sampler
-        sampler = new DynamicSampler(sampleProbability);
-
-        // set up spanProcessor and spanExporter
-        spanExporter = DynamicMultiSpanExporter.create();
-        spanProcessor = BatchSpanProcessor.builder(spanExporter)
-                .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
-                .setScheduleDelay(configuration.getTracing().getScheduleDelayMillis(), TimeUnit.MILLISECONDS)
-                .build();
-        // build TracerProvider
-        SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
-                .setSampler(sampler)
-                .setResource(serviceNameResource)
-                .addSpanProcessor(spanProcessor);
-
-        return builder.build();
     }
 
     /**
