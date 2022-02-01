@@ -349,20 +349,18 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                 .setPropagators(ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), JaegerPropagator.getInstance(), W3CBaggagePropagator.getInstance(), B3Propagator.injectingMultiHeaders())))
                 .build();
 
-        // if the OpenTelemetryImpl has not been build, then build and register it
+        // build and register OpenTelemetryImpl
         openTelemetry = OpenTelemetryImpl.builder().openTelemetry(openTelemetrySdk).build();
-
         // check if any OpenTelemetry has been registered to GlobalOpenTelemetry.
         // If so, reset it.
         if (null != OpenTelemetryUtils.getGlobalOpenTelemetry()) {
             log.info("reset {}", GlobalOpenTelemetry.get().getClass().getName());
             GlobalOpenTelemetry.resetForTest();
-            // update the OTEL_TRACER field in OpenTelemetrySpanBuilderImpl in case that it was already set
-            OpenCensusShimUtils.updateOpenTelemetryTracerInOpenTelemetrySpanBuilderImpl();
         }
-
-        // set GlobalOpenTelemetry
         openTelemetry.registerGlobal();
+
+        // update the OTEL_TRACER field in OpenTelemetrySpanBuilderImpl in case that it was already set
+        OpenCensusShimUtils.updateOpenTelemetryTracerInOpenTelemetrySpanBuilderImpl();
     }
 
     /**

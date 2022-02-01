@@ -430,7 +430,9 @@ class OpenTelemetryControllerImplTest {
             // make OC spans and flush
             makeOCSpansAndFlush("test-span");
             // verify the spans are logged
-            Awaitility.waitAtMost(5, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> assertThat(spanLogs.size()).isEqualTo(1));
+            Awaitility.waitAtMost(5, TimeUnit.SECONDS)
+                    .pollInterval(1, TimeUnit.SECONDS)
+                    .untilAsserted(() -> assertThat(spanLogs.getEvents()).hasSize(1));
             assertThat(sdkTracerProvider).isEqualTo(openTelemetryController.getTracerProvider());
 
             // shut off tracer
@@ -442,7 +444,7 @@ class OpenTelemetryControllerImplTest {
             makeOCSpansAndFlush("ignored-span");
             // verify that no more spans are logged
             Thread.sleep(5000);
-            assertThat(spanLogs.size()).isEqualTo(1);
+            assertThat(spanLogs.getEvents()).hasSize(1);
         }
 
         private static void makeOtelSpansAndFlush(String spanName) {

@@ -174,7 +174,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             makeSpansAndFlush();
 
             // assert that both spans are logged
-            assertThat(spanLogs.getEvents()).hasSize(2);
+            Awaitility.waitAtMost(5, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> assertThat(spanLogs.getEvents()).hasSize(2));
             assertThat(spanLogs.getEvents().get(0).getMessage()).contains("openCensusChild");
 
             int numEvents = spanLogs.size();

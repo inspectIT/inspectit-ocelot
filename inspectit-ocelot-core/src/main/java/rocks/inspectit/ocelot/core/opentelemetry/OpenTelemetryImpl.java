@@ -141,11 +141,12 @@ public class OpenTelemetryImpl implements OpenTelemetry {
     }
 
     /**
-     * Registers {@link OpenTelemetryImpl this} to {@link GlobalOpenTelemetry#set(OpenTelemetry)}
+     * Registers {@link OpenTelemetryImpl this} to {@link GlobalOpenTelemetry#set(OpenTelemetry)}.
      *
      * @return
      */
     public OpenTelemetryImpl registerGlobal() {
+        // register globally
         GlobalOpenTelemetry.set(this);
         return this;
     }
