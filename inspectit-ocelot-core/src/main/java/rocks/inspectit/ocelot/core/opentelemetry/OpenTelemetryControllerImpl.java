@@ -363,8 +363,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
         // set GlobalOpenTelemetry
         openTelemetry.registerGlobal();
-
-
     }
 
     /**

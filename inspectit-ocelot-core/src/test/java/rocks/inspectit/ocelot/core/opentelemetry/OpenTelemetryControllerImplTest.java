@@ -1,10 +1,15 @@
 package rocks.inspectit.ocelot.core.opentelemetry;
 
+import io.github.netmikey.logunit.api.LogCapturer;
+import io.opencensus.trace.Tracing;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.metrics.MeterProvider;
+import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.TracerProvider;
+import io.opentelemetry.context.Scope;
 import io.opentelemetry.exporter.logging.LoggingMetricExporter;
+import io.opentelemetry.exporter.logging.LoggingSpanExporter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
@@ -19,6 +24,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -30,6 +36,8 @@ import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableTraceExporterService;
+import rocks.inspectit.ocelot.core.exporter.LoggingTraceExporterService;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -398,6 +406,68 @@ class OpenTelemetryControllerImplTest {
             });
             assertGet200("http://localhost:8888/metrics");
 
+        }
+
+        @RegisterExtension
+        LogCapturer spanLogs = LogCapturer.create().captureForType(LoggingSpanExporter.class);
+
+        @Autowired
+        LoggingTraceExporterService loggingTraceExporterService;
+
+        /**
+         * Verify that the {@link io.opencensus.trace.Tracer} in {@link Tracing#getTracer()} is correctly set to {@link GlobalOpenTelemetry#getTracerProvider()}
+         *
+         * @throws InterruptedException
+         */
+        @Test
+        void testChangeTracingExporterServices() throws InterruptedException {
+            SdkTracerProvider sdkTracerProvider = openTelemetryController.getTracerProvider();
+            // enable logging
+            updateProperties(properties -> {
+                properties.setProperty("inspectit.exporters.tracing.logging.enabled", true);
+            });
+            assertThat(loggingTraceExporterService.isEnabled()).isTrue();
+            // make OC spans and flush
+            makeOCSpansAndFlush("test-span");
+            // verify the spans are logged
+            Awaitility.waitAtMost(5, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> assertThat(spanLogs.size()).isEqualTo(1));
+            assertThat(sdkTracerProvider).isEqualTo(openTelemetryController.getTracerProvider());
+
+            // shut off tracer
+            updateProperties(properties -> {
+                properties.setProperty("inspectit.exporters.tracing.logging.enabled", false);
+            });
+            assertThat(loggingTraceExporterService.isEnabled()).isFalse();
+            // make OC spans and flush
+            makeOCSpansAndFlush("ignored-span");
+            // verify that no more spans are logged
+            Thread.sleep(5000);
+            assertThat(spanLogs.size()).isEqualTo(1);
+        }
+
+        private static void makeOtelSpansAndFlush(String spanName) {
+            // build and flush span
+            Span span = GlobalOpenTelemetry.getTracerProvider()
+                    .get("rocks.inspectit.instrumentation.test")
+                    .spanBuilder(spanName)
+                    .startSpan();
+            try (Scope scope = span.makeCurrent()) {
+            } finally {
+                span.end();
+            }
+            OpenTelemetryUtils.flush();
+        }
+
+        private static void makeOCSpansAndFlush(String spanName) {
+            // get OC tracer and start spans
+            io.opencensus.trace.Tracer tracer = Tracing.getTracer();
+
+            // start span
+            try (io.opencensus.common.Scope scope = tracer.spanBuilder(spanName).startScopedSpan()) {
+                io.opencensus.trace.Span span = tracer.getCurrentSpan();
+                span.addAnnotation("anno");
+            }
+            OpenTelemetryUtils.flush();
         }
     }
 
