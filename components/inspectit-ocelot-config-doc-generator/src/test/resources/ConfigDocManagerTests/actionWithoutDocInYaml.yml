@@ -1,0 +1,14 @@
+inspectit:
+  instrumentation:
+    actions:
+      # Prints two given Objects to stdout
+      a_debug_println_2:
+        imports:
+          - java.util
+        input:
+          a: Object
+          b: |
+            Object
+        value-body: |
+          System.out.println(a + \"\" + b);
+          return a + \"\" b;";

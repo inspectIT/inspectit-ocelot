@@ -19,7 +19,10 @@ repositories {
 
 dependencies {
     // Use JUnit Jupiter for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
+    testImplementation (
+            'org.junit.jupiter:junit-jupiter:5.7.2',
+            "io.opencensus:opencensus-api:${openCensusVersion}"
+    )
 
     // This dependency is used by the application.
     implementation (
@@ -28,7 +31,9 @@ dependencies {
             'org.apache.commons:commons-lang3:3.0',
             'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.0',
             "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
-            'commons-beanutils:commons-beanutils:1.9.4'
+            'commons-beanutils:commons-beanutils:1.9.4',
+            'com.google.guava:guava:31.0.1-jre',
+
     )
 
     compileOnly 'org.projectlombok:lombok:1.18.22'
