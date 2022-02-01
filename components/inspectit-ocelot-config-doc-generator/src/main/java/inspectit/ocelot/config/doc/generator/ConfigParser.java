@@ -59,12 +59,12 @@ public class ConfigParser {
      * @param configYaml String in YAML format with placeholders.
      * @return The YAML-String with the placeholders replaced.
      */
-    private String replacePlaceholders(String configYaml){
+    protected String replacePlaceholders(String configYaml){
 
         //deserialize YAML to Map to get the placeholders' values from
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         try{
-            Map yamlMap = mapper.readValue(configYaml, Map.class);
+            Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
 
             //find the first occurence of the ${placeholder} syntax
             int index = configYaml.indexOf("${");
@@ -117,10 +117,10 @@ public class ConfigParser {
                 value = new_value;
             } else {
                 if(keys.get(keys.size() - 1).equals(key)){
-                    //if the corresponding value can not be found, return the full key.
+                    // if the corresponding value can not be found, return the full key.
                     // This is a workaround for, as of now, only environment variables, so it should be fine for the
                     // Documentation but would not be for any actually running agents.
-                    return old_key + key;
+                    return String.join(".", keys);
                 } else {
                     old_key = old_key + key + ".";
                 }
@@ -156,11 +156,9 @@ public class ConfigParser {
      * The CustomDurationDeserializer is needed to parse the Duration values in the YAML files using Jackson.
      */
     private static class CustomDurationDeserializer extends JsonDeserializer<Duration> {
-
         @Override
         public Duration deserialize(JsonParser parser, DeserializationContext context) throws IOException, JsonProcessingException {
-            //return parseHuman(parser.getText());\
-            return Duration.ofMillis(50);
+            return parseHuman(parser.getText());
         }
     }
 }

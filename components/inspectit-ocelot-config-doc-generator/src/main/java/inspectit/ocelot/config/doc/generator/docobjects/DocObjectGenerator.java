@@ -24,33 +24,37 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DocObjectGenerator {
     
-    public ConfigDocumentation generateFullDocObject(InspectitConfig config){
-        
+    public ConfigDocumentation generateConfigDocumentation(InspectitConfig config){
+
         InstrumentationSettings instrumentation = config.getInstrumentation();
+
+        if(instrumentation == null) {
+            instrumentation = new InstrumentationSettings();
+        }
         Map<String, InstrumentationScopeSettings> scopes = instrumentation.getScopes();
         Map<String, GenericActionSettings> actions = instrumentation.getActions();
         Map<String, InstrumentationRuleSettings> rules = instrumentation.getRules();
 
-        MetricsSettings metricsSettings = config.getMetrics();
-        
         List<ScopeDoc> scopesDocs = generateScopeDocs(scopes);
         scopesDocs.sort(Comparator.comparing(BaseDoc::getName));
+
         List<ActionDoc> actionsDocs = generateActionDocs(actions);
         actionsDocs.sort(Comparator.comparing(BaseDoc::getName));
-        List<MetricDoc> metricDocs = generateMetricDocs(metricsSettings);
-        metricDocs.sort(Comparator.comparing(BaseDoc::getName));
 
-
-        Map<String, RuleDoc> ruleDocsMap = generateruleDocsMap(rules);
+        Map<String, RuleDoc> ruleDocsMap = generateRuleDocsMap(rules);
         for(RuleDoc currentRule: ruleDocsMap.values()){
             currentRule.addEntryExitFromIncludedRules(ruleDocsMap, currentRule.getInclude());
         }
         List<RuleDoc> ruleDocs = new ArrayList<>(ruleDocsMap.values());
         ruleDocs.sort(Comparator.comparing(BaseDoc::getName));
 
+        MetricsSettings metricsSettings = config.getMetrics();
+        List<MetricDoc> metricDocs = generateMetricDocs(metricsSettings);
+        metricDocs.sort(Comparator.comparing(BaseDoc::getName));
+
         return new ConfigDocumentation(scopesDocs, actionsDocs, ruleDocs, metricDocs);
     }
-    
+
     private List<ScopeDoc> generateScopeDocs(Map<String, InstrumentationScopeSettings> scopes){
         List<ScopeDoc> scopeDocs = new ArrayList<>();
         for(String scopeName: scopes.keySet()){
@@ -117,7 +121,7 @@ public class DocObjectGenerator {
         return actionDocs;
     }
 
-    private Map<String, RuleDoc> generateruleDocsMap(Map<String, InstrumentationRuleSettings> rules){
+    private Map<String, RuleDoc> generateRuleDocsMap(Map<String, InstrumentationRuleSettings> rules){
         Map<String, RuleDoc> ruleDocsMap = new HashMap<>();
         for(String ruleName: rules.keySet()){
 
