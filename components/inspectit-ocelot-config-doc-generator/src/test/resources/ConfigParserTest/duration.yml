@@ -1,0 +1,5 @@
+inspectit:
+  instrumentation:
+    internal:
+      inter-batch-delay: 50ms
+      new-class-discovery-interval: 10s

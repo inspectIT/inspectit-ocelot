@@ -6,12 +6,12 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 
 public class ConfigDocManager {
 
-    public ConfigDocumentation getConfigDocumentation(String configYaml){
+    public ConfigDocumentation loadConfigDocumentation(String configYaml){
         ConfigParser configParser = new ConfigParser();
         InspectitConfig config = configParser.parseConfig(configYaml);
 
         DocObjectGenerator docObjectGenerator = new DocObjectGenerator();
-        return docObjectGenerator.generateFullDocObject(config);
+        return docObjectGenerator.generateConfigDocumentation(config);
     }
 
 }
