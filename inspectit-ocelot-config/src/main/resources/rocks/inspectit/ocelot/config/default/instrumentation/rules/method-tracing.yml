@@ -3,8 +3,8 @@ inspectit:
     rules:
 
       'r_trace_method':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             This rule records the current method as a span.
             In addition, the FQN of the method is added as a tag and the error status is set based on if the method threw an exception
           

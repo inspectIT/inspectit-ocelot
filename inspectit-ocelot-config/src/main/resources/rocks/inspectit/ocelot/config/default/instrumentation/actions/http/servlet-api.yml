@@ -3,8 +3,8 @@ inspectit:
     actions:
 
       'a_servletrequest_isHttp':
-        _doc:
-          _description: 'Checks if a given ServletRequest is an instance of HttpServletRequest.'
+        doc:
+          description: 'Checks if a given ServletRequest is an instance of HttpServletRequest.'
         imports:
           - 'javax.servlet'
           - 'javax.servlet.http'
@@ -13,8 +13,8 @@ inspectit:
         value: 'Boolean.valueOf(request instanceof HttpServletRequest)'
 
       'a_httpservletrequest_getPath':
-        _doc:
-          _description: 'Extracts the request path from the HttpServletRequest.'
+        doc:
+          description: 'Extracts the request path from the HttpServletRequest.'
         imports:
           - 'javax.servlet.http'
         input:
@@ -22,8 +22,8 @@ inspectit:
         value: 'java.net.URI.create(request.getRequestURI()).getPath()'
 
       'a_httpservletrequest_getMethod':
-        _doc:
-          _description: 'Extracts the method path from the HttpServletRequest.'
+        doc:
+          description: 'Extracts the method path from the HttpServletRequest.'
         imports:
           - 'javax.servlet.http'
         input:
@@ -31,8 +31,8 @@ inspectit:
         value: 'request.getMethod()'
 
       'a_httpservletresponse_getStatus':
-        _doc:
-          _description: 'Extracts the response status from the given HttpServletResponse.'
+        doc:
+          description: 'Extracts the response status from the given HttpServletResponse.'
         imports:
           - 'javax.servlet.http'
         input:
@@ -40,8 +40,8 @@ inspectit:
         value: 'Integer.valueOf(response.getStatus())'
 
       'a_servletapi_downPropagation':
-        _doc:
-          _description: 'Reads down-propagated data from the request HTTP Headers.'
+        doc:
+          description: 'Reads down-propagated data from the request HTTP Headers.'
         is-void: true
         imports:
           - 'java.util'
@@ -67,8 +67,8 @@ inspectit:
           }
 
       'a_servletapi_upPropagation':
-        _doc:
-          _description: 'Writes up-propagated data to the response HTTP Headers.'
+        doc:
+          description: 'Writes up-propagated data to the response HTTP Headers.'
         is-void: true
         imports:
           - 'java.util'

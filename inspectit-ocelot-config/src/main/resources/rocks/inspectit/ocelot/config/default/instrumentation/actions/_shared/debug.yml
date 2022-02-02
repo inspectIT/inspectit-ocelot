@@ -3,8 +3,8 @@ inspectit:
     actions:
 
       'a_debug_println':
-        _doc:
-          _description: 'Prints a given Object to stdout.'
+        doc:
+          description: 'Prints a given Object to stdout.'
         input:
           'value': 'Object'
         is-void: true
@@ -12,8 +12,8 @@ inspectit:
           System.out.println(value);
 
       'a_debug_println_2':
-        _doc:
-          _description: 'Prints two given Objects to stdout.'
+        doc:
+          description: 'Prints two given Objects to stdout.'
         input:
           'a': 'Object'
           'b': 'Object'

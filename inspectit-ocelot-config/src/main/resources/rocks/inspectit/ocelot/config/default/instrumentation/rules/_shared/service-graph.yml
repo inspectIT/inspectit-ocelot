@@ -76,8 +76,8 @@ inspectit:
     rules:
 
       'r_servicegraph_prepare_up_propagation':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             This rule prepares up-propagation to include service-graph related information.
             Namely this ensures that the current service name is included as target service.
             Because depending on the used communication up-propagation can happen on both exit or entry, this rule configures servicegraph_target_service in both entry and exit of the method.
@@ -93,8 +93,8 @@ inspectit:
               'value': 'service'
 
       'r_servicegraph_prepare_down_propagation':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             This rule prepares down-propagation to include service-graph related information
             Namely this ensures that the current service name is included as origin service
         entry:
@@ -104,8 +104,8 @@ inspectit:
               'value': 'service'
 
       'r_servicegraph_inbound_record_method':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Can be included to record the current method invocation as an inbound service graph call.
             The includer should populate servicegraph_is_entry if this method is the correct entry point.
             In addition, servicegraph_origin_external can be populated if an external origin is present.
@@ -115,8 +115,8 @@ inspectit:
           'r_servicegraph_inbound_record_metric': true
 
       'r_servicegraph_outbound_record_method':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Can be included to record the current method invocation as an outbound service graph call.
             The includer should populate servicegraph_is_entry if this method is the correct entry point.
             In addition, servicegraph_target_external can be populated if an external target is present.
@@ -126,8 +126,8 @@ inspectit:
           'r_servicegraph_outbound_record_metric': true
 
       'r_servicegraph_inbound_record_metric':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Records inbound traffic as service graph call.
             When this rule is included, it is expected that servicegraph_duration, servicegraph_protocol and servicegraph_is_error are populated.
             If there was an external origin, servicegraph_origin_external should contain it's name.
@@ -155,8 +155,8 @@ inspectit:
               'error': 'servicegraph_is_error'
 
       'r_servicegraph_outbound_record_metric':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Records outbound traffic as service graph call
             When this rule is included, it is expected that servicegraph_duration, servicegraph_protocol and servicegraph_is_error are populated.
             If there was an external target, servicegraph_target_external should contain it's name.
@@ -175,8 +175,8 @@ inspectit:
               'error': 'servicegraph_is_error'
 
       'r_servicegraph_capture_method_duration':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Utility rule used for both inbound & outbout service graph traffic.
             Captures the duration of the current method as servicegraph_duration
             This capturing takes only place if servicegraph_is_entry is populated with "true"

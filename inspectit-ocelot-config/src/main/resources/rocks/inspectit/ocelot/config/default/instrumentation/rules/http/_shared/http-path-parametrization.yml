@@ -3,8 +3,8 @@ inspectit:
     rules:
 
       'r_http_parametrize_path':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             This rule is included by all HTTP instrumentation to derive the parametrized http_path from http_raw_path.
             It should therefore be extended via custom includes in order to perform application specific parametrizations.
         include:
@@ -17,8 +17,8 @@ inspectit:
               'value': 'http_raw_path'
 
       'r_http_parametrize_path_remove_ids':
-        _doc:
-          _description: 'The default parametrization inspectIT provides, which removes numeric ID path segments and UUIDs.'
+        doc:
+          description: 'The default parametrization inspectIT provides, which removes numeric ID path segments and UUIDs.'
         entry:
           'http_path':
             only-if-not-null: 'http_path'

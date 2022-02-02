@@ -3,8 +3,8 @@ inspectit:
     actions:
 
       'a_httpurlconnection_getTargetHost':
-        _doc:
-          _description: 'Extracts the target of the request in the format "host:port".'
+        doc:
+          description: 'Extracts the target of the request in the format "host:port".'
         imports:
           - 'java.net'
         input:
@@ -19,22 +19,22 @@ inspectit:
           }
 
       'a_httpurlconnection_getPath':
-        _doc:
-          _description: 'Extracts the target path of the request.'
+        doc:
+          description: 'Extracts the target path of the request.'
         input:
           _this: 'java.net.HttpURLConnection'
         value: '_this.getURL().getPath()'
 
       'a_httpurlconnection_getMethod':
-        _doc:
-          _description: 'Extracts the method of the request, e.g. GET or POST.'
+        doc:
+          description: 'Extracts the method of the request, e.g. GET or POST.'
         input:
           _this: 'java.net.HttpURLConnection'
         value: '_this.getRequestMethod()'
 
       'a_httpurlconnection_getStatus':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Extracts the response status code if the request returned without an exception.
             Otherwise returns the name of the exception, e.g. SocketTimeoutException.'
         input:
@@ -47,8 +47,8 @@ inspectit:
           }
 
       'a_httpurlconnection_downPropagation':
-        _doc:
-          _description: 'Writes down-propagated data to the HTTP Headers.'
+        doc:
+          description: 'Writes down-propagated data to the HTTP Headers.'
         is-void: true
         imports:
           - 'java.util'
@@ -75,8 +75,8 @@ inspectit:
           }
 
       'a_httpurlconnection_upPropagation':
-        _doc:
-          _description: 'Reads up-propagated data from the HTTP Headers'
+        doc:
+          description: 'Reads up-propagated data from the HTTP Headers'
         is-void: true
         imports:
           - 'java.util'

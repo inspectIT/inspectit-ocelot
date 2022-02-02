@@ -3,8 +3,8 @@ inspectit:
     rules:
 
       'r_apacheclient_http_metric':
-        _doc:
-          _description: 'Records the http/out metrics for calls done via the Apache HTTP Client.'
+        doc:
+          description: 'Records the http/out metrics for calls done via the Apache HTTP Client.'
         include:
           'r_apacheclient_extract_details': true
           'r_http_client_record_metric_on_method': true

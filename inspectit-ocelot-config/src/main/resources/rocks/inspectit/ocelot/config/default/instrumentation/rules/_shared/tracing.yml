@@ -3,8 +3,8 @@ inspectit:
     rules:
 
       'r_tracing_global_attributes':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             This rule should be included by all other tracing rules.
             It allows to specify data which is added to all spans as attributes, e.g. a business transaction
 
@@ -13,8 +13,8 @@ inspectit:
           'r_tracing_fqn_attribute': true
 
       'r_tracing_exception_attributes':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             This rule by default only tags the exception name and message (using the toString() method).
             If required, it can be enhanced to include the stack trace.
         'tracing':
@@ -22,8 +22,8 @@ inspectit:
             'java.exception': _thrown
 
       'r_tracing_fqn_attribute':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             This rule adds the fully qualified name of the method as span attribute
         'tracing':
           attributes:

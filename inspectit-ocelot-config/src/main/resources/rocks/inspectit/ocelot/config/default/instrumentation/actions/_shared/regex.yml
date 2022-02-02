@@ -3,8 +3,8 @@ inspectit:
     actions:
 
       'a_regex_replaceAll':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Replaces all matches for the provided regex pattern with the given replacement string.
             If the input string is null, null is returned.
         imports:
@@ -20,8 +20,8 @@ inspectit:
           return string.replaceAll(pattern, replacement);
 
       'a_regex_replaceAll_multi':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Replaces all matches for all of the provided regex patterns with the given replacement strings.
             If the input string is null, null is returned.
             
@@ -53,8 +53,8 @@ inspectit:
           return result;
 
       'a_regex_replaceMatch':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Replaces the provided input string if it fully matches a given regex.
             If the input string is null, null is returned.
         imports:
@@ -77,10 +77,9 @@ inspectit:
           }
           return string;
 
-      #
       'a_regex_replaceMatch_multi':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Scans the provided list of regexes to check if any matches the input string fully.
             If a match is found, it is replaced with the provided replacement and returned.
             If the input string is null, null is returned.
@@ -120,8 +119,8 @@ inspectit:
           return result;
 
       'a_regex_replaceFirst':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Replaces the first match for the provided regex pattern with the given replacement string.
             If the input string is null, null is returned.
         imports:
@@ -143,8 +142,8 @@ inspectit:
           return string;
 
       'a_regex_extractMatch':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Checks if the given input string fully matches the provided regex.
             If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
             If the input string is null or the input string does not match the regex, null is returned.
@@ -173,8 +172,8 @@ inspectit:
           return null;
 
       'a_regex_extractMatch_multi':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Checks if the given input string fully matches any of the provided regexes.
             If it does, the result for the matching regex is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
             The checking happens in the order of the list, meaning that the replacement for the first matching regex is returned.
@@ -216,8 +215,8 @@ inspectit:
           return null;
 
       'a_regex_extractFirst':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Checks if the given input string has any match for the provided regex.
             If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
             If the input string is null or the input string does not match the regex, null is returned.
@@ -241,49 +240,6 @@ inspectit:
               return sb.toString();
             } else {
               return result;
-            }
-          }
-          return null;
-
-      'a_regex_extractFirst_multi':
-        _doc:
-          _description: |-
-            Checks if the given input string contains a match for any of the provided regexes.
-            If it does, the result for the matching regex is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
-            The checking happens in the order of the list, meaning that the replacement for the first matching regex is returned.
-            If the input string is null or the input string does not match the regex, null is returned. 
-            
-            the patterns_and_results are expected to be a list of the following form:
-            constant-input:
-              patterns_and_results:
-                - pattern: <regexA>
-                result: <resultA>
-                - pattern: <regexB>
-                result: <resultA>
-        imports:
-         - 'java.util'
-         - 'java.util.regex'
-        input:
-          'string': 'String'
-          'patterns_and_results': 'Map'
-        value-body: |
-          if (string == null) {
-            return null;
-          }
-          for (int i = 0; i < patterns_and_results.size(); i++) {
-            Map patAndRepl = (Map) patterns_and_results.get(String.valueOf(i));
-            String pattern = (String) patAndRepl.get("pattern");
-            Object result = patAndRepl.get("result");
-            Pattern regex = Pattern.compile(pattern);
-            Matcher m = regex.matcher(string);
-            if (m.find()) {
-              if (result instanceof String) {
-                StringBuffer sb = new StringBuffer();
-                m.appendReplacement(sb, (String) result);
-                return sb.toString();
-              } else {
-                return result;
-              }
             }
           }
           return null;

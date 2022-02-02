@@ -28,8 +28,8 @@ inspectit:
     rules:
 
       'r_method_metric':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             This rule captures the method's duration and invocation count as a method/duration metric. 
             The metric is tagged with the signature of the method as well as the name of the declaring class.
             In addition an error tag is set depending on whether the method threw an exception or not.

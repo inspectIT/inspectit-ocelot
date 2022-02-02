@@ -4,8 +4,8 @@ inspectit:
     
       #
       'a_entrypoint_check':
-        _doc:
-          _description: |-
+        doc:
+          description: |-
             Utility function to detect entry methods.
             This functions checks if a given "marker" is present on the context.
             The marker should be configured for down-propagation.
