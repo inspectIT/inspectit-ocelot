@@ -3,11 +3,11 @@ inspectit:
     actions:
       # Prints a given Object to stdout
       a_debug_println:
-        _doc:
-          _description: 'Prints a given Object to stdout.'
-          _input-desc:
+        doc:
+          description: 'Prints a given Object to stdout.'
+          input-desc:
             value: Object to be printed
-          _return-desc: Void
+          return-desc: Void
         input:
           value: Object
         is-void: true

@@ -1,17 +1,12 @@
 package inspectit.ocelot.config.doc.generator;
 
 import com.google.common.io.Resources;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import com.sun.tools.javac.jvm.Gen;
-import io.opencensus.metrics.export.Metric;
-import jdk.nashorn.internal.runtime.regexp.joni.Config;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.InternalSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.documentation.ActionDocSettings;
-import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.StandardPollingMetricsRecorderSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
@@ -126,15 +121,15 @@ class ConfigParserTest {
         inputDescs.put("value", "Object to be printed");
 
         ActionDocSettings actionDoc = new ActionDocSettings();
-        actionDoc.set_description("Prints a given Object to stdout.");
-        actionDoc.set_inputDesc(inputDescs);
-        actionDoc.set_returnDesc("Void");
+        actionDoc.setDescription("Prints a given Object to stdout.");
+        actionDoc.setInputDesc(inputDescs);
+        actionDoc.setReturnDesc("Void");
 
 
         Map<String, String> inputs = new HashMap<>();
         inputs.put("value", "Object");
         GenericActionSettings action = new GenericActionSettings();
-        action.set_doc(actionDoc);
+        action.setDoc(actionDoc);
         action.setInput(inputs);
         action.setIsVoid(true);
         action.setValueBody("System.out.println(value);");
