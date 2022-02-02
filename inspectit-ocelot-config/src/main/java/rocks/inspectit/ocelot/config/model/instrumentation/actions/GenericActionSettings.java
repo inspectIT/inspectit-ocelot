@@ -54,7 +54,7 @@ public class GenericActionSettings {
     /**
      * Documentation for Config-Docs generation
      */
-    private ActionDocSettings _doc;
+    private ActionDocSettings doc;
 
     /**
      * If true, the action does not return a value.

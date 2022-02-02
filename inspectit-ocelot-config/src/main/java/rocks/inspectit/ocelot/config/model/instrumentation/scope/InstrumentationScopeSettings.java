@@ -29,7 +29,7 @@ public class InstrumentationScopeSettings {
     /**
      * Documentation for Config-Docs generation
      */
-    private BaseDocSettings _doc;
+    private BaseDocSettings doc;
 
     /**
      * Interfaces which have to be implemented.

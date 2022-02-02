@@ -29,7 +29,7 @@ public class InstrumentationRuleSettings {
     /**
      * Documentation for Config-Docs generation
      */
-    private BaseDocSettings _doc;
+    private BaseDocSettings doc;
 
     /**
      * Defines whether the rule is enabled.

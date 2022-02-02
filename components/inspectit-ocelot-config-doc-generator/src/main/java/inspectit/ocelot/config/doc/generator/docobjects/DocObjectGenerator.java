@@ -59,11 +59,11 @@ public class DocObjectGenerator {
         List<ScopeDoc> scopeDocs = new ArrayList<>();
         for(String scopeName: scopes.keySet()){
             InstrumentationScopeSettings scopeSettings = scopes.get(scopeName);
-            BaseDocSettings doc = scopeSettings.get_doc();
+            BaseDocSettings doc = scopeSettings.getDoc();
 
             String description = "";
             if(doc != null) {
-                description = doc.get_description();
+                description = doc.getDescription();
             }
             scopeDocs.add(new ScopeDoc(scopeName, description));
         }
@@ -93,7 +93,7 @@ public class DocObjectGenerator {
         List<ActionDoc> actionDocs = new ArrayList<>();
         for(String actionName: actions.keySet()){
             GenericActionSettings actionSettings = actions.get(actionName);
-            ActionDocSettings doc = actionSettings.get_doc();
+            ActionDocSettings doc = actionSettings.getDoc();
 
             String description = "";
             String returnDesc = null;
@@ -101,9 +101,9 @@ public class DocObjectGenerator {
             Map<String, String> inputDescriptions = Collections.emptyMap();
 
             if(doc != null) {
-                description = doc.get_description();
-                returnDesc = doc.get_returnDesc();
-                inputDescriptions = doc.get_inputDesc();
+                description = doc.getDescription();
+                returnDesc = doc.getReturnDesc();
+                inputDescriptions = doc.getInputDesc();
             }
 
             Boolean isVoid = actionSettings.getIsVoid();
@@ -126,11 +126,11 @@ public class DocObjectGenerator {
         for(String ruleName: rules.keySet()){
 
             InstrumentationRuleSettings ruleSettings = rules.get(ruleName);
-            BaseDocSettings doc = ruleSettings.get_doc();
+            BaseDocSettings doc = ruleSettings.getDoc();
 
             String description = "";
             if(doc != null) {
-                description = doc.get_description();
+                description = doc.getDescription();
             }
 
             Map<String, Boolean> include = ruleSettings.getInclude();

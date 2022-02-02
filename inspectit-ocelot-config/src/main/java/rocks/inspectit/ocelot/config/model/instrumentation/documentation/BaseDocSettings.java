@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class BaseDocSettings {
 
-    private String _description = "";
+    private String description = "";
 
 }

@@ -9,7 +9,7 @@ import java.util.Map;
 @Data
 public class ActionDocSettings extends BaseDocSettings {
 
-    private Map<@NotBlank String, @NotBlank String> _inputDesc = new HashMap<>();
-    private String _returnDesc;
+    private Map<@NotBlank String, @NotBlank String> inputDesc = new HashMap<>();
+    private String returnDesc;
 
 }
