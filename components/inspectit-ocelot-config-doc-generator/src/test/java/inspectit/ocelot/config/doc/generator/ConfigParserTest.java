@@ -1,7 +1,13 @@
 package inspectit.ocelot.config.doc.generator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.io.Resources;
+import org.apache.commons.text.StringSubstitutor;
 import org.junit.jupiter.api.Test;
+import parsing.ConfigParser;
+import parsing.StringSubstitutorNestedMap;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.InternalSettings;
@@ -34,31 +40,43 @@ class ConfigParserTest {
     private final ConfigParser configParser = new ConfigParser();
 
     @Test
-    void replacePlaceholders() {
+    void replacePlaceholders() throws JsonProcessingException {
 
-        String configYaml =
+        final String variable1 = "inspectit.name.placeholder-value";
+        final String variable2 = "inspectit.name.second.placeholder-value";
+        final String variable3 = "inspectit.doesnotexist";
+        final String variable4 = "doesnotexist";
+
+        String configYaml = String.format(
                 "inspectit:\n" +
                 // Test replacement of placeholders at different deepness levels
-                "  placeholder-test: ${inspectit.name.placeholder-value}\n" +
-                "  placeholder-test2: ${inspectit.name.second.placeholder-value}\n" +
+                "  placeholder-test: ${%s}\n" +
+                "  placeholder-test2: ${%s}\n" +
                 // Test replacement if placeholder-keys do not lead to a value
-                "  placeholder-test3: ${inspectit.doesnotexist}\n" +
+                "  placeholder-test3: ${%s}\n" +
                 "  name:\n" +
                 "    placeholder-value: value\n" +
                 "    second:\n" +
-                "      placeholder-value: value2";
+                "      placeholder-value: value2\n" +
+                "      placeholder-test4: ${%s}",
+                variable1, variable2, variable3, variable4);
 
-        String result = configParser.replacePlaceholders(configYaml);
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
+        StringSubstitutor stringSubstitutor = new StringSubstitutorNestedMap(yamlMap);
+        String result = stringSubstitutor.replace(configYaml);
 
-        String expected =
+        String expected = String.format(
                 "inspectit:\n" +
                 "  placeholder-test: value\n" +
                 "  placeholder-test2: value2\n" +
-                "  placeholder-test3: inspectit.doesnotexist\n" +
+                "  placeholder-test3: ${%s}\n" +
                 "  name:\n" +
                 "    placeholder-value: value\n" +
                 "    second:\n" +
-                "      placeholder-value: value2";
+                "      placeholder-value: value2\n" +
+                "      placeholder-test4: ${%s}",
+                variable3, variable4);
 
         assertEquals(expected, result);
     }
