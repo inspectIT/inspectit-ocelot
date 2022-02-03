@@ -1,22 +1,15 @@
 package inspectit.ocelot.config.doc.generator.docobjects;
 
-import lombok.Getter;
+import lombok.Data;
 
 import java.util.Map;
 
-@Getter
+@Data
 public class RuleMetricsDoc {
 
-    public RuleMetricsDoc(String name, String value, Map<String, String> dataTags, Map<String, String> constantTags) {
-        this.name = name;
-        this.value = value;
-        this.dataTags = dataTags;
-        this.constantTags = constantTags;
-    }
-
-    String name;
-    String value;
-    Map<String, String> dataTags;
-    Map<String, String> constantTags;
+    private final String name;
+    private final String value;
+    private final Map<String, String> dataTags;
+    private final Map<String, String> constantTags;
 
 }

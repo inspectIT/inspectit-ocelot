@@ -1,8 +1,8 @@
 package inspectit.ocelot.config.doc.generator.docobjects;
 
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class ActionInputDoc{
 
     public ActionInputDoc(String name, String type, String description){
@@ -11,7 +11,7 @@ public class ActionInputDoc{
         this.description = description;
     }
 
-    String name;
-    String type;
-    String description;
+    private final String name;
+    private final String type;
+    private final String description;
 }

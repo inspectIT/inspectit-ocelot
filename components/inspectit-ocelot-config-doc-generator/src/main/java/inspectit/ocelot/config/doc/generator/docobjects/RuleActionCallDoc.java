@@ -1,8 +1,10 @@
 package inspectit.ocelot.config.doc.generator.docobjects;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
 public class RuleActionCallDoc {
 
     public RuleActionCallDoc(String name, String action) {
@@ -16,8 +18,8 @@ public class RuleActionCallDoc {
         this.inheritedFrom = inheritedFrom;
     }
 
-    String name;
-    String action;
-    String inheritedFrom;
+    private final String name;
+    private final String action;
+    private String inheritedFrom;
 
 }

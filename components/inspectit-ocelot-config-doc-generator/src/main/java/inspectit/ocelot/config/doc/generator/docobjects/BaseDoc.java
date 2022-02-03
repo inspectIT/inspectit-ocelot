@@ -10,7 +10,7 @@ public abstract class BaseDoc {
         this.name = name;
     }
 
-    String description;
-    String name;
+    private final String description;
+    private final String name;
 
 }

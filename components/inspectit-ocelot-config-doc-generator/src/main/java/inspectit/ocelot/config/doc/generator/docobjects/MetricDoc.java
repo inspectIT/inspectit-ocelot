@@ -1,8 +1,10 @@
 package inspectit.ocelot.config.doc.generator.docobjects;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 @Getter
+@EqualsAndHashCode (callSuper = true)
 public class MetricDoc extends BaseDoc {
 
     public MetricDoc(String name, String description, String unit){
@@ -10,5 +12,5 @@ public class MetricDoc extends BaseDoc {
         this.unit = unit;
     }
 
-    String unit;
+    private final String unit;
 }
