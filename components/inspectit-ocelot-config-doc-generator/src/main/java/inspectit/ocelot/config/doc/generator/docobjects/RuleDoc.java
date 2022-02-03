@@ -1,5 +1,6 @@
 package inspectit.ocelot.config.doc.generator.docobjects;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,6 +8,7 @@ import java.util.*;
 
 @Getter
 @Setter
+@EqualsAndHashCode (callSuper = true)
 public class RuleDoc extends BaseDoc {
 
     public RuleDoc(String name, String description, List<String> include, List<String> scopes,
@@ -20,15 +22,18 @@ public class RuleDoc extends BaseDoc {
         this.entryExits = entryExits;
     }
 
+    /*
+    As of now only needed for simpler code in RuleDocTest.
+     */
     public RuleDoc(String name){
         super(name, "");
     }
 
-    List<String> include = Collections.emptyList();
-    List<String> scopes = Collections.emptyList();
-    List<RuleMetricsDoc> metricsDocs = Collections.emptyList();
-    RuleTracingDoc tracingDoc;
-    Map<String, Map<String, RuleActionCallDoc>> entryExits = Collections.emptyMap();
+    private List<String> include = Collections.emptyList();
+    private List<String> scopes = Collections.emptyList();
+    private List<RuleMetricsDoc> metricsDocs = Collections.emptyList();
+    private RuleTracingDoc tracingDoc;
+    private Map<String, Map<String, RuleActionCallDoc>> entryExits = Collections.emptyMap();
 
     public void addEntryExitFromIncludedRules(Map<String, RuleDoc> allRuleDocs, List<String> includedRules){
 

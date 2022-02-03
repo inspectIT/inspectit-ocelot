@@ -7,16 +7,9 @@ import java.util.List;
 @Data
 public class ConfigDocumentation {
 
-    public ConfigDocumentation(List<ScopeDoc> scopes, List<ActionDoc> actions, List<RuleDoc> rules, List<MetricDoc> metrics) {
-        this.scopes = scopes;
-        this.actions = actions;
-        this.rules = rules;
-        this.metrics = metrics;
-    }
-
-    private List<ScopeDoc> scopes;
-    private List<ActionDoc> actions;
-    private List<RuleDoc> rules;
-    private List<MetricDoc> metrics;
+    private final List<ScopeDoc> scopes;
+    private final List<ActionDoc> actions;
+    private final List<RuleDoc> rules;
+    private final List<MetricDoc> metrics;
 
 }

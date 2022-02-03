@@ -1,20 +1,14 @@
 package inspectit.ocelot.config.doc.generator.docobjects;
 
-import lombok.Getter;
+import lombok.Data;
 
 import java.util.Map;
 
-@Getter
+@Data
 public class RuleTracingDoc {
 
-    public RuleTracingDoc(Boolean startSpan, Map<String, String> startSpanConditions, Map<String, String> attributes) {
-        this.startSpan = startSpan;
-        this.startSpanConditions = startSpanConditions;
-        this.attributes = attributes;
-    }
-
-    Boolean startSpan;
-    Map<String, String> startSpanConditions;
-    Map<String, String> attributes;
+    private final Boolean startSpan;
+    private final Map<String, String> startSpanConditions;
+    private final Map<String, String> attributes;
 
 }
