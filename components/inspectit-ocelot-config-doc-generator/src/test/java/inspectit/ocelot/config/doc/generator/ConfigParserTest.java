@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.io.Resources;
 import org.apache.commons.text.StringSubstitutor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Nested;
 import parsing.ConfigParser;
 import parsing.StringSubstitutorNestedMap;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
@@ -27,140 +28,175 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigParserTest {
 
-    private String getYaml(String fileName){
-        try {
-            URL url = Resources.getResource("ConfigParserTest/" + fileName);
-            return Resources.toString(url, StandardCharsets.UTF_8);
-        } catch (Exception e){
-            System.out.printf("Could not read YAML from file: %s%n", fileName);
-            return null;
+    private final ConfigParser configParser = new ConfigParser();
+
+    @Nested
+    class ReplacePlaceholdersTest{
+
+        @Test
+        void replacePlaceholders() throws JsonProcessingException {
+
+            final String variable1 = "inspectit.name.placeholder-value";
+            final String variable2 = "inspectit.name.second.placeholder-value";
+            final String variable3 = "inspectit.doesnotexist";
+            final String variable4 = "doesnotexist";
+
+            final String configYaml = String.format(
+                    "inspectit:\n" +
+                    // Test replacement of placeholders at different deepness levels
+                    "  placeholder-test: ${%s}\n" +
+                    "  placeholder-test2: ${%s}\n" +
+                    // Test replacement if placeholder-keys do not lead to a value
+                    "  placeholder-test3: ${%s}\n" +
+                    "  name:\n" +
+                    "    placeholder-value: value\n" +
+                    "    second:\n" +
+                    "      placeholder-value: value2\n" +
+                    "      placeholder-test4: ${%s}",
+                    variable1, variable2, variable3, variable4);
+
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
+            StringSubstitutor stringSubstitutor = new StringSubstitutorNestedMap(yamlMap);
+            String result = stringSubstitutor.replace(configYaml);
+
+            final String expected = String.format(
+                    "inspectit:\n" +
+                    "  placeholder-test: value\n" +
+                    "  placeholder-test2: value2\n" +
+                    "  placeholder-test3: ${%s}\n" +
+                    "  name:\n" +
+                    "    placeholder-value: value\n" +
+                    "    second:\n" +
+                    "      placeholder-value: value2\n" +
+                    "      placeholder-test4: ${%s}",
+                    variable3, variable4);
+
+            assertEquals(expected, result);
         }
     }
 
-    private final ConfigParser configParser = new ConfigParser();
+    @Nested
+    class ParseConfigTests{
 
-    @Test
-    void replacePlaceholders() throws JsonProcessingException {
+        @Test
+        void withPlaceholder() {
 
-        final String variable1 = "inspectit.name.placeholder-value";
-        final String variable2 = "inspectit.name.second.placeholder-value";
-        final String variable3 = "inspectit.doesnotexist";
-        final String variable4 = "doesnotexist";
-
-        String configYaml = String.format(
+            final String configYaml =
                 "inspectit:\n" +
-                // Test replacement of placeholders at different deepness levels
-                "  placeholder-test: ${%s}\n" +
-                "  placeholder-test2: ${%s}\n" +
-                // Test replacement if placeholder-keys do not lead to a value
-                "  placeholder-test3: ${%s}\n" +
-                "  name:\n" +
-                "    placeholder-value: value\n" +
-                "    second:\n" +
-                "      placeholder-value: value2\n" +
-                "      placeholder-test4: ${%s}",
-                variable1, variable2, variable3, variable4);
+                "  metrics:\n" +
+                "    disk:\n" +
+                "      enabled:\n" +
+                "        # if true, the free disk space will be measured and the view \"disk/free\" is registered\n" +
+                "        free: true\n" +
+                "    definitions:\n" +
+                "      '[disk/free]':\n" +
+                "        enabled: ${inspectit.metrics.disk.enabled.free}\n" +
+                "        type: LONG\n" +
+                "        unit: bytes\n" +
+                "        description: free disk space";
 
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
-        StringSubstitutor stringSubstitutor = new StringSubstitutorNestedMap(yamlMap);
-        String result = stringSubstitutor.replace(configYaml);
+            InspectitConfig result = configParser.parseConfig(configYaml);
 
-        String expected = String.format(
+            // Build the expected result by hand
+            Map<String, Boolean> enabledMap = new HashMap<>();
+            enabledMap.put("free", true);
+            StandardPollingMetricsRecorderSettings pollingSettings = new StandardPollingMetricsRecorderSettings();
+            pollingSettings.setEnabled(enabledMap);
+
+            MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
+                    .enabled(true).type(MetricDefinitionSettings.MeasureType.LONG).unit("bytes")
+                    .description("free disk space").build();
+            // I am not sure why adding views(null) to the builder is not allowed, but it isn't, so it's done afterwards.
+            metricDefinition.setViews(null);
+            Map<String, MetricDefinitionSettings> metricDefinitions = new HashMap<>();
+            metricDefinitions.put("[disk/free]", metricDefinition);
+
+            MetricsSettings metricsSettings = new MetricsSettings();
+            metricsSettings.setDisk(pollingSettings);
+            metricsSettings.setDefinitions(metricDefinitions);
+
+            InspectitConfig expected = new InspectitConfig();
+            expected.setMetrics(metricsSettings);
+
+            assertEquals(expected, result);
+        }
+
+        @Test
+        void withDuration() {
+
+            final String configYaml =
                 "inspectit:\n" +
-                "  placeholder-test: value\n" +
-                "  placeholder-test2: value2\n" +
-                "  placeholder-test3: ${%s}\n" +
-                "  name:\n" +
-                "    placeholder-value: value\n" +
-                "    second:\n" +
-                "      placeholder-value: value2\n" +
-                "      placeholder-test4: ${%s}",
-                variable3, variable4);
+                "  instrumentation:\n" +
+                "    internal:\n" +
+                "      inter-batch-delay: 50ms\n" +
+                "      new-class-discovery-interval: 10s";
 
-        assertEquals(expected, result);
-    }
+            InspectitConfig result = configParser.parseConfig(configYaml);
 
-    @Test
-    void parseConfigPlaceholder() {
+            // Build the expected result by hand
+            InternalSettings internal = new InternalSettings();
+            internal.setInterBatchDelay(Duration.ofMillis(50));
+            internal.setNewClassDiscoveryInterval(Duration.ofSeconds(10));
 
-        String configYaml = getYaml("placeholder.yml");
-        InspectitConfig result = configParser.parseConfig(configYaml);
+            InstrumentationSettings instrumentation = new InstrumentationSettings();
+            instrumentation.setInternal(internal);
 
-        Map<String, Boolean> enabledMap = new HashMap<>();
-        enabledMap.put("free", true);
-        StandardPollingMetricsRecorderSettings pollingSettings = new StandardPollingMetricsRecorderSettings();
-        pollingSettings.setEnabled(enabledMap);
+            InspectitConfig expected = new InspectitConfig();
+            expected.setInstrumentation(instrumentation);
 
-        MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
-                .enabled(true).type(MetricDefinitionSettings.MeasureType.LONG).unit("bytes")
-                .description("free disk space").build();
-        // I am not sure why adding views(null) to the builder is not allowed?
-        metricDefinition.setViews(null);
-        Map<String, MetricDefinitionSettings> metricDefinitions = new HashMap<>();
-        metricDefinitions.put("[disk/free]", metricDefinition);
+            assertEquals(expected, result);
+        }
 
-        MetricsSettings metricsSettings = new MetricsSettings();
-        metricsSettings.setDisk(pollingSettings);
-        metricsSettings.setDefinitions(metricDefinitions);
+        @Test
+        void withDocumentation() {
 
-        InspectitConfig expected = new InspectitConfig();
-        expected.setMetrics(metricsSettings);
+            final String configYaml =
+                "inspectit:\n" +
+                "  instrumentation:\n" +
+                "    actions:\n" +
+                "      a_debug_println:\n" +
+                "        doc:\n" +
+                "          description: 'Prints a given Object to stdout.'\n" +
+                "          input-desc:\n" +
+                "            value: Object to be printed\n" +
+                "          return-desc: Void\n" +
+                "        input:\n" +
+                "          value: Object\n" +
+                "        is-void: true\n" +
+                "        value-body: |\n" +
+                "          System.out.println(value);";
 
-        assertEquals(expected, result);
-    }
+            InspectitConfig result = configParser.parseConfig(configYaml);
 
-    @Test
-    void parseConfigDuration() {
+            // Build the expected result by hand
+            Map<String, String> inputDescs = new HashMap<>();
+            inputDescs.put("value", "Object to be printed");
 
-        String configYaml = getYaml("duration.yml");
-        InspectitConfig result = configParser.parseConfig(configYaml);
-
-        InternalSettings internal = new InternalSettings();
-        internal.setInterBatchDelay(Duration.ofMillis(50));
-        internal.setNewClassDiscoveryInterval(Duration.ofSeconds(10));
-
-        InstrumentationSettings instrumentation = new InstrumentationSettings();
-        instrumentation.setInternal(internal);
-
-        InspectitConfig expected = new InspectitConfig();
-        expected.setInstrumentation(instrumentation);
-
-        assertEquals(expected, result);
-    }
-
-    @Test
-    void parseConfigDocumentation() {
-
-        String configYaml = getYaml("documentation.yml");
-        InspectitConfig result = configParser.parseConfig(configYaml);
-
-        Map<String, String> inputDescs = new HashMap<>();
-        inputDescs.put("value", "Object to be printed");
-
-        ActionDocSettings actionDoc = new ActionDocSettings();
-        actionDoc.setDescription("Prints a given Object to stdout.");
-        actionDoc.setInputDesc(inputDescs);
-        actionDoc.setReturnDesc("Void");
+            ActionDocSettings actionDoc = new ActionDocSettings();
+            actionDoc.setDescription("Prints a given Object to stdout.");
+            actionDoc.setInputDesc(inputDescs);
+            actionDoc.setReturnDesc("Void");
 
 
-        Map<String, String> inputs = new HashMap<>();
-        inputs.put("value", "Object");
-        GenericActionSettings action = new GenericActionSettings();
-        action.setDoc(actionDoc);
-        action.setInput(inputs);
-        action.setIsVoid(true);
-        action.setValueBody("System.out.println(value);");
+            Map<String, String> inputs = new HashMap<>();
+            inputs.put("value", "Object");
+            GenericActionSettings action = new GenericActionSettings();
+            action.setDoc(actionDoc);
+            action.setInput(inputs);
+            action.setIsVoid(true);
+            action.setValueBody("System.out.println(value);");
 
-        Map<String, GenericActionSettings> actions = new HashMap<>();
-        actions.put("a_debug_println", action);
+            Map<String, GenericActionSettings> actions = new HashMap<>();
+            actions.put("a_debug_println", action);
 
-        InstrumentationSettings instrumentation = new InstrumentationSettings();
-        instrumentation.setActions(actions);
+            InstrumentationSettings instrumentation = new InstrumentationSettings();
+            instrumentation.setActions(actions);
 
-        InspectitConfig expected = new InspectitConfig();
-        expected.setInstrumentation(instrumentation);
+            InspectitConfig expected = new InspectitConfig();
+            expected.setInstrumentation(instrumentation);
 
-        assertEquals(expected, result);
+            assertEquals(expected, result);
+        }
     }
 }
