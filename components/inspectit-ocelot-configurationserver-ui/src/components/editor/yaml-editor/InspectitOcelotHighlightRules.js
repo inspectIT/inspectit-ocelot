@@ -504,7 +504,23 @@ let InspectitOcelotHighlightRules = function () {
 
   // rulesToGenerate is a map whose contents determine what the highlighting rules need to be. The contents are
   // retrieved over the config-server's REST API in AceEditor.js
-  mapToRules(rulesToGenerate, '', 1);
+
+  // To correctly function, a few additional entries need to be added in the following lines.
+  const rulesToGenerateObject = {
+    start: {
+      start: VALUE_TYPE_OBJECT,
+      KEY_OBJECT_ATTRIBUTES: {
+        inspectit: {
+          type: VALUE_TYPE_OBJECT,
+          KEY_OBJECT_ATTRIBUTES: rulesToGenerate
+        }
+      }
+    }
+  };
+
+  const rulesToGenerateMap = new Map(Object.entries(rulesToGenerateObject));
+
+  mapToRules(rulesToGenerateMap, '', 1);
 
   // regexp must not have capturing parentheses. Use (?:) instead.
   // regexps are ordered -> the first match is used

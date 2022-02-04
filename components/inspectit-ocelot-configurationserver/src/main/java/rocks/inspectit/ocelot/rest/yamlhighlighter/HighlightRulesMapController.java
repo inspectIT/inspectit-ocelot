@@ -146,19 +146,7 @@ public class HighlightRulesMapController extends AbstractBaseController {
     @ApiOperation(value = "Get JSON for Highlight Rules Generation", notes = "")
     @GetMapping(value = "highlight-rules", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> getHighlightRulesMap() {
-
-        Map<String, Object> mainMap = new HashMap<>();
-        Map<String, Object> innerMap = new HashMap<>();
-        Map<String, Object> innerInnerMap = new HashMap<>();
-        Map<String, Object> innerInnerInnerMap = new HashMap<>();
-        innerInnerInnerMap.put(KEY_TYPE, VALUE_TYPE_OBJECT);
-        innerInnerInnerMap.put(KEY_OBJECT_ATTRIBUTES, generateMap(InspectitConfig.class));
-        innerInnerMap.put(KEY_INSPECTIT, innerInnerInnerMap);
-        innerMap.put(KEY_OBJECT_ATTRIBUTES, innerInnerMap);
-        innerMap.put(KEY_TYPE, VALUE_TYPE_OBJECT);
-        mainMap.put(KEY_START, innerMap);
-
-        return  mainMap;
+        return  generateMap(InspectitConfig.class);
     }
 
 }
