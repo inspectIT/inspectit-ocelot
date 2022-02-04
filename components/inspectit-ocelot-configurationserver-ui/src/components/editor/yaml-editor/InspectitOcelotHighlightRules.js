@@ -2,18 +2,39 @@ import ace from 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/mode-java';
 import {rulesToGenerate} from './AceEditor';
 
-var oop = ace.require('ace/lib/oop');
+const oop = ace.require('ace/lib/oop');
 const TextHighlightRules = ace.require('ace/mode/text_highlight_rules').TextHighlightRules;
 const JavaHighlightRules = ace.require('ace/mode/java_highlight_rules').JavaHighlightRules;
 
-var InspectitOcelotHighlightRules = function () {
+// keys for rulesToGenerateMap
+const VALUE_TYPE_OBJECT = 'object';
+const VALUE_TYPE_MAP = 'map';
+const VALUE_TYPE_LIST = 'list';
+const VALUE_TYPE_JAVA = 'java';
+const VALUE_TYPE_ENUM = 'enum';
+const VALUE_TYPE_YAML = 'yaml';
+const VALUE_TYPE_TEXT = 'text';
+const KEY_TYPE = 'type';
+const KEY_ENUM_VALUES = 'enum-values';
+const KEY_MAP_CONTENT_TYPE = 'map-content-type';
+const KEY_MAP_CONTENTS = 'map-contents';
+const KEY_LIST_CONTENT_TYPE = 'list-content-type';
+const KEY_LIST_CONTENTS = 'list-contents';
+const KEY_OBJECT_ATTRIBUTES = 'object-attributes';
+const KEY_START = 'start';
+
+// keys for states map
+const KEY_PARENT = 'parents';
+const KEY_INDENT = 'indent';
+
+let InspectitOcelotHighlightRules = function () {
   const commentRule = {
     token: 'comment',
     regex: '#.*$',
   };
 
   const defaultRule = {
-    defaultToken: 'text',
+    defaultToken: VALUE_TYPE_TEXT,
   };
 
   // For the limited support of JSON objects within the YAML, opening braces need to be allowed
@@ -29,8 +50,8 @@ var InspectitOcelotHighlightRules = function () {
       regex: /[|>][-+\d]*(?:$|\s+(?:$|#))/,
       onMatch: function (val, state, stack, line) {
         line = line.replace(/ #.*/, '');
-        var indent = /^ *((:\s*)?-(\s*[^|>])?)?/.exec(line)[0].replace(/\S\s*$/, '').length;
-        var indentationIndicator = parseInt(/\d+[\s+-]*$/.exec(line));
+        let indent = /^ *((:\s*)?-(\s*[^|>])?)?/.exec(line)[0].replace(/\S\s*$/, '').length;
+        let indentationIndicator = parseInt(/\d+[\s+-]*$/.exec(line));
 
         if (indentationIndicator) {
           indent += indentationIndicator - 1;
@@ -156,13 +177,13 @@ var InspectitOcelotHighlightRules = function () {
       it is generally correct but for a different state.
    */
   function evaluateIndent(val, state_name) {
-    let expected_indent = states.get(state_name).get('indent');
-    let content_type = states.get(state_name).get('content-type');
+    let expected_indent = states.get(state_name).get(KEY_INDENT);
+    let content_type = states.get(state_name).get(KEY_TYPE);
 
-    if (val.length % 2 !== 0 || (val.length > expected_indent && content_type !== 'yaml')) {
+    if (val.length % 2 !== 0 || (val.length > expected_indent && content_type !== VALUE_TYPE_YAML)) {
       return [state_name, `invalid.illegal.indentationError`];
     } else if (val.length < expected_indent) {
-      let parent_states = states.get(state_name).get('parents');
+      let parent_states = states.get(state_name).get(KEY_PARENT);
       let states_up = (expected_indent - val.length) / 2;
       let new_state = parent_states[parent_states.length - states_up];
       return [new_state, undefined];
@@ -217,20 +238,20 @@ var InspectitOcelotHighlightRules = function () {
   at how much lower it is and then looks through the state's parents to choose the correct new state for this indentation.
    */
   function addToStatesMap(state_name, parent_name, content_type, nested_level) {
-    let parent_parents = states.get(parent_name).get('parents');
+    let parent_parents = states.get(parent_name).get(KEY_PARENT);
     let all_parents = parent_parents.concat([parent_name]);
     let state_entry = new Map();
-    state_entry.set('indent', nested_level * 2);
-    state_entry.set('parents', all_parents);
-    state_entry.set('content-type', content_type);
+    state_entry.set(KEY_INDENT, nested_level * 2);
+    state_entry.set(KEY_PARENT, all_parents);
+    state_entry.set(KEY_TYPE, content_type);
     states.set(state_name, state_entry);
   }
 
   const states = new Map();
   const start_entry = new Map();
-  start_entry.set('indent', 0);
-  start_entry.set('parents', []);
-  states.set('start', start_entry);
+  start_entry.set(KEY_INDENT, 0);
+  start_entry.set(KEY_PARENT, []);
+  states.set(KEY_START, start_entry);
 
   /*
   Generates rules for the syntax highlighter based on the values in the given Map.
@@ -240,10 +261,10 @@ var InspectitOcelotHighlightRules = function () {
     // The given map contains as keys the possible values for keys in the YAML at the current state.
     // This for loop iterates through them.
     for (let key of map.keys()) {
-      // To avoid name-collisions all the names for states except for the 'start'-state are created by
+      // To avoid name-collisions all the names for states except for the KEY_START-state are created by
       // combining the parent's key and the current key
       let current_state_name;
-      if (key === 'start') {
+      if (key === KEY_START) {
         current_state_name = key;
       } else {
         current_state_name = `${key}-${parent_name}`;
@@ -260,27 +281,33 @@ var InspectitOcelotHighlightRules = function () {
       // The info on what values should be behind a key, is within a nested map. This map is retrieved here.
       let inner_map = new Map(Object.entries(map.get(key)));
 
-      // The type field determines what type the value has.
-      let type = inner_map.get('type');
-
-      if (type === 'object') {
-        rules_for_current_key = mapToRulesTypeObject(inner_map, rules_for_current_key, current_state_name, nested_level);
-      } else if (type === 'map') {
-        rules_for_current_key = mapToRulesTypeMap(inner_map, rules_for_current_key, current_state_name, nested_level);
-      } else if (type === 'list') {
-        rules_for_current_key = mapToRulesTypeList(inner_map, rules_for_current_key, current_state_name, nested_level);
-      } else if (type === 'java') {
-        rules_for_current_key = rulesForJava(rules_for_current_key);
-      } else if (type === 'enum') {
-        // the possible values for an enum are behind the key 'enum-values' in the inner_map
-        let enum_values = inner_map.get('enum-values');
-        rules_for_current_key = rulesForEnum(rules_for_current_key, current_state_name, enum_values);
-      } else if (type === 'yaml') {
-        rules_for_current_key = rulesForYaml(rules_for_current_key);
-      } else if (type === 'text') {
-        rules_for_current_key = rules_for_current_key.concat(textRules);
+      // The type field determines what type the value has
+      switch(inner_map.get(KEY_TYPE)) {
+        case VALUE_TYPE_OBJECT:
+          rules_for_current_key = mapToRulesTypeObject(inner_map, rules_for_current_key, current_state_name, nested_level);
+          break;
+        case VALUE_TYPE_MAP:
+          rules_for_current_key = mapToRulesTypeMap(inner_map, rules_for_current_key, current_state_name, nested_level);
+          break;
+        case VALUE_TYPE_LIST:
+          rules_for_current_key = mapToRulesTypeList(inner_map, rules_for_current_key, current_state_name, nested_level);
+          break;
+        case VALUE_TYPE_JAVA:
+          rules_for_current_key = rulesForJava(rules_for_current_key);
+          break;
+        case VALUE_TYPE_ENUM:
+          // the possible values for an enum are behind the key KEY_ENUM_VALUES in the inner_map
+          let enum_values = inner_map.get(KEY_ENUM_VALUES);
+          rules_for_current_key = rulesForEnum(rules_for_current_key, current_state_name, enum_values);
+          break;
+        case VALUE_TYPE_YAML:
+          rules_for_current_key = rulesForYaml(rules_for_current_key);
+          break;
+        case VALUE_TYPE_TEXT:
+          rules_for_current_key = rules_for_current_key.concat(textRules);
+          break;
       }
-      if (key !== 'start') {
+      if (key !== KEY_START) {
         // start does not need them because in the start state the indent is always zero and it
         // would lead to an infinite loop if you added them
         rules_for_current_key = indentRules.concat(rules_for_current_key);
@@ -301,7 +328,7 @@ var InspectitOcelotHighlightRules = function () {
     for (let attribute of attributes_map.keys()) {
       let new_state_name = `${attribute}-${current_state_name}`;
       let inner_map = new Map(Object.entries(attributes_map.get(attribute)));
-      let content_type = inner_map.get('type');
+      let content_type = inner_map.get(KEY_TYPE);
       current_rules.push({
         token: 'meta.tag',
         regex: `(${attribute}(?=:))`,
@@ -345,7 +372,7 @@ var InspectitOcelotHighlightRules = function () {
         regex: `(${enum_values.join('|')})(})`,
       },
       {
-        token: ['variable.enum', 'text'],
+        token: ['variable.enum', VALUE_TYPE_TEXT],
         regex: `(${enum_values.join('|')})(,)`,
       },
       {
@@ -360,7 +387,7 @@ var InspectitOcelotHighlightRules = function () {
 
   function mapToRulesTypeObject(inner_map, rules_for_current_key, current_state_name, nested_level) {
     // If the current key being looked at stands for an object, this object's attributes are behind the key 'object-attributes'
-    let attributes_map = new Map(Object.entries(inner_map.get('object-attributes')));
+    let attributes_map = new Map(Object.entries(inner_map.get(KEY_OBJECT_ATTRIBUTES)));
 
     rules_for_current_key = rulesForObject(attributes_map, rules_for_current_key, current_state_name, nested_level);
     return rules_for_current_key;
@@ -370,9 +397,9 @@ var InspectitOcelotHighlightRules = function () {
   function mapToRulesTypeMap(inner_map, rules_for_current_key, current_state_name, nested_level) {
     // Depending on whether Maps contain more InspectitConfig-specific objects
     // or not, e.g. Strings or int, as values, different rules need to be added.
-    let map_content_type = inner_map.get('map-content-type');
+    let map_content_type = inner_map.get(KEY_MAP_CONTENT_TYPE);
 
-    if (map_content_type === 'object' || map_content_type === 'yaml') {
+    if (map_content_type === VALUE_TYPE_OBJECT || map_content_type === VALUE_TYPE_YAML) {
       // If the map contains InspectitConfig-specific objects or arbitrary YAML as values, a new state is needed that is entered
       // after seeing any key for the map.
       let sub_state_name = `single-${current_state_name}`;
@@ -402,7 +429,7 @@ var InspectitOcelotHighlightRules = function () {
 
       // only keys with arbitrary names are allowed in this state, so the invalidRule is added
       rules_for_current_key.push(invalidRule);
-    } else if (map_content_type === 'text') {
+    } else if (map_content_type === VALUE_TYPE_TEXT) {
       // if the map simply contains text content, no new sub-state is needed and instead, keys are simply
       // highlighted as variables again and the textRules are added to highlight any text in the values properly.
       rules_for_current_key.push(
@@ -426,13 +453,13 @@ var InspectitOcelotHighlightRules = function () {
     // As before the list of rules for the state is created with the comment-rule already in it.
     let rules_for_sub_state = [commentRule, defaultRule, keywordRule, jsonStartRule];
 
-    if (map_content_type === 'object') {
+    if (map_content_type === VALUE_TYPE_OBJECT) {
       // If the map contains InspectitConfig-specific objects as values, these objects' attributes will be behind
       // the key 'map-contents' in the inner_map.
-      let contents_map = new Map(Object.entries(inner_map.get('map-contents')));
+      let contents_map = new Map(Object.entries(inner_map.get(KEY_MAP_CONTENTS)));
 
       rules_for_sub_state = rulesForObject(contents_map, rules_for_sub_state, sub_state_name, nested_level + 1);
-    } else if (map_content_type === 'yaml') {
+    } else if (map_content_type === VALUE_TYPE_YAML) {
       rules_for_sub_state = rulesForYaml(rules_for_sub_state);
     }
     rules_for_sub_state = indentRules.concat(rules_for_sub_state);
@@ -443,8 +470,8 @@ var InspectitOcelotHighlightRules = function () {
   function mapToRulesTypeList(inner_map, rules_for_current_key, current_state_name, nested_level) {
     // If the list contains InspectitConfig-specific objects as values, a new state is needed that is entered
     // after seeing the start of the list.
-    let list_content_type = inner_map.get('list-content-type');
-    if (list_content_type === 'object') {
+    let list_content_type = inner_map.get(KEY_LIST_CONTENT_TYPE);
+    if (list_content_type === VALUE_TYPE_OBJECT) {
       let sub_state_name = `single-${current_state_name}`;
       rules_for_current_key.push({
         token: 'list.markup',
@@ -457,12 +484,12 @@ var InspectitOcelotHighlightRules = function () {
       });
 
       let rules_for_sub_state = [];
-      let contents_map = new Map(Object.entries(inner_map.get('list-contents')));
+      let contents_map = new Map(Object.entries(inner_map.get(KEY_LIST_CONTENTS)));
 
       rules_for_sub_state = rulesForObject(contents_map, rules_for_sub_state, sub_state_name, nested_level + 1);
       rules_for_sub_state = indentRules.concat(rules_for_sub_state);
       allRules.set(sub_state_name, rules_for_sub_state);
-    } else if (inner_map.get('list-content-type') === 'text') {
+    } else if (inner_map.get(KEY_LIST_CONTENT_TYPE) === VALUE_TYPE_TEXT) {
       // if the map simply contains text content, no new sub-state is needed and instead simply a rule to highlight
       // the list beginning correctly is needed and the textRules are added to highlight any text in the list
       rules_for_current_key.push({
@@ -491,7 +518,7 @@ var InspectitOcelotHighlightRules = function () {
         token: 'indent',
         regex: /^ */,
         onMatch: function (val, state, stack) {
-          var curIndent = stack[1];
+          let curIndent = stack[1];
           let last_state = stack[2];
 
           if (curIndent >= val.length) {
@@ -524,7 +551,7 @@ var InspectitOcelotHighlightRules = function () {
         token: 'indent',
         regex: /^ */,
         onMatch: function (val, state, stack) {
-          var curIndent = stack[1];
+          let curIndent = stack[1];
           let last_state = stack[2];
 
           if (curIndent >= val.length) {
@@ -566,7 +593,7 @@ var InspectitOcelotHighlightRules = function () {
         token: 'indent',
         regex: /^ */,
         onMatch: function (val, state, stack) {
-          var curIndent = stack[1];
+          let curIndent = stack[1];
           let last_state = stack[2];
 
           if (curIndent >= val.length) {
@@ -601,7 +628,7 @@ var InspectitOcelotHighlightRules = function () {
           // push pushes back the values in stack by two indices:
           // https://github.com/ajaxorg/ace/blob/v1.1.4/lib/ace/mode/text_highlight_rules.js#L112-L121
           // so the curIndent and last_state values are now at 3 and 4 instead of 1 and 2
-          var curIndent = stack[3];
+          let curIndent = stack[3];
           let last_state = stack[4];
 
           if (curIndent >= val.length) {
@@ -644,7 +671,7 @@ var InspectitOcelotHighlightRules = function () {
       token: 'indent',
       regex: /^ */,
       onMatch: function (val, state, stack) {
-        var curIndent = stack[1];
+        let curIndent = stack[1];
         let last_state = stack[2];
 
         if (curIndent >= val.length) {
