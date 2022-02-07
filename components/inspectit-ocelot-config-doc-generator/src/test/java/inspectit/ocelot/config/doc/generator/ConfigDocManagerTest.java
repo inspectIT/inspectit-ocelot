@@ -31,7 +31,7 @@ class ConfigDocManagerTest {
         List<ActionInputDoc> inputs1 = new ArrayList<>();
         inputs1.add(new ActionInputDoc("value", "Object", "Object to be printed"));
         actionWithDocInYaml = new ActionDoc("a_debug_println", "Prints a given Object to stdout.",
-                inputs1, "void", true);
+                inputs1, "Void", true);
         
         // Create a sample ActionDoc object where there was no documentation values in the YAML
         List<ActionInputDoc> inputs2 = new ArrayList<>();
@@ -82,7 +82,7 @@ class ConfigDocManagerTest {
         
         // Create the RuleTracingDoc for the RuleDoc
         Map<String, String> startSpanConditions = new HashMap<>();
-        startSpanConditions.put("only-if-true", "jdbc_is_entry");
+        startSpanConditions.put("onlyIfTrue", "jdbc_is_entry");
         Map<String, String> attributes = new HashMap<>();
         attributes.put("db.type", "db_type_sql");
         attributes.put("db.url", "jdbc_url");
@@ -110,6 +110,7 @@ class ConfigDocManagerTest {
 
     @Nested
     class LoadConfigDocumentationTests{
+
         @Test
         void loadActionDocWithDocInYaml() throws IOException {
 
@@ -136,7 +137,10 @@ class ConfigDocManagerTest {
             ConfigDocumentation expected = new ConfigDocumentation(Collections.emptyList(), actions,
                     Collections.emptyList(), Collections.emptyList());
 
-            assertEquals(expected, result);
+            assertEquals(expected.getScopes(), result.getScopes());
+            assertEquals(expected.getActions(), result.getActions());
+            assertEquals(expected.getRules(), result.getRules());
+            assertEquals(expected.getMetrics(), result.getMetrics());
         }
 
         @Test
@@ -151,8 +155,7 @@ class ConfigDocManagerTest {
                     "          - java.util\n" +
                     "        input:\n" +
                     "          a: Object\n" +
-                    "          b: |\n" +
-                    "            Object\n" +
+                    "          b: Object\n" +
                     "        value-body: |\n" +
                     "          System.out.println(a + \\\"\\\" + b);\n" +
                     "          return a + \\\"\\\" b;\";";
@@ -163,7 +166,11 @@ class ConfigDocManagerTest {
             actions.add(actionWithoutDocInYaml);
             ConfigDocumentation expected = new ConfigDocumentation(Collections.emptyList(), actions,
                     Collections.emptyList(), Collections.emptyList());
-            assertEquals(expected, result);
+
+            assertEquals(expected.getScopes(), result.getScopes());
+            assertEquals(expected.getActions(), result.getActions());
+            assertEquals(expected.getRules(), result.getRules());
+            assertEquals(expected.getMetrics(), result.getMetrics());
         }
 
         @Test
@@ -178,8 +185,7 @@ class ConfigDocManagerTest {
                     "          - java.util\n" +
                     "        input:\n" +
                     "          a: Object\n" +
-                    "          b: |\n" +
-                    "            Object\n" +
+                    "          b: Object\n" +
                     "        value-body: |\n" +
                     "          System.out.println(a + \\\"\\\" + b);\n" +
                     "          return a + \\\"\\\" b;\";\n" +
@@ -203,24 +209,33 @@ class ConfigDocManagerTest {
 
             ConfigDocumentation expected = new ConfigDocumentation(Collections.emptyList(), actions,
                     Collections.emptyList(), Collections.emptyList());
+
             assertEquals(expected, result);
+            assertEquals(expected.getScopes(), result.getScopes());
+            assertEquals(expected.getActions(), result.getActions());
+            assertEquals(expected.getRules(), result.getRules());
+            assertEquals(expected.getMetrics(), result.getMetrics());
         }
 
         @Test
         void loadScopeDoc(){
             String configYaml =
                     "inspectit:\n" +
-                    "  metrics:\n" +
-                    "    disk:\n" +
-                    "      enabled:\n" +
-                    "        # if true, the free disk space will be measured and the view \"disk/free\" is registered\n" +
-                    "        free: true\n" +
-                    "    definitions:\n" +
-                    "      '[disk/free]':\n" +
-                    "        enabled: ${inspectit.metrics.disk.enabled.free}\n" +
-                    "        type: LONG\n" +
-                    "        unit: bytes\n" +
-                    "        description: free disk space";
+                    "  instrumentation:\n" +
+                    "    scopes:\n" +
+                    "      s_jdbc_statement_execute:\n" +
+                    "        doc:\n" +
+                    "          description: 'Scope for executed JDBC statements.'\n" +
+                    "        superclass:\n" +
+                    "          name: java.net.HttpURLConnection\n" +
+                    "        interfaces:\n" +
+                    "          - name: java.sql.Statement\n" +
+                    "        methods:\n" +
+                    "          - name: execute\n" +
+                    "          - name: executeQuery\n" +
+                    "          - name: executeUpdate\n" +
+                    "        advanced:\n" +
+                    "          instrument-only-inherited-methods: true";
 
             ConfigDocumentation result = configDocManager.loadConfigDocumentation(configYaml);
 
@@ -229,7 +244,11 @@ class ConfigDocManagerTest {
 
             ConfigDocumentation expected = new ConfigDocumentation(scopes, Collections.emptyList(),
                     Collections.emptyList(), Collections.emptyList());
-            assertEquals(expected, result);
+
+            assertEquals(expected.getScopes(), result.getScopes());
+            assertEquals(expected.getActions(), result.getActions());
+            assertEquals(expected.getRules(), result.getRules());
+            assertEquals(expected.getMetrics(), result.getMetrics());
         }
 
         @Test
@@ -255,7 +274,11 @@ class ConfigDocManagerTest {
 
             ConfigDocumentation expected = new ConfigDocumentation(Collections.emptyList(), Collections.emptyList(),
                     Collections.emptyList(), metrics);
-            assertEquals(expected, result);
+
+            assertEquals(expected.getScopes(), result.getScopes());
+            assertEquals(expected.getActions(), result.getActions());
+            assertEquals(expected.getRules(), result.getRules());
+            assertEquals(expected.getMetrics(), result.getMetrics());
         }
 
         @Test
@@ -317,7 +340,11 @@ class ConfigDocManagerTest {
 
             ConfigDocumentation expected = new ConfigDocumentation(Collections.emptyList(), Collections.emptyList(),
                     rules, Collections.emptyList());
-            assertEquals(expected, result);
+
+            assertEquals(expected.getScopes(), result.getScopes());
+            assertEquals(expected.getActions(), result.getActions());
+            assertEquals(expected.getRules(), result.getRules());
+            assertEquals(expected.getMetrics(), result.getMetrics());
         }
 
         @Test
@@ -332,8 +359,7 @@ class ConfigDocManagerTest {
                     "          - java.util\n" +
                     "        input:\n" +
                     "          a: Object\n" +
-                    "          b: |\n" +
-                    "            Object\n" +
+                    "          b: Object\n" +
                     "        value-body: |\n" +
                     "          System.out.println(a + \\\"\\\" + b);\n" +
                     "          return a + \\\"\\\" b;\";\n" +
@@ -436,7 +462,11 @@ class ConfigDocManagerTest {
 
             ConfigDocumentation expected = new ConfigDocumentation(scopes, actions,
                     rules, metrics);
-            assertEquals(expected, result);
+
+            assertEquals(expected.getScopes(), result.getScopes());
+            assertEquals(expected.getActions(), result.getActions());
+            assertEquals(expected.getRules(), result.getRules());
+            assertEquals(expected.getMetrics(), result.getMetrics());
         }
     }
 
