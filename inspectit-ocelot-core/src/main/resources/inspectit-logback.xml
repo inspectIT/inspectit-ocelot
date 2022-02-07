@@ -53,12 +53,18 @@
         <filter class="rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer$SelfMonitoringFilter" />
     </appender>
 
+    <!-- Appender von Tim hehe -->
+    <appender name="extractLogs" class="rocks.inspectit.ocelot.core.selfmonitoring.ExtractLogsAppender">
+    </appender>
+
+
     <!-- set log levels - for more verbose logging change inspectit.logging.trace or inspectit.logging.debug to true -->
     <root level="${INSPECTIT_LOG_LEVEL:-INFO}">
         <appender-ref ref="stdout" />
         <appender-ref ref="file" />
         <appender-ref ref="exceptions" />
         <appender-ref ref="logMetrics" />
+        <appender-ref ref="extractLogs" />
     </root>
 
     <!-- deactivate all other loggers, except for errors -->
