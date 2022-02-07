@@ -67,13 +67,7 @@ public class HighlightRulesMapController extends AbstractBaseController {
     static final String KEY_OBJECT_ATTRIBUTES = "object-attributes";
 
     @VisibleForTesting
-    static final String KEY_START = "start";
-
-    @VisibleForTesting
-    static final String KEY_INSPECTIT = "inspectit";
-
-    @VisibleForTesting
-    static Map<String, Object> generateMap(Class<?> currentClass) {
+    Map<String, Object> generateMap(Class<?> currentClass) {
         Map<String, Object> currentClassMap = new HashMap<>();
 
         ReflectionUtils.doWithFields(currentClass, field -> {
@@ -89,14 +83,8 @@ public class HighlightRulesMapController extends AbstractBaseController {
                 innerMap.put(KEY_TYPE, VALUE_TYPE_MAP);
                 ParameterizedType type = (ParameterizedType) field.getGenericType();
                 Type valueType = type.getActualTypeArguments()[1];
-                if (valueType.equals(java.lang.Object.class)) {
-                    innerMap.put(KEY_MAP_CONTENT_TYPE, VALUE_TYPE_YAML);
-                } else if (valueType.getTypeName().startsWith("rocks.inspectit.ocelot.config.model")) {
-                    innerMap.put(KEY_MAP_CONTENT_TYPE, VALUE_TYPE_OBJECT);
-                    innerMap.put(KEY_MAP_CONTENTS, generateMap((Class<?>) valueType));
-                } else {
-                    innerMap.put(KEY_MAP_CONTENT_TYPE, VALUE_TYPE_TEXT);
-                }
+
+                generateMapCollections(innerMap, valueType, KEY_MAP_CONTENT_TYPE, KEY_MAP_CONTENTS);
 
             } else if (field.getType().equals(java.util.List.class)) {
 
@@ -104,34 +92,31 @@ public class HighlightRulesMapController extends AbstractBaseController {
                 ParameterizedType type = (ParameterizedType) field.getGenericType();
                 Type listContentType = type.getActualTypeArguments()[0];
 
-                if (listContentType.equals(String.class)) {
-                    innerMap.put(KEY_LIST_CONTENT_TYPE, VALUE_TYPE_TEXT);
-                } else {
-                    innerMap.put(KEY_LIST_CONTENT_TYPE, VALUE_TYPE_OBJECT);
-                    innerMap.put(KEY_LIST_CONTENTS, generateMap((Class<?>) listContentType));
-                }
+                generateMapCollections(innerMap, listContentType, KEY_LIST_CONTENT_TYPE, KEY_LIST_CONTENTS);
 
             } else if (field.getType().equals(java.lang.Object.class)) {
 
                 innerMap.put(KEY_TYPE, VALUE_TYPE_YAML);
 
+            } else if (field.getType().isEnum()){
+
+                List<String> enumValues = new ArrayList<>();
+                for (Field enumField : field.getType().getFields()) {
+                    enumValues.add(enumField.getName());
+                }
+                innerMap.put(KEY_TYPE, VALUE_TYPE_ENUM);
+                innerMap.put(KEY_ENUM_VALUES, enumValues);
+
             } else if (field.getType().getName().startsWith("rocks.inspectit.ocelot.config.model")) {
 
-                if (field.getType().isEnum()) {
-                    List<String> enumValues = new ArrayList<>();
-                    for (Field enumField : field.getType().getFields()) {
-                        enumValues.add(enumField.getName());
-                    }
-                    innerMap.put(KEY_TYPE, VALUE_TYPE_ENUM);
-                    innerMap.put(KEY_ENUM_VALUES, enumValues);
-                } else {
-                    innerMap.put(KEY_TYPE, VALUE_TYPE_OBJECT);
-                    innerMap.put(KEY_OBJECT_ATTRIBUTES, generateMap(field.getType()));
-                }
+                innerMap.put(KEY_TYPE, VALUE_TYPE_OBJECT);
+                innerMap.put(KEY_OBJECT_ATTRIBUTES, generateMap(field.getType()));
 
-            } else if (currentClass.equals(GenericActionSettings.class) && (field.getName()
-                    .equals("value") || field.getName().equals("valueBody"))) {
+            } else if (currentClass.equals(GenericActionSettings.class) &&
+                    (field.getName().equals("value") || field.getName().equals("valueBody"))) {
+
                 innerMap.put(KEY_TYPE, VALUE_TYPE_JAVA);
+
             } else {
 
                 innerMap.put(KEY_TYPE, VALUE_TYPE_TEXT);
@@ -141,6 +126,17 @@ public class HighlightRulesMapController extends AbstractBaseController {
         });
 
         return currentClassMap;
+    }
+
+    private void generateMapCollections(Map<String, Object> innerMap, Type contentType, String keyContentType, String keyContents) {
+        if (contentType.equals(Object.class)) {
+            innerMap.put(keyContentType, VALUE_TYPE_YAML);
+        } else if (contentType.getTypeName().startsWith("rocks.inspectit.ocelot.config.model")) {
+            innerMap.put(keyContentType, VALUE_TYPE_OBJECT);
+            innerMap.put(keyContents, generateMap((Class<?>) contentType));
+        } else {
+            innerMap.put(keyContentType, VALUE_TYPE_TEXT);
+        }
     }
 
     @ApiOperation(value = "Get JSON for Highlight Rules Generation", notes = "")
