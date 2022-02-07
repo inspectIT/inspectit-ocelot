@@ -508,11 +508,11 @@ let InspectitOcelotHighlightRules = function () {
   // To correctly function, a few additional entries need to be added in the following lines.
   const rulesToGenerateObject = {
     start: {
-      start: VALUE_TYPE_OBJECT,
-      KEY_OBJECT_ATTRIBUTES: {
+      [KEY_TYPE]: VALUE_TYPE_OBJECT,
+      [KEY_OBJECT_ATTRIBUTES]: {
         inspectit: {
           type: VALUE_TYPE_OBJECT,
-          KEY_OBJECT_ATTRIBUTES: rulesToGenerate
+          [KEY_OBJECT_ATTRIBUTES]: rulesToGenerate
         }
       }
     }
