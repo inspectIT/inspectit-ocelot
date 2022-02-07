@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * StringLookup that uses a nested Map to find the value for a given variable.
+ */
 @Data
 public class StringLookupNestedMap implements StringLookup {
 

@@ -16,6 +16,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
+/**
+ * Class used to parse a YAML String into an InspectitConfig object.
+ */
 public class ConfigParser {
 
     public ConfigParser() {
@@ -31,7 +34,7 @@ public class ConfigParser {
         mapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE);
     }
 
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     /**
      * Parses YAML describing an InspectitConfig into InspectitConfig object.
@@ -58,33 +61,34 @@ public class ConfigParser {
     }
 
     /**
-     * Returns a Duration corresponding to the given value in a String in humanly readable format, e.g. 2h3m20s40ms.
-     * Needed for deserializing the YAML using Jackson.
-     * @param text String to be parsed.
-     * @return Returns the corresponding Duration object.
-     */
-    private static Duration parseHuman(String text) {
-        Matcher m = Pattern.compile("\\s*(?:(\\d+)\\s*(?:hours?|hrs?|h))?" +
-                        "\\s*(?:(\\d+)\\s*(?:minutes?|mins?|m))?" +
-                        "\\s*(?:(\\d+)\\s*(?:seconds?|secs?|s))?" +
-                        "\\s*(?:(\\d+)\\s*(?:milliseconds?|ms))?" +
-                        "\\s*", Pattern.CASE_INSENSITIVE)
-                .matcher(text);
-        if (! m.matches())
-            throw new IllegalArgumentException("Not valid duration: " + text);
-        int hours = (m.start(1) == -1 ? 0 : Integer.parseInt(m.group(1)));
-        int mins  = (m.start(2) == -1 ? 0 : Integer.parseInt(m.group(2)));
-        int secs  = (m.start(3) == -1 ? 0 : Integer.parseInt(m.group(3)));
-        int ms  = (m.start(4) == -1 ? 0 : Integer.parseInt(m.group(4)));
-        return Duration.ofMillis(((hours * 60L + mins) * 60L + secs) * 1000L + ms);
-    }
-
-    /**
      * The CustomDurationDeserializer is needed to parse the Duration values in the YAML files using Jackson.
      * Normally Jackson would use Duration.parse() for this, however that function expects the Strings in
      * ISO-8601 duration format (e.g. PT20.5S) and in the YAMLs a different format is used (e.g. 50ms).
      */
     private static class CustomDurationDeserializer extends JsonDeserializer<Duration> {
+
+        /**
+         * Returns a Duration corresponding to the given value in a String in humanly readable format, e.g. 2h3m20s40ms.
+         * Needed for deserializing the YAML using Jackson.
+         * @param text String to be parsed.
+         * @return Returns the corresponding Duration object.
+         */
+        private Duration parseHuman(String text) {
+            Matcher m = Pattern.compile("\\s*(?:(\\d+)\\s*(?:hours?|hrs?|h))?" +
+                            "\\s*(?:(\\d+)\\s*(?:minutes?|mins?|m))?" +
+                            "\\s*(?:(\\d+)\\s*(?:seconds?|secs?|s))?" +
+                            "\\s*(?:(\\d+)\\s*(?:milliseconds?|ms))?" +
+                            "\\s*", Pattern.CASE_INSENSITIVE)
+                    .matcher(text);
+            if (! m.matches())
+                throw new IllegalArgumentException("Not valid duration: " + text);
+            int hours = (m.start(1) == -1 ? 0 : Integer.parseInt(m.group(1)));
+            int mins  = (m.start(2) == -1 ? 0 : Integer.parseInt(m.group(2)));
+            int secs  = (m.start(3) == -1 ? 0 : Integer.parseInt(m.group(3)));
+            int ms  = (m.start(4) == -1 ? 0 : Integer.parseInt(m.group(4)));
+            return Duration.ofMillis(((hours * 60L + mins) * 60L + secs) * 1000L + ms);
+        }
+
         @Override
         public Duration deserialize(JsonParser parser, DeserializationContext context) throws IOException, JsonProcessingException {
             return parseHuman(parser.getText());
