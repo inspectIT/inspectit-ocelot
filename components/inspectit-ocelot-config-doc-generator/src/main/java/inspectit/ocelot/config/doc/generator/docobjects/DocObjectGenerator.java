@@ -96,7 +96,7 @@ public class DocObjectGenerator {
             ActionDocSettings doc = actionSettings.getDoc();
 
             String description = "";
-            String returnDesc = null;
+            String returnDesc = "";
 
             Map<String, String> inputDescriptions = Collections.emptyMap();
 
@@ -191,14 +191,18 @@ public class DocObjectGenerator {
             Map<String, String> startSpanConditions = new HashMap<>();
             ConditionalActionSettings conditionalActionSettings = tracingSettings.getStartSpanConditions();
 
-            for (Field field : conditionalActionSettings.getClass().getFields()) {
+            for (Field field : conditionalActionSettings.getClass().getDeclaredFields()) {
 
-                String fieldName = field.getName();
-                try {
-                    String fieldValue = BeanUtils.getProperty(conditionalActionSettings, fieldName);
-                    startSpanConditions.put(fieldName, fieldValue);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if(!field.isSynthetic()){
+                    String fieldName = field.getName();
+                    try {
+                        String fieldValue = BeanUtils.getProperty(conditionalActionSettings, fieldName);
+                        if(fieldValue!=null){
+                            startSpanConditions.put(fieldName, fieldValue);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
