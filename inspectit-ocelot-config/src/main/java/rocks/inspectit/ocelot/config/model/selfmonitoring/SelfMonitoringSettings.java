@@ -2,7 +2,6 @@ package rocks.inspectit.ocelot.config.model.selfmonitoring;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import rocks.inspectit.ocelot.config.model.metrics.StandardMetricsSettings;
 
 import javax.validation.Valid;
 
@@ -15,10 +14,16 @@ public class SelfMonitoringSettings {
      */
     private boolean enabled;
 
-     /**
+    /**
      * Settings for {@link rocks.inspectit.ocelot.core.selfmonitoring.ActionsMetricsRecorder}
      */
     @Valid
     private ActionMetricsSettings actionMetrics;
+
+    /**
+     * Settings for the log preloading.
+     */
+    @Valid
+    private LogPreloadingSettings logPreloading;
 
 }

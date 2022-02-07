@@ -1,14 +1,14 @@
 package rocks.inspectit.ocelot.config.model.selfmonitoring;
 
+import ch.qos.logback.classic.Level;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.net.URL;
-import java.util.logging.Level;
 
 @Data
 @NoArgsConstructor
-public class LogsPreloadingSettings {
+public class LogPreloadingSettings {
 
     /**
      * Whether commands are enabled or not.
@@ -18,12 +18,14 @@ public class LogsPreloadingSettings {
     /**
      * The URL for fetching agent commands.
      */
+    // TODO: not needed! This is controlled by central agent command handling.
     private URL url;
 
     /**
      * The used log level and higher
      */
-    private Level logLevel = Level.WARNING;
+    // TODO: changed it to logback level for compatibility. Please remove this line when read.
+    private Level logLevel = Level.WARN;
 
     /**
      * Buffer size
