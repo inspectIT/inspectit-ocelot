@@ -6,7 +6,7 @@ inspectit:
       # If the input string is null, null is returned.
       'a_regex_replaceAll':
         imports:
-         - 'java.util'
+          - 'java.util'
         input:
           'string': 'String'
           'pattern': 'String'
@@ -31,7 +31,7 @@ inspectit:
       # The replacement is executed in the order of the inputs.
       'a_regex_replaceAll_multi':
         imports:
-         - 'java.util'
+          - 'java.util'
         input:
           'string': 'String'
           'patterns_and_replacements': 'Map'
@@ -52,8 +52,8 @@ inspectit:
       # If the input string is null, null is returned.
       'a_regex_replaceMatch':
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'pattern': 'String'
@@ -86,8 +86,8 @@ inspectit:
       # The replacement is executed in the order of the inputs.    
       'a_regex_replaceMatch_multi':
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'patterns_and_replacements': 'Map'
@@ -114,8 +114,8 @@ inspectit:
       # If the input string is null, null is returned.    
       'a_regex_replaceFirst':
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'pattern': 'String'
@@ -136,8 +136,8 @@ inspectit:
       # If the input string is null or the input string does not match the regex, null is returned.
       'a_regex_extractMatch':
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'pattern': 'String'
@@ -173,8 +173,8 @@ inspectit:
       #      result: <resultA>
       'a_regex_extractMatch_multi':
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'patterns_and_results': 'Map'
@@ -205,8 +205,8 @@ inspectit:
       # If the input string is null or the input string does not match the regex, null is returned.    
       'a_regex_extractFirst':
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'pattern': 'String'
@@ -242,8 +242,8 @@ inspectit:
       #      result: <resultA> 
       'a_regex_extractFirst_multi':
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'patterns_and_results': 'Map'
