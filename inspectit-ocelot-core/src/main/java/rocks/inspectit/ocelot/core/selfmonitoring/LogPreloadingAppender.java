@@ -5,6 +5,7 @@ import ch.qos.logback.core.AppenderBase;
 
 /**
  * TODO: description
+ * TODO: make sure logs are only collected when/as configured using a filter (see {@link rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer.SelfMonitoringFilter}.
  */
 public class LogPreloadingAppender extends AppenderBase<ILoggingEvent> {
 

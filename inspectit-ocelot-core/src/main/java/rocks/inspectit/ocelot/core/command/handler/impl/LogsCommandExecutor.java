@@ -53,6 +53,9 @@ public class LogsCommandExecutor implements CommandExecutor {
             logs.append("\n");
         }
 
+        // TODO: properly format logs (currently only returns [LEVEL] MESSAGE)
+        // should at least contain timestamp, level, message (using formatter?)
+
         //response.setResult("Hello World und noch die ID: " + command.getCommandId());
         response.setResult(logs.toString());
         return response;
