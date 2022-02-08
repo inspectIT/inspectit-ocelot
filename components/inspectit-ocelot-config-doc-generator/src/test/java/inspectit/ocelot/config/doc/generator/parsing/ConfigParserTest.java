@@ -1,14 +1,13 @@
-package inspectit.ocelot.config.doc.generator;
+package inspectit.ocelot.config.doc.generator.parsing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.common.io.Resources;
 import org.apache.commons.text.StringSubstitutor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
-import parsing.ConfigParser;
-import parsing.StringSubstitutorNestedMap;
+import inspectit.ocelot.config.doc.generator.parsing.ConfigParser;
+import inspectit.ocelot.config.doc.generator.parsing.StringSubstitutorNestedMap;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.InternalSettings;
@@ -18,8 +17,6 @@ import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.StandardPollingMetricsRecorderSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;

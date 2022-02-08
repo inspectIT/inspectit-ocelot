@@ -1,4 +1,4 @@
-package parsing;
+package inspectit.ocelot.config.doc.generator.parsing;
 
 import lombok.Data;
 import org.apache.commons.text.lookup.StringLookup;

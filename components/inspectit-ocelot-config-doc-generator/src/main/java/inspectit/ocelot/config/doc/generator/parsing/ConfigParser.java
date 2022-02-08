@@ -1,4 +1,4 @@
-package parsing;
+package inspectit.ocelot.config.doc.generator.parsing;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
