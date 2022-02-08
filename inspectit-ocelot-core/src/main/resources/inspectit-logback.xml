@@ -54,7 +54,7 @@
     </appender>
 
     <!-- Appender von Tim hehe -->
-    <appender name="extractLogs" class="rocks.inspectit.ocelot.core.selfmonitoring.ExtractLogsAppender">
+    <appender name="extractLogs" class="rocks.inspectit.ocelot.core.selfmonitoring.LogPreloadingAppender">
     </appender>
 
 

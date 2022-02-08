@@ -1,20 +1,21 @@
 package rocks.inspectit.ocelot.core.command.handler.impl;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
+import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
-import rocks.inspectit.ocelot.core.selfmonitoring.ExtractLogsAppender;
-
-import java.util.List;
+import rocks.inspectit.ocelot.core.selfmonitoring.LogPreloader;
 
 /**
  * Executor for executing {@link LogsCommand}s.
  */
 @Component
 public class LogsCommandExecutor implements CommandExecutor {
+
+    @Autowired
+    private LogPreloader logPreloader;
 
     /**
      * Checks if the given {@link Command} is an instance of {@link LogsCommand}.
@@ -47,11 +48,10 @@ public class LogsCommandExecutor implements CommandExecutor {
         LogsCommand.Response response = new LogsCommand.Response();
         response.setCommandId(command.getCommandId());
         StringBuilder logs = new StringBuilder();
-        for (Object o : ExtractLogsAppender.list){
+        for (Object o : logPreloader.getPreloadedLogs()) {
             logs.append(o);
             logs.append("\n");
         }
-
 
         //response.setResult("Hello World und noch die ID: " + command.getCommandId());
         response.setResult(logs.toString());
