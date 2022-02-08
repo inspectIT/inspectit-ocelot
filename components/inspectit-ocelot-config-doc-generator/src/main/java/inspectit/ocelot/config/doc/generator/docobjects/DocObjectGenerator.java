@@ -218,13 +218,11 @@ public class DocObjectGenerator {
         for (String fieldName : fieldNames) {
             try {
                 Map<String, ActionCallSettings> entryExit = (Map<String, ActionCallSettings>) PropertyUtils.getProperty(ruleSettings, fieldName);
-                if (!entryExit.isEmpty()) {
-                    Map<String, RuleActionCallDoc> actionCallDocs = new TreeMap<>();
-                    for (String actionCallKey : entryExit.keySet()) {
-                        actionCallDocs.put(actionCallKey, new RuleActionCallDoc(actionCallKey, entryExit.get(actionCallKey).getAction()));
-                    }
-                    entryExits.put(fieldName, actionCallDocs);
+                Map<String, RuleActionCallDoc> actionCallDocs = new TreeMap<>();
+                for (String actionCallKey : entryExit.keySet()) {
+                    actionCallDocs.put(actionCallKey, new RuleActionCallDoc(actionCallKey, entryExit.get(actionCallKey).getAction()));
                 }
+                entryExits.put(fieldName, actionCallDocs);
             } catch (Exception e) {
                 e.printStackTrace();
             }
