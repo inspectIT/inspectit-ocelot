@@ -1,6 +1,6 @@
 import ace from 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/mode-java';
-import {rulesToGenerate} from './AceEditor';
+import { rulesToGenerate } from './AceEditor';
 
 const oop = ace.require('ace/lib/oop');
 const TextHighlightRules = ace.require('ace/mode/text_highlight_rules').TextHighlightRules;
@@ -282,7 +282,7 @@ let InspectitOcelotHighlightRules = function () {
       let inner_map = new Map(Object.entries(map.get(key)));
 
       // The type field determines what type the value has
-      switch(inner_map.get(KEY_TYPE)) {
+      switch (inner_map.get(KEY_TYPE)) {
         case VALUE_TYPE_OBJECT:
           rules_for_current_key = mapToRulesTypeObject(inner_map, rules_for_current_key, current_state_name, nested_level);
           break;
@@ -295,11 +295,12 @@ let InspectitOcelotHighlightRules = function () {
         case VALUE_TYPE_JAVA:
           rules_for_current_key = rulesForJava(rules_for_current_key);
           break;
-        case VALUE_TYPE_ENUM:
+        case VALUE_TYPE_ENUM: {
           // the possible values for an enum are behind the key KEY_ENUM_VALUES in the inner_map
           let enum_values = inner_map.get(KEY_ENUM_VALUES);
           rules_for_current_key = rulesForEnum(rules_for_current_key, current_state_name, enum_values);
           break;
+        }
         case VALUE_TYPE_YAML:
           rules_for_current_key = rulesForYaml(rules_for_current_key);
           break;
@@ -512,10 +513,10 @@ let InspectitOcelotHighlightRules = function () {
       [KEY_OBJECT_ATTRIBUTES]: {
         inspectit: {
           type: VALUE_TYPE_OBJECT,
-          [KEY_OBJECT_ATTRIBUTES]: rulesToGenerate
-        }
-      }
-    }
+          [KEY_OBJECT_ATTRIBUTES]: rulesToGenerate,
+        },
+      },
+    },
   };
 
   const rulesToGenerateMap = new Map(Object.entries(rulesToGenerateObject));

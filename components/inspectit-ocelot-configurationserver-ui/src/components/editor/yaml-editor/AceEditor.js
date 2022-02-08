@@ -76,13 +76,16 @@ class AceEditor extends React.Component {
     // retrieved over the config-server's REST API. Until the results are returned the standard YAML highlighting mode
     // is used. When the results have been returned, the mode is set to InspectitOcelotMode.
     this.editor.getSession().setMode('ace/mode/yaml');
-    axios.get('highlight-rules').then((response) => {
-      rulesToGenerate = response.data;
-      this.editor.getSession().setMode(new InspectitOcelotMode());
-    }).catch((error) => {
-      console.log('Encountered error when retrieving Map to create custom Highlighting mode:');
-      console.log(error);
-    });
+    axios
+      .get('highlight-rules')
+      .then((response) => {
+        rulesToGenerate = response.data;
+        this.editor.getSession().setMode(new InspectitOcelotMode());
+      })
+      .catch((error) => {
+        console.log('Encountered error when retrieving Map to create custom Highlighting mode:');
+        console.log(error);
+      });
 
     this.updateValue();
   }
@@ -138,6 +141,6 @@ class AceEditor extends React.Component {
 }
 
 // needed for getting the contents of rulesToGenerate to InspectitOcelotHighlightingRules
-export {rulesToGenerate};
+export { rulesToGenerate };
 
 export default AceEditor;
