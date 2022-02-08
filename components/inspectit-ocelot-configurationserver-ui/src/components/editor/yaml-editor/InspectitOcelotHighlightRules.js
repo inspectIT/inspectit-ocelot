@@ -34,7 +34,7 @@ let InspectitOcelotHighlightRules = function () {
   };
 
   const defaultRule = {
-    defaultToken: VALUE_TYPE_TEXT,
+    defaultToken: 'text',
   };
 
   // For the limited support of JSON objects within the YAML, opening braces need to be allowed
@@ -373,7 +373,7 @@ let InspectitOcelotHighlightRules = function () {
         regex: `(${enum_values.join('|')})(})`,
       },
       {
-        token: ['variable.enum', VALUE_TYPE_TEXT],
+        token: ['variable.enum', 'text'],
         regex: `(${enum_values.join('|')})(,)`,
       },
       {
