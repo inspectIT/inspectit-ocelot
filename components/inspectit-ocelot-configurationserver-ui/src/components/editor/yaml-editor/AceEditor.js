@@ -79,6 +79,9 @@ class AceEditor extends React.Component {
     axios.get('highlight-rules').then((response) => {
       rulesToGenerate = response.data;
       this.editor.getSession().setMode(new InspectitOcelotMode());
+    }).catch((error) => {
+      console.log('Encountered error when retrieving Map to create custom Highlighting mode:');
+      console.log(error);
     });
 
     this.updateValue();
