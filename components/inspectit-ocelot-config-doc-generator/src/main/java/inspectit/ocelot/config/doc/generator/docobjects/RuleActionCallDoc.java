@@ -3,7 +3,6 @@ package inspectit.ocelot.config.doc.generator.docobjects;
 import lombok.*;
 
 @Getter
-@Setter
 public class RuleActionCallDoc {
 
     public RuleActionCallDoc(String name, String action) {
