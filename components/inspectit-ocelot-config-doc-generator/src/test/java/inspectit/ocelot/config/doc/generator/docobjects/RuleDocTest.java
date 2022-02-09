@@ -2,10 +2,13 @@ package inspectit.ocelot.config.doc.generator.docobjects;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 class RuleDocTest {
     
@@ -28,6 +31,14 @@ class RuleDocTest {
     private static final String ENTRY_KEY = "entry";
     private static final String EXIT_KEY = "exit";
 
+    public static Map<String, Map<String, RuleActionCallDoc>> getEmptyEntryExits(){
+        Map<String, Map<String, RuleActionCallDoc>> entryExits = new HashMap<>();
+        for (String fieldName : RuleDoc.possibleValuesEntryExits) {
+            entryExits.put(fieldName, new TreeMap<>());
+        }
+        return entryExits;
+    }
+
     private Map<String, RuleDoc> getTestRuleDocs(){
         Map<String, RuleDoc> allRuleDocs = new HashMap<>();
 
@@ -41,7 +52,7 @@ class RuleDocTest {
         includes1.add(RULE_4_NAME);
         allRuleDocs.get(RULE_1_NAME).setInclude(includes1);
 
-        Map<String, Map<String, RuleActionCallDoc>> entryExits1 = new HashMap<>();
+        Map<String, Map<String, RuleActionCallDoc>> entryExits1 = getEmptyEntryExits();
         Map<String, RuleActionCallDoc> actionCalls1 = new HashMap<>();
         RuleActionCallDoc actionCall11 = new RuleActionCallDoc(OVERWRITTEN_BY_1, ACTION_FROM_RULE_1);
         actionCalls1.put(OVERWRITTEN_BY_1, actionCall11);
@@ -114,23 +125,38 @@ class RuleDocTest {
 
             // ActionCall created in 3 is added to testRule2 and testRule1
             RuleActionCallDoc created_by_3 = expected.get(RULE_3_NAME).getEntryExits().get(ENTRY_KEY).get(CREATED_BY_3);
-            RuleActionCallDoc inherited_from_3 = new RuleActionCallDoc(created_by_3, RULE_3_NAME);
+
+            RuleActionCallDoc inherited_from_3 = Mockito.mock(RuleActionCallDoc.class);
+            when(inherited_from_3.getName()).thenReturn(created_by_3.getName());
+            when(inherited_from_3.getAction()).thenReturn(created_by_3.getAction());
+            when(inherited_from_3.getInheritedFrom()).thenReturn(RULE_3_NAME);
+
             expected.get(RULE_2_NAME).getEntryExits().get(ENTRY_KEY).put(CREATED_BY_3, inherited_from_3);
             expected.get(RULE_1_NAME).getEntryExits().get(ENTRY_KEY).put(CREATED_BY_3, inherited_from_3);
 
             // ActionCall created in 3 but overwritten in 2 is added to testRule1
             RuleActionCallDoc overwritten_by_2 = expected.get(RULE_2_NAME).getEntryExits().get(ENTRY_KEY).get(OVERWRITTEN_BY_2);
-            RuleActionCallDoc inherited_from_2 = new RuleActionCallDoc(overwritten_by_2, RULE_2_NAME);
+
+            RuleActionCallDoc inherited_from_2 = Mockito.mock(RuleActionCallDoc.class);
+            when(inherited_from_2.getName()).thenReturn(overwritten_by_2.getName());
+            when(inherited_from_2.getAction()).thenReturn(overwritten_by_2.getAction());
+            when(inherited_from_2.getInheritedFrom()).thenReturn(RULE_2_NAME);
+
             expected.get(RULE_1_NAME).getEntryExits().get(ENTRY_KEY).put(OVERWRITTEN_BY_2, inherited_from_2);
 
             // ActionCall created in 4 is added to testRule1
             RuleActionCallDoc created_by_4 = expected.get(RULE_4_NAME).getEntryExits().get(EXIT_KEY).get(CREATED_BY_4);
-            RuleActionCallDoc inherited_from_4 = new RuleActionCallDoc(created_by_4, RULE_4_NAME);
+
+            RuleActionCallDoc inherited_from_4 = Mockito.mock(RuleActionCallDoc.class);
+            when(inherited_from_4.getName()).thenReturn(created_by_4.getName());
+            when(inherited_from_4.getAction()).thenReturn(created_by_4.getAction());
+            when(inherited_from_4.getInheritedFrom()).thenReturn(RULE_4_NAME);
+
             Map<String, RuleActionCallDoc> actionCallsEntry = new HashMap<>();
             actionCallsEntry.put(CREATED_BY_4, inherited_from_4);
             expected.get(RULE_1_NAME).getEntryExits().put(EXIT_KEY, actionCallsEntry);
 
-            assertEquals(expected, result);
+            assertThat(result).usingRecursiveComparison().isEqualTo(expected);
         }
         
     }

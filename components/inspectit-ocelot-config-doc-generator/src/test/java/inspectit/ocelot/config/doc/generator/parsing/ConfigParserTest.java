@@ -3,11 +3,14 @@ package inspectit.ocelot.config.doc.generator.parsing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import inspectit.ocelot.config.doc.generator.docobjects.ActionDoc;
 import org.apache.commons.text.StringSubstitutor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
-import inspectit.ocelot.config.doc.generator.parsing.ConfigParser;
-import inspectit.ocelot.config.doc.generator.parsing.StringSubstitutorNestedMap;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.InternalSettings;
@@ -21,8 +24,10 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class ConfigParserTest {
 
     private final ConfigParser configParser = new ConfigParser();
@@ -37,6 +42,7 @@ class ConfigParserTest {
             final String variable2 = "inspectit.name.second.placeholder-value";
             final String variable3 = "inspectit.doesnotexist";
             final String variable4 = "doesnotexist";
+            final String variable5 = "inspectit.name.dot.placeholder-value";
 
             final String configYaml = String.format(
                     "inspectit:\n" +
@@ -45,15 +51,19 @@ class ConfigParserTest {
                     "  placeholder-test2: ${%s}\n" +
                     // Test replacement if placeholder-keys do not lead to a value
                     "  placeholder-test3: ${%s}\n" +
+                    // Test replacement with key containing dots
+                    "  placeholder-test5: ${%s}\n" +
                     "  name:\n" +
                     "    placeholder-value: value\n" +
+                    "    dot.placeholder-value: value5\n" +
                     "    second:\n" +
                     "      placeholder-value: value2\n" +
                     "      placeholder-test4: ${%s}",
-                    variable1, variable2, variable3, variable4);
+                    variable1, variable2, variable3, variable5, variable4);
 
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
+
             StringSubstitutor stringSubstitutor = new StringSubstitutorNestedMap(yamlMap);
             String result = stringSubstitutor.replace(configYaml);
 
@@ -62,14 +72,16 @@ class ConfigParserTest {
                     "  placeholder-test: value\n" +
                     "  placeholder-test2: value2\n" +
                     "  placeholder-test3: ${%s}\n" +
+                    "  placeholder-test5: value5\n" +
                     "  name:\n" +
                     "    placeholder-value: value\n" +
+                    "    dot.placeholder-value: value5\n" +
                     "    second:\n" +
                     "      placeholder-value: value2\n" +
                     "      placeholder-test4: ${%s}",
                     variable3, variable4);
 
-            assertEquals(expected, result);
+            assertThat(result).isEqualTo(expected);
         }
     }
 
@@ -79,44 +91,40 @@ class ConfigParserTest {
         @Test
         void withPlaceholder() {
 
-            final String configYaml =
-                "inspectit:\n" +
-                "  metrics:\n" +
-                "    disk:\n" +
-                "      enabled:\n" +
-                "        # if true, the free disk space will be measured and the view \"disk/free\" is registered\n" +
-                "        free: true\n" +
-                "    definitions:\n" +
-                "      '[disk/free]':\n" +
-                "        enabled: ${inspectit.metrics.disk.enabled.free}\n" +
-                "        type: LONG\n" +
-                "        unit: bytes\n" +
-                "        description: free disk space";
+            final String metricName = "[disk/free]";
+
+            final String configYaml = String.format(
+                    "inspectit:\n" +
+                    "  metrics:\n" +
+                    "    disk:\n" +
+                    "      enabled:\n" +
+                    "        # if true, the free disk space will be measured and the view \"disk/free\" is registered\n" +
+                    "        free: true\n" +
+                    "    definitions:\n" +
+                    "      '%s':\n" +
+                    "        enabled: ${inspectit.metrics.disk.enabled.free}\n" +
+                    "        type: LONG\n" +
+                    "        unit: bytes\n" +
+                    "        description: free disk space"
+                    , metricName);
 
             InspectitConfig result = configParser.parseConfig(configYaml);
 
             // Build the expected result by hand
             Map<String, Boolean> enabledMap = new HashMap<>();
             enabledMap.put("free", true);
-            StandardPollingMetricsRecorderSettings pollingSettings = new StandardPollingMetricsRecorderSettings();
-            pollingSettings.setEnabled(enabledMap);
+            StandardPollingMetricsRecorderSettings pollingSettingsMock = Mockito.mock(StandardPollingMetricsRecorderSettings.class);
+            when(pollingSettingsMock.getEnabled()).thenReturn(enabledMap);
 
-            MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
-                    .enabled(true).type(MetricDefinitionSettings.MeasureType.LONG).unit("bytes")
-                    .description("free disk space").build();
-            // I am not sure why adding views(null) to the builder is not allowed, but it isn't, so it's done afterwards.
-            metricDefinition.setViews(null);
-            Map<String, MetricDefinitionSettings> metricDefinitions = new HashMap<>();
-            metricDefinitions.put("[disk/free]", metricDefinition);
+            MetricDefinitionSettings metricDefinitionMock = Mockito.mock(MetricDefinitionSettings.class);
+            when(metricDefinitionMock.isEnabled()).thenReturn(true);
+            when(metricDefinitionMock.getType()).thenReturn(MetricDefinitionSettings.MeasureType.LONG);
+            when(metricDefinitionMock.getUnit()).thenReturn("bytes");
+            when(metricDefinitionMock.getDescription()).thenReturn("free disk space");
+            when(metricDefinitionMock.getViews()).thenReturn(null);
 
-            MetricsSettings metricsSettings = new MetricsSettings();
-            metricsSettings.setDisk(pollingSettings);
-            metricsSettings.setDefinitions(metricDefinitions);
-
-            InspectitConfig expected = new InspectitConfig();
-            expected.setMetrics(metricsSettings);
-
-            assertEquals(expected, result);
+            assertThat(result.getMetrics().getDefinitions().get(metricName)).usingRecursiveComparison().isEqualTo(metricDefinitionMock);
+            assertThat(result.getMetrics().getDisk()).usingRecursiveComparison().isEqualTo(pollingSettingsMock);
         }
 
         @Test
@@ -131,18 +139,8 @@ class ConfigParserTest {
 
             InspectitConfig result = configParser.parseConfig(configYaml);
 
-            // Build the expected result by hand
-            InternalSettings internal = new InternalSettings();
-            internal.setInterBatchDelay(Duration.ofMillis(50));
-            internal.setNewClassDiscoveryInterval(Duration.ofSeconds(10));
-
-            InstrumentationSettings instrumentation = new InstrumentationSettings();
-            instrumentation.setInternal(internal);
-
-            InspectitConfig expected = new InspectitConfig();
-            expected.setInstrumentation(instrumentation);
-
-            assertEquals(expected, result);
+            assertThat(result.getInstrumentation().getInternal().getInterBatchDelay()).isEqualTo(Duration.ofMillis(50));
+            assertThat(result.getInstrumentation().getInternal().getNewClassDiscoveryInterval()).isEqualTo(Duration.ofSeconds(10));
         }
 
         @Test
@@ -170,30 +168,20 @@ class ConfigParserTest {
             Map<String, String> inputDescs = new HashMap<>();
             inputDescs.put("value", "Object to be printed");
 
-            ActionDocSettings actionDoc = new ActionDocSettings();
-            actionDoc.setDescription("Prints a given Object to stdout.");
-            actionDoc.setInputDesc(inputDescs);
-            actionDoc.setReturnDesc("Void");
-
+            ActionDocSettings actionDocSettingsMock = Mockito.mock(ActionDocSettings.class);
+            when(actionDocSettingsMock.getDescription()).thenReturn("Prints a given Object to stdout.");
+            when(actionDocSettingsMock.getInputDesc()).thenReturn(inputDescs);
+            when(actionDocSettingsMock.getReturnDesc()).thenReturn("Void");
 
             Map<String, String> inputs = new HashMap<>();
             inputs.put("value", "Object");
-            GenericActionSettings action = new GenericActionSettings();
-            action.setDoc(actionDoc);
-            action.setInput(inputs);
-            action.setIsVoid(true);
-            action.setValueBody("System.out.println(value);");
+            GenericActionSettings actionSettingsMock = Mockito.mock(GenericActionSettings.class);
+            when(actionSettingsMock.getDoc()).thenReturn(actionDocSettingsMock);
+            when(actionSettingsMock.getInput()).thenReturn(inputs);
+            when(actionSettingsMock.getIsVoid()).thenReturn(true);
+            when(actionSettingsMock.getValueBody()).thenReturn("System.out.println(value);");
 
-            Map<String, GenericActionSettings> actions = new HashMap<>();
-            actions.put("a_debug_println", action);
-
-            InstrumentationSettings instrumentation = new InstrumentationSettings();
-            instrumentation.setActions(actions);
-
-            InspectitConfig expected = new InspectitConfig();
-            expected.setInstrumentation(instrumentation);
-
-            assertEquals(expected, result);
+            assertThat(result.getInstrumentation().getActions().get("a_debug_println")).usingRecursiveComparison().isEqualTo(actionSettingsMock);
         }
     }
 }

@@ -35,9 +35,8 @@ public class StringLookupNestedMap implements StringLookup {
                 value = new_value;
             } else {
                 if(keys.get(keys.size() - 1).equals(key)){
-                    // if the corresponding value can not be found, return the full key.
-                    // This is a workaround for, as of now, only environment variables, so it should be fine for the
-                    // Documentation but would not be for any actually running agents.
+                    // if the corresponding value can not be found, return null which leads to the full variable being
+                    // kept in the YAML
                     return null;
                 } else {
                     old_key.append(key).append(".");

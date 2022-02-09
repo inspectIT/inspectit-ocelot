@@ -9,8 +9,9 @@ import java.util.*;
 
 @Getter
 @Setter
-@EqualsAndHashCode (callSuper = true)
 public class RuleDoc extends BaseDoc {
+
+    public static String[] possibleValuesEntryExits = {"preEntry", "entry", "postEntry", "preExit", "exit", "postExit"};
 
     public RuleDoc(String name, String description, List<String> include, List<String> scopes,
                    List<RuleMetricsDoc> metricsDocs, RuleTracingDoc tracingDoc, Map<String, Map<String,

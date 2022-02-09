@@ -34,7 +34,7 @@ public class ConfigParser {
         mapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE);
     }
 
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     /**
      * Parses YAML describing an InspectitConfig into InspectitConfig object.

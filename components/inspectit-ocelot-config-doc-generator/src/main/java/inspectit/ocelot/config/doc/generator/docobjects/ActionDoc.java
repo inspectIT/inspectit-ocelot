@@ -6,7 +6,6 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-@EqualsAndHashCode (callSuper = true)
 public class ActionDoc extends BaseDoc {
 
     public ActionDoc(String name, String description, List<ActionInputDoc> inputs, String returnDescription, Boolean isVoid) {

@@ -1,16 +1,13 @@
 package inspectit.ocelot.config.doc.generator.docobjects;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@Data
+@RequiredArgsConstructor
+@Getter
 public abstract class BaseDoc {
 
-    public BaseDoc(String name, String description) {
-        this.description = description;
-        this.name = name;
-    }
-
-    private final String description;
     private final String name;
+    private final String description;
 
 }

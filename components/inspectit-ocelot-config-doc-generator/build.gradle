@@ -21,7 +21,9 @@ dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation (
             'org.junit.jupiter:junit-jupiter:5.7.2',
-            "io.opencensus:opencensus-api:${openCensusVersion}"
+            "io.opencensus:opencensus-api:${openCensusVersion}",
+            'org.mockito:mockito-junit-jupiter:2.23.0',
+            "org.assertj:assertj-core:3.19.0"
     )
 
     // This dependency is used by the application.

@@ -214,8 +214,7 @@ public class DocObjectGenerator {
     
     private Map<String, Map<String, RuleActionCallDoc>> generateRuleActionCallDocs(InstrumentationRuleSettings ruleSettings) {
         Map<String, Map<String, RuleActionCallDoc>> entryExits = new HashMap<>();
-        String[] fieldNames = {"preEntry", "entry", "postEntry", "preExit", "exit", "postExit"};
-        for (String fieldName : fieldNames) {
+        for (String fieldName : RuleDoc.possibleValuesEntryExits) {
             try {
                 Map<String, ActionCallSettings> entryExit = (Map<String, ActionCallSettings>) PropertyUtils.getProperty(ruleSettings, fieldName);
                 Map<String, RuleActionCallDoc> actionCallDocs = new TreeMap<>();

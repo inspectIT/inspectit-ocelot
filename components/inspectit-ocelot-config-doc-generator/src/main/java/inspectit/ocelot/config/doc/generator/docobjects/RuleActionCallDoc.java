@@ -4,7 +4,6 @@ import lombok.*;
 
 @Getter
 @Setter
-@EqualsAndHashCode
 public class RuleActionCallDoc {
 
     public RuleActionCallDoc(String name, String action) {
