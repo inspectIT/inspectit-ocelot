@@ -3,13 +3,13 @@ id: syntax-highlighting
 title: YAML Editor Syntax Highlighting
 ---
 
-The *inspectIT Configuration Server* uses a custom [Mode for Syntax Highlighting](https://ace.c9.io/#nav=higlighter) in its Ace Editor based on the standard YAML Highlighting to help with writing your configurations.
+The *inspectIT Configuration Server* uses a custom Mode for [Syntax Highlighting in its Ace Editor](https://ace.c9.io/#nav=higlighter) based on the editor's default YAML Highlighting to help with writing your configurations.
 
 ## Additions to the standard YAML Highlighting
 
 - Marking illegal fields that do not fit within the Java object the current part of the YAML corresponds to, which should help with both typing and indentation errors.
-- Differentiating between keys that are predetermined by the underlying Java objects that are created from the YAML later and fields whose names you can choose yourself, e.g. the name of a scope.
-- When a value in the YAML corresponds to an Enum, impossible values for that Enum are marked as invalid.
+- Differentiating between keys that are predetermined by the underlying Java objects that are created from the YAML later and fields whose names can be chosen freely, e.g. the name of a scope.
+- When a value in the YAML corresponds to an enum, impossible values, i.e. values that are not part of the enum's set of predefined constants, are marked as invalid.
 - Highlighting Java code in an action's value or value-body fields using Ace Editor's (albeit a bit limited) Java Highlighting.
   
 
@@ -28,7 +28,7 @@ This happens because to make the Syntax Highlighting possible some rules needed 
 
 - Indentation between levels must always be 2 spaces, this also includes lists.
 - JSON objects are only supported to a limited degree, i.e. when only one key-value pair is inside the JSON object. For cases with more than one key-value pair use nested YAML instead.
-- Keys that are predetermined by the underlying Java objects and not freely chosen by you, must be written without quotation marks.
+- Keys that are predetermined by the underlying Java objects and not freely chosen, must be written without quotation marks.
   
 
 | Examples for guidelines      |                                                                                                |
