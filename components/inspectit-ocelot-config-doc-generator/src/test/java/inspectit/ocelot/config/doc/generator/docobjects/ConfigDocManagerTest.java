@@ -1,5 +1,6 @@
-package inspectit.ocelot.config.doc.generator;
+package inspectit.ocelot.config.doc.generator.docobjects;
 
+import inspectit.ocelot.config.doc.generator.ConfigDocManager;
 import inspectit.ocelot.config.doc.generator.docobjects.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
