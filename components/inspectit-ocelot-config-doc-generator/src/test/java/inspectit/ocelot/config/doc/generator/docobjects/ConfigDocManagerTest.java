@@ -65,9 +65,9 @@ class DocObjectGeneratorTest {
 
         actionWithoutDocInYaml = Mockito.mock(ActionDoc.class);
         when(actionWithoutDocInYaml.getName()).thenReturn("a_debug_println_2");
-        when(actionWithoutDocInYaml.getDescription()).thenReturn("");
+        when(actionWithoutDocInYaml.getDescription()).thenReturn(null);
         when(actionWithoutDocInYaml.getInputs()).thenReturn(inputs2);
-        when(actionWithoutDocInYaml.getReturnDescription()).thenReturn("");
+        when(actionWithoutDocInYaml.getReturnDescription()).thenReturn(null);
         when(actionWithoutDocInYaml.getIsVoid()).thenReturn(false);
 
         // Create a sample ScopeDoc object

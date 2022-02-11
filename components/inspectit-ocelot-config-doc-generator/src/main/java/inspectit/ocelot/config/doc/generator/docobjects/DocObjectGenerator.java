@@ -95,8 +95,8 @@ public class DocObjectGenerator {
             GenericActionSettings actionSettings = actions.get(actionName);
             ActionDocSettings doc = actionSettings.getDoc();
 
-            String description = "";
-            String returnDesc = "";
+            String description = null;
+            String returnDesc = null;
 
             Map<String, String> inputDescriptions = Collections.emptyMap();
 
