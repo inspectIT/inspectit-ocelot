@@ -28,7 +28,7 @@ The following properties are nested properties below the `inspectit.exporters.me
 
 |Property |Default| Description
 |---|---|---|
-|`.enabled`|`true`|If true, the inspectIT Ocelot agent will try to start the Prometheus metrics exporter and Prometheus HTTP server.
+|`.enabled`|`false`|If true, the inspectIT Ocelot agent will try to start the Prometheus metrics exporter and Prometheus HTTP server.
 |`.host`|`0.0.0.0`|The hostname or network address to which the Prometheus HTTP server should bind.
 |`.port`|`8888`|The port the Prometheus HTTP server should use.
 
@@ -38,7 +38,7 @@ The following properties are nested properties below the `inspectit.exporters.me
 ## OpenCensus Agent Metrics Exporter
 
 Metrics can be additionally exported to the [OpenCensus Agent](https://opencensus.io/service/components/agent/).
-When enabled, all metrics are sent via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address is set to `null`.
+When enabled, all metrics are sent via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address that is needed for the exporter to actually start is set to `null`.
 
 The following properties are nested properties below the `inspectit.exporters.metrics.open-census-agent` property:
 

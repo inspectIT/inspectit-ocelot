@@ -3,6 +3,14 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
+## Breaking changes in 1.15.0
+
+### Default value for Prometheus exporter's enabled property
+
+The default value for the Prometheus exporter's property `enabled` is now `false` instead of `true`.
+This was changed so the exporter's behaviour is in line with the behaviour of other exporters, i.e. it will not run without changing the default settings.
+Other exporters do not run by default even though their `enabled` property is set to `true`, because they need additional configuration set, e.g. external URLs to push data to.
+
 ## Breaking changes in 1.12.2
 
 There are no breaking changes for version 1.12.2.
