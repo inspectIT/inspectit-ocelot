@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
+import ch.qos.logback.classic.Level;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
@@ -61,5 +62,15 @@ public class JaegerExporterServiceIntTest extends SpringTestBase {
         await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
             verify(postRequestedFor(urlPathEqualTo(JAEGER_PATH)));
         });
+    }
+
+    @DirtiesContext
+    @Test
+    void testNoUrlSet() {
+        updateProperties(props -> {
+            props.setProperty("inspectit.exporters.tracing.jaeger.url", "");
+        });
+        assertLogsOfLevelOrGreater(Level.WARN);
+        assertLogCount("Jaeger Exporter is enabled but no url set.", 1);
     }
 }

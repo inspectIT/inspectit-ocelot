@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
+import ch.qos.logback.classic.Level;
 import de.flapdoodle.embed.process.runtime.Network;
 import io.apisense.embed.influx.InfluxServer;
 import io.apisense.embed.influx.configuration.InfluxConfigurationWriter;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.util.Arrays;
@@ -91,5 +93,16 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
         });
     }
 
-
+    @DirtiesContext
+    @Test
+    void testNoUrlSet() {
+        updateProperties(props -> {
+            props.setProperty("inspectit.exporters.metrics.influx.url", "");
+            // change a second property so change is detected and another try of enabling triggered,
+            // since url already is empty by default
+            props.setProperty("inspectit.exporters.metrics.influx.database", DATABASE);
+        });
+        assertLogsOfLevelOrGreater(Level.WARN);
+        assertLogCount("InfluxDB Exporter is enabled but no url set.", 1);
+    }
 }

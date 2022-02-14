@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
+import ch.qos.logback.classic.Level;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.opencensus.exporter.trace.zipkin.ZipkinTraceExporter;
 import io.opencensus.impl.trace.TraceComponentImpl;
@@ -65,5 +66,15 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
         await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
             verify(postRequestedFor(urlPathEqualTo(ZIPKIN_PATH)).withRequestBody(containing("zipkinspan")));
         });
+    }
+
+    @DirtiesContext
+    @Test
+    void testNoUrlSet() {
+        updateProperties(props -> {
+            props.setProperty("inspectit.exporters.tracing.zipkin.url", "");
+        });
+        assertLogsOfLevelOrGreater(Level.WARN);
+        assertLogCount("Zipkin Exporter is enabled but no url set.", 1);
     }
 }

@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
+import ch.qos.logback.classic.Level;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import io.grpc.BindableService;
@@ -13,6 +14,7 @@ import io.opencensus.proto.agent.metrics.v1.MetricsServiceGrpc;
 import io.opencensus.stats.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -29,10 +31,6 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@TestPropertySource(properties = {
-        "inspectit.exporters.metrics.open-census-agent.address=localhost:55678",
-        "inspectit.exporters.metrics.open-census-agent.use-insecure=true",
-})
 @DirtiesContext
 public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase {
 
@@ -59,6 +57,10 @@ public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase
     //@Test This test is currently deactivated, since the current implementation of the trace exporter tries to connect to a google service before starting
     // and the request runs into a timeout.
     public void testGrpcRequest() {
+        updateProperties(props -> {
+            props.setProperty("inspectit.exporters.metrics.open-census-agent.address", "localhost:55678");
+            props.setProperty("inspectit.exporters.metrics.open-census-agent.use-insecure", "true");
+        });
         try {
             agent.start();
             recordDummyMetric();
@@ -124,6 +126,19 @@ public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase
         synchronized List<ExportMetricsServiceRequest> getExportMetricsServiceRequests() {
             return Collections.unmodifiableList(exportMetricsServiceRequests);
         }
+    }
+
+    @DirtiesContext
+    @Test
+    void testNoAddressSet() throws Exception {
+        updateProperties(props -> {
+            props.setProperty("inspectit.exporters.metrics.open-census-agent.address", "");
+            // change a second property so change is detected and another try of enabling triggered,
+            // since address already is empty by default
+            props.setProperty("inspectit.exporters.metrics.open-census-agent.use-insecure", "true");
+        });
+        assertLogsOfLevelOrGreater(Level.WARN);
+        assertLogCount("OpenCensus Metrics Exporter is enabled but no address set.", 1);
     }
 
 }

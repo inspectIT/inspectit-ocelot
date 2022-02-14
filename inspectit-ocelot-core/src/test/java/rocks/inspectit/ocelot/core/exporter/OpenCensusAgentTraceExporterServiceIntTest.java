@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
+import ch.qos.logback.classic.Level;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import io.grpc.BindableService;
@@ -14,6 +15,7 @@ import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.core.SpringTestBase;
@@ -203,5 +205,15 @@ public class OpenCensusAgentTraceExporterServiceIntTest extends SpringTestBase {
         private synchronized void resetConfigRequestObserverRef() {
             configRequestObserverRef.set(null);
         }
+    }
+
+    @DirtiesContext
+    @Test
+    void testNoAddressSet() {
+        updateProperties(props -> {
+            props.setProperty("inspectit.exporters.tracing.open-census-agent.address", "");
+        });
+        assertLogsOfLevelOrGreater(Level.WARN);
+        assertLogCount("OpenCensus Tracing Exporter is enabled but no address set.", 1);
     }
 }
