@@ -4,7 +4,7 @@ import io.opencensus.common.Duration;
 import io.opencensus.exporter.trace.ocagent.OcAgentTraceExporter;
 import io.opencensus.exporter.trace.ocagent.OcAgentTraceExporterConfiguration;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.trace.OpenCensusAgentTraceExporterSettings;
@@ -21,9 +21,14 @@ public class OpenCensusAgentTraceExporterService extends DynamicallyActivatableS
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         OpenCensusAgentTraceExporterSettings openCensusAgent = conf.getExporters().getTracing().getOpenCensusAgent();
-        return conf.getTracing().isEnabled()
-                && openCensusAgent.isEnabled()
-                && !StringUtils.isEmpty(openCensusAgent.getAddress());
+        if(conf.getTracing().isEnabled() && openCensusAgent.isEnabled()){
+            if(StringUtils.hasText(openCensusAgent.getAddress())){
+                return true;
+            } else {
+                log.warn("OpenCensus Tracing Exporter is enabled but no address set.");
+            }
+        }
+        return false;
     }
 
     @Override

@@ -3,7 +3,7 @@ package rocks.inspectit.ocelot.core.exporter;
 import io.opencensus.exporter.trace.zipkin.ZipkinExporterConfiguration;
 import io.opencensus.exporter.trace.zipkin.ZipkinTraceExporter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.trace.ZipkinExporterSettings;
@@ -26,7 +26,14 @@ public class ZipkinExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         @Valid ZipkinExporterSettings zipkin = conf.getExporters().getTracing().getZipkin();
-        return zipkin.isEnabled() && !StringUtils.isEmpty(zipkin.getUrl()) && conf.getTracing().isEnabled();
+        if(conf.getTracing().isEnabled() && zipkin.isEnabled()){
+            if(StringUtils.hasText(zipkin.getUrl())){
+                return true;
+            } else {
+                log.warn("Zipkin Exporter is enabled but no url set.");
+            }
+        }
+        return false;
     }
 
     @Override

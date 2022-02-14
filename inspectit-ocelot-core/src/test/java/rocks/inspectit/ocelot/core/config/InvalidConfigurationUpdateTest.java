@@ -19,7 +19,7 @@ public class InvalidConfigurationUpdateTest extends SpringTestBase {
             mp.setProperty("inspectit.service-name", "ConfA");
         });
         Assertions.assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("ConfA");
-        assertNoLogsOfLevelOrGreater(Level.WARN);
+        assertNoLogsOfLevelOrGreater(Level.ERROR);
         updateProperties(mp -> {
             mp.setProperty("inspectit.service-name", "ConfB");
             mp.setProperty("inspectit.thread-pool-size", "-1");

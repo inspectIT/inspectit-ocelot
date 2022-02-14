@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.io.IOException;
@@ -16,6 +17,9 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+@TestPropertySource(properties = {
+        "inspectit.exporters.metrics.prometheus.enabled=true"
+})
 public class PrometheusExporterServiceIntTest extends SpringTestBase {
 
     private static final int HTTP_TIMEOUT = 1000;

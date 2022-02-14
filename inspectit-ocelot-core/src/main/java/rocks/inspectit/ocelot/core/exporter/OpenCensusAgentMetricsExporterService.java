@@ -4,8 +4,8 @@ import io.opencensus.common.Duration;
 import io.opencensus.exporter.metrics.ocagent.OcAgentMetricsExporter;
 import io.opencensus.exporter.metrics.ocagent.OcAgentMetricsExporterConfiguration;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.OpenCensusAgentMetricsExporterSettings;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
@@ -23,9 +23,14 @@ public class OpenCensusAgentMetricsExporterService extends DynamicallyActivatabl
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         @Valid OpenCensusAgentMetricsExporterSettings openCensusAgent = conf.getExporters().getMetrics().getOpenCensusAgent();
-        return conf.getMetrics().isEnabled()
-                && openCensusAgent.isEnabled()
-                && !StringUtils.isEmpty(openCensusAgent.getAddress());
+        if(conf.getMetrics().isEnabled() && openCensusAgent.isEnabled()){
+            if(StringUtils.hasText(openCensusAgent.getAddress())){
+                return true;
+            } else {
+                log.warn("OpenCensus Metrics Exporter is enabled but no address set.");
+            }
+        }
+        return false;
     }
 
     @Override

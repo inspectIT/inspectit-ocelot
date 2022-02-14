@@ -9,7 +9,7 @@ inspectit:
       # settings for the prometheus exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/stats/prometheus)
       prometheus:
         # if true, the agent will try to start the Prometheus stats exporter
-        enabled: true
+        enabled: false
         # the hostname or IP-address on which the /metrics endpoint of prometheus will be started.
         host: 0.0.0.0
         # the port on which the /metrics endpoint of prometheus will be started
@@ -31,7 +31,10 @@ inspectit:
         export-interval: ${inspectit.metrics.frequency}
 
       influx:
+        # if true, the agent will try to start the InfluxDB exporter
         enabled: true
+        # the Url under which the InfluxDB can be accessed, e.g. http://localhost:8086
+        url: null
         # the export interval of the metrics
         export-interval: ${inspectit.metrics.frequency}
         # the database to write to
