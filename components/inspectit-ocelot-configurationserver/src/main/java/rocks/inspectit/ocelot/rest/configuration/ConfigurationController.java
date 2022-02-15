@@ -15,15 +15,21 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
+import rocks.inspectit.ocelot.agentconfiguration.ObjectStructureMerger;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
+import rocks.inspectit.ocelot.rest.file.DefaultConfigController;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,9 +51,15 @@ public class ConfigurationController extends AbstractBaseController {
 
     @Autowired
     private AgentMappingManager mappingManager;
+
+    @Autowired
+    private DefaultConfigController defaultConfigController;
     
     // Not final to make mocking in test possible
     private ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator();
+
+    // Not final to make mocking in test possible
+    private Yaml yaml = new Yaml();
 
     /**
      * Reloads all configuration files present in the servers working directory.
@@ -88,7 +100,7 @@ public class ConfigurationController extends AbstractBaseController {
      */
     @ApiOperation(value = "Get the full configuration documentation of an AgentMappings config, based on the AgentMapping name.")
     @GetMapping(value = "configuration/documentation", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getConfigDocumentation(@ApiParam("The name of the AgentMapping the configuration documentation should be for.") @RequestParam(name = "agent-mapping") String mappingName) {
+    public ResponseEntity<Object> getConfigDocumentation(@ApiParam("The name of the AgentMapping the configuration documentation should be for.") @RequestParam(name = "agent-mapping") String mappingName, @ApiParam("Whether the shown documentation should include the merged in Default Config as well.") @RequestParam(name = "include-default") Boolean includeDefault) {
 
         ConfigDocumentation configDocumentation = null;
 
@@ -96,6 +108,24 @@ public class ConfigurationController extends AbstractBaseController {
         if (agentMapping.isPresent()) {
             AgentConfiguration configuration = configManager.getConfigurationForMapping(agentMapping.get());
             String configYaml = configuration.getConfigYaml();
+
+            if (includeDefault) {
+                try {
+                    Map<String, String> defaultYamls = defaultConfigController.getDefaultConfigContent();
+
+                    Object combined = yaml.load(configYaml);
+                    if (combined == null) {
+                        combined = Collections.emptyMap();
+                    }
+                    for (String defaultYaml : defaultYamls.values()) {
+                        Object loadedYaml = yaml.load(defaultYaml);
+                        combined = ObjectStructureMerger.merge(combined, loadedYaml);
+                    }
+                    configYaml = yaml.dump(combined);
+                } catch (Exception e) {
+                    log.error("Could not get contents of DefaultConfig. Will continue without including it.", e);
+                }
+            }
 
             try {
                 configDocumentation = configDocsGenerator.generateConfigDocs(configYaml);
