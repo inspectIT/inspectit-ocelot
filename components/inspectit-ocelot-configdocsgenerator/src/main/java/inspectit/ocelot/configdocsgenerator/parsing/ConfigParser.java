@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 
@@ -47,21 +48,26 @@ public class ConfigParser {
      * @return InspectitConfig described by given YAML.
      */
     public InspectitConfig parseConfig(String configYaml) {
-        try {
-            // config YAMLs contain variables that in the inspectit-ocelot-core project are evaluated by Spring-Boot,
-            // however here there is no InspectitEnvironment which is used for that, so instead Jackson is used and
-            // the variables are evaluated using a custom version of StringSubstitutor.
-            Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
-            StringSubstitutor stringSubstitutor = new NestedMapStringSubstitutor(yamlMap);
-            String cleanedInputString = stringSubstitutor.replace(configYaml);
 
-            //Parse the InspectitConfig from the created YAML String
-            ObjectReader reader = mapper.reader().withRootName("inspectit").forType(InspectitConfig.class);
-            return reader.readValue(cleanedInputString);
-        } catch (IOException e) {
-            log.error("YAML String could not be parsed by Jackson. This is probably caused by an error in the configuration files:");
-            e.printStackTrace();
-            return null;
+        if (!StringUtils.isEmpty(configYaml)) {
+            try {
+                // config YAMLs contain variables that in the inspectit-ocelot-core project are evaluated by Spring-Boot,
+                // however here there is no InspectitEnvironment which is used for that, so instead Jackson is used and
+                // the variables are evaluated using a custom version of StringSubstitutor.
+                Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
+                StringSubstitutor stringSubstitutor = new NestedMapStringSubstitutor(yamlMap);
+                String cleanedInputString = stringSubstitutor.replace(configYaml);
+
+                //Parse the InspectitConfig from the created YAML String
+                ObjectReader reader = mapper.reader().withRootName("inspectit").forType(InspectitConfig.class);
+                return reader.readValue(cleanedInputString);
+            } catch (IOException e) {
+                log.error("YAML String could not be parsed by Jackson. This is probably caused by an error in the configuration files:");
+                e.printStackTrace();
+                return null;
+            }
+        } else {
+            return new InspectitConfig();
         }
     }
 
