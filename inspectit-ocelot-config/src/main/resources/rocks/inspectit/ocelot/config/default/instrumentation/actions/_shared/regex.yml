@@ -8,7 +8,7 @@ inspectit:
             Replaces all matches for the provided regex pattern with the given replacement string.
             If the input string is null, null is returned.
         imports:
-         - 'java.util'
+          - 'java.util'
         input:
           'string': 'String'
           'pattern': 'String'
@@ -35,7 +35,7 @@ inspectit:
               
             The replacement is executed in the order of the inputs.
         imports:
-         - 'java.util'
+          - 'java.util'
         input:
           'string': 'String'
           'patterns_and_replacements': 'Map'
@@ -58,8 +58,8 @@ inspectit:
             Replaces the provided input string if it fully matches a given regex.
             If the input string is null, null is returned.
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'pattern': 'String'
@@ -94,8 +94,8 @@ inspectit:
             
             The replacement is executed in the order of the inputs.
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'patterns_and_replacements': 'Map'
@@ -124,8 +124,8 @@ inspectit:
             Replaces the first match for the provided regex pattern with the given replacement string.
             If the input string is null, null is returned.
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'pattern': 'String'
@@ -148,8 +148,8 @@ inspectit:
             If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
             If the input string is null or the input string does not match the regex, null is returned.
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'pattern': 'String'
@@ -187,8 +187,8 @@ inspectit:
                 - pattern: <regexB>
                   result: <resultA>
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'patterns_and_results': 'Map'
@@ -221,8 +221,8 @@ inspectit:
             If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
             If the input string is null or the input string does not match the regex, null is returned.
         imports:
-         - 'java.util'
-         - 'java.util.regex'
+          - 'java.util'
+          - 'java.util.regex'
         input:
           'string': 'String'
           'pattern': 'String'

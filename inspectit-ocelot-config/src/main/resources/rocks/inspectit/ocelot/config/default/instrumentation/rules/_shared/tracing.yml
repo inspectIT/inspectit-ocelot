@@ -17,7 +17,7 @@ inspectit:
           description: |-
             This rule by default only tags the exception name and message (using the toString() method).
             If required, it can be enhanced to include the stack trace.
-        'tracing':
+        tracing:
           attributes:
             'java.exception': _thrown
 
@@ -25,7 +25,7 @@ inspectit:
         doc:
           description: |-
             This rule adds the fully qualified name of the method as span attribute
-        'tracing':
+        tracing:
           attributes:
             'java.fqn': 'method_fqn'
         entry:
