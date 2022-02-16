@@ -4,6 +4,7 @@ import { configurationActions } from '../../../../redux/ducks/configuration';
 import VersionItem from '../history/VersionItem';
 import { VERSION_LIMIT } from '../../../../data/constants';
 import {Dropdown} from "primereact/dropdown";
+import {Checkbox} from "primereact/checkbox";
 import axios from '../../../../lib/axios-api';
 import ConfigDocumentation from "./ConfigDocumentation";
 
@@ -18,6 +19,7 @@ class DocumentationView extends React.Component {
       agentMappingNames: [],
       configDocumentation: null,
       selectedAgentMapping: null,
+      includeDefault: true
     };
   }
 
@@ -40,19 +42,31 @@ class DocumentationView extends React.Component {
 
   }
 
-  getNewDocumentationForMapping(mappingName) {
-    axios
-      .get('configuration/documentation/', { params: { 'agent-mapping': mappingName}})
-      .then((response) => {
-        this.setState({
-          configDocumentation: response.data,
-          selectedAgentMapping: mappingName,
+  newDocumentationForMapping(mappingName, includeDefault) {
+    if(mappingName != null){
+      axios
+        .get('configuration/documentation/', { params: { 'agent-mapping': mappingName, 'include-default': includeDefault}})
+        .then((response) => {
+          this.setState({
+            configDocumentation: response.data,
+            includeDefault: includeDefault,
+            selectedAgentMapping: mappingName,
+          });
+        })
+        .catch( (error) => {
+          console.log(`Error when retrieving configuration documentation for Agent Mapping ${mappingName}:`);
+          console.log(error);
+          this.setState({
+            includeDefault: includeDefault,
+            selectedAgentMapping: mappingName,
+          });
         });
-      })
-      .catch( (error) => {
-        console.log(`Error when retrieving configuration documentation for Agent Mapping ${mappingName}:`);
-        console.log(error);
+    } else {
+      this.setState({
+        includeDefault: includeDefault,
       });
+    }
+
   }
 
   render() {
@@ -64,15 +78,19 @@ class DocumentationView extends React.Component {
             background-color: #e0e0e0;
             color: #111;
             padding: 0.5rem 0.5rem 0.5rem;
-            height: 50px
+            height: 75px
         `}
       </style>
-        <div className={'mappingDropdown'}>Config Docs for <Dropdown
-          placeholder="Select an Agent Mapping" options={this.state.agentMappingNames}
-          value={this.state.selectedAgentMapping}
-          onChange={(e) => {
-            this.getNewDocumentationForMapping(e.value)
-          }}/>
+        <div className={'mappingDropdown'}>
+          <div>
+            Config Docs for <Dropdown
+            placeholder="Select an Agent Mapping" options={this.state.agentMappingNames}
+            value={this.state.selectedAgentMapping}
+            onChange={e => this.newDocumentationForMapping(e.value, this.state.includeDefault) }/>
+          </div>
+          <div>
+            <Checkbox checked={this.state.includeDefault} onChange={e => this.newDocumentationForMapping(this.state.selectedAgentMapping, e.checked)}/> Include Default Configuration
+          </div>
         </div>
         <ConfigDocumentation configDocumentation={this.state.configDocumentation}/>
       </>
