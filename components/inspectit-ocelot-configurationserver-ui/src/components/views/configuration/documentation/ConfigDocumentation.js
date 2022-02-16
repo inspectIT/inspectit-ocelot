@@ -10,7 +10,7 @@ class ConfigDocumentation extends React.Component {
   }
 
   scrollToDocElement(docElementName){
-    this.state.docElementRefs[docElementName].parentNode.parentNode.scroll(0, this.state.docElementRefs[docElementName].offsetTop - 50);
+    this.state.docElementRefs[docElementName].parentNode.parentNode.scroll(0, this.state.docElementRefs[docElementName].offsetTop - 75);
   }
 
   baseHtml(docObject, type){
@@ -240,7 +240,7 @@ class ConfigDocumentation extends React.Component {
                 white-space: pre-wrap;
                 width: 35rem;
                 overflow: auto;
-                max-height: calc(100% - 50px);
+                max-height: calc(100% - 75px);
                 bottom: 0;
               }
               
