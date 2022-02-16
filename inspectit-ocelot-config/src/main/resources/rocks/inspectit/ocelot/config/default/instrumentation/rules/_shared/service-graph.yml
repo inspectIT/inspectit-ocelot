@@ -76,7 +76,7 @@ inspectit:
     rules:
 
       'r_servicegraph_prepare_up_propagation':
-        doc:
+        docs:
           description: |-
             This rule prepares up-propagation to include service-graph related information.
             Namely this ensures that the current service name is included as target service.
@@ -93,7 +93,7 @@ inspectit:
               'value': 'service'
 
       'r_servicegraph_prepare_down_propagation':
-        doc:
+        docs:
           description: |-
             This rule prepares down-propagation to include service-graph related information
             Namely this ensures that the current service name is included as origin service
@@ -104,7 +104,7 @@ inspectit:
               'value': 'service'
 
       'r_servicegraph_inbound_record_method':
-        doc:
+        docs:
           description: |-
             Can be included to record the current method invocation as an inbound service graph call.
             The includer should populate servicegraph_is_entry if this method is the correct entry point.
@@ -115,7 +115,7 @@ inspectit:
           'r_servicegraph_inbound_record_metric': true
 
       'r_servicegraph_outbound_record_method':
-        doc:
+        docs:
           description: |-
             Can be included to record the current method invocation as an outbound service graph call.
             The includer should populate servicegraph_is_entry if this method is the correct entry point.
@@ -126,7 +126,7 @@ inspectit:
           'r_servicegraph_outbound_record_metric': true
 
       'r_servicegraph_inbound_record_metric':
-        doc:
+        docs:
           description: |-
             Records inbound traffic as service graph call.
             When this rule is included, it is expected that servicegraph_duration, servicegraph_protocol and servicegraph_is_error are populated.
@@ -155,7 +155,7 @@ inspectit:
               'error': 'servicegraph_is_error'
 
       'r_servicegraph_outbound_record_metric':
-        doc:
+        docs:
           description: |-
             Records outbound traffic as service graph call
             When this rule is included, it is expected that servicegraph_duration, servicegraph_protocol and servicegraph_is_error are populated.
@@ -175,7 +175,7 @@ inspectit:
               'error': 'servicegraph_is_error'
 
       'r_servicegraph_capture_method_duration':
-        doc:
+        docs:
           description: |-
             Utility rule used for both inbound & outbout service graph traffic.
             Captures the duration of the current method as servicegraph_duration

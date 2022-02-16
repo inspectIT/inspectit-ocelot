@@ -3,7 +3,7 @@ inspectit:
     rules:
 
       'r_apacheclient_detect_entry':
-        doc:
+        docs:
           description: 'Can be included to detect and exclude nested calls.'
         pre-entry:
           'http_is_entry':
@@ -12,7 +12,7 @@ inspectit:
               'marker': 'http_client_entrypoint_marker' # propagation is defined in the shared http settings
 
       'r_apacheclient_extract_details':
-        doc:
+        docs:
           description: |-
             Reads all HTTP related data, e.g. http_raw_path, http_path, http_method, etc. 
             Designed to be applied on the scope s_apacheclient_doExecute.

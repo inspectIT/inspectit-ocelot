@@ -3,7 +3,7 @@ inspectit:
     rules:
 
       'r_apacheclient_tracing':
-        doc:
+        docs:
           description: 'Enables tracing of Apache HTTP Client calls.'
         include:
           'r_apacheclient_extract_details': true

@@ -3,7 +3,7 @@ inspectit:
     rules:
 
       'r_jdbc_servicegraph_record':
-        doc:
+        docs:
           description: 'Records JDBC statement executions in the service graph.'
         include:
           'r_servicegraph_outbound_record_method': true

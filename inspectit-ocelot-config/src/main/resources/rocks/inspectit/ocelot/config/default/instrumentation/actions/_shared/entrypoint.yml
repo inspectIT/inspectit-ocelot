@@ -4,7 +4,7 @@ inspectit:
     
       #
       'a_entrypoint_check':
-        doc:
+        docs:
           description: |-
             Utility function to detect entry methods.
             This functions checks if a given "marker" is present on the context.

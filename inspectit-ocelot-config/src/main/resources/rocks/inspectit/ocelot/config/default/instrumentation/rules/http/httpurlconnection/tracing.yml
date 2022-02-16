@@ -3,7 +3,7 @@ inspectit:
     rules:
 
       'r_httpurlconnection_tracing_start':
-        doc:
+        docs:
           description: 'Starts a span for an HTTPUrlConnection before down propagation happens.'
         include:
           'r_httpurlconnection_detect_start': true
@@ -31,7 +31,7 @@ inspectit:
               'key': 'span'
 
       'r_httpurlconnection_tracing_end':
-        doc:
+        docs:
           description: |-
             Continues an already started span for this HTTPUrlConnection via r_httpurlconnection_tracing_start.
             If no span was started yet, a fresh one is started.

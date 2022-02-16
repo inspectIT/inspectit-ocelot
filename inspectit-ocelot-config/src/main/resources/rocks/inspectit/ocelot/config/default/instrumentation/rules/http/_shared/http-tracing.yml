@@ -3,7 +3,7 @@ inspectit:
     rules:
 
       'r_http_tracing_span_name_default':
-        doc:
+        docs:
           description: 'This rule is included by all HTTP tracing rules in order to define the span name.'
         tracing:
           name: 'http_span_name'
@@ -18,7 +18,7 @@ inspectit:
               'b': ' '
 
       'r_http_client_tracing_default_attributes':
-        doc:
+        docs:
           description: 'This rule is included by all HTTP Client tracing rules to define which attributes should be added to the span.'
         include:
           'r_http_tracing_default_attributes': true
@@ -27,13 +27,13 @@ inspectit:
             'http.host': 'http_target_host'
 
       'r_http_server_tracing_default_attributes':
-        doc:
+        docs:
           description: 'This rule is included by all HTTP Server tracing rules to define which attributes should be added to the span.'
         include:
           'r_http_tracing_default_attributes': true
 
       'r_http_tracing_default_attributes':
-        doc:
+        docs:
           description: 'This rule is included by all HTTP Client AND Server tracing rules to define which attributes should be added to the span.'
         include:
           'r_tracing_global_attributes': true

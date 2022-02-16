@@ -3,7 +3,7 @@ inspectit:
     actions:
 
       'a_string_concat':
-        doc:
+        docs:
           description: 'Concatenates two provided inputs to a single string.'
         input:
           'a': 'Object'
@@ -11,7 +11,7 @@ inspectit:
         value: 'new StringBuilder().append(a).append(b).toString();'
 
       'a_string_concat_3':
-        doc:
+        docs:
           description: 'Concatenates three provided inputs to a single string.'
         input:
           'a': 'Object'

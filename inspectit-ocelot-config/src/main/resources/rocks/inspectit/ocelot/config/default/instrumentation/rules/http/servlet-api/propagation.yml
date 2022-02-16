@@ -6,7 +6,7 @@ inspectit:
     rules:
 
       'r_servletapi_downPropagation':
-        doc:
+        docs:
           description: 'Reads down-propagated data from the request HTTP headers.'
         include:
           'r_servletapi_detect_entry': true
@@ -19,7 +19,7 @@ inspectit:
             action: 'a_servletapi_downPropagation'
 
       'r_servletapi_servlet_filter_upPropagation':
-        doc:
+        docs:
           description: 'Writes up-propagated data to the response HTTP headers.'
         scopes:
           's_servletapi_servlet_service': true

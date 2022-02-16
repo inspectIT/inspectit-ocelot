@@ -3,7 +3,7 @@ inspectit:
     actions:
 
       'a_regex_replaceAll':
-        doc:
+        docs:
           description: |-
             Replaces all matches for the provided regex pattern with the given replacement string.
             If the input string is null, null is returned.
@@ -20,7 +20,7 @@ inspectit:
           return string.replaceAll(pattern, replacement);
 
       'a_regex_replaceAll_multi':
-        doc:
+        docs:
           description: |-
             Replaces all matches for all of the provided regex patterns with the given replacement strings.
             If the input string is null, null is returned.
@@ -53,7 +53,7 @@ inspectit:
           return result;
 
       'a_regex_replaceMatch':
-        doc:
+        docs:
           description: |-
             Replaces the provided input string if it fully matches a given regex.
             If the input string is null, null is returned.
@@ -78,7 +78,7 @@ inspectit:
           return string;
 
       'a_regex_replaceMatch_multi':
-        doc:
+        docs:
           description: |-
             Scans the provided list of regexes to check if any matches the input string fully.
             If a match is found, it is replaced with the provided replacement and returned.
@@ -119,7 +119,7 @@ inspectit:
           return result;
 
       'a_regex_replaceFirst':
-        doc:
+        docs:
           description: |-
             Replaces the first match for the provided regex pattern with the given replacement string.
             If the input string is null, null is returned.
@@ -142,7 +142,7 @@ inspectit:
           return string;
 
       'a_regex_extractMatch':
-        doc:
+        docs:
           description: |-
             Checks if the given input string fully matches the provided regex.
             If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
@@ -172,7 +172,7 @@ inspectit:
           return null;
 
       'a_regex_extractMatch_multi':
-        doc:
+        docs:
           description: |-
             Checks if the given input string fully matches any of the provided regexes.
             If it does, the result for the matching regex is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
@@ -215,7 +215,7 @@ inspectit:
           return null;
 
       'a_regex_extractFirst':
-        doc:
+        docs:
           description: |-
             Checks if the given input string has any match for the provided regex.
             If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
@@ -245,7 +245,7 @@ inspectit:
           return null;
 
       'a_regex_extractFirst_multi':
-        doc:
+        docs:
           description: |-
             Checks if the given input string contains a match for any of the provided regexes.
             If it does, the result for the matching regex is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.

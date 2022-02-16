@@ -3,7 +3,7 @@ inspectit:
     actions:
 
       'a_attachment_get':
-        doc:
+        docs:
           description: 'Reads a given attachment from a target object.'
         input:
           _attachments: 'ObjectAttachments'
@@ -12,7 +12,7 @@ inspectit:
         value: '_attachments.getAttachment(target, key)'
 
       'a_attachment_put':
-        doc:
+        docs:
           description: 'Replaces a given attachment of a target object with a new one, returns the previous value.'
         input:
           _attachments: ObjectAttachments
@@ -22,7 +22,7 @@ inspectit:
         value: '_attachments.attach(target, key, value)'
 
       'a_attachment_remove':
-        doc:
+        docs:
           description: 'Removes a given attachment from a target object, returning the previously attached value.'
         input:
           _attachments: ObjectAttachments

@@ -5,7 +5,7 @@ inspectit:
       # Utility action which checks if a provided HTTP status (either as string or number) is an error code
       # Everything except "null", 2xx and 3xx is interpreted as error
       'a_http_isErrorStatus':
-        doc:
+        docs:
           description: |-
             Utility action which checks if a provided HTTP status (either as string or number) is an error code
             Everything except "null", 2xx and 3xx is interpreted as error.'

@@ -3,14 +3,14 @@ inspectit:
     actions:
 
       'a_timing_nanos':
-        doc:
+        docs:
           description: 'Computes a nanosecond-timestamp as a long for the current point in time.'
         value: 'new Long(System.nanoTime())'
 
       'a_timing_elapsedMillis':
-        doc:
+        docs:
           description: 'Computes the elapsed milliseconds as double since a given nanosecond-timestamp'
-          input-desc:
+          inputs:
             'since_nanos': 'the timestamp captured via System.nanoTime() to compare against'
         input:
           'since_nanos': 'long'

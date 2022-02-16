@@ -3,7 +3,7 @@ inspectit:
     rules:
 
       'r_httpurlconnection_http_metric':
-        doc:
+        docs:
           description: 'Records HTTP calls done via HTTPUrlConnection via the http/out metric.'
         include:
           'r_httpurlconnection_extract_details': true

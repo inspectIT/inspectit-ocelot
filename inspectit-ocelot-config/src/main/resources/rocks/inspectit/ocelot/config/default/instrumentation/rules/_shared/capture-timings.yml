@@ -3,7 +3,7 @@ inspectit:
     rules:
 
       'r_capture_method_duration':
-        doc:
+        docs:
           description: 'When applied to a method, this rule will populate method_duration with the duration the method execution took.'
         include:
           'r_capture_method_duration_conditional': true
@@ -12,7 +12,7 @@ inspectit:
             action: 'a_assign_true'
 
       'r_capture_method_duration_conditional':
-        doc:
+        docs:
           description: |-
             Conditionally captures the execution time of the current method into method_duration
             The capturing will only happen it capture_time_condition is defined as true.
@@ -28,7 +28,7 @@ inspectit:
               'since_nanos': 'method_entry_time'
 
       'r_capture_method_entry_timestamp_conditional':
-        doc:
+        docs:
           description: |-
             Conditionally captures the entry timestamp of the current method into method_entry_time
             The capturing will only happen it capture_time_condition is defined as true.

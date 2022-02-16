@@ -4,7 +4,7 @@ inspectit:
     
       #
       'r_httpurlconnection_servicegraph_propagation':
-        doc:
+        docs:
           description: 'Reads and writes the service graph correlation information on the context (e.g. origin_service and target_service).'
         include:
           'r_servicegraph_prepare_down_propagation': true
@@ -14,7 +14,7 @@ inspectit:
           's_httpurlconnection_getInputStream': true
 
       'r_httpurlconnection_servicegraph_record':
-        doc:
+        docs:
           description: 'Records an HTTP call done via HTTPUrlConnection as service-call.'
         include:
           'r_servicegraph_outbound_record_method': true

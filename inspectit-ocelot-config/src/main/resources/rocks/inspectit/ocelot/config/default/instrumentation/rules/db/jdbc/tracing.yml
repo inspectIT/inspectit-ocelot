@@ -3,7 +3,7 @@ inspectit:
     rules:
 
       'r_jdbc_tracing_statement_execute':
-        doc:
+        docs:
           description: "Traces execute/executeUpdate calls with non-prepared SQL (the SQL is given as method argument)"
         include:
           'r_jdbc_tracing_defaults': true
@@ -14,7 +14,7 @@ inspectit:
             'db.statement': _arg0
 
       'r_jdbc_tracing_statement_executeBatch':
-        doc:
+        docs:
           description: 'Traces executeBatch calls with non-prepared SQL.'
         include:
           'r_jdbc_tracing_defaults': true
@@ -22,7 +22,7 @@ inspectit:
           's_jdbc_statement_executeBatch': true
 
       'r_jdbc_tracing_preparedstatement':
-        doc:
+        docs:
           description: 'Traces execute/executeUpdate/executeBatch calls with prepared SQL.'
         include:
           'r_jdbc_tracing_defaults': true

@@ -3,7 +3,7 @@ inspectit:
     rules:
 
       'r_servletapi_tracing':
-        doc:
+        docs:
           description: 'Enables tracing of HTTP calls received via the servlet API.'
         include:
           'r_servletapi_extract_details': true

@@ -7,7 +7,7 @@ inspectit:
       #--------------------------------------------------------------------------------------------------------------
 
       'a_apacheclient_toHostString':
-        doc:
+        docs:
           description: 'Extracts the target of the request in the form host:port.'
         imports:
           - 'java.net'
@@ -17,7 +17,7 @@ inspectit:
         value: '_arg0.toHostString()'
 
       'a_apacheclient_getPath':
-        doc:
+        docs:
           description: 'Extracts the target http path.'
         imports:
           - 'java.net'
@@ -27,7 +27,7 @@ inspectit:
         value: 'URI.create(_arg1.getRequestLine().getUri()).getPath()'
 
       'a_apacheclient_getMethod':
-        doc:
+        docs:
           description: 'Extracts the HTTP Method of the request, e.g. GET or POST.'
         imports:
           - 'org.apache.http'
@@ -36,7 +36,7 @@ inspectit:
         value: '_arg1.getRequestLine().getMethod()'
 
       'a_apacheclient_getStatus':
-        doc:
+        docs:
           description: |-
             Extracts the response status in case the request succeeded.
             If an exception is thrown instead, it's name is returned (e.g. SocketTimeoutException).
@@ -53,7 +53,7 @@ inspectit:
           }
 
       'a_apacheclient_downPropagation':
-        doc:
+        docs:
           description: 'Writes down-propagated context data to the HTTP Headers.'
         is-void: true
         imports:
@@ -71,7 +71,7 @@ inspectit:
           }
 
       'a_apacheclient_upPropagation':
-        doc:
+        docs:
           description: 'Reads up-propagated context data from the HTTP Headers.'
         is-void: true
         imports:

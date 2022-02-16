@@ -6,7 +6,7 @@ inspectit:
     rules:
 
       'r_servletapi_detect_entry':
-        doc:
+        docs:
           description: 'Marks the first service() or doFilter() calls as entry for which the ServletRequest is an HTTPServletRequest.'
         pre-entry:
           'is_http_servlet':
@@ -20,7 +20,7 @@ inspectit:
             only-if-true: 'is_http_servlet'
 
       'r_servletapi_extract_details':
-        doc:
+        docs:
           description: 'Extracts all http details, such as http_path, http_method, http_status, etc.'
         include:
           'r_servletapi_detect_entry': true
