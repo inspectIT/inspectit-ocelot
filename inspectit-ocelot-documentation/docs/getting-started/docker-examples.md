@@ -60,6 +60,8 @@ Sends Zipkin traces to Wavefront through a Wavefront proxy running as a Docker c
 
 ## Launching the Demo
 
+>Currently the Demo is only supported on Windows and Linux platforms
+
 *Pre-requisites:* To launch the demo, [Docker](https://www.docker.com/) needs to be installed on your system.
 If you are using Docker for Windows or running Docker in a virtual machine, ensure that Docker has at least 4GB main memory assigned.
 
@@ -109,8 +111,8 @@ The traces can be viewed in Jaeger on http://localhost:16686.
 
 Prometheus can be accessed through http://localhost:9090.
 
-:::note Currently the EUM-Server dashboards are only supported for the InfluxDB demos. You may use the Explore view in Grafana to view the EUM server metrics.
-:::
+>Currently the EUM-Server dashboards are only supported for the InfluxDB demos. You may use the Explore view in Grafana to view the EUM server metrics.
+
 
 ### InfluxDB and Jaeger Scenario
 In this scenario the following components are preconfigured and used for monitoring:
@@ -141,8 +143,7 @@ In this scenario the following components are preconfigured and used for monitor
 You can access Grafana through http://localhost:3000 and the configuration server via http://localhost:8090.
 The traces can be viewed in Zipkin on http://localhost:9411.
 
-:::note Currently only the Beacons Dashboard is working for the InfluxDB and Zipkin scenario
-:::
+>Currently only the Beacons Dashboard is working for the InfluxDB and Zipkin scenario
 
 ### Wavefront Demo Scenario
 
