@@ -1,0 +1,24 @@
+# Configuration used in rocks.inspectit.ocelot.instrumentation.hook.RecursionInstrumentation
+inspectit:
+  instrumentation:
+    actions:
+      'a_recursive_helloWorld':
+        is-void: true
+        value-body: |
+          // Call instrumented method to provoke infinity loop
+          rocks.inspectit.ocelot.instrumentation.hook.RecursionInstrumentation.helloWorld();
+
+    scopes:
+      's_RecursionInstrumentation_helloWorld':
+        type:
+          name: 'rocks.inspectit.ocelot.instrumentation.hook.RecursionInstrumentation'
+        methods:
+          - name: 'helloWorld'
+
+    rules:
+      'r_recursive_test':
+        scopes:
+          's_RecursionInstrumentation_helloWorld': true
+        entry:
+          'c_invoke_hello':
+            action: 'a_recursive_helloWorld'
