@@ -82,7 +82,6 @@ const EditorView = ({
       <AceEditor
         editorRef={(editor) => (editorRef.current = editor)}
         onCreate={onCreate}
-        mode="yaml"
         theme="cobalt"
         options={editorConfig}
         value={value}
