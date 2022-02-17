@@ -91,7 +91,7 @@ public class ConfigurationController extends AbstractBaseController {
 
         Optional<AgentMapping> agentMapping = mappingManager.getAgentMapping(mappingName);
         if (agentMapping.isPresent()) {
-            AgentConfiguration configuration = configManager.getConfiguration(agentMapping.get().getAttributes());
+            AgentConfiguration configuration = configManager.getConfigurationForMapping(agentMapping.get());
             String configYaml = configuration.getConfigYaml();
 
             configDocumentation = configDocsGenerator.generateConfigDocs(configYaml);
