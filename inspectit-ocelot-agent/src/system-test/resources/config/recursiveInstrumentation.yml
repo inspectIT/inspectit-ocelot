@@ -6,12 +6,12 @@ inspectit:
         is-void: true
         value-body: |
           // Call instrumented method to provoke infinity loop
-          rocks.inspectit.ocelot.instrumentation.hook.RecursionInstrumentation.helloWorld();
+          rocks.inspectit.ocelot.instrumentation.hook.RecursionInstrumentationTest.helloWorld();
 
     scopes:
       's_RecursionInstrumentation_helloWorld':
         type:
-          name: 'rocks.inspectit.ocelot.instrumentation.hook.RecursionInstrumentation'
+          name: 'rocks.inspectit.ocelot.instrumentation.hook.RecursionInstrumentationTest'
         methods:
           - name: 'helloWorld'
 
