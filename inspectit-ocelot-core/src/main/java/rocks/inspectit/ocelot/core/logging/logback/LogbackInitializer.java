@@ -65,13 +65,14 @@ public class LogbackInitializer {
     static boolean consoleEnabled = isConsoleInitiallyEnabled();
     static boolean fileEnabled = true;
     static boolean selfMonitoringEnabled = true;
+    static boolean logPreloadingEnabled = false;
 
     public static void initDefaultLogging() {
         initLogging(null);
     }
 
     /**
-     * (Re-)initializes the logback configuration.
+     * (Re-)initializes the logback configuration
      *
      * @param config inspectIT config to read values from
      */
@@ -129,6 +130,7 @@ public class LogbackInitializer {
         consoleEnabled = config.getLogging().getConsole().isEnabled();
         fileEnabled = config.getLogging().getFile().isEnabled();
         selfMonitoringEnabled = config.getSelfMonitoring().isEnabled();
+        logPreloadingEnabled = config.getSelfMonitoring().getLogPreloading().isEnabled();
 
         LoggingSettings loggingSettings = config.getLogging();
         // path
@@ -229,6 +231,18 @@ public class LogbackInitializer {
         @Override
         public FilterReply decide(Object event) {
             if (selfMonitoringEnabled) {
+                return FilterReply.NEUTRAL;
+            } else {
+                return FilterReply.DENY;
+            }
+        }
+    }
+
+    public static class LogPreloadingFilter extends Filter {
+
+        @Override
+        public FilterReply decide(Object event) {
+            if (logPreloadingEnabled) {
                 return FilterReply.NEUTRAL;
             } else {
                 return FilterReply.DENY;

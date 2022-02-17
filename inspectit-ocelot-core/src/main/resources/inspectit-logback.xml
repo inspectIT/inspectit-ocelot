@@ -53,8 +53,9 @@
         <filter class="rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer$SelfMonitoringFilter" />
     </appender>
 
-    <!-- Appender von Tim hehe -->
-    <appender name="extractLogs" class="rocks.inspectit.ocelot.core.selfmonitoring.LogPreloadingAppender">
+    <!-- Appender, which returns the logs from a given timeframe. Is only activated, if logs preloading is activated -->
+    <appender name="logPreloader" class="rocks.inspectit.ocelot.core.selfmonitoring.LogPreloadingAppender">
+        <filter class="rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer$LogPreloadingFilter" />
     </appender>
 
 
@@ -64,7 +65,7 @@
         <appender-ref ref="file" />
         <appender-ref ref="exceptions" />
         <appender-ref ref="logMetrics" />
-        <appender-ref ref="extractLogs" />
+        <appender-ref ref="logPreloader" />
     </root>
 
     <!-- deactivate all other loggers, except for errors -->
