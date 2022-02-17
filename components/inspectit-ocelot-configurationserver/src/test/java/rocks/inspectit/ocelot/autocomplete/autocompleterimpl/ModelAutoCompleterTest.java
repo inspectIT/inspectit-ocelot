@@ -37,14 +37,7 @@ public class ModelAutoCompleterTest {
 
             List<String> result = completer.getSuggestions(input);
 
-            assertThat(result).containsExactlyInAnyOrder(
-                    "doc",
-                    "advanced",
-                    "interfaces",
-                    "methods",
-                    "superclass",
-                    "type",
-                    "exclude");
+            assertThat(result).containsExactlyInAnyOrder("docs", "advanced", "interfaces", "methods", "superclass", "type", "exclude");
         }
 
         @Test
