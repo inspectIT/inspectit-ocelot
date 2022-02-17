@@ -17,24 +17,24 @@ import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 import javax.validation.Valid;
 
 /**
- * Service for the {@link io.opentelemetry.exporter.logging.LoggingMetricExporter}
+ * Service for the {@link io.opentelemetry.exporter.logging.LoggingMetricExporter}.
  */
 @Component
 @Slf4j
 public class LoggingMetricExporterService extends DynamicallyActivatableService {
 
     /**
-     * The {@link SdkMeterProvider}
+     * The {@link SdkMeterProvider}.
      */
     private SdkMeterProvider meterProvider;
 
     /**
-     * The {@link LoggingMetricExporter} for exporting metrics to the system log
+     * The {@link LoggingMetricExporter} for exporting metrics to the system log.
      */
     private LoggingMetricExporter metricExporter;
 
     /**
-     * The {@link PeriodicMetricReader} for reading metrics to the log
+     * The {@link PeriodicMetricReader} for reading metrics to the log.
      */
     private PeriodicMetricReaderBuilder metricReader;
 
@@ -49,7 +49,7 @@ public class LoggingMetricExporterService extends DynamicallyActivatableService 
         // create new metric exporter
         metricExporter = new LoggingMetricExporter();
 
-        // close the tracer provider when the JVM is shutting down
+        // close the meter provider when the JVM is shutting down
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (null != meterProvider) {
                 meterProvider.shutdown();

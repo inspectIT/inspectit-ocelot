@@ -39,15 +39,6 @@ public class ContextUtil {
     }
 
     /**
-     * Gets the {@link InspectitContext} stored in the {@link #currentGrpc() current GRPC context} with the {@link InspectitContextImpl#INSPECTIT_KEY_GRPC}
-     *
-     * @return The {@link InspectitContext} stored in the {@link #currentGrpc() current GRPC context} with the {@link InspectitContextImpl#INSPECTIT_KEY_GRPC}
-     */
-    public static InspectitContextImpl currentInspectitContextStoredInGrpcContext() {
-        return InspectitContextImpl.INSPECTIT_KEY_GRPC.get(currentGrpc());
-    }
-
-    /**
      * Gets the object stored in {@link #current()} with the given {@link ContextKey}
      *
      * @param key The {@link ContextKey} under which the object is stored
@@ -55,7 +46,7 @@ public class ContextUtil {
      *
      * @return The object stored under {@link #current()} with the given {@link ContextKey}
      */
-    public static <T> T get(ContextKey<T> key) {
+    public static <T> T getObject(ContextKey<T> key) {
         return current().get(key);
     }
 }

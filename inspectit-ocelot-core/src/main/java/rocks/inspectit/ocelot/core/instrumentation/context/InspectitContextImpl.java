@@ -114,9 +114,9 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private io.grpc.Context overriddenGrpcContext;
 
     /**
-     * Holds the previous {@link ContextHandle} associated with OTELs {@link Context}, which was overridden when attaching this context as active in OTEL
+     * Holds the current {@link io.opentelemetry.context.Scope} associated with OTELs {@link Context}, which was obtained when attaching this context as active in OTEL
      */
-    private io.opentelemetry.context.Scope overriddenOtelScope;
+    private io.opentelemetry.context.Scope currentOtelScope;
 
     /**
      * The span which was (potentially) opened by invoking {@link #enterSpan(Span)}
@@ -274,7 +274,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         cachedActivePhaseDownPropagatedData = postEntryPhaseDownPropagatedData;
 
         // store the Context in OTEL
-        overriddenOtelScope = ContextUtil.current().with(INSPECTIT_KEY, this).makeCurrent();
+        currentOtelScope = ContextUtil.current().with(INSPECTIT_KEY, this).makeCurrent();
         // store the Context in GRPC context
         overriddenGrpcContext = ContextUtil.currentGrpc().withValue(INSPECTIT_KEY_GRPC, this).attach();
 
@@ -317,7 +317,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * @return true, if {@link #makeActive()} was called but {@link #close()} was not called yet
      */
     public boolean isInActiveOrExitPhase() {
-        return overriddenOtelScope != null;
+        return currentOtelScope != null;
     }
 
     /**
@@ -391,9 +391,9 @@ public class InspectitContextImpl implements InternalInspectitContext {
             openedDownPropagationScope.close();
         }
 
-        // close the overridden OTEL scope
-        if (null != overriddenOtelScope) {
-            overriddenOtelScope.close();
+        // close the current OTEL scope to restore the previous scope
+        if (null != currentOtelScope) {
+            currentOtelScope.close();
         }
 
         // detach the overridden GRPC context
@@ -416,7 +416,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         openedDownPropagationScope = null;
         currentSpanScope = null;
         parent = null;
-        overriddenOtelScope = null;
+        currentOtelScope = null;
         overriddenGrpcContext = null;
     }
 

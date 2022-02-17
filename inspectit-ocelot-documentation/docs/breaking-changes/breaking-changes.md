@@ -2,7 +2,7 @@
 id: Breaking Changes
 title: Breaking Changes
 ---
-## Breaking changes in 1.15.0
+## Breaking changes in 2.X.X
 
 ### Integration of the OpenTelemetry OpenCensus Shim
 

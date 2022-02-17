@@ -21,7 +21,7 @@ public class TraceTestBase extends InstrumentationSysTestBase {
 
     final static InMemorySpanExporter spanExporter = TestUtils.initializeOpenTelemetryForSystemTesting();
 
-    protected List<io.opentelemetry.sdk.trace.data.SpanData> getExportedSpans() {
+    protected List<SpanData> getExportedSpans() {
         return spanExporter.getFinishedSpanItems();
     }
 
@@ -38,14 +38,14 @@ public class TraceTestBase extends InstrumentationSysTestBase {
     void assertTraceExported(Consumer<? super List<? extends SpanData>> assertions) {
 
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
-            Map<String, List<io.opentelemetry.sdk.trace.data.SpanData>> traces = getExportedSpans().stream()
+            Map<String, List<SpanData>> traces = getExportedSpans().stream()
                     .collect(Collectors.groupingBy(s -> s.getSpanContext().getTraceId(), Collectors.toList()));
             assertThat(traces.values()).anySatisfy(assertions);
             assertThat(traces.values()).filteredOnAssertions(assertions).hasSize(1);
         });
     }
 
-    void assertSpansExported(Consumer<? super Collection<? extends io.opentelemetry.sdk.trace.data.SpanData>> assertions) {
+    void assertSpansExported(Consumer<? super Collection<? extends SpanData>> assertions) {
 
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
             assertions.accept(getExportedSpans());

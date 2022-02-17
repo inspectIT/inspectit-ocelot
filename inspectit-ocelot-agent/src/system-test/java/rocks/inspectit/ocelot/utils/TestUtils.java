@@ -12,24 +12,22 @@ import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.context.propagation.TextMapPropagator;
-import io.opentelemetry.exporter.logging.LoggingSpanExporter;
 import io.opentelemetry.extension.trace.propagation.B3Propagator;
-import io.opentelemetry.extension.trace.propagation.JaegerPropagator;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.awaitility.core.ConditionTimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 
 import java.lang.reflect.Field;
@@ -49,6 +47,8 @@ public class TestUtils {
     private static Cache<Class<?>, Object> activeInstrumentations = null;
 
     public static ConcurrentHashMap<Class<?>, Long> instrumentationTimeStamp = new ConcurrentHashMap<>();
+
+    private static final Logger logger = LoggerFactory.getLogger(TestUtils.class);
 
     static {
         Thread poller = new Thread(() -> {
@@ -166,7 +166,7 @@ public class TestUtils {
             for (Class<?> clazz : clazzes) {
                 Long timeStamp = instrumentationTimeStamp.get(clazz);
                 if (timeStamp == null) {
-                    System.out.println(clazz.getName() + " was not instrumented!");
+                    logger.info("{} was not instrumented!", clazz.getName());
                     missingClassCount++;
                 }
             }
@@ -190,7 +190,7 @@ public class TestUtils {
             Map<Class<?>, Object> hooksMap = getHooksMap();
             for (Class<?> clazz : clazzes) {
                 if (!hooksMap.containsKey(clazz)) {
-                    System.out.println("No hooks were created for class " + clazz.getName());
+                    logger.info("No hookes were created for class {}", clazz.getName());
                 }
             }
             throw ex;
@@ -319,23 +319,28 @@ public class TestUtils {
         SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
                 .setSampler(Sampler.alwaysOn())
                 .addSpanProcessor(BatchSpanProcessor.builder(inMemSpanExporter).build())
-                .addSpanProcessor(SimpleSpanProcessor.create(new LoggingSpanExporter()))
                 .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "rocks.inspectit.ocelot.system.test")))
                 .build();
 
         GlobalOpenTelemetry.resetForTest();
 
+        ContextPropagators propagators = ContextPropagators.create(
+                TextMapPropagator.composite(
+                        // for use with OpenTelemetry
+                        W3CTraceContextPropagator.getInstance(),
+                        // services expecting Zipkin's B3 header
+                        B3Propagator.injectingMultiHeaders()
+                        ));
         OpenTelemetrySdk openTelemetry = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
-                .setPropagators(ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), JaegerPropagator.getInstance(), W3CBaggagePropagator.getInstance(), B3Propagator.injectingMultiHeaders())))
+                .setPropagators(propagators)
                 .buildAndRegisterGlobal();
 
         // set the OTEL_TRACER in OpenTelemetrySpanBuilderImpl via reflection.
         // this needs to be done in case that another code already registered OTEL and the OTEL_TRACER is pointing to the wrong Tracer
         try {
-            Field tracerField = null;
             Tracer tracer = GlobalOpenTelemetry.getTracer("io.opentelemetry.opencensusshim");
-            tracerField = Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl")
+            Field tracerField = Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl")
                     .getDeclaredField("OTEL_TRACER");
             // set static final field
             tracerField.setAccessible(true);
@@ -344,10 +349,10 @@ public class TestUtils {
             modifiers.setInt(tracerField, tracerField.getModifiers() & ~Modifier.FINAL);
             tracerField.set(null, tracer);
 
-            System.out.println("OTEL_TRACER updated to " + tracer + " (" + openTelemetry.getTracer("io.opentelemetry.opencensusshim") + ")");
+            logger.info("OTEL_TRACER updated to {} ({})",
+                    tracer, openTelemetry.getTracer("io.opentelemetry.opencensusshim"));
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Failed to set OTEL_TRACER in OpenTelemetrySpanBuilderImpl");
+            logger.error("Failed to set OTEL_TRACER in OpenTelemetrySpanBuilderImpl", e);
         }
 
         return inMemSpanExporter;

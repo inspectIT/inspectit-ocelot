@@ -5,18 +5,20 @@ title: Trace Exporters
 
 Metrics exporters are responsible for passing the recorded tracing data to a corresponding storage.
 
-inspectIT Ocelot currently supports the following OpenCensus trace exporters:
+inspectIT Ocelot currently supports the following trace exporters:
 
 * [Logging](#logging-exporter) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/blob/main/exporters/logging/src/main/java/io/opentelemetry/exporter/logging/LoggingSpanExporter.java)]
 * [~~Zipkin~~](#zipkin-exporter) [[Homepage](https://zipkin.io/)]
 * [~~Jaeger~~](#jaeger-exporter) [[Homepage](https://www.jaegertracing.io/)]
 
->**Important note**: Starting with version `1.15.0`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
+>**Important note**: Starting with version `2.X.X`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
 Currently, Zipkin and Jaeger are **not** functional and will be re-implemented in the next version.
 
 ## Logging Exporter
 
-The Logging exporter exports traces to the system log. By default, the Logging exporter is enabled.
+The Logging exporter exports traces to the system log. By default, the Logging exporter is disabled.
+The Logging trace exporter has the following properties:
+- `inspectit.exporters.tracing.logging.enabled`: enables/disables the Logging trace exporter.
 
 ## Zipkin Exporter
 >**Important**: the Zipkin exporter is currently not working

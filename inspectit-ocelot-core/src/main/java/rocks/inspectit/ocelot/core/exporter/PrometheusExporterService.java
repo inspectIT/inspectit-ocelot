@@ -37,7 +37,6 @@ public class PrometheusExporterService extends DynamicallyActivatableService {
             int port = config.getPort();
             log.info("Starting Prometheus Exporter on {}:{}", host, port);
             // TODO: implement OTel PrometheusStatsCollector
-           //  PrometheusStatsCollector.createAndRegister(PrometheusStatsConfiguration.builder().setRegistry(defaultRegistry).build());
             prometheusClient = new HTTPServer(host, port, true);
         } catch (Exception e) {
             log.error("Error Starting Prometheus HTTP Endpoint!", e);

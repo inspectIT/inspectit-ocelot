@@ -90,16 +90,6 @@ public class AgentMain {
         }
     }
 
-    private static void startAgent(String agentArgs, Instrumentation inst, TelemetrySettings telemetrySettings) {
-        try {
-            InspectITClassLoader icl = initializeInspectitLoader(inst, telemetrySettings);
-            AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
-        } catch (Exception e) {
-            System.err.println("Error starting inspectIT Agent!");
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Loads {@link #INSPECTIT_BOOTSTRAP_JAR_PATH} with the bootstrap classloader and @link {@link #INSPECTIT_CORE_JAR_PATH} with a new inspectIT loader.
      *
@@ -121,33 +111,6 @@ public class AgentMain {
         if (includeOpenTelemetry) {
             Path otJarFile = copyResourceToTempJarFile(OPEN_TELEMETRY_FAT_JAR_PATH);
             icl.addURL(otJarFile.toUri().toURL());
-        }
-
-        return icl;
-    }
-
-    /**
-     * Loads {@link #INSPECTIT_BOOTSTRAP_JAR_PATH} with the bootstrap classloader and @link {@link #INSPECTIT_CORE_JAR_PATH} with a new inspectIT loader.
-     *
-     * @return the created inspectIT classloader
-     *
-     * @throws IOException
-     */
-    private static InspectITClassLoader initializeInspectitLoader(Instrumentation inst, TelemetrySettings telemetrySettings) throws IOException {
-        Path bootstrapJar = copyResourceToTempJarFile(INSPECTIT_BOOTSTRAP_JAR_PATH);
-        inst.appendToBootstrapClassLoaderSearch(new JarFile(bootstrapJar.toFile()));
-
-        Instances.BOOTSTRAP_JAR_URL = bootstrapJar.toUri().toURL();
-
-        Instances.AGENT_JAR_URL = AgentMain.class.getProtectionDomain().getCodeSource().getLocation();
-
-        Path coreJar = copyResourceToTempJarFile(INSPECTIT_CORE_JAR_PATH);
-        InspectITClassLoader icl = new InspectITClassLoader(new URL[]{coreJar.toUri().toURL()});
-
-        // add the fat jar of the telemetry if it has not been published to bootstrap already
-        if (!telemetrySettings.isPublishToBootstrap()) {
-            Path telJarFile = copyResourceToTempJarFile(telemetrySettings.getPathToFatJar());
-            icl.addURL(telJarFile.toUri().toURL());
         }
 
         return icl;
@@ -218,33 +181,5 @@ public class AgentMain {
             }
         }
     }
-
-}
-
-/**
- * The telemetry implementation for collecting metrics and traces
- */
-enum TelemetryImplementation {
-    UNKNOWN, OPEN_CENSUS, OPEN_TELEMETRY, COUNT
-}
-
-@Value
-@AllArgsConstructor
-class TelemetrySettings {
-
-    /**
-     * The {@link TelemetryImplementation}
-     */
-    TelemetryImplementation telemetryImplementation;
-
-    /**
-     * Whether the jar of the {@link TelemetryImplementation} should be published/loaded in the bootstrap classloader
-     */
-    boolean publishToBootstrap;
-
-    /**
-     * The path to the fat.jar of the {@link TelemetryImplementation}
-     */
-    String pathToFatJar;
 
 }

@@ -102,7 +102,6 @@ dependencies {
             "io.opentelemetry:opentelemetry-opencensus-shim",
             "io.opencensus:opencensus-impl:${openCensusVersion}",
 
-
             project(':inspectit-ocelot-bootstrap')
     )
 
@@ -114,7 +113,6 @@ dependencies {
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-sdk-testing",
             "io.opentelemetry:opentelemetry-semconv",
-            "io.opentelemetry:opentelemetry-exporter-logging",
 
             'org.junit.jupiter:junit-jupiter-engine:5.3.1',
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
@@ -226,16 +224,16 @@ task systemTest {
 
                 jvmArgs "-Dinspectit.config.file-based.path=$projectDir/src/system-test/resources/config"
                 // make inspectIT scan the workdir for configs
-                jvmArgs "-Dinspectit.publishOpenTelemetryToBootstrap=true"  // make inspectIT push OC to the bootstrap
+                jvmArgs "-Dinspectit.publishOpenTelemetryToBootstrap=true"  // make inspectIT push OTEL to the bootstrap
                 jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"
                 // JaCoCo agent first + bootstrap instrumentation
                 jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.
-                jacoco.enabled = false  // Don't add the JaCoCo agent again.
 
                 // stricter checker makes sure that {@link Scope}s are closed on the correct thread and
                 // that they are not garbage collected before being closed.
                 jvmArgs "-Dio.opentelemetry.context.enableStrictContext=true"
 
+                jacoco.enabled = false  // Don't add the JaCoCo agent again.
             }
 
             doFirst { logger.lifecycle("Running system tests using ${javaExecutable}.") }

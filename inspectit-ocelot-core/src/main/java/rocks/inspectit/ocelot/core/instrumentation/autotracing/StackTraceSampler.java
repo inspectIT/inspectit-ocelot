@@ -264,9 +264,10 @@ public class StackTraceSampler {
             TraceState traceState = tsBuilder.build();
 
             // rebuild SpanContext
+            TraceFlags flags = remoteParent.getTraceOptions()
+                    .isSampled() ? TraceFlags.getSampled() : TraceFlags.getDefault();
             io.opentelemetry.api.trace.SpanContext fromRemoteParent = io.opentelemetry.api.trace.SpanContext.createFromRemoteParent(remoteParent.getTraceId()
-                    .toLowerBase16(), remoteParent.getSpanId().toLowerBase16(), remoteParent.getTraceOptions()
-                    .isSampled() ? TraceFlags.getSampled() : TraceFlags.getDefault(), traceState);
+                    .toLowerBase16(), remoteParent.getSpanId().toLowerBase16(), flags, traceState);
 
             // get a non-recording OTEL span from the manually rebuilt span context
             io.opentelemetry.api.trace.Span span = io.opentelemetry.api.trace.Span.wrap(fromRemoteParent);

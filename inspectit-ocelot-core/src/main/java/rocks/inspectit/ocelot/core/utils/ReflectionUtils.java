@@ -54,9 +54,7 @@ public class ReflectionUtils {
      */
 
     public static Field getFinalStaticFieldAndMakeAccessible(Class clazz, String fieldName, boolean removeFinal) throws NoSuchFieldException, IllegalAccessException {
-        Field field = null;
-
-        field = clazz.getDeclaredField(fieldName);
+        Field field =  clazz.getDeclaredField(fieldName);
 
         // make field accessible
         if (removeFinal) {

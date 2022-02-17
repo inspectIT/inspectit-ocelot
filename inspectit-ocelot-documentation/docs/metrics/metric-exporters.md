@@ -18,7 +18,7 @@ inspectIT Ocelot currently supports the following OpenTelemetry metrics exporter
 |[~~Prometheus Exporter~~](#prometheus-exporter)|Yes|Pull|Yes
 |[~~InfluxDB Exporter~~](#influxdb-exporter)|Yes|Push|Yes
 
->**Important note**: Starting with version `1.15.0`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
+>**Important note**: Starting with version `2.X.X`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
 Currently, Prometheus and InfluxDB are **not** functional and will be re-implemented in the next version.
 
 ## Logging Exporter
