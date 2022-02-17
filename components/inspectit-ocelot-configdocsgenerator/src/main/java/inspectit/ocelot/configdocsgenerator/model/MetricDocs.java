@@ -15,9 +15,8 @@ public class MetricDocs extends BaseDocs {
     private final String unit;
 
     public MetricDocs(String name, String description, String unit) {
-
         // MetricDefinitions do not contain the info for the since field, so it is left empty
-        super(name, description, "");
+        super(name, description, null);
 
         this.unit = unit;
     }

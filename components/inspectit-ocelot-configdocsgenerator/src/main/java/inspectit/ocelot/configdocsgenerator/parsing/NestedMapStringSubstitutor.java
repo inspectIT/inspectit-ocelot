@@ -10,11 +10,11 @@ import java.util.Map;
 /**
  * Version of {@link StringSubstitutor} with the possibility to use a nested Map to define values for the replaced variables.
  */
-public class StringSubstitutorNestedMap extends StringSubstitutor implements StringLookup {
+public class NestedMapStringSubstitutor extends StringSubstitutor implements StringLookup {
 
     private final Map<String, Object> valueMap;
 
-    public StringSubstitutorNestedMap(Map<String, Object> valueMap) {
+    public NestedMapStringSubstitutor(Map<String, Object> valueMap) {
         this.valueMap = valueMap;
         setVariableResolver(this);
     }

@@ -42,16 +42,16 @@ public class RuleDocsTest {
     private static final String EXIT_KEY = "exit";
 
     /**
-     * Generate an entryExits Map for a {@link RuleDocs} object with empty TreeMaps as values.
+     * Generate an actionCallsMap for a {@link RuleDocs} object with empty TreeMaps as values.
      *
-     * @return The entryExits Map with empty TreeMaps.
+     * @return The actionCallsMap with empty TreeMaps.
      */
-    public static Map<String, Map<String, ActionCallDocs>> getEmptyEntryExits() {
-        Map<String, Map<String, ActionCallDocs>> entryExits = new HashMap<>();
-        for (RuleDocs.EntryExitKey entryExitKey : RuleDocs.EntryExitKey.values()) {
-            entryExits.put(entryExitKey.getKey(), new TreeMap<>());
+    public static Map<String, Map<String, ActionCallDocs>> getEmptyActionCallsMap() {
+        Map<String, Map<String, ActionCallDocs>> actionCallsMap = new HashMap<>();
+        for (RuleLifecycleState ruleLifecycleState : RuleLifecycleState.values()) {
+            actionCallsMap.put(ruleLifecycleState.getKey(), new TreeMap<>());
         }
-        return entryExits;
+        return actionCallsMap;
     }
 
     /**
@@ -83,14 +83,14 @@ public class RuleDocsTest {
         includes1.add(RULE_4_NAME);
         allRuleDocs.get(RULE_1_NAME).setInclude(includes1);
 
-        Map<String, Map<String, ActionCallDocs>> entryExits1 = getEmptyEntryExits();
+        Map<String, Map<String, ActionCallDocs>> actionCallsMap1 = getEmptyActionCallsMap();
         Map<String, ActionCallDocs> actionCalls1 = new HashMap<>();
         ActionCallDocs actionCall11 = new ActionCallDocs(OVERWRITTEN_BY_1, ACTION_FROM_RULE_1);
         actionCalls1.put(OVERWRITTEN_BY_1, actionCall11);
         ActionCallDocs actionCall12 = new ActionCallDocs(OVERWRITTEN_BY_1_AND_2, ACTION_FROM_RULE_1);
         actionCalls1.put(OVERWRITTEN_BY_1_AND_2, actionCall12);
-        entryExits1.put(ENTRY_KEY, actionCalls1);
-        allRuleDocs.get(RULE_1_NAME).setEntryExits(entryExits1);
+        actionCallsMap1.put(ENTRY_KEY, actionCalls1);
+        allRuleDocs.get(RULE_1_NAME).setActionCallsMap(actionCallsMap1);
 
         /*
         RuleDoc2: inherits from RuleDoc3. Overwrites overwritten_by_1_and_2 from RuleDoc3 and creates own ActionCall
@@ -101,7 +101,7 @@ public class RuleDocsTest {
         includes2.add(RULE_3_NAME);
         allRuleDocs.get(RULE_2_NAME).setInclude(includes2);
 
-        Map<String, Map<String, ActionCallDocs>> entryExits2 = new HashMap<>();
+        Map<String, Map<String, ActionCallDocs>> actionCallsMap2 = new HashMap<>();
         Map<String, ActionCallDocs> actionCalls2 = new HashMap<>();
         ActionCallDocs actionCall21 = new ActionCallDocs(OVERWRITTEN_BY_1, ACTION_FROM_RULE_2);
         actionCalls2.put(OVERWRITTEN_BY_1, actionCall21);
@@ -109,14 +109,14 @@ public class RuleDocsTest {
         actionCalls2.put(OVERWRITTEN_BY_1_AND_2, actionCall22);
         ActionCallDocs actionCall23 = new ActionCallDocs(OVERWRITTEN_BY_2, ACTION_FROM_RULE_2);
         actionCalls2.put(OVERWRITTEN_BY_2, actionCall23);
-        entryExits2.put(ENTRY_KEY, actionCalls2);
-        allRuleDocs.get(RULE_2_NAME).setEntryExits(entryExits2);
+        actionCallsMap2.put(ENTRY_KEY, actionCalls2);
+        allRuleDocs.get(RULE_2_NAME).setActionCallsMap(actionCallsMap2);
         
         /*
         RuleDoc3: Creates ActionCalls overwritten_by_1_and_2, overwritten_by_2 and created_by_3.
         */
         allRuleDocs.put(RULE_3_NAME, simpleRuleDoc(RULE_3_NAME));
-        Map<String, Map<String, ActionCallDocs>> entryExits3 = new HashMap<>();
+        Map<String, Map<String, ActionCallDocs>> actionCallsMap3 = new HashMap<>();
         Map<String, ActionCallDocs> actionCalls3 = new HashMap<>();
         ActionCallDocs actionCall31 = new ActionCallDocs(OVERWRITTEN_BY_1_AND_2, ACTION_FROM_RULE_3);
         actionCalls3.put(OVERWRITTEN_BY_1_AND_2, actionCall31);
@@ -124,50 +124,53 @@ public class RuleDocsTest {
         actionCalls3.put(CREATED_BY_3, actionCall32);
         ActionCallDocs actionCall33 = new ActionCallDocs(OVERWRITTEN_BY_2, ACTION_FROM_RULE_3);
         actionCalls3.put(OVERWRITTEN_BY_2, actionCall33);
-        entryExits3.put(ENTRY_KEY, actionCalls3);
-        allRuleDocs.get(RULE_3_NAME).setEntryExits(entryExits3);
+        actionCallsMap3.put(ENTRY_KEY, actionCalls3);
+        allRuleDocs.get(RULE_3_NAME).setActionCallsMap(actionCallsMap3);
 
         /*
         RuleDoc4: Creates ActionCall created_by_4.
         */
         allRuleDocs.put(RULE_4_NAME, simpleRuleDoc(RULE_4_NAME));
-        Map<String, Map<String, ActionCallDocs>> entryExits4 = new HashMap<>();
+        Map<String, Map<String, ActionCallDocs>> actionCallsMap4 = new HashMap<>();
         Map<String, ActionCallDocs> actionCalls4 = new HashMap<>();
         ActionCallDocs actionCall41 = new ActionCallDocs(CREATED_BY_4, ACTION_FROM_RULE_4);
         actionCalls4.put(CREATED_BY_4, actionCall41);
-        entryExits4.put(EXIT_KEY, actionCalls4);
-        allRuleDocs.get(RULE_4_NAME).setEntryExits(entryExits4);
+        actionCallsMap4.put(EXIT_KEY, actionCalls4);
+        allRuleDocs.get(RULE_4_NAME).setActionCallsMap(actionCallsMap4);
 
         return allRuleDocs;
     }
 
     @Nested
-    class AddEntryExitFromIncludedRulesTest {
+    class AddActionCallsFromIncludedRulesTest {
 
         @Test
-        void addEntryExitFromIncludedRules() {
+        void addActionCallsFromIncludedRules() {
 
             Map<String, RuleDocs> result = getTestRuleDocs();
             for (RuleDocs currentRule : result.values()) {
-                currentRule.addEntryExitFromIncludedRules(result, currentRule.getInclude());
+                currentRule.addActionCallsFromIncludedRules(result, currentRule.getInclude());
             }
 
             Map<String, RuleDocs> expected = getTestRuleDocs();
 
             // ActionCall created in 3 is added to testRule2 and testRule1
-            ActionCallDocs created_by_3 = expected.get(RULE_3_NAME).getEntryExits().get(ENTRY_KEY).get(CREATED_BY_3);
+            ActionCallDocs created_by_3 = expected.get(RULE_3_NAME)
+                    .getActionCallsMap()
+                    .get(ENTRY_KEY)
+                    .get(CREATED_BY_3);
 
             ActionCallDocs inherited_from_3 = Mockito.mock(ActionCallDocs.class);
             when(inherited_from_3.getName()).thenReturn(created_by_3.getName());
             when(inherited_from_3.getActionName()).thenReturn(created_by_3.getActionName());
             when(inherited_from_3.getInheritedFrom()).thenReturn(RULE_3_NAME);
 
-            expected.get(RULE_2_NAME).getEntryExits().get(ENTRY_KEY).put(CREATED_BY_3, inherited_from_3);
-            expected.get(RULE_1_NAME).getEntryExits().get(ENTRY_KEY).put(CREATED_BY_3, inherited_from_3);
+            expected.get(RULE_2_NAME).getActionCallsMap().get(ENTRY_KEY).put(CREATED_BY_3, inherited_from_3);
+            expected.get(RULE_1_NAME).getActionCallsMap().get(ENTRY_KEY).put(CREATED_BY_3, inherited_from_3);
 
             // ActionCall created in 3 but overwritten in 2 is added to testRule1
             ActionCallDocs overwritten_by_2 = expected.get(RULE_2_NAME)
-                    .getEntryExits()
+                    .getActionCallsMap()
                     .get(ENTRY_KEY)
                     .get(OVERWRITTEN_BY_2);
 
@@ -176,10 +179,10 @@ public class RuleDocsTest {
             when(inherited_from_2.getActionName()).thenReturn(overwritten_by_2.getActionName());
             when(inherited_from_2.getInheritedFrom()).thenReturn(RULE_2_NAME);
 
-            expected.get(RULE_1_NAME).getEntryExits().get(ENTRY_KEY).put(OVERWRITTEN_BY_2, inherited_from_2);
+            expected.get(RULE_1_NAME).getActionCallsMap().get(ENTRY_KEY).put(OVERWRITTEN_BY_2, inherited_from_2);
 
             // ActionCall created in 4 is added to testRule1
-            ActionCallDocs created_by_4 = expected.get(RULE_4_NAME).getEntryExits().get(EXIT_KEY).get(CREATED_BY_4);
+            ActionCallDocs created_by_4 = expected.get(RULE_4_NAME).getActionCallsMap().get(EXIT_KEY).get(CREATED_BY_4);
 
             ActionCallDocs inherited_from_4 = Mockito.mock(ActionCallDocs.class);
             when(inherited_from_4.getName()).thenReturn(created_by_4.getName());
@@ -188,7 +191,7 @@ public class RuleDocsTest {
 
             Map<String, ActionCallDocs> actionCallsEntry = new HashMap<>();
             actionCallsEntry.put(CREATED_BY_4, inherited_from_4);
-            expected.get(RULE_1_NAME).getEntryExits().put(EXIT_KEY, actionCallsEntry);
+            expected.get(RULE_1_NAME).getActionCallsMap().put(EXIT_KEY, actionCallsEntry);
 
             assertThat(result).usingRecursiveComparison().isEqualTo(expected);
         }

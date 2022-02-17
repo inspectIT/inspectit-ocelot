@@ -68,7 +68,7 @@ public class ConfigDocsGenerator {
 
         Map<String, RuleDocs> ruleDocsMap = generateRuleDocsMap(rules);
         for (RuleDocs currentRule : ruleDocsMap.values()) {
-            currentRule.addEntryExitFromIncludedRules(ruleDocsMap, currentRule.getInclude());
+            currentRule.addActionCallsFromIncludedRules(ruleDocsMap, currentRule.getInclude());
         }
         List<RuleDocs> ruleDocs = new ArrayList<>(ruleDocsMap.values());
         ruleDocs.sort(Comparator.comparing(BaseDocs::getName));
@@ -172,7 +172,7 @@ public class ConfigDocsGenerator {
 
     /**
      * Generates documentation objects for the given actions. Other than the other similar methods in this class,
-     * the RuleDocs objects are returned in a map, because that map is needed to later call {@link RuleDocs#addEntryExitFromIncludedRules(Map, List)}.
+     * the RuleDocs objects are returned in a map, because that map is needed to later call {@link RuleDocs#addActionCallsFromIncludedRules(Map, List)}.
      *
      * @param rules Map with rules' names as keys and their settings as values, see {@link InstrumentationSettings#getRules()}.
      *
@@ -212,9 +212,9 @@ public class ConfigDocsGenerator {
 
             RuleTracingDocs ruleTracingDocs = generateRuleTracingDocs(ruleSettings);
 
-            Map<String, Map<String, ActionCallDocs>> entryExits = generateActionCallDocs(ruleSettings);
+            Map<String, Map<String, ActionCallDocs>> actionCallsMap = generateActionCallDocs(ruleSettings);
 
-            ruleDocsMap.put(ruleName, new RuleDocs(ruleName, description, since, includeForDoc, scopesForDoc, ruleMetricsDocs, ruleTracingDocs, entryExits));
+            ruleDocsMap.put(ruleName, new RuleDocs(ruleName, description, since, includeForDoc, scopesForDoc, ruleMetricsDocs, ruleTracingDocs, actionCallsMap));
         }
         return ruleDocsMap;
     }
@@ -293,21 +293,21 @@ public class ConfigDocsGenerator {
      * the names of {@link ActionCallSettings} as keys and the corresponding {@link ActionCallDocs} as values.
      */
     private Map<String, Map<String, ActionCallDocs>> generateActionCallDocs(InstrumentationRuleSettings ruleSettings) {
-        Map<String, Map<String, ActionCallDocs>> entryExits = new HashMap<>();
-        for (RuleDocs.EntryExitKey entryExitKey : RuleDocs.EntryExitKey.values()) {
+        Map<String, Map<String, ActionCallDocs>> actionCallsMap = new HashMap<>();
+        for (RuleLifecycleState ruleLifecycleState : RuleLifecycleState.values()) {
             try {
-                Map<String, ActionCallSettings> entryExit = (Map<String, ActionCallSettings>) PropertyUtils.getProperty(ruleSettings, entryExitKey.getKey());
+                Map<String, ActionCallSettings> singleStateActionCallMap = (Map<String, ActionCallSettings>) PropertyUtils.getProperty(ruleSettings, ruleLifecycleState.getKey());
                 Map<String, ActionCallDocs> actionCallDocs = new TreeMap<>();
-                for (String actionCallKey : entryExit.keySet()) {
-                    actionCallDocs.put(actionCallKey, new ActionCallDocs(actionCallKey, entryExit.get(actionCallKey)
+                for (String actionCallKey : singleStateActionCallMap.keySet()) {
+                    actionCallDocs.put(actionCallKey, new ActionCallDocs(actionCallKey, singleStateActionCallMap.get(actionCallKey)
                             .getAction()));
                 }
-                entryExits.put(entryExitKey.getKey(), actionCallDocs);
+                actionCallsMap.put(ruleLifecycleState.getKey(), actionCallDocs);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return entryExits;
+        return actionCallsMap;
     }
 
 }

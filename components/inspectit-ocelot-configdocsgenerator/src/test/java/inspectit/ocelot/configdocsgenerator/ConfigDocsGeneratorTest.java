@@ -97,8 +97,8 @@ class ConfigDocsGeneratorTest {
         when(metricDoc.getUnit()).thenReturn("bytes");
 
         // Create a sample RuleDoc object to include inside of the other RuleDoc object
-        // Create the entryExits-Map for the RuleDoc object
-        Map<String, Map<String, ActionCallDocs>> entryExitsParent = RuleDocsTest.getEmptyEntryExits();
+        // Create the actionCallsMap for the RuleDoc object
+        Map<String, Map<String, ActionCallDocs>> actionCallsMapParent = RuleDocsTest.getEmptyActionCallsMap();
         Map<String, ActionCallDocs> actionCallsParent = new HashMap<>();
 
         ActionCallDocs actionCallParentMock = Mockito.mock(ActionCallDocs.class);
@@ -108,13 +108,13 @@ class ConfigDocsGeneratorTest {
         when(actionCallParentMock.getActionName()).thenReturn(actionCallParentAction);
 
         actionCallsParent.put("method_name", actionCallParentMock);
-        entryExitsParent.put("exit", actionCallsParent);
+        actionCallsMapParent.put("exit", actionCallsParent);
 
         ruleDocParent = Mockito.mock(RuleDocs.class);
         when(ruleDocParent.getName()).thenReturn("r_tracing_global_attributes");
         when(ruleDocParent.getDescription()).thenReturn("");
         when(ruleDocParent.getSince()).thenReturn("");
-        when(ruleDocParent.getEntryExits()).thenReturn(entryExitsParent);
+        when(ruleDocParent.getActionCallsMap()).thenReturn(actionCallsMapParent);
 
         // Create a sample RuleDoc with examples for all possible contents
         // Create the includes list for the RuleDoc
@@ -155,8 +155,8 @@ class ConfigDocsGeneratorTest {
         when(tracingDocMock.getStartSpanConditions()).thenReturn(startSpanConditions);
         when(tracingDocMock.getAttributes()).thenReturn(attributes);
 
-        // Create the entryExits Map for the RuleDoc
-        Map<String, Map<String, ActionCallDocs>> entryExitsChild = RuleDocsTest.getEmptyEntryExits();
+        // Create the actionCallsMap for the RuleDoc
+        Map<String, Map<String, ActionCallDocs>> actionCallsMapChild = RuleDocsTest.getEmptyActionCallsMap();
         Map<String, ActionCallDocs> actionCallsChild = new HashMap<>();
 
         ActionCallDocs actionCallChildMock1 = Mockito.mock(ActionCallDocs.class);
@@ -170,7 +170,7 @@ class ConfigDocsGeneratorTest {
         when(actionCallChildMock2.getInheritedFrom()).thenReturn("r_tracing_global_attributes");
         actionCallsChild.put("method_name", actionCallChildMock2);
 
-        entryExitsChild.put("exit", actionCallsChild);
+        actionCallsMapChild.put("exit", actionCallsChild);
 
         ruleDocChild = Mockito.mock(RuleDocs.class);
         when(ruleDocChild.getName()).thenReturn("r_capture_method_duration_conditional");
@@ -180,7 +180,7 @@ class ConfigDocsGeneratorTest {
         when(ruleDocChild.getScopes()).thenReturn(scopes);
         when(ruleDocChild.getMetricsDocs()).thenReturn(metricsDocs);
         when(ruleDocChild.getTracingDoc()).thenReturn(tracingDocMock);
-        when(ruleDocChild.getEntryExits()).thenReturn(entryExitsChild);
+        when(ruleDocChild.getActionCallsMap()).thenReturn(actionCallsMapChild);
     }
 
     @Nested

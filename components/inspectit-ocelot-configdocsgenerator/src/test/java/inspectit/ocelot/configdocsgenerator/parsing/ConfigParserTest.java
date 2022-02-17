@@ -59,7 +59,7 @@ class ConfigParserTest {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
 
-            StringSubstitutor stringSubstitutor = new StringSubstitutorNestedMap(yamlMap);
+            StringSubstitutor stringSubstitutor = new NestedMapStringSubstitutor(yamlMap);
             String result = stringSubstitutor.replace(configYaml);
 
             final String expected = String.format(
