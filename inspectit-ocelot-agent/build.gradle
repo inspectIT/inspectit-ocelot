@@ -1,9 +1,7 @@
 plugins {
-    id "me.champeau.gradle.jmh" version "0.4.8"
+    id "me.champeau.gradle.jmh" version "0.5.3"
+    id 'maven-publish'
 }
-
-apply plugin: 'java'
-apply plugin: 'maven' // for publishing to the local maven repository
 
 evaluationDependsOn(':inspectit-ocelot-bootstrap')
 evaluationDependsOn(':inspectit-ocelot-core')
@@ -53,6 +51,9 @@ task buildOpenTelemetryFatJar(type: Jar){
     }
 }
 
+processJmhResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 
 jar {
     destinationDirectory = buildDir
@@ -130,7 +131,8 @@ dependencies {
             // only used for log-correlation tests
             'org.apache.logging.log4j:log4j-api:2.15.0',
             'org.apache.logging.log4j:log4j-core:2.15.0',
-            'log4j:log4j:1.2.16'
+            'log4j:log4j:1.2.16',
+            'ch.qos.logback:logback-classic:1.2.10' // Used for SLF4J Correlation
 
     )
 

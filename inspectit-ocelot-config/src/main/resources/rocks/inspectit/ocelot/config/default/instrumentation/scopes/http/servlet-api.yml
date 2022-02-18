@@ -20,7 +20,7 @@ inspectit:
           
       's_servletapi_servletresponse_getOutputStream':
         interfaces:
-            - name: 'javax.servlet.ServletResponse'
+          - name: 'javax.servlet.ServletResponse'
         methods:
           - name: 'getOutputStream'
         advanced:
