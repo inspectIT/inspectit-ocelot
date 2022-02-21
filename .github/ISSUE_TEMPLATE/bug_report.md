@@ -20,9 +20,9 @@ Steps to reproduce the behavior:
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
+**Additional information (screenshots, stack traces, etc.)**
 If applicable, add screenshots to help explain your problem.
-If you have a Stacktrace, please copy and paste it here as text.
+If you have a stack trace, please copy and paste it here as text.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. iOS]
