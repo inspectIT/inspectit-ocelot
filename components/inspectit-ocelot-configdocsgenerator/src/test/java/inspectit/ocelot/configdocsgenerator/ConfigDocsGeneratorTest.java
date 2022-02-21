@@ -1,5 +1,6 @@
 package inspectit.ocelot.configdocsgenerator;
 
+import com.google.common.io.Resources;
 import inspectit.ocelot.configdocsgenerator.model.*;
 import inspectit.ocelot.configdocsgenerator.parsing.ConfigParser;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,6 +10,8 @@ import org.mockito.Mockito;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 
 import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +37,18 @@ class ConfigDocsGeneratorTest {
      * Needed to create InspectitConfig Objects to use as input for DocObjectGenerator in tests.
      */
     private final ConfigParser configParser = new ConfigParser();
+
+    /**
+     * Helper method to read Yaml from resources.
+     *
+     * @param fileName Name of yml File in resources.
+     *
+     * @return String containing the Yaml from the yml file.
+     */
+    private String getYaml(String fileName) throws IOException {
+        URL url = Resources.getResource("ConfigDocGeneratorTest/" + fileName);
+        return Resources.toString(url, StandardCharsets.UTF_8);
+    }
 
     /**
      * Instantiates the Doc-Objects that are later used by different Tests to test whether the ConfigDocumentation is
@@ -93,7 +108,7 @@ class ConfigDocsGeneratorTest {
         metricDoc = Mockito.mock(MetricDocs.class);
         when(metricDoc.getName()).thenReturn("[disk/free]");
         when(metricDoc.getDescription()).thenReturn("free disk space");
-        when(metricDoc.getSince()).thenReturn("");
+        when(metricDoc.getSince()).thenReturn(null);
         when(metricDoc.getUnit()).thenReturn("bytes");
 
         // Create a sample RuleDoc object to include inside of the other RuleDoc object
@@ -174,7 +189,7 @@ class ConfigDocsGeneratorTest {
 
         ruleDocChild = Mockito.mock(RuleDocs.class);
         when(ruleDocChild.getName()).thenReturn("r_capture_method_duration_conditional");
-        when(ruleDocChild.getDescription()).thenReturn("Conditionally captures the execution time of the current method into method_duration\n" + "The capturing will only happen it capture_time_condition is defined as true.\n" + "For example, http instrumentation define capture_time_condition based on http_is_entry\n" + "The condition is there to prevent unnecessary invocations of System.nanoTime(), which can be expensive");
+        when(ruleDocChild.getDescription()).thenReturn("Conditionally captures\n" + "linebreak.");
         when(ruleDocChild.getSince()).thenReturn("");
         when(ruleDocChild.getInclude()).thenReturn(include);
         when(ruleDocChild.getScopes()).thenReturn(scopes);
@@ -188,8 +203,7 @@ class ConfigDocsGeneratorTest {
 
         @Test
         void loadActionDocWithDocInYaml() throws IOException {
-
-            String configYaml = "inspectit:\n" + "  instrumentation:\n" + "    actions:\n" + "      # Prints a given Object to stdout\n" + "      a_debug_println:\n" + "        docs:\n" + "          description: 'Prints a given Object to stdout.'\n" + "          since: '1.0'\n" + "          inputs:\n" + "            value: Object to be printed\n" + "          return-value: Void\n" + "        input:\n" + "          value: Object\n" + "        is-void: true\n" + "        value: System.out.println(value);";
+            String configYaml = getYaml("actionWithDocInYaml.yml");
 
             InspectitConfig config = configParser.parseConfig(configYaml);
             ConfigDocumentation result = configDocsGenerator.generateConfigDocs(config);
@@ -207,8 +221,8 @@ class ConfigDocsGeneratorTest {
         }
 
         @Test
-        void loadActionDocWithoutDocInYaml() {
-            String configYaml = "inspectit:\n" + "  instrumentation:\n" + "    actions:\n" + "      # Prints two given Objects to stdout\n" + "      a_debug_println_2:\n" + "        imports:\n" + "          - java.util\n" + "        input:\n" + "          a: Object\n" + "          b: Object\n" + "        value-body: |\n" + "          System.out.println(a + \\\"\\\" + b);\n" + "          return a + \\\"\\\" b;\";";
+        void loadActionDocWithoutDocInYaml() throws IOException {
+            String configYaml = getYaml("actionWithoutDocInYaml.yml");
 
             InspectitConfig config = configParser.parseConfig(configYaml);
             ConfigDocumentation result = configDocsGenerator.generateConfigDocs(config);
@@ -226,8 +240,8 @@ class ConfigDocsGeneratorTest {
         }
 
         @Test
-        void loadMultipleActions() {
-            String configYaml = "inspectit:\n" + "  instrumentation:\n" + "    actions:\n" + "      # Prints two given Objects to stdout\n" + "      a_debug_println_2:\n" + "        imports:\n" + "          - java.util\n" + "        input:\n" + "          a: Object\n" + "          b: Object\n" + "        value-body: |\n" + "          System.out.println(a + \\\"\\\" + b);\n" + "          return a + \\\"\\\" b;\";\n" + "      # Prints a given Object to stdout\n" + "      a_debug_println:\n" + "        docs:\n" + "          description: 'Prints a given Object to stdout.'\n" + "          since: '1.0'\n" + "          inputs:\n" + "            value: Object to be printed\n" + "          return-value: Void\n" + "        input:\n" + "          value: Object\n" + "        is-void: true\n" + "        value: System.out.println(value);";
+        void loadMultipleActions() throws IOException {
+            String configYaml = getYaml("multipleActions.yml");
 
             InspectitConfig config = configParser.parseConfig(configYaml);
             ConfigDocumentation result = configDocsGenerator.generateConfigDocs(config);
@@ -246,8 +260,8 @@ class ConfigDocsGeneratorTest {
         }
 
         @Test
-        void loadScopeDoc() {
-            String configYaml = "inspectit:\n" + "  instrumentation:\n" + "    scopes:\n" + "      s_jdbc_statement_execute:\n" + "        docs:\n" + "          description: 'Scope for executed JDBC statements.'\n" + "        superclass:\n" + "          name: java.net.HttpURLConnection\n" + "        interfaces:\n" + "          - name: java.sql.Statement\n" + "        methods:\n" + "          - name: execute\n" + "          - name: executeQuery\n" + "          - name: executeUpdate\n" + "        advanced:\n" + "          instrument-only-inherited-methods: true";
+        void loadScopeDoc() throws IOException {
+            String configYaml = getYaml("scope.yml");
 
             InspectitConfig config = configParser.parseConfig(configYaml);
             ConfigDocumentation result = configDocsGenerator.generateConfigDocs(config);
@@ -265,8 +279,8 @@ class ConfigDocsGeneratorTest {
         }
 
         @Test
-        void loadMetricDoc() {
-            String configYaml = "inspectit:\n" + "  metrics:\n" + "    disk:\n" + "      enabled:\n" + "        # if true, the free disk space will be measured and the view \"disk/free\" is registered\n" + "        free: true\n" + "    definitions:\n" + "      '[disk/free]':\n" + "        enabled: ${inspectit.metrics.disk.enabled.free}\n" + "        type: LONG\n" + "        unit: bytes\n" + "        description: free disk space";
+        void loadMetricDoc() throws IOException {
+            String configYaml = getYaml("metric.yml");
 
             InspectitConfig config = configParser.parseConfig(configYaml);
             ConfigDocumentation result = configDocsGenerator.generateConfigDocs(config);
@@ -284,8 +298,8 @@ class ConfigDocsGeneratorTest {
         }
 
         @Test
-        void loadRuleDocs() {
-            String configYaml = "inspectit:\n" + "  instrumentation:\n" + "    rules:\n" + "      r_tracing_global_attributes:\n" + "        exit:\n" + "          method_name:\n" + "            action: a_get_name\n" + "\n" + "      r_capture_method_duration_conditional:\n" + "        docs:\n" + "          description: |-\n" + "            Conditionally captures the execution time of the current method into method_duration\n" + "            The capturing will only happen it capture_time_condition is defined as true.\n" + "            For example, http instrumentation define capture_time_condition based on http_is_entry\n" + "            The condition is there to prevent unnecessary invocations of System.nanoTime(), which can be expensive\n" + "        include:\n" + "          r_tracing_global_attributes: true\n" + "          r_capture_method_entry_timestamp_conditional: true\n" + "          r_capture_ddd: false\n" + "        scopes:\n" + "          s_httpurlconnection_connect: true\n" + "          s_httpurlconnection_getOutputStream: true\n" + "        exit:\n" + "          method_duration:\n" + "            only-if-true: capture_time_condition\n" + "            action: a_timing_elapsedMillis\n" + "            data-input:\n" + "              since_nanos: method_entry_time\n" + "            constant-input:\n" + "              value: sql\n" + "        tracing:\n" + "          start-span: true\n" + "          start-span-conditions:\n" + "            only-if-true: jdbc_is_entry\n" + "          attributes:\n" + "            db.type: db_type_sql\n" + "            db.url: jdbc_url\n" + "          error-status: _thrown\n" + "        metrics:\n" + "          '[service/in/responsetime]':\n" + "            value: servicegraph_duration\n" + "            data-tags:\n" + "              origin_service: servicegraph_origin_service_local\n" + "              origin_external: servicegraph_origin_external\n" + "            constant-tags:\n" + "              protocol: servicegraph_protocol\n" + "              error: servicegraph_is_error";
+        void loadRuleDocs() throws IOException {
+            String configYaml = getYaml("rules.yml");
 
             InspectitConfig config = configParser.parseConfig(configYaml);
             ConfigDocumentation result = configDocsGenerator.generateConfigDocs(config);
@@ -304,8 +318,8 @@ class ConfigDocsGeneratorTest {
         }
 
         @Test
-        void loadAll() {
-            String configYaml = "inspectit:\n" + "  instrumentation:\n" + "    actions:\n" + "      # Prints two given Objects to stdout\n" + "      a_debug_println_2:\n" + "        imports:\n" + "          - java.util\n" + "        input:\n" + "          a: Object\n" + "          b: Object\n" + "        value-body: |\n" + "          System.out.println(a + \\\"\\\" + b);\n" + "          return a + \\\"\\\" b;\";\n" + "      # Prints a given Object to stdout\n" + "      a_debug_println:\n" + "        docs:\n" + "          description: 'Prints a given Object to stdout.'\n" + "          since: '1.0'\n" + "          inputs:\n" + "            value: Object to be printed\n" + "          return-value: Void\n" + "        input:\n" + "          value: Object\n" + "        is-void: true\n" + "        value: System.out.println(value);\n" + "\n" + "    scopes:\n" + "      s_jdbc_statement_execute:\n" + "        docs:\n" + "          description: 'Scope for executed JDBC statements.'\n" + "        superclass:\n" + "          name: java.net.HttpURLConnection\n" + "        interfaces:\n" + "          - name: java.sql.Statement\n" + "        methods:\n" + "          - name: execute\n" + "          - name: executeQuery\n" + "          - name: executeUpdate\n" + "        advanced:\n" + "          instrument-only-inherited-methods: true\n" + "      \n" + "    rules:\n" + "      r_tracing_global_attributes:\n" + "        exit:\n" + "          method_name:\n" + "            action: a_get_name\n" + "\n" + "      r_capture_method_duration_conditional:\n" + "        docs:\n" + "          description: |-\n" + "            Conditionally captures the execution time of the current method into method_duration\n" + "            The capturing will only happen it capture_time_condition is defined as true.\n" + "            For example, http instrumentation define capture_time_condition based on http_is_entry\n" + "            The condition is there to prevent unnecessary invocations of System.nanoTime(), which can be expensive\n" + "        include:\n" + "          r_tracing_global_attributes: true\n" + "          r_capture_method_entry_timestamp_conditional: true\n" + "          r_capture_ddd: false\n" + "        scopes:\n" + "          s_httpurlconnection_connect: true\n" + "          s_httpurlconnection_getOutputStream: true\n" + "        exit:\n" + "          method_duration:\n" + "            only-if-true: capture_time_condition\n" + "            action: a_timing_elapsedMillis\n" + "            data-input:\n" + "              since_nanos: method_entry_time\n" + "            constant-input:\n" + "              value: sql\n" + "        tracing:\n" + "          start-span: true\n" + "          start-span-conditions:\n" + "            only-if-true: jdbc_is_entry\n" + "          attributes:\n" + "            db.type: db_type_sql\n" + "            db.url: jdbc_url\n" + "          error-status: _thrown\n" + "        metrics:\n" + "          '[service/in/responsetime]':\n" + "            value: servicegraph_duration\n" + "            data-tags:\n" + "              origin_service: servicegraph_origin_service_local\n" + "              origin_external: servicegraph_origin_external\n" + "            constant-tags:\n" + "              protocol: servicegraph_protocol\n" + "              error: servicegraph_is_error\n" + "  metrics:\n" + "    disk:\n" + "      enabled:\n" + "        # if true, the free disk space will be measured and the view \"disk/free\" is registered\n" + "        free: true\n" + "    definitions:\n" + "      '[disk/free]':\n" + "        enabled: ${inspectit.metrics.disk.enabled.free}\n" + "        type: LONG\n" + "        unit: bytes\n" + "        description: free disk space";
+        void loadAll() throws IOException {
+            String configYaml = getYaml("all.yml");
 
             InspectitConfig config = configParser.parseConfig(configYaml);
             ConfigDocumentation result = configDocsGenerator.generateConfigDocs(config);

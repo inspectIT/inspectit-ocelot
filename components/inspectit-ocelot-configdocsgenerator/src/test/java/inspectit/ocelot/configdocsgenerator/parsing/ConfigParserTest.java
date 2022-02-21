@@ -1,8 +1,8 @@
 package inspectit.ocelot.configdocsgenerator.parsing;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.common.io.Resources;
 import org.apache.commons.text.StringSubstitutor;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,6 +15,9 @@ import rocks.inspectit.ocelot.config.model.instrumentation.documentation.ActionD
 import rocks.inspectit.ocelot.config.model.metrics.StandardPollingMetricsRecorderSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,54 +30,32 @@ class ConfigParserTest {
 
     private final ConfigParser configParser = new ConfigParser();
 
+    /**
+     * Helper method to read Yaml from resources.
+     *
+     * @param fileName Name of yml File in resources.
+     *
+     * @return String containing the Yaml from the yml file.
+     */
+    private String getYaml(String fileName) throws IOException {
+        URL url = Resources.getResource("ConfigParserTest/" + fileName);
+        return Resources.toString(url, StandardCharsets.UTF_8);
+    }
+
     @Nested
     class ReplacePlaceholdersTest {
 
         @Test
-        void replacePlaceholders() throws JsonProcessingException {
+        void replacePlaceholders() throws IOException {
 
-            final String variable1 = "inspectit.name.placeholder-value";
-            final String variable2 = "inspectit.name.second.placeholder-value";
-            final String variable3 = "inspectit.doesnotexist";
-            final String variable4 = "doesnotexist";
-            final String variable5 = "inspectit.name.dot.placeholder-value";
-
-            final String configYaml = String.format(
-                    "inspectit:\n" +
-                    // Test replacement of placeholders at different deepness levels
-                    "  placeholder-test: ${%s}\n" +
-                    "  placeholder-test2: ${%s}\n" +
-                    // Test replacement if placeholder-keys do not lead to a value
-                    "  placeholder-test3: ${%s}\n" +
-                    // Test replacement with key containing dots
-                    "  placeholder-test5: ${%s}\n" +
-                    "  name:\n" +
-                    "    placeholder-value: value\n" +
-                    "    dot.placeholder-value: value5\n" +
-                    "    second:\n" +
-                    "      placeholder-value: value2\n" +
-                    "      placeholder-test4: ${%s}",
-                    variable1, variable2, variable3, variable5, variable4);
-
+            String configYaml = getYaml("placeholdersOrigin.yml");
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
 
             StringSubstitutor stringSubstitutor = new NestedMapStringSubstitutor(yamlMap);
             String result = stringSubstitutor.replace(configYaml);
 
-            final String expected = String.format(
-                    "inspectit:\n" +
-                    "  placeholder-test: value\n" +
-                    "  placeholder-test2: value2\n" +
-                    "  placeholder-test3: ${%s}\n" +
-                    "  placeholder-test5: value5\n" +
-                    "  name:\n" +
-                    "    placeholder-value: value\n" +
-                    "    dot.placeholder-value: value5\n" +
-                    "    second:\n" +
-                    "      placeholder-value: value2\n" +
-                    "      placeholder-test4: ${%s}",
-                    variable3, variable4);
+            String expected = getYaml("placeholdersExpected.yml");
 
             assertThat(result).isEqualTo(expected);
         }
@@ -84,24 +65,9 @@ class ConfigParserTest {
     class ParseConfigTests {
 
         @Test
-        void withPlaceholder() {
+        void withPlaceholder() throws IOException {
 
-            final String metricName = "[disk/free]";
-
-            final String configYaml = String.format(
-                    "inspectit:\n" +
-                    "  metrics:\n" +
-                    "    disk:\n" +
-                    "      enabled:\n" +
-                    "        # if true, the free disk space will be measured and the view \"disk/free\" is registered\n" +
-                    "        free: true\n" +
-                    "    definitions:\n" +
-                    "      '%s':\n" +
-                    "        enabled: ${inspectit.metrics.disk.enabled.free}\n" +
-                    "        type: LONG\n" +
-                    "        unit: bytes\n" +
-                    "        description: free disk space"
-                    , metricName);
+            String configYaml = getYaml("configWithPlaceholder.yml");
 
             InspectitConfig result = configParser.parseConfig(configYaml);
 
@@ -118,20 +84,15 @@ class ConfigParserTest {
             when(metricDefinitionMock.getDescription()).thenReturn("free disk space");
             when(metricDefinitionMock.getViews()).thenReturn(null);
 
-            assertThat(result.getMetrics().getDefinitions().get(metricName)).usingRecursiveComparison()
+            assertThat(result.getMetrics().getDefinitions().get("[disk/free]")).usingRecursiveComparison()
                     .isEqualTo(metricDefinitionMock);
             assertThat(result.getMetrics().getDisk()).usingRecursiveComparison().isEqualTo(pollingSettingsMock);
         }
 
         @Test
-        void withDuration() {
+        void withDuration() throws IOException {
 
-            final String configYaml =
-                "inspectit:\n" +
-                "  instrumentation:\n" +
-                "    internal:\n" +
-                "      inter-batch-delay: 50ms\n" +
-                "      new-class-discovery-interval: 10s";
+            String configYaml = getYaml("configWithDuration.yml");
 
             InspectitConfig result = configParser.parseConfig(configYaml);
 
@@ -142,24 +103,9 @@ class ConfigParserTest {
         }
 
         @Test
-        void withDocumentation() {
+        void withDocumentation() throws IOException {
 
-            final String configYaml =
-                "inspectit:\n" +
-                "  instrumentation:\n" +
-                "    actions:\n" +
-                "      a_debug_println:\n" +
-                "        docs:\n" +
-                "          description: 'Prints a given Object to stdout.'\n" +
-                "          since: '1.0'\n" +
-                "          inputs:\n" +
-                "            value: Object to be printed\n" +
-                "          return-value: Void\n" +
-                "        input:\n" +
-                "          value: Object\n" +
-                "        is-void: true\n" +
-                "        value-body: |\n" +
-                "          System.out.println(value);";
+            String configYaml = getYaml("configWithDocumentation.yml");
 
             InspectitConfig result = configParser.parseConfig(configYaml);
 

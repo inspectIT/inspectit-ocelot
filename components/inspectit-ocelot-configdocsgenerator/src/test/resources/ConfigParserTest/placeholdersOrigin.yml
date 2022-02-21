@@ -1,0 +1,14 @@
+inspectit:
+  # Test replacement of placeholders at different deepness levels
+  placeholder-test: ${inspectit.name.placeholder-value}
+  placeholder-test2: ${inspectit.name.second.placeholder-value}
+  # Test replacement if placeholder-keys do not lead to a value
+  placeholder-test3: ${inspectit.doesnotexist}
+  # Test replacement with key containing dots
+  placeholder-test4: ${inspectit.name.dot.placeholder-value}
+  name:
+    placeholder-value: value
+    dot.placeholder-value: value4
+    second:
+      placeholder-value: value2
+      placeholder-test5: ${doesnotexist}
