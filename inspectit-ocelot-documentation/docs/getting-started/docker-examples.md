@@ -167,8 +167,8 @@ The inspectIT Ocelot Configuration Server can be accessed via http://localhost:8
 The InfluxDB and Prometheus demo scenarios include the following predefined Grafana Dashboards:
 
 ### Agent
-| Name + Grafana Marketplace | Description | Screenshot                                                                              |
-| -------------- | ------- |-----------------------------------------------------------------------------------------|
+| Name + Grafana Marketplace | Description | Screenshot|
+| -------------- | ------- | -------- |
 | Service Graph [[InfluxDB]](https://grafana.com/dashboards/10142) [[Prometheus]](https://grafana.com/dashboards/10139) | Shows a graph of all instrumented and external services and their interaction. All flows are derived based on live metrics. |[![](assets/demo-dashboard-servicegraph_small.png)](assets/demo-dashboard-servicegraph.png)|
 | HTTP Metrics [[InfluxDB]](https://grafana.com/dashboards/10141) [[Prometheus]](https://grafana.com/dashboards/10138) | Shows statistics of incoming and outgoing HTTP requests for each instrumented service. | [![](assets/demo-dashboard-http_small.png)](assets/demo-dashboard-http.png)|
 | System Metrics [[InfluxDB]](https://grafana.com/dashboards/9601) [[Prometheus]](https://grafana.com/dashboards/9599) | Shows system metrics, such as system CPU utilization, load average and disk usage. | [![](assets/demo-dashboard-system_small.png)](assets/demo-dashboard-system.png)|
@@ -177,7 +177,7 @@ The InfluxDB and Prometheus demo scenarios include the following predefined Graf
 
 ### End User Monitoring
 | Name | Description | Screenshot|
-| ---------- | ------- |----------------------------------------------------------------------------------|
+| ---------- | ------- | -------- |
 | Beacons  | Shows metrics for the number of processed beacons and their average processing times | [![](assets/demo-dashboard-beacons_small.png)](assets/demo-dashboard-beacons.png)|
 | Trace Controller | Shows metrics for the number of processed traces, the number of spans and the average processing times for the traces| [![](assets/demo-dashboard-trace-controller_small.png)](assets/demo-dashboard-trace-controller.png)|
 
