@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+message Command {
+  oneof commandType {
+    PingCommand ping = 1;
+    ListClassesCommand listClasses = 2;
+  }
+}
+
+message PingCommand {}
+
+message ListClassesCommand {
+  string filter = 1;
+}
+
+message CommandResponse {
+  oneof commandResponseType {
+    FirstResponse first = 1;
+    PingCommandResponse ping = 2;
+    ListClassesCommandResponse listClasses = 3;
+  }
+}
+
+message FirstResponse {
+  string agentId = 1;
+}
+
+message PingCommandResponse {}
+
+message ListClassesCommandResponse {
+  repeated TypeElement result = 1;
+}
+
+message TypeElement {
+  string name = 1;
+  string type = 2;
+  repeated string methods = 3;
+}
