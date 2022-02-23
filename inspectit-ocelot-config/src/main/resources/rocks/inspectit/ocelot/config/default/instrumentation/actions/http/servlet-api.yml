@@ -1,42 +1,47 @@
 inspectit:
   instrumentation:
     actions:
-    
-      # Checks if a given ServletRequest is an instance of HttpServletRequest
+
       'a_servletrequest_isHttp':
+        docs:
+          description: 'Checks if a given ServletRequest is an instance of HttpServletRequest.'
         imports:
           - 'javax.servlet'
           - 'javax.servlet.http'
         input:
           'request': 'ServletRequest'
         value: 'Boolean.valueOf(request instanceof HttpServletRequest)'
-      
-      # Extracts the request path from the HttpServletRequest
+
       'a_httpservletrequest_getPath':
+        docs:
+          description: 'Extracts the request path from the HttpServletRequest.'
         imports:
           - 'javax.servlet.http'
         input:
           'request': 'HttpServletRequest'
         value: 'java.net.URI.create(request.getRequestURI()).getPath()'
 
-      # Extracts the method path from the HttpServletRequest
       'a_httpservletrequest_getMethod':
+        docs:
+          description: 'Extracts the method path from the HttpServletRequest.'
         imports:
           - 'javax.servlet.http'
         input:
           'request': 'HttpServletRequest'
         value: 'request.getMethod()'
 
-      # Extracts the response status from the given HttpServletResponse
       'a_httpservletresponse_getStatus':
+        docs:
+          description: 'Extracts the response status from the given HttpServletResponse.'
         imports:
           - 'javax.servlet.http'
         input:
           'response': 'HttpServletResponse'
         value: 'Integer.valueOf(response.getStatus())'
 
-      # Reads down-propagated data from the request HTTP Headers
       'a_servletapi_downPropagation':
+        docs:
+          description: 'Reads down-propagated data from the request HTTP Headers.'
         is-void: true
         imports:
           - 'java.util'
@@ -61,8 +66,9 @@ inspectit:
             _context.readDownPropagationHeaders(presentHeaders);
           }
 
-      # Writes up-propagated data to the response HTTP Headers
       'a_servletapi_upPropagation':
+        docs:
+          description: 'Writes up-propagated data to the response HTTP Headers.'
         is-void: true
         imports:
           - 'java.util'

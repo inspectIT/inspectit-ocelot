@@ -5,8 +5,9 @@ inspectit:
   instrumentation:
     rules:
 
-      # Performs up- and down-propagation via the HTTP Headers
       'r_apacheclient_propagation':
+        docs:
+          description: 'Performs up- and down-propagation via the HTTP Headers.'
         include:
           'r_apacheclient_detect_entry': true # to make sure propagation happens only once
         scopes:

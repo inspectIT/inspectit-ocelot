@@ -2,22 +2,29 @@ inspectit:
   instrumentation:
     rules:
 
-      # This rule should be included by all other tracing rules.
-      # It allows to specify data which is added to all spans as attributes, e.g. a business transaction
       'r_tracing_global_attributes':
+        docs:
+          description: |-
+            This rule should be included by all other tracing rules.
+            It allows to specify data which is added to all spans as attributes, e.g. a business transaction
+
         include:
           'r_tracing_exception_attributes': true
           'r_tracing_fqn_attribute': true
 
-      # This rule by default only tags the exception name and message (using the toString() method)
-      # If required, it can be enhanced to include the stack trace.
       'r_tracing_exception_attributes':
+        docs:
+          description: |-
+            This rule by default only tags the exception name and message (using the toString() method).
+            If required, it can be enhanced to include the stack trace.
         tracing:
           attributes:
             'java.exception': _thrown
 
-      # This rule adds the fully qualified name of the method as span attribute
       'r_tracing_fqn_attribute':
+        docs:
+          description: |-
+            This rule adds the fully qualified name of the method as span attribute
         tracing:
           attributes:
             'java.fqn': 'method_fqn'
