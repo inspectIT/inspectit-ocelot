@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.rest.configuration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import inspectit.ocelot.configdocsgenerator.ConfigDocsGenerator;
 import inspectit.ocelot.configdocsgenerator.model.ConfigDocumentation;
 import org.assertj.core.api.AssertionsForClassTypes;
@@ -82,7 +83,7 @@ public class ConfigurationControllerTest {
     public class GetConfigDocumentationTest {
 
         @Test
-        void getConfigDocumentation() {
+        void getConfigDocumentation() throws JsonProcessingException {
 
             String mappingName = "name";
             AgentMapping agentMapping = AgentMapping.builder().build();

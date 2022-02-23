@@ -1,9 +1,11 @@
 package rocks.inspectit.ocelot.rest.configuration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import inspectit.ocelot.configdocsgenerator.ConfigDocsGenerator;
 import inspectit.ocelot.configdocsgenerator.model.ConfigDocumentation;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,7 @@ import java.util.Optional;
  * Controller for endpoints related to configuration files.
  */
 @RestController
+@Slf4j
 public class ConfigurationController extends AbstractBaseController {
 
     /**
@@ -94,14 +97,20 @@ public class ConfigurationController extends AbstractBaseController {
             AgentConfiguration configuration = configManager.getConfigurationForMapping(agentMapping.get());
             String configYaml = configuration.getConfigYaml();
 
-            configDocumentation = configDocsGenerator.generateConfigDocs(configYaml);
+            try {
+                configDocumentation = configDocsGenerator.generateConfigDocs(configYaml);
+            } catch (JsonProcessingException e) {
+                log.error("Config-Yaml could not be parsed.", e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(String.format("Config-Yaml for given AgentMapping %s could not be parsed and led to error %s.", mappingName, e));
+            }
         }
 
         if (configDocumentation != null) {
             return ResponseEntity.ok().body(configDocumentation);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(String.format("No Agent Mapping found with the name %s.", mappingName));
+                    .body(String.format("No AgentMapping found with the name %s.", mappingName));
         }
     }
 }
