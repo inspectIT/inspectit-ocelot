@@ -201,10 +201,10 @@ const configurationReducer = createReducer(initialState)({
     let newState = {
       ...state,
       showHistoryView: !state.showHistoryView,
-    }
+    };
     // If HistoryView is being turned on, DocumentationView needs to be turned off.
-    if(!state.showHistoryView){
-      newState["showDocumentationView"] = false;
+    if (!state.showHistoryView) {
+      newState['showDocumentationView'] = false;
     }
     return newState;
   },
@@ -213,10 +213,10 @@ const configurationReducer = createReducer(initialState)({
     let newState = {
       ...state,
       showDocumentationView: !state.showDocumentationView,
-    }
+    };
     // If DocumentationView is being turned on, HistoryView needs to be turned off.
-    if(!state.showDocumentationView){
-      newState["showHistoryView"] = false;
+    if (!state.showDocumentationView) {
+      newState['showHistoryView'] = false;
     }
     return newState;
   },
