@@ -26,9 +26,15 @@ public class AgentMain {
 
     private static final String INSPECTIT_BOOTSTRAP_JAR_PATH = "/inspectit-ocelot-bootstrap.jar";
 
+    private static final String INSPECTIT_BOOTSTRAP_JAR_TEMP_PREFIX = "ocelot-bootstrap-";
+
     private static final String INSPECTIT_CORE_JAR_PATH = "/inspectit-ocelot-core.jar";
 
+    private static final String INSPECTIT_CORE_JAR_TEMP_PREFIX = "ocelot-core-";
+
     private static final String OPENCENSUS_FAT_JAR_PATH = "/opencensus-fat.jar";
+
+    private static final String OPENCENSUS_FAT_JAR_TEMP_PREFIX = "ocelot-opencensus-fat-";
 
     private static final String PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY = "inspectit.publishOpenCensusToBootstrap";
 
@@ -58,7 +64,7 @@ public class AgentMain {
         boolean loadOpenCensusToBootstrap = "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY));
         try {
             if (loadOpenCensusToBootstrap) {
-                Path ocJarFile = copyResourceToTempJarFile(OPENCENSUS_FAT_JAR_PATH, "opencensus-fat-");
+                Path ocJarFile = copyResourceToTempJarFile(OPENCENSUS_FAT_JAR_PATH, OPENCENSUS_FAT_JAR_TEMP_PREFIX);
                 inst.appendToBootstrapClassLoaderSearch(new JarFile(ocJarFile.toFile()));
             }
 
@@ -88,18 +94,18 @@ public class AgentMain {
      * @throws IOException
      */
     private static InspectITClassLoader initializeInspectitLoader(Instrumentation inst, boolean includeOpenCensus) throws IOException {
-        Path bootstrapJar = copyResourceToTempJarFile(INSPECTIT_BOOTSTRAP_JAR_PATH, "ocelot-bootstrap-");
+        Path bootstrapJar = copyResourceToTempJarFile(INSPECTIT_BOOTSTRAP_JAR_PATH, INSPECTIT_BOOTSTRAP_JAR_TEMP_PREFIX);
         inst.appendToBootstrapClassLoaderSearch(new JarFile(bootstrapJar.toFile()));
 
         Instances.BOOTSTRAP_JAR_URL = bootstrapJar.toUri().toURL();
 
         Instances.AGENT_JAR_URL = AgentMain.class.getProtectionDomain().getCodeSource().getLocation();
 
-        Path coreJar = copyResourceToTempJarFile(INSPECTIT_CORE_JAR_PATH, "ocelot-core-");
+        Path coreJar = copyResourceToTempJarFile(INSPECTIT_CORE_JAR_PATH, INSPECTIT_CORE_JAR_TEMP_PREFIX);
         InspectITClassLoader icl = new InspectITClassLoader(new URL[]{coreJar.toUri().toURL()});
 
         if (includeOpenCensus) {
-            Path ocJarFile = copyResourceToTempJarFile(OPENCENSUS_FAT_JAR_PATH, "ocelot-oc-fat-");
+            Path ocJarFile = copyResourceToTempJarFile(OPENCENSUS_FAT_JAR_PATH, OPENCENSUS_FAT_JAR_TEMP_PREFIX);
             icl.addURL(ocJarFile.toUri().toURL());
         }
 
@@ -110,7 +116,7 @@ public class AgentMain {
      * Copies the given resource to a new temporary file with the ending ".jar"
      *
      * @param resourcePath the path to the resource
-     * @param prefix the name of the new temporary file
+     * @param prefix       the name of the new temporary file
      *
      * @return the path to the generated jar file
      *
