@@ -94,11 +94,11 @@ public class AgentConfigurationManager {
     }
 
     /**
-     * Fetches the configuration given an AgentMapping the configuration should be for.
+     * Fetches the configuration for the given AgentMapping.
      *
      * @param agentMapping AgentMapping for which the configuration should be returned.
      *
-     * @return The configuration for this AgentMapping or null if no configuration for that mapping found.
+     * @return The configuration for this AgentMapping or null if no configuration for that mapping is found.
      */
     public AgentConfiguration getConfigurationForMapping(AgentMapping agentMapping) {
         Optional<AgentConfiguration> myConfig = currentConfigurations.stream()
