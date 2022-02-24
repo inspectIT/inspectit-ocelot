@@ -1,9 +1,10 @@
 inspectit:
   instrumentation:
     rules:
-      
-      # Enables tracing of Apache HTTP Client calls
+
       'r_apacheclient_tracing':
+        docs:
+          description: 'Enables tracing of Apache HTTP Client calls.'
         include:
           'r_apacheclient_extract_details': true
           'r_http_tracing_span_name_default': true

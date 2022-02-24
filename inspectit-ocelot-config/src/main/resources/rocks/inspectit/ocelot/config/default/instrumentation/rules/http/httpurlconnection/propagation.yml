@@ -5,8 +5,9 @@ inspectit:
   instrumentation:
     rules:
 
-      # Writes down-propagated data to the HTTP Headers
       'r_httpurlconnection_down_propagation':
+        docs:
+          description: 'Writes down-propagated data to the HTTP Headers.'
         include:
           'r_httpurlconnection_detect_entry': true
         scopes:
@@ -17,8 +18,9 @@ inspectit:
           do_down_propagation:
             action: 'a_httpurlconnection_downPropagation'
 
-      # Reads up-propagated data from the response HTTP Headers
       'r_httpurlconnection_up_propagation':
+        docs:
+          description: 'Reads up-propagated data from the response HTTP Headers.'
         include:
           'r_httpurlconnection_detect_entry': true
         scopes:

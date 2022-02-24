@@ -1,0 +1,15 @@
+inspectit:
+  instrumentation:
+    actions:
+      # Prints a given Object to stdout
+      a_debug_println:
+        docs:
+          description: 'Prints a given Object to stdout.'
+          inputs:
+            value: Object to be printed
+          return-value: Void
+          since: '1.0'
+        input:
+          value: Object
+        is-void: true
+        value: System.out.println(value);

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.documentation.BaseDocumentation;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.validation.ViolationBuilder;
 
@@ -24,6 +25,11 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class InstrumentationRuleSettings {
+
+    /**
+     * Documentation for Config-Docs generation.
+     */
+    private BaseDocumentation docs;
 
     /**
      * Defines whether the rule is enabled.

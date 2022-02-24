@@ -1,0 +1,12 @@
+inspectit:
+  metrics:
+    disk:
+      enabled:
+        # if true, the free disk space will be measured and the view "disk/free" is registered
+        free: true
+    definitions:
+      '[disk/free]':
+        enabled: ${inspectit.metrics.disk.enabled.free}
+        type: LONG
+        unit: bytes
+        description: free disk space
