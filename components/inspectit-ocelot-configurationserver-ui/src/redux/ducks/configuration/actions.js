@@ -376,7 +376,6 @@ export const toggleHistoryView = () => ({
   type: types.TOGGLE_HISTORY_VIEW,
 });
 
-
 /**
  * Shows or hides the documentation view.
  */
