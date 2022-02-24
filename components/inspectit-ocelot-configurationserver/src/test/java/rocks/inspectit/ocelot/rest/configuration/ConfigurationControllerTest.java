@@ -127,16 +127,16 @@ public class ConfigurationControllerTest {
 
             ResponseEntity<Object> result = configurationController.getConfigDocumentation(mappingName, true);
 
+            verify(mappingManager).getAgentMapping(eq(mappingName));
+            verifyNoMoreInteractions(mappingManager);
+            verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
+            verifyNoMoreInteractions(agentConfigurationManager);
             verify(defaultConfigController).getDefaultConfigContent();
             verifyNoMoreInteractions(defaultConfigController);
             verify(yaml).load(eq(defaultYamlContent));
             verify(yaml).load(eq(configYaml));
             verify(yaml).dump(eq(combinedYamls));
             verifyNoMoreInteractions(yaml);
-            verify(mappingManager).getAgentMapping(eq(mappingName));
-            verifyNoMoreInteractions(mappingManager);
-            verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
-            verifyNoMoreInteractions(agentConfigurationManager);
             verify(configDocsGenerator).generateConfigDocs(eq(combinedYamlString));
             verifyNoMoreInteractions(configDocsGenerator);
 
@@ -153,27 +153,28 @@ public class ConfigurationControllerTest {
             final String configYaml = "yaml";
             AgentConfiguration agentConfiguration = AgentConfiguration.builder().configYaml(configYaml).build();
 
+            IOException exception = new IOException();
+
             ConfigDocumentation configDocumentationMock = mock(ConfigDocumentation.class);
 
             when(mappingManager.getAgentMapping(mappingName)).thenReturn(Optional.of(agentMapping));
             when(agentConfigurationManager.getConfigurationForMapping(agentMapping)).thenReturn(agentConfiguration);
-            when(defaultConfigController.getDefaultConfigContent()).thenThrow(new IOException());
-            when(configDocsGenerator.generateConfigDocs(configYaml)).thenReturn(configDocumentationMock);
+            when(defaultConfigController.getDefaultConfigContent()).thenThrow(exception);
 
             ResponseEntity<Object> result = configurationController.getConfigDocumentation(mappingName, true);
 
-            verify(defaultConfigController).getDefaultConfigContent();
-            verifyNoMoreInteractions(defaultConfigController);
-            verifyNoInteractions(yaml);
             verify(mappingManager).getAgentMapping(eq(mappingName));
             verifyNoMoreInteractions(mappingManager);
             verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
             verifyNoMoreInteractions(agentConfigurationManager);
-            verify(configDocsGenerator).generateConfigDocs(eq(configYaml));
-            verifyNoMoreInteractions(configDocsGenerator);
+            verify(defaultConfigController).getDefaultConfigContent();
+            verifyNoMoreInteractions(defaultConfigController);
+            verifyNoInteractions(yaml);
+            verifyNoInteractions(configDocsGenerator);
 
-            AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-            AssertionsForClassTypes.assertThat(result.getBody()).isSameAs(configDocumentationMock);
+            AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            AssertionsForClassTypes.assertThat(result.getBody()).isEqualTo(
+                    String.format("Config Documentation for given AgentMapping '%s' could not be generated due to the following error: %s.", mappingName, exception.getMessage()));
         }
 
         @Test
@@ -220,7 +221,7 @@ public class ConfigurationControllerTest {
 
             AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
             AssertionsForClassTypes.assertThat(result.getBody())
-                    .isEqualTo(String.format("No AgentMapping found with the name %s.", mappingName));
+                    .isEqualTo(String.format("No AgentMapping found with the name '%s'.", mappingName));
 
         }
 
@@ -239,7 +240,7 @@ public class ConfigurationControllerTest {
             when(mappingManager.getAgentMapping(mappingName)).thenReturn(Optional.of(agentMapping));
             when(agentConfigurationManager.getConfigurationForMapping(agentMapping)).thenReturn(agentConfiguration);
             when(configDocsGenerator.generateConfigDocs(configYaml)).thenThrow(exception);
-            when(exception.toString()).thenReturn(errorMessage);
+            when(exception.getMessage()).thenReturn(errorMessage);
 
             ResponseEntity<Object> result = configurationController.getConfigDocumentation(mappingName, false);
 
@@ -254,7 +255,7 @@ public class ConfigurationControllerTest {
 
             AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
             AssertionsForClassTypes.assertThat(result.getBody()).isEqualTo(
-                    String.format("Config-Yaml for given AgentMapping %s could not be parsed and led to error %s.", mappingName, errorMessage));
+                    String.format("Config Documentation for given AgentMapping '%s' could not be generated due to the following error: %s.", mappingName, exception.getMessage()));
         }
     }
 }

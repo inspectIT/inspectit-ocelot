@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.rest.configuration;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import inspectit.ocelot.configdocsgenerator.ConfigDocsGenerator;
 import inspectit.ocelot.configdocsgenerator.model.ConfigDocumentation;
 import io.swagger.annotations.ApiOperation;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.error.YAMLException;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.agentconfiguration.ObjectStructureMerger;
@@ -28,7 +26,6 @@ import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.file.DefaultConfigController;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -54,7 +51,7 @@ public class ConfigurationController extends AbstractBaseController {
 
     @Autowired
     private DefaultConfigController defaultConfigController;
-    
+
     // Not final to make mocking in test possible
     private ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator();
 
@@ -105,12 +102,14 @@ public class ConfigurationController extends AbstractBaseController {
         ConfigDocumentation configDocumentation = null;
 
         Optional<AgentMapping> agentMapping = mappingManager.getAgentMapping(mappingName);
+
         if (agentMapping.isPresent()) {
+
             AgentConfiguration configuration = configManager.getConfigurationForMapping(agentMapping.get());
             String configYaml = configuration.getConfigYaml();
 
-            if (includeDefault) {
-                try {
+            try {
+                if (includeDefault) {
                     Map<String, String> defaultYamls = defaultConfigController.getDefaultConfigContent();
 
                     Object combined = yaml.load(configYaml);
@@ -122,17 +121,14 @@ public class ConfigurationController extends AbstractBaseController {
                         combined = ObjectStructureMerger.merge(combined, loadedYaml);
                     }
                     configYaml = yaml.dump(combined);
-                } catch (Exception e) {
-                    log.error("Could not get contents of DefaultConfig. Will continue without including it.", e);
                 }
-            }
 
-            try {
                 configDocumentation = configDocsGenerator.generateConfigDocs(configYaml);
-            } catch (JsonProcessingException e) {
-                log.error("Config-Yaml could not be parsed.", e);
+
+            } catch (Exception e) {
+                log.error("Config Documentation could not be generated due to Exception.", e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(String.format("Config-Yaml for given AgentMapping %s could not be parsed and led to error %s.", mappingName, e));
+                        .body(String.format("Config Documentation for given AgentMapping '%s' could not be generated due to the following error: %s.", mappingName, e.getMessage()));
             }
         }
 
@@ -140,7 +136,7 @@ public class ConfigurationController extends AbstractBaseController {
             return ResponseEntity.ok().body(configDocumentation);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(String.format("No AgentMapping found with the name %s.", mappingName));
+                    .body(String.format("No AgentMapping found with the name '%s'.", mappingName));
         }
     }
 }
