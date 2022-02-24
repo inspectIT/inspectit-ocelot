@@ -1,36 +1,37 @@
-import React from "react";
+import React from 'react';
 
 class ConfigDocumentation extends React.Component {
-
   constructor(props) {
     super(props);
-    this.state = {
-      docElementRefs: {}
-    };
   }
 
-  scrollToDocElement(docElementName){
-    this.state.docElementRefs[docElementName].parentNode.parentNode.scroll(0, this.state.docElementRefs[docElementName].offsetTop - 75);
+  docElementRefs = {};
+
+  scrollToDocElement(docElementName) {
+    this.docElementRefs[docElementName].parentNode.parentNode.scroll(0, this.docElementRefs[docElementName].offsetTop - 75);
   }
 
-  baseHtml(docObject, type){
+  baseHtml(docObject, type) {
     return (
-      <div className={'doc-element'} ref={(element) => {
-        this.state.docElementRefs[docObject.name] = element;
-      }}>
+      <div
+        className={'doc-element'}
+        ref={(element) => {
+          this.docElementRefs[docObject.name] = element;
+        }}
+      >
         <h3 className={'element-heading'}>{docObject.name}</h3>
         <div className={'doc-element-content'}>
           <p>{docObject.description}</p>
           {this.specificHtml(docObject, type)}
         </div>
       </div>
-    )
+    );
   }
 
-  specificHtml(docObject, type){
-    switch (type){
+  specificHtml(docObject, type) {
+    switch (type) {
       case 'action':
-       return this.actionHtml(docObject);
+        return this.actionHtml(docObject);
       case 'rule':
         return this.ruleHtml(docObject);
       case 'metric':
@@ -39,21 +40,21 @@ class ConfigDocumentation extends React.Component {
         return null;
     }
   }
-  
-  metricHtml(metric){
-    return <p>{metric.unit}</p>
-  }
-  
-  actionHtml(action){
-    return (
-      <dl>
-        { action.inputs.length > 0 &&  this.actionInputListHtml(action.inputs)}
-        { action.returnDescription !== null &&  this.actionReturnDescriptionHtml(action.returnDescription)}
-      </dl>
-    )
+
+  metricHtml(metric) {
+    return <p>{metric.unit}</p>;
   }
 
-  actionInputListHtml(inputs){
+  actionHtml(action) {
+    return (
+      <dl>
+        {action.inputs.length > 0 && this.actionInputListHtml(action.inputs)}
+        {action.returnDescription !== null && this.actionReturnDescriptionHtml(action.returnDescription)}
+      </dl>
+    );
+  }
+
+  actionInputListHtml(inputs) {
     return (
       <>
         <dt>
@@ -61,18 +62,18 @@ class ConfigDocumentation extends React.Component {
         </dt>
         {inputs.map((input) => {
           return (
-            <dd>
+            <dd key={input.name}>
               <span className={'actionInputType'}>{input.type} </span>
               <span className={'actionInputName'}>{input.name} </span>
               <span className={'actionInputDescription'}>{input.description}</span>
             </dd>
-          )
+          );
         })}
       </>
-    )
+    );
   }
 
-  actionReturnDescriptionHtml(returnDesc){
+  actionReturnDescriptionHtml(returnDesc) {
     return (
       <dt>
         <dt>
@@ -80,26 +81,28 @@ class ConfigDocumentation extends React.Component {
         </dt>
         <dd>{returnDesc}</dd>
       </dt>
-    )
+    );
   }
 
-  ruleHtml(rule){
+  ruleHtml(rule) {
     return (
       <>
         {rule.include.length > 0 && this.ruleIncludeHtml(rule.include)}
         {rule.scopes.length > 0 && this.ruleScopesHtml(rule.scopes)}
         {rule.tracingDoc !== null && this.ruleTracingHtml(rule.tracingDoc)}
-        {(Object.keys(rule.actionCallsMap)
+        {Object.keys(rule.actionCallsMap)
           .map((key) => {
-            return (Object.keys(rule.actionCallsMap[key]).length);
+            return Object.keys(rule.actionCallsMap[key]).length;
           })
-          .reduce((x, y) => {return x + y}) > 0) && this.ruleEntryExitHtml(rule.actionCallsMap)}
+          .reduce((x, y) => {
+            return x + y;
+          }) > 0 && this.ruleEntryExitHtml(rule.actionCallsMap)}
         {rule.metricsDocs.length > 0 && this.ruleMetricsHtml(rule.metricsDocs)}
       </>
-    )
+    );
   }
 
-  ruleIncludeHtml(include){
+  ruleIncludeHtml(include) {
     return (
       <>
         <dt>
@@ -107,16 +110,18 @@ class ConfigDocumentation extends React.Component {
         </dt>
         {include.map((singleInclude) => {
           return (
-            <dd>
-              <button className={'doc-element-link'} onClick={() => this.scrollToDocElement(singleInclude)}>{singleInclude}</button>
+            <dd key={singleInclude}>
+              <button className={'doc-element-link'} onClick={() => this.scrollToDocElement(singleInclude)}>
+                {singleInclude}
+              </button>
             </dd>
-          )
+          );
         })}
       </>
-    )
+    );
   }
 
-  ruleScopesHtml(scopes){
+  ruleScopesHtml(scopes) {
     return (
       <>
         <dt>
@@ -124,16 +129,18 @@ class ConfigDocumentation extends React.Component {
         </dt>
         {scopes.map((singleScope) => {
           return (
-            <dd>
-              <button className={'doc-element-link'} onClick={() => this.scrollToDocElement(singleScope)}>{singleScope}</button>
+            <dd key={singleScope}>
+              <button className={'doc-element-link'} onClick={() => this.scrollToDocElement(singleScope)}>
+                {singleScope}
+              </button>
             </dd>
-          )
+          );
         })}
       </>
-    )
+    );
   }
 
-  ruleTracingHtml(tracing){
+  ruleTracingHtml(tracing) {
     return (
       <>
         <dt>
@@ -143,44 +150,56 @@ class ConfigDocumentation extends React.Component {
         <dd>{this.keyValueListHtml('Start-Span-Condtions', tracing.startSpanConditions)}</dd>
         <dd>{this.keyValueListHtml('Attributes', tracing.attributes)}</dd>
       </>
-    )
+    );
   }
 
-  ruleEntryExitHtml(actionCallsMap){
-    return(
+  ruleEntryExitHtml(actionCallsMap) {
+    return (
       <>
         <dt>
           <h4>Attributes:</h4>
         </dt>
         {Object.keys(actionCallsMap).map((key) => {
-            if (Object.keys(actionCallsMap[key]).length > 0){
-              return <dd>
+          if (Object.keys(actionCallsMap[key]).length > 0) {
+            return (
+              <dd>
                 <dl>
-                  <dt><strong>{key}: </strong></dt>
+                  <dt>
+                    <strong>{key}: </strong>
+                  </dt>
                   {Object.keys(actionCallsMap[key]).map((attributeKey) => {
                     let actionCall = actionCallsMap[key][attributeKey];
-                    return <dd>
-                      {actionCall.name}:
-                      <button className={'doc-element-link'} onClick={() => this.scrollToDocElement(actionCall.action)}> {actionCall.action} </button>
-                      {actionCall.inheritedFrom !== null && <>
-                        <i>( from included rule </i>
-                        <button className={'doc-element-link'} onClick={() => this.scrollToDocElement(actionCall.inheritedFrom)}>{actionCall.inheritedFrom} </button>
-                        <i>)</i>
-                      </>}
-                    </dd>
+                    return (
+                      <dd key={attributeKey}>
+                        {actionCall.name}:
+                        <button className={'doc-element-link'} onClick={() => this.scrollToDocElement(actionCall.action)}>
+                          {' '}
+                          {actionCall.action}{' '}
+                        </button>
+                        {actionCall.inheritedFrom !== null && (
+                          <>
+                            <i>( from included rule </i>
+                            <button className={'doc-element-link'} onClick={() => this.scrollToDocElement(actionCall.inheritedFrom)}>
+                              {actionCall.inheritedFrom}{' '}
+                            </button>
+                            <i>)</i>
+                          </>
+                        )}
+                      </dd>
+                    );
                   })}
                 </dl>
               </dd>
-            } else {
-              return null;
-            }
-          })}
+            );
+          } else {
+            return null;
+          }
+        })}
       </>
-    )
-
+    );
   }
 
-  ruleMetricsHtml(metrics){
+  ruleMetricsHtml(metrics) {
     return (
       <>
         <dt>
@@ -188,8 +207,10 @@ class ConfigDocumentation extends React.Component {
         </dt>
         {metrics.map((singleMetric) => {
           return (
-            <dd className={'metric'}>
-              <button className={'doc-element-link'} onClick={() => this.scrollToDocElement(singleMetric.name)}>{singleMetric.name}</button>
+            <dd key={singleMetric.name} className={'metric'}>
+              <button className={'doc-element-link'} onClick={() => this.scrollToDocElement(singleMetric.name)}>
+                {singleMetric.name}
+              </button>
               <dl>
                 <dt>Value:</dt>
                 <dd>singleMetric.value</dd>
@@ -197,31 +218,35 @@ class ConfigDocumentation extends React.Component {
                 {this.keyValueListHtml('Data Tags', singleMetric.dataTags)}
               </dl>
             </dd>
-          )
+          );
         })}
       </>
-    )
+    );
   }
 
-  keyValueListHtml(title, entriesMap){
-    if ( Object.keys(entriesMap).length > 0){
+  keyValueListHtml(title, entriesMap) {
+    if (Object.keys(entriesMap).length > 0) {
       return (
         <dl>
           <dt>{title}:</dt>
           {Object.keys(entriesMap).map((key) => {
-            return <dd>{key}: {entriesMap[key]}</dd>
+            return (
+              <dd key={key}>
+                {key}: {entriesMap[key]}
+              </dd>
+            );
           })}
         </dl>
-      )
+      );
     } else {
       return null;
     }
   }
 
-  docElements(docObjects, type){
+  docElements(docObjects, type) {
     return docObjects.map((docObject) => this.baseHtml(docObject, type));
   }
-  
+
   render() {
     return (
       <>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import HistoryView from './history/HistoryView';
 import { configurationActions } from '../../../redux/ducks/configuration';
-import DocumentationView from "./documentation/DocumentationView";
+import DocumentationView from './documentation/DocumentationView';
 
 /**
  * The sidebar of the configuration view.
@@ -53,8 +53,8 @@ const ConfigurationSidebar = () => {
 
       <div className="sidebar">
         <div className="content-container">
-            {showHistoryView && <HistoryView />}
-            {showDocumentationView && <DocumentationView />}
+          {showHistoryView && <HistoryView />}
+          {showDocumentationView && <DocumentationView />}
         </div>
 
         <div>
@@ -62,7 +62,10 @@ const ConfigurationSidebar = () => {
             <i className={'pi pi-chevron-' + (showHistoryView ? 'right' : 'left')} />
             <span>Versioning</span>
           </button>
-          <button className={'vert-button p-button p-togglebutton' + (showDocumentationView ? 'p-highlight' : '')} onClick={toggleDocumentationView}>
+          <button
+            className={'vert-button p-button p-togglebutton' + (showDocumentationView ? 'p-highlight' : '')}
+            onClick={toggleDocumentationView}
+          >
             <i className={'pi pi-chevron-' + (showDocumentationView ? 'right' : 'left')} />
             <span>Config Docs</span>
           </button>
