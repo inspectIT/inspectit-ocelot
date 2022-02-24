@@ -1,5 +1,6 @@
 package inspectit.ocelot.configdocsgenerator.parsing;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.io.Resources;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -129,6 +131,13 @@ class ConfigParserTest {
 
             assertThat(result.getInstrumentation().getActions().get("a_debug_println")).usingRecursiveComparison()
                     .isEqualTo(actionSettingsMock);
+        }
+
+        @Test
+        void invalidYaml() {
+            String configYaml = "invalid-yaml";
+
+            assertThat(assertThatThrownBy(() -> configParser.parseConfig(configYaml)).isInstanceOf(JsonProcessingException.class));
         }
     }
 }

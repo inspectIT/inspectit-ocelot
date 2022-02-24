@@ -1,5 +1,6 @@
 package inspectit.ocelot.configdocsgenerator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import inspectit.ocelot.configdocsgenerator.model.*;
 import inspectit.ocelot.configdocsgenerator.parsing.ConfigParser;
 import org.apache.commons.beanutils.BeanUtils;
@@ -35,7 +36,7 @@ public class ConfigDocsGenerator {
      *
      * @return Returns the generated ConfigDocumentation.
      */
-    public ConfigDocumentation generateConfigDocs(String configYaml) {
+    public ConfigDocumentation generateConfigDocs(String configYaml) throws JsonProcessingException {
         ConfigParser configParser = new ConfigParser();
         InspectitConfig config = configParser.parseConfig(configYaml);
 
