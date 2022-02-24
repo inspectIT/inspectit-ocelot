@@ -110,7 +110,7 @@ public class ConfigurationControllerTest {
         }
 
         @Test
-        void getConfigDocumentationMappingNotFound() {
+        void agentMappingNotFound() {
 
             String mappingName = "name";
 
@@ -125,6 +125,35 @@ public class ConfigurationControllerTest {
             AssertionsForClassTypes.assertThat(result.getBody())
                     .isEqualTo(String.format("No AgentMapping found with the name %s.", mappingName));
 
+        }
+
+        @Test
+        void invalidYaml() throws JsonProcessingException {
+
+            String mappingName = "name";
+            AgentMapping agentMapping = AgentMapping.builder().build();
+
+            String configYaml = "yaml";
+            AgentConfiguration agentConfiguration = AgentConfiguration.builder().configYaml(configYaml).build();
+
+            JsonProcessingException exception = mock(JsonProcessingException.class);
+
+            when(mappingManager.getAgentMapping(mappingName)).thenReturn(Optional.of(agentMapping));
+            when(agentConfigurationManager.getConfigurationForMapping(agentMapping)).thenReturn(agentConfiguration);
+            when(configDocsGenerator.generateConfigDocs(configYaml)).thenThrow(exception);
+
+            ResponseEntity<Object> result = configurationController.getConfigDocumentation(mappingName);
+
+            verify(mappingManager).getAgentMapping(eq(mappingName));
+            verifyNoMoreInteractions(mappingManager);
+            verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
+            verifyNoMoreInteractions(agentConfigurationManager);
+            verify(configDocsGenerator).generateConfigDocs(eq(configYaml));
+            verifyNoMoreInteractions(configDocsGenerator);
+
+            AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            AssertionsForClassTypes.assertThat(result.getBody()).isEqualTo(
+                    String.format("Config-Yaml for given AgentMapping %s could not be parsed and led to error %s.", mappingName, exception));
         }
     }
 }
