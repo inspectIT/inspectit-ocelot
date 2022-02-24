@@ -1,4 +1,5 @@
 import { omitBy } from 'lodash';
+import SidebarTypes from '../../../components/views/configuration/SidebarTypes';
 import { createReducer } from '../../utils';
 import { configuration as initialState } from '../initial-states';
 import * as types from './types';
@@ -198,27 +199,17 @@ const configurationReducer = createReducer(initialState)({
   },
 
   [types.TOGGLE_HISTORY_VIEW]: (state) => {
-    let newState = {
+    return {
       ...state,
-      showHistoryView: !state.showHistoryView,
+      currentSidebar: state.currentSidebar == SidebarTypes.HISTORY ? SidebarTypes.NONE : SidebarTypes.HISTORY,
     };
-    // If HistoryView is being turned on, DocumentationView needs to be turned off.
-    if (!state.showHistoryView) {
-      newState['showDocumentationView'] = false;
-    }
-    return newState;
   },
 
   [types.TOGGLE_DOCUMENTATION_VIEW]: (state) => {
-    let newState = {
+    return {
       ...state,
-      showDocumentationView: !state.showDocumentationView,
+      currentSidebar: state.currentSidebar == SidebarTypes.CONFIGURATION_DOCS ? SidebarTypes.NONE : SidebarTypes.CONFIGURATION_DOCS,
     };
-    // If DocumentationView is being turned on, HistoryView needs to be turned off.
-    if (!state.showDocumentationView) {
-      newState['showHistoryView'] = false;
-    }
-    return newState;
   },
 });
 

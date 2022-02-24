@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import HistoryView from './history/HistoryView';
 import { configurationActions } from '../../../redux/ducks/configuration';
 import DocumentationView from './documentation/DocumentationView';
+import SidebarTypes from './SidebarTypes';
 
 /**
  * The sidebar of the configuration view.
@@ -11,8 +12,7 @@ const ConfigurationSidebar = () => {
   const dispatch = useDispatch();
 
   // global state variables
-  const showHistoryView = useSelector((state) => state.configuration.showHistoryView);
-  const showDocumentationView = useSelector((state) => state.configuration.showDocumentationView);
+  const currentSidebar = useSelector((state) => state.configuration.currentSidebar);
 
   const toggleHistoryView = () => {
     dispatch(configurationActions.toggleHistoryView());
@@ -53,21 +53,21 @@ const ConfigurationSidebar = () => {
 
       <div className="sidebar">
         <div className="content-container">
-          {showHistoryView && <HistoryView />}
-          {showDocumentationView && <DocumentationView />}
+          {currentSidebar == SidebarTypes.HISTORY && <HistoryView />}
+          {currentSidebar == SidebarTypes.CONFIGURATION_DOCS && <DocumentationView />}
         </div>
 
         <div>
-          <button className={'vert-button p-button p-togglebutton' + (showHistoryView ? 'p-highlight' : '')} onClick={toggleHistoryView}>
-            <i className={'pi pi-chevron-' + (showHistoryView ? 'right' : 'left')} />
+          <button className={'vert-button p-button p-togglebutton' + (currentSidebar == SidebarTypes.HISTORY ? 'p-highlight' : '')} onClick={toggleHistoryView}>
+            <i className={'pi pi-chevron-' + (currentSidebar == SidebarTypes.HISTORY ? 'right' : 'left')} />
             <span>Versioning</span>
           </button>
           <button
-            className={'vert-button p-button p-togglebutton' + (showDocumentationView ? 'p-highlight' : '')}
+            className={'vert-button p-button p-togglebutton' + (currentSidebar == SidebarTypes.CONFIGURATION_DOCS ? 'p-highlight' : '')}
             onClick={toggleDocumentationView}
           >
-            <i className={'pi pi-chevron-' + (showDocumentationView ? 'right' : 'left')} />
-            <span>Config Docs</span>
+            <i className={'pi pi-chevron-' + (currentSidebar == SidebarTypes.CONFIGURATION_DOCS ? 'right' : 'left')} />
+            <span>Configuration Docs</span>
           </button>
         </div>
       </div>
