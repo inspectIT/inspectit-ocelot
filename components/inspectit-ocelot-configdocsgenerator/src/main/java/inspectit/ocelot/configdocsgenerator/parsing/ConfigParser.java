@@ -34,6 +34,7 @@ public class ConfigParser {
         SimpleModule module = new SimpleModule();
         module.addDeserializer(Duration.class, new CustomDurationDeserializer());
         mapper.registerModule(module);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         //In the YAML property-names are kebab-case in the Java objects CamelCase, Jackson can do that conversion
         //with the following line
@@ -54,6 +55,11 @@ public class ConfigParser {
             // however here there is no InspectitEnvironment which is used for that, so instead Jackson is used and
             // the variables are evaluated using a custom version of StringSubstitutor.
             Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
+
+            // remove any invalid keys at the top level to make the String parseable for Jackson
+            yamlMap.keySet().removeIf(key -> !key.equals("inspectit"));
+            configYaml = mapper.writeValueAsString(yamlMap);
+
             StringSubstitutor stringSubstitutor = new NestedMapStringSubstitutor(yamlMap);
             String cleanedInputString = stringSubstitutor.replace(configYaml);
 
