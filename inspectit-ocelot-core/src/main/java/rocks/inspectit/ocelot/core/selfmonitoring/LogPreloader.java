@@ -30,8 +30,8 @@ public class LogPreloader {
     }
 
     /**
-     * Records one log event and stores into a local buffer.
-     *
+     * Records one log event and stores into a local buffer
+     * 
      * @param logEvent The log event to record
      */
     public void record(ILoggingEvent logEvent) {
