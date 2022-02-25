@@ -1,104 +1,117 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { configurationActions } from '../../../../redux/ducks/configuration';
-import VersionItem from '../history/VersionItem';
-import { VERSION_LIMIT } from '../../../../data/constants';
+import React, { useState, useEffect } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { Checkbox } from 'primereact/checkbox';
-import axios from '../../../../lib/axios-api';
 import ConfigDocumentation from './ConfigDocumentation';
+import useFetchData from '../../../../hooks/use-fetch-data';
 
 /**
  * The sidebar panel for showing existing versions of the configuration files.
  */
-class DocumentationView extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      agentMappingNames: [],
-      configDocumentation: null,
-      selectedAgentMapping: null,
-      includeDefault: true,
-    };
-  }
+const DocumentationView = ({ }) => {
+  // local state
+  const [selectedAgentMapping, setSelectedAgentMapping] = useState(null);
+  const [includeDefault, setIncludeDefault] = useState(true);
 
-  componentDidMount() {
-    let tempAgentMappingNames = [];
-
-    axios
-      .get('mappings')
-      .then((response) => {
-        for (let mapping of response.data) {
-          tempAgentMappingNames.push(mapping.name);
-        }
-        this.setState({ agentMappingNames: tempAgentMappingNames });
-      })
-      .catch((error) => {
-        console.log('Error when retrieving mappings for Dropdown menu:');
-        console.log(error);
-      });
-  }
-
-  newDocumentationForMapping(mappingName, includeDefault) {
-    if (mappingName != null) {
-      axios
-        .get('configuration/documentation/', { params: { 'agent-mapping': mappingName, 'include-default': includeDefault } })
-        .then((response) => {
-          this.setState({
-            configDocumentation: response.data,
-            includeDefault: includeDefault,
-            selectedAgentMapping: mappingName,
-          });
-        })
-        .catch((error) => {
-          console.log(`Error when retrieving configuration documentation for Agent Mapping ${mappingName}:`);
-          console.log(error);
-          this.setState({
-            includeDefault: includeDefault,
-            selectedAgentMapping: mappingName,
-          });
-        });
-    } else {
-      this.setState({
-        includeDefault: includeDefault,
-      });
+  // fetch required data
+  const [{ data: agentMappings, isLoading: isLoadingMappings, isError: isMappingsError }, refreshAgentMappings] = useFetchData(
+    'mappings',
+    {},
+    []
+  );
+  const [{ data: configurationDocs, isLoading: isLoadingDocs, isError: isDocsError }, refreshConfigurationDocs] = useFetchData(
+    'configuration/documentation',
+    {
+      'agent-mapping': selectedAgentMapping,
+      'include-default': includeDefault,
     }
-  }
+  );
 
-  render() {
-    return (
-      <>
-        <style>
-          {`
-          .mappingDropdown {
-            background-color: #e0e0e0;
+  // derived variables
+  const agentMappingNames = agentMappings.map((mapping) => mapping.name);
+
+  // initially load the agent mappings
+  useEffect(() => {
+    refreshAgentMappings();
+  }, []);
+
+  // refresh the configuration docs when parameters changed
+  useEffect(() => {
+    if (selectedAgentMapping) {
+      refreshConfigurationDocs();
+    }
+  }, [selectedAgentMapping, includeDefault]);
+
+  return (
+    <>
+      <style jsx>
+        {`
+          .documentation {
+            background-color: #eeeeee;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            width: 35rem;
+            overflow-y: auto;
+            height: 100%;
+            box-shadow: -5px 0px 5px 0px #0000001c;
+          }
+          .head {
+            padding: 1rem 0;
+            border-bottom: 1px solid #9e9e9e;
+          }
+          .headline {
             color: #111;
-            padding: 0.5rem 0.5rem 0.5rem;
-            height: 75px
+            border-bottom: 1px solid #9e9e9e;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 1rem 0.5rem;
+            font-size: 1rem;
+          }
+          .input-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.25rem;
+            padding: 0 1rem;
+          }
+          .input-row label {
+            width: 13rem;
+          }
+          .no-selection {
+            flex: 1;
+            padding: 1rem;
+          }
         `}
-        </style>
-        <div className={'mappingDropdown'}>
-          <div>
-            Config Docs for{' '}
+      </style>
+      <div className="documentation p-component">
+        <div className="head">
+          <div className="headline">Configuration Docs</div>
+
+          <div className="input-row">
+            <label htmlFor="agentMappingDd">Select Agent Mapping:</label>
             <Dropdown
+              id="agentMappingDd"
               placeholder="Select an Agent Mapping"
-              options={this.state.agentMappingNames}
-              value={this.state.selectedAgentMapping}
-              onChange={(e) => this.newDocumentationForMapping(e.value, this.state.includeDefault)}
+              options={agentMappingNames}
+              value={selectedAgentMapping}
+              onChange={(e) => setSelectedAgentMapping(e.value)}
             />
           </div>
-          <div>
-            <Checkbox
-              checked={this.state.includeDefault}
-              onChange={(e) => this.newDocumentationForMapping(this.state.selectedAgentMapping, e.checked)}
-            />{' '}
-            Include Default Configuration
+
+          <div className="input-row">
+            <label htmlFor="defaultConfigurationCb">Include Default Configuration:</label>
+            <Checkbox id="defaultConfigurationCb" checked={includeDefault} onChange={(e) => setIncludeDefault(e.checked)} />
           </div>
         </div>
-        <ConfigDocumentation configDocumentation={this.state.configDocumentation} />
-      </>
-    );
-  }
-}
+
+        {selectedAgentMapping ? (
+          <ConfigDocumentation configDocumentation={configurationDocs} />
+        ) : (
+          <>
+            <div className='no-selection'>Select the Agent Mapping whose documentation should be displayed.</div>
+          </>
+        )}
+      </div>
+    </>
+  );
+};
 
 export default DocumentationView;
