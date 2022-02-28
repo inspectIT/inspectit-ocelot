@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Preloads log events to be used by, e.g., {@link rocks.inspectit.ocelot.core.command.handler.impl.LogsCommandExecutor}.
  * Events are stored in a ring buffer, meaning old events are overwritten when the buffer is full and new events arrive.
  */
+// TODO: Implement as a DynamicallyActivatableService?
 @Component
 public class LogPreloader {
 
@@ -31,7 +32,7 @@ public class LogPreloader {
 
     /**
      * Records one log event and stores into a local buffer
-     * 
+     *
      * @param logEvent The log event to record
      */
     public void record(ILoggingEvent logEvent) {
@@ -75,6 +76,7 @@ public class LogPreloader {
      * @param settings The LogPreloadingSettings
      */
     private void recreateBufferIfSizeChanged(LogPreloadingSettings settings) {
+        // TODO: check that buffer size is > 1
         if (settings != null && (buffer == null || buffer.length != settings.getBufferSize())) {
             buffer = new ILoggingEvent[settings.getBufferSize()];
             // few log entries might be written to arbitrary indices between these two code lines,

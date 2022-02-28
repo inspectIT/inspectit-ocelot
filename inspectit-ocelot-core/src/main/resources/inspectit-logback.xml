@@ -53,7 +53,7 @@
         <filter class="rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer$SelfMonitoringFilter" />
     </appender>
 
-    <!-- Appender, which returns the logs from a given timeframe. Is only activated, if logs preloading is activated -->
+    <!-- Appender, which preloads the logs into a memory buffer to be fetched by an agent command. Is only activated, if logs preloading is activated -->
     <appender name="logPreloader" class="rocks.inspectit.ocelot.core.selfmonitoring.LogPreloadingAppender">
         <filter class="rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer$LogPreloadingFilter" />
     </appender>
