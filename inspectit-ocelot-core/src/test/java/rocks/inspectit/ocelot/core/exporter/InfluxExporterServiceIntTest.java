@@ -98,11 +98,9 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
     void testNoUrlSet() {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.metrics.influx.url", "");
-            // change a second property so change is detected and another try of enabling triggered,
-            // since url already is empty by default
-            props.setProperty("inspectit.exporters.metrics.influx.database", DATABASE);
+            props.setProperty("inspectit.exporters.metrics.influx.enabled", "ENABLED");
         });
-        assertLogsOfLevelOrGreater(Level.WARN);
+        assertLogsOfLevelOrGreater(Level.ERROR);
         assertLogCount("InfluxDB Exporter is enabled but no url set.", 1);
     }
 }

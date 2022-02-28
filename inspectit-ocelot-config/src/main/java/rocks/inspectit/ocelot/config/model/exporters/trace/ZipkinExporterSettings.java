@@ -2,12 +2,13 @@ package rocks.inspectit.ocelot.config.model.exporters.trace;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledSetting;
 
 @Data
 @NoArgsConstructor
 public class ZipkinExporterSettings {
 
-    private boolean enabled;
+    private ExporterEnabledSetting enabled;
 
     /**
      * The URL of the Zipkin server.

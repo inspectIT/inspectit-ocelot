@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledSetting;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.InfluxExporterSettings;
 import rocks.inspectit.ocelot.core.metrics.percentiles.PercentileViewManager;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
@@ -44,11 +45,12 @@ public class InfluxExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         InfluxExporterSettings influx = conf.getExporters().getMetrics().getInflux();
-        if(conf.getMetrics().isEnabled() && influx.isEnabled()){
-            if(StringUtils.hasText(influx.getUrl())){
+        if (conf.getMetrics().isEnabled() && !influx.getEnabled().equals(ExporterEnabledSetting.DISABLED)) {
+            if (StringUtils.hasText(influx.getUrl())) {
                 return true;
-            } else {
-                log.warn("InfluxDB Exporter is enabled but no url set.");
+            }
+            if (influx.getEnabled().equals(ExporterEnabledSetting.ENABLED)) {
+                log.error("InfluxDB Exporter is enabled but no url set.");
             }
         }
         return false;
@@ -57,8 +59,7 @@ public class InfluxExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         InfluxExporterSettings influx = configuration.getExporters().getMetrics().getInflux();
-        log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx
-                .getUrl());
+        log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx.getUrl());
         activeExporter = InfluxExporter.builder()
                 .url(influx.getUrl())
                 .database(influx.getDatabase())

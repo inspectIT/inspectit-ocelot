@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.config.model.exporters.metrics;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledSetting;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -17,7 +18,7 @@ public class PrometheusExporterSettings {
     /**
      * If true, the inspectIT Agent will try to start a Prometheus metrics exporter.
      */
-    private boolean enabled;
+    private ExporterEnabledSetting enabled;
 
     /**
      * The hostname on which the /metrics endpoint of prometheus will be started.

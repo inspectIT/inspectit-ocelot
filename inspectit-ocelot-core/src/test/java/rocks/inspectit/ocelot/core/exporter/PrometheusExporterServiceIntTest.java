@@ -74,7 +74,7 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
     @Test
     void testLocalSwitch() throws Exception {
         updateProperties(props -> {
-            props.setProperty("inspectit.exporters.metrics.prometheus.enabled", "false");
+            props.setProperty("inspectit.exporters.metrics.prometheus.enabled", "DISABLED");
         });
         assertUnavailable("http://localhost:8888/metrics");
         assertNoLogsOfLevelOrGreater(Level.WARN);

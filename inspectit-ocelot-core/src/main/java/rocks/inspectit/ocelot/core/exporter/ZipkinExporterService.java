@@ -3,9 +3,10 @@ package rocks.inspectit.ocelot.core.exporter;
 import io.opencensus.exporter.trace.zipkin.ZipkinExporterConfiguration;
 import io.opencensus.exporter.trace.zipkin.ZipkinTraceExporter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledSetting;
 import rocks.inspectit.ocelot.config.model.exporters.trace.ZipkinExporterSettings;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
@@ -26,11 +27,12 @@ public class ZipkinExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         @Valid ZipkinExporterSettings zipkin = conf.getExporters().getTracing().getZipkin();
-        if(conf.getTracing().isEnabled() && zipkin.isEnabled()){
-            if(StringUtils.hasText(zipkin.getUrl())){
+        if (conf.getTracing().isEnabled() && !zipkin.getEnabled().equals(ExporterEnabledSetting.DISABLED)) {
+            if (StringUtils.hasText(zipkin.getUrl())) {
                 return true;
-            } else {
-                log.warn("Zipkin Exporter is enabled but no url set.");
+            }
+            if (zipkin.getEnabled().equals(ExporterEnabledSetting.ENABLED)) {
+                log.error("Zipkin Exporter is enabled but no url set.");
             }
         }
         return false;
@@ -41,8 +43,10 @@ public class ZipkinExporterService extends DynamicallyActivatableService {
         try {
             ZipkinExporterSettings settings = configuration.getExporters().getTracing().getZipkin();
             log.info("Starting Zipkin Exporter with url '{}'", settings.getUrl());
-            ZipkinTraceExporter.createAndRegister(
-                    ZipkinExporterConfiguration.builder().setV2Url(settings.getUrl()).setServiceName(settings.getServiceName()).build());
+            ZipkinTraceExporter.createAndRegister(ZipkinExporterConfiguration.builder()
+                    .setV2Url(settings.getUrl())
+                    .setServiceName(settings.getServiceName())
+                    .build());
             return true;
         } catch (Throwable t) {
             log.error("Error creating Zipkin exporter", t);

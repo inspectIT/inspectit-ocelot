@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledSetting;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import static io.prometheus.client.CollectorRegistry.defaultRegistry;
@@ -27,7 +28,11 @@ public class PrometheusExporterService extends DynamicallyActivatableService {
 
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
-        return conf.getExporters().getMetrics().getPrometheus().isEnabled() && conf.getMetrics().isEnabled();
+        return conf.getMetrics().isEnabled() && !conf.getExporters()
+                .getMetrics()
+                .getPrometheus()
+                .getEnabled()
+                .equals(ExporterEnabledSetting.DISABLED);
     }
 
     @Override
@@ -37,7 +42,9 @@ public class PrometheusExporterService extends DynamicallyActivatableService {
             String host = config.getHost();
             int port = config.getPort();
             log.info("Starting Prometheus Exporter on {}:{}", host, port);
-            PrometheusStatsCollector.createAndRegister(PrometheusStatsConfiguration.builder().setRegistry(defaultRegistry).build());
+            PrometheusStatsCollector.createAndRegister(PrometheusStatsConfiguration.builder()
+                    .setRegistry(defaultRegistry)
+                    .build());
             prometheusClient = new HTTPServer(host, port, true);
         } catch (Exception e) {
             log.error("Error Starting Prometheus HTTP Endpoint!", e);

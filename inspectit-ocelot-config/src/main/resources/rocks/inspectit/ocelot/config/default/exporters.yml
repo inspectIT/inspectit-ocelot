@@ -9,7 +9,7 @@ inspectit:
       # settings for the prometheus exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/stats/prometheus)
       prometheus:
         # if true, the agent will try to start the Prometheus stats exporter
-        enabled: false
+        enabled: DISABLED
         # the hostname or IP-address on which the /metrics endpoint of prometheus will be started.
         host: 0.0.0.0
         # the port on which the /metrics endpoint of prometheus will be started
@@ -18,7 +18,7 @@ inspectit:
       # settings for the OpenCensus Agent Metrics exporter (https://opencensus.io/exporters/supported-exporters/java/ocagent/)
       open-census-agent:
         # if true, the agent will try to start the OpenCensus agent metrics exporter
-        enabled: true
+        enabled: IF_CONFIGURED
         # address of the open-census agent (e.g. localhost:1234)
         address: null
         # if true, SSL is disabled
@@ -32,7 +32,7 @@ inspectit:
 
       influx:
         # if true, the agent will try to start the InfluxDB exporter
-        enabled: true
+        enabled: IF_CONFIGURED
         # the Url under which the InfluxDB can be accessed, e.g. http://localhost:8086
         url: null
         # the export interval of the metrics
@@ -58,7 +58,7 @@ inspectit:
       # settings for the zipkin exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/zipkin)
       zipkin:
         # if true, the agent will try to start the ZipKin trace exporter
-        enabled: true
+        enabled: IF_CONFIGURED
         # the v2 Url under which the ZipKin server can be accessed, e.g. http://127.0.0.1:9411/api/v2/spans
         url: null
         # the service-name which will be used to publish the spans
@@ -67,7 +67,7 @@ inspectit:
 
       jaeger:
         # if true, the agent will try to start the Jaeger trace exporter
-        enabled: true
+        enabled: IF_CONFIGURED
         # the URL under which the jaeger thrift server can be accessed, e.g. http://127.0.0.1:14268/api/traces
         url: null
         # the service-name which will be used to publish the spans
@@ -76,7 +76,7 @@ inspectit:
       # settings for the OpenCensus Agent Trace exporter (https://opencensus.io/exporters/supported-exporters/java/ocagent/)
       open-census-agent:
         # if true, the agent will try to start the OpenCensus agent trace exporter
-        enabled: true
+        enabled: IF_CONFIGURED
         # Address of the open-census agent (e.g. localhost:1234)
         address: null
         # if true, SSL is disabled

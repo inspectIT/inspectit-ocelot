@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.config.model.exporters.metrics;
 
 import lombok.Data;
 import org.hibernate.validator.constraints.time.DurationMin;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledSetting;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -13,10 +14,7 @@ import java.time.Duration;
 @Data
 public class InfluxExporterSettings {
 
-    /**
-     * If true, the influx exporter will be started (if the DB is not null)
-     */
-    private boolean enabled;
+    private ExporterEnabledSetting enabled;
 
     /**
      * The HTTP URL of influx (e.g. http://localhost:8086)

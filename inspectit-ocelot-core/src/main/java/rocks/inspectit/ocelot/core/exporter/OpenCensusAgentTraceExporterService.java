@@ -4,9 +4,10 @@ import io.opencensus.common.Duration;
 import io.opencensus.exporter.trace.ocagent.OcAgentTraceExporter;
 import io.opencensus.exporter.trace.ocagent.OcAgentTraceExporterConfiguration;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledSetting;
 import rocks.inspectit.ocelot.config.model.exporters.trace.OpenCensusAgentTraceExporterSettings;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
@@ -21,11 +22,12 @@ public class OpenCensusAgentTraceExporterService extends DynamicallyActivatableS
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         OpenCensusAgentTraceExporterSettings openCensusAgent = conf.getExporters().getTracing().getOpenCensusAgent();
-        if(conf.getTracing().isEnabled() && openCensusAgent.isEnabled()){
-            if(StringUtils.hasText(openCensusAgent.getAddress())){
+        if (conf.getTracing().isEnabled() && !openCensusAgent.getEnabled().equals(ExporterEnabledSetting.DISABLED)) {
+            if (StringUtils.hasText(openCensusAgent.getAddress())) {
                 return true;
-            } else {
-                log.warn("OpenCensus Tracing Exporter is enabled but no address set.");
+            }
+            if (openCensusAgent.getEnabled().equals(ExporterEnabledSetting.ENABLED)) {
+                log.error("OpenCensus Tracing Exporter is enabled but no address set.");
             }
         }
         return false;
@@ -34,13 +36,16 @@ public class OpenCensusAgentTraceExporterService extends DynamicallyActivatableS
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         try {
-            OpenCensusAgentTraceExporterSettings settings = configuration.getExporters().getTracing().getOpenCensusAgent();
+            OpenCensusAgentTraceExporterSettings settings = configuration.getExporters()
+                    .getTracing()
+                    .getOpenCensusAgent();
             log.info("Starting OpenCensus Agent Trace exporter");
             OcAgentTraceExporter.createAndRegister(OcAgentTraceExporterConfiguration.builder()
                     .setEndPoint(settings.getAddress())
                     .setServiceName(settings.getServiceName())
                     .setUseInsecure(settings.isUseInsecure())
-                    .setRetryInterval(Duration.fromMillis(settings.getReconnectionPeriod().toMillis())).build());
+                    .setRetryInterval(Duration.fromMillis(settings.getReconnectionPeriod().toMillis()))
+                    .build());
             return true;
         } catch (Throwable t) {
             log.error("Error creating OpenCensus Agent Trace exporter", t);
