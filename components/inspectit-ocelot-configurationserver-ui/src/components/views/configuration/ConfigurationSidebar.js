@@ -58,7 +58,10 @@ const ConfigurationSidebar = () => {
         </div>
 
         <div>
-          <button className={'vert-button p-button p-togglebutton' + (currentSidebar == SidebarTypes.HISTORY ? 'p-highlight' : '')} onClick={toggleHistoryView}>
+          <button
+            className={'vert-button p-button p-togglebutton' + (currentSidebar == SidebarTypes.HISTORY ? 'p-highlight' : '')}
+            onClick={toggleHistoryView}
+          >
             <i className={'pi pi-chevron-' + (currentSidebar == SidebarTypes.HISTORY ? 'right' : 'left')} />
             <span>Versioning</span>
           </button>

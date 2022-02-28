@@ -12,14 +12,14 @@ const ConfigDocumentation = ({ configurationDocs }) => {
   const elementRefs = {};
 
   const registerRef = (name, ref) => {
-    if (!elementRefs.hasOwnProperty(name)) {
+    if (!_.has(elementRefs, name)) {
       elementRefs[name] = ref;
     }
   };
 
   // scrolls to the given element
   const scrollTo = (elementName) => {
-    if (elementRefs.hasOwnProperty(elementName)) {
+    if (_.has(elementRefs, elementName)) {
       elementRefs[elementName].scrollIntoView();
     } else {
       growl.current.show({
@@ -27,7 +27,7 @@ const ConfigDocumentation = ({ configurationDocs }) => {
         summary: 'Element Does Not Exist',
         detail: (
           <>
-            'The element "<i>{elementName}</i>" does not exist in the current documentation.'
+            The element &quot;<i>{elementName}</i>&quot; does not exist in the current documentation.
           </>
         ),
       });

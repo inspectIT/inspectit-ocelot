@@ -1,7 +1,7 @@
 import React from 'react';
 
 const DocsActionElement = ({ action }) => {
-  const { inputs, returnDescription, isVoid } = action;
+  const { inputs, returnDescription } = action;
 
   return (
     <>

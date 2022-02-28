@@ -7,17 +7,13 @@ import useFetchData from '../../../../hooks/use-fetch-data';
 /**
  * The sidebar panel for showing existing versions of the configuration files.
  */
-const DocumentationView = ({}) => {
+const DocumentationView = () => {
   // local state
   const [selectedAgentMapping, setSelectedAgentMapping] = useState(null);
   const [includeDefault, setIncludeDefault] = useState(true);
 
   // fetch required data
-  const [{ data: agentMappings, isLoading: isLoadingMappings, isError: isMappingsError }, refreshAgentMappings] = useFetchData(
-    'mappings',
-    {},
-    []
-  );
+  const [{ data: agentMappings }, refreshAgentMappings] = useFetchData('mappings', {}, []);
   const [{ data: configurationDocs, isLoading: isLoadingDocs, isError: isDocsError }, refreshConfigurationDocs] = useFetchData(
     'configuration/documentation',
     {
