@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.model.instrumentation.actions;
 import lombok.*;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.documentation.ActionDocumentation;
 
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
@@ -49,6 +50,11 @@ public class GenericActionSettings {
             Pattern.compile(CONTEXT_VARIABLE),
             Pattern.compile(OBJECT_ATTACHMENTS_VARIABLE)
     );
+
+    /**
+     * Documentation for Config-Docs generation.
+     */
+    private ActionDocumentation docs;
 
     /**
      * If true, the action does not return a value.

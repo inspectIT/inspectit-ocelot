@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class SpringConfiguration {
 
-
     private ScheduledExecutorService activeExecutor = null;
 
     @Bean

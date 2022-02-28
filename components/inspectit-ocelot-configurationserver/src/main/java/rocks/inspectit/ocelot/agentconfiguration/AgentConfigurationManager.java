@@ -19,6 +19,7 @@ import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -46,6 +47,12 @@ public class AgentConfigurationManager {
 
     @Autowired
     private FileManager fileManager;
+
+    /**
+     * List of current AgentConfigurations for retrieval of AgentConfiguration corresponding to AgentMapping in
+     * {@link AgentConfigurationManager#getConfigurationForMapping(AgentMapping)}.
+     */
+    private List<AgentConfiguration> currentConfigurations;
 
     /**
      * Cache mapping attribute-maps to configurations.
@@ -87,12 +94,27 @@ public class AgentConfigurationManager {
     }
 
     /**
+     * Fetches the configuration for the given AgentMapping.
+     *
+     * @param agentMapping AgentMapping for which the configuration should be returned.
+     *
+     * @return The configuration for this AgentMapping or null if no configuration for that mapping is found.
+     */
+    public AgentConfiguration getConfigurationForMapping(AgentMapping agentMapping) {
+        Optional<AgentConfiguration> myConfig = currentConfigurations.stream()
+                .filter(config -> config.getMapping().equals(agentMapping))
+                .findFirst();
+        return myConfig.orElse(null);
+    }
+
+    /**
      * Replaces {@link #attributesToConfigurationCache} with a new cache which is backed by the given list of configurations.
      * The order of the list is used as priority, e.g. configurations coming first have a higher priority.
      *
      * @param newConfigurations the new ordered list of configurations
      */
     private synchronized void replaceConfigurations(List<AgentConfiguration> newConfigurations) {
+        currentConfigurations = newConfigurations;
         attributesToConfigurationCache = CacheBuilder.newBuilder()
                 .maximumSize(config.getMaxAgents())
                 .expireAfterAccess(config.getAgentEvictionDelay().toMillis(), TimeUnit.MILLISECONDS)

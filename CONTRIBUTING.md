@@ -17,8 +17,10 @@ The first step in order to contribute is to fork this repository into your accou
 You can develop your changes on a separate branch there and open a [pull request](https://github.com/inspectIT/inspectit-ocelot/pulls)
 in the main repository as soon as you are done.
 
+> **Important**: please update and commit the third party licenses (`THIRD-PARTY-LICENSES.txt`) if you changed any of the `build.gradle` files by executing the gradle task `gradlew generateLicenseReport` before you open your pull request.
+
 Usually, a pull request should correspond to an open [issue](https://github.com/inspectIT/inspectit-ocelot/issues) in this repository.
-Therefore make sure that an issue exists which your pull request attempts to resolve. If none exists, you should create one.
+Therefore, make sure that an issue exists which your pull request attempts to resolve. If none exists, you should create one.
 There is an exemption to this rule: For very small fixes (e.g. Typo-Fixes), your pull request does not need to have a corresponding issue.
 If your PR corresponds to an issue, the issue should be correctly labeled (e.g. `enhancement`, `bug`, etc.) because the release notes will be generated based on these labels.
 

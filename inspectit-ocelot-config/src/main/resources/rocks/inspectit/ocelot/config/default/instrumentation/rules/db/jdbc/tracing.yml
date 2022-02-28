@@ -2,8 +2,9 @@ inspectit:
   instrumentation:
     rules:
 
-      # Traces execute/executeUpdate calls with non-prepared SQL (the SQL is given as method argument)
       'r_jdbc_tracing_statement_execute':
+        docs:
+          description: "Traces execute/executeUpdate calls with non-prepared SQL (the SQL is given as method argument)"
         include:
           'r_jdbc_tracing_defaults': true
         scopes:
@@ -11,16 +12,18 @@ inspectit:
         tracing:
           attributes:
             'db.statement': _arg0
-      
-      # Traces executeBatch calls with non-prepared SQL 
+
       'r_jdbc_tracing_statement_executeBatch':
+        docs:
+          description: 'Traces executeBatch calls with non-prepared SQL.'
         include:
           'r_jdbc_tracing_defaults': true
         scopes:
           's_jdbc_statement_executeBatch': true
 
-      # Traces execute/executeUpdate/executeBatch calls with prepared SQL 
       'r_jdbc_tracing_preparedstatement':
+        docs:
+          description: 'Traces execute/executeUpdate/executeBatch calls with prepared SQL.'
         include:
           'r_jdbc_tracing_defaults': true
         scopes:
