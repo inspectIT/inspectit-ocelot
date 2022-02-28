@@ -324,16 +324,8 @@ public class TestUtils {
 
         GlobalOpenTelemetry.resetForTest();
 
-        ContextPropagators propagators = ContextPropagators.create(
-                TextMapPropagator.composite(
-                        // for use with OpenTelemetry
-                        W3CTraceContextPropagator.getInstance(),
-                        // services expecting Zipkin's B3 header
-                        B3Propagator.injectingMultiHeaders()
-                        ));
         OpenTelemetrySdk openTelemetry = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
-                .setPropagators(propagators)
                 .buildAndRegisterGlobal();
 
         // set the OTEL_TRACER in OpenTelemetrySpanBuilderImpl via reflection.

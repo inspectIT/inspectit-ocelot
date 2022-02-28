@@ -29,7 +29,8 @@ public class WriteSpanAttributesTest {
     IObfuscatory obfuscatory;
 
     @Spy
-    // get the current span. This is needed when using the opencensus-shim as mocking the span collides with the OTel's implementation of the Span
+    // get the current span. We need to use @Spy instead of @Mock when using the opencensus-shim as mocking the span collides with OTel's implementation of the Span.
+    // see also the discussion at https://github.com/inspectIT/inspectit-ocelot/pull/1270
     Span span = Tracing.getTracer().getCurrentSpan();
 
     @BeforeEach

@@ -105,13 +105,9 @@ public class LoggingTraceExporterService extends DynamicallyActivatableService {
                     .setResource(serviceNameResource)
                     .build();
 
-            // create a composite ContextPropagator
-            ContextPropagators propagators = ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(),  B3Propagator.injectingMultiHeaders()));
-
-            // build and register OTel
+             // build and register OTel
              OpenTelemetrySdk.builder()
                     .setTracerProvider(tracerProvider)
-                    .setPropagators(propagators)
                     .buildAndRegisterGlobal();
 
             // update OC tracer
