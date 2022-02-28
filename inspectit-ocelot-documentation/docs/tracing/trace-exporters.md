@@ -18,9 +18,10 @@ The Zipkin exporter exports Traces in Zipkin v2 format to a Zipkin server or oth
 By default, the Zipkin exporter is enabled but its URL that is needed for the exporter to actually start is set to `null`.
 
 The following properties are nested properties below the `inspectit.exporters.tracing.zipkin` property:
+
 |Property |Default| Description
 |---|---|---|
-|`.enabled`|`true`|If true, the agent will try to start the Zipkin exporter.
+|`.enabled`|`IF_CONFIGURED`|If ENABLED or IF_CONFIGURED, the agent will try to start the Zipkin exporter. If the url is not set, it will log an error with ENABLED but fail silently with IF_CONFIGURED.
 |`.url`|`null`|v2 URL under which the ZipKin server can be accessed (e.g. http://127.0.0.1:9411/api/v2/spans).
 |`.service-name`|refers to `inspectit.service-name`|The service-name which will be used to publish the spans.
 
@@ -37,9 +38,10 @@ The Jaeger exports works exactly the same way as the [Zipkin Exporter](#zipkin-e
 By default, the Jaeger exporter is enabled but its URL that is needed for the exporter to actually start is set to `null`.
 
 The following properties are nested properties below the `inspectit.exporters.tracing.jaeger` property:
+
 |Property |Default| Description
 |---|---|---|
-|`.enabled`|`true`|If true, the agent will try to start the Jaeger exporter.
+|`.enabled`|`IF_CONFIGURED`|If ENABLED or IF_CONFIGURED, the agent will try to start the Jaeger exporter. If the url is not set, it will log an error with ENABLED but fail silently with IF_CONFIGURED.
 |`.url`|`null`|URL under which the Jaeger Thrift server can be accessed (e.g. http://127.0.0.1:14268/api/traces).
 |`.service-name`|refers to `inspectit.service-name`|The service-name which will be used to publish the spans.
 
@@ -55,9 +57,10 @@ Spans can be additionally exported to the [OpenCensus Agent](https://opencensus.
 When enabled, all Spans are sent via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address that is needed for the exporter to actually start is set to `null`.
 
 The following properties are nested properties below the `inspectit.exporters.tracing.open-census-agent` property:
+
 |Property |Default| Description
 |---|---|---|
-|`.enabled`|`true`|If true, the agent will try to start the OpenCensus Agent Trace exporter.
+|`.enabled`|`IF_CONFIGURED`|If ENABLED or IF_CONFIGURED, the agent will try to start the OpenCensus Agent Trace exporter. If the address is not set, it will log an error with ENABLED but fail silently with IF_CONFIGURED.
 |`.address`|`null`|Address of the open-census agent (e.g. localhost:1234).
 |`.use-insecure`|`false`|If true, SSL is disabled.
 |`.service-name`|refers to `inspectit.service-name`|The service-name which will be used to publish the spans.

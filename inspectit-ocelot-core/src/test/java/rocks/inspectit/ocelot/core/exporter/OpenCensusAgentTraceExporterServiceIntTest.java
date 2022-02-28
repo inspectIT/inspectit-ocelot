@@ -212,8 +212,9 @@ public class OpenCensusAgentTraceExporterServiceIntTest extends SpringTestBase {
     void testNoAddressSet() {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.tracing.open-census-agent.address", "");
+            props.setProperty("inspectit.exporters.tracing.open-census-agent.enabled", "ENABLED");
         });
-        assertLogsOfLevelOrGreater(Level.WARN);
+        assertLogsOfLevelOrGreater(Level.ERROR);
         assertLogCount("OpenCensus Tracing Exporter is enabled but no address set.", 1);
     }
 }

@@ -3,9 +3,10 @@ package rocks.inspectit.ocelot.core.exporter;
 import io.opencensus.exporter.trace.jaeger.JaegerExporterConfiguration;
 import io.opencensus.exporter.trace.jaeger.JaegerTraceExporter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.trace.JaegerExporterSettings;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
@@ -26,14 +27,15 @@ public class JaegerExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         @Valid JaegerExporterSettings jaeger = conf.getExporters().getTracing().getJaeger();
-        if (conf.getTracing().isEnabled() && jaeger.isEnabled()) {
+        if (conf.getTracing().isEnabled() && !jaeger.getEnabled().equals(ExporterEnabledState.DISABLED)) {
             if (StringUtils.hasText(jaeger.getUrl())) {
                 return true;
             } else if (StringUtils.hasText(jaeger.getGrpc())) {
                 // print warning if user used wrong setup
                 log.warn("In order to use Jaeger span exporter, please specify the HTTP URL endpoint property instead of the gRPC.");
-            } else {
-                log.warn("Jaeger Exporter is enabled but no url set.");
+            }
+                log.error("Jaeger Exporter is enabled but no url set.");
+            if (jaeger.getEnabled().equals(ExporterEnabledState.ENABLED)) {
             }
         }
         return false;
@@ -44,8 +46,10 @@ public class JaegerExporterService extends DynamicallyActivatableService {
         try {
             JaegerExporterSettings settings = configuration.getExporters().getTracing().getJaeger();
             log.info("Starting Jaeger Exporter with url '{}'", settings.getUrl());
-            JaegerTraceExporter.createAndRegister(
-                    JaegerExporterConfiguration.builder().setThriftEndpoint(settings.getUrl()).setServiceName(settings.getServiceName()).build());
+            JaegerTraceExporter.createAndRegister(JaegerExporterConfiguration.builder()
+                    .setThriftEndpoint(settings.getUrl())
+                    .setServiceName(settings.getServiceName())
+                    .build());
             return true;
         } catch (Throwable t) {
             log.error("Error creating Jaeger exporter", t);
