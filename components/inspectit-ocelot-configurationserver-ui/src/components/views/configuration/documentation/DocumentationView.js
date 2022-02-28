@@ -7,7 +7,7 @@ import useFetchData from '../../../../hooks/use-fetch-data';
 /**
  * The sidebar panel for showing existing versions of the configuration files.
  */
-const DocumentationView = ({ }) => {
+const DocumentationView = ({}) => {
   // local state
   const [selectedAgentMapping, setSelectedAgentMapping] = useState(null);
   const [includeDefault, setIncludeDefault] = useState(true);
@@ -75,7 +75,10 @@ const DocumentationView = ({ }) => {
           .input-row label {
             width: 13rem;
           }
-          .no-selection {
+          .input-row :global(.p-dropdown) {
+            width: 15rem;
+          }
+          .note {
             flex: 1;
             padding: 1rem;
           }
@@ -103,11 +106,15 @@ const DocumentationView = ({ }) => {
         </div>
 
         {selectedAgentMapping ? (
-          <ConfigDocumentation configDocumentation={configurationDocs} />
+          configurationDocs && !isDocsError ? (
+            <ConfigDocumentation configurationDocs={configurationDocs} />
+          ) : isLoadingDocs ? (
+            <div className="note">Loading documentation...</div>
+          ) : (
+            <div className="note">The documentation for the selected Agent Mapping could not been loaded.</div>
+          )
         ) : (
-          <>
-            <div className='no-selection'>Select the Agent Mapping whose documentation should be displayed.</div>
-          </>
+          <div className="note">Select the Agent Mapping whose documentation should be displayed.</div>
         )}
       </div>
     </>
