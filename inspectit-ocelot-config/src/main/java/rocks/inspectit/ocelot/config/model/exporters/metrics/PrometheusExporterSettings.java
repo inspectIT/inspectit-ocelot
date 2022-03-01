@@ -16,7 +16,7 @@ import javax.validation.constraints.NotBlank;
 public class PrometheusExporterSettings {
 
     /**
-     * If true, the inspectIT Agent will try to start a Prometheus metrics exporter.
+     * Whether the exporter should be started.
      */
     private ExporterEnabledState enabled;
 

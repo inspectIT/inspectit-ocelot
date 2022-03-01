@@ -15,7 +15,7 @@ import java.time.Duration;
 public class InfluxExporterSettings {
 
     /**
-     * Whether the exporter is enabled.
+     * Whether the exporter should be started.
      */
     private ExporterEnabledState enabled;
 

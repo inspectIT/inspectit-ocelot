@@ -11,6 +11,9 @@ import java.time.Duration;
 @NoArgsConstructor
 public class OpenCensusAgentTraceExporterSettings {
 
+    /**
+     * Whether the exporter should be started.
+     */
     private ExporterEnabledState enabled;
 
     /**

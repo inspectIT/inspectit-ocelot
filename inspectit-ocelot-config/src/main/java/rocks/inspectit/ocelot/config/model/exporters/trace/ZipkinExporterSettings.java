@@ -8,6 +8,9 @@ import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 @NoArgsConstructor
 public class ZipkinExporterSettings {
 
+    /**
+     * Whether the exporter should be started.
+     */
     private ExporterEnabledState enabled;
 
     /**
