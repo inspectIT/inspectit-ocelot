@@ -137,7 +137,7 @@ public class LogbackInitializer {
     private static void setPropertiesFromConfig(InspectitConfig config) {
         consoleEnabled = config.getLogging().getConsole().isEnabled();
         fileEnabled = config.getLogging().getFile().isEnabled();
-        // TODO: changes to self-monitoring won't cause this method being called (see LoggingConfigurationChangeListener)
+        
         selfMonitoringEnabled = config.getSelfMonitoring().isEnabled();
 
         LogPreloadingSettings logPreloadingSettings = config.getLogPreloading();
