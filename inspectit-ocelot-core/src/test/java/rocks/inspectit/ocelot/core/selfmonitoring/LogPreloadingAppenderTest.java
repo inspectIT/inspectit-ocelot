@@ -26,6 +26,8 @@ public class LogPreloadingAppenderTest {
 
     @BeforeEach
     void resetLogPreloadingAppender() {
+        logPreloadingAppender = new LogPreloadingAppender();
+
         try {
             Field field = LogPreloadingAppender.class.getDeclaredField("preloader");
             field.setAccessible(true);
@@ -33,7 +35,6 @@ public class LogPreloadingAppenderTest {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
-
     }
 
     @Nested

@@ -46,7 +46,7 @@ public class ModelAutoCompleterTest {
 
             List<String> result = completer.getSuggestions(input);
 
-            assertThat(result).containsExactlyInAnyOrder("config", "env", "exporters", "instrumentation", "logging", "metrics", "plugins", "privacy", "publish-open-census-to-bootstrap", "self-monitoring", "service-name", "tags", "thread-pool-size", "tracing", "agent-commands");
+            assertThat(result).containsExactlyInAnyOrder("config", "env", "exporters", "instrumentation", "logging", "metrics", "plugins", "privacy", "publish-open-census-to-bootstrap", "self-monitoring", "service-name", "tags", "thread-pool-size", "tracing", "agent-commands", "log-preloading");
         }
 
         @Test
@@ -133,7 +133,7 @@ public class ModelAutoCompleterTest {
         void getPropertiesInspectit() {
             List<String> result = completer.getProperties(InspectitConfig.class);
 
-            assertThat(result).containsExactlyInAnyOrder("config", "env", "exporters", "instrumentation", "logging", "metrics", "plugins", "privacy", "publish-open-census-to-bootstrap", "self-monitoring", "service-name", "tags", "thread-pool-size", "tracing", "agent-commands");
+            assertThat(result).containsExactlyInAnyOrder("config", "env", "exporters", "instrumentation", "logging", "metrics", "plugins", "privacy", "publish-open-census-to-bootstrap", "self-monitoring", "service-name", "tags", "thread-pool-size", "tracing", "agent-commands", "log-preloading");
         }
     }
 }
