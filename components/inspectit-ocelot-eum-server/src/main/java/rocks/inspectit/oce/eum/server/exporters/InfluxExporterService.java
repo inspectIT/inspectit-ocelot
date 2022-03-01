@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
 import rocks.inspectit.oce.eum.server.metrics.percentiles.TimeWindowViewManager;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.InfluxExporterSettings;
 import rocks.inspectit.opencensus.influx.InfluxExporter;
 
@@ -30,7 +31,7 @@ public class InfluxExporterService {
     private TimeWindowViewManager timeWindowViewManager;
 
     @Autowired
-    private EumServerConfiguration config;
+    private EumServerConfiguration configuration;
 
     /**
      * The currently active influx exporter, null if none is active.
@@ -43,19 +44,22 @@ public class InfluxExporterService {
     private Future exporterTask;
 
     private boolean shouldEnable() {
-        InfluxExporterSettings influx = config.getExporters().getMetrics().getInflux();
-        return influx.isEnabled()
-                && !StringUtils.isEmpty(influx.getUrl())
-                && !StringUtils.isEmpty(influx.getDatabase())
-                && !StringUtils.isEmpty(influx.getRetentionPolicy());
+        InfluxExporterSettings influx = configuration.getExporters().getMetrics().getInflux();
+        if (!influx.getEnabled().equals(ExporterEnabledState.DISABLED)) {
+            if (StringUtils.hasText(influx.getUrl())) {
+                return true;
+            } else if (influx.getEnabled().equals(ExporterEnabledState.ENABLED)) {
+                log.error("InfluxDB Exporter is enabled but no url set.");
+            }
+        }
+        return false;
     }
 
     @PostConstruct
     private void doEnable() {
-        InfluxExporterSettings influx = config.getExporters().getMetrics().getInflux();
+        InfluxExporterSettings influx = configuration.getExporters().getMetrics().getInflux();
         if (shouldEnable()) {
-            log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx
-                    .getUrl());
+            log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx.getUrl());
             activeExporter = InfluxExporter.builder()
                     .url(influx.getUrl())
                     .database(influx.getDatabase())

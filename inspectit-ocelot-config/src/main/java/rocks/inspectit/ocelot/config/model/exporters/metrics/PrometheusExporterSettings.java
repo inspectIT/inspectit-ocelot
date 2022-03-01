@@ -29,7 +29,7 @@ public class PrometheusExporterSettings {
     /**
      * The port on which the /metrics endpoint of prometheus will be started.
      */
-    @Min(0)
+    @Min(1)
     @Max(65535)
     private int port;
 }

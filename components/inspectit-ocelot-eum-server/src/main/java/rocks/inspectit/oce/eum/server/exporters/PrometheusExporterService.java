@@ -9,13 +9,14 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /**
  * Service for the Prometheus OpenCensus exporters.
- * Is enabled, if exporters.metrics.prometheus.enabled is set to "true".
+ * Is enabled, if exporters.metrics.prometheus.enabled is set to ENABLED or IF_CONFIGURED.
  */
 @Component
 @Slf4j
@@ -26,18 +27,17 @@ public class PrometheusExporterService {
     @Autowired
     private EumServerConfiguration configuration;
 
-    /**
-     * Triggered, if exporters.metrics.prometheus.enabled is set to "true".
-     */
     @PostConstruct
     private void doEnable() {
         val config = configuration.getExporters().getMetrics().getPrometheus();
-        if (config.isEnabled() && config.getHost() != null && config.getPort() != 0) {
+        if (!config.getEnabled().equals(ExporterEnabledState.DISABLED)) {
             try {
                 String host = config.getHost();
                 int port = config.getPort();
                 log.info("Starting Prometheus Exporter on {}:{}", host, port);
-                PrometheusStatsCollector.createAndRegister(PrometheusStatsConfiguration.builder().setRegistry(CollectorRegistry.defaultRegistry).build());
+                PrometheusStatsCollector.createAndRegister(PrometheusStatsConfiguration.builder()
+                        .setRegistry(CollectorRegistry.defaultRegistry)
+                        .build());
                 prometheusClient = new HTTPServer(host, port, true);
             } catch (Exception e) {
                 log.error("Error Starting Prometheus HTTP Endpoint!", e);
@@ -45,7 +45,6 @@ public class PrometheusExporterService {
             }
         }
     }
-
 
     @PreDestroy
     protected boolean doDisable() {

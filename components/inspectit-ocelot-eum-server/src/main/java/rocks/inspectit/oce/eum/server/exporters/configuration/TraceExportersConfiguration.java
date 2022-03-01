@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.ExportersSettings;
 import rocks.inspectit.ocelot.config.model.exporters.trace.JaegerExporterSettings;
 import rocks.inspectit.ocelot.config.model.exporters.trace.TraceExportersSettings;
@@ -31,9 +32,9 @@ public class TraceExportersConfiguration {
         Optional.ofNullable(configuration.getExporters())
                 .map(ExportersSettings::getTracing)
                 .map(TraceExportersSettings::getJaeger)
-                .filter(JaegerExporterSettings::isEnabled)
+                .filter((jaeger) -> !jaeger.getEnabled().equals(ExporterEnabledState.DISABLED))
                 .ifPresent(settings -> {
-                    if (!StringUtils.isEmpty(settings.getUrl()) && StringUtils.isEmpty(settings.getGrpc())) {
+                    if (StringUtils.hasText(settings.getUrl()) && !StringUtils.hasText(settings.getGrpc())) {
                         log.warn("In order to use Jaeger span exporter, please specify the grpc API endpoint property instead of the url.");
                     }
                 });
@@ -41,22 +42,17 @@ public class TraceExportersConfiguration {
 
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnProperty({"inspectit-eum-server.exporters.tracing.jaeger.enabled", "inspectit-eum-server.exporters.tracing.jaeger.grpc"})
-    @ConditionalOnExpression("new String('${inspectit-eum-server.exporters.tracing.jaeger.grpc}').length() > 0")
+    @ConditionalOnExpression("NOT new String('${inspectit-eum-server.exporters.tracing.jaeger.enabled}').equals('DISABLED') AND new String('${inspectit-eum-server.exporters.tracing.jaeger.grpc}').length() > 0")
     public SpanExporter jaegerSpanExporter() {
         JaegerExporterSettings jaegerExporterSettings = configuration.getExporters().getTracing().getJaeger();
 
-        ManagedChannel channel = ManagedChannelBuilder.forTarget(jaegerExporterSettings.getGrpc()).usePlaintext().build();
-        if(!StringUtils.isEmpty(jaegerExporterSettings.getUrl()) && StringUtils.isEmpty(jaegerExporterSettings.getGrpc())) {
-            log.info("Starting Jaeger Exporter on url '{}'", jaegerExporterSettings.getUrl());
-        } else {
-            log.info("Starting Jaeger Exporter on grpc '{}'", jaegerExporterSettings.getGrpc());
-        }
+        ManagedChannel channel = ManagedChannelBuilder.forTarget(jaegerExporterSettings.getGrpc())
+                .usePlaintext()
+                .build();
 
         System.setProperty("otel.resource.attributes", "service.name=" + jaegerExporterSettings.getServiceName());
 
-        return JaegerGrpcSpanExporter.builder()
-                .setChannel(channel)
-                .build();
+        return JaegerGrpcSpanExporter.builder().setChannel(channel).build();
     }
 
 }

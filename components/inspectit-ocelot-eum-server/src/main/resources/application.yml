@@ -118,7 +118,7 @@ inspectit-eum-server:
     metrics:
       prometheus:
         # Determines whether the prometheus exporter is enabled.
-        enabled: true
+        enabled: DISABLED
 
         # The host of the prometheus HTTP endpoint.
         host: localhost
@@ -128,7 +128,7 @@ inspectit-eum-server:
 
       influx:
         # Determines whether the influx exporter is enabled.
-        enabled: true
+        enabled: IF_CONFIGURED
 
         # the export interval of the metrics.
         export-interval: 15s
@@ -170,7 +170,7 @@ inspectit-eum-server:
 
       jaeger:
         # If jaeger exporter for the OT received spans is enabled.
-        enabled: true
+        enabled: IF_CONFIGURED
 
         # Location of the jaeger gRPC API.
         # Either a valid NameResolver-compliant URI, or an authority string.
