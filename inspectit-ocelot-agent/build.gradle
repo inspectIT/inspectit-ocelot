@@ -113,6 +113,7 @@ dependencies {
             // for InMemorySpanExporter
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-sdk-testing",
+            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             "io.opentelemetry:opentelemetry-semconv",
 
             'org.junit.jupiter:junit-jupiter-engine:5.3.1',
@@ -227,13 +228,18 @@ task systemTest {
                 jvmArgs "-Dinspectit.config.file-based.path=$projectDir/src/system-test/resources/config"
                 // make inspectIT scan the workdir for configs
                 jvmArgs "-Dinspectit.publishOpenTelemetryToBootstrap=true"  // make inspectIT push OTEL to the bootstrap
-                jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"
-                // JaCoCo agent first + bootstrap instrumentation
+                jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"      // JaCoCo agent first + bootstrap instrumentation
                 jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.
 
                 // stricter checker makes sure that {@link Scope}s are closed on the correct thread and
                 // that they are not garbage collected before being closed.
                 jvmArgs "-Dio.opentelemetry.context.enableStrictContext=true"
+
+                // enable reflection used in TestUtils#initializeOpenTelemetryForSystemTesting for JDK 11 and later
+                if(JavaVersion.current() >= JavaVersion.VERSION_11) {
+                    // --add-opens has the following syntax: {A}/{package}={B}
+                    jvmArgs "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED"
+                }
 
                 jacoco.enabled = false  // Don't add the JaCoCo agent again.
             }

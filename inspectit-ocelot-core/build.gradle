@@ -10,7 +10,11 @@ test {
     useJUnitPlatform()
 
     jvmArgs '-Xmx512m', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:HeapDumpPath=/__w/inspectit-ocelot/inspectit-ocelot/test_heapdump.bin'
-
+    // enable reflection used in relation with OpenTelemetry for JDK 11 and later
+    if(JavaVersion.current() >= JavaVersion.VERSION_11) {
+        // --add-opens has the following syntax: {A}/{package}={B}
+        jvmArgs "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED"
+    }
     testLogging {
         exceptionFormat = 'full'
     }
