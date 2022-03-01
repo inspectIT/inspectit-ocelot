@@ -2,6 +2,18 @@
 id: Breaking Changes
 title: Breaking Changes
 ---
+## Breaking changes in 2.X.X
+
+### Integration of the OpenTelemetry OpenCensus Shim
+
+Starting with the current release, inspectIT Ocelot migrates from OpenCensus to [OpenTelemetry](https://github.com/open-telemetry). As a first step, we include the [OpenTelemetry OpenCensus Shim](https://github.com/open-telemetry/opentelemetry-java/tree/main/opencensus-shim). inspectIT Ocelot still uses and supports the [OpenCensus-API](https://opencensus.io/quickstart/java/), but the exporter implementations of OpenTelemetry are used.
+
+### Updated trace and metric exporter services
+
+Due to the migration from OpenCensus to OpenTelemetry, several trace and metric exporter services are disabled or have been removed. The only exporters supported in the current version are `Logging` [metric](metrics/metric-exporters.md#logging) and [trace](tracing/tracing-exporters.md#logging) exporters. 
+
+The [Jaeger](tracing/tracing-exporters.md#jaeger-exporter) and [Zipkin](tracing/tracing-exporters.md#zipking-exporter) trace exporters as well as the [Prometheus](metrics/metric-exporters.md#prometheus-exporter) and [InfluxDB](metrics/metric-exporters.md#influxdb-exporter) metric exporters are disabled until they are properly integrated with OpenTelemetry.
+The `OpenCensus Agent Exporter` (for metrics and traces) has been completely removed and will not be supported in the future.
 
 ## Breaking changes in 1.12.2
 

@@ -5,13 +5,23 @@ title: Trace Exporters
 
 Metrics exporters are responsible for passing the recorded tracing data to a corresponding storage.
 
-inspectIT Ocelot currently supports the following OpenCensus trace exporters:
+inspectIT Ocelot currently supports the following trace exporters:
 
-* [Zipkin](#zipkin-exporter) [[Homepage](https://zipkin.io/)]
-* [Jaeger](#jaeger-exporter) [[Homepage](https://www.jaegertracing.io/)]
-* [OpenCensus Agent](#opencensus-agent-trace-exporter) [[Homepage](https://opencensus.io/exporters/supported-exporters/java/ocagent/)]
+* [Logging](#logging-exporter) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/blob/main/exporters/logging/src/main/java/io/opentelemetry/exporter/logging/LoggingSpanExporter.java)]
+* [~~Zipkin~~](#zipkin-exporter) [[Homepage](https://zipkin.io/)]
+* [~~Jaeger~~](#jaeger-exporter) [[Homepage](https://www.jaegertracing.io/)]
+
+>**Important note**: Starting with version `2.X.X`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
+Currently, Zipkin and Jaeger are **not** functional and will be re-implemented in the next version.
+
+## Logging Exporter
+
+The Logging exporter exports traces to the system log. By default, the Logging exporter is disabled.
+The Logging trace exporter has the following properties:
+- `inspectit.exporters.tracing.logging.enabled`: enables/disables the Logging trace exporter.
 
 ## Zipkin Exporter
+>**Important**: the Zipkin exporter is currently not working
 
 The Zipkin exporter exports Traces in Zipkin v2 format to a Zipkin server or other compatible servers.
 It can be enabled and disabled via the `inspectit.exporters.tracing.zipkin.enabled` property. By default, the Zipkin exporter is enabled. It however does not have an URL configured. The exporter will start up as soon as you define the `inspectit.exporters.tracing.zipkin.url` property.
@@ -26,6 +36,7 @@ When sending spans, Zipkin expects you to give a name of the service where the s
 
 
 ## Jaeger Exporter
+>**Important**: the Jaeger exporter is currently not working
 
 The Jaeger exports works exactly the same way as the [Zipkin Exporter](#zipkin-exporter).
 The corresponding properties are the following:
@@ -42,18 +53,3 @@ To make inspectIT Ocelot push the spans to a Jaeger server running on the same m
 ```
 -Dinspectit.exporters.tracing.jaeger.url=http://127.0.0.1:14268/api/traces
 ```
-
-## OpenCensus Agent Trace Exporter
-
-Spans can be additionally exported to the [OpenCensus Agent](https://opencensus.io/service/components/agent/).
-When enabled, all Spans are sent via gRCP to the OpenCensus Agent. By default, the exporter is enabled, but the agent address is set to `null`.
-
-|Property |Default| Description
-|---|---|---|
-|`inspectit.exporters.tracing.open-census-agent.enabled`|`true`|If true, the agent will try to start the OpenCensus Agent Trace exporter.
-|`inspectit.exporters.tracing.open-census-agent.address`|`null`|Address of the open-census agent (e.g. localhost:1234).
-|`inspectit.exporters.tracing.open-census-agent.use-insecure`|`false`|If true, SSL is disabled.
-|`inspectit.exporters.tracing.open-census-agent.service-name`|refers to `inspectit.service-name`|The service-name which will be used to publish the spans.
-|`inspectit.exporters.tracing.open-census-agent.reconnection-period`|`5`|The time at which the exporter tries to reconnect to the OpenCensus agent.
-
-> Don't forget to check [the official OpenCensus Agent exporter documentation](https://opencensus.io/exporters/supported-exporters/java/ocagent/).

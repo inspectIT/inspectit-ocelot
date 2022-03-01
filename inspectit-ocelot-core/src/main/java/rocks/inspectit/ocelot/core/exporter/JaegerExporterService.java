@@ -1,7 +1,5 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-import io.opencensus.exporter.trace.jaeger.JaegerExporterConfiguration;
-import io.opencensus.exporter.trace.jaeger.JaegerTraceExporter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -42,8 +40,11 @@ public class JaegerExporterService extends DynamicallyActivatableService {
         try {
             JaegerExporterSettings settings = configuration.getExporters().getTracing().getJaeger();
             log.info("Starting Jaeger Exporter with url '{}'", settings.getUrl());
+            // TODO re-implement with OTel
+            /*
             JaegerTraceExporter.createAndRegister(
                     JaegerExporterConfiguration.builder().setThriftEndpoint(settings.getUrl()).setServiceName(settings.getServiceName()).build());
+            */
             return true;
         } catch (Throwable t) {
             log.error("Error creating Jaeger exporter", t);
@@ -55,7 +56,10 @@ public class JaegerExporterService extends DynamicallyActivatableService {
     protected boolean doDisable() {
         log.info("Stopping Jaeger Exporter");
         try {
+            // TODO: reimplement with OTel
+            /*
             JaegerTraceExporter.unregister();
+            */
         } catch (Throwable t) {
             log.error("Error disabling Jaeger exporter", t);
         }

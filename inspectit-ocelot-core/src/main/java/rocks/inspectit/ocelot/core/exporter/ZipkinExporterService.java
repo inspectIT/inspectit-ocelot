@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-import io.opencensus.exporter.trace.zipkin.ZipkinExporterConfiguration;
-import io.opencensus.exporter.trace.zipkin.ZipkinTraceExporter;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -34,8 +33,11 @@ public class ZipkinExporterService extends DynamicallyActivatableService {
         try {
             ZipkinExporterSettings settings = configuration.getExporters().getTracing().getZipkin();
             log.info("Starting Zipkin Exporter with url '{}'", settings.getUrl());
+            // TODO: implement OTel equivalent
+            /*
             ZipkinTraceExporter.createAndRegister(
                     ZipkinExporterConfiguration.builder().setV2Url(settings.getUrl()).setServiceName(settings.getServiceName()).build());
+             */
             return true;
         } catch (Throwable t) {
             log.error("Error creating Zipkin exporter", t);
@@ -47,7 +49,10 @@ public class ZipkinExporterService extends DynamicallyActivatableService {
     protected boolean doDisable() {
         log.info("Stopping Zipkin Exporter");
         try {
+            // TODO: implement OTel equivalent
+            /*
             ZipkinTraceExporter.unregister();
+             */
         } catch (Throwable t) {
             log.error("Error disabling Zipkin exporter", t);
         }

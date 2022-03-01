@@ -18,6 +18,5 @@ public enum PropagationFormat {
     /**
      * Using Datadog headers.
      */
-    DATADOG;
-
+    DATADOG,
 }

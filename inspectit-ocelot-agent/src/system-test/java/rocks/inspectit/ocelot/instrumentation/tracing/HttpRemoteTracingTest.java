@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.instrumentation.tracing;
 
-import io.opencensus.trace.Span;
+import io.opentelemetry.api.trace.SpanId;
+import io.opentelemetry.api.trace.SpanKind;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIUtils;
@@ -89,19 +90,15 @@ public class HttpRemoteTracingTest extends TraceTestBase {
             TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), true, 30, TimeUnit.SECONDS);
 
             clientSpan();
-
-            assertTraceExported((spans) ->
-                    assertThat(spans)
-                            .anySatisfy((sp) -> {
-                                assertThat(sp.getName()).endsWith("HttpUrlConnectionTest.clientSpan");
-                                assertThat(sp.getKind()).isEqualTo(Span.Kind.CLIENT);
-                                assertThat(sp.getParentSpanId()).isNull();
-                            })
-                            .anySatisfy((sp) -> {
-                                assertThat(sp.getName()).endsWith("TracingServlet.myHandler");
-                                assertThat(sp.getKind()).isEqualTo(Span.Kind.SERVER);
-                                assertThat(sp.getParentSpanId()).isNotNull();
-                            })
+            assertTraceExported((spans) -> assertThat(spans).anySatisfy((sp) -> {
+                        assertThat(sp.getName()).endsWith("HttpUrlConnectionTest.clientSpan");
+                        assertThat(sp.getKind()).isEqualTo(SpanKind.CLIENT);
+                        assertThat(SpanId.isValid(sp.getParentSpanId())).isFalse();
+                    }).anySatisfy((sp) -> {
+                        assertThat(sp.getName()).endsWith("TracingServlet.myHandler");
+                        assertThat(sp.getKind()).isEqualTo(SpanKind.SERVER);
+                        assertThat(SpanId.isValid(sp.getParentSpanId())).isTrue();
+                    })
 
             );
 
@@ -131,25 +128,18 @@ public class HttpRemoteTracingTest extends TraceTestBase {
         @Test
         void testPropagationViaServlet() throws Exception {
 
-            TestUtils.waitForClassInstrumentations(Arrays.asList(
-                    CloseableHttpClient.class,
-                    Class.forName("org.apache.http.impl.client.InternalHttpClient"),
-                    ApacheClientConnectionTest.class,
-                    TracingServlet.class), true, 15, TimeUnit.SECONDS);
+            TestUtils.waitForClassInstrumentations(Arrays.asList(CloseableHttpClient.class, Class.forName("org.apache.http.impl.client.InternalHttpClient"), ApacheClientConnectionTest.class, TracingServlet.class), true, 15, TimeUnit.SECONDS);
             clientSpan();
 
-            assertTraceExported((spans) ->
-                    assertThat(spans)
-                            .anySatisfy((sp) -> {
-                                assertThat(sp.getName()).endsWith("ApacheClientConnectionTest.clientSpan");
-                                assertThat(sp.getKind()).isEqualTo(Span.Kind.CLIENT);
-                                assertThat(sp.getParentSpanId()).isNull();
-                            })
-                            .anySatisfy((sp) -> {
-                                assertThat(sp.getName()).endsWith("TracingServlet.myHandler");
-                                assertThat(sp.getKind()).isEqualTo(Span.Kind.SERVER);
-                                assertThat(sp.getParentSpanId()).isNotNull();
-                            })
+            assertTraceExported((spans) -> assertThat(spans).anySatisfy((sp) -> {
+                        assertThat(sp.getName()).endsWith("ApacheClientConnectionTest.clientSpan");
+                        assertThat(sp.getKind()).isEqualTo(SpanKind.CLIENT);
+                        assertThat(SpanId.isValid(sp.getParentSpanId())).isFalse();
+                    }).anySatisfy((sp) -> {
+                        assertThat(sp.getName()).endsWith("TracingServlet.myHandler");
+                        assertThat(sp.getKind()).isEqualTo(SpanKind.SERVER);
+                        assertThat(SpanId.isValid(sp.getParentSpanId())).isTrue();
+                    })
 
             );
 
