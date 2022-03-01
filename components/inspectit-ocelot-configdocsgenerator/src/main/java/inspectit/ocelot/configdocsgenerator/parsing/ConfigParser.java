@@ -54,6 +54,11 @@ public class ConfigParser {
             // however here there is no InspectitEnvironment which is used for that, so instead Jackson is used and
             // the variables are evaluated using a custom version of StringSubstitutor.
             Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
+
+            // remove any invalid keys at the top level to make the String parseable for Jackson
+            yamlMap.keySet().removeIf(key -> !key.equals("inspectit"));
+            configYaml = mapper.writeValueAsString(yamlMap);
+
             StringSubstitutor stringSubstitutor = new NestedMapStringSubstitutor(yamlMap);
             String cleanedInputString = stringSubstitutor.replace(configYaml);
 
