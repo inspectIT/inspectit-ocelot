@@ -5,11 +5,17 @@ title: Breaking Changes
 
 ## Breaking changes in 1.15.0
 
-### Default value for Prometheus exporter's enabled property
+### New definition of exporters' enabled property
 
-The default value for the Prometheus exporter's property `enabled` is now `false` instead of `true`.
+Instead of a Boolean, the enabled field of exporters is now an enum with the values `DISABLED`, `ENABLED` and `IF_CONFIGURED` to express the way this property behaves more clearly.
+For now old configurations using `true` and `false` will still work and be converted to their equivalent new values `IF_CONFIGURED` and `DISABLED` respectively.
+This conversion is however deprecated, so configurations should still be updated to the new values.
+
+### Prometheus exporter disabled by default
+
+By default the Prometheus exporter is now disabled.
 This was changed so the exporter's behaviour is in line with the behaviour of other exporters, i.e. it will not run without changing the default settings.
-Other exporters do not run by default even though their `enabled` property is set to `true`, because they need additional configuration set, e.g. external URLs to push data to.
+To enable the Prometheus exporter set its `enabled` property to `ENABLED`.
 
 ## Breaking changes in 1.12.2
 
