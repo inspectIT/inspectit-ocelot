@@ -20,10 +20,4 @@ public class SelfMonitoringSettings {
     @Valid
     private ActionMetricsSettings actionMetrics;
 
-    /**
-     * Settings for the log preloading.
-     */
-    @Valid
-    private LogPreloadingSettings logPreloading;
-
 }

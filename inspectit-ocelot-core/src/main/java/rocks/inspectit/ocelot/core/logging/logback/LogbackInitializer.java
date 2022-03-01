@@ -140,7 +140,7 @@ public class LogbackInitializer {
         // TODO: changes to self-monitoring won't cause this method being called (see LoggingConfigurationChangeListener)
         selfMonitoringEnabled = config.getSelfMonitoring().isEnabled();
 
-        LogPreloadingSettings logPreloadingSettings = config.getSelfMonitoring().getLogPreloading();
+        LogPreloadingSettings logPreloadingSettings = config.getLogPreloading();
         if (null != logPreloadingSettings) {
             logPreloadingEnabled = logPreloadingSettings.isEnabled();
             if (null != logPreloadingSettings.getLogLevel()) {

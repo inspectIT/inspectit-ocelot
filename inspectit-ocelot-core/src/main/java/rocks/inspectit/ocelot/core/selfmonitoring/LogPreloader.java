@@ -25,7 +25,7 @@ public class LogPreloader extends DynamicallyActivatableService {
     private final AtomicInteger currentIndex = new AtomicInteger(0);
 
     public LogPreloader() {
-        super("selfMonitoring.logPreloading");
+        super("logPreloading");
     }
 
     /**
@@ -63,9 +63,7 @@ public class LogPreloader extends DynamicallyActivatableService {
 
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig configuration) {
-        return configuration.getSelfMonitoring().getLogPreloading() != null && configuration.getSelfMonitoring()
-                .getLogPreloading()
-                .isEnabled();
+        return configuration.getLogPreloading() != null && configuration.getLogPreloading().isEnabled();
     }
 
     /**
@@ -78,7 +76,7 @@ public class LogPreloader extends DynamicallyActivatableService {
      */
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        LogPreloadingSettings settings = configuration.getSelfMonitoring().getLogPreloading();
+        LogPreloadingSettings settings = configuration.getLogPreloading();
 
         if (settings != null && (buffer == null || buffer.length != settings.getBufferSize())) {
             if (settings.getBufferSize() < 1) {
@@ -119,10 +117,13 @@ public class LogPreloader extends DynamicallyActivatableService {
          * @param targetIndex The maximum index to be returned
          */
         private BufferIterator(ILoggingEvent[] buffer, int targetIndex) {
-            this.buffer = new ILoggingEvent[buffer.length];
-            System.arraycopy(buffer, 0, this.buffer, 0, buffer.length);
+            this.buffer = new ILoggingEvent[buffer != null ? buffer.length : 0];
             this.targetIndex = targetIndex;
-            currentIndex = targetIndex >= buffer.length ? targetIndex - buffer.length + 1 : 0;
+
+            if (buffer != null) {
+                System.arraycopy(buffer, 0, this.buffer, 0, buffer.length);
+                currentIndex = targetIndex >= buffer.length ? targetIndex - buffer.length + 1 : 0;
+            }
         }
 
         @Override
