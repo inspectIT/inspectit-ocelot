@@ -35,9 +35,9 @@ public class LogsCommandExecutorTest {
 
     static final String tmpDir = "tmpconf_int_test";
 
-    static final String configurationA = "inspectit:\n  self-monitoring:\n    log-preloading:\n      enabled: true\n      log-level: WARN\n      buffer-size: 512";
+    static final String configurationA = "inspectit:\n  log-preloading:\n    enabled: true\n    log-level: WARN\n    buffer-size: 512";
 
-    static final String configurationB = "inspectit:\n  self-monitoring:\n    log-preloading:\n      enabled: true\n      log-level: ERROR\n      buffer-size: 1024";
+    static final String configurationB = "inspectit:\n  log-preloading:\n    enabled: true\n    log-level: ERROR\n    buffer-size: 1024";
 
     @BeforeAll
     static void createConfigDir() {
@@ -72,7 +72,7 @@ public class LogsCommandExecutorTest {
             FileUtils.write(new File(tmpDir + "/logs-command.yml"), configuration, Charset.defaultCharset());
 
             await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
-                LogPreloadingSettings settings = env.getCurrentConfig().getSelfMonitoring().getLogPreloading();
+                LogPreloadingSettings settings = env.getCurrentConfig().getLogPreloading();
                 assertThat(settings).isNotNull();
                 if (settings != null) {
                     assertThat(settings.isEnabled()).isEqualTo(enabled);
@@ -97,30 +97,32 @@ public class LogsCommandExecutorTest {
         @Test
         public void testLogFormat() {
             Mockito.when(preloader.getPreloadedLogs())
-                    .thenReturn(Arrays.asList(new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.ERROR, "Message", new Throwable(), new String[]{}), new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.WARN, "Message {}", new Throwable(), new String[]{"Foo"}), new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.ERROR, "Exception", new RuntimeException(), new String[]{})));
+                    .thenReturn(Arrays.asList(new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.ERROR, "Message", null, new String[]{}), new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.WARN, "Message {}", null, new String[]{"Foo"}), new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.ERROR, "Exception", new RuntimeException(), new String[]{})));
 
             LogsCommand command = new LogsCommand();
             command.setCommandId(UUID.randomUUID());
             LogsCommand.Response response = (LogsCommand.Response) executor.execute(command);
 
-            assertThat(response.getResult().split("\\n")).hasSize(3);
+            // should have at least 3 rows, plus exception stack traces
+            assertThat(response.getLogs().split("\\n").length).isGreaterThanOrEqualTo(3);
 
             // should contain log levels
-            assertThat(response.getResult()).contains("WARN");
-            assertThat(response.getResult()).contains("ERROR");
+            assertThat(response.getLogs()).contains("WARN");
+            assertThat(response.getLogs()).contains("ERROR");
 
             // should contain messages
-            assertThat(response.getResult()).contains("Message");
-            assertThat(response.getResult()).contains("Message Foo");
-            assertThat(response.getResult()).contains("Exception");
+            assertThat(response.getLogs()).contains("Message");
+            assertThat(response.getLogs()).contains("Message Foo");
+            assertThat(response.getLogs()).contains("Exception");
 
             // should contain the exception
-            assertThat(response.getResult()).contains("RuntimeException");
+            assertThat(response.getLogs()).contains("RuntimeException");
 
             // should contain class that logged the message
-            assertThat(response.getResult()).contains("LogsCommandExecutorTest");
+            assertThat(response.getLogs()).contains("LogsCommandExecutorTest");
 
-            // TODO: check if timestamps are present in the appropriate format
+            // should contain timestamps
+            assertThat(response.getLogs()).containsPattern("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}");
         }
 
     }

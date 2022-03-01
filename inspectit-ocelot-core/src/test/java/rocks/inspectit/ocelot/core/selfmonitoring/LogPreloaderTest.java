@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
-import rocks.inspectit.ocelot.config.model.selfmonitoring.SelfMonitoringSettings;
 
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -38,10 +37,8 @@ public class LogPreloaderTest {
     private static InspectitConfig createConfig(int bufferSize) {
         LogPreloadingSettings logSettings = new LogPreloadingSettings();
         logSettings.setBufferSize(bufferSize);
-        SelfMonitoringSettings smSettings = new SelfMonitoringSettings();
-        smSettings.setLogPreloading(logSettings);
         InspectitConfig config = new InspectitConfig();
-        config.setSelfMonitoring(smSettings);
+        config.setLogPreloading(logSettings);
         return config;
     }
 
@@ -98,7 +95,7 @@ public class LogPreloaderTest {
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs()
                     .spliterator(), false)).extracting(ILoggingEvent::getLevel).containsOnly(Level.WARN);
         }
-        
+
     }
 
 }

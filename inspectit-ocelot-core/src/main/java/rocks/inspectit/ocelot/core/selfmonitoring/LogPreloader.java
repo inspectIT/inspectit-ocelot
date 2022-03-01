@@ -83,7 +83,7 @@ public class LogPreloader extends DynamicallyActivatableService {
                 log.error("Cannot enable LogPreloader with configured buffer size {}!", settings.getBufferSize());
                 return false;
             } else {
-                log.info("Enabling LogPreloader with buffer size {}. This will drop all previously preloaded logs.", settings.getBufferSize());
+                log.info("Enabling LogPreloader with buffer size {}.", settings.getBufferSize());
                 buffer = new ILoggingEvent[settings.getBufferSize()];
                 // few log entries might be written to arbitrary indices between these two code lines,
                 // meaning they are lost as well
@@ -97,7 +97,7 @@ public class LogPreloader extends DynamicallyActivatableService {
 
     @Override
     protected boolean doDisable() {
-        log.info("Disabling LogPreloader.");
+        log.info("Disabling LogPreloader. All previously preloaded logs are dropped.");
         buffer = null;
         return true;
     }

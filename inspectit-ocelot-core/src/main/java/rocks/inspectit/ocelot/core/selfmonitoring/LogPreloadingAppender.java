@@ -5,7 +5,6 @@ import ch.qos.logback.core.AppenderBase;
 
 /**
  * Appends a given ILoggingEvent to the ring buffer
- * TODO: make sure logs are only collected when/as configured using a filter (see {@link rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer.SelfMonitoringFilter}.
  */
 public class LogPreloadingAppender extends AppenderBase<ILoggingEvent> {
 

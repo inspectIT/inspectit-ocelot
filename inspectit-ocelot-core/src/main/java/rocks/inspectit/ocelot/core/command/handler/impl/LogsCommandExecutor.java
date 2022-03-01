@@ -1,5 +1,9 @@
 package rocks.inspectit.ocelot.core.command.handler.impl;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.PatternLayout;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.command.Command;
@@ -39,25 +43,27 @@ public class LogsCommandExecutor implements CommandExecutor {
      */
     @Override
     public CommandResponse execute(Command command) {
-
         if (!canExecute(command)) {
             String exceptionMessage = "Invalid command type. Executor does not support commands of type " + command.getClass();
             throw new IllegalArgumentException(exceptionMessage);
         }
 
+        LogsCommand logsCommand = (LogsCommand) command;
+        PatternLayout layout = new PatternLayout();
+        layout.setPattern(logsCommand.getLogFormat());
+        Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        layout.setContext(rootLogger.getLoggerContext());
+        layout.start();
+
         LogsCommand.Response response = new LogsCommand.Response();
         response.setCommandId(command.getCommandId());
         StringBuilder logs = new StringBuilder();
-        for (Object o : logPreloader.getPreloadedLogs()) {
-            logs.append(o);
-            logs.append("\n");
+        for (ILoggingEvent event : logPreloader.getPreloadedLogs()) {
+            logs.append(layout.doLayout(event));
         }
 
-        // TODO: properly format logs (currently only returns [LEVEL] MESSAGE)
-        // should at least contain timestamp, level, message (using formatter?)
-
-        //response.setResult("Hello World und noch die ID: " + command.getCommandId());
-        response.setResult(logs.toString());
+        response.setLogs(logs.toString());
+        layout.stop();
         return response;
     }
 }

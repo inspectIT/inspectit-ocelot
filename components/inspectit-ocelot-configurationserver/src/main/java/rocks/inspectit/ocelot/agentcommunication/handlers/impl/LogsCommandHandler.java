@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.handlers.CommandHandler;
 import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
+import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.time.Duration;
@@ -81,6 +81,6 @@ public class LogsCommandHandler implements CommandHandler {
     @Override
     public void handleResponse(CommandResponse response, DeferredResult<ResponseEntity<?>> result) {
         LogsCommand.Response logsResponse = (LogsCommand.Response) response;
-        result.setResult(ResponseEntity.ok().body(logsResponse.getResult()));
+        result.setResult(ResponseEntity.ok().body(logsResponse.getLogs()));
     }
 }
