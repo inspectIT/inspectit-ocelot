@@ -50,6 +50,7 @@ public class TraceExportersConfiguration {
                 .usePlaintext()
                 .build();
 
+        log.info("Starting Jaeger Exporter on grpc '{}'", jaegerExporterSettings.getGrpc());
         System.setProperty("otel.resource.attributes", "service.name=" + jaegerExporterSettings.getServiceName());
 
         return JaegerGrpcSpanExporter.builder().setChannel(channel).build();
