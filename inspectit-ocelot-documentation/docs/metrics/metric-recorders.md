@@ -154,7 +154,7 @@ The available metrics are explained in the table below.
 
 Metrics exposed by MBean objects are recorded by the `inspectit.metrics.jmx` recorder which can be enabled by setting the `inspectit.metrics.jmx.enabled` property to `true`.
 
-This recorder polls all registered MBean servers with a frequency specified by `inspectit.metrics.classloader.frequency` which defaults to `inspectit.metrics.frequency`.
+This recorder polls all registered MBean servers with a frequency specified by `inspectit.metrics.jmx.frequency` which defaults to `inspectit.metrics.frequency`.
 The recorder exposes JMX attributes containing values that are non-negative numbers or booleans.
 All values are exposed as double metric representing the last value of the JMX MBean.
 Booleans are converted to `0.0` or `1.0` and non-double numbers to double representations.
