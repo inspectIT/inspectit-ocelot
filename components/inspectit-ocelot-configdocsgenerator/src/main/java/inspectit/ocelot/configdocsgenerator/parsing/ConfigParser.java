@@ -34,6 +34,7 @@ public class ConfigParser {
         SimpleModule module = new SimpleModule();
         module.addDeserializer(Duration.class, new CustomDurationDeserializer());
         mapper.registerModule(module);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         //In the YAML property-names are kebab-case in the Java objects CamelCase, Jackson can do that conversion
         //with the following line
