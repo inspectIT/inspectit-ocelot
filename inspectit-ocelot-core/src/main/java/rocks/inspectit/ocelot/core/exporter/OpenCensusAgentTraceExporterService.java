@@ -25,8 +25,8 @@ public class OpenCensusAgentTraceExporterService extends DynamicallyActivatableS
         if (conf.getTracing().isEnabled() && !openCensusAgent.getEnabled().equals(ExporterEnabledState.DISABLED)) {
             if (StringUtils.hasText(openCensusAgent.getAddress())) {
                 return true;
-                log.error("OpenCensus Tracing Exporter is enabled but no address set.");
             } else if (openCensusAgent.getEnabled().equals(ExporterEnabledState.ENABLED)) {
+                log.warn("OpenCensus Tracing Exporter is enabled but no address set.");
             }
         }
         return false;

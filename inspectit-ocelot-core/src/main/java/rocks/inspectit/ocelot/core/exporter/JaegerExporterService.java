@@ -34,8 +34,8 @@ public class JaegerExporterService extends DynamicallyActivatableService {
                 // print warning if user used wrong setup
                 log.warn("In order to use Jaeger span exporter, please specify the HTTP URL endpoint property instead of the gRPC.");
             }
-                log.error("Jaeger Exporter is enabled but no url set.");
             if (jaeger.getEnabled().equals(ExporterEnabledState.ENABLED)) {
+                log.warn("Jaeger Exporter is enabled but no url set.");
             }
         }
         return false;

@@ -75,7 +75,7 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
             props.setProperty("inspectit.exporters.tracing.zipkin.url", "");
             props.setProperty("inspectit.exporters.tracing.zipkin.enabled", "ENABLED");
         });
-        assertLogsOfLevelOrGreater(Level.ERROR);
+        assertLogsOfLevelOrGreater(Level.WARN);
         assertLogCount("Zipkin Exporter is enabled but no url set.", 1);
     }
 }

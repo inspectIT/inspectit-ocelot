@@ -48,8 +48,8 @@ public class InfluxExporterService extends DynamicallyActivatableService {
         if (conf.getMetrics().isEnabled() && !influx.getEnabled().equals(ExporterEnabledState.DISABLED)) {
             if (StringUtils.hasText(influx.getUrl())) {
                 return true;
-                log.error("InfluxDB Exporter is enabled but no url set.");
             } else if (influx.getEnabled().equals(ExporterEnabledState.ENABLED)) {
+                log.warn("InfluxDB Exporter is enabled but no url set.");
             }
         }
         return false;

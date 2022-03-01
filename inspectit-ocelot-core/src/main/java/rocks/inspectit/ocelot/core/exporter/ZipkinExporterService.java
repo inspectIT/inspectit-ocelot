@@ -30,8 +30,8 @@ public class ZipkinExporterService extends DynamicallyActivatableService {
         if (conf.getTracing().isEnabled() && !zipkin.getEnabled().equals(ExporterEnabledState.DISABLED)) {
             if (StringUtils.hasText(zipkin.getUrl())) {
                 return true;
-                log.error("Zipkin Exporter is enabled but no url set.");
             } else if (zipkin.getEnabled().equals(ExporterEnabledState.ENABLED)) {
+                log.warn("Zipkin Exporter is enabled but no url set.");
             }
         }
         return false;

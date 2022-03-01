@@ -138,7 +138,7 @@ public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase
             props.setProperty("inspectit.exporters.metrics.open-census-agent.use-insecure", "true");
             props.setProperty("inspectit.exporters.metrics.open-census-agent.enabled", "ENABLED");
         });
-        assertLogsOfLevelOrGreater(Level.ERROR);
+        assertLogsOfLevelOrGreater(Level.WARN);
         assertLogCount("OpenCensus Metrics Exporter is enabled but no address set.", 1);
     }
 
