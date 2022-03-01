@@ -1,4 +1,5 @@
 import { omitBy } from 'lodash';
+import SidebarTypes from '../../../components/views/configuration/SidebarTypes';
 import { createReducer } from '../../utils';
 import { configuration as initialState } from '../initial-states';
 import * as types from './types';
@@ -200,7 +201,14 @@ const configurationReducer = createReducer(initialState)({
   [types.TOGGLE_HISTORY_VIEW]: (state) => {
     return {
       ...state,
-      showHistoryView: !state.showHistoryView,
+      currentSidebar: state.currentSidebar == SidebarTypes.HISTORY ? SidebarTypes.NONE : SidebarTypes.HISTORY,
+    };
+  },
+
+  [types.TOGGLE_DOCUMENTATION_VIEW]: (state) => {
+    return {
+      ...state,
+      currentSidebar: state.currentSidebar == SidebarTypes.CONFIGURATION_DOCS ? SidebarTypes.NONE : SidebarTypes.CONFIGURATION_DOCS,
     };
   },
 });
