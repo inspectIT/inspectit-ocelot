@@ -56,37 +56,6 @@ const ConfigDocumentation = ({ configurationDocs }) => {
             border-bottom: 1px solid #dddddd;
             border-top: 1px solid #dddddd;
           }
-
-          .doc-element {
-            margin: 8px;
-          }
-
-          .doc-element-content {
-            background-color: white;
-            padding: 1px 10px;
-          }
-
-          .element-heading {
-            padding: 2px 8px;
-            margin: 0;
-            background-color: #ffcd9c; /*#ffc387*/
-            word-wrap: break-word;
-          }
-
-          button.doc-element-link {
-            background: none;
-            border: none;
-            padding: 0;
-            color: #007ad9;
-            cursor: pointer;
-            font-size: 1rem;
-          }
-
-          .actionInputDescription {
-            color: #545454;
-            font-family: '';
-          }
-
           .placeholder {
             color: #777;
             padding: 1rem 0.5rem;
