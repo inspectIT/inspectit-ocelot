@@ -8,17 +8,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.SelfMonitoringSettings;
-import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
@@ -36,9 +31,8 @@ public class LogPreloaderTest {
 
     @BeforeEach
     void setupPreloader() {
-        InspectitEnvironment env = Mockito.mock(InspectitEnvironment.class);
-        Mockito.when(env.getCurrentConfig()).thenReturn(createConfig(DEFAULT_BUFFER_SIZE));
-        logPreloader = new LogPreloader(env);
+        logPreloader = new LogPreloader();
+        logPreloader.doEnable(createConfig(DEFAULT_BUFFER_SIZE));
     }
 
     private static InspectitConfig createConfig(int bufferSize) {
@@ -95,7 +89,7 @@ public class LogPreloaderTest {
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false)
                     .count()).isEqualTo(DEFAULT_BUFFER_SIZE / 2);
 
-            logPreloader.inspectitConfigurationChanged(createBufferChangedEvent(2 * DEFAULT_BUFFER_SIZE));
+            logPreloader.doEnable(createConfig(2 * DEFAULT_BUFFER_SIZE));
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false).count()).isZero();
 
             IntStream.range(0, DEFAULT_BUFFER_SIZE + 1).forEach(n -> logPreloader.record(warnEvent));
@@ -104,17 +98,7 @@ public class LogPreloaderTest {
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs()
                     .spliterator(), false)).extracting(ILoggingEvent::getLevel).containsOnly(Level.WARN);
         }
-
-        private InspectitConfigChangedEvent createBufferChangedEvent(int newBufferSize) {
-            try {
-                Constructor<InspectitConfigChangedEvent> constructor = InspectitConfigChangedEvent.class.getDeclaredConstructor(Object.class, InspectitConfig.class, InspectitConfig.class);
-                constructor.setAccessible(true);
-                return constructor.newInstance(this, null, createConfig(newBufferSize));
-            } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
+        
     }
 
 }

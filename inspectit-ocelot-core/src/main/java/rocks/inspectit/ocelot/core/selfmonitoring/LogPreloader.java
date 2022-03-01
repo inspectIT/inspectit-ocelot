@@ -1,13 +1,12 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.google.common.annotations.VisibleForTesting;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
-import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.annotation.PostConstruct;
 import java.util.Iterator;
@@ -17,17 +16,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Preloads log events to be used by, e.g., {@link rocks.inspectit.ocelot.core.command.handler.impl.LogsCommandExecutor}.
  * Events are stored in a ring buffer, meaning old events are overwritten when the buffer is full and new events arrive.
  */
-// TODO: Implement as a DynamicallyActivatableService?
 @Component
-public class LogPreloader {
+@Slf4j
+public class LogPreloader extends DynamicallyActivatableService {
 
     private ILoggingEvent[] buffer;
 
     private final AtomicInteger currentIndex = new AtomicInteger(0);
 
-    @Autowired
-    public LogPreloader(InspectitEnvironment env) {
-        recreateBufferIfSizeChanged(env.getCurrentConfig().getSelfMonitoring().getLogPreloading());
+    public LogPreloader() {
+        super("selfMonitoring.logPreloading");
     }
 
     /**
@@ -63,26 +61,47 @@ public class LogPreloader {
         LogPreloadingAppender.registerPreloader(this);
     }
 
-    @EventListener
-    @VisibleForTesting
-    void inspectitConfigurationChanged(InspectitConfigChangedEvent event) {
-        recreateBufferIfSizeChanged(event.getNewConfig().getSelfMonitoring().getLogPreloading());
+    @Override
+    protected boolean checkEnabledForConfig(InspectitConfig configuration) {
+        return configuration.getSelfMonitoring().getLogPreloading() != null && configuration.getSelfMonitoring()
+                .getLogPreloading()
+                .isEnabled();
     }
 
     /**
-     * Recreates the buffer array and tries to re-insert old values into the new array.
+     * Recreates the buffer array if the configured size changed.
      * Drops all previously collected logs.
      *
-     * @param settings The LogPreloadingSettings
+     * @param configuration the configuration used to start the service. Is the same configuration as {@link InspectitEnvironment#getCurrentConfig()}.
+     *
+     * @return true if the enabling was successful, false otherwise.
      */
-    private void recreateBufferIfSizeChanged(LogPreloadingSettings settings) {
-        // TODO: check that buffer size is > 1
+    @Override
+    protected boolean doEnable(InspectitConfig configuration) {
+        LogPreloadingSettings settings = configuration.getSelfMonitoring().getLogPreloading();
+
         if (settings != null && (buffer == null || buffer.length != settings.getBufferSize())) {
-            buffer = new ILoggingEvent[settings.getBufferSize()];
-            // few log entries might be written to arbitrary indices between these two code lines,
-            // meaning they are lost as well
-            currentIndex.set(0);
+            if (settings.getBufferSize() < 1) {
+                log.error("Cannot enable LogPreloader with configured buffer size {}!", settings.getBufferSize());
+                return false;
+            } else {
+                log.info("Enabling LogPreloader with buffer size {}. This will drop all previously preloaded logs.", settings.getBufferSize());
+                buffer = new ILoggingEvent[settings.getBufferSize()];
+                // few log entries might be written to arbitrary indices between these two code lines,
+                // meaning they are lost as well
+                currentIndex.set(0);
+                return true;
+            }
         }
+
+        return false;
+    }
+
+    @Override
+    protected boolean doDisable() {
+        log.info("Disabling LogPreloader.");
+        buffer = null;
+        return true;
     }
 
     private class BufferIterator implements Iterator<ILoggingEvent> {
