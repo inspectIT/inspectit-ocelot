@@ -49,7 +49,7 @@ public class InfluxExporterService {
             if (StringUtils.hasText(influx.getUrl())) {
                 return true;
             } else if (influx.getEnabled().equals(ExporterEnabledState.ENABLED)) {
-                log.error("InfluxDB Exporter is enabled but no url set.");
+                log.warn("InfluxDB Exporter is enabled but no url set.");
             }
         }
         return false;
