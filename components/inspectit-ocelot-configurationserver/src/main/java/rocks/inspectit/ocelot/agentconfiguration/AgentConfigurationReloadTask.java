@@ -11,10 +11,7 @@ import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.utils.CancellableTask;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -172,7 +169,7 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         String src = fileAccessor.readConfigurationFile(path).orElse("");
 
         try {
-            Object loadedYaml = yaml.load(src);
+            Map<String, Object> loadedYaml = yaml.load(src);
             if (toMerge == null) {
                 return loadedYaml;
             } else {
