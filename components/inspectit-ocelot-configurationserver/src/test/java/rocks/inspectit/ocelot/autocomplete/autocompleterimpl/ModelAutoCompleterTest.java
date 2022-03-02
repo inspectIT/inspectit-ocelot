@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +47,7 @@ public class ModelAutoCompleterTest {
 
             List<String> result = completer.getSuggestions(input);
 
-            assertThat(result).containsExactlyInAnyOrder("config", "env", "exporters", "instrumentation", "logging", "metrics", "plugins", "privacy", "publish-open-census-to-bootstrap", "self-monitoring", "service-name", "tags", "thread-pool-size", "tracing", "agent-commands");
+            assertThat(result).containsExactlyInAnyOrder("config", "exporters", "instrumentation", "logging", "metrics", "plugins", "privacy", "publish-open-census-to-bootstrap", "self-monitoring", "service-name", "tags", "thread-pool-size", "tracing", "agent-commands");
         }
 
         @Test
@@ -119,6 +120,24 @@ public class ModelAutoCompleterTest {
         @Test
         void startsNotWithInspectit() {
             List<String> input = Arrays.asList("test", "antotherTest");
+
+            List<String> result = completer.getSuggestions(input);
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        void filtersInspectitEnvPath() {
+            List<String> input = Collections.singletonList("inspectit");
+
+            List<String> result = completer.getSuggestions(input);
+
+            assertThat(result).doesNotContain("env");
+        }
+
+        @Test
+        void ignoresPastInspectitEnvPath() {
+            List<String> input = Collections.singletonList("inspectit.env");
 
             List<String> result = completer.getSuggestions(input);
 
