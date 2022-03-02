@@ -21,7 +21,7 @@ The following properties are nested properties below the `inspectit.exporters.tr
 
 |Property |Default| Description
 |---|---|---|
-|`.enabled`|`IF_CONFIGURED`|If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Zipkin exporter. If the url is not set, it will log a warning with `ENABLED` but fail silently with `IF_CONFIGURED`.
+|`.enabled`|`IF_CONFIGURED`|If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Zipkin exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.
 |`.url`|`null`|v2 URL under which the ZipKin server can be accessed (e.g. http://127.0.0.1:9411/api/v2/spans).
 |`.service-name`|refers to `inspectit.service-name`|The service-name which will be used to publish the spans.
 
@@ -41,7 +41,7 @@ The following properties are nested properties below the `inspectit.exporters.tr
 
 |Property |Default| Description
 |---|---|---|
-|`.enabled`|`IF_CONFIGURED`|If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Jaeger exporter. If the url is not set, it will log a warning with `ENABLED` but fail silently with `IF_CONFIGURED`.
+|`.enabled`|`IF_CONFIGURED`|If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Jaeger exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.
 |`.url`|`null`|URL under which the Jaeger Thrift server can be accessed (e.g. http://127.0.0.1:14268/api/traces).
 |`.service-name`|refers to `inspectit.service-name`|The service-name which will be used to publish the spans.
 
@@ -60,7 +60,7 @@ The following properties are nested properties below the `inspectit.exporters.tr
 
 |Property |Default| Description
 |---|---|---|
-|`.enabled`|`IF_CONFIGURED`|If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the OpenCensus Agent Trace exporter. If the address is not set, it will log a warning with `ENABLED` but fail silently with `IF_CONFIGURED`.
+|`.enabled`|`IF_CONFIGURED`|If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the OpenCensus Agent Trace exporter. If the address is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.
 |`.address`|`null`|Address of the open-census agent (e.g. localhost:1234).
 |`.use-insecure`|`false`|If true, SSL is disabled.
 |`.service-name`|refers to `inspectit.service-name`|The service-name which will be used to publish the spans.
