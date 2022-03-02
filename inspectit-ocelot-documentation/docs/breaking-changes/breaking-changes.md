@@ -7,7 +7,7 @@ title: Breaking Changes
 
 ### New definition of exporters' enabled property
 
-Instead of a Boolean, the enabled field of exporters is now an enum with the values `DISABLED`, `ENABLED` and `IF_CONFIGURED` to express the behaviour of this property more clearly.
+Instead of a Boolean, the `enabled` property of exporters is now an enum with the values `DISABLED`, `ENABLED` and `IF_CONFIGURED` to express the behaviour of this property more clearly.
 For now old configurations using `true` and `false` will still work and be converted to their equivalent new values `IF_CONFIGURED` and `DISABLED` respectively.
 This conversion is however deprecated, so configurations should still be updated to the new values.
 

@@ -28,7 +28,7 @@ The following properties are nested properties below the `inspectit.exporters.me
 
 |Property | Default    | Description
 |---|------------|---|
-|`.enabled`| `DISABLED` |If ENABLED or IF_CONFIGURED, the inspectIT Ocelot agent will try to start the Prometheus metrics exporter and Prometheus HTTP server.
+|`.enabled`| `DISABLED` |If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the Prometheus metrics exporter and Prometheus HTTP server.
 |`.host`| `0.0.0.0`  |The hostname or network address to which the Prometheus HTTP server should bind.
 |`.port`| `8888`     |The port the Prometheus HTTP server should use.
 
@@ -44,7 +44,7 @@ The following properties are nested properties below the `inspectit.exporters.me
 
 |Property | Default                                 | Description
 |---|-----------------------------------------|---|
-|`.enabled`| `IF_CONFIGURED`                         |If ENABLED or IF_CONFIGURED, the agent will try to start the OpenCensus Agent Metrics exporter. If the address is not set, it will log an error with ENABLED but fail silently with IF_CONFIGURED.
+|`.enabled`| `IF_CONFIGURED`                         |If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the OpenCensus Agent Metrics exporter. If the address is not set, it will log a warning with `ENABLED` but fail silently with `IF_CONFIGURED`.
 |`.address`| `null`                                  |Address of the open-census agent (e.g. localhost:1234).
 |`.use-insecure`| `false`                                 |If true, SSL is disabled.
 |`.service-name`| refers to `inspectit.service-name`      |The service-name which will be used to publish the metrics.
@@ -70,7 +70,7 @@ The following properties are nested properties below the `inspectit.exporters.me
 
 |Property | Default                                 | Description
 |---|-----------------------------------------|---|
-|`.enabled`| `IF_CONFIGURED`                         |If ENABLED or IF_CONFIGURED, the agent will try to start the Influx exporter. If the url is not set, it will log an error with ENABLED but fail silently with IF_CONFIGURED.
+|`.enabled`| `IF_CONFIGURED`                         |If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Influx exporter. If the url is not set, it will log a warning with `ENABLED` but fail silently with `IF_CONFIGURED`.
 |`.url`| `null`                                  |The HTTP url of the InfluxDB, e.g. `http://localhost:8086`.
 |`.user`| `null`                                  | The user to use for connecting to the InfluxDB, can be empty if the InfluxDB is configured for unauthorized access.
 |`.password`| `null`                                  |The password to use for connecting to the InfluxDB, can be empty if the InfluxDB is configured for unauthorized access.
