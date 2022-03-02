@@ -92,8 +92,7 @@ jobs:
           echo "class Dummy{public static void main(String[] args)throws InterruptedException{while (true){Thread.sleep(1000);}}}" > Dummy.java
           javac Dummy.java
           $(nohup java Dummy > out.txt &)
-          sleep 2
-          ps -e -o pid,comm | grep java
+          ps -e | grep java
           processId=$( ps -e -o pid,comm | grep java | awk {'print $1'} )
           echo ProcessId: $processId
           pwd
