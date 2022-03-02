@@ -69,7 +69,7 @@ public class LogPreloadingAppenderTest {
             LogPreloader preloader = Mockito.mock(LogPreloader.class);
             logPreloadingAppender.registerPreloader(preloader);
 
-            verifyZeroInteractions(preloader);
+            verifyNoInteractions(preloader);
 
             logPreloadingAppender.append(infoEvent);
             logPreloadingAppender.append(infoEvent);
