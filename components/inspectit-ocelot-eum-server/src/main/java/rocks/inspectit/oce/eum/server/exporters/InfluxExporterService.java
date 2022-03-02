@@ -45,7 +45,7 @@ public class InfluxExporterService {
 
     private boolean shouldEnable() {
         InfluxExporterSettings influx = configuration.getExporters().getMetrics().getInflux();
-        if (!influx.getEnabled().equals(ExporterEnabledState.DISABLED)) {
+        if (!influx.getEnabled().isDisabled()) {
             if (StringUtils.hasText(influx.getUrl())) {
                 return true;
             } else if (influx.getEnabled().equals(ExporterEnabledState.ENABLED)) {

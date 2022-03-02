@@ -22,11 +22,11 @@ public class OpenCensusAgentTraceExporterService extends DynamicallyActivatableS
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         OpenCensusAgentTraceExporterSettings openCensusAgent = conf.getExporters().getTracing().getOpenCensusAgent();
-        if (conf.getTracing().isEnabled() && !openCensusAgent.getEnabled().equals(ExporterEnabledState.DISABLED)) {
+        if (conf.getTracing().isEnabled() && !openCensusAgent.getEnabled().isDisabled()) {
             if (StringUtils.hasText(openCensusAgent.getAddress())) {
                 return true;
             } else if (openCensusAgent.getEnabled().equals(ExporterEnabledState.ENABLED)) {
-                log.warn("OpenCensus Tracing Exporter is enabled but no address set.");
+                log.warn("OpenCensus Tracing Exporter is enabled but 'address' is not set.");
             }
         }
         return false;

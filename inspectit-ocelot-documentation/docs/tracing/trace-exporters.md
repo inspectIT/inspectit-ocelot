@@ -15,7 +15,7 @@ inspectIT Ocelot currently supports the following OpenCensus trace exporters:
 
 The Zipkin exporter exports Traces in Zipkin v2 format to a Zipkin server or other compatible servers.
 
-By default, the Zipkin exporter is enabled but its URL that is needed for the exporter to actually start is set to `null`.
+By default, the Zipkin exporter is enabled but the URL needed for the exporter to actually start is set to `null`.
 
 The following properties are nested properties below the `inspectit.exporters.tracing.zipkin` property:
 
@@ -35,7 +35,7 @@ To make inspectIT Ocelot push the spans to a Zipkin server running on the same m
 
 The Jaeger exports works exactly the same way as the [Zipkin Exporter](#zipkin-exporter).
 
-By default, the Jaeger exporter is enabled but its URL that is needed for the exporter to actually start is set to `null`.
+By default, the Jaeger exporter is enabled but the URL needed for the exporter to actually start is set to `null`.
 
 The following properties are nested properties below the `inspectit.exporters.tracing.jaeger` property:
 

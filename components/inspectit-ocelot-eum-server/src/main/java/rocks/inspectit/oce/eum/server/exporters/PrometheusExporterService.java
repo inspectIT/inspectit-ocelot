@@ -30,7 +30,7 @@ public class PrometheusExporterService {
     @PostConstruct
     private void doEnable() {
         val config = configuration.getExporters().getMetrics().getPrometheus();
-        if (!config.getEnabled().equals(ExporterEnabledState.DISABLED)) {
+        if (!config.getEnabled().isDisabled()) {
             try {
                 String host = config.getHost();
                 int port = config.getPort();

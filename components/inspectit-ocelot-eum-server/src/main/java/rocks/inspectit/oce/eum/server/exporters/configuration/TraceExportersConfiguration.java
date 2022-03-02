@@ -32,7 +32,7 @@ public class TraceExportersConfiguration {
         Optional.ofNullable(configuration.getExporters())
                 .map(ExportersSettings::getTracing)
                 .map(TraceExportersSettings::getJaeger)
-                .filter((jaeger) -> !jaeger.getEnabled().equals(ExporterEnabledState.DISABLED))
+                .filter((jaeger) -> !jaeger.getEnabled().isDisabled())
                 .ifPresent(settings -> {
                     if (StringUtils.hasText(settings.getUrl()) && !StringUtils.hasText(settings.getGrpc())) {
                         log.warn("In order to use Jaeger span exporter, please specify the grpc API endpoint property instead of the url.");

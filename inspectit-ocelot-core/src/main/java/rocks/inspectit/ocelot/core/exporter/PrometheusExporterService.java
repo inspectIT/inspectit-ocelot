@@ -31,8 +31,7 @@ public class PrometheusExporterService extends DynamicallyActivatableService {
         return conf.getMetrics().isEnabled() && !conf.getExporters()
                 .getMetrics()
                 .getPrometheus()
-                .getEnabled()
-                .equals(ExporterEnabledState.DISABLED);
+                .getEnabled().isDisabled();
     }
 
     @Override

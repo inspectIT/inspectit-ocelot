@@ -11,7 +11,7 @@ public class BooleanToExporterEnabledStateConverter implements Converter<Boolean
     @Override
     public ExporterEnabledState convert(Boolean source) {
         // log deprecation warn
-        log.warn("You are using the deprecated Boolean-based style to define whether an exporter is enabled. This style will be invalid in future ocelot releases.");
+        log.warn("You are using the deprecated Boolean-based style to define whether an exporter is enabled. This style will be invalid in future releases of InspectIT Ocelot.");
 
         if (source) {
             return ExporterEnabledState.IF_CONFIGURED;

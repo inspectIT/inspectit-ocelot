@@ -101,6 +101,6 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
             props.setProperty("inspectit.exporters.metrics.influx.enabled", "ENABLED");
         });
         assertLogsOfLevelOrGreater(Level.WARN);
-        assertLogCount("InfluxDB Exporter is enabled but no url set.", 1);
+        assertLogCount("InfluxDB Exporter is enabled but 'url' is not set.", 1);
     }
 }

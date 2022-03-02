@@ -26,11 +26,11 @@ public class OpenCensusAgentMetricsExporterService extends DynamicallyActivatabl
         @Valid OpenCensusAgentMetricsExporterSettings openCensusAgent = conf.getExporters()
                 .getMetrics()
                 .getOpenCensusAgent();
-        if (conf.getMetrics().isEnabled() && !openCensusAgent.getEnabled().equals(ExporterEnabledState.DISABLED)) {
+        if (conf.getMetrics().isEnabled() && !openCensusAgent.getEnabled().isDisabled()) {
             if (StringUtils.hasText(openCensusAgent.getAddress())) {
                 return true;
             } else if (openCensusAgent.getEnabled().equals(ExporterEnabledState.ENABLED)) {
-                log.warn("OpenCensus Metrics Exporter is enabled but no address set.");
+                log.warn("OpenCensus Metrics Exporter is enabled but 'address' is not set.");
             }
         }
         return false;

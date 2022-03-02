@@ -72,6 +72,6 @@ public class JaegerExporterServiceIntTest extends SpringTestBase {
             props.setProperty("inspectit.exporters.tracing.jaeger.enabled", "ENABLED");
         });
         assertLogsOfLevelOrGreater(Level.WARN);
-        assertLogCount("Jaeger Exporter is enabled but no url set.", 1);
+        assertLogCount("Jaeger Exporter is enabled but 'url' is not set.", 1);
     }
 }
