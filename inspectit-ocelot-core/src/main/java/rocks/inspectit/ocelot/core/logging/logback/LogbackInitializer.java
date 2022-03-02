@@ -80,7 +80,7 @@ public class LogbackInitializer {
     }
 
     /**
-     * (Re-)initializes the logback configuration
+     * (Re-)initializes the logback configuration.
      *
      * @param config inspectIT config to read values from
      */
@@ -137,7 +137,7 @@ public class LogbackInitializer {
     private static void setPropertiesFromConfig(InspectitConfig config) {
         consoleEnabled = config.getLogging().getConsole().isEnabled();
         fileEnabled = config.getLogging().getFile().isEnabled();
-        
+
         selfMonitoringEnabled = config.getSelfMonitoring().isEnabled();
 
         LogPreloadingSettings logPreloadingSettings = config.getLogPreloading();

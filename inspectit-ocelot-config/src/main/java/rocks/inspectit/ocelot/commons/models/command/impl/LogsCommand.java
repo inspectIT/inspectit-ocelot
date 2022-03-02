@@ -8,7 +8,7 @@ import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 
 /**
- * Represents a Logs-Command. Logs commands are used to recieve the logs from a certain agent.
+ * Represents a Logs-Command. Logs commands are used to receive the logs from a certain agent.
  */
 @Data
 @NoArgsConstructor
@@ -33,5 +33,6 @@ public class LogsCommand extends Command {
     public static class Response extends CommandResponse {
 
         private String logs;
+
     }
 }

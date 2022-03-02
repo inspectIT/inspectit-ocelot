@@ -62,9 +62,9 @@ public class LogsCommandHandler implements CommandHandler {
         if (!canHandle(command)) {
             throw new IllegalArgumentException("LogsCommandHandler can only handle commands of type LogsCommand.");
         }
+
         Duration responseTimeout = configuration.getAgentCommand().getResponseTimeout();
         DeferredResult<ResponseEntity<?>> deferredResult = new DeferredResult<>(responseTimeout.toMillis());
-
         deferredResult.onTimeout(() -> ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build());
 
         return deferredResult;
@@ -83,4 +83,5 @@ public class LogsCommandHandler implements CommandHandler {
         LogsCommand.Response logsResponse = (LogsCommand.Response) response;
         result.setResult(ResponseEntity.ok().body(logsResponse.getLogs()));
     }
+
 }
