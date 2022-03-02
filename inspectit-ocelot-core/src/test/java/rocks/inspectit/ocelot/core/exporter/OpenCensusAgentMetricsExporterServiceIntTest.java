@@ -1,8 +1,8 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-import ch.qos.logback.classic.Level;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
+import io.github.netmikey.logunit.api.LogCapturer;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -15,9 +15,9 @@ import io.opencensus.stats.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.io.IOException;
@@ -35,11 +35,19 @@ import static org.awaitility.Awaitility.await;
 public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase {
 
     public static final String HOST = "localhost";
+
     public static final int PORT = 55678;
+
     private static Server agent;
+
     @Autowired
     private StatsRecorder statsRecorder;
+
     private static FakeOcAgentMetricsServiceGrpcImpl fakeOcAgentMetricsServiceGrpc = new FakeOcAgentMetricsServiceGrpcImpl();
+
+    @RegisterExtension
+    LogCapturer spanLogs = LogCapturer.create()
+            .captureForType(OpenCensusAgentMetricsExporterService.class, org.slf4j.event.Level.WARN);
 
     @BeforeAll
     public static void setUp() {
@@ -97,25 +105,23 @@ public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase
         private final List<ExportMetricsServiceRequest> exportMetricsServiceRequests = new ArrayList<>();
 
         @GuardedBy("this")
-        private final StreamObserver<ExportMetricsServiceRequest> exportRequestObserver =
-                new StreamObserver<ExportMetricsServiceRequest>() {
-                    @Override
-                    public void onNext(ExportMetricsServiceRequest value) {
-                        addExportRequest(value);
-                    }
+        private final StreamObserver<ExportMetricsServiceRequest> exportRequestObserver = new StreamObserver<ExportMetricsServiceRequest>() {
+            @Override
+            public void onNext(ExportMetricsServiceRequest value) {
+                addExportRequest(value);
+            }
 
-                    @Override
-                    public void onError(Throwable t) {
-                    }
+            @Override
+            public void onError(Throwable t) {
+            }
 
-                    @Override
-                    public void onCompleted() {
-                    }
-                };
+            @Override
+            public void onCompleted() {
+            }
+        };
 
         @Override
-        public synchronized StreamObserver<ExportMetricsServiceRequest> export(
-                StreamObserver<ExportMetricsServiceResponse> responseObserver) {
+        public synchronized StreamObserver<ExportMetricsServiceRequest> export(StreamObserver<ExportMetricsServiceResponse> responseObserver) {
             return exportRequestObserver;
         }
 
@@ -138,8 +144,7 @@ public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase
             props.setProperty("inspectit.exporters.metrics.open-census-agent.use-insecure", "true");
             props.setProperty("inspectit.exporters.metrics.open-census-agent.enabled", "ENABLED");
         });
-        assertLogsOfLevelOrGreater(Level.WARN);
-        assertLogCount("OpenCensus Metrics Exporter is enabled but 'address' is not set.", 1);
+        spanLogs.assertContains("'address'");
     }
 
 }
