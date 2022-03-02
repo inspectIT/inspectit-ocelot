@@ -44,7 +44,9 @@ public class AgentMain {
      * @param args the pid of a JVM
      */
     public static void main(String[] args) {
-        System.out.println(args);
+        for (String arg : args) {
+            System.out.println(arg);
+        }
         
         boolean error = (args.length != 1 && args.length != 2) || !args[0].matches("\\d+");
 
