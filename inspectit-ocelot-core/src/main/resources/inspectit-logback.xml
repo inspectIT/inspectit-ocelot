@@ -58,7 +58,6 @@
         <filter class="rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer$LogPreloadingFilter" />
     </appender>
 
-
     <!-- set log levels - for more verbose logging change inspectit.logging.trace or inspectit.logging.debug to true -->
     <root level="${INSPECTIT_LOG_LEVEL:-INFO}">
         <appender-ref ref="stdout" />

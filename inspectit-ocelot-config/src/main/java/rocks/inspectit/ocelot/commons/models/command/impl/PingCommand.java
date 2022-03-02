@@ -13,6 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class PingCommand extends Command {
+
     /**
      * Type identifier for JSON serialization.
      */
