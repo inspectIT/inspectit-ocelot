@@ -4,7 +4,8 @@ import ch.qos.logback.classic.Level;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.net.URL;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 @Data
 @NoArgsConstructor
@@ -18,10 +19,13 @@ public class LogPreloadingSettings {
     /**
      * The used log level and higher
      */
+    @NotNull
     private Level logLevel = Level.WARN;
 
     /**
      * Buffer size
      */
+    @Min(1)
     private int bufferSize;
+
 }
