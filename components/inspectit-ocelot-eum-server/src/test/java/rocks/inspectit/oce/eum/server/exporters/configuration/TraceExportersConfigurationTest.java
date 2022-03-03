@@ -1,13 +1,11 @@
 package rocks.inspectit.oce.eum.server.exporters.configuration;
 
-import io.opencensus.trace.export.SpanExporter;
+import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,11 +17,11 @@ class TraceExportersConfigurationTest {
     public class MissingGrpcTest {
 
         @Autowired(required = false)
-        List<SpanExporter> spanExporters;
+        JaegerGrpcSpanExporter exporter;
 
         @Test
         public void testDisabled() {
-            assertThat(spanExporters).isEqualTo(null);
+            assertThat(exporter).isEqualTo(null);
         }
     }
 
@@ -32,11 +30,11 @@ class TraceExportersConfigurationTest {
     public class DisabledTest {
 
         @Autowired(required = false)
-        List<SpanExporter> spanExporters;
+        JaegerGrpcSpanExporter exporter;
 
         @Test
         public void testDisabled() {
-            assertThat(spanExporters).isEqualTo(null);
+            assertThat(exporter).isEqualTo(null);
         }
     }
 
@@ -45,11 +43,11 @@ class TraceExportersConfigurationTest {
     public class BothAvailableTest {
 
         @Autowired
-        SpanExporter spanExporters;
+        JaegerGrpcSpanExporter exporter;
 
         @Test
         public void testDisabled() {
-            assertThat(spanExporters).isNotEqualTo(null);
+            assertThat(exporter).isNotEqualTo(null);
         }
     }
 
