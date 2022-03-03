@@ -1,9 +1,18 @@
 syntax = "proto3";
 
+option java_multiple_files = true;
+option java_package = "rocks.inspectit.ocelot.grpc";
+option java_outer_classname = "Commands";
+
+service AgentCommands{
+  rpc AskForCommands(stream CommandResponse) returns (stream Command);
+}
+
 message Command {
+  string commandId = 1;
   oneof commandType {
-    PingCommand ping = 1;
-    ListClassesCommand listClasses = 2;
+    PingCommand ping = 2;
+    ListClassesCommand listClasses = 3;
   }
 }
 
@@ -14,10 +23,11 @@ message ListClassesCommand {
 }
 
 message CommandResponse {
+  string commandId = 1;
   oneof commandResponseType {
-    FirstResponse first = 1;
-    PingCommandResponse ping = 2;
-    ListClassesCommandResponse listClasses = 3;
+    FirstResponse first = 2;
+    PingCommandResponse ping = 3;
+    ListClassesCommandResponse listClasses = 4;
   }
 }
 
