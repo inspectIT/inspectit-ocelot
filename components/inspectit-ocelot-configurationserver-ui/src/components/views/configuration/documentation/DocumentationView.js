@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { Checkbox } from 'primereact/checkbox';
+import { InputText } from 'primereact/inputtext';
 import ConfigDocumentation from './ConfigDocumentation';
 import useFetchData from '../../../../hooks/use-fetch-data';
+import _ from 'lodash';
+import useDebounce from '../../../../hooks/use-debounce';
 
 /**
  * The sidebar panel for showing existing versions of the configuration files.
@@ -11,10 +14,15 @@ const DocumentationView = () => {
   // local state
   const [selectedAgentMapping, setSelectedAgentMapping] = useState(null);
   const [includeDefault, setIncludeDefault] = useState(true);
+  const [filterValue, setFilterValue] = useState('');
+  const [configurationDocs, setConfigurationDocs] = useState(null);
+
+  // debounced filter value for preventing filtering on each input change
+  const filterValueDebounced = useDebounce(filterValue, 500);
 
   // fetch required data
   const [{ data: agentMappings }, refreshAgentMappings] = useFetchData('mappings', {}, []);
-  const [{ data: configurationDocs, isLoading: isLoadingDocs, isError: isDocsError }, refreshConfigurationDocs] = useFetchData(
+  const [{ data: fullConfigurationDocs, isLoading: isLoadingDocs, isError: isDocsError }, refreshConfigurationDocs] = useFetchData(
     'configuration/documentation',
     {
       'agent-mapping': selectedAgentMapping,
@@ -36,6 +44,20 @@ const DocumentationView = () => {
       refreshConfigurationDocs();
     }
   }, [selectedAgentMapping, includeDefault]);
+
+  // filter documentation for display
+  useEffect(() => {
+    if (fullConfigurationDocs) {
+      const filter = filterValueDebounced.toLowerCase();
+      const filteredData = {
+        actions: _.filter(fullConfigurationDocs.actions, (e) => e.name.toLowerCase().includes(filter)),
+        scopes: _.filter(fullConfigurationDocs.scopes, (e) => e.name.toLowerCase().includes(filter)),
+        rules: _.filter(fullConfigurationDocs.rules, (e) => e.name.toLowerCase().includes(filter)),
+        metrics: _.filter(fullConfigurationDocs.metrics, (e) => e.name.toLowerCase().includes(filter)),
+      };
+      setConfigurationDocs(filteredData);
+    }
+  }, [filterValueDebounced, fullConfigurationDocs]);
 
   return (
     <>
@@ -78,6 +100,10 @@ const DocumentationView = () => {
             flex: 1;
             padding: 1rem;
           }
+          .filter {
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #9e9e9e;
+          }
         `}
       </style>
       <div className="documentation p-component">
@@ -99,6 +125,18 @@ const DocumentationView = () => {
             <label htmlFor="defaultConfigurationCb">Include Default Configuration:</label>
             <Checkbox id="defaultConfigurationCb" checked={includeDefault} onChange={(e) => setIncludeDefault(e.checked)} />
           </div>
+        </div>
+
+        <div className="filter p-inputgroup">
+          <span className="pi p-inputgroup-addon pi-filter" />
+
+          <InputText
+            style={{ flex: 1 }}
+            value={filterValue}
+            placeholder={'Filter Documentation'}
+            onChange={(e) => setFilterValue(e.target.value)}
+            disabled={!(configurationDocs && !isDocsError)}
+          />
         </div>
 
         {selectedAgentMapping ? (

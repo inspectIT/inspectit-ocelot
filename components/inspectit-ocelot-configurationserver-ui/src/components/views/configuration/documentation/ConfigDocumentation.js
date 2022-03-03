@@ -4,7 +4,7 @@ import DocsElementTypes from './DocsElementTypes';
 import { Growl } from 'primereact/growl';
 import _ from 'lodash';
 
-const ConfigDocumentation = ({ configurationDocs }) => {
+const ConfigDocumentation = React.memo(({ configurationDocs }) => {
   // growl for showing notifications
   const growl = useRef(null);
 
@@ -52,7 +52,7 @@ const ConfigDocumentation = ({ configurationDocs }) => {
             background-color: #eee;
             font-size: 1rem;
             font-weight: bold;
-            padding: 1rem 0.5rem;
+            padding: 1rem;
             border-bottom: 1px solid #dddddd;
             border-top: 1px solid #dddddd;
           }
@@ -104,6 +104,8 @@ const ConfigDocumentation = ({ configurationDocs }) => {
       </div>
     </>
   );
-};
+}, _.isEqual);
+
+ConfigDocumentation.displayName = 'ConfigDocumentation';
 
 export default ConfigDocumentation;
