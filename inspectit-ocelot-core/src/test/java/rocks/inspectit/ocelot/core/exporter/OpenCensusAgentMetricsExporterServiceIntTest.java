@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.io.IOException;
@@ -46,7 +47,7 @@ public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase
     private static FakeOcAgentMetricsServiceGrpcImpl fakeOcAgentMetricsServiceGrpc = new FakeOcAgentMetricsServiceGrpcImpl();
 
     @RegisterExtension
-    LogCapturer spanLogs = LogCapturer.create()
+    LogCapturer warnLogs = LogCapturer.create()
             .captureForType(OpenCensusAgentMetricsExporterService.class, org.slf4j.event.Level.WARN);
 
     @BeforeAll
@@ -142,9 +143,9 @@ public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase
             // change a second property so change is detected and another try of enabling triggered,
             // since address already is empty by default
             props.setProperty("inspectit.exporters.metrics.open-census-agent.use-insecure", "true");
-            props.setProperty("inspectit.exporters.metrics.open-census-agent.enabled", "ENABLED");
+            props.setProperty("inspectit.exporters.metrics.open-census-agent.enabled", ExporterEnabledState.ENABLED);
         });
-        spanLogs.assertContains("'address'");
+        warnLogs.assertContains("'address'");
     }
 
 }

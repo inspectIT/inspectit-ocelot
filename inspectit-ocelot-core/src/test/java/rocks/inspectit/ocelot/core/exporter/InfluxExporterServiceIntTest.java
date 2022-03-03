@@ -37,7 +37,7 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
     private static final String DATABASE = "ocelot_test";
 
     @RegisterExtension
-    LogCapturer spanLogs = LogCapturer.create().captureForType(InfluxExporterService.class, org.slf4j.event.Level.WARN);
+    LogCapturer warnLogs = LogCapturer.create().captureForType(InfluxExporterService.class, org.slf4j.event.Level.WARN);
 
     @BeforeEach
     void startInfluxDB() throws Exception {
@@ -102,6 +102,6 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
             props.setProperty("inspectit.exporters.metrics.influx.url", "");
             props.setProperty("inspectit.exporters.metrics.influx.enabled", "ENABLED");
         });
-        spanLogs.assertContains("'url'");
+        warnLogs.assertContains("'url'");
     }
 }

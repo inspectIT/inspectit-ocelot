@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.testutils.OpenCensusUtils;
 
@@ -34,7 +35,7 @@ public class JaegerExporterServiceIntTest extends SpringTestBase {
     private WireMockServer wireMockServer;
 
     @RegisterExtension
-    LogCapturer spanLogs = LogCapturer.create().captureForType(JaegerExporterService.class, org.slf4j.event.Level.WARN);
+    LogCapturer warnLogs = LogCapturer.create().captureForType(JaegerExporterService.class, org.slf4j.event.Level.WARN);
 
     @BeforeEach
     void setupWiremock() {
@@ -70,8 +71,8 @@ public class JaegerExporterServiceIntTest extends SpringTestBase {
     void testNoUrlSet() {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.tracing.jaeger.url", "");
-            props.setProperty("inspectit.exporters.tracing.jaeger.enabled", "ENABLED");
+            props.setProperty("inspectit.exporters.tracing.jaeger.enabled", ExporterEnabledState.ENABLED);
         });
-        spanLogs.assertContains("'url'");
+        warnLogs.assertContains("'url'");
     }
 }

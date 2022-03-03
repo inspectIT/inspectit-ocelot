@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import javax.annotation.Nullable;
@@ -50,7 +51,7 @@ public class OpenCensusAgentTraceExporterServiceIntTest extends SpringTestBase {
     private static FakeOcAgentTraceServiceGrpcImpl fakeOcAgentTraceServiceGrpc = new FakeOcAgentTraceServiceGrpcImpl();
 
     @RegisterExtension
-    LogCapturer spanLogs = LogCapturer.create()
+    LogCapturer warnLogs = LogCapturer.create()
             .captureForType(OpenCensusAgentTraceExporterService.class, org.slf4j.event.Level.WARN);
 
     @BeforeAll
@@ -207,8 +208,8 @@ public class OpenCensusAgentTraceExporterServiceIntTest extends SpringTestBase {
     void testNoAddressSet() {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.tracing.open-census-agent.address", "");
-            props.setProperty("inspectit.exporters.tracing.open-census-agent.enabled", "ENABLED");
+            props.setProperty("inspectit.exporters.tracing.open-census-agent.enabled", ExporterEnabledState.ENABLED);
         });
-        spanLogs.assertContains("'address'");
+        warnLogs.assertContains("'address'");
     }
 }
