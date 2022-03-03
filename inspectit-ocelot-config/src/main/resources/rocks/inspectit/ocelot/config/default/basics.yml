@@ -105,8 +105,10 @@ inspectit:
   agent-commands:
     # whether agent commands are enabled or not
     enabled: false
-    # the URL for fetching agent commands - e.g.: http://localhost:8090/api/v1/agent/command
+    # the URL for fetching agent commands over grpc - e.g.: http://localhost:8090/api/v1/agent/command
     url:
+    # the URL for fetching agent commands - e.g.: http://localhost:9090
+    grpc-url: http://localhost:9090
     # whether the agent commands URL should be derived from the HTTP configuration URL
     derive-from-http-config-url: false
     # path which is used for the agent command URL in case it is derived from the HTTP configuration URL

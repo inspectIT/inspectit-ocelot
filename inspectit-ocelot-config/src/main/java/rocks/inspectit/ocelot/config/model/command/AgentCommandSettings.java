@@ -21,6 +21,11 @@ public class AgentCommandSettings {
     private URL url;
 
     /**
+     * The URL for getting agent commands over grpc.
+     */
+    private String grpcUrl;
+
+    /**
      * Whether the agent commands URL should be derived from the HTTP configuration URL.
      */
     private boolean deriveFromHttpConfigUrl = false;
