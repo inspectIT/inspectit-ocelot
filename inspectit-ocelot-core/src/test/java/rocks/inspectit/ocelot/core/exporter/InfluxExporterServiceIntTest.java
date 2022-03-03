@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.exporter;
 import de.flapdoodle.embed.process.runtime.Network;
 import io.apisense.embed.influx.InfluxServer;
 import io.apisense.embed.influx.configuration.InfluxConfigurationWriter;
+import io.github.netmikey.logunit.api.LogCapturer;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.*;
 import io.opencensus.tags.TagKey;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.util.Arrays;
@@ -33,12 +36,14 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
 
     private static final String DATABASE = "ocelot_test";
 
+    @RegisterExtension
+    LogCapturer warnLogs = LogCapturer.create().captureForType(InfluxExporterService.class, org.slf4j.event.Level.WARN);
+
     @BeforeEach
     void startInfluxDB() throws Exception {
         InfluxServer.Builder builder = new InfluxServer.Builder();
         int freeHttpPort = Network.getFreeServerPort();
-        InfluxConfigurationWriter influxConfig = new InfluxConfigurationWriter.Builder()
-                .setHttp(freeHttpPort) // by default auth is disabled
+        InfluxConfigurationWriter influxConfig = new InfluxConfigurationWriter.Builder().setHttp(freeHttpPort) // by default auth is disabled
                 .build();
         builder.setInfluxConfiguration(influxConfig);
 
@@ -76,20 +81,27 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
         }
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
-            QueryResult result = InfluxDBFactory.connect(url).query(new Query("SELECT LAST(cool_data) FROM " + DATABASE + ".autogen.my_test_measure GROUP BY *"));
+            QueryResult result = InfluxDBFactory.connect(url)
+                    .query(new Query("SELECT LAST(cool_data) FROM " + DATABASE + ".autogen.my_test_measure GROUP BY *"));
 
             List<QueryResult.Result> results = result.getResults();
             assertThat(results).hasSize(1);
             QueryResult.Result data = results.get(0);
             assertThat(data.getSeries()).hasSize(1);
             QueryResult.Series series = data.getSeries().get(0);
-            assertThat(series.getTags())
-                    .hasSize(1)
-                    .containsEntry("my_tag", "myval");
+            assertThat(series.getTags()).hasSize(1).containsEntry("my_tag", "myval");
             assertThat(series.getValues().get(0).get(1)).isEqualTo(42.0);
 
         });
     }
 
-
+    @DirtiesContext
+    @Test
+    void testNoUrlSet() {
+        updateProperties(props -> {
+            props.setProperty("inspectit.exporters.metrics.influx.url", "");
+            props.setProperty("inspectit.exporters.metrics.influx.enabled", "ENABLED");
+        });
+        warnLogs.assertContains("'url'");
+    }
 }

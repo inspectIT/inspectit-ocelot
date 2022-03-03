@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+@TestPropertySource(properties = {"inspectit.exporters.metrics.prometheus.enabled=ENABLED"})
 public class PrometheusExporterServiceIntTest extends SpringTestBase {
 
     private static final int HTTP_TIMEOUT = 1000;
@@ -45,7 +47,9 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
     }
 
     void assertUnavailable(String url) throws Exception {
-        Throwable throwable = catchThrowable(() -> testClient.execute(new HttpGet(url)).getStatusLine().getStatusCode());
+        Throwable throwable = catchThrowable(() -> testClient.execute(new HttpGet(url))
+                .getStatusLine()
+                .getStatusCode());
 
         assertThat(throwable).isInstanceOf(IOException.class);
     }
@@ -70,7 +74,7 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
     @Test
     void testLocalSwitch() throws Exception {
         updateProperties(props -> {
-            props.setProperty("inspectit.exporters.metrics.prometheus.enabled", "false");
+            props.setProperty("inspectit.exporters.metrics.prometheus.enabled", "DISABLED");
         });
         assertUnavailable("http://localhost:8888/metrics");
         assertNoLogsOfLevelOrGreater(Level.WARN);

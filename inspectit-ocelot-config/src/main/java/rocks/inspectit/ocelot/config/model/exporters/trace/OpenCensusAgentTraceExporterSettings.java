@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.config.model.exporters.trace;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
@@ -10,7 +11,10 @@ import java.time.Duration;
 @NoArgsConstructor
 public class OpenCensusAgentTraceExporterSettings {
 
-    private boolean enabled;
+    /**
+     * Whether the exporter should be started.
+     */
+    private ExporterEnabledState enabled;
 
     /**
      * The address of the OpenCensus Agent.

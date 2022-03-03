@@ -92,8 +92,7 @@ jobs:
           echo "class Dummy{public static void main(String[] args)throws InterruptedException{while (true){Thread.sleep(1000);}}}" > Dummy.java
           javac Dummy.java
           $(nohup java Dummy > out.txt &)
-          sleep 2
-          processId=$( ps -e -o pid,comm | grep java | awk {'print $1'} )
+          processId=$( ps -e -o pid,comm,args | grep 'java Dummy' | awk '{ if ($2=="java") print $1 }' )
           pwd
-          java -jar inspectit-ocelot-agent/build/inspectit-ocelot-agent-SNAPSHOT.jar $processId
+          java -jar inspectit-ocelot-agent/build/inspectit-ocelot-agent-SNAPSHOT.jar $processId '{inspectit:{exporters:{metrics:{prometheus:{enabled:"ENABLED"}}}}}'
           curl -4 -o /dev/null -s -w "%{http_code}" --connect-timeout 2 --max-time 2  --retry 3 --retry-delay 3 --retry-max-time 10 --retry-connrefuse http://localhost:8888
