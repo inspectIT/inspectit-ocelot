@@ -58,14 +58,14 @@ public class ConfigParser {
 
             // remove any invalid keys at the top level to make the String parseable for Jackson
             yamlMap.keySet().removeIf(key -> !key.equals("inspectit"));
-            configYaml = mapper.writeValueAsString(yamlMap);
+            String cleanedConfigYaml = mapper.writeValueAsString(yamlMap);
 
             StringSubstitutor stringSubstitutor = new NestedMapStringSubstitutor(yamlMap);
-            String cleanedInputString = stringSubstitutor.replace(configYaml);
+            cleanedConfigYaml = stringSubstitutor.replace(cleanedConfigYaml);
 
             //Parse the InspectitConfig from the created YAML String
             ObjectReader reader = mapper.reader().withRootName("inspectit").forType(InspectitConfig.class);
-            return reader.readValue(cleanedInputString);
+            return reader.readValue(cleanedConfigYaml);
         } else {
             return new InspectitConfig();
         }

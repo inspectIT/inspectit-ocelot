@@ -93,7 +93,6 @@ class ConfigParserTest {
 
         @Test
         void withAdditionalInvalidRootKey() throws IOException {
-
             String configYaml = getYaml("configWithAdditionalInvalidRootKey.yml");
 
             InspectitConfig result = configParser.parseConfig(configYaml);
@@ -103,7 +102,6 @@ class ConfigParserTest {
 
         @Test
         void withUnknownProperty() throws IOException {
-
             String configYaml = getYaml("configWithUnknownProperty.yml");
 
             InspectitConfig result = configParser.parseConfig(configYaml);
