@@ -92,6 +92,24 @@ class ConfigParserTest {
         }
 
         @Test
+        void withAdditionalInvalidRootKey() throws IOException {
+            String configYaml = getYaml("configWithAdditionalInvalidRootKey.yml");
+
+            InspectitConfig result = configParser.parseConfig(configYaml);
+
+            assertThat(result.getServiceName()).isEqualTo("name");
+        }
+
+        @Test
+        void withUnknownProperty() throws IOException {
+            String configYaml = getYaml("configWithUnknownProperty.yml");
+
+            InspectitConfig result = configParser.parseConfig(configYaml);
+
+            assertThat(result.getServiceName()).isEqualTo("name");
+        }
+
+        @Test
         void withDuration() throws IOException {
 
             String configYaml = getYaml("configWithDuration.yml");
