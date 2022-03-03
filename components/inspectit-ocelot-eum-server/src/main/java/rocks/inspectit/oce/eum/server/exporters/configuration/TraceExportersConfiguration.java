@@ -11,9 +11,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
+import rocks.inspectit.oce.eum.server.configuration.model.EumExportersSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
-import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
-import rocks.inspectit.ocelot.config.model.exporters.ExportersSettings;
 import rocks.inspectit.ocelot.config.model.exporters.trace.JaegerExporterSettings;
 import rocks.inspectit.ocelot.config.model.exporters.trace.TraceExportersSettings;
 
@@ -30,7 +29,7 @@ public class TraceExportersConfiguration {
     @PostConstruct
     public void logWrongJaegerConfig() {
         Optional.ofNullable(configuration.getExporters())
-                .map(ExportersSettings::getTracing)
+                .map(EumExportersSettings::getTracing)
                 .map(TraceExportersSettings::getJaeger)
                 .filter((jaeger) -> !jaeger.getEnabled().isDisabled())
                 .ifPresent(settings -> {

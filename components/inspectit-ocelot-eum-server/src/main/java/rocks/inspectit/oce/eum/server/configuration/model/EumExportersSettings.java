@@ -1,9 +1,8 @@
 package rocks.inspectit.oce.eum.server.configuration.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.validation.annotation.Validated;
-import rocks.inspectit.ocelot.config.model.exporters.ExportersSettings;
+import rocks.inspectit.ocelot.config.model.exporters.metrics.MetricsExportersSettings;
 
 import javax.validation.Valid;
 
@@ -11,9 +10,11 @@ import javax.validation.Valid;
  * Extended exporter settings.
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Validated
-public class EumExportersSettings extends ExportersSettings {
+public class EumExportersSettings {
+
+    @Valid
+    private MetricsExportersSettings metrics;
 
     /**
      * Exporter settings for beacon exporters.
