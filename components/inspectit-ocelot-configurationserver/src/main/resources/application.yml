@@ -23,6 +23,10 @@ spring:
 server:
   port: 8090
 
+grpc:
+  server:
+    port: 9090
+
 inspectit-config-server:
   # the directory which is used as working directory
   working-directory: working_directory
