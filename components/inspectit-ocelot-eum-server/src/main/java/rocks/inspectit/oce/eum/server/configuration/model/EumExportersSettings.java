@@ -13,14 +13,17 @@ import javax.validation.Valid;
 @Validated
 public class EumExportersSettings {
 
-    @Valid
-    private MetricsExportersSettings metrics;
-
     /**
      * Exporter settings for beacon exporters.
      */
     private BeaconExporterSettings beacons;
 
+    /**
+     * Exporter settings for metric exporters.
+     */
+    @Valid
+    private MetricsExportersSettings metrics;
+    
     /**
      * Exporter settings for trace exporters.
      */
