@@ -20,7 +20,7 @@ class TraceExportersConfigurationTest {
         JaegerGrpcSpanExporter exporter;
 
         @Test
-        public void testDisabled() {
+        public void testBeanWasNotCreated() {
             assertThat(exporter).isEqualTo(null);
         }
     }
@@ -33,7 +33,7 @@ class TraceExportersConfigurationTest {
         JaegerGrpcSpanExporter exporter;
 
         @Test
-        public void testDisabled() {
+        public void testBeanWasNotCreated() {
             assertThat(exporter).isEqualTo(null);
         }
     }
@@ -46,7 +46,7 @@ class TraceExportersConfigurationTest {
         JaegerGrpcSpanExporter exporter;
 
         @Test
-        public void testDisabled() {
+        public void testBeanWasGetCreated() {
             assertThat(exporter).isNotEqualTo(null);
         }
     }
