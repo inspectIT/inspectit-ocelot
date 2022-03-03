@@ -20,3 +20,6 @@ inspectit:
 
   self-monitoring:
     enabled: false
+
+  log-preloading:
+    enabled: false

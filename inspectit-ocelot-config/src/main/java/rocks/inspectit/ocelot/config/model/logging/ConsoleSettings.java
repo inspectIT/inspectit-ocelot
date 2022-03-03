@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 public class ConsoleSettings {
 
     /**
-     * If file-based logging is enabled.
+     * If console-based logging is enabled.
      */
     private boolean enabled;
 
