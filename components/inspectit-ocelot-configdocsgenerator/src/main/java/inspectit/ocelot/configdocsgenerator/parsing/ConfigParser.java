@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -33,6 +34,7 @@ public class ConfigParser {
         //Add Module to deal with non-standard Duration values in the YAML
         SimpleModule module = new SimpleModule();
         module.addDeserializer(Duration.class, new CustomDurationDeserializer());
+        module.addDeserializer(ExporterEnabledState.class, new ExporterEnabledStateDeserializer());
         mapper.registerModule(module);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -102,6 +104,28 @@ public class ConfigParser {
         @Override
         public Duration deserialize(JsonParser parser, DeserializationContext context) throws IOException, JsonProcessingException {
             return parseHuman(parser.getText());
+        }
+    }
+
+    /**
+     * The CustomDurationDeserializer is needed to parse 'enabled' fields in exporters using the old Boolean style.
+     * Analogous to {@link rocks.inspectit.ocelot.config.conversion.BooleanToExporterEnabledStateConverter}.
+     */
+    private static class ExporterEnabledStateDeserializer extends JsonDeserializer<ExporterEnabledState> {
+
+        @Override
+        public ExporterEnabledState deserialize(JsonParser parser, DeserializationContext context) throws IOException, JsonProcessingException {
+            String text = parser.getText().toUpperCase();
+            switch (text) {
+                case "TRUE":
+                    // old setting 'true' is equivalent to IF_CONFIGURED
+                    return ExporterEnabledState.IF_CONFIGURED;
+                case "FALSE":
+                    // old setting 'false' is equivalent to DISABLED
+                    return ExporterEnabledState.DISABLED;
+                default:
+                    return ExporterEnabledState.valueOf(text);
+            }
         }
     }
 }
