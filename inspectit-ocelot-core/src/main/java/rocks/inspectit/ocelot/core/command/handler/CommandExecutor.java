@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.core.command.handler;
 
-import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
+import rocks.inspectit.ocelot.grpc.Command;
+import rocks.inspectit.ocelot.grpc.CommandResponse;
 
 /**
  * Interface for all command executors. These executors contain the logic how agent commands should be processed.

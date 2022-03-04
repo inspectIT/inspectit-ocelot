@@ -1,10 +1,11 @@
 package rocks.inspectit.ocelot.core.command.handler.impl;
 
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
-import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
+import rocks.inspectit.ocelot.grpc.Command;
+import rocks.inspectit.ocelot.grpc.CommandResponse;
+import rocks.inspectit.ocelot.grpc.PingCommand;
+import rocks.inspectit.ocelot.grpc.PingCommandResponse;
 
 /**
  * Executor for executing {@link PingCommand}s.
@@ -21,7 +22,7 @@ public class PingCommandExecutor implements CommandExecutor {
      */
     @Override
     public boolean canExecute(Command command) {
-        return command instanceof PingCommand;
+        return command.hasPing();
     }
 
     /**
@@ -39,6 +40,9 @@ public class PingCommandExecutor implements CommandExecutor {
             throw new IllegalArgumentException(exceptionMessage);
         }
 
-        return new PingCommand.Response(command.getCommandId());
+        return CommandResponse.newBuilder()
+                .setCommandId(command.getCommandId())
+                .setPing(PingCommandResponse.newBuilder())
+                .build();
     }
 }

@@ -3,18 +3,14 @@ package rocks.inspectit.ocelot.core.command.handler.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
-import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
 import rocks.inspectit.ocelot.core.instrumentation.NewClassDiscoveryService;
+import rocks.inspectit.ocelot.grpc.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Command for listing existing classes.
@@ -84,46 +80,46 @@ public class ListClassesCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean canExecute(Command command) {
-        return command instanceof ListClassesCommand;
+        return command.hasListClasses();
     }
 
     @Override
     public CommandResponse execute(Command command) {
-        ListClassesCommand lcCommand = (ListClassesCommand) command;
+        ListClassesCommand lcCommand = command.getListClasses();
         String filter = lcCommand.getFilter();
 
-        log.debug("Executing a ListClassesCommand: {}", lcCommand.getCommandId().toString());
+        log.debug("Executing a ListClassesCommand: {}", command.getCommandId());
 
         Set<Class<?>> setCopy = new HashSet<>(discoveryService.getKnownClasses());
-        ListClassesCommand.Response.TypeElement[] result = setCopy.parallelStream()
+        List<TypeElement> result = setCopy.parallelStream()
                 .filter(clazz -> clazz.getName().contains(filter))
                 .filter(this::includeClass)
                 .map(clazz -> {
                     try {
-                        String[] methods = Arrays.stream(clazz.getDeclaredMethods())
+                        List<String> methods = Arrays.stream(clazz.getDeclaredMethods())
                                 .map(ListClassesCommandExecutor::getMethodSignature)
                                 .filter(Objects::nonNull)
-                                .toArray(String[]::new);
+                                .collect(Collectors.toList());
 
-                        ListClassesCommand.Response.TypeElement element = new ListClassesCommand.Response.TypeElement();
-                        element.setName(clazz.getName());
-                        element.setType(clazz.isInterface() ? "interface" : "class");
-                        element.setMethods(methods);
-                        return element;
+                        return TypeElement.newBuilder()
+                                .setName(clazz.getName())
+                                .setType(clazz.isInterface() ? "interface" : "class")
+                                .addAllMethods(methods)
+                                .build();
                     } catch (Throwable e) {
                         log.debug("Could not add class to result list: {}", clazz);
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .toArray(ListClassesCommand.Response.TypeElement[]::new);
+                .collect(Collectors.toList());
 
-        log.debug("Finished executing ListClassesCommand: {}", lcCommand.getCommandId().toString());
+        log.debug("Finished executing ListClassesCommand: {}", command.getCommandId());
 
-        ListClassesCommand.Response response = new ListClassesCommand.Response();
-        response.setCommandId(lcCommand.getCommandId());
-        response.setResult(result);
-        return response;
+        return CommandResponse.newBuilder()
+                .setCommandId(command.getCommandId())
+                .setListClasses(ListClassesCommandResponse.newBuilder().addAllResult(result))
+                .build();
     }
 
     /**

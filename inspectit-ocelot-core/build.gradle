@@ -1,5 +1,6 @@
 plugins {
     id "me.champeau.gradle.jmh" version "0.5.3"
+    id 'com.google.protobuf' version '0.8.17'
 }
 
 configurations {
@@ -13,6 +14,22 @@ test {
 
     testLogging {
         exceptionFormat = 'full'
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.19.2"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.44.0'
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
     }
 }
 
@@ -30,6 +47,8 @@ dependencies {
     )
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
+    runtimeOnly 'io.grpc:grpc-netty-shaded:1.44.1'
+
     implementation(
             project(':inspectit-ocelot-config'),
             project(':inspectit-ocelot-sdk'),
@@ -38,6 +57,10 @@ dependencies {
             "org.springframework.boot:spring-boot:${springVersion}",
             'org.yaml:snakeyaml:1.30',
             'javax.annotation:javax.annotation-api:1.3.2', //Required for @PostConstruct and @PreDestroy to work in Java9+
+
+            //grpc
+            'io.grpc:grpc-stub:1.44.1',
+            'io.grpc:grpc-protobuf:1.44.1',
 
             // data validation
             'org.apache.tomcat.embed:tomcat-embed-el:9.0.13',
@@ -56,7 +79,7 @@ dependencies {
 
             'org.javassist:javassist:3.24.1-GA',
 
-            // OpenCensus exporters
+            // OpenCensus exporters\
             "io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
             "io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
             "io.opencensus:opencensus-exporter-trace-zipkin:${openCensusVersion}",
@@ -93,8 +116,6 @@ dependencies {
             'org.assertj:assertj-guava:3.2.1',
             'org.awaitility:awaitility:3.1.5',
             "com.github.tomakehurst:wiremock-jre8:2.21.0",
-            "io.grpc:grpc-netty-shaded:1.20.0",
-            "io.grpc:grpc-stub:1.20.0",
             'org.influxdb:influxdb-java:2.15',
             'io.apisense.embed.influx:embed-influxDB:1.2.1',
 
