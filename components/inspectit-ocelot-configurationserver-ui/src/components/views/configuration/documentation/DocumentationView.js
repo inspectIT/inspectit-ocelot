@@ -36,7 +36,6 @@ const DocumentationView = () => {
 
   // refresh the configuration docs when parameters or configuration changed
   useEffect(() => {
-    console.log('Update docs');
     if (selectedAgentMapping) {
       refreshConfigurationDocs();
     }
@@ -120,7 +119,7 @@ const DocumentationView = () => {
             <div className="note">Loading documentation...</div>
           ) : (
             <div className="note">
-              The documentation for the selected Agent Mapping could not been loaded.
+              The documentation for the selected Agent Mapping could not be loaded.
               <div className="error">
                 Error: <span>{error?.message}</span>
               </div>
