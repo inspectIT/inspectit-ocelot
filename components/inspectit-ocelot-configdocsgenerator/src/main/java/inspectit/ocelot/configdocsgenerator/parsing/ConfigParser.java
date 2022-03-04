@@ -115,12 +115,12 @@ public class ConfigParser {
 
         @Override
         public ExporterEnabledState deserialize(JsonParser parser, DeserializationContext context) throws IOException, JsonProcessingException {
-            String text = parser.getText();
+            String text = parser.getText().toUpperCase();
             switch (text) {
-                case "true":
+                case "TRUE":
                     // old setting 'true' is equivalent to IF_CONFIGURED
                     return ExporterEnabledState.IF_CONFIGURED;
-                case "false":
+                case "FALSE":
                     // old setting 'false' is equivalent to DISABLED
                     return ExporterEnabledState.DISABLED;
                 default:
