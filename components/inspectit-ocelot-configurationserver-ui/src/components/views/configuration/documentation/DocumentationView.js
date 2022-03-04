@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { Dropdown } from 'primereact/dropdown';
 import { Checkbox } from 'primereact/checkbox';
 import ConfigDocumentation from './ConfigDocumentation';
@@ -8,13 +9,16 @@ import useFetchData from '../../../../hooks/use-fetch-data';
  * The sidebar panel for showing existing versions of the configuration files.
  */
 const DocumentationView = () => {
+  // global state variables
+  const configurationUpdateDate = useSelector((state) => state.configuration.updateDate);
+
   // local state
   const [selectedAgentMapping, setSelectedAgentMapping] = useState(null);
   const [includeDefault, setIncludeDefault] = useState(true);
 
   // fetch required data
   const [{ data: agentMappings }, refreshAgentMappings] = useFetchData('mappings', {}, []);
-  const [{ data: configurationDocs, isLoading: isLoadingDocs, isError: isDocsError }, refreshConfigurationDocs] = useFetchData(
+  const [{ data: configurationDocs, isLoading: isLoadingDocs, isError: isDocsError, error }, refreshConfigurationDocs] = useFetchData(
     'configuration/documentation',
     {
       'agent-mapping': selectedAgentMapping,
@@ -30,12 +34,12 @@ const DocumentationView = () => {
     refreshAgentMappings();
   }, []);
 
-  // refresh the configuration docs when parameters changed
+  // refresh the configuration docs when parameters or configuration changed
   useEffect(() => {
     if (selectedAgentMapping) {
       refreshConfigurationDocs();
     }
-  }, [selectedAgentMapping, includeDefault]);
+  }, [selectedAgentMapping, includeDefault, configurationUpdateDate]);
 
   return (
     <>
@@ -78,6 +82,13 @@ const DocumentationView = () => {
             flex: 1;
             padding: 1rem;
           }
+          .note .error {
+            margin-top: 0.5rem;
+            color: #333;
+            border-left: 4px solid #c1c1c1;
+            padding: 0.5rem;
+            font-family: monospace;
+          }
         `}
       </style>
       <div className="documentation p-component">
@@ -107,7 +118,12 @@ const DocumentationView = () => {
           ) : isLoadingDocs ? (
             <div className="note">Loading documentation...</div>
           ) : (
-            <div className="note">The documentation for the selected Agent Mapping could not been loaded.</div>
+            <div className="note">
+              The documentation for the selected Agent Mapping could not be loaded.
+              <div className="error">
+                Error: <span>{error?.message}</span>
+              </div>
+            </div>
           )
         ) : (
           <div className="note">Select the Agent Mapping whose documentation should be displayed.</div>
