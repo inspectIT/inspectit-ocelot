@@ -1,0 +1,10 @@
+inspectit:
+  exporters:
+    metrics:
+      influx:
+        enabled: true
+      prometheus:
+        enabled: ENABLED
+    tracing:
+      jaeger:
+        enabled: false

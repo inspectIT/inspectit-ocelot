@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.documentation.ActionDocumentation;
 import rocks.inspectit.ocelot.config.model.metrics.StandardPollingMetricsRecorderSettings;
@@ -98,6 +99,29 @@ class ConfigParserTest {
             InspectitConfig result = configParser.parseConfig(configYaml);
 
             assertThat(result.getServiceName()).isEqualTo("name");
+        }
+
+        @Test
+        void withOldExporterEnabled() throws IOException {
+            String configYaml = getYaml("configWithOldExporterEnabled.yml");
+
+            InspectitConfig result = configParser.parseConfig(configYaml);
+
+            // value 'true' in yaml to IF_CONFIGURED in InspectitConfig
+            assertThat(result.getExporters()
+                    .getMetrics()
+                    .getInflux()
+                    .getEnabled()).isEqualTo(ExporterEnabledState.IF_CONFIGURED);
+            // value 'false' in yaml to DISABLED in InspectitConfig
+            assertThat(result.getExporters()
+                    .getTracing()
+                    .getJaeger()
+                    .getEnabled()).isEqualTo(ExporterEnabledState.DISABLED);
+            // example for new style, value 'ENABLED' in yaml to ENABLED in InspectitConfig
+            assertThat(result.getExporters()
+                    .getMetrics()
+                    .getPrometheus()
+                    .getEnabled()).isEqualTo(ExporterEnabledState.ENABLED);
         }
 
         @Test
