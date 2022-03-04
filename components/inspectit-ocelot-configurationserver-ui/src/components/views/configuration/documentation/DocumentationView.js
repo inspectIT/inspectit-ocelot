@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { Dropdown } from 'primereact/dropdown';
 import { Checkbox } from 'primereact/checkbox';
 import { InputText } from 'primereact/inputtext';
+import { Button } from 'primereact/button';
 import ConfigDocumentation from './ConfigDocumentation';
 import useFetchData from '../../../../hooks/use-fetch-data';
 import _ from 'lodash';
@@ -148,6 +149,8 @@ const DocumentationView = () => {
             onChange={(e) => setFilterValue(e.target.value)}
             disabled={!(configurationDocs && !isDocsError)}
           />
+
+          <Button icon="pi pi-times" disabled={!filterValue} onClick={() => setFilterValue('')} />
         </div>
 
         {selectedAgentMapping ? (
