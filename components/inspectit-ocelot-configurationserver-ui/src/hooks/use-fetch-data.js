@@ -11,6 +11,7 @@ export default (url, params, initialData = null) => {
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,8 +25,10 @@ export default (url, params, initialData = null) => {
         const result = await axios.get(url, { params });
 
         setData(result.data);
+        setError(null);
       } catch (error) {
         setIsError(true);
+        setError(error);
       }
 
       setLastUpdate(Date.now());
@@ -37,5 +40,5 @@ export default (url, params, initialData = null) => {
 
   const refresh = () => setCounter(counter + 1);
 
-  return [{ data, isLoading, isError, lastUpdate }, refresh];
+  return [{ data, isLoading, isError, lastUpdate, error }, refresh];
 };

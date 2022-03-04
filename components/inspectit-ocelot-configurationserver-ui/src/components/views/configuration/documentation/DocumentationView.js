@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { Dropdown } from 'primereact/dropdown';
 import { Checkbox } from 'primereact/checkbox';
 import { InputText } from 'primereact/inputtext';
@@ -11,6 +12,9 @@ import useDebounce from '../../../../hooks/use-debounce';
  * The sidebar panel for showing existing versions of the configuration files.
  */
 const DocumentationView = () => {
+  // global state variables
+  const configurationUpdateDate = useSelector((state) => state.configuration.updateDate);
+
   // local state
   const [selectedAgentMapping, setSelectedAgentMapping] = useState(null);
   const [includeDefault, setIncludeDefault] = useState(true);
@@ -22,7 +26,7 @@ const DocumentationView = () => {
 
   // fetch required data
   const [{ data: agentMappings }, refreshAgentMappings] = useFetchData('mappings', {}, []);
-  const [{ data: fullConfigurationDocs, isLoading: isLoadingDocs, isError: isDocsError }, refreshConfigurationDocs] = useFetchData(
+  const [{ data: fullConfigurationDocs, isLoading: isLoadingDocs, isError: isDocsError, error }, refreshConfigurationDocs] = useFetchData(
     'configuration/documentation',
     {
       'agent-mapping': selectedAgentMapping,
@@ -38,12 +42,12 @@ const DocumentationView = () => {
     refreshAgentMappings();
   }, []);
 
-  // refresh the configuration docs when parameters changed
+  // refresh the configuration docs when parameters or configuration changed
   useEffect(() => {
     if (selectedAgentMapping) {
       refreshConfigurationDocs();
     }
-  }, [selectedAgentMapping, includeDefault]);
+  }, [selectedAgentMapping, includeDefault, configurationUpdateDate]);
 
   // filter documentation for display
   useEffect(() => {
@@ -100,6 +104,13 @@ const DocumentationView = () => {
             flex: 1;
             padding: 1rem;
           }
+          .note .error {
+            margin-top: 0.5rem;
+            color: #333;
+            border-left: 4px solid #c1c1c1;
+            padding: 0.5rem;
+            font-family: monospace;
+          }
           .filter {
             padding: 0.5rem 1rem;
             border-bottom: 1px solid #9e9e9e;
@@ -145,7 +156,12 @@ const DocumentationView = () => {
           ) : isLoadingDocs ? (
             <div className="note">Loading documentation...</div>
           ) : (
-            <div className="note">The documentation for the selected Agent Mapping could not been loaded.</div>
+            <div className="note">
+              The documentation for the selected Agent Mapping could not be loaded.
+              <div className="error">
+                Error: <span>{error?.message}</span>
+              </div>
+            </div>
           )
         ) : (
           <div className="note">Select the Agent Mapping whose documentation should be displayed.</div>
