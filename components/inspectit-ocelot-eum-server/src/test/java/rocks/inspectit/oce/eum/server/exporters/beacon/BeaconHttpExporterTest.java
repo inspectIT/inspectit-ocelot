@@ -100,7 +100,7 @@ class BeaconHttpExporterTest {
         }
 
         @Test
-        public void succesfulExport() throws InterruptedException {
+        public void successfulExport() throws InterruptedException {
             exporterSettings.setMaxBatchSize(3);
             exporter.initialize();
             ReflectionTestUtils.setField(exporter, "executor", executor);
