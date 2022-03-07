@@ -38,7 +38,7 @@ public class AgentManager {
             }
             try {
                 Class<?> implClass = Class.forName("rocks.inspectit.ocelot.core.AgentImpl", true, inspectITClassLoader);
-                agentInstance = (IAgent) implClass.newInstance();
+                agentInstance = (IAgent) implClass.getDeclaredConstructor().newInstance();
                 agentInstance.start(agentCmdArgs, instrumentation);
                 initialized = true;
             } catch (Exception e) {

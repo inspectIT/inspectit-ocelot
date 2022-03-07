@@ -1,0 +1,16 @@
+inspectit:
+  instrumentation:
+    scopes:
+      s_jdbc_statement_execute:
+        docs:
+          description: 'Scope for executed JDBC statements.'
+        superclass:
+          name: java.net.HttpURLConnection
+        interfaces:
+          - name: java.sql.Statement
+        methods:
+          - name: execute
+          - name: executeQuery
+          - name: executeUpdate
+        advanced:
+          instrument-only-inherited-methods: true

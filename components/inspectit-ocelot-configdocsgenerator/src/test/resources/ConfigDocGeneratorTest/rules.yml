@@ -1,0 +1,45 @@
+inspectit:
+  instrumentation:
+    rules:
+      r_tracing_global_attributes:
+        exit:
+          method_name:
+            action: a_get_name
+
+      r_capture_method_duration_conditional:
+        docs:
+          description: |-
+            Conditionally captures
+            linebreak.
+        include:
+          r_tracing_global_attributes: true
+          r_capture_method_entry_timestamp_conditional: true
+          r_capture_ddd: false
+        scopes:
+          s_httpurlconnection_connect: true
+          s_httpurlconnection_getOutputStream: true
+        exit:
+          method_duration:
+            only-if-true: capture_time_condition
+            action: a_timing_elapsedMillis
+            data-input:
+              since_nanos: method_entry_time
+            constant-input:
+              value: sql
+        tracing:
+          start-span: true
+          start-span-conditions:
+            only-if-true: jdbc_is_entry
+          attributes:
+            db.type: db_type_sql
+            db.url: jdbc_url
+          error-status: _thrown
+        metrics:
+          '[service/in/responsetime]':
+            value: servicegraph_duration
+            data-tags:
+              origin_service: servicegraph_origin_service_local
+              origin_external: servicegraph_origin_external
+            constant-tags:
+              protocol: servicegraph_protocol
+              error: servicegraph_is_error

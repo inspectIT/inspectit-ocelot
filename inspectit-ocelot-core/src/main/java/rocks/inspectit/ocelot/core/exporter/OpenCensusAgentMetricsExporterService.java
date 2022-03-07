@@ -4,9 +4,10 @@ import io.opencensus.common.Duration;
 import io.opencensus.exporter.metrics.ocagent.OcAgentMetricsExporter;
 import io.opencensus.exporter.metrics.ocagent.OcAgentMetricsExporterConfiguration;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.OpenCensusAgentMetricsExporterSettings;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
@@ -22,23 +23,33 @@ public class OpenCensusAgentMetricsExporterService extends DynamicallyActivatabl
 
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
-        @Valid OpenCensusAgentMetricsExporterSettings openCensusAgent = conf.getExporters().getMetrics().getOpenCensusAgent();
-        return conf.getMetrics().isEnabled()
-                && openCensusAgent.isEnabled()
-                && !StringUtils.isEmpty(openCensusAgent.getAddress());
+        @Valid OpenCensusAgentMetricsExporterSettings openCensusAgent = conf.getExporters()
+                .getMetrics()
+                .getOpenCensusAgent();
+        if (conf.getMetrics().isEnabled() && !openCensusAgent.getEnabled().isDisabled()) {
+            if (StringUtils.hasText(openCensusAgent.getAddress())) {
+                return true;
+            } else if (openCensusAgent.getEnabled().equals(ExporterEnabledState.ENABLED)) {
+                log.warn("OpenCensus Metrics Exporter is enabled but 'address' is not set.");
+            }
+        }
+        return false;
     }
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         try {
-            OpenCensusAgentMetricsExporterSettings settings = configuration.getExporters().getMetrics().getOpenCensusAgent();
+            OpenCensusAgentMetricsExporterSettings settings = configuration.getExporters()
+                    .getMetrics()
+                    .getOpenCensusAgent();
             log.info("Starting OpenCensus Agent Metrics exporter");
             OcAgentMetricsExporter.createAndRegister(OcAgentMetricsExporterConfiguration.builder()
                     .setExportInterval(Duration.fromMillis(settings.getExportInterval().toMillis()))
                     .setEndPoint(settings.getAddress())
                     .setServiceName(settings.getServiceName())
                     .setUseInsecure(settings.isUseInsecure())
-                    .setRetryInterval(Duration.fromMillis(settings.getReconnectionPeriod().toMillis())).build());
+                    .setRetryInterval(Duration.fromMillis(settings.getReconnectionPeriod().toMillis()))
+                    .build());
             return true;
         } catch (Throwable t) {
             log.error("Error creating OpenCensus Agent Metrics exporter", t);

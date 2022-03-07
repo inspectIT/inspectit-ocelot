@@ -20,7 +20,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
     environment:
       - INSPECTIT_CONFIG_SERVER_WORKING_DIRECTORY=/configuration-server
       - INSPECTIT_CONFIG_SERVER_DEFAULT_USER_PASSWORD=demo
@@ -28,6 +28,24 @@ services:
       - ./configuration-server:/configuration-server
     ports:
       - 8090:8090
+
+  ## Self Monitoring
+  ocelot-eum-server:
+    image: inspectit/inspectit-ocelot-eum-server:${INSPECTIT_OCELOT_VERSION}
+    container_name: ocelot-eum-server
+    environment:
+      - INSPECTIT_EUM_SERVER_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
+      - INSPECTIT_EUM_SERVER_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
+      - INSPECTIT_EUM_SERVER_EXPORTERS_METRICS_INFLUX_DATABASE=inspectit_eum
+      - INSPECTIT_EUM_SERVER_EXPORTERS_TRACING_JAEGER_GRPC=jaeger:14250
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    volumes:
+      - ./eum-server:/eum-server
+    ports:
+      - 8085:8085
 
   #  Petclinic
   config-server:
@@ -226,7 +244,7 @@ services:
       - ./grafana/provisioning/influxdb:/usr/share/grafana/custom/
       - ./grafana/provisioning/home-dashboard/home.json:/usr/share/grafana/public/dashboards/home.json
     ports:
-      - 3001:3000
+      - 3000:3000
 
 volumes:
   agent-vol:

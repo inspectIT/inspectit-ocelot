@@ -48,7 +48,7 @@ public class ListClassesCommand extends Command {
             private String name;
 
             /**
-             * Whether it is a class or interace.
+             * Whether it is a class or interface.
              */
             private String type;
 

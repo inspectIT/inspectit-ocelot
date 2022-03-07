@@ -48,7 +48,8 @@
       "config-server/configuration-files-staging",
       "config-server/agent-mappings",
       "config-server/user-authentication",
-      "config-server/log-config"
+      "config-server/log-config",
+      "config-server/syntax-highlighting"
     ],
     "Breaking Changes": [
       "breaking-changes/Breaking Changes"

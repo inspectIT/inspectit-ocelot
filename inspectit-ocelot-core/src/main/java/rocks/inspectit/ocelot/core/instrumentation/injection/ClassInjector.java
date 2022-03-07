@@ -1,10 +1,9 @@
 package rocks.inspectit.ocelot.core.instrumentation.injection;
 
+import javassist.util.proxy.DefineClassHelper;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import net.bytebuddy.ByteBuddy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.objenesis.instantiator.util.DefineClassHelper;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
@@ -13,9 +12,6 @@ import java.lang.instrument.Instrumentation;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
@@ -155,7 +151,7 @@ public class ClassInjector {
             //however it also is not necessary as a reference to the bootstrap loader won't cause a memory leak anyway
             return bootstrapChildLoader.defineNewClass(className, byteCode, protectionDomain);
         } else {
-            return DefineClassHelper.defineClass(className, byteCode, 0, byteCode.length, neighborClass, loader, protectionDomain);
+            return DefineClassHelper.toClass(className, neighborClass, loader, protectionDomain, byteCode);
         }
     }
 

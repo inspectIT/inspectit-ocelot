@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.AgentCommandDispatcher;
 import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
+import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
@@ -33,8 +34,14 @@ public class AgentCommandController extends AbstractBaseController {
      */
     @GetMapping(value = "command/ping")
     public DeferredResult<ResponseEntity<?>> ping(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
-        PingCommand command = new PingCommand();
-        return commandDispatcher.dispatchCommand(agentId, command);
+        PingCommand pingCommand = new PingCommand();
+        return commandDispatcher.dispatchCommand(agentId, pingCommand);
+    }
+
+    @GetMapping(value = "command/logs")
+    public DeferredResult<ResponseEntity<?>> logs(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
+        LogsCommand logsCommand = new LogsCommand();
+        return commandDispatcher.dispatchCommand(agentId, logsCommand);
     }
 
     @GetMapping(value = "command/list/classes")

@@ -64,6 +64,56 @@ class SpecialElementMatchersTest {
     }
 
     @Nested
+    public class NotEquals {
+
+        // define some name pattern
+        String NAME_PATTERN_A = "rocks.inspectit.ocelot.core.class.method";
+
+        String NAME_PATTERN_A_UPPERCASE = NAME_PATTERN_A.toUpperCase();
+
+        String NAME_PATTERN_B = "rocks.inspectit.ocelot.core.class.other";
+
+        String NAME_PATTERN_C = NAME_PATTERN_A + "2";
+
+        @Test
+        public void notEquals() {
+            // create the NameMatcherSettings
+            NameMatcherSettings notEqualsSettings = new NameMatcherSettings();
+            notEqualsSettings.setName(NAME_PATTERN_A);
+            notEqualsSettings.setMatcherMode(MatcherMode.NOT_EQUALS_FULLY);
+            // get the ElementMatcher
+            ElementMatcher.Junction<NamedElement> matcherNotEquals = SpecialElementMatchers.nameIs(notEqualsSettings);
+
+            // make sure that only the original namePattern does not match
+            assertThat(matcherNotEquals.matches(() -> NAME_PATTERN_A)).isFalse();
+
+            // every other string must match
+            assertThat(matcherNotEquals.matches(() -> NAME_PATTERN_A_UPPERCASE)).isTrue();
+            assertThat(matcherNotEquals.matches(() -> NAME_PATTERN_B)).isTrue();
+            assertThat(matcherNotEquals.matches(() -> NAME_PATTERN_C)).isTrue();
+        }
+
+        @Test
+        public void notEqualsIgnoreCase() {
+
+            // create the NameMatcherSettings
+            NameMatcherSettings notEqualsIgnoreCaseSettings = new NameMatcherSettings();
+            notEqualsIgnoreCaseSettings.setName(NAME_PATTERN_A);
+            notEqualsIgnoreCaseSettings.setMatcherMode(MatcherMode.NOT_EQUALS_FULLY_IGNORE_CASE);
+
+            // get the ElementMatcher
+            ElementMatcher.Junction<NamedElement> matcherNotEqualsIgnoreCase = SpecialElementMatchers.nameIs(notEqualsIgnoreCaseSettings);
+
+            // namePattern and all case-variants may not match
+            assertThat(matcherNotEqualsIgnoreCase.matches(() -> NAME_PATTERN_A)).isFalse();
+            assertThat(matcherNotEqualsIgnoreCase.matches(() -> NAME_PATTERN_A_UPPERCASE)).isFalse();
+
+            assertThat(matcherNotEqualsIgnoreCase.matches(() -> NAME_PATTERN_B)).isTrue();
+            assertThat(matcherNotEqualsIgnoreCase.matches(() -> NAME_PATTERN_C)).isTrue();
+        }
+    }
+
+    @Nested
     public class ArgumentsAre {
 
         @Test
@@ -96,7 +146,8 @@ class SpecialElementMatchersTest {
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.argumentsAre(arguments);
 
-            Object expectedResult = takesArguments(2).and(takesArgument(0, named("class0"))).and(takesArgument(1, named("class1")));
+            Object expectedResult = takesArguments(2).and(takesArgument(0, named("class0")))
+                    .and(takesArgument(1, named("class1")));
             assertThat(result).isEqualTo(expectedResult);
         }
     }
@@ -240,7 +291,8 @@ class SpecialElementMatchersTest {
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.onlyOverridenMethodsOf(scope);
 
-            Object expectedResult = isOverriddenFrom(named("interface1").and(isInterface()).or(named("superclass1").and(not(isInterface()))));
+            Object expectedResult = isOverriddenFrom(named("interface1").and(isInterface())
+                    .or(named("superclass1").and(not(isInterface()))));
             assertThat(result).isEqualTo(expectedResult);
         }
     }
@@ -302,7 +354,6 @@ class SpecialElementMatchersTest {
             assertThat(result).isEqualTo(expectedResult);
         }
 
-
         @Test
         public void multipleAnnotations() {
             NameMatcherSettings annotationMatcher1 = new NameMatcherSettings();
@@ -314,7 +365,8 @@ class SpecialElementMatchersTest {
 
             ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(settings);
 
-            Object expectedResult = IsAnnotatedMatcher.of(named("annotation1")).and(IsAnnotatedMatcher.of(named("annotation2")));
+            Object expectedResult = IsAnnotatedMatcher.of(named("annotation1"))
+                    .and(IsAnnotatedMatcher.of(named("annotation2")));
             assertThat(result).isEqualTo(expectedResult);
         }
 

@@ -1,14 +1,13 @@
 import com.github.jk1.license.render.TextReportRenderer
 
 plugins {
-    id 'com.github.jk1.dependency-license-report' version '1.6'
+    id 'com.github.jk1.dependency-license-report' version '2.0'
 }
 
 licenseReport {
     outputDir = "$projectDir/build/licenses"
 
-    renderers = [new TextReportRenderer("THIRD-PARTY-LICENSES.txt")]
-
+    renderers = [new TextReportRenderer("../../THIRD-PARTY-LICENSES.txt")]
 }
 
 allprojects {
@@ -17,9 +16,11 @@ allprojects {
         mavenCentral()
         maven {
             name 'Nexus@NT'
-            url "http://repository.novatec-gmbh.de/content/repositories/3rd_party_libs/"
+            url "https://repository.novatec-gmbh.de/content/repositories/3rd_party_libs/"
         }
     }
+
+    apply plugin: 'java'
     apply plugin: 'jacoco'
 
     if (!project.hasProperty('buildVersion') || project.getProperty('buildVersion').empty) {
@@ -33,7 +34,7 @@ task codeCoverageReport(type: JacocoReport) {
     group = 'Verification'
     description = 'Generates a combined report from all subprojects'
 
-    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+    executionData { fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec") }
 
     dependsOn(':inspectit-ocelot-agent:systemTest')
     dependsOn(':inspectit-ocelot-agent:test')
@@ -41,10 +42,9 @@ task codeCoverageReport(type: JacocoReport) {
     dependsOn(':inspectit-ocelot-config:test')
     dependsOn(':inspectit-ocelot-core:test')
 
-    doFirst {
-        [project(':inspectit-ocelot-agent'), project(':inspectit-ocelot-bootstrap'), project(':inspectit-ocelot-config'), project(':inspectit-ocelot-core')].each {
-            sourceSets it.sourceSets.main
-        }
+
+    [project(':inspectit-ocelot-agent'), project(':inspectit-ocelot-bootstrap'), project(':inspectit-ocelot-config'), project(':inspectit-ocelot-core')].each {
+        sourceSets it.sourceSets.main
     }
 
     reports {

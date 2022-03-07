@@ -1,9 +1,7 @@
 plugins {
-    id "me.champeau.gradle.jmh" version "0.4.8"
+    id "me.champeau.gradle.jmh" version "0.5.3"
+    id 'maven-publish'
 }
-
-apply plugin: 'java'
-apply plugin: 'maven' // for publishing to the local maven repository
 
 evaluationDependsOn(':inspectit-ocelot-bootstrap')
 evaluationDependsOn(':inspectit-ocelot-core')
@@ -35,7 +33,7 @@ dependencies {
     testImplementation (
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
             'org.mockito:mockito-junit-jupiter:2.23.0',
-            'ch.qos.logback:logback-classic:1.1.3',
+            "ch.qos.logback:logback-classic:${logbackVersion}",
     )
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
@@ -48,6 +46,9 @@ task buildOpencensusFatJar(type: Jar) {
     }
 }
 
+processJmhResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 
 jar {
     destinationDirectory = buildDir
@@ -112,10 +113,11 @@ dependencies {
             
             'com.h2database:h2:1.4.199',
 
-            // for log-correlation tests
-            'org.apache.logging.log4j:log4j-api:2.12.1',
-            'org.apache.logging.log4j:log4j-core:2.12.1',
-            'log4j:log4j:1.2.16'
+            // only used for log-correlation tests
+            'org.apache.logging.log4j:log4j-api:2.15.0',
+            'org.apache.logging.log4j:log4j-core:2.15.0',
+            'log4j:log4j:1.2.16',
+            'ch.qos.logback:logback-classic:1.2.10' // Used for SLF4J Correlation
 
     )
 

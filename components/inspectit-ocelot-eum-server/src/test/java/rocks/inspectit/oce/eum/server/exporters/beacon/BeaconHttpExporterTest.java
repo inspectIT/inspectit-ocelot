@@ -12,6 +12,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
 import rocks.inspectit.oce.eum.server.configuration.model.BeaconHttpExporterSettings;
 import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 
 import java.time.Duration;
 import java.util.concurrent.BlockingQueue;
@@ -38,7 +39,7 @@ class BeaconHttpExporterTest {
     @BeforeEach
     public void beforeEach() {
         exporterSettings = new BeaconHttpExporterSettings();
-        exporterSettings.setEnabled(true);
+        exporterSettings.setEnabled(ExporterEnabledState.ENABLED);
         exporterSettings.setEndpointUrl("http//localhost:1000");
         exporterSettings.setFlushInterval(Duration.ofSeconds(1));
         exporterSettings.setMaxBatchSize(10);
@@ -89,7 +90,7 @@ class BeaconHttpExporterTest {
 
         @Test
         public void isDisabled() throws InterruptedException {
-            exporterSettings.setEnabled(false);
+            exporterSettings.setEnabled(ExporterEnabledState.DISABLED);
             exporter.initialize();
             ReflectionTestUtils.setField(exporter, "executor", executor);
 

@@ -70,7 +70,7 @@ jobs:
   # Generates the changelog body sued for the Github release
   generate_changelog:
     docker:
-      - image: circleci/ruby:2.6.2
+      - image: circleci/ruby:3.0
     working_directory: ~/inspectit
     steps:
       - attach_repo

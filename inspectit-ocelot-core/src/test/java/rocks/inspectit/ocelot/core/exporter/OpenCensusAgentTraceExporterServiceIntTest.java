@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.exporter;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
+import io.github.netmikey.logunit.api.LogCapturer;
 import io.grpc.BindableService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -14,8 +15,11 @@ import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import javax.annotation.Nullable;
@@ -32,22 +36,27 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@TestPropertySource(properties = {
-        "inspectit.exporters.tracing.open-census-agent.address=localhost:55678",
-        "inspectit.exporters.tracing.open-census-agent.use-insecure=true",
-})
+@TestPropertySource(properties = {"inspectit.exporters.tracing.open-census-agent.address=localhost:55678", "inspectit.exporters.tracing.open-census-agent.use-insecure=true",})
 @DirtiesContext
 public class OpenCensusAgentTraceExporterServiceIntTest extends SpringTestBase {
 
     public static final String HOST = "localhost";
+
     public static final int PORT = 55678;
+
     public static final String SPAN_NAME = "ocagentspan";
+
     private static Server agent;
+
     private static FakeOcAgentTraceServiceGrpcImpl fakeOcAgentTraceServiceGrpc = new FakeOcAgentTraceServiceGrpcImpl();
+
+    @RegisterExtension
+    LogCapturer warnLogs = LogCapturer.create()
+            .captureForType(OpenCensusAgentTraceExporterService.class, org.slf4j.event.Level.WARN);
 
     @BeforeAll
     public static void setUp() {
-        agent = getServer("localhost:55678" , fakeOcAgentTraceServiceGrpc);
+        agent = getServer("localhost:55678", fakeOcAgentTraceServiceGrpc);
     }
 
     @AfterAll
@@ -63,18 +72,14 @@ public class OpenCensusAgentTraceExporterServiceIntTest extends SpringTestBase {
     public void testGrpcRequest() {
         try {
             agent.start();
-            Tracing.getTracer().spanBuilder(SPAN_NAME)
-                    .setSampler(Samplers.alwaysSample())
-                    .startSpanAndRun(() -> {
-                    });
+            Tracing.getTracer().spanBuilder(SPAN_NAME).setSampler(Samplers.alwaysSample()).startSpanAndRun(() -> {
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
-            assertThat(fakeOcAgentTraceServiceGrpc.getExportTraceServiceRequests()).anySatisfy((req) ->
-                    assertThat(req.getSpansList()).anySatisfy((span) ->
-                            assertThat(span.getName().getValue()).isEqualTo(SPAN_NAME))
-            );
+            assertThat(fakeOcAgentTraceServiceGrpc.getExportTraceServiceRequests()).anySatisfy((req) -> assertThat(req.getSpansList()).anySatisfy((span) -> assertThat(span.getName()
+                    .getValue()).isEqualTo(SPAN_NAME)));
         });
     }
 
@@ -92,14 +97,13 @@ public class OpenCensusAgentTraceExporterServiceIntTest extends SpringTestBase {
 
         // Default updatedLibraryConfig uses an always sampler.
         @GuardedBy("this")
-        private UpdatedLibraryConfig updatedLibraryConfig =
-                UpdatedLibraryConfig.newBuilder()
-                        .setConfig(
-                                TraceConfig.newBuilder()
-                                        .setConstantSampler(
-                                                ConstantSampler.newBuilder().setDecision(ConstantSampler.ConstantDecision.ALWAYS_ON).build())
-                                        .build())
-                        .build();
+        private UpdatedLibraryConfig updatedLibraryConfig = UpdatedLibraryConfig.newBuilder()
+                .setConfig(TraceConfig.newBuilder()
+                        .setConstantSampler(ConstantSampler.newBuilder()
+                                .setDecision(ConstantSampler.ConstantDecision.ALWAYS_ON)
+                                .build())
+                        .build())
+                .build();
 
         @GuardedBy("this")
         private final List<CurrentLibraryConfig> currentLibraryConfigs = new ArrayList<>();
@@ -108,68 +112,63 @@ public class OpenCensusAgentTraceExporterServiceIntTest extends SpringTestBase {
         private final CopyOnWriteArrayList<ExportTraceServiceRequest> exportTraceServiceRequests = new CopyOnWriteArrayList<>();
 
         @GuardedBy("this")
-        private final AtomicReference<StreamObserver<UpdatedLibraryConfig>> configRequestObserverRef =
-                new AtomicReference<>();
+        private final AtomicReference<StreamObserver<UpdatedLibraryConfig>> configRequestObserverRef = new AtomicReference<>();
 
         @GuardedBy("this")
-        private final StreamObserver<CurrentLibraryConfig> configResponseObserver =
-                new StreamObserver<CurrentLibraryConfig>() {
-                    @Override
-                    public void onNext(CurrentLibraryConfig value) {
-                        addCurrentLibraryConfig(value);
-                        try {
-                            // Do not send UpdatedLibraryConfigs too frequently.
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        sendUpdatedLibraryConfig();
-                    }
+        private final StreamObserver<CurrentLibraryConfig> configResponseObserver = new StreamObserver<CurrentLibraryConfig>() {
+            @Override
+            public void onNext(CurrentLibraryConfig value) {
+                addCurrentLibraryConfig(value);
+                try {
+                    // Do not send UpdatedLibraryConfigs too frequently.
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                sendUpdatedLibraryConfig();
+            }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        t.printStackTrace();
-                        resetConfigRequestObserverRef();
-                    }
+            @Override
+            public void onError(Throwable t) {
+                t.printStackTrace();
+                resetConfigRequestObserverRef();
+            }
 
-                    @Override
-                    public void onCompleted() {
-                        resetConfigRequestObserverRef();
-                    }
-                };
+            @Override
+            public void onCompleted() {
+                resetConfigRequestObserverRef();
+            }
+        };
 
         @GuardedBy("this")
-        private final StreamObserver<ExportTraceServiceRequest> exportRequestObserver =
-                new StreamObserver<ExportTraceServiceRequest>() {
-                    @Override
-                    public void onNext(ExportTraceServiceRequest value) {
-                        addExportRequest(value);
-                    }
+        private final StreamObserver<ExportTraceServiceRequest> exportRequestObserver = new StreamObserver<ExportTraceServiceRequest>() {
+            @Override
+            public void onNext(ExportTraceServiceRequest value) {
+                addExportRequest(value);
+            }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        t.printStackTrace();
+            @Override
+            public void onError(Throwable t) {
+                t.printStackTrace();
 
-                    }
+            }
 
-                    @Override
-                    public void onCompleted() {
-                    }
-                };
+            @Override
+            public void onCompleted() {
+            }
+        };
 
         @GuardedBy("this")
         private CountDownLatch countDownLatch;
 
         @Override
-        public synchronized StreamObserver<CurrentLibraryConfig> config(
-                StreamObserver<UpdatedLibraryConfig> updatedLibraryConfigStreamObserver) {
+        public synchronized StreamObserver<CurrentLibraryConfig> config(StreamObserver<UpdatedLibraryConfig> updatedLibraryConfigStreamObserver) {
             configRequestObserverRef.set(updatedLibraryConfigStreamObserver);
             return configResponseObserver;
         }
 
         @Override
-        public synchronized StreamObserver<ExportTraceServiceRequest> export(
-                StreamObserver<ExportTraceServiceResponse> exportTraceServiceResponseStreamObserver) {
+        public synchronized StreamObserver<ExportTraceServiceRequest> export(StreamObserver<ExportTraceServiceResponse> exportTraceServiceResponseStreamObserver) {
             return exportRequestObserver;
         }
 
@@ -190,8 +189,7 @@ public class OpenCensusAgentTraceExporterServiceIntTest extends SpringTestBase {
         }
 
         private synchronized void sendUpdatedLibraryConfig() {
-            @Nullable
-            StreamObserver<UpdatedLibraryConfig> configRequestObserver = configRequestObserverRef.get();
+            @Nullable StreamObserver<UpdatedLibraryConfig> configRequestObserver = configRequestObserverRef.get();
             if (configRequestObserver != null) {
                 configRequestObserver.onNext(updatedLibraryConfig);
             }
@@ -203,5 +201,15 @@ public class OpenCensusAgentTraceExporterServiceIntTest extends SpringTestBase {
         private synchronized void resetConfigRequestObserverRef() {
             configRequestObserverRef.set(null);
         }
+    }
+
+    @DirtiesContext
+    @Test
+    void testNoAddressSet() {
+        updateProperties(props -> {
+            props.setProperty("inspectit.exporters.tracing.open-census-agent.address", "");
+            props.setProperty("inspectit.exporters.tracing.open-census-agent.enabled", ExporterEnabledState.ENABLED);
+        });
+        warnLogs.assertContains("'address'");
     }
 }

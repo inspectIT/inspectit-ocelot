@@ -27,7 +27,7 @@
   "dependencies": {
     "@zeit/next-css": "^1.0.1",
     "ace-builds": "^1.4.5",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "classnames": "^2.2.6",
     "dateformat": "^3.0.3",
     "js-yaml": "^3.13.1",
@@ -41,17 +41,18 @@
     "randexp": "^0.5.3",
     "react": "^16.13.1",
     "react-diff-viewer": "^3.1.1",
-    "uuid":  "^8.3.2",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",
     "react-syntax-highlighter": "^12.2.1",
     "react-timeago": "^4.4.0",
+    "react-tooltip": "^4.2.21",
     "react-transition-group": "^4.2.1",
     "redux": "^4.0.5",
     "redux-devtools-extension": "^2.13.2",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.3.0",
-    "reselect": "^4.0.0"
+    "reselect": "^4.0.0",
+    "uuid": "^8.3.2"
   },
   "license": "apache-2.0",
   "devDependencies": {

@@ -1,3 +1,5 @@
+import SidebarTypes from '../../components/views/configuration/SidebarTypes';
+
 const authentication = {
   /** The access token which is used for bearer authentication. */
   token: null,
@@ -55,8 +57,8 @@ const configuration = {
   showVisualConfigurationView: false,
   /** Specifies the selected git version. The latest version always has the number 0. */
   selectedVersion: null,
-  /** Whether the history view should be shown */
-  showHistoryView: false,
+  /** Defines which sidebar is currently shown */
+  currentSidebar: SidebarTypes.NONE,
 };
 
 const notification = {

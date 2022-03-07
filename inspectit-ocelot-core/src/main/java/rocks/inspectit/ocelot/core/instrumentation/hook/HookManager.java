@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
@@ -28,6 +29,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class HookManager {
+
+    /**
+     * Thread local flag for marking the current thread that it is currently in the execution/scope of agent actions.
+     * This is used to prevent an endless action recursion in case an instrumented action is invoked within another
+     * action. In that case, the instrumentation has to be suppressed.
+     */
+    public static final ThreadLocal<Boolean> RECURSION_GATE = ThreadLocal.withInitial(() -> false);
 
     @Autowired
     private InstrumentationConfigurationResolver configResolver;
@@ -63,17 +71,22 @@ public class HookManager {
      * Actual implementation for {@link IHookManager#getHook(Class, String)}.
      *
      * @param clazz           the name of the class to which the method to query the hook for belongs
-     * @param methodSignature the signature of the method in the form of name(parametertype,parametertype,..)
-     * @return
+     * @param methodSignature the signature of the method in the form of name(parametertype, parametertype,..)
+     *
+     * @return the method hook for the specified method
      */
-    private IMethodHook getHook(Class<?> clazz, String methodSignature) {
-        Map<String, MethodHook> methodHooks = hooks.get(clazz);
-        if (methodHooks != null) {
-            MethodHook hook = methodHooks.get(methodSignature);
-            if (hook != null) {
-                return hook;
+    @VisibleForTesting
+    IMethodHook getHook(Class<?> clazz, String methodSignature) {
+        if (!RECURSION_GATE.get()) {
+            Map<String, MethodHook> methodHooks = hooks.get(clazz);
+            if (methodHooks != null) {
+                MethodHook hook = methodHooks.get(methodSignature);
+                if (hook != null) {
+                    return hook;
+                }
             }
         }
+
         return NoopMethodHook.INSTANCE;
     }
 
@@ -87,7 +100,6 @@ public class HookManager {
     public HookUpdate startUpdate() {
         return new HookUpdate();
     }
-
 
     /**
      * A {@link HookUpdate} instance represents a (potential) change to apply to the {@link HookManager}.
@@ -120,7 +132,8 @@ public class HookManager {
                 newHooks = new WeakHashMap<>();
                 for (Map.Entry<Class<?>, Map<String, MethodHook>> existingMethodHooks : hooks.entrySet()) {
                     HashMap<String, MethodHook> newMethodHooks = new HashMap<>();
-                    existingMethodHooks.getValue().forEach((signature, hook) -> newMethodHooks.put(signature, hook.getResettedCopy()));
+                    existingMethodHooks.getValue()
+                            .forEach((signature, hook) -> newMethodHooks.put(signature, hook.getResettedCopy()));
                     newHooks.put(existingMethodHooks.getKey(), newMethodHooks);
                 }
             }
@@ -159,13 +172,11 @@ public class HookManager {
 
         private Optional<MethodHook> getCurrentHook(Class<?> declaringClass, String methodSignature) {
             Map<String, MethodHook> methodHooks = newHooks.get(declaringClass);
-            return Optional.ofNullable(methodHooks)
-                    .map(myHooks -> myHooks.get(methodSignature));
+            return Optional.ofNullable(methodHooks).map(myHooks -> myHooks.get(methodSignature));
         }
 
         private void setHook(Class<?> declaringClass, String methodSignature, MethodHook newHook) {
-            newHooks.computeIfAbsent(declaringClass, (v) -> new HashMap<>())
-                    .put(methodSignature, newHook);
+            newHooks.computeIfAbsent(declaringClass, (v) -> new HashMap<>()).put(methodSignature, newHook);
         }
 
         private void removeHook(Class<?> declaringClass, String methodSignature) {
@@ -193,8 +204,7 @@ public class HookManager {
         private void addOrReplaceHooks(Class<?> clazz, Map<MethodDescription, MethodHookConfiguration> hookConfigs) {
             hookConfigs.forEach((method, newConfig) -> {
                 String signature = CoreUtils.getSignature(method);
-                MethodHookConfiguration oldConfig = getCurrentHook(clazz, signature)
-                        .map(MethodHook::getSourceConfiguration)
+                MethodHookConfiguration oldConfig = getCurrentHook(clazz, signature).map(MethodHook::getSourceConfiguration)
                         .orElse(null);
                 if (!Objects.equals(newConfig, oldConfig)) {
                     if (log.isDebugEnabled()) {

@@ -1,8 +1,6 @@
 plugins {
-    id "me.champeau.gradle.jmh" version "0.4.8"
+    id "me.champeau.gradle.jmh" version "0.5.3"
 }
-
-apply plugin: 'java'
 
 configurations {
     buildTools
@@ -31,20 +29,14 @@ dependencies {
             'jarcheck:jarcheck:1.5'
     )
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
-    testImplementation(
-            'org.junit.jupiter:junit-jupiter-api:5.3.1',
-            'org.mockito:mockito-junit-jupiter:2.23.0'
-    )
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 
     implementation(
             project(':inspectit-ocelot-config'),
             project(':inspectit-ocelot-sdk'),
 
-            
             // spring releated
             "org.springframework.boot:spring-boot:${springVersion}",
-            'org.yaml:snakeyaml:1.23',
+            'org.yaml:snakeyaml:1.30',
             'javax.annotation:javax.annotation-api:1.3.2', //Required for @PostConstruct and @PreDestroy to work in Java9+
 
             // data validation
@@ -52,7 +44,7 @@ dependencies {
             'org.hibernate.validator:hibernate-validator:6.0.13.Final',
 
             // logging
-            'ch.qos.logback:logback-classic:1.2.3',
+            "ch.qos.logback:logback-classic:${logbackVersion}",
 
             // utils
             "org.apache.commons:commons-lang3:3.+",
@@ -88,7 +80,13 @@ dependencies {
     testImplementation(
             project(':inspectit-ocelot-bootstrap'),
             "io.opencensus:opencensus-impl:${openCensusVersion}",
-            'org.springframework:spring-test:5.1.3.RELEASE',
+
+            // matching the spring-core version used in the currently used version of spring boot version
+            'org.springframework:spring-test:5.3.14',
+
+            'org.junit.jupiter:junit-jupiter-api:5.8.2',
+            'org.mockito:mockito-junit-jupiter:4.2.0',
+
             'org.apache.httpcomponents:httpclient:4.5.6',
             "org.mockito:mockito-core:${mockitoVersion}",
             'org.assertj:assertj-core:3.11.1',
@@ -98,7 +96,14 @@ dependencies {
             "io.grpc:grpc-netty-shaded:1.20.0",
             "io.grpc:grpc-stub:1.20.0",
             'org.influxdb:influxdb-java:2.15',
-            'io.apisense.embed.influx:embed-influxDB:1.2.1'
+            'io.apisense.embed.influx:embed-influxDB:1.2.1',
+
+            // LogCapturer
+            'io.github.netmikey.logunit:logunit-core:1.1.3'
+    )
+    testRuntimeOnly (
+            'org.junit.jupiter:junit-jupiter-engine:5.8.2',
+            'io.github.netmikey.logunit:logunit-logback:1.1.3'
     )
 
     jmh(
@@ -149,6 +154,8 @@ jar.dependsOn checkDependencyJavaVersions
 jar.dependsOn generateVersionFile
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     archiveName = "${project.name}.jar"
 
     // include version file

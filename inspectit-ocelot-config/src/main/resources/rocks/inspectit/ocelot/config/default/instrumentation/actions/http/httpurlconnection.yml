@@ -1,9 +1,10 @@
 inspectit:
   instrumentation:
     actions:
-    
-      # Extracts the target of the request in the format "host:port"
+
       'a_httpurlconnection_getTargetHost':
+        docs:
+          description: 'Extracts the target of the request in the format "host:port".'
         imports:
           - 'java.net'
         input:
@@ -17,21 +18,25 @@ inspectit:
             return url.getHost() + ":" + port;
           }
 
-      # Extracts the target path of the request
       'a_httpurlconnection_getPath':
+        docs:
+          description: 'Extracts the target path of the request.'
         input:
           _this: 'java.net.HttpURLConnection'
         value: '_this.getURL().getPath()'
 
-      # Extracts the method of the request, e.g. GET or POST
       'a_httpurlconnection_getMethod':
+        docs:
+          description: 'Extracts the method of the request, e.g. GET or POST.'
         input:
           _this: 'java.net.HttpURLConnection'
         value: '_this.getRequestMethod()'
 
-      # Extracts the response status code if the request returned without an exception
-      # Otherwise returns the name of the exception, e.g. SocketTimeoutException.
       'a_httpurlconnection_getStatus':
+        docs:
+          description: |-
+            Extracts the response status code if the request returned without an exception.
+            Otherwise returns the name of the exception, e.g. SocketTimeoutException.'
         input:
           _this: 'java.net.HttpURLConnection'
         value-body: |
@@ -41,8 +46,9 @@ inspectit:
             return t.getClass().getSimpleName();
           }
 
-      # Writes down-propagated data to the HTTP Headers
       'a_httpurlconnection_downPropagation':
+        docs:
+          description: 'Writes down-propagated data to the HTTP Headers.'
         is-void: true
         imports:
           - 'java.util'
@@ -68,8 +74,9 @@ inspectit:
             }
           }
 
-      # Reads up-propagated data from the HTTP Headers
       'a_httpurlconnection_upPropagation':
+        docs:
+          description: 'Reads up-propagated data from the HTTP Headers'
         is-void: true
         imports:
           - 'java.util'

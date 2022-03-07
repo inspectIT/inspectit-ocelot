@@ -2,6 +2,8 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import HistoryView from './history/HistoryView';
 import { configurationActions } from '../../../redux/ducks/configuration';
+import DocumentationView from './documentation/DocumentationView';
+import SidebarTypes from './SidebarTypes';
 
 /**
  * The sidebar of the configuration view.
@@ -10,10 +12,14 @@ const ConfigurationSidebar = () => {
   const dispatch = useDispatch();
 
   // global state variables
-  const showHistoryView = useSelector((state) => state.configuration.showHistoryView);
+  const currentSidebar = useSelector((state) => state.configuration.currentSidebar);
 
   const toggleHistoryView = () => {
     dispatch(configurationActions.toggleHistoryView());
+  };
+
+  const toggleDocumentationView = () => {
+    dispatch(configurationActions.toggleDocumentationView());
   };
 
   return (
@@ -28,8 +34,6 @@ const ConfigurationSidebar = () => {
             flex: 0;
             display: flex;
             background-color: #eeeeee;
-          }
-          .content-container {
           }
           .vert-button {
             display: flex;
@@ -48,12 +52,25 @@ const ConfigurationSidebar = () => {
       </style>
 
       <div className="sidebar">
-        <div className="content-container">{showHistoryView && <HistoryView />}</div>
+        <div className="content-container">
+          {currentSidebar == SidebarTypes.HISTORY && <HistoryView />}
+          {currentSidebar == SidebarTypes.CONFIGURATION_DOCS && <DocumentationView />}
+        </div>
 
         <div>
-          <button className={'vert-button p-button p-togglebutton' + (showHistoryView ? 'p-highlight' : '')} onClick={toggleHistoryView}>
-            <i className={'pi pi-chevron-' + (showHistoryView ? 'right' : 'left')} />
+          <button
+            className={'vert-button p-button p-togglebutton' + (currentSidebar == SidebarTypes.HISTORY ? 'p-highlight' : '')}
+            onClick={toggleHistoryView}
+          >
+            <i className={'pi pi-chevron-' + (currentSidebar == SidebarTypes.HISTORY ? 'right' : 'left')} />
             <span>Versioning</span>
+          </button>
+          <button
+            className={'vert-button p-button p-togglebutton' + (currentSidebar == SidebarTypes.CONFIGURATION_DOCS ? 'p-highlight' : '')}
+            onClick={toggleDocumentationView}
+          >
+            <i className={'pi pi-chevron-' + (currentSidebar == SidebarTypes.CONFIGURATION_DOCS ? 'right' : 'left')} />
+            <span>Configuration Docs</span>
           </button>
         </div>
       </div>

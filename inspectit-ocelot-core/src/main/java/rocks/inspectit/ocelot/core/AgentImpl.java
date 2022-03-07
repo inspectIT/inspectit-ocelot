@@ -3,16 +3,20 @@ package rocks.inspectit.ocelot.core;
 import io.opencensus.tags.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.event.ContextClosedEvent;
 import rocks.inspectit.ocelot.bootstrap.IAgent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.config.spring.SpringConfiguration;
 import rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.instrument.Instrumentation;
+import java.net.URLClassLoader;
 import java.util.Optional;
 
 /**
@@ -24,9 +28,9 @@ import java.util.Optional;
 public class AgentImpl implements IAgent {
 
     /**
-     * References the classloader which contains all ocelot classes.
+     * Reference to the class loader of the current agent implementation.
      */
-    public static final ClassLoader INSPECTIT_CLASS_LOADER = AgentImpl.class.getClassLoader();
+    public static final ClassLoader AGENT_CLASS_LOADER = AgentImpl.class.getClassLoader();
 
     /**
      * Logger that is initialized in the static init block
@@ -61,15 +65,13 @@ public class AgentImpl implements IAgent {
 
     @Override
     public void start(String cmdArgs, Instrumentation instrumentation) {
-        ClassLoader classloader = AgentImpl.class.getClassLoader();
-
         LOGGER.info("Starting inspectIT Ocelot Agent...");
         LOGGER.info("\tVersion: {}", getVersion());
         LOGGER.info("\tBuild Date: {}", getBuildDate());
         logOpenCensusClassLoader();
 
         ctx = new AnnotationConfigApplicationContext();
-        ctx.setClassLoader(classloader);
+        ctx.setClassLoader(AGENT_CLASS_LOADER);
         InspectitEnvironment environment = new InspectitEnvironment(ctx, Optional.ofNullable(cmdArgs));
 
         // once we have the environment, init the logging with the config
@@ -77,7 +79,20 @@ public class AgentImpl implements IAgent {
 
         ctx.registerShutdownHook();
 
-        //Allows to use autowiring to acquire the Instrumentation instance
+        // add event lister in order to close the inspectit class loader at context closing
+        // cast listener so we'll only receive context closed events
+        ctx.addApplicationListener((ApplicationListener<ContextClosedEvent>) event -> {
+            if (AGENT_CLASS_LOADER instanceof URLClassLoader) {
+                try {
+                    LOGGER.info("Closing inspectIT class loader.");
+                    ((URLClassLoader) AGENT_CLASS_LOADER).close();
+                } catch (IOException e) {
+                    LOGGER.error("Failed closing inspectIT class loader.", e);
+                }
+            }
+        });
+
+        // allows to use autowiring to acquire the Instrumentation instance
         ctx.addBeanFactoryPostProcessor(bf -> bf.registerSingleton("instrumentation", instrumentation));
 
         ctx.register(SpringConfiguration.class);

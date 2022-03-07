@@ -31,8 +31,8 @@ public class ConditionalHookAction implements IHookAction {
     }
 
     /**
-     * If a action contains values for the "only-if-..." settings the provider is meant to be only executed conditionally.
-     * Therefore in this method we wrap the call in {@link ConditionalHookAction} which check the corresponding preconditions.
+     * If an action contains values for the "only-if-..." settings the provider is meant to be only executed conditionally.
+     * Therefore, in this method we wrap the call in {@link ConditionalHookAction} which check the corresponding preconditions.
      *
      * @param conditions              the definitions of the conditions to check
      * @param inputAction             the action to execute only conditionally
