@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(value = "inspectit-eum-server.exporters.beacons.http.enabled", havingValue = "true")
+@ConditionalOnExpression("NOT new String('${inspectit-eum-server.exporters.beacons.http.enabled}').equals('DISABLED')")
 public class ExportWorkerFactory {
 
     /**
