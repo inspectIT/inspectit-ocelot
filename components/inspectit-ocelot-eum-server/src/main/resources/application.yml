@@ -183,7 +183,7 @@ inspectit-eum-server:
     beacons:
       http:
         # Whether beacons should be exported via HTTP.
-        enabled: false
+        enabled: DISABLED
 
         # The endpoint to which the beacons are to be sent.
         endpoint-url: http://localhost:8080
