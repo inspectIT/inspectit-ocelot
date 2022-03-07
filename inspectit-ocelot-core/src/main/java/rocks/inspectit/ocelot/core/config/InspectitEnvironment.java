@@ -215,7 +215,7 @@ public class InspectitEnvironment extends StandardEnvironment {
     private void loadCmdLineArgumentsPropertySource(Optional<String> cmdLineArgs, MutablePropertySources propsList) {
         if (cmdLineArgs.isPresent() && !cmdLineArgs.get().isEmpty()) {
             try {
-                Properties config = PropertyUtils.readJson(cmdLineArgs.get());
+                Properties config = PropertyUtils.readYamlOrJson(cmdLineArgs.get());
                 PropertiesPropertySource pps = new PropertiesPropertySource(CMD_ARGS_PROPERTYSOURCE_NAME, config);
                 propsList.addFirst(pps);
             } catch (Exception e) {

@@ -113,14 +113,14 @@ public class HttpPropertySourceState {
     /**
      * Fetches the latest configuration. If the configuration is successfully fetched a new {@link PropertySource} is
      * created which can be accessed using {@link #getCurrentPropertySource()}. In case of an error or if the server responds
-     * that the configuration has not be changed the property source will not be updated!
+     * that the configuration has not been changed the property source will not be updated!
      *
      * @param fallBackToFile if true, the configured persisted configuration will be loaded in case of an error
      *
      * @return returns true if a new property source has been created, otherwise false.
      */
     public boolean update(boolean fallBackToFile) {
-        RawProperties configuration = fetchConfiguration(fallBackToFile);
+        String configuration = fetchConfiguration(fallBackToFile);
         log.info("configuration={}", configuration);
         if (configuration != null) {
             try {
@@ -146,25 +146,8 @@ public class HttpPropertySourceState {
         if (StringUtils.isBlank(rawProperties)) {
             return EMPTY_PROPERTIES;
         }
-        try {
-            return PropertyUtils.readJson(rawProperties);
-        } catch (IOException e) {
-            return PropertyUtils.readYaml(rawProperties);
-        }
-    }
+        return PropertyUtils.readYamlOrJson(rawProperties);
 
-    /**
-     * Parse the given properties represented as {@link RawProperties} into an instance of {@link Properties} using the appropriate parser for the given MIME type.
-     *
-     * @param rawProperties the {@link RawProperties} containing the properties in a String representation and the MIME type
-     *
-     * @return the parsed {@link Properties} object
-     */
-    private Properties parseProperties(RawProperties rawProperties) throws IOException {
-        if (StringUtils.isBlank(rawProperties.getRawProperties())) {
-            return EMPTY_PROPERTIES;
-        }
-        return PropertyUtils.read(rawProperties);
     }
 
     /**
@@ -193,10 +176,10 @@ public class HttpPropertySourceState {
      * Fetches the configuration by executing a HTTP request against the configured HTTP endpoint. The request contains
      * the 'If-Modified-Since' header if a previous response returned a 'Last-Modified' header.
      *
-     * @return The request's response body representing the configuration in a JSON/YAML format and the MIME type. null is returned if request fails or the
+     * @return The request's response body representing the configuration in a JSON/YAML format. null is returned if request fails or the
      * server returns 304 (not modified).
      */
-    private RawProperties fetchConfiguration(boolean fallBackToFile) {
+    private String fetchConfiguration(boolean fallBackToFile) {
         HttpGet httpGet;
         try {
             URI uri = getEffectiveRequestUri();
@@ -217,27 +200,12 @@ public class HttpPropertySourceState {
         setAgentMetaHeaders(httpGet);
 
         String configuration = null;
-        RawProperties rawProp = null;
         boolean isError = true;
         try {
             HttpResponse response = createHttpClient().execute(httpGet);
-            // try to retrieve the MIME type of the response
-            ContentType contentType = null;
-            String mimeType = null;
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                contentType = ContentType.get(entity);
-                if (contentType != null) {
-                    mimeType = contentType.getMimeType();
-                }
-            }
 
             // get the config from the response
             configuration = processHttpResponse(response);
-            // create raw properties file if the response contains a configuration
-            if (configuration != null) {
-                rawProp = new RawProperties(configuration, contentType);
-            }
             isError = false;
             if (errorCounter != 0) {
                 log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
@@ -253,13 +221,12 @@ public class HttpPropertySourceState {
             httpGet.releaseConnection();
         }
 
-        if (!isError && rawProp != null) {
-            writePersistenceFile(rawProp.getRawProperties());
+        if (!isError && configuration != null) {
+            writePersistenceFile(configuration);
         } else if (isError && fallBackToFile) {
             configuration = readPersistenceFile();
-            rawProp = new RawProperties(configuration, ContentType.TEXT_PLAIN);
         }
-        return rawProp;
+        return configuration;
     }
 
     /**

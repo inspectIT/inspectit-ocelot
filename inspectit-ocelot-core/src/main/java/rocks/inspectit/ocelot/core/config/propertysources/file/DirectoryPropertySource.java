@@ -94,12 +94,11 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
         List<ChildFilePropertySource> fileSources = new ArrayList<>();
         files.sorted(Comparator.comparing(Path::toString, String.CASE_INSENSITIVE_ORDER))
                 .forEachOrdered(file -> {
+                    log.info("try to load property source from file '{}'", file.getFileName());
                     if (doesFileHaveEnding(file, PROPERTIES_ENDINGS)) {
                         loadProperties(file, PropertyUtils::readPropertyFiles).ifPresent(fileSources::add);
-                    } else if (doesFileHaveEnding(file, YAML_ENDINGS)) {
+                    } else if (doesFileHaveEnding(file, YAML_ENDINGS) || doesFileHaveEnding(file, JSON_ENDINGS)) {
                         loadProperties(file, PropertyUtils::readYamlFiles).ifPresent(fileSources::add);
-                    } else if (doesFileHaveEnding(file, JSON_ENDINGS)) {
-                        loadProperties(file, PropertyUtils::readJsonFile).ifPresent(fileSources::add);
                     }
                 });
         return fileSources;
