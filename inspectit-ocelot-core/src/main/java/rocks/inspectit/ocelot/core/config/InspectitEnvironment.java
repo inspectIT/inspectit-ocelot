@@ -22,6 +22,7 @@ import rocks.inspectit.ocelot.config.utils.CaseUtils;
 import rocks.inspectit.ocelot.core.config.propertysources.EnvironmentInformationPropertySource;
 import rocks.inspectit.ocelot.core.config.propertysources.file.DirectoryPropertySource;
 import rocks.inspectit.ocelot.core.config.propertysources.http.HttpPropertySourceState;
+import rocks.inspectit.ocelot.core.config.util.InvalidPropertiesException;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
 import javax.validation.ConstraintViolation;
@@ -289,7 +290,12 @@ public class InspectitEnvironment extends StandardEnvironment {
     private static PropertiesPropertySource loadAgentResourceYaml(String propertySourceName, Resource[] resources) {
         Properties result = new Properties();
         for (val res : resources) {
-            Properties properties = PropertyUtils.readYamlFiles(res);
+            Properties properties = null;
+            try {
+                properties = PropertyUtils.readYamlFiles(res);
+            } catch (InvalidPropertiesException e) {
+                log.error("Error loading agent resource yaml '{}'", res, e);
+            }
             result.putAll(properties);
         }
         return new PropertiesPropertySource(propertySourceName, result);

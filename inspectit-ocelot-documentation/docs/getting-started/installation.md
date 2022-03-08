@@ -34,7 +34,7 @@ $ java -jar inspectit-ocelot-agent-{inspectit-ocelot-version}.jar <PID> [<AGENT_
 
 In the following example, we are attaching the agent to the JVM process `1337` and passing some [additional arguments](configuration/configuration-sources.md#java-agent-arguments) to it:
 ```bash
-$ java -jar inspectit-ocelot-agent-{inspectit-ocelot-version}.jar 1337 '{inspectit:{service-name:"my-agent"}}'
+$ java -jar inspectit-ocelot-agent-{inspectit-ocelot-version}.jar 1337 '{"inspectit":{"service-name":"my-agent"}}'
 ```
 
 > The agent is internally using the utility [jattach](https://github.com/apangin/jattach) for attaching itself to a running JVM.

@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -12,13 +11,13 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
+import rocks.inspectit.ocelot.core.config.util.InvalidPropertiesException;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
 import java.io.IOException;
@@ -142,7 +141,7 @@ public class HttpPropertySourceState {
      *
      * @return the parsed {@link Properties} object
      */
-    private Properties parseProperties(String rawProperties) {
+    private Properties parseProperties(String rawProperties) throws InvalidPropertiesException {
         if (StringUtils.isBlank(rawProperties)) {
             return EMPTY_PROPERTIES;
         }

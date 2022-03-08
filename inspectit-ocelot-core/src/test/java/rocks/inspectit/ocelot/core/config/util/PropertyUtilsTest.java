@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class PropertyUtilsTest {
 
@@ -13,11 +14,13 @@ public class PropertyUtilsTest {
 
     String yaml = "root:\n  sub-child:\n    value: true\n  second: 42";
 
+    String invalidJson = "{inspectit:{exporters:{metrics:{prometheus:{enabled:\"ENABLED\"}}}}}";
+
     @Nested
     public class ReadJson {
 
         @Test
-        public void readJson() {
+        public void readJson() throws InvalidPropertiesException {
 
             Properties result = PropertyUtils.readYamlOrJson(json);
 
@@ -30,13 +33,21 @@ public class PropertyUtilsTest {
             assertThat(result).containsEntry("nested.complex.key", true);
 
         }
+
+        /**
+         * Test that configuration with invalid JSON are rejected and an exception is thrown.
+         */
+        @Test
+        public void throwExceptionForInvalidJson() {
+            assertThatExceptionOfType(InvalidPropertiesException.class).isThrownBy(() -> PropertyUtils.readYamlOrJson(invalidJson));
+        }
     }
 
     @Nested
     public class ReadYaml {
 
         @Test
-        public void readYaml() {
+        public void readYaml() throws InvalidPropertiesException {
 
             Properties result = PropertyUtils.readYamlOrJson(yaml);
 
