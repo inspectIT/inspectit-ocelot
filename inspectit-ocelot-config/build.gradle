@@ -1,6 +1,7 @@
 plugins {
     id 'maven-publish'
-    id 'com.google.protobuf' version '0.8.17'
+    id 'idea'
+    id 'com.google.protobuf' version '0.8.18'
 }
 
 test {
@@ -21,7 +22,7 @@ protobuf {
     }
     plugins {
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.44.0'
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.44.1'
         }
     }
     generateProtoTasks {
@@ -49,9 +50,10 @@ dependencies {
             'org.apache.commons:commons-lang3:3.9',
             'commons-io:commons-io:2.5',
             'com.fasterxml.jackson.core:jackson-databind:2.8.9',
-            'io.grpc:grpc-stub:1.44.0',
-            'io.grpc:grpc-protobuf:1.44.0',
-            'net.devh:grpc-server-spring-boot-starter:2.13.1.RELEASE',
+
+            // grpc
+            'io.grpc:grpc-stub:1.44.1',
+            'io.grpc:grpc-protobuf:1.44.1',
 
             // logging
             "ch.qos.logback:logback-classic:${logbackVersion}",

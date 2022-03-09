@@ -3,9 +3,6 @@ package rocks.inspectit.ocelot.config.model.command;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.net.URL;
-import java.time.Duration;
-
 @Data
 @NoArgsConstructor
 public class AgentCommandSettings {
@@ -16,14 +13,9 @@ public class AgentCommandSettings {
     private boolean enabled = false;
 
     /**
-     * The URL for fetching agent commands.
-     */
-    private URL url;
-
-    /**
      * The URL for getting agent commands over grpc.
      */
-    private String grpcUrl;
+    private String url;
 
     /**
      * Whether the agent commands URL should be derived from the HTTP configuration URL.
@@ -33,26 +25,12 @@ public class AgentCommandSettings {
     /**
      * Path which is used for the agent command URL in case it is derived from the HTTP configuration URL
      */
-    private String agentCommandPath;
+    private int agentCommandPort;
 
     /**
-     * The timeout duration used for requests  when the agent is in discovery mode. Defining how long the agent will wait for
-     * new commands.
+     * Maximum size for inbound grpc messages, i.e. commands from config-server, in MiB.
+     * Commands probably will never exceed grpc's default of 4MiB that is also set as default here,
+     * but if your commands do you can configure it.
      */
-    private Duration liveSocketTimeout;
-
-    /**
-     * The timeout duration used for requests when the agent is in normal mode.
-     */
-    private Duration socketTimeout;
-
-    /**
-     * The used interval for polling commands.
-     */
-    private Duration pollingInterval;
-
-    /**
-     * How long the agent will staying in the live mode, before falling back to the normal mode.
-     */
-    private Duration liveModeDuration;
+    private Integer maxInboundMessageSize = 4;
 }

@@ -104,24 +104,16 @@ inspectit:
   # settings for the agent commands and communication
   agent-commands:
     # whether agent commands are enabled or not
-    enabled: false
-    # the URL for fetching agent commands over grpc - e.g.: http://localhost:8090/api/v1/agent/command
-    url:
-    # the URL for fetching agent commands - e.g.: http://localhost:9090
-    grpc-url: http://localhost:9090
+    enabled: true
+    # the URL for fetching agent commands over grpc - e.g.: localhost:9090
+    url: localhost:9090
     # whether the agent commands URL should be derived from the HTTP configuration URL
     derive-from-http-config-url: false
-    # path which is used for the agent command URL in case it is derived from the HTTP configuration URL
-    agent-command-path: "/api/v1/agent/command"
-    # the timeout duration used when the agent is in discovery mode. Defining how long the agent
-    # will wait for new commands.
-    live-socket-timeout: 30s
-    # the timeout duration used for requests when the agent is in normal mode
-    socket-timeout: 5s
-    # the used interval for polling commands
-    polling-interval: 15s
-    # how long the agent will staying in the live mode, before falling back to the normal mode
-    live-mode-duration: 2m
+    # port on which the config-server exposes its grpc-service, should correspond to grpc.server.port in config-server's application.yml
+    # used for the agent command URL in case it is derived from the HTTP configuration URL
+    agent-command-port: 9090
+    # maximum size for inbound grpc messages, i.e. commands from config-server, in MiB. Default is 4MiB.
+    max-inbound-message-size: 4
 
   log-preloading:
     enabled: false
