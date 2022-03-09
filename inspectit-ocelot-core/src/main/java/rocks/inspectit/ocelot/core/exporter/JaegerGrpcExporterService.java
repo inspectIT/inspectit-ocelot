@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
-import io.opentelemetry.sdk.trace.export.SpanExporter;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -18,15 +18,11 @@ import javax.validation.Valid;
 @Slf4j
 public class JaegerGrpcExporterService extends DynamicallyActivatableTraceExporterService {
 
+    @Getter
     private JaegerGrpcSpanExporter spanExporter;
 
     public JaegerGrpcExporterService() {
         super("exporters.tracing.jaegerGrpc", "tracing.enabled");
-    }
-
-    @Override
-    public SpanExporter getSpanExporter() {
-        return null;
     }
 
     @Override
@@ -37,7 +33,7 @@ public class JaegerGrpcExporterService extends DynamicallyActivatableTraceExport
                 return true;
             } else if (StringUtils.isNotEmpty(jaeger.getUrl())) {
                 // print warning if user used wrong setup
-                log.warn("In order to use Jaeger Thrift span exporter, please specify the gRPC URL endpoint property instead of the HTTP URL.");
+                log.warn("In order to use Jaeger gRPC span exporter, please specify the gRPC URL endpoint property instead of the HTTP URL.");
             }
         }
         return false;

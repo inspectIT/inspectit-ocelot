@@ -9,23 +9,21 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@DirtiesContext
-public class OtlpGrpcTraceExporterServiceIntTest extends ExporterServiceIntegrationTestBase {
+public class JaegerGrpcExporterServiceIntTest extends ExporterServiceIntegrationTestBase {
 
-    public static final String OTLP_GRPC_TRACING_PATH = "/v1/trace";
+    public static String JAEGER_GRPC_PATH = "/v1/traces";
 
     @Autowired
-    private OtlpGrpcTraceExporterService service;
+    JaegerGrpcExporterService service;
 
     @Test
+    @DirtiesContext
     void verifyTraceSent() {
-        updateProperties(properties -> {
-            properties.setProperty("inspectit.exporters.tracing.otlp-grpc.url", getEndpoint(COLLECTOR_OTLP_GRPC_PORT, OTLP_GRPC_TRACING_PATH));
-            properties.setProperty("inspectit.exporters.tracing.otlp-grpc.enabled", true);
+        updateProperties(mps -> {
+            mps.setProperty("inspectit.exporters.tracing.jaeger-grpc.enabled", true);
+            mps.setProperty("inspectit.exporters.tracing.jaeger-grpc.grpc", getEndpoint(COLLECTOR_JAEGER_GRPC_PORT, JAEGER_GRPC_PATH));
         });
-
-        System.out.println("endpoint: " + getEndpoint(COLLECTOR_OTLP_GRPC_PORT, OTLP_GRPC_TRACING_PATH));
-        await().atMost(10, TimeUnit.SECONDS)
+        await().atMost(15, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 

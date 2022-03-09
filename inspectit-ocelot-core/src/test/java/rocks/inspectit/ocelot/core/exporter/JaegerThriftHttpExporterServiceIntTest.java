@@ -10,22 +10,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @DirtiesContext
-public class OtlpGrpcTraceExporterServiceIntTest extends ExporterServiceIntegrationTestBase {
+public class JaegerThriftHttpExporterServiceIntTest extends ExporterServiceIntegrationTestBase {
 
-    public static final String OTLP_GRPC_TRACING_PATH = "/v1/trace";
+    public static final String JAEGER_PATH = "/api/traces";
 
     @Autowired
-    private OtlpGrpcTraceExporterService service;
+    JaegerExporterService service;
 
+    @DirtiesContext
     @Test
     void verifyTraceSent() {
-        updateProperties(properties -> {
-            properties.setProperty("inspectit.exporters.tracing.otlp-grpc.url", getEndpoint(COLLECTOR_OTLP_GRPC_PORT, OTLP_GRPC_TRACING_PATH));
-            properties.setProperty("inspectit.exporters.tracing.otlp-grpc.enabled", true);
-        });
 
-        System.out.println("endpoint: " + getEndpoint(COLLECTOR_OTLP_GRPC_PORT, OTLP_GRPC_TRACING_PATH));
-        await().atMost(10, TimeUnit.SECONDS)
+        // enable Jaeger Thrift exporter
+        updateProperties(mps -> {
+            mps.setProperty("inspectit.exporters.tracing.jaeger.enabled", true);
+            mps.setProperty("inspectit.exporters.tracing.jaeger.url", getEndpoint(COLLECTOR_JAEGER_THRIFT_HTTP_PORT, JAEGER_PATH));
+        });
+        await().atMost(15, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
@@ -34,5 +35,7 @@ public class OtlpGrpcTraceExporterServiceIntTest extends ExporterServiceIntegrat
         await().atMost(15, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(grpcServer.traceRequests).hasSize(1));
+
     }
+
 }
