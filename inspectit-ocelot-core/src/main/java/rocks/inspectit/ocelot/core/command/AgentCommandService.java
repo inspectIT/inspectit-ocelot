@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.command;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -17,6 +18,7 @@ import rocks.inspectit.ocelot.grpc.FirstResponse;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.net.URL;
 
 /**
  * Service responsible for fetching agent commands.
@@ -55,12 +57,11 @@ public class AgentCommandService extends DynamicallyActivatableService {
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        // TODO: 09.03.2022 derive from http configuration address
         try {
-            String commandsAddress = configuration.getAgentCommands().getUrl();
+            String commandsUrl = getCommandUrl(configuration);
             Integer grpcMaxSize = configuration.getAgentCommands().getMaxInboundMessageSize();
 
-            Channel channel = ManagedChannelBuilder.forTarget(commandsAddress)
+            Channel channel = ManagedChannelBuilder.forTarget(commandsUrl)
                     .maxInboundMessageSize(grpcMaxSize * 1024 * 1024)
                     .usePlaintext()
                     .build();
@@ -70,9 +71,10 @@ public class AgentCommandService extends DynamicallyActivatableService {
             RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
             String agentId = runtime.getName();
 
-            log.info("Connecting to Configserver over grpc for agent commands over URL '{}' with agent ID '{}'", commandsAddress, agentId);
+            log.info("Connecting to Configserver over grpc for agent commands over URL '{}' with agent ID '{}'", commandsUrl, agentId);
 
             return startAskForCommandsConnection(asyncStub, agentId);
+            
         } catch (Exception e) {
             log.error("Could not enable the agent command service.", e);
             return false;
@@ -136,5 +138,21 @@ public class AgentCommandService extends DynamicallyActivatableService {
             commandResponseObserver = null;
         }
         return true;
+    }
+
+    @VisibleForTesting
+    String getCommandUrl(InspectitConfig configuration) {
+        AgentCommandSettings settings = configuration.getAgentCommands();
+
+        if (settings.isDeriveFromHttpConfigUrl()) {
+            URL url = configuration.getConfig().getHttp().getUrl();
+            if (url == null) {
+                throw new IllegalStateException("The URL cannot derived from the HTTP configuration URL because it is null.");
+            }
+
+            return String.format("%s:%s", url.getHost(), settings.getAgentCommandPort());
+        } else {
+            return settings.getUrl();
+        }
     }
 }
