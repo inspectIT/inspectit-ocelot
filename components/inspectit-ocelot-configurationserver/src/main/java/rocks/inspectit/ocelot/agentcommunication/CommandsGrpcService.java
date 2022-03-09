@@ -82,12 +82,13 @@ public class CommandsGrpcService extends AgentCommandsGrpc.AgentCommandsImplBase
             public void onError(Throwable t) {
                 String agentId = agentConnections.inverse().get(commandsObserver);
                 log.error("Encountered error in exchangeInformation ending the stream connection with agent {}. {}", agentId, t.toString());
+                agentConnections.remove(agentId);
             }
 
             @Override
             public void onCompleted() {
                 String agentId = agentConnections.inverse().get(commandsObserver);
-                log.info("Agent {} ended the stream connection.", agentId);
+                log.info("Agent '{}' ended the stream connection.", agentId);
                 agentConnections.remove(agentId);
                 commandsObserver.onCompleted();
             }
