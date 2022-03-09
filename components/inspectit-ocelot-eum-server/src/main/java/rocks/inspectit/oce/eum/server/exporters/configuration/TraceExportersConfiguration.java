@@ -41,7 +41,7 @@ public class TraceExportersConfiguration {
 
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnProperty({"inspectit-eum-server.exporters.tracing.jaeger.enabled", "inspectit-eum-server.exporters.tracing.jaeger.grpc"})
-    @ConditionalOnExpression("NOT new String('${inspectit-eum-server.exporters.tracing.jaeger.enabled}').equals('DISABLED') AND new String('${inspectit-eum-server.exporters.tracing.jaeger.grpc}').length() > 0")
+    @ConditionalOnExpression("(NOT new String('${inspectit-eum-server.exporters.tracing.jaeger.enabled}').toUpperCase().equals(T(rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState).DISABLED.toString())) AND (new String('${inspectit-eum-server.exporters.tracing.jaeger.grpc}').length() > 0)")
     public SpanExporter jaegerSpanExporter() {
         JaegerExporterSettings jaegerExporterSettings = configuration.getExporters().getTracing().getJaeger();
 
