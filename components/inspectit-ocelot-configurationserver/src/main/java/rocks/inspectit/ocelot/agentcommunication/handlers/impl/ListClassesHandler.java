@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.agentcommunication.handlers.impl;
 
+import com.googlecode.protobuf.format.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,9 @@ public class ListClassesHandler implements CommandHandler {
     @Override
     public void handleResponse(CommandResponse response, DeferredResult<ResponseEntity<?>> result) {
         ListClassesCommandResponse classesResponse = response.getListClasses();
-        result.setResult(ResponseEntity.ok().body(classesResponse.getResultList()));
+
+        // TODO: 09.03.2022 Either get 'result' key from json in UI or parse the String and extract only result part.
+        // Just setting printToString(classesResponse.getResultList()) sadly does not work.
+        result.setResult(ResponseEntity.ok().body(new JsonFormat().printToString(classesResponse)));
     }
 }

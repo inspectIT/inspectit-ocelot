@@ -90,7 +90,7 @@ protobuf {
     }
     plugins {
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.44.0'
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.44.1'
         }
     }
     generateProtoTasks {
@@ -128,9 +128,12 @@ dependencies {
             "org.springframework.ldap:spring-ldap-core",
             "org.springframework.security:spring-security-ldap",
             'org.springframework.boot:spring-boot-starter-actuator',
+
+            // grpc
             'net.devh:grpc-server-spring-boot-starter:2.13.1.RELEASE',
-            'io.grpc:grpc-stub:1.44.0',
-            'io.grpc:grpc-protobuf:1.44.0',
+            'io.grpc:grpc-stub:1.44.1',
+            'io.grpc:grpc-protobuf:1.44.1',
+            'com.googlecode.protobuf-java-format:protobuf-java-format:1.4',
 
             // spring releated
             "org.yaml:snakeyaml:1.30",
