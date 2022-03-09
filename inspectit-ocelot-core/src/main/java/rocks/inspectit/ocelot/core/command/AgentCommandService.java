@@ -55,8 +55,8 @@ public class AgentCommandService extends DynamicallyActivatableService {
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
+        // TODO: 09.03.2022 derive from http configuration address
         try {
-            // TODO: 09.03.2022 derive from http configuration address 
             String commandsAddress = configuration.getAgentCommands().getUrl();
             Integer grpcMaxSize = configuration.getAgentCommands().getMaxInboundMessageSize();
 
@@ -72,6 +72,15 @@ public class AgentCommandService extends DynamicallyActivatableService {
 
             log.info("Connecting to Configserver over grpc for agent commands over URL '{}' with agent ID '{}'", commandsAddress, agentId);
 
+            return startAskForCommandsConnection(asyncStub, agentId);
+        } catch (Exception e) {
+            log.error("Could not enable the agent command service.", e);
+            return false;
+        }
+    }
+
+    private boolean startAskForCommandsConnection(AgentCommandsGrpc.AgentCommandsStub asyncStub, String agentId) {
+        try {
             commandResponseObserver = asyncStub.askForCommands(new StreamObserver<Command>() {
                 @Override
                 public void onNext(Command command) {
@@ -89,7 +98,14 @@ public class AgentCommandService extends DynamicallyActivatableService {
                 public void onError(Throwable t) {
                     log.error("Encountered error in exchangeInformation ending the stream connection with config-Server. {}", t.toString());
                     commandResponseObserver = null;
-                    // TODO: 04.03.2022 try to restart connection, disable service if not possible
+
+                    boolean success = startAskForCommandsConnection(asyncStub, agentId);
+                    if (success) {
+                        log.info("Successfully restarted connection after error.");
+                    } else {
+                        disable();
+                        log.info("Could not restart connection after error.");
+                    }
                 }
 
                 @Override
@@ -104,7 +120,7 @@ public class AgentCommandService extends DynamicallyActivatableService {
                     .setFirst(FirstResponse.newBuilder().setAgentId(agentId))
                     .buildPartial());
         } catch (Exception e) {
-            log.error("Could not enable the agent command service.", e);
+            log.error("Could not start askForCommands-connection.", e);
             return false;
         }
 
@@ -117,6 +133,7 @@ public class AgentCommandService extends DynamicallyActivatableService {
 
         if (commandResponseObserver != null) {
             commandResponseObserver.onCompleted();
+            commandResponseObserver = null;
         }
         return true;
     }
