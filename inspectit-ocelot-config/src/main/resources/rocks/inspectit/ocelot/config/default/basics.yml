@@ -106,12 +106,12 @@ inspectit:
     # whether agent commands are enabled or not
     enabled: true
     # the URL for fetching agent commands over grpc - e.g.: localhost:9090
-    url: localhost:9090
+    url:
     # whether the agent commands URL should be derived from the HTTP configuration URL
     derive-from-http-config-url: false
     # port on which the config-server exposes its grpc-service, should correspond to grpc.server.port in config-server's application.yml
     # used for the agent command URL in case it is derived from the HTTP configuration URL
-    agent-command-port: 9090
+    agent-command-port:
     # maximum size for inbound grpc messages, i.e. commands from config-server, in MiB. Default is 4MiB.
     max-inbound-message-size: 4
 
