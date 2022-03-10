@@ -13,7 +13,7 @@ public class AgentCommandSettings {
     private boolean enabled = false;
 
     /**
-     * The URL for getting agent commands over grpc.
+     * The URL for getting agent commands over grpc, e.g. "localhost:9090".
      */
     private String url;
 
@@ -23,9 +23,9 @@ public class AgentCommandSettings {
     private boolean deriveFromHttpConfigUrl = false;
 
     /**
-     * Path which is used for the agent command URL in case it is derived from the HTTP configuration URL
+     * Port which is used for the agent command URL in case it is derived from the HTTP configuration URL
      */
-    private int agentCommandPort;
+    private Integer agentCommandPort;
 
     /**
      * Maximum size for inbound grpc messages, i.e. commands from config-server, in MiB.
