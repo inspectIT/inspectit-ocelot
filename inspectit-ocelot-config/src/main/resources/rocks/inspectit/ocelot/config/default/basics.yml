@@ -104,7 +104,7 @@ inspectit:
   # settings for the agent commands and communication
   agent-commands:
     # whether agent commands are enabled or not
-    enabled: true
+    enabled: false
     # the URL for fetching agent commands over grpc - e.g.: localhost:9090
     url:
     # whether the agent commands URL should be derived from the HTTP configuration URL
@@ -114,8 +114,17 @@ inspectit:
     agent-command-port:
     # maximum size for inbound grpc messages, i.e. commands from config-server, in MiB. Default is 4MiB.
     max-inbound-message-size: 4
+    # Time after which the backoff between retries to re-establish the grpc connection between agent and config-server
+    # is reset to the lowest value.
+    backoff-reset-time: 60
+    # How often the backoff between retries to re-establish the grpc connection between agent and config-server is increased for the next retry.
+    # Backoff is calculated as 2 to the power of how often the backoff has been increased, so a value of 5 means that the max backoff is 32 seconds.
+    #
+    # This setting only sets a maximum for the backoff between retries, it does not affect the number of retries,
+    # the service will always continue to try reconnecting on errors unless disabled.
+    max-backoff-increases: 5
 
-  log-preloading:
-    enabled: false
-    log-level: WARN
-    buffer-size: 128
+log-preloading:
+  enabled: false
+  log-level: WARN
+  buffer-size: 128
