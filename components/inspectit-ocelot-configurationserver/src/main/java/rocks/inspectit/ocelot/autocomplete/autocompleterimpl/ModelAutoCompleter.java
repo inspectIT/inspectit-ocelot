@@ -1,7 +1,5 @@
 package rocks.inspectit.ocelot.autocomplete.autocompleterimpl;
 
-import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.INSPECTIT;
-
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
@@ -17,6 +15,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static rocks.inspectit.ocelot.autocomplete.autocompleterimpl.Constants.INSPECTIT;
 
 @Component
 public class ModelAutoCompleter implements AutoCompleter {
@@ -41,7 +41,9 @@ public class ModelAutoCompleter implements AutoCompleter {
     private List<String> collectProperties(List<String> propertyPath) {
         Type endType = PropertyPathHelper.getPathEndType(propertyPath, InspectitConfig.class);
         if (CollectionUtils.isEmpty(propertyPath) || ((propertyPath.size() == 1) && propertyPath.get(0).equals(""))) {
-            return getProperties(InspectitConfig.class);
+            return getProperties(InspectitConfig.class).stream()
+                    //Filter out the path "inspectit.env" which may only be managed by the agent.
+                    .filter(property -> !property.equals("env")).collect(Collectors.toList());
         }
         if (endType instanceof Class<?> && ((Class<?>) endType).isEnum()) {
             return Arrays.stream(((Class<?>) endType).getEnumConstants())

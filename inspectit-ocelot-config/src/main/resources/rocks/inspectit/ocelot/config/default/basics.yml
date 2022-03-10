@@ -120,3 +120,8 @@ inspectit:
     polling-interval: 15s
     # how long the agent will staying in the live mode, before falling back to the normal mode
     live-mode-duration: 2m
+
+  log-preloading:
+    enabled: false
+    log-level: WARN
+    buffer-size: 128

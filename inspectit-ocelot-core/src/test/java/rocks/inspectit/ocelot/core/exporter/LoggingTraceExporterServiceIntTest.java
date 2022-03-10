@@ -8,10 +8,9 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.exporter.logging.LoggingSpanExporter;
 import org.awaitility.Awaitility;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
@@ -36,6 +35,24 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
     @Autowired
     InspectitEnvironment environment;
 
+    @BeforeAll
+    static void beforeAll() {
+        // enable jul -> slf4j bridge
+        // this is necessary as OTEL logs to jul, but we use the LogCapturerer with logback
+        if (!SLF4JBridgeHandler.isInstalled()) {
+            SLF4JBridgeHandler.removeHandlersForRootLogger();
+            SLF4JBridgeHandler.install();
+        }
+    }
+
+    @AfterAll
+    static void afterAll(){
+        if(SLF4JBridgeHandler.isInstalled()){
+            SLF4JBridgeHandler.uninstall();
+        }
+    }
+
+
     @BeforeEach
     void enableService() {
         localSwitch(true);
@@ -45,6 +62,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.tracing.logging.enabled", enabled);
         });
+
     }
 
     @Nested

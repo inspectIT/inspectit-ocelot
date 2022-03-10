@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -33,7 +34,9 @@ public class ConfigParser {
         //Add Module to deal with non-standard Duration values in the YAML
         SimpleModule module = new SimpleModule();
         module.addDeserializer(Duration.class, new CustomDurationDeserializer());
+        module.addDeserializer(ExporterEnabledState.class, new ExporterEnabledStateDeserializer());
         mapper.registerModule(module);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         //In the YAML property-names are kebab-case in the Java objects CamelCase, Jackson can do that conversion
         //with the following line
@@ -54,12 +57,17 @@ public class ConfigParser {
             // however here there is no InspectitEnvironment which is used for that, so instead Jackson is used and
             // the variables are evaluated using a custom version of StringSubstitutor.
             Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
+
+            // remove any invalid keys at the top level to make the String parseable for Jackson
+            yamlMap.keySet().removeIf(key -> !key.equals("inspectit"));
+            String cleanedConfigYaml = mapper.writeValueAsString(yamlMap);
+
             StringSubstitutor stringSubstitutor = new NestedMapStringSubstitutor(yamlMap);
-            String cleanedInputString = stringSubstitutor.replace(configYaml);
+            cleanedConfigYaml = stringSubstitutor.replace(cleanedConfigYaml);
 
             //Parse the InspectitConfig from the created YAML String
             ObjectReader reader = mapper.reader().withRootName("inspectit").forType(InspectitConfig.class);
-            return reader.readValue(cleanedInputString);
+            return reader.readValue(cleanedConfigYaml);
         } else {
             return new InspectitConfig();
         }
@@ -96,6 +104,28 @@ public class ConfigParser {
         @Override
         public Duration deserialize(JsonParser parser, DeserializationContext context) throws IOException, JsonProcessingException {
             return parseHuman(parser.getText());
+        }
+    }
+
+    /**
+     * The CustomDurationDeserializer is needed to parse 'enabled' fields in exporters using the old Boolean style.
+     * Analogous to {@link rocks.inspectit.ocelot.config.conversion.BooleanToExporterEnabledStateConverter}.
+     */
+    private static class ExporterEnabledStateDeserializer extends JsonDeserializer<ExporterEnabledState> {
+
+        @Override
+        public ExporterEnabledState deserialize(JsonParser parser, DeserializationContext context) throws IOException, JsonProcessingException {
+            String text = parser.getText().toUpperCase();
+            switch (text) {
+                case "TRUE":
+                    // old setting 'true' is equivalent to IF_CONFIGURED
+                    return ExporterEnabledState.IF_CONFIGURED;
+                case "FALSE":
+                    // old setting 'false' is equivalent to DISABLED
+                    return ExporterEnabledState.DISABLED;
+                default:
+                    return ExporterEnabledState.valueOf(text);
+            }
         }
     }
 }

@@ -62,6 +62,8 @@ public class PrometheusExporterServiceIntTest {
             PROMETHEUS_PORT = SocketUtils.findAvailableTcpPort(20000);
             TestPropertyValues.of(String.format("inspectit-eum-server.exporters.metrics.prometheus.port=%d", PROMETHEUS_PORT))
                     .applyTo(applicationContext);
+            TestPropertyValues.of(String.format("inspectit-eum-server.exporters.metrics.prometheus.enabled=ENABLED"))
+                    .applyTo(applicationContext);
         }
     }
 
