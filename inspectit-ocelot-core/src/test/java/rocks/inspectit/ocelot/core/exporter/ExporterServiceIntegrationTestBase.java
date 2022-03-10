@@ -6,6 +6,10 @@ import com.linecorp.armeria.server.ServiceRequestContext;
 import com.linecorp.armeria.server.grpc.protocol.AbstractUnaryGrpcService;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
@@ -15,6 +19,8 @@ import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse;
+import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.junit.jupiter.api.AfterAll;
@@ -32,10 +38,14 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.testcontainers.Testcontainers.exposeHostPorts;
 
 /**
@@ -62,6 +72,10 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
     static final Integer COLLECTOR_JAEGER_THRIFT_COMPACT_PORT = 6831;
 
     static final Integer COLLECTOR_PROMETHEUS_PORT = 8888;
+
+    static final Integer COLLECTOR_INFLUX_DB1_PORT = 8086;
+
+    static final int COLLECTOR_ZIPKIN_PORT = 9411;
 
     static final String INSTRUMENTATION_NAME = "rocks.inspectit.ocelot.instrumentation";
 
@@ -102,7 +116,7 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
                 .withCommand("--config", "/otel-config.yaml")
                 .withLogConsumer(outputFrame -> LOGGER.log(Level.INFO, outputFrame.getUtf8String().replace("\n", "")))
                 // expose all relevant ports
-                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_JAEGER_THRIFT_HTTP_PORT, COLLECTOR_JAEGER_THRIFT_BINARY_PORT, COLLECTOR_JAEGER_THRIFT_COMPACT_PORT, COLLECTOR_JAEGER_GRPC_PORT, COLLECTOR_PROMETHEUS_PORT)
+                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_JAEGER_THRIFT_HTTP_PORT, COLLECTOR_JAEGER_THRIFT_BINARY_PORT, COLLECTOR_JAEGER_THRIFT_COMPACT_PORT, COLLECTOR_JAEGER_GRPC_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_INFLUX_DB1_PORT, COLLECTOR_ZIPKIN_PORT)
                 .waitingFor(Wait.forHttp("/").forPort(COLLECTOR_HEALTH_CHECK_PORT));
 
         // collector.withStartupTimeout(Duration.of(1, ChronoUnit.MINUTES));
@@ -145,12 +159,15 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
 
     /**
      * Creates a nested trace with parent and child span and flushes them.
+     *
+     * @param parentSpanName the name of the parent {@link Span}
+     * @param childSpanName  the name of the child {@link Span}
      */
-    void makeSpansAndFlush() {
+    void makeSpansAndFlush(String parentSpanName, String childSpanName) {
         // start span and nested span
-        Span parentSpan = getTracer().spanBuilder("openTelemetryParentSpan").startSpan();
+        Span parentSpan = getTracer().spanBuilder(parentSpanName).startSpan();
         try (Scope scope = parentSpan.makeCurrent()) {
-            Span childSpan = getTracer().spanBuilder("openTelemetryChildSpan").startSpan();
+            Span childSpan = getTracer().spanBuilder(childSpanName).startSpan();
             try (Scope child = childSpan.makeCurrent()) {
                 // do sth
             } finally {
@@ -162,6 +179,99 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
 
         // flush pending spans
         Instances.openTelemetryController.flush();
+    }
+
+    /**
+     * Records some dummy metrics and flushes them.
+     */
+    void recordMetricsAndFlush() {
+        recordMetricsAndFlush(1, "my-key", "my-val");
+    }
+
+    /**
+     * Records a counter with the given value and tag
+     *
+     * @param value  the value to add to the counter
+     * @param tagKey the key of the tag
+     * @param tagVal the value of the tag
+     */
+    void recordMetricsAndFlush(int value, String tagKey, String tagVal) {
+        // get the meter and create a counter
+        Meter meter = GlobalOpenTelemetry.getMeterProvider()
+                .meterBuilder("rocks.inspectit.ocelot")
+                .setInstrumentationVersion("0.0.1")
+                .build();
+        LongCounter counter = meter.counterBuilder("my-counter").setDescription("My counter").setUnit("1").build();
+
+        // record counter
+        counter.add(value, Attributes.of(AttributeKey.stringKey(tagKey), tagVal));
+
+        Instances.openTelemetryController.flush();
+
+    }
+
+    /**
+     * Verifies that the metric with the given value and key/value attribute (tag) has been exported to and received by the {@link #grpcServer}
+     *
+     * @param value
+     * @param tagKey
+     * @param tagVal
+     */
+    void awaitMetricsExported(int value, String tagKey, String tagVal) {
+        // create the attribute that we will use to verify that the metric has been written
+        KeyValue attribute = KeyValue.newBuilder()
+                .setKey(tagKey)
+                .setValue(AnyValue.newBuilder().setStringValue(tagVal).build())
+                .build();
+
+        await().atMost(30, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream()).anyMatch(mReq -> mReq.getResourceMetricsList()
+                        .stream()
+                        .anyMatch(rm ->
+                                // check for the "my-counter" metrics
+                                rm.getInstrumentationLibraryMetrics(0).getMetrics(0).getName().equals("my-counter")
+                                        // check for the specific attribute and value
+                                        && rm.getInstrumentationLibraryMetrics(0)
+                                        .getMetricsList()
+                                        .stream()
+                                        .anyMatch(metric -> metric.getSum()
+                                                .getDataPointsList()
+                                                .stream()
+                                                .anyMatch(d -> d.getAttributesList()
+                                                        .contains(attribute) && d.getAsInt() == value)))));
+    }
+
+    /**
+     * Waits for the spans to be exported to and received by the {@link #grpcServer}. This method asserts that Spans with the given names exist and that the child's {@link io.opentelemetry.proto.trace.v1.Span#getParentSpanId()} equals the parent's {@link io.opentelemetry.proto.trace.v1.Span#getSpanId()}
+     *
+     * @param parentSpanName the name of the parent span
+     * @param childSpanName  the name of the child span
+     */
+    void awaitSpansExported(String parentSpanName, String childSpanName) {
+
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+
+            // get a flat list of spans
+            Stream<List<io.opentelemetry.proto.trace.v1.Span>> spansLis = grpcServer.traceRequests.stream()
+                    .flatMap(tr -> tr.getResourceSpansList()
+                            .stream()
+                            .flatMap(rs -> rs.getInstrumentationLibrarySpansList()
+                                    .stream()
+                                    .map(ils -> ils.getSpansList())));
+
+            // assert that parent and child span are present and that the parent's spanId equals the child's parentSpanId
+            assertThat(spansLis.anyMatch(s -> s.stream()
+                    .filter(span -> span.getName().equals(childSpanName))
+                    .findFirst()
+                    .orElse(io.opentelemetry.proto.trace.v1.Span.getDefaultInstance())
+                    .getParentSpanId()
+                    .equals(s.stream()
+                            .filter(span -> span.getName().equals(parentSpanName))
+                            .findFirst()
+                            .orElse(io.opentelemetry.proto.trace.v1.Span.getDefaultInstance())
+                            .getSpanId()))).isTrue();
+        });
+
     }
 
     /**

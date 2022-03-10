@@ -87,6 +87,8 @@ dependencies {
             "io.opentelemetry:opentelemetry-exporter-jaeger-thrift",
             "io.opentelemetry:opentelemetry-exporter-zipkin",
             "io.opentelemetry:opentelemetry-exporter-otlp",
+            "io.opentelemetry:opentelemetry-exporter-otlp-metrics",
+
 
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             "io.opentelemetry:opentelemetry-exporter-prometheus",

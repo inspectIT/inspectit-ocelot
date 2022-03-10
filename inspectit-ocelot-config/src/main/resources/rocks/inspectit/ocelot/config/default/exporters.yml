@@ -35,11 +35,19 @@ inspectit:
         # E.g. if the exportInterval is 15s and the buffer-size is 4, the export will keep up to one minute of data in memory.
         buffer-size: 40
 
-      # settings for the LoggingMetricExporter used in LoggingExporterService
+      # settings for the LoggingMetricExporter used in LoggingMetricExporterService
       logging:
           enabled: false
           # the export interval of the metrics
           export-interval: ${inspectit.metrics.frequency}
+
+      # settings for the OtlpGrpcMetricExporter used in OtlpGrpcMetricExporterService
+      otlp-grpc:
+        enabled: false
+        # the export interval of the metrics
+        export-interval: ${inspectit.metrics.frequency}
+        # the endpoint
+        url: http://127.0.0.1:4318
 
     # settings for trace exporters
     tracing:
@@ -61,6 +69,8 @@ inspectit:
       # settings for Jaeger gRPC exporter
       jaeger-grpc:
         enabled: false
+        # the URL under which the Jaeger gRPC server can be accessed, e.g., http://127.0.0.1:14250/v1/traces
+        grpc: http://127.0.0.1:14250/v1/traces
 
       # settings for the LoggingSpanExporter used in LoggingTraceExporterService
       logging:
@@ -68,5 +78,5 @@ inspectit:
 
       # settings for the OtlpGrpcSpanExporter used in OtlpGrpcTraceExporterService
       otlp-grpc:
-          enabled: true
+          enabled: false
           url: null

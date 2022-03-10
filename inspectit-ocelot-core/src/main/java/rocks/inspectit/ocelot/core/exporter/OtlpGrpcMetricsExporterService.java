@@ -1,57 +1,53 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-import io.opentelemetry.exporter.logging.LoggingMetricExporter;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.model.exporters.metrics.LoggingMetricsExporterSettings;
+import rocks.inspectit.ocelot.config.model.exporters.metrics.OtlpGrpcMetricsExporterSettings;
 
 import javax.validation.Valid;
 
 /**
- * Service for the {@link io.opentelemetry.exporter.logging.LoggingMetricExporter}
+ * Service for {@link io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter}.
+ * Can be dynamically started and stopped using the exporters.metrics.otlp-grpc.enabled configuration
  */
 @Component
 @Slf4j
-public class LoggingMetricExporterService extends DynamicallyActivatableMetricsExporterService {
+public class OtlpGrpcMetricsExporterService extends DynamicallyActivatableMetricsExporterService {
 
     /**
-     * The {@link LoggingMetricExporter} for exporting metrics to the log
+     * The {@link OtlpGrpcMetricExporter} for exporting metrics via OTLP gRPC
      */
-    private LoggingMetricExporter metricExporter;
+    private OtlpGrpcMetricExporter metricExporter;
 
     /**
      * The {@link PeriodicMetricReaderBuilder} for reading metrics to the log
      */
     private PeriodicMetricReaderBuilder metricReaderBuilder;
 
-    public LoggingMetricExporterService() {
-        super("exporters.metrics.logging", "metrics.enabled");
-    }
-
-    @Override
-    protected void init() {
-        super.init();
-
-        // create new metric exporter
-        metricExporter = LoggingMetricExporter.create();
+    public OtlpGrpcMetricsExporterService() {
+        super("metrics.enabled", "exporters.metrics.otlpGrpc");
     }
 
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig configuration) {
-        @Valid LoggingMetricsExporterSettings logging = configuration.getExporters().getMetrics().getLogging();
-        return configuration.getMetrics().isEnabled() && logging.isEnabled();
+        @Valid OtlpGrpcMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlpGrpc();
+        return configuration.getMetrics().isEnabled() && !StringUtils.isEmpty(otlp.getUrl()) && otlp.isEnabled();
     }
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        LoggingMetricsExporterSettings logging = configuration.getExporters().getMetrics().getLogging();
         try {
-            // build and register the MeterProvider
-            metricReaderBuilder = PeriodicMetricReader.builder(metricExporter).setInterval(logging.getExportInterval());
+            // build and register exporter service
+            OtlpGrpcMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlpGrpc();
+            metricExporter = OtlpGrpcMetricExporter.builder().setEndpoint(otlp.getUrl()).build();
+            metricReaderBuilder = PeriodicMetricReader.builder(metricExporter).setInterval(otlp.getExportInterval());
+
             boolean success = openTelemetryController.registerMetricExporterService(this);
             if (success) {
                 log.info("Starting {}", getClass().getSimpleName());
@@ -61,7 +57,7 @@ public class LoggingMetricExporterService extends DynamicallyActivatableMetricsE
             }
             return success;
         } catch (Exception e) {
-            log.error("Failed to start " + getClass().getSimpleName(), e);
+            log.error("Error creatig OTLP metrics exporter service", e);
             return false;
         }
     }
@@ -69,11 +65,11 @@ public class LoggingMetricExporterService extends DynamicallyActivatableMetricsE
     @Override
     protected boolean doDisable() {
         try {
-            log.info("Stopping LoggingMetricExporter");
+            log.info("Stopping OtlpGrpcMetricsExporter");
             openTelemetryController.unregisterMetricExporterService(this);
             return true;
         } catch (Exception e) {
-            log.error("Failed to stop LoggingMetricExporter", e);
+            log.error("Failed to stop OtlpGrpcMetricsExporter", e);
             return false;
         }
     }

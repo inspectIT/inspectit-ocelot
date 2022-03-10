@@ -24,15 +24,12 @@ public class OtlpGrpcTraceExporterServiceIntTest extends ExporterServiceIntegrat
             properties.setProperty("inspectit.exporters.tracing.otlp-grpc.enabled", true);
         });
 
-        System.out.println("endpoint: " + getEndpoint(COLLECTOR_OTLP_GRPC_PORT, OTLP_GRPC_TRACING_PATH));
         await().atMost(10, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
-        makeSpansAndFlush();
+        makeSpansAndFlush("otlp-grpc-parent", "otlp-grpc-child");
 
-        await().atMost(15, TimeUnit.SECONDS)
-                .pollInterval(1, TimeUnit.SECONDS)
-                .untilAsserted(() -> assertThat(grpcServer.traceRequests).hasSize(1));
+        awaitSpansExported("otlp-grpc-parent", "otlp-grpc-child");
     }
 }

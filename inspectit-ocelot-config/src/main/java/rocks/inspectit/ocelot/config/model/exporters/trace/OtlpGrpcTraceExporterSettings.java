@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Settings for {@link rocks.inspectit.ocelot.core.exporter.OtlpTraceExporterService}
+ * Settings for {@link rocks.inspectit.ocelot.core.exporter.OtlpGrpcTraceExporterService}
  */
 @Data
 @NoArgsConstructor
@@ -13,7 +13,7 @@ public class OtlpGrpcTraceExporterSettings {
     private boolean enabled;
 
     /***
-     * The OTLP traces endpoint to connect to
+     * The OTLP traces gRPC endpoint to connect to.
      */
     private String url;
 

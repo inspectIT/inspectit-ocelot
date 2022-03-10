@@ -30,7 +30,7 @@ public class JaegerThriftHttpExporterServiceIntTest extends ExporterServiceInteg
                 .pollInterval(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
-        makeSpansAndFlush();
+        makeSpansAndFlush("jaeger-thrift-parent","jaeger-thrift-child");
 
         await().atMost(15, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS)

@@ -49,8 +49,9 @@ public class JaegerExporterIntTest {
 
         @Override
         public void initialize(ConfigurableApplicationContext applicationContext) {
-            TestPropertyValues.of(String.format("inspectit-eum-server.exporters.tracing.jaeger.grpc=%s:%d", jaegerContainer
-                    .getHost(), jaegerContainer.getMappedPort(COLLECTOR_PORT)), "inspectit-eum-server.exporters.tracing.jaeger.service-name=" + JaegerExporterIntTest.SERVICE_NAME)
+            TestPropertyValues.of("inspectit-eum-server.exporters.tracing.jaegerGrpc.enabled=true",
+                            String.format("inspectit-eum-server.exporters.tracing.jaegerGrpc.grpc=%s:%d", jaegerContainer
+                    .getHost(), jaegerContainer.getMappedPort(COLLECTOR_PORT)), "inspectit-eum-server.exporters.tracing.jaegerGrpc.service-name=" + JaegerExporterIntTest.SERVICE_NAME)
                     .applyTo(applicationContext);
         }
     }

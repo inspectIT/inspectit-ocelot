@@ -46,9 +46,6 @@ public class OtlpGrpcTraceExporterService extends DynamicallyActivatableTraceExp
             return true;
         } catch (Throwable t) {
             log.error("Error creating OTLP trace exporter", t);
-            if (true) {
-                throw t;
-            }
             return false;
         }
     }

@@ -16,7 +16,7 @@ receivers:
       grpc:
       http:
 
-  # accept Prometheus from port 8888
+  # scrape Prometheus
   prometheus:
     config:
       scrape_configs:
@@ -24,6 +24,12 @@ receivers:
           scrape_interval: 500ms
           static_configs:
             - targets:  [$PROMETHEUS_SCRAPE_TARGET]
+
+  # accept InfluxDB
+  influxdb:
+
+  # accept Zipkin
+  zipkin:
 
 exporters:
   logging:
@@ -36,10 +42,10 @@ service:
   extensions: [health_check]
   pipelines:
     metrics:
-      receivers: [otlp, prometheus]
+      receivers: [otlp, prometheus, influxdb]
       exporters: [logging, otlp]
     traces:
-      receivers: [otlp, jaeger]
+      receivers: [otlp, jaeger, zipkin]
       exporters: [logging, otlp]
     logs:
       receivers: [otlp]

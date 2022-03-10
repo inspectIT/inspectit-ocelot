@@ -27,7 +27,7 @@ public class JaegerGrpcExporterServiceIntTest extends ExporterServiceIntegration
                 .pollInterval(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
-        makeSpansAndFlush();
+        makeSpansAndFlush("jaeger-grpc-parent","jaeger-grpc-child");
 
         await().atMost(15, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS)
