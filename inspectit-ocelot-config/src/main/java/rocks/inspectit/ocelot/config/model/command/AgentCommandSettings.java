@@ -33,4 +33,20 @@ public class AgentCommandSettings {
      * but if your commands do you can configure it.
      */
     private Integer maxInboundMessageSize = 4;
+
+    /**
+     * Time after which the backoff between retries to re-establish the grpc connection between agent and config-server
+     * is reset to the lowest value.
+     */
+    private int backoffResetTime = 60;
+
+    /**
+     * How often the backoff between retries to re-establish the grpc connection between agent and config-server is increased for the next retry.
+     * Backoff is calculated as 2 to the power of how often the backoff has been increased, so a value of 5 means that the max backoff is 32 seconds.
+     * <p>
+     * This setting only sets a maximum for the backoff between retries, it does not affect the number of retries,
+     * the service will always continue to try reconnecting on errors unless disabled.
+     */
+    private int maxBackoffIncreases = 5;
+
 }
