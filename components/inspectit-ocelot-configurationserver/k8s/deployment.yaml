@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ocelot-config-server
+  name: ocelot-config-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-server
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: config-server
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+    spec:
+      containers:
+      - image: inspectit/inspectit-ocelot-configurationserver
+        name: ocelot-config-server
+        resources: {}
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ocelot-config-server
+  name: ocelot-config-server
+spec:
+  ports:
+  - port: 8090
+    protocol: TCP
+    targetPort: 8090
+  selector:
+    app: config-server
+status:
+  loadBalancer: {}
