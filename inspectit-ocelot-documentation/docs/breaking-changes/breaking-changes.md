@@ -3,6 +3,24 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
+## Breaking changes in <mark>1.15.X</mark>
+
+### Configuration sources only accept valid `YAML`, `JSON` (keys must be wrapped in double quotes) or `properties` notation 
+
+As of version <mark>1.15.x+</mark>, the [configuration sources](/configuration/configuration-sources.md) only accept valid `YAML`, `JSON` or `properties` notation. The "mix and match" of JSON and YAML should be avoided. For JSON, all keys need to be wrapped in double quotes. 
+Upgrading to version <mark>1.15.X</mark> may break your startup routines if the JSON passed as command line arguments is invalid. For example, the following code will **not** work anymore and cause an exception:  
+
+```bash
+# invalid JSON (keys not wrapped in double quotes) causes an exception
+ java -jar inspectit-ocelot-agent-1.15.1.jar 1337 '{inspectit:{service-name:"my-agent"}}'
+```
+Instead, use valid JSON and wrap the keys in double quotes:
+
+```bash
+# valid JSON (keys wrapped in double quotes)
+ java -jar inspectit-ocelot-agent-1.15.1.jar 1337 '{"inspectit":{"service-name":"my-agent"}}'
+```
+
 ## Breaking changes in 1.15.0
 
 ### New definition of exporters' enabled property
