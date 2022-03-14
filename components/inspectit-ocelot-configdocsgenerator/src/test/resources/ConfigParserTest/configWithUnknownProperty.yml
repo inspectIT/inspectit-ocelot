@@ -1,0 +1,3 @@
+inspectit:
+  service-name: name
+  unknown: value

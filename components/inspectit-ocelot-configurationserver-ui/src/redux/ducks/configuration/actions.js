@@ -370,8 +370,15 @@ export const toggleVisualConfigurationView = () => ({
 });
 
 /**
- * Shows or hides the history voiew.
+ * Shows or hides the history view.
  */
 export const toggleHistoryView = () => ({
   type: types.TOGGLE_HISTORY_VIEW,
+});
+
+/**
+ * Shows or hides the documentation view.
+ */
+export const toggleDocumentationView = () => ({
+  type: types.TOGGLE_DOCUMENTATION_VIEW,
 });

@@ -1,7 +1,9 @@
 package rocks.inspectit.ocelot.core.logging.logback;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.spi.FilterReply;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.logging.LoggingSettings;
+import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,8 +66,14 @@ public class LogbackInitializer {
 
     // flags for the filters
     static boolean consoleEnabled = isConsoleInitiallyEnabled();
+
     static boolean fileEnabled = true;
+
     static boolean selfMonitoringEnabled = true;
+
+    static boolean logPreloadingEnabled = false;
+
+    static Level minimumPreloadingLevel = Level.WARN;
 
     public static void initDefaultLogging() {
         initLogging(null);
@@ -128,7 +137,16 @@ public class LogbackInitializer {
     private static void setPropertiesFromConfig(InspectitConfig config) {
         consoleEnabled = config.getLogging().getConsole().isEnabled();
         fileEnabled = config.getLogging().getFile().isEnabled();
+
         selfMonitoringEnabled = config.getSelfMonitoring().isEnabled();
+
+        LogPreloadingSettings logPreloadingSettings = config.getLogPreloading();
+        if (null != logPreloadingSettings) {
+            logPreloadingEnabled = logPreloadingSettings.isEnabled();
+            if (null != logPreloadingSettings.getLogLevel()) {
+                minimumPreloadingLevel = logPreloadingSettings.getLogLevel();
+            }
+        }
 
         LoggingSettings loggingSettings = config.getLogging();
         // path
@@ -229,6 +247,19 @@ public class LogbackInitializer {
         @Override
         public FilterReply decide(Object event) {
             if (selfMonitoringEnabled) {
+                return FilterReply.NEUTRAL;
+            } else {
+                return FilterReply.DENY;
+            }
+        }
+    }
+
+    public static class LogPreloadingFilter extends Filter {
+
+        @Override
+        public FilterReply decide(Object event) {
+            if (logPreloadingEnabled && event instanceof ILoggingEvent && ((ILoggingEvent) event).getLevel()
+                    .isGreaterOrEqual(minimumPreloadingLevel)) {
                 return FilterReply.NEUTRAL;
             } else {
                 return FilterReply.DENY;

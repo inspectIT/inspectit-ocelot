@@ -108,8 +108,7 @@ dependencies {
 
             // to make use of SpyBean
             "org.springframework.boot:spring-boot-test:2.1.4.RELEASE",
-            // LogCapturer
-            "io.github.netmikey.logunit:logunit-jul:1.1.0",
+
             'org.apache.httpcomponents:httpclient:4.5.6',
             "org.mockito:mockito-core:${mockitoVersion}",
             'org.assertj:assertj-core:3.11.1',
@@ -119,9 +118,18 @@ dependencies {
             "io.grpc:grpc-netty-shaded:1.20.0",
             "io.grpc:grpc-stub:1.20.0",
             'org.influxdb:influxdb-java:2.15',
-            'io.apisense.embed.influx:embed-influxDB:1.2.1'
+            'io.apisense.embed.influx:embed-influxDB:1.2.1',
+
+            // LogCapturer
+            'io.github.netmikey.logunit:logunit-core:1.1.3',
+            // jul-slf4j bridge needed to redirect OTEL logs using java.util.logging to logback
+            "org.slf4j:jul-to-slf4j:1.7.5",
     )
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testRuntimeOnly (
+            'org.junit.jupiter:junit-jupiter-engine:5.8.2',
+            // LogCapturer
+            'io.github.netmikey.logunit:logunit-logback:1.1.3',
+    )
 
     jmh(
             project(':inspectit-ocelot-bootstrap')
