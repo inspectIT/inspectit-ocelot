@@ -12,15 +12,9 @@ import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
-import io.opentelemetry.context.propagation.ContextPropagators;
-import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.exporter.logging.LoggingSpanExporter;
-import io.opentelemetry.extension.trace.propagation.B3Propagator;
-import io.opentelemetry.extension.trace.propagation.JaegerPropagator;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
@@ -31,6 +25,8 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.NoopOpenTelemetryController;
@@ -52,6 +48,8 @@ public class TestUtils {
     private static Cache<Class<?>, Object> activeInstrumentations = null;
 
     public static ConcurrentHashMap<Class<?>, Long> instrumentationTimeStamp = new ConcurrentHashMap<>();
+
+    private static final Logger logger = LoggerFactory.getLogger(TestUtils.class);
 
     static {
         Thread poller = new Thread(() -> {
@@ -328,7 +326,7 @@ public class TestUtils {
     public static InMemorySpanExporter initializeOpenTelemetryForSystemTesting() {
 
         if (NoopOpenTelemetryController.INSTANCE != Instances.openTelemetryController) {
-            System.out.println("shut down " + Instances.openTelemetryController.getClass().getSimpleName());
+            logger.info("shut down " + Instances.openTelemetryController.getClass().getSimpleName());
 
             // shut down any previously configured OTELs
             Instances.openTelemetryController.shutdown();
@@ -348,15 +346,13 @@ public class TestUtils {
 
         OpenTelemetrySdk openTelemetry = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
-                .setPropagators(ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), JaegerPropagator.getInstance(), W3CBaggagePropagator.getInstance(), B3Propagator.injectingMultiHeaders())))
                 .buildAndRegisterGlobal();
 
         // set the OTEL_TRACER in OpenTelemetrySpanBuilderImpl via reflection.
         // this needs to be done in case that another code already registered OTEL and the OTEL_TRACER is pointing to the wrong Tracer
         try {
-            Field tracerField = null;
             Tracer tracer = GlobalOpenTelemetry.getTracer("io.opentelemetry.opencensusshim");
-            tracerField = Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl")
+            Field tracerField = Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl")
                     .getDeclaredField("OTEL_TRACER");
             // set static final field
             tracerField.setAccessible(true);
@@ -365,10 +361,9 @@ public class TestUtils {
             modifiers.setInt(tracerField, tracerField.getModifiers() & ~Modifier.FINAL);
             tracerField.set(null, tracer);
 
-            System.out.println("OTEL_TRACER updated to " + tracer + " (" + openTelemetry.getTracer("io.opentelemetry.opencensusshim") + ")");
+            logger.info("OTEL_TRACER updated to {} ({})", tracer, openTelemetry.getTracer("io.opentelemetry.opencensusshim"));
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Failed to set OTEL_TRACER in OpenTelemetrySpanBuilderImpl");
+            logger.error("Failed to set OTEL_TRACER in OpenTelemetrySpanBuilderImpl", e);
         }
 
         return inMemSpanExporter;

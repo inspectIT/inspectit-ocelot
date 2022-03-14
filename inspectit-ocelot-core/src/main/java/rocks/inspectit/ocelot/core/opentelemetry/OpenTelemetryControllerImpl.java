@@ -218,7 +218,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                     OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                             .setTracerProvider(sdkTracerProvider)
                             .setMeterProvider(sdkMeterProvider)
-                            .setPropagators(ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), JaegerPropagator.getInstance(), W3CBaggagePropagator.getInstance(), B3Propagator.injectingMultiHeaders())))
                             .build();
                     // update OTEL
                     openTelemetry.set(openTelemetrySdk, false, false);
