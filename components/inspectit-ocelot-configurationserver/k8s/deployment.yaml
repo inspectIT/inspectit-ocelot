@@ -1,0 +1,47 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: inspectit-ocelot
+  labels:
+    name: inspectit-ocelot
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: inspectit-ocelot-configurationserver
+  name: inspectit-ocelot-configurationserver
+  namespace: inspectit-ocelot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inspectit-ocelot-configurationserver
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: inspectit-ocelot-configurationserver
+    spec:
+      containers:
+        - image: inspectit/inspectit-ocelot-configurationserver
+          name: inspectit-ocelot-configurationserver
+          resources: {}
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: inspectit-ocelot-configurationserver
+  name: inspectit-ocelot-configurationserver
+  namespace: inspectit-ocelot
+spec:
+  ports:
+    - port: 8090
+      protocol: TCP
+      targetPort: 8090
+  selector:
+    app: inspectit-ocelot-configurationserver
+status:
+  loadBalancer: {}
