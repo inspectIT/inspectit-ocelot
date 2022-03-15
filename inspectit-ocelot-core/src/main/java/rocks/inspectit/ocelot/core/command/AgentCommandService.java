@@ -78,8 +78,10 @@ public class AgentCommandService extends DynamicallyActivatableService {
     protected boolean doDisable() {
         log.info("Stopping agent command service.");
 
-        client.shutdown();
-        client = null;
+        if (client != null) {
+            client.shutdown();
+            client = null;
+        }
 
         return true;
     }

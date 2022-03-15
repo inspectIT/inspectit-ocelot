@@ -3,23 +3,20 @@ package rocks.inspectit.ocelot.core.command;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.Answers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
-import java.time.Duration;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class AgentCommandServiceTest {
@@ -27,36 +24,20 @@ public class AgentCommandServiceTest {
     @InjectMocks
     private AgentCommandService service;
 
-    @Mock
-    private ScheduledExecutorService executor;
-
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private InspectitConfig configuration;
-
-    @Mock
-    private HttpCommandFetcher commandFetcher;
 
     @Nested
     public class DoEnable {
 
-        @Captor
-        private ArgumentCaptor<URI> uriCaptor;
-
         @Test
-        public void successfullyEnabled() throws MalformedURLException {
-            when(configuration.getAgentCommands().getPollingInterval()).thenReturn(Duration.ofSeconds(1));
-            lenient().when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://inspectit.rocks"));
-            when(configuration.getConfig().getHttp().getUrl()).thenReturn(new URL("http://example.org/api/endpoint"));
-            when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
-            when(configuration.getAgentCommands().getAgentCommandPath()).thenReturn("/api/v1/agent/command");
+        public void successfullyEnabled() throws InterruptedException {
+            lenient().when(configuration.getAgentCommands().getUrl()).thenReturn("inspectit.rocks:9090");
 
             boolean result = service.doEnable(configuration);
 
-            verify(executor).scheduleWithFixedDelay(service, 1000, 1000, TimeUnit.MILLISECONDS);
-            verify(commandFetcher).setCommandUri(uriCaptor.capture());
-            verifyNoMoreInteractions(executor, commandFetcher);
             assertThat(result).isTrue();
-            assertThat(uriCaptor.getValue().toString()).isEqualTo("http://example.org/api/v1/agent/command");
+            assertThat(service.getClient()).isNotNull();
         }
     }
 
@@ -68,37 +49,35 @@ public class AgentCommandServiceTest {
             boolean result = service.doDisable();
 
             assertThat(result).isTrue();
-            verifyNoMoreInteractions(commandFetcher);
+            assertThat(service.getClient()).isNull();
         }
 
         @Test
-        public void isEnabled() throws MalformedURLException {
-            when(configuration.getAgentCommands().getPollingInterval()).thenReturn(Duration.ofSeconds(1));
-            when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://example.org"));
-            ScheduledFuture futureMock = mock(ScheduledFuture.class);
-            when(executor.scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(futureMock);
+        public void isEnabled() throws MalformedURLException, InterruptedException {
+            lenient().when(configuration.getAgentCommands().getUrl()).thenReturn("inspectitrocks:9090");
 
             service.doEnable(configuration);
+            TimeUnit.SECONDS.sleep(5);
+            assertThat(service.getClient()).isNotNull();
 
             boolean result = service.doDisable();
+            TimeUnit.SECONDS.sleep(5);
 
             assertThat(result).isTrue();
-            verify(futureMock).cancel(true);
-            verify(commandFetcher).setCommandUri(any());
-            verifyNoMoreInteractions(commandFetcher);
+            assertThat(service.getClient()).isNull();
         }
     }
 
     @Nested
-    public class GetCommandUri {
+    public class GetCommandUrl {
 
         @Test
         public void validCommandUrl() throws Exception {
-            when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://example.org:8090/api"));
+            when(configuration.getAgentCommands().getUrl()).thenReturn("example.org:9090");
 
-            URI result = service.getCommandUri(configuration);
+            String result = service.getCommandUrl(configuration);
 
-            assertThat(result.toString()).isEqualTo("http://example.org:8090/api");
+            assertThat(result).isEqualTo("example.org:9090");
         }
 
         @Test
@@ -107,8 +86,19 @@ public class AgentCommandServiceTest {
             when(configuration.getConfig().getHttp().getUrl()).thenReturn(null);
 
             assertThat(configuration.getConfig().getHttp().getUrl()).isNull();
-            assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> service.getCommandUri(configuration))
-                    .withMessage("The URL cannot derived from the HTTP configuration URL because it is null.");
+            assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> service.getCommandUrl(configuration))
+                    .withMessage("The URL cannot be derived from the HTTP configuration URL because it is null.");
+        }
+
+        @Test
+        public void deriveUrlWithoutPort() throws MalformedURLException {
+            when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
+            when(configuration.getConfig().getHttp().getUrl()).thenReturn(new URL("https://inspectit.rocks"));
+            when(configuration.getAgentCommands().getAgentCommandPort()).thenReturn(null);
+
+            assertThat(configuration.getAgentCommands().getAgentCommandPort()).isNull();
+            assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> service.getCommandUrl(configuration))
+                    .withMessage("The URL cannot be derived from the HTTP configuration URL because the agentCommandPort is null.");
         }
 
         @Test
@@ -117,31 +107,21 @@ public class AgentCommandServiceTest {
                     .getHttp()
                     .getUrl()).thenReturn(new URL("http://example.org:8090/api/endpoint"));
             when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
-            when(configuration.getAgentCommands().getAgentCommandPath()).thenReturn("/api/v1/agent/command");
-            URI result = service.getCommandUri(configuration);
+            when(configuration.getAgentCommands().getAgentCommandPort()).thenReturn(9090);
+            String result = service.getCommandUrl(configuration);
 
-            assertThat(result.toString()).isEqualTo("http://example.org:8090/api/v1/agent/command");
-        }
-
-        @Test
-        public void deriveUrlWithoutPort() throws Exception {
-            when(configuration.getConfig().getHttp().getUrl()).thenReturn(new URL("http://example.org/api/endpoint"));
-            when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
-            when(configuration.getAgentCommands().getAgentCommandPath()).thenReturn("/api/command");
-            URI result = service.getCommandUri(configuration);
-
-            assertThat(result.toString()).isEqualTo("http://example.org/api/command");
+            assertThat(result).isEqualTo("example.org:9090");
         }
 
         @Test
         public void verifyPrioritization() throws Exception {
-            lenient().when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://example.org"));
+            lenient().when(configuration.getAgentCommands().getUrl()).thenReturn("inspectit.rocks:9090");
             when(configuration.getConfig().getHttp().getUrl()).thenReturn(new URL("http://example.org/api/endpoint"));
             when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
-            when(configuration.getAgentCommands().getAgentCommandPath()).thenReturn("/api/command");
-            URI result = service.getCommandUri(configuration);
+            when(configuration.getAgentCommands().getAgentCommandPort()).thenReturn(9090);
+            String result = service.getCommandUrl(configuration);
 
-            assertThat(result.toString()).isEqualTo("http://example.org/api/command");
+            assertThat(result).isEqualTo("example.org:9090");
         }
     }
 }
