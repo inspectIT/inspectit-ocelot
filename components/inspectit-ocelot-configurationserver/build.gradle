@@ -146,7 +146,7 @@ dependencies {
             'org.mockito:mockito-junit-jupiter:2.23.0',
             'com.h2database:h2:1.4.194',
             'org.awaitility:awaitility:3.1.5',
-
+            'io.grpc:grpc-testing:1.45.0',
     )
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }

@@ -20,7 +20,6 @@ import rocks.inspectit.ocelot.grpc.CommandResponse;
 
 import java.time.Duration;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 @GrpcService
 @Slf4j
@@ -37,7 +36,7 @@ public class CommandsGrpcService extends AgentCommandsGrpc.AgentCommandsImplBase
      */
     BiMap<String, StreamObserver<Command>> agentConnections = Maps.synchronizedBiMap(HashBiMap.create());
 
-    public DeferredResult<ResponseEntity<?>> dispatchCommand(String agentId, Command command) throws ExecutionException {
+    public DeferredResult<ResponseEntity<?>> dispatchCommand(String agentId, Command command) {
 
         // TODO: 03.03.2022 Move this comment into Reviewable comment
         // Build Response here, since it is the same in each handler
