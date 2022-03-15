@@ -56,54 +56,87 @@ In this example we're also passing [JSON arguments](configuration/configuration-
 
 > Using the attach options has some limitations with respect to using the OpenCensus instrumentation library in combination with the inspectIT Ocelot agent. Please refer to [OpenCensus Configuration](configuration/open-census-configuration.md) section to understand these limitations.
 
-### Kubernetes
+## Using the Agent with Kubernetes
 
-If you want to use the agent in a K8s environment, you can do so by using the [OpenTelemetry K8s Operator](https://github.com/open-telemetry/opentelemetry-operator).  
-It is still in development, so it is not feature-complete, but depending on your needs the current version could already provide everything necessary.  
-This also means that the installation steps described in the following could be out-of-date, but they might still help with navigating their documentation on installation by showing you which parts you need.
+There are several ways to use the agent in a Kubernetes cluster.
+For example, you could integrate the agent directly into the application container images, but this requires customizing all images.
 
-#### Installation
-Install OpenTelemetry Operator as described in [the readme](https://github.com/open-telemetry/opentelemetry-operator#getting-started).  
-As of creating this section this means doing the following:
+Another possibility is that the agent is automatically injected into the application containers using an **operator** and attached to the JVM processes.
+For this purpose, the [OpenTelemetry K8s Operator](https://github.com/open-telemetry/opentelemetry-operator) can be used, with which it is possible to automatically roll out the inspectIT Ocelot Java Agent.
+It is still under development, so it is not feature-complete, but depending on your needs the current version could already provide everything needed.
 
-   1. Installing [cert-manager](https://cert-manager.io/docs/installation/) in your cluster if you have not yet. 
-   2. Running the following command with your desired version:
-   ```shell
-   kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v{version}/opentelemetry-operator.yaml
-   ```
+:::warning Up-to-dateness of the Documentation
+Since the OpenTelemetry K8s operator is currently under heavy development, the installation steps described below **may be outdated**.
+They may nevertheless be helpful in navigating the OpenTelemetry Operator installation documentation by showing you which parts you need.
+:::
 
-#### Usage
-1. Annotate the namespaces or containers as described in [the readme](https://github.com/open-telemetry/opentelemetry-operator#getting-started).  
-As of creating this section the annotation for java agent injection is:
-```yaml
-instrumentation.opentelemetry.io/inject-java: "true"
-```
+### Installing the Operator
 
-2. (Optional) Add environment variables for configuration to the containers.  
-For example to connect the agent to a config-server for further configuration and set a service-name you could set INSPECTIT_CONFIG_HTTP_URL and INSPECTIT_SERVICE_NAME like in the following:
-```yaml
-containers:
-  - image: my-app-image
-    name: my-app
-    env:
-      - name: INSPECTIT_CONFIG_HTTP_URL
-        value: http://my-ocelot-config-server:8090/api/v1/agent/configuration
-      - name: INSPECTIT_SERVICE_NAME
-        value: my-service-name
-```
-For further info see [Configuration Sources](../configuration/configuration-sources.md).
+Install the OpenTelemetry Operator as described in its [official readme file](https://github.com/open-telemetry/opentelemetry-operator#getting-started). This includes the following steps:
 
-3. Create an Instrumentation object like the following with spec.java.image set to the inspectIT Ocelot agent image you would like to use (only works with version 1.15.2 and up):
+1. Install the [cert-manager](https://cert-manager.io/docs/installation/) in your cluster if you have not done it already.
+2. Install the operator using the following command. Please note that this will install the latest version of it. By adjusting the URL to a different GitHub release, a specific version of the operator can be used.
 
-```yaml
-apiVersion: opentelemetry.io/v1alpha1
-kind: Instrumentation
-metadata:
-  name: inspectit-instrumentation
-spec:
-  java:
-    image: inspectit/inspectit-ocelot-agent:1.15.2
-```
+    ```shell
+    kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
+    ```
 
-4. Restart the containers to trigger the insertion.  
-As of now changes in the Instrumentation object are only applied on a restart of a container, however there are plans to make automatic restarting configurable, see [issue #553](https://github.com/open-telemetry/opentelemetry-operator/issues/553).
+    By adjusting the URL to a different GitHub release, a specific version of the operator can be used:
+
+    ```shell
+    kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v{version}/opentelemetry-operator.yaml
+    ```
+
+### Using the Operator
+
+1. Create an `Instrumentation` object as shown below. Set the `spec.java.image` to the inspectIT Ocelot agent container image you would like to use. (only works with version 1.15.2 and up):
+
+    :::note
+    Please note that only container images of the inspectIT Ocelot Agent starting from version `1.15.2` are compatible and work with the OpenTelemetry K8s Operator.
+    :::
+
+    ```yaml
+    apiVersion: opentelemetry.io/v1alpha1
+    kind: Instrumentation
+    metadata:
+      name: my-instrumentation
+    spec:
+      java:
+        image: inspectit/inspectit-ocelot-agent:1.15.2
+    ```
+
+2. Annotate namespaces or containers that should receive the agent as described in the [official readme file](https://github.com/open-telemetry/opentelemetry-operator#getting-started). The possible values for the annotation can be:
+
+    - `true` - inject the `Instrumentation` resource from the namespace.
+    - `my-instrumentation` - name of Instrumentation CR instance.
+    - `false` - do not inject
+
+    The following annotation can be used for this:
+    ```yaml
+    instrumentation.opentelemetry.io/inject-java: "true"
+    ```
+
+    :::warning Ensure Correct Referencing
+    If the operator cannot find the instrumentation object, e.g. because none was created or the name was written incorrectly in the annotation, the containers will not be started!
+    :::
+
+3. (Optional) Add environment variables to the containers to configure the agent. See the following section for using [environment variables to configure](configuration/configuration-sources.md#os-environment-variables) the inspectIT Ocelot agent.
+
+    For example, to set a service-name for the agent and connect it to a specific configuration-server , you could set the `INSPECTIT_CONFIG_HTTP_URL` and `INSPECTIT_SERVICE_NAME` environment variable like in the following:
+
+    ```yaml
+    containers:
+      - image: my-app-image
+        name: my-app
+        env:
+          - name: INSPECTIT_CONFIG_HTTP_URL
+            value: http://my-ocelot-config-server:8090/api/v1/agent/configuration
+          - name: INSPECTIT_SERVICE_NAME
+            value: my-service-name
+    ```
+
+    You can also take a look at the [deployment file](https://github.com/inspectIT/trading-demo-application/blob/main/k8s/deployment.yaml) of the [trading demo application](https://github.com/inspectIT/trading-demo-application) where exactly this is set up.
+
+4. Start or restart the containers to trigger the injection and attachment of the agent.
+
+    Currently, the operator **will not automatically restart running containert** in case changes are made to the `Instrumentation` objects. However there are plans to provide the abbility to restart containers in order to roll-out changes of the configurable `Instrumentation` objects automatically (see [issue #553](https://github.com/open-telemetry/opentelemetry-operator/issues/553)).

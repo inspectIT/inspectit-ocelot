@@ -1,47 +1,47 @@
 kind: Namespace
 apiVersion: v1
 metadata:
-  name: ocelot-config-server
+  name: inspectit-ocelot
   labels:
-    name: ocelot-config-server
+    name: inspectit-ocelot
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: ocelot-config-server
-  name: ocelot-config-server
+    app: inspectit-ocelot-configurationserver
+  name: inspectit-ocelot-configurationserver
+  namespace: inspectit-ocelot
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ocelot-config-server
+      app: inspectit-ocelot-configurationserver
   strategy: {}
   template:
     metadata:
       labels:
-        app: ocelot-config-server
-      annotations:
-        instrumentation.opentelemetry.io/inject-java: "true"
+        app: inspectit-ocelot-configurationserver
     spec:
       containers:
-      - image: inspectit/inspectit-ocelot-configurationserver
-        name: ocelot-config-server
-        resources: {}
+        - image: inspectit/inspectit-ocelot-configurationserver
+          name: inspectit-ocelot-configurationserver
+          resources: {}
 status: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: ocelot-config-server
-  name: ocelot-config-server
+    app: inspectit-ocelot-configurationserver
+  name: inspectit-ocelot-configurationserver
+  namespace: inspectit-ocelot
 spec:
   ports:
-  - port: 8090
-    protocol: TCP
-    targetPort: 8090
+    - port: 8090
+      protocol: TCP
+      targetPort: 8090
   selector:
-    app: ocelot-config-server
+    app: inspectit-ocelot-configurationserver
 status:
   loadBalancer: {}
