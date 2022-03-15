@@ -51,7 +51,7 @@ public class CommandsGrpcService extends AgentCommandsGrpc.AgentCommandsImplBase
         StreamObserver<Command> commandObserver = agentConnections.get(agentId);
         if (commandObserver != null) {
             // Send command to agent
-            log.info("Sending command {} to agent {}", command.getCommandId(), agentId);
+            log.info("Sending command '{}' to agent '{}'.", command.getCommandId(), agentId);
             commandObserver.onNext(command);
         } else {
             // If no connection to agent exists, return error.
