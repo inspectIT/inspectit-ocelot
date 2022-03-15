@@ -75,7 +75,7 @@ They may nevertheless be helpful in navigating the OpenTelemetry Operator instal
 Install the OpenTelemetry Operator as described in its [official readme file](https://github.com/open-telemetry/opentelemetry-operator#getting-started). This includes the following steps:
 
 1. Install the [cert-manager](https://cert-manager.io/docs/installation/) in your cluster if you have not done it already.
-2. Install the operator using the following command. Please note that this will install the latest version of it. By adjusting the URL to a different GitHub release, a specific version of the operator can be used.
+2. Install the operator using the following command. Please note that this will install the latest version of it:
 
     ```shell
     kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
@@ -89,7 +89,7 @@ Install the OpenTelemetry Operator as described in its [official readme file](ht
 
 ### Using the Operator
 
-1. Create an `Instrumentation` object as shown below. Set the `spec.java.image` to the inspectIT Ocelot agent container image you would like to use. (only works with version 1.15.2 and up):
+1. Create an `Instrumentation` object as shown below. Set the `spec.java.image` to the inspectIT Ocelot agent container image you would like to use:
 
     :::note
     Please note that only container images of the inspectIT Ocelot Agent starting from version `1.15.2` are compatible and work with the OpenTelemetry K8s Operator.
@@ -122,7 +122,7 @@ Install the OpenTelemetry Operator as described in its [official readme file](ht
 
 3. (Optional) Add environment variables to the containers to configure the agent. See the following section for using [environment variables to configure](configuration/configuration-sources.md#os-environment-variables) the inspectIT Ocelot agent.
 
-    For example, to set a service-name for the agent and connect it to a specific configuration-server , you could set the `INSPECTIT_CONFIG_HTTP_URL` and `INSPECTIT_SERVICE_NAME` environment variable like in the following:
+    For example, to set a service-name for the agent and connect it to a specific configuration-server, you could set the `INSPECTIT_CONFIG_HTTP_URL` and `INSPECTIT_SERVICE_NAME` environment variable like in the following:
 
     ```yaml
     containers:
@@ -139,4 +139,4 @@ Install the OpenTelemetry Operator as described in its [official readme file](ht
 
 4. Start or restart the containers to trigger the injection and attachment of the agent.
 
-    Currently, the operator **will not automatically restart running containert** in case changes are made to the `Instrumentation` objects. However there are plans to provide the abbility to restart containers in order to roll-out changes of the configurable `Instrumentation` objects automatically (see [issue #553](https://github.com/open-telemetry/opentelemetry-operator/issues/553)).
+    Currently, the operator **will not automatically restart running containers** in case changes are made to the `Instrumentation` objects. However, there are plans to provide the ability to restart containers in order to roll out changes of the configurable `Instrumentation` objects automatically (see [issue #553](https://github.com/open-telemetry/opentelemetry-operator/issues/553)).
