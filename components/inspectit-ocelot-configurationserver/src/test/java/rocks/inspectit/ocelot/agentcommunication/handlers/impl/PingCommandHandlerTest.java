@@ -9,15 +9,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
-import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
-import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.grpc.Command;
+import rocks.inspectit.ocelot.grpc.CommandResponse;
+import rocks.inspectit.ocelot.grpc.PingCommand;
 
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class PingCommandHandlerTest {
@@ -33,7 +33,7 @@ public class PingCommandHandlerTest {
 
         @Test
         public void cantHandleCommand() {
-            Command command = null;
+            Command command = Command.newBuilder().build();
             String agentId = "test-id";
 
             try {
@@ -47,7 +47,7 @@ public class PingCommandHandlerTest {
         @Test
         public void preparesResponse() {
             when(configuration.getAgentCommand().getResponseTimeout()).thenReturn(Duration.ofMinutes(1));
-            PingCommand command = new PingCommand();
+            Command command = Command.newBuilder().setPing(PingCommand.newBuilder()).build();
             String agentId = "test-id";
 
             DeferredResult<ResponseEntity<?>> result = pingCommandHandler.prepareResponse(agentId, command);
@@ -63,13 +63,12 @@ public class PingCommandHandlerTest {
 
         @Test
         public void handlesResponse() {
-            CommandResponse mockResponse = mock(CommandResponse.class);
+            CommandResponse response = CommandResponse.newBuilder().build();
             DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
 
-            pingCommandHandler.handleResponse(mockResponse, result);
+            pingCommandHandler.handleResponse(response, result);
 
             assertThat(result.getResult()).isEqualTo(ResponseEntity.ok().build());
-            verifyNoMoreInteractions(mockResponse);
         }
     }
 
