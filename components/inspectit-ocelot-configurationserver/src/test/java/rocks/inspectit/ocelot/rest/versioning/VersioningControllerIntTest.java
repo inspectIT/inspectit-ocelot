@@ -6,12 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+@TestPropertySource(properties = {"grpc.server.port=0"})
 class VersioningControllerIntTest extends IntegrationTestBase {
 
     @Nested

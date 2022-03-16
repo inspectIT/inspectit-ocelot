@@ -5,12 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.file.FileData;
 import rocks.inspectit.ocelot.file.FileInfo;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+@TestPropertySource(properties = {"grpc.server.port=0"})
 public class FileControllerIntTest extends IntegrationTestBase {
 
     @Nested
@@ -23,8 +26,7 @@ public class FileControllerIntTest extends IntegrationTestBase {
             ResponseEntity<FileInfo[]> result = authRest.getForEntity("/api/v1/directories/", FileInfo[].class);
 
             FileInfo[] resultBody = result.getBody();
-            assertThat(resultBody)
-                    .hasSize(1)
+            assertThat(resultBody).hasSize(1)
                     .extracting(FileInfo::getName, FileInfo::getType, FileInfo::getChildren)
                     .contains(tuple("file.yml", FileInfo.Type.FILE, null));
 
@@ -43,12 +45,11 @@ public class FileControllerIntTest extends IntegrationTestBase {
             ResponseEntity<FileInfo[]> result = authRest.getForEntity("/api/v1/directories/", FileInfo[].class);
 
             FileInfo[] resultBody = result.getBody();
-            assertThat(resultBody)
-                    .hasSize(1)
+            assertThat(resultBody).hasSize(1)
                     .extracting(FileInfo::getName, FileInfo::getType, FileInfo::getChildren)
                     .contains(tuple("file.yml", FileInfo.Type.FILE, null));
 
-            ResponseEntity<Error> result1 = authRest.getForEntity("/api/v1/files/file.yml?version=live/",Error.class);
+            ResponseEntity<Error> result1 = authRest.getForEntity("/api/v1/files/file.yml?version=live/", Error.class);
 
             assertThat(result1.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         }

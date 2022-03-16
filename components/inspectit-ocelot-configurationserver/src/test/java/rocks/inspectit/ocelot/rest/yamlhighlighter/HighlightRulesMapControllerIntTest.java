@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
@@ -22,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test class for {@link HighlightRulesMapController}
  */
+@TestPropertySource(properties = {"grpc.server.port=0"})
 public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
 
     @Autowired
@@ -31,10 +33,11 @@ public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
 
     @Nested
     public class GetHighlightingRulesMapTest {
+
         @Test
         void testGetHighlightingRulesMap() {
 
-            final String JSON = controller.generateMap(InspectitConfig.class).toString();
+            String JSON = controller.generateMap(InspectitConfig.class).toString();
 
             // get expected JSON
             JsonObject expected = jsonParser.parse(JSON).getAsJsonObject();
@@ -60,43 +63,11 @@ public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
         void withTestClass() throws JsonProcessingException {
 
             // Build expected Map from JSON String using Jackson
-            final String advancedScopeSettingsExpected = String.format(
-                    "{\"instrument-only-inherited-methods\":{\"%s\":\"%s\"}, \"disable-safety-mechanisms\":{\"%s\":\"%s\"}}",
-                    HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT,
-                    HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT);
+            String advancedScopeSettingsExpected = String.format("{\"instrument-only-inherited-methods\":{\"%s\":\"%s\"}, \"disable-safety-mechanisms\":{\"%s\":\"%s\"}}", HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT, HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT);
 
-            final String expectedJson = String.format("{\"object-map\":{\"%s\":\"%s\", \"%s\":\"%s\"},",
-                    HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_MAP,
-                    HighlightRulesMapController.KEY_MAP_CONTENT_TYPE, HighlightRulesMapController.VALUE_TYPE_YAML) +
-                    String.format("\"advanced-scope-settings-map\":{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":%s},",
-                            HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_MAP,
-                            HighlightRulesMapController.KEY_MAP_CONTENT_TYPE, HighlightRulesMapController.VALUE_TYPE_OBJECT,
-                            HighlightRulesMapController.KEY_MAP_CONTENTS, advancedScopeSettingsExpected) +
-                    String.format("\"string-map\":{\"%s\":\"%s\", \"%s\":\"%s\"},",
-                            HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_MAP,
-                            HighlightRulesMapController.KEY_MAP_CONTENT_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT) +
-                    String.format("\"object-list\":{\"%s\":\"%s\", \"%s\":\"%s\"},",
-                            HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_LIST,
-                            HighlightRulesMapController.KEY_LIST_CONTENT_TYPE, HighlightRulesMapController.VALUE_TYPE_YAML) +
-                    String.format("\"advanced-scope-settings-list\":{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":%s},",
-                            HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_LIST,
-                            HighlightRulesMapController.KEY_LIST_CONTENT_TYPE, HighlightRulesMapController.VALUE_TYPE_OBJECT,
-                            HighlightRulesMapController.KEY_LIST_CONTENTS, advancedScopeSettingsExpected) +
-                    String.format("\"boolean-list\":{\"%s\":\"%s\", \"%s\":\"%s\"},",
-                            HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_LIST,
-                            HighlightRulesMapController.KEY_LIST_CONTENT_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT) +
-                    String.format("\"object\":{\"%s\":\"%s\"},",
-                            HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_YAML) +
-                    String.format("\"propagation-mode\":{\"%s\":\"%s\", \"%s\":[\"NONE\", \"JVM_LOCAL\", \"GLOBAL\"]},",
-                            HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_ENUM,
-                            HighlightRulesMapController.KEY_ENUM_VALUES) +
-                    String.format("\"advanced-scope-settings\":{\"%s\":\"%s\", \"%s\":%s},",
-                            HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_OBJECT,
-                            HighlightRulesMapController.KEY_OBJECT_ATTRIBUTES, advancedScopeSettingsExpected) +
-                    String.format("\"a-boolean\":{\"%s\":\"%s\"}}",
-                            HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT);
+            String expectedJson = String.format("{\"object-map\":{\"%s\":\"%s\", \"%s\":\"%s\"},", HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_MAP, HighlightRulesMapController.KEY_MAP_CONTENT_TYPE, HighlightRulesMapController.VALUE_TYPE_YAML) + String.format("\"advanced-scope-settings-map\":{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":%s},", HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_MAP, HighlightRulesMapController.KEY_MAP_CONTENT_TYPE, HighlightRulesMapController.VALUE_TYPE_OBJECT, HighlightRulesMapController.KEY_MAP_CONTENTS, advancedScopeSettingsExpected) + String.format("\"string-map\":{\"%s\":\"%s\", \"%s\":\"%s\"},", HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_MAP, HighlightRulesMapController.KEY_MAP_CONTENT_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT) + String.format("\"object-list\":{\"%s\":\"%s\", \"%s\":\"%s\"},", HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_LIST, HighlightRulesMapController.KEY_LIST_CONTENT_TYPE, HighlightRulesMapController.VALUE_TYPE_YAML) + String.format("\"advanced-scope-settings-list\":{\"%s\":\"%s\", \"%s\":\"%s\", \"%s\":%s},", HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_LIST, HighlightRulesMapController.KEY_LIST_CONTENT_TYPE, HighlightRulesMapController.VALUE_TYPE_OBJECT, HighlightRulesMapController.KEY_LIST_CONTENTS, advancedScopeSettingsExpected) + String.format("\"boolean-list\":{\"%s\":\"%s\", \"%s\":\"%s\"},", HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_LIST, HighlightRulesMapController.KEY_LIST_CONTENT_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT) + String.format("\"object\":{\"%s\":\"%s\"},", HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_YAML) + String.format("\"propagation-mode\":{\"%s\":\"%s\", \"%s\":[\"NONE\", \"JVM_LOCAL\", \"GLOBAL\"]},", HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_ENUM, HighlightRulesMapController.KEY_ENUM_VALUES) + String.format("\"advanced-scope-settings\":{\"%s\":\"%s\", \"%s\":%s},", HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_OBJECT, HighlightRulesMapController.KEY_OBJECT_ATTRIBUTES, advancedScopeSettingsExpected) + String.format("\"a-boolean\":{\"%s\":\"%s\"}}", HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT);
 
-            Map<String,Object> expected = new ObjectMapper().readValue(expectedJson, Map.class);
+            Map<String, Object> expected = new ObjectMapper().readValue(expectedJson, Map.class);
 
             // Generate the Map using generateMap
             Map<String, Object> result = controller.generateMap(TestClass.class);
@@ -110,10 +81,9 @@ public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
         @Test
         void testValueTypeJava() throws JsonProcessingException {
             // Build expected Map from JSON String using Jackson
-            final String expectedJson = String.format("{\"%s\":\"%s\"},",
-                    HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_JAVA);
+            String expectedJson = String.format("{\"%s\":\"%s\"},", HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_JAVA);
 
-            Map<String,Object> expected = new ObjectMapper().readValue(expectedJson, Map.class);
+            Map<String, Object> expected = new ObjectMapper().readValue(expectedJson, Map.class);
 
             // Generate the Map using generateMap
             Map<String, Object> result = controller.generateMap(GenericActionSettings.class);
@@ -124,14 +94,18 @@ public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
         }
     }
 
-    private static class TestClass{
+    private static class TestClass {
 
-        Map<String, Object>  objectMap;
+        Map<String, Object> objectMap;
+
         Map<String, AdvancedScopeSettings> advancedScopeSettingsMap;
+
         Map<String, String> stringMap;
 
         List<Object> objectList;
+
         List<AdvancedScopeSettings> advancedScopeSettingsList;
+
         List<Boolean> booleanList;
 
         Object object;
