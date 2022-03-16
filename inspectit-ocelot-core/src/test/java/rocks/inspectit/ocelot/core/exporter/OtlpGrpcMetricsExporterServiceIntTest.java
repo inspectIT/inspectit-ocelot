@@ -19,8 +19,10 @@ import static org.awaitility.Awaitility.await;
 public class OtlpGrpcMetricsExporterServiceIntTest extends ExporterServiceIntegrationTestBase {
 
     public static final String OTLP_GRPC_METRICS_PATH = "/v1/metrics";
+
     @RegisterExtension
-    LogCapturer warnLogs = LogCapturer.create().captureForType(OtlpGrpcMetricsExporterService.class, org.slf4j.event.Level.WARN);
+    LogCapturer warnLogs = LogCapturer.create()
+            .captureForType(OtlpGrpcMetricsExporterService.class, org.slf4j.event.Level.WARN);
 
     @Autowired
     OtlpGrpcMetricsExporterService service;
@@ -50,7 +52,6 @@ public class OtlpGrpcMetricsExporterServiceIntTest extends ExporterServiceIntegr
 
         awaitMetricsExported(metricVal, tagKey, tagVal);
     }
-
 
     @DirtiesContext
     @Test

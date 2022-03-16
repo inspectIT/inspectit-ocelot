@@ -31,11 +31,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
+import rocks.inspectit.ocelot.core.SLF4JBridgeHandlerUtils;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
@@ -349,19 +349,12 @@ class OpenTelemetryControllerImplTest {
 
         @BeforeAll
         static void beforeAll() {
-            // enable jul -> slf4j bridge
-            // this is necessary as OTEL logs to jul, but we use the LogCapturer with logback
-            if (!SLF4JBridgeHandler.isInstalled()) {
-                SLF4JBridgeHandler.removeHandlersForRootLogger();
-                SLF4JBridgeHandler.install();
-            }
+            SLF4JBridgeHandlerUtils.installSLF4JBridgeHandler();
         }
 
         @AfterAll
         static void afterAll() {
-            if (SLF4JBridgeHandler.isInstalled()) {
-                SLF4JBridgeHandler.uninstall();
-            }
+            SLF4JBridgeHandlerUtils.uninstallSLF4jBridgeHandler();
         }
 
         @BeforeAll
