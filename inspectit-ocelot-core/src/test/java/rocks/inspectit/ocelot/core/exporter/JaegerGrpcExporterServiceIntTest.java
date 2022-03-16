@@ -1,12 +1,13 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.github.netmikey.logunit.api.LogCapturer;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.event.LoggingEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
+import rocks.inspectit.ocelot.config.model.exporters.trace.JaegerGrpcExporterSettings;
 
 import java.util.concurrent.TimeUnit;
 
@@ -76,4 +77,18 @@ public class JaegerGrpcExporterServiceIntTest extends ExporterServiceIntegration
         warnLogs.assertContains("'grpc'");
     }
 
+    @Test
+    void defaultSettings() {
+        // service is not running
+        AssertionsForClassTypes.assertThat(service.isEnabled()).isFalse();
+
+        JaegerGrpcExporterSettings jaegerGrpc = environment.getCurrentConfig()
+                .getExporters()
+                .getTracing()
+                .getJaegerGrpc();
+        // enabled property is set to IF_CONFIGURED
+        AssertionsForClassTypes.assertThat(jaegerGrpc.getEnabled().equals(ExporterEnabledState.IF_CONFIGURED));
+        // url is null or empty
+        AssertionsForClassTypes.assertThat(jaegerGrpc.getUrl()).isNullOrEmpty();
+    }
 }

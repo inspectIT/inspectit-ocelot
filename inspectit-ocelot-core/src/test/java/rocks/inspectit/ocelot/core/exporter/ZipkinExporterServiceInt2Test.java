@@ -50,10 +50,6 @@ public class ZipkinExporterServiceInt2Test extends ExporterServiceIntegrationTes
             props.setProperty("inspectit.exporters.tracing.zipkin.url", "");
             props.setProperty("inspectit.exporters.tracing.zipkin.enabled", ExporterEnabledState.ENABLED);
         });
-        System.out.println("----- WARNING LOGS ----");
-        for (LoggingEvent event : warnLogs.getEvents()) {
-            System.out.println(event.getMessage());
-        }
         warnLogs.assertContains("'url'");
     }
 

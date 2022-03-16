@@ -1,11 +1,13 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.github.netmikey.logunit.api.LogCapturer;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
+import rocks.inspectit.ocelot.config.model.exporters.metrics.OtlpGrpcMetricsExporterSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import java.util.concurrent.TimeUnit;
@@ -36,6 +38,7 @@ public class OtlpGrpcMetricsExporterServiceIntTest extends ExporterServiceIntegr
 
     int metricVal = 1337;
 
+    @DirtiesContext
     @Test
     void verifyMetricsWritten() {
         updateProperties(mps -> {
@@ -62,5 +65,19 @@ public class OtlpGrpcMetricsExporterServiceIntTest extends ExporterServiceIntegr
         });
         warnLogs.assertContains("'url'");
     }
+    
+    @Test
+    void defaultSettings() {
+        // service is not running
+        AssertionsForClassTypes.assertThat(service.isEnabled()).isFalse();
 
+        OtlpGrpcMetricsExporterSettings otlpGrpc = environment.getCurrentConfig()
+                .getExporters()
+                .getMetrics()
+                .getOtlpGrpc();
+        // enabled property is set to IF_CONFIGURED
+        AssertionsForClassTypes.assertThat(otlpGrpc.getEnabled().equals(ExporterEnabledState.IF_CONFIGURED));
+        // url is null or empty
+        AssertionsForClassTypes.assertThat(otlpGrpc.getUrl()).isNullOrEmpty();
+    }
 }
