@@ -36,7 +36,12 @@ const DocumentationView = () => {
   );
 
   // derived variables
-  const agentMappingNames = agentMappings.map((mapping) => mapping.name);
+  const agentMappingOptions = _(agentMappings)
+    .sortBy((mapping) => mapping.name.toLowerCase())
+    .map((mapping) => {
+      return { label: mapping.name, value: mapping.name };
+    })
+    .value();
 
   // initially load the agent mappings
   useEffect(() => {
@@ -127,9 +132,10 @@ const DocumentationView = () => {
             <Dropdown
               id="agentMappingDd"
               placeholder="Select an Agent Mapping"
-              options={agentMappingNames}
+              options={agentMappingOptions}
               value={selectedAgentMapping}
               onChange={(e) => setSelectedAgentMapping(e.value)}
+              filter={true}
             />
           </div>
 
