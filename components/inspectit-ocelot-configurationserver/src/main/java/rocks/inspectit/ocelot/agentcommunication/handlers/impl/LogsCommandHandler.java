@@ -7,10 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.handlers.CommandHandler;
-import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
-import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.grpc.Command;
+import rocks.inspectit.ocelot.grpc.CommandResponse;
+import rocks.inspectit.ocelot.grpc.LogsCommand;
+import rocks.inspectit.ocelot.grpc.LogsCommandResponse;
 
 import java.time.Duration;
 
@@ -33,19 +34,19 @@ public class LogsCommandHandler implements CommandHandler {
      */
     @Override
     public boolean canHandle(Command command) {
-        return command instanceof LogsCommand;
+        return command.hasLogs();
     }
 
     /**
-     * Checks if the given {@link CommandResponse} is an instance of {@link LogsCommand.Response}.
+     * Checks if the given {@link CommandResponse} is an instance of {@link LogsCommandResponse}.
      *
      * @param response The response which should be checked.
      *
-     * @return True if the given response is an instance of {@link LogsCommand.Response}.
+     * @return True if the given response is an instance of {@link LogsCommandResponse}.
      */
     @Override
     public boolean canHandle(CommandResponse response) {
-        return response instanceof LogsCommand.Response;
+        return response.hasLogs();
     }
 
     /**
@@ -80,7 +81,7 @@ public class LogsCommandHandler implements CommandHandler {
      */
     @Override
     public void handleResponse(CommandResponse response, DeferredResult<ResponseEntity<?>> result) {
-        LogsCommand.Response logsResponse = (LogsCommand.Response) response;
+        LogsCommandResponse logsResponse = response.getLogs();
         result.setResult(ResponseEntity.ok().body(logsResponse.getLogs()));
     }
 

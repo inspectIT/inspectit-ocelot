@@ -10,6 +10,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.CommandsGrpcService;
 import rocks.inspectit.ocelot.grpc.Command;
 import rocks.inspectit.ocelot.grpc.ListClassesCommand;
+import rocks.inspectit.ocelot.grpc.LogsCommand;
 import rocks.inspectit.ocelot.grpc.PingCommand;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
@@ -24,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 public class AgentCommandController extends AbstractBaseController {
 
     @Autowired
-    private CommandsGrpcService commandsService;
+    private CommandsGrpcService commandService;
 
     /**
      * Creates a {@link PingCommand} for an agent with the given id.
@@ -36,24 +37,28 @@ public class AgentCommandController extends AbstractBaseController {
     @GetMapping(value = "command/ping")
     public DeferredResult<ResponseEntity<?>> ping(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
         Command command = Command.newBuilder()
-                .setPing(PingCommand.newBuilder())
                 .setCommandId(UUID.randomUUID().toString())
+                .setPing(PingCommand.newBuilder())
                 .build();
-        return commandsService.dispatchCommand(agentId, command);
+        return commandService.dispatchCommand(agentId, command);
     }
 
     @GetMapping(value = "command/logs")
     public DeferredResult<ResponseEntity<?>> logs(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
-        LogsCommand logsCommand = new LogsCommand();
-        return commandDispatcher.dispatchCommand(agentId, logsCommand);
+        Command command = Command.newBuilder()
+                .setCommandId(UUID.randomUUID().toString())
+                .setLogs(LogsCommand.newBuilder()
+                        .setLogFormat("%d{ISO8601} %-5p %-6r --- [inspectIT] [%15.15t] %-40.40logger{39} : %m%n%rEx"))
+                .build();
+        return commandService.dispatchCommand(agentId, command);
     }
 
     @GetMapping(value = "command/list/classes")
     public DeferredResult<ResponseEntity<?>> listClasses(@RequestParam(value = "agent-id") String agentId, @RequestParam(value = "query") String query) throws ExecutionException {
         Command command = Command.newBuilder()
-                .setListClasses(ListClassesCommand.newBuilder().setFilter(query))
                 .setCommandId(UUID.randomUUID().toString())
+                .setListClasses(ListClassesCommand.newBuilder().setFilter(query))
                 .build();
-        return commandsService.dispatchCommand(agentId, command);
+        return commandService.dispatchCommand(agentId, command);
     }
 }

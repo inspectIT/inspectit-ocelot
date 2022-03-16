@@ -13,13 +13,8 @@ message Command {
   oneof commandType {
     PingCommand ping = 2;
     ListClassesCommand listClasses = 3;
+    LogsCommand logs = 4;
   }
-}
-
-message PingCommand {}
-
-message ListClassesCommand {
-  string filter = 1;
 }
 
 message CommandResponse {
@@ -28,6 +23,7 @@ message CommandResponse {
     FirstResponse first = 2;
     PingCommandResponse ping = 3;
     ListClassesCommandResponse listClasses = 4;
+    LogsCommandResponse logs = 5;
   }
 }
 
@@ -35,10 +31,23 @@ message FirstResponse {
   string agentId = 1;
 }
 
+message PingCommand {}
+
 message PingCommandResponse {}
+
+message ListClassesCommand {
+  string filter = 1;
+}
 
 message ListClassesCommandResponse {
   repeated TypeElement result = 1;
+}
+
+message LogsCommand {
+  string logFormat = 1;
+}
+message LogsCommandResponse {
+  string logs = 1;
 }
 
 message TypeElement {
