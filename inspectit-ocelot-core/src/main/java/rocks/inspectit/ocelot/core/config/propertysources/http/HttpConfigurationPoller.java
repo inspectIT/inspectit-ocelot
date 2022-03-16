@@ -2,10 +2,12 @@ package rocks.inspectit.ocelot.core.config.propertysources.http;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.selfmonitoring.AgentStatusChangedEvent;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -78,6 +80,13 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
                     propertySources.replace(InspectitEnvironment.HTTP_BASED_CONFIGURATION, currentState.getCurrentPropertySource());
                 }
             });
+        }
+    }
+
+    @EventListener
+    void agentStatusChanged(AgentStatusChangedEvent event) {
+        if (currentState != null) {
+            currentState.updateAgentStatus(event.getNewStatus());
         }
     }
 }

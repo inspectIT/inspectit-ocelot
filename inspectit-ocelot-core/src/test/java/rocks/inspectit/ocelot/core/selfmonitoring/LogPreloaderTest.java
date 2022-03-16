@@ -30,7 +30,7 @@ public class LogPreloaderTest {
 
     @BeforeEach
     void setupPreloader() {
-        logPreloader = new LogPreloader();
+        logPreloader = new LogPreloader(null);
         logPreloader.doEnable(createConfig(DEFAULT_BUFFER_SIZE));
     }
 

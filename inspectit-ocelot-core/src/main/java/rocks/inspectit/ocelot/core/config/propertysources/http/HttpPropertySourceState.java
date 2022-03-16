@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -16,7 +17,7 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
-import rocks.inspectit.ocelot.bootstrap.IAgent;
+import rocks.inspectit.ocelot.commons.models.status.AgentStatus;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
@@ -31,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -95,6 +97,8 @@ public class HttpPropertySourceState {
     @Getter
     private boolean firstFileWriteAttemptSuccessful = true;
 
+    private Optional<AgentStatus> agentStatus = Optional.empty();
+
     /**
      * Constructor.
      *
@@ -130,6 +134,15 @@ public class HttpPropertySourceState {
         }
 
         return false;
+    }
+
+    /**
+     * Updates the agent status to be sent with the request for agent configuration.
+     *
+     * @param newStatus The new agent status
+     */
+    public void updateAgentStatus(@NonNull AgentStatus newStatus) {
+        agentStatus = Optional.of(newStatus);
     }
 
     /**
@@ -243,6 +256,10 @@ public class HttpPropertySourceState {
         httpGet.setHeader(META_HEADER_PREFIX + "VM-NAME", runtime.getVmName());
         httpGet.setHeader(META_HEADER_PREFIX + "VM-VENDOR", runtime.getVmVendor());
         httpGet.setHeader(META_HEADER_PREFIX + "START-TIME", String.valueOf(runtime.getStartTime()));
+
+        if (agentStatus.isPresent()) {
+            httpGet.setHeader(META_HEADER_PREFIX + "STATUS", agentStatus.get().name());
+        }
     }
 
     /**
