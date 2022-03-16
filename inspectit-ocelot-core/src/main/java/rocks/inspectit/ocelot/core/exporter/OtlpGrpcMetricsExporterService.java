@@ -5,9 +5,10 @@ import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.OtlpGrpcMetricsExporterSettings;
 
 import javax.validation.Valid;
@@ -37,7 +38,14 @@ public class OtlpGrpcMetricsExporterService extends DynamicallyActivatableMetric
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig configuration) {
         @Valid OtlpGrpcMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlpGrpc();
-        return configuration.getMetrics().isEnabled() && !StringUtils.isEmpty(otlp.getUrl()) && otlp.isEnabled();
+        if (configuration.getMetrics().isEnabled() && !otlp.getEnabled().isDisabled()) {
+            if (StringUtils.hasText(otlp.getUrl())) {
+                return true;
+            } else if (otlp.getEnabled().equals(ExporterEnabledState.ENABLED)) {
+                log.warn("OTLP gRPC Metric Exporter is enabled but 'url' is not set.");
+            }
+        }
+        return false;
     }
 
     @Override

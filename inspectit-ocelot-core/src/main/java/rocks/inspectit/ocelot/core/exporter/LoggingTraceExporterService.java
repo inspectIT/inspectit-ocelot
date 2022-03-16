@@ -37,7 +37,7 @@ public class LoggingTraceExporterService extends DynamicallyActivatableTraceExpo
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig configuration) {
         @Valid LoggingTraceExporterSettings logging = configuration.getExporters().getTracing().getLogging();
-        return configuration.getTracing().isEnabled() && logging.isEnabled();
+        return configuration.getTracing().isEnabled() && !logging.getEnabled().isDisabled();
 
     }
 

@@ -43,7 +43,7 @@ public class LoggingMetricExporterService extends DynamicallyActivatableMetricsE
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig configuration) {
         @Valid LoggingMetricsExporterSettings logging = configuration.getExporters().getMetrics().getLogging();
-        return configuration.getMetrics().isEnabled() && logging.isEnabled();
+        return configuration.getMetrics().isEnabled() && !logging.getEnabled().isDisabled();
     }
 
     @Override

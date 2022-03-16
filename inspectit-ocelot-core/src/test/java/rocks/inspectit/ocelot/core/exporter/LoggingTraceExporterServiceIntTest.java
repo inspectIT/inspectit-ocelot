@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.util.concurrent.TimeUnit;
@@ -57,11 +58,11 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
 
     @BeforeEach
     void enableService() {
-        localSwitch(true);
+        localSwitch(ExporterEnabledState.ENABLED);
         masterSwitch(true);
     }
 
-    private void localSwitch(boolean enabled) {
+    private void localSwitch(ExporterEnabledState enabled) {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.tracing.logging.enabled", enabled);
         });
@@ -87,7 +88,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
         @Test
         void testLocalSwitch() {
             assertThat(service.isEnabled()).isTrue();
-            localSwitch(false);
+            localSwitch(ExporterEnabledState.DISABLED);
             assertThat(service.isEnabled()).isFalse();
         }
     }
@@ -135,7 +136,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             int numEvents = spanLogs.size();
 
             // turn off trace exporter
-            localSwitch(false);
+            localSwitch(ExporterEnabledState.DISABLED);
 
             // wait until the service is shut down
             Awaitility.waitAtMost(5, TimeUnit.SECONDS)
@@ -147,7 +148,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             assertThat(spanLogs.size()).isEqualTo(numEvents);
 
             // turn the trace exporter on again
-            localSwitch(true);
+            localSwitch(ExporterEnabledState.ENABLED);
             Awaitility.waitAtMost(1, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
             makeSpansAndFlush();
@@ -165,7 +166,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             assertThat(service.isEnabled()).isTrue();
 
             // disable exporter service
-            localSwitch(false);
+            localSwitch(ExporterEnabledState.DISABLED);
 
             assertThat(service.isEnabled()).isFalse();
 
@@ -197,13 +198,13 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             int numEvents = spanLogs.size();
 
             // turn off tracing exporter
-            localSwitch(false);
+            localSwitch(ExporterEnabledState.DISABLED);
             // make sure no more spans are recorded
             Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isFalse());
             assertThat(spanLogs.size()).isEqualTo(numEvents);
 
             // turn tracing exporter back on
-            localSwitch(true);
+            localSwitch(ExporterEnabledState.ENABLED);
             Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
             // make spans

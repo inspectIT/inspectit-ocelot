@@ -10,19 +10,21 @@ If an exporter supports run-time updates it means that it can be enabled/disable
 This way you can, for example, change the endpoint where exporter pushes the metrics without a need to restart the application.
 In order to use run-time updates, you must enable one of the [externalized configuration methods](configuration/external-configuration-sources) that support dynamic updates.
 
-inspectIT Ocelot currently supports the following OpenTelemetry metrics exporters:
+inspectIT Ocelot currently supports the following metrics exporters:
 
-|Exporter |Supports run-time updates| Push / Pull |Enabled by default
+|Exporter |Supports run-time updates| Push / Pull |Enabled by default|
 |---|---|---|---|
-|[Logging Exporter](#logging-exporter)|Yes|Pull|No
-|[Prometheus Exporter](#prometheus-exporter)|Yes|Pull|No
-|[InfluxDB Exporter](#influxdb-exporter)|Yes|Push|Yes
+|[Logging Exporter (Metrics)](#logging-exporter-metrics) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/blob/main/exporters/logging/src/main/java/io/opentelemetry/exporter/logging/LoggingMetricExporter.java)]|Yes|Push|No|
+|[Prometheus Exporter](#prometheus-exporter)|Yes|Pull|No|
+|[InfluxDB Exporter](#influxdb-exporter)|Yes|Push|No|
+|[OTLP Exporter (Metrics)](#otlp-exporter-metrics) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp/metrics)]|Yes|Push|No|
 
->**Important note**: Starting with version `2.X.X`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
+>**Important note**: Starting with version <mark>`2.X.X`</mark>, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
 
-## Logging Exporter
+## Logging Exporter (Metrics)
 
-The Logging exporter exports the metrics to the console. By default, the exporter is enabled. The following properties are nested properties below the `inspectit.exporters.metrics.logging`:
+The Logging exporter exports the metrics to the system log. By default, the exporter is disabled. 
+The following properties are nested properties below the `inspectit.exporters.metrics.logging`:
 
 |Property |Default| Description
 |---|---|---|
@@ -47,8 +49,6 @@ The following properties are nested properties below the `inspectit.exporters.me
 > Don't forget to check [the official OpenTelemetry Prometheus exporter documentation](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/prometheus).
 
 ## InfluxDB Exporter
->**Important**: the InfluxDB exporter is currently not working
-
 If enabled, metrics are pushed at a specified interval directly to a given InfluxDB v1.x instance.
 To enable the InfluxDB Exporters, it is only required to specify the `url`.
 
@@ -74,3 +74,17 @@ The following properties are nested properties below the `inspectit.exporters.me
 |`.export-interval`| refers to `inspectit.metrics.frequency` |Defines how often metrics are pushed to the InfluxDB.
 |<nobr>`.counters-as-differences`</nobr>| `true`                                  |Defines whether counters are exported using their absolute value or as the increase between exports
 |`buffer-size`| `40`                                    | In case the InfluxDB is not reachable, failed writes will be buffered and written on the next export. This value defines the maximum number of batches to buffer.
+
+## OTLP Exporter (Metrics)
+
+The OpenTelemetry Protocol (OTLP) exporters export the metrics to the desired endpoint at a specified interval. 
+To enable the OTLP exporters, it is only required to specify the `url`.
+
+### OTLP gRPC Exporter
+
+The following properties are nested properties below the `inspectit.exporters.metrics.otlp-grpc` property:
+
+| Property   | Default    | Description                                                  |
+| ---------- | ---------- | ------------------------------------------------------------ |
+| `.enabled` | `DISABLED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC metrics exporter. |
+| `.url`     | `null`     | The OTLP gRPC endpoint to connect to, e.g. `http://localhost:4317` |

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.trace.OtlpGrpcTraceExporterSettings;
 
 import javax.validation.Valid;
@@ -29,7 +30,14 @@ public class OtlpGrpcTraceExporterService extends DynamicallyActivatableTraceExp
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig configuration) {
         @Valid OtlpGrpcTraceExporterSettings otlp = configuration.getExporters().getTracing().getOtlpGrpc();
-        return configuration.getTracing().isEnabled() && !StringUtils.isEmpty(otlp.getUrl()) && otlp.isEnabled();
+        if (configuration.getTracing().isEnabled() && !otlp.getEnabled().isDisabled()) {
+            if (org.springframework.util.StringUtils.hasText(otlp.getUrl())) {
+                return true;
+            } else if (otlp.getEnabled().equals(ExporterEnabledState.ENABLED)) {
+                log.warn("OTLP gRPC Trace Exporter is enabled but 'url' is not set.");
+            }
+        }
+        return false;
     }
 
     @Override

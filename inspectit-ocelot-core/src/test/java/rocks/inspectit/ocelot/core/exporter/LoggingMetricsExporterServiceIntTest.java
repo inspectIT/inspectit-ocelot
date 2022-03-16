@@ -15,6 +15,7 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
@@ -53,7 +54,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
 
     @BeforeEach
     void enableService() {
-        localSwitch(true);
+        localSwitch(ExporterEnabledState.ENABLED);
         Awaitility.await()
                 .atMost(15, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS)
@@ -62,10 +63,10 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
 
     @AfterEach
     void disableService() {
-        localSwitch(false);
+        localSwitch(ExporterEnabledState.DISABLED);
     }
 
-    private void localSwitch(boolean enabled) {
+    private void localSwitch(ExporterEnabledState enabled) {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.metrics.logging.enabled", enabled);
         });
@@ -86,7 +87,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
         @DirtiesContext
         @Test
         void testLocalSwitch() {
-            localSwitch(false);
+            localSwitch(ExporterEnabledState.DISABLED);
             assertThat(service.isEnabled()).isFalse();
         }
     }
@@ -155,7 +156,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
             });
 
             // now turn the exporter off and make sure that no more metrics are exported to the log
-            localSwitch(false);
+            localSwitch(ExporterEnabledState.DISABLED);
             // wait until everything is flushed
             Thread.sleep(500);
             int numEvents = metricLogs.getEvents().size();

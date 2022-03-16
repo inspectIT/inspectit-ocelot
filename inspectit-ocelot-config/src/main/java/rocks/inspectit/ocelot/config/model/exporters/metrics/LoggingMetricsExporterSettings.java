@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.model.exporters.metrics;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.time.DurationMin;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 
 import java.time.Duration;
 
@@ -13,7 +14,7 @@ import java.time.Duration;
 @NoArgsConstructor
 public class LoggingMetricsExporterSettings {
 
-    private boolean enabled;
+    private ExporterEnabledState enabled;
 
     /**
      * Defines how often metrics are pushed to the log.
