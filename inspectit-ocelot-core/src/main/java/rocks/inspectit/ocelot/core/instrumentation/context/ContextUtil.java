@@ -55,7 +55,7 @@ public class ContextUtil {
      *
      * @return The object stored under {@link #current()} with the given {@link ContextKey}
      */
-    public static <T> T get(ContextKey<T> key) {
+    public static <T> T getObject(ContextKey<T> key) {
         return current().get(key);
     }
 }

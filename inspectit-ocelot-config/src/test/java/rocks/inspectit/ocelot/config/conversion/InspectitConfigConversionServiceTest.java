@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.config.conversion;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.convert.TypeDescriptor;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,6 +43,26 @@ public class InspectitConfigConversionServiceTest {
             MetricRecordingSettings result = (MetricRecordingSettings) converter.convert("", TARGET);
 
             assertThat(result.getValue()).isEqualTo("");
+        }
+    }
+
+    @Nested
+    class ExporterEnabledStateConverter {
+
+        private final TypeDescriptor TARGET = TypeDescriptor.valueOf(ExporterEnabledState.class);
+
+        @Test
+        void fromTrue() {
+            ExporterEnabledState result = (ExporterEnabledState) converter.convert(true, TARGET);
+
+            assertThat(result).isEqualTo(ExporterEnabledState.IF_CONFIGURED);
+        }
+
+        @Test
+        void fromFalse() {
+            ExporterEnabledState result = (ExporterEnabledState) converter.convert(false, TARGET);
+
+            assertThat(result).isEqualTo(ExporterEnabledState.DISABLED);
         }
     }
 }

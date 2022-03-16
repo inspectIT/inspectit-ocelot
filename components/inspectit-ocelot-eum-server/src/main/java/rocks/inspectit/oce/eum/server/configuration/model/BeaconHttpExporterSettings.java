@@ -2,6 +2,7 @@ package rocks.inspectit.oce.eum.server.configuration.model;
 
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Min;
@@ -20,7 +21,7 @@ public class BeaconHttpExporterSettings {
      * Whether beacons should be exported via HTTP
      */
     @NotNull
-    private boolean enabled;
+    private ExporterEnabledState enabled;
 
     /**
      * The endpoint to which the beacons are to be sent

@@ -9,11 +9,9 @@ import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.exporter.logging.LoggingMetricExporter;
 import org.awaitility.Awaitility;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.bootstrap.Instances;
@@ -35,6 +33,23 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
 
     @Autowired
     InspectitEnvironment environment;
+
+    @BeforeAll
+    static void beforeAll() {
+        // enable jul -> slf4j bridge
+        // this is necessary as OTEL logs to jul, but we use the LogCapturer with logback
+        if (!SLF4JBridgeHandler.isInstalled()) {
+            SLF4JBridgeHandler.removeHandlersForRootLogger();
+            SLF4JBridgeHandler.install();
+        }
+    }
+
+    @AfterAll
+    static void afterAll() {
+        if (SLF4JBridgeHandler.isInstalled()) {
+            SLF4JBridgeHandler.uninstall();
+        }
+    }
 
     @BeforeEach
     void enableService() {
@@ -107,8 +122,8 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
             // verify that the metric has been exported to the log
             Awaitility.waitAtMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
                 assertThat(metricLogs.getEvents().size()).isGreaterThan(0);
-                assertThat(metricLogs.getEvents()).anyMatch(evt -> evt.getArgumentArray() != null && evt.getArgumentArray()[0].toString()
-                        .contains("processed_jobs"));
+                assertThat(metricLogs.getEvents()).anyMatch(evt -> (evt.getArgumentArray() != null && evt.getArgumentArray()[0].toString()
+                        .contains("processed_jobs")) || evt.getMessage().contains("name=processed_jobs"));
             });
         }
     }
@@ -135,7 +150,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
                 assertThat(metricLogs.getEvents().size()).isGreaterThan(0);
                 // assert that the latest metric is our custom log
                 assertThat(metricLogs.getEvents()).anyMatch(evt -> evt.getArgumentArray() != null && evt.getArgumentArray()[0].toString()
-                        .contains("oc.desc"));
+                        .contains("oc.desc") || evt.getMessage().contains("description=oc.desc"));
 
             });
 

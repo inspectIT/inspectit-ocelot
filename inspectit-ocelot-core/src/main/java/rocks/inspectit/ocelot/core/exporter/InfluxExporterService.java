@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.InfluxExporterSettings;
 import rocks.inspectit.ocelot.core.metrics.percentiles.PercentileViewManager;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
@@ -57,8 +58,15 @@ public class InfluxExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         InfluxExporterSettings influx = conf.getExporters().getMetrics().getInflux();
-        return conf.getMetrics()
-                .isEnabled() && influx.isEnabled() && !StringUtils.isEmpty(influx.getUrl()) && !StringUtils.isEmpty(influx.getDatabase()) && !StringUtils.isEmpty(influx.getRetentionPolicy());
+        if ( conf.getMetrics()
+                .isEnabled() && !influx.getEnabled().isDisabled() ) {
+            if (StringUtils.hasText(influx.getUrl()) ) {
+                return true;
+            } else if (influx.getEnabled().equals(ExporterEnabledState.ENABLED)) {
+                log.warn("InfluxDB Exporter is enabled but 'url' is not set.");
+            }
+        }
+        return false;
     }
 
     @Override

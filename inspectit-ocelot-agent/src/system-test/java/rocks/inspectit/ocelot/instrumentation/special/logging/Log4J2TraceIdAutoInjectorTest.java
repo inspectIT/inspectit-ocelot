@@ -24,9 +24,11 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
         TestUtils.waitForClassInstrumentations(AbstractMessageFactory.class, MessageFactory.class);
     }
 
+    // TODO: maybe remove this method once the OTelController has been implemented
     @BeforeAll
     public static void initializeOpenTelemetry() {
-        TestUtils.waitForOpenTelemetryControllerInitialization();
+        // initialize OTel as we are otherwise not exporting any traces.
+        TestUtils.initializeOpenTelemetryForSystemTesting();
     }
 
     @Test

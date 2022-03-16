@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.time.DurationMin;
 import java.time.Duration;
 
 /**
- * Settings for the {@link io.opentelemetry.exporter.logging.LoggingMetricExporter} and
+ * Settings for the {@link io.opentelemetry.exporter.logging.LoggingMetricExporter}
  */
 @Data
 @NoArgsConstructor

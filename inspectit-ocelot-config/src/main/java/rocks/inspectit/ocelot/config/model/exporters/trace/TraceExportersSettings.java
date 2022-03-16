@@ -22,4 +22,5 @@ public class TraceExportersSettings {
 
     @Valid
     private OtlpGrpcTraceExporterSettings otlpGrpc;
+
 }

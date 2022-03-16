@@ -29,9 +29,13 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
@@ -52,6 +56,8 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 class OpenTelemetryControllerImplTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenTelemetryControllerImplTest.class);
 
     @Spy
     OpenTelemetryControllerImpl openTelemetryController = new OpenTelemetryControllerImpl();
@@ -138,10 +144,10 @@ class OpenTelemetryControllerImplTest {
             // when a service is not registered, unregistration fails
             unregisterTestTraceExporterServiceAndVerify(false);
 
-            System.out.println(testTraceExporterService.getName() + " - " + openTelemetryController.registeredTraceExportServices.size());
+            LOGGER.info(testTraceExporterService.getName() + " - " + openTelemetryController.registeredTraceExportServices.size());
             // register service
             registerTestTraceExporterServiceAndVerify(true);
-            System.out.println(openTelemetryController.registeredTraceExportServices.size());
+            LOGGER.info("num of registered services:{}", openTelemetryController.registeredTraceExportServices.size());
             // unregistering should now succeed
             unregisterTestTraceExporterServiceAndVerify(true);
         }
@@ -342,6 +348,23 @@ class OpenTelemetryControllerImplTest {
         private static CloseableHttpClient testClient;
 
         @BeforeAll
+        static void beforeAll() {
+            // enable jul -> slf4j bridge
+            // this is necessary as OTEL logs to jul, but we use the LogCapturer with logback
+            if (!SLF4JBridgeHandler.isInstalled()) {
+                SLF4JBridgeHandler.removeHandlersForRootLogger();
+                SLF4JBridgeHandler.install();
+            }
+        }
+
+        @AfterAll
+        static void afterAll() {
+            if (SLF4JBridgeHandler.isInstalled()) {
+                SLF4JBridgeHandler.uninstall();
+            }
+        }
+
+        @BeforeAll
         private static void initTestClient() {
             RequestConfig.Builder requestBuilder = RequestConfig.custom();
             requestBuilder = requestBuilder.setConnectTimeout(1000);
@@ -378,7 +401,7 @@ class OpenTelemetryControllerImplTest {
             SdkMeterProvider sdkMeterProvider = openTelemetryController.getMeterProvider();
             // enable prometheus and logging
             updateProperties(properties -> {
-                properties.setProperty("inspectit.exporters.metrics.prometheus.enabled", true);
+                properties.setProperty("inspectit.exporters.metrics.prometheus.enabled", ExporterEnabledState.ENABLED);
                 properties.setProperty("inspectit.exporters.metrics.logging.enabled", true);
             });
             // wait until the OpenTelemetryController has been reconfigured
@@ -390,7 +413,7 @@ class OpenTelemetryControllerImplTest {
 
             // disable prometheus
             updateProperties(properties -> {
-                properties.setProperty("inspectit.exporters.metrics.prometheus.enabled", false);
+                properties.setProperty("inspectit.exporters.metrics.prometheus.enabled", ExporterEnabledState.DISABLED);
             });
             assertUnavailable("http://localhost:8888/metrics");
 
@@ -402,7 +425,7 @@ class OpenTelemetryControllerImplTest {
 
             // enable prometheus
             updateProperties(properties -> {
-                properties.setProperty("inspectit.exporters.metrics.prometheus.enabled", true);
+                properties.setProperty("inspectit.exporters.metrics.prometheus.enabled", ExporterEnabledState.ENABLED);
             });
             assertGet200("http://localhost:8888/metrics");
 

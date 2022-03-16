@@ -24,7 +24,10 @@ public class PrometheusExporterService extends DynamicallyActivatableMetricsExpo
 
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
-        return conf.getExporters().getMetrics().getPrometheus().isEnabled() && conf.getMetrics().isEnabled();
+        return conf.getMetrics().isEnabled() && !conf.getExporters()
+                .getMetrics()
+                .getPrometheus()
+                .getEnabled().isDisabled();
     }
 
     @Override

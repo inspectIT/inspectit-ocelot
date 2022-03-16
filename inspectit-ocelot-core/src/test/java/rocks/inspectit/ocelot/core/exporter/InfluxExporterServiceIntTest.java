@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.exporter;
 import de.flapdoodle.embed.process.runtime.Network;
 import io.apisense.embed.influx.InfluxServer;
 import io.apisense.embed.influx.configuration.InfluxConfigurationWriter;
+import io.github.netmikey.logunit.api.LogCapturer;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.*;
 import io.opencensus.tags.TagKey;
@@ -16,6 +17,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.util.Arrays;
@@ -33,6 +36,9 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
     private String url;
 
     private static final String DATABASE = "ocelot_test";
+
+    @RegisterExtension
+    LogCapturer warnLogs = LogCapturer.create().captureForType(InfluxExporterService.class, org.slf4j.event.Level.WARN);
 
     @BeforeEach
     void startInfluxDB() throws Exception {
@@ -84,7 +90,8 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
             InfluxDB iDB = InfluxDBFactory.connect(url, user, password); // note: user and password are mandatory as of v1.15.0
-            QueryResult result = iDB.query(new Query("SELECT LAST(cool_data) FROM " + DATABASE + ".autogen.my_test_measure GROUP BY *"));
+            QueryResult result = iDB
+                    .query(new Query("SELECT LAST(cool_data) FROM " + DATABASE + ".autogen.my_test_measure GROUP BY *"));
 
             List<QueryResult.Result> results = result.getResults();
             assertThat(results).hasSize(1);
@@ -97,4 +104,13 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
         });
     }
 
+    @DirtiesContext
+    @Test
+    void testNoUrlSet() {
+        updateProperties(props -> {
+            props.setProperty("inspectit.exporters.metrics.influx.url", "");
+            props.setProperty("inspectit.exporters.metrics.influx.enabled", "ENABLED");
+        });
+        warnLogs.assertContains("'url'");
+    }
 }

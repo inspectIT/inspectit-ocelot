@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +15,7 @@ import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -34,16 +34,26 @@ public class MethodHookTest {
     @Mock
     private ActionScopeFactory actionScopeFactory;
 
-    @BeforeEach
-    void setupContextManagerMock() {
-        when(contextManager.enterNewContext()).thenReturn(context);
-    }
-
     @Nested
     class OnEnter {
 
         @Test
+        void ensureRecursionGateReset() {
+            // we provoke a NPE
+            MethodHook hook = MethodHook.builder().actionScopeFactory(mock(ActionScopeFactory.class)).build();
+
+            assertThat(HookManager.RECURSION_GATE.get()).isFalse();
+
+            // execute hook
+            assertThatNullPointerException().isThrownBy(() -> hook.onEnter(null, null));
+
+            assertThat(HookManager.RECURSION_GATE.get()).isFalse();
+        }
+
+        @Test
         void testExceptionHandling() {
+            when(contextManager.enterNewContext()).thenReturn(context);
+
             IHookAction first = Mockito.mock(IHookAction.class);
             IHookAction second = Mockito.mock(IHookAction.class);
             IHookAction third = Mockito.mock(IHookAction.class);
@@ -83,6 +93,8 @@ public class MethodHookTest {
 
         @Test
         void testReactivationOfActionsOnCopy() {
+            when(contextManager.enterNewContext()).thenReturn(context);
+
             IHookAction action = Mockito.mock(IHookAction.class);
             doThrow(Error.class).when(action).execute(any());
             MethodHook hook = MethodHook.builder()
@@ -123,7 +135,22 @@ public class MethodHookTest {
     class OnExit {
 
         @Test
+        void ensureRecursionGateReset() {
+            // we provoke a NPE
+            MethodHook hook = MethodHook.builder().actionScopeFactory(mock(ActionScopeFactory.class)).build();
+
+            assertThat(HookManager.RECURSION_GATE.get()).isFalse();
+
+            // execute hook
+            assertThatNullPointerException().isThrownBy(() -> hook.onExit(null, null, null, null, null));
+
+            assertThat(HookManager.RECURSION_GATE.get()).isFalse();
+        }
+
+        @Test
         void testExceptionHandling() {
+            when(contextManager.enterNewContext()).thenReturn(context);
+
             IHookAction first = Mockito.mock(IHookAction.class);
             IHookAction second = Mockito.mock(IHookAction.class);
             IHookAction third = Mockito.mock(IHookAction.class);
@@ -157,6 +184,8 @@ public class MethodHookTest {
 
         @Test
         void testReactivationOfActionsOnCopy() {
+            when(contextManager.enterNewContext()).thenReturn(context);
+
             IHookAction action = Mockito.mock(IHookAction.class);
             doThrow(Error.class).when(action).execute(any());
             MethodHook hook = MethodHook.builder()
@@ -190,7 +219,5 @@ public class MethodHookTest {
             verify(actionScopeFactory, times(2)).createScope(action);
             verifyNoMoreInteractions(actionScopeFactory, action);
         }
-
     }
-
 }

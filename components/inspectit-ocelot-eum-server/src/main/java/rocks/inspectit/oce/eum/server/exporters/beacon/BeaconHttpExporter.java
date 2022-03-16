@@ -2,6 +2,7 @@ package rocks.inspectit.oce.eum.server.exporters.beacon;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.oce.eum.server.beacon.Beacon;
@@ -17,7 +18,8 @@ import java.util.concurrent.*;
  */
 @Component
 @Slf4j
-@ConditionalOnProperty(value = "inspectit-eum-server.exporters.beacons.http.enabled", havingValue = "true")
+@ConditionalOnProperty({"inspectit-eum-server.exporters.beacons.http.enabled"})
+@ConditionalOnExpression("NOT new String('${inspectit-eum-server.exporters.beacons.http.enabled}').toUpperCase().equals(T(rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState).DISABLED.toString())")
 public class BeaconHttpExporter {
 
     /**

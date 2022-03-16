@@ -2,7 +2,7 @@
 id: Breaking Changes
 title: Breaking Changes
 ---
-## Breaking changes in 1.15.0
+## Breaking changes in 2.X.X
 
 ### Integration of the OpenTelemetry OpenCensus Shim
 
@@ -14,6 +14,20 @@ Due to the migration from OpenCensus to OpenTelemetry, several trace and metric 
 
 The [Jaeger](tracing/tracing-exporters.md#jaeger-exporter) and [Zipkin](tracing/tracing-exporters.md#zipking-exporter) trace exporters as well as the [Prometheus](metrics/metric-exporters.md#prometheus-exporter) and [InfluxDB](metrics/metric-exporters.md#influxdb-exporter) metric exporters are disabled until they are properly integrated with OpenTelemetry.
 The `OpenCensus Agent Exporter` (for metrics and traces) has been completely removed and will not be supported in the future.
+
+## Breaking changes in 1.15.0
+
+### New definition of exporters' enabled property
+
+Instead of a Boolean, the `enabled` property of exporters is now an enum with the values `DISABLED`, `ENABLED` and `IF_CONFIGURED` to express the behaviour of this property more clearly.
+For now old configurations using `true` and `false` will still work and be converted to their equivalent new values `IF_CONFIGURED` and `DISABLED` respectively.
+This conversion is however deprecated, so configurations should still be updated to the new values.
+
+### Prometheus exporter disabled by default
+
+By default, the Prometheus exporter is now disabled.
+This was changed so the exporter's behaviour is in line with the behaviour of other exporters, i.e. it will not run without changing the default settings.
+To enable the Prometheus exporter, set its `enabled` property to `ENABLED`.
 
 ## Breaking changes in 1.12.2
 

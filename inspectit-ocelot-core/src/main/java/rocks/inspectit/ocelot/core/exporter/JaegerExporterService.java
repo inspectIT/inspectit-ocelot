@@ -4,9 +4,10 @@ import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
 import io.opentelemetry.exporter.jaeger.thrift.JaegerThriftSpanExporter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.trace.JaegerExporterSettings;
 
 import javax.validation.Valid;
@@ -36,12 +37,12 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         @Valid JaegerExporterSettings jaeger = conf.getExporters().getTracing().getJaeger();
-        if (conf.getTracing().isEnabled() && jaeger.isEnabled()) {
-            if (!StringUtils.isEmpty(jaeger.getUrl())) {
+        if (conf.getTracing().isEnabled() && !jaeger.getEnabled().isDisabled()) {
+            if (StringUtils.hasText(jaeger.getUrl())) {
                 return true;
-            } else if (StringUtils.isNotEmpty(jaeger.getGrpc())) {
-                // print warning if user used wrong setup
-                log.warn("In order to use Jaeger span exporter, please specify the HTTP URL endpoint property instead of the gRPC.");
+            }
+            if (jaeger.getEnabled().equals(ExporterEnabledState.ENABLED)) {
+                log.warn("Jaeger Exporter is enabled but 'url' is not set.");
             }
         }
         return false;
@@ -51,7 +52,7 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
     protected boolean doEnable(InspectitConfig configuration) {
         try {
             JaegerExporterSettings settings = configuration.getExporters().getTracing().getJaeger();
-            log.info("Starting Jaeger Thrift Exporter with url '{}' (grpc '{}')", settings.getUrl(), settings.getGrpc());
+            log.info("Starting Jaeger Thrift Exporter with url '{}'", settings.getUrl());
 
             // create span exporter
             spanExporter = JaegerThriftSpanExporter.builder().setEndpoint(settings.getUrl()).build();

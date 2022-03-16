@@ -1,13 +1,12 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import ch.qos.logback.classic.Level;
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.metrics.MeterProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,13 +14,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
-@TestPropertySource(properties = {"inspecit.exporters.metrics.prometheus.enabled=true"})
+@TestPropertySource(properties = {"inspectit.exporters.metrics.prometheus.enabled=ENABLED"})
 @DirtiesContext
 public class PrometheusExporterServiceIntTest extends SpringTestBase {
 
@@ -37,6 +39,7 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
         RequestConfig.Builder requestBuilder = RequestConfig.custom();
         requestBuilder = requestBuilder.setConnectTimeout(HTTP_TIMEOUT);
         requestBuilder = requestBuilder.setConnectionRequestTimeout(HTTP_TIMEOUT);
+        requestBuilder = requestBuilder.setSocketTimeout(HTTP_TIMEOUT);
 
         HttpClientBuilder builder = HttpClientBuilder.create();
         builder.setDefaultRequestConfig(requestBuilder.build());
@@ -68,9 +71,9 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
      *
      * @param enabled
      */
-    void switchPrometheusExporterService(boolean enabled) {
+    void localSwitch(ExporterEnabledState enabled) {
         updateProperties(props -> {
-            props.setProperty("inspectit.exporters.metrics.prometheus.enabled", enabled + "");
+            props.setProperty("inspectit.exporters.metrics.prometheus.enabled", enabled);
         });
     }
 
@@ -79,7 +82,7 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
      */
     @BeforeEach
     void enableService() {
-        switchPrometheusExporterService(true);
+        localSwitch(ExporterEnabledState.ENABLED);
     }
 
     @DirtiesContext
@@ -91,7 +94,7 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
 
     @DirtiesContext
     @Test
-    void testMasterSwitch() throws Exception {
+    void testMasterSwitch() {
         updateProperties(props -> {
             props.setProperty("inspectit.metrics.enabled", "false");
         });
@@ -101,11 +104,10 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
 
     @DirtiesContext
     @Test
-    void testLocalSwitch() {
-        updateProperties(props -> {
-            props.setProperty("inspectit.exporters.metrics.prometheus.enabled", "false");
-        });
-        System.out.println("test local switch unavail");
+    void testLocalSwitch() throws Exception {
+        assertGet200("http://localhost:8888/metrics");
+        localSwitch(ExporterEnabledState.DISABLED);
+        Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isFalse());
         assertUnavailable("http://localhost:8888/metrics");
         assertNoLogsOfLevelOrGreater(Level.WARN);
     }
@@ -124,13 +126,11 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
     @DirtiesContext
     @Test
     void testRestartPrometheus() throws Exception {
-
         assertGet200("http://localhost:8888/metrics");
         assertUnavailable("http://localhost:8889/metrics");
         // disable prometheus
-        updateProperties(props -> {
-            props.setProperty("inspectit.exporters.metrics.prometheus.enabled", "false");
-        });
+        localSwitch(ExporterEnabledState.DISABLED);
+        assertThat(service.isEnabled()).isFalse();
         assertUnavailable("http://localhost:8888/metrics");
         // enable prometheus
         enableService();

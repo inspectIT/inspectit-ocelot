@@ -1,12 +1,14 @@
 inspectit:
   instrumentation:
     rules:
-      
-      # This rule records the current method as a span
-      # In addition, the FQN of the method is added as a tag and the error status is set based on if the method threw an exception
-      #
-      # This rule can be either included or scopes can be directly added to it
+
       'r_trace_method':
+        docs:
+          description: |-
+            This rule records the current method as a span.
+            In addition, the FQN of the method is added as a tag and the error status is set based on if the method threw an exception
+          
+            This rule can be either included or scopes can be directly added to it.
         include:
           'r_tracing_global_attributes': true
         tracing:

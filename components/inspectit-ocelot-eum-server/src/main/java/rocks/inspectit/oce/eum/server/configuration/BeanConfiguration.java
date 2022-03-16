@@ -5,6 +5,8 @@ import io.opencensus.stats.StatsRecorder;
 import io.opencensus.stats.ViewManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.ConversionService;
+import rocks.inspectit.ocelot.config.conversion.InspectitConfigConversionService;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -37,5 +39,10 @@ public class BeanConfiguration {
     @Bean
     public ScheduledExecutorService scheduledExecutor() {
         return Executors.newScheduledThreadPool(4);
+    }
+
+    @Bean("conversionService")
+    public ConversionService getConversionService() {
+        return InspectitConfigConversionService.getInstance();
     }
 }

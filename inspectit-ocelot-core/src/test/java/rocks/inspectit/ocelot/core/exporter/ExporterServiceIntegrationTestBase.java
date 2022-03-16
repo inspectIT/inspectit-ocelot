@@ -26,6 +26,7 @@ import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -33,6 +34,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.core.SpringTestBase;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -97,6 +99,9 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
      * The OpenTelemetry Collector
      */
     static GenericContainer<?> collector;
+
+    @Autowired
+    InspectitEnvironment environment;
 
     @BeforeAll
     static void startCollector() {

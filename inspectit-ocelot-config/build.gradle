@@ -1,6 +1,6 @@
-
-apply plugin: 'java'
-apply plugin: 'maven' // for publishing to the local maven repository
+plugins {
+    id 'maven-publish'
+}
 
 test {
     useJUnitPlatform()
@@ -34,7 +34,7 @@ dependencies {
             'com.fasterxml.jackson.core:jackson-databind:2.8.9',
 
             // logging
-            'ch.qos.logback:logback-classic:1.2.3',
+            "ch.qos.logback:logback-classic:${logbackVersion}",
     )
 
     testImplementation(

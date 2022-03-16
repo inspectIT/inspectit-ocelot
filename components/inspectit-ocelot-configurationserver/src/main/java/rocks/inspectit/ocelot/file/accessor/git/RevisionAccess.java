@@ -189,7 +189,8 @@ public class RevisionAccess extends AbstractFileAccessor {
         Path path = Paths.get(relativePath).normalize();
 
         if (StringUtils.isBlank(relativeBasePath)) {
-            return path.toString().replace("\\\\", "/");
+            // replace '\' with '/'. A regex that matches a single backslash character must include four backslashes, see https://www.gnu.org/software/guile/manual/html_node/Backslash-Escapes.html
+            return path.toString().replaceAll("\\\\", "/");
         }
 
         Path basePath = Paths.get(relativeBasePath).normalize();
@@ -199,6 +200,7 @@ public class RevisionAccess extends AbstractFileAccessor {
             throw new IllegalArgumentException("User path escapes the base path: " + relativePath);
         }
 
+        // replace '\' with '/'. A regex that matches a single backslash character must include four backslashes, see https://www.gnu.org/software/guile/manual/html_node/Backslash-Escapes.html
         return resolvedPath.toString().replaceAll("\\\\", "/");
     }
 

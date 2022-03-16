@@ -16,9 +16,7 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.mock.env.MockPropertySource;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
@@ -36,9 +34,6 @@ import static org.mockito.Mockito.when;
 /**
  * Base class for all tests.
  */
-
-@TestPropertySource(properties = "inspectit.exporters.metrics.prometheus.enabled=false")
-@DirtiesContext
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = SpringConfiguration.class, initializers = SpringTestBase.TestContextInitializer.class)
 public class SpringTestBase {

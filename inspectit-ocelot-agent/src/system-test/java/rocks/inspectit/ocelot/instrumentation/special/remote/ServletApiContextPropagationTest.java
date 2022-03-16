@@ -1,12 +1,12 @@
 package rocks.inspectit.ocelot.instrumentation.special.remote;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.junit.jupiter.api.*;
-import org.mockito.internal.util.io.IOUtil;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
@@ -244,7 +244,8 @@ public class ServletApiContextPropagationTest {
             String correlHeader = urlConnection.getHeaderField("Correlation-Context");
 
             assertThat(correlHeader).contains("up_propagated=" + Math.PI + ";type=d");
-            assertThat(IOUtil.readLines(urlConnection.getInputStream())).containsExactly("Hallo Welt!");
+
+            assertThat(IOUtils.readLines(urlConnection.getInputStream())).containsExactly("Hallo Welt!");
         }
 
         @Test
@@ -261,7 +262,7 @@ public class ServletApiContextPropagationTest {
             String correlHeader = urlConnection.getHeaderField("Correlation-Context");
 
             assertThat(correlHeader).contains("up_propagated=" + Math.PI + ";type=d");
-            assertThat(IOUtil.readLines(urlConnection.getInputStream())).containsExactly("Hallo Welt!");
+            assertThat(IOUtils.readLines(urlConnection.getInputStream())).containsExactly("Hallo Welt!");
         }
     }
 

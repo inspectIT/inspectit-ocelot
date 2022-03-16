@@ -16,6 +16,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,17 +42,14 @@ public class JaegerExporterIntTest {
     public static final String SERVICE_NAME = "E2E-test";
 
     @Container
-    public static GenericContainer<?> jaegerContainer = new GenericContainer<>("ghcr.io/open-telemetry/java-test-containers:jaeger")
-            .withExposedPorts(COLLECTOR_PORT, QUERY_PORT, HEALTH_PORT)
+    public static GenericContainer<?> jaegerContainer = new GenericContainer<>("ghcr.io/open-telemetry/java-test-containers:jaeger").withExposedPorts(COLLECTOR_PORT, QUERY_PORT, HEALTH_PORT)
             .waitingFor(Wait.forHttp("/").forPort(HEALTH_PORT));
 
     static class EnvInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
         @Override
         public void initialize(ConfigurableApplicationContext applicationContext) {
-            TestPropertyValues.of("inspectit-eum-server.exporters.tracing.jaegerGrpc.enabled=true",
-                            String.format("inspectit-eum-server.exporters.tracing.jaegerGrpc.grpc=%s:%d", jaegerContainer
-                    .getHost(), jaegerContainer.getMappedPort(COLLECTOR_PORT)), "inspectit-eum-server.exporters.tracing.jaegerGrpc.service-name=" + JaegerExporterIntTest.SERVICE_NAME)
+            TestPropertyValues.of("inspectit-eum-server.exporters.tracing.jaegerGrpc.enabled=" + ExporterEnabledState.ENABLED, String.format("inspectit-eum-server.exporters.tracing.jaegerGrpc.grpc=%s:%d", jaegerContainer.getHost(), jaegerContainer.getMappedPort(COLLECTOR_PORT)), "inspectit-eum-server.exporters.tracing.jaegerGrpc.service-name=" + JaegerExporterIntTest.SERVICE_NAME)
                     .applyTo(applicationContext);
         }
     }

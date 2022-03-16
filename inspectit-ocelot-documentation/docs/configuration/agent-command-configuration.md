@@ -39,7 +39,7 @@ Due to the fact that the agent fetches the created agent commands in a certain i
 However, once the agent receives a command, it switches to its "live"-mode for a specific period of time where it receives commands in near real time.
 If no more commands appear then, the agent will then switch back to normal mode, where it will again obtain the commands at the interval mentioned earlier.
 
-## Configuration
+## General Configuration
 
 The agent command feature is disabled by default and must be enabled on the agent side.
 This can be achieved with the help of the following configuration:
@@ -111,3 +111,31 @@ The agent command feature can be more precisely configured to the needs with the
 | `socket-timeout` | `5s` | The timeout duration used for requests when the agent is in normal mode. |
 | `polling-interval` | `15s` | The used interval for polling agent commands. |
 | `live-mode-duration` | `2m` | How long the agent will staying in the live mode, before falling back to the normal mode. |
+
+## Command-specific Configuration
+
+Some agent commands need specific configuration to work, which is described in the following.
+
+### Log Preloading for Logs Command
+
+The Logs Command allows retrieving the agent logs via the configuration server.
+For that, the agent preloads its own logs into a memory buffer, from which log entries are then retrieved by the command.
+
+Log preloading is disabled by default and can be enabled as follows:
+
+```YAML
+inspectit:
+  log-preloading:
+    enabled: true
+```
+
+Preloading can be further configured, using the following properties below `inspectit.log-preloading`:
+
+| Property              | Default Value | Description                                                                                                                                                                      |
+|-----------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `log-level`           | `WARN`        | The minimum log level to preload. If it is `WARN`, only log messages with level `WARN` and `ERROR` are preloaded. Allowed values are: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`. |
+| `buffer-size`         | `128`         | The maximum number of log messages to preload. When reaching the size, oldest messages are dropped first.                                                                        |
+
+:::warning
+Please note that any change to the log preloading configuration will cause all previously preloaded messages to be dropped.
+:::

@@ -14,13 +14,11 @@ import io.opencensus.tags.Tags;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.exporter.logging.LoggingSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.awaitility.Awaitility;
@@ -167,7 +165,7 @@ public class TestUtils {
             for (Class<?> clazz : clazzes) {
                 Long timeStamp = instrumentationTimeStamp.get(clazz);
                 if (timeStamp == null) {
-                    System.out.println(clazz.getName() + " was not instrumented!");
+                    logger.info("{} was not instrumented!", clazz.getName());
                     missingClassCount++;
                 }
             }
@@ -191,7 +189,7 @@ public class TestUtils {
             Map<Class<?>, Object> hooksMap = getHooksMap();
             for (Class<?> clazz : clazzes) {
                 if (!hooksMap.containsKey(clazz)) {
-                    System.out.println("No hooks were created for class " + clazz.getName());
+                    logger.info("No hookes were created for class {}", clazz.getName());
                 }
             }
             throw ex;
@@ -338,7 +336,6 @@ public class TestUtils {
         SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
                 .setSampler(Sampler.alwaysOn())
                 .addSpanProcessor(BatchSpanProcessor.builder(inMemSpanExporter).build())
-                .addSpanProcessor(SimpleSpanProcessor.create(new LoggingSpanExporter()))
                 .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "rocks.inspectit.ocelot.system.test")))
                 .build();
 

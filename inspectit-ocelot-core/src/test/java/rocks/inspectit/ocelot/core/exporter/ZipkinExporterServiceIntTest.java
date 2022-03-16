@@ -1,16 +1,19 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import io.github.netmikey.logunit.api.LogCapturer;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.util.concurrent.TimeUnit;
@@ -30,6 +33,9 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
     private static final String ZIPKIN_PATH = "/api/v2/spans";
 
     private WireMockServer wireMockServer;
+
+    @RegisterExtension
+    LogCapturer warnLogs = LogCapturer.create().captureForType(ZipkinExporterService.class, org.slf4j.event.Level.WARN);
 
     @BeforeEach
     void setupWiremock() {
@@ -58,5 +64,15 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
         await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
             verify(postRequestedFor(urlPathEqualTo(ZIPKIN_PATH)).withRequestBody(containing("zipkinspan")));
         });
+    }
+
+    @DirtiesContext
+    @Test
+    void testNoUrlSet() {
+        updateProperties(props -> {
+            props.setProperty("inspectit.exporters.tracing.zipkin.url", "");
+            props.setProperty("inspectit.exporters.tracing.zipkin.enabled", ExporterEnabledState.ENABLED);
+        });
+        warnLogs.assertContains("'url'");
     }
 }

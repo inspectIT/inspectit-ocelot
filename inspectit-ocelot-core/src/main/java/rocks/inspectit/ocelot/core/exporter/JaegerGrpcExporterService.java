@@ -3,10 +3,10 @@ package rocks.inspectit.ocelot.core.exporter;
 import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.model.exporters.trace.JaegerExporterSettings;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.trace.JaegerGrpcExporterSettings;
 
 import javax.validation.Valid;
@@ -29,9 +29,16 @@ public class JaegerGrpcExporterService extends DynamicallyActivatableTraceExport
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         @Valid JaegerGrpcExporterSettings jaeger = conf.getExporters().getTracing().getJaegerGrpc();
-        if (conf.getTracing().isEnabled() && jaeger.isEnabled()) {
-            if (!StringUtils.isEmpty(jaeger.getGrpc())) {
+        if (conf.getTracing().isEnabled() && !jaeger.getEnabled().isDisabled()) {
+
+            if (StringUtils.hasText(jaeger.getGrpc())) {
                 return true;
+            } else if (StringUtils.hasText(jaeger.getUrl())) {
+                // print warning if user used wrong setup
+                log.warn("In order to use Jaeger gRPC span exporter, please specify the 'grpc' API endpoint property instead of the 'url'.");
+            }
+            if (jaeger.getEnabled().equals(ExporterEnabledState.ENABLED)) {
+                log.warn("Jaeger Exporter is enabled but 'grpc' is not set.");
             }
         }
         return false;
@@ -43,9 +50,7 @@ public class JaegerGrpcExporterService extends DynamicallyActivatableTraceExport
             JaegerGrpcExporterSettings settings = configuration.getExporters().getTracing().getJaegerGrpc();
             log.info("Starting Jaeger gRPC Exporter with grpc '{}'", settings.getGrpc());
 
-            spanExporter = JaegerGrpcSpanExporter.builder()
-                    .setEndpoint(settings.getGrpc())
-                    .build();
+            spanExporter = JaegerGrpcSpanExporter.builder().setEndpoint(settings.getGrpc()).build();
 
             // register
             openTelemetryController.registerTraceExporterService(this);

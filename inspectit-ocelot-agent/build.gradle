@@ -1,9 +1,7 @@
 plugins {
-    id "me.champeau.gradle.jmh" version "0.4.8"
+    id "me.champeau.gradle.jmh" version "0.5.3"
+    id 'maven-publish'
 }
-
-apply plugin: 'java'
-apply plugin: 'maven' // for publishing to the local maven repository
 
 evaluationDependsOn(':inspectit-ocelot-bootstrap')
 evaluationDependsOn(':inspectit-ocelot-core')
@@ -39,7 +37,7 @@ dependencies {
     testImplementation(
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
             'org.mockito:mockito-junit-jupiter:2.23.0',
-            'ch.qos.logback:logback-classic:1.1.3',
+            "ch.qos.logback:logback-classic:${logbackVersion}",
     )
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
@@ -53,6 +51,9 @@ task buildOpenTelemetryFatJar(type: Jar){
     }
 }
 
+processJmhResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 
 jar {
     destinationDirectory = buildDir
@@ -102,7 +103,6 @@ dependencies {
             "io.opentelemetry:opentelemetry-opencensus-shim",
             "io.opencensus:opencensus-impl:${openCensusVersion}",
 
-
             project(':inspectit-ocelot-bootstrap')
     )
 
@@ -113,8 +113,9 @@ dependencies {
             // for InMemorySpanExporter
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-sdk-testing",
-            "io.opentelemetry:opentelemetry-semconv",
             "io.opentelemetry:opentelemetry-exporter-logging",
+            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
+            "io.opentelemetry:opentelemetry-semconv",
 
             'org.junit.jupiter:junit-jupiter-engine:5.3.1',
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
@@ -132,7 +133,8 @@ dependencies {
             // only used for log-correlation tests
             'org.apache.logging.log4j:log4j-api:2.15.0',
             'org.apache.logging.log4j:log4j-core:2.15.0',
-            'log4j:log4j:1.2.16'
+            'log4j:log4j:1.2.16',
+            'ch.qos.logback:logback-classic:1.2.10' // Used for SLF4J Correlation
 
     )
 
@@ -226,10 +228,21 @@ task systemTest {
 
                 jvmArgs "-Dinspectit.config.file-based.path=$projectDir/src/system-test/resources/config"
                 // make inspectIT scan the workdir for configs
-                jvmArgs "-Dinspectit.publishOpenTelemetryToBootstrap=true"  // make inspectIT push OC to the bootstrap
+                jvmArgs "-Dinspectit.publishOpenTelemetryToBootstrap=true"  // make inspectIT push OTEL to the bootstrap
                 jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"
                 // JaCoCo agent first + bootstrap instrumentation
                 jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.
+
+                // stricter checker makes sure that {@link Scope}s are closed on the correct thread and
+                // that they are not garbage collected before being closed.
+                jvmArgs "-Dio.opentelemetry.context.enableStrictContext=true"
+
+                // enable reflection used in TestUtils#initializeOpenTelemetryForSystemTesting for JDK 11 and later
+                if(JavaVersion.current() >= JavaVersion.VERSION_11) {
+                    // --add-opens has the following syntax: {A}/{package}={B}
+                    jvmArgs "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED"
+                }
+
                 jacoco.enabled = false  // Don't add the JaCoCo agent again.
 
                 // stricter checker makes sure that {@link Scope}s are closed on the correct thread and

@@ -3,9 +3,9 @@ id: trace-exporters
 title: Trace Exporters
 ---
 
-Metrics exporters are responsible for passing the recorded tracing data to a corresponding storage.
+Tracing exporters are responsible for passing the recorded tracing data to a corresponding storage.
 
-inspectIT Ocelot currently supports the following OpenCensus trace exporters:
+inspectIT Ocelot currently supports the following trace exporters:
 
 * [Logging](#logging-exporter) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/blob/main/exporters/logging/src/main/java/io/opentelemetry/exporter/logging/LoggingSpanExporter.java)]
 * [Zipkin](#zipkin-exporter) [[Homepage](https://zipkin.io/)]
@@ -16,14 +16,25 @@ inspectIT Ocelot currently supports the following OpenCensus trace exporters:
 
 ## Logging Exporter
 
-The Logging exporter exports traces to the system log. By default, the Logging exporter is enabled.
+The Logging exporter exports traces to the system log. By default, the Logging exporter is disabled.
+The Logging trace exporter has the following properties:
+- `inspectit.exporters.tracing.logging.enabled`: enables/disables the Logging trace exporter.
 
 ## Zipkin Exporter
 
 The Zipkin exporter exports Traces in Zipkin v2 format to a Zipkin server or other compatible servers.
-It can be enabled and disabled via the `inspectit.exporters.tracing.zipkin.enabled` property. By default, the Zipkin exporter is enabled. It however does not have an URL configured. The exporter will start up as soon as you define the `inspectit.exporters.tracing.zipkin.url` property.
 
-For example, when adding the following property to your `-javaagent` options, traces will be sent to a zipkin server running on your localhost with the default port:
+By default, the Zipkin exporter is enabled but the URL needed for the exporter to actually start is set to `null`.
+
+The following properties are nested properties below the `inspectit.exporters.tracing.zipkin` property:
+
+|Property |Default| Description
+|---|---|---|
+|`.enabled`|`IF_CONFIGURED`|If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Zipkin exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.
+|`.url`|`null`|v2 URL under which the ZipKin server can be accessed (e.g. http://127.0.0.1:9411/api/v2/spans).
+|`.service-name`|refers to `inspectit.service-name`|The service-name which will be used to publish the spans.
+
+To make inspectIT Ocelot push the spans to a Zipkin server running on the same machine as the agent, the following JVM property can be used:
 
 ```
 -Dinspectit.exporters.tracing.zipkin.url=http://127.0.0.1:9411/api/v2/spans
@@ -32,12 +43,16 @@ For example, when adding the following property to your `-javaagent` options, tr
 ## Jaeger Exporter
 
 The Jaeger exports works exactly the same way as the [Zipkin Exporter](#zipkin-exporter).
-The corresponding properties are the following:
 
-* `inspectit.exporters.tracing.jaeger.enabled`: enables / disables the Jaeger exporter
-* `inspectit.exporters.tracing.jaeger.url`: defines the URL where the spans will be pushed
+By default, the Jaeger exporter is enabled but the URL needed for the exporter to actually start is set to `null`.
 
-By default, the Jaeger exporter is enabled but has no URL configured.
+The following properties are nested properties below the `inspectit.exporters.tracing.jaeger` property:
+
+|Property |Default| Description
+|---|---|---|
+|`.enabled`|`IF_CONFIGURED`|If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Jaeger exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.
+|`.url`|`null`|URL under which the Jaeger Thrift server can be accessed (e.g. http://127.0.0.1:14268/api/traces).
+|`.service-name`|refers to `inspectit.service-name`|The service-name which will be used to publish the spans.
 
 To make inspectIT Ocelot push the spans to a Jaeger server running on the same machine as the agent, the following JVM property can be used:
 

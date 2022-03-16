@@ -8,10 +8,9 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.exporter.logging.LoggingSpanExporter;
 import org.awaitility.Awaitility;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -39,7 +38,23 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
     @Autowired
     LoggingTraceExporterService service;
 
-    @DirtiesContext
+    @BeforeAll
+    static void beforeAll() {
+        // enable jul -> slf4j bridge
+        // this is necessary as OTEL logs to jul, but we use the LogCapturer with logback
+        if (!SLF4JBridgeHandler.isInstalled()) {
+            SLF4JBridgeHandler.removeHandlersForRootLogger();
+            SLF4JBridgeHandler.install();
+        }
+    }
+
+    @AfterAll
+    static void afterAll() {
+        if (SLF4JBridgeHandler.isInstalled()) {
+            SLF4JBridgeHandler.uninstall();
+        }
+    }
+
     @BeforeEach
     void enableService() {
         localSwitch(true);
@@ -174,7 +189,9 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             makeSpansAndFlush();
 
             // assert that both spans are logged
-            Awaitility.waitAtMost(5, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> assertThat(spanLogs.getEvents()).hasSize(2));
+            Awaitility.waitAtMost(5, TimeUnit.SECONDS)
+                    .pollInterval(1, TimeUnit.SECONDS)
+                    .untilAsserted(() -> assertThat(spanLogs.getEvents()).hasSize(2));
             assertThat(spanLogs.getEvents().get(0).getMessage()).contains("openCensusChild");
 
             int numEvents = spanLogs.size();

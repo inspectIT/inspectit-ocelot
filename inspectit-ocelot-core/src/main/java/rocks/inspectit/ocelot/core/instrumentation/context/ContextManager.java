@@ -23,6 +23,11 @@ import static java.lang.Boolean.TRUE;
 /**
  * This class is based on the ContextStrategyImpl (https://github.com/census-instrumentation/opencensus-java/blob/master/contrib/agent/src/main/java/io/opencensus/contrib/agent/instrumentation/ContextStrategyImpl.java)
  * class from the opencensus-java repository.
+ *
+ * OpenCensus and inspectIT Ocelot use {@link io.grpc.Context} to propagate data, such as the InspectitContext, Span or TraceId.
+ * OpenTelemetry uses its own {@link io.opentelemetry.context.Context} implementation.
+ * To make all system tests succeed, we need to concurrently support (re-)storing data in {@link io.grpc.Context} as well as {@link io.opentelemetry.context.Context}.
+ *
  */
 public class ContextManager implements IContextManager {
 
@@ -57,6 +62,7 @@ public class ContextManager implements IContextManager {
     @Override
     public Runnable wrap(Runnable r) {
         // manually build up own wrap method to support io.grpc.Context and io.telemetry.context.Context
+        // we need to support both context implementations for the transition from OpenCensus to OpenTelemetry, see https://github.com/inspectIT/inspectit-ocelot/pull/1270#issuecomment-1010061201
 
         // get current OpenTelemetry and grpc context
         Context current = ContextUtil.current();

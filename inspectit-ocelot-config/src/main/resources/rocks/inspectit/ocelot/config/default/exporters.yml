@@ -8,8 +8,8 @@ inspectit:
 
       # settings for the prometheus exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/stats/prometheus)
       prometheus:
-        # if true, the agent will try to start the Prometheus stats exporter
-        enabled: true
+        # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
+        enabled: DISABLED
         # the hostname or IP-address on which the /metrics endpoint of prometheus will be started.
         host: 0.0.0.0
         # the port on which the /metrics endpoint of prometheus will be started
@@ -17,7 +17,10 @@ inspectit:
 
 
       influx:
-        enabled: true
+        # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
+        enabled: IF_CONFIGURED
+        # the Url under which the InfluxDB can be accessed, e.g. http://localhost:8086
+        url: null
         # the export interval of the metrics
         export-interval: ${inspectit.metrics.frequency}
         # the database to write to
@@ -35,7 +38,7 @@ inspectit:
         # E.g. if the exportInterval is 15s and the buffer-size is 4, the export will keep up to one minute of data in memory.
         buffer-size: 40
 
-      # settings for the LoggingMetricExporter used in LoggingMetricExporterService
+      # settings used in LoggingMetricsExporterService for the LoggingMetricExporter (https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/logging)
       logging:
           enabled: false
           # the export interval of the metrics
@@ -54,25 +57,26 @@ inspectit:
 
       # settings for the zipkin exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/zipkin)
       zipkin:
-        # if true, the agent will try to start the ZipKin trace exporter
-        enabled: true
+        # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
+        enabled: IF_CONFIGURED
         # the v2 Url under which the ZipKin server can be accessed, e.g. http://127.0.0.1:9411/api/v2/spans
         url: null
 
 
       # settings for the jaeger exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/jaeger)
       jaeger:
-        # if true, the agent will try to start the Jaeger trace exporter
-        enabled: true
+        # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
+        enabled: IF_CONFIGURED
         # the URL under which the jaeger thrift server can be accessed, e.g. http://127.0.0.1:14268/api/traces
         url: null
       # settings for Jaeger gRPC exporter
       jaeger-grpc:
-        enabled: false
+        # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
+        enabled: IF_CONFIGURED
         # the URL under which the Jaeger gRPC server can be accessed, e.g., http://127.0.0.1:14250/v1/traces
-        grpc: http://127.0.0.1:14250/v1/traces
+        grpc: null
 
-      # settings for the LoggingSpanExporter used in LoggingTraceExporterService
+      # settings used in LoggingTraceExporterService for the LoggingSpanExporter (https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/logging)
       logging:
           enabled: false
 
