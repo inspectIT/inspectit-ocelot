@@ -13,8 +13,6 @@ import io.opencensus.proto.trace.v1.ConstantSampler;
 import io.opencensus.proto.trace.v1.TraceConfig;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.test.annotation.DirtiesContext;
@@ -54,12 +52,12 @@ public class OpenCensusAgentTraceExporterServiceIntTest extends SpringTestBase {
     LogCapturer warnLogs = LogCapturer.create()
             .captureForType(OpenCensusAgentTraceExporterService.class, org.slf4j.event.Level.WARN);
 
-    @BeforeAll
+    //@BeforeAll
     public static void setUp() {
         agent = getServer("localhost:55678", fakeOcAgentTraceServiceGrpc);
     }
 
-    @AfterAll
+    //@AfterAll
     public static void tearDown() {
         agent.shutdown();
     }

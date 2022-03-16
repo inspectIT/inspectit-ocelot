@@ -12,8 +12,6 @@ import io.opencensus.proto.agent.metrics.v1.ExportMetricsServiceRequest;
 import io.opencensus.proto.agent.metrics.v1.ExportMetricsServiceResponse;
 import io.opencensus.proto.agent.metrics.v1.MetricsServiceGrpc;
 import io.opencensus.stats.*;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,12 +48,12 @@ public class OpenCensusAgentMetricsExporterServiceIntTest extends SpringTestBase
     LogCapturer warnLogs = LogCapturer.create()
             .captureForType(OpenCensusAgentMetricsExporterService.class, org.slf4j.event.Level.WARN);
 
-    @BeforeAll
+    //@BeforeAll
     public static void setUp() {
         agent = getServer("localhost:55678", fakeOcAgentMetricsServiceGrpc);
     }
 
-    @AfterAll
+    //@AfterAll
     public static void tearDown() {
         agent.shutdown();
     }
