@@ -22,7 +22,7 @@ protobuf {
     }
     plugins {
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.44.1'
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.45.0'
         }
     }
     generateProtoTasks {
@@ -52,8 +52,8 @@ dependencies {
             'com.fasterxml.jackson.core:jackson-databind:2.8.9',
 
             // grpc
-            'io.grpc:grpc-stub:1.44.1',
-            'io.grpc:grpc-protobuf:1.44.1',
+            'io.grpc:grpc-stub:1.45.0',
+            'io.grpc:grpc-protobuf:1.45.0',
 
             // logging
             "ch.qos.logback:logback-classic:${logbackVersion}",

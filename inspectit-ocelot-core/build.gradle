@@ -30,7 +30,7 @@ dependencies {
     )
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
-    runtimeOnly 'io.grpc:grpc-netty-shaded:1.44.1'
+    runtimeOnly 'io.grpc:grpc-netty-shaded:1.45.0'
 
     implementation(
             project(':inspectit-ocelot-config'),
@@ -58,7 +58,7 @@ dependencies {
 
             'org.javassist:javassist:3.24.1-GA',
 
-            // OpenCensus exporters\
+            // OpenCensus exporters
             "io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
             "io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
             "io.opencensus:opencensus-exporter-trace-zipkin:${openCensusVersion}",
