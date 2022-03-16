@@ -124,7 +124,7 @@ inspectit:
     # the service will always continue to try reconnecting on errors unless disabled.
     max-backoff-increases: 5
 
-log-preloading:
-  enabled: false
-  log-level: WARN
-  buffer-size: 128
+  log-preloading:
+    enabled: false
+    log-level: WARN
+    buffer-size: 128
