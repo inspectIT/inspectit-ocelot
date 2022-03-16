@@ -108,7 +108,7 @@ public abstract class AbstractFileAccessor {
             String fileContent = new String(rawFileContent, FILE_ENCODING);
             return Optional.of(fileContent);
         } catch (Exception ex) {
-            log.error("File '{}' could not been loaded.", ex);
+            log.error("File '{}' could not been loaded.", file, ex);
             return Optional.empty();
         }
     }
