@@ -2,7 +2,9 @@ package rocks.inspectit.ocelot.core.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.grpc.Channel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.ChannelCredentials;
+import io.grpc.Grpc;
+import io.grpc.TlsChannelCredentials;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +15,7 @@ import rocks.inspectit.ocelot.config.model.command.AgentCommandSettings;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 import rocks.inspectit.ocelot.grpc.Command;
 
+import java.io.File;
 import java.net.URL;
 
 /**
@@ -57,9 +60,16 @@ public class AgentCommandService extends DynamicallyActivatableService {
             String commandsUrl = getCommandUrl(configuration);
             Integer grpcMaxSize = configuration.getAgentCommands().getMaxInboundMessageSize();
 
-            Channel channel = ManagedChannelBuilder.forTarget(commandsUrl)
+            ChannelCredentials creds = TlsChannelCredentials.newBuilder()
+                    // if server's cert doesn't chain to a standard root
+                    .keyManager(new File("C:/Users/awi/Documents/GitHub/grpc-java-1.44.0/testing/src/main/resources/certs/client.pem"), new File("C:/Users/awi/Documents/GitHub/grpc-java-1.44.0/testing/src/main/resources/certs/client.key"))
+                    .trustManager(new File("C:/Users/awi/Documents/GitHub/grpc-java-1.44.0/testing/src/main/resources/certs/ca.pem"))
+                    .build();
+
+            // TODO: 16.03.2022 split url into  
+            Channel channel = Grpc.newChannelBuilderForAddress("localhost", 9090, creds)
                     .maxInboundMessageSize(grpcMaxSize * 1024 * 1024)
-                    .usePlaintext()
+                    .overrideAuthority("foo.test.google.com.au")
                     .build();
 
             client = new AgentCommandClient(channel);
