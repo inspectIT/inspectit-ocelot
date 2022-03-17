@@ -58,7 +58,7 @@ public class AgentCommandClient {
 
                 @Override
                 public void onError(Throwable t) {
-                    log.error("Encountered error in exchangeInformation ending the stream connection with config-Server. {}", t.toString());
+                    log.error("Encountered error in exchangeInformation ending the stream connection with config-Server.", t);
 
                     long currentTime = System.nanoTime();
 
