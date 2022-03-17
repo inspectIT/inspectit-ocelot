@@ -396,7 +396,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             if (null != meterProvider) {
                 long start = System.nanoTime();
                 OpenTelemetryUtils.stopMeterProvider(meterProvider, true);
-                log.info("time to stopMeterProvider: {} ms", (System.nanoTime() - start) / 1000000);
+                // log.info("time to stopMeterProvider: {} ms", (System.nanoTime() - start) / 1000000);
             }
             // build new SdkMeterProvider
             SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(serviceNameResource);
