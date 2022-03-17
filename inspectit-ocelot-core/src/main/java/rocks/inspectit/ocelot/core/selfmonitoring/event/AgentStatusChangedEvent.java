@@ -1,9 +1,10 @@
-package rocks.inspectit.ocelot.core.selfmonitoring;
+package rocks.inspectit.ocelot.core.selfmonitoring.event;
 
 import lombok.Getter;
 import lombok.NonNull;
 import org.springframework.context.ApplicationEvent;
 import rocks.inspectit.ocelot.commons.models.status.AgentStatus;
+import rocks.inspectit.ocelot.core.selfmonitoring.LogPreloader;
 
 import java.util.Optional;
 

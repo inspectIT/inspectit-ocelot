@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.selfmonitoring.AgentStatusChangedEvent;
+import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentStatusChangedEvent;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.util.concurrent.ScheduledExecutorService;
