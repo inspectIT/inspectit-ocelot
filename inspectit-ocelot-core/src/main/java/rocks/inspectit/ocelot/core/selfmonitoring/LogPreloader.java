@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -10,6 +10,7 @@ import rocks.inspectit.ocelot.commons.models.status.AgentStatus;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.annotation.PostConstruct;
@@ -23,13 +24,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 @Slf4j
-public class LogPreloader extends DynamicallyActivatableService {
+public class LogPreloader extends DynamicallyActivatableService implements InternalProcessingAppender.Observer {
 
     private static final String LOG_CHANGE_STATUS = "Changing the agent status from {} to {}.";
 
     private ILoggingEvent[] buffer;
 
     private final AtomicInteger currentIndex = new AtomicInteger(0);
+
+    private Level minimumPreloadingLevel = Level.WARN;
 
     private final ApplicationContext ctx;
 
@@ -44,18 +47,25 @@ public class LogPreloader extends DynamicallyActivatableService {
     /**
      * Records one log event and stores into a local buffer
      *
-     * @param logEvent The log event to record
+     * @param event The log event to record
      */
-    public void record(ILoggingEvent logEvent) {
-        if (buffer != null) {
+    @Override
+    public void onGeneralLoggingEvent(ILoggingEvent event) {
+        if (buffer != null && event.getLevel().isGreaterOrEqual(minimumPreloadingLevel)) {
+            // TODO: handle category
             int index = currentIndex.getAndIncrement() % buffer.length;
             try {
-                buffer[index] = logEvent;
+                buffer[index] = event;
             } catch (ArrayIndexOutOfBoundsException e) {
                 // this may happen while the buffer gets recreated with a smaller size
                 // in this case, we just drop the event until everything is properly set again
             }
         }
+    }
+
+    @Override
+    public void onInstrumentationLoggingEvent(ILoggingEvent event) {
+        // TODO
     }
 
     /**
@@ -71,7 +81,7 @@ public class LogPreloader extends DynamicallyActivatableService {
 
     @PostConstruct
     private void subscribe() {
-        LogPreloadingAppender.registerPreloader(this);
+        InternalProcessingAppender.register(this);
     }
 
     @Override
@@ -116,9 +126,9 @@ public class LogPreloader extends DynamicallyActivatableService {
     }
 
     // TODO: call it!
-    private void updateStatus(@NonNull AgentStatus newStatus) {
-        if (newStatus != status.get()) {
-            String oldStatusName = status.map(AgentStatus::name).orElseGet(() -> "none");
+    private void updateStatus(AgentStatus newStatus) {
+        if (status.map(newStatus::equals).orElse(false)) {
+            String oldStatusName = status.map(AgentStatus::name).orElse("none");
             if (newStatus.isMoreSevereOrEqualTo(AgentStatus.WARNING)) {
                 log.warn(LOG_CHANGE_STATUS, oldStatusName, newStatus);
             } else {
