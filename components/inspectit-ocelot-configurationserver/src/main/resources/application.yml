@@ -25,7 +25,18 @@ server:
 
 grpc:
   server:
+    # The grpc port, needs to be synced with the port set in the client configuration
     port: 9090
+    # The grpc server's security settings
+    security:
+      # If enabled, the server will expect clients to connect using TLS
+      enabled: true
+      # If enabled, the server needs a certificate and corresponding private key
+      certificate-chain: file:C:/Users/awi/Documents/GitHub/grpc-java-1.44.0/testing/src/main/resources/certs/server0.pem
+      private-key: file:C:/Users/awi/Documents/GitHub/grpc-java-1.44.0/testing/src/main/resources/certs/server0.key
+      # For mutual certificate authentication, clientAuth needs to be set to REQUIRE and trustCertCollection to the trusted certificates
+      clientAuth: REQUIRE
+      trustCertCollection: file:C:/Users/awi/Documents/GitHub/grpc-java-1.44.0/testing/src/main/resources/certs/ca.pem
 
 inspectit-config-server:
   # the directory which is used as working directory
