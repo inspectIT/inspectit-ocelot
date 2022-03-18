@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.status.AgentStatus;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
 import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentStatusChangedEvent;
 
@@ -30,6 +31,8 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
 
     private final ScheduledExecutorService executor;
 
+    private final InspectitEnvironment env;
+
     private AgentStatus instrumentationStatus = AgentStatus.OK;
 
     private final Map<AgentStatus, LocalDateTime> generalStatusTimeouts = new ConcurrentHashMap<>();
@@ -40,8 +43,29 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
 
     @PostConstruct
     private void startEventTrigger() {
-        long notificationIntervalMillis = 42; // TODO: read from config
-        executor.scheduleWithFixedDelay(this::triggerEventIfStatusChanged, notificationIntervalMillis, notificationIntervalMillis, TimeUnit.MILLISECONDS);
+        checkStateAndSchedule();
+    }
+
+    /**
+     * Checks whether the current state has changed since last check and schedules another check.
+     * The next check will run dependent on the earliest status timeout in the future:
+     * <ul>
+     *     <li>does not exist -> run again after validity period</li>
+     *     <li>exists -> run until that timeout is over</li>
+     * </ul>
+     */
+    private void checkStateAndSchedule() {
+        triggerEventIfStatusChanged();
+
+        Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentStatus().getValidityPeriod();
+        Duration delay = generalStatusTimeouts.values()
+                .stream()
+                .filter(d -> d.isAfter(LocalDateTime.now()))
+                .max(Comparator.naturalOrder())
+                .map(d -> Duration.between(d, LocalDateTime.now()))
+                .orElse(validityPeriod);
+
+        executor.schedule(this::checkStateAndSchedule, delay.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -53,10 +77,10 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
     @Override
     public void onGeneralLoggingEvent(ILoggingEvent event) {
         AgentStatus eventStatus = AgentStatus.fromLogLevel(event.getLevel());
-        Duration statusTimeout = Duration.ofMinutes(30); // TODO: read from config
+        Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentStatus().getValidityPeriod();
 
         if (eventStatus.isMoreSevereOrEqualTo(AgentStatus.WARNING)) {
-            generalStatusTimeouts.put(eventStatus, LocalDateTime.now().plus(statusTimeout));
+            generalStatusTimeouts.put(eventStatus, LocalDateTime.now().plus(validityPeriod));
         }
 
         triggerEventIfStatusChanged();

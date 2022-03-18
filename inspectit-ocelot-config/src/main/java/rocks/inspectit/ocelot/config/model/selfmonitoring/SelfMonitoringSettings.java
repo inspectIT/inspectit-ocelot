@@ -20,4 +20,10 @@ public class SelfMonitoringSettings {
     @Valid
     private ActionMetricsSettings actionMetrics;
 
+    /**
+     * Settings for {@link rocks.inspectit.ocelot.core.selfmonitoring.AgentStatusManager}
+     */
+    @Valid
+    private AgentStatusSettings agentStatus;
+
 }
