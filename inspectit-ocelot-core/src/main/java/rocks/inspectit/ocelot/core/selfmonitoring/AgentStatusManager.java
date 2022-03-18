@@ -1,12 +1,15 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.status.AgentStatus;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
 import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentStatusChangedEvent;
 
@@ -25,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class AgentStatusManager implements InternalProcessingAppender.Observer {
 
-    private static final String LOG_CHANGE_STATUS = "Changing the agent status from {} to {}.";
+    private static final String LOG_CHANGE_STATUS = "The agent status changed from {} to {}.";
 
     private final ApplicationContext ctx;
 
@@ -38,35 +41,6 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
     private final Map<AgentStatus, LocalDateTime> generalStatusTimeouts = new ConcurrentHashMap<>();
 
     private AgentStatus lastNotifiedStatus = AgentStatus.OK;
-
-    // TODO: reset instrumentationStatus when instrumentation is newly triggered
-
-    @PostConstruct
-    private void startEventTrigger() {
-        checkStateAndSchedule();
-    }
-
-    /**
-     * Checks whether the current state has changed since last check and schedules another check.
-     * The next check will run dependent on the earliest status timeout in the future:
-     * <ul>
-     *     <li>does not exist -> run again after validity period</li>
-     *     <li>exists -> run until that timeout is over</li>
-     * </ul>
-     */
-    private void checkStateAndSchedule() {
-        triggerEventIfStatusChanged();
-
-        Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentStatus().getValidityPeriod();
-        Duration delay = generalStatusTimeouts.values()
-                .stream()
-                .filter(d -> d.isAfter(LocalDateTime.now()))
-                .max(Comparator.naturalOrder())
-                .map(d -> Duration.between(d, LocalDateTime.now()))
-                .orElse(validityPeriod);
-
-        executor.schedule(this::checkStateAndSchedule, delay.toMillis(), TimeUnit.MILLISECONDS);
-    }
 
     @Override
     public void onInstrumentationLoggingEvent(ILoggingEvent event) {
@@ -99,6 +73,40 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
                 .max(Comparator.naturalOrder());
 
         return AgentStatus.mostSevere(instrumentationStatus, generalStatus.orElse(AgentStatus.OK));
+    }
+
+    @EventListener
+    @VisibleForTesting
+    private void resetInstrumentationStatus(InstrumentationConfigurationChangedEvent ev) {
+        instrumentationStatus = AgentStatus.OK;
+        triggerEventIfStatusChanged();
+    }
+
+    @PostConstruct
+    private void startEventTrigger() {
+        checkStateAndSchedule();
+    }
+
+    /**
+     * Checks whether the current state has changed since last check and schedules another check.
+     * The next check will run dependent on the earliest status timeout in the future:
+     * <ul>
+     *     <li>does not exist -> run again after validity period</li>
+     *     <li>exists -> run until that timeout is over</li>
+     * </ul>
+     */
+    private void checkStateAndSchedule() {
+        triggerEventIfStatusChanged();
+
+        Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentStatus().getValidityPeriod();
+        Duration delay = generalStatusTimeouts.values()
+                .stream()
+                .filter(d -> d.isAfter(LocalDateTime.now()))
+                .max(Comparator.naturalOrder())
+                .map(d -> Duration.between(d, LocalDateTime.now()))
+                .orElse(validityPeriod);
+
+        executor.schedule(this::checkStateAndSchedule, delay.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     private void triggerEventIfStatusChanged() {
