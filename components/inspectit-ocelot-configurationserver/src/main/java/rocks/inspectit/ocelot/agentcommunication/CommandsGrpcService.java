@@ -89,7 +89,6 @@ public class CommandsGrpcService extends AgentCommandsGrpc.AgentCommandsImplBase
                 String agentId = agentConnections.inverse().get(commandsObserver);
                 log.info("Agent '{}' ended the stream connection.", agentId);
                 agentConnections.remove(agentId);
-                commandsObserver.onCompleted();
             }
         };
     }
