@@ -1,16 +1,13 @@
 package rocks.inspectit.ocelot.commons.models.status;
 
-import lombok.AllArgsConstructor;
+import ch.qos.logback.classic.Level;
 
 /**
  * Represents the status of an individual agent.
  */
-@AllArgsConstructor
 public enum AgentStatus {
 
-    OK(10), WARNING(20), ERROR(30);
-
-    private final int severity;
+    OK, WARNING, ERROR;
 
     /**
      * Decides whether this status is more severe or equal to the passed one.
@@ -21,7 +18,7 @@ public enum AgentStatus {
      * @return {@code true} if both status are equal or this is more severe than other; {@code false} otherwise.
      */
     public boolean isMoreSevereOrEqualTo(AgentStatus other) {
-        return other != null ? other.severity >= severity : true;
+        return other != null ? compareTo(other) >= 0 : true;
     }
 
     /**
@@ -41,6 +38,23 @@ public enum AgentStatus {
         }
 
         return max;
+    }
+
+    /**
+     * Determines the agent status based on the level of a log event that occurred (e.g., WARN level corresponds with WARNING).
+     *
+     * @param logLevel The log level that occurred
+     *
+     * @return The agent status that corresponds to the log level.
+     */
+    public static AgentStatus fromLogLevel(Level logLevel) {
+        if (logLevel.isGreaterOrEqual(Level.ERROR)) {
+            return ERROR;
+        } else if (logLevel.isGreaterOrEqual(Level.WARN)) {
+            return WARNING;
+        } else {
+            return OK;
+        }
     }
 
 }

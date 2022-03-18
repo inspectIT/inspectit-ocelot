@@ -3,20 +3,15 @@ package rocks.inspectit.ocelot.core.selfmonitoring;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.commons.models.status.AgentStatus;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
-import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentStatusChangedEvent;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.annotation.PostConstruct;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -27,22 +22,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class LogPreloader extends DynamicallyActivatableService implements InternalProcessingAppender.Observer {
 
-    private static final String LOG_CHANGE_STATUS = "Changing the agent status from {} to {}.";
-
     private ILoggingEvent[] buffer;
 
     private final AtomicInteger currentIndex = new AtomicInteger(0);
 
     private Level minimumPreloadingLevel = Level.WARN;
 
-    private final ApplicationContext ctx;
-
-    private Optional<AgentStatus> status = Optional.empty();
-
-    @Autowired
-    public LogPreloader(ApplicationContext ctx) {
+    public LogPreloader() {
         super("logPreloading");
-        this.ctx = ctx;
     }
 
     /**
@@ -66,7 +53,8 @@ public class LogPreloader extends DynamicallyActivatableService implements Inter
 
     @Override
     public void onInstrumentationLoggingEvent(ILoggingEvent event) {
-        // TODO
+        // TODO: handle differently
+        onGeneralLoggingEvent(event);
     }
 
     /**
@@ -124,27 +112,6 @@ public class LogPreloader extends DynamicallyActivatableService implements Inter
         log.info("Disabling LogPreloader. All previously preloaded logs are dropped.");
         buffer = null;
         return true;
-    }
-
-    // TODO: call it!
-    private void updateStatus(AgentStatus newStatus) {
-        if (status.map(newStatus::equals).orElse(false)) {
-            String oldStatusName = status.map(AgentStatus::name).orElse("none");
-            if (newStatus.isMoreSevereOrEqualTo(AgentStatus.WARNING)) {
-                log.warn(LOG_CHANGE_STATUS, oldStatusName, newStatus);
-            } else {
-                log.info(LOG_CHANGE_STATUS, oldStatusName, newStatus);
-            }
-
-            Optional<AgentStatus> oldStatus = status;
-            status = Optional.of(newStatus);
-            sendAgentStatusChangedEvent(oldStatus, newStatus);
-        }
-    }
-
-    private void sendAgentStatusChangedEvent(Optional<AgentStatus> oldStatus, AgentStatus newStatus) {
-        AgentStatusChangedEvent event = new AgentStatusChangedEvent(this, oldStatus, newStatus);
-        ctx.publishEvent(event);
     }
 
     private class BufferIterator implements Iterator<ILoggingEvent> {
