@@ -58,37 +58,43 @@ public class AgentCommandClient {
 
                 @Override
                 public void onError(Throwable t) {
-                    log.error("Encountered error in exchangeInformation ending the stream connection with config-Server.", t);
 
-                    long currentTime = System.nanoTime();
+                    // It can happen that onError() is called after the service was disabled already, since the client in shutdown()
+                    // tries to send an onCompleted() to the server, which will lead to an error if the connection is unavailable.
+                    // So, if the commandResponseObserver was already set to null by shutdown(), do not retry to establish the connection
+                    if (commandResponseObserver != null) {
+                        log.error("Encountered error in exchangeInformation ending the stream connection with config-Server.", t);
 
-                    if (retriesAttempted > 0) {
-                        if ((currentTime - lastRetryAttempt) > (Math.pow(10, 9) * settings.getBackoffResetTime())) {
-                            retriesAttempted = 0;
+                        long currentTime = System.nanoTime();
+
+                        if (retriesAttempted > 0) {
+                            if ((currentTime - lastRetryAttempt) > (Math.pow(10, 9) * settings.getBackoffResetTime())) {
+                                retriesAttempted = 0;
+                            }
                         }
-                    }
 
-                    ScheduledFuture<?> restartFuture = reconnectExecutor.schedule(() -> {
-                        boolean success = startAskForCommandsConnection(settings, service);
-                        if (success) {
-                            log.info("Successfully restarted connection after error.");
-                        } else {
-                            service.disable();
-                            log.info("Could not restart connection after error.");
+                        ScheduledFuture<?> restartFuture = reconnectExecutor.schedule(() -> {
+                            boolean success = startAskForCommandsConnection(settings, service);
+                            if (success) {
+                                log.info("Successfully restarted connection after error.");
+                            } else {
+                                service.disable();
+                                log.info("Could not restart connection after error.");
+                            }
+                        }, (long) Math.pow(2, retriesAttempted + 1), TimeUnit.SECONDS);
+
+                        if (retriesAttempted < settings.getMaxBackoffIncreases()) {
+                            retriesAttempted++;
                         }
-                    }, (long) Math.pow(2, retriesAttempted), TimeUnit.SECONDS);
 
-                    if (retriesAttempted < settings.getMaxBackoffIncreases()) {
-                        retriesAttempted++;
+                        lastRetryAttempt = currentTime;
+                    } else {
+                        log.info("Error while trying to send onCompleted() to server. Will end connection without retrying.", t);
                     }
-
-                    lastRetryAttempt = currentTime;
                 }
 
                 @Override
                 public void onCompleted() {
-                    log.info("Received completion acknowledgement from config-Server.");
-                    commandResponseObserver = null;
                 }
 
             };

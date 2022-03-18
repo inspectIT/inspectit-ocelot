@@ -1,8 +1,8 @@
 package rocks.inspectit.ocelot.core.command;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.grpc.Channel;
 import io.grpc.Grpc;
+import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.TlsChannelCredentials;
 import lombok.Getter;
@@ -35,6 +35,8 @@ public class AgentCommandService extends DynamicallyActivatableService {
 
     AgentCommandClient client;
 
+    ManagedChannel channel;
+
     public AgentCommandService() {
         super("agentCommands");
     }
@@ -58,11 +60,13 @@ public class AgentCommandService extends DynamicallyActivatableService {
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         try {
+            log.info("Starting agent command service.");
+
             AgentCommandSettings settings = configuration.getAgentCommands();
             String commandsHost = getCommandHost(configuration);
             int commandsPort = configuration.getAgentCommands().getPort();
 
-            Channel channel = getChannel(settings, commandsHost, commandsPort);
+            channel = getChannel(settings, commandsHost, commandsPort);
 
             client = new AgentCommandClient(channel);
 
@@ -85,6 +89,11 @@ public class AgentCommandService extends DynamicallyActivatableService {
             client = null;
         }
 
+        if (channel != null) {
+            channel.shutdown();
+            channel = null;
+        }
+
         return true;
     }
 
@@ -104,9 +113,9 @@ public class AgentCommandService extends DynamicallyActivatableService {
     }
 
     @VisibleForTesting
-    Channel getChannel(AgentCommandSettings settings, String host, int port) throws IOException {
+    ManagedChannel getChannel(AgentCommandSettings settings, String host, int port) throws IOException {
 
-        Channel channel;
+        ManagedChannel channel;
 
         if (settings.isUseTls()) {
             TlsChannelCredentials.Builder credsBuilder = TlsChannelCredentials.newBuilder();
@@ -130,6 +139,7 @@ public class AgentCommandService extends DynamicallyActivatableService {
 
             channel = Grpc.newChannelBuilderForAddress(host, port, credsBuilder.build())
                     .maxInboundMessageSize(settings.getMaxInboundMessageSize() * 1024 * 1024)
+                    .overrideAuthority("foo.test.google.com.au")
                     .build();
         } else {
             channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
