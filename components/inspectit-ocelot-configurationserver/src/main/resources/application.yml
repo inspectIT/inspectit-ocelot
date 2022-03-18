@@ -28,18 +28,19 @@ grpc:
     # The grpc port, needs to be synced with the port set in the agent configuration.
     # The default value if nothing is set is 9090. That is also the default value for the agent
     # If set to -1 the grpc server is deactivated.
-    port: 9090
+    port: -1
 
     # The grpc server's security settings
     security:
       # If enabled, the server will expect clients to connect using TLS
       enabled: true
       # If enabled, the server needs a certificate and corresponding private key
-      certificate-chain: file:C:/Users/awi/Documents/GitHub/grpc-java-1.44.0/testing/src/main/resources/certs/server0.pem
-      private-key: file:C:/Users/awi/Documents/GitHub/grpc-java-1.44.0/testing/src/main/resources/certs/server0.key
-      # For mutual certificate authentication, clientAuth needs to be set to REQUIRE and trustCertCollection to the trusted certificates
-      clientAuth: REQUIRE
-      trustCertCollection: file:C:/Users/awi/Documents/GitHub/grpc-java-1.44.0/testing/src/main/resources/certs/ca.pem
+      certificate-chain:
+      private-key:
+      # Possible values are NONE, OPTIONAL and REQUIRED
+      # For mutual certificate authentication clientAuth needs to be set to REQUIRE and trustCertCollection to the trusted certificates
+      clientAuth: NONE
+      trustCertCollection:
 
 inspectit-config-server:
   # the directory which is used as working directory
