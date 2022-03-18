@@ -13,26 +13,48 @@ public class AgentCommandSettings {
     private boolean enabled = false;
 
     /**
-     * The URL for getting agent commands over grpc, e.g. "localhost:9090".
+     * Whether the agent commands URL should be derived from the HTTP configuration URL. This has priority over {@link #host}.
      */
-    private String url;
+    private boolean deriveHostFromHttpConfigUrl = false;
 
     /**
-     * Whether the agent commands URL should be derived from the HTTP configuration URL.
+     * The hostname for getting agent commands over grpc, e.g. "localhost".
      */
-    private boolean deriveFromHttpConfigUrl = false;
+    private String host;
 
     /**
      * Port which is used for the agent command URL in case it is derived from the HTTP configuration URL
      */
-    private Integer agentCommandPort;
+    private int port;
+
+    /**
+     * Whether agent should use TLS to connect to config-server over grpc.
+     */
+    private boolean useTls = true;
+
+    /**
+     * Path to a collection of trusted certificates, needed for TLS for agent commands if server's certificate does not chain to a standard root.
+     */
+    private String trustCertCollectionFilePath;
+
+    /**
+     * Path to certificate file for client, i.e. agent, needed only for mutual authentication.
+     * If set, {@link #clientPrivateKeyFilePath} also needs to be set.
+     */
+    private String clientCertChainFilePath;
+
+    /**
+     * Path to private key file for client, i.e. agent, needed only for mutual authentication.
+     * If set, {@link #clientCertChainFilePath} also needs to be set.
+     */
+    private String clientPrivateKeyFilePath;
 
     /**
      * Maximum size for inbound grpc messages, i.e. commands from config-server, in MiB.
      * Commands probably will never exceed grpc's default of 4MiB that is also set as default here,
      * but if your commands do you can configure it.
      */
-    private Integer maxInboundMessageSize = 4;
+    private int maxInboundMessageSize = 4;
 
     /**
      * Time after which the backoff between retries to re-establish the grpc connection between agent and config-server
