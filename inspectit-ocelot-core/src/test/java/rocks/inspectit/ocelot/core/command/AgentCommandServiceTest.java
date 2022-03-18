@@ -138,7 +138,7 @@ public class AgentCommandServiceTest {
             when(settings.getClientPrivateKeyFilePath()).thenReturn("testpath");
 
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> service.getChannel(settings, HOST, PORT))
-                    .withMessage(String.format("Only one of clientCertChainFilePath='%s' and clientPrivateKeyFilePath='%s' is set, but either both need to be set or neither", null, "testpath"));
+                    .withMessage(String.format("Only one of clientCertChainFilePath='%s' and clientPrivateKeyFilePath='%s' is set, but either both need to be set or neither.", null, "testpath"));
         }
 
         /**
@@ -182,9 +182,9 @@ public class AgentCommandServiceTest {
          */
         @Test
         public void withTlsWithoutTrustCertCollection() throws URISyntaxException, IOException {
-            URL pemResource = AgentCommandServiceTest.class.getResource("certificates/client.pem");
+            URL pemResource = Resources.getResource("certificates/client.pem");
             File pemPath = Paths.get(pemResource.toURI()).toFile();
-            URL keyResource = AgentCommandServiceTest.class.getResource("certificates/client.key");
+            URL keyResource = Resources.getResource("certificates/client.key");
             File keyPath = Paths.get(keyResource.toURI()).toFile();
 
             when(settings.isUseTls()).thenReturn(true);
