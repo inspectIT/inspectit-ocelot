@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.command;
 
 import com.google.common.io.Resources;
 import io.grpc.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,11 @@ public class AgentCommandServiceTest {
 
             assertThat(result).isTrue();
             assertThat(service.getClient()).isNotNull();
+        }
+
+        @AfterEach
+        public void closeGrpcConnection() {
+            service.doDisable();
         }
     }
 
