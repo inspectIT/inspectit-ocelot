@@ -24,11 +24,16 @@ message CommandResponse {
     PingCommandResponse ping = 3;
     ListClassesCommandResponse listClasses = 4;
     LogsCommandResponse logs = 5;
+    ErrorResponse error = 6;
   }
 }
 
 message FirstResponse {
   string agentId = 1;
+}
+
+message ErrorResponse {
+  string message = 1;
 }
 
 message PingCommand {}

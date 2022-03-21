@@ -5,10 +5,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.config.model.command.AgentCommandSettings;
-import rocks.inspectit.ocelot.grpc.AgentCommandsGrpc;
-import rocks.inspectit.ocelot.grpc.Command;
-import rocks.inspectit.ocelot.grpc.CommandResponse;
-import rocks.inspectit.ocelot.grpc.FirstResponse;
+import rocks.inspectit.ocelot.grpc.*;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -51,7 +48,10 @@ public class AgentCommandClient {
                         commandResponseObserver.onNext(service.getCommandDelegator().delegate(command));
                         log.info("Answered to command '{}'.", command.getCommandId());
                     } catch (Exception exception) {
-                        // TODO: 03.03.2022 Send an answer with Exception Message?
+                        commandResponseObserver.onNext(CommandResponse.newBuilder()
+                                .setCommandId(command.getCommandId())
+                                .setError(ErrorResponse.newBuilder().setMessage(exception.getMessage()))
+                                .build());
                         log.error("Exception during agent command execution.", exception);
                     }
                 }

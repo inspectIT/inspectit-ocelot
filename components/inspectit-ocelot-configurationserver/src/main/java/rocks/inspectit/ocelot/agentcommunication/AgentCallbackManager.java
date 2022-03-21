@@ -79,12 +79,15 @@ public class AgentCallbackManager {
         if (result != null) {
             resultCache.invalidate(commandId);
 
-            for (CommandHandler handler : handlers) {
-                if (handler.canHandle(response)) {
-                    handler.handleResponse(response, result);
+            if (response.hasError()) {
+                result.setErrorResult(new RuntimeException(response.getError().getMessage()));
+            } else {
+                for (CommandHandler handler : handlers) {
+                    if (handler.canHandle(response)) {
+                        handler.handleResponse(response, result);
+                    }
                 }
             }
         }
-
     }
 }
