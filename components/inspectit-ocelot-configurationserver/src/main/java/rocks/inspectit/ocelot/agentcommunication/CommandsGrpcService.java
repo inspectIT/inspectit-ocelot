@@ -94,7 +94,7 @@ public class CommandsGrpcService extends AgentCommandsGrpc.AgentCommandsImplBase
     }
 
     @Bean
-    public GrpcServerConfigurer keepAliveServerConfigurer() {
+    public GrpcServerConfigurer grpcServerConfigurer() {
         return serverBuilder -> {
             if (serverBuilder instanceof NettyServerBuilder) {
                 ((NettyServerBuilder) serverBuilder).maxInboundMessageSize(configuration.getAgentCommand()

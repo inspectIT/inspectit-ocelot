@@ -123,22 +123,23 @@ public class AgentCommandService extends DynamicallyActivatableService {
             String clientCertChainFilePath = settings.getClientCertChainFilePath();
             String clientPrivateKeyFilePath = settings.getClientPrivateKeyFilePath();
             if (StringUtils.isNotEmpty(clientCertChainFilePath) && StringUtils.isNotEmpty(clientPrivateKeyFilePath)) {
-                log.info("Setting up client certificate with clientCertChainFilePath='{}' and clientPrivateKeyFilePath='{}' for mutual authentication.", clientCertChainFilePath, clientPrivateKeyFilePath);
+                log.debug("Setting up client certificate with clientCertChainFilePath='{}' and clientPrivateKeyFilePath='{}' for mutual authentication.", clientCertChainFilePath, clientPrivateKeyFilePath);
                 credsBuilder.keyManager(new File(clientCertChainFilePath), new File(clientPrivateKeyFilePath));
             } else if (StringUtils.isNotEmpty(clientCertChainFilePath) ^ StringUtils.isNotEmpty(clientPrivateKeyFilePath)) {
                 throw new IllegalStateException(String.format("Only one of clientCertChainFilePath='%s' and clientPrivateKeyFilePath='%s' is set, but either both need to be set or neither.", clientCertChainFilePath, clientPrivateKeyFilePath));
             } else {
-                log.info("Using TLS without mutual authentication.");
+                log.debug("Using TLS without mutual authentication.");
             }
 
             String trustCertCollectionFilePath = settings.getTrustCertCollectionFilePath();
             if (StringUtils.isNotEmpty(trustCertCollectionFilePath)) {
                 credsBuilder.trustManager(new File(trustCertCollectionFilePath));
-                log.info("Adding trustCertCollection='{}' for grpc connection.", trustCertCollectionFilePath);
+                log.debug("Adding trustCertCollection='{}' for grpc connection.", trustCertCollectionFilePath);
             }
 
             channel = Grpc.newChannelBuilderForAddress(host, port, credsBuilder.build())
                     .maxInboundMessageSize(settings.getMaxInboundMessageSize() * 1024 * 1024)
+                    // TODO: 21.03.2022 remove 
                     .overrideAuthority("foo.test.google.com.au")
                     .build();
         } else {

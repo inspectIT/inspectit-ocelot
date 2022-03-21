@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.agentcommunication;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit;
  * Each callback is represented by an instance of {@link DeferredResult} and can be mapped by a UUID of the respective command.
  */
 @Component
+@Slf4j
 public class AgentCallbackManager {
 
     @Autowired
@@ -47,7 +49,7 @@ public class AgentCallbackManager {
      * and adds it to the internal result cache. Throws an {@link IllegalArgumentException} when the given commandId is
      * null. Does nothing if the given commandResponse is null.
      *
-     * @param commandId       An instance of {@link UUID} which represents the UUID of a existing command.
+     * @param commandId       An instance of {@link UUID} which represents the UUID of an existing command.
      * @param commandResponse The instance of {@link DeferredResult} to which the result of the command should be written.
      *
      * @throws IllegalArgumentException when the given command id is null.
@@ -80,7 +82,9 @@ public class AgentCallbackManager {
             resultCache.invalidate(commandId);
 
             if (response.hasError()) {
-                result.setErrorResult(new RuntimeException(response.getError().getMessage()));
+                String errorMessage = response.getError().getMessage();
+                log.info("The agent has encountered an error while trying to process command '{}': {}", commandId, errorMessage);
+                result.setErrorResult(new RuntimeException(errorMessage));
             } else {
                 for (CommandHandler handler : handlers) {
                     if (handler.canHandle(response)) {
