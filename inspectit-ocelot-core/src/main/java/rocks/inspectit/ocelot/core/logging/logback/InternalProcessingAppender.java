@@ -4,6 +4,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import lombok.NonNull;
 import lombok.val;
+import rocks.inspectit.ocelot.core.instrumentation.InstrumentationManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +14,14 @@ import java.util.List;
  */
 public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
 
+    private static final String INSTRUMENTATION_PACKAGE = InstrumentationManager.class.getPackage().getName();
+
     private static final List<Observer> observers = new ArrayList<>();
 
     /**
      * Registers an {@link Observer} to be notified when a new logging event comes in.
      *
-     * @param observer The observer, whose {@link Observer#onLoggingEvent(ILoggingEvent, Category) onLoggingEvent(...)} method sshould be called
+     * @param observer The observer to be called with incoming events
      */
     public static void register(@NonNull Observer observer) {
         observers.add(observer);
@@ -26,8 +29,14 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
 
     @Override
     protected void append(ILoggingEvent event) {
+        boolean isInstrumentationEvent = event.getLoggerName().startsWith(INSTRUMENTATION_PACKAGE);
+
         for (val observer : observers) {
-            observer.onGeneralLoggingEvent(event); // TODO: select category
+            if (isInstrumentationEvent) {
+                observer.onInstrumentationLoggingEvent(event);
+            } else {
+                observer.onGeneralLoggingEvent(event);
+            }
         }
     }
 

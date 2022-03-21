@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
+import rocks.inspectit.ocelot.core.instrumentation.InstrumentationManager;
 import rocks.inspectit.ocelot.core.selfmonitoring.LogMetricsRecorderTest;
 
 import java.lang.reflect.Field;
@@ -62,8 +63,7 @@ public class InternalProcessingAppenderTest {
         @Test
         void logInstrumentationMessages() {
 
-            // TODO: create event that should be classified as instrumentation
-            ILoggingEvent instrumentationEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
+            ILoggingEvent instrumentationEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(InstrumentationManager.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
 
             InternalProcessingAppender.Observer observer = Mockito.mock(InternalProcessingAppender.Observer.class);
             appender.register(observer);
@@ -81,8 +81,7 @@ public class InternalProcessingAppenderTest {
         void logGeneralAndInstrumentationMessages() {
 
             ILoggingEvent generalEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
-            // TODO: create event that should be classified as instrumentation
-            ILoggingEvent instrumentationEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
+            ILoggingEvent instrumentationEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(InstrumentationManager.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
 
             InternalProcessingAppender.Observer observer = Mockito.mock(InternalProcessingAppender.Observer.class);
             appender.register(observer);
