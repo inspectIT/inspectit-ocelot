@@ -68,7 +68,7 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
     public AgentStatus getCurrentStatus() {
         Optional<AgentStatus> generalStatus = generalStatusTimeouts.entrySet()
                 .stream()
-                .filter((entry) -> entry.getValue().isBefore(LocalDateTime.now()))
+                .filter((entry) -> entry.getValue().isAfter(LocalDateTime.now()))
                 .map(Map.Entry::getKey)
                 .max(Comparator.naturalOrder());
 
