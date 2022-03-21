@@ -114,7 +114,7 @@ dependencies {
 
             // grpc
             'net.devh:grpc-server-spring-boot-starter:2.13.1.RELEASE',
-            'com.googlecode.protobuf-java-format:protobuf-java-format:1.4',
+            'com.google.protobuf:protobuf-java-util:3.19.2',
 
             // spring releated
             "org.yaml:snakeyaml:1.30",
