@@ -45,9 +45,9 @@ public class LogPreloaderTest {
     @Nested
     class Record {
 
-        private ILoggingEvent infoEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
-
         private ILoggingEvent warnEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.WARN, "Dummy Info", new Throwable(), new String[]{});
+
+        private ILoggingEvent errorEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.ERROR, "Dummy Info", new Throwable(), new String[]{});
 
         @Test
         void readWhenEmpty() {
@@ -55,45 +55,45 @@ public class LogPreloaderTest {
         }
 
         @Test
-        void logOneInfoMessage() {
-            logPreloader.onGeneralLoggingEvent(infoEvent);
+        void logOneWarnMessage() {
+            logPreloader.onGeneralLoggingEvent(warnEvent);
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false).count()).isOne();
         }
 
         @Test
-        void logMultipleInfoMessages() {
-            IntStream.range(0, DEFAULT_BUFFER_SIZE - 2).forEach(n -> logPreloader.onGeneralLoggingEvent(infoEvent));
+        void logMultipleWarnMessages() {
+            IntStream.range(0, DEFAULT_BUFFER_SIZE - 2).forEach(n -> logPreloader.onGeneralLoggingEvent(warnEvent));
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false)
                     .count()).isEqualTo(DEFAULT_BUFFER_SIZE - 2);
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs()
-                    .spliterator(), false)).extracting(ILoggingEvent::getLevel).containsOnly(Level.INFO);
+                    .spliterator(), false)).extracting(ILoggingEvent::getLevel).containsOnly(Level.WARN);
         }
 
         @Test
         void logMoreMessagesThanBufferSize() {
-            logPreloader.onGeneralLoggingEvent(warnEvent);
-            IntStream.range(0, DEFAULT_BUFFER_SIZE).forEach(n -> logPreloader.onGeneralLoggingEvent(infoEvent));
+            logPreloader.onGeneralLoggingEvent(errorEvent);
+            IntStream.range(0, DEFAULT_BUFFER_SIZE).forEach(n -> logPreloader.onGeneralLoggingEvent(warnEvent));
 
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false)
                     .count()).isEqualTo(DEFAULT_BUFFER_SIZE);
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs()
-                    .spliterator(), false)).extracting(ILoggingEvent::getLevel).containsOnly(Level.INFO);
+                    .spliterator(), false)).extracting(ILoggingEvent::getLevel).containsOnly(Level.WARN);
         }
 
         @Test
         void logMessagesAndChangeBufferSize() {
-            IntStream.range(0, DEFAULT_BUFFER_SIZE / 2).forEach(n -> logPreloader.onGeneralLoggingEvent(infoEvent));
+            IntStream.range(0, DEFAULT_BUFFER_SIZE / 2).forEach(n -> logPreloader.onGeneralLoggingEvent(warnEvent));
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false)
                     .count()).isEqualTo(DEFAULT_BUFFER_SIZE / 2);
 
             logPreloader.doEnable(createConfig(2 * DEFAULT_BUFFER_SIZE));
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false).count()).isZero();
 
-            IntStream.range(0, DEFAULT_BUFFER_SIZE + 1).forEach(n -> logPreloader.onGeneralLoggingEvent(warnEvent));
+            IntStream.range(0, DEFAULT_BUFFER_SIZE + 1).forEach(n -> logPreloader.onGeneralLoggingEvent(errorEvent));
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false)
                     .count()).isEqualTo(DEFAULT_BUFFER_SIZE + 1);
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs()
-                    .spliterator(), false)).extracting(ILoggingEvent::getLevel).containsOnly(Level.WARN);
+                    .spliterator(), false)).extracting(ILoggingEvent::getLevel).containsOnly(Level.ERROR);
         }
 
     }

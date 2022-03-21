@@ -1,13 +1,15 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.LoggingEvent;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.logging.Level;
+import org.slf4j.LoggerFactory;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -27,9 +29,11 @@ public class LogMetricsRecorderTest {
     @Nested
     class Increment {
 
+        private ILoggingEvent infoEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), ch.qos.logback.classic.Level.INFO, "Dummy Info", new Throwable(), new String[]{});
+
         @Test
         void incrementOneInfoMessage() {
-            logMetricsRecorder.increment(Level.INFO.getName(), 1);
+            logMetricsRecorder.onGeneralLoggingEvent(infoEvent);
             verify(selfMonitoringService, times(1)).recordMeasurement(anyString(), eq(1L), anyMap());
             verifyNoMoreInteractions(selfMonitoringService);
 
@@ -37,8 +41,13 @@ public class LogMetricsRecorderTest {
 
         @Test
         void incrementMultipleInfoMessages() {
-            logMetricsRecorder.increment(Level.INFO.getName(), 8);
-            verify(selfMonitoringService, times(1)).recordMeasurement(anyString(), eq(8L), anyMap());
+            for (int i = 0; i < 4; i++) {
+                logMetricsRecorder.onGeneralLoggingEvent(infoEvent);
+                logMetricsRecorder.onInstrumentationLoggingEvent(infoEvent);
+            }
+
+            verify(selfMonitoringService, times(8)).recordMeasurement(anyString(), eq(1L), anyMap());
+
             verifyNoMoreInteractions(selfMonitoringService);
         }
     }
