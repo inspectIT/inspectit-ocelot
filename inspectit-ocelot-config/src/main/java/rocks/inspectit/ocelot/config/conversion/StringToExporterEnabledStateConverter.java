@@ -21,14 +21,10 @@ public class StringToExporterEnabledStateConverter implements Converter<String, 
 
     @Override
     public ExporterEnabledState convert(String source) {
-        if (source.equalsIgnoreCase("true")) {
+        if (source.equalsIgnoreCase("true") || source.equalsIgnoreCase("false")) {
             // log deprecation warn
             log.warn("You are using the deprecated Boolean-based style with quotes to define whether an exporter is enabled. This style will be invalid in future releases of InspectIT Ocelot.");
-            return ExporterEnabledState.IF_CONFIGURED;
-        } else if (source.equalsIgnoreCase("false")) {
-            // log deprecation warn
-            log.warn("You are using the deprecated Boolean-based style with quotes to define whether an exporter is enabled. This style will be invalid in future releases of InspectIT Ocelot.");
-            return ExporterEnabledState.DISABLED;
+            return source.equalsIgnoreCase("true") ? ExporterEnabledState.IF_CONFIGURED : ExporterEnabledState.DISABLED;
         } else {
             return ExporterEnabledState.valueOf(source);
         }
