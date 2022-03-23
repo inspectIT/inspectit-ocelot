@@ -26,17 +26,6 @@ public interface CommandHandler {
     boolean canHandle(CommandResponse response);
 
     /**
-     * Takes an instance of {@link Command} as well as a String resembling the id of the agent the command is meant for.
-     * Prepares an instance of {@link DeferredResult} for this command.
-     *
-     * @param agentId The id of the agent the command is meant for.
-     * @param command The command to be Executed.
-     *
-     * @return An instance of {@link DeferredResult} which is prepared as defined by the handler.
-     */
-    DeferredResult<ResponseEntity<?>> prepareResponse(String agentId, Command command);
-
-    /**
      * Takes an instance of {@link CommandResponse} as well as an instance of {@link DeferredResult} and handles
      * the given parameters as implemented by the handler.
      *
