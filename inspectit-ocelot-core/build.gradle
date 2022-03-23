@@ -24,7 +24,6 @@ dependencies {
             "io.opencensus:opencensus-api:${openCensusVersion}",
             "io.opencensus:opencensus-impl:${openCensusVersion}",
             'org.projectlombok:lombok:1.18.12',
-            'org.apache.tomcat:annotations-api:6.0.53', // necessary for grpc with Java 9+
     )
     buildTools(
             'jarcheck:jarcheck:1.5'

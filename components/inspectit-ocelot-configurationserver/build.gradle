@@ -96,7 +96,6 @@ test {
 dependencies {
     compileOnly (
             'org.projectlombok:lombok:1.18.12',
-            'org.apache.tomcat:annotations-api:6.0.53', // necessary for grpc with Java 9+
     )
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 }
