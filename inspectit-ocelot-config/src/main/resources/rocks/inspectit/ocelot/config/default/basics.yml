@@ -109,12 +109,15 @@ inspectit:
     derive-host-from-http-config-url: false
     # the host for fetching agent commands over grpc - e.g.: localhost
     host:
-    # Port on which the config-server exposes its grpc-service, should correspond to grpc.server.port in config-server's properties
+    # Port the agent will use to connect to the config-server over grpc, should correspond to grpc.server.port in config-server's properties.
     port: 9090
     # Whether TLS should be used for grpc connection.
     use-tls: true
     # Path to a collection of trusted certificates, needed for TLS for agent commands if server's certificate does not chain to a standard root.
     trust-cert-collection-file-path:
+    # If the server's certificate is not valid for the hostname the agent uses to connect itself,
+    # this option can be used to add that name to fix the problem
+    authority-override:
     # Path to certificate file for client, i.e. agent, needed only for mutual authentication.
     client-cert-chain-file-path:
     # Path to private key file for client, i.e. agent, needed only for mutual authentication.
@@ -122,7 +125,7 @@ inspectit:
     # maximum size for inbound grpc messages, i.e. commands from config-server, in MiB. Default is 4MiB.
     max-inbound-message-size: 4
     # Time after which the backoff between retries to re-establish the grpc connection between agent and config-server
-    # is reset to the lowest value.
+    # is reset to the lowest value in seconds.
     backoff-reset-time: 60
     # How often the backoff between retries to re-establish the grpc connection between agent and config-server is increased for the next retry.
     # Backoff is calculated as 2 to the power of how often the backoff has been increased plus 1, so a value of 4 means that the max backoff is 32 seconds.

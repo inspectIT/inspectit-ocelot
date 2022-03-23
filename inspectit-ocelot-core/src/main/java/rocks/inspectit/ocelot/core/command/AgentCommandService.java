@@ -137,11 +137,16 @@ public class AgentCommandService extends DynamicallyActivatableService {
                 log.debug("Adding trustCertCollection='{}' for grpc connection.", trustCertCollectionFilePath);
             }
 
-            channel = Grpc.newChannelBuilderForAddress(host, port, credsBuilder.build())
-                    .maxInboundMessageSize(settings.getMaxInboundMessageSize() * 1024 * 1024)
-                    // TODO: 21.03.2022 remove 
-                    .overrideAuthority("foo.test.google.com.au")
-                    .build();
+            ManagedChannelBuilder<?> channelBuilder = Grpc.newChannelBuilderForAddress(host, port, credsBuilder.build())
+                    .maxInboundMessageSize(settings.getMaxInboundMessageSize() * 1024 * 1024);
+
+            String authorityOverride = settings.getAuthorityOverride();
+            if (StringUtils.isNotEmpty(authorityOverride)) {
+                channelBuilder.overrideAuthority(authorityOverride);
+                log.debug("Overriding authority with '{}' for grpc connection.", authorityOverride);
+            }
+
+            channel = channelBuilder.build();
         } else {
             channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
         }

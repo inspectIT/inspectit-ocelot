@@ -23,7 +23,7 @@ public class AgentCommandSettings {
     private String host;
 
     /**
-     * Port which is used for the agent command URL in case it is derived from the HTTP configuration URL
+     * Port the agent will use to connect to the config-server over grpc, should correspond to grpc.server.port in config-server's properties
      */
     private int port;
 
@@ -36,6 +36,12 @@ public class AgentCommandSettings {
      * Path to a collection of trusted certificates, needed for TLS for agent commands if server's certificate does not chain to a standard root.
      */
     private String trustCertCollectionFilePath;
+
+    /**
+     * If the server's certificate is not valid for the hostname the agent uses to connect itself,
+     * this option can be used to add that name to fix the problem
+     */
+    private String authorityOverride;
 
     /**
      * Path to certificate file for client, i.e. agent, needed only for mutual authentication.
