@@ -28,19 +28,19 @@ grpc:
     # The grpc port, needs to be synced with the port set in the agent configuration.
     # The default value if nothing is set is 9090. That is also the default value for the agent
     # If set to -1 the grpc server is deactivated.
-    port: -1
+    port: 9090
 
     # The grpc server's security settings
     security:
       # If enabled, the server will expect clients to connect using TLS
-      enabled: true
+      enabled: false
       # If enabled, the server needs a certificate and corresponding private key
       certificate-chain:
       private-key:
       # Possible values are NONE, OPTIONAL and REQUIRED
       # For mutual certificate authentication clientAuth needs to be set to REQUIRE and trustCertCollection to the trusted certificates
-      clientAuth: NONE
-      trustCertCollection:
+      client-auth: NONE
+      trust-cert-collection:
 
 inspectit-config-server:
   # the directory which is used as working directory
