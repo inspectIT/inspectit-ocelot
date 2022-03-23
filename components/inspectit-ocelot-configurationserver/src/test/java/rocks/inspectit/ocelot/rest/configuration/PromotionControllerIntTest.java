@@ -17,7 +17,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@TestPropertySource(properties = {"grpc.server.port=0"})
+@TestPropertySource(properties = {"grpc.server.port=-1"})
 class PromotionControllerIntTest extends IntegrationTestBase {
 
     @Nested

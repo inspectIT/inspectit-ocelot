@@ -17,7 +17,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@TestPropertySource(properties = {"grpc.server.port=0"})
+@TestPropertySource(properties = {"grpc.server.port=-1"})
 public class UserControllerIntTest extends IntegrationTestBase {
 
     @Autowired

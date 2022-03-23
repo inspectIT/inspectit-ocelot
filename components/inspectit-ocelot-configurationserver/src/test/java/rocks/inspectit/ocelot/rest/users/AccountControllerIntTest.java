@@ -20,7 +20,7 @@ import rocks.inspectit.ocelot.user.UserService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static rocks.inspectit.ocelot.rest.users.AccountController.PasswordChangeRequest;
 
-@TestPropertySource(properties = {"grpc.server.port=0"})
+@TestPropertySource(properties = {"grpc.server.port=-1"})
 public class AccountControllerIntTest extends IntegrationTestBase {
 
     @Autowired

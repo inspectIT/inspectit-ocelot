@@ -13,7 +13,7 @@ import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-@TestPropertySource(properties = {"grpc.server.port=0"})
+@TestPropertySource(properties = {"grpc.server.port=-1"})
 class VersioningControllerIntTest extends IntegrationTestBase {
 
     @Nested

@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@TestPropertySource(properties = {"grpc.server.port=0"})
+@TestPropertySource(properties = {"grpc.server.port=-1"})
 class MoveControllerIntTest extends IntegrationTestBase {
 
     @Nested

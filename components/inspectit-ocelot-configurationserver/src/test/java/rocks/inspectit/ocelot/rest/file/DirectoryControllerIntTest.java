@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-@TestPropertySource(properties = {"grpc.server.port=0"})
+@TestPropertySource(properties = {"grpc.server.port=-1"})
 class DirectoryControllerIntTest extends IntegrationTestBase {
 
     @Nested

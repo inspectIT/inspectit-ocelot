@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test class for {@link HighlightRulesMapController}
  */
-@TestPropertySource(properties = {"grpc.server.port=0"})
+@TestPropertySource(properties = {"grpc.server.port=-1"})
 public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
 
     @Autowired
