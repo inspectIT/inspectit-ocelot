@@ -23,7 +23,8 @@ dependencies {
             project(':inspectit-ocelot-bootstrap'),
             "io.opencensus:opencensus-api:${openCensusVersion}",
             "io.opencensus:opencensus-impl:${openCensusVersion}",
-            'org.projectlombok:lombok:1.18.12'
+            'org.projectlombok:lombok:1.18.12',
+            'org.apache.tomcat:annotations-api:6.0.53', // necessary for grpc with Java 9+
     )
     buildTools(
             'jarcheck:jarcheck:1.5'
@@ -65,7 +66,6 @@ dependencies {
 
             "io.opencensus:opencensus-exporter-trace-ocagent:${openCensusVersion}",
             'io.grpc:grpc-netty-shaded:1.45.0',
-            'org.apache.tomcat:annotations-api:6.0.53', // necessary for grpc with Java 9+
 
             "rocks.inspectit:opencensus-influxdb-exporter:1.2",
 

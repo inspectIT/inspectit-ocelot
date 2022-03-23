@@ -36,7 +36,10 @@ group = 'rocks.inspectit.ocelot'
 sourceCompatibility = 1.8
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.12'
+    compileOnly (
+            'org.projectlombok:lombok:1.18.12',
+            'org.apache.tomcat:annotations-api:6.0.53', // necessary for grpc with Java 9+
+    )
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     testImplementation (
             'org.junit.jupiter:junit-jupiter-api:5.3.1',

@@ -94,7 +94,10 @@ test {
 }
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.12'
+    compileOnly (
+            'org.projectlombok:lombok:1.18.12',
+            'org.apache.tomcat:annotations-api:6.0.53', // necessary for grpc with Java 9+
+    )
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 }
 
@@ -115,7 +118,6 @@ dependencies {
             // grpc
             'net.devh:grpc-server-spring-boot-starter:2.13.1.RELEASE',
             'com.google.protobuf:protobuf-java-util:3.19.2',
-            'org.apache.tomcat:annotations-api:6.0.53', // necessary for grpc with Java 9+
 
             // spring releated
             "org.yaml:snakeyaml:1.30",
