@@ -4,13 +4,12 @@ title: Agent Command Configuration
 sidebar_label: Agent Command Configuration
 ---
 
-Since version `1.10.0`, the inspectIT Ocelot agent provides the _Agent Commands_ feature, which allows to interact with a specific agent.
+Since version `1.10.0` the inspectIT Ocelot agent provides the _Agent Commands_ feature, which allows interacting with a specific agent.
 Using this feature is only possible if the agent is used together with the inspectIT Ocelot Configuration-Server.
 
 With this feature it is possible to send specific commands or operations to the agent via the configuration server, which the agent should execute.
 Subsequently, the result of these commands is returned.
 
-It is now possible to interact with the agent.
 Simple commands can be executed, such as a "ping" command whether an agent exists or more complex commands, such as loading the class structure of the application in which the agent is integrated.
 Some new functionality of the configuration server interface is based on this feature, e.g. the _class browser_.
 These functions work only if this feature is enabled.
@@ -21,61 +20,50 @@ It is important to note that depending on the complexity of the agent commands, 
 
 ## How it works
 
-It is important to note that the mentioned agent commands **cannot** be sent directly to the agents.
 For security reasons, **all communication with the agents is initiated by the agents themselves**.
-This means that the agent must always initiate communication and not vice versa.
+This means that the agent must always initiate communication and not vice versa.  
+However, since version `1.16/2.0? todo` agent commands can still be sent from the configuration server to the agent without any delay.
+This works using a bidirectional streaming gRPC connection, that the agent opens once and that then is used for all communication regarding agent commands.
+The server sends commands over that connection as soon as they come in, and then the agent executes the command and responds over the same connection.
 
 In order to use the agent commands feature, it must first be enabled, as it is disabled by default.
-See the [Configuration section](configuration/agent-command-configuration.md#configuration) for more information.
+See [General Configuration](#general-configuration) below for more information.
 
 Once the feature is enabled, specific agent commands can be triggered via the configuration server.
-The configuration server offers a certain [set of endpoints](https://github.com/inspectIT/inspectit-ocelot/blob/f01ad602a3b188d3be0d17eca22bc4370913b6a1/components/inspectit-ocelot-configurationserver/src/main/java/rocks/inspectit/ocelot/rest/command/AgentCommandController.java) for this purpose. 
+The configuration server offers a certain [set of endpoints](https://github.com/inspectIT/inspectit-ocelot/blob/master/components/inspectit-ocelot-configurationserver/src/main/java/rocks/inspectit/ocelot/rest/command/AgentCommandController.java) for this purpose.
 
-Once a command has been created, it is ready for the agent to pick up in the configuration server.
-The agent then asks the configuration server at certain intervals whether new commands exist and obtains the commands assigned to it.
-After that, the respective commands are executed by the agent and the result is sent back to the configuration server.
+### Existing Commands
+|  Name       | Description                                                                                                                                                                                                      | Endpoint                     | Parameters      |
+|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|-----------------|
+| Ping        | Simple ping command to see if an agent exists and is available.                                                                                                                                                  | /api/v1/ping                 | agent-id        |
+| ListClasses | Requests a list of classes available in the application the agent is attached to. <br>The full class set is filtered using a query. <br>Also provides info about the classes' types and a list of their methods. | /api/v1/command/list/classes | agent-id, query |
+| Logs        | Retrieves logs from an agent. <br> See also its command-specific [configuration section](#log-preloading-for-logs-command).                                                                                      | /api/v1/logs                 | agent-id        |
 
-Due to the fact that the agent fetches the created agent commands in a certain interval, in the worst case it can take exactly the time of the interval until the agent receives a new command.
-However, once the agent receives a command, it switches to its "live"-mode for a specific period of time where it receives commands in near real time.
-If no more commands appear then, the agent will then switch back to normal mode, where it will again obtain the commands at the interval mentioned earlier.
 
 ## General Configuration
 
-The agent command feature is disabled by default and must be enabled on the agent side.
-This can be achieved with the help of the following configuration:
+The agent command feature is disabled by default and must be enabled on the agent side using the `enabled` property.  
+Furthermore, the agent needs to know where it can reach the configuration server to establish the connection for receiving the commands, this is set in the `host` property.
 
-```YAML
-inspectit:
-  agent-commands:
-    enabled: true
-```
-
-Now the agent has to be configured where it can reach the configuration server and retrieve its commands.
-For this, the following endpoint of the configuration server has to be used: `/api/v1/agent/command`.
-This is achieved by configuring the URL as follows:
-
-```YAML
-inspectit:
-  agent-commands:
-    url: http://<CONFIGURATION_SERVER_AND_PORT>/api/v1/agent/command
-```
-
-As soon as this is activated, the agent obtains the commands stored in the configuration server and executes them.
 The complete configuration for activating the agent commands thus looks as follows.
 
 ```YAML
 inspectit:
   agent-commands:
     enabled: true
-    url: http://<CONFIGURATION_SERVER_AND_PORT>/api/v1/agent/command
+    host: <CONFIGURATION_HOST>
 ```
+
+:::warning
+By default the agent commands and responses are sent as plaintext without encryption. To use TLS, at least a certificate for the config-server needs to be provided. See [Using TLS](#using-tls) for further info.
+:::
 
 ### Dynamic Agent Command URL
 
-In larger environments, where many agents exist and these reach the configuration server under different addresses, it can be cumbersome and difficult to successfully configure the agent command URL.
+In larger environments, where many agents exist and these reach the configuration server under different addresses, it can be cumbersome and difficult to successfully configure the agent command host.
 Especially if the configuration server HTTP address is already successfully set up, e.g. via JVM properties, you do not want to have to configure the agent command URL additionally.
 
-For this purpose, there is the possibility that the agent derives the agent command URL based on the configured URL for retrieving the agent configuration via HTTP.
+For this purpose, there is the possibility that the agent derives the agent command host based on the configured URL for retrieving the agent configuration via HTTP.
 This possibility can be activated by using the following configuration:
 
 ```YAML
@@ -88,29 +76,88 @@ inspectit:
 This setting takes the URL defined under `inspectit.config.http.url` as a basis.
 :::
 
-This setting has a higher priority than manually specifying the URL.
-If an agent command URL is configured and the `derive-from-http-config-url` option is enabled, the URL is ignored if it is possible to derive the agent command URL based on the HTTP configuration URL.
+This setting has a higher priority than manually specifying the host.
+If an agent command host is configured and the `derive-from-http-config-url` option is enabled, the host is ignored if it is possible to derive the agent command host based on the HTTP configuration URL.
 
-To generate the agent command URL, only the information regarding protocol, host and port is used from the URL of the HTTP configuration. 
-By default, `/api/v1/agent/command` is used as the path of the URL.
-However, this can be adjusted using the following configuration, for example in the case that the configuration server is operated behind a reverse proxy and the URLs are not accessible under their actual name:
+### Using TLS
 
+To use TLS you will at least need a valid certificate and private key for your configuration server. 
+Depending on your needs you might have to change additional settings too.
+
+:::tip
+The [Trouble-Shooting section](https://yidongnan.github.io/grpc-spring-boot-starter/en/trouble-shooting.html#network-closed-for-unknown-reason) of the library the configuration server uses to set up the gRPC service can help with problems with setting up TLS.
+:::
+
+#### Enabling TLS on the configuration server
+
+The configuration server uses [grpc-spring-boot-starter](https://github.com/yidongnan/grpc-spring-boot-starter), so the [Server Security](https://yidongnan.github.io/grpc-spring-boot-starter/en/server/security.html) section of their documentation is the base for the server-side part of this documentation.
+
+To enable TLS on the configuration server the property `security.enabled` needs to be set to `true`.  
+To make TLS work, the properties `certificate-chain` and `private-key` need to be set as well to a path to your certificate and the corresponding private key.  
+So in the end a configuration for the configuration server could look like this:
+```YAML
+grpc:
+  server:
+    security:
+      enabled: true
+      certificate-chain: file:certificates/server.pem
+      private-key: file:certificates/server.key
+```
+
+On the agent-side you need to set the property `use-tls` to `true`.  
+If the issuing certificate authority of the server's certificate is not known to the agent, then you also need to set the property `trust-cert-collection-file-path` to the path to a file containing a collection of trusted certificates.  
+Finally, if the server's certificate is not valid for the hostname the agent uses to connect itself, you can also provide that hostname to fix the problem under `authority-override`.  
+So in the end a configuration for the agent could look like this:
 ```YAML
 inspectit:
   agent-commands:
-    agent-command-path: "/proxy/command"
+    use-tls: true
+    trust-cert-collection-file-path: certificates/ca.pem
+    authority-override: ocelot-config-server
+```
+
+#### Mutual authentication
+
+To use [mutual authentication](https://en.wikipedia.org/wiki/Mutual_authentication) the following needs to be done additionally to the settings in the previous section.
+
+In the configuration server's configuration you need to set the property `client-auth` to either `OPTIONAL` or rather `REQUIRED`, since only the latter enforces mutual authentication.  
+Furthermore `trust-cert-collection` needs to be set to a collection of trusted certificates, so the server knows which client certificates are trusted:
+```YAML
+grpc:
+  server:
+    security:
+      client-auth: REQUIRED
+      trust-cert-collection: file:certificates/ca.pem
+```
+
+In the agent's configuration you need to set the properties `client-cert-chain-file-path` and `client-private-key-file-path` to a certificate and corresponding key for the agent:
+```YAML
+inspectit:
+  agent-commands:
+    client-cert-chain-file-path: certificates/client.pem
+    client-private-key-file-path: certificates/client.key
 ```
 
 ### Additional Configuration Options
 
-The agent command feature can be more precisely configured to the needs with the following optional parameters which are defined bellow the property `inspectit.agent-commands`:
+The agent command feature can be more precisely configured to your needs with some optional parameters described below.
 
-| Property | Default Value | Description |
-| --- | --- | --- |
-| <nobr>`live-socket-timeout`</nobr> | `30s` | The timeout duration used when the agent is in discovery mode. Defining how long the agent will wait for new commands. |
-| `socket-timeout` | `5s` | The timeout duration used for requests when the agent is in normal mode. |
-| `polling-interval` | `15s` | The used interval for polling agent commands. |
-| `live-mode-duration` | `2m` | How long the agent will staying in the live mode, before falling back to the normal mode. |
+For the agent there are the following properties which are defined below `inspectit.agent-commands`:
+
+| Property                   | Default Value | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+|----------------------------|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `port`                     | `9090`        | Port the agent will use to connect to the config-server over gRPC, should correspond to `grpc.server.port` in configuration server's properties.                                                                                                                                                                                                                                                                                                                                                     |
+| `max-inbound-message-size` | `4`           | Maximum size for inbound gRPC messages, i.e. commands from config-server, in MiB.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `backoff-reset-time`       | `60s`         | Time after which the backoff between retries to re-establish the gRPC connection between agent and configuration server is reset to the lowest value.                                                                                                                                                                                                                                                                                                                                                |                                                                                  |
+| `max-backoff-increases`    | `4`           | How often the backoff between retries to re-establish the gRPC connection between agent and config-server is increased for the next retry. Backoff is calculated as 2 to the power of how often the backoff has been increased plus 1, so a value of 4 means that the maximum backoff is 32 seconds. <br>This setting only sets a maximum for the backoff between retries, it does not affect the number of retries, the service will always continue to try reconnecting on errors unless disabled. |
+
+For the configuration server there are the following properties:
+
+| Property                                                          | Default Value | Description                                                                                                                           |
+|-------------------------------------------------------------------|---------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| `inspectit-config-server.agent-commands.response-timeout`         | `30s`         | How long a command will wait for a response from the agent before throwing a timeout-exception.                                       |
+| `inspectit-config-server.agent-commands.max-inbound-message-size` | `4`           | Maximum size for inbound grpc messages, i.e. responses from agents, in MiB.                                                           |
+| `grpc.server.port`                                                | `9090`        | The server's grpc port. Needs to be synced with the port set in the agent configuration. If set to -1 the grpc server is deactivated. |
 
 ## Command-specific Configuration
 

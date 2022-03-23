@@ -3,6 +3,15 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
+## Breaking changes in 1.16.0 / 2.0? todo
+
+### Agent commands now use grpc
+
+Formerly agents polled the configuration server repeatedly over a REST-endpoint for new commands. 
+Now agents start a grpc stream connection once and the configuration server sends new commands to agents and agents their responses over this connection.
+
+This means that new agents are not able to exchange agent commands with old config-servers and vice versa.
+
 ## Breaking changes in 1.15.0
 
 ### New definition of exporters' enabled property
