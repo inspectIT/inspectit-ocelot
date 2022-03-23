@@ -68,7 +68,7 @@ public class AgentCommandClient {
                         long currentTime = System.nanoTime();
 
                         if (retriesAttempted > 0) {
-                            if ((currentTime - lastRetryAttempt) > (Math.pow(10, 9) * settings.getBackoffResetTime())) {
+                            if ((currentTime - lastRetryAttempt) > settings.getBackoffResetTime().toNanos()) {
                                 retriesAttempted = 0;
                             }
                         }

@@ -1,7 +1,10 @@
 package rocks.inspectit.ocelot.config.model.command;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.Duration;
 
 @Data
 @NoArgsConstructor
@@ -66,7 +69,8 @@ public class AgentCommandSettings {
      * Time after which the backoff between retries to re-establish the grpc connection between agent and config-server
      * is reset to the lowest value.
      */
-    private int backoffResetTime = 60;
+    @Builder.Default
+    private Duration backoffResetTime = Duration.ofSeconds(60);
 
     /**
      * How often the backoff between retries to re-establish the grpc connection between agent and config-server is increased for the next retry.

@@ -126,7 +126,7 @@ inspectit:
     max-inbound-message-size: 4
     # Time after which the backoff between retries to re-establish the grpc connection between agent and config-server
     # is reset to the lowest value in seconds.
-    backoff-reset-time: 60
+    backoff-reset-time: 60s
     # How often the backoff between retries to re-establish the grpc connection between agent and config-server is increased for the next retry.
     # Backoff is calculated as 2 to the power of how often the backoff has been increased plus 1, so a value of 4 means that the max backoff is 32 seconds.
     #
