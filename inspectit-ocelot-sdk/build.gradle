@@ -13,6 +13,6 @@ dependencies {
     implementation project(':inspectit-ocelot-config')
     implementation 'org.slf4j:slf4j-api:1.7.25'
 
-    compileOnly 'org.projectlombok:lombok:1.18.12'
-    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 }

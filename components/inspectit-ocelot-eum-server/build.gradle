@@ -127,8 +127,8 @@ dependencies {
             "rocks.inspectit:opencensus-influxdb-exporter:1.2",
     )
 
-    compileOnly "org.projectlombok:lombok:1.18.12"
-    annotationProcessor "org.projectlombok:lombok:1.18.12"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     testImplementation(
             project(':inspectit-ocelot-config'),

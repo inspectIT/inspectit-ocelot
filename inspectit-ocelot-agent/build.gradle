@@ -25,12 +25,12 @@ configurations {
 dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
-            'org.projectlombok:lombok:1.18.12'
+            "org.projectlombok:lombok:${lombokVersion}"
     )
     opencensus(
             "io.opencensus:opencensus-impl:${openCensusVersion}"
     )
-    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testImplementation (
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
             'org.mockito:mockito-junit-jupiter:2.23.0',

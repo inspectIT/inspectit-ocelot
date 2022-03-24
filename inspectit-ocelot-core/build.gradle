@@ -23,12 +23,12 @@ dependencies {
             project(':inspectit-ocelot-bootstrap'),
             "io.opencensus:opencensus-api:${openCensusVersion}",
             "io.opencensus:opencensus-impl:${openCensusVersion}",
-            'org.projectlombok:lombok:1.18.12'
+            "org.projectlombok:lombok:${lombokVersion}"
     )
     buildTools(
             'jarcheck:jarcheck:1.5'
     )
-    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     implementation(
             project(':inspectit-ocelot-config'),
