@@ -84,9 +84,9 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
     }
 
     @EventListener
-    void agentStatusChanged(AgentHealthChangedEvent event) {
+    void agentHealthChanged(AgentHealthChangedEvent event) {
         if (currentState != null) {
-            currentState.updateAgentStatus(event.getNewHealth());
+            currentState.updateAgentHealth(event.getNewHealth());
         }
     }
 }

@@ -1,13 +1,21 @@
 package rocks.inspectit.ocelot.commons.models.health;
 
 import ch.qos.logback.classic.Level;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Represents the health status of an individual agent.
  */
+@RequiredArgsConstructor
 public enum AgentHealth {
 
-    OK, WARNING, ERROR;
+    OK("the agent is working properly"),
+
+    WARNING("the agent has warning messages"),
+
+    ERROR("the agent has encountered errors");
+
+    private final String description;
 
     /**
      * Decides whether this health status is more severe or equal to the passed one.
@@ -57,4 +65,8 @@ public enum AgentHealth {
         }
     }
 
+    @Override
+    public String toString() {
+        return name() + " (" + description + ")";
+    }
 }

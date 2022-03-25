@@ -3,9 +3,11 @@ package rocks.inspectit.ocelot.agentstatus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
+import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import javax.annotation.PostConstruct;
@@ -19,7 +21,13 @@ import java.util.concurrent.TimeUnit;
  * This is useful for detecting which agents are active.
  */
 @Component
+@Slf4j
 public class AgentStatusManager {
+
+    /**
+     * Name of the agent health header.
+     */
+    private static final String HEADER_AGENT_HEALTH = "x-ocelot-health";
 
     @Autowired
     @VisibleForTesting
@@ -52,9 +60,11 @@ public class AgentStatusManager {
      */
     public void notifyAgentConfigurationFetched(Map<String, String> agentAttributes, Map<String, String> headers, AgentConfiguration resultConfiguration) {
         AgentMetaInformation metaInformation = AgentMetaInformation.of(headers);
+        AgentHealth agentHealth = AgentHealth.valueOf(headers.getOrDefault(HEADER_AGENT_HEALTH, "OK"));
 
         AgentStatus agentStatus = AgentStatus.builder()
                 .metaInformation(metaInformation)
+                .health(agentHealth)
                 .attributes(agentAttributes)
                 .lastConfigFetch(new Date())
                 .mappingName(resultConfiguration == null ? null : resultConfiguration.getMapping().getName())
@@ -68,6 +78,10 @@ public class AgentStatusManager {
             statusKey = metaInformation.getAgentId();
         } else {
             statusKey = agentAttributes;
+        }
+
+        if (agentHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING)) {
+            log.warn("Agent {} reported health status {}!", statusKey, agentHealth);
         }
 
         attributesToAgentStatusCache.put(statusKey, agentStatus);

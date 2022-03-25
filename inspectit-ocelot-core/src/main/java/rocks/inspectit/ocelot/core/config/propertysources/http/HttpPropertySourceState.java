@@ -32,7 +32,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.Date;
-import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -97,7 +96,7 @@ public class HttpPropertySourceState {
     @Getter
     private boolean firstFileWriteAttemptSuccessful = true;
 
-    private Optional<AgentHealth> agentStatus = Optional.empty();
+    private AgentHealth agentHealth = AgentHealth.OK;
 
     /**
      * Constructor.
@@ -138,12 +137,12 @@ public class HttpPropertySourceState {
     }
 
     /**
-     * Updates the agent status to be sent with the request for agent configuration.
+     * Updates the agent health to be sent with the request for agent configuration.
      *
-     * @param newStatus The new agent status
+     * @param newHealth The new agent health
      */
-    public void updateAgentStatus(@NonNull AgentHealth newStatus) {
-        agentStatus = Optional.of(newStatus);
+    public void updateAgentHealth(@NonNull AgentHealth newHealth) {
+        agentHealth = newHealth;
     }
 
     /**
@@ -258,10 +257,7 @@ public class HttpPropertySourceState {
         httpGet.setHeader(META_HEADER_PREFIX + "VM-NAME", runtime.getVmName());
         httpGet.setHeader(META_HEADER_PREFIX + "VM-VENDOR", runtime.getVmVendor());
         httpGet.setHeader(META_HEADER_PREFIX + "START-TIME", String.valueOf(runtime.getStartTime()));
-
-        if (agentStatus.isPresent()) {
-            httpGet.setHeader(META_HEADER_PREFIX + "STATUS", agentStatus.get().name());
-        }
+        httpGet.setHeader(META_HEADER_PREFIX + "HEALTH", agentHealth.name());
     }
 
     /**
