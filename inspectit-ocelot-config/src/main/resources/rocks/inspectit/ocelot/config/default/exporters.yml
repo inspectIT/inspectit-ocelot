@@ -20,7 +20,7 @@ inspectit:
         # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
         enabled: IF_CONFIGURED
         # the Url under which the InfluxDB can be accessed, e.g. http://localhost:8086
-        url: null
+        endpoint: null
         # the export interval of the metrics
         export-interval: ${inspectit.metrics.frequency}
         # the database to write to
@@ -45,12 +45,14 @@ inspectit:
           export-interval: ${inspectit.metrics.frequency}
 
       # settings for the OtlpGrpcMetricExporter used in OtlpGrpcMetricExporterService
-      otlp-grpc:
+      otlp:
         enabled: IF_CONFIGURED
         # the export interval of the metrics
         export-interval: ${inspectit.metrics.frequency}
         # the gRPC API endpoint, e.g., http://127.0.0.1:4318
-        url: null
+        endpoint: null
+        # the transport protocol, e.g., grpc or http/protobuf
+        protocol: grpc
 
     # settings for trace exporters
     tracing:
@@ -60,28 +62,24 @@ inspectit:
         # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
         enabled: IF_CONFIGURED
         # the v2 Url under which the ZipKin server can be accessed, e.g. http://127.0.0.1:9411/api/v2/spans
-        url: null
-
+        endpoint: null
 
       # settings for the jaeger exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/jaeger)
       jaeger:
         # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
         enabled: IF_CONFIGURED
-        # the URL under which the jaeger thrift server can be accessed, e.g. http://127.0.0.1:14268/api/traces
-        url: null
-      # settings for Jaeger gRPC exporter
-      jaeger-grpc:
-        # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
-        enabled: IF_CONFIGURED
-        # the URL under which the Jaeger gRPC server can be accessed, e.g., http://127.0.0.1:14250/v1/traces
-        grpc: null
+        # the URL under which the jaeger thrift server can be accessed, e.g. http://127.0.0.1:14268/api/traces for http/thrift or http://127.0.0.1:14250/v1/traces for grpc
+        endpoint: null
+        # the transport protocol
+        protocol: http/thrift
 
       # settings used in LoggingTraceExporterService for the LoggingSpanExporter (https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/logging)
       logging:
           enabled: DISABLED
 
-      # settings for the OtlpGrpcSpanExporter used in OtlpGrpcTraceExporterService
-      otlp-grpc:
+      # settings for the OtlpGrpcSpanExporter/OtlpHttpSpanExporter used in OtlpTraceExporterService
+      otlp:
           enabled: IF_CONFIGURED
-          # the gRPC API endpoint, e.g., http://127.0.0.1:4318
-          url: null
+          # the URL endpoint, e.g., http://127.0.0.1:4318
+          endpoint: null
+          protocol: grpc

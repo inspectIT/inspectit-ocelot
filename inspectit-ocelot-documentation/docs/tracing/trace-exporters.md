@@ -39,7 +39,7 @@ The following properties are nested properties below the `inspectit.exporters.tr
 |Property |Default| Description|
 |---|---|---|
 |`.enabled`|`IF_CONFIGURED`|If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Zipkin exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.|
-|`.url`|`null`|v2 URL under which the ZipKin server can be accessed (e.g. http://127.0.0.1:9411/api/v2/spans).|
+|`.endpoint`|`null`|v2 URL under which the ZipKin server can be accessed (e.g. http://127.0.0.1:9411/api/v2/spans).|
 
 To make inspectIT Ocelot push the spans to a Zipkin server running on the same machine as the agent, the following JVM property can be used:
 
@@ -60,39 +60,30 @@ The following properties are nested properties below the `inspectit.exporters.tr
 |Property |Default| Description|
 |---|---|---|
 |`.enabled`|`IF_CONFIGURED`|If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Jaeger exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.|
-|`.url`|`null`|URL under which the Jaeger thrift server can be accessed (e.g. http://127.0.0.1:14268/api/traces).|
+|`.endpoint`|`null`|URL endpoint under which the Jaeger server can be accessed (e.g. http://127.0.0.1:14268/api/traces).|
+|`.protocol`|`grpc`|The transport protocol. Supported protocols are `grpc` and `http/thrift`.|
 
 To make inspectIT Ocelot push the spans to a Jaeger server running on the same machine as the agent, the following JVM property can be used:
 
 ```
--Dinspectit.exporters.tracing.jaeger.url=http://127.0.0.1:14268/api/traces
-```
-
-### Jaeger gRPC Exporter 
-
-The following properties are nested properties below the `inspectit.exporters.tracing.jaeger-grpc` property:
-
-| Property   | Default         | Description                                                  |
-| ---------- | --------------- | ------------------------------------------------------------ |
-| `.enabled` | `IF_CONFIGURED` | If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Jaeger exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`. |
-| `.grpc`    | `null`          | gRPC endpoint under which the Jaeger gRPC server can be accessed (e.g. http://127.0.0.1:14250/v1/traces). |
-
-To make inspectIT Ocelot push the spans to a Jaeger server running on the same machine as the agent, the following JVM property can be used:
-
-```
--Dinspectit.exporters.tracing.jaeger-grpc.url=http://127.0.0.1:14250/v1/traces
+-Dinspectit.exporters.tracing.jaeger.endpoint=http://127.0.0.1:14268/api/traces
 ```
 
 ## OTLP Exporter (Traces)
 
 The OpenTelemetry Protocol (OTLP) exporters export the Traces in OTLP to the desired endpoint at a specified interval. 
-By default, the OTLP exporters are enabled but the URL needed for the exporter to actually start is set to `null`.
+By default, the OTLP exporters are enabled but the URL endpoint needed for the exporter to actually start is set to `null`.
 
-## OTLP gRPC Exporter
+The following properties are nested properties below the `inspectit.exporters.traces.otlp` property:
 
-The following properties are nested properties below the `inspectit.exporters.traces.otlp-grpc` property:
+| Property    | Default    | Description                                                  |
+| ----------- | ---------- | ------------------------------------------------------------ |
+| `.enabled`  | `DISABLED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC trace exporter. |
+| `.endpoint` | `null`     | The OTLP endpoint to connect to, e.g. `http://localhost:4317` |
+| `.protocol` | `grpc`     | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`. |
 
-| Property   | Default    | Description                                                  |
-| ---------- | ---------- | ------------------------------------------------------------ |
-| `.enabled` | `DISABLED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC trace exporter. |
-| `.url`     | `null`     | The OTLP gRPC endpoint to connect to, e.g. `http://localhost:4317` |
+To make inspectIT Ocelot push the spans via OTLP to, e.g. an OpenTelemetry Collector running on the same machine as the agent, the following JVM property can be used:
+
+```
+-Dinspectit.exporters.tracing.otlp.endpoint=http://127.0.0.1:4318
+```

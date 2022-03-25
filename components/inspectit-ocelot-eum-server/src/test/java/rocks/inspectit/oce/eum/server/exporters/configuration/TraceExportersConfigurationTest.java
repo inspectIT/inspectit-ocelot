@@ -11,14 +11,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This Test class tests whether the annotations on {@link TraceExportersConfiguration#jaegerSpanExporter()} are working as expected,
- * i.e. whether the Bean only gets created when 'jaeger.enabled' is not set to DISABLED and 'jaeger.grpc' is not empty.
+ * i.e. whether the Bean only gets created when 'jaeger.enabled' is not set to DISABLED and 'jaeger.endpoint' is not empty.
  */
 @SpringBootTest
 class TraceExportersConfigurationTest {
 
-    @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaegerGrpc.grpc=", "inspectit-eum-server.exporters.tracing.jaegerGrpc.enabled=ENABLED"})
+    @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaeger.endpoint=", "inspectit-eum-server.exporters.tracing.jaeger.enabled=ENABLED"})
     @Nested
-    public class MissingGrpcTest {
+    public class MissingEndpointTest {
 
         @Autowired(required = false)
         JaegerGrpcSpanExporter exporter;
@@ -29,7 +29,7 @@ class TraceExportersConfigurationTest {
         }
     }
 
-    @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaegerGrpc.grpc=localhost:1234", "inspectit-eum-server.exporters.tracing.jaegerGrpc.enabled=DISABLED"})
+    @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaeger.endpoint=localhost:1234", "inspectit-eum-server.exporters.tracing.jaeger.enabled=DISABLED", "inspectit-eum-server.exporters.tracing.jaeger.protocol=grpc"})
     @Nested
     public class DisabledTest {
 
@@ -42,7 +42,7 @@ class TraceExportersConfigurationTest {
         }
     }
 
-    @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaegerGrpc.grpc=localhost:1234", "inspectit-eum-server.exporters.tracing.jaegerGrpc.enabled=ENABLED"})
+    @TestPropertySource(properties = {"inspectit-eum-server.exporters.tracing.jaeger.endpoint=localhost:1234", "inspectit-eum-server.exporters.tracing.jaeger.enabled=ENABLED", "inspectit-eum-server.exporters.tracing.jaeger.protocol=grpc"})
     @Nested
     public class BothAvailableTest {
 

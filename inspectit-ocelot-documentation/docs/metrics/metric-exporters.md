@@ -62,29 +62,34 @@ This can greatly reduce the amount of data written into the InfluxDB, especially
 
 The following properties are nested properties below the `inspectit.exporters.metrics.influx` property:
 
-|Property | Default                                 | Description
+|Property | Default                                 | Description|
 |---|-----------------------------------------|---|
-|`.enabled`| `IF_CONFIGURED`                         |If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Influx exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.
-|`.url`| `null`                                  |The HTTP url of the InfluxDB, e.g. `http://localhost:8086`.
-|`.user`| `null`                                  | The user to use for connecting to the InfluxDB, can not be empty.
-|`.password`| `null`                                  |The password to use for connecting to the InfluxDB, can be not be empty.
-|`.database`| `inspectit`                             | The InfluxDB database to which the metrics are pushed.
-|`.retention-policy`| `autogen`                               | The retention policy of the database to use for writing metrics.
-|`.create-database`| `true`                                  | If enabled, the database defined by the `database` property is automatically created on startup with an `autogen` retention policy if it does not exist yet.
-|`.export-interval`| refers to `inspectit.metrics.frequency` |Defines how often metrics are pushed to the InfluxDB.
-|<nobr>`.counters-as-differences`</nobr>| `true`                                  |Defines whether counters are exported using their absolute value or as the increase between exports
-|`buffer-size`| `40`                                    | In case the InfluxDB is not reachable, failed writes will be buffered and written on the next export. This value defines the maximum number of batches to buffer.
+|`.enabled`| `IF_CONFIGURED`                         |If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Influx exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.|
+|`.endpoint`| `null`                                  |The HTTP endpoint of the InfluxDB, e.g. `http://localhost:8086`.|
+|`.user`| `null`                                  | The user to use for connecting to the InfluxDB, can not be empty.|
+|`.password`| `null`                                  |The password to use for connecting to the InfluxDB, can be not be empty.|
+|`.database`| `inspectit`                             | The InfluxDB database to which the metrics are pushed.|
+|`.retention-policy`| `autogen`                               | The retention policy of the database to use for writing metrics.|
+|`.create-database`| `true`                                  | If enabled, the database defined by the `database` property is automatically created on startup with an `autogen` retention policy if it does not exist yet.|
+|`.export-interval`| refers to `inspectit.metrics.frequency` |Defines how often metrics are pushed to the InfluxDB.|
+|<nobr>`.counters-as-differences`</nobr>| `true`                                  |Defines whether counters are exported using their absolute value or as the increase between exports|
+|`buffer-size`| `40`                                    | In case the InfluxDB is not reachable, failed writes will be buffered and written on the next export. This value defines the maximum number of batches to buffer.|
 
 ## OTLP Exporter (Metrics)
 
 The OpenTelemetry Protocol (OTLP) exporters export the metrics to the desired endpoint at a specified interval. 
 To enable the OTLP exporters, it is only required to specify the `url`.
 
-### OTLP gRPC Exporter
-
 The following properties are nested properties below the `inspectit.exporters.metrics.otlp-grpc` property:
 
-| Property   | Default    | Description                                                  |
-| ---------- | ---------- | ------------------------------------------------------------ |
-| `.enabled` | `DISABLED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC metrics exporter. |
-| `.url`     | `null`     | The OTLP gRPC endpoint to connect to, e.g. `http://localhost:4317` |
+| Property    | Default    | Description                                                  |
+| ----------- | ---------- | ------------------------------------------------------------ |
+| `.enabled`  | `DISABLED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC metrics exporter. |
+| `.endpoint` | `null`     | The OTLP endpoint to connect to, e.g. `http://localhost:4317` |
+| `.protocol` | `grpc`     | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`. |
+
+To make inspectIT Ocelot push the metris via OTLP to, e.g. an OpenTelemetry Collector running on the same machine as the agent, the following JVM property can be used:
+
+```
+-Dinspectit.exporters.metrics.otlp.endpoint=http://127.0.0.1:4317
+```

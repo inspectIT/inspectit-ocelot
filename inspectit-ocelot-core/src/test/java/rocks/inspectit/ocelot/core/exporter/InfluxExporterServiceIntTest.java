@@ -66,7 +66,7 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.metrics.influx.enabled", true);
             props.setProperty("inspectit.exporters.metrics.influx.export-interval", "1s");
-            props.setProperty("inspectit.exporters.metrics.influx.url", url);
+            props.setProperty("inspectit.exporters.metrics.influx.endpoint", url);
             props.setProperty("inspectit.exporters.metrics.influx.database", DATABASE);
             // note: user and password are mandatory as of v1.15.0
             props.setProperty("inspectit.exporters.metrics.influx.user", user);
@@ -90,8 +90,7 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
             InfluxDB iDB = InfluxDBFactory.connect(url, user, password); // note: user and password are mandatory as of v1.15.0
-            QueryResult result = iDB
-                    .query(new Query("SELECT LAST(cool_data) FROM " + DATABASE + ".autogen.my_test_measure GROUP BY *"));
+            QueryResult result = iDB.query(new Query("SELECT LAST(cool_data) FROM " + DATABASE + ".autogen.my_test_measure GROUP BY *"));
 
             List<QueryResult.Result> results = result.getResults();
             assertThat(results).hasSize(1);
@@ -106,11 +105,11 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
 
     @DirtiesContext
     @Test
-    void testNoUrlSet() {
+    void testNoEndpointSet() {
         updateProperties(props -> {
-            props.setProperty("inspectit.exporters.metrics.influx.url", "");
+            props.setProperty("inspectit.exporters.metrics.influx.endpoint", "");
             props.setProperty("inspectit.exporters.metrics.influx.enabled", "ENABLED");
         });
-        warnLogs.assertContains("'url'");
+        warnLogs.assertContains("'endpoint'");
     }
 }

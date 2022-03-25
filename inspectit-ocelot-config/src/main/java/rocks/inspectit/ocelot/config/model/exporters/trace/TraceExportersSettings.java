@@ -12,8 +12,6 @@ public class TraceExportersSettings {
     @Valid
     private JaegerExporterSettings jaeger;
 
-    @Valid JaegerGrpcExporterSettings jaegerGrpc;
-
     @Valid
     private ZipkinExporterSettings zipkin;
 
@@ -21,6 +19,6 @@ public class TraceExportersSettings {
     private LoggingTraceExporterSettings logging;
 
     @Valid
-    private OtlpGrpcTraceExporterSettings otlpGrpc;
+    private OtlpTraceExporterSettings otlp;
 
 }

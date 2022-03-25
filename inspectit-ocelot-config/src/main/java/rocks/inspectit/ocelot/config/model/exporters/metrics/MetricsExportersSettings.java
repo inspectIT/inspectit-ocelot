@@ -22,5 +22,5 @@ public class MetricsExportersSettings {
     private LoggingMetricsExporterSettings logging;
 
     @Valid
-    private OtlpGrpcMetricsExporterSettings otlpGrpc;
+    private OtlpMetricsExporterSettings otlp;
 }

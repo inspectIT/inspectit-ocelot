@@ -13,9 +13,15 @@ public class ZipkinExporterSettings {
      */
     private ExporterEnabledState enabled;
 
+    @Deprecated
     /**
+     * This property is deprecated since v2.0. Please use {@link #endpoint} instead.
      * The URL of the Zipkin server.
+     */ private String url;
+
+    /**
+     * The URL endpoint of the Zipkin server.
      */
-    private String url;
+    private String endpoint;
 
 }

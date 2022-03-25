@@ -58,12 +58,14 @@ public class InfluxExporterService extends DynamicallyActivatableService {
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         InfluxExporterSettings influx = conf.getExporters().getMetrics().getInflux();
-        if ( conf.getMetrics()
-                .isEnabled() && !influx.getEnabled().isDisabled() ) {
-            if (StringUtils.hasText(influx.getUrl()) ) {
+        if (conf.getMetrics().isEnabled() && !influx.getEnabled().isDisabled()) {
+            if (StringUtils.hasText(influx.getEndpoint())) {
+                return true;
+            } else if (StringUtils.hasText(influx.getUrl())) {
+                log.warn("You are using the deprecated property 'url'. This property will be invalid in future releases of InspectIT Ocelot, please use 'endpoint' instead.");
                 return true;
             } else if (influx.getEnabled().equals(ExporterEnabledState.ENABLED)) {
-                log.warn("InfluxDB Exporter is enabled but 'url' is not set.");
+                log.warn("InfluxDB Exporter is enabled but 'endpoint' is not set.");
             }
         }
         return false;
@@ -75,15 +77,16 @@ public class InfluxExporterService extends DynamicallyActivatableService {
         String user = influx.getUser();
         String password = influx.getPassword();
 
+        String endpoint = StringUtils.hasText(influx.getEndpoint()) ? influx.getEndpoint() : influx.getUrl();
         // check user and password, which are not allowed to be null as of v1.15.0
         if (null == user) {
             user = DUMMY_USER;
             password = DUMMY_PASSWORD;
             LOGGER.warning(String.format("You are using the InfluxDB exporter without specifying 'user' and 'password'. Since v1.15.0, 'user' and 'password' are mandatory. Will be using the dummy user '%s' and dummy password '%s'.", DUMMY_USER, DUMMY_PASSWORD));
         }
-        log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx.getUrl());
+        log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), endpoint);
         activeExporter = InfluxExporter.builder()
-                .url(influx.getUrl())
+                .url(endpoint)
                 .database(influx.getDatabase())
                 .retention(influx.getRetentionPolicy())
                 .user(user)

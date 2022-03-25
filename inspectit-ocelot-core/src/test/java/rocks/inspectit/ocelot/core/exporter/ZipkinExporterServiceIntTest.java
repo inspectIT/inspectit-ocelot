@@ -22,7 +22,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.awaitility.Awaitility.await;
 
-@TestPropertySource(properties = {"inspectit.exporters.tracing.zipkin.url=http://127.0.0.1:9411/api/v2/spans", "inspectit.tracing.max-export-batch-size=512", "inspectit.tracing.schedule-delay-millis=20000"})
+@TestPropertySource(properties = {"inspectit.exporters.tracing.zipkin.endpoint=http://127.0.0.1:9411/api/v2/spans", "inspectit.tracing.max-export-batch-size=512", "inspectit.tracing.schedule-delay-millis=20000"})
 @DirtiesContext
 public class ZipkinExporterServiceIntTest extends SpringTestBase {
 
@@ -32,10 +32,10 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
 
     private static final String ZIPKIN_PATH = "/api/v2/spans";
 
-    private WireMockServer wireMockServer;
-
     @RegisterExtension
     LogCapturer warnLogs = LogCapturer.create().captureForType(ZipkinExporterService.class, org.slf4j.event.Level.WARN);
+
+    private WireMockServer wireMockServer;
 
     @BeforeEach
     void setupWiremock() {
@@ -68,11 +68,11 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
 
     @DirtiesContext
     @Test
-    void testNoUrlSet() {
+    void testNoEndpointSet() {
         updateProperties(props -> {
-            props.setProperty("inspectit.exporters.tracing.zipkin.url", "");
+            props.setProperty("inspectit.exporters.tracing.zipkin.endpoint", "");
             props.setProperty("inspectit.exporters.tracing.zipkin.enabled", ExporterEnabledState.ENABLED);
         });
-        warnLogs.assertContains("'url'");
+        warnLogs.assertContains("'endpoint'");
     }
 }
