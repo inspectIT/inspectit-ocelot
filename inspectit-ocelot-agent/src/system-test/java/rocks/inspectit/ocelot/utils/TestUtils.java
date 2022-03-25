@@ -226,6 +226,7 @@ public class TestUtils {
      *
      * @param viewName the name of the views
      * @param tags     the expected tag values
+     *
      * @return the found aggregation data, null otherwise
      */
     public static AggregationData getDataForView(String viewName, Map<String, String> tags) {
@@ -239,21 +240,17 @@ public class TestUtils {
         assertThat(orderedTagKeys).contains(tags.keySet().toArray(new String[]{}));
         List<String> expectedTagValues = orderedTagKeys.stream().map(tags::get).collect(Collectors.toList());
 
-        return view.getAggregationMap().entrySet()
-                .stream()
-                .filter(e -> {
-                    List<TagValue> tagValues = e.getKey();
-                    for (int i = 0; i < tagValues.size(); i++) {
-                        String regex = expectedTagValues.get(i);
-                        TagValue tagValue = tagValues.get(i);
-                        if (regex != null && (tagValue == null || !tagValue.asString().matches(regex))) {
-                            return false;
-                        }
-                    }
-                    return true;
-                })
-                .map(Map.Entry::getValue)
-                .findFirst().orElse(null);
+        return view.getAggregationMap().entrySet().stream().filter(e -> {
+            List<TagValue> tagValues = e.getKey();
+            for (int i = 0; i < tagValues.size(); i++) {
+                String regex = expectedTagValues.get(i);
+                TagValue tagValue = tagValues.get(i);
+                if (regex != null && (tagValue == null || !tagValue.asString().matches(regex))) {
+                    return false;
+                }
+            }
+            return true;
+        }).map(Map.Entry::getValue).findFirst().orElse(null);
     }
 
     public static TimeSeries getTimeseries(String metricName, Map<String, String> tags) {
@@ -265,25 +262,25 @@ public class TestUtils {
                 .filter(m -> m.getMetricDescriptor().getName().equals(metricName))
                 .flatMap(m -> {
                     List<String> orderedTagKeys = m.getMetricDescriptor()
-                            .getLabelKeys().stream()
+                            .getLabelKeys()
+                            .stream()
                             .map(LabelKey::getKey)
                             .collect(Collectors.toList());
                     assertThat(orderedTagKeys).contains(tags.keySet().toArray(new String[]{}));
                     List<String> expectedTagValues = orderedTagKeys.stream()
                             .map(tags::get)
                             .collect(Collectors.toList());
-                    return m.getTimeSeriesList().stream()
-                            .filter(ts -> {
-                                List<LabelValue> tagValues = ts.getLabelValues();
-                                for (int i = 0; i < tagValues.size(); i++) {
-                                    String regex = expectedTagValues.get(i);
-                                    LabelValue tagValue = tagValues.get(i);
-                                    if (regex != null && (tagValue == null || !tagValue.getValue().matches(regex))) {
-                                        return false;
-                                    }
-                                }
-                                return true;
-                            });
+                    return m.getTimeSeriesList().stream().filter(ts -> {
+                        List<LabelValue> tagValues = ts.getLabelValues();
+                        for (int i = 0; i < tagValues.size(); i++) {
+                            String regex = expectedTagValues.get(i);
+                            LabelValue tagValue = tagValues.get(i);
+                            if (regex != null && (tagValue == null || !tagValue.getValue().matches(regex))) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    });
                 })
                 .findFirst();
         assertThat(series).isNotEmpty();
@@ -292,23 +289,23 @@ public class TestUtils {
 
     private static long getInstrumentationQueueLength() {
         ViewManager viewManager = Stats.getViewManager();
-        AggregationData.LastValueDataLong queueSize =
-                (AggregationData.LastValueDataLong)
-                        viewManager.getView(View.Name.create("inspectit/self/instrumentation-queue-size"))
-                                .getAggregationMap().values().stream()
-                                .findFirst()
-                                .get();
+        AggregationData.LastValueDataLong queueSize = (AggregationData.LastValueDataLong) viewManager.getView(View.Name.create("inspectit/self/instrumentation-queue-size"))
+                .getAggregationMap()
+                .values()
+                .stream()
+                .findFirst()
+                .get();
         return queueSize.getLastValue();
     }
 
     private static long getInstrumentationClassesCount() {
         ViewManager viewManager = Stats.getViewManager();
-        AggregationData.LastValueDataLong queueSize =
-                (AggregationData.LastValueDataLong)
-                        viewManager.getView(View.Name.create("inspectit/self/instrumented-classes"))
-                                .getAggregationMap().values().stream()
-                                .findFirst()
-                                .get();
+        AggregationData.LastValueDataLong queueSize = (AggregationData.LastValueDataLong) viewManager.getView(View.Name.create("inspectit/self/instrumented-classes"))
+                .getAggregationMap()
+                .values()
+                .stream()
+                .findFirst()
+                .get();
         return queueSize.getLastValue();
     }
 
