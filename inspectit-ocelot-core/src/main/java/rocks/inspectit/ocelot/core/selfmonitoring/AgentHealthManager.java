@@ -88,7 +88,8 @@ public class AgentHealthManager implements InternalProcessingAppender.Observer {
     }
 
     @PostConstruct
-    private void startEventTrigger() {
+    private void startHealthManager() {
+        InternalProcessingAppender.register(this);
         checkHealthAndSchedule();
     }
 

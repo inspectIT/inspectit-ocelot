@@ -80,11 +80,16 @@ public class AgentStatusManager {
             statusKey = agentAttributes;
         }
 
-        if (agentHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING)) {
-            log.warn("Agent {} reported health status {}!", statusKey, agentHealth);
-        }
-
+        logHealthIfChanged(statusKey, agentHealth);
         attributesToAgentStatusCache.put(statusKey, agentStatus);
+    }
+
+    private void logHealthIfChanged(Object statusKey, AgentHealth agentHealth) {
+        AgentStatus lastStatus = attributesToAgentStatusCache.getIfPresent(statusKey);
+
+        if (lastStatus != null && lastStatus.getHealth() != agentHealth) {
+            log.info("Health of agent {} changed to {}.", statusKey, agentHealth);
+        }
     }
 
     /**

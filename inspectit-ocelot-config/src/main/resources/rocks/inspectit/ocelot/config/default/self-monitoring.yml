@@ -9,10 +9,10 @@ inspectit:
       # if true, the execution time (duration in ms) per action will be recorded
       enabled: false
 
-    # settings regarding the update and notification frequency of the agent status
-    agent-status:
-      # defines how long a non-ok and non-instrumentation-related status is valid
-      # status changes due to instrumentation errors are valid until the next re-instrumentation
+    # settings regarding the update and notification frequency of the agent health
+    agent-health:
+      # defines how long a non-ok and non-instrumentation-related health status is valid
+      # health changes due to instrumentation errors are valid until the next re-instrumentation
       validity-period: 1h
 
   # definitions of existing self-monitoring metrics
