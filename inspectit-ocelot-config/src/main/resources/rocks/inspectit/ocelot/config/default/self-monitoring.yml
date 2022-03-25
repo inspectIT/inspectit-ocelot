@@ -49,6 +49,15 @@ inspectit:
             aggregation: SUM
             tags: {"level": true}
 
+      '[inspectit/self/status]':
+        enabled: ${inspectit.self-monitoring.enabled}
+        type: LONG
+        unit: status
+        description: "current status of the agent (0 = OK, 1 = WARNING, 2 = ERROR)"
+        views:
+          '[inspectit/self/status]':
+            aggregation: LAST_VALUE
+
       '[inspectit/self/action/execution-time]':
         enabled: ${inspectit.self-monitoring.action-metrics.enabled}
         type: LONG

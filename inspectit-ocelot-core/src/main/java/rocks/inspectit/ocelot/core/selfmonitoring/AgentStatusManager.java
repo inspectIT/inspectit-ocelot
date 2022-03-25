@@ -39,6 +39,8 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
 
     private final InspectitEnvironment env;
 
+    private final SelfMonitoringService selfMonitoringService;
+
     private AgentStatus instrumentationStatus = AgentStatus.OK;
 
     private final Map<AgentStatus, LocalDateTime> generalStatusTimeouts = new ConcurrentHashMap<>();
@@ -48,7 +50,7 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
     @Override
     public void onInstrumentationLoggingEvent(ILoggingEvent event) {
         instrumentationStatus = AgentStatus.mostSevere(instrumentationStatus, AgentStatus.fromLogLevel(event.getLevel()));
-        triggerEventIfStatusChanged();
+        triggerEventAndMetricIfStatusChanged();
     }
 
     @Override
@@ -60,7 +62,7 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
             generalStatusTimeouts.put(eventStatus, LocalDateTime.now().plus(validityPeriod));
         }
 
-        triggerEventIfStatusChanged();
+        triggerEventAndMetricIfStatusChanged();
     }
 
     /**
@@ -82,7 +84,7 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
     @VisibleForTesting
     private void resetInstrumentationStatus(InstrumentationConfigurationChangedEvent ev) {
         instrumentationStatus = AgentStatus.OK;
-        triggerEventIfStatusChanged();
+        triggerEventAndMetricIfStatusChanged();
     }
 
     @PostConstruct
@@ -99,7 +101,7 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
      * </ul>
      */
     private void checkStateAndSchedule() {
-        triggerEventIfStatusChanged();
+        triggerEventAndMetricIfStatusChanged();
 
         Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentStatus().getValidityPeriod();
         Duration delay = generalStatusTimeouts.values()
@@ -112,7 +114,7 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
         executor.schedule(this::checkStateAndSchedule, delay.toMillis(), TimeUnit.MILLISECONDS);
     }
 
-    private void triggerEventIfStatusChanged() {
+    private void triggerEventAndMetricIfStatusChanged() {
         AgentStatus currStatus = getCurrentStatus();
         if (currStatus != lastNotifiedStatus) {
             if (currStatus.isMoreSevereOrEqualTo(AgentStatus.WARNING)) {
@@ -120,6 +122,8 @@ public class AgentStatusManager implements InternalProcessingAppender.Observer {
             } else {
                 log.info(LOG_CHANGE_STATUS, lastNotifiedStatus, currStatus);
             }
+
+            selfMonitoringService.recordMeasurement("status", currStatus.ordinal());
 
             AgentStatusChangedEvent event = new AgentStatusChangedEvent(this, lastNotifiedStatus, currStatus);
             ctx.publishEvent(event);
