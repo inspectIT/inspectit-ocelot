@@ -52,12 +52,14 @@ jobs:
     working_directory: ~/inspectit
     steps:
       - attach_repo
-      - run: cd repo && ./gradlew assemble bootJarWithFrontend packageDemo :inspectit-ocelot-eum-server:bootJar -PbuildVersion=${CIRCLE_TAG}
+      - run: cd repo && ./gradlew assemble bootJarWithFrontend packageDemo cyclonedxBom :inspectit-ocelot-eum-server:bootJar -PbuildVersion=${CIRCLE_TAG}
       - run: mkdir artifacts
       - run: cp ~/inspectit/repo/inspectit-ocelot-agent/build/inspectit-ocelot-agent-${CIRCLE_TAG}.jar ~/inspectit/artifacts
       - run: cp ~/inspectit/repo/inspectit-ocelot-demo/build/inspectit-ocelot-demo-${CIRCLE_TAG}.zip ~/inspectit/artifacts
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/libs/inspectit-ocelot-configurationserver-${CIRCLE_TAG}.jar ~/inspectit/artifacts
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/libs/inspectit-ocelot-eum-server-${CIRCLE_TAG}.jar ~/inspectit/artifacts
+      - run: cp ~/inspectit/repo/build/reports/bom.json ~/inspectit/artifacts
+      - run: cp ~/inspectit/repo/build/reports/bom.xml ~/inspectit/artifacts
       - run:
           name: Calculate checksums of release artifacts
           working_directory: ~/inspectit/artifacts
