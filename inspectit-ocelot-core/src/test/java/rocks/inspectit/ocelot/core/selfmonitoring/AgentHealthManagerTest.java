@@ -68,7 +68,7 @@ public class AgentHealthManagerTest {
 
         context = mock(ApplicationContext.class);
 
-        healthManager = new AgentHealthManager(context, executorService, environment);
+        healthManager = new AgentHealthManager(context, executorService, environment, mock(SelfMonitoringService.class));
 
         try {
             Method startEventTriggerMethod = AgentHealthManager.class.getDeclaredMethod("startEventTrigger");
@@ -97,7 +97,7 @@ public class AgentHealthManagerTest {
 
     private void resetInstrumentationStatus() {
         try {
-            Method resetMethod = AgentHealthManager.class.getDeclaredMethod("resetInstrumentationStatus", InstrumentationConfigurationChangedEvent.class);
+            Method resetMethod = AgentHealthManager.class.getDeclaredMethod("resetInstrumentationHealth", InstrumentationConfigurationChangedEvent.class);
             resetMethod.setAccessible(true);
             resetMethod.invoke(healthManager, new InstrumentationConfigurationChangedEvent(this, null, null));
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
