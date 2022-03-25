@@ -24,6 +24,6 @@ public class SelfMonitoringSettings {
      * Settings for {@link rocks.inspectit.ocelot.core.selfmonitoring.AgentStatusManager}
      */
     @Valid
-    private AgentStatusSettings agentStatus;
+    private AgentHealthSettings agentHealth;
 
 }

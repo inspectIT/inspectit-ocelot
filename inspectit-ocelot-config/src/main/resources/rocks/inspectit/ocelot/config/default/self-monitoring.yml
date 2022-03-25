@@ -49,13 +49,13 @@ inspectit:
             aggregation: SUM
             tags: {"level": true}
 
-      '[inspectit/self/status]':
+      '[inspectit/self/health]':
         enabled: ${inspectit.self-monitoring.enabled}
         type: LONG
-        unit: status
-        description: "current status of the agent (0 = OK, 1 = WARNING, 2 = ERROR)"
+        unit: health
+        description: "current health status of the agent (0 = OK, 1 = WARNING, 2 = ERROR)"
         views:
-          '[inspectit/self/status]':
+          '[inspectit/self/health]':
             aggregation: LAST_VALUE
 
       '[inspectit/self/action/execution-time]':

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentStatusChangedEvent;
+import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentHealthChangedEvent;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -84,9 +84,9 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
     }
 
     @EventListener
-    void agentStatusChanged(AgentStatusChangedEvent event) {
+    void agentStatusChanged(AgentHealthChangedEvent event) {
         if (currentState != null) {
-            currentState.updateAgentStatus(event.getNewStatus());
+            currentState.updateAgentStatus(event.getNewHealth());
         }
     }
 }

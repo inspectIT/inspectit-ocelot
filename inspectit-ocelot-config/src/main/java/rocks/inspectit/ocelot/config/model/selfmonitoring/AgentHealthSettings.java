@@ -12,7 +12,7 @@ import java.time.Duration;
  */
 @Data
 @NoArgsConstructor
-public class AgentStatusSettings {
+public class AgentHealthSettings {
 
     /**
      * The period during which a non-ok and non-instrumentation-related status is valid.

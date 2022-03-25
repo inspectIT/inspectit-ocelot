@@ -17,7 +17,7 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
-import rocks.inspectit.ocelot.commons.models.status.AgentStatus;
+import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
@@ -97,7 +97,7 @@ public class HttpPropertySourceState {
     @Getter
     private boolean firstFileWriteAttemptSuccessful = true;
 
-    private Optional<AgentStatus> agentStatus = Optional.empty();
+    private Optional<AgentHealth> agentStatus = Optional.empty();
 
     /**
      * Constructor.
@@ -108,7 +108,7 @@ public class HttpPropertySourceState {
     public HttpPropertySourceState(String name, HttpConfigSettings currentSettings) {
         this.name = name;
         this.currentSettings = currentSettings;
-        this.errorCounter = 0;
+        errorCounter = 0;
         //ensure that currentPropertySource is never null, even if the initial fetching fails
         currentPropertySource = new PropertiesPropertySource(name, new Properties());
     }
@@ -119,6 +119,7 @@ public class HttpPropertySourceState {
      * that the configuration has not be changed the property source will not be updated!
      *
      * @param fallBackToFile if true, the configured persisted configuration will be loaded in case of an error
+     *
      * @return returns true if a new property source has been created, otherwise false.
      */
     public boolean update(boolean fallBackToFile) {
@@ -141,7 +142,7 @@ public class HttpPropertySourceState {
      *
      * @param newStatus The new agent status
      */
-    public void updateAgentStatus(@NonNull AgentStatus newStatus) {
+    public void updateAgentStatus(@NonNull AgentHealth newStatus) {
         agentStatus = Optional.of(newStatus);
     }
 
@@ -150,6 +151,7 @@ public class HttpPropertySourceState {
      * or YAML document.
      *
      * @param rawProperties the properties in a String representation
+     *
      * @return the parsed {@link Properties} object
      */
     private Properties parseProperties(String rawProperties) {
@@ -280,11 +282,14 @@ public class HttpPropertySourceState {
      * Builds the request URI by combining the base URI with the configured attributes.
      *
      * @return the resulting URI
+     *
      * @throws URISyntaxException if the base URI is malformed
      */
     public URI getEffectiveRequestUri() throws URISyntaxException {
         URIBuilder uriBuilder = new URIBuilder(currentSettings.getUrl().toURI());
-        currentSettings.getAttributes().entrySet().stream()
+        currentSettings.getAttributes()
+                .entrySet()
+                .stream()
                 .filter(pair -> !StringUtils.isEmpty(pair.getValue()))
                 .forEach(pair -> uriBuilder.setParameter(pair.getKey(), pair.getValue()));
         return uriBuilder.build();
@@ -295,7 +300,9 @@ public class HttpPropertySourceState {
      * If the response contains a 'Last-Modified' header, its value will be stored.
      *
      * @param response the HTTP response object
+     *
      * @return the response body or null in case server sends 304 (not modified)
+     *
      * @throws IOException if an error occurs reading the input stream or if the server returned an unexpected status code
      */
     private String processHttpResponse(HttpResponse response) throws IOException {
@@ -378,6 +385,5 @@ public class HttpPropertySourceState {
         }
         return null;
     }
-
 
 }
