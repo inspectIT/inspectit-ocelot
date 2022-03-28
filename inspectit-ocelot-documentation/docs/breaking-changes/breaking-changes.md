@@ -18,9 +18,9 @@ Due to the migration from OpenCensus to OpenTelemetry, the `OpenCensus Agent Exp
 
 Due to the migration to OpenTelemetry, InspectIT Ocelot now supports OpenTelemetry Protocol (OTLP) exporter for metrics and tracing.
 
-#### Exporter property `url` replaced by `endpoint`
+#### Exporter property `url` and `grpc` replaced by `endpoint`
 
-Due to the migration to OpenTelemetry, we approach the naming of OpenTelemetry for the exporters' properties. For this, the previously used property `url` is replaced by the property `endpoint`. The deprecated property `url` is still supported in this release but will be removed in future releases.
+Due to the migration to OpenTelemetry, we approach the naming of OpenTelemetry for the exporters' properties. For this, the previously used properties `url` and `grpc` are replaced by the property `endpoint`. The deprecated property `url` is still supported in this release but will be removed in future releases.
 
 #### New property `protocol` for Jaeger and OTLP exporter
 
