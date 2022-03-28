@@ -47,6 +47,7 @@
       "config-server/managing-configurations",
       "config-server/configuration-files-staging",
       "config-server/agent-mappings",
+      "config-server/scope-wizard",
       "config-server/user-authentication",
       "config-server/log-config",
       "config-server/syntax-highlighting"
