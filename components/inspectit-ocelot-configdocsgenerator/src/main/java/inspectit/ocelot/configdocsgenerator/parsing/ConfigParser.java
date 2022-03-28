@@ -2,7 +2,6 @@ package inspectit.ocelot.configdocsgenerator.parsing;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.config.YamlProcessor;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.context.properties.bind.PropertySourcesPlaceholdersResolver;
@@ -39,7 +38,7 @@ public class ConfigParser {
 
         if (!StringUtils.isEmpty(configYaml)) {
 
-            File tempFile = File.createTempFile("temp-", ".tmp");
+            File tempFile = File.createTempFile("inspectit-ocelot-configdocsgenerator-temp-config-", ".yml");
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
                 writer.write(configYaml);
             }
@@ -47,8 +46,6 @@ public class ConfigParser {
             // Read yaml into Properties
             YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
             factory.setResources(new FileUrlResource(tempFile.getAbsolutePath()));
-            factory.setDocumentMatchers((profile) -> YamlProcessor.MatchStatus.FOUND);
-            factory.afterPropertiesSet();
             Properties properties = factory.getObject();
 
             // Create ConfigurationPropertySource from Properties
