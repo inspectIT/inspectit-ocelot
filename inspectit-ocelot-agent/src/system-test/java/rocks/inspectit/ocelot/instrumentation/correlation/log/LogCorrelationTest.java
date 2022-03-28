@@ -492,7 +492,7 @@ public class LogCorrelationTest {
 
         @Test
         void verifyScheduleWithFixedDelayCorrelation_lambda() throws Exception {
-            CountDownLatch latch = new CountDownLatch(5);
+            CountDownLatch latch = new CountDownLatch(10);
             Deque<Boolean> deque = new LinkedBlockingDeque<>();
 
             traced(() -> {
@@ -503,13 +503,18 @@ public class LogCorrelationTest {
                     latch.countDown();
                 };
 
-                scheduledExecutorService.scheduleWithFixedDelay(runnable, 0, 10, TimeUnit.MILLISECONDS);
+                scheduledExecutorService.scheduleWithFixedDelay(runnable, 1, 10, TimeUnit.MILLISECONDS);
 
             }, 1.0);
 
             latch.await();
 
-            assertThat(deque).size().isGreaterThanOrEqualTo(5);
+            assertThat(deque).size().isGreaterThanOrEqualTo(10);
+            // remove all elements until the first "true" one
+            // this is done in case the instrumentation is a bit delayed
+            while (deque.peek() != null && !deque.peek()) {
+                deque.pop();
+            }
             assertThat(deque).extracting(Boolean::booleanValue)
                     .containsOnly(true);
         }

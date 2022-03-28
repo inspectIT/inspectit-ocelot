@@ -5,7 +5,6 @@ import io.opencensus.stats.*;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.Tags;
 import org.assertj.core.util.Maps;
-import org.junit.AssumptionViolatedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -380,7 +379,7 @@ public class MeasuresAndViewsManagerTest {
             manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
             Measure resultMeasure = manager.getMeasure(metricName)
-                    .orElseThrow(() -> new AssumptionViolatedException("Measure did not exist"));
+                    .orElseThrow(() -> new RuntimeException("Measure did not exist"));
             assertThat(resultMeasure.getName()).isEqualTo(metricName);
             assertThat(resultMeasure.getDescription()).isEqualTo(metricName);
             assertThat(resultMeasure).isInstanceOf(Measure.MeasureDouble.class);
@@ -418,7 +417,7 @@ public class MeasuresAndViewsManagerTest {
             manager.addOrUpdateAndCacheMeasureWithViews(metricName, metricDefinition, emptyMap(), emptyMap());
 
             Measure resultMeasure = manager.getMeasure(metricName)
-                    .orElseThrow(() -> new AssumptionViolatedException("Measure did not exist"));
+                    .orElseThrow(() -> new RuntimeException("Measure did not exist"));
             assertThat(resultMeasure.getName()).isEqualTo(metricName);
             assertThat(resultMeasure.getDescription()).isEqualTo(metricName);
             assertThat(resultMeasure).isInstanceOf(Measure.MeasureDouble.class);

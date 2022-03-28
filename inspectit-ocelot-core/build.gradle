@@ -42,7 +42,7 @@ dependencies {
     buildTools(
             'jarcheck:jarcheck:1.5'
     )
-    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     implementation(
             project(':inspectit-ocelot-config'),
@@ -125,7 +125,7 @@ dependencies {
             'org.assertj:assertj-core:3.11.1',
             'org.assertj:assertj-guava:3.2.1',
             'org.awaitility:awaitility:3.1.5',
-            "com.github.tomakehurst:wiremock-jre8:2.21.0",
+            "com.github.tomakehurst:wiremock-jre8-standalone:2.32.0",
             "io.grpc:grpc-netty-shaded:${grpcVersion}",
             "io.grpc:grpc-stub:${grpcVersion}",
             'org.influxdb:influxdb-java:2.15',

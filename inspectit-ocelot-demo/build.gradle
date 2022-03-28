@@ -1,22 +1,3 @@
-plugins {
-    id 'com.palantir.docker' version "0.21.0"
-}
-
-task copyAgent(type: Copy) {
-    dependsOn ':inspectit-ocelot-agent:jar'
-    from(project(':inspectit-ocelot-agent').buildDir.toString() + "/inspectit-ocelot-agent-${version}.jar")
-    into(buildDir)
-    rename ("inspectit-ocelot-agent-${version}\\.jar",
-            'inspectit-ocelot-agent.jar')
-}
-
-docker {
-    name "inspectit/inspectit-ocelot-agent"
-    tags "${version}"
-    dockerfile file('agent/Dockerfile')
-    files 'agent/entrypoint.sh', "$buildDir/inspectit-ocelot-agent.jar"
-}
-
 task setVersionForDockerCompose(type: Copy) {
     from '.env'
     into buildDir
@@ -41,6 +22,3 @@ task packageDemo(type: Zip) {
         include ".env"
     }
 }
-
-
-docker.dependsOn copyAgent
