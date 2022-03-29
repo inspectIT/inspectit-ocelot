@@ -33,14 +33,14 @@ public class LogPreloader extends DynamicallyActivatableService implements Inter
     }
 
     /**
-     * Records one log event and stores into a local buffer
+     * Records one general log event and stores into a local buffer
      *
-     * @param event The log event to record
+     * @param event       The log event to record
+     * @param invalidator Ignored
      */
     @Override
-    public void onGeneralLoggingEvent(ILoggingEvent event) {
+    public void onLoggingEvent(ILoggingEvent event, Class<?> invalidator) {
         if (buffer != null && event.getLevel().isGreaterOrEqual(minimumPreloadingLevel)) {
-            // TODO: handle category
             int index = currentIndex.getAndIncrement() % buffer.length;
             try {
                 buffer[index] = event;
@@ -49,12 +49,6 @@ public class LogPreloader extends DynamicallyActivatableService implements Inter
                 // in this case, we just drop the event until everything is properly set again
             }
         }
-    }
-
-    @Override
-    public void onInstrumentationLoggingEvent(ILoggingEvent event) {
-        // TODO: handle differently
-        onGeneralLoggingEvent(event);
     }
 
     /**

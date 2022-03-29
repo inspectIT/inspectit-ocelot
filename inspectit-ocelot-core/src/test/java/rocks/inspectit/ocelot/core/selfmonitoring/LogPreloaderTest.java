@@ -56,13 +56,13 @@ public class LogPreloaderTest {
 
         @Test
         void logOneWarnMessage() {
-            logPreloader.onGeneralLoggingEvent(warnEvent);
+            logPreloader.onLoggingEvent(warnEvent, null);
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false).count()).isOne();
         }
 
         @Test
         void logMultipleWarnMessages() {
-            IntStream.range(0, DEFAULT_BUFFER_SIZE - 2).forEach(n -> logPreloader.onGeneralLoggingEvent(warnEvent));
+            IntStream.range(0, DEFAULT_BUFFER_SIZE - 2).forEach(n -> logPreloader.onLoggingEvent(warnEvent, null));
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false)
                     .count()).isEqualTo(DEFAULT_BUFFER_SIZE - 2);
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs()
@@ -71,8 +71,8 @@ public class LogPreloaderTest {
 
         @Test
         void logMoreMessagesThanBufferSize() {
-            logPreloader.onGeneralLoggingEvent(errorEvent);
-            IntStream.range(0, DEFAULT_BUFFER_SIZE).forEach(n -> logPreloader.onGeneralLoggingEvent(warnEvent));
+            logPreloader.onLoggingEvent(errorEvent, null);
+            IntStream.range(0, DEFAULT_BUFFER_SIZE).forEach(n -> logPreloader.onLoggingEvent(warnEvent, null));
 
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false)
                     .count()).isEqualTo(DEFAULT_BUFFER_SIZE);
@@ -82,14 +82,14 @@ public class LogPreloaderTest {
 
         @Test
         void logMessagesAndChangeBufferSize() {
-            IntStream.range(0, DEFAULT_BUFFER_SIZE / 2).forEach(n -> logPreloader.onGeneralLoggingEvent(warnEvent));
+            IntStream.range(0, DEFAULT_BUFFER_SIZE / 2).forEach(n -> logPreloader.onLoggingEvent(warnEvent, null));
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false)
                     .count()).isEqualTo(DEFAULT_BUFFER_SIZE / 2);
 
             logPreloader.doEnable(createConfig(2 * DEFAULT_BUFFER_SIZE));
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false).count()).isZero();
 
-            IntStream.range(0, DEFAULT_BUFFER_SIZE + 1).forEach(n -> logPreloader.onGeneralLoggingEvent(errorEvent));
+            IntStream.range(0, DEFAULT_BUFFER_SIZE + 1).forEach(n -> logPreloader.onLoggingEvent(errorEvent, null));
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false)
                     .count()).isEqualTo(DEFAULT_BUFFER_SIZE + 1);
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs()
