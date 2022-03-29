@@ -1,5 +1,6 @@
 plugins {
     id "me.champeau.gradle.jmh" version "0.5.3"
+    id "org.cyclonedx.bom" version "1.5.0"
 }
 
 configurations {
@@ -148,6 +149,11 @@ task generateVersionFile {
             writer << "$version\n$currentDate"
         }
     }
+}
+
+cyclonedxBom {
+    // includeConfigs is the list of configuration names to include when generating the BOM (leave empty to include every configuration)
+    includeConfigs += ["runtimeClasspath"]
 }
 
 jar.dependsOn checkDependencyJavaVersions
