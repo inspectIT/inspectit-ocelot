@@ -18,8 +18,6 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentHealthChangedEvent;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -69,14 +67,7 @@ public class AgentHealthManagerTest {
         context = mock(ApplicationContext.class);
 
         healthManager = new AgentHealthManager(context, executorService, environment, mock(SelfMonitoringService.class));
-
-        try {
-            Method startEventTriggerMethod = AgentHealthManager.class.getDeclaredMethod("startEventTrigger");
-            startEventTriggerMethod.setAccessible(true);
-            startEventTriggerMethod.invoke(healthManager);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        healthManager.startHealthManager();
     }
 
     @AfterEach
@@ -95,16 +86,6 @@ public class AgentHealthManagerTest {
         verifyNoMoreInteractions(context);
     }
 
-    private void resetInstrumentationStatus() {
-        try {
-            Method resetMethod = AgentHealthManager.class.getDeclaredMethod("resetInstrumentationHealth", InstrumentationConfigurationChangedEvent.class);
-            resetMethod.setAccessible(true);
-            resetMethod.invoke(healthManager, new InstrumentationConfigurationChangedEvent(this, null, null));
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
     @Nested
     class OnLogEvent {
 
@@ -113,35 +94,35 @@ public class AgentHealthManagerTest {
             assertThat(healthManager.getCurrentHealth()).withFailMessage("Initial status shall be OK")
                     .isEqualTo(AgentHealth.OK);
 
-            healthManager.onInstrumentationLoggingEvent(createLoggingEvent(Level.INFO));
-            healthManager.onInstrumentationLoggingEvent(createLoggingEvent(Level.DEBUG));
+            healthManager.onLoggingEvent(createLoggingEvent(Level.INFO), InstrumentationConfigurationChangedEvent.class);
+            healthManager.onLoggingEvent(createLoggingEvent(Level.DEBUG), InstrumentationConfigurationChangedEvent.class);
             assertThat(healthManager.getCurrentHealth()).withFailMessage("INFO and DEBUG messages shall not change the status")
                     .isEqualTo(AgentHealth.OK);
 
             verifyNoInteractions(context);
 
-            healthManager.onInstrumentationLoggingEvent(createLoggingEvent(Level.WARN));
+            healthManager.onLoggingEvent(createLoggingEvent(Level.WARN), InstrumentationConfigurationChangedEvent.class);
             assertThat(healthManager.getCurrentHealth()).withFailMessage("Status after WARN message shall be WARNING")
                     .isEqualTo(AgentHealth.WARNING);
             verifyExactlyOneEventWasPublished(AgentHealth.WARNING);
 
             clearInvocations(context);
 
-            healthManager.onInstrumentationLoggingEvent(createLoggingEvent(Level.ERROR));
+            healthManager.onLoggingEvent(createLoggingEvent(Level.ERROR), InstrumentationConfigurationChangedEvent.class);
             assertThat(healthManager.getCurrentHealth()).withFailMessage("Status after ERROR message shall be ERROR")
                     .isEqualTo(AgentHealth.ERROR);
             verifyExactlyOneEventWasPublished(AgentHealth.ERROR);
 
             clearInvocations(context);
 
-            healthManager.onInstrumentationLoggingEvent(createLoggingEvent(Level.INFO));
+            healthManager.onLoggingEvent(createLoggingEvent(Level.INFO), InstrumentationConfigurationChangedEvent.class);
             assertThat(healthManager.getCurrentHealth()).withFailMessage("INFO messages shall not change the status")
                     .isEqualTo(AgentHealth.ERROR);
             verifyNoMoreInteractions(context);
 
             clearInvocations(context);
 
-            resetInstrumentationStatus();
+            healthManager.invalidateEvents(new InstrumentationConfigurationChangedEvent(this, null, null));
             assertThat(healthManager.getCurrentHealth()).withFailMessage("When new instrumentation was triggered, status shall be OK")
                     .isEqualTo(AgentHealth.OK);
             verifyExactlyOneEventWasPublished(AgentHealth.OK);
@@ -152,14 +133,14 @@ public class AgentHealthManagerTest {
             assertThat(healthManager.getCurrentHealth()).withFailMessage("Initial status shall be OK")
                     .isEqualTo(AgentHealth.OK);
 
-            healthManager.onGeneralLoggingEvent(createLoggingEvent(Level.INFO));
-            healthManager.onGeneralLoggingEvent(createLoggingEvent(Level.DEBUG));
+            healthManager.onLoggingEvent(createLoggingEvent(Level.INFO), null);
+            healthManager.onLoggingEvent(createLoggingEvent(Level.DEBUG), null);
             assertThat(healthManager.getCurrentHealth()).withFailMessage("INFO and DEBUG messages shall not change the status")
                     .isEqualTo(AgentHealth.OK);
 
             verifyNoInteractions(context);
 
-            healthManager.onGeneralLoggingEvent(createLoggingEvent(Level.ERROR));
+            healthManager.onLoggingEvent(createLoggingEvent(Level.ERROR), null);
             assertThat(healthManager.getCurrentHealth()).withFailMessage("Status after ERROR message shall be ERROR")
                     .isEqualTo(AgentHealth.ERROR);
             verifyExactlyOneEventWasPublished(AgentHealth.ERROR);

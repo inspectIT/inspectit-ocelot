@@ -5,11 +5,9 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
 import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentHealthChangedEvent;
 
@@ -18,7 +16,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -41,28 +38,35 @@ public class AgentHealthManager implements InternalProcessingAppender.Observer {
 
     private final SelfMonitoringService selfMonitoringService;
 
-    private AgentHealth instrumentationHealth = AgentHealth.OK;
+    private final Map<Class<?>, AgentHealth> invalidatableHealth = new ConcurrentHashMap<>();
 
     private final Map<AgentHealth, LocalDateTime> generalHealthTimeouts = new ConcurrentHashMap<>();
 
     private AgentHealth lastNotifiedHealth = AgentHealth.OK;
 
     @Override
-    public void onInstrumentationLoggingEvent(ILoggingEvent event) {
-        instrumentationHealth = AgentHealth.mostSevere(instrumentationHealth, AgentHealth.fromLogLevel(event.getLevel()));
+    public void onLoggingEvent(ILoggingEvent event, Class<?> invalidator) {
+        AgentHealth eventHealth = AgentHealth.fromLogLevel(event.getLevel());
+
+        if (invalidator == null) {
+            handleTimeoutHealth(eventHealth);
+        } else {
+            handleInvalidatableHealth(eventHealth, invalidator);
+        }
+
         triggerEventAndMetricIfHealthChanged();
     }
 
-    @Override
-    public void onGeneralLoggingEvent(ILoggingEvent event) {
-        AgentHealth eventHealth = AgentHealth.fromLogLevel(event.getLevel());
+    private void handleInvalidatableHealth(AgentHealth eventHealth, Class<?> invalidator) {
+        invalidatableHealth.merge(invalidator, eventHealth, AgentHealth::mostSevere);
+    }
+
+    private void handleTimeoutHealth(AgentHealth eventHealth) {
         Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod();
 
         if (eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING)) {
             generalHealthTimeouts.put(eventHealth, LocalDateTime.now().plus(validityPeriod));
         }
-
-        triggerEventAndMetricIfHealthChanged();
     }
 
     /**
@@ -71,24 +75,30 @@ public class AgentHealthManager implements InternalProcessingAppender.Observer {
      * @return The current agent health
      */
     public AgentHealth getCurrentHealth() {
-        Optional<AgentHealth> generalStatus = generalHealthTimeouts.entrySet()
+        AgentHealth generalHealth = generalHealthTimeouts.entrySet()
                 .stream()
                 .filter((entry) -> entry.getValue().isAfter(LocalDateTime.now()))
                 .map(Map.Entry::getKey)
-                .max(Comparator.naturalOrder());
+                .max(Comparator.naturalOrder())
+                .orElse(AgentHealth.OK);
 
-        return AgentHealth.mostSevere(instrumentationHealth, generalStatus.orElse(AgentHealth.OK));
+        AgentHealth invHealth = invalidatableHealth.values()
+                .stream()
+                .reduce(AgentHealth::mostSevere)
+                .orElse(AgentHealth.OK);
+
+        return AgentHealth.mostSevere(generalHealth, invHealth);
     }
 
-    @EventListener
-    @VisibleForTesting
-    private void resetInstrumentationHealth(InstrumentationConfigurationChangedEvent ev) {
-        instrumentationHealth = AgentHealth.OK;
+    @Override
+    public void invalidateEvents(Object invalidator) {
+        invalidatableHealth.remove(invalidator.getClass());
         triggerEventAndMetricIfHealthChanged();
     }
 
     @PostConstruct
-    private void startHealthManager() {
+    @VisibleForTesting
+    void startHealthManager() {
         InternalProcessingAppender.register(this);
         checkHealthAndSchedule();
     }

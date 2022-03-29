@@ -18,22 +18,14 @@ public class LogMetricsRecorder implements InternalProcessingAppender.Observer {
     @Autowired
     private SelfMonitoringService selfMonitoringService;
 
-    @Override
-    public void onInstrumentationLoggingEvent(ILoggingEvent event) {
-        recordLogEvent(event);
-    }
-
-    @Override
-    public void onGeneralLoggingEvent(ILoggingEvent event) {
-        recordLogEvent(event);
-    }
-
     /**
      * Records an increment of one of the number of metrics.
      *
-     * @param event The log event, which defines the logLevel (e.g. WARN or ERROR).
+     * @param event       The log event, which defines the logLevel (e.g. WARN or ERROR).
+     * @param invalidator Ignored.
      */
-    private void recordLogEvent(ILoggingEvent event) {
+    @Override
+    public void onLoggingEvent(ILoggingEvent event, Class<?> invalidator) {
         Map<String, String> customTags = new HashMap<>();
         customTags.put("level", event.getLevel().toString());
         selfMonitoringService.recordMeasurement("logs", 1, customTags);

@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.core.instrumentation.InstrumentationManager;
+import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.ocelot.core.selfmonitoring.LogMetricsRecorderTest;
 
 import java.lang.reflect.Field;
@@ -56,7 +57,7 @@ public class InternalProcessingAppenderTest {
             appender.append(infoEvent);
             appender.append(infoEvent);
 
-            verify(observer, times(2)).onGeneralLoggingEvent(any());
+            verify(observer, times(2)).onLoggingEvent(any(), eq(null));
             verifyNoMoreInteractions(observer);
         }
 
@@ -73,7 +74,7 @@ public class InternalProcessingAppenderTest {
             appender.append(instrumentationEvent);
             appender.append(instrumentationEvent);
 
-            verify(observer, times(2)).onInstrumentationLoggingEvent(any());
+            verify(observer, times(2)).onLoggingEvent(any(), eq(InstrumentationConfigurationChangedEvent.class));
             verifyNoMoreInteractions(observer);
         }
 
@@ -93,8 +94,8 @@ public class InternalProcessingAppenderTest {
             appender.append(generalEvent);
             appender.append(instrumentationEvent);
 
-            verify(observer, times(2)).onGeneralLoggingEvent(any());
-            verify(observer, times(2)).onInstrumentationLoggingEvent(any());
+            verify(observer, times(2)).onLoggingEvent(any(), eq(null));
+            verify(observer, times(2)).onLoggingEvent(any(), eq(InstrumentationConfigurationChangedEvent.class));
             verifyNoMoreInteractions(observer);
         }
     }
