@@ -23,6 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Manages the {@link AgentStatus} and publishes {@link AgentStatusChangedEvent}s when it changes.
+ */
 @Component
 @Slf4j
 @RequiredArgsConstructor
