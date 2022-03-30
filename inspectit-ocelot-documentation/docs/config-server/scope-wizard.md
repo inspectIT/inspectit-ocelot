@@ -68,13 +68,13 @@ arguments_ by clicking the respective checkbox to do so. With the (+)-button you
 for the method. Then you can add the fully qualified name of each argument type. The matcher in the screenshot below
 would for instance match on the method `public myTestMethod(String someParam1, Object someParam2)`, `protected myTestMethod(String someParam1, Object someParam2)`, `private myTestMethod(String someParam1, Object someParam2)` and `myTestMethod(String someParam1, Object someParam2)`.
 
-![Defining a Scope using the Scope Wizard](assets/method-matcher-example.png)
+![Method Matcher](assets/method-matcher-example.png)
 
 ### Enabling and Disbaling Tracing and Time Measurement
 
 After creating and applying the Scope, it appears in your main window, as shown in the screenshot below. Here you can toggle two methods: `Tracing` and `Measure`. `Tracing` enables stack tracing for the respective Scope. With `Measure` you can allow inspectIT to measure the execution time for all methods that apply to your Scope.
 
-![Defining a Scope using the Scope Wizard](assets/scope-wizard.png)
+![Trace and Measure via UI](assets/scope-wizard.png)
 
 ## Convert back to YAML
 
@@ -84,5 +84,5 @@ Sometimes you want to extend the configuration you have created with functions t
 Converting the file back to YAML is *not* reversible! Only use this feature if you are 100% certain that you won't use the UI-based configuration anymore!
 :::
 
-![Defining a Scope using the Scope Wizard](assets/scope-wizard-2.png)
+![Convert to YAML](assets/scope-wizard-2.png)
 
