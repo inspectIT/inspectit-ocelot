@@ -103,17 +103,17 @@ public class ConfigurationControllerTest {
             final String configYaml = "yaml";
             AgentConfiguration agentConfiguration = AgentConfiguration.builder().configYaml(configYaml).build();
 
-            final Map<String, String> defaultYamls = new HashMap<>();
+            Map<String, String> defaultYamls = new HashMap<>();
             final String defaultYamlContent = "defaultYaml";
             defaultYamls.put("firstYaml", defaultYamlContent);
 
-            final Map<String, String> configYamlMap = new HashMap<>();
+            Map<String, String> configYamlMap = new HashMap<>();
             configYamlMap.put("entry", "value");
 
-            final Map<String, String> defaultConfigYamlMap = new HashMap<>();
+            Map<String, String> defaultConfigYamlMap = new HashMap<>();
             defaultConfigYamlMap.put("defaultEntry", "defaultValue");
 
-            final Object combinedYamls = ObjectStructureMerger.merge(configYamlMap, defaultConfigYamlMap);
+            Object combinedYamls = ObjectStructureMerger.merge(configYamlMap, defaultConfigYamlMap);
             final String combinedYamlString = "bothYamls";
 
             ConfigDocumentation configDocumentationMock = mock(ConfigDocumentation.class);
@@ -173,12 +173,12 @@ public class ConfigurationControllerTest {
             verifyNoInteractions(configDocsGenerator);
 
             AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-            AssertionsForClassTypes.assertThat(result.getBody()).isEqualTo(
-                    String.format("Config Documentation for given AgentMapping '%s' could not be generated due to the following error: %s.", mappingName, exception.getMessage()));
+            AssertionsForClassTypes.assertThat(result.getBody())
+                    .isEqualTo(String.format("Config Documentation for given AgentMapping '%s' could not be generated due to the following error: %s.", mappingName, exception.getMessage()));
         }
 
         @Test
-        void withoutDefaultConfig() throws JsonProcessingException {
+        void withoutDefaultConfig() throws IOException {
 
             final String mappingName = "name";
             AgentMapping agentMapping = AgentMapping.builder().build();
@@ -226,7 +226,7 @@ public class ConfigurationControllerTest {
         }
 
         @Test
-        void invalidYaml() throws JsonProcessingException {
+        void invalidYaml() throws IOException {
 
             final String mappingName = "name";
             AgentMapping agentMapping = AgentMapping.builder().build();
@@ -254,8 +254,8 @@ public class ConfigurationControllerTest {
             verifyNoMoreInteractions(configDocsGenerator);
 
             AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-            AssertionsForClassTypes.assertThat(result.getBody()).isEqualTo(
-                    String.format("Config Documentation for given AgentMapping '%s' could not be generated due to the following error: %s.", mappingName, exception.getMessage()));
+            AssertionsForClassTypes.assertThat(result.getBody())
+                    .isEqualTo(String.format("Config Documentation for given AgentMapping '%s' could not be generated due to the following error: %s.", mappingName, exception.getMessage()));
         }
     }
 }
