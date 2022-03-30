@@ -106,7 +106,7 @@ class ConfigDocsGeneratorTest {
 
         // Create a sample MetricDoc object
         metricDoc = Mockito.mock(MetricDocs.class);
-        when(metricDoc.getName()).thenReturn("[disk/free]");
+        when(metricDoc.getName()).thenReturn("disk/free");
         when(metricDoc.getDescription()).thenReturn("free disk space");
         when(metricDoc.getSince()).thenReturn(null);
         when(metricDoc.getUnit()).thenReturn("bytes");
@@ -134,8 +134,8 @@ class ConfigDocsGeneratorTest {
         // Create a sample RuleDoc with examples for all possible contents
         // Create the includes list for the RuleDoc
         List<String> include = new ArrayList<>();
-        include.add("r_tracing_global_attributes");
         include.add("r_capture_method_entry_timestamp_conditional");
+        include.add("r_tracing_global_attributes");
 
         // Create the scopes list for the RuleDoc
         List<String> scopes = new ArrayList<>();
@@ -152,7 +152,7 @@ class ConfigDocsGeneratorTest {
         constantTags.put("error", "servicegraph_is_error");
 
         RuleMetricsDocs ruleMetricsDocsMock = Mockito.mock(RuleMetricsDocs.class);
-        when(ruleMetricsDocsMock.getName()).thenReturn("[service/in/responsetime]");
+        when(ruleMetricsDocsMock.getName()).thenReturn("service/in/responsetime");
         when(ruleMetricsDocsMock.getValue()).thenReturn("servicegraph_duration");
         when(ruleMetricsDocsMock.getDataTags()).thenReturn(dataTags);
         when(ruleMetricsDocsMock.getConstantTags()).thenReturn(constantTags);
