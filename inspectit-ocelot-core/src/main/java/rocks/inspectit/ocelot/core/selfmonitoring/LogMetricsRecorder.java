@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,5 +35,10 @@ public class LogMetricsRecorder implements InternalProcessingAppender.Observer {
     @PostConstruct
     private void subscribe() {
         InternalProcessingAppender.register(this);
+    }
+
+    @PreDestroy
+    private void unsubscribe() {
+        InternalProcessingAppender.unregister(this);
     }
 }

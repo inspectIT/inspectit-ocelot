@@ -11,6 +11,7 @@ import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -65,6 +66,11 @@ public class LogPreloader extends DynamicallyActivatableService implements Inter
     @PostConstruct
     private void subscribe() {
         InternalProcessingAppender.register(this);
+    }
+
+    @PreDestroy
+    private void unsubscribe() {
+        InternalProcessingAppender.unregister(this);
     }
 
     @Override

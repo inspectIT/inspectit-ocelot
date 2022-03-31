@@ -12,6 +12,7 @@ import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
 import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentHealthChangedEvent;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -46,6 +47,11 @@ public class AgentHealthManager implements InternalProcessingAppender.Observer {
 
     @Override
     public void onLoggingEvent(ILoggingEvent event, Class<?> invalidator) {
+        if (AgentHealthManager.class.getCanonicalName().equals(event.getLoggerName())) {
+            // ignore own logs, which otherwise would tend to cause infinite loops
+            return;
+        }
+
         AgentHealth eventHealth = AgentHealth.fromLogLevel(event.getLevel());
 
         if (invalidator == null) {
@@ -98,9 +104,20 @@ public class AgentHealthManager implements InternalProcessingAppender.Observer {
 
     @PostConstruct
     @VisibleForTesting
-    void startHealthManager() {
+    void registerAtAppender() {
         InternalProcessingAppender.register(this);
+    }
+
+    @PostConstruct
+    @VisibleForTesting
+    void startHealthCheckScheduler() {
         checkHealthAndSchedule();
+    }
+
+    @PreDestroy
+    @VisibleForTesting
+    void unregisterFromAppender() {
+        InternalProcessingAppender.unregister(this);
     }
 
     /**
@@ -126,19 +143,24 @@ public class AgentHealthManager implements InternalProcessingAppender.Observer {
     }
 
     private void triggerEventAndMetricIfHealthChanged() {
-        AgentHealth currHealth = getCurrentHealth();
-        if (currHealth != lastNotifiedHealth) {
-            if (currHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING)) {
-                log.warn(LOG_CHANGE_STATUS, lastNotifiedHealth, currHealth);
-            } else {
-                log.info(LOG_CHANGE_STATUS, lastNotifiedHealth, currHealth);
+        if (getCurrentHealth() != lastNotifiedHealth) {
+            synchronized (this) {
+                AgentHealth currHealth = getCurrentHealth();
+                if (currHealth != lastNotifiedHealth) {
+                    AgentHealth lastHealth = lastNotifiedHealth;
+                    lastNotifiedHealth = currHealth;
+                    if (currHealth.isMoreSevereOrEqualTo(lastHealth)) {
+                        log.warn(LOG_CHANGE_STATUS, lastHealth, currHealth);
+                    } else {
+                        log.info(LOG_CHANGE_STATUS, lastHealth, currHealth);
+                    }
+
+                    selfMonitoringService.recordMeasurement("health", currHealth.ordinal());
+
+                    AgentHealthChangedEvent event = new AgentHealthChangedEvent(this, lastHealth, currHealth);
+                    ctx.publishEvent(event);
+                }
             }
-
-            selfMonitoringService.recordMeasurement("health", currHealth.ordinal());
-
-            AgentHealthChangedEvent event = new AgentHealthChangedEvent(this, lastNotifiedHealth, currHealth);
-            ctx.publishEvent(event);
-            lastNotifiedHealth = currHealth;
         }
     }
 }

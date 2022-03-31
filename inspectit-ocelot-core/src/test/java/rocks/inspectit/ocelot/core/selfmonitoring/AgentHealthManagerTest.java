@@ -4,7 +4,10 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,11 +48,6 @@ public class AgentHealthManagerTest {
 
     private AgentHealthManager healthManager;
 
-    @BeforeAll
-    static void setupExecutorService() {
-
-    }
-
     @BeforeEach
     void setupStatusManager() {
         executorService = new ScheduledThreadPoolExecutor(1);
@@ -67,7 +65,7 @@ public class AgentHealthManagerTest {
         context = mock(ApplicationContext.class);
 
         healthManager = new AgentHealthManager(context, executorService, environment, mock(SelfMonitoringService.class));
-        healthManager.startHealthManager();
+        healthManager.startHealthCheckScheduler();
     }
 
     @AfterEach
@@ -129,7 +127,7 @@ public class AgentHealthManagerTest {
         }
 
         @Test
-        void logGeneralEvents() throws InterruptedException {
+        void logGeneralEvents() {
             assertThat(healthManager.getCurrentHealth()).withFailMessage("Initial status shall be OK")
                     .isEqualTo(AgentHealth.OK);
 
