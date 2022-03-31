@@ -155,7 +155,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
         </div>
         <div className="row-center row-margin meta-row">
           <label className="start-label" htmlFor="Method which">
-            Method which name
+            Method name
           </label>
           <Dropdown
             disabled={methodMatcher.isConstructor}
@@ -218,7 +218,7 @@ const MethodMatcher = ({ methodMatcher, onMethodMatcherChange }) => {
               tooltip="A fully qualified class name representing the method argument"
               tooltipOptions={TOOLTIP_OPTIONS}
               onChange={(e) => updateMatcher('parameterInput', e.target.value)}
-              placeholder="Argument Full-Qualified Class Name"
+              placeholder="Argument's fully qualified class name"
             />
             <Button
               disabled={disableArguments}
