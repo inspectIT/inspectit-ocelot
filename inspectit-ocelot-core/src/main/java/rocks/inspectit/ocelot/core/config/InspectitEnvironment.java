@@ -142,6 +142,7 @@ public class InspectitEnvironment extends StandardEnvironment {
      *                          neither the property sources nor {@link #currentConfig} will change during the execution of propertiesUpdater.
      */
     public synchronized void updatePropertySources(Consumer<MutablePropertySources> propertiesUpdater) {
+        eventDrain.publishEvent(new PropertySourcesReloadEvent(this));
         propertiesUpdater.accept(getPropertySources());
         InspectitConfig oldConfig = currentConfig;
 

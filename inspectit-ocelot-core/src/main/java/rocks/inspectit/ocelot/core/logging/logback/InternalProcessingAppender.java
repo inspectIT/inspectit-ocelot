@@ -6,8 +6,12 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.NonNull;
 import lombok.val;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.config.PropertyNamesValidator;
-import rocks.inspectit.ocelot.core.config.PropertySourcesChangedEvent;
+import rocks.inspectit.ocelot.core.config.PropertySourcesReloadEvent;
 import rocks.inspectit.ocelot.core.config.propertysources.EnvironmentInformationPropertySource;
 import rocks.inspectit.ocelot.core.instrumentation.InstrumentationManager;
 import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
@@ -29,9 +33,10 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
     static {
         INVALIDATORS.put(InstrumentationManager.class.getPackage()
                 .getName(), InstrumentationConfigurationChangedEvent.class);
-        INVALIDATORS.put(PropertyNamesValidator.class.getCanonicalName(), PropertySourcesChangedEvent.class);
+        INVALIDATORS.put(InspectitEnvironment.class.getCanonicalName(), PropertySourcesReloadEvent.class);
+        INVALIDATORS.put(PropertyNamesValidator.class.getCanonicalName(), PropertySourcesReloadEvent.class);
         INVALIDATORS.put(EnvironmentInformationPropertySource.class.getPackage()
-                .getName(), PropertySourcesChangedEvent.class);
+                .getName(), PropertySourcesReloadEvent.class);
     }
 
     /**
@@ -58,7 +63,7 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
         String key = INVALIDATORS.floorKey(event.getLoggerName());
         Class<?> invalidator = null;
 
-        if (event.getLoggerName().startsWith(key)) {
+        if (key != null && event.getLoggerName().startsWith(key)) {
             invalidator = INVALIDATORS.get(key);
         }
 
@@ -67,21 +72,28 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
         }
     }
 
-    @EventListener
-    private void onInstrumentationConfigurationChangedEvent(InstrumentationConfigurationChangedEvent ev) {
-        onInvalidationEvent(ev);
-    }
-
-    @EventListener
-    private void onPropertySourcesChangedEvent(PropertySourcesChangedEvent ev) {
-        onInvalidationEvent(ev);
-    }
-
     @VisibleForTesting
-    void onInvalidationEvent(Object ev) {
+    static void onInvalidationEvent(Object ev) {
         for (val observer : observers.values()) {
             observer.invalidateEvents(ev);
         }
+    }
+
+    @Component
+    static class InvalidationListener {
+
+        @EventListener
+        @Order(Ordered.HIGHEST_PRECEDENCE)
+        private void onInstrumentationConfigurationChangedEvent(InstrumentationConfigurationChangedEvent ev) {
+            onInvalidationEvent(ev);
+        }
+
+        @EventListener
+        @Order(Ordered.HIGHEST_PRECEDENCE)
+        private void onPropertySourcesReloadEvent(PropertySourcesReloadEvent ev) {
+            onInvalidationEvent(ev);
+        }
+
     }
 
     /**

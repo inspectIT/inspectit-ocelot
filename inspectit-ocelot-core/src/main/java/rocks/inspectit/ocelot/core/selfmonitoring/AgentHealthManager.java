@@ -114,6 +114,12 @@ public class AgentHealthManager implements InternalProcessingAppender.Observer {
         checkHealthAndSchedule();
     }
 
+    @PostConstruct
+    @VisibleForTesting
+    void sendInitialHealthMetric() {
+        selfMonitoringService.recordMeasurement("health", AgentHealth.OK.ordinal());
+    }
+
     @PreDestroy
     @VisibleForTesting
     void unregisterFromAppender() {
