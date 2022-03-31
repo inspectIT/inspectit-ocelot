@@ -17,7 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -57,7 +57,7 @@ public class LogMetricsIntTest {
         try {
             Field field = InternalProcessingAppender.class.getDeclaredField("observers");
             field.setAccessible(true);
-            ((List<?>) field.get(null)).clear();
+            ((Map<?, ?>) field.get(null)).clear();
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }

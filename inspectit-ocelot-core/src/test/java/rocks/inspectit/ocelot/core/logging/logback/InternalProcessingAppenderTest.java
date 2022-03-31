@@ -16,7 +16,7 @@ import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationC
 import rocks.inspectit.ocelot.core.selfmonitoring.LogMetricsRecorderTest;
 
 import java.lang.reflect.Field;
-import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
@@ -35,7 +35,7 @@ public class InternalProcessingAppenderTest {
         try {
             Field field = InternalProcessingAppender.class.getDeclaredField("observers");
             field.setAccessible(true);
-            ((List<?>) field.get(null)).clear();
+            ((Map<?, ?>) field.get(null)).clear();
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }

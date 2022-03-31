@@ -12,8 +12,8 @@ import rocks.inspectit.ocelot.core.config.propertysources.EnvironmentInformation
 import rocks.inspectit.ocelot.core.instrumentation.InstrumentationManager;
 import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
@@ -24,7 +24,7 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
 
     private static final NavigableMap<String, Class<?>> INVALIDATORS = new TreeMap<>();
 
-    private static final List<Observer> observers = new ArrayList<>();
+    private static final Map<Class<? extends Observer>, Observer> observers = new HashMap<>();
 
     static {
         INVALIDATORS.put(InstrumentationManager.class.getPackage()
@@ -36,11 +36,21 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
 
     /**
      * Registers an {@link Observer} to be notified when a new logging event comes in.
+     * Following the singleton principle, only one observer per observer class is allowed.
      *
      * @param observer The observer to be called with incoming events
      */
     public static void register(@NonNull Observer observer) {
-        observers.add(observer);
+        observers.put(observer.getClass(), observer);
+    }
+
+    /**
+     * Unregisters an {@link Observer}, which won't be notified anymore.
+     *
+     * @param observer The observer to be unregistered
+     */
+    public static void unregister(@NonNull Observer observer) {
+        observers.remove(observer.getClass(), observer);
     }
 
     @Override
@@ -52,7 +62,7 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
             invalidator = INVALIDATORS.get(key);
         }
 
-        for (val observer : observers) {
+        for (val observer : observers.values()) {
             observer.onLoggingEvent(event, invalidator);
         }
     }
@@ -69,7 +79,7 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
 
     @VisibleForTesting
     void onInvalidationEvent(Object ev) {
-        for (val observer : observers) {
+        for (val observer : observers.values()) {
             observer.invalidateEvents(ev);
         }
     }
