@@ -68,7 +68,7 @@ const TypeMatcher = ({ typeMatcher, onTypeMatcherChange, onShowClassBrowser }) =
         <div className="row-center">
           <Dropdown style={{ width: '7rem' }} value={typeMatcher.type} options={types} onChange={(e) => setState('type', e.value)} />
           <label className="inner-label" htmlFor="which">
-            name
+            whose name
           </label>
           <Dropdown
             style={{ width: '14rem' }}
