@@ -3,6 +3,7 @@ plugins {
     id "com.moowork.node" version "1.3.1"
     id 'com.palantir.docker' version "0.21.0"
     id 'org.springframework.boot' version "${springboot_version}"
+    id "org.cyclonedx.bom" version "1.5.0"
 }
 
 apply plugin: 'idea'
@@ -78,6 +79,11 @@ task bootJarWithFrontend(type: org.springframework.boot.gradle.tasks.bundling.Bo
     with bootJar
 }
 bootJarWithFrontend.dependsOn buildFrontend
+
+cyclonedxBom {
+    // includeConfigs is the list of configuration names to include when generating the BOM (leave empty to include every configuration)
+    includeConfigs += ["runtimeClasspath"]
+}
 
 repositories {
     mavenCentral()
