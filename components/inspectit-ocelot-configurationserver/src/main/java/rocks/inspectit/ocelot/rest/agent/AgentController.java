@@ -54,7 +54,7 @@ public class AgentController extends AbstractBaseController {
      * @return The configuration mapped on the given agent name
      */
     @ApiOperation(value = "Fetch the Agent Configuration", notes = "Reads the configuration for the given agent and returns it as a yaml string")
-    @GetMapping(value = "agent/configuration", produces = "text/plain")
+    @GetMapping(value = "agent/configuration", produces = "application/x-yaml")
     public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes, @RequestHeader Map<String, String> headers) {
         log.debug("Fetching the agent configuration for agent ({})", attributes.toString());
         AgentConfiguration configuration = configManager.getConfiguration(attributes);

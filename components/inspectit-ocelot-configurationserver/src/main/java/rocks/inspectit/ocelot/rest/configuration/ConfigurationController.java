@@ -63,7 +63,7 @@ public class ConfigurationController extends AbstractBaseController {
      */
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @ApiOperation(value = "Reloads all configuration files.", notes = "Reloads all configuration files present in the " + "servers working directory and adds them to the workspace revision.")
-    @GetMapping(value = "configuration/reload", produces = "text/plain")
+    @GetMapping(value = "configuration/reload", produces = "application/x-yaml")
     public void reloadConfiguration() throws GitAPIException {
         fileManager.commitWorkingDirectory();
     }
@@ -78,7 +78,7 @@ public class ConfigurationController extends AbstractBaseController {
      * @return The configuration mapped on the given agent name
      */
     @ApiOperation(value = "Fetch the Agent Configuration without logging the access.", notes = "Reads the configuration for the given agent and returns it as a yaml string." + "Does not log the access in the agent status.")
-    @GetMapping(value = "configuration/agent-configuration", produces = "text/plain")
+    @GetMapping(value = "configuration/agent-configuration", produces = "application/x-yaml")
     public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes) {
         AgentConfiguration configuration = configManager.getConfiguration(attributes);
         if (configuration == null) {

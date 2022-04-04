@@ -26,9 +26,9 @@ public class ConfigurationServer {
      * This is required because otherwise the SQLite DB can't create its database file.
      */
     private static final ApplicationContextInitializer<ConfigurableApplicationContext> WORKING_DIRECTORY_INITIALIZER = (ctx) -> {
-        InspectitServerSettings settings = Binder
-                .get(ctx.getEnvironment())
-                .bind("inspectit-config-server", InspectitServerSettings.class).get();
+        InspectitServerSettings settings = Binder.get(ctx.getEnvironment())
+                .bind("inspectit-config-server", InspectitServerSettings.class)
+                .get();
         try {
             FileUtils.forceMkdir(new File(settings.getWorkingDirectory()));
         } catch (Exception e) {
@@ -37,9 +37,7 @@ public class ConfigurationServer {
     };
 
     public static void main(String[] args) {
-        new SpringApplicationBuilder(ConfigurationServer.class)
-                .initializers(WORKING_DIRECTORY_INITIALIZER)
-                .run(args);
+        new SpringApplicationBuilder(ConfigurationServer.class).initializers(WORKING_DIRECTORY_INITIALIZER).run(args);
     }
 
 }

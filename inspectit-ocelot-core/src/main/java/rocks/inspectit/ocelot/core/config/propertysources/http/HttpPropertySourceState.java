@@ -16,8 +16,8 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
-import rocks.inspectit.ocelot.bootstrap.IAgent;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
+import rocks.inspectit.ocelot.core.config.util.InvalidPropertiesException;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
 import java.io.IOException;
@@ -104,7 +104,7 @@ public class HttpPropertySourceState {
     public HttpPropertySourceState(String name, HttpConfigSettings currentSettings) {
         this.name = name;
         this.currentSettings = currentSettings;
-        this.errorCounter = 0;
+        errorCounter = 0;
         //ensure that currentPropertySource is never null, even if the initial fetching fails
         currentPropertySource = new PropertiesPropertySource(name, new Properties());
     }
@@ -112,9 +112,10 @@ public class HttpPropertySourceState {
     /**
      * Fetches the latest configuration. If the configuration is successfully fetched a new {@link PropertySource} is
      * created which can be accessed using {@link #getCurrentPropertySource()}. In case of an error or if the server responds
-     * that the configuration has not be changed the property source will not be updated!
+     * that the configuration has not been changed the property source will not be updated!
      *
      * @param fallBackToFile if true, the configured persisted configuration will be loaded in case of an error
+     *
      * @return returns true if a new property source has been created, otherwise false.
      */
     public boolean update(boolean fallBackToFile) {
@@ -128,7 +129,6 @@ public class HttpPropertySourceState {
                 log.error("Could not parse fetched configuration.", e);
             }
         }
-
         return false;
     }
 
@@ -137,17 +137,15 @@ public class HttpPropertySourceState {
      * or YAML document.
      *
      * @param rawProperties the properties in a String representation
+     *
      * @return the parsed {@link Properties} object
      */
-    private Properties parseProperties(String rawProperties) {
+    private Properties parseProperties(String rawProperties) throws InvalidPropertiesException {
         if (StringUtils.isBlank(rawProperties)) {
             return EMPTY_PROPERTIES;
         }
-        try {
-            return PropertyUtils.readJson(rawProperties);
-        } catch (IOException e) {
-            return PropertyUtils.readYaml(rawProperties);
-        }
+        return PropertyUtils.readYaml(rawProperties);
+
     }
 
     /**
@@ -176,7 +174,7 @@ public class HttpPropertySourceState {
      * Fetches the configuration by executing a HTTP request against the configured HTTP endpoint. The request contains
      * the 'If-Modified-Since' header if a previous response returned a 'Last-Modified' header.
      *
-     * @return The requests response body representing the configuration in a JSON format. null is returned if request fails or the
+     * @return The request's response body representing the configuration in a JSON/YAML format. null is returned if request fails or the
      * server returns 304 (not modified).
      */
     private String fetchConfiguration(boolean fallBackToFile) {
@@ -203,6 +201,8 @@ public class HttpPropertySourceState {
         boolean isError = true;
         try {
             HttpResponse response = createHttpClient().execute(httpGet);
+
+            // get the config from the response
             configuration = processHttpResponse(response);
             isError = false;
             if (errorCounter != 0) {
@@ -224,13 +224,12 @@ public class HttpPropertySourceState {
         } else if (isError && fallBackToFile) {
             configuration = readPersistenceFile();
         }
-
         return configuration;
     }
 
     /**
-     * Injects all the agent's meta information headers, which should be send when fetching a new configuration,
-     * into the given request request.
+     * Injects all the agent's meta information headers, which should be sent when fetching a new configuration,
+     * into the given request.
      *
      * @param httpGet the request to inject the meat information headers
      */
@@ -263,11 +262,14 @@ public class HttpPropertySourceState {
      * Builds the request URI by combining the base URI with the configured attributes.
      *
      * @return the resulting URI
+     *
      * @throws URISyntaxException if the base URI is malformed
      */
     public URI getEffectiveRequestUri() throws URISyntaxException {
         URIBuilder uriBuilder = new URIBuilder(currentSettings.getUrl().toURI());
-        currentSettings.getAttributes().entrySet().stream()
+        currentSettings.getAttributes()
+                .entrySet()
+                .stream()
                 .filter(pair -> !StringUtils.isEmpty(pair.getValue()))
                 .forEach(pair -> uriBuilder.setParameter(pair.getKey(), pair.getValue()));
         return uriBuilder.build();
@@ -278,7 +280,9 @@ public class HttpPropertySourceState {
      * If the response contains a 'Last-Modified' header, its value will be stored.
      *
      * @param response the HTTP response object
+     *
      * @return the response body or null in case server sends 304 (not modified)
+     *
      * @throws IOException if an error occurs reading the input stream or if the server returned an unexpected status code
      */
     private String processHttpResponse(HttpResponse response) throws IOException {
@@ -361,6 +365,5 @@ public class HttpPropertySourceState {
         }
         return null;
     }
-
 
 }
