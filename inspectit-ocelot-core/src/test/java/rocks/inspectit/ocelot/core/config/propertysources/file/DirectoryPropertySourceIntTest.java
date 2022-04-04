@@ -4,14 +4,18 @@ import org.apache.commons.io.FileUtils;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.support.TestPropertySourceUtils;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,21 +25,35 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DirectoryPropertySourceIntTest {
 
-    private static final String tmpDir = "tmpconf_dirprop_test";
+    private static Path TEMP_DIRECTORY;
 
     @BeforeAll
-    static void createConfigDir() {
-        new File(tmpDir).mkdir();
+    static void createConfigDir() throws IOException {
+        TEMP_DIRECTORY = Files.createTempDirectory("Ocelot_DirectoryPropertySourceIntTest");
     }
 
     @AfterEach
     void cleanConfigDir() throws Exception {
-        FileUtils.cleanDirectory(new File(tmpDir));
+        FileUtils.cleanDirectory(TEMP_DIRECTORY.toFile());
     }
 
     @AfterAll
     static void deleteConfigDir() throws Exception {
-        FileUtils.deleteDirectory(new File(tmpDir));
+        FileUtils.deleteDirectory(TEMP_DIRECTORY.toFile());
+    }
+
+    /**
+     * Injection of test properties.
+     */
+    static class ContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext context) {
+            //@formatter:off
+            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, "inspectit.config.file-based.path=" + TEMP_DIRECTORY.toAbsolutePath());
+            TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, "inspectit.config.file-based.frequency=50ms");
+            //@formatter:on
+        }
     }
 
     /**
@@ -43,7 +61,7 @@ public class DirectoryPropertySourceIntTest {
      */
     @Nested
     @DirtiesContext
-    @TestPropertySource(properties = {"inspectit.config.file-based.path=" + tmpDir, "inspectit.config.file-based.frequency=50ms"})
+    @ContextConfiguration(initializers = DirectoryPropertySourceIntTest.ContextInitializer.class)
     class LoadContentsToPropertySources extends SpringTestBase {
 
         @Autowired
@@ -84,8 +102,8 @@ public class DirectoryPropertySourceIntTest {
          */
         private void writeConfigurationAndAssertServiceName(String fileName, String data, String serviceName) throws IOException {
             // write data to the file
-            String pathName = tmpDir + "/" + fileName;
-            FileUtils.write(new File(pathName), data, Charset.defaultCharset());
+            Path targetFile = TEMP_DIRECTORY.resolve(fileName);
+            FileUtils.write(targetFile.toFile(), data, Charset.defaultCharset());
             // assert new service name
             Awaitility.await()
                     .atMost(15, TimeUnit.SECONDS)

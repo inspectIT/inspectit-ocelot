@@ -10,19 +10,17 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class PropertyUtilsTest {
 
-    String json = "{\"arr\": [{\"x\":42},{\"y\":7},[\"A\",\"B\"]],nested:{\"name\":\"blub\",\"complex.key\":true}}";
-
-    String yaml = "root:\n  sub-child:\n    value: true\n  second: 42";
-
-    String invalidJson = "{inspectit:{exporters:{metrics:{prometheus:{enabled:\"ENABLED\"}}}}}";
-
     @Nested
     public class ReadJson {
+
+        private String json = "{\"arr\": [{\"x\":42},{\"y\":7},[\"A\",\"B\"]],nested:{\"name\":\"blub\",\"complex.key\":true}}";
+
+        private String invalidJson = "{inspectit:{exporters:{metrics:{prometheus:{enabled:\"ENABLED\"}}}}}";
 
         @Test
         public void readJson() throws InvalidPropertiesException {
 
-            Properties result = PropertyUtils.readYamlOrJson(json);
+            Properties result = PropertyUtils.readYaml(json);
 
             assertThat(result).hasSize(6);
             assertThat(result).containsEntry("arr[0].x", 42);
@@ -39,23 +37,24 @@ public class PropertyUtilsTest {
          */
         @Test
         public void throwExceptionForInvalidJson() {
-            assertThatExceptionOfType(InvalidPropertiesException.class).isThrownBy(() -> PropertyUtils.readYamlOrJson(invalidJson));
+            assertThatExceptionOfType(InvalidPropertiesException.class).isThrownBy(() -> PropertyUtils.readYaml(invalidJson));
         }
     }
 
     @Nested
     public class ReadYaml {
 
+        private String yaml = "root:\n  sub-child:\n    value: true\n  second: 42";
+
         @Test
         public void readYaml() throws InvalidPropertiesException {
 
-            Properties result = PropertyUtils.readYamlOrJson(yaml);
+            Properties result = PropertyUtils.readYaml(yaml);
 
             assertThat(result).hasSize(2);
             assertThat(result).containsEntry("root.sub-child.value", true);
             assertThat(result).containsEntry("root.second", 42);
 
         }
-
     }
 }

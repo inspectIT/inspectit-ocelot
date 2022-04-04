@@ -120,7 +120,6 @@ public class HttpPropertySourceState {
      */
     public boolean update(boolean fallBackToFile) {
         String configuration = fetchConfiguration(fallBackToFile);
-        log.info("configuration={}", configuration);
         if (configuration != null) {
             try {
                 Properties properties = parseProperties(configuration);
@@ -145,7 +144,7 @@ public class HttpPropertySourceState {
         if (StringUtils.isBlank(rawProperties)) {
             return EMPTY_PROPERTIES;
         }
-        return PropertyUtils.readYamlOrJson(rawProperties);
+        return PropertyUtils.readYaml(rawProperties);
 
     }
 

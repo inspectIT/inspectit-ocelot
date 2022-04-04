@@ -58,7 +58,7 @@ public class PropertyUtils {
      *
      * @return the generated {@link Properties} object
      */
-    public static Properties readYamlOrJson(String yamlOrJson) throws InvalidPropertiesException {
+    public static Properties readYaml(String yamlOrJson) throws InvalidPropertiesException {
         ByteArrayResource resource = new ByteArrayResource(yamlOrJson.getBytes(StandardCharsets.UTF_8));
         Properties result = readYamlFiles(resource);
         validateProperties(result);
@@ -66,7 +66,8 @@ public class PropertyUtils {
     }
 
     /**
-     * Validates the given  {@link Properties}
+     * Validates the given  {@link Properties}. It is assumed that a property is invalid if it contains a ":" character
+     * in its key and the value itself is empty.
      *
      * @param properties the {@link Properties} to validate
      *
@@ -79,7 +80,8 @@ public class PropertyUtils {
                 .filter(entry -> entry.getKey().toString().contains(":") && entry.getValue().toString().isEmpty())
                 .collect(Collectors.toList());
         if (!invalidEntries.isEmpty()) {
-            throw new InvalidPropertiesException(String.format("Properties contain invalid YAML or JSON. Make sure that valid YAML or JSON is used. For JSON, all keys must be quoted, otherwise the value is parsed as part of the key. Invalid properties: %s", Arrays.toString(invalidEntries.toArray())));
+            throw new InvalidPropertiesException(String.format("Properties contain invalid YAML or JSON. Make sure that valid YAML or JSON is used. For JSON, all keys must be quoted, otherwise the value is parsed as part of the key. Invalid properties: %s", Arrays
+                    .toString(invalidEntries.toArray())));
         }
     }
 

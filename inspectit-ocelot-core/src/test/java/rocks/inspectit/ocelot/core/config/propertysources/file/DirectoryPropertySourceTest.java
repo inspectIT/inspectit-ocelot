@@ -26,9 +26,8 @@ import static org.mockito.Mockito.*;
 /**
  * Test class for {@link DirectoryPropertySource}
  */
+@ExtendWith(MockitoExtension.class)
 public class DirectoryPropertySourceTest {
-
-    private static final String tmpDir = "tmpconf_dirprop_test";
 
     private static final String testPropertySourceName = "test";
 
@@ -41,11 +40,9 @@ public class DirectoryPropertySourceTest {
 
     ArgumentCaptor<PropertySource> captor = ArgumentCaptor.forClass(PropertySource.class);
 
-
-
     @BeforeAll
     static void createConfigDir() throws IOException {
-        testDirectory = Files.createTempDirectory(tmpDir);
+        testDirectory = Files.createTempDirectory("Ocelot_DirectoryPropertySourceTest");
     }
 
     @AfterAll
@@ -71,7 +68,6 @@ public class DirectoryPropertySourceTest {
      */
     @DirtiesContext
     @Nested
-    @ExtendWith(MockitoExtension.class)
     class Reload {
 
         @Test
@@ -115,7 +111,6 @@ public class DirectoryPropertySourceTest {
      */
     @Nested
     @DirtiesContext
-    @ExtendWith(MockitoExtension.class)
     class LoadContentsToPropertySources {
 
         /**
@@ -168,7 +163,6 @@ public class DirectoryPropertySourceTest {
                     .untilAsserted(() -> assertThat(serviceName).isEqualTo(ps.getProperty("inspectit.service-name")));
         }
     }
-
 }
 
 
