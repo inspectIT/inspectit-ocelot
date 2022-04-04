@@ -32,15 +32,15 @@ dependencies {
             'ch.qos.logback:logback-classic:0.9.26',
             'org.apache.commons:commons-lang3:3.12.0',
             'org.apache.commons:commons-text:1.9',
-            'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.0',
-            "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
             'commons-beanutils:commons-beanutils:1.9.4',
             'com.google.guava:guava:31.0.1-jre',
 
+            "org.springframework.boot:spring-boot-starter-web:${springVersion}",
+
     )
 
-    compileOnly 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 }
 
 application {

@@ -1,6 +1,5 @@
 package inspectit.ocelot.configdocsgenerator;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import inspectit.ocelot.configdocsgenerator.model.*;
 import inspectit.ocelot.configdocsgenerator.parsing.ConfigParser;
 import org.apache.commons.beanutils.BeanUtils;
@@ -19,6 +18,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.scope.Instrumentation
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,7 +36,7 @@ public class ConfigDocsGenerator {
      *
      * @return Returns the generated ConfigDocumentation.
      */
-    public ConfigDocumentation generateConfigDocs(String configYaml) throws JsonProcessingException {
+    public ConfigDocumentation generateConfigDocs(String configYaml) throws IOException {
         ConfigParser configParser = new ConfigParser();
         InspectitConfig config = configParser.parseConfig(configYaml);
 
@@ -165,6 +165,7 @@ public class ConfigDocsGenerator {
             for (String inputName : inputTypes.keySet()) {
                 inputs.add(new ActionInputDocs(inputName, inputTypes.get(inputName), inputDescriptions.getOrDefault(inputName, "")));
             }
+            inputs.sort(Comparator.comparing(ActionInputDocs::getName));
 
             actionDocs.add(new ActionDocs(actionName, description, since, inputs, returnDesc, isVoid));
         }
@@ -199,6 +200,7 @@ public class ConfigDocsGenerator {
                     .filter(e -> e.getValue() != null)
                     .filter(Map.Entry::getValue)
                     .map(Map.Entry::getKey)
+                    .sorted(Comparator.naturalOrder())
                     .collect(Collectors.toList());
 
             Map<String, Boolean> scopes = ruleSettings.getScopes();
@@ -207,9 +209,11 @@ public class ConfigDocsGenerator {
                     .filter(e -> e.getValue() != null)
                     .filter(Map.Entry::getValue)
                     .map(Map.Entry::getKey)
+                    .sorted(Comparator.naturalOrder())
                     .collect(Collectors.toList());
 
             List<RuleMetricsDocs> ruleMetricsDocs = generateRuleMetricsDocs(ruleSettings);
+            ruleMetricsDocs.sort(Comparator.comparing(RuleMetricsDocs::getName));
 
             RuleTracingDocs ruleTracingDocs = generateRuleTracingDocs(ruleSettings);
 

@@ -1,6 +1,7 @@
 plugins {
     id "me.champeau.gradle.jmh" version "0.5.3"
     id 'maven-publish'
+    id 'com.palantir.docker' version "0.21.0"
 }
 
 evaluationDependsOn(':inspectit-ocelot-bootstrap')
@@ -24,18 +25,34 @@ configurations {
 dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
-            'org.projectlombok:lombok:1.18.12'
+            "org.projectlombok:lombok:${lombokVersion}"
     )
     opencensus(
             "io.opencensus:opencensus-impl:${openCensusVersion}"
     )
-    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testImplementation (
             'org.junit.jupiter:junit-jupiter-api:5.3.1',
             'org.mockito:mockito-junit-jupiter:2.23.0',
             "ch.qos.logback:logback-classic:${logbackVersion}",
     )
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+}
+
+task copyAgent(type: Copy) {
+    dependsOn jar
+    from(buildDir.toString() + "/inspectit-ocelot-agent-${version}.jar")
+    into(buildDir)
+    rename ("inspectit-ocelot-agent-${version}\\.jar", 'inspectit-ocelot-agent.jar')
+}
+
+docker {
+    dependsOn copyAgent
+
+    name "inspectit/inspectit-ocelot-agent"
+    tags "${version}"
+    dockerfile file('docker/Dockerfile')
+    files 'docker/entrypoint.sh', "$buildDir/inspectit-ocelot-agent.jar"
 }
 
 task buildOpencensusFatJar(type: Jar) {
