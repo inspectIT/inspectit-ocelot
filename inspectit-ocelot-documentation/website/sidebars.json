@@ -50,6 +50,7 @@
       "config-server/scope-wizard",
       "config-server/class-browser",
       "config-server/user-authentication",
+      "config-server/config-docs",
       "config-server/log-config",
       "config-server/syntax-highlighting"
     ],
