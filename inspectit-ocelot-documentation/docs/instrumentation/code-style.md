@@ -1,6 +1,6 @@
 ---
 id: code-style
-title: Code style conventions
+title: Code style
 ---
 
 Below you can see a YAML with some comments regarding style conventions that inspectIT Ocelot's default configuration follows.
