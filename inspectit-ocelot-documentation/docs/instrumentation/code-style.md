@@ -6,7 +6,7 @@ title: Code style conventions
 Below you can see a YAML with some comments regarding style conventions that inspectIT Ocelot's default configuration follows.
 They might help you with making your configurations easy to read and understand.
 
-If you are using the inspectIT Ocelot configuration server to write and/or manage your configurations, also consider the [guidelines for its Syntax Highlighter](../config-server/syntax-highlighting.md).  
+If you are using the inspectIT Ocelot configuration server to write and/or manage your configurations, also consider the guidelines for its [Syntax Highlighter](../config-server/syntax-highlighting.md).  
 Similarly, for writing documentation into your configurations see the section [Configuration Docs](../config-server/config-docs.md).
 ```YAML
 inspectit:
