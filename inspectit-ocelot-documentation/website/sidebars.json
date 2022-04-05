@@ -32,6 +32,7 @@
       "instrumentation/instrumentation",
       "instrumentation/scopes",
       "instrumentation/rules",
+      "instrumentation/code-style",
       "instrumentation/special-sensors",
       "instrumentation/process"
     ],
