@@ -65,8 +65,7 @@ jobs:
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/reports/bom.xml ~/inspectit/boms/inspectit-ocelot-configurationserver-bom.xml
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/reports/bom.json ~/inspectit/boms/inspectit-ocelot-eum-server-bom.json
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/reports/bom.xml ~/inspectit/boms/inspectit-ocelot-eum-server-bom.xml
-      - run: zip -r inspectit-ocelot-boms.zip boms
-      - run: cp inspectit-ocelot-boms.zip ~/inspectit/artifacts
+      - run: zip -r ~/inspectit/artifacts/inspectit-ocelot-boms.zip boms
       - run:
           name: Calculate checksums of release artifacts
           working_directory: ~/inspectit/artifacts
