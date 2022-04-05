@@ -58,12 +58,15 @@ jobs:
       - run: cp ~/inspectit/repo/inspectit-ocelot-demo/build/inspectit-ocelot-demo-${CIRCLE_TAG}.zip ~/inspectit/artifacts
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/libs/inspectit-ocelot-configurationserver-${CIRCLE_TAG}.jar ~/inspectit/artifacts
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/libs/inspectit-ocelot-eum-server-${CIRCLE_TAG}.jar ~/inspectit/artifacts
-      - run: cp ~/inspectit/repo/inspectit-ocelot-core/build/reports/bom.json ~/inspectit/artifacts/inspectit-ocelot-agent-bom.json
-      - run: cp ~/inspectit/repo/inspectit-ocelot-core/build/reports/bom.xml ~/inspectit/artifacts/inspectit-ocelot-agent-bom.xml
-      - run: cp ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/reports/bom.json ~/inspectit/artifacts/inspectit-ocelot-configurationserver-bom.json
-      - run: cp ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/reports/bom.xml ~/inspectit/artifacts/inspectit-ocelot-configurationserver-bom.xml
-      - run: cp ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/reports/bom.json ~/inspectit/artifacts/inspectit-ocelot-eum-server-bom.json
-      - run: cp ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/reports/bom.xml ~/inspectit/artifacts/inspectit-ocelot-eum-server-bom.xml
+      - run: mkdir boms
+      - run: cp ~/inspectit/repo/inspectit-ocelot-core/build/reports/bom.json ~/inspectit/boms/inspectit-ocelot-agent-bom.json
+      - run: cp ~/inspectit/repo/inspectit-ocelot-core/build/reports/bom.xml ~/inspectit/boms/inspectit-ocelot-agent-bom.xml
+      - run: cp ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/reports/bom.json ~/inspectit/boms/inspectit-ocelot-configurationserver-bom.json
+      - run: cp ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/reports/bom.xml ~/inspectit/boms/inspectit-ocelot-configurationserver-bom.xml
+      - run: cp ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/reports/bom.json ~/inspectit/boms/inspectit-ocelot-eum-server-bom.json
+      - run: cp ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/reports/bom.xml ~/inspectit/boms/inspectit-ocelot-eum-server-bom.xml
+      - run: zip -r inspectit-ocelot-boms.zip boms
+      - run: cp inspectit-ocelot-boms.zip ~/inspectit/artifacts
       - run:
           name: Calculate checksums of release artifacts
           working_directory: ~/inspectit/artifacts
