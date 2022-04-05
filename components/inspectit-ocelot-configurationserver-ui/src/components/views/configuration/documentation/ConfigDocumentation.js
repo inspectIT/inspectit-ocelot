@@ -47,7 +47,6 @@ const ConfigDocumentation = React.memo(({ configurationDocs }) => {
             overflow: auto;
           }
           .doc-section {
-            white-space: pre-wrap
           }
           .section-heading {
             background-color: #eee;

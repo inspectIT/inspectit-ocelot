@@ -25,6 +25,7 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
           padding: 0.5rem;
           transition: background-color 0.2s;
           border-bottom: solid 1px #eeeeee;
+          white-space: pre-wrap
         }
         .element:hover {
           background: #eaeaea;
