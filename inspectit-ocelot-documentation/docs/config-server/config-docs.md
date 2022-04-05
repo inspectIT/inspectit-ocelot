@@ -34,10 +34,16 @@ However, this is of course limited, so to make full use of the feature, you shou
 ### All instrumentation objects
 
 With all three kinds of instrumentation objects documentation is added below the key `docs`.  
+
 With the key `description`, you can provide a general description of what the instrumentation object is for, what it does or how it works.  
+Multiline Strings within the description will be in the actual documentation with all the linebreaks, indents, etc. that you put into them. 
+Wrapping of lines that are too long for the documentation view will happen automatically. 
+Therefore, you should avoid putting linebreaks within sentences, it could lead to seemingly random linebreaks in the actual documentation view. 
+It is implemented that way, so you can use group the description into paragraphs or express something more specific, e.g. describe what an input of type Map should look like by writing an example as YAML into the description.  
+
 With the key `since` you can add a versioning tag as a string that will also be shown in the documentation.
 
-For scopes and rules these two options are all, for actions there a few more.
+For scopes and rules these two are all options, for actions there a few more.
 The documentation for a rule could then for example look like the following:
 ```YAML
 rules:
@@ -54,7 +60,7 @@ rules:
 For actions there are two more possible keys below `docs`.
 
 One is `inputs` below which you can add any input names as keys and a description for them as values.
-For special input parameters (see [Input Parameters](../instrumentation/rules#input-parameters)) the description is added automatically, so you do not have to add any yourself.  
+For special input parameters (see [Input Parameters](../instrumentation/rules#input-parameters) for further info) the description is added automatically, so you do not have to add any yourself.  
 The other is `return-value` which should contain a description of the return value, if there is any.
 
 So all in all, an action with documentation could look like the following:
