@@ -81,7 +81,6 @@ task bootJarWithFrontend(type: org.springframework.boot.gradle.tasks.bundling.Bo
 bootJarWithFrontend.dependsOn buildFrontend
 
 cyclonedxBom {
-    // includeConfigs is the list of configuration names to include when generating the BOM (leave empty to include every configuration)
     includeConfigs += ["runtimeClasspath"]
 }
 
