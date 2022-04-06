@@ -47,17 +47,19 @@ class CountryCodeBeaconProcessorTest {
 
     private Beacon beacon;
 
+    private MockHttpServletRequest request;
+
     @BeforeEach
     private void initializeBeacon() {
         beacon = Beacon.of(ImmutableMap.of("dummyMetric", "dummyValue"));
-        MockHttpServletRequest request = new MockHttpServletRequest();
+        request = new MockHttpServletRequest();
         request.setRemoteAddr(DEFAULT_IP_ADDRESS);
         ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(requestAttributes);
     }
 
     @Nested
-    public class process {
+    public class Process {
 
         @Test
         public void addEmptyCountryCode() {
@@ -126,6 +128,30 @@ class CountryCodeBeaconProcessorTest {
 
             Beacon b = preProcessor.process(beacon);
             assertThat(b.get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEqualTo("CUSTOM_TAG_2");
+        }
+
+        @Test
+        public void respectForwardedHeader() {
+            when(geolocationResolver.getCountryCode("10.0.0.0")).thenReturn("DE");
+            when(configuration.getTags()).thenReturn(tagsSettings);
+            request.addHeader("X-Forwarded-For", "10.0.0.0");
+
+            Beacon result = preProcessor.process(beacon);
+
+            assertThat(result.contains(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isTrue();
+            assertThat(result.get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEqualTo("DE");
+        }
+
+        @Test
+        public void respectForwardedHeader_multiValue() {
+            when(geolocationResolver.getCountryCode("10.0.0.0")).thenReturn("DE");
+            when(configuration.getTags()).thenReturn(tagsSettings);
+            request.addHeader("X-Forwarded-For", new String[]{"10.0.0.0", "10.0.0.1"});
+
+            Beacon result = preProcessor.process(beacon);
+
+            assertThat(result.contains(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isTrue();
+            assertThat(result.get(CountryCodeBeaconProcessor.TAG_COUNTRY_CODE)).isEqualTo("DE");
         }
     }
 }
