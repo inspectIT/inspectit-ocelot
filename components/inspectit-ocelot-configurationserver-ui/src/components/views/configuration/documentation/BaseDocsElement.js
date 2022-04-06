@@ -25,7 +25,6 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
           padding: 0.5rem;
           transition: background-color 0.2s;
           border-bottom: solid 1px #eeeeee;
-          white-space: pre-wrap;
         }
         .element:hover {
           background: #eaeaea;
@@ -49,6 +48,7 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
         .description {
           padding-top: 0.25rem;
           color: #333;
+          white-space: pre-wrap;
         }
       `}</style>
       {data.map((element) => (
