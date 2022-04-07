@@ -227,11 +227,6 @@ workflows:
             <<: *filter_release
           requires:
             - checkout
-      - publish_dashboards_to_marketplace:
-          filters:
-            <<: *filter_release      
-          requires:
-            - checkout
       - publish_github_release:
           filters:
             <<: *filter_release
