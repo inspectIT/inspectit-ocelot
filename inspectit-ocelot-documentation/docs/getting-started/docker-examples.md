@@ -6,11 +6,11 @@ sidebar_label: Demo Application
 
 ## inspectIT Ocelot Demo
 
-If you would like to check inspectIT Ocelot in action with a demo application, you can use our docker compose example.
+If you would like to see inspectIT Ocelot in action with a demo application, you can use our docker compose example.
 We use the distributed version of the [Spring PetClinic sample application](https://github.com/spring-petclinic/spring-petclinic-microservices) as the target application in our demo.
-To demonstrate the flexibility of the OpenCensus bases inspectIT agent, we provide different demo scenarios covering different monitoring and APM components.
+To demonstrate the flexibility of the OpenCensus based inspectIT agent, we provide different demo scenarios covering different monitoring and APM components.
 
-All of the demo scenarios are fully configured with predefined dashboards, *so you can get started in 5 minutes*.
+All the demo scenarios are fully configured with predefined dashboards, *so you can get started in 5 minutes*.
 
 ### Demo #1 - Prometheus, Grafana and Jaeger
 
@@ -52,47 +52,36 @@ Sends Zipkin traces to Wavefront through a Wavefront proxy running as a Docker c
 
 * File: `docker-compose-wavefront-zipkin.yml`
 
->Note: Before running the demo, you must add the Wavefront host and API token to the ```.env``` file in the ```inspectit-ocelot-demo```. Please add the following lines and change the cluster and token according to your Wavefront instance.
-> ```
-> WAVEFRONT_URL=https://<your cluster>.wavefront.com/api
-> WAVEFRONT_TOKEN=<API token obtained from Wavefront>
-> ```
+:::note 
+Before running the demo, you must add the Wavefront host and API token to the ```.env``` file in the ```inspectit-ocelot-demo```. Please add the following lines and change the cluster and token according to your Wavefront instance.
+```
+WAVEFRONT_URL=https://<your cluster>.wavefront.com/api
+WAVEFRONT_TOKEN=<API token obtained from Wavefront>
+```
+:::
 
 ## Launching the Demo
 
-:::note
+:::warning
 Currently, the demo is only available as Docker images for the AMD64 architecture.
 On ARM platforms there may be problems with the execution.
 :::
 
 *Pre-requisites:* To launch the demo, [Docker](https://www.docker.com/) needs to be installed on your system.
-If you are using Docker for Windows or running Docker in a virtual machine, ensure that Docker has at least 4GB main memory assigned.
+If you are using Docker Desktop or running Docker in a virtual machine, ensure that Docker has at least 4GB main memory assigned.
 
-Either [download](https://github.com/inspectIT/inspectit-ocelot/archive/master.zip) or [clone the inspectit-Ocelot GitHub repository](https://github.com/inspectIT/inspectit-ocelot).
+Either [download](https://github.com/inspectIT/inspectit-ocelot-demo/archive/refs/heads/main.zip) or clone the [inspectIT Ocelot-Demo GitHub repository](https://github.com/inspectIT/inspectit-ocelot-demo).
 
-Change into the ```inspectit-ocelot-demo/``` directory and execute the following command to launch the desired demo scenario (replace [SCENARIO_POSTFIX] with the postfix of the scenario you would like to launch):
+Change into the `spring-petclinic-docker-demo/` directory and execute the following command to launch the desired demo scenario (replace [SCENARIO_POSTFIX] with the postfix of the scenario you would like to launch):
 
 ```bash
 $ docker-compose -f docker-compose-[SCENARIO_POSTFIX].yml up
 ```
 
-This will start all the Docker containers required for the corresponding demo scenario, including the Petclinic demo application.
+This will start all the Docker containers required for the corresponding demo scenario, including the PetClinic demo application.
 
 You can access the demo application (PetClinic) under http://localhost:8080.
 Details on accessing monitoring infrastructure components are listed below, depending on the selected demo scenario.
-
-### Starting the Demo on Windows Using WSL
-
-If you want to execute the demo on Windows using the Windows subsystem for linux (WSL), you have to mount your hard drive to the WSL's root directory due to a problem of Docker for Windows and its volume mounting.
-
-For example, mounting your C drive to the root file system can be achieved using the following commands:
-
-```bash
-sudo mkdir /c
-sudo mount --bind /mnt/c /c
-```
-
-For more information, check out the following blog post: [Setting Up Docker for Windows and WSL to Work Flawlessly](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly)
 
 
 ## Demo Scenarios
@@ -115,7 +104,7 @@ The traces can be viewed in Jaeger on http://localhost:16686.
 Prometheus can be accessed through http://localhost:9090.
 
 :::note
-Currently the EUM-Server dashboards are only supported for the InfluxDB demos. You may use the Explore view in Grafana to view the EUM server metrics.
+Currently the EUM-Server dashboards are only supported for the InfluxDB demos. You may use the `Explore` view in Grafana to view the EUM server metrics.
 :::
 
 ### InfluxDB and Jaeger Scenario
@@ -159,7 +148,7 @@ Wavefront is a SaaS-based monitoring and tracing solution. In this demo, we are 
 - *Telegraf:* Polls the Prometheus metric endpoints on the services.
 - *Wavefront Proxy:* Receives Zipkin traces and metrics (via Telegraf), aggregates, secures and compresses them before sending them to Wavefront.
 
-A sandbox instance of Wavefront can be obtained here: https://www.wavefront.com/sign-up/
+A sandbox instance of Wavefront can be obtained at https://www.wavefront.com/sign-up/.
 
 The inspectIT Ocelot Configuration Server can be accessed via http://localhost:8090.
 
@@ -184,7 +173,7 @@ The InfluxDB and Prometheus demo scenarios include the following predefined Graf
 ## Changing Agent Configurations
 
 In all demo scenarios the inspectIT Ocelot agents already have their service names and used ports as well as a basic instrumentation set up.
-Each scenario uses the *inspectIT Ocelot Configuration Server* for managing and providing the configuration files to the agents.
+Each scenario uses the [inspectIT Ocelot Configuration Server](../config-server/overview.md) for managing and providing the configuration files to the agents.
 The web UI of the configuration server can be accessed via [localhost:8090](http://localhost:8090).
 
 The demo starts the following services, of which each is instrumented with an inspectIT Ocelot Agent:
