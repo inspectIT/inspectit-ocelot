@@ -60,11 +60,9 @@ public class AgentStatusManager {
      */
     public void notifyAgentConfigurationFetched(Map<String, String> agentAttributes, Map<String, String> headers, AgentConfiguration resultConfiguration) {
         AgentMetaInformation metaInformation = AgentMetaInformation.of(headers);
-        AgentHealth agentHealth = AgentHealth.valueOf(headers.getOrDefault(HEADER_AGENT_HEALTH, "OK"));
 
         AgentStatus agentStatus = AgentStatus.builder()
                 .metaInformation(metaInformation)
-                .health(agentHealth)
                 .attributes(agentAttributes)
                 .lastConfigFetch(new Date())
                 .mappingName(resultConfiguration == null ? null : resultConfiguration.getMapping().getName())
@@ -80,14 +78,19 @@ public class AgentStatusManager {
             statusKey = agentAttributes;
         }
 
-        logHealthIfChanged(statusKey, agentHealth);
+        if (headers.containsKey(HEADER_AGENT_HEALTH)) {
+            AgentHealth agentHealth = AgentHealth.valueOf(headers.get(HEADER_AGENT_HEALTH));
+            agentStatus.setHealth(agentHealth);
+            logHealthIfChanged(statusKey, agentHealth);
+        }
+
         attributesToAgentStatusCache.put(statusKey, agentStatus);
     }
 
     private void logHealthIfChanged(Object statusKey, AgentHealth agentHealth) {
         AgentStatus lastStatus = attributesToAgentStatusCache.getIfPresent(statusKey);
 
-        if (lastStatus != null && lastStatus.getHealth() != agentHealth) {
+        if (lastStatus == null || lastStatus.getHealth() != agentHealth) {
             log.info("Health of agent {} changed to {}.", statusKey, agentHealth);
         }
     }
