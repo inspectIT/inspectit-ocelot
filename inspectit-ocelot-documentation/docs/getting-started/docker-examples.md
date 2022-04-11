@@ -35,6 +35,23 @@ This will start all the Docker containers required for the corresponding demo sc
 You can access the demo application (PetClinic) under http://localhost:8080.
 Details on accessing monitoring infrastructure components are listed below, depending on the selected demo scenario.
 
+### Starting the Demo on Windows Using WSL
+
+:::note
+Using current versions of Docker Desktop and WSL 2 will work without this workaround.
+:::
+
+If you want to execute the demo on Windows using the Windows subsystem for linux (WSL), you have to mount your hard drive to the WSL's root directory due to a problem of Docker for Windows and its volume mounting.
+
+For example, mounting your C drive to the root file system can be achieved using the following commands:
+
+```bash
+sudo mkdir /c
+sudo mount --bind /mnt/c /c
+```
+
+For more information, check out the following blog post: [Setting Up Docker for Windows and WSL to Work Flawlessly](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly)
+
 ## Demo Scenarios
 
 > In all scenarios you can use `admin` as username and `demo` as password for accessing Grafana and the inspectIT Ocelot Configuration Server.
