@@ -49,16 +49,16 @@ public class InternalProcessingAppenderTest {
 
             ILoggingEvent infoEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
 
-            InternalProcessingAppender.Observer observer = Mockito.mock(InternalProcessingAppender.Observer.class);
-            appender.register(observer);
+            InternalProcessingAppender.LogEventConsumer logEventConsumer = Mockito.mock(InternalProcessingAppender.LogEventConsumer.class);
+            appender.register(logEventConsumer);
 
-            verifyNoInteractions(observer);
+            verifyNoInteractions(logEventConsumer);
 
             appender.append(infoEvent);
             appender.append(infoEvent);
 
-            verify(observer, times(2)).onLoggingEvent(any(), eq(null));
-            verifyNoMoreInteractions(observer);
+            verify(logEventConsumer, times(2)).onLoggingEvent(any(), eq(null));
+            verifyNoMoreInteractions(logEventConsumer);
         }
 
         @Test
@@ -66,16 +66,16 @@ public class InternalProcessingAppenderTest {
 
             ILoggingEvent instrumentationEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(InstrumentationManager.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
 
-            InternalProcessingAppender.Observer observer = Mockito.mock(InternalProcessingAppender.Observer.class);
-            appender.register(observer);
+            InternalProcessingAppender.LogEventConsumer logEventConsumer = Mockito.mock(InternalProcessingAppender.LogEventConsumer.class);
+            appender.register(logEventConsumer);
 
-            verifyNoInteractions(observer);
+            verifyNoInteractions(logEventConsumer);
 
             appender.append(instrumentationEvent);
             appender.append(instrumentationEvent);
 
-            verify(observer, times(2)).onLoggingEvent(any(), eq(InstrumentationConfigurationChangedEvent.class));
-            verifyNoMoreInteractions(observer);
+            verify(logEventConsumer, times(2)).onLoggingEvent(any(), eq(InstrumentationConfigurationChangedEvent.class));
+            verifyNoMoreInteractions(logEventConsumer);
         }
 
         @Test
@@ -84,19 +84,19 @@ public class InternalProcessingAppenderTest {
             ILoggingEvent generalEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
             ILoggingEvent instrumentationEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(InstrumentationManager.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
 
-            InternalProcessingAppender.Observer observer = Mockito.mock(InternalProcessingAppender.Observer.class);
-            appender.register(observer);
+            InternalProcessingAppender.LogEventConsumer logEventConsumer = Mockito.mock(InternalProcessingAppender.LogEventConsumer.class);
+            appender.register(logEventConsumer);
 
-            verifyNoInteractions(observer);
+            verifyNoInteractions(logEventConsumer);
 
             appender.append(instrumentationEvent);
             appender.append(generalEvent);
             appender.append(generalEvent);
             appender.append(instrumentationEvent);
 
-            verify(observer, times(2)).onLoggingEvent(any(), eq(null));
-            verify(observer, times(2)).onLoggingEvent(any(), eq(InstrumentationConfigurationChangedEvent.class));
-            verifyNoMoreInteractions(observer);
+            verify(logEventConsumer, times(2)).onLoggingEvent(any(), eq(null));
+            verify(logEventConsumer, times(2)).onLoggingEvent(any(), eq(InstrumentationConfigurationChangedEvent.class));
+            verifyNoMoreInteractions(logEventConsumer);
         }
     }
 }

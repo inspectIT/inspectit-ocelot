@@ -120,7 +120,7 @@ public class AgentHealthManagerTest {
 
             clearInvocations(context);
 
-            healthManager.invalidateEvents(new InstrumentationConfigurationChangedEvent(this, null, null));
+            healthManager.onInvalidationEvent(new InstrumentationConfigurationChangedEvent(this, null, null));
             assertThat(healthManager.getCurrentHealth()).withFailMessage("When new instrumentation was triggered, status shall be OK")
                     .isEqualTo(AgentHealth.OK);
             verifyExactlyOneEventWasPublished(AgentHealth.OK);

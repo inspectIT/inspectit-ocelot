@@ -14,7 +14,7 @@ import java.util.Map;
  * Logback recorder which exposes the counts to the {@link SelfMonitoringService}
  */
 @Component
-public class LogMetricsRecorder implements InternalProcessingAppender.Observer {
+public class LogMetricsRecorder implements InternalProcessingAppender.LogEventConsumer {
 
     @Autowired
     private SelfMonitoringService selfMonitoringService;

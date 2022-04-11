@@ -28,7 +28,7 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
 
     private static final NavigableMap<String, Class<?>> INVALIDATORS = new TreeMap<>();
 
-    private static final Map<Class<? extends Observer>, Observer> observers = new HashMap<>();
+    private static final Map<Class<? extends LogEventConsumer>, LogEventConsumer> consumers = new HashMap<>();
 
     static {
         INVALIDATORS.put(InstrumentationManager.class.getPackage()
@@ -40,22 +40,22 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
     }
 
     /**
-     * Registers an {@link Observer} to be notified when a new logging event comes in.
+     * Registers an {@link LogEventConsumer} to be notified when a new logging event comes in.
      * Following the singleton principle, only one observer per observer class is allowed.
      *
-     * @param observer The observer to be called with incoming events
+     * @param consumer The observer to be called with incoming events
      */
-    public static void register(@NonNull Observer observer) {
-        observers.put(observer.getClass(), observer);
+    public static void register(@NonNull InternalProcessingAppender.LogEventConsumer consumer) {
+        consumers.put(consumer.getClass(), consumer);
     }
 
     /**
-     * Unregisters an {@link Observer}, which won't be notified anymore.
+     * Unregisters an {@link LogEventConsumer}, which won't be notified anymore.
      *
-     * @param observer The observer to be unregistered
+     * @param consumer The observer to be unregistered
      */
-    public static void unregister(@NonNull Observer observer) {
-        observers.remove(observer.getClass(), observer);
+    public static void unregister(@NonNull InternalProcessingAppender.LogEventConsumer consumer) {
+        consumers.remove(consumer.getClass(), consumer);
     }
 
     @Override
@@ -67,15 +67,15 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
             invalidator = INVALIDATORS.get(key);
         }
 
-        for (val observer : observers.values()) {
+        for (val observer : consumers.values()) {
             observer.onLoggingEvent(event, invalidator);
         }
     }
 
     @VisibleForTesting
     static void onInvalidationEvent(Object ev) {
-        for (val observer : observers.values()) {
-            observer.invalidateEvents(ev);
+        for (val observer : consumers.values()) {
+            observer.onInvalidationEvent(ev);
         }
     }
 
@@ -97,9 +97,12 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
     }
 
     /**
-     * Observer to logging events.
+     * Consumer of logging events.
+     * When registered using {@link InternalProcessingAppender#register(LogEventConsumer)}, it will be called
+     * when new log events occur {@link #onLoggingEvent(ILoggingEvent, Class)} or log events are invalidated
+     * {@link #onInvalidationEvent(Object)}.
      */
-    public interface Observer {
+    public interface LogEventConsumer {
 
         /**
          * Will be called whenever a new logging event comes in.
@@ -114,7 +117,7 @@ public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
          *
          * @param invalidator The invalidator
          */
-        default void invalidateEvents(Object invalidator) {
+        default void onInvalidationEvent(Object invalidator) {
         }
 
     }

@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 @Slf4j
-public class LogPreloader extends DynamicallyActivatableService implements InternalProcessingAppender.Observer {
+public class LogPreloader extends DynamicallyActivatableService implements InternalProcessingAppender.LogEventConsumer {
 
     private ILoggingEvent[] buffer;
 

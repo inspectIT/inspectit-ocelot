@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class AgentHealthManager implements InternalProcessingAppender.Observer {
+public class AgentHealthManager implements InternalProcessingAppender.LogEventConsumer {
 
     private static final String LOG_CHANGE_STATUS = "The agent status changed from {} to {}.";
 
@@ -97,7 +97,7 @@ public class AgentHealthManager implements InternalProcessingAppender.Observer {
     }
 
     @Override
-    public void invalidateEvents(Object invalidator) {
+    public void onInvalidationEvent(Object invalidator) {
         invalidatableHealth.remove(invalidator.getClass());
         triggerEventAndMetricIfHealthChanged();
     }
