@@ -39,8 +39,17 @@ public class AgentHealthManager implements InternalProcessingAppender.LogEventCo
 
     private final SelfMonitoringService selfMonitoringService;
 
+    /**
+     * Map of {@code eventClass -> agentHealth}, whereas the {@code agentHealth} is reset whenever an event of type
+     * {@code eventClass} occurs (see {@link #onInvalidationEvent(Object)}.
+     * The resulting agent health is the most severe value in the map.
+     */
     private final Map<Class<?>, AgentHealth> invalidatableHealth = new ConcurrentHashMap<>();
 
+    /**
+     * Contains agent health that cannot be invalidated by events. Instead, these health status time out after a
+     * defined validity period. The timestamp when that period is over is stored as value.
+     */
     private final Map<AgentHealth, LocalDateTime> generalHealthTimeouts = new ConcurrentHashMap<>();
 
     private AgentHealth lastNotifiedHealth = AgentHealth.OK;

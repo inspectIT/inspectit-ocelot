@@ -26,6 +26,11 @@ import java.util.TreeMap;
  */
 public class InternalProcessingAppender extends AppenderBase<ILoggingEvent> {
 
+    /**
+     * Map of class name prefixes (including the package) to events that invalidate corresponding logs,
+     * i.e., when there is an entry {@code a.b.c -> MyEvent.class} and {@code MyEvent} occurs,
+     * all past logs messages of classes in the package {@code a.b.c} are to be considered invalid/outdated.
+     */
     private static final NavigableMap<String, Class<?>> INVALIDATORS = new TreeMap<>();
 
     private static final Map<Class<? extends LogEventConsumer>, LogEventConsumer> consumers = new HashMap<>();
