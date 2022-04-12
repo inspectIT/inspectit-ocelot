@@ -100,7 +100,8 @@ const siteConfig = {
   editUrl: "https://github.com/inspectit/inspectit-ocelot-documentation/edit/master/docs/",
 
   algolia: {
-    apiKey: 'ce332dcee733a92cefacc3195edd83dd',
+    apiKey: 'd499024131bf8d92e6d469a6c14f4798',
+    appId: 'P7JV0ZK66K',
     indexName: 'inspectit-ocelot',
     algoliaOptions: {
       facetFilters: ["version:VERSION"]
