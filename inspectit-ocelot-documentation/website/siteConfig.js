@@ -97,7 +97,7 @@ const siteConfig = {
 
   docsSideNavCollapsible: true,
 
-  editUrl: "https://github.com/inspectit/inspectit-ocelot-documentation/edit/master/docs/",
+  editUrl: "https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/",
 
   algolia: {
     apiKey: 'd499024131bf8d92e6d469a6c14f4798',
