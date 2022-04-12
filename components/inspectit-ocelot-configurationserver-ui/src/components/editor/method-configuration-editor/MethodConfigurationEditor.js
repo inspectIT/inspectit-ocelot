@@ -147,7 +147,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
       // If currentScopeName is undefined, a new scope is being created
       // Generate random name for new scope
       scopeName = ('s_gen_scope_' + uuid()).replaceAll('-', '_');
-      // Enable Trace and Measure by default for new scopes
+      // Enable Trace and Measure by default for new scope
       _.set(cloneConfiguration, ['inspectit', 'instrumentation', 'rules', 'r_method_configuration_trace', 'scopes', scopeName], true);
       _.set(cloneConfiguration, ['inspectit', 'instrumentation', 'rules', 'r_method_configuration_duration', 'scopes', scopeName], true);
     }
