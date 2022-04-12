@@ -142,7 +142,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
     // Check whether an existing scope was modified or a new scope created
     if (currentScopeName) {
       // If currentScopeName is set, an existing scope is being modified
-      scopeName = currentScopeName
+      scopeName = currentScopeName;
     } else {
       // If currentScopeName is undefined, a new scope is being created
       // Generate random name for new scope
