@@ -9,7 +9,6 @@ on:
       - master
     paths-ignore:
       - 'components/**'
-      - 'inspectit-ocelot-demo/**'
       - 'inspectit-ocelot-documentation/**'
       - 'resources/**'
 

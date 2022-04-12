@@ -52,10 +52,9 @@ jobs:
     working_directory: ~/inspectit
     steps:
       - attach_repo
-      - run: cd repo && ./gradlew assemble bootJarWithFrontend packageDemo :inspectit-ocelot-core:cyclonedxBom :inspectit-ocelot-configurationserver:cyclonedxBom :inspectit-ocelot-eum-server:cyclonedxBom :inspectit-ocelot-eum-server:bootJar -PbuildVersion=${CIRCLE_TAG}
+      - run: cd repo && ./gradlew assemble bootJarWithFrontend :inspectit-ocelot-core:cyclonedxBom :inspectit-ocelot-configurationserver:cyclonedxBom :inspectit-ocelot-eum-server:cyclonedxBom :inspectit-ocelot-eum-server:bootJar -PbuildVersion=${CIRCLE_TAG}
       - run: mkdir artifacts
       - run: cp ~/inspectit/repo/inspectit-ocelot-agent/build/inspectit-ocelot-agent-${CIRCLE_TAG}.jar ~/inspectit/artifacts
-      - run: cp ~/inspectit/repo/inspectit-ocelot-demo/build/inspectit-ocelot-demo-${CIRCLE_TAG}.zip ~/inspectit/artifacts
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-configurationserver/build/libs/inspectit-ocelot-configurationserver-${CIRCLE_TAG}.jar ~/inspectit/artifacts
       - run: cp ~/inspectit/repo/components/inspectit-ocelot-eum-server/build/libs/inspectit-ocelot-eum-server-${CIRCLE_TAG}.jar ~/inspectit/artifacts
       - run: mkdir boms
@@ -123,15 +122,6 @@ jobs:
       - run: docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
       - run: docker push
 
-  publish_dashboards_to_marketplace:
-    docker:
-      - image: circleci/openjdk:8-jdk
-    working_directory: ~/inspectit/repo/inspectit-ocelot-demo/grafana/marketplace
-    steps:
-      - run:
-          command: |
-            chmod +x ~/inspectit/repo/resources/upload-all-dashboards.sh
-            ~/inspectit/repo/resources/upload-all-dashboards.sh
   # Deploy pre-release documentation
   deploy-master-documentation:
     docker:
@@ -235,11 +225,6 @@ workflows:
       - generate_changelog:
           filters:
             <<: *filter_release
-          requires:
-            - checkout
-      - publish_dashboards_to_marketplace:
-          filters:
-            <<: *filter_release      
           requires:
             - checkout
       - publish_github_release:
