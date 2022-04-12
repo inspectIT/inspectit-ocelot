@@ -4,10 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -38,9 +35,9 @@ public class AgentHealthManagerTest {
 
     private static final long VALIDITY_PERIOD_MILLIS = 500;
 
-    private ScheduledExecutorService executorService;
+    private static InspectitConfig config;
 
-    private InspectitConfig config;
+    private ScheduledExecutorService executorService;
 
     private InspectitEnvironment environment;
 
@@ -48,16 +45,19 @@ public class AgentHealthManagerTest {
 
     private AgentHealthManager healthManager;
 
-    @BeforeEach
-    void setupStatusManager() {
-        executorService = new ScheduledThreadPoolExecutor(1);
-
+    @BeforeAll
+    static void createInspectitConfig() {
         config = new InspectitConfig();
         AgentHealthSettings agentHealth = new AgentHealthSettings();
         agentHealth.setValidityPeriod(Duration.ofMillis(VALIDITY_PERIOD_MILLIS));
         SelfMonitoringSettings selfMonitoring = new SelfMonitoringSettings();
         selfMonitoring.setAgentHealth(agentHealth);
         config.setSelfMonitoring(selfMonitoring);
+    }
+
+    @BeforeEach
+    void setupStatusManager() {
+        executorService = new ScheduledThreadPoolExecutor(1);
 
         environment = mock(InspectitEnvironment.class);
         when(environment.getCurrentConfig()).thenReturn(config);
