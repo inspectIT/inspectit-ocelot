@@ -39,7 +39,7 @@ See also the chapter regarding [Configuration Code Style](instrumentation/code-s
 ### Common Documentation Attributes
 
 With all three kinds of instrumentation objects documentation is added below the key `docs`.
-Depending on the type of the instrumentation object there are more or less documentation attributes which can be filled.
+Depending on the type of the instrumentation object there are more or less documentation attributes that can be set.
 
 For scopes and rules the following attributes are all options, for actions there a few more.
 
