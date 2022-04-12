@@ -91,7 +91,8 @@ inspectit:
         include:
           'r_capture_method_entry_timestamp_conditional': true
         exit:
-          'method_duration':
+          # attributes in rules should start with 'c_' (stands for context-variable)
+          'c_method_duration':
             only-if-true: 'capture_time_condition'
             action: 'a_timing_elapsedMillis'
             data-input:
