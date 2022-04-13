@@ -164,6 +164,22 @@ let InspectitOcelotHighlightRules = function () {
     regex: /:\s*/,
   };
 
+  const mapKeysRules = [
+    {
+      token: ['variable', 'keyword', 'text'],
+      regex: /(['][^']*?[']\s*(?=:))(:)(\s*)/,
+    },
+    {
+      token: ['variable', 'keyword', 'text'],
+      regex: /([^\s]+?\s*(?=:))(:)(\s*)/,
+    },
+  ];
+
+  const listRule = {
+    token: 'list.markup',
+    regex: `- `,
+  };
+
   const invalidRule = {
     token: 'invalid.illegal',
     regex: /.*/,
@@ -267,7 +283,7 @@ let InspectitOcelotHighlightRules = function () {
       if (key === KEY_START) {
         current_state_name = key;
       } else {
-        current_state_name = `${key}-${parent_name}`;
+        current_state_name = `${parent_name}-${key}`;
       }
 
       // Rules for highlighting are kept in a list per state, this list for the state corresponding to the
@@ -275,7 +291,7 @@ let InspectitOcelotHighlightRules = function () {
 
       // The list already contains two rules that are needed for every key and are at the correct position if
       // added now (the order of rules matters for evaluation, if a string matches a regex in a previous rule,
-      // later rules are not evaluated anymore.
+      // later rules are not evaluated anymore).
       let rules_for_current_key = [commentRule, defaultRule, keywordRule, jsonStartRule];
 
       // The info on what values should be behind a key, is within a nested map. This map is retrieved here.
@@ -327,7 +343,7 @@ let InspectitOcelotHighlightRules = function () {
     // state. These rules are created here.
 
     for (let attribute of attributes_map.keys()) {
-      let new_state_name = `${attribute}-${current_state_name}`;
+      let new_state_name = `${current_state_name}-${attribute}`;
       let inner_map = new Map(Object.entries(attributes_map.get(attribute)));
       let content_type = inner_map.get(KEY_TYPE);
       current_rules.push({
@@ -398,70 +414,78 @@ let InspectitOcelotHighlightRules = function () {
   function mapToRulesTypeMap(inner_map, rules_for_current_key, current_state_name, nested_level) {
     // Depending on whether Maps contain more InspectitConfig-specific objects
     // or not, e.g. Strings or int, as values, different rules need to be added.
-    let map_content_type = inner_map.get(KEY_MAP_CONTENT_TYPE);
+    const map_content_type = inner_map.get(KEY_MAP_CONTENT_TYPE);
+    switch (map_content_type) {
+      case VALUE_TYPE_OBJECT:
+      case VALUE_TYPE_YAML: {
+        // If the map contains InspectitConfig-specific objects or arbitrary YAML as values, a new state is needed that is entered
+        // after seeing any key for the map.
+        let sub_state_name = `${current_state_name}-single`;
 
-    if (map_content_type === VALUE_TYPE_OBJECT || map_content_type === VALUE_TYPE_YAML) {
-      // If the map contains InspectitConfig-specific objects or arbitrary YAML as values, a new state is needed that is entered
-      // after seeing any key for the map.
-      let sub_state_name = `single-${current_state_name}`;
+        // the rules for the new substate are created in mapToRulesMapSubkey
+        mapToRulesCollectionSubkey(inner_map, sub_state_name, map_content_type, nested_level, KEY_MAP_CONTENTS);
 
-      // the rules for the new substate are created in mapToRulesMapSubkey
-      mapToRulesMapSubkey(inner_map, sub_state_name, map_content_type, nested_level);
+        // Any text is accepted as a key after which the new sub-state is entered for its values.
+        rules_for_current_key.push({
+          token: 'variable',
+          regex: /(.+?(?=:))/,
+          next: sub_state_name,
+          onMatch: function () {
+            addToStatesMap(sub_state_name, current_state_name, map_content_type, nested_level);
+            return this.token;
+          },
+        });
+        rules_for_current_key.push({
+          token: 'variable',
+          regex: /(['][^']*?['](?=:))/,
+          next: sub_state_name,
+          onMatch: function () {
+            addToStatesMap(sub_state_name, current_state_name, map_content_type, nested_level);
+            return this.token;
+          },
+        });
 
-      // Any text is accepted as a key after which the new sub-state is entered for its values.
-      rules_for_current_key.push({
-        token: 'variable',
-        regex: /(.+?(?=:))/,
-        next: sub_state_name,
-        onMatch: function () {
-          addToStatesMap(sub_state_name, current_state_name, map_content_type, nested_level);
-          return this.token;
-        },
-      });
-      rules_for_current_key.push({
-        token: 'variable',
-        regex: /(['][^']*?['](?=:))/,
-        next: sub_state_name,
-        onMatch: function () {
-          addToStatesMap(sub_state_name, current_state_name, map_content_type, nested_level);
-          return this.token;
-        },
-      });
-
-      // only keys with arbitrary names are allowed in this state, so the invalidRule is added
-      rules_for_current_key.push(invalidRule);
-    } else if (map_content_type === VALUE_TYPE_TEXT) {
-      // if the map simply contains text content, no new sub-state is needed and instead, keys are simply
-      // highlighted as variables again and the textRules are added to highlight any text in the values properly.
-      rules_for_current_key.push(
-        {
-          token: ['variable', 'keyword'],
-          regex: /(['][^']*?[']\s*(?=:))(:)/,
-        },
-        {
-          token: ['variable', 'keyword'],
-          regex: /([^\s]+?\s*(?=:))(:)/,
-        }
-      );
-      rules_for_current_key = rules_for_current_key.concat(textRules);
+        // only new keys with arbitrary names are allowed in this state, so the invalidRule is added
+        rules_for_current_key.push(invalidRule);
+        break;
+      }
+      case VALUE_TYPE_ENUM: {
+        // if the map contains enum content, no new sub-state is needed and instead, keys are simply
+        // highlighted as variables and the rules for the enum are added to highlight the values properly.
+        rules_for_current_key = rules_for_current_key.concat(mapKeysRules);
+        let enum_values = inner_map.get(KEY_ENUM_VALUES);
+        rules_for_current_key = rulesForEnum(rules_for_current_key, current_state_name, enum_values);
+        break;
+      }
+      case VALUE_TYPE_TEXT: {
+        // if the map contains text content, there is also no new sub-state needed and instead, keys are simply
+        // highlighted as variables again and the textRules are added to highlight any text in the values properly.
+        rules_for_current_key = rules_for_current_key.concat(mapKeysRules);
+        rules_for_current_key = rules_for_current_key.concat(textRules);
+        break;
+      }
     }
 
     return rules_for_current_key;
   }
 
   // Generates the rules for the contents of a Map if it contains InspectitConfig-specific objects.
-  function mapToRulesMapSubkey(inner_map, sub_state_name, map_content_type, nested_level) {
+  function mapToRulesCollectionSubkey(inner_map, sub_state_name, content_type, nested_level, contents_key) {
     // As before the list of rules for the state is created with the comment-rule already in it.
     let rules_for_sub_state = [commentRule, defaultRule, keywordRule, jsonStartRule];
 
-    if (map_content_type === VALUE_TYPE_OBJECT) {
-      // If the map contains InspectitConfig-specific objects as values, these objects' attributes will be behind
-      // the key 'map-contents' in the inner_map.
-      let contents_map = new Map(Object.entries(inner_map.get(KEY_MAP_CONTENTS)));
-
-      rules_for_sub_state = rulesForObject(contents_map, rules_for_sub_state, sub_state_name, nested_level + 1);
-    } else if (map_content_type === VALUE_TYPE_YAML) {
-      rules_for_sub_state = rulesForYaml(rules_for_sub_state);
+    switch (content_type) {
+      case VALUE_TYPE_OBJECT: {
+        // If the map contains InspectitConfig-specific objects as values, these objects' attributes will be behind
+        // the key 'map-contents' in the inner_map.
+        let contents_map = new Map(Object.entries(inner_map.get(contents_key)));
+        rules_for_sub_state = rulesForObject(contents_map, rules_for_sub_state, sub_state_name, nested_level + 1);
+        break;
+      }
+      case VALUE_TYPE_YAML: {
+        rules_for_sub_state = rulesForYaml(rules_for_sub_state);
+        break;
+      }
     }
     rules_for_sub_state = indentRules.concat(rules_for_sub_state);
     allRules.set(sub_state_name, rules_for_sub_state);
@@ -471,33 +495,39 @@ let InspectitOcelotHighlightRules = function () {
   function mapToRulesTypeList(inner_map, rules_for_current_key, current_state_name, nested_level) {
     // If the list contains InspectitConfig-specific objects as values, a new state is needed that is entered
     // after seeing the start of the list.
-    let list_content_type = inner_map.get(KEY_LIST_CONTENT_TYPE);
-    if (list_content_type === VALUE_TYPE_OBJECT) {
-      let sub_state_name = `single-${current_state_name}`;
-      rules_for_current_key.push({
-        token: 'list.markup',
-        regex: /\s*[-?](?:$|\s)/,
-        next: sub_state_name,
-        onMatch: function () {
-          addToStatesMap(sub_state_name, current_state_name, list_content_type, nested_level);
-          return this.token;
-        },
-      });
-
-      let rules_for_sub_state = [];
-      let contents_map = new Map(Object.entries(inner_map.get(KEY_LIST_CONTENTS)));
-
-      rules_for_sub_state = rulesForObject(contents_map, rules_for_sub_state, sub_state_name, nested_level + 1);
-      rules_for_sub_state = indentRules.concat(rules_for_sub_state);
-      allRules.set(sub_state_name, rules_for_sub_state);
-    } else if (inner_map.get(KEY_LIST_CONTENT_TYPE) === VALUE_TYPE_TEXT) {
-      // if the map simply contains text content, no new sub-state is needed and instead simply a rule to highlight
-      // the list beginning correctly is needed and the textRules are added to highlight any text in the list
-      rules_for_current_key.push({
-        token: 'list.markup',
-        regex: `- `,
-      });
-      rules_for_current_key = rules_for_current_key.concat(textRules);
+    const list_content_type = inner_map.get(KEY_LIST_CONTENT_TYPE);
+    switch (list_content_type) {
+      case VALUE_TYPE_OBJECT:
+      case VALUE_TYPE_YAML: {
+        let sub_state_name = `${current_state_name}-single`;
+        rules_for_current_key.push({
+          token: 'list.markup',
+          regex: /\s*[-?](?:$|\s)/,
+          next: sub_state_name,
+          onMatch: function () {
+            addToStatesMap(sub_state_name, current_state_name, list_content_type, nested_level);
+            return this.token;
+          },
+        });
+        mapToRulesCollectionSubkey(inner_map, sub_state_name, list_content_type, nested_level, KEY_LIST_CONTENTS);
+        rules_for_current_key.push(invalidRule);
+        break;
+      }
+      case VALUE_TYPE_ENUM: {
+        // if the map contains text content, there is also new sub-state needed and instead a rule to highlight
+        // the list beginning correctly is added and the enum rules are added to highlight the values in the list
+        rules_for_current_key.push(listRule);
+        let enum_values = inner_map.get(KEY_ENUM_VALUES);
+        rules_for_current_key = rulesForEnum(rules_for_current_key, current_state_name, enum_values);
+        break;
+      }
+      case VALUE_TYPE_TEXT: {
+        // if the map contains text content, there is also new sub-state needed and instead a rule to highlight
+        // the list beginning correctly is added and the textRules are added to highlight the values in the list
+        rules_for_current_key.push(listRule);
+        rules_for_current_key = rules_for_current_key.concat(textRules);
+        break;
+      }
     }
 
     return rules_for_current_key;

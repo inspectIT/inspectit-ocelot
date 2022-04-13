@@ -3,7 +3,6 @@ include 'inspectit-ocelot-bootstrap'
 include 'inspectit-ocelot-core'
 include "inspectit-ocelot-agent"
 include 'inspectit-ocelot-documentation'
-include 'inspectit-ocelot-demo'
 include 'inspectit-ocelot-configurationserver'
 include 'inspectit-ocelot-eum-server'
 include 'inspectit-ocelot-sdk'

@@ -1,10 +1,6 @@
 package inspectit.ocelot.configdocsgenerator.parsing;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.io.Resources;
-import org.apache.commons.text.StringSubstitutor;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,25 +40,6 @@ class ConfigParserTest {
     private String getYaml(String fileName) throws IOException {
         URL url = Resources.getResource("ConfigParserTest/" + fileName);
         return Resources.toString(url, StandardCharsets.UTF_8);
-    }
-
-    @Nested
-    class ReplacePlaceholdersTest {
-
-        @Test
-        void replacePlaceholders() throws IOException {
-
-            String configYaml = getYaml("placeholdersOrigin.yml");
-            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            Map<String, Object> yamlMap = mapper.readValue(configYaml, Map.class);
-
-            StringSubstitutor stringSubstitutor = new NestedMapStringSubstitutor(yamlMap);
-            String result = stringSubstitutor.replace(configYaml);
-
-            String expected = getYaml("placeholdersExpected.yml");
-
-            assertThat(result).isEqualTo(expected);
-        }
     }
 
     @Nested
@@ -87,7 +65,7 @@ class ConfigParserTest {
             when(metricDefinitionMock.getDescription()).thenReturn("free disk space");
             when(metricDefinitionMock.getViews()).thenReturn(null);
 
-            assertThat(result.getMetrics().getDefinitions().get("[disk/free]")).usingRecursiveComparison()
+            assertThat(result.getMetrics().getDefinitions().get("disk/free")).usingRecursiveComparison()
                     .isEqualTo(metricDefinitionMock);
             assertThat(result.getMetrics().getDisk()).usingRecursiveComparison().isEqualTo(pollingSettingsMock);
         }
@@ -179,7 +157,7 @@ class ConfigParserTest {
         void invalidYaml() {
             String configYaml = "invalid-yaml";
 
-            assertThat(assertThatThrownBy(() -> configParser.parseConfig(configYaml)).isInstanceOf(JsonProcessingException.class));
+            assertThat(assertThatThrownBy(() -> configParser.parseConfig(configYaml)).isInstanceOf(NoSuchElementException.class));
         }
     }
 }

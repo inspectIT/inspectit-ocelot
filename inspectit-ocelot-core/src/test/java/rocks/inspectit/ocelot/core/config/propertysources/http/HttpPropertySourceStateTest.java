@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.http.MultiValue;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.google.common.collect.ImmutableMap;
+import org.apache.http.entity.ContentType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -56,7 +57,6 @@ class HttpPropertySourceStateTest {
             state = new HttpPropertySourceState("test-state", httpSettings);
         }
 
-
         @AfterEach
         public void teardown() {
             mockServer.stop();
@@ -66,10 +66,9 @@ class HttpPropertySourceStateTest {
         public void fetchingYaml() {
             String config = "inspectit:\n  service-name: test-name";
 
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .willReturn(aResponse()
-                            .withStatus(200)
-                            .withBody(config)));
+            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
+                    .withBody(config)
+                    .withHeader("Content-Type", "application/x-yaml")));
 
             boolean updateResult = state.update(false);
             PropertySource result = state.getCurrentPropertySource();
@@ -81,29 +80,24 @@ class HttpPropertySourceStateTest {
             List<ServeEvent> requests = mockServer.getServeEvents().getRequests();
             assertThat(requests).hasSize(1);
 
-            List<String> headerKeys = requests.get(0).getRequest().getHeaders().all().stream()
+            List<String> headerKeys = requests.get(0)
+                    .getRequest()
+                    .getHeaders()
+                    .all()
+                    .stream()
                     .map(MultiValue::key)
                     .filter(key -> key.startsWith("X-OCELOT-"))
                     .collect(Collectors.toList());
 
-            assertThat(headerKeys).containsOnly(
-                    "X-OCELOT-AGENT-ID",
-                    "X-OCELOT-AGENT-VERSION",
-                    "X-OCELOT-JAVA-VERSION",
-                    "X-OCELOT-VM-NAME",
-                    "X-OCELOT-VM-VENDOR",
-                    "X-OCELOT-START-TIME",
-                    "X-OCELOT-HEALTH"
-            );
+            assertThat(headerKeys).containsOnly("X-OCELOT-AGENT-ID", "X-OCELOT-AGENT-VERSION", "X-OCELOT-JAVA-VERSION", "X-OCELOT-VM-NAME", "X-OCELOT-VM-VENDOR", "X-OCELOT-START-TIME", "X-OCELOT-HEALTH");
         }
 
         @Test
         public void fetchingJson() {
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .willReturn(aResponse()
-                            .withStatus(200)
-                            .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")));
-
+            String json = "{\"inspectit\": {\"service-name\": \"test-name\"}}";
+            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
+                    .withBody(json)
+                    .withHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType())));
             boolean updateResult = state.update(false);
             PropertySource result = state.getCurrentPropertySource();
 
@@ -113,15 +107,11 @@ class HttpPropertySourceStateTest {
 
         @Test
         public void fetchingEmptyResponse() {
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .willReturn(aResponse()
-                            .withStatus(200)
-                            .withBody("")));
+            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200).withBody("")));
 
             boolean updateResult = state.update(false);
             PropertySource result = state.getCurrentPropertySource();
             Properties source = (Properties) result.getSource();
-
 
             assertTrue(updateResult);
             assertThat(new File(httpSettings.getPersistenceFile())).hasContent("");
@@ -131,10 +121,7 @@ class HttpPropertySourceStateTest {
         @Test
         public void multipleFetchingWithoutCaching() {
             String config = "{\"inspectit\": {\"service-name\": \"test-name\"}}";
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .willReturn(aResponse()
-                            .withStatus(200)
-                            .withBody(config)));
+            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200).withBody(config)));
 
             boolean updateResultFirst = state.update(false);
             PropertySource resultFirst = state.getCurrentPropertySource();
@@ -153,15 +140,11 @@ class HttpPropertySourceStateTest {
         @Test
         public void usingLastModifiedHeader() {
             String config = "{\"inspectit\": {\"service-name\": \"test-name\"}}";
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .willReturn(aResponse()
-                            .withStatus(200)
-                            .withBody(config)
-                            .withHeader("Last-Modified", "last_modified_header")));
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .withHeader("If-Modified-Since", equalTo("last_modified_header"))
-                    .willReturn(aResponse()
-                            .withStatus(304)));
+            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
+                    .withBody(config)
+                    .withHeader("Last-Modified", "last_modified_header")));
+            mockServer.stubFor(get(urlPathEqualTo("/")).withHeader("If-Modified-Since", equalTo("last_modified_header"))
+                    .willReturn(aResponse().withStatus(304)));
 
             boolean updateResultFirst = state.update(false);
             PropertySource resultFirst = state.getCurrentPropertySource();
@@ -179,15 +162,11 @@ class HttpPropertySourceStateTest {
         @Test
         public void usingETagHeader() {
             String config = "{\"inspectit\": {\"service-name\": \"test-name\"}}";
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .willReturn(aResponse()
-                            .withStatus(200)
-                            .withBody(config)
-                            .withHeader("ETag", "etag_header")));
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .withHeader("If-None-Match", matching("etag_header.*")) // regex required because this header can be different - e.g. Jetty adds "--gzip" to the ETag header value
-                    .willReturn(aResponse()
-                            .withStatus(304)));
+            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
+                    .withBody(config)
+                    .withHeader("ETag", "etag_header")));
+            mockServer.stubFor(get(urlPathEqualTo("/")).withHeader("If-None-Match", matching("etag_header.*")) // regex required because this header can be different - e.g. Jetty adds "--gzip" to the ETag header value
+                    .willReturn(aResponse().withStatus(304)));
 
             boolean updateResultFirst = state.update(false);
             PropertySource resultFirst = state.getCurrentPropertySource();
@@ -206,9 +185,7 @@ class HttpPropertySourceStateTest {
         public void serverReturnsErrorNoFallback() throws IOException {
             Files.write(Paths.get(httpSettings.getPersistenceFile()), "test: testvalue".getBytes());
 
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .willReturn(aResponse()
-                            .withStatus(500)));
+            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(500)));
 
             boolean updateResult = state.update(false);
             PropertySource result = state.getCurrentPropertySource();
@@ -222,9 +199,7 @@ class HttpPropertySourceStateTest {
         public void serverReturnsErrorWithFallback() throws IOException {
             Files.write(Paths.get(httpSettings.getPersistenceFile()), "test: testvalue".getBytes());
 
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .willReturn(aResponse()
-                            .withStatus(500)));
+            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(500)));
 
             boolean updateResult = state.update(true);
             PropertySource result = state.getCurrentPropertySource();
@@ -234,12 +209,9 @@ class HttpPropertySourceStateTest {
             assertThat(new File(httpSettings.getPersistenceFile())).hasContent("test: testvalue");
         }
 
-
         @Test
         public void serverReturnsErrorWithoutFallbackFile() throws IOException {
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .willReturn(aResponse()
-                            .withStatus(500)));
+            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(500)));
 
             boolean updateResult = state.update(false);
             PropertySource result = state.getCurrentPropertySource();
@@ -249,7 +221,6 @@ class HttpPropertySourceStateTest {
             assertThat(new File(httpSettings.getPersistenceFile())).doesNotExist();
         }
     }
-
 
     @Nested
     public class GetEffectiveRequestUri {
@@ -278,10 +249,10 @@ class HttpPropertySourceStateTest {
 
             state = new HttpPropertySourceState("test-state", httpSettings);
 
-            assertThat(state.getEffectiveRequestUri().toString()).isEqualTo("http://localhost:4242/endpoint?fixed=something&service=myservice");
+            assertThat(state.getEffectiveRequestUri()
+                    .toString()).isEqualTo("http://localhost:4242/endpoint?fixed=something&service=myservice");
         }
     }
-
 
     @Nested
     public class SkipPersistenceFileWriteOnError {
@@ -301,22 +272,18 @@ class HttpPropertySourceStateTest {
             state = Mockito.spy(new HttpPropertySourceState("test-state", httpSettings));
         }
 
-
         @AfterEach
         public void teardown() {
             mockServer.stop();
         }
-
 
         @Test
         public void fileWritesSkippedOnError() {
             // "/dev/null/*inspectit-config" will fail on Unix and Windows systems
             when(httpSettings.getPersistenceFile()).thenReturn("/dev/null/*inspectit-config");
 
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .willReturn(aResponse()
-                            .withStatus(200)
-                            .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")));
+            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
+                    .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")));
 
             assertTrue(state.update(false));
             assertFalse(state.isFirstFileWriteAttemptSuccessful());
@@ -329,10 +296,8 @@ class HttpPropertySourceStateTest {
         @Test
         public void fileWritesContinuedOnSuccess() {
             when(httpSettings.getPersistenceFile()).thenReturn(generateTempFilePath());
-            mockServer.stubFor(get(urlPathEqualTo("/"))
-                    .willReturn(aResponse()
-                            .withStatus(200)
-                            .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")));
+            mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
+                    .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")));
 
             assertTrue(state.update(false));
             assertTrue(state.isFirstFileWriteAttemptSuccessful());
@@ -342,7 +307,6 @@ class HttpPropertySourceStateTest {
 
         }
     }
-
 
     private static String generateTempFilePath() {
         try {

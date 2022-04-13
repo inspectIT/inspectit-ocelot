@@ -22,6 +22,7 @@ import rocks.inspectit.ocelot.config.utils.CaseUtils;
 import rocks.inspectit.ocelot.core.config.propertysources.EnvironmentInformationPropertySource;
 import rocks.inspectit.ocelot.core.config.propertysources.file.DirectoryPropertySource;
 import rocks.inspectit.ocelot.core.config.propertysources.http.HttpPropertySourceState;
+import rocks.inspectit.ocelot.core.config.util.InvalidPropertiesException;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
 import javax.validation.ConstraintViolation;
@@ -99,8 +100,10 @@ public class InspectitEnvironment extends StandardEnvironment {
      * In contrast items appearing first in the list can provide information for loading items appearing later in the list.
      */
     private static final List<BiConsumer<MutablePropertySources, ConfigSettings>> CONFIGURATION_INIT_STEPS = Arrays.asList(
+            //@formatter:off
             InspectitEnvironment::addFileBasedConfiguration,
             InspectitEnvironment::addHttpBasedConfiguration
+            //@formatter:on
     );
 
     /**
@@ -178,6 +181,8 @@ public class InspectitEnvironment extends StandardEnvironment {
             defaultSettings = loadAgentResourceYaml(DEFAULT_CONFIG_PROPERTYSOURCE_NAME, ConfigFileLoader.getDefaultResources());
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (InvalidPropertiesException e) {
+            throw new RuntimeException("Could not load default configuration.", e);
         }
         propsList.addLast(defaultSettings);
         propsList.addLast(new EnvironmentInformationPropertySource(INSPECTIT_ENV_PROPERTYSOURCE_NAME));
@@ -197,6 +202,8 @@ public class InspectitEnvironment extends StandardEnvironment {
                 fallbackSettings = loadAgentResourceYaml(FALLBACK_CONFIG_PROPERTYSOURCE_NAME, ConfigFileLoader.getFallBackResources());
             } catch (IOException e) {
                 throw new RuntimeException(e);
+            } catch (InvalidPropertiesException e) {
+                throw new RuntimeException("Could not load fallback configuration.", e);
             }
             val currentSources = propsList.stream().collect(Collectors.toList());
             val fallbackSources = Arrays.<PropertySource<?>>asList(fallbackSettings, defaultSettings);
@@ -216,7 +223,7 @@ public class InspectitEnvironment extends StandardEnvironment {
     private void loadCmdLineArgumentsPropertySource(Optional<String> cmdLineArgs, MutablePropertySources propsList) {
         if (cmdLineArgs.isPresent() && !cmdLineArgs.get().isEmpty()) {
             try {
-                Properties config = PropertyUtils.readJson(cmdLineArgs.get());
+                Properties config = PropertyUtils.readYaml(cmdLineArgs.get());
                 PropertiesPropertySource pps = new PropertiesPropertySource(CMD_ARGS_PROPERTYSOURCE_NAME, config);
                 propsList.addFirst(pps);
             } catch (Exception e) {
@@ -237,9 +244,8 @@ public class InspectitEnvironment extends StandardEnvironment {
     public synchronized <T> Optional<T> loadAndValidateFromProperties(String prefix, Class<T> configClazz) {
         T newConfig;
         try {
-            Binder binder = new Binder(ConfigurationPropertySources.get(this),
-                    new PropertySourcesPlaceholdersResolver(this),
-                    InspectitConfigConversionService.getInstance());
+            Binder binder = new Binder(ConfigurationPropertySources.get(this), new PropertySourcesPlaceholdersResolver(this), InspectitConfigConversionService
+                    .getInstance());
             newConfig = binder.bind(prefix, configClazz).get();
         } catch (Exception e) {
             log.error("Error loading the configuration '{}'.", prefix, e);
@@ -253,9 +259,7 @@ public class InspectitEnvironment extends StandardEnvironment {
             log.error("Error loading the configuration '{}'.", prefix);
             for (ConstraintViolation<T> vio : violations) {
                 String property = CaseUtils.camelCaseToKebabCase(vio.getPropertyPath().toString());
-                if (vio.getInvalidValue() instanceof CharSequence
-                        || vio.getInvalidValue() instanceof Number
-                        || vio.getInvalidValue() instanceof Duration) {
+                if (vio.getInvalidValue() instanceof CharSequence || vio.getInvalidValue() instanceof Number || vio.getInvalidValue() instanceof Duration) {
                     log.error("{} (={}) => {}", property, vio.getInvalidValue(), vio.getMessage());
                 } else {
                     log.error("{} => {}", property, vio.getMessage());
@@ -287,7 +291,7 @@ public class InspectitEnvironment extends StandardEnvironment {
         return config.isPresent() ? config : lastConfig;
     }
 
-    private static PropertiesPropertySource loadAgentResourceYaml(String propertySourceName, Resource[] resources) {
+    private static PropertiesPropertySource loadAgentResourceYaml(String propertySourceName, Resource[] resources) throws InvalidPropertiesException {
         Properties result = new Properties();
         for (val res : resources) {
             Properties properties = PropertyUtils.readYamlFiles(res);
@@ -348,7 +352,7 @@ public class InspectitEnvironment extends StandardEnvironment {
      * This is a workaround to fix Issue https://github.com/inspectIT/inspectit-ocelot/issues/942.
      * <p>
      * The root cause of this issue is that Spring automatically calls
-     * {@link LiveBeansView#registerApplicationContext(ConfigurableApplicationContext)} when a context is refreshed.
+     * LiveBeansView#registerApplicationContext(ConfigurableApplicationContext) when a context is refreshed.
      * <p>
      * This call checks for the property with the name {@link LiveBeansView#MBEAN_DOMAIN_PROPERTY_NAME} and if it is present,
      * an MBean will be registered.

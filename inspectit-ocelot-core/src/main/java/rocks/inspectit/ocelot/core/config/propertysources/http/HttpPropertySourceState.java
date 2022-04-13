@@ -19,6 +19,7 @@ import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
+import rocks.inspectit.ocelot.core.config.util.InvalidPropertiesException;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 
 import java.io.IOException;
@@ -115,7 +116,7 @@ public class HttpPropertySourceState {
     /**
      * Fetches the latest configuration. If the configuration is successfully fetched a new {@link PropertySource} is
      * created which can be accessed using {@link #getCurrentPropertySource()}. In case of an error or if the server responds
-     * that the configuration has not be changed the property source will not be updated!
+     * that the configuration has not been changed the property source will not be updated!
      *
      * @param fallBackToFile if true, the configured persisted configuration will be loaded in case of an error
      *
@@ -132,7 +133,6 @@ public class HttpPropertySourceState {
                 log.error("Could not parse fetched configuration.", e);
             }
         }
-
         return false;
     }
 
@@ -153,15 +153,12 @@ public class HttpPropertySourceState {
      *
      * @return the parsed {@link Properties} object
      */
-    private Properties parseProperties(String rawProperties) {
+    private Properties parseProperties(String rawProperties) throws InvalidPropertiesException {
         if (StringUtils.isBlank(rawProperties)) {
             return EMPTY_PROPERTIES;
         }
-        try {
-            return PropertyUtils.readJson(rawProperties);
-        } catch (IOException e) {
-            return PropertyUtils.readYaml(rawProperties);
-        }
+        return PropertyUtils.readYaml(rawProperties);
+
     }
 
     /**
@@ -190,7 +187,7 @@ public class HttpPropertySourceState {
      * Fetches the configuration by executing a HTTP request against the configured HTTP endpoint. The request contains
      * the 'If-Modified-Since' header if a previous response returned a 'Last-Modified' header.
      *
-     * @return The requests response body representing the configuration in a JSON format. null is returned if request fails or the
+     * @return The request's response body representing the configuration in a JSON/YAML format. null is returned if request fails or the
      * server returns 304 (not modified).
      */
     private String fetchConfiguration(boolean fallBackToFile) {
@@ -217,6 +214,8 @@ public class HttpPropertySourceState {
         boolean isError = true;
         try {
             HttpResponse response = createHttpClient().execute(httpGet);
+
+            // get the config from the response
             configuration = processHttpResponse(response);
             isError = false;
             if (errorCounter != 0) {
@@ -238,13 +237,12 @@ public class HttpPropertySourceState {
         } else if (isError && fallBackToFile) {
             configuration = readPersistenceFile();
         }
-
         return configuration;
     }
 
     /**
-     * Injects all the agent's meta information headers, which should be send when fetching a new configuration,
-     * into the given request request.
+     * Injects all the agent's meta information headers, which should be sent when fetching a new configuration,
+     * into the given request.
      *
      * @param httpGet the request to inject the meat information headers
      */

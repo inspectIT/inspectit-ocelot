@@ -1,6 +1,7 @@
 plugins {
     id 'org.springframework.boot' version "${springboot_version}"
     id 'com.palantir.docker' version "0.21.0"
+    id "org.cyclonedx.bom" version "1.5.0"
 }
 
 apply plugin: 'java'
@@ -82,6 +83,10 @@ bootJar {
     }
 }
 
+cyclonedxBom {
+    includeConfigs += ["runtimeClasspath"]
+}
+
 test {
     useJUnitPlatform()
 
@@ -127,8 +132,8 @@ dependencies {
             "rocks.inspectit:opencensus-influxdb-exporter:1.2",
     )
 
-    compileOnly "org.projectlombok:lombok:1.18.12"
-    annotationProcessor "org.projectlombok:lombok:1.18.12"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     testImplementation(
             project(':inspectit-ocelot-config'),

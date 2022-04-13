@@ -46,7 +46,7 @@ public class ConfigurationDirectoriesPoller extends DynamicallyActivatableServic
 
     @Override
     protected boolean doEnable(InspectitConfig conf) {
-        log.info("Starting config directory polling service..");
+        log.info("Starting config directory polling service...");
         env.readPropertySources(propertySources ->
                 filePollers = propertySources.stream()
                         .filter(ps -> ps instanceof DirectoryPropertySource)
