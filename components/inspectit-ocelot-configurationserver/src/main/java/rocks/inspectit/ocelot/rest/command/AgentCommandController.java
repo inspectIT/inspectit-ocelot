@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.AgentCommandDispatcher;
 import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
+import rocks.inspectit.ocelot.commons.models.command.impl.ListDependenciesCommand;
 import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
@@ -48,5 +49,11 @@ public class AgentCommandController extends AbstractBaseController {
     public DeferredResult<ResponseEntity<?>> listClasses(@RequestParam(value = "agent-id") String agentId, @RequestParam(value = "query") String query) throws ExecutionException {
         ListClassesCommand listClassesCommand = new ListClassesCommand(query);
         return commandDispatcher.dispatchCommand(agentId, listClassesCommand);
+    }
+
+    @GetMapping(value = "command/dependencies")
+    public DeferredResult<ResponseEntity<?>> listDependencies(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
+        ListDependenciesCommand dependenciesCommand = new ListDependenciesCommand();
+        return commandDispatcher.dispatchCommand(agentId, dependenciesCommand);
     }
 }
