@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -16,6 +17,7 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
+import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.util.InvalidPropertiesException;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
@@ -95,6 +97,8 @@ public class HttpPropertySourceState {
     @Getter
     private boolean firstFileWriteAttemptSuccessful = true;
 
+    private AgentHealth agentHealth = AgentHealth.OK;
+
     /**
      * Constructor.
      *
@@ -130,6 +134,15 @@ public class HttpPropertySourceState {
             }
         }
         return false;
+    }
+
+    /**
+     * Updates the agent health to be sent with the request for agent configuration.
+     *
+     * @param newHealth The new agent health
+     */
+    public void updateAgentHealth(@NonNull AgentHealth newHealth) {
+        agentHealth = newHealth;
     }
 
     /**
@@ -242,6 +255,7 @@ public class HttpPropertySourceState {
         httpGet.setHeader(META_HEADER_PREFIX + "VM-NAME", runtime.getVmName());
         httpGet.setHeader(META_HEADER_PREFIX + "VM-VENDOR", runtime.getVmVendor());
         httpGet.setHeader(META_HEADER_PREFIX + "START-TIME", String.valueOf(runtime.getStartTime()));
+        httpGet.setHeader(META_HEADER_PREFIX + "HEALTH", agentHealth.name());
     }
 
     /**

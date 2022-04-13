@@ -9,6 +9,12 @@ inspectit:
       # if true, the execution time (duration in ms) per action will be recorded
       enabled: false
 
+    # settings regarding the update and notification frequency of the agent health
+    agent-health:
+      # defines how long a non-ok and non-instrumentation-related health status is valid
+      # health changes due to instrumentation errors are valid until the next re-instrumentation
+      validity-period: 1h
+
   # definitions of existing self-monitoring metrics
   metrics:
     definitions:
@@ -42,6 +48,15 @@ inspectit:
           '[inspectit/self/logs]':
             aggregation: SUM
             tags: {"level": true}
+
+      '[inspectit/self/health]':
+        enabled: ${inspectit.self-monitoring.enabled}
+        type: LONG
+        unit: health
+        description: "current health status of the agent (0 = OK, 1 = WARNING, 2 = ERROR)"
+        views:
+          '[inspectit/self/health]':
+            aggregation: LAST_VALUE
 
       '[inspectit/self/action/execution-time]':
         enabled: ${inspectit.self-monitoring.action-metrics.enabled}
