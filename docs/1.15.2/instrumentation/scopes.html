@@ -1,0 +1,259 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Scopes · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="A Scope is one of the basic instrumentation configuration components."/><meta name="docsearch:version" content="1.15.2"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Scopes · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content="A Scope is one of the basic instrumentation configuration components."/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>1.15.2</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Instrumentation</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Getting Started<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/doc1">Hello World</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/getting-started/quick-start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/getting-started/docker-examples">Demo Application</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/getting-started/installation">Installation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/configuration/configuration-sources">Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/configuration/external-configuration-sources">External Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/configuration/logging-configuration">Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/configuration/open-census-configuration">OpenCensus Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/configuration/plugin-configuration">Plugin Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/configuration/agent-command-configuration">Agent Command Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Metrics<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/metrics/metrics">Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/metrics/metric-recorders">Metrics Recorders</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/metrics/metric-exporters">Metrics Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/metrics/common-tags">Common Tags</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/metrics/custom-metrics">Custom Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/metrics/self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tracing<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/tracing/tracing">Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/tracing/trace-exporters">Trace Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/tracing/log-correlation">Log Correlation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/tracing/privacy">Data Privacy</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/instrumentation/instrumentation">Instrumentation</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/instrumentation/scopes">Scopes</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/instrumentation/rules">Rules &amp; Actions</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/instrumentation/special-sensors">Special Sensors</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/instrumentation/process">Instrumentation Process</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">End User Monitoring<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/enduser-monitoring/enduser-monitoring-server">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/enduser-monitoring/eum-server-setup">Server Setup</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/enduser-monitoring/eum-server-configuration">Server and Metrics Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/enduser-monitoring/install-eum-agent">Install EUM Agent</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration Server<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/config-server/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/config-server/cs-configuration">Server Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/config-server/managing-configurations">Managing Configuration Files</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/config-server/configuration-files-staging">Configuration Files Staging</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/config-server/agent-mappings">Agent Mappings</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/config-server/user-authentication">User Authentication</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/config-server/log-config">Server Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/config-server/syntax-highlighting">YAML Editor Syntax Highlighting</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Breaking Changes<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/1.15.2/breaking-changes/Breaking Changes">Breaking Changes</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/instrumentation/scopes.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Scopes</h1></header><article><div><span><p>A Scope is one of the basic instrumentation configuration components.
+It is important to get familiar with it in order to understand which methods are targeted by which instrumentation rule.
+A single scope can be considered as a set of methods and is used by rules to determine which instrumentation should apply to which method.</p>
+<p>Scopes are defined under the configuration key <code>inspectit.instrumentation.scopes</code> and will be defined as a map of key-value pairs:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">scopes:</span>
+      <span class="hljs-attr">'s_my_scope':</span>
+        <span class="hljs-comment"># SCOPE_DEFINITION</span>
+      <span class="hljs-attr">'s_another_scope':</span>
+        <span class="hljs-comment"># SCOPE_DEFINITION</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="scope-definition"></a><a href="#scope-definition" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Scope Definition</h2>
+<p>The definition of a scope contains the following five attributes:</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>interfaces</code></td><td>A list of matcher which defines the required interfaces of the target method's class.</td></tr>
+<tr><td><code>superclass</code></td><td>A matcher which defines the required superclass of the target method's class.</td></tr>
+<tr><td><code>type</code></td><td>A matcher which defines the required type of the target method's class.</td></tr>
+<tr><td><code>methods</code></td><td>A list of matchers which defines the target methods itself.</td></tr>
+<tr><td><code>advanced</code></td><td>Advanced settings.</td></tr>
+<tr><td><code>exclude</code></td><td>A map of scopes. This map is used to exclude the specified scopes methods.</td></tr>
+</tbody>
+</table>
+<p>In order to determine which methods should be instrumented all classes are checked against the defined <code>interface</code>, <code>superclass</code> and <code>type</code> matchers.
+If and only if a class matches on <em>all</em> matchers, each of their methods is checked against the defined method matchers in order to determine the target methods.
+Finally, the methods of the excluded scopes are excluded from the matcher.
+Thus, the process of determine whether the methods of a class <code>X</code> should be instrumented can be represented as:</p>
+<ol>
+<li>Check if all interface matcher matches the interface of class <code>X</code> (if any is defined)</li>
+<li>Check if the superclass matcher matches any superclass of class <code>X</code> (if defined)</li>
+<li>Check if the type matcher matches the type of class <code>X</code> (if defined)</li>
+<li>For each method: check if the method is matching <em>any</em> of the defined method matchers (if defined)</li>
+<li>For each excluded scope: exclude the corresponding methods from the method matcher (if defined)</li>
+</ol>
+<blockquote>
+<p>Keep in mind that all of the type matchers have to match whereas only one of the method matchers have to match!</p>
+</blockquote>
+<p>Based on the previous description a scope definition looks like the following code-snippet:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment"># interfaces which have to be implemented</span>
+<span class="hljs-attr">interfaces:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-comment"># TYPE_MATCHER_A</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-comment"># TYPE_MATCHER_B</span>
+<span class="hljs-comment"># the superclass which has to be extended</span>
+<span class="hljs-attr">superclass:</span>
+  <span class="hljs-comment"># TYPE_MATCHER_C</span>
+<span class="hljs-comment"># matcher describing the class' type</span>
+<span class="hljs-attr">type:</span>
+  <span class="hljs-comment"># TYPE_MACHER_D</span>
+<span class="hljs-comment"># the targeted method - each method which matches at least one of the defined matchers will be instrumented</span>
+<span class="hljs-attr">methods:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-comment"># METHOD_MATCHER_A</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-comment"># METHOD_MATCHER_B</span>
+<span class="hljs-comment"># the scopes which have to be excluded</span>
+<span class="hljs-attr">exclude:</span>
+  <span class="hljs-comment"># SCOPE_A: true</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="type-matcher"></a><a href="#type-matcher" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type Matcher</h2>
+<p>As shown in the previous code-snippet, the scope definition contains multiple type matchers which are used to match interfaces, superclasses and class types itself.</p>
+<p>A type matcher consists of the following attributes:</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>name</code></td><td>-</td><td>The name or pattern which is used to match against the fully qualified class or interface name.</td></tr>
+<tr><td><code>matcher-mode</code></td><td><code>EQUALS_FULLY</code></td><td>The matching mode. Possible values: <code>EQUALS_FULLY</code>, <code>MATCHES</code> (see <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#matches-java.lang.String">String.match</a>), <code>STARTS_WITH</code>, <code>STARTS_WITH_IGNORE_CASE</code>, <code>CONTAINS</code>, <code>CONTAINS_IGNORE_CASE</code>, <code>ENDS_WITH</code>, <code>ENDS_WITH_IGNORE_CASE</code>, <code>NOT_EQUALS_FULLY</code>, <code>NOT_EQUALS_FULLY_IGNORE_CASE</code></td></tr>
+<tr><td><code>annotations</code></td><td>-</td><td>A list of matchers used for matching annotations. Each annotation matcher consists of a <code>name</code> and <code>matcher-mode</code> which are equivalent to the ones above.</td></tr>
+</tbody>
+</table>
+
+    <div class="admonition admonition-caution">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16"><path fill-rule="evenodd" d="M5.05.31c.81 2.17.41 3.38-.52 4.31C3.55 5.67 1.98 6.45.9 7.98c-1.45 2.05-1.7 6.53 3.53 7.7-2.2-1.16-2.67-4.52-.3-6.61-.61 2.03.53 3.33 1.94 2.86 1.39-.47 2.3.53 2.27 1.67-.02.78-.31 1.44-1.13 1.81 3.42-.59 4.78-3.42 4.78-5.56 0-2.84-2.53-3.22-1.25-5.61-1.52.13-2.03 1.13-1.89 2.75.09 1.08-1.02 1.8-1.86 1.33-.67-.41-.66-1.19-.06-1.78C8.18 5.31 8.68 2.45 5.05.32L5.03.3l.02.01z"/></svg></div> caution</h5>
+      </div>
+      <div class="admonition-content">
+    <p><code>NOT_EQUALS_FULLY</code> and <code>NOT_EQUALS_FULLY_IGNORE_CASE</code> are disabled by default for <strong>type matchers</strong> (but enabled for method matchers) as this will result in too many instrumented classes.</p>
+<p>In order to enable these matcher modes for type matchers, use the <code>disable-safety-mechanisms</code> advanced settings.</p>
+</div></div><p>The following example will match against a type which is exactly named <code>java.util.AbstractList</code> and is annotated with the annotation <code>any.Annotation</code>.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">name:</span> <span class="hljs-string">'java.util.AbstractList'</span>
+<span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
+<span class="hljs-attr">annotations:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'any.Annotation'</span>
+    <span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="method-matcher"></a><a href="#method-matcher" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Method Matcher</h2>
+<p>The matcher used to determine whether a method is affected by a certain scope contains the <em>same attributes as the previously described type matcher</em> but also contains additional ones.</p>
+<p>Besides <code>name</code>, <code>matcher-mode</code> and <code>annotations</code>, the method matcher contains the following attributes:</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>visibility</code></td><td>[PUBLIC, PROTECTED, PACKAGE, PRIVATE]</td><td>A list of visibility modifiers. The target method has to use one of the specified modifiers. Possible values: <code>PUBLIC</code>, <code>PROTECTED</code>, <code>PACKAGE</code>, <code>PRIVATE</code></td></tr>
+<tr><td><code>arguments</code></td><td>-</td><td>A list of fully qualified class names representing the method's arguments.</td></tr>
+<tr><td><code>is-synchronized</code></td><td>-</td><td>Specifies whether the target method is synchronized.</td></tr>
+<tr><td><code>is-constructor</code></td><td><code>false</code></td><td>Specifies whether the target method is a constructor. If this value is <code>true</code>, the <code>name</code> and <code>is-synchronized</code> attribute will <em>not</em> be used!</td></tr>
+</tbody>
+</table>
+<p>The following example will match against all methods which are exactly named <code>contains</code>, use the <code>PUBLIC</code> visibility modifier, have exactly one argument which is a <code>java.lang.Object</code>, are not synchronized and are annotated by the annotation <code>any.Annotation</code>.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">name:</span> <span class="hljs-string">'contains'</span>
+<span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
+<span class="hljs-attr">visibility:</span> <span class="hljs-string">[PUBLIC]</span>
+<span class="hljs-attr">arguments:</span> <span class="hljs-string">["java.lang.Object"]</span>
+<span class="hljs-attr">is-synchronized:</span> <span class="hljs-literal">false</span>
+<span class="hljs-attr">annotations:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'any.Annotation'</span>
+    <span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
+<span class="hljs-attr">is-constructor:</span> <span class="hljs-literal">false</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="advanced-settings"></a><a href="#advanced-settings" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Advanced Settings</h2>
+<p>The scope definition's advanced settings contains currently the following two attributes:</p>
+<table>
+<thead>
+<tr><th>Attribute</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>instrument-only-inherited-methods</code></td><td>false</td><td>If this value is <code>true</code>, only methods will be instrumented which are inherited of a superclass or interface which were specified in the <code>interfaces</code> or <code>superclass</code> configuration.</td></tr>
+<tr><td><code>disable-safety-mechanisms</code></td><td>false</td><td>By default, the agent will not allow scopes containing only &quot;any-matcher&quot; like <code>MATCHES(*)</code>. If required, this safety feature can be disabled by setting this value to <code>true</code>.</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="example-scope-definition"></a><a href="#example-scope-definition" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Scope Definition</h2>
+<p>The following code-snippet contains an example of a complete scope definitions.
+Note: the following configuration contains all possible attributes even though they are not all necessary!</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+        <span class="hljs-attr">scopes:</span>
+          <span class="hljs-comment"># the id of the following defined scope element - this example scope targets the ArrayList's contains method</span>
+          <span class="hljs-attr">'s_example_list_scope':</span>
+            <span class="hljs-comment"># interfaces which have to be implemented</span>
+            <span class="hljs-attr">interfaces:</span>
+              <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'java.util.List'</span>
+                <span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
+                <span class="hljs-attr">annotations:</span>
+                  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'any.Annotation'</span>
+                    <span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
+            <span class="hljs-comment"># the superclass which has to be extended</span>
+            <span class="hljs-attr">superclass:</span>
+              <span class="hljs-attr">name:</span> <span class="hljs-string">'java.util.AbstractList'</span>
+              <span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
+              <span class="hljs-attr">annotations:</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'any.Annotation'</span>
+                  <span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
+            <span class="hljs-comment"># matcher describing the class' name (full qualified)</span>
+            <span class="hljs-attr">type:</span>
+              <span class="hljs-attr">name:</span> <span class="hljs-string">'ArrayList'</span>
+              <span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">ENDS_WITH</span>
+              <span class="hljs-attr">annotations:</span>
+                <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'any.Annotation'</span>
+                  <span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
+            <span class="hljs-comment"># the targeted method - each method which matches at least one of the defined matchers will be instrumented</span>
+            <span class="hljs-attr">methods:</span>
+              <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'contains'</span>
+                <span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
+                <span class="hljs-attr">visibility:</span> <span class="hljs-string">[PUBLIC]</span>
+                <span class="hljs-attr">arguments:</span> <span class="hljs-string">["java.lang.Object"]</span>
+                <span class="hljs-attr">is-synchronized:</span> <span class="hljs-literal">false</span>
+                <span class="hljs-attr">annotations:</span>
+                  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'any.Annotation'</span>
+                    <span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
+              <span class="hljs-bullet">-</span> <span class="hljs-attr">is-constructor:</span> <span class="hljs-literal">true</span>
+                <span class="hljs-attr">visibility:</span> <span class="hljs-string">[PUBLIC]</span>
+                <span class="hljs-attr">arguments:</span> <span class="hljs-string">[]</span>
+                <span class="hljs-attr">annotations:</span>
+                  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">'any.Annotation'</span>
+                    <span class="hljs-attr">matcher-mode:</span> <span class="hljs-string">EQUALS_FULLY</span>
+             <span class="hljs-comment"># advances settings which can be used to specify and narrow the instrumentation</span>
+            <span class="hljs-attr">advanced:</span>
+              <span class="hljs-attr">instrument-only-inherited-methods:</span> <span class="hljs-literal">false</span>
+              <span class="hljs-attr">disable-safety-mechanisms:</span> <span class="hljs-literal">false</span>
+            <span class="hljs-comment"># exclude the methods from the specified scope</span>
+            <span class="hljs-attr">exclude:</span>
+              <span class="hljs-attr">'s_to_be_exclude':</span> <span class="hljs-literal">true</span>
+</code></pre>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 12/22/2021 by Heiko Holz</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/1.15.2/instrumentation/instrumentation"><span class="arrow-prev">← </span><span>Instrumentation</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/1.15.2/instrumentation/rules"><span>Rules &amp; Actions</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#scope-definition">Scope Definition</a></li><li><a href="#type-matcher">Type Matcher</a></li><li><a href="#method-matcher">Method Matcher</a></li><li><a href="#advanced-settings">Advanced Settings</a></li><li><a href="#example-scope-definition">Example Scope Definition</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2022 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'P7JV0ZK66K',
+                apiKey: 'd499024131bf8d92e6d469a6c14f4798',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:1.15.2"]}
+              });
+            </script></body></html>
