@@ -97,11 +97,13 @@ public class OtlpTraceExporterServiceIntTest extends ExporterServiceIntegrationT
         // service is not running
         AssertionsForClassTypes.assertThat(service.isEnabled()).isFalse();
 
-        OtlpTraceExporterSettings otlpGrpc = environment.getCurrentConfig().getExporters().getTracing().getOtlp();
+        OtlpTraceExporterSettings otlp = environment.getCurrentConfig().getExporters().getTracing().getOtlp();
         // enabled property is set to IF_CONFIGURED
-        AssertionsForClassTypes.assertThat(otlpGrpc.getEnabled().equals(ExporterEnabledState.IF_CONFIGURED));
-        // url is null or empty
-        AssertionsForClassTypes.assertThat(otlpGrpc.getUrl()).isNullOrEmpty();
+        assertThat(otlp.getEnabled().equals(ExporterEnabledState.IF_CONFIGURED));
+        // endpoint is null or empty
+        assertThat(otlp.getEndpoint()).isNullOrEmpty();
+        // protocol is unset
+        assertThat(otlp.getProtocol()).isEqualTo(TransportProtocol.UNSET);
     }
 
 }

@@ -51,8 +51,8 @@ inspectit:
         export-interval: ${inspectit.metrics.frequency}
         # the gRPC API endpoint, e.g., http://127.0.0.1:4318
         endpoint: null
-        # the transport protocol, e.g., grpc or http/protobuf
-        protocol: grpc
+        # the transport protocol, e.g., 'grpc' or 'http/protobuf'
+        protocol: null
 
     # settings for trace exporters
     tracing:
@@ -70,8 +70,8 @@ inspectit:
         enabled: IF_CONFIGURED
         # the URL under which the jaeger thrift server can be accessed, e.g. http://127.0.0.1:14268/api/traces for http/thrift or http://127.0.0.1:14250/v1/traces for grpc
         endpoint: null
-        # the transport protocol
-        protocol: http/thrift
+        # the transport protocol, e.g., 'http/thrift' or 'grpc'
+        protocol: null
 
       # settings used in LoggingTraceExporterService for the LoggingSpanExporter (https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/logging)
       logging:
@@ -82,4 +82,5 @@ inspectit:
           enabled: IF_CONFIGURED
           # the URL endpoint, e.g., http://127.0.0.1:4318
           endpoint: null
-          protocol: grpc
+          # the transport protocol, e.g., 'http/thrift' or 'grpc'
+          protocol: null

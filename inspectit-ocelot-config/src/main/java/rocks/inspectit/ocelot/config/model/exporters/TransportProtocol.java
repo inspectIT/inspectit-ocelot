@@ -26,6 +26,13 @@ public enum TransportProtocol {
         }
     }
 
+    /**
+     * Parses the given name into a {@link TransportProtocol}
+     *
+     * @param name The {@link TransportProtocol#name}
+     *
+     * @return The {@link TransportProtocol} with the given name
+     */
     public static TransportProtocol parse(String name) {
         return names.containsKey(name) ? names.get(name) : TransportProtocol.valueOf(name);
     }

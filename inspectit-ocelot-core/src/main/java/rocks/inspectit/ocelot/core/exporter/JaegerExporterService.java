@@ -42,11 +42,18 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
     protected boolean checkEnabledForConfig(InspectitConfig conf) {
         @Valid JaegerExporterSettings jaeger = conf.getExporters().getTracing().getJaeger();
         if (conf.getTracing().isEnabled() && !jaeger.getEnabled().isDisabled()) {
+
+            // fallback if 'protocol' was not set: derive from set properties 'url'  or 'grpc'
+            if ((null == jaeger.getProtocol() || jaeger.getProtocol()
+                    .equals(TransportProtocol.UNSET)) && (StringUtils.hasText(jaeger.getUrl()) || StringUtils.hasText(jaeger.getGrpc()))) {
+                jaeger.setProtocol(StringUtils.hasText(jaeger.getUrl()) ? TransportProtocol.HTTP_THRIFT : TransportProtocol.GRPC);
+                log.warn("The property 'protocol' was not set. Based on the set property '{}' we assume the protocol '{}'. This fallback will be removed in future releases. Please make sure to use the property 'protocol' in future.", StringUtils.hasText(jaeger.getUrl()) ? "url" : "grpc", StringUtils.hasText(jaeger.getUrl()) ? TransportProtocol.HTTP_THRIFT.getName() : TransportProtocol.GRPC.getName());
+            }
             if (SUPPORTED_PROTOCOLS.contains(jaeger.getProtocol())) {
                 if (StringUtils.hasText(jaeger.getEndpoint())) {
                     return true;
-                } else if (StringUtils.hasText(jaeger.getUrl())) {
-                    log.warn("You are using the deprecated property 'url'. This property will be invalid in future releases of InspectIT Ocelot, please use 'endpoint' instead.");
+                } else if (StringUtils.hasText(jaeger.getUrl()) || StringUtils.hasText(jaeger.getGrpc())) {
+                    log.warn("You are using the deprecated property '{}'. This property will be invalid in future releases of InspectIT Ocelot, please use 'endpoint' instead.", StringUtils.hasText(jaeger.getUrl()) ? "url" : "grpc");
                     return true;
                 }
             }
@@ -56,7 +63,7 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
                             .map(transportProtocol -> transportProtocol.getName())
                             .toArray()));
                 }
-                if (!StringUtils.hasText(jaeger.getEndpoint()) && !StringUtils.hasText(jaeger.getUrl())) {
+                if (!StringUtils.hasText(jaeger.getEndpoint()) && !StringUtils.hasText(jaeger.getUrl()) && !StringUtils.hasText(jaeger.getGrpc())) {
                     log.warn("Jaeger Exporter is enabled but 'endpoint' is not set.");
                 }
             }
@@ -68,8 +75,8 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
     protected boolean doEnable(InspectitConfig configuration) {
         try {
             JaegerExporterSettings settings = configuration.getExporters().getTracing().getJaeger();
-            String endpoint = StringUtils.hasText(settings.getEndpoint()) ? settings.getEndpoint() : settings.getUrl();
-            log.info("Starting Jaeger Thrift Exporter with endpoint '{}'", endpoint);
+            String endpoint = StringUtils.hasText(settings.getEndpoint()) ? settings.getEndpoint() : StringUtils.hasText(settings.getUrl()) ? settings.getUrl() : settings.getGrpc();
+            log.info("Starting Jaeger Exporter with endpoint '{}' and protocol '{}'", endpoint, settings.getProtocol());
 
             // create span exporter
             switch (settings.getProtocol()) {
@@ -88,21 +95,21 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
 
             return true;
         } catch (Throwable t) {
-            log.error("Error creating Jaeger exporter", t);
+            log.error("Error creating Jaeger Exporter", t);
             return false;
         }
     }
 
     @Override
     protected boolean doDisable() {
-        log.info("Stopping Jaeger Thrift Exporter");
+        log.info("Stopping Jaeger Exporter");
         try {
             openTelemetryController.unregisterTraceExporterService(this);
             if (null != spanExporter) {
                 spanExporter.close();
             }
         } catch (Throwable t) {
-            log.error("Error disabling Jaeger Thrift Exporter", t);
+            log.error("Error disabling Jaeger Exporter", t);
         }
         return true;
     }

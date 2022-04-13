@@ -115,7 +115,7 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
         assertThat(otlp.getEnabled().equals(ExporterEnabledState.IF_CONFIGURED));
         // endpoint is null or empty
         assertThat(otlp.getEndpoint()).isNullOrEmpty();
-        // protocol is GRPC
-        assertThat(otlp.getProtocol()).isEqualTo(TransportProtocol.GRPC);
+        // protocol is UNSET
+        assertThat(otlp.getProtocol()).isEqualTo(TransportProtocol.UNSET);
     }
 }

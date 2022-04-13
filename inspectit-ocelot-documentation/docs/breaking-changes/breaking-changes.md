@@ -20,7 +20,7 @@ Due to the migration to OpenTelemetry, InspectIT Ocelot now supports OpenTelemet
 
 #### Exporter property `url` and `grpc` replaced by `endpoint`
 
-Due to the migration to OpenTelemetry, we approach the naming of OpenTelemetry for the exporters' properties. For this, the previously used properties `url` and `grpc` are replaced by the property `endpoint`. The deprecated property `url` is still supported in this release but will be removed in future releases.
+Due to the migration to OpenTelemetry, we approach the naming of OpenTelemetry for the exporters' properties. For this, the previously used properties `url` and `grpc` are replaced by the property `endpoint`. The deprecated properties `url` and `grpc` are still supported in this release but will be removed in future releases.
 
 #### New property `protocol` for Jaeger and OTLP exporter
 

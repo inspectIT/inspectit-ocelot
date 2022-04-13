@@ -17,6 +17,12 @@ public class JaegerExporterSettings {
     @Deprecated
     /**
      * This property is deprecated since v2.0. Please use {@link #endpoint} instead.
+     * The gRPC endpoint of the Jaeger server.
+     */ private String grpc;
+
+    @Deprecated
+    /**
+     * This property is deprecated since v2.0. Please use {@link #endpoint} instead.
      * The URL of the Jaeger server.
      */ private String url;
 
