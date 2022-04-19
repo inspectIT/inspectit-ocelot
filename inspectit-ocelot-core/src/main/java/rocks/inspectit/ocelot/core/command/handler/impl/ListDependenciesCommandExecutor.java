@@ -7,9 +7,9 @@ import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.commons.models.command.impl.ListDependenciesCommand;
 import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.util.Arrays;
 
 /**
  * Executor for executing {@link ListDependenciesCommand}s.
@@ -41,24 +41,16 @@ public class ListDependenciesCommandExecutor implements CommandExecutor {
 
         log.debug("Executing a ListDependenciesCommand: {}", ldCommand.getCommandId().toString());
 
-        Set<Class<?>> setCopy = new HashSet<>(discoveryService.getKnownClasses()); //Something like the discService but for the dependencies still needs to be implemented in inspecitit-core
-        ListDependenciesCommand.Response.DependecyElement[] result = setCopy.parallelStream().map(dependenzzy -> {
-            try {
-                ListDependenciesCommand.Response.DependecyElement element = new ListDependenciesCommand.Response.DependecyElement();
-                element.setName("Test Name"); //to do
-                element.setVersion("Test Version");// to do
-                return element;
-            } catch (Throwable e) {
-                log.debug("Could not add dependency to result list: {}", dependenzzy);
-                return null;
-            }
-        }).filter(Objects::nonNull).toArray(ListDependenciesCommand.Response.DependecyElement[]::new);
+        RuntimeMXBean bean = ManagementFactory.getRuntimeMXBean();
+        String classPath = bean.getClassPath();//    /opt/spring-boot/app.jar
+
+        System.out.println(Arrays.toString(classPath.split(":")));
 
         log.debug("Finished executing ListDependenciesCommand: {}", ldCommand.getCommandId().toString());
 
         ListDependenciesCommand.Response response = new ListDependenciesCommand.Response();
         response.setCommandId(ldCommand.getCommandId());
-        response.setResult(result);
+        //response.setResult(result);
         return response;
     }
 }
