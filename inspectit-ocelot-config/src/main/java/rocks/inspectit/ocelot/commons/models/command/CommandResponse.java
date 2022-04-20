@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
+import rocks.inspectit.ocelot.commons.models.command.impl.ListDependenciesCommand;
 import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
 
@@ -18,11 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-@JsonSubTypes(value = {
-        @JsonSubTypes.Type(name = PingCommand.TYPE_IDENTIFIER, value = PingCommand.Response.class),
-        @JsonSubTypes.Type(name = ListClassesCommand.TYPE_IDENTIFIER, value = ListClassesCommand.Response.class),
-        @JsonSubTypes.Type(name = LogsCommand.TYPE_IDENTIFIER, value = LogsCommand.Response.class),
-})
+@JsonSubTypes(value = {@JsonSubTypes.Type(name = PingCommand.TYPE_IDENTIFIER, value = PingCommand.Response.class), @JsonSubTypes.Type(name = ListClassesCommand.TYPE_IDENTIFIER, value = ListClassesCommand.Response.class), @JsonSubTypes.Type(name = LogsCommand.TYPE_IDENTIFIER, value = LogsCommand.Response.class), @JsonSubTypes.Type(name = ListDependenciesCommand.TYPE_IDENTIFIER, value = ListDependenciesCommand.Response.class)})
 public abstract class CommandResponse {
 
     /**
