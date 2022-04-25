@@ -56,6 +56,20 @@ In this example we're also passing [JSON arguments](configuration/configuration-
 
 > Using the attach options has some limitations with respect to using the OpenCensus instrumentation library in combination with the inspectIT Ocelot agent. Please refer to [OpenCensus Configuration](configuration/open-census-configuration.md) section to understand these limitations.
 
+## Using the Agent With a Security Manager
+
+If a Java Security Manager is enabled, the agent needs to be granted additional permissions to work. 
+For this, add the following to your policy file:
+
+```
+grant codeBase "file:<absolute_path_to_inspectit-ocelot-agent.jar>" {
+    permission java.security.AllPermission;
+};
+```
+
+The correct policy file location depends on different factors.
+See the [official Java documentation](https://docs.oracle.com/en/java/javase/17/security/permissions-jdk1.html#GUID-789089CA-8557-4017-B8B0-6899AD3BA18D) for further information.
+
 ## Using the Agent with Kubernetes
 
 There are several ways to use the agent in a Kubernetes cluster.
