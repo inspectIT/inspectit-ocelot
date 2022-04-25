@@ -47,7 +47,7 @@ public class CountryCodeBeaconProcessor implements BeaconProcessor {
         String countryCode = "";
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (requestAttributes != null) {
-            String ip = getClientIp(requestAttributes.getRequest());
+            String ip = ipUtils.getClientIpAddress(requestAttributes.getRequest());
             countryCode = resolveCustomIPMapping(ip);
             if (countryCode == null) {
                 countryCode = geolocationResolver.getCountryCode(ip);
@@ -55,16 +55,6 @@ public class CountryCodeBeaconProcessor implements BeaconProcessor {
         }
 
         return countryCode;
-    }
-
-    private String getClientIp(HttpServletRequest request ) {
-        String forwardedIp = request.getHeader("X-Forwarded-For");
-
-        if (forwardedIp != null) {
-            return forwardedIp;
-        } else {
-            return  ipUtils.getClientIpAddress(request);
-        }
     }
 
     /**
