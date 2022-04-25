@@ -63,7 +63,7 @@ For this, add the following to your policy file:
 
 ```
 grant codeBase "file:<absolute_path_to_inspectit-ocelot-agent.jar>" {
-permission java.security.AllPermission;
+    permission java.security.AllPermission;
 };
 ```
 
