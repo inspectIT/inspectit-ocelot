@@ -11,6 +11,7 @@ inspectit:
 
       '[service/in/responsetime]':
         unit: ms
+        description: 'the response time of incoming service calls'
         views:
           '[service/in/count]':
             aggregation: COUNT
@@ -29,6 +30,7 @@ inspectit:
             
       '[service/out/responsetime]':
         unit: ms
+        description: 'the response time of outgoing service calls'
         views:
           '[service/out/count]':
             aggregation: COUNT

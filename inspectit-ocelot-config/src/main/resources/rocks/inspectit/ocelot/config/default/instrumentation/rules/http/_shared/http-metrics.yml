@@ -10,6 +10,7 @@ inspectit:
 
       '[http/in/responsetime]':
         unit: ms
+        description: 'the response time of incoming HTTP requests'
         views:
           '[http/in/count]':
             aggregation: COUNT
@@ -28,6 +29,7 @@ inspectit:
             
       '[http/out/responsetime]':
         unit: ms
+        description: 'the response time of outgoing HTTP requests'
         views:
           '[http/out/count]':
             aggregation: COUNT
