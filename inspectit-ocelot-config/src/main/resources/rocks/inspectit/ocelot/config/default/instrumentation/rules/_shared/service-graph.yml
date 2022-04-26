@@ -95,8 +95,8 @@ inspectit:
       'r_servicegraph_prepare_down_propagation':
         docs:
           description: |-
-            This rule prepares down-propagation to include service-graph related information
-            Namely this ensures that the current service name is included as origin service
+            This rule prepares down-propagation to include service-graph related information.
+            Namely this ensures that the current service name is included as origin service.
         entry:
           'servicegraph_origin_service':
             action: 'a_assign_value'
@@ -130,8 +130,8 @@ inspectit:
           description: |-
             Records inbound traffic as service graph call.
             When this rule is included, it is expected that servicegraph_duration, servicegraph_protocol and servicegraph_is_error are populated.
-            If there was an external origin, servicegraph_origin_external should contain it's name.
-            In addition this rule prevent invalid further down-propagation of servicegraph_origin_service by moving it into the JVM_LOCAL variable servicegraph_origin_service_local
+            If there was an external origin, servicegraph_origin_external should contain its name.
+            In addition this rule prevent invalid further down-propagation of servicegraph_origin_service by moving it into the JVM_LOCAL variable servicegraph_origin_service_local.
 
         entry:
           'servicegraph_origin_service_local':
@@ -157,9 +157,9 @@ inspectit:
       'r_servicegraph_outbound_record_metric':
         docs:
           description: |-
-            Records outbound traffic as service graph call
+            Records outbound traffic as service graph call in the metric [service/out/responsetime].
             When this rule is included, it is expected that servicegraph_duration, servicegraph_protocol and servicegraph_is_error are populated.
-            If there was an external target, servicegraph_target_external should contain it's name.
+            If there was an external target, servicegraph_target_external should contain its name.
             In addition further invalid up-propagation of the target service is prevented.
         post-exit: # clear the target service AFTER the metric has been recorded but before propagation
           'servicegraph_target_service':
@@ -178,8 +178,8 @@ inspectit:
         docs:
           description: |-
             Utility rule used for both inbound & outbout service graph traffic.
-            Captures the duration of the current method as servicegraph_duration
-            This capturing takes only place if servicegraph_is_entry is populated with "true"
+            Captures the duration of the current method as servicegraph_duration.
+            This capturing takes only place if servicegraph_is_entry is populated with "true".
         include:
           'r_capture_method_duration_conditional': true
         entry:

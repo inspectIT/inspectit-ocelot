@@ -50,8 +50,7 @@ inspectit:
   # Instrumentation Configuration
   instrumentation:    
     rules:
-    
-      #
+
       'r_http_client_record_metric_on_method':
         docs:
           description: |-
@@ -71,8 +70,7 @@ inspectit:
         include:
           'r_http_capture_method_duration': true
           'r_http_server_record_metric': true
-      
-      #
+
       'r_http_client_record_metric':
         docs:
           description: |-

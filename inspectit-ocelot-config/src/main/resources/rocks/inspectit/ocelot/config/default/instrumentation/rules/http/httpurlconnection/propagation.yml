@@ -7,7 +7,7 @@ inspectit:
 
       'r_httpurlconnection_down_propagation':
         docs:
-          description: 'Writes down-propagated data to the HTTP Headers.'
+          description: 'Writes down-propagated data to the request HTTP Headers of HTTP URL Connections.'
         include:
           'r_httpurlconnection_detect_entry': true
         scopes:
@@ -20,7 +20,7 @@ inspectit:
 
       'r_httpurlconnection_up_propagation':
         docs:
-          description: 'Reads up-propagated data from the response HTTP Headers.'
+          description: 'Reads up-propagated data from the response HTTP Headers of HTTP URL Connections.'
         include:
           'r_httpurlconnection_detect_entry': true
         scopes:

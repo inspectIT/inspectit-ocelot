@@ -4,7 +4,7 @@ inspectit:
 
       'r_apacheclient_servicegraph_propagation':
         docs:
-          description: 'Reads and writes the service graph correlation information on the context (e.g. origin_service and target_service).'
+          description: 'Prepares the context to contain the service graph correlation information (e.g. origin_service and target_service).'
         include:
           'r_servicegraph_prepare_down_propagation': true
         scopes:
@@ -13,7 +13,7 @@ inspectit:
       #
       'r_apacheclient_servicegraph_record':
         docs:
-          description: 'Records an HTTP call done via the Apache HTTP Client as service-call.'
+          description: 'Records HTTP calls done via the Apache HTTP Client in the [service/out/responsetime] metric for the service graph.'
         include:
           'r_servicegraph_outbound_record_method': true
           'r_apacheclient_detect_entry': true

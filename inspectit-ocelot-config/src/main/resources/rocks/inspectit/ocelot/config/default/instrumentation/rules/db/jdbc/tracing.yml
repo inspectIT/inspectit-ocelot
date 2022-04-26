@@ -4,7 +4,7 @@ inspectit:
 
       'r_jdbc_tracing_statement_execute':
         docs:
-          description: "Traces execute/executeUpdate calls with non-prepared SQL (the SQL is given as method argument)"
+          description: 'Traces execute/executeUpdate calls with non-prepared SQL (the SQL is given as method argument).'
         include:
           'r_jdbc_tracing_defaults': true
         scopes:
@@ -38,6 +38,10 @@ inspectit:
       # ---------------------------------------------------------------
       
       'r_jdbc_tracing_defaults':
+        docs:
+          description: |-
+            To be included in JDBC tracing rules.
+            Activates span collection and adds default attributes.
         include:
           'r_jdbc_detect_entry': true
           'r_jdbc_extract_url': true

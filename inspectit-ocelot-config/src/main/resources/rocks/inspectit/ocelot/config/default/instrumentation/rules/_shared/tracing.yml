@@ -6,7 +6,7 @@ inspectit:
         docs:
           description: |-
             This rule should be included by all other tracing rules.
-            It allows to specify data which is added to all spans as attributes, e.g. a business transaction
+            It allows to specify data which is added to all spans as attributes, e.g. a business transaction.
 
         include:
           'r_tracing_exception_attributes': true
@@ -24,7 +24,7 @@ inspectit:
       'r_tracing_fqn_attribute':
         docs:
           description: |-
-            This rule adds the fully qualified name of the method as span attribute
+            This rule adds the fully qualified name of the method as span attribute.
         tracing:
           attributes:
             'java.fqn': 'method_fqn'
