@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
@@ -26,6 +27,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class LogPreloader extends DynamicallyActivatableService implements InternalProcessingAppender.LogEventConsumer {
 
     private static final String LOG_INVALIDATION_EVENT = "{}! Some previous log messages may now be outdated.";
+
+    private final Logger invalidationLogger = (Logger) LoggerFactory.getLogger("### LOG-INVALIDATING EVENT ###");
 
     private ILoggingEvent[] buffer;
 
@@ -67,7 +70,7 @@ public class LogPreloader extends DynamicallyActivatableService implements Inter
                         .toUpperCase() + invalidationLowercase.substring(1);
             }
 
-            ILoggingEvent logEvent = new LoggingEvent(getClass().getName(), (Logger) log, Level.INFO, LOG_INVALIDATION_EVENT, null, new String[]{invalidationString});
+            ILoggingEvent logEvent = new LoggingEvent(getClass().getName(), invalidationLogger, Level.INFO, LOG_INVALIDATION_EVENT, null, new String[]{invalidationString});
             recordLoggingEvent(logEvent);
         }
     }
