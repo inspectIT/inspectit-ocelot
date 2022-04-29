@@ -125,29 +125,11 @@ The traces can be viewed in Zipkin on http://localhost:9411.
 Currently, of the EUM dashboards only the Beacons one is working for this scenario.
 :::
 
-### Demo #4 - Wavefront and Zipkin
+### Ocelot Meets Friends
 
-Sends Zipkin traces to Wavefront through a Wavefront proxy running as a Docker container. Collects metrics via Telegraf and sends them to Wavefront.
-
-* File: `docker-compose-wavefront-zipkin.yml`
-
-:::note
-Before running the demo, you must add the Wavefront host and API token to the ```.env``` file in the ```inspectit-ocelot-demo```. Please add the following lines and change the cluster and token according to your Wavefront instance.
-```
-WAVEFRONT_URL=https://<your cluster>.wavefront.com/api
-WAVEFRONT_TOKEN=<API token obtained from Wavefront>
-```
-:::
-
-Wavefront is a SaaS-based monitoring and tracing solution. In this demo, we are running a local proxy as a Docker container that is responsible for receiving Zipkin traces and sending them to Wavefront. We're also using Telegraf to poll the Prometheus endpoints on the monitored services and send that data to Wavefront through the proxy.
-
-- *inspectIT Ocelot agent:* Instruments all the target demo application components.
-- *Telegraf:* Polls the Prometheus metric endpoints on the services.
-- *Wavefront Proxy:* Receives Zipkin traces and metrics (via Telegraf), aggregates, secures and compresses them before sending them to Wavefront.
-
-A sandbox instance of Wavefront can be obtained at https://www.wavefront.com/sign-up/.
-
-The inspectIT Ocelot Configuration Server can be accessed via http://localhost:8090.
+Created for a [series of blogposts](https://www.novatec-gmbh.de/en/blog/ocelot-meets-friends/), there also are a few scenarios integrating inspectIT Ocelot with commercial tools like Datadog, Elastic, Lightstep and Wavefront.
+Unlike the scenarios above, these are not actively maintained.
+The corresponding files can be found in the *ocelot-meets-friends* [GitHub repository](https://github.com/inspectIT/ocelot-meets-friends).
 
 ## Demo Grafana Dashboards
 The InfluxDB and Prometheus demo scenarios include the following predefined Grafana Dashboards:
