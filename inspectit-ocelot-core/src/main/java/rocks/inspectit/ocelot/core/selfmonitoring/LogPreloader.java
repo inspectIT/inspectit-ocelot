@@ -48,7 +48,7 @@ public class LogPreloader extends DynamicallyActivatableService implements Inter
      */
     @Override
     public void onLoggingEvent(ILoggingEvent event, Class<?> invalidator) {
-        if (buffer != null && event.getLevel().isGreaterOrEqual(minimumPreloadingLevel)) {
+        if (event.getLevel().isGreaterOrEqual(minimumPreloadingLevel)) {
             recordLoggingEvent(event);
         }
     }
@@ -76,12 +76,14 @@ public class LogPreloader extends DynamicallyActivatableService implements Inter
     }
 
     private void recordLoggingEvent(ILoggingEvent event) {
-        int index = currentIndex.getAndIncrement() % buffer.length;
-        try {
-            buffer[index] = event;
-        } catch (ArrayIndexOutOfBoundsException e) {
-            // this may happen while the buffer gets recreated with a smaller size
-            // in this case, we just drop the event until everything is properly set again
+        if (buffer != null) {
+            int index = currentIndex.getAndIncrement() % buffer.length;
+            try {
+                buffer[index] = event;
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // this may happen while the buffer gets recreated with a smaller size
+                // in this case, we just drop the event until everything is properly set again
+            }
         }
     }
 
