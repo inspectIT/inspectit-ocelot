@@ -16,7 +16,7 @@ This allows DevOps teams to start collecting performance data about their Java a
 
 The decision to base the agent on the OpenCensus implementation was made because of the flexibility that OpenCensus provides with respect to where the collected data can be exported and stored.
 OpenCensus offers multiple [exporters for Java](https://opencensus.io/exporters) (Prometheus, Zipkin, Jaeger, etc) and inspectIT Ocelot supports them all.
-Thus, combining different open source tools you can come to the desired APM solution based on open source software only, as an example [OpenAPM.io](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=jaeger-collector,zipkin-server,prometheus-server&visualization=jaeger-query,zipkin-server&dashboarding=grafana) landscape shows below:
+Thus, combining different open source tools you can come to the desired APM solution based on open source software only, as an example [OpenAPM.io](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=jaeger-collector,zipkin-server,prometheus-server&visualization=jaeger-query,zipkin-server&dashboarding=grafana) landscape shows below:
 
 ![Possible landscape with inspectIT Ocelot and other open source tools](assets/inspectit-ocelot-landscape.png)
 

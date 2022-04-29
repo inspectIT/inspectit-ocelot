@@ -62,7 +62,7 @@ Uses Prometheus Server for metrics gathering and storage, Grafana for Dashboards
 Traces are exported to Jaeger.
 
 * File: `docker-compose-prometheus-jaeger.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=prometheus-server,jaeger-collector,inspectit-oce-eum-server&visualization=jaeger-query&dashboarding=grafana&usedges=inspectit-ocelot-agent:prometheus-server,inspectit-ocelot-agent:jaeger-collector,jaeger-query:grafana,inspectit-oce-eum-server:prometheus-server,inspectit-oce-eum-server:jaeger-collector&showCommercial=false&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=jaeger-collector,inspectit-oce-eum-server,prometheus-server&dashboarding=grafana&visualization=jaeger-query&usedges=jaeger-query:grafana&showCommercial=true&showFormats=false)
 
 ![Demo scenario using Prometheus and Jaeger](assets/demo-landscape-prometheus-jaeger.png)
 
@@ -87,8 +87,8 @@ Uses InfluxDB for metrics storage and Grafana for Dashboards.
 Traces are exported to Jaeger.
 
 * File: `docker-compose-influxdb-jaeger.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=jaeger-collector,inspectit-oce-eum-server&storage=influx-db&visualization=jaeger-query&dashboarding=grafana&alerting=grafana&usedges=jaeger-query:grafana,inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:jaeger-collector,inspectit-ocelot-agent:influxdata-influxdb,inspectit-oce-eum-server:influxdata-influxdb,inspectit-oce-eum-server:jaeger-collector&showCommercial=false&showFormats=false)
-
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=jaeger-collector,inspectit-oce-eum-server&storage=influx-db&visualization=jaeger-query&dashboarding=grafana&alerting=grafana&usedges=jaeger-query:grafana&showCommercial=false&showFormats=false)
+* 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-jaeger.png)
 
 In this scenario the following components are preconfigured and used for monitoring:
@@ -107,7 +107,7 @@ Uses InfluxDB for metrics storage and Grafana for Dashboards.
 Traces are exported to Zipkin.
 
 * File: `docker-compose-influxdb-zipkin.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=zipkin-server,inspectit-oce-eum-server&storage=influx-db&visualization=zipkin-server&dashboarding=grafana&alerting=grafana&usedges=inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:zipkin-server,inspectit-ocelot-agent:influxdata-influxdb,inspectit-oce-eum-server:influxdata-influxdb,inspectit-oce-eum-server:zipkin-server&showCommercial=false&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=zipkin-server,inspectit-oce-eum-server&storage=influx-db&visualization=zipkin-server&dashboarding=grafana&alerting=grafana&showCommercial=false&showFormats=false)
 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-zipkin.png)
 
