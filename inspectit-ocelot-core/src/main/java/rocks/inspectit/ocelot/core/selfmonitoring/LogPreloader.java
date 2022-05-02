@@ -63,7 +63,8 @@ public class LogPreloader extends DynamicallyActivatableService implements Inter
         if (invalidator != null) {
             String invalidationString = invalidator.getClass().getSimpleName();
             if (invalidationString.endsWith("Event")) {
-                String invalidationLowercase = invalidationString.substring(0, invalidationString.length() - 5)
+                // pretty-format event, e.g., transform 'SomethingHappenedEvent' into 'Something happened'
+                String invalidationLowercase = invalidationString.substring(0, invalidationString.length() - "Event".length())
                         .replaceAll("([a-z])([A-Z]+)", "$1 $2")
                         .toLowerCase();
                 invalidationString = invalidationLowercase.substring(0, 1)
