@@ -7,7 +7,7 @@ inspectit:
             Utility action which checks if a provided HTTP status is an error code.
             Everything except 'null', 2xx and 3xx is interpreted as error.
           inputs:
-            'status': 'The Status as String or Number.'
+            'status': 'The status as String or Number.'
           return-value: 'True if the status is an error code, and false if it is not.'
         input:
           'status': 'Object'
