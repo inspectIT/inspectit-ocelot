@@ -8,7 +8,8 @@ inspectit:
 
       'a_apacheclient_toHostString':
         docs:
-          description: 'Extracts the target of the request in the form host:port.'
+          description: "Extracts the target of the request in the form 'host:port'."
+          return-value: "The target as a String in the form 'host:port'."
         imports:
           - 'java.net'
           - 'org.apache.http'
@@ -18,7 +19,8 @@ inspectit:
 
       'a_apacheclient_getPath':
         docs:
-          description: 'Extracts the target http path.'
+          description: 'Extracts the target HTTP path.'
+          return-value: "The target HTTP path as a String."
         imports:
           - 'java.net'
           - 'org.apache.http'
@@ -28,7 +30,8 @@ inspectit:
 
       'a_apacheclient_getMethod':
         docs:
-          description: 'Extracts the HTTP Method of the request, e.g. GET or POST.'
+          description: 'Extracts the HTTP method of the request, e.g. GET or POST.'
+          return-value: "The HTTP method as a String."
         imports:
           - 'org.apache.http'
         input:
@@ -38,8 +41,9 @@ inspectit:
       'a_apacheclient_getStatus':
         docs:
           description: |-
-            Extracts the response status in case the request succeeded.
-            If an exception is thrown instead, it's name is returned (e.g. SocketTimeoutException).
+            Extracts the response status code if the request returned without an exception.
+            Otherwise returns the name of the exception, e.g. SocketTimeoutException.
+          return-value: "The response status code as an Integer or the name of the exception as a String."
         imports:
           - 'org.apache.http'
         input:
@@ -54,7 +58,7 @@ inspectit:
 
       'a_apacheclient_downPropagation':
         docs:
-          description: 'Writes down-propagated context data to the HTTP Headers.'
+          description: 'Writes down-propagated context data to the HTTP headers.'
         is-void: true
         imports:
           - 'java.util'
@@ -72,7 +76,7 @@ inspectit:
 
       'a_apacheclient_upPropagation':
         docs:
-          description: 'Reads up-propagated context data from the HTTP Headers.'
+          description: 'Reads up-propagated context data from the HTTP headers.'
         is-void: true
         imports:
           - 'java.util'

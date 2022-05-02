@@ -4,7 +4,8 @@ inspectit:
 
       'a_httpurlconnection_getTargetHost':
         docs:
-          description: 'Extracts the target of the request in the format "host:port".'
+          description: "Extracts the target of the request in the format 'host:port'."
+          return-value: "The target as a String in the form 'host:port'."
         imports:
           - 'java.net'
         input:
@@ -21,13 +22,15 @@ inspectit:
       'a_httpurlconnection_getPath':
         docs:
           description: 'Extracts the target path of the request.'
+          return-value: "The target HTTP path as a String."
         input:
           _this: 'java.net.HttpURLConnection'
         value: '_this.getURL().getPath()'
 
       'a_httpurlconnection_getMethod':
         docs:
-          description: 'Extracts the method of the request, e.g. GET or POST.'
+          description: 'Extracts the HTTP method of the request, e.g. GET or POST.'
+          return-value: "The HTTP method as a String."
         input:
           _this: 'java.net.HttpURLConnection'
         value: '_this.getRequestMethod()'
@@ -36,7 +39,8 @@ inspectit:
         docs:
           description: |-
             Extracts the response status code if the request returned without an exception.
-            Otherwise returns the name of the exception, e.g. SocketTimeoutException.'
+            Otherwise returns the name of the exception, e.g. SocketTimeoutException.
+          return-value: "The response status code or the name of the exception as a String."
         input:
           _this: 'java.net.HttpURLConnection'
         value-body: |
@@ -48,7 +52,7 @@ inspectit:
 
       'a_httpurlconnection_downPropagation':
         docs:
-          description: 'Writes down-propagated data to the HTTP Headers.'
+          description: 'Writes down-propagated data to the HTTP headers.'
         is-void: true
         imports:
           - 'java.util'
@@ -76,7 +80,7 @@ inspectit:
 
       'a_httpurlconnection_upPropagation':
         docs:
-          description: 'Reads up-propagated data from the HTTP Headers'
+          description: 'Reads up-propagated data from the HTTP headers'
         is-void: true
         imports:
           - 'java.util'
