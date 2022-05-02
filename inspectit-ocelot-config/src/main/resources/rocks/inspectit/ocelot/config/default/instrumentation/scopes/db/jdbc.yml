@@ -3,6 +3,8 @@ inspectit:
     scopes:
 
       's_jdbc_statement_execute':
+        docs:
+          description: "Covers methods that execute a single java.sql.Statement, i.e. 'execute', 'executeQuery' and 'executeUpdate' in classes implementing the interface."
         interfaces:
           - name: 'java.sql.Statement'
         methods:
@@ -11,8 +13,10 @@ inspectit:
           - name: 'executeUpdate'
         advanced:
           instrument-only-inherited-methods: true
-          
+
       's_jdbc_preparedstatement_execute':
+        docs:
+          description: "Covers methods that execute a single java.sql.PreparedStatement, i.e. 'execute', 'executeQuery' and 'executeUpdate' in classes implementing the interface."
         interfaces:
           - name: 'java.sql.PreparedStatement'
         methods:
@@ -21,16 +25,20 @@ inspectit:
           - name: 'executeUpdate'
         advanced:
           instrument-only-inherited-methods: true
-          
+
       's_jdbc_statement_executeBatch':
+        docs:
+          description: "Covers the 'executeBatch' method for any class implementing java.sql.Statement."
         interfaces:
           - name: 'java.sql.PreparedStatement'
         methods:
           - name: 'executeBatch'
         advanced:
           instrument-only-inherited-methods: true
-          
+
       's_jdbc_preparedstatement_executeBatch':
+        docs:
+          description: "Covers the 'executeBatch' method for any class implementing java.sql.PreparedStatement."
         interfaces:
           - name: 'java.sql.PreparedStatement'
         methods:

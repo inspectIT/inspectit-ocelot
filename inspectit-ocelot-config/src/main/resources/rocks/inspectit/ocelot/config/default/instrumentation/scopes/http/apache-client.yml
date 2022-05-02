@@ -3,6 +3,8 @@ inspectit:
     scopes:
 
       's_apacheclient_doExecute':
+        docs:
+          description: "Covers the 'doExecute' method for any class inheriting from org.apache.http.impl.client.CloseableHttpClient."
         superclass:
           name: 'org.apache.http.impl.client.CloseableHttpClient'
         methods:
