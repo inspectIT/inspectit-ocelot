@@ -1,6 +1,7 @@
 inspectit:
   instrumentation:
     actions:
+      
       'a_http_isErrorStatus':
         docs:
           description: |-
