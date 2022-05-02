@@ -5,6 +5,9 @@ inspectit:
       'a_logic_isNull':
         docs:
           description: 'Returns true, if the given Object is null, false otherwise.'
+          inputs:
+            'value': 'The Object.'
+          return-value: 'True, if the given Object is null, false otherwise.'
         input:
           'value': 'Object'
         value: 'Boolean.valueOf(value == null)'
@@ -12,6 +15,9 @@ inspectit:
       'a_logic_isNotNull':
         docs:
           description: 'Returns true, if the given Object is not null, false otherwise.'
+          inputs:
+            'value': 'The Object.'
+          return-value: 'True, if the given Object is not null, false otherwise.'
         input:
           'value': 'Object'
         value: 'Boolean.valueOf(value != null)'
@@ -19,6 +25,10 @@ inspectit:
       'a_logic_and':
         docs:
           description: 'Returns true, if both provided arguments are not null and true.'
+          inputs:
+            'a': 'First Boolean.'
+            'b': 'Second Boolean.'
+          return-value: 'True, if both provided arguments are not null and true.'
         input:
           'a': 'Boolean'
           'b': 'Boolean'
@@ -27,6 +37,10 @@ inspectit:
       'a_logic_or':
         docs:
           description: 'Returns true, if one of the provided arguments is not null and true.'
+          inputs:
+            'a': 'First Boolean.'
+            'b': 'Second Boolean.'
+          return-value: 'True, if one of the provided arguments is not null and true.'
         input:
           'a': 'Boolean'
           'b': 'Boolean'
@@ -38,8 +52,10 @@ inspectit:
           description: |-
             Returns whether the input value is set or represents a true value. 
             The action will return true in case a true-Boolean or any other object is passed into the input parameter.
-          
-            Since: 1.14.0'
+          inputs:
+            'value': 'The input value.'
+          return-value: 'True, if the input value is set or represents a true value.'
+          since: '1.14.0'
         input:
           'value': 'Object'
         value-body: |

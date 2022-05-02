@@ -4,7 +4,11 @@ inspectit:
 
       'a_attachment_get':
         docs:
-          description: 'Reads a given attachment from a target object.'
+          description: 'Reads the attachment with a given key from a target Object.'
+          inputs:
+            'target': 'The target Object.'
+            'key': 'The key of the attachment.'
+          return-value: 'The attachment Object.'
         input:
           _attachments: 'ObjectAttachments'
           'target': 'Object'
@@ -13,7 +17,12 @@ inspectit:
 
       'a_attachment_put':
         docs:
-          description: 'Replaces a given attachment of a target object with a new one, returns the previous value.'
+          description: 'Replaces the attachment with a given key of a target object with a new one. Returns the previous value.'
+          inputs:
+            'target': 'The target object.'
+            'key': 'The key of the attachment.'
+            'value': 'The new value for the attachment.'
+          return-value: 'The previous value of the replaced attachment.'
         input:
           _attachments: ObjectAttachments
           'target': Object
@@ -23,7 +32,11 @@ inspectit:
 
       'a_attachment_remove':
         docs:
-          description: 'Removes a given attachment from a target object, returning the previously attached value.'
+          description: 'Removes a given attachment from a target object. Returns the previous value.'
+          inputs:
+            'target': 'The target object.'
+            'key': 'The key of the attachment.'
+          return-value: 'The previous value of the removed attachment.'
         input:
           _attachments: ObjectAttachments
           'target': Object

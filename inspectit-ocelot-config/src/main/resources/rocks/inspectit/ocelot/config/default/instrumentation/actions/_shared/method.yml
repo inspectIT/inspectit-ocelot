@@ -1,14 +1,15 @@
 inspectit:
-  instrumentation:  
+  instrumentation:
     actions:
 
       'a_method_getFQN':
         docs:
-          description: 'Returns the full qualified name of the current method, e.g. "my.package.MyClass.myMethod".'
+          description: 'Returns the fully qualified name of the current method, e.g. "my.package.MyClass.myMethod".'
+          return-value: 'The fully qualified name of the current method as a String.'
         input:
           _class: 'Class'
           _methodName: 'String'
-          '_parameterTypes': 'Class[]'
+          _parameterTypes: 'Class[]'
         value-body: |
           StringBuilder sb = new StringBuilder();
           sb.append(_class.getName()).append('.');
@@ -25,9 +26,10 @@ inspectit:
       'a_method_getNameWithParameters':
         docs:
           description: 'Returns the name of the method with the simple parameter list, e.g. "myMethod(int, String, MyClass)".'
+          return-value: 'The name of the method with the simple parameter list as a String.'
         input:
           _methodName: 'String'
-          '_parameterTypes': 'Class[]'
+          _parameterTypes: 'Class[]'
         value-body: |
           StringBuilder sb = new StringBuilder();
           sb.append(_methodName).append('(');
@@ -42,7 +44,8 @@ inspectit:
 
       'a_method_getClassFQN':
         docs:
-          description: 'Returns the full qualified name of the class declaring the current method, e.g. "my.package.MyClass".'
+          description: 'Returns the fully qualified name of the class declaring the current method, e.g. "my.package.MyClass".'
+          return-value: 'The fully qualified name of the class declaring the current method.'
         input:
           _class: 'Class'
         value: '_class.getName()'

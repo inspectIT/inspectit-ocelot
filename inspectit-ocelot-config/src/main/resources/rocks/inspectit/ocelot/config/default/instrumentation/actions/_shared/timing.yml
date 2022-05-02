@@ -5,13 +5,15 @@ inspectit:
       'a_timing_nanos':
         docs:
           description: 'Computes a nanosecond-timestamp as a long for the current point in time.'
+          return-value: 'A nanosecond-timestamp as a long for the current point in time.'
         value: 'new Long(System.nanoTime())'
 
       'a_timing_elapsedMillis':
         docs:
-          description: 'Computes the elapsed milliseconds as double since a given nanosecond-timestamp'
+          description: 'Computes the elapsed milliseconds as a double since a given nanosecond-timestamp.'
           inputs:
-            'since_nanos': 'the timestamp captured via System.nanoTime() to compare against'
+            'since_nanos': 'The timestamp captured via System.nanoTime() to compare against.'
+          return-value: 'The elapsed milliseconds as a double.'
         input:
           'since_nanos': 'long'
         value: 'new Double( (System.nanoTime() - since_nanos) * 1E-6)'

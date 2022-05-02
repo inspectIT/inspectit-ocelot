@@ -4,7 +4,11 @@ inspectit:
 
       'a_string_concat':
         docs:
-          description: 'Concatenates two provided inputs to a single string.'
+          description: 'Concatenates two provided inputs to a single String.'
+          inputs:
+            'a': 'The first input value.'
+            'b': 'The second input value.'
+          return-value: 'The concatenated inputs as a String.'
         input:
           'a': 'Object'
           'b': 'Object'
@@ -12,7 +16,12 @@ inspectit:
 
       'a_string_concat_3':
         docs:
-          description: 'Concatenates three provided inputs to a single string.'
+          description: 'Concatenates three provided inputs to a single String.'
+          inputs:
+            'a': 'The first input value.'
+            'b': 'The second input value.'
+            'c': 'The third input value.'
+          return-value: 'The concatenated inputs as a String.'
         input:
           'a': 'Object'
           'b': 'Object'

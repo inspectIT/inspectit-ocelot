@@ -1,18 +1,32 @@
 inspectit:
   instrumentation:
     actions:
-      
+
       'a_assign_value':
+        docs:
+          description: 'Returns the input value.'
+          inputs:
+            'value': 'The value to return.'
+          return-value: 'The input value.'
         input:
           'value': 'Object'
         value: 'value'
 
       'a_assign_null':
+        docs:
+          description: 'Returns null.'
+          return-value: 'null'
         value-body: 'return null;'
-        
+
       'a_assign_true':
+        docs:
+          description: 'Returns true.'
+          return-value: 'true'
         value: 'Boolean.TRUE'
-        
+
       'a_assign_false':
+        docs:
+          description: 'Returns false.'
+          return-value: 'false'
         value: 'Boolean.FALSE'
-        
+
