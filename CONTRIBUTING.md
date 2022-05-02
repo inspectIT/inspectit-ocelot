@@ -4,7 +4,9 @@
 
 We recommend using [IntelliJ](https://www.jetbrains.com/idea/download/#section=windows) as IDE for contributing.
 
-We also recommend installing the **Gradle Plugin**, the **[Save Actions Plugin](https://plugins.jetbrains.com/plugin/7642-save-actions)** and the **[Lombok Plugin](https://plugins.jetbrains.com/plugin/6317-lombok-plugin)** for IntelliJ.
+We also recommend installing the **Gradle Plugin** and the **[Save Actions Plugin](https://plugins.jetbrains.com/plugin/7642-save-actions)** (Note that you need to make sure your [keymap is up to date](https://youtrack.jetbrains.com/issue/IDEA-277194) for the plugin to work properly).
+
+For IntelliJ 203.* or older, we also advise you to use the **[Lombok Plugin](https://plugins.jetbrains.com/plugin/6317-lombok-plugin)**.
 
 After installing IntelliJ you can import the root folder of this repository as a Gradle project. 
 When using the Save Actions Plugin, you have to copy the *saveactions_settings.xml* from the `/codequality/idea` to the  `.idea` directory which is generated on project import.
