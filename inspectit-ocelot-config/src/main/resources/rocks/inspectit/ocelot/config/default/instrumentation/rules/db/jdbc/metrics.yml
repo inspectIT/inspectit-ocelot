@@ -1,0 +1,89 @@
+inspectit:
+  metrics:
+    definitions:
+
+      '[jdbc/query/duration]':
+        unit: ms
+        description: 'the duration of JDBC queries'
+        views:
+          '[jdbc/query/duration/sum]':
+            aggregation: SUM
+            tags:
+              'jdbc_url': true
+              'sql_command' : true # e.g., SELECT, UPDATE, CALL, ...
+              'jdbc_operation': true # e.g., execute, executeUpdate, executeBatch, ...
+          '[jdbc/query/duration/count]':
+            aggregation: COUNT
+            tags:
+              'jdbc_url': true
+              'sql_command': true
+              'jdbc_operation': true
+  
+  instrumentation:
+    rules:
+      
+      'r_jdbc_query_metric_statement_execute':
+        docs:
+          description: 'Collects metrics for execute/executeUpdate calls with non-prepared SQL (the SQL is given as method argument).'
+        include:
+          'r_jdbc_query_metric_defaults': true
+        scopes:
+          's_jdbc_statement_execute': true
+        exit:
+          'db_sql_query':
+            action: 'a_assign_value'
+            data-input:
+              'value': _arg0
+      
+      'r_jdbc_query_metric_statement_executeBatch':
+        docs:
+          description: 'Collects metrics for executeBatch calls with non-prepared SQL.'
+        include:
+          'r_jdbc_query_metric_defaults': true
+        scopes:
+          's_jdbc_statement_executeBatch': true
+
+      'r_jdbc_query_metric_preparedstatement':
+        docs:
+          description: 'Collects metrics for execute/executeUpdate/executeBatch calls with prepared SQL.'
+        include:
+          'r_jdbc_query_metric_defaults': true
+        scopes:
+          's_jdbc_preparedstatement_execute': true
+          's_jdbc_preparedstatement_executeBatch': true
+        exit:
+          'db_sql_query':
+            action: 'a_assign_value'
+            data-input:
+              'value': 'prepared_sql' # prepared_sql is populated and up-propagated by driver instrumentations
+          
+      # ---------------------------------------------------------------
+      # Shared JDBC metric rules below
+      # ---------------------------------------------------------------
+      
+      'r_jdbc_query_metric_defaults':
+        docs:
+          description: |-
+            Collects the metric [jdbc/query/duration]. To be included in JDBC query metric collection rules.
+            Rules that include it should provide the context variable 'db_sql_query'.
+        include:
+          'r_capture_method_duration_conditional': true
+          'r_jdbc_detect_entry': true
+          'r_jdbc_extract_url': true
+        entry:
+          'capture_time_condition':
+            action: 'a_assign_true'
+            only-if-true: 'jdbc_is_entry'
+        exit:
+          'sql_command':
+            action: 'a_jdbc_extract_sql_command'
+            only-if-not-null: 'db_sql_query'
+            data-input:
+              'sql_query': 'db_sql_query' # is set by the specific rules above
+        metrics:
+          '[jdbc/query/duration]':
+            value: 'method_duration'
+            data-tags:
+              'jdbc_url': 'jdbc_url'
+              'sql_command': 'sql_command'
+              'jdbc_operation': _methodName

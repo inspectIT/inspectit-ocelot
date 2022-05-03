@@ -34,3 +34,15 @@ inspectit:
           } catch (Exception e) { // in case the connection is closed
             return null;
           }
+    
+      'a_jdbc_extract_sql_command':
+        docs:
+          description: |-
+            Extracts the command (e.g., SELECT, UPDATE, CALL, ...) from a SQL query.
+            The used heuristic takes everything before the first blank.
+          inputs:
+            'sql_query': 'A string containing the SQL query from which the command will be extracted.'
+          return-value: 'The SQL command as string.'
+        input:
+          'sql_query': 'String'
+        value: 'sql_query.trim().split("\\s+")[0].toUpperCase()'
