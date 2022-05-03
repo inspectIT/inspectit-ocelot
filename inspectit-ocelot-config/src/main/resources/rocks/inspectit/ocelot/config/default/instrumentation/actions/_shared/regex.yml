@@ -169,12 +169,21 @@ inspectit:
         docs:
           description: |-
             Checks if the given input-String fully matches the provided regex. If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
+            
+            Example with capturing groups in String:
+            
+              string: "Hello world!"
+              pattern: "(\w+)\s(\w+!)"
+              result: "$1 you beautiful $2"
+            
+              This would lead to the return value "Hello you beautiful world!", because the regex matches the input-String and puts "Hello" in the first and "world!" in the second capturing group, so they replace the "$1" and "$2" respectively.
+            
             If the input-String is null or it does not match the regex, null is returned.
           inputs:
             'string': 'The input-String.'
             'pattern': 'The regex pattern.'
             'result': 'The result.'
-          return-value: 'The result, or the modified input-String, or null if the input-String is null or it does not match the regex.'
+          return-value: 'The result, with populated capturing groups if it was a String, or null if the input-String is null or it does not match the regex.'
         imports:
           - 'java.util'
           - 'java.util.regex'
@@ -214,10 +223,20 @@ inspectit:
                   result: <resultA>
                 - pattern: <regexB>
                   result: <resultA>
+            
+            Example with capturing groups in String:
+
+              string: "Hello world!"
+              patterns_and_results: 
+                - pattern: "(\w+)\s(\w+!)"
+                  result: "$1 you beautiful $2"
+
+              This would lead to the return value "Hello you beautiful world!", because the regex matches the input-String and puts "Hello" in the first and "world!" in the second capturing group, so they replace the "$1" and "$2" respectively.
+
           inputs:
             'string': 'The input-String.'
             'patterns_and_results': 'The regex patterns and results in the format described above.'
-          return-value: 'The result, or the modified input-String, or null if the input-String is null or it does not match the regex.'
+          return-value: 'The result, with populated capturing groups if it was a String, or null if the input-String is null or it does not match the regex.'
         imports:
           - 'java.util'
           - 'java.util.regex'
@@ -251,11 +270,20 @@ inspectit:
           description: |-
             Checks if the given input string has any match for the provided regex. If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
             If the input string is null or the input string does not match the regex, null is returned.
+            
+            Example with capturing groups in String:
+
+              string: "Hello world!"
+              pattern: "(\w+)"
+              result: "$1 everyone!"
+
+              This would lead to the return value "Hello everyone!", because the regex matches "Hello" from the input-String and puts it into the first capturing group, so it replaces the "$1".
+
           inputs:
             'string': 'The input-String.'
             'pattern': 'The regex pattern.'
             'result': 'The result.'
-          return-value: 'The result, or the modified input-String, or null if the input-String is null or it does not match the regex.'
+          return-value: 'The result, with populated capturing groups if it was a String, or null if the input-String is null or it does not match the regex.'
         imports:
           - 'java.util'
           - 'java.util.regex'
@@ -295,10 +323,19 @@ inspectit:
                  result: <resultA>
                - pattern: <regexB>
                  result: <resultA>
+            
+            
+            Example with capturing groups in String:
+              string: "Hello world!"
+              patterns_and_results: 
+                - pattern: "(\w+)"
+                  result: "$1 everyone!"
+            
+              This would lead to the return value "Hello everyone!", because the regex matches "Hello" from the input-String and puts it into the first capturing group, so it replaces the "$1".
           inputs:
             'string': 'The input-String.'
             'patterns_and_results': 'The regex patterns and results in the format described above.'
-          return-value: 'The result, or the modified input-String, or null if the input-String is null or it does not match the regex.'
+          return-value: 'The result, with populated capturing groups if it was a String, or null if the input-String is null or it does not match the regex.'
         imports:
           - 'java.util'
           - 'java.util.regex'
