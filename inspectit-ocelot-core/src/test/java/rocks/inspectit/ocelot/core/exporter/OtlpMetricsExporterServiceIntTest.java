@@ -51,7 +51,7 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
     @Test
     void verifyMetricsWrittenGrpc() {
         updateProperties(mps -> {
-            mps.setProperty("inspectit.exporters.metrics.otlp.url", getEndpoint(COLLECTOR_OTLP_GRPC_PORT, OTLP_METRICS_PATH));
+            mps.setProperty("inspectit.exporters.metrics.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_GRPC_PORT, OTLP_METRICS_PATH));
             mps.setProperty("inspectit.exporters.metrics.otlp.export-interval", "500ms");
             mps.setProperty("inspectit.exporters.metrics.otlp.enabled", ExporterEnabledState.ENABLED);
             mps.setProperty("inspectit.exporters.metrics.otlp.protocol", TransportProtocol.GRPC);
@@ -70,7 +70,7 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
     @Test
     void verifyMetricsWrittenHttp() {
         updateProperties(mps -> {
-            mps.setProperty("inspectit.exporters.metrics.otlp.url", getEndpoint(COLLECTOR_OTLP_HTTP_PORT, OTLP_METRICS_PATH));
+            mps.setProperty("inspectit.exporters.metrics.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_HTTP_PORT, OTLP_METRICS_PATH));
             mps.setProperty("inspectit.exporters.metrics.otlp.export-interval", "500ms");
             mps.setProperty("inspectit.exporters.metrics.otlp.enabled", ExporterEnabledState.ENABLED);
             mps.setProperty("inspectit.exporters.metrics.otlp.protocol", TransportProtocol.HTTP_PROTOBUF);
@@ -90,6 +90,7 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
     void testNoEndpointSet() {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.metrics.otlp.endpoint", "");
+            props.setProperty("inspectit.exporters.metrics.otlp.protocol", TransportProtocol.GRPC);
             props.setProperty("inspectit.exporters.metrics.otlp.enabled", ExporterEnabledState.ENABLED);
         });
         warnLogs.assertContains("'endpoint'");
@@ -107,15 +108,10 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
 
     @Test
     void defaultSettings() {
-        // service is not running
         AssertionsForClassTypes.assertThat(service.isEnabled()).isFalse();
-
         OtlpMetricsExporterSettings otlp = environment.getCurrentConfig().getExporters().getMetrics().getOtlp();
-        // enabled property is set to IF_CONFIGURED
         assertThat(otlp.getEnabled().equals(ExporterEnabledState.IF_CONFIGURED));
-        // endpoint is null or empty
         assertThat(otlp.getEndpoint()).isNullOrEmpty();
-        // protocol is UNSET
         assertThat(otlp.getProtocol()).isEqualTo(TransportProtocol.UNSET);
     }
 }

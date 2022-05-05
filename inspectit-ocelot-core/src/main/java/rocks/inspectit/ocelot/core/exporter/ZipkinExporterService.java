@@ -8,6 +8,7 @@ import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.trace.ZipkinExporterSettings;
+import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.validation.Valid;
 
@@ -17,7 +18,7 @@ import javax.validation.Valid;
  */
 @Component
 @Slf4j
-public class ZipkinExporterService extends DynamicallyActivatableTraceExporterService {
+public class ZipkinExporterService extends DynamicallyActivatableService {
 
     @Getter
     private ZipkinSpanExporter spanExporter;
@@ -47,14 +48,16 @@ public class ZipkinExporterService extends DynamicallyActivatableTraceExporterSe
         try {
             ZipkinExporterSettings settings = configuration.getExporters().getTracing().getZipkin();
             String endpoint = StringUtils.hasText(settings.getEndpoint()) ? settings.getEndpoint() : settings.getUrl();
-            log.info("Starting Zipkin Exporter with endpoint '{}'", endpoint);
 
-            // create span exporter
             spanExporter = ZipkinSpanExporter.builder().setEndpoint(endpoint).build();
 
-            // register
-            openTelemetryController.registerTraceExporterService(this);
-            return true;
+            boolean success = openTelemetryController.registerTraceExporterService(spanExporter, getName());
+            if (success) {
+                log.info("Starting Zipkin Exporter with endpoint '{}'", endpoint);
+            } else {
+                log.error("Failed to register {} at the OpenTelemetry controller!", getName());
+            }
+            return success;
         } catch (Throwable t) {
             log.error("Error creating Zipkin exporter", t);
             return false;
@@ -65,7 +68,7 @@ public class ZipkinExporterService extends DynamicallyActivatableTraceExporterSe
     protected boolean doDisable() {
         log.info("Stopping Zipkin Exporter");
         try {
-            openTelemetryController.unregisterTraceExporterService(this);
+            openTelemetryController.unregisterTraceExporterService(getName());
             if (null != spanExporter) {
                 spanExporter.close();
             }

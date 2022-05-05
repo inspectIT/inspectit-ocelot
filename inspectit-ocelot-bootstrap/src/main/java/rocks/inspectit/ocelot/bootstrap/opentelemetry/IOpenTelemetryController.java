@@ -6,34 +6,18 @@ package rocks.inspectit.ocelot.bootstrap.opentelemetry;
 public interface IOpenTelemetryController {
 
     /**
-     * Returns a completely noop {@link IOpenTelemetryController}
+     * Gets whether the {@link IOpenTelemetryController} is configured and active.
      *
-     * @return
+     * @return Whether the {@link IOpenTelemetryController} is configured and active.
      */
-    static IOpenTelemetryController noop() {
-        return NoopOpenTelemetryController.INSTANCE;
-    }
+    boolean isActive();
 
     /**
-     * Gets whether the {@link IOpenTelemetryController} is configured
+     * Gets whether the {@link IOpenTelemetryController} has been shut down. Once shut down, it cannot be restarted
      *
-     * @return Whether the {@link IOpenTelemetryController} is configured
+     * @return Whether the {@link IOpenTelemetryController} has been shut down.
      */
-    boolean isConfigured();
-
-    /**
-     * Gets whether the {@link IOpenTelemetryController} is enabled
-     *
-     * @return Whether the {@link IOpenTelemetryController} is enabled
-     */
-    boolean isEnabled();
-
-    /**
-     * Gets whether the {@link IOpenTelemetryController} has been stopped. Once stopped, it cannot be restarted
-     *
-     * @return Whether the {@link IOpenTelemetryController} has been stopped.
-     */
-    boolean isStopped();
+    boolean isShutdown();
 
     /**
      * Starts the {@link IOpenTelemetryController}
@@ -62,4 +46,12 @@ public interface IOpenTelemetryController {
      * Notifies the {@link IOpenTelemetryController} that something in the {@link rocks.inspectit.ocelot.config.model.metrics.MetricsSettings} or in the {@link rocks.inspectit.ocelot.config.model.exporters.metrics.MetricsExportersSettings} changed
      */
     void notifyMetricsSettingsChanged();
+
+    /**
+     * Returns the name of this {@link IOpenTelemetryController}
+     * @return The name of this {@link IOpenTelemetryController}
+     */
+    default String getName(){
+        return getClass().getSimpleName();
+    }
 }

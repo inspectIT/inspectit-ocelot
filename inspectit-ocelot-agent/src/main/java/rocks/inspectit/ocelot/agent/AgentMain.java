@@ -1,7 +1,5 @@
 package rocks.inspectit.ocelot.agent;
 
-import lombok.AllArgsConstructor;
-import lombok.Value;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 

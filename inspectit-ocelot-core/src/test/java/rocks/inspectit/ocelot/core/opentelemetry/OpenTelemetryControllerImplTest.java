@@ -6,7 +6,6 @@ import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.api.trace.TracerProvider;
 import io.opentelemetry.exporter.logging.LoggingMetricExporter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
-import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -25,7 +24,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
-import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableTraceExporterService;
+import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.lang.reflect.Method;
 
@@ -59,7 +58,7 @@ class OpenTelemetryControllerImplTest {
     @Test
     void testShutdown() {
         openTelemetryController.shutdown();
-        assertThat(openTelemetryController.isStopped());
+        assertThat(openTelemetryController.isShutdown());
     }
 
     @Nested
@@ -73,7 +72,7 @@ class OpenTelemetryControllerImplTest {
 
         @BeforeEach
         protected void init() {
-            openTelemetryController.setSpanExporter(spanExporter);
+            openTelemetryController.setMultiSpanExporter(spanExporter);
             clearInvocations(openTelemetryController);
         }
 
@@ -84,9 +83,9 @@ class OpenTelemetryControllerImplTest {
          */
         protected void registerTestTraceExporterServiceAndVerify(boolean expected) {
             int registeredServices = openTelemetryController.registeredTraceExportServices.size();
-            assertThat(openTelemetryController.registerTraceExporterService(testTraceExporterService)).isEqualTo(expected);
+            assertThat(openTelemetryController.registerTraceExporterService(testTraceExporterService.getSpanExporter(), testTraceExporterService.getName())).isEqualTo(expected);
             assertThat(openTelemetryController.registeredTraceExportServices.size()).isEqualTo(registeredServices + (expected ? 1 : 0));
-            verify(openTelemetryController, times(1)).registerTraceExporterService(testTraceExporterService);
+            verify(openTelemetryController, times(1)).registerTraceExporterService(testTraceExporterService.getSpanExporter(), testTraceExporterService.getName());
             verify(openTelemetryController, times(expected ? 1 : 0)).notifyTracingSettingsChanged();
             verify(spanExporter, times(1)).registerSpanExporter(testTraceExporterService.getName(), testTraceExporterService.getSpanExporter());
             verifyNoMoreInteractions(openTelemetryController, spanExporter);
@@ -100,9 +99,9 @@ class OpenTelemetryControllerImplTest {
          */
         protected void unregisterTestTraceExporterServiceAndVerify(boolean expected) {
             int registeredServices = openTelemetryController.registeredTraceExportServices.size();
-            assertThat(openTelemetryController.unregisterTraceExporterService(testTraceExporterService)).isEqualTo(expected);
+            assertThat(openTelemetryController.unregisterTraceExporterService(testTraceExporterService.getName())).isEqualTo(expected);
             assertThat(openTelemetryController.registeredTraceExportServices.size()).isEqualTo(registeredServices - (expected ? 1 : 0));
-            verify(openTelemetryController, times(1)).unregisterTraceExporterService(testTraceExporterService);
+            verify(openTelemetryController, times(1)).unregisterTraceExporterService(testTraceExporterService.getName());
             verify(openTelemetryController, times(expected ? 1 : 0)).notifyTracingSettingsChanged();
             verify(spanExporter, times(1)).unregisterSpanExporter(testTraceExporterService.getName());
             verifyNoMoreInteractions(openTelemetryController, spanExporter);
@@ -143,7 +142,7 @@ class OpenTelemetryControllerImplTest {
             assertThat(openTelemetryController.configureOpenTelemetry()).isTrue();
             // tracing should have changed but metrics not
             verify(openTelemetryController, times(1)).configureTracing(any(InspectitConfig.class));
-            verify(openTelemetryController, times(0)).configureMeterProvider(any(InspectitConfig.class));
+            verify(openTelemetryController, times(0)).configureMeterProvider();
 
             // verify that the tracer provider does not change after tracing has been (re-)configured
             assertThat(globalTracerProvider).isSameAs(GlobalOpenTelemetry.getTracerProvider());
@@ -157,11 +156,10 @@ class OpenTelemetryControllerImplTest {
         }
 
         /**
-         * A noop {@link DynamicallyActivatableTraceExporterService} for testing
+         * A noop {@link DynamicallyActivatableService trace exporter service} for testing
          */
-        class TestTraceExporterService extends DynamicallyActivatableTraceExporterService {
+        class TestTraceExporterService extends DynamicallyActivatableService {
 
-            @Override
             public SpanExporter getSpanExporter() {
                 try {
                     Method m = Class.forName("io.opentelemetry.sdk.trace.export.NoopSpanExporter")
@@ -265,7 +263,7 @@ class OpenTelemetryControllerImplTest {
             assertThat(openTelemetryController.configureOpenTelemetry()).isTrue();
 
             // verify that meter provider was configured but not tracing
-            verify(openTelemetryController, times(1)).configureMeterProvider(any(InspectitConfig.class));
+            verify(openTelemetryController, times(1)).configureMeterProvider();
             verify(openTelemetryController, times(0)).configureTracing(any(InspectitConfig.class));
 
             // the meter provider should have changed, but the tracer provider not
@@ -283,16 +281,13 @@ class OpenTelemetryControllerImplTest {
         }
 
         /**
-         * A noop {@link DynamicallyActivatableMetricsExporterService} for testing
+         * A noop {@link DynamicallyActivatableService metric exporter service} for testing
          */
         class TestMetricsExporterService extends DynamicallyActivatableMetricsExporterService {
 
-            @Mock
-            MetricExporter metricExporter;
-
             @Override
             public MetricReaderFactory getNewMetricReaderFactory() {
-                return PeriodicMetricReader.newMetricReaderFactory(new LoggingMetricExporter());
+                return PeriodicMetricReader.newMetricReaderFactory(LoggingMetricExporter.create());
             }
 
             @Override

@@ -5,7 +5,8 @@ import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 
 /**
- * A {@link Converter} to convert from the String-representation to a {@link TransportProtocol}
+ * A {@link Converter} to convert from the String-representation to a {@link TransportProtocol}.
+ * This custom {@link Converter} is needed as we are using slash ('/') in the values used in the configuration, e.g., 'http/thrift'.
  */
 public class StringToTransportProtocolConverter implements Converter<String, TransportProtocol> {
 

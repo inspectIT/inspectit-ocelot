@@ -51,7 +51,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
         Awaitility.await()
                 .atMost(15, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS)
-                .untilAsserted(() -> assertThat(Instances.openTelemetryController.isConfigured()).isTrue());
+                .untilAsserted(() -> assertThat(Instances.openTelemetryController.isActive()).isTrue());
     }
 
     @AfterEach

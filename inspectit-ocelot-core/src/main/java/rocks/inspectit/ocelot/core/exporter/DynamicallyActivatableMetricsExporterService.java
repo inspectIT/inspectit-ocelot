@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
-import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.PrometheusExporterSettings;
@@ -15,6 +14,7 @@ public abstract class DynamicallyActivatableMetricsExporterService extends Dynam
 
     /**
      * Gets a new {@link MetricReaderFactory} for this service.
+     * It is important that this method returns a <strong>new</strong> {@link MetricReaderFactory}, as when the previously used {@link MetricReaderFactory} is shut down during {@link SdkMeterProvider#shutdown()}, it cannot be re-enabled.
      *
      * @return A new {@link MetricReaderFactory}
      */

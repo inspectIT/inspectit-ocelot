@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import io.github.netmikey.logunit.api.LogCapturer;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -89,6 +88,7 @@ public class JaegerExporterServiceIntTest {
      * Test for the {@link JaegerExporterService} using {@link ExporterServiceIntegrationTestBase}
      */
     @Nested
+    @DirtiesContext
     class JaegerExporterServiceIntDockerTest extends ExporterServiceIntegrationTestBase {
 
         @Autowired
@@ -103,7 +103,6 @@ public class JaegerExporterServiceIntTest {
          * Test using the {@link TransportProtocol#GRPC}
          */
         @Test
-        @DirtiesContext
         void verifyTraceSentGrpc() {
             updateProperties(mps -> {
                 mps.setProperty("inspectit.exporters.tracing.jaeger.enabled", ExporterEnabledState.ENABLED);
@@ -123,7 +122,6 @@ public class JaegerExporterServiceIntTest {
          * Test using the {@link TransportProtocol#HTTP_THRIFT}
          */
         @Test
-        @DirtiesContext
         void verifyTraceSentThrift() {
             updateProperties(mps -> {
                 mps.setProperty("inspectit.exporters.tracing.jaeger.enabled", ExporterEnabledState.ENABLED);
@@ -153,6 +151,15 @@ public class JaegerExporterServiceIntTest {
         @Autowired
         InspectitEnvironment environment;
 
+        @BeforeEach
+        void beforeEach() {
+            System.out.printf("jaeger endpoint=" + environment.getCurrentConfig()
+                    .getExporters()
+                    .getTracing()
+                    .getJaeger()
+                    .getEndpoint());
+        }
+
         @DirtiesContext
         @Test
         void testEndpointNotSet() {
@@ -174,42 +181,14 @@ public class JaegerExporterServiceIntTest {
         }
 
         /**
-         * Test the default {@link rocks.inspectit.ocelot.config.model.exporters.trace.JaegerExporterSettings settings} of the {@link JaegerExporterService}
+         * Verifies the default {@link rocks.inspectit.ocelot.config.model.exporters.trace.JaegerExporterSettings settings} of the {@link JaegerExporterService}
          */
         @Test
-        void testDefault() {
-            // service should be disabled
-            assertThat(service.isEnabled()).isFalse();
-            // enabled flag should be IF_CONFIGURED
-            assertThat(environment.getCurrentConfig()
-                    .getExporters()
-                    .getTracing()
-                    .getJaeger()
-                    .getEnabled()).isEqualTo(ExporterEnabledState.IF_CONFIGURED);
-            // endpoint should be null or empty
-            assertThat(environment.getCurrentConfig()
-                    .getExporters()
-                    .getTracing()
-                    .getJaeger()
-                    .getEndpoint()).isNullOrEmpty();
-            assertThat(environment.getCurrentConfig()
-                    .getExporters()
-                    .getTracing()
-                    .getJaeger()
-                    .getProtocol()).isEqualTo(TransportProtocol.UNSET);
-        }
-
-        @Test
         void defaultSettings() {
-            // service is not running
-            AssertionsForClassTypes.assertThat(service.isEnabled()).isFalse();
-
             JaegerExporterSettings jaeger = environment.getCurrentConfig().getExporters().getTracing().getJaeger();
-            // enabled property is set to IF_CONFIGURED
-            assertThat(jaeger.getEnabled().equals(ExporterEnabledState.IF_CONFIGURED));
-            // endpoint is null or empty
+            assertThat(service.isEnabled()).isFalse();
+            assertThat(jaeger.getEnabled()).isEqualTo(ExporterEnabledState.IF_CONFIGURED);
             assertThat(jaeger.getEndpoint()).isNullOrEmpty();
-            // protocol is unset
             assertThat(jaeger.getProtocol()).isEqualTo(TransportProtocol.UNSET);
         }
 

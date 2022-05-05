@@ -50,18 +50,16 @@ public class LoggingMetricExporterService extends DynamicallyActivatableMetricsE
     protected boolean doEnable(InspectitConfig configuration) {
         LoggingMetricsExporterSettings logging = configuration.getExporters().getMetrics().getLogging();
         try {
-            // build and register the MeterProvider
             metricReaderBuilder = PeriodicMetricReader.builder(metricExporter).setInterval(logging.getExportInterval());
             boolean success = openTelemetryController.registerMetricExporterService(this);
             if (success) {
-                log.info("Starting {}", getClass().getSimpleName());
+                log.info("Starting {}", getName());
             } else {
-                log.error("Failed to register {} at {}!", getClass().getSimpleName(), openTelemetryController.getClass()
-                        .getSimpleName());
+                log.error("Failed to register {} at the OpenTelemetry controller!", getName());
             }
             return success;
         } catch (Exception e) {
-            log.error("Failed to start " + getClass().getSimpleName(), e);
+            log.error("Failed to start " + getName(), e);
             return false;
         }
     }

@@ -6,7 +6,7 @@ title: Breaking Changes
 
 ### Integration of the OpenTelemetry OpenCensus Shim
 
-Starting with the current release, inspectIT Ocelot migrates from OpenCensus to [OpenTelemetry](https://github.com/open-telemetry). As a first step, we include the [OpenTelemetry OpenCensus Shim](https://github.com/open-telemetry/opentelemetry-java/tree/main/opencensus-shim). InspectIT Ocelot still uses and supports the [OpenCensus-API](https://opencensus.io/quickstart/java/), but the exporter implementations of OpenTelemetry are used.
+Starting with the current release, inspectIT Ocelot migrates from OpenCensus to [OpenTelemetry](https://github.com/open-telemetry). As a first step, we include the [OpenTelemetry OpenCensus Shim](https://github.com/open-telemetry/opentelemetry-java/tree/main/opencensus-shim). inspectIT Ocelot still uses and supports the [OpenCensus-API](https://opencensus.io/quickstart/java/), but the exporter implementations of OpenTelemetry are used.
 
 ### Updated and removed exporter 
 
@@ -16,7 +16,7 @@ Due to the migration from OpenCensus to OpenTelemetry, the `OpenCensus Agent Exp
 
 #### Added `OTLPMetricsExporter` and `OTLPTraceExporter`
 
-Due to the migration to OpenTelemetry, InspectIT Ocelot now supports OpenTelemetry Protocol (OTLP) exporter for metrics and tracing.
+Due to the migration to OpenTelemetry, inspectIT Ocelot now supports OpenTelemetry Protocol (OTLP) exporter for metrics and tracing.
 
 #### Exporter property `url` and `grpc` replaced by `endpoint`
 

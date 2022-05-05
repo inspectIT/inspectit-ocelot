@@ -4,9 +4,9 @@ import io.opentelemetry.exporter.prometheus.PrometheusHttpServer;
 import io.opentelemetry.exporter.prometheus.PrometheusHttpServerBuilder;
 import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.metrics.PrometheusExporterSettings;
 
 /**
  * Service for the Prometheus OpenTelemetry exporter.
@@ -27,24 +27,29 @@ public class PrometheusExporterService extends DynamicallyActivatableMetricsExpo
         return conf.getMetrics().isEnabled() && !conf.getExporters()
                 .getMetrics()
                 .getPrometheus()
-                .getEnabled().isDisabled();
+                .getEnabled()
+                .isDisabled();
     }
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        val config = configuration.getExporters().getMetrics().getPrometheus();
+        PrometheusExporterSettings config = configuration.getExporters().getMetrics().getPrometheus();
 
         try {
             String host = config.getHost();
             int port = config.getPort();
-            log.info("Starting Prometheus Exporter on {}:{}", host, port);
             prometheusHttpServerBuilder = PrometheusHttpServer.builder().setHost(host).setPort(port);
-            openTelemetryController.registerMetricExporterService(this);
+            boolean success = openTelemetryController.registerMetricExporterService(this);
+            if (success) {
+                log.info("Starting Prometheus Exporter on {}:{}", host, port);
+            } else {
+                log.error("Failed to register {} at the OpenTelemetry controller!", getName());
+            }
+            return success;
         } catch (Exception e) {
             log.error("Error Starting Prometheus HTTP Endpoint!", e);
             return false;
         }
-        return true;
     }
 
     @Override

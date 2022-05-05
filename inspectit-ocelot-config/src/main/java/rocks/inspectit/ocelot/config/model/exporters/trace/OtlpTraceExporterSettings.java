@@ -14,12 +14,6 @@ public class OtlpTraceExporterSettings {
 
     private ExporterEnabledState enabled;
 
-    @Deprecated
-    /***
-     * This property is deprecated since v2.0. Please use {@link #endpoint} instead.
-     * The OTLP traces gRPC endpoint to connect to.
-     */ private String url;
-
     /**
      * The OTLP traces endpoint to connect to.
      */
@@ -31,5 +25,4 @@ public class OtlpTraceExporterSettings {
      */
     private TransportProtocol protocol;
 
-    private String serviceName;
 }

@@ -29,8 +29,10 @@ You can additionally define the following global properties (`inspectit.tracing-
 |---|---|---|
 |`max-export-batch-size`|512|The max export batch size for every export, i.e., the maximum number of spans exported by the used `BatchSpanProcessor`|
 |`schedule-delay-millis`|5000|The delay interval between two consecutive exports in milliseconds.
-**Note**: These properties take only effect once when the agent is starting. If you change these properties while the agent is running, they will not take effect until the agent retarted.
 
+:::warning
+These properties take only effect once when the agent is starting. If you change these properties while the agent is running, they will not take effect until the agent retarted.
+:::
 ### Common Tags as Attributes
 
 Globally defined [common tags](metrics/common-tags.md) used when recording metrics can also be inserted as attributes in traces.

@@ -50,7 +50,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
 
                 if (StringUtils.hasText(otlp.getEndpoint())) {
                     return true;
-                } else if (StringUtils.hasText(otlp.getUrl())) {
+                } else if (StringUtils.hasText(otlp.getEndpoint())) {
                     log.warn("You are using the deprecated property 'url'. This property will be invalid in future releases of InspectIT Ocelot, please use 'endpoint' instead.");
                     return true;
                 }
@@ -58,31 +58,30 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
             if (otlp.getEnabled().equals(ExporterEnabledState.ENABLED)) {
                 if (!SUPPORTED_PROTOCOLS.contains(otlp.getProtocol())) {
                     log.warn("OTLP Metric Exporter is enabled, but wrong 'protocol' is specified. Supported values are ", Arrays.toString(SUPPORTED_PROTOCOLS.stream()
-                            .map(transportProtocol -> transportProtocol.getName())
+                            .map(transportProtocol -> transportProtocol.getConfigRepresentation())
                             .toArray()));
                 }
-                if (!StringUtils.hasText(otlp.getEndpoint()) && !StringUtils.hasText(otlp.getUrl())) {
+                if (!StringUtils.hasText(otlp.getEndpoint()) && !StringUtils.hasText(otlp.getEndpoint())) {
                     log.warn("OTLP Metric Exporter is enabled but 'endpoint' is not set.");
                 }
             }
         }
+
         return false;
     }
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
         try {
-            // build and register exporter service
             OtlpMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlp();
-            String endpoint = StringUtils.hasText(otlp.getEndpoint()) ? otlp.getEndpoint() : otlp.getUrl();
 
             switch (otlp.getProtocol()) {
                 case GRPC: {
-                    metricExporter = OtlpGrpcMetricExporter.builder().setEndpoint(endpoint).build();
+                    metricExporter = OtlpGrpcMetricExporter.builder().setEndpoint(otlp.getEndpoint()).build();
                     break;
                 }
                 case HTTP_PROTOBUF: {
-                    metricExporter = OtlpHttpMetricExporter.builder().setEndpoint(endpoint).build();
+                    metricExporter = OtlpHttpMetricExporter.builder().setEndpoint(otlp.getEndpoint()).build();
                     break;
                 }
             }
@@ -90,10 +89,9 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
 
             boolean success = openTelemetryController.registerMetricExporterService(this);
             if (success) {
-                log.info("Starting {}", getClass().getSimpleName());
+                log.info("Starting {}", getName());
             } else {
-                log.error("Failed to register {} at {}!", getClass().getSimpleName(), openTelemetryController.getClass()
-                        .getSimpleName());
+                log.error("Failed to register {} at the OpenTelemetry controller!", getName());
             }
             return success;
         } catch (Exception e) {

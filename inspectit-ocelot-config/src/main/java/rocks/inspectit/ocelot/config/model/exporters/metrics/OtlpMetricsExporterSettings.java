@@ -17,12 +17,6 @@ public class OtlpMetricsExporterSettings {
 
     private ExporterEnabledState enabled;
 
-    @Deprecated
-    /***
-     * This property is deprecated since v2.0. Please use {@link #endpoint} instead.
-     * The OTLP metrics endpoint to connect to.
-     */ private String url;
-
     /**
      * The OTLP metrics endpoint to connect to.
      */

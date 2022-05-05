@@ -11,6 +11,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.config.model.exporters.trace.JaegerExporterSettings;
+import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.validation.Valid;
 import java.util.Arrays;
@@ -22,7 +23,7 @@ import java.util.List;
  */
 @Component
 @Slf4j
-public class JaegerExporterService extends DynamicallyActivatableTraceExporterService {
+public class JaegerExporterService extends DynamicallyActivatableService {
 
     private final List<TransportProtocol> SUPPORTED_PROTOCOLS = Arrays.asList(TransportProtocol.GRPC, TransportProtocol.HTTP_THRIFT);
 
@@ -47,7 +48,7 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
             if ((null == jaeger.getProtocol() || jaeger.getProtocol()
                     .equals(TransportProtocol.UNSET)) && (StringUtils.hasText(jaeger.getUrl()) || StringUtils.hasText(jaeger.getGrpc()))) {
                 jaeger.setProtocol(StringUtils.hasText(jaeger.getUrl()) ? TransportProtocol.HTTP_THRIFT : TransportProtocol.GRPC);
-                log.warn("The property 'protocol' was not set. Based on the set property '{}' we assume the protocol '{}'. This fallback will be removed in future releases. Please make sure to use the property 'protocol' in future.", StringUtils.hasText(jaeger.getUrl()) ? "url" : "grpc", StringUtils.hasText(jaeger.getUrl()) ? TransportProtocol.HTTP_THRIFT.getName() : TransportProtocol.GRPC.getName());
+                log.warn("The property 'protocol' was not set. Based on the set property '{}' we assume the protocol '{}'. This fallback will be removed in future releases. Please make sure to use the property 'protocol' in future.", StringUtils.hasText(jaeger.getUrl()) ? "url" : "grpc", StringUtils.hasText(jaeger.getUrl()) ? TransportProtocol.HTTP_THRIFT.getConfigRepresentation() : TransportProtocol.GRPC.getConfigRepresentation());
             }
             if (SUPPORTED_PROTOCOLS.contains(jaeger.getProtocol())) {
                 if (StringUtils.hasText(jaeger.getEndpoint())) {
@@ -60,7 +61,7 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
             if (jaeger.getEnabled().equals(ExporterEnabledState.ENABLED)) {
                 if (!SUPPORTED_PROTOCOLS.contains(jaeger.getProtocol())) {
                     log.warn("Jaeger Exporter is enabled, but wrong 'protocol' is specified. Supported values are ", Arrays.toString(SUPPORTED_PROTOCOLS.stream()
-                            .map(transportProtocol -> transportProtocol.getName())
+                            .map(transportProtocol -> transportProtocol.getConfigRepresentation())
                             .toArray()));
                 }
                 if (!StringUtils.hasText(jaeger.getEndpoint()) && !StringUtils.hasText(jaeger.getUrl()) && !StringUtils.hasText(jaeger.getGrpc())) {
@@ -76,9 +77,7 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
         try {
             JaegerExporterSettings settings = configuration.getExporters().getTracing().getJaeger();
             String endpoint = StringUtils.hasText(settings.getEndpoint()) ? settings.getEndpoint() : StringUtils.hasText(settings.getUrl()) ? settings.getUrl() : settings.getGrpc();
-            log.info("Starting Jaeger Exporter with endpoint '{}' and protocol '{}'", endpoint, settings.getProtocol());
 
-            // create span exporter
             switch (settings.getProtocol()) {
                 case GRPC: {
                     spanExporter = JaegerGrpcSpanExporter.builder().setEndpoint(endpoint).build();
@@ -90,10 +89,13 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
                 }
             }
 
-            // register
-            openTelemetryController.registerTraceExporterService(this);
-
-            return true;
+            boolean success = openTelemetryController.registerTraceExporterService(spanExporter, getName());
+            if (success) {
+                log.info("Starting Jaeger Exporter with endpoint '{}' and protocol '{}'", endpoint, settings.getProtocol());
+            } else {
+                log.error("Failed to register {} at the OpenTelemetry controller!", getName());
+            }
+            return success;
         } catch (Throwable t) {
             log.error("Error creating Jaeger Exporter", t);
             return false;
@@ -104,7 +106,7 @@ public class JaegerExporterService extends DynamicallyActivatableTraceExporterSe
     protected boolean doDisable() {
         log.info("Stopping Jaeger Exporter");
         try {
-            openTelemetryController.unregisterTraceExporterService(this);
+            openTelemetryController.unregisterTraceExporterService(getName());
             if (null != spanExporter) {
                 spanExporter.close();
             }

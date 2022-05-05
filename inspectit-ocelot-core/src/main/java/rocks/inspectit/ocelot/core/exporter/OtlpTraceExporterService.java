@@ -11,6 +11,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.config.model.exporters.trace.OtlpTraceExporterSettings;
+import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.validation.Valid;
 import java.util.Arrays;
@@ -22,7 +23,7 @@ import java.util.List;
  */
 @Component
 @Slf4j
-public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporterService {
+public class OtlpTraceExporterService extends DynamicallyActivatableService {
 
     private final List<TransportProtocol> SUPPORTED_PROTOCOLS = Arrays.asList(TransportProtocol.GRPC, TransportProtocol.HTTP_PROTOBUF);
 
@@ -37,21 +38,16 @@ public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporte
     protected boolean checkEnabledForConfig(InspectitConfig configuration) {
         @Valid OtlpTraceExporterSettings otlp = configuration.getExporters().getTracing().getOtlp();
         if (configuration.getTracing().isEnabled() && !otlp.getEnabled().isDisabled()) {
-            if (SUPPORTED_PROTOCOLS.contains(otlp.getProtocol())) {
-                if (StringUtils.hasText(otlp.getEndpoint())) {
-                    return true;
-                } else if (StringUtils.hasText(otlp.getUrl())) {
-                    log.warn("You are using the deprecated property 'url'. This property will be invalid in future releases of InspectIT Ocelot, please use 'endpoint' instead.");
-                    return true;
-                }
+            if (SUPPORTED_PROTOCOLS.contains(otlp.getProtocol()) && StringUtils.hasText(otlp.getEndpoint())) {
+                return true;
             }
             if (otlp.getEnabled().equals(ExporterEnabledState.ENABLED)) {
                 if (!SUPPORTED_PROTOCOLS.contains(otlp.getProtocol())) {
                     log.warn("OTLP Trace Exporter is enabled, but wrong 'protocol' is specified. Supported values are ", Arrays.toString(SUPPORTED_PROTOCOLS.stream()
-                            .map(transportProtocol -> transportProtocol.getName())
+                            .map(transportProtocol -> transportProtocol.getConfigRepresentation())
                             .toArray()));
                 }
-                if (!StringUtils.hasText(otlp.getEndpoint()) && !StringUtils.hasText(otlp.getUrl())) {
+                if (!StringUtils.hasText(otlp.getEndpoint())) {
                     log.warn("OTLP Trace Exporter is enabled but 'endpoint' is not set.");
                 }
             }
@@ -63,24 +59,25 @@ public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporte
     protected boolean doEnable(InspectitConfig configuration) {
         try {
             OtlpTraceExporterSettings otlp = configuration.getExporters().getTracing().getOtlp();
-            String endpoint = StringUtils.hasText(otlp.getEndpoint()) ? otlp.getEndpoint() : otlp.getUrl();
-            log.info("Starting OTLP Trace Exporter with endpoint {}", endpoint);
 
-            // create span exporter
             switch (otlp.getProtocol()) {
                 case GRPC: {
-                    spanExporter = OtlpGrpcSpanExporter.builder().setEndpoint(endpoint).build();
+                    spanExporter = OtlpGrpcSpanExporter.builder().setEndpoint(otlp.getEndpoint()).build();
                     break;
                 }
                 case HTTP_PROTOBUF: {
-                    spanExporter = OtlpHttpSpanExporter.builder().setEndpoint(endpoint).build();
+                    spanExporter = OtlpHttpSpanExporter.builder().setEndpoint(otlp.getEndpoint()).build();
                     break;
                 }
             }
 
-            // register service
-            openTelemetryController.registerTraceExporterService(this);
-            return true;
+            boolean success = openTelemetryController.registerTraceExporterService(spanExporter, getName());
+            if (success) {
+                log.info("Starting OTLP Trace Exporter with endpoint {}", otlp.getEndpoint());
+            } else {
+                log.error("Failed to register {} at the OpenTelemetry controller!", getName());
+            }
+            return success;
         } catch (Throwable t) {
             log.error("Error creating OTLP Trace Exporter", t);
             return false;
@@ -93,7 +90,7 @@ public class OtlpTraceExporterService extends DynamicallyActivatableTraceExporte
         log.info("Stopping OTLP Trace Exporter");
         try {
             // unregister service
-            openTelemetryController.unregisterTraceExporterService(this);
+            openTelemetryController.unregisterTraceExporterService(getName());
             if (null != spanExporter) {
                 spanExporter.close();
             }

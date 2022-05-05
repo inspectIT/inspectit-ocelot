@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
+import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -28,33 +29,25 @@ public class OpenTelemetryImpl implements OpenTelemetry {
     /**
      * The {@link OpenTelemetrySdk} implementation
      */
+    @NotNull
     private OpenTelemetrySdk openTelemetry;
 
     @Builder.Default
-    private Object lock = new Object();
-
-    /**
-     * Gets the currently registered {@link OpenTelemetry} or {@link OpenTelemetry#noop()} if nothing has been registered.
-     *
-     * @return
-     */
-    public OpenTelemetry get() {
-        return null == openTelemetry ? OpenTelemetry.noop() : openTelemetry;
-    }
+    private final Object lock = new Object();
 
     @Override
     public TracerProvider getTracerProvider() {
-        return get().getTracerProvider();
+        return openTelemetry.getTracerProvider();
     }
 
     @Override
     public ContextPropagators getPropagators() {
-        return get().getPropagators();
+        return openTelemetry.getPropagators();
     }
 
     @Override
     public MeterProvider getMeterProvider() {
-        return get().getMeterProvider();
+        return openTelemetry.getMeterProvider();
     }
 
     /**
@@ -76,15 +69,6 @@ public class OpenTelemetryImpl implements OpenTelemetry {
     }
 
     /**
-     * Registers the {@link OpenTelemetrySdk}. If an {@link OpenTelemetrySdk} was already registered as {@link #openTelemetry}, flushes and closes the {@link SdkTracerProvider} and {@link SdkMeterProvider} of the previously registered {@link OpenTelemetrySdk} before registering the new {@link OpenTelemetrySdk}.
-     *
-     * @param openTelemetry The new {@link OpenTelemetrySdk} to register
-     */
-    public void set(OpenTelemetrySdk openTelemetry) {
-        set(openTelemetry, true, true);
-    }
-
-    /**
      * Registers the {@link OpenTelemetry}. If an {@link OpenTelemetrySdk} was already registered as {@link #openTelemetry}, flush and close the {@link SdkTracerProvider} and {@link SdkMeterProvider} of the previously registered {@link OpenTelemetrySdk} if required before registering the new {@link OpenTelemetrySdk}
      *
      * @param openTelemetry              The new {@link OpenTelemetrySdk} to register.
@@ -94,11 +78,9 @@ public class OpenTelemetryImpl implements OpenTelemetry {
     public void set(OpenTelemetrySdk openTelemetry, boolean stopPreviousTracerProvider, boolean stopPreviousMeterProvider) {
         synchronized (lock) {
             if (null != openTelemetry) {
-                // stop previous SdkTracerProvider if settings changed
                 if (stopPreviousTracerProvider) {
                     OpenTelemetryUtils.stopTracerProvider(getSdkTracerProvider());
                 }
-                // stop previous SdkMeterProvider if settings changed
                 if (stopPreviousMeterProvider) {
                     OpenTelemetryUtils.stopMeterProvider(getSdkMeterProvider());
                 }
@@ -131,24 +113,20 @@ public class OpenTelemetryImpl implements OpenTelemetry {
         CompletableResultCode resultCode = CompletableResultCode.ofAll(Arrays.asList(flushTracerProvider, flushMeterProvider));
         if (!resultCode.isDone()) {
             CountDownLatch latch = new CountDownLatch(1);
-            resultCode.whenComplete(() -> latch.countDown());
+            resultCode.whenComplete(latch::countDown);
             try {
                 latch.await(15, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error("Interrupted while waiting for the OpenTelemetryImpl to flush", e);
             }
         }
     }
 
     /**
      * Registers {@link OpenTelemetryImpl this} to {@link GlobalOpenTelemetry#set(OpenTelemetry)}.
-     *
-     * @return
      */
-    public OpenTelemetryImpl registerGlobal() {
-        // register globally
+    public void registerGlobal() {
         GlobalOpenTelemetry.set(this);
-        return this;
     }
 
 }

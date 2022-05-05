@@ -94,15 +94,10 @@ public class OtlpTraceExporterServiceIntTest extends ExporterServiceIntegrationT
 
     @Test
     void defaultSettings() {
-        // service is not running
         AssertionsForClassTypes.assertThat(service.isEnabled()).isFalse();
-
         OtlpTraceExporterSettings otlp = environment.getCurrentConfig().getExporters().getTracing().getOtlp();
-        // enabled property is set to IF_CONFIGURED
         assertThat(otlp.getEnabled().equals(ExporterEnabledState.IF_CONFIGURED));
-        // endpoint is null or empty
         assertThat(otlp.getEndpoint()).isNullOrEmpty();
-        // protocol is unset
         assertThat(otlp.getProtocol()).isEqualTo(TransportProtocol.UNSET);
     }
 

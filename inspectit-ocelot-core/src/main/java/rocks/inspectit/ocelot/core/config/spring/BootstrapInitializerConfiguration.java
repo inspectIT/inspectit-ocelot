@@ -56,8 +56,7 @@ public class BootstrapInitializerConfiguration {
     }
 
     @Bean(OpenTelemetryControllerImpl.BEAN_NAME)
-    public OpenTelemetryControllerImpl getOpenTelemetryController(InspectitEnvironment environment) {
-        InspectitConfig configuration = environment.getCurrentConfig();
+    public OpenTelemetryControllerImpl getOpenTelemetryController() {
         return new OpenTelemetryControllerImpl();
     }
 

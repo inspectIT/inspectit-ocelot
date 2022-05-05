@@ -13,6 +13,4 @@ public class LoggingTraceExporterSettings {
 
     private ExporterEnabledState enabled;
 
-    private String serviceName;
-
 }

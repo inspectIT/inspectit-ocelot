@@ -60,19 +60,15 @@ public class TracingSettings {
     @NotNull
     private PropagationFormat propagationFormat = PropagationFormat.B3;
 
-    static final int DEFAULT_MAX_EXPORT_BATCH_SIZE = 512;
-
     /**
-     * The maximum batch size for every span export. Default value is 512.
+     * The maximum batch size for every span export.
      */
     @Positive
-    private int maxExportBatchSize = DEFAULT_MAX_EXPORT_BATCH_SIZE;
-
-    static final long DEFAULT_SCHEDULE_DELAY_MILLIS = 5000;
+    private int maxExportBatchSize = 512;
 
     /**
-     * Delay interval between two consecutive exports in milliseconds. Default value is 5000ms.
+     * Delay interval between two consecutive exports in milliseconds..
      */
     @Positive
-    private long scheduleDelayMillis = DEFAULT_SCHEDULE_DELAY_MILLIS;
+    private long scheduleDelayMillis = 5000;
 }
