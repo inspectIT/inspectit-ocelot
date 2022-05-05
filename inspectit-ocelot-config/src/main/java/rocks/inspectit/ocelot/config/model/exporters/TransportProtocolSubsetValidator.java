@@ -1,10 +1,12 @@
-package rocks.inspectit.ocelot.config.utils;
-
-import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
+package rocks.inspectit.ocelot.config.model.exporters;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Arrays;
+
+/**
+ * Validator for {@link TransportProtocolSubset}
+ */
 
 public class TransportProtocolSubsetValidator implements ConstraintValidator<TransportProtocolSubset, Enum> {
 

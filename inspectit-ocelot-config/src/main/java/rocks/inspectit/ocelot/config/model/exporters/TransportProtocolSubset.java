@@ -1,6 +1,4 @@
-package rocks.inspectit.ocelot.config.utils;
-
-import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
+package rocks.inspectit.ocelot.config.model.exporters;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -23,7 +21,7 @@ public @interface TransportProtocolSubset {
 
     TransportProtocol[] anyOf();
 
-    String message() default "must be any of {anyOf}";
+    String message() default "Wrong 'protocol' is specified. Supported values are {anyOf}.";
 
     Class<?>[] groups() default {};
 
