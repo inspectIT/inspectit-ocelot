@@ -4,9 +4,15 @@ inspectit:
 
       'a_regex_replaceAll':
         docs:
+          since: '1.2.1'
           description: |-
-            Replaces all matches for the provided regex pattern with the given replacement string.
+            Replaces all matches for the provided regex pattern in the input string with the given replacement String.
             If the input string is null, null is returned.
+          inputs:
+            'string': 'The input string.'
+            'pattern': 'The regex pattern.'
+            'replacement': 'The replacement-String.'
+          return-value: 'The modified input string or null if the input string is null.'
         imports:
           - 'java.util'
         input:
@@ -21,19 +27,25 @@ inspectit:
 
       'a_regex_replaceAll_multi':
         docs:
+          since: '1.2.1'
           description: |-
-            Replaces all matches for all of the provided regex patterns with the given replacement strings.
+            Replaces all matches for all of the provided regex patterns in the input string with the given replacement Strings.
             If the input string is null, null is returned.
             
             the patterns_and_replacements are expected to be a list of the following form:
-            constant-input:
-              patterns_and_replacements:
-              - pattern: <regexA>
-              replacement: <replacementA>
-              - pattern: <regexB>
-              replacement: <replacementA>
+            
+              constant-input:
+                patterns_and_replacements:
+                  - pattern: <regexA>
+                    replacement: <replacementA>
+                  - pattern: <regexB>
+                    replacement: <replacementA>
               
             The replacement is executed in the order of the inputs.
+          inputs:
+            'string': 'The input string.'
+            'patterns_and_replacements': 'The regex patterns and replacements in the format described above.'
+          return-value: 'The modified input string or null if the input string is null.'
         imports:
           - 'java.util'
         input:
@@ -54,9 +66,15 @@ inspectit:
 
       'a_regex_replaceMatch':
         docs:
+          since: '1.2.1'
           description: |-
             Replaces the provided input string if it fully matches a given regex.
             If the input string is null, null is returned.
+          inputs:
+            'string': 'The input string.'
+            'pattern': 'The regex pattern to match the input string against.'
+            'replacement': 'The replacement-String.'
+          return-value: 'The modified input string or null if the input string is null.'
         imports:
           - 'java.util'
           - 'java.util.regex'
@@ -79,20 +97,25 @@ inspectit:
 
       'a_regex_replaceMatch_multi':
         docs:
+          since: '1.2.1'
           description: |-
-            Scans the provided list of regexes to check if any matches the input string fully.
-            If a match is found, it is replaced with the provided replacement and returned.
+            Scans the provided list of regexes to check if any matches the input string fully. If a match is found, the input string is replaced with the provided replacement and returned.
             If the input string is null, null is returned.
             
             the patterns_and_replacements are expected to be a list of the following form:
-            constant-input:
-              patterns_and_replacements:
-                - pattern: <regexA>
-                  replacement: <replacementA>
-                - pattern: <regexB>
-                  replacement: <replacementA>
+            
+              constant-input:
+                patterns_and_replacements:
+                  - pattern: <regexA>
+                    replacement: <replacementA>
+                  - pattern: <regexB>
+                    replacement: <replacementA>
             
             The replacement is executed in the order of the inputs.
+          inputs:
+            'string': 'The input string.'
+            'patterns_and_replacements': 'The regex patterns and replacements in the format described above.'
+          return-value: 'The modified input string or null if the input string is null.'
         imports:
           - 'java.util'
           - 'java.util.regex'
@@ -120,9 +143,15 @@ inspectit:
 
       'a_regex_replaceFirst':
         docs:
+          since: '1.2.1'
           description: |-
-            Replaces the first match for the provided regex pattern with the given replacement string.
+            Replaces the first match for the provided regex pattern with the given replacement-String.
             If the input string is null, null is returned.
+          inputs:
+            'string': 'The input string.'
+            'pattern': 'The regex pattern.'
+            'replacement': 'The replacement-String.'
+          return-value: 'The modified input string or null if the input string is null.'
         imports:
           - 'java.util'
           - 'java.util.regex'
@@ -143,10 +172,24 @@ inspectit:
 
       'a_regex_extractMatch':
         docs:
+          since: '1.2.1'
           description: |-
-            Checks if the given input string fully matches the provided regex.
-            If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
-            If the input string is null or the input string does not match the regex, null is returned.
+            Checks if the given input string fully matches the provided regex. If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
+            
+            Example with capturing groups in String:
+            
+              string: "Hello world!"
+              pattern: "(\w+)\s(\w+!)"
+              result: "$1 you beautiful $2"
+            
+              This would lead to the return value "Hello you beautiful world!", because the regex matches the input string and puts "Hello" in the first and "world!" in the second capturing group, so they replace the "$1" and "$2" respectively.
+            
+            If the input string is null or it does not match the regex, null is returned.
+          inputs:
+            'string': 'The input string.'
+            'pattern': 'The regex pattern.'
+            'result': 'The result.'
+          return-value: 'The result, with populated capturing groups if it was a String, or null if the input string is null or it does not match the regex.'
         imports:
           - 'java.util'
           - 'java.util.regex'
@@ -173,19 +216,34 @@ inspectit:
 
       'a_regex_extractMatch_multi':
         docs:
+          since: '1.2.1'
           description: |-
-            Checks if the given input string fully matches any of the provided regexes.
-            If it does, the result for the matching regex is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
+            Checks if the given input string fully matches any of the provided regexes. If it does, the result for the matching regex is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
             The checking happens in the order of the list, meaning that the replacement for the first matching regex is returned.
             If the input string is null or the input string does not match the regex, null is returned. 
             
             the patterns_and_results are expected to be a list of the following form:
+            
             constant-input:
               patterns_and_results:
                 - pattern: <regexA>
                   result: <resultA>
                 - pattern: <regexB>
                   result: <resultA>
+            
+            Example with capturing groups in String:
+
+              string: "Hello world!"
+              patterns_and_results: 
+                - pattern: "(\w+)\s(\w+!)"
+                  result: "$1 you beautiful $2"
+
+              This would lead to the return value "Hello you beautiful world!", because the regex matches the input string and puts "Hello" in the first and "world!" in the second capturing group, so they replace the "$1" and "$2" respectively.
+
+          inputs:
+            'string': 'The input string.'
+            'patterns_and_results': 'The regex patterns and results in the format described above.'
+          return-value: 'The result, with populated capturing groups if it was a String, or null if the input string is null or it does not match the regex.'
         imports:
           - 'java.util'
           - 'java.util.regex'
@@ -216,10 +274,24 @@ inspectit:
 
       'a_regex_extractFirst':
         docs:
+          since: '1.2.1'
           description: |-
-            Checks if the given input string has any match for the provided regex.
-            If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
+            Checks if the given input string has any match for the provided regex. If it does, the result is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
             If the input string is null or the input string does not match the regex, null is returned.
+            
+            Example with capturing groups in String:
+
+              string: "Hello world!"
+              pattern: "(\w+)"
+              result: "$1 everyone!"
+
+              This would lead to the return value "Hello everyone!", because the regex matches "Hello" from the input string and puts it into the first capturing group, so it replaces the "$1".
+
+          inputs:
+            'string': 'The input string.'
+            'pattern': 'The regex pattern.'
+            'result': 'The result.'
+          return-value: 'The result, with populated capturing groups if it was a String, or null if the input string is null or it does not match the regex.'
         imports:
           - 'java.util'
           - 'java.util.regex'
@@ -246,19 +318,33 @@ inspectit:
 
       'a_regex_extractFirst_multi':
         docs:
+          since: '1.2.1'
           description: |-
-            Checks if the given input string contains a match for any of the provided regexes.
-            If it does, the result for the matching regex is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
+            Checks if the given input string contains any match for any of the provided regexes. If it does, the result for the matching regex is returned. If "result" is a string, then capturing groups ($1,$2, etc) are populated.
             The checking happens in the order of the list, meaning that the replacement for the first matching regex is returned.
             If the input string is null or the input string does not match the regex, null is returned.
            
             the patterns_and_results are expected to be a list of the following form:
+            
             constant-input:
               patterns_and_results:
                - pattern: <regexA>
                  result: <resultA>
                - pattern: <regexB>
                  result: <resultA>
+            
+            
+            Example with capturing groups in String:
+              string: "Hello world!"
+              patterns_and_results: 
+                - pattern: "(\w+)"
+                  result: "$1 everyone!"
+            
+              This would lead to the return value "Hello everyone!", because the regex matches "Hello" from the input string and puts it into the first capturing group, so it replaces the "$1".
+          inputs:
+            'string': 'The input string.'
+            'patterns_and_results': 'The regex patterns and results in the format described above.'
+          return-value: 'The result, with populated capturing groups if it was a String, or null if the input string is null or it does not match the regex.'
         imports:
           - 'java.util'
           - 'java.util.regex'

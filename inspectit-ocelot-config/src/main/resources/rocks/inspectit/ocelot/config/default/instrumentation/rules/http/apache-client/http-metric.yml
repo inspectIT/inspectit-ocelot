@@ -4,6 +4,7 @@ inspectit:
 
       'r_apacheclient_http_metric':
         docs:
+          since: '1.2.1'
           description: 'Records the http/out metrics for calls done via the Apache HTTP Client.'
         include:
           'r_apacheclient_extract_details': true

@@ -1,14 +1,16 @@
 inspectit:
   instrumentation:
     actions:
-    
-      # Utility action which checks if a provided HTTP status (either as string or number) is an error code
-      # Everything except "null", 2xx and 3xx is interpreted as error
+      
       'a_http_isErrorStatus':
         docs:
+          since: '1.2.1'
           description: |-
-            Utility action which checks if a provided HTTP status (either as string or number) is an error code
-            Everything except "null", 2xx and 3xx is interpreted as error.'
+            Utility action which checks if a provided HTTP status is an error code.
+            Everything except 'null', 2xx and 3xx is interpreted as error.
+          inputs:
+            'status': 'The status as String or Number.'
+          return-value: 'True if the status is an error code, and false if it is not.'
         input:
           'status': 'Object'
         value-body: |

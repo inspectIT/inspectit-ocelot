@@ -4,7 +4,11 @@ inspectit:
 
       'a_jdbc_getUrl':
         docs:
-          description: 'Extracts the name of the JDBC connection for a given statement.'
+          since: '1.2.1'
+          description: 'Extracts the name of the JDBC connection for a given Statement.'
+          inputs:
+            'statement': 'The given Statement'
+          return-value: 'The name as a String or null if the connection is closed.'
         imports:
           - 'java.sql'
         input:

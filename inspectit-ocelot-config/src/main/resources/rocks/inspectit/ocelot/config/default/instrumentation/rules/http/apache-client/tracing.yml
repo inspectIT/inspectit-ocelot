@@ -4,6 +4,7 @@ inspectit:
 
       'r_apacheclient_tracing':
         docs:
+          since: '1.2.1'
           description: 'Enables tracing of Apache HTTP Client calls.'
         include:
           'r_apacheclient_extract_details': true

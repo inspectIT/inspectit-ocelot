@@ -4,6 +4,7 @@ inspectit:
 
       'r_http_tracing_span_name_default':
         docs:
+          since: '1.2.1'
           description: 'This rule is included by all HTTP tracing rules in order to define the span name.'
         tracing:
           name: 'http_span_name'
@@ -19,6 +20,7 @@ inspectit:
 
       'r_http_client_tracing_default_attributes':
         docs:
+          since: '1.2.1'
           description: 'This rule is included by all HTTP Client tracing rules to define which attributes should be added to the span.'
         include:
           'r_http_tracing_default_attributes': true
@@ -28,12 +30,14 @@ inspectit:
 
       'r_http_server_tracing_default_attributes':
         docs:
+          since: '1.2.1'
           description: 'This rule is included by all HTTP Server tracing rules to define which attributes should be added to the span.'
         include:
           'r_http_tracing_default_attributes': true
 
       'r_http_tracing_default_attributes':
         docs:
+          since: '1.2.1'
           description: 'This rule is included by all HTTP Client AND Server tracing rules to define which attributes should be added to the span.'
         include:
           'r_tracing_global_attributes': true

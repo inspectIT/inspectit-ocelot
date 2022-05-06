@@ -4,7 +4,11 @@ inspectit:
 
       'a_servletrequest_isHttp':
         docs:
+          since: '1.2.1'
           description: 'Checks if a given ServletRequest is an instance of HttpServletRequest.'
+          inputs:
+            'request': 'The given ServletRequest'
+          return-value: "true, if it is an instance of HttpServletRequest, otherwise false."
         imports:
           - 'javax.servlet'
           - 'javax.servlet.http'
@@ -14,7 +18,11 @@ inspectit:
 
       'a_httpservletrequest_getPath':
         docs:
-          description: 'Extracts the request path from the HttpServletRequest.'
+          since: '1.2.1'
+          description: 'Extracts the request path of a given HttpServletRequest.'
+          inputs:
+            'request': 'The given HttpServletRequest'
+          return-value: "The request path as a String."
         imports:
           - 'javax.servlet.http'
         input:
@@ -23,7 +31,11 @@ inspectit:
 
       'a_httpservletrequest_getMethod':
         docs:
-          description: 'Extracts the method path from the HttpServletRequest.'
+          since: '1.2.1'
+          description: 'Extracts the HTTP method of a given HttpServletRequest, e.g. GET or POST.'
+          inputs:
+            'request': 'The given HttpServletRequest'
+          return-value: "The HTTP method as a String."
         imports:
           - 'javax.servlet.http'
         input:
@@ -32,7 +44,11 @@ inspectit:
 
       'a_httpservletresponse_getStatus':
         docs:
-          description: 'Extracts the response status from the given HttpServletResponse.'
+          since: '1.2.1'
+          description: 'Extracts the response status code of a given HttpServletResponse.'
+          inputs:
+            'response': 'The given HttpServletResponse'
+          return-value: "The response status code as an Integer."
         imports:
           - 'javax.servlet.http'
         input:
@@ -41,7 +57,8 @@ inspectit:
 
       'a_servletapi_downPropagation':
         docs:
-          description: 'Reads down-propagated data from the request HTTP Headers.'
+          since: '1.2.1'
+          description: 'Reads down-propagated data from the request HTTP headers.'
         is-void: true
         imports:
           - 'java.util'
@@ -68,7 +85,10 @@ inspectit:
 
       'a_servletapi_upPropagation':
         docs:
-          description: 'Writes up-propagated data to the response HTTP Headers.'
+          since: '1.2.1'
+          description: "Writes up-propagated data to the given HttpServletResponse's HTTP headers."
+          inputs:
+            'response': 'The HttpServletResponse to write to.'
         is-void: true
         imports:
           - 'java.util'

@@ -3,6 +3,9 @@ inspectit:
     scopes:
 
       's_httpurlconnection_getOutputStream':
+        docs:
+          since: '1.2.1'
+          description: "Targets the 'getOutputStream' method for any class inheriting from java.net.HttpURLConnection."
         superclass:
           name: 'java.net.HttpURLConnection'
         methods:
@@ -10,6 +13,9 @@ inspectit:
             arguments: []
 
       's_httpurlconnection_getInputStream':
+        docs:
+          since: '1.2.1'
+          description: "Targets the 'getInputStream' method for any class inheriting from java.net.HttpURLConnection."
         superclass:
           name: 'java.net.HttpURLConnection'
         methods:
@@ -17,6 +23,9 @@ inspectit:
             arguments: []
 
       's_httpurlconnection_connect':
+        docs:
+          since: '1.2.1'
+          description: "Targets the 'connect' method for any class inheriting from java.net.HttpURLConnection."
         superclass:
           name: 'java.net.HttpURLConnection'
         methods:
@@ -24,6 +33,9 @@ inspectit:
             arguments: []
 
       's_httpurlconnection_requestInitiators':
+        docs:
+          since: '1.3.1'
+          description: "Targets the methods 'getHeaderField', 'getHeaderFieldDate', 'getHeaderFieldKey', 'getResponseCode' and 'getResponseMessage' for any class inheriting from java.net.HttpURLConnection."
         superclass:
           name: 'java.net.HttpURLConnection'
         methods:
