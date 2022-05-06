@@ -21,6 +21,8 @@ import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSe
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +30,23 @@ import java.util.stream.Collectors;
  * InspectitConfig itself.
  */
 public class ConfigDocsGenerator {
+
+    /**
+     * Map of descriptions for special input parameters.
+     */
+    Map<String, String> specialInputDescriptions = new HashMap<String, String>() {{
+        put("_methodName", "The name of the instrumented method within which this action is getting executed.");
+        put("_class", "The class declaring the instrumented method within which this action is getting executed.");
+        put("_parameterTypes", "The types of the parameters which the instrumented method declares for which the action is executed.");
+        put("_this", "The this-instance in the context of the instrumented method within which this action is getting executed.");
+        put("_args", "The arguments with which the instrumented method was called within which this action is getting executed. The arguments are boxed if necessary and packed into an array.");
+        put("_returnValue", "The value returned by the instrumented method within which this action is getting executed. If the method terminated with an exception or the action is executed in the entry phase this is null.");
+        put("_thrown", "The exception thrown by the instrumented method within which this action is getting executed. If the method returned normally or the action is executed in the entry phase this is null.");
+        put("_context", "Gives direct read and write access to the current context. Can be used to implement custom data propagation.");
+        put("_attachments", "Allows you to attach values to objects instead of to the control flow, as done via _context.");
+    }};
+
+    Map<String, String> specialInputDescriptionsRegex = Collections.singletonMap("_arg\\d", "The _argN-th argument with which the instrumented method was called within which this action is getting executed.");
 
     /**
      * Generates a ConfigDocumentation from a YAML String describing an {@link InspectitConfig}.
@@ -163,7 +182,27 @@ public class ConfigDocsGenerator {
             Map<String, String> inputTypes = actionSettings.getInput();
 
             for (String inputName : inputTypes.keySet()) {
-                inputs.add(new ActionInputDocs(inputName, inputTypes.get(inputName), inputDescriptions.getOrDefault(inputName, "")));
+                String inputDescription = "";
+
+                if (inputName.startsWith("_")) {
+
+                    if (specialInputDescriptions.containsKey(inputName)) {
+                        inputDescription = specialInputDescriptions.get(inputName);
+
+                    } else {
+                        for (String inputNameRegex : specialInputDescriptionsRegex.keySet()) {
+                            Pattern pattern = Pattern.compile(inputNameRegex);
+                            Matcher matcher = pattern.matcher(inputName);
+                            if (matcher.matches()) {
+                                inputDescription = specialInputDescriptionsRegex.get(inputNameRegex);
+                            }
+                        }
+                    }
+                } else {
+                    inputDescription = inputDescriptions.getOrDefault(inputName, "");
+                }
+
+                inputs.add(new ActionInputDocs(inputName, inputTypes.get(inputName), inputDescription));
             }
             inputs.sort(Comparator.comparing(ActionInputDocs::getName));
 
