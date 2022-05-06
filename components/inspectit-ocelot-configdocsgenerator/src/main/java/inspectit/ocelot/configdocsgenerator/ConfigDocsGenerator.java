@@ -46,6 +46,9 @@ public class ConfigDocsGenerator {
         put("_attachments", "Allows you to attach values to objects instead of to the control flow, as done via _context.");
     }};
 
+    /**
+     * Map of descriptions for special input parameters that can have different names matching a regex.
+     */
     Map<String, String> specialInputDescriptionsRegex = Collections.singletonMap("_arg\\d", "The _argN-th argument with which the instrumented method was called within which this action is getting executed.");
 
     /**
