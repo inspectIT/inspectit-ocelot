@@ -30,7 +30,7 @@ inspectit:
         docs:
           description: "Covers the 'executeBatch' method for any class implementing java.sql.Statement."
         interfaces:
-          - name: 'java.sql.PreparedStatement'
+          - name: 'java.sql.Statement'
         methods:
           - name: 'executeBatch'
         advanced:
@@ -43,4 +43,5 @@ inspectit:
           - name: 'java.sql.PreparedStatement'
         methods:
           - name: 'executeBatch'
-            arguments: []
+        advanced:
+          instrument-only-inherited-methods: true

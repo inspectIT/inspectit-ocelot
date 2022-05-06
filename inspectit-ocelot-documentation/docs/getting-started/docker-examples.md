@@ -62,7 +62,7 @@ Uses Prometheus Server for metrics gathering and storage, Grafana for Dashboards
 Traces are exported to Jaeger.
 
 * File: `docker-compose-prometheus-jaeger.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=prometheus-server,jaeger-collector,inspectit-oce-eum-server&visualization=jaeger-query&dashboarding=grafana&usedges=inspectit-ocelot-agent:prometheus-server,inspectit-ocelot-agent:jaeger-collector,jaeger-query:grafana,inspectit-oce-eum-server:prometheus-server,inspectit-oce-eum-server:jaeger-collector&showCommercial=false&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=jaeger-collector,inspectit-oce-eum-server,prometheus-server&dashboarding=grafana&visualization=jaeger-query&usedges=jaeger-query:grafana&showCommercial=true&showFormats=false)
 
 ![Demo scenario using Prometheus and Jaeger](assets/demo-landscape-prometheus-jaeger.png)
 
@@ -87,8 +87,8 @@ Uses InfluxDB for metrics storage and Grafana for Dashboards.
 Traces are exported to Jaeger.
 
 * File: `docker-compose-influxdb-jaeger.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=jaeger-collector,inspectit-oce-eum-server&storage=influx-db&visualization=jaeger-query&dashboarding=grafana&alerting=grafana&usedges=jaeger-query:grafana,inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:jaeger-collector,inspectit-ocelot-agent:influxdata-influxdb,inspectit-oce-eum-server:influxdata-influxdb,inspectit-oce-eum-server:jaeger-collector&showCommercial=false&showFormats=false)
-
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=jaeger-collector,inspectit-oce-eum-server&storage=influx-db&visualization=jaeger-query&dashboarding=grafana&alerting=grafana&usedges=jaeger-query:grafana&showCommercial=false&showFormats=false)
+* 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-jaeger.png)
 
 In this scenario the following components are preconfigured and used for monitoring:
@@ -107,7 +107,7 @@ Uses InfluxDB for metrics storage and Grafana for Dashboards.
 Traces are exported to Zipkin.
 
 * File: `docker-compose-influxdb-zipkin.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&instrumentation-lib=opencensus&collector=zipkin-server,inspectit-oce-eum-server&storage=influx-db&visualization=zipkin-server&dashboarding=grafana&alerting=grafana&usedges=inspectit-ocelot-agent:influx-db,inspectit-ocelot-agent:zipkin-server,inspectit-ocelot-agent:influxdata-influxdb,inspectit-oce-eum-server:influxdata-influxdb,inspectit-oce-eum-server:zipkin-server&showCommercial=false&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=zipkin-server,inspectit-oce-eum-server&storage=influx-db&visualization=zipkin-server&dashboarding=grafana&alerting=grafana&showCommercial=false&showFormats=false)
 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-zipkin.png)
 
@@ -124,30 +124,6 @@ The traces can be viewed in Zipkin on http://localhost:9411.
 :::note
 Currently, of the EUM dashboards only the Beacons one is working for this scenario.
 :::
-
-### Demo #4 - Wavefront and Zipkin
-
-Sends Zipkin traces to Wavefront through a Wavefront proxy running as a Docker container. Collects metrics via Telegraf and sends them to Wavefront.
-
-* File: `docker-compose-wavefront-zipkin.yml`
-
-:::note
-Before running the demo, you must add the Wavefront host and API token to the ```.env``` file in the ```inspectit-ocelot-demo```. Please add the following lines and change the cluster and token according to your Wavefront instance.
-```
-WAVEFRONT_URL=https://<your cluster>.wavefront.com/api
-WAVEFRONT_TOKEN=<API token obtained from Wavefront>
-```
-:::
-
-Wavefront is a SaaS-based monitoring and tracing solution. In this demo, we are running a local proxy as a Docker container that is responsible for receiving Zipkin traces and sending them to Wavefront. We're also using Telegraf to poll the Prometheus endpoints on the monitored services and send that data to Wavefront through the proxy.
-
-- *inspectIT Ocelot agent:* Instruments all the target demo application components.
-- *Telegraf:* Polls the Prometheus metric endpoints on the services.
-- *Wavefront Proxy:* Receives Zipkin traces and metrics (via Telegraf), aggregates, secures and compresses them before sending them to Wavefront.
-
-A sandbox instance of Wavefront can be obtained at https://www.wavefront.com/sign-up/.
-
-The inspectIT Ocelot Configuration Server can be accessed via http://localhost:8090.
 
 ## Demo Grafana Dashboards
 The InfluxDB and Prometheus demo scenarios include the following predefined Grafana Dashboards:
@@ -188,3 +164,15 @@ The demo starts the following services, of which each is instrumented with an in
 All demo scenarios launch with a load test written in [artillery](https://artillery.io/) that simulates user behavior. 
 For 10 minutes approximately every 3 seconds a new virtual user is created which either looks up a random owner from the database or edits the pet type of an existing animal. 
 Therefore, no real user interaction with the PetClinic is needed to generate data.
+
+## Further Scenarios
+
+For demonstrations on how to use inspectIT Ocelot with tools other than the ones in the demo scenarios described above, you can also take a look at the following blog posts:
+- [Ocelot meets Bits - Enhanced Observability for Datadog](https://www.novatec-gmbh.de/en/blog/ocelot-meets-bits/)
+- [Ocelot meets Lightstep - Enhanced Tracing with Lightstep](https://www.novatec-gmbh.de/en/blog/ocelot-meets-lightstep/)
+- [Ocelot meets Wavefront - Enhanced Tracing with Wavefront](https://www.novatec-gmbh.de/en/blog/ocelot-meets-wavefront/)
+- [Ocelot meets Elastic - Better Java Instrumentation for Elastic APM via Jaeger](https://www.novatec-gmbh.de/en/blog/ocelot-meets-elastic-better-java-instrumentation-for-elastic-apm-via-jaeger/)
+
+:::note
+If you have any examples of your own, additions to this list are happily welcome!
+:::
