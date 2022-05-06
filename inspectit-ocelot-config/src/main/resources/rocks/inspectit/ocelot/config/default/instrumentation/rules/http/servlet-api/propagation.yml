@@ -7,6 +7,7 @@ inspectit:
 
       'r_servletapi_downPropagation':
         docs:
+          since: '1.2.1'
           description: 'Reads down-propagated data from the HTTP headers of Servlet API requests.'
         include:
           'r_servletapi_detect_entry': true
@@ -20,6 +21,7 @@ inspectit:
 
       'r_servletapi_servlet_filter_upPropagation':
         docs:
+          since: '1.2.1'
           description: 'Writes up-propagated data to the responses HTTP headers in Servlet API service() or doFilter() calls.'
         scopes:
           's_servletapi_servlet_service': true
@@ -32,6 +34,7 @@ inspectit:
 
       'r_servletapi_servletresponse_upPropagation':
         docs:
+          since: '1.2.1'
           description: 'Writes up-propagated data to the responses HTTP headers Servlet Response methods.'
         scopes:
           's_servletapi_servletresponse_getWriter': true

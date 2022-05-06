@@ -4,6 +4,7 @@ inspectit:
 
       'a_attachment_get':
         docs:
+          since: '1.2.1'
           description: 'Reads the attachment with a given key from a target Object.'
           inputs:
             'target': 'The target Object.'
@@ -17,6 +18,7 @@ inspectit:
 
       'a_attachment_put':
         docs:
+          since: '1.2.1'
           description: 'Replaces the attachment with a given key of a target object with a new one. Returns the previous value.'
           inputs:
             'target': 'The target object.'
@@ -32,6 +34,7 @@ inspectit:
 
       'a_attachment_remove':
         docs:
+          since: '1.2.1'
           description: 'Removes a given attachment from a target object. Returns the previous value.'
           inputs:
             'target': 'The target object.'

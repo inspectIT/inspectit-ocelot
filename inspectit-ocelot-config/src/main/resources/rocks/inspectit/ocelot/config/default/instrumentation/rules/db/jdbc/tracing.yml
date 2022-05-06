@@ -4,6 +4,7 @@ inspectit:
 
       'r_jdbc_tracing_statement_execute':
         docs:
+          since: '1.2.1'
           description: 'Traces execute/executeUpdate calls with non-prepared SQL (the SQL is given as method argument).'
         include:
           'r_jdbc_tracing_defaults': true
@@ -15,6 +16,7 @@ inspectit:
 
       'r_jdbc_tracing_statement_executeBatch':
         docs:
+          since: '1.2.1'
           description: 'Traces executeBatch calls with non-prepared SQL.'
         include:
           'r_jdbc_tracing_defaults': true
@@ -23,6 +25,7 @@ inspectit:
 
       'r_jdbc_tracing_preparedstatement':
         docs:
+          since: '1.2.1'
           description: 'Traces execute/executeUpdate/executeBatch calls with prepared SQL.'
         include:
           'r_jdbc_tracing_defaults': true
@@ -39,6 +42,7 @@ inspectit:
       
       'r_jdbc_tracing_defaults':
         docs:
+          since: '1.2.1'
           description: |-
             To be included in JDBC tracing rules.
             Activates span collection and adds default attributes.

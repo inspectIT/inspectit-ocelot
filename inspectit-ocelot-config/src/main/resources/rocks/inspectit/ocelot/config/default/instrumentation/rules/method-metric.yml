@@ -29,6 +29,7 @@ inspectit:
 
       'r_method_metric':
         docs:
+          since: '1.2.1'
           description: |-
             This rule captures the method's duration and invocation count as a method/duration metric. 
             The metric is tagged with the signature of the method as well as the name of the declaring class.

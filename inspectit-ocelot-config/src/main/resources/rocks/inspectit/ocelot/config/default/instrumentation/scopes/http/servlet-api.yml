@@ -4,7 +4,8 @@ inspectit:
 
       's_servletapi_servlet_service':
         docs:
-          description: "Covers the 'service' method for any class implementing javax.servlet.Servlet."
+          since: '1.2.1'
+          description: "Targets the 'service' method for any class implementing javax.servlet.Servlet."
         interfaces:
           - name: 'javax.servlet.Servlet'
         methods:
@@ -14,7 +15,8 @@ inspectit:
 
       's_servletapi_filter_doFilter':
         docs:
-          description: "Covers the 'doFilter' method for any class implementing javax.servlet.Filter."
+          since: '1.2.1'
+          description: "Targets the 'doFilter' method for any class implementing javax.servlet.Filter."
         interfaces:
           - name: 'javax.servlet.Filter'
         methods:
@@ -24,7 +26,8 @@ inspectit:
 
       's_servletapi_servletresponse_getOutputStream':
         docs:
-          description: "Covers the 'getOutputStream' method for any class implementing javax.servlet.ServletResponse."
+          since: '1.2.1'
+          description: "Targets the 'getOutputStream' method for any class implementing javax.servlet.ServletResponse."
         interfaces:
           - name: 'javax.servlet.ServletResponse'
         methods:
@@ -34,7 +37,8 @@ inspectit:
 
       's_servletapi_servletresponse_getWriter':
         docs:
-          description: "Covers the 'getWriter' method for any class implementing javax.servlet.ServletResponse."
+          since: '1.2.1'
+          description: "Targets the 'getWriter' method for any class implementing javax.servlet.ServletResponse."
         interfaces:
           - name: 'javax.servlet.ServletResponse'
         methods:

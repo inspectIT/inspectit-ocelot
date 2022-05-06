@@ -4,6 +4,7 @@ inspectit:
 
       'r_jdbc_servicegraph_record':
         docs:
+          since: '1.2.1'
           description: 'Records JDBC statement executions as [service/out/responsetime] metric for the service graph.'
         include:
           'r_servicegraph_outbound_record_method': true

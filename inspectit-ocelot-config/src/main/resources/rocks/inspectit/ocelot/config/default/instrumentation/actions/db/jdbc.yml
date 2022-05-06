@@ -4,6 +4,7 @@ inspectit:
 
       'a_jdbc_getUrl':
         docs:
+          since: '1.2.1'
           description: 'Extracts the name of the JDBC connection for a given Statement.'
           inputs:
             'statement': 'The given Statement'

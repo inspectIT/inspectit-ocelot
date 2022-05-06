@@ -4,6 +4,7 @@ inspectit:
 
       'r_apacheclient_detect_entry':
         docs:
+          since: '1.2.1'
           description: 'Can be included to detect and exclude nested Apache Client HTTP calls.'
         pre-entry:
           'http_is_entry':
@@ -13,6 +14,7 @@ inspectit:
 
       'r_apacheclient_extract_details':
         docs:
+          since: '1.2.1'
           description: |-
             Reads all HTTP related data from Apache Client calls, e.g. http_raw_path, http_path, http_method, etc. 
             Designed to be applied on the scope s_apacheclient_doExecute.

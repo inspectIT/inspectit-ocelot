@@ -4,6 +4,7 @@ inspectit:
 
       'r_servletapi_http_metric':
         docs:
+          since: '1.2.1'
           description: 'Records the http/in metrics for calls received via the Servlet API.'
         include:
           'r_servletapi_extract_details': true

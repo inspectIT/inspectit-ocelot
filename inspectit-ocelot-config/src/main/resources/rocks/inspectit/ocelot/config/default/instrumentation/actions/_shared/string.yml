@@ -4,6 +4,7 @@ inspectit:
 
       'a_string_concat':
         docs:
+          since: '1.2.1'
           description: 'Concatenates two provided inputs to a single String.'
           inputs:
             'a': 'The first input value.'
@@ -16,6 +17,7 @@ inspectit:
 
       'a_string_concat_3':
         docs:
+          since: '1.2.1'
           description: 'Concatenates three provided inputs to a single String.'
           inputs:
             'a': 'The first input value.'

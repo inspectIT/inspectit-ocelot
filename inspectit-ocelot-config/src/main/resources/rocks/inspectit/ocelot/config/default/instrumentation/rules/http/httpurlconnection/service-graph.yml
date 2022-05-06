@@ -4,6 +4,7 @@ inspectit:
 
       'r_httpurlconnection_servicegraph_propagation':
         docs:
+          since: '1.2.1'
           description: 'Prepares the context to contain the service graph correlation information (e.g. origin_service and target_service).'
         include:
           'r_servicegraph_prepare_down_propagation': true
@@ -14,6 +15,7 @@ inspectit:
 
       'r_httpurlconnection_servicegraph_record':
         docs:
+          since: '1.2.1'
           description: 'Records HTTP calls done via HTTPUrlConnection in the [service/out/responsetime] metric for the service graph.'
         include:
           'r_servicegraph_outbound_record_method': true

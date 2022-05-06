@@ -8,6 +8,7 @@ inspectit:
 
       'a_apacheclient_toHostString':
         docs:
+          since: '1.2.1'
           description: "Extracts the target of the request in the form 'host:port'."
           return-value: "The target as a String in the form 'host:port'."
         imports:
@@ -19,6 +20,7 @@ inspectit:
 
       'a_apacheclient_getPath':
         docs:
+          since: '1.2.1'
           description: 'Extracts the target HTTP path.'
           return-value: "The target HTTP path as a String."
         imports:
@@ -30,6 +32,7 @@ inspectit:
 
       'a_apacheclient_getMethod':
         docs:
+          since: '1.2.1'
           description: 'Extracts the HTTP method of the request, e.g. GET or POST.'
           return-value: "The HTTP method as a String."
         imports:
@@ -40,6 +43,7 @@ inspectit:
 
       'a_apacheclient_getStatus':
         docs:
+          since: '1.2.1'
           description: |-
             Extracts the response status code if the request returned without an exception.
             Otherwise returns the name of the exception, e.g. SocketTimeoutException.
@@ -58,6 +62,7 @@ inspectit:
 
       'a_apacheclient_downPropagation':
         docs:
+          since: '1.2.1'
           description: 'Writes down-propagated context data to the HTTP headers.'
         is-void: true
         imports:
@@ -76,6 +81,7 @@ inspectit:
 
       'a_apacheclient_upPropagation':
         docs:
+          since: '1.2.1'
           description: 'Reads up-propagated context data from the HTTP headers.'
         is-void: true
         imports:

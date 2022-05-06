@@ -4,6 +4,7 @@ inspectit:
 
       'r_servletapi_tracing':
         docs:
+          since: '1.2.1'
           description: 'Enables tracing of HTTP calls received via the Servlet API.'
         include:
           'r_servletapi_extract_details': true

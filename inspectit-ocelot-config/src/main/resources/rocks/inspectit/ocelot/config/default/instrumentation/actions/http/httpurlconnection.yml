@@ -4,6 +4,7 @@ inspectit:
 
       'a_httpurlconnection_getTargetHost':
         docs:
+          since: '1.2.1'
           description: "Extracts the target of the request in the format 'host:port'."
           return-value: "The target as a String in the form 'host:port'."
         imports:
@@ -21,6 +22,7 @@ inspectit:
 
       'a_httpurlconnection_getPath':
         docs:
+          since: '1.2.1'
           description: 'Extracts the target path of the request.'
           return-value: "The target HTTP path as a String."
         input:
@@ -29,6 +31,7 @@ inspectit:
 
       'a_httpurlconnection_getMethod':
         docs:
+          since: '1.2.1'
           description: 'Extracts the HTTP method of the request, e.g. GET or POST.'
           return-value: "The HTTP method as a String."
         input:
@@ -37,6 +40,7 @@ inspectit:
 
       'a_httpurlconnection_getStatus':
         docs:
+          since: '1.2.1'
           description: |-
             Extracts the response status code if the request returned without an exception.
             Otherwise returns the name of the exception, e.g. SocketTimeoutException.
@@ -52,6 +56,7 @@ inspectit:
 
       'a_httpurlconnection_downPropagation':
         docs:
+          since: '1.2.1'
           description: 'Writes down-propagated data to the HTTP headers.'
         is-void: true
         imports:
@@ -80,6 +85,7 @@ inspectit:
 
       'a_httpurlconnection_upPropagation':
         docs:
+          since: '1.2.1'
           description: 'Reads up-propagated data from the HTTP headers'
         is-void: true
         imports:

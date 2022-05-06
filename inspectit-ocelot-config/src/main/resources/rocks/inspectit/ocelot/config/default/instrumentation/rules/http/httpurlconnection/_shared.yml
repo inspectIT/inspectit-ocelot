@@ -4,6 +4,7 @@ inspectit:
 
       'r_httpurlconnection_detect_entry':
         docs:
+          since: '1.2.1'
           description: |-
             Can be included to detect and exclude nested HTTP URL Connection calls.
             Works for both HTTP and HTTPS connections.
@@ -15,6 +16,7 @@ inspectit:
 
       'r_httpurlconnection_detect_start':
         docs:
+          since: '1.2.1'
           description: |-
             Tests and sets a "start" marker on this HTTP Url Connection object.
             The start marker will only be set exactly once.
@@ -37,6 +39,7 @@ inspectit:
 
       'r_httpurlconnection_detect_end':
         docs:
+          since: '1.2.1'
           description: |-
             Tests and sets an "end" marker on this HTTP Url Connection object.
             The end marker will only be set exactly once.
@@ -60,6 +63,7 @@ inspectit:
 
       'r_httpurlconnection_extract_details':
         docs:
+          since: '1.2.1'
           description: 'Extracts all http information such as http_status, http_path, etc. from an HTTP URL Connection.'
         include:
           'r_httpurlconnection_extract_request_details': true
@@ -67,6 +71,7 @@ inspectit:
 
       'r_httpurlconnection_extract_request_details':
         docs:
+          since: '1.2.1'
           description: 'Extracts all http request information such as http_path, http_raw_path, http_method etc. from an HTTP URL Connection.'
         include:
           'r_httpurlconnection_detect_entry': true
@@ -84,6 +89,7 @@ inspectit:
 
       'r_httpurlconnection_extract_response_details':
         docs:
+          since: '1.2.1'
           description: 'Extracts all http response information such as http_status, http_is_error etc. from an HTTP URL Connection.'
         include:
           'r_httpurlconnection_detect_entry': true

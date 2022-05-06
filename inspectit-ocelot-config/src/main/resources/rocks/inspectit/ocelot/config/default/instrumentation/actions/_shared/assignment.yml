@@ -4,6 +4,7 @@ inspectit:
 
       'a_assign_value':
         docs:
+          since: '1.2.1'
           description: 'Returns the input value.'
           inputs:
             'value': 'The value to return.'
@@ -14,18 +15,21 @@ inspectit:
 
       'a_assign_null':
         docs:
+          since: '1.2.1'
           description: 'Returns null.'
           return-value: 'null'
         value-body: 'return null;'
 
       'a_assign_true':
         docs:
+          since: '1.2.1'
           description: 'Returns true.'
           return-value: 'true'
         value: 'Boolean.TRUE'
 
       'a_assign_false':
         docs:
+          since: '1.2.1'
           description: 'Returns false.'
           return-value: 'false'
         value: 'Boolean.FALSE'
