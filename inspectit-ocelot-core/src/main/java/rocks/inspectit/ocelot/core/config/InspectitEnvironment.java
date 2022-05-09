@@ -215,7 +215,7 @@ public class InspectitEnvironment extends StandardEnvironment {
             if (fallbackConfig.isPresent()) {
                 currentConfig = fallbackConfig.get();
             } else {
-                throw new RuntimeException("The fallback configuration could not be parsed, probably due to a validation error.");
+                throw new RuntimeException("The fallback configuration could not be parsed, probably due to a validation error. See logs for further information.");
             }
 
             fallbackSources.forEach(ps -> propsList.remove(ps.getName()));
