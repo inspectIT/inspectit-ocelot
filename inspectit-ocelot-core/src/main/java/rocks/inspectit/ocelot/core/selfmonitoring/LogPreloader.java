@@ -1,8 +1,11 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.LoggingEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
@@ -23,6 +26,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class LogPreloader extends DynamicallyActivatableService implements InternalProcessingAppender.LogEventConsumer {
 
+    private static final String LOG_INVALIDATION_EVENT = "{}! Some previous log messages may now be outdated.";
+
+    private final Logger invalidationLogger = (Logger) LoggerFactory.getLogger("### LOG-INVALIDATING EVENT ###");
+
     private ILoggingEvent[] buffer;
 
     private final AtomicInteger currentIndex = new AtomicInteger(0);
@@ -41,7 +48,36 @@ public class LogPreloader extends DynamicallyActivatableService implements Inter
      */
     @Override
     public void onLoggingEvent(ILoggingEvent event, Class<?> invalidator) {
-        if (buffer != null && event.getLevel().isGreaterOrEqual(minimumPreloadingLevel)) {
+        if (event.getLevel().isGreaterOrEqual(minimumPreloadingLevel)) {
+            recordLoggingEvent(event);
+        }
+    }
+
+    /**
+     * Appends the invalidation event as an artificial log message into the buffer.
+     *
+     * @param invalidator The invalidator
+     */
+    @Override
+    public void onInvalidationEvent(Object invalidator) {
+        if (invalidator != null) {
+            String invalidationString = invalidator.getClass().getSimpleName();
+            if (invalidationString.endsWith("Event")) {
+                // pretty-format event, e.g., transform 'SomethingHappenedEvent' into 'Something happened'
+                String invalidationLowercase = invalidationString.substring(0, invalidationString.length() - "Event".length())
+                        .replaceAll("([a-z])([A-Z]+)", "$1 $2")
+                        .toLowerCase();
+                invalidationString = invalidationLowercase.substring(0, 1)
+                        .toUpperCase() + invalidationLowercase.substring(1);
+            }
+
+            ILoggingEvent logEvent = new LoggingEvent(getClass().getName(), invalidationLogger, Level.INFO, LOG_INVALIDATION_EVENT, null, new String[]{invalidationString});
+            recordLoggingEvent(logEvent);
+        }
+    }
+
+    private void recordLoggingEvent(ILoggingEvent event) {
+        if (buffer != null) {
             int index = currentIndex.getAndIncrement() % buffer.length;
             try {
                 buffer[index] = event;
