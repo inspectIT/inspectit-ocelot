@@ -31,6 +31,7 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
+import rocks.inspectit.ocelot.core.opentelemetry.trace.RandomIdGenerator64Bit;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
@@ -338,8 +339,10 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                 .build();
         SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
                 .setSampler(sampler)
-                .setResource(serviceNameResource)
-                .addSpanProcessor(spanProcessor);
+                .setResource(serviceNameResource);
+        if(env.getCurrentConfig().getTracing().isUse64BitTraceIds()) {
+            builder.addSpanProcessor(spanProcessor).setIdGenerator(RandomIdGenerator64Bit.INSTANCE);
+        }
         return builder.build();
     }
 

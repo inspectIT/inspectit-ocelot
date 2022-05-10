@@ -71,4 +71,9 @@ public class TracingSettings {
      */
     @Positive
     private long scheduleDelayMillis = 5000;
+
+    /**
+     * I enabled 64 Bit Trace Ids are used instead of the default 128 Bit.
+     */
+    private boolean use64BitTraceIds = false;
 }
