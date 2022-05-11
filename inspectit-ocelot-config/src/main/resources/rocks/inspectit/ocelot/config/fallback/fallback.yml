@@ -20,6 +20,8 @@ inspectit:
 
   self-monitoring:
     enabled: false
+    agent-status:
+      validity-period: 1h
 
   log-preloading:
     enabled: false

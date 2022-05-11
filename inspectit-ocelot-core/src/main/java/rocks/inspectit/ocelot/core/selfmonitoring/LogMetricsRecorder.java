@@ -1,9 +1,12 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,25 +14,31 @@ import java.util.Map;
  * Logback recorder which exposes the counts to the {@link SelfMonitoringService}
  */
 @Component
-public class LogMetricsRecorder {
+public class LogMetricsRecorder implements InternalProcessingAppender.LogEventConsumer {
 
     @Autowired
     private SelfMonitoringService selfMonitoringService;
 
     /**
-     * Records the increment of the number of metrics.
+     * Records an increment of one of the number of metrics.
      *
-     * @param logLevel  The logLevel (e.g. WARN or ERROR).
-     * @param increment The number, which will be added to the current number of log events.
+     * @param event       The log event, which defines the logLevel (e.g. WARN or ERROR).
+     * @param invalidator Ignored.
      */
-    public void increment(String logLevel, long increment) {
+    @Override
+    public void onLoggingEvent(ILoggingEvent event, Class<?> invalidator) {
         Map<String, String> customTags = new HashMap<>();
-        customTags.put("level", logLevel);
-        selfMonitoringService.recordMeasurement("logs", increment, customTags);
+        customTags.put("level", event.getLevel().toString());
+        selfMonitoringService.recordMeasurement("logs", 1, customTags);
     }
 
     @PostConstruct
     private void subscribe() {
-        LogMetricsAppender.registerRecorder(this);
+        InternalProcessingAppender.register(this);
+    }
+
+    @PreDestroy
+    private void unsubscribe() {
+        InternalProcessingAppender.unregister(this);
     }
 }

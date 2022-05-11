@@ -1,14 +1,17 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -18,26 +21,30 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 @Slf4j
-public class LogPreloader extends DynamicallyActivatableService {
+public class LogPreloader extends DynamicallyActivatableService implements InternalProcessingAppender.LogEventConsumer {
 
     private ILoggingEvent[] buffer;
 
     private final AtomicInteger currentIndex = new AtomicInteger(0);
+
+    private Level minimumPreloadingLevel = Level.WARN;
 
     public LogPreloader() {
         super("logPreloading");
     }
 
     /**
-     * Records one log event and stores into a local buffer
+     * Records one general log event and stores into a local buffer
      *
-     * @param logEvent The log event to record
+     * @param event       The log event to record
+     * @param invalidator Ignored
      */
-    public void record(ILoggingEvent logEvent) {
-        if (buffer != null) {
+    @Override
+    public void onLoggingEvent(ILoggingEvent event, Class<?> invalidator) {
+        if (buffer != null && event.getLevel().isGreaterOrEqual(minimumPreloadingLevel)) {
             int index = currentIndex.getAndIncrement() % buffer.length;
             try {
-                buffer[index] = logEvent;
+                buffer[index] = event;
             } catch (ArrayIndexOutOfBoundsException e) {
                 // this may happen while the buffer gets recreated with a smaller size
                 // in this case, we just drop the event until everything is properly set again
@@ -58,7 +65,12 @@ public class LogPreloader extends DynamicallyActivatableService {
 
     @PostConstruct
     private void subscribe() {
-        LogPreloadingAppender.registerPreloader(this);
+        InternalProcessingAppender.register(this);
+    }
+
+    @PreDestroy
+    private void unsubscribe() {
+        InternalProcessingAppender.unregister(this);
     }
 
     @Override
