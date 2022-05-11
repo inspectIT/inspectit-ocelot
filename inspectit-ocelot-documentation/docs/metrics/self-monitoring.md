@@ -17,6 +17,7 @@ The metric is split by the tag containing the component name and also includes a
 |```inspectit/self/instrumented-classes```|`classes`|Exposes the total number of classes which are currently instrumented by inspectIT.
 |```inspectit/self/action/execution-time```|us|The execution time of individual actions. The metric contains the tag `action_name`, specifying the name of the instrumented action.
 |```inspectit/self/action/count```|`action executions`|The number of executions per action. The metric contains the tag `action_name`, specifying the name of the instrumented action.
+|```inspectit/self/health```|health in `{0, 1, 2}`|The current health status, which can be `OK` (= 0), `WARNING` (= 1), or `ERROR` (= 2)
 
 Self monitoring is enabled by default (except action metrics) and can be disabled by setting the `inspectit.self-monitoring.enabled` property to `false`.
 
@@ -37,3 +38,27 @@ inspectit:
 ```
 
 Note: the action execution metrics are only recorded in case the self-monitoring metrics are enabled. 
+
+### Agent Health
+
+Since version 1.16.0, the agent determines its health by observing its own log messages.
+Whenever `WARN` messages occur, it changes the health to `WARNING`; when `ERROR` messages occur, to `ERROR`.
+
+It takes into account that some log messages become outdated, e.g., a `WARN` message about an invalid configuration
+becomes outdated when the configuration changes. Given there was one such `WARN` message, the health was `WARNING` and
+jumps back to `OK` when the new, correct configuration is received.
+
+Log messages that not become obsolete due to specific events time out after a defined period.
+This period is controlled via the following configuration:
+
+```yaml
+inspectit:
+  self-monitoring:
+    agent-health:
+      validity-period: 1h
+```
+
+Note: the health metric is only recorded in case the self-monitoring metrics are enabled.
+
+> Besides the metric, the agent also reports its health via the `X-OCELOT-HEALTH` header when fetching HTTP configurations.
+> This information may be used by configuration providers, such as the configuration server, to display the agent health.

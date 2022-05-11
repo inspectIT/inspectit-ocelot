@@ -34,7 +34,7 @@ $ java -jar inspectit-ocelot-agent-{inspectit-ocelot-version}.jar <PID> [<AGENT_
 
 In the following example, we are attaching the agent to the JVM process `1337` and passing some [additional arguments](configuration/configuration-sources.md#java-agent-arguments) to it:
 ```bash
-$ java -jar inspectit-ocelot-agent-{inspectit-ocelot-version}.jar 1337 '{inspectit:{service-name:"my-agent"}}'
+$ java -jar inspectit-ocelot-agent-{inspectit-ocelot-version}.jar 1337 '{"inspectit":{"service-name":"my-agent"}}'
 ```
 
 > The agent is internally using the utility [jattach](https://github.com/apangin/jattach) for attaching itself to a running JVM.
@@ -55,6 +55,20 @@ $ ./jattach.sh <PID> load instrument false /path/to/inspectit-ocelot-agent-{insp
 In this example we're also passing [JSON arguments](configuration/configuration-sources.md#java-agent-arguments) to the agent in order to configure its service name.
 
 > Using the attach options has some limitations with respect to using the OpenCensus instrumentation library in combination with the inspectIT Ocelot agent. Please refer to [OpenCensus Configuration](configuration/open-census-configuration.md) section to understand these limitations.
+
+## Using the Agent With a Security Manager
+
+If a Java Security Manager is enabled, the agent needs to be granted additional permissions to work. 
+For this, add the following to your policy file:
+
+```
+grant codeBase "file:<absolute_path_to_inspectit-ocelot-agent.jar>" {
+    permission java.security.AllPermission;
+};
+```
+
+The correct policy file location depends on different factors.
+See the [official Java documentation](https://docs.oracle.com/en/java/javase/17/security/permissions-jdk1.html#GUID-789089CA-8557-4017-B8B0-6899AD3BA18D) for further information.
 
 ## Using the Agent with Kubernetes
 

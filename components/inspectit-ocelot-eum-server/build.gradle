@@ -1,6 +1,7 @@
 plugins {
     id 'org.springframework.boot' version "${springboot_version}"
     id 'com.palantir.docker' version "0.21.0"
+    id "org.cyclonedx.bom" version "1.5.0"
 }
 
 apply plugin: 'java'
@@ -80,6 +81,10 @@ bootJar {
         include "boomerang-opentelemetry.js"
         into "static/boomerang"
     }
+}
+
+cyclonedxBom {
+    includeConfigs += ["runtimeClasspath"]
 }
 
 test {

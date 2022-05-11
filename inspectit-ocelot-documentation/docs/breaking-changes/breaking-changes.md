@@ -15,6 +15,33 @@ Due to the migration from OpenCensus to OpenTelemetry, several trace and metric 
 The [Jaeger](tracing/tracing-exporters.md#jaeger-exporter) and [Zipkin](tracing/tracing-exporters.md#zipking-exporter) trace exporters as well as the [Prometheus](metrics/metric-exporters.md#prometheus-exporter) and [InfluxDB](metrics/metric-exporters.md#influxdb-exporter) metric exporters are disabled until they are properly integrated with OpenTelemetry.
 The `OpenCensus Agent Exporter` (for metrics and traces) has been completely removed and will not be supported in the future.
 
+## Breaking changes in 1.16.0
+
+### Configuration sources only accept valid `YAML`, `JSON` (keys must be wrapped in double quotes) or `properties` notation 
+
+As of version 1.16.0, the [configuration sources](/configuration/configuration-sources.md) only accept valid `YAML`, `JSON` or `properties` notation. The "mix and match" of JSON and YAML should be avoided. For JSON, all keys need to be wrapped in double quotes. 
+Upgrading to version 1.16.0 may break your startup routines if the JSON passed as command line arguments is invalid. For example, the following code will **not** work anymore and cause an exception:  
+
+```bash
+# invalid JSON (keys not wrapped in double quotes) causes an exception
+ java -jar inspectit-ocelot-agent-1.16.0.jar 1337 '{inspectit:{service-name:"my-agent"}}'
+```
+Instead, use valid JSON and wrap the keys in double quotes:
+
+```bash
+# valid JSON (keys wrapped in double quotes)
+ java -jar inspectit-ocelot-agent-1.16.0.jar 1337 '{"inspectit":{"service-name":"my-agent"}}'
+```
+
+## Breaking changes in 1.15.2
+
+There are no breaking changes for version 1.15.2.
+
+## Breaking changes in 1.15.1
+
+There are no breaking changes for version 1.15.1.
+
+
 ## Breaking changes in 1.15.0
 
 ### New definition of exporters' enabled property
@@ -28,6 +55,14 @@ This conversion is however deprecated, so configurations should still be updated
 By default, the Prometheus exporter is now disabled.
 This was changed so the exporter's behaviour is in line with the behaviour of other exporters, i.e. it will not run without changing the default settings.
 To enable the Prometheus exporter, set its `enabled` property to `ENABLED`.
+
+## Breaking changes in 1.14.0
+
+There are no breaking changes for version 1.14.0.
+
+## Breaking changes in 1.13.0
+
+There are no breaking changes for version 1.13.0.
 
 ## Breaking changes in 1.12.2
 

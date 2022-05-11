@@ -48,6 +48,7 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
         .description {
           padding-top: 0.25rem;
           color: #333;
+          white-space: pre-wrap;
         }
       `}</style>
       {data.map((element) => (

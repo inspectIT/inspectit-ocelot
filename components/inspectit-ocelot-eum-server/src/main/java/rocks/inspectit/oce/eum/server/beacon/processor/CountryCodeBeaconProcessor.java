@@ -10,6 +10,7 @@ import rocks.inspectit.oce.eum.server.configuration.model.EumServerConfiguration
 import rocks.inspectit.oce.eum.server.utils.GeolocationResolver;
 import rocks.inspectit.oce.eum.server.utils.IPUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 

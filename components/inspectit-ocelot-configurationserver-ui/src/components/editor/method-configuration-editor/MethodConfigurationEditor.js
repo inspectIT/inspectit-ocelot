@@ -138,16 +138,27 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
    */
   const addScope = (typeMatcher, methodMatcher) => {
     const cloneConfiguration = _.cloneDeep(configuration);
-    const scopeName = currentScopeName ? currentScopeName : ('s_gen_scope_' + uuid()).replaceAll('-', '_');
+    let scopeName;
+    // Check whether an existing scope was modified or a new scope created
+    if (currentScopeName) {
+      // If currentScopeName is set, an existing scope is being modified
+      scopeName = currentScopeName;
+    } else {
+      // If currentScopeName is undefined, a new scope is being created
+      // Generate random name for new scope
+      scopeName = ('s_gen_scope_' + uuid()).replaceAll('-', '_');
+      // Enable Trace and Measure by default for new scope
+      _.set(cloneConfiguration, ['inspectit', 'instrumentation', 'rules', 'r_method_configuration_trace', 'scopes', scopeName], true);
+      _.set(cloneConfiguration, ['inspectit', 'instrumentation', 'rules', 'r_method_configuration_duration', 'scopes', scopeName], true);
+    }
+
     const preparedScope = prepareScope(typeMatcher, methodMatcher);
 
     try {
       _.set(cloneConfiguration, ['inspectit', 'instrumentation', 'scopes', scopeName], preparedScope);
-      _.set(cloneConfiguration, ['inspectit', 'instrumentation', 'rules', 'r_method_configuration_trace', 'scopes', scopeName], true);
-      _.set(cloneConfiguration, ['inspectit', 'instrumentation', 'rules', 'r_method_configuration_duration', 'scopes', scopeName], true);
-
       updateConfiguration(cloneConfiguration);
     } catch (error) {
+      // todo: proper error handling
       throw new Error(error);
     }
   };

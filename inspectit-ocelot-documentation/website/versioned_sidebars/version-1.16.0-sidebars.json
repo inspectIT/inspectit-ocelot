@@ -1,0 +1,62 @@
+{
+  "version-1.16.0-docs": {
+    "Getting Started": [
+      "version-1.16.0-doc1",
+      "version-1.16.0-getting-started/quick-start",
+      "version-1.16.0-getting-started/docker-examples",
+      "version-1.16.0-getting-started/installation"
+    ],
+    "Configuration": [
+      "version-1.16.0-configuration/configuration-sources",
+      "version-1.16.0-configuration/external-configuration-sources",
+      "version-1.16.0-configuration/logging-configuration",
+      "version-1.16.0-configuration/open-census-configuration",
+      "version-1.16.0-configuration/plugin-configuration",
+      "version-1.16.0-configuration/agent-command-configuration"
+    ],
+    "Metrics": [
+      "version-1.16.0-metrics/metrics",
+      "version-1.16.0-metrics/metric-recorders",
+      "version-1.16.0-metrics/metric-exporters",
+      "version-1.16.0-metrics/common-tags",
+      "version-1.16.0-metrics/custom-metrics",
+      "version-1.16.0-metrics/self-monitoring"
+    ],
+    "Tracing": [
+      "version-1.16.0-tracing/tracing",
+      "version-1.16.0-tracing/trace-exporters",
+      "version-1.16.0-tracing/log-correlation",
+      "version-1.16.0-tracing/privacy"
+    ],
+    "Instrumentation": [
+      "version-1.16.0-instrumentation/instrumentation",
+      "version-1.16.0-instrumentation/scopes",
+      "version-1.16.0-instrumentation/rules",
+      "version-1.16.0-instrumentation/code-style",
+      "version-1.16.0-instrumentation/special-sensors",
+      "version-1.16.0-instrumentation/process"
+    ],
+    "End User Monitoring": [
+      "version-1.16.0-enduser-monitoring/enduser-monitoring-server",
+      "version-1.16.0-enduser-monitoring/eum-server-setup",
+      "version-1.16.0-enduser-monitoring/eum-server-configuration",
+      "version-1.16.0-enduser-monitoring/install-eum-agent"
+    ],
+    "Configuration Server": [
+      "version-1.16.0-config-server/overview",
+      "version-1.16.0-config-server/cs-configuration",
+      "version-1.16.0-config-server/managing-configurations",
+      "version-1.16.0-config-server/configuration-files-staging",
+      "version-1.16.0-config-server/agent-mappings",
+      "version-1.16.0-config-server/scope-wizard",
+      "version-1.16.0-config-server/class-browser",
+      "version-1.16.0-config-server/user-authentication",
+      "version-1.16.0-config-server/config-docs",
+      "version-1.16.0-config-server/log-config",
+      "version-1.16.0-config-server/syntax-highlighting"
+    ],
+    "Breaking Changes": [
+      "version-1.16.0-breaking-changes/Breaking Changes"
+    ]
+  }
+}

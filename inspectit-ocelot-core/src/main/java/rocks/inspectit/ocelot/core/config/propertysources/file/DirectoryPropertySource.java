@@ -89,10 +89,8 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
             files.sorted(Comparator.comparing(Path::toString, String.CASE_INSENSITIVE_ORDER)).forEachOrdered(file -> {
                 if (doesFileHaveEnding(file, PROPERTIES_ENDINGS)) {
                     loadProperties(file, PropertyUtils::readPropertyFiles).ifPresent(fileSources::add);
-                } else if (doesFileHaveEnding(file, YAML_ENDINGS)) {
+                }  else if (doesFileHaveEnding(file, YAML_ENDINGS) || doesFileHaveEnding(file, JSON_ENDINGS)) {
                     loadProperties(file, PropertyUtils::readYamlFiles).ifPresent(fileSources::add);
-                } else if (doesFileHaveEnding(file, JSON_ENDINGS)) {
-                    loadProperties(file, PropertyUtils::readJsonFile).ifPresent(fileSources::add);
                 }
             });
             return fileSources;

@@ -3,9 +3,11 @@ package rocks.inspectit.ocelot.agentstatus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
+import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import javax.annotation.PostConstruct;
@@ -19,7 +21,13 @@ import java.util.concurrent.TimeUnit;
  * This is useful for detecting which agents are active.
  */
 @Component
+@Slf4j
 public class AgentStatusManager {
+
+    /**
+     * Name of the agent health header.
+     */
+    private static final String HEADER_AGENT_HEALTH = "x-ocelot-health";
 
     @Autowired
     @VisibleForTesting
@@ -70,7 +78,21 @@ public class AgentStatusManager {
             statusKey = agentAttributes;
         }
 
+        if (headers.containsKey(HEADER_AGENT_HEALTH)) {
+            AgentHealth agentHealth = AgentHealth.valueOf(headers.get(HEADER_AGENT_HEALTH));
+            agentStatus.setHealth(agentHealth);
+            logHealthIfChanged(statusKey, agentHealth);
+        }
+
         attributesToAgentStatusCache.put(statusKey, agentStatus);
+    }
+
+    private void logHealthIfChanged(Object statusKey, AgentHealth agentHealth) {
+        AgentStatus lastStatus = attributesToAgentStatusCache.getIfPresent(statusKey);
+
+        if (lastStatus == null || lastStatus.getHealth() != agentHealth) {
+            log.info("Health of agent {} changed to {}.", statusKey, agentHealth);
+        }
     }
 
     /**
