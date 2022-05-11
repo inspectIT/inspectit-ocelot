@@ -11,6 +11,8 @@ import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
+import org.influxdb.InfluxDBIOException;
+import org.influxdb.dto.Pong;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.junit.jupiter.api.AfterEach;
@@ -27,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-// @Disabled //TODO: Get this test to work on the CI
 public class InfluxExporterServiceIntTest extends SpringTestBase {
 
     private InfluxServer influx;
@@ -49,6 +50,16 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
         influx = builder.build();
         influx.start();
         url = "http://localhost:" + freeHttpPort;
+
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            try {
+                InfluxDB influxDB = InfluxDBFactory.connect(url, user, password);
+                Pong ping = influxDB.ping();
+                assertThat(ping.isGood()).isTrue();
+            } catch (InfluxDBIOException exception) {
+                // ignore
+            }
+        });
     }
 
     @AfterEach
@@ -74,7 +85,8 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
 
         TagKey testTag = TagKey.create("my_tag");
         Measure.MeasureDouble testMeasure = Measure.MeasureDouble.create("my/test/measure", "foo", "bars");
-        View testView = View.create(View.Name.create("my/test/measure/cool%data"), "", testMeasure, Aggregation.Sum.create(), Arrays.asList(testTag));
+        View testView = View.create(View.Name.create("my/test/measure/cool%data"), "", testMeasure, Aggregation.Sum.create(), Arrays
+                .asList(testTag));
         Stats.getViewManager().registerView(testView);
 
         try (Scope tc = Tags.getTagger().emptyBuilder().putLocal(testTag, TagValue.create("myval")).buildScoped()) {

@@ -45,8 +45,7 @@ public class JaegerExporterService extends DynamicallyActivatableService {
         if (conf.getTracing().isEnabled() && !jaeger.getEnabled().isDisabled()) {
 
             // fallback if 'protocol' was not set: derive from set properties 'url'  or 'grpc'
-            if ((null == jaeger.getProtocol() || jaeger.getProtocol()
-                    .equals(TransportProtocol.UNSET)) && (StringUtils.hasText(jaeger.getUrl()) || StringUtils.hasText(jaeger.getGrpc()))) {
+            if (jaeger.getProtocol() == null && (StringUtils.hasText(jaeger.getUrl()) || StringUtils.hasText(jaeger.getGrpc()))) {
                 jaeger.setProtocol(StringUtils.hasText(jaeger.getUrl()) ? TransportProtocol.HTTP_THRIFT : TransportProtocol.GRPC);
                 log.warn("The property 'protocol' was not set. Based on the set property '{}' we assume the protocol '{}'. This fallback will be removed in future releases. Please make sure to use the property 'protocol' in future.", StringUtils.hasText(jaeger.getUrl()) ? "url" : "grpc", StringUtils.hasText(jaeger.getUrl()) ? TransportProtocol.HTTP_THRIFT.getConfigRepresentation() : TransportProtocol.GRPC.getConfigRepresentation());
             }

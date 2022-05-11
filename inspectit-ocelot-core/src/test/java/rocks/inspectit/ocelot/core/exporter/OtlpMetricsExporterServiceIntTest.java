@@ -112,6 +112,6 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
         OtlpMetricsExporterSettings otlp = environment.getCurrentConfig().getExporters().getMetrics().getOtlp();
         assertThat(otlp.getEnabled().equals(ExporterEnabledState.IF_CONFIGURED));
         assertThat(otlp.getEndpoint()).isNullOrEmpty();
-        assertThat(otlp.getProtocol()).isEqualTo(TransportProtocol.UNSET);
+        assertThat(otlp.getProtocol()).isNull();
     }
 }

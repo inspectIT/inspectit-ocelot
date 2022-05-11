@@ -189,7 +189,7 @@ public class JaegerExporterServiceIntTest {
             assertThat(service.isEnabled()).isFalse();
             assertThat(jaeger.getEnabled()).isEqualTo(ExporterEnabledState.IF_CONFIGURED);
             assertThat(jaeger.getEndpoint()).isNullOrEmpty();
-            assertThat(jaeger.getProtocol()).isEqualTo(TransportProtocol.UNSET);
+            assertThat(jaeger.getProtocol()).isNull();
         }
 
         /**

@@ -305,7 +305,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                 .setMeterProvider(meterProvider)
                 .build();
 
-        openTelemetry = OpenTelemetryImpl.builder().openTelemetry(openTelemetrySdk).build();
+        openTelemetry = new OpenTelemetryImpl(openTelemetrySdk);
 
         // if any OpenTelemetry has already been registered to GlobalOpenTelemetry, reset it.
         if (null != OpenTelemetryUtils.getGlobalOpenTelemetry()) {

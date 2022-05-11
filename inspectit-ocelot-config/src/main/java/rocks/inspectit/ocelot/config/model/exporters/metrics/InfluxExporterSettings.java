@@ -15,18 +15,17 @@ import java.util.logging.Logger;
 @Data
 public class InfluxExporterSettings {
 
-    private static Logger LOGGER = Logger.getLogger(InfluxExporterSettings.class.getName());
-
     /**
      * Whether the exporter should be started.
      */
     private ExporterEnabledState enabled;
 
-    @Deprecated
     /**
      * This property is deprecated since v2.0. Please use {@link #endpoint} instead.
-     * The HTTP URL of influx (e.g. http://localhost:8086)
-     */ private String url;
+     * The HTTP URL of influx (e.g. http://localhost:8086).
+     */
+    @Deprecated
+    private String url;
 
     /**
      * The HTTP URL endpoint of Influx (e.g., http://localhost:8086)

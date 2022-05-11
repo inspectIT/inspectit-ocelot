@@ -44,7 +44,7 @@ public class TraceExportersConfiguration {
     @ConditionalOnProperty({"inspectit-eum-server.exporters.tracing.jaeger.enabled", "inspectit-eum-server.exporters.tracing.jaeger.endpoint"})
     @ConditionalOnExpression("(NOT new String('${inspectit-eum-server.exporters.tracing.jaeger.enabled}').toUpperCase().equals(T(rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState).DISABLED.toString())) AND (new String('${inspectit-eum-server.exporters.tracing.jaeger.endpoint}').length() > 0)")
     public SpanExporter jaegerSpanExporter() {
-        @Valid JaegerExporterSettings jaegerExporterSettings = configuration.getExporters().getTracing().getJaeger();
+        JaegerExporterSettings jaegerExporterSettings = configuration.getExporters().getTracing().getJaeger();
 
         ManagedChannel channel = ManagedChannelBuilder.forTarget(jaegerExporterSettings.getEndpoint())
                 .usePlaintext()

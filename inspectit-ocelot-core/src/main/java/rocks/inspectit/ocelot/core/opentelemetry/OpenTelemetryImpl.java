@@ -9,6 +9,7 @@ import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * This wrapper class is used to change {@link #openTelemetry} without the exception handling of {@link io.opentelemetry.api.GlobalOpenTelemetry#set(OpenTelemetry)}
  */
 @Slf4j
-@Builder
+@AllArgsConstructor
 public class OpenTelemetryImpl implements OpenTelemetry {
 
     /**
@@ -32,7 +33,6 @@ public class OpenTelemetryImpl implements OpenTelemetry {
     @NotNull
     private OpenTelemetrySdk openTelemetry;
 
-    @Builder.Default
     private final Object lock = new Object();
 
     @Override
@@ -95,13 +95,11 @@ public class OpenTelemetryImpl implements OpenTelemetry {
      * @return The {@link CompletableResultCode}
      */
     public synchronized CompletableResultCode close() {
-        CompletableResultCode closeTracerProviderResultCode;
-        CompletableResultCode closeMeterProviderResultCode;
         synchronized (lock) {
-            closeTracerProviderResultCode = OpenTelemetryUtils.stopTracerProvider(getSdkTracerProvider(), true);
-            closeMeterProviderResultCode = OpenTelemetryUtils.stopMeterProvider(getSdkMeterProvider(), true);
+            CompletableResultCode closeTracerProviderResultCode = OpenTelemetryUtils.stopTracerProvider(getSdkTracerProvider(), true);
+            CompletableResultCode closeMeterProviderResultCode = OpenTelemetryUtils.stopMeterProvider(getSdkMeterProvider(), true);
+            return CompletableResultCode.ofAll(Arrays.asList(closeMeterProviderResultCode, closeTracerProviderResultCode));
         }
-        return CompletableResultCode.ofAll(Arrays.asList(closeMeterProviderResultCode, closeTracerProviderResultCode));
     }
 
     /**

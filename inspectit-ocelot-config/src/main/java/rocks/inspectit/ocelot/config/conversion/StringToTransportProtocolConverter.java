@@ -12,6 +12,6 @@ public class StringToTransportProtocolConverter implements Converter<String, Tra
 
     @Override
     public TransportProtocol convert(String source) {
-        return StringUtils.hasText(source) ? TransportProtocol.parse(source) : TransportProtocol.UNSET;
+        return StringUtils.hasText(source) ? TransportProtocol.parse(source) : null;
     }
 }
