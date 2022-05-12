@@ -49,7 +49,7 @@ public class JaegerExporterServiceIntTest {
      */
     @DirtiesContext
     @Nested
-    @TestPropertySource(properties = {"inspectit.exporters.tracing.jaeger.endpoint=http://127.0.0.1:14268/api/traces", "inspectit.exporters.tracing.jaeger.protocol=http/thrift", "inspectit.tracing.max-export-batch-size=1"})
+    @TestPropertySource(properties = {"inspectit.exporters.tracing.jaeger.endpoint=http://localhost:14268/api/traces", "inspectit.exporters.tracing.jaeger.protocol=http/thrift", "inspectit.tracing.max-export-batch-size=1"})
     class JaegerThriftExporterServiceIntTest extends SpringTestBase {
 
         private WireMockServer wireMockServer;
