@@ -147,11 +147,6 @@ let InspectitOcelotHighlightRules = function () {
     //Java code is always within Strings (it really just is strings in the background too), so it can be both a
     // single line in quotes or multiple lines just like Strings can be within a YAML document.
     {
-      token: 'keyword.java-sl-start',
-      regex: /([:](?=(?:^\|'|'|''')*$))/,
-      push: 'java-singleline-start',
-    },
-    {
       token: 'text.java-sl-start',
       regex: /("|'|''')/,
       push: 'java-singleline-start',
@@ -289,7 +284,7 @@ let InspectitOcelotHighlightRules = function () {
       // Rules for highlighting are kept in a list per state, this list for the state corresponding to the
       // current key is created here.
 
-      // The list already contains two rules that are needed for every key and are at the correct position if
+      // The list already contains a few default rules that are needed for every key and are at the correct position if
       // added now (the order of rules matters for evaluation, if a string matches a regex in a previous rule,
       // later rules are not evaluated anymore).
       let rules_for_current_key = [commentRule, defaultRule, keywordRule, jsonStartRule];
@@ -471,7 +466,7 @@ let InspectitOcelotHighlightRules = function () {
 
   // Generates the rules for the contents of a Map if it contains InspectitConfig-specific objects.
   function mapToRulesCollectionSubkey(inner_map, sub_state_name, content_type, nested_level, contents_key) {
-    // As before the list of rules for the state is created with the comment-rule already in it.
+    // As before the list of rules for the state is created with default rules already in it.
     let rules_for_sub_state = [commentRule, defaultRule, keywordRule, jsonStartRule];
 
     switch (content_type) {
