@@ -8,6 +8,11 @@ title: Breaking Changes
 
 Starting with the current release, inspectIT Ocelot migrates from OpenCensus to [OpenTelemetry](https://github.com/open-telemetry). As a first step, we include the [OpenTelemetry OpenCensus Shim](https://github.com/open-telemetry/opentelemetry-java/tree/main/opencensus-shim). inspectIT Ocelot still uses and supports the [OpenCensus-API](https://opencensus.io/quickstart/java/), but the exporter implementations of OpenTelemetry are used.
 
+### AutoTracing currently not available
+
+Due to the migration from OpenCensus to OpenTelemetry, the agent's AutoTracing feature is currently **not** available.
+The AutoTracing feature will be available again in the next release of the inspectIT Ocelot agent.
+
 ### Updated and removed exporter 
 
 #### Removed `OpenCensusAgentExporter`
