@@ -55,9 +55,8 @@ public class OpenCensusShimUtils {
         try {
             Field tracerField = null;
             // make the field accessible
-            tracerField = ReflectionUtils.getFinalStaticFieldAndMakeAccessible(Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl"), "OTEL_TRACER", true);
-            Tracer tracer = (Tracer) tracerField.get(null);
-            return tracer;
+            tracerField = ReflectionUtils.getAccessibleField(Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl"), "OTEL_TRACER");
+            return (Tracer) tracerField.get(null);
         } catch (Exception e) {
             log.error("Failed to get OTEL_TRACER of OpenTelemetrySpanBuilderImpl");
             return null;

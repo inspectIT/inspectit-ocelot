@@ -16,11 +16,11 @@ public class MetricsExportersSettings {
     private PrometheusExporterSettings prometheus;
 
     @Valid
-    private OpenCensusAgentMetricsExporterSettings openCensusAgent;
-
-    @Valid
     private InfluxExporterSettings influx;
 
     @Valid
     private LoggingMetricsExporterSettings logging;
+
+    @Valid
+    private OtlpMetricsExporterSettings otlp;
 }

@@ -15,26 +15,12 @@ inspectit:
         # the port on which the /metrics endpoint of prometheus will be started
         port: 8888
 
-      # settings for the OpenCensus Agent Metrics exporter (https://opencensus.io/exporters/supported-exporters/java/ocagent/)
-      open-census-agent:
-        # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
-        enabled: IF_CONFIGURED
-        # address of the open-census agent (e.g. localhost:1234)
-        address: null
-        # if true, SSL is disabled
-        use-insecure: false
-        # the service-name which will be used to publish the metrics
-        service-name: ${inspectit.service-name}
-        # the time at which the exporter tries to reconnect to the OpenCensus agent
-        reconnection-period: 5s
-        # the export interval of the metrics
-        export-interval: ${inspectit.metrics.frequency}
 
       influx:
         # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
         enabled: IF_CONFIGURED
         # the Url under which the InfluxDB can be accessed, e.g. http://localhost:8086
-        url: null
+        endpoint: null
         # the export interval of the metrics
         export-interval: ${inspectit.metrics.frequency}
         # the database to write to
@@ -54,10 +40,19 @@ inspectit:
 
       # settings used in LoggingMetricsExporterService for the LoggingMetricExporter (https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/logging)
       logging:
-          enabled: false
-          service-name: ${inspectit.service-name}
+          enabled: DISABLED
           # the export interval of the metrics
           export-interval: ${inspectit.metrics.frequency}
+
+      # settings for the OtlpGrpcMetricExporter used in OtlpGrpcMetricExporterService
+      otlp:
+        enabled: IF_CONFIGURED
+        # the export interval of the metrics
+        export-interval: ${inspectit.metrics.frequency}
+        # the gRPC API endpoint, e.g., http://127.0.0.1:4318
+        endpoint: null
+        # the transport protocol, e.g., 'grpc' or 'http/protobuf'
+        protocol: null
 
     # settings for trace exporters
     tracing:
@@ -67,33 +62,25 @@ inspectit:
         # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
         enabled: IF_CONFIGURED
         # the v2 Url under which the ZipKin server can be accessed, e.g. http://127.0.0.1:9411/api/v2/spans
-        url: null
-        # the service-name which will be used to publish the spans
-        service-name: ${inspectit.service-name}
-      # settings for the jaeger exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/jaeger)
+        endpoint: null
 
+      # settings for the jaeger exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/jaeger)
       jaeger:
         # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
         enabled: IF_CONFIGURED
-        # the URL under which the jaeger thrift server can be accessed, e.g. http://127.0.0.1:14268/api/traces
-        url: null
-        # the service-name which will be used to publish the spans
-        service-name: ${inspectit.service-name}
-
-      # settings for the OpenCensus Agent Trace exporter (https://opencensus.io/exporters/supported-exporters/java/ocagent/)
-      open-census-agent:
-        # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
-        enabled: IF_CONFIGURED
-        # Address of the open-census agent (e.g. localhost:1234)
-        address: null
-        # if true, SSL is disabled
-        use-insecure: false
-        # the service-name which will be used to publish the spans
-        service-name: ${inspectit.service-name}
-        # the time at which the exporter tries to reconnect to the OpenCensus agent
-        reconnection-period: 5s
+        # the URL under which the jaeger thrift server can be accessed, e.g. http://127.0.0.1:14268/api/traces for http/thrift or http://127.0.0.1:14250/v1/traces for grpc
+        endpoint: null
+        # the transport protocol, e.g., 'http/thrift' or 'grpc'
+        protocol: null
 
       # settings used in LoggingTraceExporterService for the LoggingSpanExporter (https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/logging)
       logging:
-          enabled: false
-          service-name: ${inspectit.service-name}
+          enabled: DISABLED
+
+      # settings for the OtlpGrpcSpanExporter/OtlpHttpSpanExporter used in OtlpTraceExporterService
+      otlp:
+          enabled: IF_CONFIGURED
+          # the URL endpoint, e.g., http://127.0.0.1:4318
+          endpoint: null
+          # the transport protocol, e.g., 'http/thrift' or 'grpc'
+          protocol: null

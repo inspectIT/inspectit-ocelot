@@ -46,10 +46,13 @@ public class InfluxExporterService {
     private boolean shouldEnable() {
         InfluxExporterSettings influx = configuration.getExporters().getMetrics().getInflux();
         if (!influx.getEnabled().isDisabled()) {
-            if (StringUtils.hasText(influx.getUrl())) {
+            if (StringUtils.hasText(influx.getEndpoint())) {
+                return true;
+            } else if (StringUtils.hasText(influx.getUrl())) {
+                log.warn("You are using the deprecated property 'url'. This property will be invalid in future releases of InspectIT Ocelot, please use `endpoint` instead.");
                 return true;
             } else if (influx.getEnabled().equals(ExporterEnabledState.ENABLED)) {
-                log.warn("InfluxDB Exporter is enabled but no url set.");
+                log.warn("InfluxDB Exporter is enabled but 'endpoint' is not set.");
             }
         }
         return false;
@@ -59,9 +62,10 @@ public class InfluxExporterService {
     private void doEnable() {
         InfluxExporterSettings influx = configuration.getExporters().getMetrics().getInflux();
         if (shouldEnable()) {
-            log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), influx.getUrl());
+            String endpoint = StringUtils.hasText(influx.getEndpoint()) ? influx.getEndpoint() : influx.getUrl();
+            log.info("Starting InfluxDB Exporter to '{}:{}' on '{}'", influx.getDatabase(), influx.getRetentionPolicy(), endpoint);
             activeExporter = InfluxExporter.builder()
-                    .url(influx.getUrl())
+                    .url(endpoint)
                     .database(influx.getDatabase())
                     .retention(influx.getRetentionPolicy())
                     .user(influx.getUser())

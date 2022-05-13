@@ -32,7 +32,6 @@ dependencies {
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             'io.opentelemetry:opentelemetry-api',
-            'io.opentelemetry:opentelemetry-api-metrics',
             "io.opentelemetry:opentelemetry-sdk",
             "io.opentelemetry:opentelemetry-sdk-metrics",
             "io.opentelemetry:opentelemetry-semconv",
@@ -50,7 +49,7 @@ dependencies {
             project(':inspectit-ocelot-config'),
             project(':inspectit-ocelot-sdk'),
 
-            // spring releated
+            // spring related
             "org.springframework.boot:spring-boot:${springVersion}",
             'org.yaml:snakeyaml:1.30',
             'javax.annotation:javax.annotation-api:1.3.2', //Required for @PostConstruct and @PreDestroy to work in Java9+
@@ -81,6 +80,16 @@ dependencies {
             // OpenTelemetry exporters
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-exporter-logging",
+            "io.opentelemetry:opentelemetry-exporter-jaeger",
+            "io.opentelemetry:opentelemetry-exporter-jaeger-thrift",
+            "io.opentelemetry:opentelemetry-exporter-zipkin",
+            "io.opentelemetry:opentelemetry-exporter-otlp",
+            "io.opentelemetry:opentelemetry-exporter-otlp-http-trace",
+            "io.opentelemetry:opentelemetry-exporter-otlp-metrics",
+            "io.opentelemetry:opentelemetry-exporter-otlp-http-metrics",
+
+            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
+            "io.opentelemetry:opentelemetry-exporter-prometheus",
 
             // The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
             // See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
@@ -97,9 +106,11 @@ dependencies {
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             "io.opentelemetry:opentelemetry-sdk",
+            "io.opentelemetry:opentelemetry-sdk-metrics",
             "io.opentelemetry:opentelemetry-opencensus-shim",
             "io.opentelemetry:opentelemetry-semconv",
             "io.opentelemetry:opentelemetry-sdk-testing",
+            "io.opentelemetry:opentelemetry-proto:1.7.1-alpha",
 
             // matching the spring-core version used in the currently used version of spring boot version
             'org.springframework:spring-test:5.3.14',
@@ -116,10 +127,20 @@ dependencies {
             'org.assertj:assertj-guava:3.2.1',
             'org.awaitility:awaitility:3.1.5',
             "com.github.tomakehurst:wiremock-jre8-standalone:2.32.0",
-            "io.grpc:grpc-netty-shaded:1.20.0",
-            "io.grpc:grpc-stub:1.20.0",
+            "io.grpc:grpc-netty-shaded:${grpcVersion}",
+            "io.grpc:grpc-stub:${grpcVersion}",
             'org.influxdb:influxdb-java:2.15',
             'io.apisense.embed.influx:embed-influxDB:1.2.1',
+
+            // for docker test containers
+            'org.testcontainers:testcontainers:1.15.2',
+            'org.testcontainers:junit-jupiter:1.15.2',
+
+            // ServerExtension
+            'com.linecorp.armeria:armeria-junit5:1.14.1',
+            'com.linecorp.armeria:armeria-grpc-protocol:1.14.1',
+
+            'com.google.protobuf:protobuf-java-util:3.15.7',
 
             // LogCapturer
             'io.github.netmikey.logunit:logunit-core:1.1.3',
@@ -145,7 +166,9 @@ task checkDependencyJavaVersions {
                     // exclude OpenTelemetry as they guarantee JDK 8 support
                     "opentelemetry",
                     // exclude jackson which is being used by OTel
-                    "jackson"]
+                    "jackson",
+                    // exclude kotlin-stdlib which is being used by opentelemetry-exporter-jaeger-thrift
+                    "kotlin-stdlib"]
 
     def jarCheckPath = "$buildDir/jarCheck"
     outputs.dir jarCheckPath

@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -12,6 +14,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.PrometheusExporterSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.opentelemetry.OpenTelemetryControllerImpl;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -30,6 +33,9 @@ public abstract class DynamicallyActivatableService {
 
     @Autowired
     protected InspectitEnvironment env;
+
+    @Autowired
+    protected OpenTelemetryControllerImpl openTelemetryController;
 
     private List<Expression> configDependencies;
 
@@ -102,6 +108,7 @@ public abstract class DynamicallyActivatableService {
     }
 
     @EventListener(InspectitConfigChangedEvent.class)
+    @Order(Ordered.HIGHEST_PRECEDENCE) // make sure this is called before OpenTelemetryController#configureOpenTelemetry
     synchronized void checkForUpdates(InspectitConfigChangedEvent ev) {
         boolean affected = false;
         for (Expression exp : configDependencies) {
@@ -126,6 +133,7 @@ public abstract class DynamicallyActivatableService {
             if (checkEnabledForConfig(ev.getNewConfig())) {
                 enable();
             }
+
         }
     }
 
@@ -158,4 +166,12 @@ public abstract class DynamicallyActivatableService {
      */
     protected abstract boolean doDisable();
 
+    /**
+     * Gets the name of the {@link DynamicallyActivatableService}
+     *
+     * @return The name of the {@link DynamicallyActivatableService}
+     */
+    public String getName() {
+        return getClass().getSimpleName();
+    }
 }

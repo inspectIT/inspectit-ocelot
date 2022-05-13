@@ -2,19 +2,20 @@ package rocks.inspectit.ocelot.core.exporter;
 
 import io.github.netmikey.logunit.api.LogCapturer;
 import io.opencensus.stats.*;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.BoundLongCounter;
-import io.opentelemetry.api.metrics.GlobalMeterProvider;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.exporter.logging.LoggingMetricExporter;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.bridge.SLF4JBridgeHandler;
-import org.slf4j.event.LoggingEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
+import rocks.inspectit.ocelot.core.SLF4JBridgeHandlerUtils;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
@@ -36,32 +37,29 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
 
     @BeforeAll
     static void beforeAll() {
-        // enable jul -> slf4j bridge
-        // this is necessary as OTEL logs to jul, but we use the LogCapturerer with logback
-        if (!SLF4JBridgeHandler.isInstalled()) {
-            SLF4JBridgeHandler.removeHandlersForRootLogger();
-            SLF4JBridgeHandler.install();
-        }
+        SLF4JBridgeHandlerUtils.installSLF4JBridgeHandler();
     }
 
     @AfterAll
-    static void afterAll(){
-        if(SLF4JBridgeHandler.isInstalled()){
-            SLF4JBridgeHandler.uninstall();
-        }
+    static void afterAll() {
+        SLF4JBridgeHandlerUtils.uninstallSLF4jBridgeHandler();
     }
 
     @BeforeEach
     void enableService() {
-        localSwitch(true);
+        localSwitch(ExporterEnabledState.ENABLED);
+        Awaitility.await()
+                .atMost(15, TimeUnit.SECONDS)
+                .pollInterval(1, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertThat(Instances.openTelemetryController.isActive()).isTrue());
     }
 
     @AfterEach
     void disableService() {
-        localSwitch(false);
+        localSwitch(ExporterEnabledState.DISABLED);
     }
 
-    private void localSwitch(boolean enabled) {
+    private void localSwitch(ExporterEnabledState enabled) {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.metrics.logging.enabled", enabled);
         });
@@ -70,6 +68,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
     @Nested
     class EnableDisable {
 
+        @DirtiesContext
         @Test
         void testMasterSwitch() {
             updateProperties(props -> {
@@ -78,9 +77,10 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
             assertThat(service.isEnabled()).isFalse();
         }
 
+        @DirtiesContext
         @Test
         void testLocalSwitch() {
-            localSwitch(false);
+            localSwitch(ExporterEnabledState.DISABLED);
             assertThat(service.isEnabled()).isFalse();
         }
     }
@@ -88,6 +88,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
     @Nested
     class OpenTelemetryLogging {
 
+        @DirtiesContext
         @Test
         void verifyOpenTelemetryMetricsWritten() {
             // change export interval
@@ -98,7 +99,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
             assertThat(service.isEnabled()).isTrue();
 
             // get the meter and create a counter
-            Meter meter = GlobalMeterProvider.get()
+            Meter meter = GlobalOpenTelemetry.getMeterProvider()
                     .meterBuilder("rocks.inspectit.ocelot")
                     .setInstrumentationVersion("0.0.1")
                     .build();
@@ -106,10 +107,11 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
                     .setDescription("Processed jobs")
                     .setUnit("1")
                     .build();
-            BoundLongCounter workCounter = counter.bind(Attributes.of(AttributeKey.stringKey("Key"), "SomeWork"));
 
             // record counter
-            workCounter.add(1);
+            counter.add(1, Attributes.of(AttributeKey.stringKey("Key"), "SomeWork"));
+
+            Instances.openTelemetryController.flush();
 
             // verify that the metric has been exported to the log
             Awaitility.waitAtMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
@@ -125,6 +127,7 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
 
         StatsRecorder statsRecorder = Stats.getStatsRecorder();
 
+        @DirtiesContext
         @Test
         void verifyOpenCensusMetricsWritten() throws InterruptedException {
             // change export interval
@@ -136,20 +139,17 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
             // capture some metrics
             captureOpenCensusMetrics();
 
-
-
             // wait until the metrics are exported
             Awaitility.waitAtMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
                 assertThat(metricLogs.getEvents().size()).isGreaterThan(0);
                 // assert that the latest metric is our custom log
                 assertThat(metricLogs.getEvents()).anyMatch(evt -> evt.getArgumentArray() != null && evt.getArgumentArray()[0].toString()
-                        .contains("oc.desc") ||
-                        evt.getMessage().contains("description=oc.desc"));
+                        .contains("oc.desc") || evt.getMessage().contains("description=oc.desc"));
 
             });
 
             // now turn the exporter off and make sure that no more metrics are exported to the log
-            localSwitch(false);
+            localSwitch(ExporterEnabledState.DISABLED);
             // wait until everything is flushed
             Thread.sleep(500);
             int numEvents = metricLogs.getEvents().size();

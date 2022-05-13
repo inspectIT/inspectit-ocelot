@@ -60,6 +60,10 @@ inspectit:
         prefix: "[TraceID: "
         # the suffix to use when injecting a trace id
         suffix: "]"
+    # the maximum batch size for every span export, i.e., the maximum number of spans exported by the used BatchSpanProcessor
+    max-export-batch-size: 512
+    # the delay interval between two consecutive exports in milliseconds.
+    schedule-delay-millis: 5000
 
   # general settings regarding metrics capturing
   metrics:

@@ -4,13 +4,10 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -47,7 +44,7 @@ public class SpringTestBase {
     @Autowired
     protected Instrumentation mockInstrumentation;
 
-     /**
+    /**
      * Allows to customize properties while the Context is open.
      * This method is based on {@link InspectitEnvironment#updatePropertySources(Consumer)},
      * which therefore also triggers {@link InspectitConfigChangedEvent}s.

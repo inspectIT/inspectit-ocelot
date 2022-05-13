@@ -38,7 +38,6 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
         try (Scope scope = Tracing.getTracer().spanBuilder("test").startScopedSpan()) {
             traceId = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
-
             LOGGER.info(message, "Log4J2");
         }
 

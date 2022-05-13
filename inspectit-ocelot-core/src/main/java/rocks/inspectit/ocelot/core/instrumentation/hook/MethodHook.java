@@ -97,8 +97,7 @@ public class MethodHook implements IMethodHook {
                 try (IActionScope scope = actionScopeFactory.createScope(action)) {
                     action.execute(executionContext);
                 } catch (Throwable t) {
-                    log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation
-                            .getMethodFQN(), t);
+                    log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
                     activeEntryActions.remove(action);
                 }
             }
@@ -121,8 +120,7 @@ public class MethodHook implements IMethodHook {
                 try (IActionScope scope = actionScopeFactory.createScope(action)) {
                     action.execute(executionContext);
                 } catch (Throwable t) {
-                    log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation
-                            .getMethodFQN(), t);
+                    log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
                     activeExitActions.remove(action);
                 }
             }
