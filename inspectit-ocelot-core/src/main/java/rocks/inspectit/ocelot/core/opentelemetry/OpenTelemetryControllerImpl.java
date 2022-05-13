@@ -344,7 +344,10 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                 .addSpanProcessor(spanProcessor);
 
         if (env.getCurrentConfig().getTracing().isUse64BitTraceIds()) {
+            log.info("Use of trace IDs with a length of 64 bits.");
             builder.setIdGenerator(RandomIdGenerator64Bit.INSTANCE);
+        } else {
+            log.info("Use of trace IDs with the default length (128 bits).");
         }
 
         return builder.build();
