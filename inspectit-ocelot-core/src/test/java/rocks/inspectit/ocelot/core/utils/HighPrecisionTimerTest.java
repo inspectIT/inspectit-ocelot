@@ -33,7 +33,7 @@ public class HighPrecisionTimerTest {
             createSpyTimer(1, 100, () -> false);
             for (int i = 0; i < 10; i++) {
                 timer.start();
-                await().atMost(5, TimeUnit.SECONDS).until(timer::isStarted);
+                await().atMost(15, TimeUnit.SECONDS).until(timer::isStarted);
             }
             verify(timer).startTimerSynchronized();
         }
@@ -47,7 +47,7 @@ public class HighPrecisionTimerTest {
             createSpyTimer(1, 10, action);
 
             timer.start();
-            await().atMost(5, TimeUnit.SECONDS).until(timer::isStarted);
+            await().atMost(15, TimeUnit.SECONDS).until(timer::isStarted);
 
             verify(action, atLeastOnce()).getAsBoolean();
         }
@@ -57,7 +57,7 @@ public class HighPrecisionTimerTest {
             createSpyTimer(1, 10, () -> true);
 
             timer.start();
-            await().atMost(5, TimeUnit.SECONDS).until(timer::isStarted);
+            await().atMost(15, TimeUnit.SECONDS).until(timer::isStarted);
             timer.start();
 
             verify(timer).startTimerSynchronized();
@@ -71,7 +71,7 @@ public class HighPrecisionTimerTest {
             }
             verify(timer).startTimerSynchronized();
 
-            await().atMost(5, TimeUnit.SECONDS).until(timer::isStarted);
+            await().atMost(15, TimeUnit.SECONDS).until(timer::isStarted);
             for (int i = 0; i < 2; i++) {
                 timer.start();
             }
