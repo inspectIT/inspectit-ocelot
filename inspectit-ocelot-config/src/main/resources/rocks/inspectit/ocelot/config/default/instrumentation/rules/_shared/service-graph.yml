@@ -11,6 +11,7 @@ inspectit:
 
       '[service/in/responsetime]':
         unit: ms
+        description: 'the response time of incoming service calls'
         views:
           '[service/in/count]':
             aggregation: COUNT
@@ -29,6 +30,7 @@ inspectit:
             
       '[service/out/responsetime]':
         unit: ms
+        description: 'the response time of outgoing service calls'
         views:
           '[service/out/count]':
             aggregation: COUNT
@@ -77,6 +79,7 @@ inspectit:
 
       'r_servicegraph_prepare_up_propagation':
         docs:
+          since: '1.2.1'
           description: |-
             This rule prepares up-propagation to include service-graph related information.
             Namely this ensures that the current service name is included as target service.
@@ -94,9 +97,10 @@ inspectit:
 
       'r_servicegraph_prepare_down_propagation':
         docs:
+          since: '1.2.1'
           description: |-
-            This rule prepares down-propagation to include service-graph related information
-            Namely this ensures that the current service name is included as origin service
+            This rule prepares down-propagation to include service-graph related information.
+            Namely this ensures that the current service name is included as origin service.
         entry:
           'servicegraph_origin_service':
             action: 'a_assign_value'
@@ -105,6 +109,7 @@ inspectit:
 
       'r_servicegraph_inbound_record_method':
         docs:
+          since: '1.2.1'
           description: |-
             Can be included to record the current method invocation as an inbound service graph call.
             The includer should populate servicegraph_is_entry if this method is the correct entry point.
@@ -116,6 +121,7 @@ inspectit:
 
       'r_servicegraph_outbound_record_method':
         docs:
+          since: '1.2.1'
           description: |-
             Can be included to record the current method invocation as an outbound service graph call.
             The includer should populate servicegraph_is_entry if this method is the correct entry point.
@@ -127,11 +133,12 @@ inspectit:
 
       'r_servicegraph_inbound_record_metric':
         docs:
+          since: '1.2.1'
           description: |-
             Records inbound traffic as service graph call.
             When this rule is included, it is expected that servicegraph_duration, servicegraph_protocol and servicegraph_is_error are populated.
-            If there was an external origin, servicegraph_origin_external should contain it's name.
-            In addition this rule prevent invalid further down-propagation of servicegraph_origin_service by moving it into the JVM_LOCAL variable servicegraph_origin_service_local
+            If there was an external origin, servicegraph_origin_external should contain its name.
+            In addition this rule prevent invalid further down-propagation of servicegraph_origin_service by moving it into the JVM_LOCAL variable servicegraph_origin_service_local.
 
         entry:
           'servicegraph_origin_service_local':
@@ -156,10 +163,11 @@ inspectit:
 
       'r_servicegraph_outbound_record_metric':
         docs:
+          since: '1.2.1'
           description: |-
-            Records outbound traffic as service graph call
+            Records outbound traffic as service graph call in the metric [service/out/responsetime].
             When this rule is included, it is expected that servicegraph_duration, servicegraph_protocol and servicegraph_is_error are populated.
-            If there was an external target, servicegraph_target_external should contain it's name.
+            If there was an external target, servicegraph_target_external should contain its name.
             In addition further invalid up-propagation of the target service is prevented.
         post-exit: # clear the target service AFTER the metric has been recorded but before propagation
           'servicegraph_target_service':
@@ -176,10 +184,11 @@ inspectit:
 
       'r_servicegraph_capture_method_duration':
         docs:
+          since: '1.2.1'
           description: |-
             Utility rule used for both inbound & outbout service graph traffic.
-            Captures the duration of the current method as servicegraph_duration
-            This capturing takes only place if servicegraph_is_entry is populated with "true"
+            Captures the duration of the current method as servicegraph_duration.
+            This capturing takes only place if servicegraph_is_entry is populated with "true".
         include:
           'r_capture_method_duration_conditional': true
         entry:

@@ -1,18 +1,18 @@
 inspectit:
   instrumentation:
     actions:
-    
-      #
+
       'a_entrypoint_check':
         docs:
+          since: '1.2.1'
           description: |-
             Utility function to detect entry methods.
-            This functions checks if a given "marker" is present on the context.
-            The marker should be configured for down-propagation.
-            If the marker is not present, it is added to the context and "true" is returned.
-            If it is present, false is returned.
-            E.g. if methodA calls methodB and they both invoke "a_entrypoint_check" with the same marker,
-            "true" will only be returned for methodA.
+            This function checks if a given marker is present on the context. The marker should be configured for down-propagation.
+            If the marker is not present, it is added to the context and 'true' is returned. If it is present, 'false' is returned.
+            E.g. if methodA calls methodB and they both invoke "a_entrypoint_check" with the same marker, 'true' will only be returned for methodA.
+          inputs:
+            'marker': 'The marker.'
+          return-value: 'True if the marker is not present, false if it is.'
         input:
           _context: 'InspectitContext'
           'marker': 'String'

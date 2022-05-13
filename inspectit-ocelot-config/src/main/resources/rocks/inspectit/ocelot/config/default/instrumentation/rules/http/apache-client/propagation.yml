@@ -7,7 +7,8 @@ inspectit:
 
       'r_apacheclient_propagation':
         docs:
-          description: 'Performs up- and down-propagation via the HTTP Headers.'
+          since: '1.2.1'
+          description: 'Performs up- and down-propagation via the HTTP headers for Apache Client calls.'
         include:
           'r_apacheclient_detect_entry': true # to make sure propagation happens only once
         scopes:

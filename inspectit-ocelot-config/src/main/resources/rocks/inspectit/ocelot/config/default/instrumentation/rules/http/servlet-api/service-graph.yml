@@ -4,7 +4,8 @@ inspectit:
 
       'r_servletapi_servicegraph_propagation':
         docs:
-          description: 'Enables the propagation of the "origin_service" for the service graph.'
+          since: '1.2.1'
+          description: 'Prepares the context to contain the service graph correlation information (i.e. origin_service).'
         include:
           'r_servicegraph_prepare_up_propagation': true
         scopes:
@@ -15,7 +16,8 @@ inspectit:
 
       'r_servletapi_servicegraph_record':
         docs:
-          description: 'Records inbound HTTP calls via the Servlet API in the service graph.'
+          since: '1.2.1'
+          description: 'Records inbound HTTP calls via the Servlet API in the [service/in/responsetime] metric for the service graph.'
         include:
           'r_servicegraph_inbound_record_method': true
           'r_servletapi_detect_entry':

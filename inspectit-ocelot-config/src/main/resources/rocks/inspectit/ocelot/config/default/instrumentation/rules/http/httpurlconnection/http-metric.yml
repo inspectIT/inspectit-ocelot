@@ -4,6 +4,7 @@ inspectit:
 
       'r_httpurlconnection_http_metric':
         docs:
+          since: '1.2.1'
           description: 'Records HTTP calls done via HTTPUrlConnection via the http/out metric.'
         include:
           'r_httpurlconnection_extract_details': true
