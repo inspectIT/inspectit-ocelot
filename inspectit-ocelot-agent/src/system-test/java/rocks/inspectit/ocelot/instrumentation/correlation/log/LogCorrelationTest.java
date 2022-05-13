@@ -29,6 +29,13 @@ public class LogCorrelationTest {
 
     private static Function<String, String> getTestMdc;
 
+    // TODO: maybe remove this method once the OTelController has been implemented
+    @BeforeAll
+    public static void initializeOpenTelemetry() {
+        // initialize OTel as we are otherwise not exporting any traces.
+        TestUtils.initializeOpenTelemetryForSystemTesting();
+    }
+
     /**
      * Simulates the case where a class loader is isolated (e.g. in JBoss module system) and does not have access
      * to the ocelot bootstrap classes.

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
@@ -27,8 +28,10 @@ public class WriteSpanAttributesTest {
     @Mock
     IObfuscatory obfuscatory;
 
-    @Mock
-    Span span;
+    @Spy
+    // get the current span. We need to use @Spy instead of @Mock when using the opencensus-shim as mocking the span collides with OTel's implementation of the Span.
+    // see also the discussion at https://github.com/inspectIT/inspectit-ocelot/pull/1270
+    Span span = Tracing.getTracer().getCurrentSpan();
 
     @BeforeEach
     void setupMock() {

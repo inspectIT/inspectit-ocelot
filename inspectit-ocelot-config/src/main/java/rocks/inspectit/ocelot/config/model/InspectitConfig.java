@@ -121,10 +121,10 @@ public class InspectitConfig {
 
     /**
      * Can only be specified as JVM-property.
-     * If true, OpenCensus will be loaded to the bootstrap and accessible by the target application.
+     * If true, OpenTelemetry will be loaded to the bootstrap and accessible by the target application.
      */
     @UISettings(exclude = true)
-    private boolean publishOpenCensusToBootstrap;
+    private boolean publishOpenTelemetryToBootstrap;
 
     /**
      * Environment information.

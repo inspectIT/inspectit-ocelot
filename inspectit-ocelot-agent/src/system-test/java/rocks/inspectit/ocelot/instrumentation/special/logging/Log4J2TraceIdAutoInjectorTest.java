@@ -12,8 +12,6 @@ import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
 import rocks.inspectit.ocelot.logging.Log4J2LoggingRecorder;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
-import java.util.concurrent.TimeUnit;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
@@ -25,6 +23,13 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
         TestUtils.waitForClassInstrumentations(AbstractMessageFactory.class, MessageFactory.class);
     }
 
+    // TODO: maybe remove this method once the OTelController has been implemented
+    @BeforeAll
+    public static void initializeOpenTelemetry() {
+        // initialize OTel as we are otherwise not exporting any traces.
+        TestUtils.initializeOpenTelemetryForSystemTesting();
+    }
+
     @Test
     public void logStringAndTraceExists() {
         Log4J2LoggingRecorder.loggingEvents.clear();
@@ -33,16 +38,13 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
         try (Scope scope = Tracing.getTracer().spanBuilder("test").startScopedSpan()) {
             traceId = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
-
             LOGGER.info(message, "Log4J2");
         }
 
-        assertThat(Log4J2LoggingRecorder.loggingEvents)
-                .hasSize(1);
+        assertThat(Log4J2LoggingRecorder.loggingEvents).hasSize(1);
 
-        assertThat(Log4J2LoggingRecorder.loggingEvents.get(0))
-                .extracting(event -> event.getMessage().getFormattedMessage())
-                .isEqualTo("[TraceID: " + traceId + "] This is a traced String in Log4J2.");
+        assertThat(Log4J2LoggingRecorder.loggingEvents.get(0)).extracting(event -> event.getMessage()
+                .getFormattedMessage()).isEqualTo("[TraceID: " + traceId + "] This is a traced String in Log4J2.");
     }
 
     @Test
@@ -57,11 +59,10 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
             LOGGER.info(message);
         }
 
-        assertThat(Log4J2LoggingRecorder.loggingEvents)
-                .hasSize(1);
+        assertThat(Log4J2LoggingRecorder.loggingEvents).hasSize(1);
 
-        assertThat(Log4J2LoggingRecorder.loggingEvents.get(0))
-                .extracting(event -> event.getMessage().getFormattedMessage())
+        assertThat(Log4J2LoggingRecorder.loggingEvents.get(0)).extracting(event -> event.getMessage()
+                        .getFormattedMessage())
                 .isEqualTo("[TraceID: " + traceId + "] This is a traced CharSequence in Log4J2.");
     }
 
@@ -77,12 +78,10 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
             LOGGER.info(message);
         }
 
-        assertThat(Log4J2LoggingRecorder.loggingEvents)
-                .hasSize(1);
+        assertThat(Log4J2LoggingRecorder.loggingEvents).hasSize(1);
 
-        assertThat(Log4J2LoggingRecorder.loggingEvents.get(0))
-                .extracting(event -> event.getMessage().getFormattedMessage())
-                .isEqualTo("[TraceID: " + traceId + "] This is a traced Object in Log4J2.");
+        assertThat(Log4J2LoggingRecorder.loggingEvents.get(0)).extracting(event -> event.getMessage()
+                .getFormattedMessage()).isEqualTo("[TraceID: " + traceId + "] This is a traced Object in Log4J2.");
     }
 
     @Test
@@ -97,12 +96,10 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
             LOGGER.info(message);
         }
 
-        assertThat(Log4J2LoggingRecorder.loggingEvents)
-                .hasSize(1);
+        assertThat(Log4J2LoggingRecorder.loggingEvents).hasSize(1);
 
-        assertThat(Log4J2LoggingRecorder.loggingEvents.get(0))
-                .extracting(event -> event.getMessage().getFormattedMessage())
-                .isEqualTo("[TraceID: " + traceId + "] null");
+        assertThat(Log4J2LoggingRecorder.loggingEvents.get(0)).extracting(event -> event.getMessage()
+                .getFormattedMessage()).isEqualTo("[TraceID: " + traceId + "] null");
     }
 
     @Test
@@ -112,11 +109,9 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
         LOGGER.info(message, "Log4J2");
 
-        assertThat(Log4J2LoggingRecorder.loggingEvents)
-                .hasSize(1);
+        assertThat(Log4J2LoggingRecorder.loggingEvents).hasSize(1);
 
-        assertThat(Log4J2LoggingRecorder.loggingEvents.get(0))
-                .extracting(event -> event.getMessage().getFormattedMessage())
-                .isEqualTo("This is Log4J2.");
+        assertThat(Log4J2LoggingRecorder.loggingEvents.get(0)).extracting(event -> event.getMessage()
+                .getFormattedMessage()).isEqualTo("This is Log4J2.");
     }
 }

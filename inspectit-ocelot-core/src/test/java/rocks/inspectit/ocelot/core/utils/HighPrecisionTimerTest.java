@@ -6,8 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public class HighPrecisionTimerTest {
@@ -50,16 +53,19 @@ public class HighPrecisionTimerTest {
 
 
         @Test
-        void verifyActionCalled() {
-            BooleanSupplier action = mock(BooleanSupplier.class);
-            doReturn(true).when(action).getAsBoolean();
+        void verifyActionCalled() throws InterruptedException {
+            CountDownLatch latch = new CountDownLatch(1);
+            BooleanSupplier action = () -> {
+                latch.countDown();
+                return true;
+            };
 
             createSpyTimer(1, 10, action);
 
             timer.start();
-            sleepAtLeast(50);
 
-            verify(action, atLeastOnce()).getAsBoolean();
+            boolean reachedZero = latch.await(5, TimeUnit.SECONDS);
+            assertThat(reachedZero).isTrue();
         }
 
         @Test

@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 @Data
 @NoArgsConstructor
@@ -16,10 +17,7 @@ public class TracingSettings {
      * Enum that defines when are common tags added to span attributes.
      */
     public enum AddCommonTags {
-        NEVER,
-        ON_GLOBAL_ROOT,
-        ON_LOCAL_ROOT,
-        ALWAYS
+        NEVER, ON_GLOBAL_ROOT, ON_LOCAL_ROOT, ALWAYS
     }
 
     /**
@@ -61,4 +59,16 @@ public class TracingSettings {
      */
     @NotNull
     private PropagationFormat propagationFormat = PropagationFormat.B3;
+
+    /**
+     * The maximum batch size for every span export.
+     */
+    @Positive
+    private int maxExportBatchSize = 512;
+
+    /**
+     * Delay interval between two consecutive exports in milliseconds..
+     */
+    @Positive
+    private long scheduleDelayMillis = 5000;
 }

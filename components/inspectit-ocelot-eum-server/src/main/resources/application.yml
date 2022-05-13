@@ -172,10 +172,14 @@ inspectit-eum-server:
         # If jaeger exporter for the OT received spans is enabled.
         enabled: IF_CONFIGURED
 
+        # The transport protocol
+        protocol: grpc
+
         # Location of the jaeger gRPC API.
         # Either a valid NameResolver-compliant URI, or an authority string.
         # If this property is not set, the jaeger-exporter will not be started.
-        # grpc: localhost:14250
+        # endpoint: localhost:14250
+
 
         # service name for all exported spans.
         service-name: browser-js
