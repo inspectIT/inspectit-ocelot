@@ -6,10 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
-import static org.awaitility.Awaitility.await;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public class HighPrecisionTimerTest {
@@ -25,6 +26,18 @@ public class HighPrecisionTimerTest {
         timer.destroy();
     }
 
+    private void sleepAtLeast(long ms) {
+        long start = System.nanoTime();
+        while ((System.nanoTime() - start) < ms * 1000 * 1000) {
+            long slept = (System.nanoTime() - start) / 1000 / 1000;
+            try {
+                Thread.sleep(ms - slept);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     @Nested
     class Start {
 
@@ -33,23 +46,26 @@ public class HighPrecisionTimerTest {
             createSpyTimer(1, 100, () -> false);
             for (int i = 0; i < 10; i++) {
                 timer.start();
-                await().atMost(15, TimeUnit.SECONDS).until(timer::isStarted);
+                sleepAtLeast(20);
             }
             verify(timer).startTimerSynchronized();
         }
 
 
         @Test
-        void verifyActionCalled() {
-            BooleanSupplier action = mock(BooleanSupplier.class);
-            doReturn(true).when(action).getAsBoolean();
+        void verifyActionCalled() throws InterruptedException {
+            CountDownLatch latch = new CountDownLatch(1);
+            BooleanSupplier action = () -> {
+                latch.countDown();
+                return true;
+            };
 
             createSpyTimer(1, 10, action);
 
             timer.start();
-            await().atMost(15, TimeUnit.SECONDS).until(timer::isStarted);
 
-            verify(action, atLeastOnce()).getAsBoolean();
+            boolean reachedZero = latch.await(5, TimeUnit.SECONDS);
+            assertThat(reachedZero).isTrue();
         }
 
         @Test
@@ -57,7 +73,7 @@ public class HighPrecisionTimerTest {
             createSpyTimer(1, 10, () -> true);
 
             timer.start();
-            await().atMost(15, TimeUnit.SECONDS).until(timer::isStarted);
+            sleepAtLeast(50);
             timer.start();
 
             verify(timer).startTimerSynchronized();
@@ -71,7 +87,7 @@ public class HighPrecisionTimerTest {
             }
             verify(timer).startTimerSynchronized();
 
-            await().atMost(15, TimeUnit.SECONDS).until(timer::isStarted);
+            sleepAtLeast(150);
             for (int i = 0; i < 2; i++) {
                 timer.start();
             }
