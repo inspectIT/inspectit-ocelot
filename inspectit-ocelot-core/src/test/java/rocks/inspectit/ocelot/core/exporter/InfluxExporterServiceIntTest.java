@@ -50,16 +50,6 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
         influx = builder.build();
         influx.start();
         url = "http://localhost:" + freeHttpPort;
-
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
-            try {
-                InfluxDB influxDB = InfluxDBFactory.connect(url, user, password);
-                Pong ping = influxDB.ping();
-                assertThat(ping.isGood()).isTrue();
-            } catch (InfluxDBIOException exception) {
-                // ignore
-            }
-        });
     }
 
     @AfterEach
@@ -100,17 +90,20 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
         }
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
-            InfluxDB iDB = InfluxDBFactory.connect(url, user, password); // note: user and password are mandatory as of v1.15.0
-            QueryResult result = iDB.query(new Query("SELECT LAST(cool_data) FROM " + DATABASE + ".autogen.my_test_measure GROUP BY *"));
+            try {
+                InfluxDB iDB = InfluxDBFactory.connect(url, user, password); // note: user and password are mandatory as of v1.15.0
+                QueryResult result = iDB.query(new Query("SELECT LAST(cool_data) FROM " + DATABASE + ".autogen.my_test_measure GROUP BY *"));
 
-            List<QueryResult.Result> results = result.getResults();
-            assertThat(results).hasSize(1);
-            QueryResult.Result data = results.get(0);
-            assertThat(data.getSeries()).hasSize(1);
-            QueryResult.Series series = data.getSeries().get(0);
-            assertThat(series.getTags()).hasSize(1).containsEntry("my_tag", "myval");
-            assertThat(series.getValues().get(0).get(1)).isEqualTo(42.0);
-
+                List<QueryResult.Result> results = result.getResults();
+                assertThat(results).hasSize(1);
+                QueryResult.Result data = results.get(0);
+                assertThat(data.getSeries()).hasSize(1);
+                QueryResult.Series series = data.getSeries().get(0);
+                assertThat(series.getTags()).hasSize(1).containsEntry("my_tag", "myval");
+                assertThat(series.getValues().get(0).get(1)).isEqualTo(42.0);
+            } catch (InfluxDBIOException exception) {
+                // ignore
+            }
         });
     }
 

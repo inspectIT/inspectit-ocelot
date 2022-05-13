@@ -1,6 +1,10 @@
 package rocks.inspectit.ocelot.core.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -20,9 +24,7 @@ public class ReflectionUtils {
      */
     public static Field makeFieldAccessibleAndRemoveFinal(Field field) throws NoSuchFieldException, IllegalAccessException {
         field.setAccessible(true);
-        Field modifiers = Field.class.getDeclaredField("modifiers");
-        modifiers.setAccessible(true);
-        modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        FieldUtils.removeFinalModifier(field);
         return field;
     }
 
@@ -36,33 +38,33 @@ public class ReflectionUtils {
      * @throws IllegalAccessException
      */
     public static void setFinalStatic(Field field, Object newValue) throws NoSuchFieldException, IllegalAccessException {
-        field = makeFieldAccessibleAndRemoveFinal(field);
-        field.set(null, newValue);
+        // see https://stackoverflow.com/questions/61141836/change-static-final-field-in-java-12
+        if (SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_12)) {
+            Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            unsafeField.setAccessible(true);
+            Unsafe unsafe = (Unsafe) unsafeField.get(null);
+
+            Object staticFieldBase = unsafe.staticFieldBase(field);
+            long staticFieldOffset = unsafe.staticFieldOffset(field);
+            unsafe.putObject(staticFieldBase, staticFieldOffset, newValue);
+        } else {
+            field = makeFieldAccessibleAndRemoveFinal(field);
+            field.set(null, newValue);
+        }
     }
 
     /**
-     * Gets the final static field for the given {@link Class}, makes it accessible
+     * Gets the field for the given {@link Class}, makes it accessible
      *
-     * @param clazz       The {@link Class} that contains the final static field
-     * @param fieldName   The name of the field
-     * @param removeFinal Whether to remove the {@link Modifier#FINAL} modifier from the field
+     * @param clazz     The {@link Class} that contains the final static field
+     * @param fieldName The name of the field
      *
-     * @return
-     *
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
+     * @return the specified field of the given class
      */
 
-    public static Field getFinalStaticFieldAndMakeAccessible(Class clazz, String fieldName, boolean removeFinal) throws NoSuchFieldException, IllegalAccessException {
-        Field field =  clazz.getDeclaredField(fieldName);
-
-        // make field accessible
-        if (removeFinal) {
-            ReflectionUtils.makeFieldAccessibleAndRemoveFinal(field);
-        } else {
-            field.setAccessible(true);
-        }
-
+    public static Field getAccessibleField(Class clazz, String fieldName) throws NoSuchFieldException, IllegalAccessException {
+        Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
         return field;
     }
 

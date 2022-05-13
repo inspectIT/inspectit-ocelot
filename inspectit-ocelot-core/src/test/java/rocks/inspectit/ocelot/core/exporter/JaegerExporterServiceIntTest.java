@@ -71,14 +71,11 @@ public class JaegerExporterServiceIntTest {
         @Test
         void verifyTraceSent() throws InterruptedException {
             Tracing.getTracer().spanBuilder("jaegerspan").setSampler(Samplers.alwaysSample()).startSpanAndRun(() -> {
+                System.out.println("dummy runnable");
             });
 
-            logger.info("Wait for Jaeger to process the span...");
-            Thread.sleep(1100L);
-
-            Instances.openTelemetryController.flush();
-
             await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
+                Instances.openTelemetryController.flush();
                 verify(postRequestedFor(urlPathEqualTo(JAEGER_THRIFT_PATH)));
             });
         }
