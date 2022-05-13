@@ -61,11 +61,21 @@ class ConfigDocsGeneratorTest {
         // doc-key
         List<ActionInputDocs> inputs1 = new ArrayList<>();
 
-        ActionInputDocs actionInputDocsMock = Mockito.mock(ActionInputDocs.class);
-        when(actionInputDocsMock.getName()).thenReturn("value");
-        when(actionInputDocsMock.getType()).thenReturn("Object");
-        when(actionInputDocsMock.getDescription()).thenReturn("Object to be printed");
-        inputs1.add(actionInputDocsMock);
+        ActionInputDocs actionInputDocsMock1 = Mockito.mock(ActionInputDocs.class);
+        when(actionInputDocsMock1.getName()).thenReturn("_arg1");
+        when(actionInputDocsMock1.getType()).thenReturn("Object");
+        when(actionInputDocsMock1.getDescription()).thenReturn("The _argN-th argument with which the instrumented method was called within which this action is getting executed.");
+        inputs1.add(actionInputDocsMock1);
+        ActionInputDocs actionInputDocsMock2 = Mockito.mock(ActionInputDocs.class);
+        when(actionInputDocsMock2.getName()).thenReturn("_attachments");
+        when(actionInputDocsMock2.getType()).thenReturn("ObjectAttachments");
+        when(actionInputDocsMock2.getDescription()).thenReturn("Allows you to attach values to objects instead of to the control flow, as done via _context.");
+        inputs1.add(actionInputDocsMock2);
+        ActionInputDocs actionInputDocsMock3 = Mockito.mock(ActionInputDocs.class);
+        when(actionInputDocsMock3.getName()).thenReturn("value");
+        when(actionInputDocsMock3.getType()).thenReturn("Object");
+        when(actionInputDocsMock3.getDescription()).thenReturn("Object to be printed");
+        inputs1.add(actionInputDocsMock3);
 
         actionWithDocInYaml = Mockito.mock(ActionDocs.class);
         when(actionWithDocInYaml.getName()).thenReturn("a_debug_println");
@@ -78,17 +88,17 @@ class ConfigDocsGeneratorTest {
         // Create a sample ActionDoc object where there was no documentation values in the YAML
         List<ActionInputDocs> inputs2 = new ArrayList<>();
 
-        ActionInputDocs actionInputDocsMock2 = Mockito.mock(ActionInputDocs.class);
-        when(actionInputDocsMock2.getName()).thenReturn("a");
-        when(actionInputDocsMock2.getType()).thenReturn("Object");
-        when(actionInputDocsMock2.getDescription()).thenReturn("");
-        inputs2.add(actionInputDocsMock2);
+        ActionInputDocs actionInputDocsMock4 = Mockito.mock(ActionInputDocs.class);
+        when(actionInputDocsMock4.getName()).thenReturn("a");
+        when(actionInputDocsMock4.getType()).thenReturn("Object");
+        when(actionInputDocsMock4.getDescription()).thenReturn("");
+        inputs2.add(actionInputDocsMock4);
 
-        ActionInputDocs actionInputDocsMock3 = Mockito.mock(ActionInputDocs.class);
-        when(actionInputDocsMock3.getName()).thenReturn("b");
-        when(actionInputDocsMock3.getType()).thenReturn("Object");
-        when(actionInputDocsMock3.getDescription()).thenReturn("");
-        inputs2.add(actionInputDocsMock3);
+        ActionInputDocs actionInputDocsMock5 = Mockito.mock(ActionInputDocs.class);
+        when(actionInputDocsMock5.getName()).thenReturn("b");
+        when(actionInputDocsMock5.getType()).thenReturn("Object");
+        when(actionInputDocsMock5.getDescription()).thenReturn("");
+        inputs2.add(actionInputDocsMock5);
 
         actionWithoutDocInYaml = Mockito.mock(ActionDocs.class);
         when(actionWithoutDocInYaml.getName()).thenReturn("a_debug_println_2");
