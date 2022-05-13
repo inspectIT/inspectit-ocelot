@@ -11,18 +11,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class RandomIdGenerator64BitTest {
-    int getBitSize (String s) {
-        return s.getBytes(StandardCharsets.UTF_8).length * 8;
+
+    int getBitSize(String string) {
+        return string.getBytes(StandardCharsets.UTF_8).length * 8;
     }
 
     @Nested
     class InvalidStringId {
+
         @Test
         public void is64Bit() {
             String id = RandomIdGenerator64Bit.INVALID_STRING_ID;
             assertThat(getBitSize(id)).isEqualTo(64);
         }
-
     }
 
     @Nested

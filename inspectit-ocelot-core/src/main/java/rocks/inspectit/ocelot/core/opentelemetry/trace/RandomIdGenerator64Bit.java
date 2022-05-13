@@ -3,16 +3,15 @@ package rocks.inspectit.ocelot.core.opentelemetry.trace;
 import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.internal.OtelEncodingUtils;
 import io.opentelemetry.api.internal.TemporaryBuffers;
-import io.opentelemetry.api.trace.SpanId;
-import io.opentelemetry.api.trace.TraceId;
 import io.opentelemetry.sdk.internal.RandomSupplier;
 import io.opentelemetry.sdk.trace.IdGenerator;
 
 import java.util.Random;
 import java.util.function.Supplier;
 
-import static io.opentelemetry.api.internal.OtelEncodingUtils.byteToBase16;
-
+/**
+ * Trace ID generator for generating 64 bit trace IDs. This class is based on the {@link io.opentelemetry.sdk.trace.RandomIdGenerator}.
+ */
 public enum RandomIdGenerator64Bit implements IdGenerator {
     INSTANCE;
 
@@ -20,6 +19,7 @@ public enum RandomIdGenerator64Bit implements IdGenerator {
 
     @VisibleForTesting
     static final String INVALID_STRING_ID = "00000000";
+
     private static final Supplier<Random> randomSupplier = RandomSupplier.platformDefault();
 
     @Override
@@ -32,25 +32,20 @@ public enum RandomIdGenerator64Bit implements IdGenerator {
         return generateId();
     }
 
-    private String generateId(){
+    private String generateId() {
         Random random = randomSupplier.get();
-        long idHi = random.nextLong();
-        long idLo;
+        long id;
         do {
-            idLo = random.nextLong();
-        } while (idLo == INVALID_ID);
+            id = random.nextLong();
+        } while (id == INVALID_ID);
 
-        if (idHi == 0 && idLo == 0) {
-            return INVALID_STRING_ID;
-        }
-        char[] chars = TemporaryBuffers.chars(32);
-        OtelEncodingUtils.longToBase16String(idHi, chars, 0);
-        OtelEncodingUtils.longToBase16String(idLo, chars, 16);
+        char[] chars = TemporaryBuffers.chars(16);
+        OtelEncodingUtils.longToBase16String(id, chars, 0);
         return new String(chars, 0, 8);
     }
 
     @Override
     public String toString() {
-        return "RandomIdGenerator{}";
+        return "RandomIdGenerator64Bit{}";
     }
 }
