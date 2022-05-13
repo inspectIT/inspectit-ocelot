@@ -7,7 +7,6 @@ on:
   pull_request:
     branches:
       - master
-      - feature/opentelemetry-migration
     paths-ignore:
       - 'components/**'
       - 'inspectit-ocelot-documentation/**'
