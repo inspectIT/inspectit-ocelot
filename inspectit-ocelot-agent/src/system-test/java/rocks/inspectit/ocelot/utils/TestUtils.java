@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.NoopOpenTelemetryController;
+import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -109,7 +110,8 @@ public class TestUtils {
                 getBean.setAccessible(true);
                 Object instrumentationManager = getBean.invoke(ctx, "instrumentationManager");
 
-                activeInstrumentations = (Cache<Class<?>, Object>) getField(instrumentationManager.getClass(), "activeInstrumentations").get(instrumentationManager);
+                activeInstrumentations = (Cache<Class<?>, Object>) getField(instrumentationManager.getClass(), "activeInstrumentations")
+                        .get(instrumentationManager);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -122,14 +124,14 @@ public class TestUtils {
      * This does not wait for potential hooks which will be created.
      */
     public static void waitForClassInstrumentations(Class<?>... clazz) {
-        waitForClassInstrumentations(Arrays.asList(clazz), false, 15, TimeUnit.MINUTES);
+        waitForClassInstrumentations(Arrays.asList(clazz), false, 15, TimeUnit.SECONDS);
     }
 
     /**
      * Waits until a hook for each of the given classes exist.
      */
     public static void waitForClassHooks(Class<?>... clazz) {
-        waitForClassHooks(Arrays.asList(clazz), 10, TimeUnit.MINUTES);
+        waitForClassHooks(Arrays.asList(clazz), 10, TimeUnit.SECONDS);
     }
 
     /**
@@ -339,12 +341,7 @@ public class TestUtils {
             Tracer tracer = GlobalOpenTelemetry.getTracer("io.opentelemetry.opencensusshim");
             Field tracerField = Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl")
                     .getDeclaredField("OTEL_TRACER");
-            // set static final field
-            tracerField.setAccessible(true);
-            Field modifiers = Field.class.getDeclaredField("modifiers");
-            modifiers.setAccessible(true);
-            modifiers.setInt(tracerField, tracerField.getModifiers() & ~Modifier.FINAL);
-            tracerField.set(null, tracer);
+            setFinalField(tracerField, tracer);
 
             logger.info("OTEL_TRACER updated to {} ({})", tracer, openTelemetry.getTracer("io.opentelemetry.opencensusshim"));
         } catch (Exception e) {
@@ -352,6 +349,16 @@ public class TestUtils {
         }
 
         return inMemSpanExporter;
+    }
+
+    private static void setFinalField(Field field, Object newValue) throws Exception {
+        Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+        unsafeField.setAccessible(true);
+        Unsafe unsafe = (Unsafe) unsafeField.get(null);
+
+        Object staticFieldBase = unsafe.staticFieldBase(field);
+        long staticFieldOffset = unsafe.staticFieldOffset(field);
+        unsafe.putObject(staticFieldBase, staticFieldOffset, newValue);
     }
 
     private static long getInstrumentationQueueLength() {

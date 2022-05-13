@@ -1,11 +1,10 @@
-package rocks.inspectit.ocelot.core.util;
+package rocks.inspectit.ocelot.core.utils;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.core.SpringTestBase;
-import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
