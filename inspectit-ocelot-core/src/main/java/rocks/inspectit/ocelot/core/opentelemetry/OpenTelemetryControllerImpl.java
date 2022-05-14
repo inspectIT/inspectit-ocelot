@@ -29,7 +29,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
-import rocks.inspectit.ocelot.core.opentelemetry.trace.RandomIdGenerator64Bit;
+import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
@@ -119,7 +119,12 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     private SdkTracerProvider tracerProvider;
 
     @Autowired
+    @VisibleForTesting
     InspectitEnvironment env;
+
+    @Autowired
+    @VisibleForTesting
+    CustomIdGenerator idGenerator;
 
     /**
      * The {@link DynamicSampler} used for tracing
@@ -341,14 +346,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
                 .setSampler(sampler)
                 .setResource(serviceNameResource)
-                .addSpanProcessor(spanProcessor);
-
-        if (env.getCurrentConfig().getTracing().isUse64BitTraceIds()) {
-            log.info("Use of trace IDs with a length of 64 bits.");
-            builder.setIdGenerator(RandomIdGenerator64Bit.INSTANCE);
-        } else {
-            log.info("Use of trace IDs with the default length (128 bits).");
-        }
+                .addSpanProcessor(spanProcessor)
+                .setIdGenerator(idGenerator);
 
         return builder.build();
     }

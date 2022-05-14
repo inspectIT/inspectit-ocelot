@@ -24,6 +24,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
+import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.lang.reflect.Method;
@@ -45,11 +46,15 @@ class OpenTelemetryControllerImplTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     InspectitEnvironment env;
 
+    @Mock
+    CustomIdGenerator idGenerator;
+
     @BeforeEach
     void initOpenTelemetryController() {
         // mock max-export-batch-size to avoid exceptions
         when(env.getCurrentConfig().getTracing().getMaxExportBatchSize()).thenReturn(512);
         openTelemetryController.env = env;
+        openTelemetryController.idGenerator = idGenerator;
         openTelemetryController.init();
         openTelemetryController.start();
         clearInvocations(openTelemetryController);

@@ -4,11 +4,11 @@ import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.trace.SpanContext;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.propagation.TextFormat;
-import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
 import rocks.inspectit.ocelot.core.instrumentation.context.propagation.DatadogFormat;
+import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -118,12 +118,24 @@ public class ContextPropagationUtil {
     public static Map<String, String> buildPropagationHeaderMap(Stream<Map.Entry<String, Object>> dataToPropagate, SpanContext spanToPropagate) {
         String contextCorrelationData = buildCorrelationContextHeader(dataToPropagate);
         HashMap<String, String> result = new HashMap<>();
+        if (spanToPropagate != null) {
+            propagationFormat.inject(spanToPropagate, result, MAP_INJECTOR);
+
+            if (CustomIdGenerator.isUsing64Bit()) {
+                String traceid = spanToPropagate.getTraceId().toLowerBase16();
+
+                for (Map.Entry<String, String> entry : result.entrySet()) {
+                    // we only trim the value in case it contains only the trace id (which is not the case when using the w3c trace context format)
+                    if (entry.getValue().equals(traceid)) {
+                        entry.setValue(traceid.substring(16));
+                    }
+                }
+            }
+        }
         if (contextCorrelationData.length() > 0) {
             result.put(CORRELATION_CONTEXT_HEADER, contextCorrelationData);
         }
-        if (spanToPropagate != null) {
-            propagationFormat.inject(spanToPropagate, result, MAP_INJECTOR);
-        }
+
         return result;
     }
 
@@ -320,7 +332,7 @@ public class ContextPropagationUtil {
                 log.info("Using Datadog format for context propagation.");
                 propagationFormat = DatadogFormat.INSTANCE;
                 break;
-             default:
+            default:
                 log.warn("The specified propagation format {} is not supported. Falling back to B3 format.", format);
                 propagationFormat = Tracing.getPropagationComponent().getB3Format();
         }
