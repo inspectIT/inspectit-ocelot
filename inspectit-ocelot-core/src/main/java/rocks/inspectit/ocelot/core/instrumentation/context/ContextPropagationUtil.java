@@ -123,11 +123,13 @@ public class ContextPropagationUtil {
 
             if (CustomIdGenerator.isUsing64Bit()) {
                 String traceid = spanToPropagate.getTraceId().toLowerBase16();
-
-                for (Map.Entry<String, String> entry : result.entrySet()) {
-                    // we only trim the value in case it contains only the trace id (which is not the case when using the w3c trace context format)
-                    if (entry.getValue().equals(traceid)) {
-                        entry.setValue(traceid.substring(16));
+                // do nothing in case trace ID is already 64bit
+                if (traceid.length() > 16) {
+                    for (Map.Entry<String, String> entry : result.entrySet()) {
+                        // we only trim the value in case it contains only the trace id (which is not the case when using the w3c trace context format)
+                        if (entry.getValue().equals(traceid)) {
+                            entry.setValue(traceid.substring(16));
+                        }
                     }
                 }
             }
