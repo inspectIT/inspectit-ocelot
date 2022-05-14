@@ -1,0 +1,101 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Breaking changes in 1.1 · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="## Changed default data-propagation behaviour"/><meta name="docsearch:version" content="1.16.0"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Breaking changes in 1.1 · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content="## Changed default data-propagation behaviour"/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>1.16.0</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/breaking-changes/1.1.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Breaking changes in 1.1</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="changed-default-data-propagation-behaviour"></a><a href="#changed-default-data-propagation-behaviour" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Changed default data-propagation behaviour</h2>
+<p>In previous versions data collected in <a href="/inspectit-ocelot/docs/1.16.0/instrumentation/rules">instrumentation rules</a> could already be used without
+explicitly defining it's propagation behaviour under <code>inspectit.instrumentation.data</code>. However, in this case the data
+would be automatically down-propagated and used as a tag, which comes with a performance penalty.</p>
+<p>To avoid unnecessary propagation and usage as tag for e.g. temporary local data, the behaviour had to be explicitly defined:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">data:</span>
+      <span class="hljs-attr">temp_variable:</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">NONE,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-literal">false</span><span class="hljs-string">}</span>
+</code></pre>
+<p>As these definitions could be easily forgotten, we changed the default behaviour of data:
+It now does <em>not</em> propagate and is <em>not</em> used as a tag automatically. The exception hereby
+is (a) if the data is a <a href="/inspectit-ocelot/docs/1.16.0/metrics/common-tags">common tag</a> or (b) the data is used as a tag in any
+<a href="/inspectit-ocelot/docs/1.16.0/metrics/custom-metrics">metric definition</a>. Common Tags default to JVM_LOCAL down propagation and being a tag.
+When a data_key is also used as a tag in a metric definition, it defaults to being a tag but the propagation is not affected.
+You can still freely override the behaviour by configuring the settings for your data under <code>inspectit.instrumentation.data</code>.
+For details see the corresponding <a href="/inspectit-ocelot/docs/1.16.0/instrumentation/rules#defining-the-behaviour">documentation section</a>.</p>
+<p>This is a breaking change because your configurations might not work as expected anymore.
+You now have to make sure that for each data, where you expect down-propagation to take place, you add a behaviour definition:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">data:</span>
+      <span class="hljs-attr">down_propagated_var:</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">JVM_LOCAL}</span>
+</code></pre>
+<p>The change of the <code>is-tag</code> setting usually should not affect you, as it automatically picks up tags from the metrics definitions.</p>
+<h2><a class="anchor" aria-hidden="true" id="changed-metric-collection-configuration"></a><a href="#changed-metric-collection-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Changed metric collection configuration</h2>
+<p>In previous versions Ocelot allowed the short notation in the configuration when defining the metrics collection.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment">#inspectit.instrumentation.rules is omitted here</span>
+<span class="hljs-attr">example_rule:</span>
+  <span class="hljs-comment">#...</span>
+  <span class="hljs-attr">exit:</span>
+    <span class="hljs-attr">method_duration:</span>
+      <span class="hljs-comment">#action invocation here....</span>
+
+  <span class="hljs-attr">metrics:</span>
+    <span class="hljs-string">'[method/duration]'</span> <span class="hljs-string">:</span> <span class="hljs-string">method_duration</span>
+</code></pre>
+<p>This notation is now deprecated and has to be migrated to the explicit notation:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-comment">#inspectit.instrumentation.rules is omitted here</span>
+<span class="hljs-attr">example_rule:</span>
+  <span class="hljs-comment">#...</span>
+  <span class="hljs-attr">exit:</span>
+    <span class="hljs-attr">method_duration:</span>
+      <span class="hljs-comment">#action invocation here....</span>
+    <span class="hljs-attr">method_name:</span>
+      <span class="hljs-comment">#action invocation here....</span>
+
+  <span class="hljs-attr">metrics:</span>
+    <span class="hljs-string">'[method/duration]'</span><span class="hljs-string">:</span> 
+      <span class="hljs-attr">value:</span> <span class="hljs-string">method_duration</span>
+      <span class="hljs-attr">constant-tags:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">checkout</span>
+      <span class="hljs-attr">data-tags:</span>
+        <span class="hljs-attr">method_name:</span> <span class="hljs-string">method_name</span>
+</code></pre>
+<p>This is a breaking change because your configurations might not work as expected anymore.
+In previous versions tags were automatically picked up from the tag context at the moment of the metric recording.
+The new notation allows explicit and flexible definition of constant and data tags to be collected with their associated values.
+Staying with the short notation means that metric recording will only include addition of the common tags and values, thus most likely breaking the expected behavior.</p>
+<p>More information about the new notation can be found in the <a href="/inspectit-ocelot/docs/1.16.0/instrumentation/rules#collecting-metrics">collecting metrics</a> section.</p>
+<h2><a class="anchor" aria-hidden="true" id="changed-eum-server-tag-configuration"></a><a href="#changed-eum-server-tag-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Changed EUM server tag configuration</h2>
+<p>In previous versions of the EUM Server, tags derived from beacon values were specified as follows:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit-eum-server:</span>
+  <span class="hljs-attr">tags:</span>
+    <span class="hljs-attr">beacon:</span>
+      <span class="hljs-attr">URL:</span> <span class="hljs-string">u</span>
+</code></pre>
+<p>This has been extended with the possibility to perform regex replacements, therefore the equivalent configuration now looks as follows:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit-eum-server:</span>
+  <span class="hljs-attr">tags:</span>
+    <span class="hljs-attr">beacon:</span>
+      <span class="hljs-attr">URL:</span> 
+        <span class="hljs-attr">input:</span> <span class="hljs-string">u</span>
+</code></pre>
+<p>For the details on how to perform regex replacements see the <a href="/inspectit-ocelot/docs/1.16.0/enduser-monitoring/enduser-monitoring-server#tags-definition">EUM server documentation</a>.</p>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 3/5/2020 by Marius Oehler</em></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#changed-default-data-propagation-behaviour">Changed default data-propagation behaviour</a></li><li><a href="#changed-metric-collection-configuration">Changed metric collection configuration</a></li><li><a href="#changed-eum-server-tag-configuration">Changed EUM server tag configuration</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2022 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'P7JV0ZK66K',
+                apiKey: 'd499024131bf8d92e6d469a6c14f4798',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:1.16.0"]}
+              });
+            </script></body></html>
