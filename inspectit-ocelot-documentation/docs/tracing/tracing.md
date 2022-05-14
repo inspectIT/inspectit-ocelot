@@ -69,3 +69,18 @@ Currently the following formats are supported for sending correlation informatio
 :::important
 It is important to note that this configuration refers to the format of the correlation information used to **send this data**. When processing correlation information that the agent receives, it automatically uses the correct format.
 :::
+
+### Using 64-Bit Trace IDs
+
+Since version 2.0.0, the inspectIT Ocelot Agent is able to generate trace IDs with a size of 64 bits instead of the 128 bit trace IDs used by default by the agent.
+The functionality that trace IDs with a length of 64 bits are generated can be activated with the following configuration:
+
+```YAML
+inspectit:
+  tracing:
+    use-64-bit-trace-ids: true
+```
+
+:::important
+Please note that some propagation formats do not support 64-bit Ids, such as the W3C "Trace Context". In this case the 64-bit trace IDs are padded with leading zeros.
+:::
