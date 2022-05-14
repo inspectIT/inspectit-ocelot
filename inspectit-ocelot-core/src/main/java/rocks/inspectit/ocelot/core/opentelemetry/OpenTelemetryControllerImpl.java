@@ -29,6 +29,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
+import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
@@ -118,7 +119,12 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     private SdkTracerProvider tracerProvider;
 
     @Autowired
+    @VisibleForTesting
     InspectitEnvironment env;
+
+    @Autowired
+    @VisibleForTesting
+    CustomIdGenerator idGenerator;
 
     /**
      * The {@link DynamicSampler} used for tracing
@@ -310,7 +316,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         // if any OpenTelemetry has already been registered to GlobalOpenTelemetry, reset it.
         if (null != OpenTelemetryUtils.getGlobalOpenTelemetry()) {
             // we need to reset it before we can register our custom OpenTelemetryImpl, as GlobalOpenTelemetry is throwing an exception if we want to register a new OpenTelemetry if a previous one is still registered.
-            log.info("Reset previously registered GlobalOpenTelemetry ({}) during the initialization of {} to register {}", GlobalOpenTelemetry.get()
+            log.info("Reset previously registered GlobalOpenTelemetry ({}) during the initialization of {} to register {}", GlobalOpenTelemetry
+                    .get()
                     .getClass()
                     .getName(), getName(), openTelemetry.getClass().getSimpleName());
             GlobalOpenTelemetry.resetForTest();
@@ -339,7 +346,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
                 .setSampler(sampler)
                 .setResource(serviceNameResource)
-                .addSpanProcessor(spanProcessor);
+                .addSpanProcessor(spanProcessor)
+                .setIdGenerator(idGenerator);
+
         return builder.build();
     }
 
