@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
+import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -94,6 +95,16 @@ public class LogPreloaderTest {
                     .count()).isEqualTo(DEFAULT_BUFFER_SIZE + 1);
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs()
                     .spliterator(), false)).extracting(ILoggingEvent::getLevel).containsOnly(Level.ERROR);
+        }
+
+        @Test
+        void sendInvalidationEvents() {
+            logPreloader.onLoggingEvent(warnEvent, null);
+            logPreloader.onInvalidationEvent(new InstrumentationConfigurationChangedEvent(this, null, null));
+
+            assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false).count()).isEqualTo(2);
+            assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false)
+                    .map(ILoggingEvent::getFormattedMessage)).allMatch(s -> s.contains("Dummy") || s.contains("Instrumentation configuration changed!"));
         }
 
     }

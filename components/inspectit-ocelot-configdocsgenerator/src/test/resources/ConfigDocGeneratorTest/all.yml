@@ -21,6 +21,8 @@ inspectit:
           since: '1.0'
         input:
           value: Object
+          _arg1: Object
+          _attachments: ObjectAttachments
         is-void: true
         value: System.out.println(value);
 
@@ -38,7 +40,7 @@ inspectit:
           - name: executeUpdate
         advanced:
           instrument-only-inherited-methods: true
-      
+
     rules:
       r_tracing_global_attributes:
         exit:

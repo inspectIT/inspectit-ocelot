@@ -2,6 +2,34 @@
 id: Breaking Changes
 title: Breaking Changes
 ---
+## Breaking changes in 2.0.0
+
+### Integration of the OpenTelemetry OpenCensus Shim
+
+Starting with the current release, inspectIT Ocelot migrates from OpenCensus to [OpenTelemetry](https://github.com/open-telemetry). As a first step, we include the [OpenTelemetry OpenCensus Shim](https://github.com/open-telemetry/opentelemetry-java/tree/main/opencensus-shim). inspectIT Ocelot still uses and supports the [OpenCensus-API](https://opencensus.io/quickstart/java/), but the exporter implementations of OpenTelemetry are used.
+
+### AutoTracing currently not available
+
+Due to the migration from OpenCensus to OpenTelemetry, the agent's AutoTracing feature is currently **not** available.
+The AutoTracing feature will be available again in the next release of the inspectIT Ocelot agent.
+
+### Updated and removed exporter 
+
+#### Removed `OpenCensusAgentExporter`
+
+Due to the migration from OpenCensus to OpenTelemetry, the `OpenCensus Agent Exporter` (for metrics and traces) has been removed and will not be supported in the future.
+
+#### Added `OTLPMetricsExporter` and `OTLPTraceExporter`
+
+Due to the migration to OpenTelemetry, inspectIT Ocelot now supports OpenTelemetry Protocol (OTLP) exporter for metrics and tracing.
+
+#### Exporter property `url` and `grpc` replaced by `endpoint`
+
+Due to the migration to OpenTelemetry, we approach the naming of OpenTelemetry for the exporters' properties. For this, the previously used properties `url` and `grpc` are replaced by the property `endpoint`. The deprecated properties `url` and `grpc` are still supported in this release but will be removed in future releases.
+
+#### New property `protocol` for Jaeger and OTLP exporter
+
+This release introduces the property `protocol` for the Jaeger and OpenTelemetry Protocol (OTLP) exporter. In case for Jaeger, supported protocols are `http/thrift` and `grpc`. For OTLP, supported protocols are `grpc` and `http/protobuf`.
 
 ## Breaking changes in 1.16.0
 

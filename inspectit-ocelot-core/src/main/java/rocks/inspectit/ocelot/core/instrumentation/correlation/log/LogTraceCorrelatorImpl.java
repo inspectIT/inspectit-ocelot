@@ -2,7 +2,6 @@ package rocks.inspectit.ocelot.core.instrumentation.correlation.log;
 
 import io.opencensus.trace.SpanContext;
 import io.opencensus.trace.TraceId;
-import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
@@ -32,13 +31,11 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
     @Setter
     private String traceIdKey;
 
-    private final Tracer tracer = Tracing.getTracer();
-
     @Override
     public AutoCloseable startCorrelatedSpanScope(Supplier<? extends AutoCloseable> spanScopeStarter) {
-        TraceId oldId = tracer.getCurrentSpan().getContext().getTraceId();
+        TraceId oldId = Tracing.getTracer().getCurrentSpan().getContext().getTraceId();
         AutoCloseable spanScope = spanScopeStarter.get();
-        SpanContext newContext = tracer.getCurrentSpan().getContext();
+        SpanContext newContext = Tracing.getTracer().getCurrentSpan().getContext();
         TraceId newId = newContext.getTraceId();
         if (oldId.equals(newId) || !newContext.isValid() || !newContext.getTraceOptions().isSampled()) {
             return spanScope;
@@ -55,6 +52,7 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
      * Injects the given span context into all configured MDCs.
      *
      * @param context the context to inject
+     *
      * @return an {@link InjectionScope} to revert the injection and restore the initial state of the MDC
      */
     private InjectionScope injectTraceContextInMdc(SpanContext context) {
@@ -86,7 +84,7 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
 
     @Override
     public InjectionScope injectTraceIdIntoMdc() {
-        return injectTraceContextInMdc(tracer.getCurrentSpan().getContext());
+        return injectTraceContextInMdc(Tracing.getTracer().getCurrentSpan().getContext());
     }
 }
 

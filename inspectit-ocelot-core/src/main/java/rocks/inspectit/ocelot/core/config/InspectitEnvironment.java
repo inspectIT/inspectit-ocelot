@@ -211,7 +211,12 @@ public class InspectitEnvironment extends StandardEnvironment {
             currentSources.forEach(ps -> propsList.remove(ps.getName()));
             fallbackSources.forEach(ps -> propsList.addLast(ps));
 
-            currentConfig = loadAndValidateFromProperties(INSPECTIT_ROOT_PREFIX, InspectitConfig.class).get();
+            Optional<InspectitConfig> fallbackConfig = loadAndValidateFromProperties(INSPECTIT_ROOT_PREFIX, InspectitConfig.class);
+            if (fallbackConfig.isPresent()) {
+                currentConfig = fallbackConfig.get();
+            } else {
+                throw new RuntimeException("The fallback configuration could not be parsed, probably due to a validation error. See logs for further information.");
+            }
 
             fallbackSources.forEach(ps -> propsList.remove(ps.getName()));
             currentSources.forEach(ps -> propsList.addLast(ps));

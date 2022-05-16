@@ -11,7 +11,11 @@ test {
     useJUnitPlatform()
 
     jvmArgs '-Xmx512m', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:HeapDumpPath=/__w/inspectit-ocelot/inspectit-ocelot/test_heapdump.bin'
-
+    // enable reflection used in relation with OpenTelemetry for JDK 11 and later
+    if(JavaVersion.current() >= JavaVersion.VERSION_11) {
+        // --add-opens has the following syntax: {A}/{package}={B}
+        jvmArgs "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED"
+    }
     testLogging {
         exceptionFormat = 'full'
     }
@@ -22,9 +26,19 @@ sourceCompatibility = 1.8
 dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
-            "io.opencensus:opencensus-api:${openCensusVersion}",
-            "io.opencensus:opencensus-impl:${openCensusVersion}",
-            "org.projectlombok:lombok:${lombokVersion}"
+            'org.projectlombok:lombok:1.18.12',
+
+            // OpenTelemetry
+            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
+            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
+            'io.opentelemetry:opentelemetry-api',
+            "io.opentelemetry:opentelemetry-sdk",
+            "io.opentelemetry:opentelemetry-sdk-metrics",
+            "io.opentelemetry:opentelemetry-semconv",
+            // OC-OTel bridge
+            "io.opentelemetry:opentelemetry-opencensus-shim",
+
+
     )
     buildTools(
             'jarcheck:jarcheck:1.5'
@@ -35,7 +49,7 @@ dependencies {
             project(':inspectit-ocelot-config'),
             project(':inspectit-ocelot-sdk'),
 
-            // spring releated
+            // spring related
             "org.springframework.boot:spring-boot:${springVersion}",
             'org.yaml:snakeyaml:1.30',
             'javax.annotation:javax.annotation-api:1.3.2', //Required for @PostConstruct and @PreDestroy to work in Java9+
@@ -57,14 +71,26 @@ dependencies {
 
             'org.javassist:javassist:3.24.1-GA',
 
-            // OpenCensus exporters
-            "io.opencensus:opencensus-exporter-stats-prometheus:${openCensusVersion}",
+            // Metrics exporters
             "io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
-            "io.opencensus:opencensus-exporter-trace-zipkin:${openCensusVersion}",
-            "io.opencensus:opencensus-exporter-trace-jaeger:${openCensusVersion}",
-            "io.opencensus:opencensus-exporter-metrics-ocagent:${openCensusVersion}",
 
-            "io.opencensus:opencensus-exporter-trace-ocagent:${openCensusVersion}",
+            // we still need the OpenCensus SDK for the metric exporters to work, as the shim only includes opencensus-impl-core
+            "io.opencensus:opencensus-impl:${openCensusVersion}",
+
+            // OpenTelemetry exporters
+            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
+            "io.opentelemetry:opentelemetry-exporter-logging",
+            "io.opentelemetry:opentelemetry-exporter-jaeger",
+            "io.opentelemetry:opentelemetry-exporter-jaeger-thrift",
+            "io.opentelemetry:opentelemetry-exporter-zipkin",
+            "io.opentelemetry:opentelemetry-exporter-otlp",
+            "io.opentelemetry:opentelemetry-exporter-otlp-http-trace",
+            "io.opentelemetry:opentelemetry-exporter-otlp-metrics",
+            "io.opentelemetry:opentelemetry-exporter-otlp-http-metrics",
+
+            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
+            "io.opentelemetry:opentelemetry-exporter-prometheus",
+
             // The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
             // See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
             "io.netty:netty-tcnative-boringssl-static:${tcnativeVersion}",
@@ -72,15 +98,19 @@ dependencies {
             "rocks.inspectit:opencensus-influxdb-exporter:1.2",
 
             // bytecode manipulation
-            "net.bytebuddy:byte-buddy:1.11.15",
-
-            // use older gson version than v2.8.6 (what OC v0.26+ uses), as v2.8.6 does not work with checkDependencyJavaVersions, see https://github.com/google/gson/issues/1627
-            "com.google.code.gson:gson:2.8.5!!"
+            "net.bytebuddy:byte-buddy:1.11.15"
     )
 
     testImplementation(
             project(':inspectit-ocelot-bootstrap'),
-            "io.opencensus:opencensus-impl:${openCensusVersion}",
+            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
+            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
+            "io.opentelemetry:opentelemetry-sdk",
+            "io.opentelemetry:opentelemetry-sdk-metrics",
+            "io.opentelemetry:opentelemetry-opencensus-shim",
+            "io.opentelemetry:opentelemetry-semconv",
+            "io.opentelemetry:opentelemetry-sdk-testing",
+            "io.opentelemetry:opentelemetry-proto:1.7.1-alpha",
 
             // matching the spring-core version used in the currently used version of spring boot version
             'org.springframework:spring-test:5.3.14',
@@ -88,23 +118,39 @@ dependencies {
             'org.junit.jupiter:junit-jupiter-api:5.8.2',
             'org.mockito:mockito-junit-jupiter:4.2.0',
 
+            // to make use of SpyBean
+            "org.springframework.boot:spring-boot-test:2.1.4.RELEASE",
+
             'org.apache.httpcomponents:httpclient:4.5.6',
             "org.mockito:mockito-core:${mockitoVersion}",
             'org.assertj:assertj-core:3.11.1',
             'org.assertj:assertj-guava:3.2.1',
             'org.awaitility:awaitility:3.1.5',
             "com.github.tomakehurst:wiremock-jre8-standalone:2.32.0",
-            "io.grpc:grpc-netty-shaded:1.20.0",
-            "io.grpc:grpc-stub:1.20.0",
+            "io.grpc:grpc-netty-shaded:${grpcVersion}",
+            "io.grpc:grpc-stub:${grpcVersion}",
             'org.influxdb:influxdb-java:2.15',
             'io.apisense.embed.influx:embed-influxDB:1.2.1',
 
+            // for docker test containers
+            'org.testcontainers:testcontainers:1.15.2',
+            'org.testcontainers:junit-jupiter:1.15.2',
+
+            // ServerExtension
+            'com.linecorp.armeria:armeria-junit5:1.14.1',
+            'com.linecorp.armeria:armeria-grpc-protocol:1.14.1',
+
+            'com.google.protobuf:protobuf-java-util:3.15.7',
+
             // LogCapturer
-            'io.github.netmikey.logunit:logunit-core:1.1.3'
+            'io.github.netmikey.logunit:logunit-core:1.1.3',
+            // jul-slf4j bridge needed to redirect OTEL logs using java.util.logging to logback
+            "org.slf4j:jul-to-slf4j:1.7.5",
     )
     testRuntimeOnly (
             'org.junit.jupiter:junit-jupiter-engine:5.8.2',
-            'io.github.netmikey.logunit:logunit-logback:1.1.3'
+            // LogCapturer
+            'io.github.netmikey.logunit:logunit-logback:1.1.3',
     )
 
     jmh(
@@ -116,7 +162,13 @@ dependencies {
 
 // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
 task checkDependencyJavaVersions {
-    def excludes = ["byte-buddy"]
+    def excludes = ["byte-buddy",
+                    // exclude OpenTelemetry as they guarantee JDK 8 support
+                    "opentelemetry",
+                    // exclude jackson which is being used by OTel
+                    "jackson",
+                    // exclude kotlin-stdlib which is being used by opentelemetry-exporter-jaeger-thrift
+                    "kotlin-stdlib"]
 
     def jarCheckPath = "$buildDir/jarCheck"
     outputs.dir jarCheckPath

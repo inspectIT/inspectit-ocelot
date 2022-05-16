@@ -38,6 +38,8 @@ inspectit:
     auto-tracing:
       frequency: 50ms
       shutdown-delay: 30s
+    # whether the agent should use 64 bit trace ids instead of 128 bit trace ids
+    use-64-bit-trace-ids: false
     # settings regarding log correlation
     log-correlation:
       trace-id-mdc-injection:
@@ -60,6 +62,10 @@ inspectit:
         prefix: "[TraceID: "
         # the suffix to use when injecting a trace id
         suffix: "]"
+    # the maximum batch size for every span export, i.e., the maximum number of spans exported by the used BatchSpanProcessor
+    max-export-batch-size: 512
+    # the delay interval between two consecutive exports in milliseconds.
+    schedule-delay-millis: 5000
 
   # general settings regarding metrics capturing
   metrics:

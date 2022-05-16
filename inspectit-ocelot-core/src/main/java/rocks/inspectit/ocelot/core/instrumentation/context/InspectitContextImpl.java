@@ -1,12 +1,14 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
-import io.grpc.Context;
 import io.opencensus.common.Function;
 import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
+import io.opencensus.trace.ContextHandle;
 import io.opencensus.trace.Span;
 import io.opencensus.trace.SpanContext;
 import io.opencensus.trace.Tracing;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.ContextKey;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
@@ -77,7 +79,9 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     private static final Set<Class<?>> ALLOWED_TAG_TYPES = new HashSet<>(Arrays.asList(String.class, Character.class, Long.class, Integer.class, Short.class, Byte.class, Double.class, Float.class, Boolean.class));
 
-    static final Context.Key<InspectitContextImpl> INSPECTIT_KEY = Context.key("inspectit-context");
+    static final io.opentelemetry.context.ContextKey<InspectitContextImpl> INSPECTIT_KEY = ContextKey.named("inspectit-context");
+
+    static final io.grpc.Context.Key<InspectitContextImpl> INSPECTIT_KEY_GRPC = io.grpc.Context.key("inspectit-context");
 
     /**
      * Points to the parent from which this context inherits its data and to which potential up-propagation is performed.
@@ -107,7 +111,12 @@ public class InspectitContextImpl implements InternalInspectitContext {
     /**
      * Holds the previous GRPC context which was overridden when attaching this context as active in GRPC.
      */
-    private Context overriddenGrpcContext;
+    private io.grpc.Context overriddenGrpcContext;
+
+    /**
+     * Holds the current {@link io.opentelemetry.context.Scope} associated with OTELs {@link Context}, which was obtained when attaching this context as active in OTEL
+     */
+    private io.opentelemetry.context.Scope currentOtelScope;
 
     /**
      * The span which was (potentially) opened by invoking {@link #enterSpan(Span)}
@@ -209,7 +218,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * @return the newly created context
      */
     public static InspectitContextImpl createFromCurrent(Map<String, String> commonTags, PropagationMetaData defaultPropagation, boolean interactWithApplicationTagContexts) {
-        InspectitContextImpl parent = INSPECTIT_KEY.get();
+        InspectitContextImpl parent = ContextUtil.currentInspectitContext();
+
         InspectitContextImpl result = new InspectitContextImpl(parent, defaultPropagation, interactWithApplicationTagContexts);
 
         if (parent == null) {
@@ -263,7 +273,10 @@ public class InspectitContextImpl implements InternalInspectitContext {
         }
         cachedActivePhaseDownPropagatedData = postEntryPhaseDownPropagatedData;
 
-        overriddenGrpcContext = Context.current().withValue(INSPECTIT_KEY, this).attach();
+        // store the Context in OTEL
+        currentOtelScope = ContextUtil.current().with(INSPECTIT_KEY, this).makeCurrent();
+        // store the Context in GRPC context
+        overriddenGrpcContext = ContextUtil.currentGrpc().withValue(INSPECTIT_KEY_GRPC, this).attach();
 
         if (interactWithApplicationTagContexts) {
             Tagger tagger = Tags.getTagger();
@@ -304,7 +317,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * @return true, if {@link #makeActive()} was called but {@link #close()} was not called yet
      */
     public boolean isInActiveOrExitPhase() {
-        return overriddenGrpcContext != null;
+        return currentOtelScope != null;
     }
 
     /**
@@ -377,7 +390,16 @@ public class InspectitContextImpl implements InternalInspectitContext {
         if (openedDownPropagationScope != null) {
             openedDownPropagationScope.close();
         }
-        Context.current().detach(overriddenGrpcContext);
+
+        // close the current OTEL scope to restore the previous scope
+        if (null != currentOtelScope) {
+            currentOtelScope.close();
+        }
+
+        // detach the overridden GRPC context
+        if (null != overriddenGrpcContext){
+            ContextUtil.currentGrpc().detach(overriddenGrpcContext);
+        }
 
         if (currentSpanScope != null) {
             try {
@@ -394,6 +416,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         openedDownPropagationScope = null;
         currentSpanScope = null;
         parent = null;
+        currentOtelScope = null;
         overriddenGrpcContext = null;
     }
 
@@ -426,14 +449,12 @@ public class InspectitContextImpl implements InternalInspectitContext {
                 spanContext = null;
             }
         }
-        return ContextPropagationUtil.buildPropagationHeaderMap(getDataAsStream().filter(e -> propagation.isPropagatedDownGlobally(e
-                .getKey())), spanContext);
+        return ContextPropagationUtil.buildPropagationHeaderMap(getDataAsStream().filter(e -> propagation.isPropagatedDownGlobally(e.getKey())), spanContext);
     }
 
     @Override
     public Map<String, String> getUpPropagationHeaders() {
-        return ContextPropagationUtil.buildPropagationHeaderMap(getDataAsStream().filter(e -> propagation.isPropagatedUpGlobally(e
-                .getKey())));
+        return ContextPropagationUtil.buildPropagationHeaderMap(getDataAsStream().filter(e -> propagation.isPropagatedUpGlobally(e.getKey())));
     }
 
     @Override

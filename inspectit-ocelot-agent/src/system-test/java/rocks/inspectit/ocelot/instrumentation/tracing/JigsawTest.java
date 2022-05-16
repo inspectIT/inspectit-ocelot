@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.instrumentation.tracing;
 
-import io.opencensus.trace.AttributeValue;
+import io.opentelemetry.api.common.AttributeKey;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.utils.TestUtils;
@@ -23,8 +23,7 @@ public class JigsawTest extends TraceTestBase {
         assertSpansExported(spans -> {
             assertThat(spans).anySatisfy((span) -> {
                 assertThat(span.getName()).isEqualTo("DriverManager.getDrivers");
-                assertThat(span.getAttributes().getAttributeMap().get("test"))
-                        .isEqualTo(AttributeValue.stringAttributeValue("success"));
+                assertThat(span.getAttributes().asMap().get(AttributeKey.stringKey("test"))).isEqualTo("success");
             });
         });
     }

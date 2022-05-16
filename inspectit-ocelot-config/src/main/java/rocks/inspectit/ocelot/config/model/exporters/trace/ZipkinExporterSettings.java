@@ -13,14 +13,15 @@ public class ZipkinExporterSettings {
      */
     private ExporterEnabledState enabled;
 
+    @Deprecated
     /**
+     * This property is deprecated since v2.0. Please use {@link #endpoint} instead.
      * The URL of the Zipkin server.
-     */
-    private String url;
+     */ private String url;
 
     /**
-     * The service name under which traces are published, defaults to inspectit.service-name;
+     * The URL endpoint of the Zipkin server.
      */
-    private String serviceName;
+    private String endpoint;
 
 }

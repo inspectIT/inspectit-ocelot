@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.config.spring;
 
+import org.hibernate.validator.internal.constraintvalidators.hv.LengthValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import rocks.inspectit.ocelot.bootstrap.Instances;
@@ -8,6 +9,7 @@ import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopTraceIdInjector;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopHookManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopObjectAttachments;
+import rocks.inspectit.ocelot.bootstrap.opentelemetry.NoopOpenTelemetryController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
@@ -15,6 +17,7 @@ import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachmentsImpl;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.LogTraceCorrelatorImpl;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MdcAccessManager;
+import rocks.inspectit.ocelot.core.opentelemetry.OpenTelemetryControllerImpl;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import javax.annotation.PreDestroy;
@@ -52,6 +55,11 @@ public class BootstrapInitializerConfiguration {
         return new LogTraceCorrelatorImpl(mdcAccessManager, traceIdKey);
     }
 
+    @Bean(OpenTelemetryControllerImpl.BEAN_NAME)
+    public OpenTelemetryControllerImpl getOpenTelemetryController() {
+        return new OpenTelemetryControllerImpl();
+    }
+
     @PreDestroy
     void destroy() {
         Instances.contextManager = NoopContextManager.INSTANCE;
@@ -59,5 +67,6 @@ public class BootstrapInitializerConfiguration {
         Instances.hookManager = NoopHookManager.INSTANCE;
         Instances.logTraceCorrelator = NoopLogTraceCorrelator.INSTANCE;
         Instances.traceIdInjector = NoopTraceIdInjector.INSTANCE;
+        Instances.openTelemetryController = NoopOpenTelemetryController.INSTANCE;
     }
 }

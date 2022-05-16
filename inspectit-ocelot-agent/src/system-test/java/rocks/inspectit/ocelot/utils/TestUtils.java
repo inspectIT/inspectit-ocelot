@@ -11,11 +11,27 @@ import io.opencensus.tags.InternalUtils;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.awaitility.core.ConditionTimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
+import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.bootstrap.opentelemetry.NoopOpenTelemetryController;
+import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -30,6 +46,8 @@ public class TestUtils {
     private static Cache<Class<?>, Object> activeInstrumentations = null;
 
     public static ConcurrentHashMap<Class<?>, Long> instrumentationTimeStamp = new ConcurrentHashMap<>();
+
+    private static final Logger logger = LoggerFactory.getLogger(TestUtils.class);
 
     static {
         Thread poller = new Thread(() -> {
@@ -148,7 +166,7 @@ public class TestUtils {
             for (Class<?> clazz : clazzes) {
                 Long timeStamp = instrumentationTimeStamp.get(clazz);
                 if (timeStamp == null) {
-                    System.out.println(clazz.getName() + " was not instrumented!");
+                    logger.info("{} was not instrumented!", clazz.getName());
                     missingClassCount++;
                 }
             }
@@ -172,7 +190,7 @@ public class TestUtils {
             Map<Class<?>, Object> hooksMap = getHooksMap();
             for (Class<?> clazz : clazzes) {
                 if (!hooksMap.containsKey(clazz)) {
-                    System.out.println("No hooks were created for class " + clazz.getName());
+                    logger.info("No hookes were created for class {}", clazz.getName());
                 }
             }
             throw ex;
@@ -185,9 +203,10 @@ public class TestUtils {
      */
     public static void waitForOpenCensusQueueToBeProcessed() {
         CountDownLatch latch = new CountDownLatch(1);
+        // TODO: re-implement with OTel
         DisruptorEventQueue.getInstance().enqueue(latch::countDown);
         try {
-            latch.await(30, TimeUnit.SECONDS);
+            latch.await(3, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -285,6 +304,61 @@ public class TestUtils {
                 .findFirst();
         assertThat(series).isNotEmpty();
         return series.get();
+    }
+
+    /**
+     * Initialize {@link io.opentelemetry.api.OpenTelemetry} with a {@link InMemorySpanExporter} so that we can access the exported {@link io.opentelemetry.api.trace.Span Spans}
+     *
+     * @return The {@link InMemorySpanExporter} that can be used to retrieve exported {@link io.opentelemetry.api.trace.Span Spans}
+     */
+    public static InMemorySpanExporter initializeOpenTelemetryForSystemTesting() {
+
+        if (NoopOpenTelemetryController.INSTANCE != Instances.openTelemetryController) {
+            logger.info("shut down " + Instances.openTelemetryController.getClass().getSimpleName());
+
+            // shut down any previously configured OTELs
+            Instances.openTelemetryController.shutdown();
+            Instances.openTelemetryController = NoopOpenTelemetryController.INSTANCE;
+        }
+        // create an SdkTracerProvider with InMemorySpanExporter and LoggingSpanExporter
+        InMemorySpanExporter inMemSpanExporter = InMemorySpanExporter.create();
+
+        SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
+                .setSampler(Sampler.alwaysOn())
+                .addSpanProcessor(BatchSpanProcessor.builder(inMemSpanExporter).build())
+                .setResource(Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "rocks.inspectit.ocelot.system.test")))
+                .build();
+
+        GlobalOpenTelemetry.resetForTest();
+
+        OpenTelemetrySdk openTelemetry = OpenTelemetrySdk.builder()
+                .setTracerProvider(tracerProvider)
+                .buildAndRegisterGlobal();
+
+        // set the OTEL_TRACER in OpenTelemetrySpanBuilderImpl via reflection.
+        // this needs to be done in case that another code already registered OTEL and the OTEL_TRACER is pointing to the wrong Tracer
+        try {
+            Tracer tracer = GlobalOpenTelemetry.getTracer("io.opentelemetry.opencensusshim");
+            Field tracerField = Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl")
+                    .getDeclaredField("OTEL_TRACER");
+            setFinalField(tracerField, tracer);
+
+            logger.info("OTEL_TRACER updated to {} ({})", tracer, openTelemetry.getTracer("io.opentelemetry.opencensusshim"));
+        } catch (Exception e) {
+            logger.error("Failed to set OTEL_TRACER in OpenTelemetrySpanBuilderImpl", e);
+        }
+
+        return inMemSpanExporter;
+    }
+
+    private static void setFinalField(Field field, Object newValue) throws Exception {
+        Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+        unsafeField.setAccessible(true);
+        Unsafe unsafe = (Unsafe) unsafeField.get(null);
+
+        Object staticFieldBase = unsafe.staticFieldBase(field);
+        long staticFieldOffset = unsafe.staticFieldOffset(field);
+        unsafe.putObject(staticFieldBase, staticFieldOffset, newValue);
     }
 
     private static long getInstrumentationQueueLength() {
