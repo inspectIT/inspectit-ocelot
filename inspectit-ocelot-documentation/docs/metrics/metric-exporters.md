@@ -82,14 +82,15 @@ To enable the OTLP exporters, it is only required to specify the `url`.
 
 The following properties are nested properties below the `inspectit.exporters.metrics.otlp-grpc` property:
 
-| Property    | Default    | Description                                                  |
-| ----------- | ---------- | ------------------------------------------------------------ |
-| `.enabled`  | `DISABLED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC metrics exporter. |
-| `.endpoint` | `null`     | The OTLP endpoint to connect to, e.g. `http://localhost:4317` |
-| `.protocol` | `grpc`     | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`. |
+| Property    | Default    | Description                                                                                                                                                                     |
+| ----------- |------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.enabled`  | `DISABLED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC metrics exporter.                                                                   |
+| `.endpoint` | `null`     | Target to which the exporter is going to send metrics, e.g. `http://localhost:4317`                                                                                             |
+| `.protocol` | `null`     | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`. |
 
 To make inspectIT Ocelot push the metris via OTLP to, e.g. an OpenTelemetry Collector running on the same machine as the agent, the following JVM property can be used:
 
 ```
 -Dinspectit.exporters.metrics.otlp.endpoint=http://127.0.0.1:4317
+-Dinspectit.exporters.metrics.otlp.protocol=grpc
 ```
