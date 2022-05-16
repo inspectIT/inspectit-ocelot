@@ -19,7 +19,7 @@ inspectIT Ocelot currently supports the following metrics exporters:
 |[InfluxDB Exporter](#influxdb-exporter)|Yes|Push|No|
 |[OTLP Exporter (Metrics)](#otlp-exporter-metrics) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp/metrics)]|Yes|Push|No|
 
->**Important note**: Starting with version <mark>`2.X.X`</mark>, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
+>**Important note**: Starting with version `2.0.0`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
 
 ## Logging Exporter (Metrics)
 

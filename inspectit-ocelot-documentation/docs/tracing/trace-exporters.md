@@ -12,7 +12,7 @@ inspectIT Ocelot currently supports the following trace exporters:
 * [Jaeger](#jaeger-exporter) [[Homepage](https://www.jaegertracing.io/)]
 * [OTLP (Traces)](#otlp-exporter-traces) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp/trace)]
 
->**Important note**: Starting with version <mark>`2.X.0`</mark>, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported and has been removed.  
+>**Important note**: Starting with version `2.0.0` inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported and has been removed.  
 > Additionally, with OpenTelemetry, inspectIT Ocelot does not support the `service-name` property for individual exporter services anymore. Thus, we removed the `service-name` property from the Jaeger and Zipkin exporter. Please use the global `inspectit.service-name` property instead.
 
 ## Logging Exporter (Traces)
