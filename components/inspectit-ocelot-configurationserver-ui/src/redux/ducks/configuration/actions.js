@@ -3,6 +3,8 @@ import axios from '../../../lib/axios-api';
 import { configurationUtils } from '.';
 import { notificationActions } from '../notification';
 import * as types from './types';
+import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
 
 /**
  * Fetches all existing versions.
@@ -184,6 +186,95 @@ export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
         dispatch({ type: types.DELETE_SELECTION_FAILURE });
       });
   };
+};
+
+/**
+ * Attempts to export the currently selected or handed in file or folder.
+ * In case of success, downloadSelection() is automatically triggered.
+ */
+export const exportSelection = (fetchFilesOnSuccess, selectedFile = null) => {
+  return (dispatch, getState) => {
+    const { selection, files, selectedVersion } = getState().configuration;
+
+    const selectedName = selectedFile || selection;
+
+    const file = configurationUtils.getFile(files, selectedName);
+    const isDirectory = configurationUtils.isDirectory(file);
+
+    const params = {};
+    if (selectedVersion) {
+      params.version = selectedVersion;
+    }
+    dispatch({ type: types.EXPORT_SELECTION_STARTED });
+
+    if (!isDirectory) {
+      axios
+        .get('/files' + selection, { params })
+        .then((res) => {
+          const fileContent = res.data.content;
+          downloadSelection(fileContent, file.name);
+          dispatch({ type: types.EXPORT_SELECTION_SUCCESS, payload: { fileContent } });
+        })
+        .catch(() => {
+          dispatch({ type: types.EXPORT_SELECTION_FAILURE });
+        });
+    } else {
+      axios
+        .get('/directories', { params })
+        .then((res) => {
+          const files = res.data;
+          sortFiles(files);
+          downloadSelection(files, file.name);
+          dispatch({ type: types.EXPORT_SELECTION_SUCCESS, payload: { files } });
+        })
+        .catch(() => {
+          dispatch({ type: types.EXPORT_SELECTION_FAILURE });
+        });
+    }
+  };
+};
+
+/**
+ * Attempts to download the currently selected data or handed in file or folder.
+ * In case a single file is selected it will be downloaded immediately
+ * In case a folder with files is selected the files content gets collected and compressed before downloading
+ */
+const downloadSelection = (selectionContent, downloadName) => {
+  const params = {};
+  if (!(selectionContent instanceof Array)) {
+    // Create blob link to download
+    const content = new Blob([selectionContent], { type: 'text/plain;charset=utf-8' });
+    // Start download
+    saveAs(content, `${downloadName}`);
+  } else {
+    let zip = new JSZip();
+    let filesCollected = 0;
+    selectionContent[0].children.forEach((file) => {
+      const requestedFile = `/${selectionContent[0].name}/${file.name}`;
+      axios
+        .get('/files' + requestedFile, { params })
+        .then((res) => {
+          const fileContent = res.data.content;
+          // Create blob link to download
+          const content = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+          zip.file(`${file.name}`, content);
+        })
+        .catch((err) => {
+          console.error(err);
+        })
+        .finally(() => {
+          filesCollected++;
+          // Check if all files have been collected
+          if (filesCollected === selectionContent[0].children.length) {
+            // Compress files to download
+            zip.generateAsync({ type: 'blob' }).then(function (content) {
+              // Start download
+              saveAs(content, `${selectionContent[0].name}.zip`);
+            });
+          }
+        });
+    });
+  }
 };
 
 /**
