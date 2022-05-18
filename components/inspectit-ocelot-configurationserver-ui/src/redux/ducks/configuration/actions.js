@@ -3,6 +3,7 @@ import axios from '../../../lib/axios-api';
 import { configurationUtils } from '.';
 import { notificationActions } from '../notification';
 import * as types from './types';
+import { downloadSelection } from '../../../functions/export-selection.function';
 
 /**
  * Fetches all existing versions.
@@ -183,6 +184,53 @@ export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
       .catch(() => {
         dispatch({ type: types.DELETE_SELECTION_FAILURE });
       });
+  };
+};
+
+/**
+ * Attempts to export the currently selected or handed in file or folder.
+ * In case of success, downloadSelection() is automatically triggered.
+ */
+export const exportSelection = (fetchFilesOnSuccess, selectedFile = null) => {
+  return (dispatch, getState) => {
+    const { selection, files, selectedVersion } = getState().configuration;
+
+    const selectedName = selectedFile || selection;
+
+    const file = configurationUtils.getFile(files, selectedName);
+    const isDirectory = configurationUtils.isDirectory(file);
+
+    const params = {};
+    if (selectedVersion) {
+      params.version = selectedVersion;
+    }
+    dispatch({ type: types.EXPORT_SELECTION_STARTED });
+
+    if (!isDirectory) {
+      axios
+        .get('/files' + selection, { params })
+        .then((res) => {
+          const fileContent = res.data.content;
+          downloadSelection(fileContent, file.name);
+          dispatch({ type: types.EXPORT_SELECTION_SUCCESS, payload: { fileContent } });
+        })
+        .catch(() => {
+          dispatch({ type: types.EXPORT_SELECTION_FAILURE });
+        });
+    } else {
+      axios
+        .get('/directories', { params })
+        .then((res) => {
+          const files = res.data;
+          sortFiles(files);
+          downloadSelection(files, file.name);
+          dispatch({ type: types.EXPORT_SELECTION_SUCCESS, payload: { files } });
+        })
+        .catch((err) => {
+          console.error(err);
+          dispatch({ type: types.EXPORT_SELECTION_FAILURE });
+        });
+    }
   };
 };
 
