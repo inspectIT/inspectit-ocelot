@@ -14,6 +14,10 @@ Starting with the current release, inspectIT Ocelot migrates from OpenCensus to 
 Due to the migration from OpenCensus to OpenTelemetry, the agent's AutoTracing feature is currently **not** available.
 The AutoTracing feature will be available again in the next release of the inspectIT Ocelot agent.
 
+### Removed the tag `service-name` from all exporters
+
+Due to the migration to OpenTelemetry, the tag `service-name` was removed from all exporters. Analogous to this tag, the tag `inspectit.service-name` can now be set globally for all exporters. 
+
 ### Updated and removed exporter 
 
 #### Removed `OpenCensusAgentExporter`
