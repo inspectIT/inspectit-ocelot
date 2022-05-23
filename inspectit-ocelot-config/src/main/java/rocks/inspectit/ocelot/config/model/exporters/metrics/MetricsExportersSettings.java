@@ -12,6 +12,8 @@ import javax.validation.Valid;
 @NoArgsConstructor
 public class MetricsExportersSettings {
 
+    private String applicationName;
+
     @Valid
     private PrometheusExporterSettings prometheus;
 

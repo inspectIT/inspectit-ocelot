@@ -6,6 +6,8 @@ inspectit:
     # settings for metrics exporters
     metrics:
 
+      application-name: ${inspectit.service-name}
+
       # settings for the prometheus exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/stats/prometheus)
       prometheus:
         # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
@@ -56,6 +58,8 @@ inspectit:
 
     # settings for trace exporters
     tracing:
+
+      application-name: ${inspectit.service-name}
 
       # settings for the zipkin exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/zipkin)
       zipkin:
