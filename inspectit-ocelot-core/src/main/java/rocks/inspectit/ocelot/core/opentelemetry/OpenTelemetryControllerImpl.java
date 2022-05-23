@@ -308,7 +308,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
                 .getExporters().getMetrics().getApplicationName()));
         traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
-                .getExporters().getMetrics().getApplicationName()));
+                .getExporters().getTracing().getApplicationName()));
 
         meterProvider = SdkMeterProvider.builder().setResource(metricServiceNameResource).build();
         tracerProvider = buildTracerProvider(configuration);
