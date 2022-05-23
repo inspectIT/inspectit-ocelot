@@ -95,7 +95,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @Getter(AccessLevel.PACKAGE)
     Map<String, DynamicallyActivatableMetricsExporterService> registeredMetricExporterServices = new ConcurrentHashMap<>();
 
-    private Resource serviceNameResource;
+    private Resource metricServiceNameResource;
+
+    private Resource traceServiceNameResource;
 
     /**
      * The {@link OpenTelemetryImpl} that wraps {@link OpenTelemetrySdk}
@@ -183,7 +185,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
         InspectitConfig configuration = env.getCurrentConfig();
 
-        serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getServiceName()));
+        metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters().getMetrics().getApplicationName()));
+        traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getApplicationName()));
 
         // check if the tracing sample probability changed
         if (null == sampler || sampler.getSampleProbability() != configuration.getTracing().getSampleProbability()) {
@@ -275,7 +278,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         // set all OTEL related fields to null
         openTelemetry = null;
         meterProvider = null;
-        serviceNameResource = null;
+        metricServiceNameResource = null;
+        traceServiceNameResource = null;
         sampler = null;
         multiSpanExporter = null;
         spanProcessor = null;
@@ -301,10 +305,14 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @VisibleForTesting
     void initOtel(InspectitConfig configuration) {
 
-        serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
-                .getServiceName()));
+        metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
+                .getExporters().getMetrics().getApplicationName()));
+        traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
+                .getExporters().getMetrics().getApplicationName()));
+
+        meterProvider = SdkMeterProvider.builder().setResource(metricServiceNameResource).build();
         tracerProvider = buildTracerProvider(configuration);
-        meterProvider = SdkMeterProvider.builder().setResource(serviceNameResource).build();
+
 
         OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
@@ -345,7 +353,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                 .build();
         SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
                 .setSampler(sampler)
-                .setResource(serviceNameResource)
+                .setResource(traceServiceNameResource)
                 .addSpanProcessor(spanProcessor)
                 .setIdGenerator(idGenerator);
 
@@ -390,7 +398,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             if (null != meterProvider) {
                 OpenTelemetryUtils.stopMeterProvider(meterProvider, true);
             }
-            SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(serviceNameResource);
+            SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(metricServiceNameResource);
 
             // register metric reader for each service
             for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {
