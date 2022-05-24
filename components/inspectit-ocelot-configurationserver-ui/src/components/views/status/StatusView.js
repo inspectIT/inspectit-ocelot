@@ -19,8 +19,9 @@ class StatusView extends React.Component {
     this.state = {
       filter: '',
       useRegexFilter: false,
+      useServiceMerge: true,
       error: false,
-      filteredAgents: props.agents,
+      agentsToShow: props.agents,
       isAgentConfigurationShown: false,
       attributes: '',
       configurationValue: '',
@@ -39,6 +40,10 @@ class StatusView extends React.Component {
     this.setState({ useRegexFilter: checked }, this.filterAgents);
   };
 
+  onServiceMergeChange = ({ checked }) => {
+    this.setState({ useServiceMerge: checked }, this.filterAgents);
+  };
+
   updateFilter = (filter) => {
     this.setState({ filter }, this.filterAgents);
   };
@@ -48,10 +53,13 @@ class StatusView extends React.Component {
     const { filter, useRegexFilter } = this.state;
 
     if (filter === '') {
-      this.setState({
-        error: false,
-        filteredAgents: agents,
-      });
+      this.setState(
+        {
+          error: false,
+          agentsToShow: agents,
+        },
+        this.mergeAgents
+      );
     } else {
       try {
         let filterValue;
@@ -63,21 +71,74 @@ class StatusView extends React.Component {
 
         const regex = RegExp(filterValue, 'i');
 
-        const filteredAgents = agents.filter((agent) => {
+        const agentsToShow = agents.filter((agent) => {
           const agentFilter = this.getAgentFilter(agent);
           return this.checkRegex(agentFilter, regex);
         });
 
-        this.setState({
-          error: false,
-          filteredAgents,
-        });
+        this.setState(
+          {
+            error: false,
+            agentsToShow,
+          },
+          this.mergeAgents
+        );
       } catch (error) {
-        this.setState({
-          error: true,
-          filteredAgents: agents,
-        });
+        this.setState(
+          {
+            error: true,
+            agentsToShow: agents,
+          },
+          this.mergeAgents
+        );
       }
+    }
+  };
+
+  getServiceName = ({ metaInformation, attributes }) => {
+    if (metaInformation) {
+      return attributes.service;
+    } else {
+      return null;
+    }
+  };
+
+  getStartTime = ({ metaInformation }) => {
+    if (metaInformation) {
+      return metaInformation.startTime;
+    } else {
+      return null;
+    }
+  };
+
+  mergeAgents = () => {
+    const { agentsToShow, useServiceMerge } = this.state;
+
+    if (useServiceMerge) {
+      const mergedMap = agentsToShow.reduce((result, agent) => {
+        const name = this.getServiceName(agent);
+        if (result[name]) {
+          if (this.getStartTime(result[name]) < this.getStartTime(agent)) {
+            result[name] = {
+              ...agent,
+              count: result[name].count + 1,
+            };
+          } else {
+            result[name].count += 1;
+          }
+        } else {
+          result[name] = {
+            ...agent,
+            count: 1,
+          };
+        }
+        return result;
+      }, {});
+
+      this.setState({
+        error: false,
+        agentsToShow: mergedMap,
+      });
     }
   };
 
@@ -132,8 +193,9 @@ class StatusView extends React.Component {
     const { agents } = this.props;
     const {
       filter,
-      filteredAgents,
+      agentsToShow,
       useRegexFilter,
+      useServiceMerge,
       error,
       readOnly,
       isAgentConfigurationShown,
@@ -163,16 +225,18 @@ class StatusView extends React.Component {
               filter={filter}
               onFilterChange={this.updateFilter}
               onModeChange={this.onFilterModeChange}
+              onServiceMergeChange={this.onServiceMergeChange}
               useRegexFilter={useRegexFilter}
+              useServiceMerge={useServiceMerge}
               error={error}
               disableClear={readOnly}
             />
           </div>
           <div className="data-table">
-            <StatusTable data={filteredAgents} filter={filter} onShowConfiguration={this.showAgentConfigurationForAttributes} />
+            <StatusTable data={agentsToShow} filter={filter} onShowConfiguration={this.showAgentConfigurationForAttributes} />
           </div>
           <div>
-            <StatusFooterToolbar fullData={agents} filteredData={filteredAgents} />
+            <StatusFooterToolbar fullData={agents} filteredData={agentsToShow} />
           </div>
           <ShowConfigurationDialog
             visible={isAgentConfigurationShown}

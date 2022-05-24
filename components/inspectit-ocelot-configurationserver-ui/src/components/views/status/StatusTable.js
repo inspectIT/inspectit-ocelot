@@ -132,8 +132,22 @@ class StatusTable extends React.Component {
             background: #ddd;
             border-color: #ddd;
           }
+          .this :global(.badge) {
+            width: 1.2rem;
+            height: 1.2rem;
+            background: #007ad9;
+            border-radius: 25%;
+            display: inline-flex;
+            justify-content: center;
+            color: white;
+          }
         `}</style>
-        {name} {agentIdElement}
+        {name} {agentIdElement}{' '}
+        {rowData.count > 1 ? (
+          <span className="badge">
+            <b>{rowData.count}</b>{' '}
+          </span>
+        ) : null}
         <Button
           className="config-info-button"
           icon="pi pi-cog"
