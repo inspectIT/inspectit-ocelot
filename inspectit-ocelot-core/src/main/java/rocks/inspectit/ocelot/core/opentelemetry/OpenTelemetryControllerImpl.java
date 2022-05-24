@@ -186,7 +186,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         InspectitConfig configuration = env.getCurrentConfig();
 
         metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters().getMetrics().getApplicationName()));
-        traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getApplicationName()));
+        traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName()));
 
         // check if the tracing sample probability changed
         if (null == sampler || sampler.getSampleProbability() != configuration.getTracing().getSampleProbability()) {
@@ -308,7 +308,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
                 .getExporters().getMetrics().getApplicationName()));
         traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
-                .getExporters().getTracing().getApplicationName()));
+                .getExporters().getTracing().getServiceName()));
 
         meterProvider = SdkMeterProvider.builder().setResource(metricServiceNameResource).build();
         tracerProvider = buildTracerProvider(configuration);

@@ -9,7 +9,7 @@ import javax.validation.Valid;
 @NoArgsConstructor
 public class TraceExportersSettings {
 
-    private String applicationName;
+    private String serviceName;
 
     @Valid
     private JaegerExporterSettings jaeger;
