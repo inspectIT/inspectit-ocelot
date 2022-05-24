@@ -132,7 +132,7 @@ class StatusTable extends React.Component {
             border-color: #ddd;
           }
         `}</style>
-        {name} {agentIdElement}
+        {name} {agentIdElement} {rowData.count > 1 ? <b>({rowData.count})</b> : null}
         <Button
           className="config-info-button"
           icon="pi pi-cog"
