@@ -19,6 +19,7 @@ class StatusView extends React.Component {
     this.state = {
       filter: '',
       useRegexFilter: false,
+      useServiceMerge: false,
       error: false,
       filteredAgents: props.agents,
       isAgentConfigurationShown: false,
@@ -39,6 +40,10 @@ class StatusView extends React.Component {
     this.setState({ useRegexFilter: checked }, this.filterAgents);
   };
 
+  onServiceMergeChange = ({ checked }) => {
+    this.setState({ useServiceMerge: checked }, this.filterAgents);
+  };
+
   updateFilter = (filter) => {
     this.setState({ filter }, this.filterAgents);
   };
@@ -48,10 +53,13 @@ class StatusView extends React.Component {
     const { filter, useRegexFilter } = this.state;
 
     if (filter === '') {
-      this.setState({
-        error: false,
-        filteredAgents: agents,
-      });
+      this.setState(
+        {
+          error: false,
+          filteredAgents: agents,
+        },
+        this.mergeAgents
+      );
     } else {
       try {
         let filterValue;
@@ -68,16 +76,67 @@ class StatusView extends React.Component {
           return this.checkRegex(agentFilter, regex);
         });
 
-        this.setState({
-          error: false,
-          filteredAgents,
-        });
+        this.setState(
+          {
+            error: false,
+            filteredAgents,
+          },
+          this.mergeAgents
+        );
       } catch (error) {
-        this.setState({
-          error: true,
-          filteredAgents: agents,
-        });
+        this.setState(
+          {
+            error: true,
+            filteredAgents: agents,
+          },
+          this.mergeAgents
+        );
       }
+    }
+  };
+
+  getServiceName = ({ metaInformation, attributes }) => {
+    if (metaInformation) {
+      return attributes.service;
+    } else {
+      return null;
+    }
+  };
+
+  getStartTime = ({ metaInformation }) => {
+    if (metaInformation) {
+      return metaInformation.startTime;
+    } else {
+      return null;
+    }
+  };
+
+  mergeAgents = () => {
+    const { filteredAgents, useServiceMerge } = this.state;
+
+    if (useServiceMerge) {
+      const mergedMap = new Map();
+
+      for (const agent of filteredAgents) {
+        if (!mergedMap.has(this.getServiceName(agent))) {
+          mergedMap.set(this.getServiceName(agent), {
+            ...agent,
+            count: 1,
+          });
+        } else {
+          const currentAgent = mergedMap.get(this.getServiceName(agent));
+          const mostRecentAgent = this.getStartTime(currentAgent) > this.getStartTime(agent) ? currentAgent : agent;
+          mergedMap.set(this.getServiceName(agent), {
+            ...mostRecentAgent,
+            count: currentAgent.count + 1,
+          });
+        }
+      }
+
+      this.setState({
+        error: false,
+        filteredAgents: Array.from(mergedMap.values()),
+      });
     }
   };
 
@@ -134,6 +193,7 @@ class StatusView extends React.Component {
       filter,
       filteredAgents,
       useRegexFilter,
+      useServiceMerge,
       error,
       readOnly,
       isAgentConfigurationShown,
@@ -163,7 +223,9 @@ class StatusView extends React.Component {
               filter={filter}
               onFilterChange={this.updateFilter}
               onModeChange={this.onFilterModeChange}
+              onServiceMergeChange={this.onServiceMergeChange}
               useRegexFilter={useRegexFilter}
+              useServiceMerge={useServiceMerge}
               error={error}
               disableClear={readOnly}
             />

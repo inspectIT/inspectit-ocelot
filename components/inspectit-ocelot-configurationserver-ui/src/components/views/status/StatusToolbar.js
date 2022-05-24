@@ -16,7 +16,19 @@ class StatusToolbar extends React.Component {
   };
 
   render() {
-    const { clearing, refreshing, fetchStatus, filter, onFilterChange, disableClear, onModeChange, useRegexFilter, error } = this.props;
+    const {
+      clearing,
+      refreshing,
+      fetchStatus,
+      filter,
+      onFilterChange,
+      disableClear,
+      onModeChange,
+      useRegexFilter,
+      useServiceMerge,
+      onServiceMergeChange,
+      error,
+    } = this.props;
 
     const tooltipOptions = {
       showDelay: 500,
@@ -75,6 +87,10 @@ class StatusToolbar extends React.Component {
             <div className="p-inputgroup checkbox-group">
               <label>Use Regex</label>
               <Checkbox onChange={onModeChange} checked={useRegexFilter} />
+            </div>
+            <div className="p-inputgroup checkbox-group">
+              <label>Merge Identical Services</label>
+              <Checkbox onChange={onServiceMergeChange} checked={useServiceMerge} />
             </div>
           </div>
           <div className="p-toolbar-group-right">
