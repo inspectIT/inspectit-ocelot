@@ -9,6 +9,9 @@ import javax.validation.Valid;
 @NoArgsConstructor
 public class TraceExportersSettings {
 
+    /**
+     * The service name used for all trace exporters.
+     */
     private String serviceName;
 
     @Valid
