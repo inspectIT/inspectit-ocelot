@@ -185,7 +185,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
         InspectitConfig configuration = env.getCurrentConfig();
 
-        metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters().getMetrics().getApplicationName()));
+        // The name for the trace service resource is set, as it is exported with the data as an attribute. This does not happen in the metric service resource, hence that resource just uses the value found in inspectit.service-name.
+        metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getServiceName()));
         traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName()));
 
         // check if the tracing sample probability changed
@@ -305,8 +306,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @VisibleForTesting
     void initOtel(InspectitConfig configuration) {
 
-        metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
-                .getExporters().getMetrics().getApplicationName()));
+        // The name for the trace service resource is set, as it is exported with the data as an attribute. This does not happen in the metric service resource, hence that resource just uses the value found in inspectit.service-name.
+        metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig().getServiceName()));
         traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
                 .getExporters().getTracing().getServiceName()));
 
