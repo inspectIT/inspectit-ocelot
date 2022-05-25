@@ -36,7 +36,14 @@ inspectit:
           return-value: "The HTTP method as a String."
         input:
           _this: 'java.net.HttpURLConnection'
-        value: '_this.getRequestMethod()'
+          _methodName: 'String'
+        value-body: |
+          String requestMethod = _this.getRequestMethod();
+          if ("getOutputStream".equals(_methodName) && "GET".equals(requestMethod)) {
+            return "POST";
+          } else {
+            return requestMethod;
+          }
 
       'a_httpurlconnection_getStatus':
         docs:
