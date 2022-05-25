@@ -19,9 +19,9 @@ inspectIT Ocelot currently supports the following trace exporters:
 
 These settings apply to all trace exporters and can set below the `inspectit.exporters.tracing` property. 
 
-| Property        | Default                     | Description                                                                        |
-|-----------------|-----------------------------|------------------------------------------------------------------------------------|
-| `.service-name` | `${inspectit.service-name}` | The value of this property will be used to identify the service a trace came from. |
+| Property        | Default                     | Description                                                                                                                                                               |
+|-----------------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.service-name` | `${inspectit.service-name}` | The value of this property will be used to identify the service a trace came from. Please note that changes of this property only take effect after restarting the agent. |
 
 ## Logging Exporter (Traces)
 

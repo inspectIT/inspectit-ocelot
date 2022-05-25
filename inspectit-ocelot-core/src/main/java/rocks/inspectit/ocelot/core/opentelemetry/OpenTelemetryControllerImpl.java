@@ -95,10 +95,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @Getter(AccessLevel.PACKAGE)
     Map<String, DynamicallyActivatableMetricsExporterService> registeredMetricExporterServices = new ConcurrentHashMap<>();
 
-    private Resource metricServiceNameResource;
-
-    private Resource traceServiceNameResource;
-
     /**
      * The {@link OpenTelemetryImpl} that wraps {@link OpenTelemetrySdk}
      */
@@ -185,10 +181,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
         InspectitConfig configuration = env.getCurrentConfig();
 
-        // The name for the trace service resource is set, as it is exported with the data as an attribute. This does not happen in the metric service resource, hence that resource just uses the value found in inspectit.service-name.
-        metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getServiceName()));
-        traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName()));
-
         // check if the tracing sample probability changed
         if (null == sampler || sampler.getSampleProbability() != configuration.getTracing().getSampleProbability()) {
             tracingSettingsChanged = true;
@@ -204,6 +196,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
             // only if metrics settings changed or OTEL has not been configured and is running, we need to rebuild the OpenTelemetrySdk
             if (metricSettingsChanged || !active) {
+
                 OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                         .setTracerProvider(sdkTracerProvider)
                         .setMeterProvider(sdkMeterProvider)
@@ -279,8 +272,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         // set all OTEL related fields to null
         openTelemetry = null;
         meterProvider = null;
-        metricServiceNameResource = null;
-        traceServiceNameResource = null;
         sampler = null;
         multiSpanExporter = null;
         spanProcessor = null;
@@ -305,15 +296,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      */
     @VisibleForTesting
     void initOtel(InspectitConfig configuration) {
-
-        // The name for the trace service resource is set, as it is exported with the data as an attribute. This does not happen in the metric service resource, hence that resource just uses the value found in inspectit.service-name.
-        metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig().getServiceName()));
-        traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
-                .getExporters().getTracing().getServiceName()));
-
-        meterProvider = SdkMeterProvider.builder().setResource(metricServiceNameResource).build();
+        meterProvider = buildMeterProvider(configuration);
         tracerProvider = buildTracerProvider(configuration);
-
 
         OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
@@ -340,12 +324,11 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     /**
      * Builds a new {@link SdkTracerProvider} based on the given {@link InspectitConfig}
      *
-     * @param configuration
-     *
      * @return A new {@link SdkTracerProvider} based on the {@link InspectitConfig}
      */
     private SdkTracerProvider buildTracerProvider(InspectitConfig configuration) {
         double sampleProbability = configuration.getTracing().getSampleProbability();
+        Resource traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName()));
         sampler = new DynamicSampler(sampleProbability);
         multiSpanExporter = DynamicMultiSpanExporter.create();
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)
@@ -360,6 +343,17 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
         return builder.build();
     }
+
+    /**
+     * Builds a new {@link SdkMeterProvider} based on the given {@link InspectitConfig}
+     *
+     * @return A new {@link SdkMeterProvider} based on the {@link InspectitConfig}
+     */
+    private SdkMeterProvider buildMeterProvider(InspectitConfig configuration) {
+        Resource metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getServiceName()));
+        return SdkMeterProvider.builder().setResource(metricServiceNameResource).build();
+    }
+
 
     /**
      * Configures the tracing, i.e. {@link #openTelemetry} and the related {@link SdkTracerProvider}. A new {@link SdkTracerProvider} is only built once or after {@link #shutdown()} was called.
@@ -394,11 +388,12 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             return null;
         }
         try {
-
             // stop the previously registered MeterProvider
             if (null != meterProvider) {
                 OpenTelemetryUtils.stopMeterProvider(meterProvider, true);
             }
+
+            Resource metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig().getServiceName()));
             SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(metricServiceNameResource);
 
             // register metric reader for each service
