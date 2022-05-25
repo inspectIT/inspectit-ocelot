@@ -72,8 +72,9 @@ It is important to note that this configuration refers to the format of the corr
 
 ### Using 64-Bit Trace IDs
 
-Since version 2.0.0, the inspectIT Ocelot Agent is able to generate trace IDs with a size of 64 bits instead of the 128 bit trace IDs used by default by the agent.
-The functionality that trace IDs with a length of 64 bits are generated can be activated with the following configuration:
+Since version 2.0.0, the inspectIT Ocelot Agent is able to generate trace IDs with a size of 64 bits instead of the 128-bit trace IDs used by default by the agent.
+The functionality that trace IDs with a length of 64 bits are generated can be activated with the configuration below. Please note that the agent needs to be restarted for this
+configuration to be applied.
 
 ```YAML
 inspectit:
