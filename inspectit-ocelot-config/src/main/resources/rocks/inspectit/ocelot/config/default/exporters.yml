@@ -56,7 +56,8 @@ inspectit:
 
     # settings for trace exporters
     tracing:
-
+      # This value will be used by all trace exporters as service name.
+      service-name: ${inspectit.service-name}
       # settings for the zipkin exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/zipkin)
       zipkin:
         # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
