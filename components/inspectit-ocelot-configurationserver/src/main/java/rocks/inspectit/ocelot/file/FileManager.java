@@ -205,5 +205,6 @@ public class FileManager {
     public void synchronizeWorkspace() throws GitAPIException, IOException {
         log.info("Synchronizing configuration workspace by pulling in remote configuration source.");
         versioningManager.pullSourceBranch();
+        workingDirectoryAccessor.invalidateCache();
     }
 }
