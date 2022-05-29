@@ -45,7 +45,7 @@ public class ListDependenciesCommandExecutor implements CommandExecutor {
 
         //TODO: Add the full class path with all jars
         //Currently, this only outputs the path of the Java applications instead of the full class path with all jars
-        //Users/mahirisikli/Novatec/Scan Feature/spring-petclinic.jar:inspectit-ocelot-agent-SNAPSHOT.jar
+        //path/to/your/app/spring-petclinic.jar:inspectit-ocelot-agent-SNAPSHOT.jar
         System.out.println(classPath);
 
         log.debug("Finished executing ListDependenciesCommand: {}", ldCommand.getCommandId().toString());
