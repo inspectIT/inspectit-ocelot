@@ -32,23 +32,7 @@ public class ListDependenciesCommand extends Command {
         /**
          * Existing dependencies including their version.
          */
-        private DependecyElement[] result;
+        private String dependencies;
 
-        @Data
-        @NoArgsConstructor
-        @AllArgsConstructor
-        public static class DependecyElement {
-
-            /**
-             * The dependency name.
-             */
-            private String name;
-
-            /**
-             * Whether it is a class or interface.
-             */
-            private String version;
-
-        }
     }
 }

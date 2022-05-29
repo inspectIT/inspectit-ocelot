@@ -9,9 +9,6 @@ import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Executor for executing {@link ListDependenciesCommand}s.
@@ -44,29 +41,17 @@ public class ListDependenciesCommandExecutor implements CommandExecutor {
         log.debug("Executing a ListDependenciesCommand: {}", ldCommand.getCommandId().toString());
 
         RuntimeMXBean bean = ManagementFactory.getRuntimeMXBean();
-        String classPath = bean.getClassPath();//    /opt/spring-boot/app.jar
+        String classPath = bean.getClassPath();//
 
-        System.out.println(Arrays.toString(classPath.split(":")));
-
-        Set<String> setCopy = new HashSet<>(Arrays.asList("a", "b", "c"));
-
-        ListDependenciesCommand.Response.DependecyElement[] result = setCopy.parallelStream().map(clazz -> {
-            try {
-                ListDependenciesCommand.Response.DependecyElement element = new ListDependenciesCommand.Response.DependecyElement();
-                element.setName("Test");
-                element.setVersion("1.0");
-                return element;
-            } catch (Throwable e) {
-                log.debug("Could not add class to result list: {}", clazz);
-                return null;
-            }
-        }).toArray(ListDependenciesCommand.Response.DependecyElement[]::new);
+        //TODO: Add the full class path with all jars
+        //Currently, this only outputs the path of the Java applications instead of the full class path with all jars
+        //Users/mahirisikli/Novatec/Scan Feature/spring-petclinic.jar:inspectit-ocelot-agent-SNAPSHOT.jar
+        System.out.println(classPath);
 
         log.debug("Finished executing ListDependenciesCommand: {}", ldCommand.getCommandId().toString());
 
         ListDependenciesCommand.Response response = new ListDependenciesCommand.Response();
         response.setCommandId(ldCommand.getCommandId());
-        response.setResult(result);
         return response;
     }
 }

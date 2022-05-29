@@ -51,7 +51,7 @@ public class AgentCommandController extends AbstractBaseController {
         return commandDispatcher.dispatchCommand(agentId, listClassesCommand);
     }
 
-    @GetMapping(value = "command/dependencies")
+    @GetMapping(value = "command/list/dependencies")
     public DeferredResult<ResponseEntity<?>> listDependencies(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
         ListDependenciesCommand dependenciesCommand = new ListDependenciesCommand();
         return commandDispatcher.dispatchCommand(agentId, dependenciesCommand);
