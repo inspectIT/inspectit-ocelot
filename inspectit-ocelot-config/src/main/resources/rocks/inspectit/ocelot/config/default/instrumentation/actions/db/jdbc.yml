@@ -46,9 +46,10 @@ inspectit:
         input:
           'statement': 'String'
         value-body: |
-          int index = statement.indexOf(' ');
+          String statementTrimmed = statement.trim();
+          int index = statementTrimmed.indexOf(' ');
           if (index > -1) {
-              return statement.substring(0, index).trim();
+              return statementTrimmed.substring(0, index).trim();
           } else {
-              return statement;
+              return statementTrimmed;
           }
