@@ -172,6 +172,23 @@ class StatusTable extends React.Component {
     );
   };
 
+  agentHealthTemplate = (rowData) => {
+    const { health } = rowData;
+    let healthInfo;
+    switch (health) {
+      case 'OK':
+        healthInfo = '🟢 Ok';
+        break;
+      case 'ERROR':
+        healthInfo = '🔴 Error';
+        break;
+      case 'WARNING':
+        healthInfo = '🟡 Warning';
+        break;
+    }
+    return <span>{health ? healthInfo : '-'}</span>;
+  };
+
   agentVersionTemplate = (rowData) => {
     const { metaInformation } = rowData;
 
@@ -297,6 +314,7 @@ class StatusTable extends React.Component {
         <DataTable value={agentValues} rowHover reorderableColumns>
           <Column body={this.iconTemplate} style={{ width: '34px' }} />
           <Column header="Name" field="name" body={this.nameTemplate} sortable style={{ width: '400px' }} />
+          <Column header="Agent State" field="health" body={this.agentHealthTemplate} sortable style={{ width: '150px' }} />
           <Column
             header="Agent Version"
             field="metaInformation.agentVersion"
