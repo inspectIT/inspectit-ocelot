@@ -7,6 +7,7 @@ import TimeAgo from 'react-timeago';
 import { map } from 'lodash';
 import classnames from 'classnames';
 import { linkPrefix } from '../../../lib/configuration';
+import classNames from 'classnames';
 
 const timeFormatter = (time, unit, suffix) => {
   if (unit === 'second') {
@@ -172,6 +173,48 @@ class StatusTable extends React.Component {
     );
   };
 
+  agentHealthTemplate = (rowData) => {
+    const { health } = rowData;
+    let healthInfo;
+    let iconClass;
+    let iconColor;
+    switch (health) {
+      case 'OK':
+        healthInfo = 'OK';
+        iconClass = 'pi-check-circle';
+        iconColor = '#0abd04';
+        break;
+      case 'ERROR':
+        healthInfo = 'Error';
+        iconClass = 'pi-times-circle';
+        iconColor = 'red';
+        break;
+      case 'WARNING':
+        healthInfo = 'Warning';
+        iconClass = 'pi-minus-circle';
+        iconColor = '#e8c413';
+        break;
+    }
+    return (
+      <>
+        <style jsx>{`
+          .state {
+            align-items: center;
+            display: flex;
+          }
+        `}</style>
+        {health ? (
+          <div className="state">
+            <i className={classNames('pi pi-fw', iconClass)} style={{ color: iconColor }}></i>
+            <span>{healthInfo}</span>
+          </div>
+        ) : (
+          '-'
+        )}
+      </>
+    );
+  };
+
   agentVersionTemplate = (rowData) => {
     const { metaInformation } = rowData;
 
@@ -297,6 +340,7 @@ class StatusTable extends React.Component {
         <DataTable value={agentValues} rowHover reorderableColumns>
           <Column body={this.iconTemplate} style={{ width: '34px' }} />
           <Column header="Name" field="name" body={this.nameTemplate} sortable style={{ width: '400px' }} />
+          <Column header="Agent State" field="health" body={this.agentHealthTemplate} sortable style={{ width: '150px' }} />
           <Column
             header="Agent Version"
             field="metaInformation.agentVersion"
