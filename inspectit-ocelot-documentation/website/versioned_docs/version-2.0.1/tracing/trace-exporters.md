@@ -1,5 +1,5 @@
 ---
-id: version-2.0.0-trace-exporters
+id: version-2.0.1-trace-exporters
 title: Trace Exporters
 original_id: trace-exporters
 ---
@@ -13,8 +13,16 @@ inspectIT Ocelot currently supports the following trace exporters:
 * [Jaeger](#jaeger-exporter) [[Homepage](https://www.jaegertracing.io/)]
 * [OTLP (Traces)](#otlp-exporter-traces) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp/trace)]
 
->**Important note**: Starting with version <mark>`2.X.0`</mark>, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported and has been removed.  
-> Additionally, with OpenTelemetry, inspectIT Ocelot does not support the `service-name` property for individual exporter services anymore. Thus, we removed the `service-name` property from the Jaeger and Zipkin exporter. Please use the global `inspectit.service-name` property instead.
+>**Important note**: Starting with version `2.0.0`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported and has been removed.  
+> Additionally, with OpenTelemetry, inspectIT Ocelot does not support the `service-name` property for individual exporter services anymore. Thus, we removed the `service-name` property from the Jaeger and Zipkin exporter. This property can now be set for all trace exporters in `inspectit.exporters.tracing.service-name`.
+
+## General Trace Exporter Settings
+
+These settings apply to all trace exporters and can set below the `inspectit.exporters.tracing` property. 
+
+| Property        | Default                     | Description                                                                                                                                                               |
+|-----------------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.service-name` | `${inspectit.service-name}` | The value of this property will be used to identify the service a trace came from. Please note that changes of this property only take effect after restarting the agent. |
 
 ## Logging Exporter (Traces)
 
@@ -77,11 +85,11 @@ By default, the OTLP exporters are enabled but the URL endpoint needed for the e
 
 The following properties are nested properties below the `inspectit.exporters.traces.otlp` property:
 
-| Property    | Default         | Description                                                  |
-| ----------- |-----------------| ------------------------------------------------------------ |
-| `.enabled`  | `IF_CONFIGURED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC trace exporter. |
-| `.endpoint` | `null`          | Target to which the exporter is going to connect to, e.g. `http://localhost:4317` |
-| `.protocol` | `null`          | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`. |
+| Property    | Default    | Description                                                                                                                                                                     |
+| ----------- |------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.enabled`  | `IF_CONFIGURED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC trace exporter.                                                                     |
+| `.endpoint` | `null`     | Target to which the exporter is going to send traces, e.g. `http://localhost:4317`                                                                                              |
+| `.protocol` | `null`     | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`. |
 
 To make inspectIT Ocelot push the spans via OTLP to, e.g. an OpenTelemetry Collector running on the same machine as the agent, the following JVM property can be used:
 

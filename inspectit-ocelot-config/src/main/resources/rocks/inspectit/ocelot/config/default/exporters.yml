@@ -49,14 +49,15 @@ inspectit:
         enabled: IF_CONFIGURED
         # the export interval of the metrics
         export-interval: ${inspectit.metrics.frequency}
-        # the gRPC API endpoint, e.g., http://127.0.0.1:4318
+        # the URL endpoint, e.g., http://127.0.0.1:4317
         endpoint: null
         # the transport protocol, e.g., 'grpc' or 'http/protobuf'
         protocol: null
 
     # settings for trace exporters
     tracing:
-
+      # This value will be used by all trace exporters as service name.
+      service-name: ${inspectit.service-name}
       # settings for the zipkin exporter (https://github.com/census-instrumentation/opencensus-java/tree/master/exporters/trace/zipkin)
       zipkin:
         # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED

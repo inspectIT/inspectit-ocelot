@@ -1,6 +1,7 @@
 ---
-id: metric-exporters
+id: version-2.0.1-metric-exporters
 title: Metrics Exporters
+original_id: metric-exporters
 ---
 
 Metrics exporters are responsible for passing the recorded metrics to a metric storage.
