@@ -180,7 +180,7 @@ class StatusTable extends React.Component {
     let iconColor;
     switch (health) {
       case 'OK':
-        healthInfo = 'Ok';
+        healthInfo = 'OK';
         iconClass = 'pi-check-circle';
         iconColor = '#0abd04';
         break;
