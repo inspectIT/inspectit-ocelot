@@ -9,14 +9,14 @@ inspectit:
           '[jdbc/query/duration/sum]':
             aggregation: SUM
             tags:
-              'jdbc_url': true
-              'sql_command' : true # e.g., SELECT, UPDATE, CALL, ...
+              'db.connection_string': true
+              'db.operation' : true # e.g., SELECT, UPDATE, CALL, ...
               'jdbc_operation': true # e.g., execute, executeUpdate, executeBatch, ...
           '[jdbc/query/duration/count]':
             aggregation: COUNT
             tags:
-              'jdbc_url': true
-              'sql_command': true
+              'db.connection_string': true
+              'db.operation': true
               'jdbc_operation': true
   
   instrumentation:
@@ -30,7 +30,7 @@ inspectit:
         scopes:
           's_jdbc_statement_execute': true
         exit:
-          'db_sql_query':
+          'c_db_sql_query':
             action: 'a_assign_value'
             data-input:
               'value': _arg0
@@ -52,7 +52,7 @@ inspectit:
           's_jdbc_preparedstatement_execute': true
           's_jdbc_preparedstatement_executeBatch': true
         exit:
-          'db_sql_query':
+          'c_db_sql_query':
             action: 'a_assign_value'
             data-input:
               'value': 'prepared_sql' # prepared_sql is populated and up-propagated by driver instrumentations
@@ -65,7 +65,7 @@ inspectit:
         docs:
           description: |-
             Collects the metric [jdbc/query/duration]. To be included in JDBC query metric collection rules.
-            Rules that include it should provide the context variable 'db_sql_query'.
+            Rules that include it should provide the context variable 'c_db_sql_query'.
         include:
           'r_capture_method_duration_conditional': true
           'r_jdbc_detect_entry': true
@@ -75,15 +75,15 @@ inspectit:
             action: 'a_assign_true'
             only-if-true: 'jdbc_is_entry'
         exit:
-          'sql_command':
+          'c_sql_command':
             action: 'a_jdbc_extract_sql_command'
-            only-if-not-null: 'db_sql_query'
+            only-if-not-null: 'c_db_sql_query'
             data-input:
-              'sql_query': 'db_sql_query' # is set by the specific rules above
+              'statement': 'c_db_sql_query' # is set by the specific rules above
         metrics:
           '[jdbc/query/duration]':
             value: 'method_duration'
             data-tags:
-              'jdbc_url': 'jdbc_url'
-              'sql_command': 'sql_command'
+              'db.connection_string': 'jdbc_url'
+              'db.operation': 'c_sql_command'
               'jdbc_operation': _methodName

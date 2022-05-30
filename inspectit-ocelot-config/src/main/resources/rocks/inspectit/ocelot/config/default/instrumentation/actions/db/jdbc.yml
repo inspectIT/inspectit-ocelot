@@ -44,5 +44,11 @@ inspectit:
             'sql_query': 'A string containing the SQL query from which the command will be extracted.'
           return-value: 'The SQL command as string.'
         input:
-          'sql_query': 'String'
-        value: 'sql_query.trim().split("\\s+")[0].toUpperCase()'
+          'statement': 'String'
+        value-body: |
+          int index = statement.indexOf(' ');
+          if (index > -1) {
+              return statement.substring(0, index).trim();
+          } else {
+              return statement;
+          }
