@@ -120,7 +120,7 @@ class StatusToolbar extends React.Component {
               >
                 ?
               </span>
-              <ReactTooltip place="bottom" effect="solid" type="info" html="true" />
+              <ReactTooltip place="bottom" effect="solid" type="info" html={true} />
             </div>
           </div>
           <div className="p-toolbar-group-right">

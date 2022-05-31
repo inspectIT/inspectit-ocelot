@@ -97,10 +97,11 @@ class AgentMappingCell extends React.Component {
 class StatusTable extends React.Component {
   state = {
     configurationValue: '',
+    logValue: '',
   };
 
   nameTemplate = (rowData) => {
-    const { onShowConfiguration } = this.props;
+    const { onShowDownloadDialog } = this.props;
     const {
       metaInformation,
       attributes,
@@ -145,13 +146,13 @@ class StatusTable extends React.Component {
         {name} {agentIdElement}{' '}
         {rowData.count > 1 ? (
           <span className="badge">
-            <b>{rowData.count}</b>{' '}
+            <b>{rowData.count}</b>
           </span>
         ) : null}
         <Button
           className="config-info-button"
           icon="pi pi-cog"
-          onClick={() => onShowConfiguration(agentId, attributes)}
+          onClick={() => onShowDownloadDialog(agentId, attributes, 'config')}
           tooltip="Show Configuration"
           tooltipOptions={{ showDelay: 500 }}
         />
@@ -188,7 +189,9 @@ class StatusTable extends React.Component {
   };
 
   agentHealthTemplate = (rowData) => {
-    const { health } = rowData;
+    const { onShowDownloadDialog } = this.props;
+    const { health, metaInformation, attributes } = rowData;
+
     let healthInfo;
     let iconClass;
     let iconColor;
@@ -215,10 +218,15 @@ class StatusTable extends React.Component {
           .state {
             align-items: center;
             display: flex;
+            cursor: pointer;
           }
         `}</style>
         {health ? (
-          <div className="state">
+          <div
+            className="state"
+            onClick={() => onShowDownloadDialog(metaInformation.agentId, attributes, 'log')}
+            title="Click to show logs"
+          >
             <i className={classNames('pi pi-fw', iconClass)} style={{ color: iconColor }}></i>
             <span>{healthInfo}</span>
           </div>
