@@ -34,3 +34,7 @@ jobs:
       - name: Run Prettier
         working-directory: ${{env.working-directory}}
         run: yarn format
+        
+      - name: Run Jest
+        working-directory: ${{env.working-directory}}
+        run: yarn test

@@ -20,6 +20,24 @@ yarn dev
 
 The development server can be reached at [http://localhost:3000](http://localhost:3000).
 
+#### Testing
+
+Using the following command, the front end tests can be run. This will execute 'jest'.
+
+```bash
+yarn test
+```
+
+or 
+
+```bash
+yarn test:watch
+```
+
+to run the tests in watch mode.
+
+More information about how to test in [FRONTENDTESTS.md](FRONTENDTESTS.md)
+
 #### Storybook
 
 The project also contains [Storybook](https://storybook.js.org/) which supports the development of components by providing an isolated sandbox UI for testing these components.

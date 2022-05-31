@@ -1,0 +1,111 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoginView renders successfully 1`] = `
+<div>
+  <div
+    class="jsx-3064013252 this"
+  >
+    <div
+      class="jsx-128945688 this"
+    >
+      <div
+        class="jsx-3380344897 this"
+      >
+        <img
+          class="jsx-3380344897 ocelot-head"
+          src="/static/images/inspectit-ocelot.svg"
+        />
+        <div
+          class="jsx-3380344897 text-ocelot"
+        >
+          inspectIT Ocelot
+        </div>
+        <div
+          class="jsx-3380344897 text-server"
+        >
+          Configuration Server
+        </div>
+      </div>
+      <div
+        class="jsx-128945688 p-inputgroup input"
+      >
+        <span
+          class="jsx-128945688 p-inputgroup-addon"
+        >
+          <i
+            class="jsx-128945688 pi pi-user"
+          />
+        </span>
+        <input
+          class="p-inputtext p-component"
+          placeholder="Username"
+          style="width: 100%;"
+          value=""
+        />
+      </div>
+      <div
+        class="jsx-128945688 p-inputgroup input"
+      >
+        <span
+          class="jsx-128945688 p-inputgroup-addon"
+        >
+          <i
+            class="jsx-128945688 pi pi-lock"
+          />
+        </span>
+        <input
+          class="p-inputtext p-component"
+          placeholder="Password"
+          style="width: 100%;"
+          type="password"
+          value=""
+        />
+      </div>
+      <div
+        class="jsx-128945688 input"
+      >
+        <button
+          class="p-button p-component p-button-text-only p-disabled"
+          disabled=""
+          style="width: 100%;"
+        >
+          <span
+            class="p-button-text p-c"
+          >
+            Login
+          </span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="jsx-3064013252 build-information"
+    >
+      <span
+        class="jsx-3064013252"
+      >
+        inspectIT Ocelot Configuration Server v
+         (Build Date: 
+        ) |
+         
+        <a
+          class="jsx-3064013252"
+          href="http://docs.inspectit.rocks/"
+          target="_blank"
+        >
+          Docs
+        </a>
+         
+        |
+         
+        <a
+          class="jsx-3064013252"
+          href="https://github.com/inspectIT/inspectit-ocelot"
+          target="_blank"
+        >
+          Github
+        </a>
+      </span>
+    </div>
+  </div>
+</div>
+`;
