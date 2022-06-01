@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.ClassLoaderDelegationMarker;
 import rocks.inspectit.ocelot.config.model.instrumentation.SpecialSensorSettings;
 import rocks.inspectit.ocelot.core.instrumentation.InstrumentationTriggerer;
+import rocks.inspectit.ocelot.core.instrumentation.TypeDescriptionWithClassLoader;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
 
 import java.util.Collections;
@@ -41,36 +42,33 @@ public class ClassLoaderDelegation implements SpecialSensor {
      * We never deinstrument a classloader after we instrument it, even if {@link SpecialSensorSettings#isClassLoaderDelegation()}
      * is changed to false.
      */
-    private final Set<Class<?>> instrumentedClassloaderClasses = Collections.newSetFromMap(
-            CacheBuilder.newBuilder().weakKeys().<Class<?>, Boolean>build().asMap());
+    private final Set<TypeDescriptionWithClassLoader> instrumentedClassloaderClasses = Collections.newSetFromMap(CacheBuilder.newBuilder()
+            //.weakKeys()
+            .<TypeDescriptionWithClassLoader, Boolean>build().asMap());
 
-    private final ElementMatcher<MethodDescription> LOAD_CLASS_MATCHER =
-            named("loadClass").and(
-                    takesArguments(String.class, boolean.class)
-                            .or(takesArguments(String.class)));
+    private final ElementMatcher<MethodDescription> LOAD_CLASS_MATCHER = named("loadClass").and(takesArguments(String.class, boolean.class).or(takesArguments(String.class)));
 
-    private final ElementMatcher<TypeDescription> CLASS_LOADER_MATCHER =
-            isSubTypeOf(ClassLoader.class)
-                    .and(not(nameStartsWith("java.")))
-                    .and(declaresMethod(LOAD_CLASS_MATCHER));
+    private final ElementMatcher<TypeDescription> CLASS_LOADER_MATCHER = isSubTypeOf(ClassLoader.class).and(not(nameStartsWith("java.")))
+            .and(declaresMethod(LOAD_CLASS_MATCHER));
 
     @Override
-    public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
-        boolean isClassLoader = CLASS_LOADER_MATCHER.matches(TypeDescription.ForLoadedType.of(clazz));
+    public boolean shouldInstrument(TypeDescriptionWithClassLoader typeWithLoader, InstrumentationConfiguration settings) {
+
+        boolean isClassLoader = CLASS_LOADER_MATCHER.matches(typeWithLoader.getType());
         boolean cldEnabled = settings.getSource().getSpecial().isClassLoaderDelegation();
         //we never de instrument a classloader we previously instrumented
-        return instrumentedClassloaderClasses.contains(clazz) || (isClassLoader && cldEnabled);
+        return instrumentedClassloaderClasses.contains(typeWithLoader) || (isClassLoader && cldEnabled);
     }
 
     @Override
-    public boolean requiresInstrumentationChange(Class<?> clazz, InstrumentationConfiguration first, InstrumentationConfiguration second) {
+    public boolean requiresInstrumentationChange(TypeDescriptionWithClassLoader typeWithLoader, InstrumentationConfiguration first, InstrumentationConfiguration second) {
         return false;
     }
 
     @Override
-    public DynamicType.Builder instrument(Class<?> clazz, InstrumentationConfiguration settings, DynamicType.Builder builder) {
+    public DynamicType.Builder instrument(TypeDescriptionWithClassLoader typeWithLoader, InstrumentationConfiguration settings, DynamicType.Builder builder) {
         //remember that this classloader was instrumented
-        instrumentedClassloaderClasses.add(clazz);
+        instrumentedClassloaderClasses.add(typeWithLoader);
         return builder.visit(Advice.to(ClassloaderDelegationAdvice.class).on(LOAD_CLASS_MATCHER));
     }
 
@@ -97,8 +95,8 @@ public class ClassLoaderDelegation implements SpecialSensor {
             getClassLoaderClassesRequiringRetransformation(superClass, result);
         }
 
-        TypeDescription desc = TypeDescription.ForLoadedType.of(classLoaderClass);
-        if (!instrumentedClassloaderClasses.contains(classLoaderClass) && CLASS_LOADER_MATCHER.matches(desc)) {
+        TypeDescriptionWithClassLoader typeWithLoader = TypeDescriptionWithClassLoader.of(classLoaderClass);
+        if (!instrumentedClassloaderClasses.contains(typeWithLoader) && CLASS_LOADER_MATCHER.matches(typeWithLoader.getType())) {
             ClassLoader loadingClassLoader = classLoaderClass.getClassLoader();
             if (loadingClassLoader != null) {
                 getClassLoaderClassesRequiringRetransformation(loadingClassLoader.getClass(), result);
