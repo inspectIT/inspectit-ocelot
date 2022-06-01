@@ -11,23 +11,116 @@ import { filter } from 'lodash';
  * The file tree used in the configuration view.
  */
 class FileTree extends React.Component {
-  state = {
-    contextMenuModel: [],
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      contextMenuModel: [],
+      nodes: null,
+    };
+  }
 
+  searchedFileTest = '';
   contextMenuRef = React.createRef();
 
   /**
    * Fetch the files initially.
    */
   componentDidMount = () => {
-    const { defaultConfig } = this.props;
+    const { defaultConfig, defaultTree, files } = this.props;
     this.props.fetchFiles();
 
     if (Object.entries(defaultConfig).length === 0) {
       this.props.fetchDefaultConfig();
+      this.setState({ nodes: defaultTree.concat(files) });
     }
   };
+
+  /**
+   * Invoked immediately after updating occurs.
+   * This method is not called for the initial render.
+   */
+  componentDidUpdate(prevProps) {
+    if (prevProps.targetFile !== '' && prevProps.targetFile !== this.searchedFileTest) {
+      // Overwrite searched file from props
+      this.searchedFileTest = prevProps.targetFile.toString();
+      const targetNodeKey = '/' + this.searchedFileTest.substring(0, this.searchedFileTest.indexOf('/'));
+      const iterations = this.searchedFileTest.split('/').length - 1;
+      this.expandLabelThroughDOMElements(targetNodeKey, iterations, 1);
+    }
+  }
+
+  /**
+   * Check if a components output is not affected by current change in state or props.
+   */
+  shouldComponentUpdate(nextProps, state) {
+    if (nextProps.defaultTree.concat(nextProps.files) && state.nodes !== nextProps.defaultTree.concat(nextProps.files)) {
+      state.nodes = nextProps.defaultTree.concat(nextProps.files);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Called when class component throws error in either static lifecycle method.
+   */
+  componentDidCatch(error, errorInfo) {
+    console.error(error, errorInfo);
+  }
+
+  /**
+   * Extends closed nodes when selecting target key.
+   * @param targetNodeKey the node path given via props from ConfigurationView.js
+   * @param iterations signals if and how many recursive calls should occur
+   * @param split helps extracting the node key for recursive calls
+   */
+  expandLabelThroughDOMElements(targetNodeKey, iterations, split) {
+    let togglers = Array.from(document.getElementsByClassName('p-tree-toggler p-unselectable-text p-link'));
+    for (const toggler of togglers) {
+      if (toggler && toggler.innerHTML !== undefined) {
+        let reactHandlerKey = Object.keys(toggler).filter((item) => {
+          return item.indexOf('__reactEventHandlers') >= 0;
+        });
+        let reactHandler = toggler[reactHandlerKey[0]];
+        if (targetNodeKey === reactHandler.children._owner.key && !this.noteExtended(targetNodeKey)) {
+          toggler.click();
+        }
+      }
+    }
+    // Adding small timeout to make DOM register change in order to call of method recursively
+    setTimeout(() => {
+      if (iterations > 1) {
+        const paths = this.searchedFileTest.split('/');
+        let newString = '/' + paths[0];
+        for (let i = 1; i <= split; i++) {
+          newString = newString + '/' + paths[i];
+        }
+        iterations--;
+        split++;
+        this.expandLabelThroughDOMElements(newString, iterations, split);
+      }
+    }, '1');
+  }
+
+  /**
+   * Checks if note is already open.
+   * @param key the key of the node that needs to be extended
+   */
+  noteExtended(key) {
+    let treeNodes = document.getElementsByClassName('p-treenode-content p-treenode-selectable');
+    for (const node of treeNodes) {
+      let reactHandlerKey = Object.keys(node).filter((item) => {
+        return item.indexOf('__reactEventHandlers') >= 0;
+      });
+      let reactHandler = node[reactHandlerKey[0]];
+      if (key === reactHandler.children[0]._owner.key) {
+        if (reactHandler['aria-expanded']) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
   /**
    * Handle tree selection changes.
@@ -112,48 +205,56 @@ class FileTree extends React.Component {
   };
 
   render() {
-    const { className, defaultTree, selection, selectedDefaultConfigFile, readOnly, files, selectedVersion } = this.props;
+    const { className, selection, selectedDefaultConfigFile, readOnly, selectedVersion } = this.props;
+
     return (
       <div className="this" onContextMenu={readOnly ? undefined : this.showContextMenu} onKeyDown={readOnly ? undefined : this.onKeyDown}>
         <style jsx>{`
-                    .this {
-                        overflow: auto;
-                        flex-grow: 1;
-                        display: flex;
-                        flex-direction: column;
-                    }
-                    .this :global(.cm-tree-icon) {
-                        width: 1.3rem;
-                        height: 1.3rem;
-                    }
-                    .this :global(.cm-tree-label) {
-                        color: #aaa;
-                    }
-                    .this :global(.ocelot-tree-head-orange) {
-                        background: url("${linkPrefix}/static/images/inspectit-ocelot-head_orange.svg") center no-repeat;
-                        background-size: 1rem 1rem;
-                    }
-                    .this :global(.ocelot-tree-head-white) {
-                        background: url("${linkPrefix}/static/images/inspectit-ocelot-head_white.svg") center no-repeat;
-                        background-size: 1rem 1rem;
-                    }
-                    .tree-container {
-                      overflow: auto;
-                    }
-                    .version-banner {
-                      background-color: #ffcc80;
-                      height: 2.45rem;
-                      border-bottom: 1px solid #dddddd;
-                    }
-				`}</style>
+                  .this {
+                    overflow: auto;
+                    flex-grow: 1;
+                    display: flex;
+                    flex-direction: column;
+                  }
+
+                  .this :global(.cm-tree-icon) {
+                    width: 1.3rem;
+                    height: 1.3rem;
+                  }
+
+                  .this :global(.cm-tree-label) {
+                    color: #aaa;
+                  }
+
+                  .this :global(.ocelot-tree-head-orange) {
+                    background: url("${linkPrefix}/static/images/inspectit-ocelot-head_orange.svg") center no-repeat;
+                    background-size: 1rem 1rem;
+                  }
+
+                  .this :global(.ocelot-tree-head-white) {
+                    background: url("${linkPrefix}/static/images/inspectit-ocelot-head_white.svg") center no-repeat;
+                    background-size: 1rem 1rem;
+                  }
+
+                  .tree-container {
+                    overflow: auto;
+                  }
+
+                  .version-banner {
+                    background-color: #ffcc80;
+                    height: 2.45rem;
+                    border-bottom: 1px solid #dddddd;
+                  }
+                `}</style>
         {selectedVersion && <div className="version-banner" />}
         <div className="tree-container">
           <ContextMenu model={this.state.contextMenuModel} ref={this.contextMenuRef} />
           <Tree
+            id={'fileTree'}
             className={className}
             filter={true}
             filterBy="label"
-            value={defaultTree.concat(files)}
+            value={this.state.nodes}
             selectionMode="single"
             selectionKeys={selection || selectedDefaultConfigFile}
             onSelectionChange={this.onSelectionChange}

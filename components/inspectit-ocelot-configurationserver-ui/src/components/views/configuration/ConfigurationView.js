@@ -69,6 +69,15 @@ class ConfigurationView extends React.Component {
     isConvertDialogShown: false,
   };
 
+  // prop for FileTree.js that gets updated when the user is looking up a specific file via search dialog
+  searchedFile = '';
+
+  constructor(props) {
+    super(props);
+    // Create the child instance using react createRef
+    this.childRef = React.createRef();
+  }
+
   parsePath = (filePath, defaultConfigFilePath) => {
     if (filePath) {
       return this.splitIntoPathAndName(filePath);
@@ -153,6 +162,13 @@ class ConfigurationView extends React.Component {
       this.props.selectVersion(versionId, false);
     }
     this.props.selectFile(filename);
+    this.searchedFile = filename;
+  };
+
+  onChange = (value) => {
+    if (!this.props.loading && this.props.isLatestVersion) {
+      this.props.selectedFileContentsChanged(value);
+    }
   };
 
   render() {
@@ -220,6 +236,7 @@ class ConfigurationView extends React.Component {
           />
           <FileTree
             className="fileTree"
+            targetFile={this.searchedFile}
             showDeleteFileDialog={this.showDeleteFileDialog}
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}

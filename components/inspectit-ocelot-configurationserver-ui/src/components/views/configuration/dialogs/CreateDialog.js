@@ -180,7 +180,7 @@ const mapDispatchToProps = {
 CreateDialog.propTypes = {
   /** The file path of the element to create */
   filePath: PropTypes.string,
-  /** Wether to create a directory or a file */
+  /** Whether to create a directory or a file */
   directoryMode: PropTypes.bool,
   /** Whether the dialog is visible */
   visible: PropTypes.bool,
