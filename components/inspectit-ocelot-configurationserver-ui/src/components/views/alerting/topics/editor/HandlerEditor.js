@@ -58,7 +58,7 @@ const HandlerSpecificOptions = ({ content, readOnly, availableTopics, onContentC
   switch (handlerKind) {
     case 'smtp':
       return (
-        <Section title="Receipients">
+        <Section title="Recipients">
           <ListEditor
             compId={content.topic + '-' + content.id}
             value={content.options && content.options.to ? content.options.to : []}
@@ -66,7 +66,7 @@ const HandlerSpecificOptions = ({ content, readOnly, availableTopics, onContentC
             entryIcon={alertingConstants.handlerIcons(handlerKind)}
             entryWidth="30rem"
             validateEntryFunc={(entry) => {
-              const mailformat = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+              const mailformat = /^\w+([.-]\w+)*@\w+([.-]\w+)*(\.\w{2,3})+$/;
               const matchResult = entry.match(mailformat);
               return matchResult && matchResult[0] === entry;
             }}
