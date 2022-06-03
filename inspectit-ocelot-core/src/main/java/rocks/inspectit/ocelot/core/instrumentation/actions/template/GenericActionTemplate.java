@@ -20,7 +20,7 @@ public class GenericActionTemplate implements IGenericAction, DoNotInstrumentMar
     }
 
     @Override
-    public Object execute(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] additionalArgs) {
-        return executeImpl(instrumentedMethodArgs, thiz, returnValue, thrown, additionalArgs);
+    public Object execute(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] actionArguments) {
+        return executeImpl(instrumentedMethodArgs, thiz, returnValue, thrown, actionArguments);
     }
 }

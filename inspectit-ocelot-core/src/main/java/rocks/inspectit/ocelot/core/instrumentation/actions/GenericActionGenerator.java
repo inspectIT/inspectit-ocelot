@@ -69,7 +69,7 @@ public class GenericActionGenerator {
     private static final String THIZ = "$2";
     private static final String RETURN_VALUE = "$3";
     private static final String THROWN = "$4";
-    private static final String ADDITIONAL_ARGS = "$5";
+    private static final String ACTION_ARGS = "$5";
 
     @Autowired
     private ClassInjector classInjector;
@@ -208,7 +208,7 @@ public class GenericActionGenerator {
         val iterator = additionalArgs.entrySet().iterator();
         int id = 0;
         while (iterator.hasNext()) {
-            String value = ADDITIONAL_ARGS + "[" + id + "]";
+            String value = ACTION_ARGS + "[" + id + "]";
             val argsDef = iterator.next();
             val varName = argsDef.getKey();
             val varType = argsDef.getValue();

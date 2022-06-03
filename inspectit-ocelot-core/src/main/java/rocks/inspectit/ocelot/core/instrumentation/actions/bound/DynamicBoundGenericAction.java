@@ -18,11 +18,11 @@ import java.util.Map;
  * constant values and values depending on the execution context
  * for their input parameters assigned.
  */
-abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
+public class DynamicBoundGenericAction extends BoundGenericAction {
 
     /**
      * A template containing the already assigned constant arguments for this generic action.
-     * As the same {@link AbstractDynamicBoundGenericAction} instance could potentially be used by multiple threads,
+     * As the same {@link DynamicBoundGenericAction} instance could potentially be used by multiple threads,
      * this array needs to be copied before the dynamicAssignments can be performed.
      */
     private final Object[] argumentsTemplate;
@@ -35,10 +35,10 @@ abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
      */
     private Pair<Integer, VariableAccessor>[] dynamicAssignments;
 
-    AbstractDynamicBoundGenericAction(String callName, GenericActionConfig actionConfig,
-                                      InjectedClass<?> action, Map<String, Object> constantAssignments,
-                                      Map<String, VariableAccessor> dynamicAssignments) {
-        super(callName, actionConfig, action);
+    DynamicBoundGenericAction(String dataKey, GenericActionConfig actionConfig,
+                              InjectedClass<?> action, Map<String, Object> constantAssignments,
+                              Map<String, VariableAccessor> dynamicAssignments) {
+        super(dataKey, actionConfig, action);
 
         // the sorted additionalArgumentTypes map defines the number and the order of the additional input
         // parameters the generic action expects
@@ -69,7 +69,7 @@ abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
         this.dynamicAssignments = dynamicAssignmentsWithIndices.toArray(new Pair[0]);
     }
 
-    protected Object[] buildAdditionalArguments(ExecutionContext context) {
+    protected Object[] getActionArguments(ExecutionContext context) {
         Object[] args = Arrays.copyOf(argumentsTemplate, argumentsTemplate.length);
 
         for (val assignment : dynamicAssignments) {
