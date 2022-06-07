@@ -90,7 +90,7 @@ public class AgentManager {
         if (agentInstance == null) {
             return "UNKNOWN";
         } else {
-            return agentInstance.getOtelVersion();
+            return agentInstance.getOpenTelemetryVersion();
         }
     }
 }

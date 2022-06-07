@@ -137,7 +137,7 @@ public class AgentImpl implements IAgent {
     }
 
     @Override
-    public String getOtelVersion() {
+    public String getOpenTelemetryVersion() {
         if (otelVersion == null) {
             readVersionInformation();
         }

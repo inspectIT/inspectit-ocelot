@@ -43,5 +43,5 @@ public class EnvironmentSettings {
     /**
      * The version of OpenTelemetry the agent was build with.
      */
-    private String otelVersion;
+    private String openTelemetryVersion;
 }

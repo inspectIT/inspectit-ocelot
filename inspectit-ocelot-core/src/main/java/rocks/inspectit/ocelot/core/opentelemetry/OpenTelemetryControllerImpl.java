@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.opentelemetry;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.opencensusshim.metrics.OpenCensusMetrics;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -335,6 +336,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         multiSpanExporter = DynamicMultiSpanExporter.create();
         Resource tracerProviderAttributes = Resource.create(Attributes.of(
                 ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName(),
+                AttributeKey.stringKey("InspectIT Version"),"blah",
                 ResourceAttributes.TELEMETRY_SDK_VERSION, env.getProperty(INSPECTIT_ENV_OTEL_VERSION_PATH)
         ));
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)

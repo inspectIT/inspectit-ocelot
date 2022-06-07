@@ -27,7 +27,7 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
         Properties result = new Properties();
         result.put("inspectit.env.agent-dir", getAgentJarDirectory());
         result.put("inspectit.env.agent-version", AgentManager.getAgentVersion());
-        result.put("inspectit.env.otel-version", AgentManager.getOtelVersion());
+        result.put("inspectit.env.open-telemetry-version", AgentManager.getOtelVersion());
         result.put("inspectit.env.hostname", getHostName());
         result.put("inspectit.env.java-version", getJavaVersion());
         result.put("inspectit.env.pid", getPid());
