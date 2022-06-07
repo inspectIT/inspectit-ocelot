@@ -11,6 +11,7 @@ import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.ConditionalHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.TracingHookAction;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +44,9 @@ public class ActionCallGenerator {
 
         IHookAction actionCall = BoundGenericAction.bind(actionCallConfig.getName(), actionConfig, injectedActionClass, constantAssignments, dynamicAssignments);
 
-        return ConditionalHookAction.wrapWithConditionChecks(callSettings, actionCall, variableAccessorFactory);
+        TracingHookAction wrappedAction = TracingHookAction.wrap(actionCall, actionConfig);
+
+        return ConditionalHookAction.wrapWithConditionChecks(callSettings, wrappedAction, variableAccessorFactory);
     }
 
     /**

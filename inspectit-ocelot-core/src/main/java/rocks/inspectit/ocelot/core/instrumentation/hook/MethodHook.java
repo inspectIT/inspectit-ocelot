@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
+import io.opencensus.trace.Span;
+import io.opencensus.trace.Tracing;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
@@ -93,14 +95,21 @@ public class MethodHook implements IMethodHook {
             InspectitContextImpl inspectitContext = inspectitContextManager.enterNewContext();
             IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, null, null, this, inspectitContext);
 
+//            Span outer = Tracing.getTracer()
+//                    .spanBuilder("MethodEntry<" + executionContext.getHook().getMethodInformation().getName() + ">")
+//                    .startSpan();
+
             for (IHookAction action : activeEntryActions) {
                 try (IActionScope scope = actionScopeFactory.createScope(action)) {
                     action.execute(executionContext);
                 } catch (Throwable t) {
-                    log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
+                    log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation
+                            .getMethodFQN(), t);
                     activeEntryActions.remove(action);
                 }
             }
+
+//            outer.end();
 
             inspectitContext.makeActive();
             return inspectitContext;
@@ -120,7 +129,8 @@ public class MethodHook implements IMethodHook {
                 try (IActionScope scope = actionScopeFactory.createScope(action)) {
                     action.execute(executionContext);
                 } catch (Throwable t) {
-                    log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
+                    log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation
+                            .getMethodFQN(), t);
                     activeExitActions.remove(action);
                 }
             }

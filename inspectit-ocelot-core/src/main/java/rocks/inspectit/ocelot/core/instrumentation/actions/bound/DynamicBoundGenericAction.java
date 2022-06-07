@@ -69,7 +69,7 @@ public class DynamicBoundGenericAction extends BoundGenericAction {
         this.dynamicAssignments = dynamicAssignmentsWithIndices.toArray(new Pair[0]);
     }
 
-    protected Object[] getActionArguments(ExecutionContext context) {
+    public Object[] getActionArguments(ExecutionContext context) {
         Object[] args = Arrays.copyOf(argumentsTemplate, argumentsTemplate.length);
 
         for (val assignment : dynamicAssignments) {
