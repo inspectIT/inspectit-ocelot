@@ -24,6 +24,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.IOpenTelemetryController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
@@ -336,8 +337,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         multiSpanExporter = DynamicMultiSpanExporter.create();
         Resource tracerProviderAttributes = Resource.create(Attributes.of(
                 ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName(),
-                AttributeKey.stringKey("InspectIT Version"),"blah",
-                ResourceAttributes.TELEMETRY_SDK_VERSION, env.getProperty(INSPECTIT_ENV_OTEL_VERSION_PATH)
+                AttributeKey.stringKey("inspectit.agent.version"),AgentManager.getAgentVersion(),
+                ResourceAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOtelVersion()
         ));
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)
                 .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
