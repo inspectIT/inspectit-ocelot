@@ -39,4 +39,9 @@ public class EnvironmentSettings {
      * The version of the inspectIT Ocelot agent.
      */
     private String agentVersion;
+
+    /**
+     * The version of OpenTelemetry the agent was build with.
+     */
+    private String otelVersion;
 }

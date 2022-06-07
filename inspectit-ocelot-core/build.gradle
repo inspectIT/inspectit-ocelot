@@ -198,7 +198,7 @@ task generateVersionFile {
     doLast {
         def currentDate = new Date().toString()
         ext.versionFile.withWriter('UTF-8') { writer ->
-            writer << "$version\n$openTelemetryVersion\n$currentDate"
+            writer << "$version\nOpenTelemetry $openTelemetryVersion\n$currentDate"
         }
     }
 }
