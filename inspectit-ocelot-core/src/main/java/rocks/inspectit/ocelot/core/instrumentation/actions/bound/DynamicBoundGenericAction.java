@@ -29,7 +29,7 @@ public class DynamicBoundGenericAction extends BoundGenericAction {
 
     /**
      * An array containing (a) the index of the addition input to assign and (b) a variable accessor for querying the value.
-     * The index corresponds to the index of the parameter in {@link GenericActionConfig#getAdditionalArgumentTypes()}.
+     * The index corresponds to the index of the parameter in {@link GenericActionConfig#getActionArgumentTypes()}.
      * Therefore the index corresponds to the position in the additionalArguments array with which the
      * {@link IGenericAction#execute(Object[], Object, Object, Throwable, Object[])} function is called.
      */
@@ -43,7 +43,7 @@ public class DynamicBoundGenericAction extends BoundGenericAction {
         // the sorted additionalArgumentTypes map defines the number and the order of the additional input
         // parameters the generic action expects
         // therefore we can already reserve the exact amount of space needed for the argumentsTemplate
-        int numArgs = actionConfig.getAdditionalArgumentTypes().size();
+        int numArgs = actionConfig.getActionArgumentTypes().size();
         argumentsTemplate = new Object[numArgs];
 
         List<Pair<Integer, VariableAccessor>> dynamicAssignmentsWithIndices = new ArrayList<>();
@@ -55,7 +55,7 @@ public class DynamicBoundGenericAction extends BoundGenericAction {
         //Instead we remember the index and the function used to perform the assignment in dynamicAssignments.
 
         int idx = 0;
-        for (String argName : actionConfig.getAdditionalArgumentTypes().keySet()) {
+        for (String argName : actionConfig.getActionArgumentTypes().keySet()) {
             if (constantAssignments.containsKey(argName)) {
                 argumentsTemplate[idx] = constantAssignments.get(argName);
             } else if (dynamicAssignments.containsKey(argName)) {

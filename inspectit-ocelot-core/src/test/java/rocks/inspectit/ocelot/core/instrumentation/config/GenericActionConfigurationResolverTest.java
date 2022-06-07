@@ -57,7 +57,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isEqualTo("MyClass");
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
-            assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
+            assertThat(rc.getActionArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedReturnValueType()).isNull();
             assertThat(rc.isUsesThrown()).isFalse();
@@ -80,7 +80,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
-            assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
+            assertThat(rc.getActionArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).hasSize(2);
             assertThat(rc.getExpectedArgumentTypes()).containsEntry(1, "MyClass");
             assertThat(rc.getExpectedArgumentTypes()).containsEntry(3, "MyOtherClass");
@@ -106,9 +106,9 @@ public class GenericActionConfigurationResolverTest {
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
-            assertThat(rc.getAdditionalArgumentTypes()).hasSize(2);
-            assertThat(rc.getAdditionalArgumentTypes()).containsEntry("argument", "MyClass");
-            assertThat(rc.getAdditionalArgumentTypes()).containsEntry("x", "MyOtherClass");
+            assertThat(rc.getActionArgumentTypes()).hasSize(2);
+            assertThat(rc.getActionArgumentTypes()).containsEntry("argument", "MyClass");
+            assertThat(rc.getActionArgumentTypes()).containsEntry("x", "MyOtherClass");
             assertThat(rc.getExpectedReturnValueType()).isNull();
             assertThat(rc.isUsesThrown()).isFalse();
             assertThat(rc.getImportedPackages()).isEmpty();
@@ -128,7 +128,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
-            assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
+            assertThat(rc.getActionArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedReturnValueType()).isEqualTo("MyClass");
             assertThat(rc.isUsesThrown()).isFalse();
@@ -149,7 +149,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
-            assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
+            assertThat(rc.getActionArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedReturnValueType()).isNull();
             assertThat(rc.isUsesThrown()).isTrue();
@@ -171,7 +171,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
-            assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
+            assertThat(rc.getActionArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedReturnValueType()).isNull();
             assertThat(rc.isUsesThrown()).isFalse();
@@ -193,7 +193,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(rc.isVoid()).isFalse();
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
-            assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
+            assertThat(rc.getActionArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedReturnValueType()).isNull();
             assertThat(rc.isUsesThrown()).isFalse();
@@ -217,7 +217,7 @@ public class GenericActionConfigurationResolverTest {
             assertThat(rc.isVoid()).isTrue();
             assertThat(rc.getExpectedThisType()).isNull();
             assertThat(rc.getName()).isEqualTo(ACTION_NAME);
-            assertThat(rc.getAdditionalArgumentTypes()).isEmpty();
+            assertThat(rc.getActionArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedArgumentTypes()).isEmpty();
             assertThat(rc.getExpectedReturnValueType()).isNull();
             assertThat(rc.isUsesThrown()).isFalse();

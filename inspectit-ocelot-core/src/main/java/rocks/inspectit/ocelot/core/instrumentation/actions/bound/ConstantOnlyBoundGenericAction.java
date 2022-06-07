@@ -19,7 +19,7 @@ public class ConstantOnlyBoundGenericAction extends BoundGenericAction {
         // the additionalArgumentTypes is a sorted map
         // the order in which the arguments appear in this map correspond to the order in which their values
         // have to be placed in the arguments array
-        arguments = actionConfig.getAdditionalArgumentTypes().keySet().stream().map(constantAssignments::get).toArray();
+        arguments = actionConfig.getActionArgumentTypes().keySet().stream().map(constantAssignments::get).toArray();
     }
 
     @Override

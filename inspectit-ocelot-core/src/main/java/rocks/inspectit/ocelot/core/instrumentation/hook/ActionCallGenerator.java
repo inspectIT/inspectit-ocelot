@@ -59,7 +59,7 @@ public class ActionCallGenerator {
         Map<String, Object> constantAssignments = new HashMap<>();
 
         ActionCallSettings callSettings = actionCallConfig.getCallSettings();
-        SortedMap<String, String> actionArgumentTypes = actionConfig.getAdditionalArgumentTypes();
+        SortedMap<String, String> actionArgumentTypes = actionConfig.getActionArgumentTypes();
         actionCallConfig.getCallSettings().getConstantInput()
                 .forEach((argName, value) -> {
                     String expectedTypeName = actionArgumentTypes.get(argName);
@@ -93,7 +93,7 @@ public class ActionCallGenerator {
                 .forEach((argName, dataName) ->
                         dynamicAssignments.put(argName, variableAccessorFactory.getVariableAccessor(dataName))
                 );
-        Set<String> additionalInputVars = actionCallConfig.getAction().getAdditionalArgumentTypes().keySet();
+        Set<String> additionalInputVars = actionCallConfig.getAction().getActionArgumentTypes().keySet();
         for (String variable : additionalInputVars) {
             Object constantSpecialValue = variableAccessorFactory.getConstantSpecialVariable(variable, methodInfo);
             VariableAccessor dynamicSpecialValue = variableAccessorFactory.getSpecialVariableAccessor(variable);

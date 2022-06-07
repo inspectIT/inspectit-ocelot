@@ -15,7 +15,7 @@ public class GenericActionTemplate implements IGenericAction, DoNotInstrumentMar
     /**
      * This methods body will be replaced via javassist to the actual generic action code.
      */
-    public static Object executeImpl(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] additionalArgs) {
+    public static Object executeImpl(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] actionArguments) {
         return null;
     }
 
