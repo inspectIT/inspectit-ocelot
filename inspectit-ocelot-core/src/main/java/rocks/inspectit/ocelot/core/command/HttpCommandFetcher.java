@@ -34,7 +34,7 @@ public class HttpCommandFetcher {
     /**
      * Object mapper for serializing command responses.
      */
-    private final ObjectMapper objectMapper = new ObjectMapper().enableDefaultTyping();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * The prefix which is used for the meta information HTTP headers.
