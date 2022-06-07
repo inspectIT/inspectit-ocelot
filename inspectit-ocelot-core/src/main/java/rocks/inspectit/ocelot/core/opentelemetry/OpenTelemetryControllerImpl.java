@@ -328,16 +328,20 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      */
     private SdkTracerProvider buildTracerProvider(InspectitConfig configuration) {
         double sampleProbability = configuration.getTracing().getSampleProbability();
-        Resource traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName()));
+
         sampler = new DynamicSampler(sampleProbability);
         multiSpanExporter = DynamicMultiSpanExporter.create();
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)
                 .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
                 .setScheduleDelay(configuration.getTracing().getScheduleDelayMillis(), TimeUnit.MILLISECONDS)
                 .build();
+
+        Resource traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName()));
+        Resource otelVersionResource = Resource.create(Attributes.of(ResourceAttributes.TELEMETRY_SDK_VERSION, env.getProperty("inspectit.env.otel-version")));
         SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
                 .setSampler(sampler)
                 .setResource(traceServiceNameResource)
+                .setResource(otelVersionResource)
                 .addSpanProcessor(spanProcessor)
                 .setIdGenerator(idGenerator);
 

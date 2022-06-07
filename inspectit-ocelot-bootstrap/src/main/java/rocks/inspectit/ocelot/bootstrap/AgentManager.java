@@ -80,4 +80,17 @@ public class AgentManager {
             return agentInstance.getVersion();
         }
     }
+
+    /**
+     * Returns the Open Telemetry version the current agent was build with.
+     *
+     * @return the current OTEL version
+     */
+    public static String getOtelVersion() {
+        if (agentInstance == null) {
+            return "UNKNOWN";
+        } else {
+            return agentInstance.getOtelVersion();
+        }
+    }
 }
