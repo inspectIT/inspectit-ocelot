@@ -1,10 +1,12 @@
 name: Snyk Test
 
+#Only one of snyk_test_sarif and snyk_test should be merged probably!
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  schedule:
+    # run once a week Mondays at 4 a.m.
+    - cron: '0 4 * * 1'
 
 jobs:
   build:
