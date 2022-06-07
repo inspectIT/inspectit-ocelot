@@ -49,6 +49,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
     public static final String BEAN_NAME = "openTelemetryController";
 
+    public static final String INSPECTIT_ENV_OTEL_VERSION_PATH = "inspectit.env.otel-version";
+
     /**
      * Whether this {@link OpenTelemetryControllerImpl} has been shut down.
      */
@@ -331,17 +333,18 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
         sampler = new DynamicSampler(sampleProbability);
         multiSpanExporter = DynamicMultiSpanExporter.create();
+        Resource tracerProviderAttributes = Resource.create(Attributes.of(
+                ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName(),
+                ResourceAttributes.TELEMETRY_SDK_VERSION, env.getProperty(INSPECTIT_ENV_OTEL_VERSION_PATH)
+        ));
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)
                 .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
                 .setScheduleDelay(configuration.getTracing().getScheduleDelayMillis(), TimeUnit.MILLISECONDS)
                 .build();
 
-        Resource traceServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName()));
-        Resource otelVersionResource = Resource.create(Attributes.of(ResourceAttributes.TELEMETRY_SDK_VERSION, env.getProperty("inspectit.env.otel-version")));
         SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
                 .setSampler(sampler)
-                .setResource(traceServiceNameResource)
-                .setResource(otelVersionResource)
+                .setResource(tracerProviderAttributes)
                 .addSpanProcessor(spanProcessor)
                 .setIdGenerator(idGenerator);
 
