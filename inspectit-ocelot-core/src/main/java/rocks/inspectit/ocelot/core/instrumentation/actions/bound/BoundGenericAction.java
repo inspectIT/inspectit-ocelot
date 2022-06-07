@@ -25,9 +25,14 @@ public abstract class BoundGenericAction implements IHookAction {
     private final String dataKey;
 
     /**
-     * The configuration used by this action.
+     * The action's name.
      */
-    private final GenericActionConfig actionConfig;
+    private final String name;
+
+    /**
+     * Whether this action is a void action and does not write any data to the context.
+     */
+    private final boolean voidAction;
 
     /**
      * Reference to the class of the generic action.
@@ -63,7 +68,8 @@ public abstract class BoundGenericAction implements IHookAction {
 
     protected BoundGenericAction(String dataKey, GenericActionConfig actionConfig, InjectedClass<?> actionClass) {
         this.dataKey = dataKey;
-        this.actionConfig = actionConfig;
+        this.name = actionConfig.getName();
+        this.voidAction = actionConfig.isVoid();
         this.actionClass = actionClass;
         try {
             action = new WeakReference<>((IGenericAction) actionClass.getInjectedClassObject()
@@ -77,7 +83,7 @@ public abstract class BoundGenericAction implements IHookAction {
 
     @Override
     public String getName() {
-        return actionConfig.getName();
+        return name;
     }
 
     @Override
@@ -92,7 +98,7 @@ public abstract class BoundGenericAction implements IHookAction {
         Object result = action.get()
                 .execute(context.getMethodArguments(), context.getThiz(), context.getReturnValue(), context.getThrown(), actionArguments);
 
-        if (!actionConfig.isVoid()) {
+        if (!voidAction) {
             context.getInspectitContext().setData(dataKey, result);
         }
     }
