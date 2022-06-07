@@ -67,7 +67,7 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
         if (!systemCpuUsage.isPresent()) {
             log.info(METRIC_UNAVAILABLE, SYSTEM_USAGE_METRIC_FULL_NAME, METH_SYS_CPU_LOAD);
         }
-        if (!systemCpuUsage.isPresent()) {
+        if (!processCpuUsage.isPresent()) {
             log.info(METRIC_UNAVAILABLE, PROCESS_USAGE_METRIC_FULL_NAME, METH_PROC_CPU_LOAD);
         }
         if (!averageLoadAvailable) {
