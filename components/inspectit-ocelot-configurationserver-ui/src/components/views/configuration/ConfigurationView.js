@@ -271,14 +271,14 @@ class ConfigurationView extends React.Component {
           visible={this.state.isConfigurationDialogShown}
           onHide={this.hideConfigurationDialog}
           configurationValue={fileContentWithoutFirstLine}
-          fileName={path + name}
+          fileName={`${path}` + `${name}`}
           loading={this.props.loading}
         />
 
         <ConvertDialog
           visible={this.state.isConvertDialogShown}
           onHide={this.hideConvertDialog}
-          name={path + name}
+          name={`${path}` + `${name}`}
           text="Warning"
           onSuccess={this.convertEditor}
         />

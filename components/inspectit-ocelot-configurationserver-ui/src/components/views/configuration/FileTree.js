@@ -167,7 +167,7 @@ class FileTree extends React.Component {
   }
 
   getContextMenuModel = (filePath) => {
-    const { showCreateDirectoryDialog, showCreateFileDialog, showMoveDialog, showDeleteFileDialog } = this.props;
+    const { showCreateDirectoryDialog, showCreateFileDialog, showMoveDialog, showDeleteFileDialog, exportSelection } = this.props;
 
     return [
       {
@@ -179,6 +179,11 @@ class FileTree extends React.Component {
         label: 'Add File',
         icon: 'pi pi-file',
         command: () => showCreateFileDialog(filePath),
+      },
+      {
+        label: 'Download',
+        icon: 'pi pi-download',
+        command: () => exportSelection(true, filePath),
       },
       {
         label: 'Rename',
@@ -213,6 +218,7 @@ const mapDispatchToProps = {
   fetchDefaultConfig: configurationActions.fetchDefaultConfig,
   fetchFiles: configurationActions.fetchFiles,
   selectFile: configurationActions.selectFile,
+  exportSelection: configurationActions.exportSelection,
   move: configurationActions.move,
 };
 
