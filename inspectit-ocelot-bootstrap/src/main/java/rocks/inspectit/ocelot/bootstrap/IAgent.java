@@ -30,6 +30,13 @@ public interface IAgent {
     String getVersion();
 
     /**
+     * Returns the version of Open Telemetry the agent was build with.
+     *
+     * @return the version of Open Telemetry currently used in the agent.
+     */
+    String getOtelVersion();
+
+    /**
      * Returns the date the agent has been built.
      *
      * @return string representing when the date the agent has been built
