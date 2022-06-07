@@ -1,4 +1,4 @@
-name: Snyk Test
+name: Snyk Test SARIF
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Test and build
+    name: Snyk test and upload SARIF
     environment: snyk-npm
     runs-on: ubuntu-latest
 
