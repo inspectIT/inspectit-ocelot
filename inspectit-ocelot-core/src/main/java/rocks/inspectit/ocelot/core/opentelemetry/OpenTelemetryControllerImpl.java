@@ -336,7 +336,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         Resource tracerProviderAttributes = Resource.create(Attributes.of(
                 ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName(),
                 AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion(),
-                ResourceAttributes.TELEMETRY_SDK_VERSION, AgentManager.getAgent().getOpenTelemetryVersion()
+                ResourceAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion(),
+                ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java",
+                ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"
         ));
         // @formatter:on
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)
