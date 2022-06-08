@@ -51,8 +51,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
     public static final String BEAN_NAME = "openTelemetryController";
 
-    public static final String INSPECTIT_ENV_OTEL_VERSION_PATH = "inspectit.env.otel-version";
-
     /**
      * Whether this {@link OpenTelemetryControllerImpl} has been shut down.
      */
@@ -313,8 +311,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         // if any OpenTelemetry has already been registered to GlobalOpenTelemetry, reset it.
         if (null != OpenTelemetryUtils.getGlobalOpenTelemetry()) {
             // we need to reset it before we can register our custom OpenTelemetryImpl, as GlobalOpenTelemetry is throwing an exception if we want to register a new OpenTelemetry if a previous one is still registered.
-            log.info("Reset previously registered GlobalOpenTelemetry ({}) during the initialization of {} to register {}", GlobalOpenTelemetry
-                    .get()
+            log.info("Reset previously registered GlobalOpenTelemetry ({}) during the initialization of {} to register {}", GlobalOpenTelemetry.get()
                     .getClass()
                     .getName(), getName(), openTelemetry.getClass().getSimpleName());
             GlobalOpenTelemetry.resetForTest();
@@ -335,11 +332,13 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
         sampler = new DynamicSampler(sampleProbability);
         multiSpanExporter = DynamicMultiSpanExporter.create();
+        // @formatter:off
         Resource tracerProviderAttributes = Resource.create(Attributes.of(
                 ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName(),
-                AttributeKey.stringKey("inspectit.agent.version"),AgentManager.getAgentVersion(),
+                AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion(),
                 ResourceAttributes.TELEMETRY_SDK_VERSION, AgentManager.getAgent().getOpenTelemetryVersion()
         ));
+        // @formatter:on
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)
                 .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
                 .setScheduleDelay(configuration.getTracing().getScheduleDelayMillis(), TimeUnit.MILLISECONDS)
@@ -363,7 +362,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         Resource metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getServiceName()));
         return SdkMeterProvider.builder().setResource(metricServiceNameResource).build();
     }
-
 
     /**
      * Configures the tracing, i.e. {@link #openTelemetry} and the related {@link SdkTracerProvider}. A new {@link SdkTracerProvider} is only built once or after {@link #shutdown()} was called.
@@ -403,7 +401,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                 OpenTelemetryUtils.stopMeterProvider(meterProvider, true);
             }
 
-            Resource metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig().getServiceName()));
+            Resource metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
+                    .getServiceName()));
             SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(metricServiceNameResource);
 
             // register metric reader for each service
