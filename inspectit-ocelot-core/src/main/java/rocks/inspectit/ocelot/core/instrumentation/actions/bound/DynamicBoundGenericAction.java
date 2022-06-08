@@ -18,32 +18,32 @@ import java.util.Map;
  * constant values and values depending on the execution context
  * for their input parameters assigned.
  */
-abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
+public class DynamicBoundGenericAction extends BoundGenericAction {
 
     /**
      * A template containing the already assigned constant arguments for this generic action.
-     * As the same {@link AbstractDynamicBoundGenericAction} instance could potentially be used by multiple threads,
+     * As the same {@link DynamicBoundGenericAction} instance could potentially be used by multiple threads,
      * this array needs to be copied before the dynamicAssignments can be performed.
      */
     private final Object[] argumentsTemplate;
 
     /**
      * An array containing (a) the index of the addition input to assign and (b) a variable accessor for querying the value.
-     * The index corresponds to the index of the parameter in {@link GenericActionConfig#getAdditionalArgumentTypes()}.
+     * The index corresponds to the index of the parameter in {@link GenericActionConfig#getActionArgumentTypes()}.
      * Therefore the index corresponds to the position in the additionalArguments array with which the
      * {@link IGenericAction#execute(Object[], Object, Object, Throwable, Object[])} function is called.
      */
     private Pair<Integer, VariableAccessor>[] dynamicAssignments;
 
-    AbstractDynamicBoundGenericAction(String callName, GenericActionConfig actionConfig,
-                                      InjectedClass<?> action, Map<String, Object> constantAssignments,
-                                      Map<String, VariableAccessor> dynamicAssignments) {
-        super(callName, actionConfig, action);
+    DynamicBoundGenericAction(String dataKey, GenericActionConfig actionConfig,
+                              InjectedClass<?> action, Map<String, Object> constantAssignments,
+                              Map<String, VariableAccessor> dynamicAssignments) {
+        super(dataKey, actionConfig, action);
 
         // the sorted additionalArgumentTypes map defines the number and the order of the additional input
         // parameters the generic action expects
         // therefore we can already reserve the exact amount of space needed for the argumentsTemplate
-        int numArgs = actionConfig.getAdditionalArgumentTypes().size();
+        int numArgs = actionConfig.getActionArgumentTypes().size();
         argumentsTemplate = new Object[numArgs];
 
         List<Pair<Integer, VariableAccessor>> dynamicAssignmentsWithIndices = new ArrayList<>();
@@ -55,7 +55,7 @@ abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
         //Instead we remember the index and the function used to perform the assignment in dynamicAssignments.
 
         int idx = 0;
-        for (String argName : actionConfig.getAdditionalArgumentTypes().keySet()) {
+        for (String argName : actionConfig.getActionArgumentTypes().keySet()) {
             if (constantAssignments.containsKey(argName)) {
                 argumentsTemplate[idx] = constantAssignments.get(argName);
             } else if (dynamicAssignments.containsKey(argName)) {
@@ -69,7 +69,7 @@ abstract class AbstractDynamicBoundGenericAction extends BoundGenericAction {
         this.dynamicAssignments = dynamicAssignmentsWithIndices.toArray(new Pair[0]);
     }
 
-    protected Object[] buildAdditionalArguments(ExecutionContext context) {
+    protected Object[] getActionArguments(ExecutionContext context) {
         Object[] args = Arrays.copyOf(argumentsTemplate, argumentsTemplate.length);
 
         for (val assignment : dynamicAssignments) {

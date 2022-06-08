@@ -9,21 +9,21 @@ import java.util.Map;
  * Base class for {@link BoundGenericAction}s which only have
  * constant values for their input parameters assigned.
  */
-abstract class AbstractConstantOnlyBoundGenericAction extends BoundGenericAction {
+public class ConstantOnlyBoundGenericAction extends BoundGenericAction {
 
-    protected final Object[] arguments;
+    private final Object[] arguments;
 
-    public AbstractConstantOnlyBoundGenericAction(String callName, GenericActionConfig actionConfig,
-                                                  InjectedClass<?> action, Map<String, Object> constantAssignments) {
-        super(callName, actionConfig, action);
+    public ConstantOnlyBoundGenericAction(String dataKey, GenericActionConfig actionConfig, InjectedClass<?> action, Map<String, Object> constantAssignments) {
+        super(dataKey, actionConfig, action);
 
         // the additionalArgumentTypes is a sorted map
         // the order in which the arguments appear in this map correspond to the order in which their values
         // have to be placed in the arguments array
-        arguments = actionConfig.getAdditionalArgumentTypes()
-                .keySet().stream()
-                .map(
-                        constantAssignments::get
-                ).toArray();
+        arguments = actionConfig.getActionArgumentTypes().keySet().stream().map(constantAssignments::get).toArray();
+    }
+
+    @Override
+    protected Object[] getActionArguments(ExecutionContext context) {
+        return arguments;
     }
 }

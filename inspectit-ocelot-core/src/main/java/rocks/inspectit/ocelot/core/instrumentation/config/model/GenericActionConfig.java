@@ -61,15 +61,15 @@ public class GenericActionConfig {
     private boolean usesArgsArray;
 
     /**
-     * A sorted map of the additional arguments passed to the action.
-     * Additional arguments are usually either constants or "data" taken from the context.
+     * A sorted map of the arguments passed to the action.
+     * Action arguments are usually either constants or "data" taken from the context.
      * <p>
      * The key is the name of the argument, the value is the type.
-     * The order the arguments appear in the sorted map corresponds to the order the additionalArgs are passed to
+     * The order the arguments appear in the sorted map corresponds to the order the actionArguments are passed to
      * {@link IGenericAction#execute(Object[], Object, Object, Throwable, Object[])}
      */
     @Singular
-    private SortedMap<String, String> additionalArgumentTypes;
+    private SortedMap<String, String> actionArgumentTypes;
 
     /**
      * Allows to import packages, so that it is not required to use the Full-Qualified name when referencing types.

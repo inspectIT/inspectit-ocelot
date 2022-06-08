@@ -32,7 +32,7 @@ public class GenericActionConfigurationResolver {
             resolveSpecialVariables(additionalInputs, result);
             resolveArgumentVariables(additionalInputs, result);
             //everything remeinaing is a additional input variable
-            additionalInputs.forEach(result::additionalArgumentType);
+            additionalInputs.forEach(result::actionArgumentType);
             resolveBody(conf, result);
 
             resultMap.put(name, result.build());

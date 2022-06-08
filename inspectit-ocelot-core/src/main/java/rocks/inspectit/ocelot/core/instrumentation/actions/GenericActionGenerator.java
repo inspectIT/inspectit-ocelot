@@ -24,6 +24,8 @@ import rocks.inspectit.ocelot.core.instrumentation.injection.InjectedClass;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -69,7 +71,7 @@ public class GenericActionGenerator {
     private static final String THIZ = "$2";
     private static final String RETURN_VALUE = "$3";
     private static final String THROWN = "$4";
-    private static final String ADDITIONAL_ARGS = "$5";
+    private static final String ACTION_ARGS = "$5";
 
     @Autowired
     private ClassInjector classInjector;
@@ -204,16 +206,13 @@ public class GenericActionGenerator {
             String varName = GenericActionSettings.ARG_VARIABLE_PREFIX + id;
             buildVariableDefinition(methodBody, type, varName, value);
         });
-        val additionalArgs = actionConfig.getAdditionalArgumentTypes();
-        val iterator = additionalArgs.entrySet().iterator();
-        int id = 0;
-        while (iterator.hasNext()) {
-            String value = ADDITIONAL_ARGS + "[" + id + "]";
-            val argsDef = iterator.next();
-            val varName = argsDef.getKey();
-            val varType = argsDef.getValue();
-            buildVariableDefinition(methodBody, varType, varName, value);
-            id++;
+        Iterator<Map.Entry<String, String>> iterator = actionConfig.getActionArgumentTypes().entrySet().iterator();
+        for (int id = 0; iterator.hasNext(); id++) {
+            String argumentValue = ACTION_ARGS + "[" + id + "]";
+            Map.Entry<String, String> argumentType = iterator.next();
+            String variableName = argumentType.getKey();
+            String variableType = argumentType.getValue();
+            buildVariableDefinition(methodBody, variableType, variableName, argumentValue);
         }
         methodBody.append(actionConfig.getValueBody());
 

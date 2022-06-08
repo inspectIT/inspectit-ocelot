@@ -19,8 +19,8 @@ public class VoidGenericActionTemplate implements IGenericAction, DoNotInstrumen
     }
 
     @Override
-    public Object execute(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] additionalArgs) {
-        executeImpl(instrumentedMethodArgs, thiz, returnValue, thrown, additionalArgs);
+    public Object execute(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] actionArguments) {
+        executeImpl(instrumentedMethodArgs, thiz, returnValue, thrown, actionArguments);
         return null;
     }
 }
