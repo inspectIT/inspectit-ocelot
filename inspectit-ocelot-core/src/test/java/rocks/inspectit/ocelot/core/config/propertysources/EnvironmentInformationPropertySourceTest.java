@@ -31,7 +31,6 @@ class EnvironmentInformationPropertySourceTest {
         public void verifyAgentVersion() {
             IAgent mockAgent = mock(IAgent.class);
             when(mockAgent.getVersion()).thenReturn("1.0");
-            when(mockAgent.getOpenTelemetryVersion()).thenReturn("1.0");
             ReflectionUtils.writeStaticField(AgentManager.class, "agentInstance", mockAgent);
 
             EnvironmentInformationPropertySource result = new EnvironmentInformationPropertySource("test");
@@ -46,27 +45,6 @@ class EnvironmentInformationPropertySourceTest {
             EnvironmentInformationPropertySource result = new EnvironmentInformationPropertySource("test");
 
             assertThat(result.getProperty("inspectit.env.agent-version")).isEqualTo("UNKNOWN");
-        }
-
-        @Test
-        public void verifyOtelVersion() {
-            IAgent mockAgent = mock(IAgent.class);
-            when(mockAgent.getVersion()).thenReturn("1.0");
-            when(mockAgent.getOpenTelemetryVersion()).thenReturn("1.0");
-            ReflectionUtils.writeStaticField(AgentManager.class, "agentInstance", mockAgent);
-
-            EnvironmentInformationPropertySource result = new EnvironmentInformationPropertySource("test");
-
-            assertThat(result.getProperty("inspectit.env.open-telemetry-version")).isEqualTo("1.0");
-        }
-
-        @Test
-        public void verifyOtelVersionVersionWithNullAgent() {
-            ReflectionUtils.writeStaticField(AgentManager.class, "agentInstance", null);
-
-            EnvironmentInformationPropertySource result = new EnvironmentInformationPropertySource("test");
-
-            assertThat(result.getProperty("inspectit.env.open-telemetry-version")).isEqualTo("UNKNOWN");
         }
     }
 }
