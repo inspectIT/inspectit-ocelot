@@ -86,7 +86,7 @@ public class AgentManager {
      *
      * @return the current OTEL version
      */
-    public static String getOtelVersion() {
+    public static String getOpenTelemetryVersion() {
         if (agentInstance == null) {
             return "UNKNOWN";
         } else {

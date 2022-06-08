@@ -61,7 +61,7 @@ public class AgentImpl implements IAgent {
     /**
      * The version of open telemetry that was used for building the agent.
      */
-    private String otelVersion;
+    private String openTelemetryVersion;
 
     /**
      * The date the agent was built.
@@ -119,7 +119,7 @@ public class AgentImpl implements IAgent {
         try (InputStream inputStream = AgentImpl.class.getResourceAsStream(AGENT_VERSION_INFORMATION_FILE)) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             agentVersion = reader.readLine();
-            otelVersion = reader.readLine();
+            openTelemetryVersion = reader.readLine();
             agentBuildDate = reader.readLine();
         } catch (Exception e) {
             LOGGER.warn("Could not read agent version information file.");
@@ -138,10 +138,10 @@ public class AgentImpl implements IAgent {
 
     @Override
     public String getOpenTelemetryVersion() {
-        if (otelVersion == null) {
+        if (openTelemetryVersion == null) {
             readVersionInformation();
         }
-        return otelVersion;
+        return openTelemetryVersion;
     }
 
     @Override
