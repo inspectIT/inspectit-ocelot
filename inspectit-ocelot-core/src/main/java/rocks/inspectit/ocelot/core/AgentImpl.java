@@ -124,6 +124,7 @@ public class AgentImpl implements IAgent {
         } catch (Exception e) {
             LOGGER.warn("Could not read agent version information file.");
             agentVersion = "UNKNOWN";
+            openTelemetryVersion = "UNKNOWN";
             agentBuildDate = "UNKNOWN";
         }
     }
