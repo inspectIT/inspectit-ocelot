@@ -210,7 +210,7 @@ public class InstrumentationConfigurationResolver {
 
     private InstrumentationConfiguration resolveConfiguration(InspectitConfig config) {
         val genericActions = genericActionConfigurationResolver.resolveActions(config.getInstrumentation());
-        return InstrumentationConfiguration.builder()
+        InstrumentationConfiguration configuration = InstrumentationConfiguration.builder()
                 .metricsEnabled(config.getMetrics().isEnabled())
                 .tracingEnabled(config.getTracing().isEnabled())
                 .tracingSettings(config.getTracing())
@@ -218,6 +218,36 @@ public class InstrumentationConfigurationResolver {
                 .rules(ruleResolver.resolve(config.getInstrumentation(), genericActions))
                 .propagationMetaData(propagationMetaDataResolver.resolve(config))
                 .build();
+
+        if (log.isDebugEnabled()) {
+            log.debug("------------------------------------------------------------");
+            log.debug("Rule Dependency-Tree");
+            log.debug("------------------------------------------------------------");
+            for (Iterator<InstrumentationRule> iterator = configuration.getRules().iterator(); iterator.hasNext(); ) {
+                printRuleDependencyTree(configuration, iterator.next(), "", !iterator.hasNext());
+            }
+        }
+
+        return configuration;
+    }
+
+    /**
+     * Recursively ,prints a dependency tree for the rules of the current instrumentation.
+     *
+     * @param configuration the current configuration
+     * @param rule          the current rule to process
+     * @param indentation   the indentation to use
+     * @param isLast        whether the current rule is the last one in the list
+     */
+    private void printRuleDependencyTree(InstrumentationConfiguration configuration, InstrumentationRule rule, String indentation, boolean isLast) {
+        log.debug("{}+--- {}", indentation, rule.getName());
+
+        String newPrefix = indentation + (isLast ? " " : "|") + "    ";
+
+        for (Iterator<String> iterator = rule.getIncludedRuleNames().iterator(); iterator.hasNext(); ) {
+            Optional<InstrumentationRule> incRuleOptional = configuration.getRuleByName(iterator.next());
+            incRuleOptional.ifPresent(incRule -> printRuleDependencyTree(configuration, incRule, newPrefix, !iterator.hasNext()));
+        }
     }
 
     /**
