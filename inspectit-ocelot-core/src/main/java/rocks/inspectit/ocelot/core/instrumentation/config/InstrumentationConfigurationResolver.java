@@ -220,9 +220,10 @@ public class InstrumentationConfigurationResolver {
                 .build();
 
         if (log.isDebugEnabled()) {
-            log.debug("------------------------------------------------------------");
-            log.debug("Rule Dependency-Tree");
-            log.debug("------------------------------------------------------------");
+            StringBuilder builder = new StringBuilder();
+            builder.append("------------------------------------------------------------\n");
+            builder.append("Rule Dependency-Tree\n");
+            builder.append("------------------------------------------------------------\n");
 
             List<InstrumentationRule> sortedAndFilteredRules = configuration.getRules()
                     .stream()
@@ -230,9 +231,10 @@ public class InstrumentationConfigurationResolver {
                     .filter(rule -> !rule.getScopes().isEmpty())
                     .collect(Collectors.toList());
 
+            builder.append("Used Rules\n");
             Set<InstrumentationRule> visitedRules = new HashSet<>();
             for (Iterator<InstrumentationRule> iterator = sortedAndFilteredRules.iterator(); iterator.hasNext(); ) {
-                visitedRules.addAll(printRuleDependencyTree(configuration, iterator.next(), "", !iterator.hasNext()));
+                visitedRules.addAll(printRuleDependencyTree(builder, configuration, iterator.next(), "", !iterator.hasNext()));
             }
 
             List<InstrumentationRule> unusedRules = configuration.getRules()
@@ -241,10 +243,12 @@ public class InstrumentationConfigurationResolver {
                     .filter(rule -> !visitedRules.contains(rule))
                     .collect(Collectors.toList());
 
-            log.debug("+--- <unused rules>");
+            builder.append("Unused Rules\n");
             for (Iterator<InstrumentationRule> iterator = unusedRules.iterator(); iterator.hasNext(); ) {
-                printRuleDependencyTree(configuration, iterator.next(), "     ", !iterator.hasNext());
+                printRuleDependencyTree(builder, configuration, iterator.next(), "", !iterator.hasNext());
             }
+
+            log.debug(builder.toString());
         }
 
         return configuration;
@@ -260,18 +264,22 @@ public class InstrumentationConfigurationResolver {
      *
      * @return returns a set including all visited rules
      */
-    private Set<InstrumentationRule> printRuleDependencyTree(InstrumentationConfiguration configuration, InstrumentationRule rule, String indentation, boolean isLast) {
+    private Set<InstrumentationRule> printRuleDependencyTree(StringBuilder builder, InstrumentationConfiguration configuration, InstrumentationRule rule, String indentation, boolean isLast) {
         Set<InstrumentationRule> visitedRules = new HashSet<>();
         visitedRules.add(rule);
 
-        log.debug("{}+--- {}", indentation, rule.getName());
+        builder.append(indentation);
+        builder.append(isLast ? "\\" : "+");
+        builder.append("--- ");
+        builder.append(rule.getName());
+        builder.append("\n");
 
         String newPrefix = indentation + (isLast ? " " : "|") + "    ";
 
         for (Iterator<String> iterator = rule.getIncludedRuleNames().iterator(); iterator.hasNext(); ) {
             Optional<InstrumentationRule> incRuleOptional = configuration.getRuleByName(iterator.next());
             incRuleOptional.ifPresent(incRule -> {
-                visitedRules.addAll(printRuleDependencyTree(configuration, incRule, newPrefix, !iterator.hasNext()));
+                visitedRules.addAll(printRuleDependencyTree(builder, configuration, incRule, newPrefix, !iterator.hasNext()));
             });
 
         }
