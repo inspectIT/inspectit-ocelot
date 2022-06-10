@@ -223,8 +223,27 @@ public class InstrumentationConfigurationResolver {
             log.debug("------------------------------------------------------------");
             log.debug("Rule Dependency-Tree");
             log.debug("------------------------------------------------------------");
-            for (Iterator<InstrumentationRule> iterator = configuration.getRules().iterator(); iterator.hasNext(); ) {
-                printRuleDependencyTree(configuration, iterator.next(), "", !iterator.hasNext());
+
+            List<InstrumentationRule> sortedAndFilteredRules = configuration.getRules()
+                    .stream()
+                    .sorted(Comparator.comparing(InstrumentationRule::getName))
+                    .filter(rule -> !rule.getScopes().isEmpty())
+                    .collect(Collectors.toList());
+
+            Set<InstrumentationRule> visitedRules = new HashSet<>();
+            for (Iterator<InstrumentationRule> iterator = sortedAndFilteredRules.iterator(); iterator.hasNext(); ) {
+                visitedRules.addAll(printRuleDependencyTree(configuration, iterator.next(), "", !iterator.hasNext()));
+            }
+
+            List<InstrumentationRule> unusedRules = configuration.getRules()
+                    .stream()
+                    .sorted(Comparator.comparing(InstrumentationRule::getName))
+                    .filter(rule -> !visitedRules.contains(rule))
+                    .collect(Collectors.toList());
+
+            log.debug("+--- <unused rules>");
+            for (Iterator<InstrumentationRule> iterator = unusedRules.iterator(); iterator.hasNext(); ) {
+                printRuleDependencyTree(configuration, iterator.next(), "     ", !iterator.hasNext());
             }
         }
 
@@ -238,16 +257,25 @@ public class InstrumentationConfigurationResolver {
      * @param rule          the current rule to process
      * @param indentation   the indentation to use
      * @param isLast        whether the current rule is the last one in the list
+     *
+     * @return returns a set including all visited rules
      */
-    private void printRuleDependencyTree(InstrumentationConfiguration configuration, InstrumentationRule rule, String indentation, boolean isLast) {
+    private Set<InstrumentationRule> printRuleDependencyTree(InstrumentationConfiguration configuration, InstrumentationRule rule, String indentation, boolean isLast) {
+        Set<InstrumentationRule> visitedRules = new HashSet<>();
+        visitedRules.add(rule);
+
         log.debug("{}+--- {}", indentation, rule.getName());
 
         String newPrefix = indentation + (isLast ? " " : "|") + "    ";
 
         for (Iterator<String> iterator = rule.getIncludedRuleNames().iterator(); iterator.hasNext(); ) {
             Optional<InstrumentationRule> incRuleOptional = configuration.getRuleByName(iterator.next());
-            incRuleOptional.ifPresent(incRule -> printRuleDependencyTree(configuration, incRule, newPrefix, !iterator.hasNext()));
+            incRuleOptional.ifPresent(incRule -> {
+                visitedRules.addAll(printRuleDependencyTree(configuration, incRule, newPrefix, !iterator.hasNext()));
+            });
+
         }
+        return visitedRules;
     }
 
     /**
