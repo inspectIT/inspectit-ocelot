@@ -107,6 +107,15 @@ class StatusTable extends React.Component {
       attributes,
       attributes: { service },
     } = rowData;
+    const { agentVersion } = metaInformation;
+
+    const agentVersionTokens = agentVersion.split('.');
+    let logAvailable = true;
+    if (agentVersionTokens.length == 2 || agentVersionTokens.length == 3) {
+      const agentVersionNumber =
+        agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length == 3 ? agentVersionTokens[2] * 1 : 0);
+      logAvailable = agentVersionNumber > 11500;
+    }
 
     let name = '-';
     let agentIdElement;
@@ -129,6 +138,15 @@ class StatusTable extends React.Component {
             height: 1.2rem;
             position: absolute;
             right: 0;
+            top: 0;
+            background: #ddd;
+            border-color: #ddd;
+          }
+          .this :global(.log-button) {
+            width: 1.2rem;
+            height: 1.2rem;
+            position: absolute;
+            right: 1.5rem;
             top: 0;
             background: #ddd;
             border-color: #ddd;
@@ -156,6 +174,15 @@ class StatusTable extends React.Component {
           tooltip="Show Configuration"
           tooltipOptions={{ showDelay: 500 }}
         />
+        {logAvailable && (
+          <Button
+            className="log-button"
+            icon="pi pi-align-justify"
+            onClick={() => onShowDownloadDialog(agentId, attributes, 'log')}
+            tooltip="Show Logs"
+            tooltipOptions={{ showDelay: 500 }}
+          />
+        )}
       </div>
     );
   };
@@ -189,8 +216,7 @@ class StatusTable extends React.Component {
   };
 
   agentHealthTemplate = (rowData) => {
-    const { onShowDownloadDialog } = this.props;
-    const { health, metaInformation, attributes } = rowData;
+    const { health } = rowData;
 
     let healthInfo;
     let iconClass;
@@ -218,15 +244,10 @@ class StatusTable extends React.Component {
           .state {
             align-items: center;
             display: flex;
-            cursor: pointer;
           }
         `}</style>
         {health ? (
-          <div
-            className="state"
-            onClick={() => onShowDownloadDialog(metaInformation.agentId, attributes, 'log')}
-            title="Click to show logs"
-          >
+          <div className="state">
             <i className={classNames('pi pi-fw', iconClass)} style={{ color: iconColor }}></i>
             <span>{healthInfo}</span>
           </div>
