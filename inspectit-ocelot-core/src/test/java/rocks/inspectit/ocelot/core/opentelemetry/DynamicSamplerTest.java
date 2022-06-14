@@ -27,11 +27,15 @@ public class DynamicSamplerTest {
     private static final int TEST_RUNS = 1000;
 
     private double testRatio(Sampler sampler, Context parentContext, SamplingDecision expectedValue) {
-        double successCount = IntStream.range(0, TEST_RUNS)
+        return testRatio(sampler, parentContext, expectedValue, TEST_RUNS);
+    }
+
+    private double testRatio(Sampler sampler, Context parentContext, SamplingDecision expectedValue, int runs) {
+        double successCount = IntStream.range(0, runs)
                 .mapToObj(i -> sampler.shouldSample(parentContext, nextTraceId(), null, null, null, null))
                 .filter(result -> result.getDecision() == expectedValue)
                 .count();
-        return successCount / TEST_RUNS;
+        return successCount / runs;
     }
 
     private String nextTraceId() {
@@ -75,16 +79,16 @@ public class DynamicSamplerTest {
         public void noParent_ratioSample() {
             DynamicSampler sampler = new DynamicSampler(0.5D);
 
-            double ratio = testRatio(sampler, null, SamplingDecision.RECORD_AND_SAMPLE);
+            double ratio = testRatio(sampler, null, SamplingDecision.RECORD_AND_SAMPLE, 10_000);
 
-            assertThat(ratio).isBetween(0.48D, 0.52D);
+            assertThat(ratio).isBetween(0.45D, 0.55D);
         }
 
         @Test
         public void parentSampled_alwaysSample() {
             DynamicSampler sampler = new DynamicSampler(1);
 
-            double ratio = testRatio(sampler,getMockContext(true), SamplingDecision.RECORD_AND_SAMPLE);
+            double ratio = testRatio(sampler, getMockContext(true), SamplingDecision.RECORD_AND_SAMPLE);
 
             assertThat(ratio).isEqualTo(1.0D);
         }
@@ -93,7 +97,7 @@ public class DynamicSamplerTest {
         public void parentSampled_neverSample() {
             DynamicSampler sampler = new DynamicSampler(0);
 
-            double ratio = testRatio(sampler,getMockContext(true), SamplingDecision.RECORD_AND_SAMPLE);
+            double ratio = testRatio(sampler, getMockContext(true), SamplingDecision.RECORD_AND_SAMPLE);
 
             assertThat(ratio).isEqualTo(1.0D);
         }
@@ -102,7 +106,7 @@ public class DynamicSamplerTest {
         public void parentSampled_ratioSample() {
             DynamicSampler sampler = new DynamicSampler(0.5D);
 
-            double ratio = testRatio(sampler,getMockContext(true), SamplingDecision.RECORD_AND_SAMPLE);
+            double ratio = testRatio(sampler, getMockContext(true), SamplingDecision.RECORD_AND_SAMPLE);
 
             assertThat(ratio).isEqualTo(1.0D);
         }
@@ -111,7 +115,7 @@ public class DynamicSamplerTest {
         public void parentNotSampled_alwaysSample() {
             DynamicSampler sampler = new DynamicSampler(1);
 
-            double ratio = testRatio(sampler,getMockContext(false), SamplingDecision.DROP);
+            double ratio = testRatio(sampler, getMockContext(false), SamplingDecision.DROP);
 
             assertThat(ratio).isEqualTo(1.0D);
         }
@@ -120,7 +124,7 @@ public class DynamicSamplerTest {
         public void parentNotSampled_neverSample() {
             DynamicSampler sampler = new DynamicSampler(0);
 
-            double ratio = testRatio(sampler,getMockContext(false), SamplingDecision.DROP);
+            double ratio = testRatio(sampler, getMockContext(false), SamplingDecision.DROP);
 
             assertThat(ratio).isEqualTo(1.0D);
         }
@@ -129,7 +133,7 @@ public class DynamicSamplerTest {
         public void parentNotSampled_ratioSample() {
             DynamicSampler sampler = new DynamicSampler(0.5D);
 
-            double ratio = testRatio(sampler,getMockContext(false), SamplingDecision.DROP);
+            double ratio = testRatio(sampler, getMockContext(false), SamplingDecision.DROP);
 
             assertThat(ratio).isEqualTo(1.0D);
         }
