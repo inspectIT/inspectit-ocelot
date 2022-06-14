@@ -529,6 +529,10 @@ Instead of specifying a fixed value, you can also specify a data key here, just 
 In this case, the value from the given data key is read and used as sampling probability.
 This allows you for example to vary the sample probability based on the HTTP url.
 
+Note that this setting only has an effect if no sampling decision has been made yet.
+If a parent span has already decided that a trace is sampled or not sampled, this decision will continue to be used.
+This means that, for example, a method within a trace that has already been started will always be recorded, even if the sample setting has been set to 0.
+
 If no sample probability is defined for a rule, the [default probability](tracing/tracing.md) is used.
 
 #### Adding Attributes
