@@ -72,9 +72,22 @@ If used, the switch makes sure that the inspectIT Ocelot agent:</p>
 <h3><a class="anchor" aria-hidden="true" id="global-sampling-rate"></a><a href="#global-sampling-rate" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Global Sampling Rate</h3>
 <p>It is possible to globally regulate the number of traces generated through <a href="https://opencensus.io/tracing/sampling/">sampling</a>.
 You can configure the probability with which a trace ends up being collected via <code>inspectit.tracing.sampleProbability</code>.
-E.g. setting the value to <code>0.1</code> will result in only 10% of all traces being collected.
-By default, the sample probability is 100%. Note that this global setting only acts as a default value and can be overridden by <a href="/inspectit-ocelot/docs/next/instrumentation/rules#collecting-traces">individual rules</a>.</p>
-<h3><a class="anchor" aria-hidden="true" id="additional-properties"></a><a href="#additional-properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Additional Properties</h3>
+E.g. setting the value to <code>0.1</code> will record only 10% of all traces.</p>
+<p>Note that this setting only has an effect if <strong>no sampling decision</strong> has been made yet.
+If a parent span has already decided that a trace is sampled or not sampled, this decision will continue to be used.
+This means that, for example, a method within a trace that has already been started will always be recorded, even if the sample setting has been set to <code>0</code>.
+This also applies to the opposite case where a span has decided not to sample and the sampling rate has been set to <code>1</code>.
+In this case the method will <strong>not</strong> be recorded!</p>
+<p>By default, the sample probability is <code>1.0</code>, meaning 100% (each trace is recorded).</p>
+
+    <div class="admonition admonition-tip">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16"><path fill-rule="evenodd" d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z"/></svg></div> tip</h5>
+      </div>
+      <div class="admonition-content">
+    <p>This global setting only acts as a default value and can be <strong>overridden</strong> by <a href="/inspectit-ocelot/docs/next/instrumentation/rules#trace-sampling">individual rules</a>.</p>
+<p>For example, with this technique it can be achieved that a method (e.g. HTTP entrypoint) uses different sampling rates depending on the parameters (e.g. current HTTP path).</p>
+</div></div><h3><a class="anchor" aria-hidden="true" id="additional-properties"></a><a href="#additional-properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Additional Properties</h3>
 <p>You can additionally define the following global properties (<code>inspectit.tracing-property</code>)</p>
 <table>
 <thead>
@@ -143,7 +156,7 @@ The functionality that trace IDs with a length of 64 bits are generated can be a
       </div>
       <div class="admonition-content">
     <p>Please note that some propagation formats do not support 64-bit Ids, such as the W3C &quot;Trace Context&quot;. In this case the 64-bit trace IDs are padded with leading zeros.</p>
-</div></div></span></div></article></div><div class="docLastUpdate"><em>Last updated on 5/14/2022 by Marius Oehler</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/metrics/self-monitoring"><span class="arrow-prev">← </span><span>Self-Monitoring</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/tracing/trace-exporters"><span>Trace Exporters</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2022 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</div></div></span></div></article></div><div class="docLastUpdate"><em>Last updated on 6/14/2022 by Marius Oehler</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/metrics/self-monitoring"><span class="arrow-prev">← </span><span>Self-Monitoring</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/tracing/trace-exporters"><span>Trace Exporters</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2022 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
