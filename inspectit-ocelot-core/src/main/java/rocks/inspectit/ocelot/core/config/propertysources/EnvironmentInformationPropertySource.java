@@ -44,7 +44,7 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
         URL agentJar = Instances.AGENT_JAR_URL;
         if (agentJar != null) {
             try {
-                return new File(agentJar.toURI()).getParent();
+                return new File(agentJar.getPath()).getParent();
             } catch (Exception e) {
                 log.error("Error detecting JAR directory {}", e);
             }

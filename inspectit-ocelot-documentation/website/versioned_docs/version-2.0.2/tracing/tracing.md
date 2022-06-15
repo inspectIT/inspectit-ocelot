@@ -1,6 +1,7 @@
 ---
-id: tracing
+id: version-2.0.2-tracing
 title: Tracing
+original_id: tracing
 ---
 
 This section provides all the information on trace collection with inspectIT Ocelot.

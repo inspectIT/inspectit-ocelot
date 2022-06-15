@@ -97,15 +97,25 @@ class AgentMappingCell extends React.Component {
 class StatusTable extends React.Component {
   state = {
     configurationValue: '',
+    logValue: '',
   };
 
   nameTemplate = (rowData) => {
-    const { onShowConfiguration } = this.props;
+    const { onShowDownloadDialog } = this.props;
     const {
       metaInformation,
       attributes,
       attributes: { service },
     } = rowData;
+    const { agentVersion } = metaInformation;
+
+    const agentVersionTokens = agentVersion.split('.');
+    let logAvailable = true;
+    if (agentVersionTokens.length == 2 || agentVersionTokens.length == 3) {
+      const agentVersionNumber =
+        agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length == 3 ? agentVersionTokens[2] * 1 : 0);
+      logAvailable = agentVersionNumber > 11500;
+    }
 
     let name = '-';
     let agentIdElement;
@@ -132,6 +142,15 @@ class StatusTable extends React.Component {
             background: #ddd;
             border-color: #ddd;
           }
+          .this :global(.log-button) {
+            width: 1.2rem;
+            height: 1.2rem;
+            position: absolute;
+            right: 1.5rem;
+            top: 0;
+            background: #ddd;
+            border-color: #ddd;
+          }
           .this :global(.badge) {
             width: 1.2rem;
             height: 1.2rem;
@@ -145,16 +164,25 @@ class StatusTable extends React.Component {
         {name} {agentIdElement}{' '}
         {rowData.count > 1 ? (
           <span className="badge">
-            <b>{rowData.count}</b>{' '}
+            <b>{rowData.count}</b>
           </span>
         ) : null}
         <Button
           className="config-info-button"
           icon="pi pi-cog"
-          onClick={() => onShowConfiguration(agentId, attributes)}
+          onClick={() => onShowDownloadDialog(agentId, attributes, 'config')}
           tooltip="Show Configuration"
           tooltipOptions={{ showDelay: 500 }}
         />
+        {logAvailable && (
+          <Button
+            className="log-button"
+            icon="pi pi-align-justify"
+            onClick={() => onShowDownloadDialog(agentId, attributes, 'log')}
+            tooltip="Show Logs"
+            tooltipOptions={{ showDelay: 500 }}
+          />
+        )}
       </div>
     );
   };
@@ -189,6 +217,7 @@ class StatusTable extends React.Component {
 
   agentHealthTemplate = (rowData) => {
     const { health } = rowData;
+
     let healthInfo;
     let iconClass;
     let iconColor;
