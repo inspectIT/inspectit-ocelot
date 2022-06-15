@@ -118,7 +118,7 @@ public class RuleDependencyTreePrinterTest {
                     "+--- rule_c\n" +
                     "|    +--- rule_b\n" +
                     "|    \\--- rule_d\n" +
-                    "\\--- <unused> rule_f\n" +
+                    "\\--- <UNUSED> rule_f\n" +
                     "     \\--- rule_e\n"
             );
             // @formatter:on
