@@ -42,6 +42,10 @@ public class RuleDependencyTreePrinterTest {
                 InstrumentationRule.builder()
                         .name("rule_f")
                         .includedRuleName("rule_e")
+                        .includedRuleName("rule_g")
+                        .build(),
+                InstrumentationRule.builder()
+                        .name("rule_g")
                         .build()
         );
         // @formatter:on
@@ -119,7 +123,8 @@ public class RuleDependencyTreePrinterTest {
                     "|    +--- rule_b\n" +
                     "|    \\--- rule_d\n" +
                     "\\--- <UNUSED> rule_f\n" +
-                    "     \\--- rule_e\n"
+                    "     +--- rule_e\n"+
+                    "     \\--- rule_g\n"
             );
             // @formatter:on
         }

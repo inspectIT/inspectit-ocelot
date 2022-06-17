@@ -34,17 +34,17 @@ public class RuleDependencyTreePrinter {
     private List<RuleEntry> generateTree() {
         List<InstrumentationRule> scopedRules = getScopedRules();
 
-        Stream<RuleEntry> usedEntriesStream = scopedRules.stream().map(rule -> toRuleEntry(rule, true));
+        Stream<RuleEntry> usedRulesStream = scopedRules.stream().map(rule -> toRuleEntry(rule, true));
 
-        List<RuleEntry> unusedEntries = rules.stream()
-                .filter(rule -> !usedRules.contains(rule.getName()))
+        List<RuleEntry> unusedRules = rules.stream()
+                .filter(rule -> !this.usedRules.contains(rule.getName()))
                 .map(rule -> toRuleEntry(rule, false))
                 .collect(Collectors.toList());
 
-        Stream<RuleEntry> unusedEntriesStream = unusedEntries.stream()
-                .filter(entry -> !usedRules.contains(entry.getName()));
+        Stream<RuleEntry> unusedRulesStream = unusedRules.stream()
+                .filter(entry -> !this.usedRules.contains(entry.getName()));
 
-        return Stream.concat(usedEntriesStream, unusedEntriesStream)
+        return Stream.concat(usedRulesStream, unusedRulesStream)
                 .sorted(Comparator.comparing(RuleEntry::getName))
                 .collect(Collectors.toList());
     }
