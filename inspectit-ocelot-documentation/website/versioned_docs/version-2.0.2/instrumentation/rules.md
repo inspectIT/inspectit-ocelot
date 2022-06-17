@@ -1,6 +1,7 @@
 ---
-id: rules
+id: version-2.0.2-rules
 title: Rules & Actions
+original_id: rules
 ---
 
 Rules define (a) how data should be extracted when the instrumented

@@ -16,7 +16,6 @@ import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.util.jar.JarFile;
-import java.util.logging.Logger;
 
 /**
  * Entry point of the agent.
@@ -45,8 +44,6 @@ public class AgentMain {
 
     private static final String PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY = "inspectit.publishOpenTelemetryToBootstrap";
 
-    private static Logger LOGGER = Logger.getLogger(AgentMain.class.getName());
-
     /**
      * Main method for attaching the agent itself to a running JVM.
      *
@@ -73,7 +70,7 @@ public class AgentMain {
         boolean loadOpenTelemetryJarToBootstrap = null != System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY) ? "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY)) : "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY));
         // check for deprecated JVM property
         if (null != System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY)) {
-            LOGGER.warning("You are using the deprecated JVM property '" + PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY + "'. Please use the new JVM property '" + PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY + "'. inspectIT Ocelot has moved from OpenCensus to OpenTelemetry. However, applications using the OpenCensusAPI are still supported through the opentelemetry-opencensus-shim ");
+            System.err.println("You are using the deprecated JVM property '" + PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY + "'. Please use the new JVM property '" + PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY + "'. inspectIT Ocelot has moved from OpenCensus to OpenTelemetry. However, applications using the OpenCensusAPI are still supported through the opentelemetry-opencensus-shim ");
         }
 
         try {

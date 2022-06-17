@@ -4,9 +4,9 @@ import { agentStatusActions } from '../../../redux/ducks/agent-status';
 import StatusTable from './StatusTable';
 import StatusToolbar from './StatusToolbar';
 import StatusFooterToolbar from './StatusFooterToolbar';
-import ShowConfigurationDialog from '../dialogs/ShowConfigurationDialog';
 import axios from '../../../lib/axios-api';
 import { map, isEqual } from 'lodash';
+import DownloadDialogue from '../dialogs/DownloadDialogue';
 
 /**
  * The view presenting a list of connected agents, their mapping and when they last connected to the server.
@@ -22,9 +22,10 @@ class StatusView extends React.Component {
       useServiceMerge: true,
       error: false,
       agentsToShow: props.agents,
-      isAgentConfigurationShown: false,
+      isDownloadDialogShown: false,
       attributes: '',
-      configurationValue: '',
+      contentValue: '',
+      contentType: '',
       errorConifg: false,
       isLoading: false,
     };
@@ -113,7 +114,6 @@ class StatusView extends React.Component {
 
   mergeAgents = () => {
     const { agentsToShow, useServiceMerge } = this.state;
-
     if (useServiceMerge) {
       const mergedMap = agentsToShow.reduce((result, agent) => {
         const name = this.getServiceName(agent);
@@ -198,9 +198,10 @@ class StatusView extends React.Component {
       useServiceMerge,
       error,
       readOnly,
-      isAgentConfigurationShown,
-      configurationValue,
-      configurationLoadingFailed,
+      isDownloadDialogShown,
+      contentValue,
+      contentType,
+      contentLoadingFailed,
       isLoading,
       agentId,
     } = this.state;
@@ -233,18 +234,19 @@ class StatusView extends React.Component {
             />
           </div>
           <div className="data-table">
-            <StatusTable data={agentsToShow} filter={filter} onShowConfiguration={this.showAgentConfigurationForAttributes} />
+            <StatusTable data={agentsToShow} filter={filter} onShowDownloadDialog={this.showDownloadDialog} />
           </div>
           <div>
             <StatusFooterToolbar fullData={agents} filteredData={agentsToShow} />
           </div>
-          <ShowConfigurationDialog
-            visible={isAgentConfigurationShown}
-            onHide={() => this.setAgentConfigurationShown(false)}
-            configurationValue={configurationValue}
-            error={configurationLoadingFailed}
+          <DownloadDialogue
+            visible={isDownloadDialogShown}
+            onHide={() => this.setDownloadDialogShown(false)}
+            error={contentLoadingFailed}
             loading={isLoading}
-            agentName={agentId}
+            contentValue={contentValue}
+            contentType={contentType}
+            contextName={'Agent ' + agentId}
           />
         </div>
       </>
@@ -267,22 +269,33 @@ class StatusView extends React.Component {
     }
   };
 
-  setAgentConfigurationShown = (showDialog) => {
+  setDownloadDialogShown = (showDialog) => {
     this.setState({
-      isAgentConfigurationShown: showDialog,
+      isDownloadDialogShown: showDialog,
     });
   };
 
-  showAgentConfigurationForAttributes = (agentId, attributes) => {
-    this.setAgentConfigurationShown(true);
+  showDownloadDialog = (agentId, attributes, contentType) => {
+    this.setDownloadDialogShown(true);
     this.setState(
       {
         agentId,
         attributes,
-        configurationValue: '',
+        contentValue: '',
+        contentType,
       },
       () => {
-        this.fetchConfiguration(attributes);
+        switch (contentType) {
+          case 'config':
+            this.fetchConfiguration(attributes);
+            break;
+          case 'log':
+            this.fetchLog(agentId);
+            break;
+          default:
+            this.setDownloadDialogShown(false);
+            break;
+        }
       }
     );
   };
@@ -303,15 +316,43 @@ class StatusView extends React.Component {
           })
           .then((res) => {
             this.setState({
-              configurationValue: res.data,
-              configurationLoadingFailed: false,
+              contentValue: res.data,
+              contentLoadingFailed: false,
               isLoading: false,
             });
           })
           .catch(() => {
             this.setState({
-              configurationValue: null,
-              configurationLoadingFailed: true,
+              contentValue: null,
+              contentLoadingFailed: true,
+              isLoading: false,
+            });
+          });
+      }
+    );
+  };
+
+  fetchLog = (agentId) => {
+    this.setState(
+      {
+        isLoading: true,
+      },
+      () => {
+        axios
+          .get('/command/logs', {
+            params: { 'agent-id': agentId },
+          })
+          .then((res) => {
+            this.setState({
+              contentValue: res.data,
+              contentLoadingFailed: false,
+              isLoading: false,
+            });
+          })
+          .catch(() => {
+            this.setState({
+              contentValue: null,
+              contentLoadingFailed: true,
               isLoading: false,
             });
           });
