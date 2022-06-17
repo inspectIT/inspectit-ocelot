@@ -6,6 +6,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Records JDBC statement executions as [service/out/responsetime] metric for the service graph.'
+        default-rule: true
         include:
           'r_servicegraph_outbound_record_method': true
           'r_jdbc_detect_entry': true

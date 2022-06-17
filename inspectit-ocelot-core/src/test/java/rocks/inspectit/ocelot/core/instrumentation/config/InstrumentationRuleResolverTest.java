@@ -244,7 +244,7 @@ class InstrumentationRuleResolverTest {
         }
 
         private void verifyActionCall(ActionCallConfig ac, String name, ActionCallSettings callSettings) {
-            assertThat(ac.getName()).isEqualTo(name);
+            assertThat(ac.getDataKey()).isEqualTo(name);
             assertThat(ac.getCallSettings()).isSameAs(callSettings);
         }
 

@@ -240,7 +240,7 @@ public class MethodHookGenerator {
                 result.add(actionCallGenerator.generateAndBindGenericAction(methodInfo, call));
             } catch (Exception e) {
                 log.error("Failed to build action {} for data {} on method {}, no value will be assigned", call.getAction()
-                        .getName(), call.getName(), methodInfo.getMethodFQN(), e);
+                        .getName(), call.getDataKey(), methodInfo.getMethodFQN(), e);
             }
         }
         return result;

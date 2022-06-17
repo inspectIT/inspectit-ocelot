@@ -8,6 +8,7 @@ import rocks.inspectit.ocelot.core.instrumentation.actions.bound.BoundGenericAct
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 
 import java.util.Iterator;
+import java.util.Map;
 
 @Value(staticConstructor = "wrap")
 public class TracingHookAction implements IHookAction {
@@ -19,6 +20,8 @@ public class TracingHookAction implements IHookAction {
     private final IHookAction action;
 
     private final GenericActionConfig actionConfig;
+
+    private final String sourceRuleName;
 
     @Override
     public void execute(ExecutionContext context) {
@@ -33,11 +36,18 @@ public class TracingHookAction implements IHookAction {
             recordAttribute(span, "bound-method", context.getHook().getMethodInformation().getMethodFQN());
             recordAttribute(span, "is-void", actionConfig.isVoid());
             recordAttribute(span, "name", action.getName());
+            recordAttribute(span, "enclosing-rule", sourceRuleName);
 
             // method arguments
             Object[] methodArguments = context.getMethodArguments();
             for (int i = 0; i < methodArguments.length; i++) {
                 recordAttribute(span, "method-argument." + i, methodArguments[i]);
+            }
+
+            // context data
+            Iterable<Map.Entry<String, Object>> contextData = context.getInspectitContext().getData();
+            for (Map.Entry<String, Object> entry : contextData) {
+                recordAttribute(span, "context." + entry.getKey(), entry.getValue());
             }
 
             if (action instanceof BoundGenericAction) {

@@ -9,6 +9,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Performs up- and down-propagation via the HTTP headers for Apache Client calls.'
+        default-rule: true
         include:
           'r_apacheclient_detect_entry': true # to make sure propagation happens only once
         scopes:

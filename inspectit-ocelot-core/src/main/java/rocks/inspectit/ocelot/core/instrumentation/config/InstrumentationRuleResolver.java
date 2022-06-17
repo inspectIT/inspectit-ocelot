@@ -40,6 +40,7 @@ public class InstrumentationRuleResolver {
      * contained in the given {@link InstrumentationSettings}.
      *
      * @param source the configuration which is used as basis for the rules
+     *
      * @return A set containing the resolved rules.
      */
     public Set<InstrumentationRule> resolve(InstrumentationSettings source, Map<String, GenericActionConfig> actions) {
@@ -64,8 +65,9 @@ public class InstrumentationRuleResolver {
      */
     private InstrumentationRule resolveRule(String name, InstrumentationRuleSettings settings, Map<String, InstrumentationScope> scopeMap, Map<String, GenericActionConfig> actions) {
         val result = InstrumentationRule.builder();
-        result.name(name);
-        settings.getScopes().entrySet()
+        result.name(name).actionTracing(settings.isEnableActionTracing()).defaultRule(settings.isDefaultRule());
+        settings.getScopes()
+                .entrySet()
                 .stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
@@ -73,34 +75,30 @@ public class InstrumentationRuleResolver {
                 .filter(Objects::nonNull)
                 .forEach(result::scope);
 
-        result.includedRuleNames(settings.getInclude().entrySet().stream()
+        result.includedRuleNames(settings.getInclude()
+                .entrySet()
+                .stream()
                 .filter(e -> Boolean.TRUE.equals(e.getValue()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet()));
 
-        settings.getPreEntry().forEach((data, call) ->
-                result.preEntryAction(resolveCall(data, call, actions))
-        );
+        settings.getPreEntry()
+                .forEach((data, call) -> result.preEntryAction(resolveCall(data, name, call, actions, settings.isEnableActionTracing())));
 
-        settings.getEntry().forEach((data, call) ->
-                result.entryAction(resolveCall(data, call, actions))
-        );
+        settings.getEntry()
+                .forEach((data, call) -> result.entryAction(resolveCall(data, name, call, actions, settings.isEnableActionTracing())));
 
-        settings.getPostEntry().forEach((data, call) ->
-                result.postEntryAction(resolveCall(data, call, actions))
-        );
+        settings.getPostEntry()
+                .forEach((data, call) -> result.postEntryAction(resolveCall(data, name, call, actions, settings.isEnableActionTracing())));
 
-        settings.getPreExit().forEach((data, call) ->
-                result.preExitAction(resolveCall(data, call, actions))
-        );
+        settings.getPreExit()
+                .forEach((data, call) -> result.preExitAction(resolveCall(data, name, call, actions, settings.isEnableActionTracing())));
 
-        settings.getExit().forEach((data, call) ->
-                result.exitAction(resolveCall(data, call, actions))
-        );
+        settings.getExit()
+                .forEach((data, call) -> result.exitAction(resolveCall(data, name, call, actions, settings.isEnableActionTracing())));
 
-        settings.getPostExit().forEach((data, call) ->
-                result.postExitAction(resolveCall(data, call, actions))
-        );
+        settings.getPostExit()
+                .forEach((data, call) -> result.postExitAction(resolveCall(data, name, call, actions, settings.isEnableActionTracing())));
 
         result.metrics(resolveMetricRecordings(settings));
 
@@ -111,9 +109,12 @@ public class InstrumentationRuleResolver {
 
     @VisibleForTesting
     Multiset<MetricRecordingSettings> resolveMetricRecordings(InstrumentationRuleSettings settings) {
-        return settings.getMetrics().entrySet().stream()
+        return settings.getMetrics()
+                .entrySet()
+                .stream()
                 .filter(e -> !StringUtils.isEmpty(e.getValue().getValue()))
-                .map(entry -> entry.getValue().copyWithDefaultMetricName(entry.getKey())) //use map key as default metric name
+                .map(entry -> entry.getValue()
+                        .copyWithDefaultMetricName(entry.getKey())) //use map key as default metric name
                 .collect(Collectors.toCollection(HashMultiset::create));
     }
 
@@ -122,14 +123,19 @@ public class InstrumentationRuleResolver {
      * As this involves linking the {@link GenericActionConfig} of the action which is used,
      * the map of known generic actions is required as input.
      *
-     * @param name    the name used for the call, corresponds to the written data key for action calls
-     * @param actions a map mapping the names of data actions to their resolved configuration.
-     * @param call
-     * @return
+     * @param dataKey       the key used for storing the action's result in the current context
+     * @param ruleName      the name of the rule defining the action call
+     * @param call          settings for the action call
+     * @param actions       a map mapping the names of data actions to their resolved configuration.
+     * @param actionTracing whether action tracing is enabled
+     *
+     * @return a configuration object describing the action execution
      */
-    private ActionCallConfig resolveCall(String name, ActionCallSettings call, Map<String, GenericActionConfig> actions) {
+    private ActionCallConfig resolveCall(String dataKey, String ruleName, ActionCallSettings call, Map<String, GenericActionConfig> actions, boolean actionTracing) {
         return ActionCallConfig.builder()
-                .name(name)
+                .dataKey(dataKey)
+                .actionTracing(actionTracing)
+                .sourceRuleName(ruleName)
                 .action(actions.get(call.getAction()))
                 .callSettings(call)
                 .build();
