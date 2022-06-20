@@ -43,7 +43,8 @@ export const fetchFiles = (newSelectionOnSuccess) => {
 
     dispatch({ type: types.FETCH_FILES_STARTED });
 
-    axios.get('/directories', { params })
+    axios
+      .get('/directories', { params })
       .then((payload) => {
         const files = payload.data;
         sortFiles(files);
@@ -227,7 +228,8 @@ export const exportSelection = (fetchFilesOnSuccess, selectedFile = null) => {
         })
         .catch(dispatch({ type: types.FETCH_FILE_FAILURE }));
     } else {
-      axios.get('/directories', { params })
+      axios
+        .get('/directories', { params })
         .then((payload) => {
           const files = payload.data;
           sortFiles(files);
