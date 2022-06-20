@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     name: Snyk test and upload SARIF
-    environment: snyk-npm
+    environment: snyk
     runs-on: ubuntu-latest
 
     strategy:
