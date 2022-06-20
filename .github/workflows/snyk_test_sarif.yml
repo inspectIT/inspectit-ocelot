@@ -3,6 +3,8 @@ name: Snyk Test SARIF
 on:
   push:
     branches: [ master ]
+    paths:
+      - '**.gradle'
   schedule:
     # run once a week Mondays at 4 a.m.
     - cron: '0 4 * * 1'
