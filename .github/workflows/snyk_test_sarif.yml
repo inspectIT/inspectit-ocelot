@@ -1,6 +1,5 @@
 name: Snyk Test SARIF
 
-#Only one of snyk_test_sarif and snyk_test should be merged probably!
 on:
   push:
     branches: [ master ]
@@ -30,12 +29,15 @@ jobs:
       - name: Setup Snyk
         run: |
           npm install snyk -g
-          snyk auth ${{secrets.SNYK_AUTH}}
+          snyk auth ${{ secrets.SNYK_AUTH }}
       - name: Snyk Open Source
+        id: test
         run: |
-          snyk test --file=build.gradle --all-sub-projects --sarif --sarif-file-output=snyk_test_result.sarif
+          chmod +x ./resources/snyk-test-script.sh
+          ./resources/snyk-test-script.sh
         continue-on-error: true
       - name: Upload SARIF file
+        if: steps.test.outcome == 'success'
         uses: github/codeql-action/upload-sarif@v1
         with:
           # Path to SARIF file relative to the root of the repository
