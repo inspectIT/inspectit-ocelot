@@ -43,9 +43,9 @@ export const fetchFiles = (newSelectionOnSuccess) => {
 
     dispatch({ type: types.FETCH_FILES_STARTED });
 
-    getDirectories(params)
+    axios.get('/directories', { params })
       .then((payload) => {
-        const files = payload;
+        const files = payload.data;
         sortFiles(files);
         dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
         if (newSelectionOnSuccess) {
@@ -55,20 +55,6 @@ export const fetchFiles = (newSelectionOnSuccess) => {
       .catch(dispatch({ type: types.FETCH_FILES_FAILURE }));
   };
 };
-
-/**
- * Request all existing configuration files and directories.
- */
-export function getDirectories(params) {
-  return axios
-    .get('/directories', { params })
-    .then((res) => {
-      return res.data;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-}
 
 /**
  * Arranges first directories and then files. Within the directories or files it is an alphabetical sorting.
@@ -241,9 +227,9 @@ export const exportSelection = (fetchFilesOnSuccess, selectedFile = null) => {
         })
         .catch(dispatch({ type: types.FETCH_FILE_FAILURE }));
     } else {
-      getDirectories(params)
+      axios.get('/directories', { params })
         .then((payload) => {
-          const files = payload;
+          const files = payload.data;
           sortFiles(files);
           downloadSelection(files, file.name);
           dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
