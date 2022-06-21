@@ -21,6 +21,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.MetricsRecorder;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
 import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
+import rocks.inspectit.ocelot.core.metrics.MeasureTagValueGuard;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
@@ -65,6 +66,9 @@ public class MethodHookGenerator {
 
     @Autowired
     private ActionScopeFactory actionScopeFactory;
+
+    @Autowired
+    private MeasureTagValueGuard tagValueGuard;
 
     /**
      * Builds an executable method hook based on the given configuration.
@@ -207,7 +211,7 @@ public class MethodHookGenerator {
                     .map(this::buildMetricAccessor)
                     .collect(Collectors.toList());
 
-            MetricsRecorder recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager);
+            MetricsRecorder recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager, tagValueGuard);
             return Optional.of(recorder);
         } else {
             return Optional.empty();

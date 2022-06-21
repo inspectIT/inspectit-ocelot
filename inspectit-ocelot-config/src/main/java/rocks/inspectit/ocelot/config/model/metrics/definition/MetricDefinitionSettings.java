@@ -5,6 +5,7 @@ import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
@@ -34,6 +35,9 @@ public class MetricDefinitionSettings {
 
     @NotBlank
     private String unit;
+
+    @Min(1)
+    private int tagValueLimit = 1;
 
     @NotNull
     @Builder.Default
