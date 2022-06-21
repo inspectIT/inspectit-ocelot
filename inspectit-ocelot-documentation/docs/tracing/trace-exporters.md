@@ -82,7 +82,7 @@ To make inspectIT Ocelot push the spans to a Jaeger server running on the same m
 The OpenTelemetry Protocol (OTLP) exporters export the Traces in OTLP to the desired endpoint at a specified interval. 
 By default, the OTLP exporters are enabled but the URL endpoint needed for the exporter to actually start is set to `null`.
 
-The following properties are nested properties below the `inspectit.exporters.traces.otlp` property:
+The following properties are nested properties below the `inspectit.exporters.tracing.otlp` property:
 
 | Property    | Default    | Description                                                                                                                                                                     |
 | ----------- |------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
