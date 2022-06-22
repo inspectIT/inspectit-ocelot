@@ -233,12 +233,22 @@ public class MethodHookGenerator {
         }
     }
 
+    /**
+     * @return Returns whether action tracing should be enabled for internal actions (e.g. {@link MetricsRecorder}).
+     */
     private boolean isTracingInternalActions() {
         return environment.getCurrentConfig()
                 .getSelfMonitoring()
                 .getActionTracing() == ActionTracingMode.ALL_WITH_DEFAULT;
     }
 
+    /**
+     * Decorates each action of the given list which a {@link TracingHookAction}.
+     *
+     * @param actions the actions to wrap
+     *
+     * @return A list where all the actions are wrapped withing a {@link TracingHookAction}.
+     */
     private List<IHookAction> wrapActionsWithTracing(List<IHookAction> actions) {
         return actions.stream()
                 .map(action -> TracingHookAction.wrap(action, null, "INTERNAL"))

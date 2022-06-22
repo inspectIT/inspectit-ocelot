@@ -31,8 +31,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Value
 public class MethodHook implements IMethodHook {
 
+    /**
+     * Prefix used for span attributes in method hook spans.
+     */
     private static final String SPAN_ATTRIBUTE_PREFIX = "inspectit.debug.method-hook.";
 
+    /**
+     * Attribute value for `null` values in span attributes.
+     */
     private static final AttributeValue NULL_STRING_ATTRIBUTE = AttributeValue.stringAttributeValue("<NULL>");
 
     /**
@@ -171,6 +177,9 @@ public class MethodHook implements IMethodHook {
         return new MethodHook(sourceConfiguration, inspectitContextManager, entryActions, exitActions, methodInformation, actionScopeFactory);
     }
 
+    /**
+     * @return Returns a span representing the entry hook of this method hook. It will be used as parent for action tracing spans.
+     */
     private Span getEntryHookTracingSpan() {
         if (sourceConfiguration.isTraceEntryHook()) {
             return getHookTracingSpan("entryHook");
@@ -179,6 +188,9 @@ public class MethodHook implements IMethodHook {
         }
     }
 
+    /**
+     * @return Returns a span representing the exit hook of this method hook. It will be used as parent for action tracing spans.
+     */
     private Span getExitHookTracingSpan() {
         if (sourceConfiguration.isTraceExitHook()) {
             return getHookTracingSpan("exitHook");
@@ -193,6 +205,13 @@ public class MethodHook implements IMethodHook {
                 .startSpan();
     }
 
+    /**
+     * Utility method for adding a the existing context as span attributes to the given span.
+     *
+     * @param span    the span to add the attributes
+     * @param context the context containing the data
+     * @param prefix  the prefix used in the attribute keys
+     */
     private void recordContextDataInSpan(Span span, InternalInspectitContext context, String prefix) {
         if (span != null) {
             Iterable<Map.Entry<String, Object>> contextData = context.getData();

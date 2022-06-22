@@ -12,20 +12,42 @@ import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionCon
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * Action that can be used to wrap another action for which a span should be generated containing various information
+ * about the current execution context and the action itself.
+ */
 @Value(staticConstructor = "wrap")
 public class TracingHookAction implements IHookAction {
 
+    /**
+     * Prefix used for the span operation name.
+     */
     public static final String DEBUG_SPAN_NAME_PREFIX = "*agent* ";
 
+    /**
+     * Attribute value for `null` values in span attributes.
+     */
     private static final AttributeValue NULL_STRING_ATTRIBUTE = AttributeValue.stringAttributeValue("<NULL>");
 
+    /**
+     * Prefix used for span attributes in method hook spans.
+     */
     private static final String SPAN_ATTRIBUTE_PREFIX = "inspectit.debug.action.";
 
+    /**
+     * The action to decorate/warp.
+     */
     @NonNull
     private final IHookAction action;
 
+    /**
+     * The configuration of the decorated action.
+     */
     private final GenericActionConfig actionConfig;
 
+    /**
+     * The name of the rule which defines the decorated action call.
+     */
     private final String sourceRuleName;
 
     @Override

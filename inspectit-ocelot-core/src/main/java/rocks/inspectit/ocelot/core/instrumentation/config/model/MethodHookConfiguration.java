@@ -72,9 +72,17 @@ public class MethodHookConfiguration {
     @Builder.Default
     private Multiset<MetricRecordingSettings> metrics = HashMultiset.create();
 
+    /**
+     * Whether a span should be created representing the entry section of the method hook.
+     * This span will be used as parent for the action tracing spans recorded during the entry phase of the method hook.
+     */
     @Builder.Default
     private boolean traceEntryHook = false;
 
+    /**
+     * Whether a span should be created representing the exit section of the method hook.
+     * This span will be used as parent for the action tracing spans recorded during the exit phase of the method hook.
+     */
     @Builder.Default
     private boolean traceExitHook = false;
 }

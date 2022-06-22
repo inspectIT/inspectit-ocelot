@@ -26,5 +26,8 @@ public class SelfMonitoringSettings {
     @Valid
     private AgentHealthSettings agentHealth;
 
+    /**
+     * Whether action tracing is enabled and if so, which mode should be used.
+     */
     private ActionTracingMode actionTracing = ActionTracingMode.ONLY_ENABLED;
 }

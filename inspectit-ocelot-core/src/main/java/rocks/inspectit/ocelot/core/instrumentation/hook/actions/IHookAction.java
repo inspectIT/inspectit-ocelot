@@ -67,6 +67,9 @@ public interface IHookAction {
          */
         private InspectitContextImpl inspectitContext;
 
+        /**
+         * The span representing the current method hook. In case the method hook in not traced, this reference is null.
+         */
         private Span methodHookSpan;
     }
 }

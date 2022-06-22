@@ -104,7 +104,7 @@ public abstract class BoundGenericAction implements IHookAction {
      * Implementation of the action's execution function. This method is also returning the action's result value compared
      * to the one of the super class which can be useful in case the result is required (e.g. see {@link rocks.inspectit.ocelot.core.instrumentation.hook.actions.TracingHookAction}).
      *
-     * @return the actions result object
+     * @return the actions result object or `null` in case of void actions
      */
     public Object executeImpl(ExecutionContext context) {
         Object[] actionArguments = getActionArguments(context);

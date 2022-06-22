@@ -116,6 +116,14 @@ public class InstrumentationRuleResolver {
         return result.build();
     }
 
+    /**
+     * Returns whether a rule contains any action that should be traced. This can be the case if a global action tracing
+     * has been enabled or a rule has been explicitly marked as action tracing should be used.
+     *
+     * @param settings the rule to check
+     *
+     * @return `true` in case any action exists which should be traced.
+     */
     private boolean hasActionTracing(InstrumentationRuleSettings settings) {
         ActionTracingMode actionTracingMode = environment.getCurrentConfig().getSelfMonitoring().getActionTracing();
         switch (actionTracingMode) {
