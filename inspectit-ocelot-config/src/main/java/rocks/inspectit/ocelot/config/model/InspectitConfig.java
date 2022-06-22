@@ -93,7 +93,7 @@ public class InspectitConfig {
      * Settings for the self monitoring.
      */
     @Valid
-    private SelfMonitoringSettings selfMonitoring;
+    private SelfMonitoringSettings selfMonitoring = new SelfMonitoringSettings();
 
     /**
      * Settings for the log preloading.

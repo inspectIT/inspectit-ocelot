@@ -4,14 +4,18 @@ import com.google.common.collect.ImmutableMap;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
+import rocks.inspectit.ocelot.config.model.selfmonitoring.ActionTracingMode;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
@@ -33,20 +37,28 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class MethodHookGeneratorTest {
 
+    @InjectMocks
+    MethodHookGenerator generator;
+
     @Mock
     ContextManager contextManager;
 
     @Mock
     ActionScopeFactory actionScopeFactory;
 
-    @InjectMocks
-    MethodHookGenerator generator;
-
     @Mock
     VariableAccessorFactory variableAccessorFactory;
 
     @Mock
     ObfuscationManager obfuscation;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    InspectitEnvironment environment;
+
+    @BeforeEach
+    public void setupEnvironment() {
+        when(environment.getCurrentConfig().getSelfMonitoring().getActionTracing()).thenReturn(ActionTracingMode.ALL_WITH_DEFAULT);
+    }
 
     @Nested
     class BuildHook {
