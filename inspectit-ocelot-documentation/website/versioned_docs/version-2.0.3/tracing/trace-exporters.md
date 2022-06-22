@@ -1,6 +1,7 @@
 ---
-id: trace-exporters
+id: version-2.0.3-trace-exporters
 title: Trace Exporters
+original_id: trace-exporters
 ---
 
 Tracing exporters are responsible for passing the recorded tracing data to a corresponding storage.

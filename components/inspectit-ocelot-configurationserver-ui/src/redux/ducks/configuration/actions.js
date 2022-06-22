@@ -52,7 +52,7 @@ export const fetchFiles = (newSelectionOnSuccess) => {
           dispatch(selectFile(newSelectionOnSuccess));
         }
       })
-      .catch(dispatch({ type: types.FETCH_FILES_FAILURE }));
+      .catch(() => dispatch({ type: types.FETCH_FILES_FAILURE }));
   };
 };
 
@@ -239,7 +239,7 @@ export const exportSelection = (fetchFilesOnSuccess, selectedFile = null) => {
           downloadSelection(fileContent, file.name);
           dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });
         })
-        .catch(dispatch({ type: types.FETCH_FILE_FAILURE }));
+        .catch(() => dispatch({ type: types.FETCH_FILE_FAILURE }));
     } else {
       getDirectories(params)
         .then((payload) => {
