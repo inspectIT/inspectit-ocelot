@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 
+import io.opencensus.trace.Span;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
@@ -66,5 +67,6 @@ public interface IHookAction {
          */
         private InspectitContextImpl inspectitContext;
 
+        private Span methodHookSpan;
     }
 }

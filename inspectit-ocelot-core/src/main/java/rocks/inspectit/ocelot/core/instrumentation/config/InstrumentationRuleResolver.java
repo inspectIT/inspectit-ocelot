@@ -13,6 +13,8 @@ import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettin
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
+import rocks.inspectit.ocelot.config.model.selfmonitoring.ActionTracingMode;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
@@ -31,6 +33,9 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class InstrumentationRuleResolver {
+
+    @Autowired
+    private InspectitEnvironment environment;
 
     @Autowired
     private InstrumentationScopeResolver scopeResolver;
@@ -65,7 +70,11 @@ public class InstrumentationRuleResolver {
      */
     private InstrumentationRule resolveRule(String name, InstrumentationRuleSettings settings, Map<String, InstrumentationScope> scopeMap, Map<String, GenericActionConfig> actions) {
         val result = InstrumentationRule.builder();
-        result.name(name).actionTracing(settings.isEnableActionTracing()).defaultRule(settings.isDefaultRule());
+        result.name(name).defaultRule(settings.isDefaultRule());
+
+        boolean hasActionTracing = hasActionTracing(settings);
+        result.actionTracing(hasActionTracing);
+
         settings.getScopes()
                 .entrySet()
                 .stream()
@@ -83,28 +92,43 @@ public class InstrumentationRuleResolver {
                 .collect(Collectors.toSet()));
 
         settings.getPreEntry()
-                .forEach((data, call) -> result.preEntryAction(resolveCall(data, name, call, actions, settings.isEnableActionTracing())));
+                .forEach((data, call) -> result.preEntryAction(resolveCall(data, name, call, actions, hasActionTracing)));
 
         settings.getEntry()
-                .forEach((data, call) -> result.entryAction(resolveCall(data, name, call, actions, settings.isEnableActionTracing())));
+                .forEach((data, call) -> result.entryAction(resolveCall(data, name, call, actions, hasActionTracing)));
 
         settings.getPostEntry()
-                .forEach((data, call) -> result.postEntryAction(resolveCall(data, name, call, actions, settings.isEnableActionTracing())));
+                .forEach((data, call) -> result.postEntryAction(resolveCall(data, name, call, actions, hasActionTracing)));
 
         settings.getPreExit()
-                .forEach((data, call) -> result.preExitAction(resolveCall(data, name, call, actions, settings.isEnableActionTracing())));
+                .forEach((data, call) -> result.preExitAction(resolveCall(data, name, call, actions, hasActionTracing)));
 
         settings.getExit()
-                .forEach((data, call) -> result.exitAction(resolveCall(data, name, call, actions, settings.isEnableActionTracing())));
+                .forEach((data, call) -> result.exitAction(resolveCall(data, name, call, actions, hasActionTracing)));
 
         settings.getPostExit()
-                .forEach((data, call) -> result.postExitAction(resolveCall(data, name, call, actions, settings.isEnableActionTracing())));
+                .forEach((data, call) -> result.postExitAction(resolveCall(data, name, call, actions, hasActionTracing)));
 
         result.metrics(resolveMetricRecordings(settings));
 
         result.tracing(settings.getTracing());
 
         return result.build();
+    }
+
+    private boolean hasActionTracing(InstrumentationRuleSettings settings) {
+        ActionTracingMode actionTracingMode = environment.getCurrentConfig().getSelfMonitoring().getActionTracing();
+        switch (actionTracingMode) {
+            case ONLY_ENABLED:
+                return settings.isEnableActionTracing();
+            case ALL_WITHOUT_DEFAULT:
+                return !settings.isDefaultRule();
+            case ALL_WITH_DEFAULT:
+                return true;
+            case OFF:
+            default:
+                return false;
+        }
     }
 
     @VisibleForTesting

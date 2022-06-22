@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
+import rocks.inspectit.ocelot.config.model.selfmonitoring.ActionTracingMode;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.StackTraceSampler;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
@@ -18,6 +20,7 @@ import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.ConditionalHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.MetricsRecorder;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.TracingHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
 import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
@@ -38,6 +41,9 @@ import static java.lang.Boolean.TRUE;
 @Component
 @Slf4j
 public class MethodHookGenerator {
+
+    @Autowired
+    private InspectitEnvironment environment;
 
     @Autowired
     private ContextManager contextManager;
@@ -88,14 +94,22 @@ public class MethodHookGenerator {
         builder.entryActions(buildActionCalls(config.getPreEntryActions(), methodInfo));
         builder.entryActions(buildActionCalls(config.getEntryActions(), methodInfo));
         if (tracingSettings != null) {
-            builder.entryActions(buildTracingEntryActions(tracingSettings));
+            List<IHookAction> actions = buildTracingEntryActions(tracingSettings);
+            if (isTracingInternalActions() && config.isTraceEntryHook()) {
+                actions = wrapActionsWithTracing(actions);
+            }
+            builder.entryActions(actions);
         }
         builder.entryActions(buildActionCalls(config.getPostEntryActions(), methodInfo));
 
         builder.exitActions(buildActionCalls(config.getPreExitActions(), methodInfo));
         builder.exitActions(buildActionCalls(config.getExitActions(), methodInfo));
         if (tracingSettings != null) {
-            builder.exitActions(buildTracingExitActions(tracingSettings));
+            List<IHookAction> actions = buildTracingExitActions(tracingSettings);
+            if (isTracingInternalActions() && config.isTraceExitHook()) {
+                actions = wrapActionsWithTracing(actions);
+            }
+            builder.exitActions(actions);
         }
         buildMetricsRecorder(config).ifPresent(builder::exitAction);
         builder.exitActions(buildActionCalls(config.getPostExitActions(), methodInfo));
@@ -207,11 +221,28 @@ public class MethodHookGenerator {
                     .map(this::buildMetricAccessor)
                     .collect(Collectors.toList());
 
-            MetricsRecorder recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager);
+            IHookAction recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager);
+
+            if (isTracingInternalActions() && config.isTraceExitHook()) {
+                recorder = TracingHookAction.wrap(recorder, null, "INTERNAL");
+            }
+
             return Optional.of(recorder);
         } else {
             return Optional.empty();
         }
+    }
+
+    private boolean isTracingInternalActions() {
+        return environment.getCurrentConfig()
+                .getSelfMonitoring()
+                .getActionTracing() == ActionTracingMode.ALL_WITH_DEFAULT;
+    }
+
+    private List<IHookAction> wrapActionsWithTracing(List<IHookAction> actions) {
+        return actions.stream()
+                .map(action -> TracingHookAction.wrap(action, null, "INTERNAL"))
+                .collect(Collectors.toList());
     }
 
     @VisibleForTesting

@@ -2,7 +2,9 @@ package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 
 import io.opencensus.trace.AttributeValue;
 import io.opencensus.trace.Span;
+import io.opencensus.trace.SpanBuilder;
 import io.opencensus.trace.Tracing;
+import lombok.NonNull;
 import lombok.Value;
 import rocks.inspectit.ocelot.core.instrumentation.actions.bound.BoundGenericAction;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
@@ -13,10 +15,13 @@ import java.util.Map;
 @Value(staticConstructor = "wrap")
 public class TracingHookAction implements IHookAction {
 
+    public static final String DEBUG_SPAN_NAME_PREFIX = "*agent* ";
+
     private static final AttributeValue NULL_STRING_ATTRIBUTE = AttributeValue.stringAttributeValue("<NULL>");
 
     private static final String SPAN_ATTRIBUTE_PREFIX = "inspectit.debug.action.";
 
+    @NonNull
     private final IHookAction action;
 
     private final GenericActionConfig actionConfig;
@@ -30,13 +35,22 @@ public class TracingHookAction implements IHookAction {
             return;
         }
 
-        String spanName = "Action<" + action.getName() + ">";
-        Span span = Tracing.getTracer().spanBuilder(spanName).startSpan();
+        String spanName = DEBUG_SPAN_NAME_PREFIX + "action<" + action.getName() + ">";
+        SpanBuilder spanBuilder;
+        if (context.getMethodHookSpan() == null) {
+            spanBuilder = Tracing.getTracer().spanBuilder(spanName);
+        } else {
+            spanBuilder = Tracing.getTracer().spanBuilderWithExplicitParent(spanName, context.getMethodHookSpan());
+        }
+
+        Span span = spanBuilder.startSpan();
         try {
             recordAttribute(span, "bound-method", context.getHook().getMethodInformation().getMethodFQN());
-            recordAttribute(span, "is-void", actionConfig.isVoid());
             recordAttribute(span, "name", action.getName());
             recordAttribute(span, "enclosing-rule", sourceRuleName);
+            if (actionConfig != null) {
+                recordAttribute(span, "is-void", actionConfig.isVoid());
+            }
 
             // method arguments
             Object[] methodArguments = context.getMethodArguments();
@@ -56,17 +70,19 @@ public class TracingHookAction implements IHookAction {
                 recordAttribute(span, "data-key", boundAction.getDataKey());
 
                 // action arguments
-                Object[] argumentValues = boundAction.getActionArguments(context);
-                Iterator<String> argumentNamesIterator = actionConfig.getActionArgumentTypes().keySet().iterator();
-
-                for (int i = 0; argumentNamesIterator.hasNext(); i++) {
-                    recordAttribute(span, "action-argument." + argumentNamesIterator.next(), argumentValues[i]);
+                if (actionConfig != null) {
+                    Object[] argumentValues = boundAction.getActionArguments(context);
+                    Iterator<String> argumentNamesIterator = actionConfig.getActionArgumentTypes().keySet().iterator();
+                    for (int i = 0; argumentNamesIterator.hasNext(); i++) {
+                        recordAttribute(span, "action-argument." + argumentNamesIterator.next(), argumentValues[i]);
+                    }
                 }
 
+                // actual call of the wrapped action
                 Object actionReturnValue = boundAction.executeImpl(context);
 
                 // action result
-                if (!actionConfig.isVoid()) {
+                if (actionConfig != null && !actionConfig.isVoid()) {
                     recordAttribute(span, "return-value", actionReturnValue);
                 }
             } else {

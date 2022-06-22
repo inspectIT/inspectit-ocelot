@@ -71,4 +71,10 @@ public class MethodHookConfiguration {
      */
     @Builder.Default
     private Multiset<MetricRecordingSettings> metrics = HashMultiset.create();
+
+    @Builder.Default
+    private boolean traceEntryHook = false;
+
+    @Builder.Default
+    private boolean traceExitHook = false;
 }
