@@ -57,7 +57,7 @@ public class MethodHookGeneratorTest {
 
     @BeforeEach
     public void setupEnvironment() {
-        when(environment.getCurrentConfig().getSelfMonitoring().getActionTracing()).thenReturn(ActionTracingMode.ALL_WITH_DEFAULT);
+        lenient().when(environment.getCurrentConfig().getSelfMonitoring().getActionTracing()).thenReturn(ActionTracingMode.ALL_WITH_DEFAULT);
     }
 
     @Nested
