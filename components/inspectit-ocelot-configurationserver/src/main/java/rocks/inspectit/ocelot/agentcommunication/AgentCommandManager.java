@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,8 +12,6 @@ import rocks.inspectit.ocelot.config.model.AgentCommandSettings;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import javax.annotation.PostConstruct;
-import java.time.Duration;
-import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -41,14 +38,14 @@ public class AgentCommandManager {
         int commandQueueSize = commandSettings.getCommandQueueSize();
 
         agentCommandCache = CacheBuilder.newBuilder()
-                .maximumSize(1000)
-                .expireAfterWrite(commandTimeout, TimeUnit.MILLISECONDS)
-                .build(new CacheLoader<String, BlockingQueue<Command>>() {
-                    @Override
-                    public BlockingQueue<Command> load(String key) {
-                        return new LinkedBlockingQueue<>(commandQueueSize);
-                    }
-                });
+            .maximumSize(1000)
+            .expireAfterWrite(commandTimeout, TimeUnit.MILLISECONDS)
+            .build(new CacheLoader<String, BlockingQueue<Command>>() {
+                @Override
+                public BlockingQueue<Command> load(String key) {
+                    return new LinkedBlockingQueue<>(commandQueueSize);
+                }
+            });
     }
 
     /**
@@ -76,13 +73,11 @@ public class AgentCommandManager {
      *
      * @param agentId        The ID of the agent for which the command should to be returned.
      * @param waitForCommand Whether it should be waited until a command appears
-     *
      * @return The {@link Command} object next in queue for the agent with the given id.
      */
     public Command getCommand(String agentId, boolean waitForCommand) {
         try {
             BlockingQueue<Command> commandQueue = agentCommandCache.get(agentId);
-
             Command command;
             if (waitForCommand) {
                 AgentCommandSettings commandSettings = configuration.getAgentCommand();
@@ -92,7 +87,7 @@ public class AgentCommandManager {
                 command = commandQueue.poll();
             }
 
-            if (commandQueue.isEmpty()) {
+            if (command == null) {
                 agentCommandCache.invalidate(agentId);
             }
             return command;
