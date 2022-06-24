@@ -70,7 +70,7 @@ public class EnvironmentCommandHandler implements CommandHandler {
     /**
      * Takes an instance of {@link CommandResponse} as well as an instance of {@link DeferredResult}.
      * Sets the {@link ResponseEntity} of the {@link DeferredResult} according to the
-     * Environment Information received from the respective Agent."
+     * Environment Information received from the respective Agent.
      *
      * @param response The {@link CommandResponse} to be handled.
      * @param result   The {@link DeferredResult} the response should be written in.

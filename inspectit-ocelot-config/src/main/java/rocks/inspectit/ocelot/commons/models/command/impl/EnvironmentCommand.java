@@ -14,7 +14,6 @@ import java.util.Properties;
 
 /**
  * Represents an Environment-Command. Environment commands are used to receive the details of a certain agent.
- * These details include environment variables, system properties and JVM arguments.
  */
 @Data
 @AllArgsConstructor
@@ -42,9 +41,9 @@ public class EnvironmentCommand extends Command {
      */
     @Data
     public static class EnvironmentDetail {
-        @JsonPropertyOrder(alphabetic = true)
+        @JsonPropertyOrder(alphabetic=true)
         private Map<String, String> environmentVariables;
-        @JsonPropertyOrder(alphabetic = true)
+        @JsonPropertyOrder(alphabetic=true)
         private Properties systemProperties;
         private List<String> jvmArguments;
     }

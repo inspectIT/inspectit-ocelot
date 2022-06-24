@@ -5,8 +5,11 @@ import StatusTable from './StatusTable';
 import StatusToolbar from './StatusToolbar';
 import StatusFooterToolbar from './StatusFooterToolbar';
 import axios from '../../../lib/axios-api';
-import { map, isEqual } from 'lodash';
+import { isEqual, map } from 'lodash';
 import DownloadDialogue from '../dialogs/DownloadDialogue';
+import { downloadArchiveFromJson } from '../../../functions/export-selection.function';
+import { notificationActions } from '../../../redux/ducks/notification';
+import { getStore } from '../../../lib/with-redux-store';
 
 /**
  * The view presenting a list of connected agents, their mapping and when they last connected to the server.
@@ -234,7 +237,12 @@ class StatusView extends React.Component {
             />
           </div>
           <div className="data-table">
-            <StatusTable data={agentsToShow} filter={filter} onShowDownloadDialog={this.showDownloadDialog} />
+            <StatusTable
+              data={agentsToShow}
+              filter={filter}
+              onShowDownloadDialog={this.showDownloadDialog}
+              onDownloadSupportArchive={this.downloadSupportArchive}
+            />
           </div>
           <div>
             <StatusFooterToolbar fullData={agents} filteredData={agentsToShow} />
@@ -298,6 +306,21 @@ class StatusView extends React.Component {
         }
       }
     );
+  };
+
+  downloadSupportArchive = (agentId, agentVersion) => {
+    getStore().dispatch(
+      notificationActions.showInfoMessage('Preparing Archive', 'Download will start automatically once the archive is ready.')
+    );
+
+    axios
+      .get('/agent/supportArchive', {
+        params: { 'agent-id': agentId },
+      })
+      .then((res) => {
+        downloadArchiveFromJson(res.data, agentId, agentVersion);
+      })
+      .catch(() => {});
   };
 
   fetchConfiguration = (attributes) => {
