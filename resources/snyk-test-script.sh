@@ -10,6 +10,6 @@ elif (( exit_code == 1)); then
   echo "Issues found by Snyk. Will upload SARIF."
   (exit 0)
 else
-  echo "Snyk command failed, will not upload SARIF."
+  echo "Snyk command failed. Will not upload SARIF."
   (exit 1)
 fi
