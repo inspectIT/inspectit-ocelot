@@ -6,7 +6,7 @@ on:
     paths:
       - '**.gradle'
   schedule:
-    # run once a week Mondays at 4 a.m.
+    # run once a week Mondays at 4 a.m. UTC
     - cron: '0 4 * * 1'
 
 jobs:
