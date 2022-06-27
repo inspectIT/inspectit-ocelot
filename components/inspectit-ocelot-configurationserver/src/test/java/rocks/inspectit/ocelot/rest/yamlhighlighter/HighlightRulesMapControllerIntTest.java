@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.config.model.instrumentation.scope.AdvancedScopeSettings;
@@ -93,8 +94,11 @@ public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
                     String.format("\"advanced-scope-settings\":{\"%s\":\"%s\", \"%s\":%s},",
                             HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_OBJECT,
                             HighlightRulesMapController.KEY_OBJECT_ATTRIBUTES, advancedScopeSettingsExpected) +
-                    String.format("\"a-boolean\":{\"%s\":\"%s\"}}",
-                            HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT);
+                    String.format("\"a-boolean\":{\"%s\":\"%s\"},",
+                            HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT)+
+                    String.format("\"protocol\":{\"%s\":\"%s\", \"%s\": [\"\", \"http/protobuf\", \"http/thrift\", \"grpc\"]}}",
+                            HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_ENUM,
+                            HighlightRulesMapController.KEY_ENUM_VALUES);
 
             Map<String,Object> expected = new ObjectMapper().readValue(expectedJson, Map.class);
 
@@ -141,6 +145,8 @@ public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
         AdvancedScopeSettings advancedScopeSettings;
 
         Boolean aBoolean;
+
+        TransportProtocol protocol;
 
     }
 }

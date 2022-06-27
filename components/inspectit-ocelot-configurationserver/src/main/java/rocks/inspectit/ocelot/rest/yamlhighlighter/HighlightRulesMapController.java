@@ -3,24 +3,24 @@ package rocks.inspectit.ocelot.rest.yamlhighlighter;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CaseFormat;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
+@Slf4j
 public class HighlightRulesMapController extends AbstractBaseController {
 
     @VisibleForTesting
@@ -166,7 +166,20 @@ public class HighlightRulesMapController extends AbstractBaseController {
      * @return List of names of all possible values for the enum.
      */
     private List<String> extractEnumValues(Class<?> currentEnum) {
-        return Arrays.stream(currentEnum.getFields()).map(Field::getName).collect(Collectors.toList());
+        List<String> allFields = Arrays.stream(currentEnum.getDeclaredFields()).map(Field::getName).collect(Collectors.toList());
+        if (allFields.contains("values")){
+            try {
+                Field valuesField = currentEnum.getDeclaredField("values");
+                valuesField.setAccessible(true);
+                Map<String, ?> valuesMap = (Map<String, ?>) valuesField.get(null);
+                return new ArrayList<>(valuesMap.keySet());
+            } catch(Exception e) {
+                log.error(String.format("Error while getting values of enum %s.", currentEnum.getName()), e);
+                return Collections.emptyList();
+            }
+        } else {
+            return Arrays.stream(currentEnum.getFields()).map(Field::getName).collect(Collectors.toList());
+        }
     }
 
     @ApiOperation(value = "Get JSON for Highlight Rules Generation", notes = "")
