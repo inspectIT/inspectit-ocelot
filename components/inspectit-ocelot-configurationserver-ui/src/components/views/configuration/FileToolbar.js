@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { configurationActions } from '../../../redux/ducks/configuration';
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
@@ -17,6 +17,7 @@ const FileToolbar = ({
   showCreateDirectoryDialog,
   showMoveDialog,
   showDeleteFileDialog,
+  showUploadDialog,
   showSearchDialog,
 }) => {
   const dispatch = useDispatch();
@@ -87,6 +88,13 @@ const FileToolbar = ({
             icon="pi pi-trash"
             tooltipOptions={TOOLTIP_OPTIONS}
             onClick={() => showDeleteFileDialog(selection)}
+          />
+          <Button
+            disabled={readOnly || loading}
+            tooltip="Upload file or Directory"
+            icon="pi pi-upload"
+            tooltipOptions={TOOLTIP_OPTIONS}
+            onClick={() => showUploadDialog(selection)}
           />
         </div>
         <div className="p-toolbar-group-right">
