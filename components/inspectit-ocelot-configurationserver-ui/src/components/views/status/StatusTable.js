@@ -6,8 +6,8 @@ import dateformat from 'dateformat';
 import TimeAgo from 'react-timeago';
 import { map } from 'lodash';
 import classnames from 'classnames';
-import { linkPrefix } from '../../../lib/configuration';
 import classNames from 'classnames';
+import { linkPrefix } from '../../../lib/configuration';
 
 const timeFormatter = (time, unit, suffix) => {
   if (unit === 'second') {
@@ -53,18 +53,22 @@ class AgentMappingCell extends React.Component {
             display: flex;
             align-items: stretch;
           }
+
           .mapping-name {
             flex: 1;
             margin-right: 0.5rem;
           }
+
           .no-mapping {
             color: gray;
             font-style: italic;
           }
+
           .show-attributes {
             float: right;
             cursor: pointer;
           }
+
           .attributes {
             margin-top: 0.5rem;
             border-left: 0.25rem solid #ddd;
@@ -133,6 +137,7 @@ class StatusTable extends React.Component {
           .this {
             position: relative;
           }
+
           .this :global(.config-info-button) {
             width: 1.2rem;
             height: 1.2rem;
@@ -142,6 +147,7 @@ class StatusTable extends React.Component {
             background: #ddd;
             border-color: #ddd;
           }
+
           .this :global(.log-button) {
             width: 1.2rem;
             height: 1.2rem;
@@ -151,17 +157,31 @@ class StatusTable extends React.Component {
             background: #ddd;
             border-color: #ddd;
           }
+
           .this :global(.badge) {
             width: 1.2rem;
             height: 1.2rem;
+            position: absolute;
+            right: 3rem;
+            top: 0;
             background: #007ad9;
             border-radius: 25%;
             display: inline-flex;
             justify-content: center;
             color: white;
           }
+
+          .this :global(.might-overflow) {
+            max-width: 19rem;
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
         `}</style>
-        {name} {agentIdElement}{' '}
+        <span className="might-overflow" title={`${name} (${agentId})`}>
+          {name} {agentIdElement}
+        </span>
         {rowData.count > 1 ? (
           <span className="badge">
             <b>{rowData.count}</b>
@@ -305,12 +325,15 @@ class StatusTable extends React.Component {
             display: flex;
             align-items: center;
           }
+
           .pi {
             margin-right: 0.5rem;
           }
+
           .pi.live {
             color: #ef5350;
           }
+
           .pi.workspace {
             color: #616161;
           }
