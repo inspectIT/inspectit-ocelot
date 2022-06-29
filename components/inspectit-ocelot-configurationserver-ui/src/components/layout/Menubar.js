@@ -2,10 +2,10 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { authenticationActions } from '../../redux/ducks/authentication';
 import Router from 'next/router';
-
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
 import { linkPrefix } from '../../lib/configuration';
+import 'primeicons/primeicons.css';
 
 /**
  * The application's menu bar.
@@ -17,6 +17,9 @@ class Menubar extends React.Component {
   };
 
   render() {
+    const handleClick = () => {
+      window.open('https://inspectit.github.io/inspectit-ocelot/docs/doc1');
+    };
     return (
       <Toolbar id="toolbar">
         <style global jsx>{`
@@ -50,12 +53,22 @@ class Menubar extends React.Component {
           .user-description b {
             color: #fff;
           }
+          .info-icon {
+            margin-top: 0.4rem;
+            margin-right: 1rem;
+            color: #fff;
+            font-size: 1.3rem;
+          }
         `}</style>
         <div className="p-toolbar-group-left flex-v-center">
           <img className="ocelot-head" src={linkPrefix + '/static/images/inspectit-ocelot-head.svg'} />
           <div className="ocelot-text">inspectIT Ocelot</div>
         </div>
+
         <div className="p-toolbar-group-right flex-v-center">
+          <box className="info-icon">
+            <i className="pi pi-info-circle" onClick={handleClick}></i>
+          </box>
           <div className="user-description">
             Logged in as <b>{this.props.username}</b>
           </div>
