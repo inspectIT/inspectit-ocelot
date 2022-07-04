@@ -67,7 +67,7 @@ class ConfigurationView extends React.Component {
     isSearchDialogShown: false,
     isConfigurationDialogShown: false,
     isConvertDialogShown: false,
-    childrens: new Array(),
+    tabs: new Array(),
   };
 
   parsePath = (filePath, defaultConfigFilePath) => {
@@ -163,9 +163,10 @@ class ConfigurationView extends React.Component {
       title: newName,
       panelContent: newFileContent,
     };
-    let childrens = this.state.childrens;
-    childrens.push(newChild);
-    this.setState({ childrens: childrens });
+    let tabs = this.state.tabs;
+    tabs.push(newChild);
+    this.setState({ tabs: tabs });
+    console.log('tabs: ', this.state.tabs);
   };
 
   render() {
@@ -265,7 +266,7 @@ class ConfigurationView extends React.Component {
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
           sidebar={<ConfigurationSidebar />}
-          childrens={this.state.childrens}
+          tabs={this.state.tabs}
         >
           {showHeader ? (
             <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} readOnly={readOnly} />

@@ -40,15 +40,16 @@ const EditorView = ({
   notificationText,
   canSave,
   loading,
-  childrens,
+  children,
   readOnly,
   showVisualConfigurationView,
   onToggleVisualConfigurationView,
   sidebar,
+  tabs,
 }) => {
   useEffect(() => {
-    if (childrens) {
-      childrens.map((child) => {
+    if (tabs) {
+      tabs.map((child) => {
         ready((instance) => {
           _instance = instance;
         });
@@ -72,7 +73,7 @@ const EditorView = ({
         });
       });
     }
-  }, [childrens]);
+  }, [JSON.stringify(tabs)]);
 
   const dispatch = useDispatch();
 
@@ -87,7 +88,7 @@ const EditorView = ({
   const configurationType = getConfigurationType(value);
 
   let options = {
-    childrens,
+    tabs,
     selectedTabID: '1',
   };
   let _instance = _instance;
@@ -205,7 +206,7 @@ const EditorView = ({
           onVisualConfigChange={onToggleVisualConfigurationView}
           showMethodConfiguration={configurationType === CONFIGURATION_TYPES.METHOD_CONFIGURATION}
         >
-          {childrens}
+          {children}
         </EditorToolbar>
       </div>
 
@@ -272,8 +273,8 @@ EditorView.propTypes = {
   isRefreshing: PropTypes.bool,
   /** Whether the toolbar buttons should be enabled or disabled. */
   enableButtons: PropTypes.bool,
-  /** The childrens will be shown in the toolbar. Can be used e.g. to show additional information. */
-  childrens: PropTypes.element,
+  /** The children will be shown in the toolbar. Can be used e.g. to show additional information. */
+  children: PropTypes.element,
   /** Whether the save button is enabled or not. The save button is enabled only if the `enableButtons` is true.  */
   canSave: PropTypes.bool,
   /** Whether the notification bar is showing an error or not. */

@@ -37,7 +37,7 @@ class AceEditor extends React.Component {
   }
 
   render() {
-    return <div ref={this.divRef} style={{ width: '100%', height: '100%' }} />;
+    return <div ref={this.divRef} style={{ width: '100%', height: '100rem' }} />;
   }
 
   configureEditor() {
