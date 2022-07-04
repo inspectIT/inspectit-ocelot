@@ -38,6 +38,7 @@ class FileTree extends React.Component {
     if (newSelection) {
       if (newSelection !== selection && newSelection !== selectedDefaultConfigFile) {
         this.props.selectFile(newSelection);
+        this.props.addToChildren();
       }
     } else {
       if (selection || selectedDefaultConfigFile) {

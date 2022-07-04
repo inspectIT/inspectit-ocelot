@@ -67,6 +67,7 @@ class ConfigurationView extends React.Component {
     isSearchDialogShown: false,
     isConfigurationDialogShown: false,
     isConvertDialogShown: false,
+    childrens: new Array(),
   };
 
   parsePath = (filePath, defaultConfigFilePath) => {
@@ -155,6 +156,18 @@ class ConfigurationView extends React.Component {
     this.props.selectFile(filename);
   };
 
+  /* Adds a new child object containing the name and the content of the newely clicked file */
+  addToChildren = (newName, newFileContent) => {
+    let newChild = {
+      id: newName,
+      title: newName,
+      panelContent: newFileContent,
+    };
+    let childrens = this.state.childrens;
+    childrens.push(newChild);
+    this.setState({ childrens: childrens });
+  };
+
   render() {
     const {
       selection,
@@ -225,6 +238,9 @@ class ConfigurationView extends React.Component {
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
             readOnly={readOnly}
+            addToChildren={() => {
+              this.addToChildren(name, fileContent);
+            }}
           />
           <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : '-'}</div>
         </div>
@@ -249,6 +265,7 @@ class ConfigurationView extends React.Component {
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
           sidebar={<ConfigurationSidebar />}
+          childrens={this.state.childrens}
         >
           {showHeader ? (
             <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} readOnly={readOnly} />

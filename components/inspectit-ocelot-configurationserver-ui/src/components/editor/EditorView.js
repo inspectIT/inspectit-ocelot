@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
 import PropTypes from 'prop-types';
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
@@ -11,6 +11,9 @@ import { configurationSelectors, configurationActions } from '../../redux/ducks/
 import { getConfigurationType } from '../../lib/configuration-utils';
 import { CONFIGURATION_TYPES } from '../../data/constants';
 import MethodConfigurationEditor from './method-configuration-editor/MethodConfigurationEditor';
+import 'react-dyn-tabs/style/react-dyn-tabs.css';
+import 'react-dyn-tabs/themes/react-dyn-tabs-card.css';
+import useDynTabs from 'react-dyn-tabs';
 
 const AceEditor = dynamic(() => import('./yaml-editor/AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./visual-editor/TreeTableEditor'), { ssr: false });
@@ -37,12 +40,40 @@ const EditorView = ({
   notificationText,
   canSave,
   loading,
-  children,
+  childrens,
   readOnly,
   showVisualConfigurationView,
   onToggleVisualConfigurationView,
   sidebar,
 }) => {
+  useEffect(() => {
+    if (childrens) {
+      childrens.map((child) => {
+        ready((instance) => {
+          _instance = instance;
+        });
+        _instance.open({
+          id: child.id,
+          title: child.title,
+          panelComponent: () => (
+            <AceEditor
+              editorRef={(editor) => (editorRef.current = editor)}
+              onCreate={onCreate}
+              theme="cobalt"
+              options={editorConfig}
+              value={child.panelContent}
+              onChange={onChange}
+              history-view
+              canSave={canSave}
+              onSave={onSave}
+              readOnly={readOnly}
+            />
+          ),
+        });
+      });
+    }
+  }, [childrens]);
+
   const dispatch = useDispatch();
 
   const editorRef = useRef(null);
@@ -54,6 +85,13 @@ const EditorView = ({
   // derived variables
   const isLiveSelected = currentVersion === 'live';
   const configurationType = getConfigurationType(value);
+
+  let options = {
+    childrens,
+    selectedTabID: '1',
+  };
+  let _instance = _instance;
+  const [TabList, PanelList, ready] = useDynTabs(options);
 
   const selectlatestVersion = () => {
     dispatch(configurationActions.selectVersion(null));
@@ -79,18 +117,10 @@ const EditorView = ({
     );
   } else {
     editorContent = (
-      <AceEditor
-        editorRef={(editor) => (editorRef.current = editor)}
-        onCreate={onCreate}
-        theme="cobalt"
-        options={editorConfig}
-        value={value}
-        onChange={onChange}
-        history-view
-        canSave={canSave}
-        onSave={onSave}
-        readOnly={readOnly}
-      />
+      <>
+        <TabList></TabList>
+        <PanelList></PanelList>
+      </>
     );
   }
 
@@ -175,7 +205,7 @@ const EditorView = ({
           onVisualConfigChange={onToggleVisualConfigurationView}
           showMethodConfiguration={configurationType === CONFIGURATION_TYPES.METHOD_CONFIGURATION}
         >
-          {children}
+          {childrens}
         </EditorToolbar>
       </div>
 
@@ -242,8 +272,8 @@ EditorView.propTypes = {
   isRefreshing: PropTypes.bool,
   /** Whether the toolbar buttons should be enabled or disabled. */
   enableButtons: PropTypes.bool,
-  /** The children will be shown in the toolbar. Can be used e.g. to show additional information. */
-  children: PropTypes.element,
+  /** The childrens will be shown in the toolbar. Can be used e.g. to show additional information. */
+  childrens: PropTypes.element,
   /** Whether the save button is enabled or not. The save button is enabled only if the `enableButtons` is true.  */
   canSave: PropTypes.bool,
   /** Whether the notification bar is showing an error or not. */
