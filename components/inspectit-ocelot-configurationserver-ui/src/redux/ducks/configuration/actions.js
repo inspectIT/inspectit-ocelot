@@ -257,6 +257,32 @@ export const exportSelection = (fetchFilesOnSuccess, selectedFile = null) => {
 };
 
 /**
+ * Either removes files that start with '.' or fetches files depending on if files are hidden.
+ */
+export const hideFiles = () => {
+  return (dispatch, getState) => {
+    let { files, filesHidden } = getState().configuration;
+
+    if (!filesHidden) {
+      for (let i = 0; i <= files.length; i++) {
+        if (files[i]) {
+          files[i].children.filter((child) => {
+            if (child.name.startsWith('.')) {
+              const index = files[i].children.indexOf(child);
+              files[i].children.splice(index, 1);
+            }
+          });
+        }
+      }
+    } else {
+      dispatch(fetchFiles());
+    }
+    filesHidden = !filesHidden;
+    dispatch({ type: types.FILTER_SELECTION_SUCCESS, payload: { files, filesHidden } });
+  };
+};
+
+/**
  * Attempts to write the given contents to the given file.
  *
  * @param {string} file - absolute path of the file to write (e.g. /configs/prod/interfaces.yml)

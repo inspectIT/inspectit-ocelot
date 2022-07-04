@@ -167,7 +167,15 @@ class FileTree extends React.Component {
   }
 
   getContextMenuModel = (filePath) => {
-    const { showCreateDirectoryDialog, showCreateFileDialog, showMoveDialog, showDeleteFileDialog, exportSelection } = this.props;
+    const {
+      showCreateDirectoryDialog,
+      showCreateFileDialog,
+      showMoveDialog,
+      showDeleteFileDialog,
+      exportSelection,
+      hideFiles,
+      filesHidden,
+    } = this.props;
 
     return [
       {
@@ -186,6 +194,11 @@ class FileTree extends React.Component {
         command: () => exportSelection(true, filePath),
       },
       {
+        label: filesHidden === false ? 'Hide files' : 'Show hidden files',
+        icon: filesHidden === false ? 'pi pi-eye-slash' : 'pi pi-eye',
+        command: () => hideFiles(),
+      },
+      {
         label: 'Rename',
         icon: 'pi pi-pencil',
         disabled: !filePath,
@@ -202,11 +215,12 @@ class FileTree extends React.Component {
 }
 
 function mapStateToProps(state) {
-  const { pendingRequests, selection, defaultConfig, selectedDefaultConfigFile, selectedVersion } = state.configuration;
+  const { pendingRequests, selection, defaultConfig, selectedDefaultConfigFile, selectedVersion, filesHidden } = state.configuration;
   return {
     files: configurationSelectors.getFileTree(state),
     loading: pendingRequests > 0,
     selection,
+    filesHidden,
     defaultConfig: defaultConfig,
     defaultTree: configurationSelectors.getDefaultConfigTree(state),
     selectedDefaultConfigFile,
@@ -219,6 +233,7 @@ const mapDispatchToProps = {
   fetchFiles: configurationActions.fetchFiles,
   selectFile: configurationActions.selectFile,
   exportSelection: configurationActions.exportSelection,
+  hideFiles: configurationActions.hideFiles,
   move: configurationActions.move,
 };
 
