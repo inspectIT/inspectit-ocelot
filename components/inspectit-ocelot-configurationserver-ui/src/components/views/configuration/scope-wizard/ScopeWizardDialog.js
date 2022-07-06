@@ -3,6 +3,7 @@ import { Dialog } from 'primereact/dialog';
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
+import ScopeProps from './ScopeProps';
 import TypeMatcher from './TypeMatcher';
 import MethodMatcher from './MethodMatcher';
 import ClassBrowserDialog from '../../../common/class-browser/ClassBrowserDialog';
@@ -10,6 +11,7 @@ import ClassBrowserDialog from '../../../common/class-browser/ClassBrowserDialog
 /** data */
 import { DEFAULT_VISIBILITIES } from '../../../editor/method-configuration-editor/constants';
 
+export const DEFAULT_SCOPE_PROPS_STATE = { name: '', description: '' };
 const DEFAULT_TYPE_MATCHER_STATE = { type: 'type', matcherType: 'EQUALS_FULLY', name: '' };
 
 const DEFAULT_METHOD_MATCHER_STATE = {
@@ -26,6 +28,7 @@ const DEFAULT_METHOD_MATCHER_STATE = {
  * The scope wizard dialog itself.
  */
 const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
+  const [scopeProperties, setScopeProperties] = useState({ ...DEFAULT_SCOPE_PROPS_STATE });
   const [typeMatcher, setTypeMatcher] = useState({ ...DEFAULT_TYPE_MATCHER_STATE });
   const [methodMatcher, setMethodMatcher] = useState({ ...DEFAULT_METHOD_MATCHER_STATE });
 
@@ -37,6 +40,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
   useEffect(() => {
     // Set default state
     if (visible) {
+      const preparedScopeProperties = { ...DEFAULT_SCOPE_PROPS_STATE };
       const preparedTypeMatcher = { ...DEFAULT_TYPE_MATCHER_STATE };
       const preparedMethodMatcher = { ...DEFAULT_METHOD_MATCHER_STATE };
       // When edit mode, fill out dialog
@@ -60,12 +64,18 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
           throw new Error('Scopes using multiple type matchers are currently not supported.');
         }
 
+        console.error('Scope Wizard Scope', scope);
+
+        preparedScopeProperties.name = preparedScopeProperties?.name === undefined ? DEFAULT_SCOPE_PROPS_STATE.name : preparedScopeProperties.name;
+        preparedScopeProperties.description = preparedScopeProperties?.description === undefined ? DEFAULT_SCOPE_PROPS_STATE.description : preparedScopeProperties.description;
         preparedTypeMatcher.type = targetType;
         preparedTypeMatcher.matcherType = _.get(targetMatcher, 'matcher-mode', 'EQUALS_FULLY');
         preparedTypeMatcher.name = _.get(targetMatcher, 'name', '');
 
         // set method matcher
         const { methods } = scope;
+
+        console.error('Scope Wizard Methods', methods);
 
         if (methods && methods.length === 1) {
           const method = methods[0];
@@ -77,6 +87,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
           preparedMethodMatcher.name = _.get(method, 'name', '');
         }
       }
+      setScopeProperties(preparedScopeProperties);
       setTypeMatcher(preparedTypeMatcher);
       setMethodMatcher(preparedMethodMatcher);
     }
@@ -148,7 +159,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
         label="Apply"
         disabled={isApplyDisabled}
         onClick={() => {
-          onApply(typeMatcher, methodMatcher);
+          onApply(scopeProperties, typeMatcher, methodMatcher);
           onHide();
         }}
       />
@@ -214,6 +225,7 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
           footer={footer}
           focusOnShow={false}
         >
+          <ScopeProps scopeProperties={scopeProperties} onScopePropsChange={setScopeProperties} />
           <TypeMatcher typeMatcher={typeMatcher} onTypeMatcherChange={setTypeMatcher} onShowClassBrowser={showClassBrowser} />
           <MethodMatcher methodMatcher={methodMatcher} onMethodMatcherChange={setMethodMatcher} />
         </Dialog>

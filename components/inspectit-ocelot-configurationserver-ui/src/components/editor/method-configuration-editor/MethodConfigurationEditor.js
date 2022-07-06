@@ -75,6 +75,8 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
     });
     setScopes(currentScopes);
 
+    console.info('Current Scopes: ', currentScopes);
+
     // expand all rows by default
     const initialExpandedRows = _.reduce(
       currentScopes,
@@ -93,7 +95,8 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
    * @param {*} typeMatcher the class instrumentation settings
    * @param {*} methodMatcher the method instrumentation settings
    */
-  const prepareScope = (typeMatcher, methodMatcher) => {
+  const prepareScope = (scopeProperties, typeMatcher, methodMatcher) => {
+    console.error('Method Config - Scope Props: ', scopeProperties);
     // Prepare class matcher
     const type = typeMatcher.type;
     const classMatcherType = typeMatcher.matcherType;
@@ -136,7 +139,9 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
    * @param {*} typeMatcher the class instrumentation settings
    * @param {*} methodMatcher the method instrumentation settings
    */
-  const addScope = (typeMatcher, methodMatcher) => {
+  const addScope = (scopeProperties, typeMatcher, methodMatcher) => {
+    console.warn('Method Config - Set Scope name');
+
     const cloneConfiguration = _.cloneDeep(configuration);
     let scopeName;
     // Check whether an existing scope was modified or a new scope created
@@ -152,7 +157,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
       _.set(cloneConfiguration, ['inspectit', 'instrumentation', 'rules', 'r_method_configuration_duration', 'scopes', scopeName], true);
     }
 
-    const preparedScope = prepareScope(typeMatcher, methodMatcher);
+    const preparedScope = prepareScope(scopeProperties, typeMatcher, methodMatcher);
 
     try {
       _.set(cloneConfiguration, ['inspectit', 'instrumentation', 'scopes', scopeName], preparedScope);
@@ -169,9 +174,9 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
    * @param {*} newConfiguration the new configuration
    */
   const updateConfiguration = (newConfiguration) => {
+    console.warn('(MCE): new Config: ', newConfiguration);
     try {
       const updatedYamlConfiguration = '# {"type": "Method-Configuration"}\n' + yaml.dump(newConfiguration);
-
       dispatch(selectedFileContentsChanged(updatedYamlConfiguration));
     } catch (error) {
       console.error('Configuration could not been updated.', error);
@@ -234,7 +239,19 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
    * @param {*} scopeName the name of the target scope
    * @param {*} stateRule  the rule to update
    */
-  const scopeStateBodyTemplate = (scopeName, stateRule) => {
+  const scopeStateBodyTemplate = (currentScope, scopeName, stateRule) => {
+    // ToDo: add scope props to file content
+    console.warn('Change scope temp to unclude props');
+    // console.log('current scope: ', currentScope);
+    // console.log('outdated scope name: ', scopeName);
+
+    // collect existing scopes from the configuration
+    const scopeObjects = _.get(configuration, 'inspectit.instrumentation.rules');
+    console.info('Scope config from condig: ', scopeObjects);
+    // setScopes(scopeObjects);
+
+    // scopeProperties
+
     const ruleScopePath = 'inspectit.instrumentation.rules.' + stateRule + '.scopes.' + scopeName;
     const ruleState = _.get(configuration, ruleScopePath);
 
@@ -347,12 +364,12 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
             >
               <Column body={scopeDescriptionBodyTemplate} header="Target" />
               <Column
-                body={({ name }) => scopeStateBodyTemplate(name, SCOPE_STATES_RULES.TRACING)}
+                body={({ name }) => scopeStateBodyTemplate(currentScope, name, SCOPE_STATES_RULES.TRACING)}
                 header="Trace"
                 style={{ width: '6rem' }}
               />
               <Column
-                body={({ name }) => scopeStateBodyTemplate(name, SCOPE_STATES_RULES.MEASURING)}
+                body={({ name }) => scopeStateBodyTemplate(currentScope, name, SCOPE_STATES_RULES.MEASURING)}
                 header="Measure"
                 style={{ width: '6rem' }}
               />
