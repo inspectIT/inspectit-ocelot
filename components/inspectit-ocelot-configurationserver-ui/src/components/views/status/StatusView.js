@@ -76,7 +76,6 @@ class StatusView extends React.Component {
           const agentFilter = this.getAgentFilter(agent);
           return this.checkRegex(agentFilter, regex);
         });
-
         this.setState(
           {
             error: false,
@@ -134,10 +133,9 @@ class StatusView extends React.Component {
         }
         return result;
       }, {});
-
       this.setState({
         error: false,
-        agentsToShow: mergedMap,
+        agentsToShow: Object.values(mergedMap),
       });
     }
   };
