@@ -178,6 +178,13 @@ class StatusTable extends React.Component {
             overflow: hidden;
             text-overflow: ellipsis;
           }
+
+          .this :global(.might-overflow):hover {
+            overflow: visible; 
+            white-space: normal; 
+            text-overflow: unset;
+            overflow-wrap: break-word;
+          }
         `}</style>
         <span className="might-overflow" title={`${name} (${agentId})`}>
           {name} {agentIdElement}
