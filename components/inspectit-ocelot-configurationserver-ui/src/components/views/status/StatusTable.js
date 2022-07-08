@@ -180,8 +180,8 @@ class StatusTable extends React.Component {
           }
 
           .this :global(.might-overflow):hover {
-            overflow: visible; 
-            white-space: normal; 
+            overflow: visible;
+            white-space: normal;
             text-overflow: unset;
             overflow-wrap: break-word;
           }
