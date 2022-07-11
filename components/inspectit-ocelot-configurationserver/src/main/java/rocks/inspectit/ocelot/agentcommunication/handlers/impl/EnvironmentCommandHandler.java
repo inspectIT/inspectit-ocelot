@@ -28,6 +28,7 @@ public class EnvironmentCommandHandler implements CommandHandler {
      * Checks if the given {@link Command} is an instance of {@link EnvironmentCommand}.
      *
      * @param command The command which should be checked.
+     *
      * @return True if the given command is an instance of {@link EnvironmentCommand}.
      */
     @Override
@@ -39,6 +40,7 @@ public class EnvironmentCommandHandler implements CommandHandler {
      * Checks if the given {@link CommandResponse} is an instance of {@link EnvironmentCommand.Response}.
      *
      * @param response The response which should be checked.
+     *
      * @return True if the given response is an instance of {@link EnvironmentCommand.Response}.
      */
     @Override
@@ -52,6 +54,7 @@ public class EnvironmentCommandHandler implements CommandHandler {
      *
      * @param agentId The id of the agent the command is meant for.
      * @param command The command to be Executed.
+     *
      * @return An instance of  {@link DeferredResult} with a set timeout value and a set timeout function.
      */
     @Override

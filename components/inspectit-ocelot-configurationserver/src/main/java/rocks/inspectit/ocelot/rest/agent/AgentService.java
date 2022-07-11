@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AgentService {
 
     private AgentCommandDispatcher commandDispatcher;
+
     private InspectitServerSettings configuration;
 
     public AgentService(AgentCommandDispatcher commandDispatcher, InspectitServerSettings configuration) {
@@ -45,7 +46,9 @@ public class AgentService {
      *
      * @param attributes    - the agent attributes used to select the correct data
      * @param configManager -  the configmanager for retrieving the current configuration
+     *
      * @return the deferred result containing the different elements of the support archive
+     *
      * @throws ExecutionException - if one of the command executions fails
      */
     public DeferredResult<ResponseEntity<?>> buildSupportArchive(Map<String, String> attributes, AgentConfigurationManager configManager) throws ExecutionException {
@@ -97,8 +100,11 @@ public class AgentService {
 
     @Data
     static class SupportArchiveData {
+
         private String currentConfig;
+
         private EnvironmentCommand.EnvironmentDetail environmentDetails;
+
         private String logs;
     }
 

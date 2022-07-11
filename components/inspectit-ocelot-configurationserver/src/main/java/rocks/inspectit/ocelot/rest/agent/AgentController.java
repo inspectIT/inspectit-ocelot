@@ -7,13 +7,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.AgentCallbackManager;
 import rocks.inspectit.ocelot.agentcommunication.AgentCommandManager;
@@ -61,6 +55,7 @@ public class AgentController extends AbstractBaseController {
      * Uses text/plain as mime type to ensure that the configuration is presented nicely when opened in a browser
      *
      * @param attributes the attributes of the agents used to select the mapping
+     *
      * @return The configuration mapped on the given agent name
      */
     @ApiOperation(value = "Fetch the Agent Configuration", notes = "Reads the configuration for the given agent and returns it as a yaml string")
@@ -81,6 +76,7 @@ public class AgentController extends AbstractBaseController {
      * If no command exists for the given agent, an empty request is returned.
      *
      * @param headers the standard request headers of the agent. Must at least contain the key x-ocelot-agent-id.
+     *
      * @return Returns either a ResponseEntity with the next command as payload or an empty payload.
      */
     @PostMapping(value = "agent/command", produces = "application/json")
@@ -111,6 +107,7 @@ public class AgentController extends AbstractBaseController {
      * Returns the data for building the downloadable support archive for the agent with the given name in the frontend.
      *
      * @param attributes the attributes of the agents used to select the appropriate data.
+     *
      * @return The data used in the support archive.
      */
     @ApiOperation(value = "Fetch an Agents Data for Downloading a Support Archive", notes = "Bundles useful information for debugging issues raised in support tickets.")

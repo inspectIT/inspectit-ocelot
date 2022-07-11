@@ -101,7 +101,7 @@ public class AgentControllerIntTest extends IntegrationTestBase {
         AtomicReference<ResponseEntity<?>> archiveResult = new AtomicReference<>();
         new Thread(() -> archiveResult.set(authRest.getForEntity("/api/v1/agent/supportArchive?agent-id=" + agentId, AgentService.SupportArchiveData.class))).start();
 
-        await().atMost(2, TimeUnit.SECONDS).until(archiveResult::get, Objects::nonNull);
+        await().atMost(5, TimeUnit.SECONDS).until(archiveResult::get, Objects::nonNull);
         assertThat(archiveResult.get().getStatusCode()).isEqualTo(HttpStatus.REQUEST_TIMEOUT);
         assertThat(archiveResult.get().getBody()).isNull();
     }
