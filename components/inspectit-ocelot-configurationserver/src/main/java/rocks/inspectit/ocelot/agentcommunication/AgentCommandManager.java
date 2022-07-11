@@ -38,14 +38,14 @@ public class AgentCommandManager {
         int commandQueueSize = commandSettings.getCommandQueueSize();
 
         agentCommandCache = CacheBuilder.newBuilder()
-            .maximumSize(1000)
-            .expireAfterWrite(commandTimeout, TimeUnit.MILLISECONDS)
-            .build(new CacheLoader<String, BlockingQueue<Command>>() {
-                @Override
-                public BlockingQueue<Command> load(String key) {
-                    return new LinkedBlockingQueue<>(commandQueueSize);
-                }
-            });
+                .maximumSize(1000)
+                .expireAfterWrite(commandTimeout, TimeUnit.MILLISECONDS)
+                .build(new CacheLoader<String, BlockingQueue<Command>>() {
+                    @Override
+                    public BlockingQueue<Command> load(String key) {
+                        return new LinkedBlockingQueue<>(commandQueueSize);
+                    }
+                });
     }
 
     /**
@@ -73,6 +73,7 @@ public class AgentCommandManager {
      *
      * @param agentId        The ID of the agent for which the command should to be returned.
      * @param waitForCommand Whether it should be waited until a command appears
+     *
      * @return The {@link Command} object next in queue for the agent with the given id.
      */
     public Command getCommand(String agentId, boolean waitForCommand) {

@@ -43,9 +43,9 @@ public class AgentCallbackManager implements RemovalListener<UUID, DeferredResul
         long responseTimeoutMs = responseTimeout.toMillis();
 
         resultCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(responseTimeoutMs, TimeUnit.MILLISECONDS)
-            .removalListener(this) // done so that deferred results which time out throw a timeout exception
-            .build();
+                .expireAfterWrite(responseTimeoutMs, TimeUnit.MILLISECONDS)
+                .removalListener(this) // done so that deferred results which time out throw a timeout exception
+                .build();
     }
 
     @Override
@@ -64,6 +64,7 @@ public class AgentCallbackManager implements RemovalListener<UUID, DeferredResul
      *
      * @param commandId       An instance of {@link UUID} which represents the UUID of a existing command.
      * @param commandResponse The instance of {@link DeferredResult} to which the result of the command should be written.
+     *
      * @throws IllegalArgumentException when the given command id is null.
      */
     public void addCommandCallback(UUID commandId, DeferredResult<ResponseEntity<?>> commandResponse) {
