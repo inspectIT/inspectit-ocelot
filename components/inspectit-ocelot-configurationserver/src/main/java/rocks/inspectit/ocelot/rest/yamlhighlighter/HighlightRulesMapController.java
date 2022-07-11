@@ -166,20 +166,7 @@ public class HighlightRulesMapController extends AbstractBaseController {
      * @return List of names of all possible values for the enum.
      */
     private List<String> extractEnumValues(Class<?> currentEnum) {
-        List<String> allFields = Arrays.stream(currentEnum.getDeclaredFields()).map(Field::getName).collect(Collectors.toList());
-        if (allFields.contains("values")){
-            try {
-                Field valuesField = currentEnum.getDeclaredField("values");
-                valuesField.setAccessible(true);
-                Map<String, ?> valuesMap = (Map<String, ?>) valuesField.get(null);
-                return new ArrayList<>(valuesMap.keySet());
-            } catch(Exception e) {
-                log.error(String.format("Error while getting values of enum %s.", currentEnum.getName()), e);
-                return Collections.emptyList();
-            }
-        } else {
-            return Arrays.stream(currentEnum.getFields()).map(Field::getName).collect(Collectors.toList());
-        }
+        return Arrays.stream(currentEnum.getEnumConstants()).map(Object::toString).collect(Collectors.toList());
     }
 
     @ApiOperation(value = "Get JSON for Highlight Rules Generation", notes = "")
