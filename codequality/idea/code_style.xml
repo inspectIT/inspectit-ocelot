@@ -1,5 +1,6 @@
 <code_scheme name="Ocelot" version="173">
   <option name="LINE_SEPARATOR" value="&#xA;" />
+  <option name="FORMATTER_TAGS_ENABLED" value="true" />
   <JavaCodeStyleSettings>
     <option name="JD_ADD_BLANK_AFTER_PARM_COMMENTS" value="true" />
     <option name="JD_ADD_BLANK_AFTER_RETURN" value="true" />
