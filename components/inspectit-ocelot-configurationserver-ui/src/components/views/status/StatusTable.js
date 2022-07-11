@@ -271,7 +271,7 @@ class StatusTable extends React.Component {
             <span>{healthInfo}</span>
             <Button
               className="archive-button"
-              icon="pi pi-folder"
+              icon="pi pi-cloud-download"
               onClick={() => onDownloadSupportArchive(metaInformation.agentId, metaInformation.agentVersion)}
               tooltip="Download Support Archive"
               tooltipOptions={{ showDelay: 500 }}
