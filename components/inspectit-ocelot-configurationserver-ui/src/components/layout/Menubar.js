@@ -16,8 +16,8 @@ class Menubar extends React.Component {
     Router.push(linkPrefix + '/login');
   };
 
-  openDocumentation = () =>{
-    window.open( 'https://inspectit.github.io/inspectit-ocelot/docs/doc1');
+  openDocumentation = () => {
+    window.open('https://inspectit.github.io/inspectit-ocelot/docs/doc1');
   };
 
   render() {
