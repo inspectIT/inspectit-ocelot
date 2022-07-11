@@ -96,7 +96,7 @@ public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
                             HighlightRulesMapController.KEY_OBJECT_ATTRIBUTES, advancedScopeSettingsExpected) +
                     String.format("\"a-boolean\":{\"%s\":\"%s\"},",
                             HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_TEXT)+
-                    String.format("\"protocol\":{\"%s\":\"%s\", \"%s\": [\"\", \"http/protobuf\", \"http/thrift\", \"grpc\"]}}",
+                    String.format("\"protocol\":{\"%s\":\"%s\", \"%s\": [\"\", \"grpc\", \"http/thrift\", \"http/protobuf\"]}}",
                             HighlightRulesMapController.KEY_TYPE, HighlightRulesMapController.VALUE_TYPE_ENUM,
                             HighlightRulesMapController.KEY_ENUM_VALUES);
 
