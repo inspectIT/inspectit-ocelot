@@ -16,10 +16,11 @@ class Menubar extends React.Component {
     Router.push(linkPrefix + '/login');
   };
 
+  openDocumentation = () =>{
+    window.open( 'https://inspectit.github.io/inspectit-ocelot/docs/doc1');
+  };
+
   render() {
-    const handleClick = () => {
-      window.open('https://inspectit.github.io/inspectit-ocelot/docs/doc1');
-    };
     return (
       <Toolbar id="toolbar">
         <style global jsx>{`
@@ -53,11 +54,12 @@ class Menubar extends React.Component {
           .user-description b {
             color: #fff;
           }
-          .info-icon {
+          .documentation-icon {
             margin-top: 0.4rem;
             margin-right: 1rem;
-            color: #fff;
+            color: #e8a034;
             font-size: 1.3rem;
+            cursor: pointer;
           }
         `}</style>
         <div className="p-toolbar-group-left flex-v-center">
@@ -66,8 +68,8 @@ class Menubar extends React.Component {
         </div>
 
         <div className="p-toolbar-group-right flex-v-center">
-          <box className="info-icon">
-            <i className="pi pi-info-circle" onClick={handleClick}></i>
+          <box className="documentation-icon">
+            <i className="pi pi-info-circle" onClick={this.openDocumentation} title="Open Documentation"></i>
           </box>
           <div className="user-description">
             Logged in as <b>{this.props.username}</b>
