@@ -259,27 +259,36 @@ export const exportSelection = (fetchFilesOnSuccess, selectedFile = null) => {
 /**
  * Either removes files that start with '.' or fetches files depending on if files are hidden.
  */
-export const hideFiles = () => {
+export const toggleShowHiddenFiles = () => {
+  let hidePattern = '^\\.';
   return (dispatch, getState) => {
-    let { files, filesHidden } = getState().configuration;
-
-    if (!filesHidden) {
-      for (let i = 0; i <= files.length; i++) {
-        if (files[i]) {
-          files[i].children.filter((child) => {
-            if (child.name.startsWith('.')) {
-              const index = files[i].children.indexOf(child);
-              files[i].children.splice(index, 1);
-            }
-          });
-        }
-      }
+    let { files, showHiddenFiles } = getState().configuration;
+    if (showHiddenFiles) {
+      hideFilesRecursively(files, hidePattern);
     } else {
       dispatch(fetchFiles());
     }
-    filesHidden = !filesHidden;
-    dispatch({ type: types.FILTER_SELECTION_SUCCESS, payload: { files, filesHidden } });
+    showHiddenFiles = !showHiddenFiles;
+    dispatch({ type: types.FILTER_SELECTION_SUCCESS, payload: { files, showHiddenFiles } });
   };
+};
+
+/**
+ * Recursively removes files that match the regex
+ * @param {array} files - the array of files
+ * @param {string} regex
+ */
+const hideFilesRecursively = (files, regex) => {
+  for (let i = 0; i <= files.length; i++) {
+    if (!files[i]) {
+      continue;
+    }
+    if (files[i].name.match(regex)) {
+      files.splice(i--, 1);
+    } else if (files[i].children) {
+      hideFilesRecursively(files[i].children, regex);
+    }
+  }
 };
 
 /**
@@ -404,7 +413,7 @@ export const selectedFileContentsChanged = (content) => ({
  */
 export const selectVersion = (version, reloadFiles = true) => {
   return (dispatch) => {
-    // chaning the selected version
+    // changing the selected version
     dispatch({
       type: types.SELECT_VERSION,
       payload: {

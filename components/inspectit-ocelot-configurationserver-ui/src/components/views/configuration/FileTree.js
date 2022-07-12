@@ -173,8 +173,8 @@ class FileTree extends React.Component {
       showMoveDialog,
       showDeleteFileDialog,
       exportSelection,
-      hideFiles,
-      filesHidden,
+      toggleShowHiddenFiles,
+      showHiddenFiles,
     } = this.props;
 
     return [
@@ -194,9 +194,9 @@ class FileTree extends React.Component {
         command: () => exportSelection(true, filePath),
       },
       {
-        label: filesHidden === false ? 'Hide files' : 'Show hidden files',
-        icon: filesHidden === false ? 'pi pi-eye-slash' : 'pi pi-eye',
-        command: () => hideFiles(),
+        label: showHiddenFiles ? 'Hide Files' : 'Show Hidden Files',
+        icon: showHiddenFiles ? 'pi pi-eye-slash' : 'pi pi-eye',
+        command: () => toggleShowHiddenFiles(),
       },
       {
         label: 'Rename',
@@ -215,12 +215,12 @@ class FileTree extends React.Component {
 }
 
 function mapStateToProps(state) {
-  const { pendingRequests, selection, defaultConfig, selectedDefaultConfigFile, selectedVersion, filesHidden } = state.configuration;
+  const { pendingRequests, selection, defaultConfig, selectedDefaultConfigFile, selectedVersion, showHiddenFiles } = state.configuration;
   return {
     files: configurationSelectors.getFileTree(state),
     loading: pendingRequests > 0,
     selection,
-    filesHidden,
+    showHiddenFiles,
     defaultConfig: defaultConfig,
     defaultTree: configurationSelectors.getDefaultConfigTree(state),
     selectedDefaultConfigFile,
@@ -233,7 +233,7 @@ const mapDispatchToProps = {
   fetchFiles: configurationActions.fetchFiles,
   selectFile: configurationActions.selectFile,
   exportSelection: configurationActions.exportSelection,
-  hideFiles: configurationActions.hideFiles,
+  toggleShowHiddenFiles: configurationActions.toggleShowHiddenFiles,
   move: configurationActions.move,
 };
 

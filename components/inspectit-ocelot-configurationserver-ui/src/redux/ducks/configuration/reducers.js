@@ -90,7 +90,7 @@ const configurationReducer = createReducer(initialState)({
   },
   [types.FILTER_SELECTION_SUCCESS]: (state, action) => {
     const { files } = action.payload;
-    const { filesHidden } = action.payload;
+    const { showHiddenFiles } = action.payload;
 
     // remove the selection in case it does not exist anymore
     let selection = movePathIfRequired(state.selection, state.moveHistory);
@@ -107,7 +107,7 @@ const configurationReducer = createReducer(initialState)({
     return {
       ...decrementPendingRequests(state),
       files,
-      filesHidden,
+      showHiddenFiles,
       moveHistory: [],
       selection,
       unsavedFileContents,
