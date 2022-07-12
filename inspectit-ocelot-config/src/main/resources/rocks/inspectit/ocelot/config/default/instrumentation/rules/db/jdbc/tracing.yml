@@ -6,6 +6,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Traces execute/executeUpdate calls with non-prepared SQL (the SQL is given as method argument).'
+        default-rule: true
         include:
           'r_jdbc_tracing_defaults': true
         scopes:
@@ -18,6 +19,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Traces executeBatch calls with non-prepared SQL.'
+        default-rule: true
         include:
           'r_jdbc_tracing_defaults': true
         scopes:
@@ -27,6 +29,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Traces execute/executeUpdate/executeBatch calls with prepared SQL.'
+        default-rule: true
         include:
           'r_jdbc_tracing_defaults': true
         scopes:
@@ -46,6 +49,7 @@ inspectit:
           description: |-
             To be included in JDBC tracing rules.
             Activates span collection and adds default attributes.
+        default-rule: true
         include:
           'r_jdbc_detect_entry': true
           'r_jdbc_extract_url': true

@@ -55,14 +55,14 @@ public class MethodHookConfigurationResolverTest {
             ActionCallSettings seta1 = new ActionCallSettings();
             seta1.setAction("providerA");
             callToA1 = ActionCallConfig.builder()
-                    .name("my_key")
+                    .dataKey("my_key")
                     .callSettings(seta1)
                     .action(providerA).build();
 
             ActionCallSettings seta2 = new ActionCallSettings();
             seta2.setAction("providerA");
             callToA2 = ActionCallConfig.builder()
-                    .name("my_key")
+                    .dataKey("my_key")
                     .callSettings(seta2)
                     .action(providerA).build();
 
@@ -73,7 +73,7 @@ public class MethodHookConfigurationResolverTest {
             ActionCallSettings setb1 = new ActionCallSettings();
             setb1.setAction("providerB");
             callToB = ActionCallConfig.builder()
-                    .name("my_key")
+                    .dataKey("my_key")
                     .callSettings(setb1)
                     .action(providerB).build();
         }
@@ -209,7 +209,7 @@ public class MethodHookConfigurationResolverTest {
             dependingOnFirst.setAction("providerA");
             dependingOnFirst.setDataInput(Maps.newHashMap("someArgument", "my_key"));
             ActionCallConfig depFirst = ActionCallConfig.builder()
-                    .name("second_key")
+                    .dataKey("second_key")
                     .callSettings(dependingOnFirst)
                     .action(providerA).build();
 
@@ -217,7 +217,7 @@ public class MethodHookConfigurationResolverTest {
             dependingOnSecond.setAction("providerA");
             dependingOnSecond.setDataInput(Maps.newHashMap("someArgument", "second_key"));
             ActionCallConfig depSecond = ActionCallConfig.builder()
-                    .name("second_key")
+                    .dataKey("second_key")
                     .callSettings(dependingOnSecond)
                     .action(providerA).build();
 
@@ -241,7 +241,7 @@ public class MethodHookConfigurationResolverTest {
             ActionCallSettings firstSettings = new ActionCallSettings();
             firstSettings.setAction("providerA");
             ActionCallConfig first = ActionCallConfig.builder()
-                    .name("first")
+                    .dataKey("first")
                     .callSettings(firstSettings)
                     .action(providerA).build();
 
@@ -249,7 +249,7 @@ public class MethodHookConfigurationResolverTest {
             secondSettings.setAction("providerB");
             secondSettings.setDataInput(ImmutableMap.of("somearg", "first"));
             ActionCallConfig second = ActionCallConfig.builder()
-                    .name("second")
+                    .dataKey("second")
                     .callSettings(secondSettings)
                     .action(providerB).build();
 
@@ -270,7 +270,7 @@ public class MethodHookConfigurationResolverTest {
             ActionCallSettings firstSettings = new ActionCallSettings();
             firstSettings.setAction("providerA");
             ActionCallConfig first = ActionCallConfig.builder()
-                    .name("first")
+                    .dataKey("first")
                     .callSettings(firstSettings)
                     .action(providerA).build();
 
@@ -278,7 +278,7 @@ public class MethodHookConfigurationResolverTest {
             secondSettings.setAction("providerB");
             secondSettings.setDataInput(ImmutableMap.of("somearg", "first"));
             ActionCallConfig second = ActionCallConfig.builder()
-                    .name("second")
+                    .dataKey("second")
                     .callSettings(secondSettings)
                     .action(providerB).build();
 
@@ -300,7 +300,7 @@ public class MethodHookConfigurationResolverTest {
             ActionCallSettings firstSettings = new ActionCallSettings();
             firstSettings.setAction("providerA");
             ActionCallConfig first = ActionCallConfig.builder()
-                    .name("first")
+                    .dataKey("first")
                     .callSettings(firstSettings)
                     .action(providerA).build();
 
@@ -308,7 +308,7 @@ public class MethodHookConfigurationResolverTest {
             secondSettings.setAction("providerB");
             secondSettings.setDataInput(ImmutableMap.of("somearg", "first"));
             ActionCallConfig second = ActionCallConfig.builder()
-                    .name("second")
+                    .dataKey("second")
                     .callSettings(secondSettings)
                     .action(providerB).build();
 
@@ -329,7 +329,7 @@ public class MethodHookConfigurationResolverTest {
             ActionCallSettings firstSettings = new ActionCallSettings();
             firstSettings.setAction("providerA");
             ActionCallConfig first = ActionCallConfig.builder()
-                    .name("first")
+                    .dataKey("first")
                     .callSettings(firstSettings)
                     .action(providerA).build();
 
@@ -337,7 +337,7 @@ public class MethodHookConfigurationResolverTest {
             secondSettings.setAction("providerB");
             secondSettings.setDataInput(ImmutableMap.of("somearg", "first"));
             ActionCallConfig second = ActionCallConfig.builder()
-                    .name("second")
+                    .dataKey("second")
                     .callSettings(secondSettings)
                     .action(providerB).build();
 
@@ -358,7 +358,7 @@ public class MethodHookConfigurationResolverTest {
             ActionCallSettings firstSettings = new ActionCallSettings();
             firstSettings.setAction("providerA");
             ActionCallConfig first = ActionCallConfig.builder()
-                    .name("first")
+                    .dataKey("first")
                     .callSettings(firstSettings)
                     .action(providerA).build();
 
@@ -366,7 +366,7 @@ public class MethodHookConfigurationResolverTest {
             secondSettings.setAction("providerB");
             secondSettings.setDataInput(ImmutableMap.of("somearg", "first"));
             ActionCallConfig second = ActionCallConfig.builder()
-                    .name("second")
+                    .dataKey("second")
                     .callSettings(secondSettings)
                     .action(providerB).build();
 
@@ -388,7 +388,7 @@ public class MethodHookConfigurationResolverTest {
             ActionCallSettings firstSettings = new ActionCallSettings();
             firstSettings.setAction("providerA");
             ActionCallConfig first = ActionCallConfig.builder()
-                    .name("first")
+                    .dataKey("first")
                     .callSettings(firstSettings)
                     .action(providerA).build();
 
@@ -396,7 +396,7 @@ public class MethodHookConfigurationResolverTest {
             secondSettings.setAction("providerB");
             secondSettings.setDataInput(ImmutableMap.of("somearg", "first"));
             ActionCallConfig second = ActionCallConfig.builder()
-                    .name("second")
+                    .dataKey("second")
                     .callSettings(secondSettings)
                     .action(providerB).build();
 

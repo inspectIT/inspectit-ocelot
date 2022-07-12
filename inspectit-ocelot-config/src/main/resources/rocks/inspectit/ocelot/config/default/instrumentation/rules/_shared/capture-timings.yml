@@ -6,6 +6,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'When applied to a method, this rule will populate method_duration with the duration the method execution took.'
+        default-rule: true
         include:
           'r_capture_method_duration_conditional': true
         entry:
@@ -20,6 +21,7 @@ inspectit:
             The capturing will only happen if capture_time_condition is defined as true.
             For example, http instrumentation define capture_time_condition based on http_is_entry.
             The condition is there to prevent unnecessary invocations of System.nanoTime(), which can be expensive.
+        default-rule: true
         include:
           'r_capture_method_entry_timestamp_conditional': true
         exit:
@@ -37,6 +39,7 @@ inspectit:
             The capturing will only happen if capture_time_condition is defined as true.
             For example, http instrumentation define capture_time_condition based on http_is_entry.
             The condition is there to prevent unnecessary invocations of System.nanoTime(), which can be expensive.
+        default-rule: true
         entry:
           'method_entry_time':
             only-if-true: 'capture_time_condition'

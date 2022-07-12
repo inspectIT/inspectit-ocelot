@@ -1,5 +1,8 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
+import io.opencensus.trace.AttributeValue;
+import io.opencensus.trace.Span;
+import io.opencensus.trace.Tracing;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
@@ -10,11 +13,13 @@ import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfig
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.TracingHookAction;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 import rocks.inspectit.ocelot.core.selfmonitoring.IActionScope;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -25,6 +30,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 @Value
 public class MethodHook implements IMethodHook {
+
+    /**
+     * Prefix used for span attributes in method hook spans.
+     */
+    private static final String SPAN_ATTRIBUTE_PREFIX = "inspectit.debug.method-hook.";
+
+    /**
+     * Attribute value for `null` values in span attributes.
+     */
+    private static final AttributeValue NULL_STRING_ATTRIBUTE = AttributeValue.stringAttributeValue("<NULL>");
 
     /**
      * The configuration on which this hook is based.
@@ -86,46 +101,71 @@ public class MethodHook implements IMethodHook {
 
     @Override
     public InternalInspectitContext onEnter(Object[] args, Object thiz) {
+        Span hookSpan = null;
         try {
             // flags the thread that it is now in action execution
             HookManager.RECURSION_GATE.set(true);
 
             InspectitContextImpl inspectitContext = inspectitContextManager.enterNewContext();
-            IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, null, null, this, inspectitContext);
+
+            hookSpan = getEntryHookTracingSpan();
+            recordContextDataInSpan(hookSpan, inspectitContext, "before.");
+
+            IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, null, null, this, inspectitContext, hookSpan);
 
             for (IHookAction action : activeEntryActions) {
                 try (IActionScope scope = actionScopeFactory.createScope(action)) {
                     action.execute(executionContext);
                 } catch (Throwable t) {
-                    log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
+                    log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation
+                            .getMethodFQN(), t);
                     activeEntryActions.remove(action);
                 }
             }
 
+            recordContextDataInSpan(hookSpan, inspectitContext, "after.");
+
             inspectitContext.makeActive();
             return inspectitContext;
         } finally {
+            if (hookSpan != null) {
+                hookSpan.end();
+            }
+
             HookManager.RECURSION_GATE.set(false);
         }
     }
 
     @Override
     public void onExit(Object[] args, Object thiz, Object returnValue, Throwable thrown, InternalInspectitContext context) {
+        Span hookSpan = null;
         try {
             // flags the thread that it is now in action execution
             HookManager.RECURSION_GATE.set(true);
 
-            IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, (InspectitContextImpl) context);
+            hookSpan = getExitHookTracingSpan();
+            recordContextDataInSpan(hookSpan, context, "before.");
+
+            IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, (InspectitContextImpl) context, hookSpan);
+
             for (IHookAction action : activeExitActions) {
                 try (IActionScope scope = actionScopeFactory.createScope(action)) {
                     action.execute(executionContext);
                 } catch (Throwable t) {
-                    log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
+                    log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation
+                            .getMethodFQN(), t);
                     activeExitActions.remove(action);
                 }
             }
+
+            recordContextDataInSpan(hookSpan, context, "after.");
+
             context.close();
         } finally {
+            if (hookSpan != null) {
+                hookSpan.end();
+            }
+
             HookManager.RECURSION_GATE.set(false);
         }
     }
@@ -137,4 +177,51 @@ public class MethodHook implements IMethodHook {
         return new MethodHook(sourceConfiguration, inspectitContextManager, entryActions, exitActions, methodInformation, actionScopeFactory);
     }
 
+    /**
+     * @return Returns a span representing the entry hook of this method hook. It will be used as parent for action tracing spans.
+     */
+    private Span getEntryHookTracingSpan() {
+        if (sourceConfiguration.isTraceEntryHook()) {
+            return getHookTracingSpan("entryHook");
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @return Returns a span representing the exit hook of this method hook. It will be used as parent for action tracing spans.
+     */
+    private Span getExitHookTracingSpan() {
+        if (sourceConfiguration.isTraceExitHook()) {
+            return getHookTracingSpan("exitHook");
+        } else {
+            return null;
+        }
+    }
+
+    private Span getHookTracingSpan(String hookName) {
+        return Tracing.getTracer()
+                .spanBuilder(TracingHookAction.DEBUG_SPAN_NAME_PREFIX + hookName + "<" + methodInformation.getMethodFQN() + ">")
+                .startSpan();
+    }
+
+    /**
+     * Utility method for adding a the existing context as span attributes to the given span.
+     *
+     * @param span    the span to add the attributes
+     * @param context the context containing the data
+     * @param prefix  the prefix used in the attribute keys
+     */
+    private void recordContextDataInSpan(Span span, InternalInspectitContext context, String prefix) {
+        if (span != null) {
+            Iterable<Map.Entry<String, Object>> contextData = context.getData();
+            for (Map.Entry<String, Object> entry : contextData) {
+                recordAttribute(span, "context." + prefix + entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private void recordAttribute(Span span, String name, Object value) {
+        span.putAttribute(SPAN_ATTRIBUTE_PREFIX + name, value != null ? AttributeValue.stringAttributeValue(value.toString()) : NULL_STRING_ATTRIBUTE);
+    }
 }

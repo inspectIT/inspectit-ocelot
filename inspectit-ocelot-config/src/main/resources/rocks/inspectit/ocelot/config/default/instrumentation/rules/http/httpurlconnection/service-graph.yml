@@ -6,6 +6,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Prepares the context to contain the service graph correlation information (e.g. origin_service and target_service).'
+        default-rule: true
         include:
           'r_servicegraph_prepare_down_propagation': true
         scopes:
@@ -17,6 +18,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Records HTTP calls done via HTTPUrlConnection in the [service/out/responsetime] metric for the service graph.'
+        default-rule: true
         include:
           'r_servicegraph_outbound_record_method': true
           'r_httpurlconnection_detect_end': true

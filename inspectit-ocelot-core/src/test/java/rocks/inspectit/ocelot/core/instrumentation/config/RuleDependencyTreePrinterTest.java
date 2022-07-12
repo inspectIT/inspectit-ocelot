@@ -23,6 +23,8 @@ public class RuleDependencyTreePrinterTest {
                         .name("rule_a")
                         .includedRuleName("rule_b")
                         .scope(dummyScope)
+                        .defaultRule(true)
+                        .actionTracing(true)
                         .build(),
                 InstrumentationRule.builder()
                         .name("rule_b")
@@ -38,6 +40,7 @@ public class RuleDependencyTreePrinterTest {
                         .build(),
                 InstrumentationRule.builder()
                         .name("rule_e")
+                        .actionTracing(true)
                         .build(),
                 InstrumentationRule.builder()
                         .name("rule_f")
@@ -46,6 +49,7 @@ public class RuleDependencyTreePrinterTest {
                         .build(),
                 InstrumentationRule.builder()
                         .name("rule_g")
+                        .defaultRule(true)
                         .build()
         );
         // @formatter:on
@@ -117,14 +121,14 @@ public class RuleDependencyTreePrinterTest {
                     "------------------------------------------------------------\n" +
                     "Rule Dependency-Tree\n" +
                     "------------------------------------------------------------\n" +
-                    "+--- rule_a\n" +
+                    "+--- *rule_a (ACTIONTRACING)\n" +
                     "|    \\--- rule_b\n" +
                     "+--- rule_c\n" +
                     "|    +--- rule_b\n" +
                     "|    \\--- rule_d\n" +
                     "\\--- <UNUSED> rule_f\n" +
-                    "     +--- rule_e\n"+
-                    "     \\--- rule_g\n"
+                    "     +--- rule_e (ACTIONTRACING)\n"+
+                    "     \\--- *rule_g\n"
             );
             // @formatter:on
         }
