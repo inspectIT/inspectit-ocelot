@@ -11,6 +11,11 @@ on:
       - 'components/**'
       - 'inspectit-ocelot-documentation/**'
       - 'resources/**'
+      - 'codequality/**'
+      - '**.md'
+      - '**.txt'
+      - '.github/**'
+      - '.circleci/**'
 
 jobs:
   pr-check:
