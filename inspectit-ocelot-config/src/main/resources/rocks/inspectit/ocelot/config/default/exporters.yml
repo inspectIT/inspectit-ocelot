@@ -40,9 +40,9 @@ inspectit:
 
       # settings used in LoggingMetricsExporterService for the LoggingMetricExporter (https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/logging)
       logging:
-          enabled: DISABLED
-          # the export interval of the metrics
-          export-interval: ${inspectit.metrics.frequency}
+        enabled: DISABLED
+        # the export interval of the metrics
+        export-interval: ${inspectit.metrics.frequency}
 
       # settings for the OtlpGrpcMetricExporter used in OtlpGrpcMetricExporterService
       otlp:
@@ -52,7 +52,7 @@ inspectit:
         # the URL endpoint, e.g., http://127.0.0.1:4317
         endpoint: null
         # the transport protocol, e.g., 'grpc' or 'http/protobuf'
-        protocol: null
+        protocol:
 
     # settings for trace exporters
     tracing:
@@ -72,16 +72,16 @@ inspectit:
         # the URL under which the jaeger thrift server can be accessed, e.g. http://127.0.0.1:14268/api/traces for http/thrift or http://127.0.0.1:14250/v1/traces for grpc
         endpoint: null
         # the transport protocol, e.g., 'http/thrift' or 'grpc'
-        protocol: null
+        protocol:
 
       # settings used in LoggingTraceExporterService for the LoggingSpanExporter (https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/logging)
       logging:
-          enabled: DISABLED
+        enabled: DISABLED
 
       # settings for the OtlpGrpcSpanExporter/OtlpHttpSpanExporter used in OtlpTraceExporterService
       otlp:
-          enabled: IF_CONFIGURED
-          # the URL endpoint, e.g., http://127.0.0.1:4318
-          endpoint: null
-          # the transport protocol, e.g., 'http/thrift' or 'grpc'
-          protocol: null
+        enabled: IF_CONFIGURED
+        # the URL endpoint, e.g., http://127.0.0.1:4318
+        endpoint: null
+        # the transport protocol, e.g., 'http/thrift' or 'grpc'
+        protocol:
