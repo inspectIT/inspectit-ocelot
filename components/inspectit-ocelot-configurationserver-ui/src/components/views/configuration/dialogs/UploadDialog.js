@@ -7,21 +7,64 @@ import PropTypes from 'prop-types';
 import { isSelectionDirectory } from '../../../../redux/ducks/configuration/selectors';
 import { connect } from 'react-redux';
 import { notificationActions } from '../../../../redux/ducks/notification';
+import _ from 'lodash';
+
+var initialState = { files: [] };
 
 class UploadDialog extends React.Component {
+  duplicateWarning = (
+    <p style={{ color: 'red' }}>
+      <i style={{ verticalAlign: 'middle', color: 'red', fontSize: '2rem' }} className="pi pi-info-circle" />
+      Some of your filenames already exist. Existing files will be overwritten.
+    </p>
+  );
+
   constructor() {
     super();
-    this.handleClick = this.handleClick.bind(this);
     this.onDrop = (files) => {
       this.setState({ files });
     };
-    this.state = {
-      files: [],
-    };
+    this.state = initialState;
+  }
+
+  removeFileByName(fileName) {
+    var files = this.state.files;
+    _.remove(files, (file) => {
+      return file.name === fileName;
+    });
+    this.setState({
+      files: files,
+    });
   }
 
   render() {
-    const files = this.state.files.map((file) => <p key={file.name}> {file.name}</p>);
+    var { files, selection } = this.props;
+    var duplicateInfo = <></>;
+
+    const filesToUpload = this.state.files.map((file) => {
+      if (this.isDuplicate(files, file)) {
+        duplicateInfo = this.duplicateWarning;
+      }
+
+      var fileName = file.name;
+      if (selection && !(_.endsWith(selection, '.yml') || _.endsWith(selection, '.yaml'))) {
+        fileName = selection + '/' + file.name;
+      }
+      return (
+        <div key={fileName}>
+          <p>
+            <i className="pi pi-file" style={{ color: 'lightgray', fontSize: '2rem', verticalAlign: 'middle', paddingRight: '0.75rem' }} />
+            {fileName}
+            <i
+              className="pi pi-times"
+              title="Click to remove file"
+              onClick={() => this.removeFileByName(file.name)}
+              style={{ color: 'red', fontSize: '2rem', verticalAlign: 'middle', float: 'right', cursor: 'pointer' }}
+            />
+          </p>
+        </div>
+      );
+    });
     const baseStyle = {
       display: 'flex',
       flexDirection: 'column',
@@ -37,62 +80,76 @@ class UploadDialog extends React.Component {
     };
     return (
       <Dialog
-        header={'Upload one or more files'}
+        header={'Configuration file upload'}
         modal={true}
         visible={this.props.visible}
-        onHide={this.props.onHide}
+        onHide={() => this.hideAndCleanState(this)}
         footer={
           <div>
-            <Button label="Upload" onClick={this.handleClick} />
+            <Button label="Upload" onClick={this.uploadFiles} disabled={this.state.files.length < 1} />
             <Button label="Cancel" className="p-button-secondary" onClick={this.props.onHide} />
           </div>
         }
       >
-        <Dropzone onDrop={this.onDrop}>
+        <div>{filesToUpload}</div>
+
+        <Dropzone onDrop={this.onDrop} accept={['.yml', '.yaml']}>
           {({ getRootProps, getInputProps }) => (
-            <section className="container">
+            <section className="container" style={{ cursor: 'pointer' }}>
               <div style={baseStyle} {...getRootProps({ className: 'dropzone' })}>
                 <input ref={this.input} {...getInputProps()} />
-                <p>Drag and drop some files here, or click to select files</p>
+                <p>Drag and drop your configuration files here, or click to select files</p>
               </div>
-              <div>{files}</div>
             </section>
           )}
         </Dropzone>
+        {duplicateInfo}
       </Dialog>
     );
   }
 
-  handleClick = () => {
-    const { showErrorMessage, showSuccessMessage } = this.props;
-    if (this.props.isDirectory) {
-      this.state.files.forEach((file) => {
-        const fileName = this.props.selection + '/' + file.name;
-        if (file.type === 'application/x-yaml') {
-          let duplicate = false;
-          this.props.files[0].children.forEach((persistedFile) => {
-            if (file.name === persistedFile.name) {
-              showErrorMessage('The file name must be unique');
-              duplicate = true;
-            }
-          });
-          if (!duplicate) {
-            const fileReader = new FileReader();
-            fileReader.readAsText(file);
-            fileReader.onload = (e) => {
-              const content = e.target.result;
-              this.props.writeFile(fileName, content, true, true);
-              showSuccessMessage('The upload was successful');
-            };
-          }
-        } else {
-          showErrorMessage('Wrong file type');
+  hideAndCleanState = (that) => {
+    that.setState(initialState);
+    that.props.onHide();
+  };
+
+  isDuplicate = (persistedFiles, file) => {
+    if (persistedFiles) {
+      for (var persistedFile of persistedFiles) {
+        if (file !== undefined && file.name === persistedFile.name) {
+          return true;
         }
-      });
-    } else {
-      showErrorMessage('You have to select a directory');
+      }
     }
+    return false;
+  };
+
+  uploadFiles = () => {
+    const { showErrorMessage, showSuccessMessage, isDirectory } = this.props;
+    var fileNamePrefix = '/';
+    if (isDirectory) {
+      fileNamePrefix = this.props.selection + '/';
+    }
+    this.state.files.forEach((file) => {
+      const fileName = fileNamePrefix + file.name;
+      if (this.validateFileType(file.type)) {
+        const fileReader = new FileReader();
+        fileReader.readAsText(file);
+        fileReader.onload = (e) => {
+          const content = e.target.result;
+          this.props.writeFile(fileName, content, true, true);
+          showSuccessMessage('The upload was successful');
+        };
+      } else {
+        showErrorMessage('Wrong file type');
+      }
+    });
+
     this.props.onHide();
+  };
+
+  validateFileType = (fileType) => {
+    return fileType === 'application/x-yaml' || fileType === 'application/x-yml';
   };
 }
 
