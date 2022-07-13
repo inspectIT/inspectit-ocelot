@@ -46,3 +46,5 @@ export const TOGGLE_VISUAL_CONFIGURATION_VIEW = 'configuration/TOGGLE_VISUAL_CON
 
 export const TOGGLE_HISTORY_VIEW = 'configuration/TOGGLE_HISTORY_VIEW';
 export const TOGGLE_DOCUMENTATION_VIEW = 'configuration/TOGGLE_DOCUMENTATION_VIEW';
+
+export const INCREMENT_TABS = 'configuration/INCREMENT_TABS';

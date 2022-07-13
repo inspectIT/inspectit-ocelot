@@ -213,4 +213,12 @@ const configurationReducer = createReducer(initialState)({
   },
 });
 
+const counter = (state = [], action) => {
+  switch (action.type) {
+    case types.INCREMENT_TABS:
+      let newState = state.push(1);
+      return newState;
+  }
+};
+
 export default configurationReducer;

@@ -31,7 +31,6 @@ const saveCommand = (doSave) => {
 class AceEditor extends React.Component {
   constructor(props) {
     super(props);
-
     this.props.editorRef(this);
     this.divRef = React.createRef();
   }

@@ -1,5 +1,5 @@
 import yaml from 'js-yaml';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { connect } from 'react-redux';
 import { configurationActions, configurationSelectors } from '../../../redux/ducks/configuration';
 import { notificationActions } from '../../../redux/ducks/notification';
@@ -158,17 +158,23 @@ class ConfigurationView extends React.Component {
 
   /* Adds a new child object containing the name and the content of the newely clicked file */
   addToChildren = (newName, newFileContent) => {
-    let newChild = {
-      id: newName,
-      title: newName,
-      panelContent: newFileContent,
-    };
-    let tabs = this.state.tabs;
-    tabs.push(newChild);
-    this.setState({ tabs: tabs });
-    console.log('tabs: ', this.state.tabs);
+    function isSameId(child) {
+      return child.id === newName;
+    }
+    if (this.state.tabs.filter(isSameId).length === 0) {
+      // console.log('newName', newName);
+      let newChild = {
+        id: newName,
+        title: newName,
+        panelContent: newFileContent,
+      };
+      // if (!this.state.tabs.includes(newChild)) {
+      let tabs = this.state.tabs;
+      tabs.push(newChild);
+      this.setState({ tabs: tabs });
+      // console.log('tabs: ', this.state.tabs);
+    }
   };
-
   render() {
     const {
       selection,
@@ -193,6 +199,8 @@ class ConfigurationView extends React.Component {
     const readOnly = !canWrite || !!selectedDefaultConfigFile || !isLatestVersion;
 
     const fileContentWithoutFirstLine = fileContent ? fileContent.split('\n').slice(1).join('\n') : '';
+    // console.log('name', name);
+    this.addToChildren(name, fileContent);
 
     return (
       <div className="this">
@@ -239,9 +247,7 @@ class ConfigurationView extends React.Component {
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
             readOnly={readOnly}
-            addToChildren={() => {
-              this.addToChildren(name, fileContent);
-            }}
+            addToChildren={() => {}}
           />
           <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : '-'}</div>
         </div>
@@ -266,7 +272,8 @@ class ConfigurationView extends React.Component {
           showVisualConfigurationView={showVisualConfigurationView}
           onToggleVisualConfigurationView={toggleVisualConfigurationView}
           sidebar={<ConfigurationSidebar />}
-          tabs={this.state.tabs}
+          // tabs={this.state.tabs}
+          name={name}
         >
           {showHeader ? (
             <EditorHeader icon={icon} path={path} name={name} isContentModified={isContentModified} readOnly={readOnly} />

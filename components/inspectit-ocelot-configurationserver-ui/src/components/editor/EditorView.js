@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
 import PropTypes from 'prop-types';
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
@@ -14,6 +14,7 @@ import MethodConfigurationEditor from './method-configuration-editor/MethodConfi
 import 'react-dyn-tabs/style/react-dyn-tabs.css';
 import 'react-dyn-tabs/themes/react-dyn-tabs-card.css';
 import useDynTabs from 'react-dyn-tabs';
+import { set } from 'lodash';
 
 const AceEditor = dynamic(() => import('./yaml-editor/AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./visual-editor/TreeTableEditor'), { ssr: false });
@@ -45,35 +46,55 @@ const EditorView = ({
   showVisualConfigurationView,
   onToggleVisualConfigurationView,
   sidebar,
-  tabs,
+  name,
 }) => {
+  const [tabs, setTabs] = useState([]);
   useEffect(() => {
-    if (tabs) {
-      tabs.map((child) => {
-        ready((instance) => {
-          _instance = instance;
-        });
-        _instance.open({
-          id: child.id,
-          title: child.title,
-          panelComponent: () => (
-            <AceEditor
-              editorRef={(editor) => (editorRef.current = editor)}
-              onCreate={onCreate}
-              theme="cobalt"
-              options={editorConfig}
-              value={child.panelContent}
-              onChange={onChange}
-              history-view
-              canSave={canSave}
-              onSave={onSave}
-              readOnly={readOnly}
-            />
-          ),
-        });
+    // console.log('tabs', tabs);
+    // if (tabs) {
+    //   setTabs(() => {
+    //     tabs.push({
+    //       id: name,
+    //       title: name,
+    //       panelContent: value,
+    //     });
+    //     return tabs;
+    //   });
+    //   let newTab = tabs[tabs.length - 1];
+    //   console.log('newTab', newTab);
+    //   if (tabs.length !== 0) {
+    if (name) {
+      ready((instance) => {
+        _instance = instance;
       });
+      _instance.open({
+        id: name,
+        title: name,
+        panelComponent: () => (
+          <AceEditor
+            editorRef={(editor) => (editorRef.current = editor)}
+            onCreate={onCreate}
+            theme="cobalt"
+            options={editorConfig}
+            value={value}
+            onChange={onChange}
+            history-view
+            canSave={canSave}
+            onSave={onSave}
+            readOnly={readOnly}
+          />
+        ),
+      });
+      if (name) {
+        _instance.select(name);
+      }
+      console.log('optins.tabs', options.tabs);
+      if (options.tabs.length > 5) {
+        console.log('reached the most amount of tabs', options.tabs[0]);
+        _instance.close(options.tabs[0].id);
+      }
     }
-  }, [JSON.stringify(tabs)]);
+  }, [name]);
 
   const dispatch = useDispatch();
 

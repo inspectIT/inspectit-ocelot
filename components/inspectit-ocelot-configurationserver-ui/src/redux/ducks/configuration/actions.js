@@ -382,3 +382,7 @@ export const toggleHistoryView = () => ({
 export const toggleDocumentationView = () => ({
   type: types.TOGGLE_DOCUMENTATION_VIEW,
 });
+
+export const addTab = () => ({
+  type: types.INCREMENT_TABS,
+});
