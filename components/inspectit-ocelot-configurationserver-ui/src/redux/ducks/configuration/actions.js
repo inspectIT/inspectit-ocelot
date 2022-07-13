@@ -263,12 +263,16 @@ export const toggleShowHiddenFiles = () => {
   let hidePattern = '^\\.';
   return (dispatch, getState) => {
     let { files, showHiddenFiles } = getState().configuration;
-    if (showHiddenFiles) {
+
+    // toggle showHiddenFiles
+    showHiddenFiles = !showHiddenFiles;
+
+    // hide/show files
+    if (!showHiddenFiles) {
       hideFilesRecursively(files, hidePattern);
     } else {
       dispatch(fetchFiles());
     }
-    showHiddenFiles = !showHiddenFiles;
     dispatch({ type: types.FILTER_SELECTION_SUCCESS, payload: { files, showHiddenFiles } });
   };
 };
