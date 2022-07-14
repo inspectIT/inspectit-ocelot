@@ -91,7 +91,7 @@ const FileToolbar = ({
           />
           <Button
             disabled={readOnly || loading}
-            tooltip="Upload file or Directory"
+            tooltip="Upload File or Directory"
             icon="pi pi-upload"
             tooltipOptions={TOOLTIP_OPTIONS}
             onClick={() => showUploadDialog(selection)}

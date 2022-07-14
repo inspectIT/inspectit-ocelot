@@ -22,6 +22,13 @@ class UploadDialog extends React.Component {
   constructor() {
     super();
     this.onDrop = (files) => {
+      // concat files with previously selected files if applicable.
+      if(this.state.files && this.state.files.length > 0){
+        // remove duplicates
+        let newFiles = files.filter( file => !this.state.files.some(f => f.name === file.name));
+        // concat with previously selected files
+        files = this.state.files.concat(newFiles);
+      }
       this.setState({ files });
     };
     this.state = initialState;
@@ -80,7 +87,7 @@ class UploadDialog extends React.Component {
     };
     return (
       <Dialog
-        header={'Configuration file upload'}
+        header={'Upload Configuration Files'}
         modal={true}
         visible={this.props.visible}
         onHide={() => this.hideAndCleanState(this)}
@@ -132,6 +139,7 @@ class UploadDialog extends React.Component {
     }
     this.state.files.forEach((file) => {
       const fileName = fileNamePrefix + file.name;
+      console.log("try uploading " + fileName + "; type: "+ file.type);
       if (this.validateFileType(file.type)) {
         const fileReader = new FileReader();
         fileReader.readAsText(file);
