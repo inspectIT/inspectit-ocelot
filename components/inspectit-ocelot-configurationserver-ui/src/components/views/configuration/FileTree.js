@@ -129,6 +129,9 @@ class FileTree extends React.Component {
                     .this :global(.cm-tree-label) {
                         color: #aaa;
                     }
+                    .this :global(.cm-hidden-file-tree-label){
+                        color: #aaa;
+                    }
                     .this :global(.ocelot-tree-head-orange) {
                         background: url("${linkPrefix}/static/images/inspectit-ocelot-head_orange.svg") center no-repeat;
                         background-size: 1rem 1rem;

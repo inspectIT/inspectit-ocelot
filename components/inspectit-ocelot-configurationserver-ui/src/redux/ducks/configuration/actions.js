@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG_TREE_KEY, VERSION_LIMIT } from '../../../data/constants';
+import {DEFAULT_CONFIG_TREE_KEY, HIDDEN_FILES_NAME_PATTERN, VERSION_LIMIT} from '../../../data/constants';
 import axios from '../../../lib/axios-api';
 import { configurationUtils } from '.';
 import { notificationActions } from '../notification';
@@ -260,7 +260,6 @@ export const exportSelection = (fetchFilesOnSuccess, selectedFile = null) => {
  * Either removes files that start with '.' or fetches files depending on if files are hidden.
  */
 export const toggleShowHiddenFiles = () => {
-  let hidePattern = '^\\.';
   return (dispatch, getState) => {
     let { files, showHiddenFiles } = getState().configuration;
 
@@ -269,7 +268,7 @@ export const toggleShowHiddenFiles = () => {
 
     // hide/show files
     if (!showHiddenFiles) {
-      hideFilesRecursively(files, hidePattern);
+      hideFilesRecursively(files, HIDDEN_FILES_NAME_PATTERN);
     } else {
       dispatch(fetchFiles());
     }
