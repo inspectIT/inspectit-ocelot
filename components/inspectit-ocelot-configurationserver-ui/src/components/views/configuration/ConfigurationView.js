@@ -156,25 +156,6 @@ class ConfigurationView extends React.Component {
     this.props.selectFile(filename);
   };
 
-  /* Adds a new child object containing the name and the content of the newely clicked file */
-  addToChildren = (newName, newFileContent) => {
-    function isSameId(child) {
-      return child.id === newName;
-    }
-    if (this.state.tabs.filter(isSameId).length === 0) {
-      // console.log('newName', newName);
-      let newChild = {
-        id: newName,
-        title: newName,
-        panelContent: newFileContent,
-      };
-      // if (!this.state.tabs.includes(newChild)) {
-      let tabs = this.state.tabs;
-      tabs.push(newChild);
-      this.setState({ tabs: tabs });
-      // console.log('tabs: ', this.state.tabs);
-    }
-  };
   render() {
     const {
       selection,
@@ -199,8 +180,6 @@ class ConfigurationView extends React.Component {
     const readOnly = !canWrite || !!selectedDefaultConfigFile || !isLatestVersion;
 
     const fileContentWithoutFirstLine = fileContent ? fileContent.split('\n').slice(1).join('\n') : '';
-    // console.log('name', name);
-    this.addToChildren(name, fileContent);
 
     return (
       <div className="this">

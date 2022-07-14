@@ -48,26 +48,16 @@ const EditorView = ({
   sidebar,
   name,
 }) => {
-  const [tabs, setTabs] = useState([]);
+  const [options, setOptions] = useState({
+    tabs: new Array(),
+    selectedTabID: '1',
+  });
   useEffect(() => {
-    // console.log('tabs', tabs);
-    // if (tabs) {
-    //   setTabs(() => {
-    //     tabs.push({
-    //       id: name,
-    //       title: name,
-    //       panelContent: value,
-    //     });
-    //     return tabs;
-    //   });
-    //   let newTab = tabs[tabs.length - 1];
-    //   console.log('newTab', newTab);
-    //   if (tabs.length !== 0) {
-    if (name) {
+    if (name && value) {
       ready((instance) => {
         _instance = instance;
       });
-      _instance.open({
+      let newInstance = {
         id: name,
         title: name,
         panelComponent: () => (
@@ -84,15 +74,19 @@ const EditorView = ({
             readOnly={readOnly}
           />
         ),
+      };
+      _instance.open(newInstance);
+      _instance.select(name);
+      setOptions(() => {
+        let isExisting = options.tabs.some((e) => {
+          return e.id === newInstance.id;
+        });
+        console.log('isExisting', isExisting);
+        if (!isExisting) {
+          options.tabs.push(newInstance);
+        }
+        return options;
       });
-      if (name) {
-        _instance.select(name);
-      }
-      console.log('optins.tabs', options.tabs);
-      if (options.tabs.length > 5) {
-        console.log('reached the most amount of tabs', options.tabs[0]);
-        _instance.close(options.tabs[0].id);
-      }
     }
   }, [name]);
 
@@ -108,10 +102,6 @@ const EditorView = ({
   const isLiveSelected = currentVersion === 'live';
   const configurationType = getConfigurationType(value);
 
-  let options = {
-    tabs,
-    selectedTabID: '1',
-  };
   let _instance = _instance;
   const [TabList, PanelList, ready] = useDynTabs(options);
 
