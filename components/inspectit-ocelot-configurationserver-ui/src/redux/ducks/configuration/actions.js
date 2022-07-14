@@ -1,4 +1,4 @@
-import {DEFAULT_CONFIG_TREE_KEY, HIDDEN_FILES_NAME_PATTERN, VERSION_LIMIT} from '../../../data/constants';
+import { DEFAULT_CONFIG_TREE_KEY, HIDDEN_FILES_NAME_PATTERN, VERSION_LIMIT } from '../../../data/constants';
 import axios from '../../../lib/axios-api';
 import { configurationUtils } from '.';
 import { notificationActions } from '../notification';
