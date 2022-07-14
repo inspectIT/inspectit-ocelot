@@ -24,7 +24,7 @@ const configuration = {
   versions: [],
   /** The existing configuration files. */
   files: [],
-  /** Indicates if files are hidden. */
+  /** Indicates if hidden files ares shown. */
   showHiddenFiles: true,
   /**
    * The history of file-move operations which were executed successfully.
