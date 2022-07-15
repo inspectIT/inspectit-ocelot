@@ -20,6 +20,19 @@ yarn dev
 
 The development server can be reached at [http://localhost:3000](http://localhost:3000).
 
+### Linting
+
+Depending on your IDE, linting errors based on the settings in .eslintrc can be shown right in your editor.
+However, if that is not the case with your IDE you can use the following command to check for linting errors.
+```bash
+yarn lint
+```
+
+And the following to fix them automatically.
+```bash
+yarn lint:fix
+```
+
 #### Storybook
 
 The project also contains [Storybook](https://storybook.js.org/) which supports the development of components by providing an isolated sandbox UI for testing these components.
