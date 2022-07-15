@@ -30,7 +30,7 @@ yarn lint
 
 And the following to fix them automatically.
 ```bash
-yarn format:write
+yarn lint:fix
 ```
 
 #### Storybook
