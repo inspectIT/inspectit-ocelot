@@ -35,12 +35,12 @@ class FileTree extends React.Component {
    */
   componentDidUpdate(prevProps) {
     // check if a new file has been searched for
-    if (this.props.searchTargetFile !== prevProps.searchTargetFile) {
+    if (this.props.selection !== prevProps.selection) {
       // if true, expand needed nodes in FileTree
-      const splittedTargetFilePath = this.props.searchTargetFile.split('/');
+      const splittedTargetFilePath = this.props.selection.split('/');
       let currentNode = '';
       let nodesToExpand = {};
-      for (let i = 0; i < splittedTargetFilePath.length; i++) {
+      for (let i = 1; i < splittedTargetFilePath.length; i++) {
         currentNode += '/' + splittedTargetFilePath[i];
         nodesToExpand[currentNode] = true;
       }
