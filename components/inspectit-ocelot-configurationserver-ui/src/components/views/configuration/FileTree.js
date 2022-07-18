@@ -59,10 +59,7 @@ class FileTree extends React.Component {
   }
 
   /**
-   * Called when class component throws error in either static lifecycle method.
    */
-  componentDidCatch(error, errorInfo) {
-    console.error(error, errorInfo);
   }
 
   /**
