@@ -13,6 +13,7 @@ import { filter } from 'lodash';
 class FileTree extends React.Component {
   state = {
     contextMenuModel: [],
+    expandedKeys: [],
   };
   contextMenuRef = React.createRef();
 
@@ -35,62 +36,16 @@ class FileTree extends React.Component {
   componentDidUpdate(prevProps) {
     // check if a new file has been searched for
     if (this.props.searchTargetFile !== prevProps.searchTargetFile) {
-      // if true, open needed nodes in FileTree
-      const targetNodeKey = '/' + this.props.searchTargetFile.substring(0, this.props.searchTargetFile.indexOf('/'));
-      const iterations = this.props.searchTargetFile.split('/').length - 1;
-      this.expandLabelThroughDOMElements(targetNodeKey, iterations, 1);
-    }
-  }
-
-  /**
-   * Extends closed nodes when selecting target key.
-   * @param targetNodeKey the node path given via props from ConfigurationView.js
-   * @param iterations signals if and how many recursive calls should occur
-   * @param split helps extracting the node key for recursive calls
-   */
-  expandLabelThroughDOMElements(targetNodeKey, iterations, split) {
-    let togglers = Array.from(document.getElementsByClassName('p-tree-toggler p-unselectable-text p-link'));
-    for (const toggler of togglers) {
-      if (toggler && toggler.innerHTML !== undefined) {
-        let reactHandlerKey = Object.keys(toggler).filter((item) => {
-          return item.indexOf('__reactEventHandlers') >= 0;
-        });
-        let reactHandler = toggler[reactHandlerKey[0]];
-        if (targetNodeKey === reactHandler.children._owner.key && !this.noteExtended(targetNodeKey)) {
-          toggler.click();
-        }
+      // if true, expand needed nodes in FileTree
+      const splittedTargetFilePath = this.props.searchTargetFile.split('/');
+      let currentNode = '';
+      let nodesToExpand = {};
+      for (let i = 0; i < splittedTargetFilePath.length; i++) {
+        currentNode += '/' + splittedTargetFilePath[i];
+        nodesToExpand[currentNode] = true;
       }
+      this.setState({ expandedKeys: nodesToExpand });
     }
-    if (iterations > 1) {
-      const paths = this.props.searchTargetFile.split('/');
-      let newString = '/' + paths[0];
-      for (let i = 1; i <= split; i++) {
-        newString = newString + '/' + paths[i];
-      }
-      iterations--;
-      split++;
-      this.expandLabelThroughDOMElements(newString, iterations, split);
-    }
-  }
-
-  /**
-   * Checks if note is already open.
-   * @param key the key of the node that needs to be extended
-   */
-  noteExtended(key) {
-    let treeNodes = document.getElementsByClassName('p-treenode-content p-treenode-selectable');
-    for (const node of treeNodes) {
-      let reactHandlerKey = Object.keys(node).filter((item) => {
-        return item.indexOf('__reactEventHandlers') >= 0;
-      });
-      let reactHandler = node[reactHandlerKey[0]];
-      if (key === reactHandler.children[0]._owner.key) {
-        if (reactHandler['aria-expanded']) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   /**
@@ -232,6 +187,8 @@ class FileTree extends React.Component {
             onContextMenuSelectionChange={readOnly ? undefined : this.showContextMenu}
             dragdropScope={readOnly ? undefined : 'config-file-tree'}
             onDragDrop={readOnly ? undefined : this.onDragDrop}
+            expandedKeys={this.state.expandedKeys}
+            onToggle={(e) => this.setState({ expandedKeys: e.value })}
           />
         </div>
       </div>
