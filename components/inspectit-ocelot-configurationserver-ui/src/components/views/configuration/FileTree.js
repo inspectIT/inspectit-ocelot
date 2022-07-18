@@ -33,20 +33,6 @@ class FileTree extends React.Component {
   };
 
   /**
-   * Invoked immediately after updating occurs.
-   * This method is not called for the initial render.
-   */
-  componentDidUpdate(prevProps) {
-    if (prevProps.targetFile !== '' && prevProps.targetFile !== this.searchedFileTest) {
-      // Overwrite searched file from props
-      this.searchedFileTest = prevProps.targetFile.toString();
-      const targetNodeKey = '/' + this.searchedFileTest.substring(0, this.searchedFileTest.indexOf('/'));
-      const iterations = this.searchedFileTest.split('/').length - 1;
-      this.expandLabelThroughDOMElements(targetNodeKey, iterations, 1);
-    }
-  }
-
-  /**
    * Check if a components output is not affected by current change in state or props.
    */
   shouldComponentUpdate(nextProps, state) {
@@ -59,7 +45,17 @@ class FileTree extends React.Component {
   }
 
   /**
+   * Invoked immediately after updating occurs.
+   * This method is not called for the initial render.
    */
+  componentDidUpdate(prevProps) {
+    if (prevProps.targetFile !== '' && prevProps.targetFile !== this.searchedFileTest) {
+      // Overwrite searched file from props
+      this.searchedFileTest = prevProps.targetFile.toString();
+      const targetNodeKey = '/' + this.searchedFileTest.substring(0, this.searchedFileTest.indexOf('/'));
+      const iterations = this.searchedFileTest.split('/').length - 1;
+      this.expandLabelThroughDOMElements(targetNodeKey, iterations, 1);
+    }
   }
 
   /**
