@@ -9435,10 +9435,10 @@
   "resolved" "https://registry.npmjs.org/primeflex/-/primeflex-1.3.1.tgz"
   "version" "1.3.1"
 
-"primeicons@^1.0.0":
-  "integrity" "sha512-p/hzIjUVccW4eJPhuORHI3AUkDpqfvCQVrjxbFEejnTEdWY4C8fomVfjiaA9jCu83fSQnBHuRIGB96iAR8R6uA=="
-  "resolved" "https://registry.npmjs.org/primeicons/-/primeicons-1.0.0.tgz"
-  "version" "1.0.0"
+"primeicons@^5.0.0":
+  "integrity" "sha512-heygWF0X5HFI1otlZE62pp6ye7sZ8om78J9au2BRkg8O7Y8AHTZ9qKMRzchZUHLe8zUAvdi6hZzzm9XxgwIExw=="
+  "resolved" "https://registry.npmjs.org/primeicons/-/primeicons-5.0.0.tgz"
+  "version" "5.0.0"
 
 "primereact@^4.2.2":
   "integrity" "sha512-7IfNGRqTUKSWCCbTKeeMLKOShShUmUm0rV0DfsPn0vw0SeT+HQ7HA1cDhdfCuc+bbAK9cLts8j6O8oFOXMDJ7A=="
