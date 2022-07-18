@@ -13,7 +13,6 @@ import { filter } from 'lodash';
 class FileTree extends React.Component {
   state = {
     contextMenuModel: [],
-    nodes: null,
   };
 
   searchedFileTest = '';
@@ -23,12 +22,11 @@ class FileTree extends React.Component {
    * Fetch the files initially.
    */
   componentDidMount = () => {
-    const { defaultConfig, defaultTree, files } = this.props;
+    const { defaultConfig } = this.props;
     this.props.fetchFiles();
 
     if (Object.entries(defaultConfig).length === 0) {
       this.props.fetchDefaultConfig();
-      this.setState({ nodes: defaultTree.concat(files) });
     }
   };
 
@@ -183,7 +181,7 @@ class FileTree extends React.Component {
   };
 
   render() {
-    const { className, selection, selectedDefaultConfigFile, readOnly, selectedVersion } = this.props;
+    const { className, defaultTree, selection, selectedDefaultConfigFile, readOnly, files, selectedVersion } = this.props;
 
     return (
       <div className="this" onContextMenu={readOnly ? undefined : this.showContextMenu} onKeyDown={readOnly ? undefined : this.onKeyDown}>
@@ -232,7 +230,7 @@ class FileTree extends React.Component {
             className={className}
             filter={true}
             filterBy="label"
-            value={this.state.nodes}
+            value={defaultTree.concat(files)}
             selectionMode="single"
             selectionKeys={selection || selectedDefaultConfigFile}
             onSelectionChange={this.onSelectionChange}
