@@ -33,18 +33,6 @@ class FileTree extends React.Component {
   };
 
   /**
-   * Check if a components output is not affected by current change in state or props.
-   */
-  shouldComponentUpdate(nextProps, state) {
-    if (nextProps.defaultTree.concat(nextProps.files) && state.nodes !== nextProps.defaultTree.concat(nextProps.files)) {
-      state.nodes = nextProps.defaultTree.concat(nextProps.files);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /**
    * Invoked immediately after updating occurs.
    * This method is not called for the initial render.
    */
