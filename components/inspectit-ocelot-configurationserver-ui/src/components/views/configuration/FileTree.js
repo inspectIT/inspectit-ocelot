@@ -14,8 +14,6 @@ class FileTree extends React.Component {
   state = {
     contextMenuModel: [],
   };
-
-  searchedFileTest = '';
   contextMenuRef = React.createRef();
 
   /**
@@ -35,11 +33,11 @@ class FileTree extends React.Component {
    * This method is not called for the initial render.
    */
   componentDidUpdate(prevProps) {
-    if (prevProps.targetFile !== '' && prevProps.targetFile !== this.searchedFileTest) {
-      // Overwrite searched file from props
-      this.searchedFileTest = prevProps.targetFile.toString();
-      const targetNodeKey = '/' + this.searchedFileTest.substring(0, this.searchedFileTest.indexOf('/'));
-      const iterations = this.searchedFileTest.split('/').length - 1;
+    // check if a new file has been searched for
+    if (this.props.searchTargetFile !== prevProps.searchTargetFile) {
+      // if true, open needed nodes in FileTree
+      const targetNodeKey = '/' + this.props.searchTargetFile.substring(0, this.props.searchTargetFile.indexOf('/'));
+      const iterations = this.props.searchTargetFile.split('/').length - 1;
       this.expandLabelThroughDOMElements(targetNodeKey, iterations, 1);
     }
   }
@@ -63,19 +61,16 @@ class FileTree extends React.Component {
         }
       }
     }
-    // Adding small timeout to make DOM register change in order to call of method recursively
-    setTimeout(() => {
-      if (iterations > 1) {
-        const paths = this.searchedFileTest.split('/');
-        let newString = '/' + paths[0];
-        for (let i = 1; i <= split; i++) {
-          newString = newString + '/' + paths[i];
-        }
-        iterations--;
-        split++;
-        this.expandLabelThroughDOMElements(newString, iterations, split);
+    if (iterations > 1) {
+      const paths = this.props.searchTargetFile.split('/');
+      let newString = '/' + paths[0];
+      for (let i = 1; i <= split; i++) {
+        newString = newString + '/' + paths[i];
       }
-    }, '1');
+      iterations--;
+      split++;
+      this.expandLabelThroughDOMElements(newString, iterations, split);
+    }
   }
 
   /**

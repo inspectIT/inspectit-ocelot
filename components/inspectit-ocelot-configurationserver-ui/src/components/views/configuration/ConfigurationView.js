@@ -70,7 +70,7 @@ class ConfigurationView extends React.Component {
   };
 
   // prop for FileTree.js that gets updated when the user is looking up a specific file via search dialog
-  searchedFile = '';
+  searchTargetFile = undefined;
 
   parsePath = (filePath, defaultConfigFilePath) => {
     if (filePath) {
@@ -156,7 +156,7 @@ class ConfigurationView extends React.Component {
       this.props.selectVersion(versionId, false);
     }
     this.props.selectFile(filename);
-    this.searchedFile = filename;
+    this.searchTargetFile = filename;
   };
 
   render() {
@@ -224,7 +224,7 @@ class ConfigurationView extends React.Component {
           />
           <FileTree
             className="fileTree"
-            targetFile={this.searchedFile}
+            searchTargetFile={this.searchTargetFile}
             showDeleteFileDialog={this.showDeleteFileDialog}
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
