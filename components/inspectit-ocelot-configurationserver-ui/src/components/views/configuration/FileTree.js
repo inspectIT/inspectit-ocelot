@@ -39,12 +39,12 @@ class FileTree extends React.Component {
       // if true, expand needed nodes in FileTree
       const splittedTargetFilePath = this.props.selection.split('/');
       let currentNode = '';
-      let nodesToExpand = {};
+      let expandedKeys = {...this.state.expandedKeys};
       for (let i = 1; i < splittedTargetFilePath.length; i++) {
         currentNode += '/' + splittedTargetFilePath[i];
-        nodesToExpand[currentNode] = true;
+        expandedKeys[currentNode] = true;
       }
-      this.setState({ expandedKeys: nodesToExpand });
+      this.setState({ expandedKeys: expandedKeys });
     }
   }
 
