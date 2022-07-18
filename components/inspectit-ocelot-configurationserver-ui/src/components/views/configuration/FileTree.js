@@ -11,13 +11,10 @@ import { filter } from 'lodash';
  * The file tree used in the configuration view.
  */
 class FileTree extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      contextMenuModel: [],
-      nodes: null,
-    };
-  }
+  state = {
+    contextMenuModel: [],
+    nodes: null,
+  };
 
   searchedFileTest = '';
   contextMenuRef = React.createRef();
