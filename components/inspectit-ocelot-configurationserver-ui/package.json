@@ -44,7 +44,7 @@
     "react": "^16.14.0",
     "react-diff-viewer": "^3.1.1",
     "react-dom": "^16.14.0",
-    "react-redux": "^7.2.8",
+    "react-redux": "^8.0.2",
     "react-syntax-highlighter": "^15.5.0",
     "react-timeago": "^7.1.0",
     "react-tooltip": "^4.2.21",
