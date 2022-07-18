@@ -72,12 +72,6 @@ class ConfigurationView extends React.Component {
   // prop for FileTree.js that gets updated when the user is looking up a specific file via search dialog
   searchedFile = '';
 
-  constructor(props) {
-    super(props);
-    // Create the child instance using react createRef
-    this.childRef = React.createRef();
-  }
-
   parsePath = (filePath, defaultConfigFilePath) => {
     if (filePath) {
       return this.splitIntoPathAndName(filePath);
