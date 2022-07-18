@@ -9430,10 +9430,10 @@
   "resolved" "https://registry.npmjs.org/pretty-hrtime/-/pretty-hrtime-1.0.3.tgz"
   "version" "1.0.3"
 
-"primeflex@^1.3.1":
-  "integrity" "sha512-APU4DNof9nvQ6/6XxdQ8ACjADktsNpO5RjDf6h5B46OcegAL9vaslKepVt8CpJc/5bYZEAwA5hz9mAUhxBgJWA=="
-  "resolved" "https://registry.npmjs.org/primeflex/-/primeflex-1.3.1.tgz"
-  "version" "1.3.1"
+"primeflex@^3.2.1":
+  "integrity" "sha512-sGDJ4mh2fG19xa1yc4IPGSQ8MUMyu5nU+tYnl27AFuFHhX8XwEA7fWCtWyBbclclVhXtre+Kf9WobWPnfxWAEQ=="
+  "resolved" "https://registry.npmjs.org/primeflex/-/primeflex-3.2.1.tgz"
+  "version" "3.2.1"
 
 "primeicons@^5.0.0":
   "integrity" "sha512-heygWF0X5HFI1otlZE62pp6ye7sZ8om78J9au2BRkg8O7Y8AHTZ9qKMRzchZUHLe8zUAvdi6hZzzm9XxgwIExw=="
