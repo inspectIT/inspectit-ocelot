@@ -9789,10 +9789,10 @@
     "prismjs" "^1.27.0"
     "refractor" "^3.6.0"
 
-"react-timeago@^4.4.0":
-  "integrity" "sha512-Zj8RchTqZEH27LAANemzMR2RpotbP2aMd+UIajfYMZ9KW4dMcViUVKzC7YmqfiqlFfz8B0bjDw2xUBjmcxDngA=="
-  "resolved" "https://registry.npmjs.org/react-timeago/-/react-timeago-4.4.0.tgz"
-  "version" "4.4.0"
+"react-timeago@^7.1.0":
+  "integrity" "sha512-rouF7MiEm55fH791Y8cg+VobIJgx8gtNJ+gjr86R4ZqO1WKPkXiXjdT/lRzrvEkUzsxT1exHqV2V+Zdi114H3A=="
+  "resolved" "https://registry.npmjs.org/react-timeago/-/react-timeago-7.1.0.tgz"
+  "version" "7.1.0"
 
 "react-tooltip@^4.2.21":
   "integrity" "sha512-zSLprMymBDowknr0KVDiJ05IjZn9mQhhg4PRsqln0OZtURAJ1snt1xi5daZfagsh6vfsziZrc9pErPTDY1ACig=="
@@ -9812,7 +9812,7 @@
     "loose-envify" "^1.4.0"
     "prop-types" "^15.6.2"
 
-"react@^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1", "react@^15.0.0 || ^16.0.0", "react@^15.3.0 || ^16.0.0", "react@^16.13.1 || ^17.0.0", "react@^16.14.0", "react@^16.6.0", "react@^16.8.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^16.8.3 || ^17 || ^18", "react@^16.8.4 || ^17.0.0", "react@^16.9.0", "react@>= 0.14.0", "react@>=16.0.0", "react@>=16.6.0", "react@15.x.x || 16.x.x":
+"react@^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1", "react@^15.3.0 || ^16.0.0", "react@^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16.13.1 || ^17.0.0", "react@^16.14.0", "react@^16.6.0", "react@^16.8.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^16.8.3 || ^17 || ^18", "react@^16.8.4 || ^17.0.0", "react@^16.9.0", "react@>= 0.14.0", "react@>=16.0.0", "react@>=16.6.0", "react@15.x.x || 16.x.x":
   "integrity" "sha512-0X2CImDkJGApiAlcf0ODKIneSwBPhqJawOa5wCtKbu7ZECrmS26NvtSILynQ66cgkT/RJ4LidJOc3bUESwmU8g=="
   "resolved" "https://registry.npmjs.org/react/-/react-16.14.0.tgz"
   "version" "16.14.0"
