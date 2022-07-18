@@ -165,12 +165,6 @@ class ConfigurationView extends React.Component {
     this.searchedFile = filename;
   };
 
-  onChange = (value) => {
-    if (!this.props.loading && this.props.isLatestVersion) {
-      this.props.selectedFileContentsChanged(value);
-    }
-  };
-
   render() {
     const {
       selection,
