@@ -65,7 +65,7 @@
     "@storybook/react": "^6.5.9",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.5",
-    "eslint": "^8.19.0",
+    "eslint": "^8.20.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-import-resolver-webpack": "^0.13.2",
     "eslint-plugin-import": "^2.26.0",
