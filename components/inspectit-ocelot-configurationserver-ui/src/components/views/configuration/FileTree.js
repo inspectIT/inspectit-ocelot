@@ -13,7 +13,7 @@ import { filter } from 'lodash';
 class FileTree extends React.Component {
   state = {
     contextMenuModel: [],
-    expandedKeys: [],
+    expandedKeys: {},
   };
   contextMenuRef = React.createRef();
 
@@ -34,9 +34,9 @@ class FileTree extends React.Component {
    * This method is not called for the initial render.
    */
   componentDidUpdate(prevProps) {
-    // check if a new file has been searched for
+    // check if a new file has been selected
     if (this.props.selection !== prevProps.selection) {
-      // if true, expand needed nodes in FileTree
+      // if true, expand needed nodes in FileTree, in case the file was opened using search
       const splittedTargetFilePath = this.props.selection.split('/');
       let currentNode = '';
       let expandedKeys = { ...this.state.expandedKeys };
