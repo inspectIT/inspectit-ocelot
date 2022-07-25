@@ -278,7 +278,7 @@ FileTree.propTypes = {
   showMoveDialog: PropTypes.func,
   /** Redux dispatch action for exporting and downloading a file. */
   exportSelection: PropTypes.func,
-  /** Redux dispatch action for exporting and downloading a file. */
+  /** Redux dispatch action for fetching all configuration files and directories. */
   fetchFiles: PropTypes.func,
   /** Redux dispatch action for fetching the default config. */
   fetchDefaultConfig: PropTypes.func,
