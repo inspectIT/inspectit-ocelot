@@ -225,7 +225,7 @@ class ConfigurationView extends React.Component {
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
             readOnly={readOnly}
-            selectedFilePath={path}
+            selectedFileFolderPath={path}
           />
           <div className="details">Last refresh: {this.props.updateDate ? new Date(this.props.updateDate).toLocaleString() : '-'}</div>
         </div>
