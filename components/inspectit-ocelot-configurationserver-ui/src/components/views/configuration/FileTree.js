@@ -35,14 +35,24 @@ class FileTree extends React.Component {
    * This method is not called for the initial render.
    */
   componentDidUpdate(prevProps) {
+    const { selection, selectedDefaultConfigFile } = this.props;
     // check if a new file has been selected
-    if (this.props.selectedFileFolderPath && this.props.selectedFileFolderPath !== prevProps.selectedFileFolderPath) {
+    if (
+      (selection || selectedDefaultConfigFile) &&
+      (selectedDefaultConfigFile !== prevProps.selectedDefaultConfigFile || selection !== prevProps.selection)
+    ) {
       // if true, expand needed nodes in FileTree, in case the file was opened using search
-      const splitTargetFilePath = this.props.selectedFileFolderPath.split('/');
+      let filePath = '';
+      if (selection) {
+        filePath = selection;
+      } else if (selectedDefaultConfigFile) {
+        filePath = selectedDefaultConfigFile.replace(DEFAULT_CONFIG_TREE_KEY, '/Ocelot Defaults');
+      }
+      const splitFilePath = filePath.split('/');
       let currentNode = '';
       let expandedKeys = { ...this.state.expandedKeys };
-      for (let i = 1; i < splitTargetFilePath.length; i++) {
-        currentNode += '/' + splitTargetFilePath[i];
+      for (let i = 1; i < splitFilePath.length; i++) {
+        currentNode += '/' + splitFilePath[i];
         expandedKeys[currentNode] = true;
       }
       this.setState({ expandedKeys: expandedKeys });
@@ -286,8 +296,6 @@ FileTree.propTypes = {
   selectFile: PropTypes.func,
   /** Redux dispatch action for moving a file. */
   move: PropTypes.func,
-  /** Path of the folder of the currently selected file. */
-  selectedFileFolderPath: PropTypes.string,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(FileTree);
