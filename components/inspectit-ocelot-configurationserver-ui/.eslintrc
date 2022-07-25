@@ -41,6 +41,7 @@
         "no-multi-spaces": "error",
         "import/first": "error",
         "import/no-useless-path-segments": "error",
-        "react/prop-types": "warn"
+        "react/prop-types": "warn",
+        "prettier/prettier": ["error", { "endOfLine": "auto" }]
     }
 }
