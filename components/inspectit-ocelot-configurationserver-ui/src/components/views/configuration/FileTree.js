@@ -6,6 +6,7 @@ import { configurationActions, configurationSelectors } from '../../../redux/duc
 import { linkPrefix } from '../../../lib/configuration';
 import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import { filter } from 'lodash';
+import PropTypes from 'prop-types';
 
 /**
  * The file tree used in the configuration view.
@@ -249,6 +250,44 @@ const mapDispatchToProps = {
   selectFile: configurationActions.selectFile,
   exportSelection: configurationActions.exportSelection,
   move: configurationActions.move,
+};
+
+FileTree.propTypes = {
+  className: PropTypes.string,
+  /**  the default configuration key/value ~ path/content pairs in a tree structure. */
+  defaultTree: PropTypes.array,
+  /** The loaded configuration files and directories in a tree structure. */
+  files: PropTypes.array,
+  /** The path of the currently selected file if it is not from the default config. */
+  selection: PropTypes.string,
+  /** The default configuration of the Ocelot agents. Will be retrieved as key/value pairs each representing path/content of a file. */
+  defaultConfig: PropTypes.object,
+  /** The path of the currently selected file if it is from the default config. */
+  selectedDefaultConfigFile: PropTypes.string,
+  /** Whether the current selection in the FileTree is readOnly. */
+  readOnly: PropTypes.bool,
+  /** The selected version of configuration files. */
+  selectedVersion: PropTypes.string,
+  /** Callback which triggers showing the deleteFileDialog. */
+  showDeleteFileDialog: PropTypes.func,
+  /** Callback which triggers showing the showCreateDirectoryDialog. */
+  showCreateDirectoryDialog: PropTypes.func,
+  /** Callback which triggers showing the showCreateFileDialog. */
+  showCreateFileDialog: PropTypes.func,
+  /** Callback which triggers showing the showMoveDialog. */
+  showMoveDialog: PropTypes.func,
+  /** Redux dispatch action for exporting and downloading a file. */
+  exportSelection: PropTypes.func,
+  /** Redux dispatch action for exporting and downloading a file. */
+  fetchFiles: PropTypes.func,
+  /** Redux dispatch action for fetching the default config. */
+  fetchDefaultConfig: PropTypes.func,
+  /** Redux dispatch action for propagating selection changes in the file tree. */
+  selectFile: PropTypes.func,
+  /** Redux dispatch action for moving a file. */
+  move: PropTypes.func,
+  /** Path of the folder of the currently selected file. */
+  selectedFileFolderPath: PropTypes.string,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(FileTree);
