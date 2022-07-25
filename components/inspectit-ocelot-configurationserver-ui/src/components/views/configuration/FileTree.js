@@ -45,7 +45,7 @@ class FileTree extends React.Component {
       let filePath = '';
       if (selection) {
         filePath = selection;
-      } else if (selectedDefaultConfigFile) {
+      } else {
         filePath = selectedDefaultConfigFile.replace(DEFAULT_CONFIG_TREE_KEY, '/Ocelot Defaults');
       }
       const splitFilePath = filePath.split('/');
