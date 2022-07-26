@@ -34,7 +34,7 @@ export const fetchVersions = () => {
  */
 export const fetchFiles = (newSelectionOnSuccess) => {
   return (dispatch, getState) => {
-    const { selectedVersion } = getState().configuration;
+    const { selectedVersion, showHiddenFiles } = getState().configuration;
 
     const params = {};
     if (selectedVersion) {
@@ -47,6 +47,9 @@ export const fetchFiles = (newSelectionOnSuccess) => {
       .then((payload) => {
         const files = payload;
         sortFiles(files);
+        if (!showHiddenFiles) {
+          hideFilesRecursively(files, HIDDEN_FILES_NAME_PATTERN);
+        }
         dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
         if (newSelectionOnSuccess) {
           dispatch(selectFile(newSelectionOnSuccess));
@@ -260,19 +263,9 @@ export const exportSelection = (fetchFilesOnSuccess, selectedFile = null) => {
  * Either removes files that start with '.' or fetches files depending on if files are hidden.
  */
 export const toggleShowHiddenFiles = () => {
-  return (dispatch, getState) => {
-    let { files, showHiddenFiles } = getState().configuration;
-
-    // toggle showHiddenFiles
-    showHiddenFiles = !showHiddenFiles;
-
-    // hide/show files
-    if (!showHiddenFiles) {
-      hideFilesRecursively(files, HIDDEN_FILES_NAME_PATTERN);
-    } else {
-      dispatch(fetchFiles());
-    }
-    dispatch({ type: types.FILTER_SELECTION_SUCCESS, payload: { files, showHiddenFiles } });
+  return (dispatch) => {
+    dispatch({ type: types.TOGGLE_SHOW_HIDDEN_FILES });
+    dispatch(fetchFiles());
   };
 };
 

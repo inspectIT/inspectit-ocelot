@@ -88,32 +88,6 @@ const configurationReducer = createReducer(initialState)({
       updateDate: Date.now(),
     };
   },
-  [types.FILTER_SELECTION_SUCCESS]: (state, action) => {
-    const { files } = action.payload;
-    const { showHiddenFiles } = action.payload;
-
-    // remove the selection in case it does not exist anymore
-    let selection = movePathIfRequired(state.selection, state.moveHistory);
-    if (selection && !utils.getFile(files, selection)) {
-      selection = null;
-    }
-    const unsavedFileContents = {};
-    for (const path in state.unsavedFileContents) {
-      const newPath = movePathIfRequired(path, state.moveHistory);
-      if (utils.getFile(files, newPath)) {
-        unsavedFileContents[newPath] = state.unsavedFileContents[path];
-      }
-    }
-    return {
-      ...decrementPendingRequests(state),
-      files,
-      showHiddenFiles,
-      moveHistory: [],
-      selection,
-      unsavedFileContents,
-      updateDate: Date.now(),
-    };
-  },
   [types.SELECT_FILE]: (state, action) => {
     const { selection } = action.payload;
     return {
@@ -235,6 +209,13 @@ const configurationReducer = createReducer(initialState)({
     return {
       ...state,
       currentSidebar: state.currentSidebar == SidebarTypes.CONFIGURATION_DOCS ? SidebarTypes.NONE : SidebarTypes.CONFIGURATION_DOCS,
+    };
+  },
+
+  [types.TOGGLE_SHOW_HIDDEN_FILES]: (state) => {
+    return {
+      ...state,
+      showHiddenFiles: !state.showHiddenFiles,
     };
   },
 });
