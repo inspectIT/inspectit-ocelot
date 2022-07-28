@@ -37,41 +37,45 @@ const AlertingChannelsTreeToolbar = ({
           background-color: rgba(0, 0, 0, 0);
         }
       `}</style>
-      <Toolbar>
-        <div className="p-toolbar-group-left">
-          <Button
-            disabled={readOnly}
-            tooltip="New handler"
-            icon="pi pi-plus"
-            tooltipOptions={tooltipOptions}
-            onClick={onShowCreateDialog}
-          />
-          <Button
-            disabled={readOnly || !handlerSelected}
-            tooltip="Edit handler"
-            icon="pi pi-pencil"
-            tooltipOptions={tooltipOptions}
-            onClick={onShowEditDialog}
-          />
-          <Button
-            disabled={readOnly || !handlerSelected}
-            tooltip="Copy handler"
-            icon="pi pi-copy"
-            tooltipOptions={tooltipOptions}
-            onClick={onShowCopyDialog}
-          />
-          <Button
-            disabled={readOnly || !handlerSelected}
-            tooltip="Delete handler"
-            icon="pi pi-trash"
-            tooltipOptions={tooltipOptions}
-            onClick={onShowDeleteDialog}
-          />
-        </div>
-        <div className="p-toolbar-group-right">
-          <Button onClick={onRefresh} tooltip="Reload" icon={'pi pi-refresh'} tooltipOptions={tooltipOptions} />
-        </div>
-      </Toolbar>
+      <Toolbar
+        left={
+          <div className="p-toolbar-group-left">
+            <Button
+              disabled={readOnly}
+              tooltip="New handler"
+              icon="pi pi-plus"
+              tooltipOptions={tooltipOptions}
+              onClick={onShowCreateDialog}
+            />
+            <Button
+              disabled={readOnly || !handlerSelected}
+              tooltip="Edit handler"
+              icon="pi pi-pencil"
+              tooltipOptions={tooltipOptions}
+              onClick={onShowEditDialog}
+            />
+            <Button
+              disabled={readOnly || !handlerSelected}
+              tooltip="Copy handler"
+              icon="pi pi-copy"
+              tooltipOptions={tooltipOptions}
+              onClick={onShowCopyDialog}
+            />
+            <Button
+              disabled={readOnly || !handlerSelected}
+              tooltip="Delete handler"
+              icon="pi pi-trash"
+              tooltipOptions={tooltipOptions}
+              onClick={onShowDeleteDialog}
+            />
+          </div>
+        }
+        right={
+          <div className="p-toolbar-group-right">
+            <Button onClick={onRefresh} tooltip="Reload" icon={'pi pi-refresh'} tooltipOptions={tooltipOptions} />
+          </div>
+        }
+      />
     </div>
   );
 };

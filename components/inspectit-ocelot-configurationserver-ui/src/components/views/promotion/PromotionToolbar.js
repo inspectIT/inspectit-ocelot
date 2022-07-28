@@ -12,16 +12,20 @@ const PromotionToolbar = ({ onRefresh, onPromote, loading, enabled, canPromote }
   };
 
   return (
-    <>
+    <div className="this">
       <style jsx>
         {`
+          .this :global(.p-toolbar) {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+          }
           .searchbox {
             display: flex;
             height: 2rem;
             align-items: center;
           }
           .searchbox :global(.pi) {
-            font-size: 1.75rem;
+            font-size: 1.25rem;
             color: #aaa;
             margin-right: 1rem;
           }
@@ -35,25 +39,30 @@ const PromotionToolbar = ({ onRefresh, onPromote, loading, enabled, canPromote }
         `}
       </style>
 
-      <Toolbar style={{ border: '0', backgroundColor: '#eee', borderBottom: '1px solid #ddd' }}>
-        <div className="p-toolbar-group-left">
-          <div className="searchbox">
-            <i className="pi pi-cloud-upload" />
-            <h4 className="headline">Configuration Promotion</h4>
+      <Toolbar
+        style={{ border: '0', backgroundColor: '#eee', borderBottom: '1px solid #ddd' }}
+        left={
+          <div className="p-toolbar-group-left">
+            <div className="searchbox">
+              <i className="pi pi-cloud-upload" />
+              <h4 className="headline">Configuration Promotion</h4>
+            </div>
           </div>
-        </div>
-        <div className="p-toolbar-group-right buttons">
-          <Button
-            disabled={loading}
-            tooltip="Reload Available Changes"
-            tooltipOptions={tooltipOptions}
-            icon={'pi pi-refresh' + (loading ? ' pi-spin' : '')}
-            onClick={onRefresh}
-          />
-          {canPromote && <Button disabled={!enabled} icon="pi pi-cloud-upload" label="Promote Configurations" onClick={onPromote} />}
-        </div>
-      </Toolbar>
-    </>
+        }
+        right={
+          <div className="p-toolbar-group-right buttons">
+            <Button
+              disabled={loading}
+              tooltip="Reload Available Changes"
+              tooltipOptions={tooltipOptions}
+              icon={'pi pi-refresh' + (loading ? ' pi-spin' : '')}
+              onClick={onRefresh}
+            />
+            {canPromote && <Button disabled={!enabled} icon="pi pi-cloud-upload" label="Promote Configurations" onClick={onPromote} />}
+          </div>
+        }
+      />
+    </div>
   );
 };
 

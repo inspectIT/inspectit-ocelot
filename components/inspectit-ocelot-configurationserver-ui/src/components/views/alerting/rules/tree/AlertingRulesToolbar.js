@@ -41,47 +41,51 @@ const AlertingRulesToolbar = ({
           background-color: rgba(0, 0, 0, 0);
         }
       `}</style>
-      <Toolbar>
-        <div className="p-toolbar-group-left">
-          <Button
-            disabled={readOnly || loading}
-            tooltip="New rule"
-            icon="pi pi-plus"
-            tooltipOptions={tooltipOptions}
-            onClick={() => onShowCreateRuleDialog()}
-          />
-          <Button
-            disabled={readOnly || loading || !ruleSelected}
-            tooltip="Rename rule"
-            icon="pi pi-pencil"
-            tooltipOptions={tooltipOptions}
-            onClick={() => onShowRenameRuleDialog()}
-          />
-          <Button
-            disabled={readOnly || loading || !ruleSelected}
-            tooltip="Copy rule"
-            icon="pi pi-copy"
-            tooltipOptions={tooltipOptions}
-            onClick={() => onShowCopyRuleDialog()}
-          />
-          <Button
-            disabled={readOnly || loading || !ruleSelected}
-            tooltip="Delete rule"
-            icon="pi pi-trash"
-            tooltipOptions={tooltipOptions}
-            onClick={() => onShowDeleteRuleDialog()}
-          />
-        </div>
-        <div className="p-toolbar-group-right">
-          <Button
-            disabled={loading}
-            onClick={() => onRefresh()}
-            tooltip="Reload"
-            icon={'pi pi-refresh' + (loading ? ' pi-spin' : '')}
-            tooltipOptions={tooltipOptions}
-          />
-        </div>
-      </Toolbar>
+      <Toolbar
+        left={
+          <div className="p-toolbar-group-left">
+            <Button
+              disabled={readOnly || loading}
+              tooltip="New rule"
+              icon="pi pi-plus"
+              tooltipOptions={tooltipOptions}
+              onClick={() => onShowCreateRuleDialog()}
+            />
+            <Button
+              disabled={readOnly || loading || !ruleSelected}
+              tooltip="Rename rule"
+              icon="pi pi-pencil"
+              tooltipOptions={tooltipOptions}
+              onClick={() => onShowRenameRuleDialog()}
+            />
+            <Button
+              disabled={readOnly || loading || !ruleSelected}
+              tooltip="Copy rule"
+              icon="pi pi-copy"
+              tooltipOptions={tooltipOptions}
+              onClick={() => onShowCopyRuleDialog()}
+            />
+            <Button
+              disabled={readOnly || loading || !ruleSelected}
+              tooltip="Delete rule"
+              icon="pi pi-trash"
+              tooltipOptions={tooltipOptions}
+              onClick={() => onShowDeleteRuleDialog()}
+            />
+          </div>
+        }
+        right={
+          <div className="p-toolbar-group-right">
+            <Button
+              disabled={loading}
+              onClick={() => onRefresh()}
+              tooltip="Reload"
+              icon={'pi pi-refresh' + (loading ? ' pi-spin' : '')}
+              tooltipOptions={tooltipOptions}
+            />
+          </div>
+        }
+      />
     </div>
   );
 };

@@ -8,12 +8,11 @@ import { Provider } from 'react-redux';
 import AuthenticationRouter from '../components/common/AuthenticationRouter';
 import NotificationHandler from '../components/common/NotificationHandler';
 import UnsavedChangesGate from '../components/common/UnsavedChangesGate';
-
 import { BASE_PAGE_TITLE } from '../data/constants';
 import { linkPrefix } from '../lib/configuration';
 
 // importing required css files for primereact
-import 'primereact/resources/themes/nova-dark/theme.css';
+import 'primereact/resources/themes/nova-alt/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
@@ -30,6 +29,12 @@ class OcelotConfigurationUI extends App {
       <Container>
         <style global jsx>
           {`
+            .p-component {
+              font-size: 14px;
+            }
+            .p-button {
+              font-size: 14px;
+            }
             body {
               margin: 0;
               font-family: 'Open Sans', 'Helvetica Neue', sans-serif;

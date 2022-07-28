@@ -20,29 +20,35 @@ class UserToolbar extends React.Component {
               border-radius: 0;
               background-color: #eee;
               border-bottom: 1px solid #ddd;
+              padding-top: 0.5rem;
+              padding-bottom: 0.5rem;
             }
             .p-toolbar-group-right > :global(*) {
               margin-left: 0.25rem;
             }
           `}
         </style>
-        <Toolbar>
-          <div className="p-toolbar-group-left">
-            <div className="p-inputgroup" style={{ display: 'inline-flex', verticalAlign: 'middle' }}>
-              <span className="pi p-inputgroup-addon pi-search" />
-              <InputText
-                style={{ width: '300px' }}
-                value={this.props.filterValue}
-                placeholder="Filter Users"
-                onChange={(e) => this.props.onFilterChange(e.target.value)}
-              />
+        <Toolbar
+          left={
+            <div className="p-toolbar-group-left">
+              <div className="p-inputgroup" style={{ display: 'inline-flex', verticalAlign: 'middle' }}>
+                <span className="pi p-inputgroup-addon pi-search" />
+                <InputText
+                  style={{ width: '300px' }}
+                  value={this.props.filterValue}
+                  placeholder="Filter Users"
+                  onChange={(e) => this.props.onFilterChange(e.target.value)}
+                />
+              </div>
             </div>
-          </div>
-          <div className="p-toolbar-group-right">
-            <Button icon="pi pi-plus" onClick={this.props.onCreateUser} />
-            <Button icon="pi pi-refresh" onClick={() => this.props.fetchUsers()} />
-          </div>
-        </Toolbar>
+          }
+          right={
+            <div className="p-toolbar-group-right">
+              <Button icon="pi pi-plus" onClick={this.props.onCreateUser} />
+              <Button icon="pi pi-refresh" onClick={() => this.props.fetchUsers()} />
+            </div>
+          }
+        />
       </div>
     );
   }

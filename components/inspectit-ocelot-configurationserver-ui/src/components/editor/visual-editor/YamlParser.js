@@ -32,7 +32,7 @@ class YamlParserCache {
     } else {
       let config;
       try {
-        config = yaml.safeLoad(yamlString);
+        config = yaml.load(yamlString);
       } catch (error) {
         config = null;
       }

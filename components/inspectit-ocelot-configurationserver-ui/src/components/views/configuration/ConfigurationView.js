@@ -31,7 +31,7 @@ const EditorHeader = ({ icon, path, name, isContentModified, readOnly }) => (
         height: 2rem;
       }
       .header :global(.pi) {
-        font-size: 1.75rem;
+        font-size: 1.25rem;
         color: #aaa;
         margin-right: 1rem;
       }
@@ -290,7 +290,7 @@ class ConfigurationView extends React.Component {
 
 const getYamlError = (content) => {
   try {
-    yaml.safeLoad(content);
+    yaml.load(content);
     return null;
   } catch (error) {
     if (error.message) {
