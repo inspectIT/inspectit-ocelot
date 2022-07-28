@@ -55,7 +55,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
   useEffect(() => {
     // parse configuration
     try {
-      setConfiguration(yaml.safeLoad(yamlConfiguration));
+      setConfiguration(yaml.load(yamlConfiguration));
     } catch (error) {
       setConfigurationError(error);
       setConfiguration(null);
