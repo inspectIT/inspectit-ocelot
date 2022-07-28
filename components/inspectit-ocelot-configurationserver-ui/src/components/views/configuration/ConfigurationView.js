@@ -290,7 +290,7 @@ class ConfigurationView extends React.Component {
 
 const getYamlError = (content) => {
   try {
-    yaml.safeLoad(content);
+    yaml.load(content);
     return null;
   } catch (error) {
     if (error.message) {
