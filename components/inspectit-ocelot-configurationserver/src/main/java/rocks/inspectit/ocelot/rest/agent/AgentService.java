@@ -16,6 +16,10 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Contains the logic for the retrieval of multiple command-responses and assembling them into one response-object.
+ * This class was created to keep the logic out of the controller layer and improve readability.
+ */
 @Service
 @Slf4j
 public class AgentService {
@@ -86,7 +90,7 @@ public class AgentService {
                         break;
                     case LOG:
                         ResponseEntity<String> logResponse = (ResponseEntity<String>) result;
-                        archiveData.logs = logResponse.getBody();
+                        archiveData.logs = archiveData.currentConfig.contains("log-preloading: {enabled: true}") ? logResponse.getBody() : "Logs cannot be retrieved because log preloading (inspectit.log-preloading) is not enabled. To retrieve agent logs, please enable the log preloading.";
                         break;
                 }
                 if (open == 0) {
