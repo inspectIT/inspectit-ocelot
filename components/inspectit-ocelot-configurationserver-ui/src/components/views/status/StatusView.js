@@ -239,7 +239,6 @@ class StatusView extends React.Component {
               data={agentsToShow}
               filter={filter}
               onShowDownloadDialog={this.showDownloadDialog}
-              onDownloadSupportArchive={this.downloadSupportArchive}
             />
           </div>
           <div>
@@ -298,6 +297,9 @@ class StatusView extends React.Component {
           case 'log':
             this.fetchLog(agentId);
             break;
+          case 'archive':
+            this.downloadSupportArchive(agentId, attributes);
+            break;
           default:
             this.setDownloadDialogShown(false);
             break;
@@ -307,18 +309,31 @@ class StatusView extends React.Component {
   };
 
   downloadSupportArchive = (agentId, agentVersion) => {
-    getStore().dispatch(
-      notificationActions.showInfoMessage('Preparing Archive', 'Download will start automatically once the archive is ready.')
+    this.setState(
+      {
+        isLoading: true,
+      },
+      () => {
+        axios
+          .get('/agent/supportArchive', {
+            params: { 'agent-id': agentId },
+          })
+          .then((res) => {
+            this.setState({
+              isLoading: false
+            });
+            downloadArchiveFromJson(res.data, agentId, agentVersion);
+            this.setDownloadDialogShown(false);
+          })
+          .catch(() => {
+            this.setState({
+              contentValue: null,
+              contentLoadingFailed: true,
+              isLoading: false,
+            });
+          });
+      }
     );
-
-    axios
-      .get('/agent/supportArchive', {
-        params: { 'agent-id': agentId },
-      })
-      .then((res) => {
-        downloadArchiveFromJson(res.data, agentId, agentVersion);
-      })
-      .catch(() => {});
   };
 
   fetchConfiguration = (attributes) => {

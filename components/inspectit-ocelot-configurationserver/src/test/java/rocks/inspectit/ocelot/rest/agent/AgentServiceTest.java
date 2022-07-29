@@ -23,32 +23,41 @@ import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.anyMap;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+/**
+ * Unit Test for the buildingprocess of the support archive in the AgentService
+ */
 @ExtendWith(MockitoExtension.class)
 public class AgentServiceTest {
 
     @InjectMocks
     AgentService cut;
+
     @Mock
     AgentConfigurationManager configManager;
+
     @Mock
     InspectitServerSettings configuration;
 
     @Nested
     public class BuildSupportArchive {
+
         AgentService serviceSpy;
+
         AgentConfiguration config;
+
         Map<String, String> attributes;
+
         String logs;
+
         EnvironmentCommand.EnvironmentDetail environmentDetail;
+
         AgentService.SupportArchiveData expectedResult;
 
         public void setupTestData() {
             serviceSpy = Mockito.spy(cut);
-            config = AgentConfiguration.builder().configYaml("foo : bar").build();
+            config = AgentConfiguration.builder().configYaml("log-preloading: {enabled: true}").build();
             attributes = new HashMap<String, String>() {{
                 put("agent-id", "test");
             }};

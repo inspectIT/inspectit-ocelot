@@ -223,8 +223,8 @@ class StatusTable extends React.Component {
   };
 
   agentHealthTemplate = (rowData) => {
-    const { onDownloadSupportArchive } = this.props;
-    const { health, metaInformation } = rowData;
+    const { onShowDownloadDialog } = this.props;
+    const { health, metaInformation, attributes } = rowData;
 
     let healthInfo;
     let iconClass;
@@ -272,7 +272,7 @@ class StatusTable extends React.Component {
             <Button
               className="archive-button"
               icon="pi pi-cloud-download"
-              onClick={() => onDownloadSupportArchive(metaInformation.agentId, metaInformation.agentVersion)}
+              onClick={() => onShowDownloadDialog(metaInformation.agentId, metaInformation.agentVersion, 'archive')}
               tooltip="Download Support Archive"
               tooltipOptions={{ showDelay: 500 }}
             />

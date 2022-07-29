@@ -52,7 +52,7 @@ public class AgentControllerIntTest extends IntegrationTestBase {
     public void shouldFetchSupportArchive() throws InterruptedException {
 
         String agentId = "testAgent";
-        String testLog = "greatLog";
+        String testLog = "Logs cannot be retrieved because log preloading (inspectit.log-preloading) is not enabled. To retrieve agent logs, please enable the log preloading.";
         EnvironmentCommand.EnvironmentDetail envDetail = new EnvironmentCommand.EnvironmentDetail() {{
             setEnvironmentVariables(Collections.emptyMap());
             setSystemProperties(System.getProperties());
