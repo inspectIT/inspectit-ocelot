@@ -63,7 +63,7 @@ class CallDependencies {
      * Implicit dependencies are for example data-inputs used by the action.
      */
     private void collectImplicitDependencies() {
-        writes.add(source.getName());
+        writes.add(source.getDataKey());
         ActionCallSettings settings = source.getCallSettings();
 
         addIfNotBlank(settings.getOnlyIfFalse(), reads);

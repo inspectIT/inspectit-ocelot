@@ -45,7 +45,9 @@ function Versions(props) {
                   </a>
                 </td>
                 <td>
-                  <a href="">Release Notes</a>
+                  <a href={`${repoUrl}/releases/tag/${latestVersion}`}>
+                    Release Notes
+                  </a>
                 </td>
               </tr>
             </tbody>
@@ -91,7 +93,7 @@ function Versions(props) {
                         </a>
                       </td>
                       <td>
-                        <a href={`${repoUrl}/releases/tag/v${version}`}>
+                        <a href={`${repoUrl}/releases/tag/${version}`}>
                           Release Notes
                         </a>
                       </td>

@@ -6,6 +6,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Records the http/in metrics for calls received via the Servlet API.'
+        default-rule: true
         include:
           'r_servletapi_extract_details': true
           'r_http_server_record_metric_on_method': true

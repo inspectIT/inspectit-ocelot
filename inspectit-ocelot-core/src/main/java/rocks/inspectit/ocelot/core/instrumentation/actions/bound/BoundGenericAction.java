@@ -86,6 +86,10 @@ public abstract class BoundGenericAction implements IHookAction {
         return name;
     }
 
+    public String getDataKey() {
+        return dataKey;
+    }
+
     @Override
     public String toString() {
         return "Action '" + getName() + "' for data key '" + dataKey + "'";
@@ -93,6 +97,16 @@ public abstract class BoundGenericAction implements IHookAction {
 
     @Override
     public void execute(ExecutionContext context) {
+        executeImpl(context);
+    }
+
+    /**
+     * Implementation of the action's execution function. This method is also returning the action's result value compared
+     * to the one of the super class which can be useful in case the result is required (e.g. see {@link rocks.inspectit.ocelot.core.instrumentation.hook.actions.TracingHookAction}).
+     *
+     * @return the actions result object or `null` in case of void actions
+     */
+    public Object executeImpl(ExecutionContext context) {
         Object[] actionArguments = getActionArguments(context);
 
         Object result = action.get()
@@ -100,6 +114,9 @@ public abstract class BoundGenericAction implements IHookAction {
 
         if (!voidAction) {
             context.getInspectitContext().setData(dataKey, result);
+            return result;
+        } else {
+            return null;
         }
     }
 
@@ -110,7 +127,7 @@ public abstract class BoundGenericAction implements IHookAction {
      *
      * @return the sorted array of action arguments
      */
-    protected abstract Object[] getActionArguments(ExecutionContext context);
+    public abstract Object[] getActionArguments(ExecutionContext context);
 }
 
 

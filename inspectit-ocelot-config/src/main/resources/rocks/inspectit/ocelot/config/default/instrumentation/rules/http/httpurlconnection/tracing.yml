@@ -6,6 +6,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Starts a span for an HTTPUrlConnection before down propagation happens.'
+        default-rule: true
         include:
           'r_httpurlconnection_detect_start': true
           'r_httpurlconnection_extract_request_details': true
@@ -37,6 +38,7 @@ inspectit:
           description: |-
             Continues an already started span for this HTTPUrlConnection via r_httpurlconnection_tracing_start.
             If no span was started yet, a fresh one is started.
+        default-rule: true
         include:
           'r_http_tracing_span_name_default': true
           'r_http_client_tracing_default_attributes': true

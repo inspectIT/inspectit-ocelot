@@ -130,10 +130,10 @@ public class GenericActionCallSorter {
         List<Pair<ActionCallConfig, List<ActionCallConfig>>> sorted = new ArrayList<>();
         dependencyGraph.forEach((call, deps) -> {
             ArrayList<ActionCallConfig> sortedDeps = new ArrayList<>(deps);
-            sortedDeps.sort(Comparator.comparing(ActionCallConfig::getName));
+            sortedDeps.sort(Comparator.comparing(ActionCallConfig::getDataKey));
             sorted.add(Pair.of(call, sortedDeps));
         });
-        sorted.sort(Comparator.comparing(p -> p.getLeft().getName()));
+        sorted.sort(Comparator.comparing(p -> p.getLeft().getDataKey()));
         return sorted;
     }
 
@@ -178,7 +178,7 @@ public class GenericActionCallSorter {
         List<String> dependencyCycle = stackTraceList.subList(idx, stackTraceList.size())
                 .stream()
                 .map(Equivalence.Wrapper::get)
-                .map(ActionCallConfig::getName)
+                .map(ActionCallConfig::getDataKey)
                 .collect(Collectors.toList());
         return new CyclicDataDependencyException(dependencyCycle);
     }

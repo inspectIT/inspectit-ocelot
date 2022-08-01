@@ -13,6 +13,12 @@ When using the Save Actions Plugin, you have to copy the *saveactions_settings.x
 
 Furthermore, please import the `/codequality/idea/code_style.xml` file into the project's settings of IntelliJ in order to match the code style we're using.
 
+### Frontend Developing
+
+If developing JavaScript in IntelliJ Ultimate, check that Settings.Languages & Frameworks.JavaScript.Code Quality Tools.ESLint is activated for correct linting.
+
+In the same location, check the checkbox for running `eslint --fix on save`.
+
 ## Process
 
 The first step in order to contribute is to fork this repository into your account.

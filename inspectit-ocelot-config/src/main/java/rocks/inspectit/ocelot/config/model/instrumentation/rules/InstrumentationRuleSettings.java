@@ -37,6 +37,16 @@ public class InstrumentationRuleSettings {
     private boolean enabled = true;
 
     /**
+     * Defines whether this is a default rule. All configuration rules shipped with the agent are marked as default rules.
+     */
+    private boolean defaultRule = false;
+
+    /**
+     * Defines whether the actions executed in the rules scope should be traced for debug purposes.
+     */
+    private boolean enableActionTracing = false;
+
+    /**
      * Defines which scope is used by this rule and whether it is enabled or not. The map's key represents the id of a scope.
      * The value specifies whether it is enabled or not.
      */

@@ -6,6 +6,7 @@ import { configurationActions, configurationSelectors } from '../../../redux/duc
 import { linkPrefix } from '../../../lib/configuration';
 import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
 import { filter } from 'lodash';
+import PropTypes from 'prop-types';
 
 /**
  * The file tree used in the configuration view.
@@ -13,8 +14,8 @@ import { filter } from 'lodash';
 class FileTree extends React.Component {
   state = {
     contextMenuModel: [],
+    expandedKeys: {},
   };
-
   contextMenuRef = React.createRef();
 
   /**
@@ -28,6 +29,35 @@ class FileTree extends React.Component {
       this.props.fetchDefaultConfig();
     }
   };
+
+  /**
+   * Invoked immediately after updating occurs.
+   * This method is not called for the initial render.
+   */
+  componentDidUpdate(prevProps) {
+    const { selection, selectedDefaultConfigFile } = this.props;
+    // check if a new file has been selected
+    if (
+      (selection || selectedDefaultConfigFile) &&
+      (selectedDefaultConfigFile !== prevProps.selectedDefaultConfigFile || selection !== prevProps.selection)
+    ) {
+      // if true, expand needed nodes in FileTree, in case the file was opened using search
+      let filePath = '';
+      if (selection) {
+        filePath = selection;
+      } else {
+        filePath = selectedDefaultConfigFile.replace(DEFAULT_CONFIG_TREE_KEY, '/Ocelot Defaults');
+      }
+      const splitFilePath = filePath.split('/');
+      let currentNode = '';
+      let expandedKeys = { ...this.state.expandedKeys };
+      for (let i = 1; i < splitFilePath.length; i++) {
+        currentNode += '/' + splitFilePath[i];
+        expandedKeys[currentNode] = true;
+      }
+      this.setState({ expandedKeys: expandedKeys });
+    }
+  }
 
   /**
    * Handle tree selection changes.
@@ -113,46 +143,55 @@ class FileTree extends React.Component {
 
   render() {
     const { className, defaultTree, selection, selectedDefaultConfigFile, readOnly, files, selectedVersion } = this.props;
+
     return (
       <div className="this" onContextMenu={readOnly ? undefined : this.showContextMenu} onKeyDown={readOnly ? undefined : this.onKeyDown}>
         <style jsx>{`
-                    .this {
-                        overflow: auto;
-                        flex-grow: 1;
-                        display: flex;
-                        flex-direction: column;
-                    }
-                    .this :global(.cm-tree-icon) {
-                        width: 1.3rem;
-                        height: 1.3rem;
-                    }
-                    .this :global(.cm-tree-label) {
-                        color: #aaa;
-                    }
-                    .this :global(.cm-hidden-file-tree-label){
-                        color: #aaa;
-                    }
-                    .this :global(.ocelot-tree-head-orange) {
-                        background: url("${linkPrefix}/static/images/inspectit-ocelot-head_orange.svg") center no-repeat;
-                        background-size: 1rem 1rem;
-                    }
-                    .this :global(.ocelot-tree-head-white) {
-                        background: url("${linkPrefix}/static/images/inspectit-ocelot-head_white.svg") center no-repeat;
-                        background-size: 1rem 1rem;
-                    }
-                    .tree-container {
-                      overflow: auto;
-                    }
-                    .version-banner {
-                      background-color: #ffcc80;
-                      height: 2.45rem;
-                      border-bottom: 1px solid #dddddd;
-                    }
-				`}</style>
+                  .this {
+                    overflow: auto;
+                    flex-grow: 1;
+                    display: flex;
+                    flex-direction: column;
+                  }
+
+                  .this :global(.cm-tree-icon) {
+                    width: 1.3rem;
+                    height: 1.3rem;
+                  }
+
+                  .this :global(.cm-tree-label) {
+                    color: #aaa;
+                  }
+                  
+                  .this :global(.cm-hidden-file-tree-label){
+                    color: #aaa;
+                  }
+                    
+                  .this :global(.ocelot-tree-head-orange) {
+                    background: url("${linkPrefix}/static/images/inspectit-ocelot-head_orange.svg") center no-repeat;
+                    background-size: 1rem 1rem;
+                  }
+
+                  .this :global(.ocelot-tree-head-white) {
+                    background: url("${linkPrefix}/static/images/inspectit-ocelot-head_white.svg") center no-repeat;
+                    background-size: 1rem 1rem;
+                  }
+
+                  .tree-container {
+                    overflow: auto;
+                  }
+
+                  .version-banner {
+                    background-color: #ffcc80;
+                    height: 2.45rem;
+                    border-bottom: 1px solid #dddddd;
+                  }
+                `}</style>
         {selectedVersion && <div className="version-banner" />}
         <div className="tree-container">
           <ContextMenu model={this.state.contextMenuModel} ref={this.contextMenuRef} />
           <Tree
+            id={'fileTree'}
             className={className}
             filter={true}
             filterBy="label"
@@ -163,6 +202,8 @@ class FileTree extends React.Component {
             onContextMenuSelectionChange={readOnly ? undefined : this.showContextMenu}
             dragdropScope={readOnly ? undefined : 'config-file-tree'}
             onDragDrop={readOnly ? undefined : this.onDragDrop}
+            expandedKeys={this.state.expandedKeys}
+            onToggle={(e) => this.setState({ expandedKeys: e.value })}
           />
         </div>
       </div>
@@ -238,6 +279,42 @@ const mapDispatchToProps = {
   exportSelection: configurationActions.exportSelection,
   toggleShowHiddenFiles: configurationActions.toggleShowHiddenFiles,
   move: configurationActions.move,
+};
+
+FileTree.propTypes = {
+  className: PropTypes.string,
+  /**  the default configuration key/value ~ path/content pairs in a tree structure. */
+  defaultTree: PropTypes.array,
+  /** The loaded configuration files and directories in a tree structure. */
+  files: PropTypes.array,
+  /** The path of the currently selected file if it is not from the default config. */
+  selection: PropTypes.string,
+  /** The default configuration of the Ocelot agents. Will be retrieved as key/value pairs each representing path/content of a file. */
+  defaultConfig: PropTypes.object,
+  /** The path of the currently selected file if it is from the default config. */
+  selectedDefaultConfigFile: PropTypes.string,
+  /** Whether the current selection in the FileTree is readOnly. */
+  readOnly: PropTypes.bool,
+  /** The selected version of configuration files. */
+  selectedVersion: PropTypes.string,
+  /** Callback which triggers showing the deleteFileDialog. */
+  showDeleteFileDialog: PropTypes.func,
+  /** Callback which triggers showing the showCreateDirectoryDialog. */
+  showCreateDirectoryDialog: PropTypes.func,
+  /** Callback which triggers showing the showCreateFileDialog. */
+  showCreateFileDialog: PropTypes.func,
+  /** Callback which triggers showing the showMoveDialog. */
+  showMoveDialog: PropTypes.func,
+  /** Redux dispatch action for exporting and downloading a file. */
+  exportSelection: PropTypes.func,
+  /** Redux dispatch action for fetching all configuration files and directories. */
+  fetchFiles: PropTypes.func,
+  /** Redux dispatch action for fetching the default config. */
+  fetchDefaultConfig: PropTypes.func,
+  /** Redux dispatch action for propagating selection changes in the file tree. */
+  selectFile: PropTypes.func,
+  /** Redux dispatch action for moving a file. */
+  move: PropTypes.func,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(FileTree);
