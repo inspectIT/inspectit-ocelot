@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit Test for the buildingprocess of the support archive in the AgentService
+ * Unit Test for the building process of the {@link rocks.inspectit.ocelot.rest.agent.AgentService.SupportArchiveData support archive} in the {@link AgentService}
  */
 @ExtendWith(MockitoExtension.class)
 public class AgentServiceTest {

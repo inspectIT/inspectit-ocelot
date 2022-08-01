@@ -28,7 +28,7 @@ const DownloadDialogue = ({ visible, onHide, error, loading, contentValue, conte
                 Ensure that both agent-commands and log-preloading are enabled and the agent-commands URL is correct in your agent
                 configuration.`;
       case 'archive':
-        return `Downloading the Support Archive for ${contextName} failed. Make sure agent-commands are enabled in your agent configuration.`;
+        return `Downloading the Support Archive for ${contextName} failed. Make sure agent-commands are enabled and the agent-commands URL is correct in your agent configuration.`;
       default:
         return `${dialogueSettings.header} could not be loaded due to an unexpected error.`;
     }
