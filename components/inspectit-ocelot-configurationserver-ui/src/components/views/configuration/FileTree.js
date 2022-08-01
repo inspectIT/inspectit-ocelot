@@ -162,7 +162,11 @@ class FileTree extends React.Component {
                   .this :global(.cm-tree-label) {
                     color: #aaa;
                   }
-
+                  
+                  .this :global(.cm-hidden-file-tree-label){
+                    color: #aaa;
+                  }
+                    
                   .this :global(.ocelot-tree-head-orange) {
                     background: url("${linkPrefix}/static/images/inspectit-ocelot-head_orange.svg") center no-repeat;
                     background-size: 1rem 1rem;
@@ -207,7 +211,15 @@ class FileTree extends React.Component {
   }
 
   getContextMenuModel = (filePath) => {
-    const { showCreateDirectoryDialog, showCreateFileDialog, showMoveDialog, showDeleteFileDialog, exportSelection } = this.props;
+    const {
+      showCreateDirectoryDialog,
+      showCreateFileDialog,
+      showMoveDialog,
+      showDeleteFileDialog,
+      exportSelection,
+      toggleShowHiddenFiles,
+      showHiddenFiles,
+    } = this.props;
 
     return [
       {
@@ -226,6 +238,11 @@ class FileTree extends React.Component {
         command: () => exportSelection(true, filePath),
       },
       {
+        label: showHiddenFiles ? 'Hide Files' : 'Show Hidden Files',
+        icon: showHiddenFiles ? 'pi pi-eye-slash' : 'pi pi-eye',
+        command: () => toggleShowHiddenFiles(),
+      },
+      {
         label: 'Rename',
         icon: 'pi pi-pencil',
         disabled: !filePath,
@@ -242,11 +259,12 @@ class FileTree extends React.Component {
 }
 
 function mapStateToProps(state) {
-  const { pendingRequests, selection, defaultConfig, selectedDefaultConfigFile, selectedVersion } = state.configuration;
+  const { pendingRequests, selection, defaultConfig, selectedDefaultConfigFile, selectedVersion, showHiddenFiles } = state.configuration;
   return {
     files: configurationSelectors.getFileTree(state),
     loading: pendingRequests > 0,
     selection,
+    showHiddenFiles,
     defaultConfig: defaultConfig,
     defaultTree: configurationSelectors.getDefaultConfigTree(state),
     selectedDefaultConfigFile,
@@ -259,6 +277,7 @@ const mapDispatchToProps = {
   fetchFiles: configurationActions.fetchFiles,
   selectFile: configurationActions.selectFile,
   exportSelection: configurationActions.exportSelection,
+  toggleShowHiddenFiles: configurationActions.toggleShowHiddenFiles,
   move: configurationActions.move,
 };
 
