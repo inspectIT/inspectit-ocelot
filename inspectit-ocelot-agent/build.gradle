@@ -16,8 +16,11 @@ test {
 }
 
 group = 'rocks.inspectit.ocelot'
-sourceCompatibility = 1.8
-
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
 configurations {
     opentelemetry
 }

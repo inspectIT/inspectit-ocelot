@@ -17,7 +17,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.instrument.Instrumentation;
 import java.net.URLClassLoader;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Implementation for the {@link IAgent} interface.
