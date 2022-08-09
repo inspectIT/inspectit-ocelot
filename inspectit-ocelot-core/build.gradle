@@ -21,8 +21,8 @@ test {
     }
 }
 
-sourceCompatibility = 1.8
-
+sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
+targetCompatibility = 1.8 // Java version to generate classes for.
 dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
@@ -39,9 +39,6 @@ dependencies {
             "io.opentelemetry:opentelemetry-opencensus-shim",
 
 
-    )
-    buildTools(
-            'jarcheck:jarcheck:1.5'
     )
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
@@ -160,39 +157,6 @@ dependencies {
 }
 
 
-// use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
-task checkDependencyJavaVersions {
-    def excludes = ["byte-buddy",
-                    // exclude OpenTelemetry as they guarantee JDK 8 support
-                    "opentelemetry",
-                    // exclude jackson which is being used by OTel
-                    "jackson",
-                    // exclude kotlin-stdlib which is being used by opentelemetry-exporter-jaeger-thrift
-                    "kotlin-stdlib"]
-
-    def jarCheckPath = "$buildDir/jarCheck"
-    outputs.dir jarCheckPath
-
-    doFirst {
-        def jarCheckOutput = new File(jarCheckPath)
-        jarCheckOutput.mkdirs()
-        configurations.runtimeClasspath.each { file ->
-            def name = file.name
-            def isExcluded = excludes.stream().anyMatch({ excl ->
-                name.contains(excl)
-            })
-            if (!isExcluded && file.exists()) {
-                javaexec {
-                    classpath configurations.buildTools
-                    main = 'com.mindprod.jarcheck.JarCheck'
-                    args = ["$file", "1.0", "1.8"]
-                    standardOutput = new File(jarCheckOutput, "$name-check.log").newOutputStream()
-                }
-            }
-        }
-    }
-}
-
 task generateVersionFile {
     ext.versionFile = new File(buildDir, "ocelot-version.info")
     doLast {
@@ -207,7 +171,6 @@ cyclonedxBom {
     includeConfigs += ["runtimeClasspath"]
 }
 
-jar.dependsOn checkDependencyJavaVersions
 jar.dependsOn generateVersionFile
 
 jar {
