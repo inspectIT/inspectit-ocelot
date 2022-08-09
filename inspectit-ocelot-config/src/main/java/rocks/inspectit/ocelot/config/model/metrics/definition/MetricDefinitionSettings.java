@@ -37,6 +37,7 @@ public class MetricDefinitionSettings {
     private String unit;
 
     @Min(1)
+    @Builder.Default
     private int tagValueLimit = 1;
 
     @NotNull

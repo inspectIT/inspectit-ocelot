@@ -38,15 +38,7 @@ public class MetricsSettings {
      */
     private Duration frequency;
 
-    /**
-     *
-     */
-    private Duration tagGuardScheduleDelay;
-
-    /**
-     *
-     */
-    private String tagGuardDatabaseFile;
+    private TagGuardSettings tagGuard;
 
     @NotNull
     private Map<@NotBlank String, @NotNull @Valid MetricDefinitionSettings> definitions = Collections.emptyMap();

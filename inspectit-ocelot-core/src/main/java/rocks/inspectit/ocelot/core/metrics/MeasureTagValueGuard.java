@@ -14,10 +14,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
+import rocks.inspectit.ocelot.core.selfmonitoring.AgentHealthManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 import rocks.inspectit.ocelot.core.tags.TagUtils;
 
@@ -38,8 +40,13 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class MeasureTagValueGuard {
 
+    private static final String tagOverFlowMessageTemplate = "Overflow for tag %s";
+
     @Autowired
     private InspectitEnvironment env;
+
+    @Autowired
+    private AgentHealthManager agentHealthManager;
 
     /**
      * Common tags manager needed for gathering common tags when recording metrics.
@@ -64,14 +71,15 @@ public class MeasureTagValueGuard {
     protected void init() {
         fileReaderWriter = new PersistedTagsReaderWriter(env.getCurrentConfig()
                 .getMetrics()
-                .getTagGuardDatabaseFile(), new ObjectMapper());
+                .getTagGuard()
+                .getDatabaseFile(), new ObjectMapper());
 
         blockTagValuesTask.run();
         scheduleTagGuardJob();
     }
 
     private void scheduleTagGuardJob() {
-        Duration tagGuardScheduleDelay = env.getCurrentConfig().getMetrics().getTagGuardScheduleDelay();
+        Duration tagGuardScheduleDelay = env.getCurrentConfig().getMetrics().getTagGuard().getScheduleDelay();
         blockTagValuesFuture = executorService.schedule(blockTagValuesTask, tagGuardScheduleDelay.toNanos(), TimeUnit.NANOSECONDS);
     }
 
@@ -82,6 +90,7 @@ public class MeasureTagValueGuard {
     }
 
     Runnable blockTagValuesTask = () -> {
+
 
         Set<TagsHolder> copy = latestTags;
         latestTags = Collections.synchronizedSet(new HashSet<>());
@@ -126,12 +135,8 @@ public class MeasureTagValueGuard {
 
         // first common tags to allow to overwrite by constant or data tags
         commonTagsManager.getCommonTagKeys().forEach(commonTagKey -> {
-            if (!blockedTageKeys.containsKey(commonTagKey.getName())) {
-                Optional.ofNullable(inspectitContext.getData(commonTagKey.getName()))
-                        .ifPresent(value -> tags.put(commonTagKey.getName(), TagUtils.createTagValueAsString(commonTagKey.getName(), value.toString())));
-            } else {
-                tags.put(commonTagKey.getName(), "Bist du ne ID?");
-            }
+            Optional.ofNullable(inspectitContext.getData(commonTagKey.getName()))
+                    .ifPresent(value -> tags.put(commonTagKey.getName(), TagUtils.createTagValueAsString(commonTagKey.getName(), value.toString())));
         });
 
         // then constant tags to allow to overwrite by data
@@ -139,7 +144,9 @@ public class MeasureTagValueGuard {
             if (!blockedTageKeys.containsKey(key)) {
                 tags.put(key, TagUtils.createTagValueAsString(key, value));
             } else {
-                //blocked
+                String overflowReplacement = env.getCurrentConfig().getMetrics().getTagGuard().getOverflowReplacement();
+                tags.put(key, TagUtils.createTagValueAsString(key, overflowReplacement));
+                agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(), String.format(tagOverFlowMessageTemplate, key));
             }
         });
 
@@ -149,7 +156,9 @@ public class MeasureTagValueGuard {
                 Optional.ofNullable(accessor.get(context))
                         .ifPresent(tagValue -> tags.put(key, TagUtils.createTagValueAsString(key, tagValue.toString())));
             } else {
-                //blocked
+                String overflowReplacement = env.getCurrentConfig().getMetrics().getTagGuard().getOverflowReplacement();
+                tags.put(key, TagUtils.createTagValueAsString(key, overflowReplacement));
+                agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(), String.format(tagOverFlowMessageTemplate, key));
             }
         });
 

@@ -1,25 +1,18 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
-import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentHealthChangedEvent;
+import rocks.inspectit.ocelot.core.selfmonitoring.event.models.AgentHealthChangedEvent;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Manages the {@link AgentHealth} and publishes {@link AgentHealthChangedEvent}s when it changes.
@@ -27,17 +20,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class AgentHealthManager implements InternalProcessingAppender.LogEventConsumer {
-
-    private static final String LOG_CHANGE_STATUS = "The agent status changed from {} to {}.";
+public class AgentHealthManager {
 
     private final ApplicationContext ctx;
-
-    private final ScheduledExecutorService executor;
-
-    private final InspectitEnvironment env;
-
-    private final SelfMonitoringService selfMonitoringService;
 
     /**
      * Map of {@code eventClass -> agentHealth}, whereas the {@code agentHealth} is reset whenever an event of type
@@ -54,26 +39,11 @@ public class AgentHealthManager implements InternalProcessingAppender.LogEventCo
 
     private AgentHealth lastNotifiedHealth = AgentHealth.OK;
 
-    @Override
-    public void onLoggingEvent(ILoggingEvent event, Class<?> invalidator) {
-        if (AgentHealthManager.class.getCanonicalName().equals(event.getLoggerName())) {
-            // ignore own logs, which otherwise would tend to cause infinite loops
-            return;
-        }
+    private final InspectitEnvironment env;
 
-        AgentHealth eventHealth = AgentHealth.fromLogLevel(event.getLevel());
-
-        if (invalidator == null) {
-            handleTimeoutHealth(eventHealth);
-        } else {
-            handleInvalidatableHealth(eventHealth, invalidator);
-        }
-
-        triggerEventAndMetricIfHealthChanged();
-    }
-
-    private void handleInvalidatableHealth(AgentHealth eventHealth, Class<?> invalidator) {
+    public void handleInvalidatableHealth(AgentHealth eventHealth, Class<?> invalidator, String eventMessage) {
         invalidatableHealth.merge(invalidator, eventHealth, AgentHealth::mostSevere);
+        triggerEventAndMetricIfHealthChanged(eventMessage);
     }
 
     private void handleTimeoutHealth(AgentHealth eventHealth) {
@@ -81,6 +51,26 @@ public class AgentHealthManager implements InternalProcessingAppender.LogEventCo
 
         if (eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING)) {
             generalHealthTimeouts.put(eventHealth, LocalDateTime.now().plus(validityPeriod));
+        }
+    }
+
+    public void invalidateIncident(Class eventClass, String eventMessage) {
+        invalidatableHealth.remove(eventClass);
+        triggerEventAndMetricIfHealthChanged(eventMessage);
+    }
+
+    private void triggerEventAndMetricIfHealthChanged(String message) {
+        if (getCurrentHealth() != lastNotifiedHealth) {
+            synchronized (this) {
+                AgentHealth currHealth = getCurrentHealth();
+                if (currHealth != lastNotifiedHealth) {
+                    AgentHealth lastHealth = lastNotifiedHealth;
+                    lastNotifiedHealth = currHealth;
+
+                    AgentHealthChangedEvent event = new AgentHealthChangedEvent(this, lastHealth, currHealth, message);
+                    ctx.publishEvent(event);
+                }
+            }
         }
     }
 
@@ -105,77 +95,14 @@ public class AgentHealthManager implements InternalProcessingAppender.LogEventCo
         return AgentHealth.mostSevere(generalHealth, invHealth);
     }
 
-    @Override
-    public void onInvalidationEvent(Object invalidator) {
-        invalidatableHealth.remove(invalidator.getClass());
-        triggerEventAndMetricIfHealthChanged();
-    }
-
-    @PostConstruct
-    @VisibleForTesting
-    void registerAtAppender() {
-        InternalProcessingAppender.register(this);
-    }
-
-    @PostConstruct
-    @VisibleForTesting
-    void startHealthCheckScheduler() {
-        checkHealthAndSchedule();
-    }
-
-    @PostConstruct
-    @VisibleForTesting
-    void sendInitialHealthMetric() {
-        selfMonitoringService.recordMeasurement("health", AgentHealth.OK.ordinal());
-    }
-
-    @PreDestroy
-    @VisibleForTesting
-    void unregisterFromAppender() {
-        InternalProcessingAppender.unregister(this);
-    }
-
-    /**
-     * Checks whether the current health has changed since last check and schedules another check.
-     * The next check will run dependent on the earliest status timeout in the future:
-     * <ul>
-     *     <li>does not exist -> run again after validity period</li>
-     *     <li>exists -> run until that timeout is over</li>
-     * </ul>
-     */
-    private void checkHealthAndSchedule() {
-        triggerEventAndMetricIfHealthChanged();
-
+    public Duration getNextHealthTimeoutDuration() {
         Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod();
-        Duration delay = generalHealthTimeouts.values()
+        return generalHealthTimeouts.values()
                 .stream()
                 .filter(d -> d.isAfter(LocalDateTime.now()))
                 .max(Comparator.naturalOrder())
                 .map(d -> Duration.between(d, LocalDateTime.now()))
                 .orElse(validityPeriod);
-
-        executor.schedule(this::checkHealthAndSchedule, delay.toMillis(), TimeUnit.MILLISECONDS);
     }
 
-    private void triggerEventAndMetricIfHealthChanged() {
-        if (getCurrentHealth() != lastNotifiedHealth) {
-            synchronized (this) {
-                AgentHealth currHealth = getCurrentHealth();
-                if (currHealth != lastNotifiedHealth) {
-                    AgentHealth lastHealth = lastNotifiedHealth;
-                    lastNotifiedHealth = currHealth;
-                    if (currHealth.isMoreSevereOrEqualTo(lastHealth)) {
-                        log.warn(LOG_CHANGE_STATUS, lastHealth, currHealth);
-                    } else {
-                        log.info(LOG_CHANGE_STATUS, lastHealth, currHealth);
-                    }
-
-                    selfMonitoringService.recordMeasurement("health", currHealth.ordinal());
-
-                    AgentHealthChangedEvent event = new AgentHealthChangedEvent(this, lastHealth, currHealth);
-                    ctx.publishEvent(event);
-                }
-            }
-        }
-    }
 }

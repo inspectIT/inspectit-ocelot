@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.core.instrumentation.InstrumentationManager;
 import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
-import rocks.inspectit.ocelot.core.selfmonitoring.LogMetricsRecorderTest;
+import rocks.inspectit.ocelot.core.selfmonitoring.logs.LogMetricsRecorderTest;
 
 import static org.mockito.Mockito.*;
 

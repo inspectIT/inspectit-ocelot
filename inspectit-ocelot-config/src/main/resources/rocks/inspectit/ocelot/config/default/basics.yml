@@ -75,8 +75,11 @@ inspectit:
     #  - no measurement values are collected via instrumentation, however the instrumentation is still performed
     #  - no views and measures are created
     enabled: true
-    tag-guard-schedule-delay: 30s
-    tag-guard-database-file : ${inspectit.env.agent-dir}/${inspectit.service-name}/tag-guard-database.json
+
+    tag-guard:
+      schedule-delay: 30s
+      database-file : ${inspectit.env.agent-dir}/${inspectit.service-name}/tag-guard-database.json
+      overflow-replacement: "TAG_LIMIT_EXCEEDED"
 
 
   # logging settings
