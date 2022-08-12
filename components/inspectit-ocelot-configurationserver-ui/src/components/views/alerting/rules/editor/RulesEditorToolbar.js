@@ -63,27 +63,30 @@ const RulesEditorToolbar = ({
       `}</style>
 
       <div className="this">
-        <Toolbar>
-          <div className="p-toolbar-group-left">
-            <i className={classNames('pi', ruleIcon)}></i>
-            <h4>
-              <span className="template-details">{templateName}</span>
-              <span className="template-details spacer">{'>'}</span>
-              {ruleName}
-            </h4>
-            {isUnsaved && <div className="text-addition">*</div>}
-            {readOnly && <div className="text-addition">(read only)</div>}
-          </div>
-
-          <div className="p-toolbar-group-right">
-            <div className="enable-switch">
-              <span>Enabled:</span>
-              <InputSwitch disabled={readOnly} checked={ruleEnabled} onChange={(e) => onEnabledStateChanged(e.value)} />
+        <Toolbar
+          left={
+            <div className="p-toolbar-group-left">
+              <i className={classNames('pi', ruleIcon)}></i>
+              <h4>
+                <span className="template-details">{templateName}</span>
+                <span className="template-details spacer">{'>'}</span>
+                {ruleName}
+              </h4>
+              {isUnsaved && <div className="text-addition">*</div>}
+              {readOnly && <div className="text-addition">(read only)</div>}
             </div>
+          }
+          right={
+            <div className="p-toolbar-group-right">
+              <div className="enable-switch">
+                <span>Enabled:</span>
+                <InputSwitch disabled={readOnly} checked={ruleEnabled} onChange={(e) => onEnabledStateChanged(e.value)} />
+              </div>
 
-            {!readOnly && <Button disabled={numErrors > 0 || !isUnsaved} label="Save" icon="pi pi-save" onClick={onSave} />}
-          </div>
-        </Toolbar>
+              {!readOnly && <Button disabled={numErrors > 0 || !isUnsaved} label="Save" icon="pi pi-save" onClick={onSave} />}
+            </div>
+          }
+        />
       </div>
     </>
   );

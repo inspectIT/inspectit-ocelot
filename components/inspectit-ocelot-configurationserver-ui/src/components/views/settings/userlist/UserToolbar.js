@@ -26,23 +26,27 @@ class UserToolbar extends React.Component {
             }
           `}
         </style>
-        <Toolbar>
-          <div className="p-toolbar-group-left">
-            <div className="p-inputgroup" style={{ display: 'inline-flex', verticalAlign: 'middle' }}>
-              <span className="pi p-inputgroup-addon pi-search" />
-              <InputText
-                style={{ width: '300px' }}
-                value={this.props.filterValue}
-                placeholder="Filter Users"
-                onChange={(e) => this.props.onFilterChange(e.target.value)}
-              />
+        <Toolbar
+          left={
+            <div className="p-toolbar-group-left">
+              <div className="p-inputgroup" style={{ display: 'inline-flex', verticalAlign: 'middle' }}>
+                <span className="pi p-inputgroup-addon pi-search" />
+                <InputText
+                  style={{ width: '300px' }}
+                  value={this.props.filterValue}
+                  placeholder="Filter Users"
+                  onChange={(e) => this.props.onFilterChange(e.target.value)}
+                />
+              </div>
             </div>
-          </div>
-          <div className="p-toolbar-group-right">
-            <Button icon="pi pi-plus" onClick={this.props.onCreateUser} />
-            <Button icon="pi pi-refresh" onClick={() => this.props.fetchUsers()} />
-          </div>
-        </Toolbar>
+          }
+          right={
+            <div className="p-toolbar-group-right">
+              <Button icon="pi pi-plus" onClick={this.props.onCreateUser} />
+              <Button icon="pi pi-refresh" onClick={() => this.props.fetchUsers()} />
+            </div>
+          }
+        />
       </div>
     );
   }

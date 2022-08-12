@@ -89,50 +89,54 @@ class StatusToolbar extends React.Component {
             opacity: 1 !important;
           }
         `}</style>
-        <Toolbar>
-          <div className="p-toolbar-group-left">
-            <div className="p-inputgroup">
-              <span className="pi p-inputgroup-addon pi-search" />
+        <Toolbar
+          left={
+            <div className="p-toolbar-group-left">
+              <div className="p-inputgroup">
+                <span className="pi p-inputgroup-addon pi-search" />
 
-              <InputText
-                onKeyPress={this.onKeyPress}
-                style={{ width: '300px' }}
-                value={filter}
-                placeholder={'Filter Agents'}
-                onChange={(e) => onFilterChange(e.target.value)}
-              />
+                <InputText
+                  onKeyPress={this.onKeyPress}
+                  style={{ width: '300px' }}
+                  value={filter}
+                  placeholder={'Filter Agents'}
+                  onChange={(e) => onFilterChange(e.target.value)}
+                />
 
-              {error && <span className="p-inputgroup-addon regex-error">Invalid regular expression</span>}
-            </div>
+                {error && <span className="p-inputgroup-addon regex-error">Invalid regular expression</span>}
+              </div>
 
-            <div className="p-inputgroup checkbox-group">
-              <label>Use Regex</label>
-              <Checkbox onChange={onModeChange} checked={useRegexFilter} />
-            </div>
-            <div className="p-inputgroup checkbox-group">
-              <label>Combine duplicate services</label>
-              <Checkbox onChange={onServiceMergeChange} checked={useServiceMerge} />
-              <span
-                data-tip="Combine agents with the same name into a single entry.<br>
+              <div className="p-inputgroup checkbox-group">
+                <label>Use Regex</label>
+                <Checkbox onChange={onModeChange} checked={useRegexFilter} />
+              </div>
+              <div className="p-inputgroup checkbox-group">
+                <label>Combine duplicate services</label>
+                <Checkbox onChange={onServiceMergeChange} checked={useServiceMerge} />
+                <span
+                  data-tip="Combine agents with the same name into a single entry.<br>
                 Only the most recently started agent will be displayed.<br>
                 A badge behind the agents name will indicate the number of combined agents."
-                className="hint-badge"
-              >
-                ?
-              </span>
-              <ReactTooltip place="bottom" effect="solid" type="info" html={true} />
+                  className="hint-badge"
+                >
+                  ?
+                </span>
+                <ReactTooltip place="bottom" effect="solid" type="info" html={true} />
+              </div>
             </div>
-          </div>
-          <div className="p-toolbar-group-right">
-            <Button
-              onClick={fetchStatus}
-              tooltip="Reload"
-              icon={'pi pi-refresh' + (refreshing ? ' pi-spin' : '')}
-              tooltipOptions={tooltipOptions}
-            />
-            <Button disabled={disableClear || clearing} onClick={() => this.setState({ isClearDialogShown: true })} label="Clear All" />
-          </div>
-        </Toolbar>
+          }
+          right={
+            <div className="p-toolbar-group-right">
+              <Button
+                onClick={fetchStatus}
+                tooltip="Reload"
+                icon={'pi pi-refresh' + (refreshing ? ' pi-spin' : '')}
+                tooltipOptions={tooltipOptions}
+              />
+              <Button disabled={disableClear || clearing} onClick={() => this.setState({ isClearDialogShown: true })} label="Clear All" />
+            </div>
+          }
+        />
         <ClearDialog visible={this.state.isClearDialogShown} onHide={() => this.setState({ isClearDialogShown: false })} />
       </div>
     );

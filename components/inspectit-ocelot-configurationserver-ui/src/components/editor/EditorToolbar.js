@@ -43,71 +43,74 @@ const EditorToolbar = ({
         }
       `}
     </style>
-    <Toolbar>
-      <div className="p-toolbar-group-left">{children}</div>
-      <div className="p-toolbar-group-right button-not-active">
-        {!showMethodConfiguration && (
-          <Button
-            disabled={!enableButtons}
-            icon="pi pi-table"
-            className={!visualConfig && 'p-button-outlined'}
-            onClick={onVisualConfigChange}
-            tooltip="Show Table View"
-            tooltipOptions={TOOLTIP_OPTIONS}
-          />
-        )}
-        {!showMethodConfiguration && onRefresh && (
-          <Button
-            disabled={!enableButtons || isRefreshing}
-            icon={'pi pi-refresh' + (isRefreshing ? ' pi-spin' : '')}
-            onClick={onRefresh}
-            tooltip="Refresh File"
-            tooltipOptions={TOOLTIP_OPTIONS}
-          />
-        )}
-        {!showMethodConfiguration && !visualConfig && (
-          <>
+    <Toolbar
+      className="p-toolbar-group-left"
+      left={children}
+      right={
+        <div className="p-toolbar-group-right button-not-active">
+          {!showMethodConfiguration && (
             <Button
               disabled={!enableButtons}
-              icon="pi pi-question"
-              onClick={onHelp}
-              tooltip="Show Keyboard Shortcuts"
+              icon="pi pi-table"
+              className={!visualConfig && 'p-button-outlined'}
+              onClick={onVisualConfigChange}
+              tooltip="Show Table View"
               tooltipOptions={TOOLTIP_OPTIONS}
             />
+          )}
+          {!showMethodConfiguration && onRefresh && (
             <Button
-              disabled={!enableButtons}
-              icon="pi pi-search"
-              onClick={onSearch}
-              tooltip="Search in File"
+              disabled={!enableButtons || isRefreshing}
+              icon={'pi pi-refresh' + (isRefreshing ? ' pi-spin' : '')}
+              onClick={onRefresh}
+              tooltip="Refresh File"
               tooltipOptions={TOOLTIP_OPTIONS}
             />
-          </>
-        )}
-        {showMethodConfiguration && (
-          <SplitButton
-            disabled={!enableButtons}
-            label="Show as YAML"
+          )}
+          {!showMethodConfiguration && !visualConfig && (
+            <>
+              <Button
+                disabled={!enableButtons}
+                icon="pi pi-question"
+                onClick={onHelp}
+                tooltip="Show Keyboard Shortcuts"
+                tooltipOptions={TOOLTIP_OPTIONS}
+              />
+              <Button
+                disabled={!enableButtons}
+                icon="pi pi-search"
+                onClick={onSearch}
+                tooltip="Search in File"
+                tooltipOptions={TOOLTIP_OPTIONS}
+              />
+            </>
+          )}
+          {showMethodConfiguration && (
+            <SplitButton
+              disabled={!enableButtons}
+              label="Show as YAML"
+              tooltipOptions={TOOLTIP_OPTIONS}
+              onClick={onShowYaml}
+              model={[
+                {
+                  label: 'Convert to YAML',
+                  icon: 'pi pi-images',
+                  command: () => onConvert(),
+                },
+              ]}
+            />
+          )}
+          <Button
+            disabled={!enableButtons || !canSave}
+            onClick={onSave}
+            label="Save"
+            icon="pi pi-save"
+            tooltip="Save File"
             tooltipOptions={TOOLTIP_OPTIONS}
-            onClick={onShowYaml}
-            model={[
-              {
-                label: 'Convert to YAML',
-                icon: 'pi pi-images',
-                command: () => onConvert(),
-              },
-            ]}
           />
-        )}
-        <Button
-          disabled={!enableButtons || !canSave}
-          onClick={onSave}
-          label="Save"
-          icon="pi pi-save"
-          tooltip="Save File"
-          tooltipOptions={TOOLTIP_OPTIONS}
-        />
-      </div>
-    </Toolbar>
+        </div>
+      }
+    ></Toolbar>
   </div>
 );
 

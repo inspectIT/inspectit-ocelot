@@ -19,7 +19,9 @@ class LoginCard extends React.Component {
   inputNameRef = React.createRef();
 
   componentDidMount = () => {
-    this.inputNameRef.current.element.focus();
+    if (this.inputNameRef.current) {
+      this.inputNameRef.current.element.focus();
+    }
   };
 
   doLogin = () => {
