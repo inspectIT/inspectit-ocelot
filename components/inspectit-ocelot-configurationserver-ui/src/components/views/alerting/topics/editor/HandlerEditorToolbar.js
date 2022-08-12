@@ -45,22 +45,25 @@ const HandlerEditorToolbar = ({ handlerName, handlerKind, topicName, readOnly, i
           margin-left: 0.5rem;
         }
       `}</style>
-      <Toolbar>
-        <div className="p-toolbar-group-left">
-          <i className={classNames('pi', icon)}></i>
-          <h4>
-            <span className="topic-details">{topicName}</span>
-            <span className="topic-details spacer">{'>'}</span>
-            {handlerName}
-          </h4>
-          {isUnsaved && <div className="text-addition">*</div>}
-          {readOnly && <div className="text-addition">(read only)</div>}
-        </div>
-
-        <div className="p-toolbar-group-right button-not-active">
-          <Button disabled={readOnly || !isUnsaved} label="Save" icon="pi pi-save" onClick={onSave} />
-        </div>
-      </Toolbar>
+      <Toolbar
+        left={
+          <div className="p-toolbar-group-left">
+            <i className={classNames('pi', icon)}></i>
+            <h4>
+              <span className="topic-details">{topicName}</span>
+              <span className="topic-details spacer">{'>'}</span>
+              {handlerName}
+            </h4>
+            {isUnsaved && <div className="text-addition">*</div>}
+            {readOnly && <div className="text-addition">(read only)</div>}
+          </div>
+        }
+        right={
+          <div className="p-toolbar-group-right button-not-active">
+            <Button disabled={readOnly || !isUnsaved} label="Save" icon="pi pi-save" onClick={onSave} />
+          </div>
+        }
+      />
     </div>
   );
 };

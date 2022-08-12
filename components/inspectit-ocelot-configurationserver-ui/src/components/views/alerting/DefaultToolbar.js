@@ -29,14 +29,16 @@ const DefaultToolbar = ({ name, icon }) => {
       `}</style>
 
       <div className="this">
-        <Toolbar>
-          <div className="p-toolbar-group-left">
-            <div className="header">
-              <i className={'pi ' + icon}></i>
-              <h4>{name}</h4>
+        <Toolbar
+          left={
+            <div className="p-toolbar-group-left">
+              <div className="header">
+                <i className={'pi ' + icon}></i>
+                <h4>{name}</h4>
+              </div>
             </div>
-          </div>
-        </Toolbar>
+          }
+        />
       </div>
     </>
   );
