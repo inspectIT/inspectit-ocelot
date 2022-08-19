@@ -25,7 +25,7 @@ const PromotionToolbar = ({ onRefresh, onPromote, loading, enabled, canPromote }
             align-items: center;
           }
           .searchbox :global(.pi) {
-            font-size: 1.75rem;
+            font-size: 1.25rem;
             color: #aaa;
             margin-right: 1rem;
           }
