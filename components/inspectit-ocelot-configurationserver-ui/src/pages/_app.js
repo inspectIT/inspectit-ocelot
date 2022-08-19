@@ -29,6 +29,12 @@ class OcelotConfigurationUI extends App {
       <Container>
         <style global jsx>
           {`
+            .p-component {
+              font-size: 14px;
+            }
+            .p-button {
+              font-size: 14px;
+            }
             body {
               margin: 0;
               font-family: 'Open Sans', 'Helvetica Neue', sans-serif;

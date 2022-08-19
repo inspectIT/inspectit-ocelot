@@ -15,7 +15,7 @@ const SideNavigationItem = ({ href, icon, name, router, unfolded }) => {
         <style jsx>
           {`
             .pi {
-              font-size: 2rem;
+              font-size: 1.5rem;
               color: #bbb;
             }
             .anchor.active .pi,
