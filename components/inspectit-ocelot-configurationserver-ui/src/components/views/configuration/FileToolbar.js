@@ -40,6 +40,8 @@ const FileToolbar = ({
           border-radius: 0;
           background-color: #eee;
           border-bottom: 1px solid #ddd;
+          padding-top: 0.5rem;
+          padding-bottom: 0.5rem;
         }
 
         .this :global(.p-toolbar-group-left > *) {

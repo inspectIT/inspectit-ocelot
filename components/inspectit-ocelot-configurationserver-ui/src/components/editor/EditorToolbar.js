@@ -33,6 +33,8 @@ const EditorToolbar = ({
           border-radius: 0;
           background-color: #eee;
           border-bottom: 1px solid #ddd;
+          padding-top: 0.5rem;
+          padding-bottom: 0.5rem;
         }
         .p-toolbar-group-right > :global(*) {
           margin-left: 0.25rem;

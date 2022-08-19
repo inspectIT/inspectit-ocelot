@@ -13,9 +13,13 @@ class MappingToolbar extends React.Component {
   render() {
     const { filterValue, onChangeFilter, onAddNewMapping, onDownload, fetchMappings, readOnly } = this.props;
     return (
-      <div>
+      <div className="this">
         <style jsx>
           {`
+            .this :global(.p-toolbar) {
+              padding-top: 0.5rem;
+              padding-bottom: 0.5rem;
+            }
             .searchbox {
               display: flex;
               height: 2rem;
@@ -34,7 +38,7 @@ class MappingToolbar extends React.Component {
             <div className="p-toolbar-group-left">
               <div className="searchbox">
                 <i className="pi pi-sitemap" />
-                <h4 style={{ fontWeight: 'normal', marginRight: '1rem' }}>Agent Mappings</h4>
+                <h4 style={{ fontWeight: 'small', marginRight: '1rem' }}>Agent Mappings</h4>
                 <InputText
                   placeholder="Search"
                   value={filterValue}

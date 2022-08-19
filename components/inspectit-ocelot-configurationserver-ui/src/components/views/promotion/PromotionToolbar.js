@@ -12,9 +12,13 @@ const PromotionToolbar = ({ onRefresh, onPromote, loading, enabled, canPromote }
   };
 
   return (
-    <>
+    <div className="this">
       <style jsx>
         {`
+          .this :global(.p-toolbar) {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+          }
           .searchbox {
             display: flex;
             height: 2rem;
@@ -58,7 +62,7 @@ const PromotionToolbar = ({ onRefresh, onPromote, loading, enabled, canPromote }
           </div>
         }
       />
-    </>
+    </div>
   );
 };
 
