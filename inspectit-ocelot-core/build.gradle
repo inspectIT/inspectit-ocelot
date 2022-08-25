@@ -21,12 +21,16 @@ test {
     }
 }
 
+
 //checks the java version ONLY for the source code, and NOT the jar files
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(8))
     }
 }
+
+
+
 dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
@@ -159,6 +163,7 @@ dependencies {
     )
 
 }
+
 apply plugin: 'java'
 // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
 task(checkDependencyJavaVersions) {
@@ -197,6 +202,7 @@ task(checkDependencyJavaVersions) {
 
 
 }
+
 
 task generateVersionFile {
     ext.versionFile = new File(buildDir, "ocelot-version.info")

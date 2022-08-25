@@ -16,11 +16,15 @@ test {
 }
 
 group = 'rocks.inspectit.ocelot'
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(8))
     }
 }
+
+
+
 configurations {
     opentelemetry
 }
