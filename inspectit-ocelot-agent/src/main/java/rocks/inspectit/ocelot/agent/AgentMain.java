@@ -15,9 +15,7 @@ import java.nio.file.StandardCopyOption;
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
-import java.util.List;
 import java.util.jar.JarFile;
-import java.util.stream.Collectors;
 
 /**
  * Entry point of the agent.
@@ -53,7 +51,6 @@ public class AgentMain {
      */
     public static void main(String[] args) {
         boolean error = (args.length != 1 && args.length != 2) || !args[0].matches("\\d+");
-        
 
         if (error) {
             System.err.println("Please specify the PID of the JVM you want the agent attach to.\nNote: you can pass properties to the agent represented as a JSON string!\n\nUsage: <PID> [AGENT_PROPERTIES]");
