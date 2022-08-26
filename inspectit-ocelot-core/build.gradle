@@ -22,13 +22,8 @@ test {
 }
 
 
-//checks the java version ONLY for the source code, and NOT the jar files
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
-    }
-}
-
+sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
+targetCompatibility = 1.8 // Java version to generate classes for.
 
 
 dependencies {

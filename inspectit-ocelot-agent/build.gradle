@@ -17,12 +17,8 @@ test {
 
 group = 'rocks.inspectit.ocelot'
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
-    }
-}
-
+sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
+targetCompatibility = 1.8 // Java version to generate classes for.
 
 
 configurations {
