@@ -216,7 +216,7 @@ cyclonedxBom {
     includeConfigs += ["runtimeClasspath"]
 }
 
-// jar.dependsOn checkDependencyJavaVersions
+jar.dependsOn checkDependencyJavaVersions
 jar.dependsOn generateVersionFile
 
 jar {
