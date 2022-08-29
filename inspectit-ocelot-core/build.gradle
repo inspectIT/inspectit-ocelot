@@ -160,8 +160,16 @@ dependencies {
 }
 
 apply plugin: 'java'
+task compileJarCheck(type: JavaCompile){
+    source = sourceSets.main.java.srcDirs
+    include 'com/mindprod/jarcheck/JarCheck.java'
+    classpath = sourceSets.main.compileClasspath
+    destinationDir =  new File("${buildDir}/classes/java/main")
+}
+
 // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
-task(checkDependencyJavaVersions) {
+task checkDependencyJavaVersions {
+
     def excludes = ["byte-buddy",
                     // exclude OpenTelemetry as they guarantee JDK 8 support
                     "opentelemetry",
@@ -173,31 +181,26 @@ task(checkDependencyJavaVersions) {
     def jarCheckPath = "$buildDir/jarCheck"
     outputs.dir jarCheckPath
 
-
-    def jarCheckOutput = new File(jarCheckPath)
-    System.out.println(jarCheckOutput)
-    jarCheckOutput.mkdirs()
-    System.out.println(configurations.runtimeClasspath.files)
-    configurations.runtimeClasspath.each { file ->
-        System.out.println(file)
-        def name = file.name
-        def isExcluded = excludes.stream().anyMatch({ excl ->
-            name.contains(excl)
-        })
-        if (!isExcluded && file.exists()) {
-            javaexec {
-                mainClass = 'com.mindprod.jarcheck.JarCheck'
-                classpath = sourceSets.main.runtimeClasspath
-                args = ["$file", "1.0", "1.8"]
-                println "execute JarCheck for $name"
-                standardOutput = new File(jarCheckOutput, "$name-check.log").newOutputStream()
+    doFirst {
+        def jarCheckOutput = new File(jarCheckPath)
+        jarCheckOutput.mkdirs()
+        configurations.runtimeClasspath.each { file ->
+            def name = file.name
+            def isExcluded = excludes.stream().anyMatch({ excl ->
+                name.contains(excl)
+            })
+            if (!isExcluded && file.exists()) {
+                javaexec {
+                    mainClass = 'com.mindprod.jarcheck.JarCheck'
+                    classpath = sourceSets.main.runtimeClasspath
+                    args = ["$file", "1.0", "1.8"]
+                    standardOutput = new File(jarCheckOutput, "$name-check.log").newOutputStream()
+                }
             }
         }
     }
-
-
 }
-
+checkDependencyJavaVersions.dependsOn compileJarCheck
 
 task generateVersionFile {
     ext.versionFile = new File(buildDir, "ocelot-version.info")
@@ -213,6 +216,7 @@ cyclonedxBom {
     includeConfigs += ["runtimeClasspath"]
 }
 
+// jar.dependsOn checkDependencyJavaVersions
 jar.dependsOn generateVersionFile
 
 jar {

@@ -209,6 +209,7 @@ public final class JarCheck
             boolean success = checkJar( jarFilename, low, high );
             if ( !success )
             {
+                err.println("JarCheck failed for " + jarFilename+". See error messages above.");
                 System.exit( 1 );
             }
         }
