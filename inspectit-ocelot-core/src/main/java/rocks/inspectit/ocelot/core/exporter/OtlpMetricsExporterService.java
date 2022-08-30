@@ -7,7 +7,7 @@ import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -139,7 +139,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
     }
 
     @Override
-    public MetricReaderFactory getNewMetricReaderFactory() {
-        return metricReaderBuilder.newMetricReaderFactory();
+    public MetricReader getNewMetricReader() {
+        return metricReaderBuilder.build();
     }
 }
