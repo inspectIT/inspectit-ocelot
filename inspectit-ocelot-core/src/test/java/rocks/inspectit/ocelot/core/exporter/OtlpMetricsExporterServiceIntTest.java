@@ -51,7 +51,7 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
     @Test
     void verifyMetricsWrittenGrpc() {
         updateProperties(mps -> {
-            mps.setProperty("inspectit.exporters.metrics.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_GRPC_PORT, OTLP_METRICS_PATH));
+            mps.setProperty("inspectit.exporters.metrics.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_GRPC_PORT));
             mps.setProperty("inspectit.exporters.metrics.otlp.export-interval", "500ms");
             mps.setProperty("inspectit.exporters.metrics.otlp.enabled", ExporterEnabledState.ENABLED);
             mps.setProperty("inspectit.exporters.metrics.otlp.protocol", TransportProtocol.GRPC);
