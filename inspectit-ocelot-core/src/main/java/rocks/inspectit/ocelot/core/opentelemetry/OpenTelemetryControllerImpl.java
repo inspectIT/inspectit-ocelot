@@ -333,13 +333,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         sampler = new DynamicSampler(sampleProbability);
         multiSpanExporter = DynamicMultiSpanExporter.create();
         // @formatter:off
-        Resource tracerProviderAttributes = Resource.create(Attributes.of(
-                ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName(),
-                AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion(),
-                ResourceAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion(),
-                ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java",
-                ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"
-        ));
+        Resource tracerProviderAttributes = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters()
+                .getTracing()
+                .getServiceName(), AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion(), ResourceAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion(), ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java", ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"));
         // @formatter:on
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)
                 .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
@@ -409,7 +405,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
             // register metric reader for each service
             for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {
-                builder.registerMetricReader(OpenCensusMetrics.attachTo(metricsExportService.getNewMetricReaderFactory()));
+                builder.registerMetricReader(OpenCensusMetrics.attachTo(metricsExportService.getNewMetricReader()));//OpenCensusMetrics.attachTo(metricsExportService.getNewMetricReader()));
             }
 
             return builder.build();

@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.core.exporter;
 
 import io.opentelemetry.exporter.prometheus.PrometheusHttpServer;
 import io.opentelemetry.exporter.prometheus.PrometheusHttpServerBuilder;
-import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
@@ -60,7 +60,7 @@ public class PrometheusExporterService extends DynamicallyActivatableMetricsExpo
     }
 
     @Override
-    public MetricReaderFactory getNewMetricReaderFactory() {
-        return prometheusHttpServerBuilder.newMetricReaderFactory();
+    public MetricReader getNewMetricReader() {
+        return prometheusHttpServerBuilder.build();
     }
 }
