@@ -1,0 +1,38 @@
+name: Deploy Master Documentation
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - inspectit-ocelot-documentation/**
+
+jobs:
+
+  deploy_master_documentation:
+    name: "Publish Master Documentation"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: inspectit-ocelot-documentation/website
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: yarn
+          cache-dependency-path: 'inspectit-ocelot-documentation/website/yarn.lock'
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Build website
+        run: yarn build
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./inspectit-ocelot-documentation/website/build/inspectit-ocelot
+          user_name: NTTechnicalUser
+          user_email: NTTechnicalUser@users.noreply.github.com
+          commit_message: "Updated master documentation"
