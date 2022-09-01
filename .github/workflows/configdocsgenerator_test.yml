@@ -1,13 +1,15 @@
 name: ConfigDocsGenerator Tests
 
 on:
-  push:
-    branches:
-      - master
+  #push:
+  #  branches:
+  #    - master
   pull_request:
     paths:
       - '.github/workflows/configdocsgenerator_test.yml'
       - 'components/inspectit-ocelot-configdocsgenerator/**'
+  workflow_call:
+
 jobs:
   test:
     name: Test

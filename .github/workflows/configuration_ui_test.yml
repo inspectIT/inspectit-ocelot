@@ -1,12 +1,14 @@
 name: Configuration UI Tests
 
 on:
-  push:
-    branches:
-      - master
+  #push:
+  #  branches:
+  #    - master
   pull_request:
     paths:
       - 'components/inspectit-ocelot-configurationserver-ui/**'
+  workflow_call:
+
 
 jobs:
   test:
