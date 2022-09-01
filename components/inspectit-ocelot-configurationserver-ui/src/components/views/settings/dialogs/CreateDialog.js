@@ -100,10 +100,9 @@ class CreateDialog extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (!prevProps.visible && this.props.visible) {
-      /**Timeout is needed for .focus() to be triggered correctly. */
-      setTimeout(() => {
+      if (this.input.current) {
         this.input.current.element.focus();
-      }, 0);
+      }
       this.setState({ ...initialState });
     }
   }
