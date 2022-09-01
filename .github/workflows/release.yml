@@ -42,3 +42,46 @@ jobs:
           body: "You can also find the corresponding documentation online under the following link: [inspectIT Ocelot Documentation](http://docs.inspectit.rocks)"
 
 
+  build_documentation:
+    name: "Build and Publish Release Documentation"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: inspectit-ocelot-documentation/website
+    #needs: build_and_release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: yarn
+          cache-dependency-path: 'inspectit-ocelot-documentation/website/yarn.lock'
+      - name: Replace Variables in Docs
+        working-directory: ./inspectit-ocelot-documentation/docs
+        run: |
+          find . -type f -print0 | xargs -0 sed -i 's/{inspectit-ocelot-version}/'"${{ github.ref_name }}"'/g'
+          OPEN_CENSUS_VERSION=$(cat ../../gradle.properties | grep -oP '(?<=openCensusVersion=).*')
+          find . -type f -print0 | xargs -0 sed -i 's/{opencensus-version}/'"${OPEN_CENSUS_VERSION}"'/g'
+      - name: Create new Documentation Version
+        run: |
+          npm install
+          npm run version ${{ github.ref_name }}
+          git add versions.json versioned_docs versioned_sidebars
+          git config --global user.name 'NTTechnicalUser'
+          git config --global user.email 'NTTechnicalUser@users.noreply.github.com'
+          git commit -m "Publish documentation for release ${{ github.ref_name }}"
+          git push origin HEAD:master
+      - name: Install Build Dependencies
+        run: yarn install --frozen-lockfile
+      - name: Build Website
+        run: yarn build
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./inspectit-ocelot-documentation/website/build/inspectit-ocelot
+          user_name: NTTechnicalUser
+          user_email: NTTechnicalUser@users.noreply.github.com
+          commit_message: Publish documentation for release ${{ github.ref_name }}
