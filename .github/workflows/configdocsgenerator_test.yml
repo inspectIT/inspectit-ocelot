@@ -1,9 +1,9 @@
 name: ConfigDocsGenerator Tests
 
 on:
-  #push:
-  #  branches:
-  #    - master
+  push:
+    branches:
+      - master
   pull_request:
     paths:
       - '.github/workflows/configdocsgenerator_test.yml'
