@@ -42,6 +42,26 @@ jobs:
           body: "You can also find the corresponding documentation online under the following link: [inspectIT Ocelot Documentation](http://docs.inspectit.rocks)"
 
 
+  build_and_publish_docker_images:
+    name: 'Build and Push Docker Images'
+    runs-on: ubuntu-latest
+    needs: build_and_release
+    environment: release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build Docker Images
+        run: ./gradlew dockerTag -PbuildVersion=${{ github.ref_name }}
+      - name: Push Docker Images
+        run: |
+          docker login -u ${{ secrets.DOCKER_HUB_USER }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
+          docker push aaronweikru/inspectit-ocelot-agent:${{ github.ref_name }}
+          docker push aaronweikru/inspectit-ocelot-agent:latest
+          docker push aaronweikru/inspectit-ocelot-configurationserver:${{ github.ref_name }}
+          docker push aaronweikru/inspectit-ocelot-configurationserver:latest
+
   build_documentation:
     name: "Build and Publish Release Documentation"
     runs-on: ubuntu-latest
