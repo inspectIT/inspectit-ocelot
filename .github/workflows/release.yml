@@ -1,0 +1,44 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "[0-9]*.[0-9]*.[0-9]**"
+
+jobs:
+
+
+  build_and_release:
+    name: 'Build and Release'
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build artifacts
+        run: |
+          ./gradlew assemble bootJarWithFrontend :inspectit-ocelot-core:cyclonedxBom :inspectit-ocelot-configurationserver:cyclonedxBom -PbuildVersion=${{ github.ref_name }}
+          mkdir artifacts
+          cp ./inspectit-ocelot-agent/build/inspectit-ocelot-agent-${{ github.ref_name }}.jar ./artifacts
+          cp ./components/inspectit-ocelot-configurationserver/build/libs/inspectit-ocelot-configurationserver-${{ github.ref_name }}.jar ./artifacts
+          mkdir boms
+          cp ./inspectit-ocelot-core/build/reports/bom.json ./boms/inspectit-ocelot-agent-bom.json
+          cp ./inspectit-ocelot-core/build/reports/bom.xml ./boms/inspectit-ocelot-agent-bom.xml
+          cp ./components/inspectit-ocelot-configurationserver/build/reports/bom.json ./boms/inspectit-ocelot-configurationserver-bom.json
+          cp ./components/inspectit-ocelot-configurationserver/build/reports/bom.xml ./boms/inspectit-ocelot-configurationserver-bom.xml
+          zip -r ./artifacts/software-bill-of-materials.zip ./boms
+      - name: Calculate checksums of release artifacts
+        working-directory: ./artifacts
+        run: for f in *; do sha256sum "$f" >> inspectit-ocelot-sha256-checksums.txt; done
+      - name: Create Release
+        uses: softprops/action-gh-release@v0.1.14
+        with:
+          tag_name: ${{ github.event.inputs.boomerang-version }}
+          files: artifacts/*
+          generate_release_notes: true
+          name: Version ${{ github.ref_name }}
+          body: "You can also find the corresponding documentation online under the following link: [inspectIT Ocelot Documentation](http://docs.inspectit.rocks)"
+
+
