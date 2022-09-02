@@ -80,7 +80,7 @@ jobs:
     defaults:
       run:
         working-directory: inspectit-ocelot-documentation/website
-    #needs: build_and_release
+    needs: build_and_release
     steps:
       - name: Checkout
         uses: actions/checkout@v3
