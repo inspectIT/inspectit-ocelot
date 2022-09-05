@@ -151,8 +151,17 @@ public class AgentHealthManager implements InternalProcessingAppender.LogEventCo
                 .stream()
                 .filter(d -> d.isAfter(LocalDateTime.now()))
                 .max(Comparator.naturalOrder())
-                .map(d -> Duration.between(d, LocalDateTime.now()))
+                .map(d -> Duration.between(d, LocalDateTime.now()).abs())
                 .orElse(validityPeriod);
+
+        delay = Duration.ofMillis(Math.max(delay.toMillis(), env.getCurrentConfig()
+                .getSelfMonitoring()
+                .getAgentHealth()
+                .getMinHealthCheckDelay()
+                .toMillis()));
+        if (log.isDebugEnabled()) {
+            log.debug("Schedule health check in {} minutes", delay.toMinutes());
+        }
 
         executor.schedule(this::checkHealthAndSchedule, delay.toMillis(), TimeUnit.MILLISECONDS);
     }
