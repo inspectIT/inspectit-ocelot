@@ -5,7 +5,7 @@ module.exports = withCSS({
     distDir: '../.next',
 
     // Each page will be exported as a directory
-    exportTrailingSlash: true,
+    trailingSlash: true,
 
     assetPrefix: isProduction ? '/ui' : '',
 
