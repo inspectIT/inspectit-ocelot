@@ -7,6 +7,8 @@ on:
   pull_request:
     branches:
       - master
+      - 1.*.*
+      - 2.*.*
     paths-ignore:
       - 'components/**'
       - 'inspectit-ocelot-documentation/**'

@@ -15,6 +15,11 @@ inspectit:
       # health changes due to instrumentation errors are valid until the next re-instrumentation
       validity-period: 1h
 
+      # The minimum delay how often the AgentHealthManager checks for invalid agent health events to clear health status
+      # By default the delay is calculated based on the last agent health event
+      # Minimum value is 1m
+      min-health-check-delay: 1m
+
   # definitions of existing self-monitoring metrics
   metrics:
     definitions:
