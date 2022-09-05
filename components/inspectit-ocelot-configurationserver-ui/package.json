@@ -25,6 +25,8 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
+    "@babel/eslint-parser": "^7.18.9",
+    "@babel/preset-react": "^7.18.6",
     "@zeit/next-css": "^1.0.1",
     "ace-builds": "^1.7.1",
     "axios": "^0.27.2",
