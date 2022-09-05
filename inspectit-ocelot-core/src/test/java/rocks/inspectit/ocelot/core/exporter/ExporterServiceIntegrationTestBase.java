@@ -61,9 +61,6 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
 
     static final String COLLECTOR_IMAGE = "otel/opentelemetry-collector-contrib:" + COLLECTOR_TAG;
 
-    // This image was used previously.
-    // static final String COLLECTOR_IMAGE = "ghcr.io/open-telemetry/opentelemetry-java/otel-collector@sha256:d34519458388e55a3fce38a33e6bc424267c1f432927c09e932ba45f7575bd84"; //"otel/opentelemetry-collector";//
-
     static final Integer COLLECTOR_OTLP_GRPC_PORT = 4317;
 
     static final Integer COLLECTOR_OTLP_HTTP_PORT = 4318;
