@@ -50,6 +50,7 @@ public class AgentHealthManagerTest {
         config = new InspectitConfig();
         AgentHealthSettings agentHealth = new AgentHealthSettings();
         agentHealth.setValidityPeriod(Duration.ofMillis(VALIDITY_PERIOD_MILLIS));
+        agentHealth.setMinHealthCheckDelay(Duration.ofMillis(0));
         SelfMonitoringSettings selfMonitoring = new SelfMonitoringSettings();
         selfMonitoring.setAgentHealth(agentHealth);
         config.setSelfMonitoring(selfMonitoring);
@@ -57,6 +58,7 @@ public class AgentHealthManagerTest {
 
     @BeforeEach
     void setupStatusManager() {
+
         executorService = new ScheduledThreadPoolExecutor(1);
 
         environment = mock(InspectitEnvironment.class);
