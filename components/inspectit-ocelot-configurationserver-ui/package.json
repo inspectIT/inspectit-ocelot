@@ -55,8 +55,10 @@
     "redux-devtools-extension": "^2.13.2",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.4.1",
+    "require-from-string": "2.0.2",
     "reselect": "^4.1.6",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "webpack": "4.46.0"
   },
   "license": "Apache-2.0",
   "devDependencies": {
