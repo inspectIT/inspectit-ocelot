@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 import { map, find, get } from 'lodash';
 import { getFile, isDirectory } from './utils';
-import { DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
+import { DEFAULT_CONFIG_TREE_KEY, HIDDEN_FILES_NAME_PATTERN } from '../../../data/constants';
 
 const configurationSelector = (state) => state.configuration;
 
@@ -24,6 +24,15 @@ const filetypeIconMapping = {
  */
 const resolveFileTypeToIcon = (type) => {
   return 'pi pi-fw ' + get(filetypeIconMapping, type, filetypeIconMapping['_default']);
+};
+
+/**
+ * Resolves the className for a given file in the tree
+ * @param file The file to resolve the className for
+ * @returns {string} The className
+ */
+const resolveFileToClassName = (file) => {
+  return file.name.match(HIDDEN_FILES_NAME_PATTERN) ? 'cm-hidden-file-tree-label' : '';
 };
 
 /**
@@ -64,6 +73,7 @@ const _asTreeNode = (parentKey, node, unsavedFileContents, isLatest) => {
       key,
       label: labelValue,
       icon: resolveFileTypeToIcon(type),
+      className: resolveFileToClassName(node),
       children: map(node.children, (child) => _asTreeNode(key + '/', child, unsavedFileContents, isLatest)),
     };
   } else {
@@ -72,6 +82,7 @@ const _asTreeNode = (parentKey, node, unsavedFileContents, isLatest) => {
       key,
       label: labelValue,
       icon: resolveFileTypeToIcon(type),
+      className: resolveFileToClassName(node),
     };
   }
 };

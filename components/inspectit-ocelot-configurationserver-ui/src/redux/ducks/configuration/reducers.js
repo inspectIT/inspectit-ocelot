@@ -211,6 +211,13 @@ const configurationReducer = createReducer(initialState)({
       currentSidebar: state.currentSidebar == SidebarTypes.CONFIGURATION_DOCS ? SidebarTypes.NONE : SidebarTypes.CONFIGURATION_DOCS,
     };
   },
+
+  [types.TOGGLE_SHOW_HIDDEN_FILES]: (state) => {
+    return {
+      ...state,
+      showHiddenFiles: !state.showHiddenFiles,
+    };
+  },
 });
 
 export default configurationReducer;
