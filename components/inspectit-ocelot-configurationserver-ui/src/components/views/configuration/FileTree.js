@@ -147,46 +147,46 @@ class FileTree extends React.Component {
     return (
       <div className="this" onContextMenu={readOnly ? undefined : this.showContextMenu} onKeyDown={readOnly ? undefined : this.onKeyDown}>
         <style jsx>{`
-                  .this {
-                    overflow: auto;
-                    flex-grow: 1;
-                    display: flex;
-                    flex-direction: column;
-                  }
+          .this {
+            overflow: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+          }
 
-                  .this :global(.cm-tree-icon) {
-                    width: 1.3rem;
-                    height: 1.3rem;
-                  }
+          .this :global(.cm-tree-icon) {
+            width: 1.3rem;
+            height: 1.3rem;
+          }
 
-                  .this :global(.cm-tree-label) {
-                    color: #aaa;
-                  }
-                  
-                  .this :global(.cm-hidden-file-tree-label){
-                    color: #aaa;
-                  }
-                    
-                  .this :global(.ocelot-tree-head-orange) {
-                    background: url("${linkPrefix}/static/images/inspectit-ocelot-head_orange.svg") center no-repeat;
-                    background-size: 1rem 1rem;
-                  }
+          .this :global(.cm-tree-label) {
+            color: #aaa;
+          }
 
-                  .this :global(.ocelot-tree-head-white) {
-                    background: url("${linkPrefix}/static/images/inspectit-ocelot-head_white.svg") center no-repeat;
-                    background-size: 1rem 1rem;
-                  }
+          .this :global(.cm-hidden-file-tree-label) {
+            color: #aaa;
+          }
 
-                  .tree-container {
-                    overflow: auto;
-                  }
+          .this :global(.ocelot-tree-head-orange) {
+            background: url('${linkPrefix}/static/images/inspectit-ocelot-head_orange.svg') center no-repeat;
+            background-size: 1rem 1rem;
+          }
 
-                  .version-banner {
-                    background-color: #ffcc80;
-                    height: 2.45rem;
-                    border-bottom: 1px solid #dddddd;
-                  }
-                `}</style>
+          .this :global(.ocelot-tree-head-white) {
+            background: url('${linkPrefix}/static/images/inspectit-ocelot-head_white.svg') center no-repeat;
+            background-size: 1rem 1rem;
+          }
+
+          .tree-container {
+            overflow: auto;
+          }
+
+          .version-banner {
+            background-color: #ffcc80;
+            height: 2.45rem;
+            border-bottom: 1px solid #dddddd;
+          }
+        `}</style>
         {selectedVersion && <div className="version-banner" />}
         <div className="tree-container">
           <ContextMenu model={this.state.contextMenuModel} ref={this.contextMenuRef} />
