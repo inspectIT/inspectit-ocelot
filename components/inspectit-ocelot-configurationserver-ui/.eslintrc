@@ -13,12 +13,16 @@
         "plugin:react/recommended",
         "plugin:prettier/recommended"
     ],
-    "parser": "babel-eslint",
+    "parser": "@babel/eslint-parser",
     "parserOptions": {
         "sourceType": "module",
         "ecmaVersion": 2018,
         "ecmaFeatures": {
             "jsx": true
+        },
+        "requireConfigFile": false,
+        "babelOptions": {
+            "presets": ["@babel/preset-react"]
         }
     },
     "settings": {
