@@ -55,19 +55,30 @@ public class AgentServiceTest {
 
         AgentService.SupportArchiveData expectedResult;
 
-        public void setupTestData() {
+        public void setupTestData(boolean logPreloadingEnabled) {
             serviceSpy = Mockito.spy(cut);
-            config = AgentConfiguration.builder().configYaml("log-preloading: {enabled: true}").build();
+
+            //set config
+            config = AgentConfiguration.builder()
+                    .configYaml(String.format("inspectit.log-preloading: {enabled: %b}", logPreloadingEnabled))
+                    .build();
+
+            //set attributes
             attributes = new HashMap<String, String>() {{
                 put("agent-id", "test");
             }};
 
-            logs = "logs: thisisalog";
+            //set logs expected result
+            logs = logPreloadingEnabled ? "logs: thisisalog" : AgentService.LOG_PRELOADING_DISABLED_MESSAGE;
+
+            //set environment expected result
             environmentDetail = new EnvironmentCommand.EnvironmentDetail() {{
                 setEnvironmentVariables(System.getenv());
                 setSystemProperties(System.getProperties());
                 setJvmArguments(ManagementFactory.getRuntimeMXBean().getInputArguments());
             }};
+
+            //create expected result object
             expectedResult = new AgentService.SupportArchiveData() {{
                 setEnvironmentDetails(environmentDetail);
                 setLogs(logs);
@@ -75,26 +86,49 @@ public class AgentServiceTest {
             }};
         }
 
-        @Test
-        public void shouldBuildSupportArchive() throws ExecutionException {
-            setupTestData();
-
+        public void setupTestObject(boolean logPreloadingEnabled) throws ExecutionException {
             DeferredResult<ResponseEntity<?>> envResult = new DeferredResult<ResponseEntity<?>>() {{
                 setResult(ResponseEntity.ok().body(environmentDetail));
-            }};
-            DeferredResult<ResponseEntity<?>> logsResult = new DeferredResult<ResponseEntity<?>>() {{
-                setResult(ResponseEntity.ok().body(logs));
             }};
 
             when(configuration.getAgentCommand()).thenReturn(new AgentCommandSettings());
             when(configManager.getConfiguration(anyMap())).thenReturn(config);
             doReturn(envResult).when(serviceSpy).environment(anyString());
-            doReturn(logsResult).when(serviceSpy).logs(anyString());
+
+            if (logPreloadingEnabled) {
+                DeferredResult<ResponseEntity<?>> logsResult = new DeferredResult<ResponseEntity<?>>() {{
+                    setResult(ResponseEntity.ok().body(logs));
+                }};
+
+                doReturn(logsResult).when(serviceSpy).logs(anyString());
+            }
+        }
+
+        @Test
+        public void shouldBuildSupportArchive() throws ExecutionException {
+            setupTestData(true);
+            setupTestObject(true);
 
             DeferredResult<ResponseEntity<?>> actualResult = serviceSpy.buildSupportArchive(attributes, configManager);
             ResponseEntity<?> unwrappedResult = (ResponseEntity<?>) actualResult.getResult();
+            
             assertThat(unwrappedResult.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(unwrappedResult.getBody()).isEqualTo(expectedResult);
+        }
+
+        @Test
+        public void logPreloadingDisabled() throws ExecutionException {
+            setupTestData(false);
+            setupTestObject(false);
+
+            DeferredResult<ResponseEntity<?>> actualResult = serviceSpy.buildSupportArchive(attributes, configManager); // Result of calling the method
+            ResponseEntity<?> unwrappedResult = (ResponseEntity<?>) actualResult.getResult();
+            AgentService.SupportArchiveData supportArchiveData = (AgentService.SupportArchiveData) unwrappedResult.getBody();
+
+            assertThat(unwrappedResult.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(supportArchiveData).isEqualTo(expectedResult);
+            assertThat(supportArchiveData.getLogs()).isEqualTo(AgentService.LOG_PRELOADING_DISABLED_MESSAGE);
+            verify(serviceSpy, never()).logs(anyString());
         }
     }
 }

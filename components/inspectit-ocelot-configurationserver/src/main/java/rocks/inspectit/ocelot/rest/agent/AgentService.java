@@ -1,7 +1,11 @@
 package rocks.inspectit.ocelot.rest.agent;
 
+import com.google.common.annotations.VisibleForTesting;
+import inspectit.ocelot.configdocsgenerator.parsing.ConfigParser;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -10,6 +14,7 @@ import rocks.inspectit.ocelot.agentcommunication.AgentCommandDispatcher;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.commons.models.command.impl.EnvironmentCommand;
 import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.util.Map;
@@ -24,9 +29,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class AgentService {
 
+    @VisibleForTesting
+    final static String LOG_PRELOADING_DISABLED_MESSAGE = "Logs cannot be retrieved because log preloading (inspectit.log-preloading) is not enabled. To retrieve agent logs, please enable the log preloading.";
+
     private AgentCommandDispatcher commandDispatcher;
 
     private InspectitServerSettings configuration;
+
+    private final ConfigParser configParser = new ConfigParser();
+
+    private final Logger logger = LoggerFactory.getLogger(AgentService.class);
 
     public AgentService(AgentCommandDispatcher commandDispatcher, InspectitServerSettings configuration) {
         this.commandDispatcher = commandDispatcher;
@@ -67,7 +79,21 @@ public class AgentService {
         String agentId = attributes.get("agent-id");
         AtomicInteger commandsLeft = new AtomicInteger(0);
         handleCommandResult(environment(agentId), composedResult, commandsLeft, ArchiveElement.ENV, archiveData);
-        handleCommandResult(logs(agentId), composedResult, commandsLeft, ArchiveElement.LOG, archiveData);
+        InspectitConfig inspectitConfig = null;
+
+        try {
+            inspectitConfig = configParser.parseConfig(archiveData.getCurrentConfig());
+        } catch (Exception e) {
+            logger.error("Could not parse Config", e);
+        }
+
+        if (inspectitConfig != null && inspectitConfig.getLogPreloading() != null && inspectitConfig.getLogPreloading()
+                .isEnabled()) {
+            handleCommandResult(logs(agentId), composedResult, commandsLeft, ArchiveElement.LOG, archiveData);
+        } else {
+            archiveData.logs = LOG_PRELOADING_DISABLED_MESSAGE;
+        }
+
         return composedResult;
     }
 
@@ -90,7 +116,7 @@ public class AgentService {
                         break;
                     case LOG:
                         ResponseEntity<String> logResponse = (ResponseEntity<String>) result;
-                        archiveData.logs = archiveData.currentConfig.contains("log-preloading: {enabled: true}") ? logResponse.getBody() : "Logs cannot be retrieved because log preloading (inspectit.log-preloading) is not enabled. To retrieve agent logs, please enable the log preloading.";
+                        archiveData.logs = logResponse.getBody();
                         break;
                 }
                 if (open == 0) {
