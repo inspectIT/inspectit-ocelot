@@ -57,7 +57,9 @@ import static org.testcontainers.Testcontainers.exposeHostPorts;
 @Testcontainers(disabledWithoutDocker = true)
 abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
 
-    static final String COLLECTOR_IMAGE = "ghcr.io/open-telemetry/opentelemetry-java/otel-collector@sha256:d34519458388e55a3fce38a33e6bc424267c1f432927c09e932ba45f7575bd84";
+    static final String COLLECTOR_TAG = "0.58.0";
+
+    static final String COLLECTOR_IMAGE = "otel/opentelemetry-collector-contrib:" + COLLECTOR_TAG;
 
     static final Integer COLLECTOR_OTLP_GRPC_PORT = 4317;
 
@@ -91,7 +93,7 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
     private static final Logger LOGGER = Logger.getLogger(ExporterServiceIntegrationTestBase.class.getName());
 
     /**
-     * The {@link OtlpGrpcServer} used as an exporter endpoirt for the OpenTelemetry Collector
+     * The {@link OtlpGrpcServer} used as an exporter endpoint for the OpenTelemetry Collector
      */
     static OtlpGrpcServer grpcServer;
 
@@ -160,6 +162,17 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
      */
     static String getEndpoint(Integer originalPort, String path) {
         return String.format("http://%s:%d/%s", collector.getHost(), collector.getMappedPort(originalPort), path.startsWith("/") ? path.substring(1) : path);
+    }
+
+    /**
+     * Gets the desired endpoint of the {@link #collector} constructed as 'http://{@link GenericContainer#getHost() collector.getHost()}:{@link GenericContainer#getMappedPort(int) collector.getMappedPort(port)}'
+     *
+     * @param originalPort the port to get the actual mapped port for
+     *
+     * @return the constructed endpoint for the {@link #collector}
+     */
+    static String getEndpoint(Integer originalPort) {
+        return String.format("http://%s:%d", collector.getHost(), collector.getMappedPort(originalPort));
     }
 
     /**

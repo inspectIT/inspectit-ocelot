@@ -22,7 +22,7 @@ import static org.awaitility.Awaitility.await;
 @DirtiesContext
 public class OtlpTraceExporterServiceIntTest extends ExporterServiceIntegrationTestBase {
 
-    public static final String OTLP_GRPC_TRACING_PATH = "/v1/trace";
+    public static final String OTLP_TRACING_PATH = "/v1/traces";
 
     @RegisterExtension
     LogCapturer warnLogs = LogCapturer.create()
@@ -41,7 +41,7 @@ public class OtlpTraceExporterServiceIntTest extends ExporterServiceIntegrationT
     void verifyTraceSentGrpc() {
         updateProperties(properties -> {
             properties.setProperty("inspectit.exporters.tracing.otlp.protocol", TransportProtocol.GRPC);
-            properties.setProperty("inspectit.exporters.tracing.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_GRPC_PORT, OTLP_GRPC_TRACING_PATH));
+            properties.setProperty("inspectit.exporters.tracing.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_GRPC_PORT));
             properties.setProperty("inspectit.exporters.tracing.otlp.enabled", ExporterEnabledState.ENABLED);
         });
 
@@ -59,7 +59,7 @@ public class OtlpTraceExporterServiceIntTest extends ExporterServiceIntegrationT
     void verifyTraceSentHttp() {
         updateProperties(properties -> {
             properties.setProperty("inspectit.exporters.tracing.otlp.protocol", TransportProtocol.HTTP_PROTOBUF);
-            properties.setProperty("inspectit.exporters.tracing.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_HTTP_PORT, OTLP_GRPC_TRACING_PATH));
+            properties.setProperty("inspectit.exporters.tracing.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_HTTP_PORT, OTLP_TRACING_PATH));
             properties.setProperty("inspectit.exporters.tracing.otlp.enabled", ExporterEnabledState.ENABLED);
         });
 
