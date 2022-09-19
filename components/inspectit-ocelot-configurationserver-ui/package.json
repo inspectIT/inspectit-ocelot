@@ -25,6 +25,9 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
+    "@babel/helper-call-delegate": "^7.12.13",
+    "@babel/helper-define-map": "^7.18.6",
+    "@babel/helper-regex": "^7.10.5",
     "@zeit/next-css": "^1.0.1",
     "ace-builds": "^1.7.1",
     "axios": "^0.27.2",
@@ -38,7 +41,7 @@
     "next": "^9.5.5",
     "primeflex": "^3.2.1",
     "primeicons": "^5.0.0",
-    "primereact": "^4.2.2",
+    "primereact": "^8.5.0",
     "prop-types": "^15.8.1",
     "randexp": "^0.5.3",
     "react": "^16.14.0",
@@ -60,7 +63,7 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@babel/core": "^7.18.9",
+    "@babel/core": "^7.19.1",
     "@babel/eslint-parser": "^7.18.9",
     "@babel/helper-string-parser": "^7.18.10",
     "@babel/preset-react": "^7.18.6",
