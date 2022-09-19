@@ -98,13 +98,13 @@ const FileToolbar = ({
         }
         right={
           <div className="p-toolbar-group-right">
-		    <Button
-			  disabled={loading}
-			  onClick={toggleShowHiddenFiles}
-			  tooltip={showHiddenFiles ? 'Hide Files' : 'Show Hidden Files'}
-			  icon={showHiddenFiles ? 'pi pi-eye' : 'pi pi-eye-slash'}
-			  tooltipOptions={TOOLTIP_OPTIONS}
-		    />
+            <Button
+              disabled={loading}
+              onClick={toggleShowHiddenFiles}
+              tooltip={showHiddenFiles ? 'Hide Files' : 'Show Hidden Files'}
+              icon={showHiddenFiles ? 'pi pi-eye' : 'pi pi-eye-slash'}
+              tooltipOptions={TOOLTIP_OPTIONS}
+            />
             <Button
               disabled={loading}
               onClick={showSearchDialog}
