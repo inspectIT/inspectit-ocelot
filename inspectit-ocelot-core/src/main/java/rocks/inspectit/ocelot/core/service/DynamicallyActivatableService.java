@@ -15,6 +15,7 @@ import rocks.inspectit.ocelot.config.model.exporters.metrics.PrometheusExporterS
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.opentelemetry.OpenTelemetryControllerImpl;
+import rocks.inspectit.ocelot.core.selfmonitoring.service.DynamicallyActivatableServiceObserver;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -38,6 +39,8 @@ public abstract class DynamicallyActivatableService {
     protected OpenTelemetryControllerImpl openTelemetryController;
 
     private List<Expression> configDependencies;
+
+    private DynamicallyActivatableServiceObserver serviceObserver = new DynamicallyActivatableServiceObserver();
 
     /**
      * True if the service is currently enabled.
@@ -72,6 +75,8 @@ public abstract class DynamicallyActivatableService {
         } else {
             enabled = false;
         }
+
+        serviceObserver.getServices(this);
     }
 
     /**
@@ -134,6 +139,7 @@ public abstract class DynamicallyActivatableService {
                 enable();
             }
 
+            serviceObserver.getServices(this);
         }
     }
 
