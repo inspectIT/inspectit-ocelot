@@ -230,6 +230,9 @@ class StatusTable extends React.Component {
     const { onShowDownloadDialog } = this.props;
     const { health, metaInformation } = rowData;
 
+    let settingStates = JSON.parse(metaInformation.settingStates);
+    let agentCommandsEnabled = settingStates.AgentCommandService;
+
     let healthInfo;
     let iconClass;
     let iconColor;
@@ -277,8 +280,9 @@ class StatusTable extends React.Component {
               className="archive-button"
               icon="pi pi-cloud-download"
               onClick={() => onShowDownloadDialog(metaInformation.agentId, metaInformation.agentVersion, 'archive')}
-              tooltip="Download Support Archive"
+              tooltip={agentCommandsEnabled ? "Download Support Archive" : "Make sure to enabled 'agent-commands' in the config and set the right URL!"}
               tooltipOptions={{ showDelay: 500 }}
+              disabled={!agentCommandsEnabled}
             />
           </div>
         ) : (
