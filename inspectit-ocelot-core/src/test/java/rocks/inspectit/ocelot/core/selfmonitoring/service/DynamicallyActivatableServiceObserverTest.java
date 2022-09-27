@@ -29,11 +29,11 @@ public class DynamicallyActivatableServiceObserverTest {
 
         String expectedJSON = "{}";
 
-        Map<String, Boolean> expectedMap = new HashMap<String, Boolean>(){{
-            put(logPreloader.getName(), true);
-            put(promExpoService.getName(), false);
-            put(agentCommandService.getName(), true);
-            put(jaegerExpoService.getName(), false);
+        Map<DynamicallyActivatableService, Boolean> expectedMap = new HashMap<DynamicallyActivatableService, Boolean>(){{
+            put(logPreloader, true);
+            put(promExpoService, false);
+            put(agentCommandService, true);
+            put(jaegerExpoService, false);
         }};
 
         void setupTest(){
@@ -45,16 +45,22 @@ public class DynamicallyActivatableServiceObserverTest {
                 System.out.println(e.getMessage()); //Add proper logging
             }
 
-            for(String service : expectedMap.keySet()){
-                serviceObserver.serviceStates.put(service, expectedMap.get(service));
+            for(DynamicallyActivatableService service : expectedMap.keySet()){
+                serviceObserver.getServices(service);
             }
+
         }
 
         @Test
-        public void checkMapToJson(){
+        public void checkMap(){
             setupTest();
 
-            assertThat(serviceObserver.MapToJson()).isEqualTo(expectedJSON);
+            Map<String, Boolean> resultMap = serviceObserver.getServiceStates();
+
+            for(DynamicallyActivatableService service : expectedMap.keySet()){
+                assertThat(resultMap.containsKey(service.getName()));
+                assertThat(resultMap.get(service)).isEqualTo(expectedMap.get(service)); // Fails because enabled/disabled status not available :(
+            }
         }
     }
 }

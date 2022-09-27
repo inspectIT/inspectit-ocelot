@@ -15,7 +15,8 @@ import java.util.Map;
  */
 @Component
 public class DynamicallyActivatableServiceObserver {
-    public static Map<String, Boolean> serviceStates = new HashMap<>();
+    @Getter
+    private static Map<String, Boolean> serviceStates = new HashMap<>();
 
     @Getter
     private static String settingStatesJSON = "{}";
