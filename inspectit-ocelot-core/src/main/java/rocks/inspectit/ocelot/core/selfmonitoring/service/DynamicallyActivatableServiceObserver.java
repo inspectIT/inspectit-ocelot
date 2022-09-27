@@ -1,22 +1,29 @@
 package rocks.inspectit.ocelot.core.selfmonitoring.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Observes all the currently available services and their current state (enabled/disabled)
+ *
+ * Has a method to generate a JSON String out of the services and their states to send it to the UI
+ */
 @Component
 public class DynamicallyActivatableServiceObserver {
-
     public static Map<String, Boolean> serviceStates = new HashMap<>();
 
-    public void getServices(DynamicallyActivatableService service) {
-        System.out.println("[SERVICE]: " + service + " STATE: " + service.isEnabled());
-        System.out.println("[SERVICE CLASS NAME]: " + service.getName());
+    @Getter
+    private static String settingStatesJSON = "{}";
 
+    public void getServices(DynamicallyActivatableService service) {
         serviceStates.put(service.getName(), service.isEnabled());
+
+        settingStatesJSON = MapToJson();
     }
 
     public String MapToJson() {
@@ -31,5 +38,4 @@ public class DynamicallyActivatableServiceObserver {
 
         return json;
     }
-
 }

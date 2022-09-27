@@ -21,6 +21,7 @@ import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.util.InvalidPropertiesException;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
+import rocks.inspectit.ocelot.core.selfmonitoring.service.DynamicallyActivatableServiceObserver;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -256,6 +257,7 @@ public class HttpPropertySourceState {
         httpGet.setHeader(META_HEADER_PREFIX + "VM-VENDOR", runtime.getVmVendor());
         httpGet.setHeader(META_HEADER_PREFIX + "START-TIME", String.valueOf(runtime.getStartTime()));
         httpGet.setHeader(META_HEADER_PREFIX + "HEALTH", agentHealth.name());
+        httpGet.setHeader(META_HEADER_PREFIX + "SETTING-STATES", DynamicallyActivatableServiceObserver.getSettingStatesJSON());
     }
 
     /**
