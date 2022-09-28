@@ -53,7 +53,7 @@ public class AgentMetaInformation {
     /**
      *  Name of the settings states header.
      */
-    private static final String HEADER_SETTING_STATES = HEADER_PREFIX + "setting-states";
+    private static final String HEADER_SETTING_STATES = HEADER_PREFIX + "service-states-map";
 
     /**
      * Generates a {@link AgentMetaInformation} instance based on the given map which represents the used HTTP headers.

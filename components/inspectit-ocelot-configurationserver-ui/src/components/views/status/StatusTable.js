@@ -196,7 +196,7 @@ class StatusTable extends React.Component {
               : "Please enable 'log-preloading' and 'agent-commands' in the config! Make sure to pass the right url for the agent commands!"
           }
           tooltipOptions={{ showDelay: 500 }}
-          disabled={!logAvailable}
+          disabled={!logAvailable || !agentCommandsEnabled}
         />
       </div>
     );

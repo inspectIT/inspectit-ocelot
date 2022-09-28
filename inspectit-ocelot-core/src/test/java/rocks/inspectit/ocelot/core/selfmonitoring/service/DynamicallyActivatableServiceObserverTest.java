@@ -36,7 +36,7 @@ public class DynamicallyActivatableServiceObserverTest {
 
         void setupTest(){
             for(DynamicallyActivatableService service : expectedList){
-                serviceObserver.getServices(service);
+                serviceObserver.updateServiceState(service);
             }
         }
 
@@ -44,7 +44,7 @@ public class DynamicallyActivatableServiceObserverTest {
         public void checkMap(){
             setupTest();
 
-            Map<String, Boolean> resultMap = serviceObserver.getServiceStates();
+            Map<String, Boolean> resultMap = serviceObserver.getServiceStateMap();
 
             //Check LogPreloader
             assertThat(resultMap.containsKey(logPreloader.getName()));

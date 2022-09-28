@@ -40,7 +40,8 @@ public abstract class DynamicallyActivatableService {
 
     private List<Expression> configDependencies;
 
-    private DynamicallyActivatableServiceObserver serviceObserver = new DynamicallyActivatableServiceObserver();
+    @Autowired
+    private DynamicallyActivatableServiceObserver serviceObserver;
 
     /**
      * True if the service is currently enabled.
@@ -76,7 +77,7 @@ public abstract class DynamicallyActivatableService {
             enabled = false;
         }
 
-        serviceObserver.getServices(this);
+        serviceObserver.updateServiceState(this);
     }
 
     /**
@@ -139,7 +140,7 @@ public abstract class DynamicallyActivatableService {
                 enable();
             }
 
-            serviceObserver.getServices(this);
+            serviceObserver.updateServiceState(this);
         }
     }
 

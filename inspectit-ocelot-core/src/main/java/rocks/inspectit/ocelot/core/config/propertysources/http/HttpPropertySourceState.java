@@ -257,7 +257,7 @@ public class HttpPropertySourceState {
         httpGet.setHeader(META_HEADER_PREFIX + "VM-VENDOR", runtime.getVmVendor());
         httpGet.setHeader(META_HEADER_PREFIX + "START-TIME", String.valueOf(runtime.getStartTime()));
         httpGet.setHeader(META_HEADER_PREFIX + "HEALTH", agentHealth.name());
-        httpGet.setHeader(META_HEADER_PREFIX + "SETTING-STATES", DynamicallyActivatableServiceObserver.getSettingStatesJSON());
+        httpGet.setHeader(META_HEADER_PREFIX + "SERVICE-STATES-MAP", DynamicallyActivatableServiceObserver.asJson());
     }
 
     /**
