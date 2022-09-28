@@ -190,7 +190,11 @@ class StatusTable extends React.Component {
           className="log-button"
           icon="pi pi-align-justify"
           onClick={() => onShowDownloadDialog(agentId, attributes, 'log')}
-          tooltip={logAvailable && agentCommandsEnabled ? "Show Logs" : "Please enable 'log-preloading' and 'agent-commands' in the config! Make sure to pass the right url for the agent commands!"}
+          tooltip={
+            logAvailable && agentCommandsEnabled
+              ? 'Show Logs'
+              : "Please enable 'log-preloading' and 'agent-commands' in the config! Make sure to pass the right url for the agent commands!"
+          }
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable}
         />
@@ -280,7 +284,11 @@ class StatusTable extends React.Component {
               className="archive-button"
               icon="pi pi-cloud-download"
               onClick={() => onShowDownloadDialog(metaInformation.agentId, metaInformation.agentVersion, 'archive')}
-              tooltip={agentCommandsEnabled ? "Download Support Archive" : "Make sure to enabled 'agent-commands' in the config and set the right URL!"}
+              tooltip={
+                agentCommandsEnabled
+                  ? 'Download Support Archive'
+                  : "Make sure to enabled 'agent-commands' in the config and set the right URL!"
+              }
               tooltipOptions={{ showDelay: 500 }}
               disabled={!agentCommandsEnabled}
             />

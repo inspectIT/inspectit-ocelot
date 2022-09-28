@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.selfmonitoring.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
 import rocks.inspectit.ocelot.core.command.AgentCommandService;
@@ -9,7 +8,8 @@ import rocks.inspectit.ocelot.core.exporter.PrometheusExporterService;
 import rocks.inspectit.ocelot.core.selfmonitoring.LogPreloader;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,28 +27,17 @@ public class DynamicallyActivatableServiceObserverTest {
         DynamicallyActivatableService agentCommandService = new AgentCommandService();
         DynamicallyActivatableService jaegerExpoService = new JaegerExporterService();
 
-        String expectedJSON = "{}";
-
-        Map<DynamicallyActivatableService, Boolean> expectedMap = new HashMap<DynamicallyActivatableService, Boolean>(){{
-            put(logPreloader, true);
-            put(promExpoService, false);
-            put(agentCommandService, true);
-            put(jaegerExpoService, false);
+        List<DynamicallyActivatableService> expectedList = new ArrayList<DynamicallyActivatableService>() {{
+            add(new LogPreloader());
+            add(new PrometheusExporterService());
+            add(new AgentCommandService());
+            add(new JaegerExporterService());
         }};
 
         void setupTest(){
-            ObjectMapper objMapper = new ObjectMapper();
-
-            try {
-                expectedJSON = objMapper.writeValueAsString(expectedMap);
-            } catch (Exception e) {
-                System.out.println(e.getMessage()); //Add proper logging
-            }
-
-            for(DynamicallyActivatableService service : expectedMap.keySet()){
+            for(DynamicallyActivatableService service : expectedList){
                 serviceObserver.getServices(service);
             }
-
         }
 
         @Test
@@ -57,10 +46,21 @@ public class DynamicallyActivatableServiceObserverTest {
 
             Map<String, Boolean> resultMap = serviceObserver.getServiceStates();
 
-            for(DynamicallyActivatableService service : expectedMap.keySet()){
-                assertThat(resultMap.containsKey(service.getName()));
-                assertThat(resultMap.get(service)).isEqualTo(expectedMap.get(service)); // Fails because enabled/disabled status not available :(
-            }
+            //Check LogPreloader
+            assertThat(resultMap.containsKey(logPreloader.getName()));
+            assertThat(resultMap.get(logPreloader.getName())).isEqualTo(logPreloader.isEnabled());
+
+            //Check PrometheusExporterService
+            assertThat(resultMap.containsKey(promExpoService.getName()));
+            assertThat(resultMap.get(promExpoService.getName())).isEqualTo(promExpoService.isEnabled());
+
+            //Check AgentCommandService
+            assertThat(resultMap.containsKey(agentCommandService.getName()));
+            assertThat(resultMap.get(agentCommandService.getName())).isEqualTo(agentCommandService.isEnabled());
+
+            //Check JaegerExporterService
+            assertThat(resultMap.containsKey(jaegerExpoService.getName()));
+            assertThat(resultMap.get(jaegerExpoService.getName())).isEqualTo(jaegerExpoService.isEnabled());
         }
     }
 }
