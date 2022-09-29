@@ -47,6 +47,6 @@
         "import/no-useless-path-segments": "error",
         "react/prop-types": "warn",
         "prettier/prettier": ["error", { "endOfLine": "auto" }],
-        "react/no-unknown-property": ["error", { "ignore": ["jsx", "global"] }]
+        "react/no-unknown-property": ["error", { "ignore": ["jsx", "global", "align"] }]
     }
 }
