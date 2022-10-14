@@ -179,8 +179,8 @@ class StatusTable extends React.Component {
         `}</style>
         <label onClick={() => this.setServiceStateDialogShown(true)}>
           {name}{agentIdElement}{' '}
-          {rowData.count > 1 ? 
-          ( <span className="badge">
+          {rowData.count > 1 ? (
+            <span className="badge">
               <b>{rowData.count}</b>
             </span>
           ) : null}

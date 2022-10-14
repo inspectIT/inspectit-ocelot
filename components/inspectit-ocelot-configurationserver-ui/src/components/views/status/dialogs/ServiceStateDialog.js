@@ -50,17 +50,18 @@ export default function ServiceStateDialog({ visible, onHide, serviceStateMap })
                         font-weight: bold;
                     }
                 `}</style>
-                <label>{rowData.state ? 
-                ( <Button className="btn-enabled" disabled={true} label="ENABLED" color="green" /> 
-                ) : ( <Button className="btn-disabled" disabled={true} label="DISABLED" color="red" /> 
-                )}</label>
+                <label>
+                    {rowData.state ? 
+                <Button className="btn-enabled" disabled={true} label="ENABLED" color="green" /> :
+                <Button className="btn-disabled" disabled={true} label="DISABLED" color="red" /> }
+                </label>
             </div>
         );
     };
 
     return (
         <Dialog
-        style={{ width: "50vw", overflow: 'auto' }}
+        style={{ width: '50vw', overflow: 'auto' }}
         header="Service States"
         modal={true}
         visible={visible}
