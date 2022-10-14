@@ -215,11 +215,12 @@ class StatusTable extends React.Component {
           }
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable || !agentCommandsEnabled}
-        />
+       />
         <ServiceStateDialog 
           visible={this.state.showServiceStateDialog}
           onHide={() => this.setServiceStateDialogShown(false)}
-          serviceStateMap={settingStates} />
+          serviceStateMap={settingStates} 
+          />
       </div>
     );
   };
@@ -228,7 +229,7 @@ class StatusTable extends React.Component {
     this.setState({
       showServiceStateDialog: showDialog,
     });
-  }
+  };
 
   iconTemplate = (rowData) => {
     const { metaInformation } = rowData;
