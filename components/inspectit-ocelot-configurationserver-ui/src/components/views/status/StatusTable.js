@@ -8,6 +8,7 @@ import { map } from 'lodash';
 import classnames from 'classnames';
 import classNames from 'classnames';
 import { linkPrefix } from '../../../lib/configuration';
+import ServiceStateDialog from './dialogs/ServiceStateDialog';
 
 const timeFormatter = (time, unit, suffix) => {
   if (unit === 'second') {
@@ -102,6 +103,7 @@ class StatusTable extends React.Component {
   state = {
     configurationValue: '',
     logValue: '',
+    showServiceStateDialog: false,
   };
 
   nameTemplate = (rowData) => {
@@ -125,6 +127,7 @@ class StatusTable extends React.Component {
     let name = '-';
     let agentIdElement;
     let agentId = null;
+    let settingStates = '{}';
     if (metaInformation) {
       if (service) {
         name = service;
@@ -132,10 +135,11 @@ class StatusTable extends React.Component {
       agentId = metaInformation.agentId;
       agentIdElement = <span style={{ color: 'gray' }}>({agentId})</span>;
 
-      let settingStates = JSON.parse(metaInformation.settingStates);
+      settingStates = JSON.parse(metaInformation.settingStates);
       logAvailable = settingStates.LogPreloader;
       agentCommandsEnabled = settingStates.AgentCommandService;
     }
+
     return (
       <div className="this">
         <style jsx>{`
@@ -172,13 +176,19 @@ class StatusTable extends React.Component {
             justify-content: center;
             color: white;
           }
+
+          .this :global(.service-state-dialog){
+            backround: #ddd;
+          }
         `}</style>
-        {name} {agentIdElement}{' '}
-        {rowData.count > 1 ? (
-          <span className="badge">
-            <b>{rowData.count}</b>
-          </span>
-        ) : null}
+        <label onClick={() => this.setServiceStateDialogShown(true)}>
+          {name}{agentIdElement}{' '}
+          {rowData.count > 1 ? (
+            <span className="badge">
+              <b>{rowData.count}</b>
+            </span>
+          ) : null}
+        </label>
         <Button
           className="config-info-button"
           icon="pi pi-cog"
@@ -198,9 +208,20 @@ class StatusTable extends React.Component {
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable || !agentCommandsEnabled}
         />
+        <ServiceStateDialog 
+          className="service-state-dialog"
+          visible={this.state.showServiceStateDialog}
+          onHide={() => this.setServiceStateDialogShown(false)}
+          serviceStateMap={settingStates} />
       </div>
     );
   };
+
+  setServiceStateDialogShown = (showDialog) => {
+    this.setState({
+      showServiceStateDialog: showDialog,
+    });
+  }
 
   iconTemplate = (rowData) => {
     const { metaInformation } = rowData;
