@@ -219,7 +219,7 @@ class StatusTable extends React.Component {
         <ServiceStateDialog 
         visible={this.state.showServiceStateDialog}
         onHide={() => this.setServiceStateDialogShown(false)}
-        serviceStateMap={settingStates} 
+        serviceStateMap={settingStates}
         />
       </div>
     );
