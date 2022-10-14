@@ -217,7 +217,6 @@ class StatusTable extends React.Component {
           disabled={!logAvailable || !agentCommandsEnabled}
         />
         <ServiceStateDialog 
-          className="service-state-dialog"
           visible={this.state.showServiceStateDialog}
           onHide={() => this.setServiceStateDialogShown(false)}
           serviceStateMap={settingStates} />
