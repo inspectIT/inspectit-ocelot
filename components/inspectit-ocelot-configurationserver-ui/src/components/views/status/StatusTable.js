@@ -179,8 +179,8 @@ class StatusTable extends React.Component {
         `}</style>
         <label onClick={() => this.setServiceStateDialogShown(true)}>
           {name}{agentIdElement}{' '}
-          {rowData.count > 1 ? (
-            <span className="badge">
+          {rowData.count > 1 ? 
+          ( <span className="badge">
               <b>{rowData.count}</b>
             </span>
           ) : null}
@@ -203,11 +203,12 @@ class StatusTable extends React.Component {
           }
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable || !agentCommandsEnabled}
-        />
+       />
         <ServiceStateDialog 
           visible={this.state.showServiceStateDialog}
           onHide={() => this.setServiceStateDialogShown(false)}
-          serviceStateMap={settingStates} />
+          serviceStateMap={settingStates} 
+          />
       </div>
     );
   };
@@ -216,7 +217,7 @@ class StatusTable extends React.Component {
     this.setState({
       showServiceStateDialog: showDialog,
     });
-  }
+  };
 
   iconTemplate = (rowData) => {
     const { metaInformation } = rowData;

@@ -24,7 +24,7 @@ export default function ServiceStateDialog({ visible, onHide, serviceStateMap })
                 <label>{rowData.name}</label>
             </div>
         );
-    }
+    };
 
     const stateTemplate = (rowData) => {
         return (
@@ -51,15 +51,16 @@ export default function ServiceStateDialog({ visible, onHide, serviceStateMap })
                     }
                 `}</style>
                 <label>{rowData.state ? 
-                ( <Button className="btn-enabled" disabled={true} label="ENABLED" color="green" /> ) : 
-                ( <Button className="btn-disabled" disabled={true} label="DISABLED" color="red" /> )}</label>
+                ( <Button className="btn-enabled" disabled={true} label="ENABLED" color="green" /> 
+                ) : ( <Button className="btn-disabled" disabled={true} label="DISABLED" color="red" /> 
+                )}</label>
             </div>
         );
-    }
+    };
 
     return (
         <Dialog
-        style={{ width: "50vw", overflow: "auto" }}
+        style={{ width: "50vw", overflow: 'auto' }}
         header="Service States"
         modal={true}
         visible={visible}
@@ -75,6 +76,6 @@ export default function ServiceStateDialog({ visible, onHide, serviceStateMap })
                 <Column header="Service Name" body={nameTemplate} />
                 <Column header="State" body={stateTemplate} />
             </DataTable>
-        </Dialog>    
+        </Dialog>
     );
 }
