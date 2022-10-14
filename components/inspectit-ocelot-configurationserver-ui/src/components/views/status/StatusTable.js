@@ -176,10 +176,6 @@ class StatusTable extends React.Component {
             justify-content: center;
             color: white;
           }
-
-          .this :global(.service-state-dialog){
-            backround: #ddd;
-          }
         `}</style>
         <label onClick={() => this.setServiceStateDialogShown(true)}>
           {name}{agentIdElement}{' '}
@@ -209,7 +205,6 @@ class StatusTable extends React.Component {
           disabled={!logAvailable || !agentCommandsEnabled}
         />
         <ServiceStateDialog 
-          className="service-state-dialog"
           visible={this.state.showServiceStateDialog}
           onHide={() => this.setServiceStateDialogShown(false)}
           serviceStateMap={settingStates} />
