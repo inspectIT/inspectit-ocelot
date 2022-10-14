@@ -178,7 +178,8 @@ class StatusTable extends React.Component {
           }
         `}</style>
         <label onClick={() => this.setServiceStateDialogShown(true)}>
-          {name}{agentIdElement}{' '}
+          
+                    {name}{agentIdElement}{' '}
           {rowData.count > 1 ? (
             <span className="badge">
               <b>{rowData.count}</b>
@@ -203,12 +204,12 @@ class StatusTable extends React.Component {
           }
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable || !agentCommandsEnabled}
-       />
+        />
         <ServiceStateDialog 
-          visible={this.state.showServiceStateDialog}
-          onHide={() => this.setServiceStateDialogShown(false)}
-          serviceStateMap={settingStates} 
-          />
+        visible={this.state.showServiceStateDialog}
+        onHide={() => this.setServiceStateDialogShown(false)}
+        serviceStateMap={settingStates} 
+        />
       </div>
     );
   };
