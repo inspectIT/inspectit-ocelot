@@ -216,10 +216,10 @@ class StatusTable extends React.Component {
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable || !agentCommandsEnabled}
         />
-        <ServiceStateDialog 
-        visible={this.state.showServiceStateDialog}
-        onHide={() => this.setServiceStateDialogShown(false)}
-        serviceStateMap={settingStates}
+        <ServiceStateDialog
+          visible={this.state.showServiceStateDialog}
+          onHide={() => this.setServiceStateDialogShown(false)}
+          serviceStateMap={settingStates}
         />
       </div>
     );
