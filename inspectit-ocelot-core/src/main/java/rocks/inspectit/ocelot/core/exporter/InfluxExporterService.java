@@ -108,6 +108,10 @@ public class InfluxExporterService extends DynamicallyActivatableService {
             exporterTask.cancel(false);
         }
         if (activeExporter != null) {
+            // perform a final export to ensure all metrics a written
+            activeExporter.export();
+        }
+        if (activeExporter != null) {
             activeExporter.close();
             activeExporter = null;
         }
