@@ -35,7 +35,16 @@ yarn lint:fix
 
 ### Prettier
 
-When facing prettier/prettier errors in the Config UI tests and developing with VS Code make sure to install the prettier extension from Prettier. Then open the file in which the prettier errors occur. With Ctrl + Shift + P you can open a small dialog on top of the file. Look for/Write the command 'Format Document With...'. Press Enter, then in the opened drop down menu you can choose your prefered code styling (in this case prettier). Select it and press Enter. The opened code file will automatically be formatted by prettier, which will fix the prettier errors in the Config UI tests.
+When facing prettier/prettier errors in the Config UI tests and developing with VS Code, follows these steps for problem solving:
+
+* make sure to install the [prettier extension from Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+* open the file in which the prettier errors occur 
+* format the document using prettier
+  1. to format the document, open the command palette with `Ctrl + Shift + P` (Windows) or `Cmd + Shift + P` (Mac) 
+  2. search for `Format Document With...`. 
+  3. press Enter
+  4. in the opened drop down menu you can choose your preferred code styling (in this case prettier). Select `prettier` and press Enter
+* the opened code file will automatically be formatted by prettier, which will fix the prettier errors in the Config UI tests.
 
 #### Storybook
 
