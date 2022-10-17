@@ -29,6 +29,7 @@ class UploadDialog extends React.Component {
         // concat with previously selected files
         files = this.state.files.concat(newFiles);
       }
+
       this.setState({ files });
     };
     this.state = initialState;
@@ -100,12 +101,15 @@ class UploadDialog extends React.Component {
       >
         <div>{filesToUpload}</div>
 
-        <Dropzone onDrop={this.onDrop} accept={['.yml', '.yaml']}>
+        <Dropzone onDrop={this.onDrop} accept={{
+          'text/yml': [".yml", ".yaml"]
+          }}>
           {({ getRootProps, getInputProps }) => (
             <section className="container" style={{ cursor: 'pointer' }}>
               <div style={baseStyle} {...getRootProps({ className: 'dropzone' })}>
                 <input ref={this.input} {...getInputProps()} />
                 <p>Drag and drop your configuration files here, or click to select files</p>
+                <p>Only yaml files are being accepted!</p>
               </div>
             </section>
           )}
@@ -138,9 +142,10 @@ class UploadDialog extends React.Component {
       fileNamePrefix = this.props.selection + '/';
     }
     this.state.files.forEach((file) => {
-      const fileName = fileNamePrefix + file.name;
-      console.log("try uploading " + fileName + "; type: "+ file.type);
-      if (this.validateFileType(file.type)) {
+      const fileName = fileNamePrefix + file.name; 
+      let extension = this.getExtension(fileName); 
+
+      if (this.validateFileType(extension)) {
         const fileReader = new FileReader();
         fileReader.readAsText(file);
         fileReader.onload = (e) => {
@@ -149,15 +154,20 @@ class UploadDialog extends React.Component {
           showSuccessMessage('The upload was successful');
         };
       } else {
-        showErrorMessage('Wrong file type');
+        showErrorMessage(`The file ${fileName} has an invalid file type. Only yaml files are accepted`);
       }
     });
 
     this.props.onHide();
   };
 
+  getExtension = (fileName) => {
+    let regex = /\.[0-9a-z]+$/; //regex pattern to get the extension of the file (e.g. tets.yml -> .yml)
+    return fileName.match(regex)[0]; //getting the first item in the array -> this will be the extension of the file
+  };
+
   validateFileType = (fileType) => {
-    return fileType === 'application/x-yaml' || fileType === 'application/x-yml';
+    return fileType === '.yaml' || fileType === '.yml';
   };
 }
 
