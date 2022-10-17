@@ -36,7 +36,7 @@ public class InternalSettings {
 
     /**
      * Defines how often the Agent should check if new classes have been defined.
-     * This check is only performed if Classloader.defineClass was called less than {@link #maxClassDefinitionDelay} ago.
+     * This check is only performed if Classloader.defineClass was called less than {@link #numClassDiscoveryTrials} ago.
      */
     private Duration newClassDiscoveryInterval;
 
@@ -56,5 +56,12 @@ public class InternalSettings {
      * Defines whether orphan action classes are recycled or new classes should be injected instead.
      */
     private boolean recyclingOldActionClasses = true;
+
+    /**
+     * Flag ensures synchronous instrumentation of class. This means, each class is instrumented on first class load.
+     * <p>
+     * Important: In Java runtimes lower than 9 this results in a significant boot time performance degradation! See: <a href="https://bugs.openjdk.java.net/browse/JDK-7018422">JDK-7018422</a>"
+     */
+    private boolean async = true;
 
 }
