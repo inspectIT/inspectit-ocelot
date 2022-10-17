@@ -33,6 +33,10 @@ And the following to fix them automatically.
 yarn lint:fix
 ```
 
+### Prettier
+
+When facing prettier/prettier errors in the Config UI tests and developing with VS Code make sure to install the prettier extension from Prettier. Then open the file in which the prettier errors occur. With Ctrl + Shift + P you can open a small dialog on top of the file. Look for/Write the command 'Format Document With...'. Press Enter, then in the opened drop down menu you can choose your prefered code styling (in this case prettier). Select it and press Enter. The opened code file will automatically be formatted by prettier, which will fix the prettier errors in the Config UI tests.
+
 #### Storybook
 
 The project also contains [Storybook](https://storybook.js.org/) which supports the development of components by providing an isolated sandbox UI for testing these components.
