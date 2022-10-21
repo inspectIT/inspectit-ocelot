@@ -210,7 +210,7 @@ public class InstrumentationConfigurationResolver {
 
     private InstrumentationConfiguration resolveConfiguration(InspectitConfig config) {
         val genericActions = genericActionConfigurationResolver.resolveActions(config.getInstrumentation());
-        return InstrumentationConfiguration.builder()
+        InstrumentationConfiguration configuration = InstrumentationConfiguration.builder()
                 .metricsEnabled(config.getMetrics().isEnabled())
                 .tracingEnabled(config.getTracing().isEnabled())
                 .tracingSettings(config.getTracing())
@@ -218,6 +218,13 @@ public class InstrumentationConfigurationResolver {
                 .rules(ruleResolver.resolve(config.getInstrumentation(), genericActions))
                 .propagationMetaData(propagationMetaDataResolver.resolve(config))
                 .build();
+
+        if (log.isDebugEnabled()) {
+            RuleDependencyTreePrinter printer = new RuleDependencyTreePrinter(configuration.getRules());
+            log.debug(printer.toString());
+        }
+
+        return configuration;
     }
 
     /**

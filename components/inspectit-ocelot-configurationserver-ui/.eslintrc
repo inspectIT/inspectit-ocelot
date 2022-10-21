@@ -14,12 +14,16 @@
         "plugin:react/recommended",
         "plugin:prettier/recommended"
     ],
-    "parser": "babel-eslint",
+    "parser": "@babel/eslint-parser",
     "parserOptions": {
         "sourceType": "module",
         "ecmaVersion": 2018,
         "ecmaFeatures": {
             "jsx": true
+        },
+        "requireConfigFile": false,
+        "babelOptions": {
+            "presets": ["@babel/preset-react"]
         }
     },
     "settings": {
@@ -42,6 +46,8 @@
         "no-multi-spaces": "error",
         "import/first": "error",
         "import/no-useless-path-segments": "error",
-        "react/prop-types": "warn"
+        "react/prop-types": "warn",
+        "prettier/prettier": ["error", { "endOfLine": "auto" }],
+        "react/no-unknown-property": ["error", { "ignore": ["jsx", "global", "align"] }]
     }
 }

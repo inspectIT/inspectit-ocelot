@@ -4,9 +4,10 @@ import { agentStatusActions } from '../../../redux/ducks/agent-status';
 import StatusTable from './StatusTable';
 import StatusToolbar from './StatusToolbar';
 import StatusFooterToolbar from './StatusFooterToolbar';
-import ShowConfigurationDialog from '../dialogs/ShowConfigurationDialog';
 import axios from '../../../lib/axios-api';
-import { map, isEqual } from 'lodash';
+import { isEqual, map } from 'lodash';
+import DownloadDialogue from '../dialogs/DownloadDialogue';
+import { downloadArchiveFromJson } from '../../../functions/export-selection.function';
 
 /**
  * The view presenting a list of connected agents, their mapping and when they last connected to the server.
@@ -19,11 +20,13 @@ class StatusView extends React.Component {
     this.state = {
       filter: '',
       useRegexFilter: false,
+      useServiceMerge: true,
       error: false,
-      filteredAgents: props.agents,
-      isAgentConfigurationShown: false,
+      agentsToShow: props.agents,
+      isDownloadDialogShown: false,
       attributes: '',
-      configurationValue: '',
+      contentValue: '',
+      contentType: '',
       errorConifg: false,
       isLoading: false,
     };
@@ -39,6 +42,10 @@ class StatusView extends React.Component {
     this.setState({ useRegexFilter: checked }, this.filterAgents);
   };
 
+  onServiceMergeChange = ({ checked }) => {
+    this.setState({ useServiceMerge: checked }, this.filterAgents);
+  };
+
   updateFilter = (filter) => {
     this.setState({ filter }, this.filterAgents);
   };
@@ -48,10 +55,13 @@ class StatusView extends React.Component {
     const { filter, useRegexFilter } = this.state;
 
     if (filter === '') {
-      this.setState({
-        error: false,
-        filteredAgents: agents,
-      });
+      this.setState(
+        {
+          error: false,
+          agentsToShow: agents,
+        },
+        this.mergeAgents
+      );
     } else {
       try {
         let filterValue;
@@ -63,21 +73,71 @@ class StatusView extends React.Component {
 
         const regex = RegExp(filterValue, 'i');
 
-        const filteredAgents = agents.filter((agent) => {
+        const agentsToShow = agents.filter((agent) => {
           const agentFilter = this.getAgentFilter(agent);
           return this.checkRegex(agentFilter, regex);
         });
-
-        this.setState({
-          error: false,
-          filteredAgents,
-        });
+        this.setState(
+          {
+            error: false,
+            agentsToShow,
+          },
+          this.mergeAgents
+        );
       } catch (error) {
-        this.setState({
-          error: true,
-          filteredAgents: agents,
-        });
+        this.setState(
+          {
+            error: true,
+            agentsToShow: agents,
+          },
+          this.mergeAgents
+        );
       }
+    }
+  };
+
+  getServiceName = ({ metaInformation, attributes }) => {
+    if (metaInformation) {
+      return attributes.service;
+    } else {
+      return null;
+    }
+  };
+
+  getStartTime = ({ metaInformation }) => {
+    if (metaInformation) {
+      return metaInformation.startTime;
+    } else {
+      return null;
+    }
+  };
+
+  mergeAgents = () => {
+    const { agentsToShow, useServiceMerge } = this.state;
+    if (useServiceMerge) {
+      const mergedMap = agentsToShow.reduce((result, agent) => {
+        const name = this.getServiceName(agent);
+        if (result[name]) {
+          if (this.getStartTime(result[name]) < this.getStartTime(agent)) {
+            result[name] = {
+              ...agent,
+              count: result[name].count + 1,
+            };
+          } else {
+            result[name].count += 1;
+          }
+        } else {
+          result[name] = {
+            ...agent,
+            count: 1,
+          };
+        }
+        return result;
+      }, {});
+      this.setState({
+        error: false,
+        agentsToShow: Object.values(mergedMap),
+      });
     }
   };
 
@@ -132,13 +192,15 @@ class StatusView extends React.Component {
     const { agents } = this.props;
     const {
       filter,
-      filteredAgents,
+      agentsToShow,
       useRegexFilter,
+      useServiceMerge,
       error,
       readOnly,
-      isAgentConfigurationShown,
-      configurationValue,
-      configurationLoadingFailed,
+      isDownloadDialogShown,
+      contentValue,
+      contentType,
+      contentLoadingFailed,
       isLoading,
       agentId,
     } = this.state;
@@ -163,24 +225,27 @@ class StatusView extends React.Component {
               filter={filter}
               onFilterChange={this.updateFilter}
               onModeChange={this.onFilterModeChange}
+              onServiceMergeChange={this.onServiceMergeChange}
               useRegexFilter={useRegexFilter}
+              useServiceMerge={useServiceMerge}
               error={error}
               disableClear={readOnly}
             />
           </div>
           <div className="data-table">
-            <StatusTable data={filteredAgents} filter={filter} onShowConfiguration={this.showAgentConfigurationForAttributes} />
+            <StatusTable data={agentsToShow} filter={filter} onShowDownloadDialog={this.showDownloadDialog} />
           </div>
           <div>
-            <StatusFooterToolbar fullData={agents} filteredData={filteredAgents} />
+            <StatusFooterToolbar fullData={agents} filteredData={agentsToShow} />
           </div>
-          <ShowConfigurationDialog
-            visible={isAgentConfigurationShown}
-            onHide={() => this.setAgentConfigurationShown(false)}
-            configurationValue={configurationValue}
-            error={configurationLoadingFailed}
+          <DownloadDialogue
+            visible={isDownloadDialogShown}
+            onHide={() => this.setDownloadDialogShown(false)}
+            error={contentLoadingFailed}
             loading={isLoading}
-            agentName={agentId}
+            contentValue={contentValue}
+            contentType={contentType}
+            contextName={'Agent ' + agentId}
           />
         </div>
       </>
@@ -203,22 +268,64 @@ class StatusView extends React.Component {
     }
   };
 
-  setAgentConfigurationShown = (showDialog) => {
+  setDownloadDialogShown = (showDialog) => {
     this.setState({
-      isAgentConfigurationShown: showDialog,
+      isDownloadDialogShown: showDialog,
     });
   };
 
-  showAgentConfigurationForAttributes = (agentId, attributes) => {
-    this.setAgentConfigurationShown(true);
+  showDownloadDialog = (agentId, attributes, contentType) => {
+    this.setDownloadDialogShown(true);
     this.setState(
       {
         agentId,
         attributes,
-        configurationValue: '',
+        contentValue: '',
+        contentType,
       },
       () => {
-        this.fetchConfiguration(attributes);
+        switch (contentType) {
+          case 'config':
+            this.fetchConfiguration(attributes);
+            break;
+          case 'log':
+            this.fetchLog(agentId);
+            break;
+          case 'archive':
+            this.downloadSupportArchive(agentId, attributes);
+            break;
+          default:
+            this.setDownloadDialogShown(false);
+            break;
+        }
+      }
+    );
+  };
+
+  downloadSupportArchive = (agentId, agentVersion) => {
+    this.setState(
+      {
+        isLoading: true,
+      },
+      () => {
+        axios
+          .get('/agent/supportArchive', {
+            params: { 'agent-id': agentId },
+          })
+          .then((res) => {
+            this.setState({
+              isLoading: false,
+            });
+            downloadArchiveFromJson(res.data, agentId, agentVersion);
+            this.setDownloadDialogShown(false);
+          })
+          .catch(() => {
+            this.setState({
+              contentValue: null,
+              contentLoadingFailed: true,
+              isLoading: false,
+            });
+          });
       }
     );
   };
@@ -239,15 +346,43 @@ class StatusView extends React.Component {
           })
           .then((res) => {
             this.setState({
-              configurationValue: res.data,
-              configurationLoadingFailed: false,
+              contentValue: res.data,
+              contentLoadingFailed: false,
               isLoading: false,
             });
           })
           .catch(() => {
             this.setState({
-              configurationValue: null,
-              configurationLoadingFailed: true,
+              contentValue: null,
+              contentLoadingFailed: true,
+              isLoading: false,
+            });
+          });
+      }
+    );
+  };
+
+  fetchLog = (agentId) => {
+    this.setState(
+      {
+        isLoading: true,
+      },
+      () => {
+        axios
+          .get('/command/logs', {
+            params: { 'agent-id': agentId },
+          })
+          .then((res) => {
+            this.setState({
+              contentValue: res.data,
+              contentLoadingFailed: false,
+              isLoading: false,
+            });
+          })
+          .catch(() => {
+            this.setState({
+              contentValue: null,
+              contentLoadingFailed: true,
               isLoading: false,
             });
           });

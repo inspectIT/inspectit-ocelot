@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.opentelemetry;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.opencensusshim.metrics.OpenCensusMetrics;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -23,6 +24,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.IOpenTelemetryController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
@@ -94,8 +96,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @VisibleForTesting
     @Getter(AccessLevel.PACKAGE)
     Map<String, DynamicallyActivatableMetricsExporterService> registeredMetricExporterServices = new ConcurrentHashMap<>();
-
-    private Resource serviceNameResource;
 
     /**
      * The {@link OpenTelemetryImpl} that wraps {@link OpenTelemetrySdk}
@@ -183,8 +183,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
         InspectitConfig configuration = env.getCurrentConfig();
 
-        serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getServiceName()));
-
         // check if the tracing sample probability changed
         if (null == sampler || sampler.getSampleProbability() != configuration.getTracing().getSampleProbability()) {
             tracingSettingsChanged = true;
@@ -200,6 +198,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
             // only if metrics settings changed or OTEL has not been configured and is running, we need to rebuild the OpenTelemetrySdk
             if (metricSettingsChanged || !active) {
+
                 OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                         .setTracerProvider(sdkTracerProvider)
                         .setMeterProvider(sdkMeterProvider)
@@ -275,7 +274,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         // set all OTEL related fields to null
         openTelemetry = null;
         meterProvider = null;
-        serviceNameResource = null;
         sampler = null;
         multiSpanExporter = null;
         spanProcessor = null;
@@ -300,11 +298,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      */
     @VisibleForTesting
     void initOtel(InspectitConfig configuration) {
-
-        serviceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
-                .getServiceName()));
+        meterProvider = buildMeterProvider(configuration);
         tracerProvider = buildTracerProvider(configuration);
-        meterProvider = SdkMeterProvider.builder().setResource(serviceNameResource).build();
 
         OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
@@ -316,8 +311,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         // if any OpenTelemetry has already been registered to GlobalOpenTelemetry, reset it.
         if (null != OpenTelemetryUtils.getGlobalOpenTelemetry()) {
             // we need to reset it before we can register our custom OpenTelemetryImpl, as GlobalOpenTelemetry is throwing an exception if we want to register a new OpenTelemetry if a previous one is still registered.
-            log.info("Reset previously registered GlobalOpenTelemetry ({}) during the initialization of {} to register {}", GlobalOpenTelemetry
-                    .get()
+            log.info("Reset previously registered GlobalOpenTelemetry ({}) during the initialization of {} to register {}", GlobalOpenTelemetry.get()
                     .getClass()
                     .getName(), getName(), openTelemetry.getClass().getSimpleName());
             GlobalOpenTelemetry.resetForTest();
@@ -331,25 +325,44 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     /**
      * Builds a new {@link SdkTracerProvider} based on the given {@link InspectitConfig}
      *
-     * @param configuration
-     *
      * @return A new {@link SdkTracerProvider} based on the {@link InspectitConfig}
      */
     private SdkTracerProvider buildTracerProvider(InspectitConfig configuration) {
         double sampleProbability = configuration.getTracing().getSampleProbability();
+
         sampler = new DynamicSampler(sampleProbability);
         multiSpanExporter = DynamicMultiSpanExporter.create();
+        // @formatter:off
+        Resource tracerProviderAttributes = Resource.create(Attributes.of(
+                ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName(),
+                AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion(),
+                ResourceAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion(),
+                ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java",
+                ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"
+        ));
+        // @formatter:on
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)
                 .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
                 .setScheduleDelay(configuration.getTracing().getScheduleDelayMillis(), TimeUnit.MILLISECONDS)
                 .build();
+
         SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
                 .setSampler(sampler)
-                .setResource(serviceNameResource)
+                .setResource(tracerProviderAttributes)
                 .addSpanProcessor(spanProcessor)
                 .setIdGenerator(idGenerator);
 
         return builder.build();
+    }
+
+    /**
+     * Builds a new {@link SdkMeterProvider} based on the given {@link InspectitConfig}
+     *
+     * @return A new {@link SdkMeterProvider} based on the {@link InspectitConfig}
+     */
+    private SdkMeterProvider buildMeterProvider(InspectitConfig configuration) {
+        Resource metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getServiceName()));
+        return SdkMeterProvider.builder().setResource(metricServiceNameResource).build();
     }
 
     /**
@@ -385,12 +398,14 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             return null;
         }
         try {
-
             // stop the previously registered MeterProvider
             if (null != meterProvider) {
                 OpenTelemetryUtils.stopMeterProvider(meterProvider, true);
             }
-            SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(serviceNameResource);
+
+            Resource metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
+                    .getServiceName()));
+            SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(metricServiceNameResource);
 
             // register metric reader for each service
             for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {

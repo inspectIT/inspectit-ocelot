@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.ocelot.commons.models.command.impl.EnvironmentCommand;
 import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
 import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
@@ -22,6 +23,7 @@ import java.util.UUID;
         @JsonSubTypes.Type(name = PingCommand.TYPE_IDENTIFIER, value = PingCommand.Response.class),
         @JsonSubTypes.Type(name = ListClassesCommand.TYPE_IDENTIFIER, value = ListClassesCommand.Response.class),
         @JsonSubTypes.Type(name = LogsCommand.TYPE_IDENTIFIER, value = LogsCommand.Response.class),
+        @JsonSubTypes.Type(name = EnvironmentCommand.TYPE_IDENTIFIER, value = EnvironmentCommand.Response.class),
 })
 public abstract class CommandResponse {
 

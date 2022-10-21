@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { configurationActions } from '../../../redux/ducks/configuration';
 import { Toolbar } from 'primereact/toolbar';
 import { Button } from 'primereact/button';
@@ -18,12 +18,15 @@ const FileToolbar = ({
   showMoveDialog,
   showDeleteFileDialog,
   showSearchDialog,
+  toggleShowHiddenFiles,
 }) => {
   const dispatch = useDispatch();
 
   // global state variables
   const loading = useSelector((state) => state.configuration.pendingRequests) > 0;
   const selection = useSelector((state) => state.configuration.selection) || '';
+
+  const showHiddenFiles = useSelector((state) => state.configuration.showHiddenFiles) || '';
 
   const reloadFiles = () => {
     dispatch(configurationActions.selectVersion(null));
@@ -90,6 +93,13 @@ const FileToolbar = ({
           />
         </div>
         <div className="p-toolbar-group-right">
+          <Button
+            disabled={loading}
+            onClick={toggleShowHiddenFiles}
+            tooltip={showHiddenFiles ? 'Hide Files' : 'Show Hidden Files'}
+            icon={showHiddenFiles ? 'pi pi-eye' : 'pi pi-eye-slash'}
+            tooltipOptions={TOOLTIP_OPTIONS}
+          />
           <Button
             disabled={loading}
             onClick={showSearchDialog}

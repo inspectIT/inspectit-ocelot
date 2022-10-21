@@ -211,8 +211,8 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
         GenericActionConfig config = GenericActionConfig.builder()
                 .name("my-action")
                 //Alphabetical order, so that this order corresponds to the index
-                .additionalArgumentType("myvalue", "int")
-                .additionalArgumentType("x", "long")
+                .actionArgumentType("myvalue", "int")
+                .actionArgumentType("x", "long")
                 .valueBody("return new Long(x * myvalue);")
                 .build();
 
@@ -256,7 +256,7 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
     void testCacheWorking() {
         GenericActionConfig config = GenericActionConfig.builder()
                 .name("my-action")
-                .additionalArgumentType("val", "Object")
+                .actionArgumentType("val", "Object")
                 .expectedReturnValueType("Object")
                 .valueBody("return _cache.put(\"myKey\",val);")
                 .build();

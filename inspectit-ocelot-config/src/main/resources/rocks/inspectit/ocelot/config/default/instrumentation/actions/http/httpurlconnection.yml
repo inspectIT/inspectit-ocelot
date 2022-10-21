@@ -32,11 +32,23 @@ inspectit:
       'a_httpurlconnection_getMethod':
         docs:
           since: '1.2.1'
-          description: 'Extracts the HTTP method of the request, e.g. GET or POST.'
+          description: |
+            Extracts the HTTP method of the request, e.g. GET or POST.
+            If this action is called on the "getOutputStream" method it will return "POST" even the request method has
+            been set to "GET". This is done because "getOutputStream" is internally setting the request method to
+            "POST" if it is has been set to "GET" (which is the default value).
+            See also: sun.net.www.protocol.http.HttpURLConnection.getOutputStream()
           return-value: "The HTTP method as a String."
         input:
           _this: 'java.net.HttpURLConnection'
-        value: '_this.getRequestMethod()'
+          _methodName: 'String'
+        value-body: |
+          String requestMethod = _this.getRequestMethod();
+          if ("getOutputStream".equals(_methodName) && "GET".equals(requestMethod)) {
+            return "POST";
+          } else {
+            return requestMethod;
+          }
 
       'a_httpurlconnection_getStatus':
         docs:

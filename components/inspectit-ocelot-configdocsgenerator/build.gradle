@@ -52,5 +52,6 @@ tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
-
-sourceCompatibility = 1.8
+//to guarantee that the Configuration Server is compatible with Java 8 runtime environments
+sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
+targetCompatibility = 1.8 // Java version to generate classes for.

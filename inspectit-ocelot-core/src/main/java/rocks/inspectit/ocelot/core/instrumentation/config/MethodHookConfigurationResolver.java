@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class MethodHookConfigurationResolver {
@@ -37,8 +38,7 @@ public class MethodHookConfigurationResolver {
      *
      * @return
      */
-    public MethodHookConfiguration buildHookConfiguration(InstrumentationConfiguration allSettings, Set<InstrumentationRule> matchedRules)
-            throws Exception {
+    public MethodHookConfiguration buildHookConfiguration(InstrumentationConfiguration allSettings, Set<InstrumentationRule> matchedRules) throws Exception {
 
         val result = MethodHookConfiguration.builder();
 
@@ -48,6 +48,25 @@ public class MethodHookConfigurationResolver {
         result.preExitActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getPreExitActions));
         result.exitActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getExitActions));
         result.postExitActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getPostExitActions));
+
+        // @formatter:off
+        boolean traceEntryHook = Stream.of(
+                    matchedRules.stream().map(InstrumentationRule::getPreEntryActions).flatMap(Collection::stream),
+                    matchedRules.stream().map(InstrumentationRule::getEntryActions).flatMap(Collection::stream),
+                    matchedRules.stream().map(InstrumentationRule::getPostEntryActions).flatMap(Collection::stream))
+                .flatMap(s -> s)
+                .anyMatch(ActionCallConfig::isActionTracing);
+
+        boolean traceExitHook = Stream.of(
+                    matchedRules.stream().map(InstrumentationRule::getPreExitActions).flatMap(Collection::stream),
+                    matchedRules.stream().map(InstrumentationRule::getExitActions).flatMap(Collection::stream),
+                    matchedRules.stream().map(InstrumentationRule::getPostExitActions).flatMap(Collection::stream))
+                .flatMap(s -> s)
+                .anyMatch(ActionCallConfig::isActionTracing);
+        // @formatter:on
+
+        result.traceEntryHook(traceEntryHook);
+        result.traceExitHook(traceExitHook);
 
         if (allSettings.isMetricsEnabled()) {
             resolveMetrics(result, matchedRules);
@@ -101,9 +120,8 @@ public class MethodHookConfigurationResolver {
             Map<String, String> resultAttributes = new HashMap<>();
             for (String attributeKey : writtenAttributes) {
                 String dataKey = getAndDetectConflicts(attributeWritingRules, r -> r.getTracing()
-                                .getAttributes()
-                                .get(attributeKey),
-                        x -> !StringUtils.isEmpty(x), "the span attribute'" + attributeKey + "'");
+                        .getAttributes()
+                        .get(attributeKey), x -> !StringUtils.isEmpty(x), "the span attribute'" + attributeKey + "'");
                 resultAttributes.put(attributeKey, dataKey);
             }
             builder.attributes(resultAttributes);
@@ -134,11 +152,9 @@ public class MethodHookConfigurationResolver {
         boolean endSpan = Optional.ofNullable(endSpanSetting).orElse(true);
         builder.endSpan(endSpan);
         if (endSpan) {
-            builder.endSpanConditions(
-                    Optional.ofNullable(
-                            getAndDetectConflicts(rulesDefiningEndSpan, r -> r.getTracing()
-                                    .getEndSpanConditions(), ALWAYS_TRUE, "end span conditions")
-                    ).orElse(new ConditionalActionSettings()));
+            builder.endSpanConditions(Optional.ofNullable(getAndDetectConflicts(rulesDefiningEndSpan, r -> r.getTracing()
+                    .getEndSpanConditions(), ALWAYS_TRUE, "end span conditions"))
+                    .orElse(new ConditionalActionSettings()));
         }
     }
 
@@ -179,8 +195,7 @@ public class MethodHookConfigurationResolver {
      *
      * @throws ConflictingDefinitionsException thrown if a conflicting setting is detected
      */
-    private <T> T getAndDetectConflicts(Collection<InstrumentationRule> rules, Function<InstrumentationRule, T> getter, Predicate<? super T> filter, String exceptionMessage)
-            throws ConflictingDefinitionsException {
+    private <T> T getAndDetectConflicts(Collection<InstrumentationRule> rules, Function<InstrumentationRule, T> getter, Predicate<? super T> filter, String exceptionMessage) throws ConflictingDefinitionsException {
 
         Optional<InstrumentationRule> firstMatch = rules.stream().filter(r -> filter.test(getter.apply(r))).findFirst();
         if (firstMatch.isPresent()) {
@@ -222,8 +237,7 @@ public class MethodHookConfigurationResolver {
      *
      * @throws CyclicDataDependencyException if the action calls have cyclic dependencies preventing a scheduling
      */
-    private List<ActionCallConfig> combineAndOrderActionCalls(Set<InstrumentationRule> rules, Function<InstrumentationRule, Collection<ActionCallConfig>> actionsGetter)
-            throws CyclicDataDependencyException {
+    private List<ActionCallConfig> combineAndOrderActionCalls(Set<InstrumentationRule> rules, Function<InstrumentationRule, Collection<ActionCallConfig>> actionsGetter) throws CyclicDataDependencyException {
 
         List<ActionCallConfig> allCalls = rules.stream()
                 .map(actionsGetter)

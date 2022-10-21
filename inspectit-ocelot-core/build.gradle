@@ -12,7 +12,7 @@ test {
 
     jvmArgs '-Xmx512m', '-XX:+HeapDumpOnOutOfMemoryError', '-XX:HeapDumpPath=/__w/inspectit-ocelot/inspectit-ocelot/test_heapdump.bin'
     // enable reflection used in relation with OpenTelemetry for JDK 11 and later
-    if(JavaVersion.current() >= JavaVersion.VERSION_11) {
+    if (JavaVersion.current() >= JavaVersion.VERSION_11) {
         // --add-opens has the following syntax: {A}/{package}={B}
         jvmArgs "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED"
     }
@@ -21,7 +21,10 @@ test {
     }
 }
 
-sourceCompatibility = 1.8
+
+sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
+targetCompatibility = 1.8 // Java version to generate classes for.
+
 
 dependencies {
     compileOnly(
@@ -39,9 +42,6 @@ dependencies {
             "io.opentelemetry:opentelemetry-opencensus-shim",
 
 
-    )
-    buildTools(
-            'jarcheck:jarcheck:1.5'
     )
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
@@ -147,7 +147,7 @@ dependencies {
             // jul-slf4j bridge needed to redirect OTEL logs using java.util.logging to logback
             "org.slf4j:jul-to-slf4j:1.7.5",
     )
-    testRuntimeOnly (
+    testRuntimeOnly(
             'org.junit.jupiter:junit-jupiter-engine:5.8.2',
             // LogCapturer
             'io.github.netmikey.logunit:logunit-logback:1.1.3',
@@ -159,9 +159,17 @@ dependencies {
 
 }
 
+apply plugin: 'java'
+task compileJarCheck(type: JavaCompile){
+    source = sourceSets.main.java.srcDirs
+    include 'com/mindprod/jarcheck/JarCheck.java'
+    classpath = sourceSets.main.compileClasspath
+    destinationDir =  new File("${buildDir}/classes/java/main")
+}
 
 // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
 task checkDependencyJavaVersions {
+
     def excludes = ["byte-buddy",
                     // exclude OpenTelemetry as they guarantee JDK 8 support
                     "opentelemetry",
@@ -183,8 +191,8 @@ task checkDependencyJavaVersions {
             })
             if (!isExcluded && file.exists()) {
                 javaexec {
-                    classpath configurations.buildTools
-                    main = 'com.mindprod.jarcheck.JarCheck'
+                    mainClass = 'com.mindprod.jarcheck.JarCheck'
+                    classpath = sourceSets.main.runtimeClasspath
                     args = ["$file", "1.0", "1.8"]
                     standardOutput = new File(jarCheckOutput, "$name-check.log").newOutputStream()
                 }
@@ -192,13 +200,14 @@ task checkDependencyJavaVersions {
         }
     }
 }
+checkDependencyJavaVersions.dependsOn compileJarCheck
 
 task generateVersionFile {
     ext.versionFile = new File(buildDir, "ocelot-version.info")
     doLast {
         def currentDate = new Date().toString()
         ext.versionFile.withWriter('UTF-8') { writer ->
-            writer << "$version\n$currentDate"
+            writer << "$version\n$openTelemetryVersion\n$currentDate"
         }
     }
 }

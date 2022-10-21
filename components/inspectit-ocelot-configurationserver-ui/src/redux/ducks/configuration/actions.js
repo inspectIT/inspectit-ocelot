@@ -1,8 +1,9 @@
-import { DEFAULT_CONFIG_TREE_KEY, VERSION_LIMIT } from '../../../data/constants';
+import { DEFAULT_CONFIG_TREE_KEY, HIDDEN_FILES_NAME_PATTERN, VERSION_LIMIT } from '../../../data/constants';
 import axios from '../../../lib/axios-api';
 import { configurationUtils } from '.';
 import { notificationActions } from '../notification';
 import * as types from './types';
+import { downloadSelection } from '../../../functions/export-selection.function';
 
 /**
  * Fetches all existing versions.
@@ -33,7 +34,7 @@ export const fetchVersions = () => {
  */
 export const fetchFiles = (newSelectionOnSuccess) => {
   return (dispatch, getState) => {
-    const { selectedVersion } = getState().configuration;
+    const { selectedVersion, showHiddenFiles } = getState().configuration;
 
     const params = {};
     if (selectedVersion) {
@@ -41,21 +42,36 @@ export const fetchFiles = (newSelectionOnSuccess) => {
     }
 
     dispatch({ type: types.FETCH_FILES_STARTED });
-    axios
-      .get('/directories', { params })
-      .then((res) => {
-        const files = res.data;
+
+    getDirectories(params)
+      .then((payload) => {
+        const files = payload;
         sortFiles(files);
+        if (!showHiddenFiles) {
+          hideFilesRecursively(files, HIDDEN_FILES_NAME_PATTERN);
+        }
         dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
         if (newSelectionOnSuccess) {
           dispatch(selectFile(newSelectionOnSuccess));
         }
       })
-      .catch(() => {
-        dispatch({ type: types.FETCH_FILES_FAILURE });
-      });
+      .catch(() => dispatch({ type: types.FETCH_FILES_FAILURE }));
   };
 };
+
+/**
+ * Request all existing configuration files and directories.
+ */
+export function getDirectories(params) {
+  return axios
+    .get('/directories', { params })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+}
 
 /**
  * Arranges first directories and then files. Within the directories or files it is an alphabetical sorting.
@@ -100,19 +116,33 @@ export const fetchSelectedFile = () => {
         }
 
         dispatch({ type: types.FETCH_FILE_STARTED });
-        axios
-          .get('/files' + selection, { params })
-          .then((res) => {
-            const fileContent = res.data.content;
+        getFile(selection, params)
+          .then((payload) => {
+            const fileContent = payload;
             dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });
           })
-          .catch(() => {
+          .catch((err) => {
+            console.error(err);
             dispatch({ type: types.FETCH_FILE_FAILURE });
           });
       }
     }
   };
 };
+
+/**
+ * Request specific configuration file.
+ */
+export function getFile(selection, params) {
+  return axios
+    .get('/files' + selection, { params })
+    .then((res) => {
+      return res.data.content;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+}
 
 /**
  * Sets the selection to the given file.
@@ -184,6 +214,77 @@ export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
         dispatch({ type: types.DELETE_SELECTION_FAILURE });
       });
   };
+};
+
+/**
+ * Attempts to export the currently selected or handed in file or folder.
+ * In case of success, downloadSelection() is automatically triggered.
+ */
+export const exportSelection = (fetchFilesOnSuccess, selectedFile = null) => {
+  return (dispatch, getState) => {
+    const { selection, files, selectedVersion } = getState().configuration;
+
+    const selectedName = selectedFile || selection;
+
+    const file = configurationUtils.getFile(files, selectedName);
+    const isDirectory = configurationUtils.isDirectory(file);
+
+    const params = {};
+    if (selectedVersion) {
+      params.version = selectedVersion;
+    }
+    dispatch({ type: types.EXPORT_SELECTION_STARTED });
+
+    if (!isDirectory) {
+      dispatch({ type: types.FETCH_FILE_STARTED });
+      getFile(selection, params)
+        .then((fileContent) => {
+          downloadSelection(fileContent, file.name);
+          dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });
+        })
+        .catch(() => dispatch({ type: types.FETCH_FILE_FAILURE }));
+    } else {
+      getDirectories(params)
+        .then((payload) => {
+          const files = payload;
+          sortFiles(files);
+          downloadSelection(files, file.name);
+          dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
+        })
+        .catch((err) => {
+          console.error(err);
+          dispatch({ type: types.FETCH_FILES_FAILURE });
+        });
+    }
+  };
+};
+
+/**
+ * Either removes files that start with '.' or fetches files depending on if files are hidden.
+ */
+export const toggleShowHiddenFiles = () => {
+  return (dispatch) => {
+    dispatch({ type: types.TOGGLE_SHOW_HIDDEN_FILES });
+    dispatch(fetchFiles());
+  };
+};
+
+/**
+ * Recursively removes files that match the regex
+ * @param {array} files - the array of files
+ * @param {string} regex
+ */
+const hideFilesRecursively = (files, regex) => {
+  for (let i = 0; i <= files.length; i++) {
+    if (!files[i]) {
+      continue;
+    }
+    if (files[i].name.match(regex)) {
+      files.splice(i--, 1);
+    } else if (files[i].children) {
+      hideFilesRecursively(files[i].children, regex);
+    }
+  }
 };
 
 /**
@@ -308,7 +409,7 @@ export const selectedFileContentsChanged = (content) => ({
  */
 export const selectVersion = (version, reloadFiles = true) => {
   return (dispatch) => {
-    // chaning the selected version
+    // changing the selected version
     dispatch({
       type: types.SELECT_VERSION,
       payload: {

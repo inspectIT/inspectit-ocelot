@@ -20,14 +20,19 @@ import java.util.Map;
 public abstract class BoundGenericAction implements IHookAction {
 
     /**
-     * The name of the call, usually equal to the data key.
+     * The key to store the action result in the data context.
      */
-    private final String callName;
+    private final String dataKey;
 
     /**
-     * The name of the action, only used to provide a meaningful name via getName()
+     * The action's name.
      */
-    protected final String actionName;
+    private final String name;
+
+    /**
+     * Whether this action is a void action and does not write any data to the context.
+     */
+    private final boolean voidAction;
 
     /**
      * Reference to the class of the generic action.
@@ -43,28 +48,6 @@ public abstract class BoundGenericAction implements IHookAction {
      */
     protected final WeakReference<IGenericAction> action;
 
-
-    protected BoundGenericAction(String callName, GenericActionConfig actionConfig, InjectedClass<?> actionClass) {
-        actionName = actionConfig.getName();
-        this.callName = callName;
-        this.actionClass = actionClass;
-        try {
-            action = new WeakReference<>((IGenericAction) actionClass.getInjectedClassObject().get().getField("INSTANCE").get(null));
-        } catch (Exception e) {
-            throw new IllegalArgumentException("The given action is not based on the GenericActionTemplate");
-        }
-    }
-
-    @Override
-    public String getName() {
-        return actionName;
-    }
-
-    @Override
-    public String toString() {
-        return "Action '" + actionName + "' for call '" + callName + "'";
-    }
-
     /**
      * Binds a generic action to the given input argument values.
      *
@@ -74,28 +57,77 @@ public abstract class BoundGenericAction implements IHookAction {
      * @param constantAssignments a map mapping input variable names to their constant values
      * @param dynamicAssignments  a map mapping input variables to a function which is used to derive
      *                            the parameter value when the action is invoked
-     * @return
      */
-    public static BoundGenericAction bind(String dataKey,
-                                          GenericActionConfig actionConfig,
-                                          InjectedClass<?> action,
-                                          Map<String, Object> constantAssignments,
-                                          Map<String, VariableAccessor> dynamicAssignments) {
-
+    public static BoundGenericAction bind(String dataKey, GenericActionConfig actionConfig, InjectedClass<?> action, Map<String, Object> constantAssignments, Map<String, VariableAccessor> dynamicAssignments) {
         if (dynamicAssignments.isEmpty()) {
-            if (actionConfig.isVoid()) {
-                return new VoidConstantOnlyBoundGenericAction(dataKey, actionConfig, action, constantAssignments);
-            } else {
-                return new NonVoidConstantOnlyBoundGenericAction(dataKey, dataKey, actionConfig, action, constantAssignments);
-            }
+            return new ConstantOnlyBoundGenericAction(dataKey, actionConfig, action, constantAssignments);
         } else {
-            if (actionConfig.isVoid()) {
-                return new VoidDynamicBoundGenericAction(dataKey, actionConfig, action, constantAssignments, dynamicAssignments);
-            } else {
-                return new NonVoidDynamicBoundGenericAction(dataKey, dataKey, actionConfig, action, constantAssignments, dynamicAssignments);
-            }
+            return new DynamicBoundGenericAction(dataKey, actionConfig, action, constantAssignments, dynamicAssignments);
         }
     }
+
+    protected BoundGenericAction(String dataKey, GenericActionConfig actionConfig, InjectedClass<?> actionClass) {
+        this.dataKey = dataKey;
+        this.name = actionConfig.getName();
+        this.voidAction = actionConfig.isVoid();
+        this.actionClass = actionClass;
+        try {
+            action = new WeakReference<>((IGenericAction) actionClass.getInjectedClassObject()
+                    .get()
+                    .getField("INSTANCE")
+                    .get(null));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("The given action is not based on the GenericActionTemplate");
+        }
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public String getDataKey() {
+        return dataKey;
+    }
+
+    @Override
+    public String toString() {
+        return "Action '" + getName() + "' for data key '" + dataKey + "'";
+    }
+
+    @Override
+    public void execute(ExecutionContext context) {
+        executeImpl(context);
+    }
+
+    /**
+     * Implementation of the action's execution function. This method is also returning the action's result value compared
+     * to the one of the super class which can be useful in case the result is required (e.g. see {@link rocks.inspectit.ocelot.core.instrumentation.hook.actions.TracingHookAction}).
+     *
+     * @return the actions result object or `null` in case of void actions
+     */
+    public Object executeImpl(ExecutionContext context) {
+        Object[] actionArguments = getActionArguments(context);
+
+        Object result = action.get()
+                .execute(context.getMethodArguments(), context.getThiz(), context.getReturnValue(), context.getThrown(), actionArguments);
+
+        if (!voidAction) {
+            context.getInspectitContext().setData(dataKey, result);
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the arguments used by the action. These are the input arguments specified in the action definition (configuration).
+     *
+     * @param context the context to use to derive dynamic arguments (aka. data inputs).
+     *
+     * @return the sorted array of action arguments
+     */
+    public abstract Object[] getActionArguments(ExecutionContext context);
 }
 
 

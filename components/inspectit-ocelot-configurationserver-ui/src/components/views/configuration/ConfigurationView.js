@@ -13,7 +13,7 @@ import { enableOcelotAutocompletion } from './OcelotAutocompleter';
 import SearchDialog from './dialogs/SearchDialog';
 import ConvertDialog from '../../common/dialogs/ConvertDialog';
 import ConfigurationSidebar from './ConfigurationSidebar';
-import ShowConfigurationDialog from '../dialogs/ShowConfigurationDialog';
+import DownloadDialogue from '../dialogs/DownloadDialogue';
 
 /** Data */
 import { CONFIGURATION_TYPES, DEFAULT_CONFIG_TREE_KEY } from '../../../data/constants';
@@ -155,6 +155,10 @@ class ConfigurationView extends React.Component {
     this.props.selectFile(filename);
   };
 
+  toggleShowHiddenFiles = () => {
+    this.props.toggleShowHiddenFiles();
+  };
+
   render() {
     const {
       selection,
@@ -217,6 +221,7 @@ class ConfigurationView extends React.Component {
             showMoveDialog={this.showMoveDialog}
             selectedVersionChange={this.selectedVersionChange}
             showSearchDialog={this.showSearchDialog}
+            toggleShowHiddenFiles={this.toggleShowHiddenFiles}
           />
           <FileTree
             className="fileTree"
@@ -267,18 +272,19 @@ class ConfigurationView extends React.Component {
 
         <SearchDialog visible={this.state.isSearchDialogShown} onHide={this.hideSearchDialog} openFile={this.openFile} />
 
-        <ShowConfigurationDialog
+        <DownloadDialogue
           visible={this.state.isConfigurationDialogShown}
           onHide={this.hideConfigurationDialog}
-          configurationValue={fileContentWithoutFirstLine}
-          fileName={path + name}
           loading={this.props.loading}
+          contentValue={fileContentWithoutFirstLine}
+          contentType={'config'}
+          contextName={`${path}${name}`}
         />
 
         <ConvertDialog
           visible={this.state.isConvertDialogShown}
           onHide={this.hideConvertDialog}
-          name={path + name}
+          name={`${path}${name}`}
           text="Warning"
           onSuccess={this.convertEditor}
         />
@@ -289,7 +295,7 @@ class ConfigurationView extends React.Component {
 
 const getYamlError = (content) => {
   try {
-    yaml.safeLoad(content);
+    yaml.load(content);
     return null;
   } catch (error) {
     if (error.message) {
@@ -342,6 +348,7 @@ const mapDispatchToProps = {
   toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView,
   selectFile: configurationActions.selectFile,
   fetchVersions: configurationActions.fetchVersions,
+  toggleShowHiddenFiles: configurationActions.toggleShowHiddenFiles,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

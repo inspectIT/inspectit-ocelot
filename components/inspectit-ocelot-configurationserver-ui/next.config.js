@@ -4,8 +4,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 module.exports = withCSS({
   distDir: '../.next',
 
-  // Each page will be exported as a directory
-  exportTrailingSlash: true,
+    // Each page will be exported as a directory
+    trailingSlash: true,
 
   assetPrefix: isProduction ? '/ui' : '',
 
@@ -34,8 +34,8 @@ module.exports = withCSS({
     return config;
   },
 
-  env: {
-    VERSION: process.env.CIRCLE_TAG || 'SNAPSHOT',
-    BUILD_DATE: new Date().toUTCString(),
-  },
-});
+    env: {
+        VERSION: process.env.CIRCLE_TAG || "SNAPSHOT",
+        BUILD_DATE: new Date().toUTCString()
+    }
+})

@@ -15,12 +15,12 @@ public class VoidGenericActionTemplate implements IGenericAction, DoNotInstrumen
     /**
      * This methods body will be replaced via javassist to the actual generic action code.
      */
-    public static void executeImpl(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] additionalArgs) {
+    public static void executeImpl(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] actionArguments) {
     }
 
     @Override
-    public Object execute(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] additionalArgs) {
-        executeImpl(instrumentedMethodArgs, thiz, returnValue, thrown, additionalArgs);
+    public Object execute(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] actionArguments) {
+        executeImpl(instrumentedMethodArgs, thiz, returnValue, thrown, actionArguments);
         return null;
     }
 }

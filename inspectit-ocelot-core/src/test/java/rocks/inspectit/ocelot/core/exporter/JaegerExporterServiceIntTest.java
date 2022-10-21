@@ -188,48 +188,5 @@ public class JaegerExporterServiceIntTest {
             assertThat(jaeger.getEndpoint()).isNullOrEmpty();
             assertThat(jaeger.getProtocol()).isNull();
         }
-
-        /**
-         * Test the fallback mechanism if the deprecated property {@link JaegerExporterSettings#url} is set but no {@link JaegerExporterSettings#protocol}
-         */
-        @Test
-        void testFallbackNoProtocolSetWithURL() {
-            updateProperties(mps -> {
-                mps.setProperty("inspectit.exporters.tracing.jaeger.protocol", "");
-                mps.setProperty("inspectit.exporters.tracing.jaeger.endpoint", "");
-                mps.setProperty("inspectit.exporters.tracing.jaeger.url", "http://127.0.0.1:14268/api/traces");
-            });
-
-            assertThat(service.isEnabled()).isTrue();
-            assertThat(warnLogs.assertContains("'protocol'"));
-            assertThat(environment.getCurrentConfig()
-                    .getExporters()
-                    .getTracing()
-                    .getJaeger()
-                    .getProtocol()).isEqualTo(TransportProtocol.HTTP_THRIFT);
-
-        }
-
-        /**
-         * Test the fallback mechanism if the deprecated property {@link JaegerExporterSettings#grpc} is set but no {@link JaegerExporterSettings#protocol}
-         */
-        @Test
-        void testFallbackNoProtocolSetWithGRPC() {
-            updateProperties(mps -> {
-                mps.setProperty("inspectit.exporters.tracing.jaeger.protocol", "");
-                mps.setProperty("inspectit.exporters.tracing.jaeger.endpoint", "");
-                mps.setProperty("inspectit.exporters.tracing.jaeger.grpc", "http://127.0.0.1:14250/api/traces");
-            });
-
-            assertThat(service.isEnabled()).isTrue();
-            assertThat(warnLogs.assertContains("'protocol'"));
-            assertThat(environment.getCurrentConfig()
-                    .getExporters()
-                    .getTracing()
-                    .getJaeger()
-                    .getProtocol()).isEqualTo(TransportProtocol.GRPC);
-
-        }
-
     }
 }

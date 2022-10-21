@@ -6,6 +6,7 @@ import ClearDialog from './dialogs/ClearDialog';
 import { connect } from 'react-redux';
 import { agentStatusActions } from '../../../redux/ducks/agent-status';
 import { Checkbox } from 'primereact/checkbox';
+import ReactTooltip from 'react-tooltip';
 
 /**
  * Toolbar in the status view. Allows filtering of statuses, refreshing and clearing all statuses.
@@ -16,7 +17,19 @@ class StatusToolbar extends React.Component {
   };
 
   render() {
-    const { clearing, refreshing, fetchStatus, filter, onFilterChange, disableClear, onModeChange, useRegexFilter, error } = this.props;
+    const {
+      clearing,
+      refreshing,
+      fetchStatus,
+      filter,
+      onFilterChange,
+      disableClear,
+      onModeChange,
+      useRegexFilter,
+      useServiceMerge,
+      onServiceMergeChange,
+      error,
+    } = this.props;
 
     const tooltipOptions = {
       showDelay: 500,
@@ -32,13 +45,16 @@ class StatusToolbar extends React.Component {
             background-color: #eee;
             border-bottom: 1px solid #ddd;
           }
+
           .p-toolbar-group-left {
             align-items: center;
             display: flex;
           }
+
           .p-toolbar-group-right > :global(*) {
             margin-left: 0.25rem;
           }
+
           .p-toolbar-warning {
             margin-top: 0.3rem;
             margin-left: 0.7rem;
@@ -46,14 +62,31 @@ class StatusToolbar extends React.Component {
             font-weight: 900;
             color: red;
           }
+
           .checkbox-group {
             margin-left: 1rem;
           }
+
           .checkbox-group label {
             margin-right: 0.5rem;
           }
+
           .regex-error {
             color: red !important;
+          }
+
+          .hint-badge {
+            display: inline-flex;
+            height: 1.2rem;
+            width: 1.2rem;
+            margin-left: 0.5rem;
+            border-radius: 50%;
+            background-color: #a4a3a3;
+            justify-content: center;
+            color: white;
+          }
+          &.__react_component_tooltip.show :global(*) {
+            opacity: 1 !important;
           }
         `}</style>
         <Toolbar>
@@ -75,6 +108,19 @@ class StatusToolbar extends React.Component {
             <div className="p-inputgroup checkbox-group">
               <label>Use Regex</label>
               <Checkbox onChange={onModeChange} checked={useRegexFilter} />
+            </div>
+            <div className="p-inputgroup checkbox-group">
+              <label>Combine duplicate services</label>
+              <Checkbox onChange={onServiceMergeChange} checked={useServiceMerge} />
+              <span
+                data-tip="Combine agents with the same name into a single entry.<br>
+                Only the most recently started agent will be displayed.<br>
+                A badge behind the agents name will indicate the number of combined agents."
+                className="hint-badge"
+              >
+                ?
+              </span>
+              <ReactTooltip place="bottom" effect="solid" type="info" html={true} />
             </div>
           </div>
           <div className="p-toolbar-group-right">

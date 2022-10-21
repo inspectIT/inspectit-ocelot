@@ -18,8 +18,20 @@ If used, the switch makes sure that the inspectIT Ocelot agent:
 
 It is possible to globally regulate the number of traces generated through [sampling](https://opencensus.io/tracing/sampling/).
 You can configure the probability with which a trace ends up being collected via `inspectit.tracing.sampleProbability`.
-E.g. setting the value to `0.1` will result in only 10% of all traces being collected.
-By default, the sample probability is 100%. Note that this global setting only acts as a default value and can be overridden by [individual rules](instrumentation/rules.md#collecting-traces).
+E.g. setting the value to `0.1` will record only 10% of all traces.
+
+Note that this setting only has an effect if **no sampling decision** has been made yet.
+If a parent span has already decided that a trace is sampled or not sampled, this decision will continue to be used.
+This means that, for example, a method within a trace that has already been started will always be recorded, even if the sample setting has been set to `0`.
+This also applies to the opposite case where a span has decided not to sample and the sampling rate has been set to `1`.
+In this case the method will **not** be recorded!
+
+By default, the sample probability is `1.0`, meaning 100% (each trace is recorded).
+
+:::tip
+This global setting only acts as a default value and can be **overridden** by [individual rules](instrumentation/rules.md#trace-sampling).
+For example, with this technique it can be achieved that a method (e.g. HTTP entrypoint) uses different sampling rates depending on the parameters (e.g. current HTTP path).
+:::
 
 ### Additional Properties
 
