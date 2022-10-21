@@ -12,15 +12,14 @@ import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class AgentCommandManagerTest {
@@ -99,6 +98,8 @@ public class AgentCommandManagerTest {
             agentCommandManager.agentCommandCache.put(agentId, list);
 
             Command result = agentCommandManager.getCommand(agentId, false);
+            // simulate periodic command fetch that invalidates the command-cache
+            agentCommandManager.getCommand(agentId, false);
 
             assertThat(result).isEqualTo(mockAgentCommand);
             assertThat(agentCommandManager.agentCommandCache.asMap()).isEmpty();

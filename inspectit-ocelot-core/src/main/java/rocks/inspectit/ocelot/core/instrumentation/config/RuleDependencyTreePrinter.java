@@ -24,6 +24,7 @@ public class RuleDependencyTreePrinter {
 
     /**
      * Constructor generating the dependency tree.
+     *
      * @param rules the rules to consider in the tree
      */
     public RuleDependencyTreePrinter(Collection<InstrumentationRule> rules) {
@@ -64,7 +65,11 @@ public class RuleDependencyTreePrinter {
         if (markAsUsed) {
             usedRules.add(rule.getName());
         }
-        RuleEntry.RuleEntryBuilder builder = RuleEntry.builder().name(rule.getName()).used(markAsUsed);
+        RuleEntry.RuleEntryBuilder builder = RuleEntry.builder()
+                .name(rule.getName())
+                .used(markAsUsed)
+                .defaultRule(rule.isDefaultRule())
+                .actionTracing(rule.isActionTracing());
 
         rule.getIncludedRuleNames()
                 .stream()
@@ -86,7 +91,13 @@ public class RuleDependencyTreePrinter {
         if (!entry.isUsed()) {
             builder.append("<UNUSED> ");
         }
+        if (entry.isDefaultRule()) {
+            builder.append("*");
+        }
         builder.append(entry.getName());
+        if (entry.isActionTracing()) {
+            builder.append(" (ACTIONTRACING)");
+        }
         builder.append("\n");
 
         String newPrefix = prefix + (isLast ? " " : "|") + "    ";
@@ -119,6 +130,10 @@ public class RuleDependencyTreePrinter {
         private String name;
 
         private boolean used;
+
+        private boolean defaultRule;
+
+        private boolean actionTracing;
 
         @Singular
         private List<RuleEntry> children;

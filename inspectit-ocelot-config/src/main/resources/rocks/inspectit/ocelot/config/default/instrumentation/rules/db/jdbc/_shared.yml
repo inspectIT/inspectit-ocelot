@@ -22,6 +22,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Can be included to detect the entry into the first JDBC layer.'
+        default-rule: true
         entry:
           'jdbc_is_entry':
             action: 'a_entrypoint_check'
@@ -34,6 +35,7 @@ inspectit:
           description: |-
             Can be included to extract the url of the JDBC connection.
             Extraction only happens for the first JDBC layer, which might be a JDBC proxy.
+        default-rule: true
         include:
           'r_jdbc_detect_entry': true
         entry:
@@ -50,6 +52,7 @@ inspectit:
             This rule does not provide any functionality but a performance benefit.
             Driver-specific instrumentations can write 'prepared_sql' which gets up-propagated.
             This rule limits the up-propagation to the JDBC scope, because propagating it up further is not necessary.
+        default-rule: true
         include:
           'r_jdbc_detect_entry': true
         scopes:

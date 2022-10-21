@@ -5,12 +5,15 @@ on:
     branches:
       - master
   pull_request:
-    branches:
-      - master
     paths-ignore:
       - 'components/**'
       - 'inspectit-ocelot-documentation/**'
       - 'resources/**'
+      - 'codequality/**'
+      - '**.md'
+      - '**.txt'
+      - '.github/**'
+      - '.circleci/**'
 
 jobs:
   pr-check:

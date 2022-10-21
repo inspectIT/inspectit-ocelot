@@ -6,8 +6,8 @@ import dateformat from 'dateformat';
 import TimeAgo from 'react-timeago';
 import { map } from 'lodash';
 import classnames from 'classnames';
-import { linkPrefix } from '../../../lib/configuration';
 import classNames from 'classnames';
+import { linkPrefix } from '../../../lib/configuration';
 
 const timeFormatter = (time, unit, suffix) => {
   if (unit === 'second') {
@@ -53,18 +53,22 @@ class AgentMappingCell extends React.Component {
             display: flex;
             align-items: stretch;
           }
+
           .mapping-name {
             flex: 1;
             margin-right: 0.5rem;
           }
+
           .no-mapping {
             color: gray;
             font-style: italic;
           }
+
           .show-attributes {
             float: right;
             cursor: pointer;
           }
+
           .attributes {
             margin-top: 0.5rem;
             border-left: 0.25rem solid #ddd;
@@ -110,7 +114,8 @@ class StatusTable extends React.Component {
     const { agentVersion } = metaInformation;
 
     const agentVersionTokens = agentVersion.split('.');
-    let logAvailable = true;
+    let logAvailable = false;
+    let agentCommandsEnabled = false;
     if (agentVersionTokens.length == 2 || agentVersionTokens.length == 3) {
       const agentVersionNumber =
         agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length == 3 ? agentVersionTokens[2] * 1 : 0);
@@ -126,6 +131,10 @@ class StatusTable extends React.Component {
       }
       agentId = metaInformation.agentId;
       agentIdElement = <span style={{ color: 'gray' }}>({agentId})</span>;
+
+      let settingStates = JSON.parse(metaInformation.settingStates);
+      logAvailable = settingStates.LogPreloader;
+      agentCommandsEnabled = settingStates.AgentCommandService;
     }
     return (
       <div className="this">
@@ -133,6 +142,7 @@ class StatusTable extends React.Component {
           .this {
             position: relative;
           }
+
           .this :global(.config-info-button) {
             width: 1.2rem;
             height: 1.2rem;
@@ -142,6 +152,7 @@ class StatusTable extends React.Component {
             background: #ddd;
             border-color: #ddd;
           }
+
           .this :global(.log-button) {
             width: 1.2rem;
             height: 1.2rem;
@@ -151,6 +162,7 @@ class StatusTable extends React.Component {
             background: #ddd;
             border-color: #ddd;
           }
+
           .this :global(.badge) {
             width: 1.2rem;
             height: 1.2rem;
@@ -174,15 +186,18 @@ class StatusTable extends React.Component {
           tooltip="Show Configuration"
           tooltipOptions={{ showDelay: 500 }}
         />
-        {logAvailable && (
-          <Button
-            className="log-button"
-            icon="pi pi-align-justify"
-            onClick={() => onShowDownloadDialog(agentId, attributes, 'log')}
-            tooltip="Show Logs"
-            tooltipOptions={{ showDelay: 500 }}
-          />
-        )}
+        <Button
+          className="log-button"
+          icon="pi pi-align-justify"
+          onClick={() => onShowDownloadDialog(agentId, attributes, 'log')}
+          tooltip={
+            logAvailable && agentCommandsEnabled
+              ? 'Show Logs'
+              : "Please enable 'log-preloading' and 'agent-commands' in the config! Make sure to pass the right url for the agent commands!"
+          }
+          tooltipOptions={{ showDelay: 500 }}
+          disabled={!logAvailable || !agentCommandsEnabled}
+        />
       </div>
     );
   };
@@ -216,7 +231,11 @@ class StatusTable extends React.Component {
   };
 
   agentHealthTemplate = (rowData) => {
-    const { health } = rowData;
+    const { onShowDownloadDialog } = this.props;
+    const { health, metaInformation } = rowData;
+
+    let settingStates = JSON.parse(metaInformation.settingStates);
+    let agentCommandsEnabled = settingStates.AgentCommandService;
 
     let healthInfo;
     let iconClass;
@@ -244,12 +263,35 @@ class StatusTable extends React.Component {
           .state {
             align-items: center;
             display: flex;
+            position: relative;
+          }
+
+          .state :global(.archive-button) {
+            width: 1.2rem;
+            height: 1.2rem;
+            position: absolute;
+            right: 0;
+            top: 0;
+            background: #ddd;
+            border-color: #ddd;
           }
         `}</style>
         {health ? (
           <div className="state">
             <i className={classNames('pi pi-fw', iconClass)} style={{ color: iconColor }}></i>
             <span>{healthInfo}</span>
+            <Button
+              className="archive-button"
+              icon="pi pi-cloud-download"
+              onClick={() => onShowDownloadDialog(metaInformation.agentId, metaInformation.agentVersion, 'archive')}
+              tooltip={
+                agentCommandsEnabled
+                  ? 'Download Support Archive'
+                  : "Make sure to enabled 'agent-commands' in the config and set the right URL!"
+              }
+              tooltipOptions={{ showDelay: 500 }}
+              disabled={!agentCommandsEnabled}
+            />
           </div>
         ) : (
           '-'
@@ -305,12 +347,15 @@ class StatusTable extends React.Component {
             display: flex;
             align-items: center;
           }
+
           .pi {
             margin-right: 0.5rem;
           }
+
           .pi.live {
             color: #ef5350;
           }
+
           .pi.workspace {
             color: #616161;
           }

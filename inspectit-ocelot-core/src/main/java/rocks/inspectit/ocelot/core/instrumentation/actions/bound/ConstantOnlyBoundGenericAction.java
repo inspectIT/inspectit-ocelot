@@ -23,7 +23,7 @@ public class ConstantOnlyBoundGenericAction extends BoundGenericAction {
     }
 
     @Override
-    protected Object[] getActionArguments(ExecutionContext context) {
+    public Object[] getActionArguments(ExecutionContext context) {
         return arguments;
     }
 }

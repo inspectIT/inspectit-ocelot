@@ -32,7 +32,7 @@ public class GenericActionCallSorterTest {
 
         ActionCallConfig build() {
             return ActionCallConfig.builder()
-                    .name(name)
+                    .dataKey(name)
                     .callSettings(settings)
                     .build();
         }
@@ -102,7 +102,7 @@ public class GenericActionCallSorterTest {
 
     List<String> getNames(List<ActionCallConfig> calls) {
         return calls.stream()
-                .map(ActionCallConfig::getName)
+                .map(ActionCallConfig::getDataKey)
                 .collect(Collectors.toList());
     }
 

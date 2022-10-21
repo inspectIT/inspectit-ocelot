@@ -6,6 +6,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Records HTTP calls done via HTTPUrlConnection via the http/out metric.'
+        default-rule: true
         include:
           'r_httpurlconnection_extract_details': true
           'r_httpurlconnection_detect_end': true

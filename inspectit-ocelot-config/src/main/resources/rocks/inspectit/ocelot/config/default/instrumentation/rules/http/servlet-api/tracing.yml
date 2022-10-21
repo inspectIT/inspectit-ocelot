@@ -6,6 +6,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Enables tracing of HTTP calls received via the Servlet API.'
+        default-rule: true
         include:
           'r_servletapi_extract_details': true
           'r_http_tracing_span_name_default': true

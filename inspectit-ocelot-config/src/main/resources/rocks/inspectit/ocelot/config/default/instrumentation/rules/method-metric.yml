@@ -36,6 +36,7 @@ inspectit:
             In addition an error tag is set depending on whether the method threw an exception or not.
   
             The rule can either be included or scopes can be added directly to it.
+        default-rule: true
         include:
           'r_capture_method_duration': true
         exit:
