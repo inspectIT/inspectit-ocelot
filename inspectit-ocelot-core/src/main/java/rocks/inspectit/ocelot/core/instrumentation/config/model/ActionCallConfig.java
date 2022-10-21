@@ -19,7 +19,17 @@ public class ActionCallConfig {
      * The name used for this action call.
      * This corresponds to the data key written by the action.
      */
-    private String name;
+    private String dataKey;
+
+    /**
+     * The name of the rule defining this action.
+     */
+    private String sourceRuleName;
+
+    /**
+     * Whether the action should be traced.
+     */
+    private boolean actionTracing;
 
     /**
      * The input assignments to use for calling the action.

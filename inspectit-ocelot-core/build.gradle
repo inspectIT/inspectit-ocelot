@@ -21,7 +21,10 @@ test {
     }
 }
 
-sourceCompatibility = 1.8
+
+sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
+targetCompatibility = 1.8 // Java version to generate classes for.
+
 
 dependencies {
     compileOnly(
@@ -39,9 +42,6 @@ dependencies {
             "io.opentelemetry:opentelemetry-opencensus-shim",
 
 
-    )
-    buildTools(
-            'jarcheck:jarcheck:1.5'
     )
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
@@ -159,9 +159,17 @@ dependencies {
 
 }
 
+apply plugin: 'java'
+task compileJarCheck(type: JavaCompile){
+    source = sourceSets.main.java.srcDirs
+    include 'com/mindprod/jarcheck/JarCheck.java'
+    classpath = sourceSets.main.compileClasspath
+    destinationDir =  new File("${buildDir}/classes/java/main")
+}
 
 // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
 task checkDependencyJavaVersions {
+
     def excludes = ["byte-buddy",
                     // exclude OpenTelemetry as they guarantee JDK 8 support
                     "opentelemetry",
@@ -183,8 +191,8 @@ task checkDependencyJavaVersions {
             })
             if (!isExcluded && file.exists()) {
                 javaexec {
-                    classpath configurations.buildTools
-                    main = 'com.mindprod.jarcheck.JarCheck'
+                    mainClass = 'com.mindprod.jarcheck.JarCheck'
+                    classpath = sourceSets.main.runtimeClasspath
                     args = ["$file", "1.0", "1.8"]
                     standardOutput = new File(jarCheckOutput, "$name-check.log").newOutputStream()
                 }
@@ -192,6 +200,7 @@ task checkDependencyJavaVersions {
         }
     }
 }
+checkDependencyJavaVersions.dependsOn compileJarCheck
 
 task generateVersionFile {
     ext.versionFile = new File(buildDir, "ocelot-version.info")

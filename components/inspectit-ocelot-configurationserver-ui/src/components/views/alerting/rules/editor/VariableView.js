@@ -204,7 +204,6 @@ const ValueEditor = ({ type, value, options, readOnly, onDataChanged }) => {
  * Simple value display component.
  */
 const SimpleDataView = ({ value, isDefault, error }) => {
-  const style = {};
   return (
     <>
       <style jsx>{`

@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
@@ -33,6 +34,8 @@ public class MethodHookTest {
 
     @Mock
     private ActionScopeFactory actionScopeFactory;
+
+    private MethodHookConfiguration sourceConfiguration = MethodHookConfiguration.builder().build();
 
     @Nested
     class OnEnter {
@@ -64,6 +67,7 @@ public class MethodHookTest {
                     .entryActions(Arrays.asList(first, second, third))
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
                     .actionScopeFactory(actionScopeFactory)
+                    .sourceConfiguration(sourceConfiguration)
                     .build();
 
             InternalInspectitContext ctx = hook.onEnter(null, null);
@@ -103,6 +107,7 @@ public class MethodHookTest {
                     .entryAction(action)
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
                     .actionScopeFactory(actionScopeFactory)
+                    .sourceConfiguration(sourceConfiguration)
                     .build();
 
             InternalInspectitContext ctx = hook.onEnter(null, null);
@@ -161,6 +166,7 @@ public class MethodHookTest {
                     .exitActions(Arrays.asList(first, second, third))
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
                     .actionScopeFactory(actionScopeFactory)
+                    .sourceConfiguration(sourceConfiguration)
                     .build();
 
             InternalInspectitContext ctx = hook.onEnter(null, null);
@@ -194,6 +200,7 @@ public class MethodHookTest {
                     .exitAction(action)
                     .methodInformation(Mockito.mock(MethodReflectionInformation.class))
                     .actionScopeFactory(actionScopeFactory)
+                    .sourceConfiguration(sourceConfiguration)
                     .build();
 
             InternalInspectitContext ctx = hook.onEnter(null, null);

@@ -5,8 +5,9 @@ import StatusTable from './StatusTable';
 import StatusToolbar from './StatusToolbar';
 import StatusFooterToolbar from './StatusFooterToolbar';
 import axios from '../../../lib/axios-api';
-import { map, isEqual } from 'lodash';
+import { isEqual, map } from 'lodash';
 import DownloadDialogue from '../dialogs/DownloadDialogue';
+import { downloadArchiveFromJson } from '../../../functions/export-selection.function';
 
 /**
  * The view presenting a list of connected agents, their mapping and when they last connected to the server.
@@ -76,7 +77,6 @@ class StatusView extends React.Component {
           const agentFilter = this.getAgentFilter(agent);
           return this.checkRegex(agentFilter, regex);
         });
-
         this.setState(
           {
             error: false,
@@ -134,10 +134,9 @@ class StatusView extends React.Component {
         }
         return result;
       }, {});
-
       this.setState({
         error: false,
-        agentsToShow: mergedMap,
+        agentsToShow: Object.values(mergedMap),
       });
     }
   };
@@ -292,10 +291,41 @@ class StatusView extends React.Component {
           case 'log':
             this.fetchLog(agentId);
             break;
+          case 'archive':
+            this.downloadSupportArchive(agentId, attributes);
+            break;
           default:
             this.setDownloadDialogShown(false);
             break;
         }
+      }
+    );
+  };
+
+  downloadSupportArchive = (agentId, agentVersion) => {
+    this.setState(
+      {
+        isLoading: true,
+      },
+      () => {
+        axios
+          .get('/agent/supportArchive', {
+            params: { 'agent-id': agentId },
+          })
+          .then((res) => {
+            this.setState({
+              isLoading: false,
+            });
+            downloadArchiveFromJson(res.data, agentId, agentVersion);
+            this.setDownloadDialogShown(false);
+          })
+          .catch(() => {
+            this.setState({
+              contentValue: null,
+              contentLoadingFailed: true,
+              isLoading: false,
+            });
+          });
       }
     );
   };

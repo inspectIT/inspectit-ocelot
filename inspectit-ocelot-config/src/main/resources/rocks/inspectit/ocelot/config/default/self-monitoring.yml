@@ -15,6 +15,10 @@ inspectit:
       # health changes due to instrumentation errors are valid until the next re-instrumentation
       validity-period: 1h
 
+    # the action tracing mode to use
+    # options are: OFF, ONLY_ENABLED, ALL_WITHOUT_DEFAULT, ALL_WITH_DEFAULT
+    action-tracing: ONLY_ENABLED
+
   # definitions of existing self-monitoring metrics
   metrics:
     definitions:

@@ -25,6 +25,7 @@ inspectit:
       'r_jdbc_query_metric_statement_execute':
         docs:
           description: 'Collects metrics for execute/executeUpdate calls with non-prepared SQL (the SQL is given as method argument).'
+        default-rule: true
         include:
           'r_jdbc_query_metric_defaults': true
         scopes:
@@ -38,6 +39,7 @@ inspectit:
       'r_jdbc_query_metric_statement_executeBatch':
         docs:
           description: 'Collects metrics for executeBatch calls with non-prepared SQL.'
+        default-rule: true
         include:
           'r_jdbc_query_metric_defaults': true
         scopes:
@@ -46,6 +48,7 @@ inspectit:
       'r_jdbc_query_metric_preparedstatement':
         docs:
           description: 'Collects metrics for execute/executeUpdate/executeBatch calls with prepared SQL.'
+        default-rule: true
         include:
           'r_jdbc_query_metric_defaults': true
         scopes:
@@ -66,6 +69,7 @@ inspectit:
           description: |-
             Collects the metric [jdbc/query/duration]. To be included in JDBC query metric collection rules.
             Rules that include it should provide the context variable 'c_db_sql_query'.
+        default-rule: true
         include:
           'r_capture_method_duration_conditional': true
           'r_jdbc_detect_entry': true

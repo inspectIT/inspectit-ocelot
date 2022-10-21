@@ -9,6 +9,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Marks the first service() or doFilter() call as entry in case the ServletRequest is an HTTPServletRequest.'
+        default-rule: true
         pre-entry:
           'is_http_servlet':
             action: 'a_servletrequest_isHttp'
@@ -24,6 +25,7 @@ inspectit:
         docs:
           since: '1.2.1'
           description: 'Extracts all http details, such as http_path, http_method, http_status, etc. from HTTPServletRequests.'
+        default-rule: true
         include:
           'r_servletapi_detect_entry': true
           'r_http_parametrize_path': true # Used to derive http_path from http_raw_path

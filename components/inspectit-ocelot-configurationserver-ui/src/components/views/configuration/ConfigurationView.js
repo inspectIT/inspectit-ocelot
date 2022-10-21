@@ -155,6 +155,10 @@ class ConfigurationView extends React.Component {
     this.props.selectFile(filename);
   };
 
+  toggleShowHiddenFiles = () => {
+    this.props.toggleShowHiddenFiles();
+  };
+
   render() {
     const {
       selection,
@@ -217,6 +221,7 @@ class ConfigurationView extends React.Component {
             showMoveDialog={this.showMoveDialog}
             selectedVersionChange={this.selectedVersionChange}
             showSearchDialog={this.showSearchDialog}
+            toggleShowHiddenFiles={this.toggleShowHiddenFiles}
           />
           <FileTree
             className="fileTree"
@@ -290,7 +295,7 @@ class ConfigurationView extends React.Component {
 
 const getYamlError = (content) => {
   try {
-    yaml.safeLoad(content);
+    yaml.load(content);
     return null;
   } catch (error) {
     if (error.message) {
@@ -343,6 +348,7 @@ const mapDispatchToProps = {
   toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView,
   selectFile: configurationActions.selectFile,
   fetchVersions: configurationActions.fetchVersions,
+  toggleShowHiddenFiles: configurationActions.toggleShowHiddenFiles,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

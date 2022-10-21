@@ -25,6 +25,16 @@ public class InstrumentationRule {
     private String name;
 
     /**
+     * Defines whether this is a default rule. All configuration rules shipped with the agent are marked as default rules.
+     */
+    private boolean defaultRule;
+
+    /**
+     * Defines whether the actions executed in the rules scope should be traced for debug purposes.
+     */
+    private boolean actionTracing;
+
+    /**
      * The scope of this rule. This represents a matcher of types and methods that should be instrumented.
      */
     @Singular

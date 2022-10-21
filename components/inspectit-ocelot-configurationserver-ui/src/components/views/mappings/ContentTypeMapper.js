@@ -1,6 +1,6 @@
 /**
  * mapping function that returns all values needed to setup the download of a file for a given content-type
- * explicitly mapped contentTypes are 'config' and 'log', everything else will default to a plain .txt configuration
+ * explicitly mapped contentTypes are 'config', 'log' and 'archive', everything else will default to a plain .txt configuration
  * @param contentType
  * @param contextName
  * @returns {{fileExtension: string, header: string, language: string, mimeType: string}}
@@ -21,6 +21,13 @@ export const ContentTypeMapper = (contentType, contextName) => {
         fileExtension: '.log',
         mimeType: 'text/plain',
         header: 'Logs of ' + contextName,
+      };
+    case 'archive':
+      return {
+        language: '',
+        fileExtension: '',
+        mimeType: '',
+        header: 'Preparing Download of the Support Archive for ' + contextName,
       };
     default:
       return {

@@ -7,21 +7,25 @@ const STARTED = ['background: darkorange', 'color: white'].join(';');
 
 const FAILURE = ['background: red', 'color: white'].join(';');
 
-const createLogger = (active = true) => (store) => (next) => (action) => {
-  if (!active || typeof action === 'function') {
-    return next(action);
-  }
+const createLogger =
+  (active = true) =>
+  (store) =>
+  (next) =>
+  (action) => {
+    if (!active || typeof action === 'function') {
+      return next(action);
+    }
 
-  const prevState = store.getState();
-  const result = next(action);
-  const nextState = store.getState();
-  logGroupCollapsed(`%c ${action.type} `, determineStyle(action));
-  logInfo('%cprev state', 'color: darkorange', prevState);
-  logInfo('%caction payload', 'color: blue', action.payload);
-  logInfo('%cnext state', 'color: darkgreen', nextState);
-  logGroupEnd();
-  return result;
-};
+    const prevState = store.getState();
+    const result = next(action);
+    const nextState = store.getState();
+    logGroupCollapsed(`%c ${action.type} `, determineStyle(action));
+    logInfo('%cprev state', 'color: darkorange', prevState);
+    logInfo('%caction payload', 'color: blue', action.payload);
+    logInfo('%cnext state', 'color: darkgreen', nextState);
+    logGroupEnd();
+    return result;
+  };
 
 export default createLogger;
 
