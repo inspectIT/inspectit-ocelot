@@ -23,9 +23,9 @@ class UploadDialog extends React.Component {
     super();
     this.onDrop = (files) => {
       // concat files with previously selected files if applicable.
-      if(this.state.files && this.state.files.length > 0){
+      if (this.state.files && this.state.files.length > 0) {
         // remove duplicates
-        let newFiles = files.filter( file => !this.state.files.some(f => f.name === file.name));
+        let newFiles = files.filter((file) => !this.state.files.some((f) => f.name === file.name));
         // concat with previously selected files
         files = this.state.files.concat(newFiles);
       }
@@ -101,9 +101,12 @@ class UploadDialog extends React.Component {
       >
         <div>{filesToUpload}</div>
 
-        <Dropzone onDrop={this.onDrop} accept={{
-          'text/yml': [".yml", ".yaml"]
-          }}>
+        <Dropzone
+          onDrop={this.onDrop}
+          accept={{
+            'text/yml': ['.yml', '.yaml'],
+          }}
+        >
           {({ getRootProps, getInputProps }) => (
             <section className="container" style={{ cursor: 'pointer' }}>
               <div style={baseStyle} {...getRootProps({ className: 'dropzone' })}>
@@ -142,8 +145,8 @@ class UploadDialog extends React.Component {
       fileNamePrefix = this.props.selection + '/';
     }
     this.state.files.forEach((file) => {
-      const fileName = fileNamePrefix + file.name; 
-      let extension = this.getExtension(fileName); 
+      const fileName = fileNamePrefix + file.name;
+      let extension = this.getExtension(fileName);
 
       if (this.validateFileType(extension)) {
         const fileReader = new FileReader();
