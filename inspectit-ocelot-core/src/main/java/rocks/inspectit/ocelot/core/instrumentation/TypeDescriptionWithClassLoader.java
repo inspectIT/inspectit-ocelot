@@ -20,9 +20,16 @@ public class TypeDescriptionWithClassLoader {
     @Getter
     private final ClassLoader loader;
 
-    private TypeDescriptionWithClassLoader(TypeDescription type, ClassLoader loader) {
+    @Getter
+    /**
+     * The class represented by the {@link TypeDescriptionWithClassLoader#type}. 
+     * Can be null if async instrumentation mode is disabled!
+     */ private final Class<?> relatedClass;
+
+    private TypeDescriptionWithClassLoader(TypeDescription type, ClassLoader loader, Class<?> relatedClass) {
         this.type = type;
         this.loader = loader;
+        this.relatedClass = relatedClass;
     }
 
     public String getName() {
@@ -37,7 +44,7 @@ public class TypeDescriptionWithClassLoader {
      * @return new {@link TypeDescriptionWithClassLoader}
      */
     public static TypeDescriptionWithClassLoader of(Class<?> clazz) {
-        return new TypeDescriptionWithClassLoader(TypeDescription.ForLoadedType.of(clazz), clazz.getClassLoader());
+        return new TypeDescriptionWithClassLoader(TypeDescription.ForLoadedType.of(clazz), clazz.getClassLoader(), clazz);
     }
 
     /**
@@ -52,8 +59,10 @@ public class TypeDescriptionWithClassLoader {
         if (loader == AgentImpl.AGENT_CLASS_LOADER) {
             // use the already loaded TypePool if loader is our InspectitClassLoader
             return new TypeDescriptionWithClassLoader(AgentImpl.AGENT_CLASS_LOADER_TYPE_POOL.describe(className)
-                    .resolve(), loader);
+                    .resolve(), loader, null);
         }
-        return new TypeDescriptionWithClassLoader(TypePool.Default.of(loader).describe(className).resolve(), loader);
+        return new TypeDescriptionWithClassLoader(TypePool.Default.of(loader)
+                .describe(className)
+                .resolve(), loader, null);
     }
 }
