@@ -144,33 +144,8 @@ class UploadDialog extends React.Component {
     if (isDirectory) {
       fileNamePrefix = this.props.selection + '/';
     }
-    this.state.files.forEach((file) => {
-      const fileName = fileNamePrefix + file.name;
-      let extension = this.getExtension(fileName);
-
-      if (this.validateFileType(extension)) {
-        const fileReader = new FileReader();
-        fileReader.readAsText(file);
-        fileReader.onload = (e) => {
-          const content = e.target.result;
-          this.props.writeFile(fileName, content, true, true);
-          showSuccessMessage('The upload was successful');
-        };
-      } else {
-        showErrorMessage(`The file ${fileName} has an invalid file type. Only yaml files are accepted`);
-      }
-    });
 
     this.props.onHide();
-  };
-
-  getExtension = (fileName) => {
-    let regex = /\.[0-9a-z]+$/; //regex pattern to get the extension of the file (e.g. tets.yml -> .yml)
-    return fileName.match(regex)[0]; //getting the first item in the array -> this will be the extension of the file
-  };
-
-  validateFileType = (fileType) => {
-    return fileType === '.yaml' || fileType === '.yml';
   };
 }
 
