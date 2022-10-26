@@ -139,7 +139,7 @@ class UploadDialog extends React.Component {
   };
 
   uploadFiles = () => {
-    const { showErrorMessage, showSuccessMessage, isDirectory } = this.props;
+    const { isDirectory } = this.props;
     var fileNamePrefix = '/';
     if (isDirectory) {
       fileNamePrefix = this.props.selection + '/';
