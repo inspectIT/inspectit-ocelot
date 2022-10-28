@@ -72,9 +72,9 @@ class Menubar extends React.Component {
           }
           right={
             <div className="p-toolbar-group-right flex-v-center">
-              <box className="documentation-icon">
+              <label className="documentation-icon">
                 <i className="pi pi-info-circle" onClick={this.openDocumentation} title="Open Documentation"></i>
-              </box>
+              </label>
               <div className="user-description">
                 Logged in as <b>{this.props.username}</b>
               </div>
