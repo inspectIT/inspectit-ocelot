@@ -44,7 +44,7 @@ class DeleteDialog extends React.Component {
     if (!prevProps.visible && this.props.visible) {
       /**Timeout is needed for .focus() to be triggered correctly. */
       setTimeout(() => {
-        this.deleteButton.current.element.focus();
+        this.deleteButton.current.focus();
       }, 0);
 
       const { filePath } = this.props;

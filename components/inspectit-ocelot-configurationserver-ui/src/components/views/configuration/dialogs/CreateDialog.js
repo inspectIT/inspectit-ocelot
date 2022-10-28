@@ -78,7 +78,7 @@ class CreateDialog extends React.Component {
     if (!prevProps.visible && this.props.visible) {
       /**Timeout is needed for .focus() to be triggered correctly. */
       setTimeout(() => {
-        this.input.current.element.focus();
+        this.input.current.focus();
       }, 0);
 
       const { filePath } = this.props;
