@@ -37,8 +37,8 @@ const PromotionApprovalDialog = ({ visible, onHide, onPromote, isLoading, approv
 
   // set the focus to the input field after the dialog is shown
   const onShow = () => {
-    if (messageInput.current.element) {
-      messageInput.current.element.focus();
+    if (messageInput.current) {
+      messageInput.current.focus();
     }
   };
 
