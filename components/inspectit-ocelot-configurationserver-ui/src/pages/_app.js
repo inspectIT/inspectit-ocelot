@@ -1,4 +1,4 @@
-import App, { Container } from 'next/app';
+import App from 'next/app';
 import Head from 'next/head';
 import React from 'react';
 import withReduxStore from '../lib/with-redux-store';
