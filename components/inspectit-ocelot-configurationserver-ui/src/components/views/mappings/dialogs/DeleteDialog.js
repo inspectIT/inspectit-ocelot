@@ -4,7 +4,6 @@ import { mappingsActions } from '../../../../redux/ducks/mappings';
 
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { ConfirmDialog } from 'primereact/confirmdialog';
 
 /**
  * Dialog for deleting the selected mapping.
@@ -16,7 +15,7 @@ class DeleteDialog extends React.Component {
     const mappingName = this.props.mappingName || '';
 
     return (
-      <ConfirmDialog
+      <Dialog
         header={'Delete Mapping'}
         modal={true}
         visible={this.props.visible}
@@ -29,7 +28,7 @@ class DeleteDialog extends React.Component {
         }
       >
         Are you sure you want to delete <b>&quot;{mappingName}&quot;</b>? This cannot be undone!
-      </ConfirmDialog>
+      </Dialog>
     );
   }
 
