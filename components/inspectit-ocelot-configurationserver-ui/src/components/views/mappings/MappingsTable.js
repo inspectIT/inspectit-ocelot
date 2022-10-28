@@ -199,7 +199,9 @@ class MappingsTable extends React.Component {
     return name;
   };
 
-  showDeleteMappingDialog = (selectedMappingName) => this.setState({ isDeleteDialogShown: true, selectedMappingName: selectedMappingName });
+  showDeleteMappingDialog = (selectedMappingName) => {
+    this.setState({ isDeleteDialogShown: true, selectedMappingName: selectedMappingName });
+  };
   hideDeleteMappingDialog = () => this.setState({ isDeleteDialogShown: false, selectedMappingName: null });
 
   render() {
