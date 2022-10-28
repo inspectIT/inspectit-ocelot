@@ -26,7 +26,7 @@ class OcelotConfigurationUI extends App {
   render() {
     const { Component, pageProps, reduxStore } = this.props;
     return (
-      <Container>
+      <React.Fragment>
         <style global jsx>
           {`
             .p-component {
@@ -57,7 +57,7 @@ class OcelotConfigurationUI extends App {
             </NotificationHandler>
           </PersistGate>
         </Provider>
-      </Container>
+      </React.Fragment>
     );
   }
 }
