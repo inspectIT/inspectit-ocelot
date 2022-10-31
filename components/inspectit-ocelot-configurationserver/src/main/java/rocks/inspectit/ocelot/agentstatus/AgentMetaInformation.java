@@ -51,7 +51,7 @@ public class AgentMetaInformation {
     private static final String HEADER_VM_VENDOR = HEADER_PREFIX + "vm-vendor";
 
     /**
-     *  Name of the settings states header.
+     *  Name of the service states header.
      */
     private static final String HEADER_SETTING_STATES = HEADER_PREFIX + "service-states-map";
 
