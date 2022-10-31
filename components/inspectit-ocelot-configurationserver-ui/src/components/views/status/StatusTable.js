@@ -8,7 +8,6 @@ import { map } from 'lodash';
 import classnames from 'classnames';
 import classNames from 'classnames';
 import { linkPrefix } from '../../../lib/configuration';
-import ServiceStateDialog from './dialogs/ServiceStateDialog';
 
 const timeFormatter = (time, unit, suffix) => {
   if (unit === 'second') {
@@ -107,7 +106,7 @@ class StatusTable extends React.Component {
   };
 
   nameTemplate = (rowData) => {
-    const { onShowDownloadDialog } = this.props;
+    const { onShowDownloadDialog, onShowServiceStateDialog } = this.props;
     const {
       metaInformation,
       attributes,
@@ -167,6 +166,16 @@ class StatusTable extends React.Component {
             border-color: #ddd;
           }
 
+          .this :global(.service-state-button) {
+            width: 1.2rem;
+            height: 1.2rem;
+            position: absolute;
+            right: 3rem;
+            top: 0;
+            background: #ddd;
+            border-color: #ddd;
+          }
+
           .this :global(.badge) {
             width: 1.2rem;
             height: 1.2rem;
@@ -177,7 +186,7 @@ class StatusTable extends React.Component {
             color: white;
           }
         `}</style>
-        <label onClick={() => this.setServiceStateDialogShown(true)}>
+        <label>
           {name}
           {agentIdElement}{' '}
           {rowData.count > 1 ? (
@@ -186,6 +195,13 @@ class StatusTable extends React.Component {
             </span>
           ) : null}
         </label>
+        <Button
+          className="service-state-button"
+          icon="pi pi-sliders-h"
+          onClick={() => onShowServiceStateDialog(settingStates)}
+          tooltip="Service States"
+          tooltipOptions={{ showDeleay: 500 }}
+        />
         <Button
           className="config-info-button"
           icon="pi pi-cog"
@@ -204,11 +220,6 @@ class StatusTable extends React.Component {
           }
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable || !agentCommandsEnabled}
-        />
-        <ServiceStateDialog
-          visible={this.state.showServiceStateDialog}
-          onHide={() => this.setServiceStateDialogShown(false)}
-          serviceStateMap={settingStates}
         />
       </div>
     );
