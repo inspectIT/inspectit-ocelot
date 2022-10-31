@@ -200,7 +200,7 @@ class StatusTable extends React.Component {
           tooltip={
             logAvailable && agentCommandsEnabled
               ? 'Show Logs'
-              : "Please enable 'log-preloading' and 'agent-commands' in the config! Make sure to pass the right url for the agent commands!"
+              : "<b>Logs not available!</b>\nMake sure to enable 'log-preloading' and 'agent-commands' in the config, and configure the URL for the agent commands."
           }
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable || !agentCommandsEnabled}
@@ -305,7 +305,7 @@ class StatusTable extends React.Component {
               tooltip={
                 agentCommandsEnabled
                   ? 'Download Support Archive'
-                  : "Make sure to enabled 'agent-commands' in the config and set the right URL!"
+                  : "<b>Support archive not available!</b>\nMake sure to enable 'agent-commands' in the config and configure the URL for the agent commands."
               }
               tooltipOptions={{ showDelay: 500 }}
               disabled={!agentCommandsEnabled}
