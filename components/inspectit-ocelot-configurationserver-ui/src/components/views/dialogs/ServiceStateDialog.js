@@ -39,7 +39,6 @@ export default function ServiceStateDialog({ visible, onHide, serviceStateMap })
             border-color: lightgreen;
             color: black;
             width: 150px;
-            margin-left: 30%;
             font-weight: bold;
           }
 
@@ -48,7 +47,6 @@ export default function ServiceStateDialog({ visible, onHide, serviceStateMap })
             border-color: lightcoral;
             color: black;
             width: 150px;
-            margin-left: 30%;
             font-weight: bold;
           }
         `}</style>
@@ -77,9 +75,9 @@ export default function ServiceStateDialog({ visible, onHide, serviceStateMap })
         </div>
       }
     >
-      <DataTable value={optimizedServiceStateMap} rowHover reorderableColumns autoLayout={true}>
-        <Column header="Service Name" body={nameTemplate} />
-        <Column header="State" body={stateTemplate} />
+      <DataTable value={optimizedServiceStateMap} rowHover reorderableColumns>
+        <Column header="Service Name" field="name" body={nameTemplate} sortable />
+        <Column header="State" field="state" body={stateTemplate} sortable style={{ width: '175px' }} />
       </DataTable>
     </Dialog>
   );
