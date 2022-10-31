@@ -20,6 +20,24 @@ yarn dev
 
 The development server can be reached at [http://localhost:3000](http://localhost:3000).
 
+#### Testing
+
+Using the following command, the front end tests can be run. This will execute 'jest'.
+
+```bash
+yarn test
+```
+
+or 
+
+```bash
+yarn test:watch
+```
+
+to run the tests in watch mode.
+
+More information about how to test in [FRONTENDTESTS.md](FRONTENDTESTS.md)
+
 ### Linting
 
 Depending on your IDE, linting errors based on the settings in .eslintrc can be shown right in your editor.

@@ -19,9 +19,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Use Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
-          node-version: '12.x'
+          node-version: '16.x'
 
       - name: Install dependencies
         working-directory: ${{env.working-directory}}
@@ -34,3 +34,7 @@ jobs:
       - name: Run Prettier
         working-directory: ${{env.working-directory}}
         run: yarn format
+        
+      - name: Run Jest
+        working-directory: ${{env.working-directory}}
+        run: yarn test
