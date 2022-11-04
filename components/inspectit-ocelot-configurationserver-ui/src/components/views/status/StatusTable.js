@@ -126,7 +126,7 @@ class StatusTable extends React.Component {
     let name = '-';
     let agentIdElement;
     let agentId = null;
-    let settingStates = '{}';
+    let serviceStates = '{}';
     if (metaInformation) {
       if (service) {
         name = service;
@@ -134,9 +134,9 @@ class StatusTable extends React.Component {
       agentId = metaInformation.agentId;
       agentIdElement = <span style={{ color: 'gray' }}>({agentId})</span>;
 
-      settingStates = JSON.parse(metaInformation.settingStates);
-      logAvailable = settingStates.LogPreloader;
-      agentCommandsEnabled = settingStates.AgentCommandService;
+      serviceStates = JSON.parse(metaInformation.serviceStates);
+      logAvailable = serviceStates.LogPreloader;
+      agentCommandsEnabled = serviceStates.AgentCommandService;
     }
 
     return (
@@ -198,7 +198,7 @@ class StatusTable extends React.Component {
         <Button
           className="service-state-button"
           icon="pi pi-sliders-h"
-          onClick={() => onShowServiceStateDialog(settingStates)}
+          onClick={() => onShowServiceStateDialog(serviceStates)}
           tooltip="Service States"
           tooltipOptions={{ showDeleay: 500 }}
         />
@@ -263,8 +263,8 @@ class StatusTable extends React.Component {
     const { onShowDownloadDialog } = this.props;
     const { health, metaInformation } = rowData;
 
-    let settingStates = JSON.parse(metaInformation.settingStates);
-    let agentCommandsEnabled = settingStates.AgentCommandService;
+    let serviceStates = JSON.parse(metaInformation.serviceStates);
+    let agentCommandsEnabled = serviceStates.AgentCommandService;
 
     let healthInfo;
     let iconClass;

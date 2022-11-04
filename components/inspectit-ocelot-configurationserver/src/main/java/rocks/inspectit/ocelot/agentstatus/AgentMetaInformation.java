@@ -53,7 +53,7 @@ public class AgentMetaInformation {
     /**
      *  Name of the service states header.
      */
-    private static final String HEADER_SETTING_STATES = HEADER_PREFIX + "service-states-map";
+    private static final String HEADER_SERVICE_STATES = HEADER_PREFIX + "service-states-map";
 
     /**
      * Generates a {@link AgentMetaInformation} instance based on the given map which represents the used HTTP headers.
@@ -106,7 +106,7 @@ public class AgentMetaInformation {
     /**
      * The current setting states in a json string
      */
-    private String settingStates;
+    private String serviceStates;
 
     private AgentMetaInformation(Map<String, String> headers) {
         Preconditions.checkArgument(StringUtils.isNotBlank(headers.get(HEADER_AGENT_ID)), "It is required that the given map contains an agent header!");
@@ -117,6 +117,6 @@ public class AgentMetaInformation {
         startTime = headers.get(HEADER_START_TIME);
         vmName = headers.get(HEADER_VM_NAME);
         vmVendor = headers.get(HEADER_VM_VENDOR);
-        settingStates = headers.get(HEADER_SETTING_STATES);
+        serviceStates = headers.get(HEADER_SERVICE_STATES);
     }
 }

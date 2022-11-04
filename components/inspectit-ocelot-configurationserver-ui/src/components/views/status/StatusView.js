@@ -25,7 +25,7 @@ class StatusView extends React.Component {
       error: false,
       agentsToShow: props.agents,
       isServiceStateDialogShown: false,
-      settingStates: '{}',
+      serviceStates: '{}',
       isDownloadDialogShown: false,
       attributes: '',
       contentValue: '',
@@ -258,7 +258,7 @@ class StatusView extends React.Component {
           <ServiceStateDialog
             visible={this.state.isServiceStateDialogShown}
             onHide={() => this.setServiceStateDialogShown(false)}
-            serviceStateMap={this.state.settingStates}
+            serviceStateMap={this.state.serviceStates}
           />
         </div>
       </>
@@ -290,10 +290,10 @@ class StatusView extends React.Component {
     });
   };
 
-  showServiceStateDialog = (settingStates) => {
+  showServiceStateDialog = (serviceStates) => {
     this.setServiceStateDialogShown(true);
     this.setState({
-      settingStates: settingStates,
+      serviceStates: serviceStates,
     });
   };
 
