@@ -179,9 +179,10 @@ class StatusTable extends React.Component {
           .this :global(.might-overflow) {
             max-width: 19rem;
             display: inline-block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            overflow: visible;
+            overflow-wrap: break-word;
+            text-overflow: unset;
           }
 
           .this :global(.might-overflow):hover {
