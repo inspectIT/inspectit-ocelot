@@ -17,11 +17,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * This class is responsible to instantiate an instance of {@link ClassFileTransformer} interface  and proxy all calls to
- * the configured the {@link  ClassTransformer}.
+ * This class is responsible to instantiate an instance of {@link ClassFileTransformer} interface and proxy all calls to
+ * the configured {@link  ClassTransformer}.
  * <p>
  * We decided to introduce this indirection to support runtimes <= and >= Java8. Since {@link ClassFileTransformer}
- * has a new method since java9 to support Jigsaw module system we created the instance on the fly and will receive
+ * has a new method since Java9 to support Jigsaw module system, we created the instance on the fly and will receive
  * an implementation for the current runtime.
  */
 @Component
@@ -64,7 +64,7 @@ public class ClassTransformerProxyGenerator {
      *
      * @param delegate The {@link ClassTransformer} instance
      *
-     * @return The {@link ClassFileTransformer} instance to be registered at the {@link Instrumentation} instanceø@
+     * @return The {@link ClassFileTransformer} instance to be registered at the {@link Instrumentation} instance
      *
      * @throws IllegalStateException if {@link ClassFileTransformer} instantiation fails
      */

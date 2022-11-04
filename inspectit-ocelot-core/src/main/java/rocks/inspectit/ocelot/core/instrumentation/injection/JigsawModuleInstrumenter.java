@@ -17,8 +17,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * When using Java9+ classes are bundeld in modules with access restrictions.
- * This class can be used to redefine the modules in order to make them accessible to inspectIT without illegal-access warnings.
+ * When using Java9+, classes are bundled in modules with access restrictions.
+ * This class can be used to redefine the modules in order to make them accessible to inspectIT without {@code illegal access} warnings.
  */
 @Component
 @Slf4j
@@ -87,8 +87,8 @@ public class JigsawModuleInstrumenter {
 
     public synchronized void openModule(Object module) {
         if (isModuleSystemAvailable()) {
-            Set<String> packages = getPackagesOfModule(module);
             if (enhancedModules.getIfPresent(module) == null) {
+                Set<String> packages = getPackagesOfModule(module);
                 if (isNamed(module)) {
                     log.info("Gaining access to package '{}' of module '{}'", StringUtils.join(packages, ", "), module);
                     Set<Object> extraReads = Collections.singleton(bootstrapModule);

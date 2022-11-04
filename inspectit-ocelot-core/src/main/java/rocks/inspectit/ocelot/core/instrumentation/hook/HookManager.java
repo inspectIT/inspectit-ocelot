@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.instrumentation.hook;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
+import io.opencensus.common.Scope;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
@@ -65,11 +66,11 @@ public class HookManager {
     private volatile Map<Class<?>, Map<String, MethodHook>> hooks = Collections.emptyMap();
 
     /**
-     * Flag indicates the lazy loading is enabled. This is only possible if configuration value
-     * inspectit.instrumentation.internal.async is false.
-     * If lazy hooking is enabled hooks will be generated on the fly while an instrumentation method asks for hooks.
-     * Only one attempt for lazy loading hooks will be performed! If no hooks are generated due to e.g a missing or invalid
-     * configuration no further attempts will be performed. Assumption is that updated hook configurations will be
+     * Flag indicates that lazy loading is enabled. This is only possible if the configuration value
+     * {@code inspectit.instrumentation.internal.async} is {@ode false}.
+     * If lazy hooking is enabled, hooks will be generated on the fly while an instrumentation method asks for hooks.
+     * Only one attempt for lazy loading hooks will be performed! If no hooks are generated, e.g. due to a missing or invalid
+     * configuration, no further attempts will be performed. Assumption is that updated hook configurations will be
      * considered while regular asynchronous updates.
      */
     private boolean isLazyHookingEnabled;
@@ -124,7 +125,7 @@ public class HookManager {
 
     /**
      * Creates {@link  MethodHook}s lazy if hooks are not yet created for an instrumented class.
-     * Lazy loaded hooks are merged to {@link HookManager#hooks} map during next regular {@link  HookUpdate}.
+     * Lazy loaded hooks are merged to {@link HookManager#hooks} map during next regular {@link HookUpdate}.
      * This method will only be called during JVM ramp up phase as long as not all classes are loaded.
      *
      * @param clazz the name of the class to which the method to query the hook for belongs
@@ -138,10 +139,10 @@ public class HookManager {
         synchronized (clazz) {
             // Lock lazy hooking for this class. We only try to lazy hooking once
             lazyHookingPerformed.add(clazz);
-            try (val sm = selfMonitoring.withDurationSelfMonitoring("hookmanager-lazy-hooking")) {
+            try (Scope sm = selfMonitoring.withDurationSelfMonitoring("hookmanager-lazy-hooking")) {
                 Map<MethodDescription, MethodHookConfiguration> hookConfigs = configResolver.getHookConfigurations(clazz);
 
-                val lazyHooks = Maps.<String, MethodHook>newHashMap();
+                HashMap<String, MethodHook> lazyHooks = Maps.newHashMap();
                 hookConfigs.forEach((method, config) -> {
                     String signature = CoreUtils.getSignature(method);
                     try {
@@ -207,10 +208,10 @@ public class HookManager {
 
         /**
          * Copies the currently active hooks into a mutable, local state.
-         * The hooks are reset when copied to reenable actions which have been deactivated due to runtime errors.
+         * The hooks are reset when copied to re-enable actions which have been deactivated due to runtime errors.
          */
         private HookUpdate() {
-            try (val sm = selfMonitoring.withDurationSelfMonitoring("hookmanager-copy-existing-hooks")) {
+            try (Scope sm = selfMonitoring.withDurationSelfMonitoring("hookmanager-copy-existing-hooks")) {
 
                 // Merge regular and lazy loaded hooks. Regular hooks take precedence
                 WeakHashMap<Class<?>, Map<String, MethodHook>> mergedHooks = Stream.of(hooks, lazyLoadedHooks)
@@ -221,7 +222,7 @@ public class HookManager {
                 for (Map.Entry<Class<?>, Map<String, MethodHook>> existingMethodHooks : mergedHooks.entrySet()) {
                     HashMap<String, MethodHook> newMethodHooks = new HashMap<>();
                     existingMethodHooks.getValue()
-                            .forEach((signature, hook) -> newMethodHooks.put(signature, hook.getResettedCopy()));
+                            .forEach((signature, hook) -> newMethodHooks.put(signature, hook.getResetCopy()));
                     newHooks.put(existingMethodHooks.getKey(), newMethodHooks);
                 }
             }
@@ -234,7 +235,7 @@ public class HookManager {
          */
         public void updateHooksForClass(Class<?> clazz) {
             ensureNotCommitted();
-            try (val sm = selfMonitoring.withDurationSelfMonitoring("hookmanager-update-class")) {
+            try (Scope sm = selfMonitoring.withDurationSelfMonitoring("hookmanager-update-class")) {
                 Map<MethodDescription, MethodHookConfiguration> hookConfigs = configResolver.getHookConfigurations(clazz);
                 removeObsoleteHooks(clazz, hookConfigs.keySet());
                 addOrReplaceHooks(clazz, hookConfigs);

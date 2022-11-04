@@ -36,7 +36,7 @@ import java.security.ProtectionDomain;
 import java.util.*;
 
 /**
- * Base for all classes which should act as {@link java.lang.instrument.ClassFileTransformer}s. Anyway, we instroduced
+ * Base for all classes which should act as {@link java.lang.instrument.ClassFileTransformer}s. Anyway, we introduced
  * a custom {@link ClassTransformer} interface to ease Java8 and Java9 interoperability.
  */
 @Slf4j
@@ -174,14 +174,14 @@ public abstract class AbstractClassTransformer implements ClassTransformer {
     protected void dispatchClassInstrumentedEvent(Class<?> clazz, TypeDescription type, ClassInstrumentationConfiguration classConf) {
         if (!shuttingDown) {
             //Notify listeners that this class has been instrumented (or deinstrumented)
-            val event = new ClassInstrumentedEvent(this, clazz, type, classConf);
+            ClassInstrumentedEvent event = new ClassInstrumentedEvent(this, clazz, type, classConf);
             ctx.publishEvent(event);
         }
     }
 
     /**
      * Triggers a retransformation for all instrumented classes until none is instrumented anymore.
-     * Therefore this class expects that {@link #shuttingDown} is already set to true.
+     * Therefore, this class expects that {@link #shuttingDown} is already set to true.
      * When {@link #shuttingDown} is true, for every retransformed class any instrumentation is removed automatically.
      */
     protected void deinstrumentAllClasses() {

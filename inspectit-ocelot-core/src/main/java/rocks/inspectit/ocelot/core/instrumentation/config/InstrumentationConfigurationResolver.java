@@ -94,7 +94,7 @@ public class InstrumentationConfigurationResolver {
 
             }
         } catch (NoClassDefFoundError e) {
-            //the class contains a reference to an not loadable class
+            //the class contains a reference to a not loadable class
             //this the case for example for very many spring boot classes
             log.trace("Ignoring class {} for instrumentation as it is not initializable ", typeWithLoader.getName(), e);
             return ClassInstrumentationConfiguration.NO_INSTRUMENTATION;

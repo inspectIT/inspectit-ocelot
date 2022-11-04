@@ -7,7 +7,7 @@ import net.bytebuddy.pool.TypePool;
 import rocks.inspectit.ocelot.core.AgentImpl;
 
 /**
- * Container for {@link TypeDescription}s and {@link  ClassLoader} pairs.
+ * Container for {@link TypeDescription}s and {@link ClassLoader} pairs.
  * The purpose of this container is to have common type for already loaded classes and for classes loading for the first time
  * when no class object is available.
  */

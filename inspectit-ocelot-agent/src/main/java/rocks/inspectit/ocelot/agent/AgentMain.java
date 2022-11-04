@@ -65,7 +65,7 @@ public class AgentMain {
         AgentAttacher.attach(Integer.parseInt(args[0]), agentProperties);
     }
 
-    // invoked if agent is started after the application
+    // invoked if agent is started after the instrumented application
     public static void agentmain(String agentArgs, Instrumentation inst) {
         //TODO: currently replacing the agent does not really work as all Agent versions share the same namespace in the same classpath
         if (!isAsyncInstrumentationEnabled()) {
@@ -74,7 +74,7 @@ public class AgentMain {
         startAgent(agentArgs, inst, true);
     }
 
-    // invoked if agent is started before the application
+    // invoked if agent is started before the instrumented application
     public static void premain(String agentArgs, Instrumentation inst) {
         boolean loadOpenTelemetryJarToBootstrap = null != System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY) ? "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY)) : "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY));
         // check for deprecated JVM property

@@ -149,10 +149,10 @@ public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryList
 
     /**
      * Utility class to keep track of implemented ClassLoaders.
-     * We need a two step caching here to support instrumenting ClassLoaders on first load, hence we have no class to cache with weak keys.
+     * We need a two-step caching here to support instrumenting ClassLoaders on first load, hence we have no class to cache with weak keys.
      * This will only happen if async instrumentation is disabled!
-     * If the instrumented ClassLoader is finally loaded it is move to a final cache to ensure unloaded ClassLoaders will be removed from cache
-     * and on reload the same ClassLoader it will be instrumented again.
+     * If the instrumented ClassLoader is finally loaded, it is moved to a final cache to ensure unloaded ClassLoaders will be removed from cache
+     * and on reload the same ClassLoader will be instrumented again.
      */
     @Slf4j
     private static class InstrumentedClassLoaders implements IClassDiscoveryListener {

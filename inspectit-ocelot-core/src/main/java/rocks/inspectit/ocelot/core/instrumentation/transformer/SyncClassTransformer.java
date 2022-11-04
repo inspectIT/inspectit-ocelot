@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Synchronous {@link ClassTransformer} implementation.
  * <p>
- * Can be enabled with  property <i>inspectit.instrumentation.internal.async</i>
+ * Can be enabled with the property <i>inspectit.instrumentation.internal.async</i>
  * </p>
  *
  * @see rocks.inspectit.ocelot.config.model.instrumentation.InternalSettings

@@ -9,7 +9,7 @@ import java.security.ProtectionDomain;
 public interface ClassTransformer {
 
     /**
-     * @return true, if transformer should be enabled false otherwise
+     * @return true, if transformer should be enabled, false otherwise
      */
     boolean isEnabled();
 
