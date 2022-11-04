@@ -46,7 +46,7 @@ class SettingsMenu extends React.Component {
             border: solid #ddd 1px;
           }
         `}</style>
-        <TabMenu model={this.state.navItems} activeItem={this.state.activeItem} onTabChange={(e) => this.onTabChange(e.value)} />
+        <TabMenu model={this.state.navItems} activeitem={this.state.activeItem} onTabChange={(e) => this.onTabChange(e.value)} />
       </div>
     );
   }
