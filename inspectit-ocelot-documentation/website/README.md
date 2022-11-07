@@ -23,6 +23,12 @@ $ yarn
 $ yarn start
 ```
 
+2.1 Access the preview version:
+
+You can access the preview version of the documentation at
+[http://localhost:3000/inspectit-ocelot/docs/next/doc1](http://localhost:3000/inspectit-ocelot/docs/next/doc1)
+(note the **/next/** sub-path).
+
 ## Directory Structure
 
 Your project file structure should look something like this
