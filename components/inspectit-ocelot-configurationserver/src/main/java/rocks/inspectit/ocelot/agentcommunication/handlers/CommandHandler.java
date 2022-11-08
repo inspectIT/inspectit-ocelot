@@ -2,8 +2,8 @@ package rocks.inspectit.ocelot.agentcommunication.handlers;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
-import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
+import rocks.inspectit.ocelot.grpc.Command;
+import rocks.inspectit.ocelot.grpc.CommandResponse;
 
 public interface CommandHandler {
 
@@ -24,17 +24,6 @@ public interface CommandHandler {
      * @return True if the response is handled by this handler.
      */
     boolean canHandle(CommandResponse response);
-
-    /**
-     * Takes an instance of {@link Command} as well as a String resembling the id of the agent the command is meant for.
-     * Prepares an instance of {@link DeferredResult} for this command.
-     *
-     * @param agentId The id of the agent the command is meant for.
-     * @param command The command to be Executed.
-     *
-     * @return An instance of {@link DeferredResult} which is prepared as defined by the handler.
-     */
-    DeferredResult<ResponseEntity<?>> prepareResponse(String agentId, Command command);
 
     /**
      * Takes an instance of {@link CommandResponse} as well as an instance of {@link DeferredResult} and handles

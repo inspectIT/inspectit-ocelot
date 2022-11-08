@@ -6,9 +6,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
-import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.core.instrumentation.NewClassDiscoveryService;
+import rocks.inspectit.ocelot.grpc.Command;
+import rocks.inspectit.ocelot.grpc.CommandResponse;
+import rocks.inspectit.ocelot.grpc.ListClassesCommand;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,13 +29,14 @@ class ListClassesCommandExecutorTest {
     public class Execute {
 
         @Test
-        public void success(){
+        public void success() {
             Set<Class<?>> set = new HashSet<>();
             set.add(String.class);
             when(discoveryService.getKnownClasses()).thenReturn(set);
 
-            ListClassesCommand command = new ListClassesCommand();
-            command.setFilter("com");
+            Command command = Command.newBuilder()
+                    .setListClasses(ListClassesCommand.newBuilder().setFilter("com"))
+                    .build();
 
             CommandResponse response = executor.execute(command);
 

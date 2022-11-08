@@ -5,12 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import rocks.inspectit.ocelot.GrpcUnrelatedIntTest;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.file.FileData;
 import rocks.inspectit.ocelot.file.FileInfo;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+@GrpcUnrelatedIntTest
 public class FileControllerIntTest extends IntegrationTestBase {
 
     @Nested

@@ -23,6 +23,27 @@ spring:
 server:
   port: 8090
 
+grpc:
+  server:
+    # The grpc port, needs to be synced with the port set in the agent configuration.
+    # The default value if nothing is set is 9090 from the used library, however the default set here is 9657 to avoid
+    # clashing with prometheus' default port.
+    # 9657 is therefore also the default value for the agent.
+    # If set to -1 the grpc server is deactivated.
+    port: 9657
+
+    # The grpc server's security settings
+    security:
+      # If enabled, the server will expect clients to connect using TLS
+      enabled: false
+      # If enabled, the server needs a certificate and corresponding private key
+      certificate-chain:
+      private-key:
+      # Possible values are NONE, OPTIONAL and REQUIRED
+      # For mutual certificate authentication clientAuth needs to be set to REQUIRE and trustCertCollection to the trusted certificates
+      client-auth: NONE
+      trust-cert-collection:
+
 inspectit-config-server:
   # the directory which is used as working directory
   working-directory: working_directory
@@ -58,14 +79,10 @@ inspectit-config-server:
 
   # settings for the agent commands
   agent-command:
-    # after this time, commands which have not been fetched will be removed
-    command-timeout: 2m
     # timeout how long a command will wait for a response from the agent
     response-timeout: 30s
-    # the size of each agents' command queue
-    command-queue-size: 100
-    # the max. time an agent is allowed to wait for a new command
-    agent-polling-timeout: 30s
+    # maximum size for inbound grpc messages, i.e. responses from agents, in MiB. Default is 4MiB.
+    max-inbound-message-size: 4
 
   # Settings for connecting the configuration server to remote Git repositories.
   remote-configurations:

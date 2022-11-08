@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
+//import rocks.inspectit.ocelot.commons.models.command.Command;
+//import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -17,8 +17,8 @@ import java.util.Properties;
  */
 @Data
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class EnvironmentCommand extends Command {
+//@EqualsAndHashCode(callSuper = true)
+public class EnvironmentCommand { //extends Command {
 
     /**
      * Type identifier for JSON serialization.
@@ -31,8 +31,8 @@ public class EnvironmentCommand extends Command {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @EqualsAndHashCode(callSuper = true)
-    public static class Response extends CommandResponse {
+    //@EqualsAndHashCode(callSuper = true)
+    public static class Response {//extends CommandResponse {
         private EnvironmentDetail environment;
     }
 

@@ -29,7 +29,36 @@ POM License: GNU Lesser General Public License - http://www.gnu.org/licenses/old
 
 --------------------------------------------------------------------------------
 
-4. Group: com.fasterxml  Name: classmate  Version: 1.5.1
+4. Group: com.fasterxml  Name: classmate  Version: 1.3.4
+
+Project URL: http://github.com/FasterXML/java-classmate
+
+POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+
+Embedded license: 
+
+                    ****************************************                    
+
+This copy of Java ClassMate library is licensed under Apache (Software) License,
+version 2.0 ("the License").
+See the License for details about distribution rights, and the specific rights regarding derivate works.
+
+You may obtain a copy of the License at:
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+                    ****************************************                    
+
+Java ClassMate library was originally written by Tatu Saloranta (tatu.saloranta@iki.fi)
+
+Other developers who have contributed code are:
+
+* Brian Langel
+
+
+--------------------------------------------------------------------------------
+
+5. Group: com.fasterxml  Name: classmate  Version: 1.5.1
 
 Project URL: https://github.com/FasterXML/java-classmate
 
@@ -60,11 +89,11 @@ Other developers who have contributed code are:
 
 --------------------------------------------------------------------------------
 
-5. Group: com.fasterxml.jackson  Name: jackson-bom  Version: 2.13.5
+6. Group: com.fasterxml.jackson  Name: jackson-bom  Version: 2.13.4.20221013
 
 No license information found
 
-6. Group: com.fasterxml.jackson.core  Name: jackson-annotations  Version: 2.13.5
+7. Group: com.fasterxml.jackson.core  Name: jackson-annotations  Version: 2.13.4
 
 Project URL: http://github.com/FasterXML/jackson
 
@@ -279,7 +308,7 @@ Embedded license:
 
 --------------------------------------------------------------------------------
 
-7. Group: com.fasterxml.jackson.core  Name: jackson-core  Version: 2.13.5
+8. Group: com.fasterxml.jackson.core  Name: jackson-core  Version: 2.13.4
 
 Project URL: https://github.com/FasterXML/jackson-core
 
@@ -516,7 +545,7 @@ from the source code management (SCM) system project uses.
 
 --------------------------------------------------------------------------------
 
-8. Group: com.fasterxml.jackson.core  Name: jackson-databind  Version: 2.13.5
+9. Group: com.fasterxml.jackson.core  Name: jackson-databind  Version: 2.13.4.2
 
 Project URL: http://github.com/FasterXML/jackson
 
@@ -753,7 +782,7 @@ from the source code management (SCM) system project uses.
 
 --------------------------------------------------------------------------------
 
-9. Group: com.fasterxml.jackson.dataformat  Name: jackson-dataformat-yaml  Version: 2.13.5
+10. Group: com.fasterxml.jackson.dataformat  Name: jackson-dataformat-yaml  Version: 2.13.4
 
 Project URL: https://github.com/FasterXML/jackson-dataformats-text
 
@@ -799,7 +828,7 @@ from the source code management (SCM) system project uses.
 
 --------------------------------------------------------------------------------
 
-10. Group: com.fasterxml.jackson.datatype  Name: jackson-datatype-jdk8  Version: 2.13.5
+11. Group: com.fasterxml.jackson.datatype  Name: jackson-datatype-jdk8  Version: 2.13.4
 
 Manifest Project URL: https://github.com/FasterXML/jackson-modules-java8/jackson-datatype-jdk8
 
@@ -809,7 +838,7 @@ POM License: The Apache Software License, Version 2.0 - http://www.apache.org/li
 
 --------------------------------------------------------------------------------
 
-11. Group: com.fasterxml.jackson.datatype  Name: jackson-datatype-jsr310  Version: 2.13.5
+12. Group: com.fasterxml.jackson.datatype  Name: jackson-datatype-jsr310  Version: 2.13.4
 
 Manifest Project URL: https://github.com/FasterXML/jackson-modules-java8/jackson-datatype-jsr310
 
@@ -832,7 +861,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 --------------------------------------------------------------------------------
 
-12. Group: com.fasterxml.jackson.jr  Name: jackson-jr-objects  Version: 2.13.5
+13. Group: com.fasterxml.jackson.jr  Name: jackson-jr-objects  Version: 2.13.4
 
 Project URL: http://wiki.fasterxml.com/JacksonHome
 
@@ -878,7 +907,7 @@ from the source code management (SCM) system project uses.
 
 --------------------------------------------------------------------------------
 
-13. Group: com.fasterxml.jackson.module  Name: jackson-module-parameter-names  Version: 2.13.5
+14. Group: com.fasterxml.jackson.module  Name: jackson-module-parameter-names  Version: 2.13.4
 
 Manifest Project URL: https://github.com/FasterXML/jackson-modules-java8/jackson-module-parameter-names
 
@@ -888,7 +917,7 @@ POM License: The Apache Software License, Version 2.0 - http://www.apache.org/li
 
 --------------------------------------------------------------------------------
 
-14. Group: com.github.gwenn  Name: sqlite-dialect  Version: 0.1.0
+15. Group: com.github.gwenn  Name: sqlite-dialect  Version: 0.1.0
 
 POM Project URL: https://github.com/gwenn/sqlite-dialect
 
@@ -896,7 +925,7 @@ POM License: Public domain - http://unlicense.org/
 
 --------------------------------------------------------------------------------
 
-15. Group: com.google.code.findbugs  Name: jsr305  Version: 3.0.2
+16. Group: com.google.code.findbugs  Name: jsr305  Version: 3.0.2
 
 POM Project URL: http://findbugs.sourceforge.net/
 
@@ -904,7 +933,7 @@ POM License: The Apache Software License, Version 2.0 - http://www.apache.org/li
 
 --------------------------------------------------------------------------------
 
-16. Group: com.google.code.gson  Name: gson  Version: 2.9.1
+17. Group: com.google.code.gson  Name: gson  Version: 2.9.1
 
 Manifest Project URL: https://github.com/google/gson/gson
 
@@ -914,13 +943,13 @@ POM License: Apache-2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-17. Group: com.google.errorprone  Name: error_prone_annotations  Version: 2.11.0
+18. Group: com.google.errorprone  Name: error_prone_annotations  Version: 2.3.4
 
 POM License: Apache 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-18. Group: com.google.guava  Name: failureaccess  Version: 1.0.1
+19. Group: com.google.guava  Name: failureaccess  Version: 1.0.1
 
 Manifest Project URL: https://github.com/google/guava/
 
@@ -928,23 +957,21 @@ POM License: The Apache Software License, Version 2.0 - http://www.apache.org/li
 
 --------------------------------------------------------------------------------
 
-19. Group: com.google.guava  Name: guava  Version: 31.1-jre
+20. Group: com.google.guava  Name: guava  Version: 29.0-android
 
 Manifest Project URL: https://github.com/google/guava/
-
-POM Project URL: https://github.com/google/guava
 
 POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-20. Group: com.google.guava  Name: listenablefuture  Version: 9999.0-empty-to-avoid-conflict-with-guava
+21. Group: com.google.guava  Name: listenablefuture  Version: 9999.0-empty-to-avoid-conflict-with-guava
 
 POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-21. Group: com.google.j2objc  Name: j2objc-annotations  Version: 1.3
+22. Group: com.google.j2objc  Name: j2objc-annotations  Version: 1.3
 
 POM Project URL: https://github.com/google/j2objc/
 
@@ -952,7 +979,7 @@ POM License: The Apache Software License, Version 2.0 - http://www.apache.org/li
 
 --------------------------------------------------------------------------------
 
-22. Group: com.googlecode.javaewah  Name: JavaEWAH  Version: 1.1.13
+23. Group: com.googlecode.javaewah  Name: JavaEWAH  Version: 1.1.7
 
 POM Project URL: https://github.com/lemire/javaewah
 
@@ -960,7 +987,7 @@ POM License: Apache 2 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-23. Group: com.jcraft  Name: jsch  Version: 0.1.55
+24. Group: com.jcraft  Name: jsch  Version: 0.1.55
 
 POM Project URL: http://www.jcraft.com/jsch/
 
@@ -968,7 +995,7 @@ POM License: Revised BSD - http://www.jcraft.com/jsch/LICENSE.txt
 
 --------------------------------------------------------------------------------
 
-24. Group: com.jcraft  Name: jzlib  Version: 1.1.1
+25. Group: com.jcraft  Name: jzlib  Version: 1.1.1
 
 POM Project URL: http://www.jcraft.com/jzlib/
 
@@ -976,7 +1003,7 @@ POM License: Revised BSD - http://www.jcraft.com/jzlib/LICENSE.txt
 
 --------------------------------------------------------------------------------
 
-25. Group: com.lmax  Name: disruptor  Version: 3.4.2
+26. Group: com.lmax  Name: disruptor  Version: 3.4.2
 
 Project URL: http://lmax-exchange.github.com/disruptor
 
@@ -984,21 +1011,19 @@ POM License: The Apache Software License, Version 2.0 - http://www.apache.org/li
 
 --------------------------------------------------------------------------------
 
-26. Group: com.squareup.moshi  Name: moshi  Version: 1.8.0
+27. Group: com.squareup.moshi  Name: moshi  Version: 1.5.0
 
 POM License: Apache 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-27. Group: com.squareup.okhttp3  Name: logging-interceptor  Version: 4.9.3
+28. Group: com.squareup.okhttp3  Name: logging-interceptor  Version: 3.13.1
 
-POM Project URL: https://square.github.io/okhttp/
-
-POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+POM License: Apache 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-28. Group: com.squareup.okhttp3  Name: okhttp  Version: 4.9.3
+29. Group: com.squareup.okhttp3  Name: okhttp  Version: 4.10.0
 
 POM Project URL: https://square.github.io/okhttp/
 
@@ -1016,7 +1041,11 @@ https://mozilla.org/MPL/2.0/
 
 --------------------------------------------------------------------------------
 
-29. Group: com.squareup.okio  Name: okio  Version: 2.8.0
+30. Group: com.squareup.okio  Name: okio  Version: 3.0.0
+
+No license information found
+
+31. Group: com.squareup.okio  Name: okio-jvm  Version: 3.0.0
 
 POM Project URL: https://github.com/square/okio/
 
@@ -1024,23 +1053,19 @@ POM License: The Apache Software License, Version 2.0 - http://www.apache.org/li
 
 --------------------------------------------------------------------------------
 
-30. Group: com.squareup.retrofit2  Name: converter-moshi  Version: 2.9.0
+32. Group: com.squareup.retrofit2  Name: converter-moshi  Version: 2.5.0
 
-POM Project URL: https://github.com/square/retrofit
-
-POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+POM License: Apache 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-31. Group: com.squareup.retrofit2  Name: retrofit  Version: 2.9.0
+33. Group: com.squareup.retrofit2  Name: retrofit  Version: 2.5.0
 
-POM Project URL: https://github.com/square/retrofit
-
-POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+POM License: Apache 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-32. Group: com.sun.activation  Name: jakarta.activation  Version: 1.2.2
+34. Group: com.sun.activation  Name: jakarta.activation  Version: 1.2.2
 
 Manifest Project URL: https://www.eclipse.org
 
@@ -1122,7 +1147,7 @@ JUnit (4.12)
 
 --------------------------------------------------------------------------------
 
-33. Group: com.sun.istack  Name: istack-commons-runtime  Version: 3.0.12
+35. Group: com.sun.istack  Name: istack-commons-runtime  Version: 3.0.12
 
 Manifest Project URL: https://www.eclipse.org
 
@@ -1361,7 +1386,7 @@ permitted.
 
 --------------------------------------------------------------------------------
 
-34. Group: com.zaxxer  Name: HikariCP  Version: 4.0.3
+36. Group: com.zaxxer  Name: HikariCP  Version: 4.0.3
 
 Manifest Project URL: https://github.com/brettwooldridge
 
@@ -1371,7 +1396,7 @@ POM License: The Apache Software License, Version 2.0 - http://www.apache.org/li
 
 --------------------------------------------------------------------------------
 
-35. Group: commons-beanutils  Name: commons-beanutils  Version: 1.9.4
+37. Group: commons-beanutils  Name: commons-beanutils  Version: 1.9.4
 
 Project URL: https://commons.apache.org/proper/commons-beanutils/
 
@@ -1594,7 +1619,242 @@ The Apache Software Foundation (http://www.apache.org/).
 
 --------------------------------------------------------------------------------
 
-36. Group: commons-codec  Name: commons-codec  Version: 1.15
+38. Group: commons-codec  Name: commons-codec  Version: 1.11
+
+Project URL: http://commons.apache.org/proper/commons-codec/
+
+POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
+
+Embedded license: 
+
+                    ****************************************                    
+
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+                    ****************************************                    
+
+Apache Commons Codec
+Copyright 2002-2017 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+src/test/org/apache/commons/codec/language/DoubleMetaphoneTest.java
+contains test data from http://aspell.net/test/orig/batch0.tab.
+Copyright (C) 2002 Kevin Atkinson (kevina@gnu.org)
+
+===============================================================================
+
+The content of package org.apache.commons.codec.language.bm has been translated
+from the original php source code available at http://stevemorse.org/phoneticinfo.htm
+with permission from the original authors.
+Original source copyright:
+Copyright (c) 2008 Alexander Beider & Stephen P. Morse.
+
+--------------------------------------------------------------------------------
+
+39. Group: commons-codec  Name: commons-codec  Version: 1.15
 
 Project URL: https://commons.apache.org/proper/commons-codec/
 
@@ -1829,7 +2089,7 @@ Copyright (c) 2008 Alexander Beider & Stephen P. Morse.
 
 --------------------------------------------------------------------------------
 
-37. Group: commons-collections  Name: commons-collections  Version: 3.2.2
+40. Group: commons-collections  Name: commons-collections  Version: 3.2.2
 
 Project URL: http://commons.apache.org/collections/
 
@@ -2052,7 +2312,7 @@ The Apache Software Foundation (http://www.apache.org/).
 
 --------------------------------------------------------------------------------
 
-38. Group: commons-io  Name: commons-io  Version: 2.11.0
+41. Group: commons-io  Name: commons-io  Version: 2.11.0
 
 Project URL: https://commons.apache.org/proper/commons-io/
 
@@ -2276,7 +2536,7 @@ The Apache Software Foundation (https://www.apache.org/).
 
 --------------------------------------------------------------------------------
 
-39. Group: commons-logging  Name: commons-logging  Version: 1.2
+42. Group: commons-logging  Name: commons-logging  Version: 1.2
 
 Project URL: http://commons.apache.org/proper/commons-logging/
 
@@ -2500,7 +2760,7 @@ The Apache Software Foundation (http://www.apache.org/).
 
 --------------------------------------------------------------------------------
 
-40. Group: io.github.classgraph  Name: classgraph  Version: 4.8.149
+43. Group: io.github.classgraph  Name: classgraph  Version: 4.8.149
 
 POM Project URL: https://github.com/classgraph/classgraph
 
@@ -2508,7 +2768,7 @@ POM License: The MIT License (MIT) - http://opensource.org/licenses/MIT
 
 --------------------------------------------------------------------------------
 
-41. Group: io.grpc  Name: grpc-context  Version: 1.27.2
+44. Group: io.grpc  Name: grpc-context  Version: 1.27.2
 
 POM Project URL: https://github.com/grpc/grpc-java
 
@@ -2516,7 +2776,7 @@ POM License: Apache 2.0 - https://opensource.org/licenses/Apache-2.0
 
 --------------------------------------------------------------------------------
 
-42. Group: io.jaegertracing  Name: jaeger-client  Version: 1.8.1
+45. Group: io.jaegertracing  Name: jaeger-client  Version: 1.8.1
 
 POM Project URL: https://github.com/jaegertracing/jaeger-client-java
 
@@ -2524,7 +2784,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-43. Group: io.jaegertracing  Name: jaeger-core  Version: 1.8.1
+46. Group: io.jaegertracing  Name: jaeger-core  Version: 1.8.1
 
 POM Project URL: https://github.com/jaegertracing/jaeger-client-java
 
@@ -2532,7 +2792,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-44. Group: io.jaegertracing  Name: jaeger-thrift  Version: 1.8.1
+47. Group: io.jaegertracing  Name: jaeger-thrift  Version: 1.8.1
 
 POM Project URL: https://github.com/jaegertracing/jaeger-client-java
 
@@ -2540,7 +2800,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-45. Group: io.jaegertracing  Name: jaeger-tracerresolver  Version: 1.8.1
+48. Group: io.jaegertracing  Name: jaeger-tracerresolver  Version: 1.8.1
 
 POM Project URL: https://github.com/jaegertracing/jaeger-client-java
 
@@ -2548,7 +2808,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-46. Group: io.jsonwebtoken  Name: jjwt-api  Version: 0.11.5
+49. Group: io.jsonwebtoken  Name: jjwt-api  Version: 0.11.5
 
 Manifest Project URL: https://github.com/jwtk/jjwt
 
@@ -2556,7 +2816,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
-47. Group: io.jsonwebtoken  Name: jjwt-impl  Version: 0.11.5
+50. Group: io.jsonwebtoken  Name: jjwt-impl  Version: 0.11.5
 
 Manifest Project URL: https://github.com/jwtk/jjwt
 
@@ -2564,7 +2824,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
-48. Group: io.jsonwebtoken  Name: jjwt-jackson  Version: 0.11.5
+51. Group: io.jsonwebtoken  Name: jjwt-jackson  Version: 0.11.5
 
 Manifest Project URL: https://github.com/jwtk/jjwt
 
@@ -2572,7 +2832,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
-49. Group: io.micrometer  Name: micrometer-core  Version: 1.9.8
+52. Group: io.micrometer  Name: micrometer-core  Version: 1.9.6
 
 POM Project URL: https://github.com/micrometer-metrics/micrometer
 
@@ -2834,25 +3094,15 @@ package in the Spring Framework library, distributed by VMware, Inc:
 
 --------------------------------------------------------------------------------
 
-50. Group: io.netty  Name: netty-tcnative-boringssl-static  Version: 2.0.56.Final
+53. Group: io.netty  Name: netty-tcnative-boringssl-static  Version: 2.0.20.Final
 
-Manifest Project URL: https://netty.io/
+Manifest Project URL: http://netty.io/
 
-POM Project URL: https://github.com/netty/netty-tcnative/netty-tcnative-boringssl-static/
-
-POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0
 
 --------------------------------------------------------------------------------
 
-51. Group: io.netty  Name: netty-tcnative-classes  Version: 2.0.56.Final
-
-Manifest Project URL: https://netty.io/
-
-POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
-
---------------------------------------------------------------------------------
-
-52. Group: io.opencensus  Name: opencensus-api  Version: 0.31.1
+54. Group: io.opencensus  Name: opencensus-api  Version: 0.28.3
 
 POM Project URL: https://github.com/census-instrumentation/opencensus-java
 
@@ -2860,7 +3110,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-53. Group: io.opencensus  Name: opencensus-impl  Version: 0.31.1
+55. Group: io.opencensus  Name: opencensus-api  Version: 0.31.1
 
 POM Project URL: https://github.com/census-instrumentation/opencensus-java
 
@@ -2868,7 +3118,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-54. Group: io.opencensus  Name: opencensus-impl-core  Version: 0.31.1
+56. Group: io.opencensus  Name: opencensus-exporter-metrics-util  Version: 0.31.1
 
 POM Project URL: https://github.com/census-instrumentation/opencensus-java
 
@@ -2876,7 +3126,31 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-55. Group: io.opentelemetry  Name: opentelemetry-api  Version: 1.23.0
+57. Group: io.opencensus  Name: opencensus-impl  Version: 0.28.3
+
+POM Project URL: https://github.com/census-instrumentation/opencensus-java
+
+POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+
+--------------------------------------------------------------------------------
+
+58. Group: io.opencensus  Name: opencensus-impl-core  Version: 0.28.3
+
+POM Project URL: https://github.com/census-instrumentation/opencensus-java
+
+POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+
+--------------------------------------------------------------------------------
+
+59. Group: io.opencensus  Name: opencensus-impl-core  Version: 0.31.1
+
+POM Project URL: https://github.com/census-instrumentation/opencensus-java
+
+POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+
+--------------------------------------------------------------------------------
+
+60. Group: io.opentelemetry  Name: opentelemetry-api  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -2884,31 +3158,15 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-56. Group: io.opentelemetry  Name: opentelemetry-api-events  Version: 1.23.0-alpha
-
-POM Project URL: https://github.com/open-telemetry/opentelemetry-java
-
-POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
-
---------------------------------------------------------------------------------
-
-57. Group: io.opentelemetry  Name: opentelemetry-api-logs  Version: 1.23.0-alpha
-
-POM Project URL: https://github.com/open-telemetry/opentelemetry-java
-
-POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
-
---------------------------------------------------------------------------------
-
-58. Group: io.opentelemetry  Name: opentelemetry-bom  Version: 1.23.0
+61. Group: io.opentelemetry  Name: opentelemetry-bom  Version: 1.17.0
 
 No license information found
 
-59. Group: io.opentelemetry  Name: opentelemetry-bom-alpha  Version: 1.23.0-alpha
+62. Group: io.opentelemetry  Name: opentelemetry-bom-alpha  Version: 1.17.0-alpha
 
 No license information found
 
-60. Group: io.opentelemetry  Name: opentelemetry-context  Version: 1.23.0
+63. Group: io.opentelemetry  Name: opentelemetry-context  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -2916,7 +3174,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-61. Group: io.opentelemetry  Name: opentelemetry-exporter-common  Version: 1.23.0
+64. Group: io.opentelemetry  Name: opentelemetry-exporter-common  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -2924,7 +3182,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-62. Group: io.opentelemetry  Name: opentelemetry-exporter-jaeger  Version: 1.23.0
+65. Group: io.opentelemetry  Name: opentelemetry-exporter-jaeger  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -2932,7 +3190,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-63. Group: io.opentelemetry  Name: opentelemetry-exporter-jaeger-thrift  Version: 1.23.0
+66. Group: io.opentelemetry  Name: opentelemetry-exporter-jaeger-thrift  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -2940,7 +3198,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-64. Group: io.opentelemetry  Name: opentelemetry-exporter-logging  Version: 1.23.0
+67. Group: io.opentelemetry  Name: opentelemetry-exporter-logging  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -2948,7 +3206,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-65. Group: io.opentelemetry  Name: opentelemetry-exporter-otlp  Version: 1.23.0
+68. Group: io.opentelemetry  Name: opentelemetry-exporter-otlp  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -2956,7 +3214,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-66. Group: io.opentelemetry  Name: opentelemetry-exporter-otlp-common  Version: 1.23.0
+69. Group: io.opentelemetry  Name: opentelemetry-exporter-otlp-common  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -2964,7 +3222,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-67. Group: io.opentelemetry  Name: opentelemetry-exporter-prometheus  Version: 1.23.0-alpha
+70. Group: io.opentelemetry  Name: opentelemetry-exporter-prometheus  Version: 1.17.0-alpha
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -2972,7 +3230,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-68. Group: io.opentelemetry  Name: opentelemetry-exporter-zipkin  Version: 1.23.0
+71. Group: io.opentelemetry  Name: opentelemetry-exporter-zipkin  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -2980,7 +3238,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-69. Group: io.opentelemetry  Name: opentelemetry-sdk  Version: 1.23.0
+72. Group: io.opentelemetry  Name: opentelemetry-extension-trace-propagators  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -2988,7 +3246,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-70. Group: io.opentelemetry  Name: opentelemetry-sdk-common  Version: 1.23.0
+73. Group: io.opentelemetry  Name: opentelemetry-opencensus-shim  Version: 1.17.0-alpha
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -2996,7 +3254,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-71. Group: io.opentelemetry  Name: opentelemetry-sdk-extension-autoconfigure-spi  Version: 1.23.0
+74. Group: io.opentelemetry  Name: opentelemetry-sdk  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -3004,7 +3262,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-72. Group: io.opentelemetry  Name: opentelemetry-sdk-logs  Version: 1.23.0-alpha
+75. Group: io.opentelemetry  Name: opentelemetry-sdk-common  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -3012,7 +3270,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-73. Group: io.opentelemetry  Name: opentelemetry-sdk-metrics  Version: 1.23.0
+76. Group: io.opentelemetry  Name: opentelemetry-sdk-logs  Version: 1.17.0-alpha
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -3020,7 +3278,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-74. Group: io.opentelemetry  Name: opentelemetry-sdk-trace  Version: 1.23.0
+77. Group: io.opentelemetry  Name: opentelemetry-sdk-metrics  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -3028,7 +3286,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-75. Group: io.opentelemetry  Name: opentelemetry-semconv  Version: 1.23.0-alpha
+78. Group: io.opentelemetry  Name: opentelemetry-sdk-trace  Version: 1.17.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -3036,67 +3294,75 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-76. Group: io.opentracing  Name: opentracing-api  Version: 0.33.0
+79. Group: io.opentelemetry  Name: opentelemetry-semconv  Version: 1.17.0-alpha
+
+POM Project URL: https://github.com/open-telemetry/opentelemetry-java
+
+POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+
+--------------------------------------------------------------------------------
+
+80. Group: io.opentracing  Name: opentracing-api  Version: 0.33.0
 
 POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-77. Group: io.opentracing  Name: opentracing-noop  Version: 0.33.0
+81. Group: io.opentracing  Name: opentracing-noop  Version: 0.33.0
 
 POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-78. Group: io.opentracing  Name: opentracing-util  Version: 0.33.0
+82. Group: io.opentracing  Name: opentracing-util  Version: 0.33.0
 
 POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-79. Group: io.opentracing.contrib  Name: opentracing-tracerresolver  Version: 0.1.8
+83. Group: io.opentracing.contrib  Name: opentracing-tracerresolver  Version: 0.1.8
 
 POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-80. Group: io.prometheus  Name: simpleclient  Version: 0.15.0
+84. Group: io.prometheus  Name: simpleclient  Version: 0.15.0
 
 POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-81. Group: io.prometheus  Name: simpleclient_common  Version: 0.15.0
+85. Group: io.prometheus  Name: simpleclient_common  Version: 0.15.0
 
 POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-82. Group: io.prometheus  Name: simpleclient_httpserver  Version: 0.15.0
+86. Group: io.prometheus  Name: simpleclient_httpserver  Version: 0.15.0
 
 POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-83. Group: io.prometheus  Name: simpleclient_tracer_common  Version: 0.15.0
+87. Group: io.prometheus  Name: simpleclient_tracer_common  Version: 0.15.0
 
 POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-84. Group: io.prometheus  Name: simpleclient_tracer_otel  Version: 0.15.0
+88. Group: io.prometheus  Name: simpleclient_tracer_otel  Version: 0.15.0
 
 POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-85. Group: io.prometheus  Name: simpleclient_tracer_otel_agent  Version: 0.15.0
+89. Group: io.prometheus  Name: simpleclient_tracer_otel_agent  Version: 0.15.0
 
 POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-86. Group: io.swagger.core.v3  Name: swagger-annotations  Version: 2.2.7
+90. Group: io.swagger.core.v3  Name: swagger-annotations  Version: 2.2.7
 
 Manifest Project URL: https://github.com/swagger-api/swagger-core/modules/swagger-annotations
 
@@ -3320,7 +3586,7 @@ Copy of the Apache 2.0 license can be found in `LICENSE` file.
 
 --------------------------------------------------------------------------------
 
-87. Group: io.swagger.core.v3  Name: swagger-core  Version: 2.2.7
+91. Group: io.swagger.core.v3  Name: swagger-core  Version: 2.2.7
 
 Manifest Project URL: https://github.com/swagger-api/swagger-core/modules/swagger-core
 
@@ -3544,7 +3810,7 @@ Copy of the Apache 2.0 license can be found in `LICENSE` file.
 
 --------------------------------------------------------------------------------
 
-88. Group: io.swagger.core.v3  Name: swagger-models  Version: 2.2.7
+92. Group: io.swagger.core.v3  Name: swagger-models  Version: 2.2.7
 
 Manifest Project URL: https://github.com/swagger-api/swagger-core/modules/swagger-models
 
@@ -3768,7 +4034,7 @@ Copy of the Apache 2.0 license can be found in `LICENSE` file.
 
 --------------------------------------------------------------------------------
 
-89. Group: io.zipkin.reporter2  Name: zipkin-reporter  Version: 2.16.3
+93. Group: io.zipkin.reporter2  Name: zipkin-reporter  Version: 2.16.3
 
 Manifest Project URL: https://zipkin.io/
 
@@ -3982,7 +4248,7 @@ Embedded license:
 
 --------------------------------------------------------------------------------
 
-90. Group: io.zipkin.reporter2  Name: zipkin-sender-okhttp3  Version: 2.16.3
+94. Group: io.zipkin.reporter2  Name: zipkin-sender-okhttp3  Version: 2.16.3
 
 Manifest Project URL: https://zipkin.io/
 
@@ -4196,7 +4462,7 @@ Embedded license:
 
 --------------------------------------------------------------------------------
 
-91. Group: io.zipkin.zipkin2  Name: zipkin  Version: 2.23.2
+95. Group: io.zipkin.zipkin2  Name: zipkin  Version: 2.23.2
 
 Manifest Project URL: http://zipkin.io/
 
@@ -4425,7 +4691,7 @@ This product contains a modified part of Okio, distributed by Square:
 
 --------------------------------------------------------------------------------
 
-92. Group: jakarta.annotation  Name: jakarta.annotation-api  Version: 1.3.5
+96. Group: jakarta.annotation  Name: jakarta.annotation-api  Version: 1.3.5
 
 Manifest Project URL: https://www.eclipse.org
 
@@ -5124,7 +5390,7 @@ permitted.
 
 --------------------------------------------------------------------------------
 
-93. Group: jakarta.persistence  Name: jakarta.persistence-api  Version: 2.2.3
+97. Group: jakarta.persistence  Name: jakarta.persistence-api  Version: 2.2.3
 
 Manifest Project URL: https://www.eclipse.org
 
@@ -5138,7 +5404,7 @@ POM License: GNU General Public License, version 2 with the GNU Classpath Except
 
 --------------------------------------------------------------------------------
 
-94. Group: jakarta.transaction  Name: jakarta.transaction-api  Version: 1.3.3
+98. Group: jakarta.transaction  Name: jakarta.transaction-api  Version: 1.3.3
 
 Manifest Project URL: https://github.com/eclipse-ee4j
 
@@ -5154,7 +5420,7 @@ POM License: GPL2 w/ CPE - https://www.gnu.org/software/classpath/license.html
 
 --------------------------------------------------------------------------------
 
-95. Group: jakarta.validation  Name: jakarta.validation-api  Version: 2.0.2
+99. Group: jakarta.validation  Name: jakarta.validation-api  Version: 2.0.2
 
 Manifest Project URL: https://www.eclipse.org
 
@@ -5168,7 +5434,7 @@ POM License: GNU General Public License, version 2 with the GNU Classpath Except
 
 --------------------------------------------------------------------------------
 
-96. Group: jakarta.xml.bind  Name: jakarta.xml.bind-api  Version: 2.3.3
+100. Group: jakarta.xml.bind  Name: jakarta.xml.bind-api  Version: 2.3.3
 
 Manifest Project URL: https://www.eclipse.org
 
@@ -5294,7 +5560,7 @@ permitted.
 
 --------------------------------------------------------------------------------
 
-97. Group: javax.annotation  Name: javax.annotation-api  Version: 1.3.2
+101. Group: javax.annotation  Name: javax.annotation-api  Version: 1.3.2
 
 Manifest Project URL: https://javaee.github.io/glassfish
 
@@ -5572,7 +5838,231 @@ As a special exception, the copyright holders of this library give you permissio
 
 --------------------------------------------------------------------------------
 
-98. Group: net.bytebuddy  Name: byte-buddy  Version: 1.12.23
+102. Group: javax.validation  Name: validation-api  Version: 2.0.1.Final
+
+POM Project URL: http://beanvalidation.org
+
+POM License: Apache License 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+
+Embedded license: 
+
+                    ****************************************                    
+
+Bean Validation API
+
+License: Apache License, Version 2.0
+See the license.txt file in the root directory or <http://www.apache.org/licenses/LICENSE-2.0>.
+
+--------------------------------------------------------------------------------
+
+103. Group: net.bytebuddy  Name: byte-buddy  Version: 1.11.15
+
+POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+
+Embedded license: 
+
+                    ****************************************                    
+
+This product bundles ASM 9.2, which is available under a "3-clause BSD"
+license. For details, see licenses/ASM. For more information visit https://asm.ow2.io.
+
+Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+
+                    ****************************************                    
+
+Copyright 2014 - ${current.year} Rafael Winterhalter
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+--------------------------------------------------------------------------------
+
+104. Group: net.bytebuddy  Name: byte-buddy  Version: 1.12.19
 
 POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
@@ -5763,7 +6253,7 @@ Apache License
 
                     ****************************************                    
 
-Copyright 2014 - Present Rafael Winterhalter
+Copyright 2014 - ${current.year} Rafael Winterhalter
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -5779,7 +6269,7 @@ limitations under the License.
 
 --------------------------------------------------------------------------------
 
-99. Group: net.logstash.logback  Name: logstash-logback-encoder  Version: 7.2
+105. Group: net.logstash.logback  Name: logstash-logback-encoder  Version: 7.2
 
 POM Project URL: https://github.com/logfellow/logstash-logback-encoder
 
@@ -5789,7 +6279,7 @@ POM License: MIT License - http://www.slf4j.org/license.html
 
 --------------------------------------------------------------------------------
 
-100. Group: org.apache.commons  Name: commons-lang3  Version: 3.12.0
+106. Group: org.apache.commons  Name: commons-lang3  Version: 3.12.0
 
 Project URL: https://commons.apache.org/proper/commons-lang/
 
@@ -6012,7 +6502,7 @@ The Apache Software Foundation (https://www.apache.org/).
 
 --------------------------------------------------------------------------------
 
-101. Group: org.apache.commons  Name: commons-math3  Version: 3.6.1
+107. Group: org.apache.commons  Name: commons-math3  Version: 3.6.1
 
 Project URL: http://commons.apache.org/proper/commons-math/
 
@@ -6467,7 +6957,7 @@ modification, are permitted provided that the following conditions are met:
       be used to endorse or promote products derived from this software without
       specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS�? AND ANY
 EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY
@@ -6489,14 +6979,14 @@ This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
 
 This product includes software developed for Orekit by
-CS Systèmes d'Information (http://www.c-s.fr/)
-Copyright 2010-2012 CS Systèmes d'Information
+CS Syst�mes d'Information (http://www.c-s.fr/)
+Copyright 2010-2012 CS Syst�mes d'Information
 
 --------------------------------------------------------------------------------
 
-102. Group: org.apache.httpcomponents  Name: httpclient  Version: 4.5.14
+108. Group: org.apache.httpcomponents  Name: httpclient  Version: 4.5.13
 
-POM Project URL: http://hc.apache.org/httpcomponents-client-ga
+POM Project URL: http://hc.apache.org/httpcomponents-client
 
 POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
@@ -6711,7 +7201,7 @@ Embedded license:
 
 
 Apache HttpClient
-Copyright 1999-2022 The Apache Software Foundation
+Copyright 1999-2020 The Apache Software Foundation
 
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
@@ -6720,7 +7210,233 @@ The Apache Software Foundation (http://www.apache.org/).
 
 --------------------------------------------------------------------------------
 
-103. Group: org.apache.httpcomponents  Name: httpcore  Version: 4.4.16
+109. Group: org.apache.httpcomponents  Name: httpclient  Version: 4.5.8
+
+POM Project URL: http://hc.apache.org/httpcomponents-client
+
+POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+
+Embedded license: 
+
+                    ****************************************                    
+
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+                    ****************************************                    
+
+
+Apache HttpClient
+Copyright 1999-2019 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+--------------------------------------------------------------------------------
+
+110. Group: org.apache.httpcomponents  Name: httpcore  Version: 4.4.11
 
 POM Project URL: http://hc.apache.org/httpcomponents-core-ga
 
@@ -6937,7 +7653,7 @@ Embedded license:
 
 
 Apache HttpCore
-Copyright 2005-2022 The Apache Software Foundation
+Copyright 2005-2019 The Apache Software Foundation
 
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
@@ -6946,7 +7662,233 @@ The Apache Software Foundation (http://www.apache.org/).
 
 --------------------------------------------------------------------------------
 
-104. Group: org.apache.logging.log4j  Name: log4j-api  Version: 2.17.2
+111. Group: org.apache.httpcomponents  Name: httpcore  Version: 4.4.15
+
+POM Project URL: http://hc.apache.org/httpcomponents-core-ga
+
+POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+
+Embedded license: 
+
+                    ****************************************                    
+
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+                    ****************************************                    
+
+
+Apache HttpCore
+Copyright 2005-2021 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+--------------------------------------------------------------------------------
+
+112. Group: org.apache.logging.log4j  Name: log4j-api  Version: 2.17.2
 
 Manifest Project URL: https://www.apache.org/
 
@@ -7172,7 +8114,7 @@ The Apache Software Foundation (http://www.apache.org/).
 
 --------------------------------------------------------------------------------
 
-105. Group: org.apache.logging.log4j  Name: log4j-to-slf4j  Version: 2.17.2
+113. Group: org.apache.logging.log4j  Name: log4j-to-slf4j  Version: 2.17.2
 
 Manifest Project URL: https://www.apache.org/
 
@@ -7398,7 +8340,7 @@ The Apache Software Foundation (http://www.apache.org/).
 
 --------------------------------------------------------------------------------
 
-106. Group: org.apache.thrift  Name: libthrift  Version: 0.15.0
+114. Group: org.apache.thrift  Name: libthrift  Version: 0.15.0
 
 POM Project URL: http://thrift.apache.org
 
@@ -7725,7 +8667,7 @@ The Apache Software Foundation (http://www.apache.org/).
 
 --------------------------------------------------------------------------------
 
-107. Group: org.apache.tomcat.embed  Name: tomcat-embed-core  Version: 9.0.71
+115. Group: org.apache.tomcat.embed  Name: tomcat-embed-core  Version: 9.0.69
 
 POM Project URL: https://tomcat.apache.org/
 
@@ -8303,7 +9245,7 @@ COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
                     ****************************************                    
 
 Apache Tomcat
-Copyright 1999-2023 The Apache Software Foundation
+Copyright 1999-2022 The Apache Software Foundation
 
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
@@ -8336,7 +9278,7 @@ http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/javaee/index.html
 
 --------------------------------------------------------------------------------
 
-108. Group: org.apache.tomcat.embed  Name: tomcat-embed-el  Version: 9.0.71
+116. Group: org.apache.tomcat.embed  Name: tomcat-embed-el  Version: 9.0.13
 
 POM Project URL: https://tomcat.apache.org/
 
@@ -8552,14 +9494,14 @@ Embedded license:
                     ****************************************                    
 
 Apache Tomcat
-Copyright 1999-2023 The Apache Software Foundation
+Copyright 1999-2018 The Apache Software Foundation
 
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
 
 --------------------------------------------------------------------------------
 
-109. Group: org.apache.tomcat.embed  Name: tomcat-embed-websocket  Version: 9.0.71
+117. Group: org.apache.tomcat.embed  Name: tomcat-embed-el  Version: 9.0.69
 
 POM Project URL: https://tomcat.apache.org/
 
@@ -8775,14 +9717,237 @@ Embedded license:
                     ****************************************                    
 
 Apache Tomcat
-Copyright 1999-2023 The Apache Software Foundation
+Copyright 1999-2022 The Apache Software Foundation
 
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
 
 --------------------------------------------------------------------------------
 
-110. Group: org.aspectj  Name: aspectjweaver  Version: 1.9.7
+118. Group: org.apache.tomcat.embed  Name: tomcat-embed-websocket  Version: 9.0.69
+
+POM Project URL: https://tomcat.apache.org/
+
+POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+
+Embedded license: 
+
+                    ****************************************                    
+
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+                    ****************************************                    
+
+Apache Tomcat
+Copyright 1999-2022 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+--------------------------------------------------------------------------------
+
+119. Group: org.aspectj  Name: aspectjweaver  Version: 1.9.7
 
 POM Project URL: https://www.eclipse.org/aspectj/
 
@@ -8790,52 +9955,47 @@ POM License: Eclipse Public License - v 2.0 - https://www.eclipse.org/org/docume
 
 --------------------------------------------------------------------------------
 
-111. Group: org.checkerframework  Name: checker-qual  Version: 3.12.0
+120. Group: org.bouncycastle  Name: bcpg-jdk15on  Version: 1.64
 
-Manifest License: MIT (Not packaged)
+POM Project URL: https://www.bouncycastle.org/java.html
 
-POM Project URL: https://checkerframework.org
+POM License: Apache Software License, Version 1.1 - https://www.apache.org/licenses/LICENSE-1.1
 
-POM License: The MIT License - http://opensource.org/licenses/MIT
-
-Embedded license: 
-
-                    ****************************************                    
-
-Checker Framework qualifiers
-Copyright 2004-present by the Checker Framework developers
-
-MIT License:
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+POM License: Bouncy Castle Licence - https://www.bouncycastle.org/licence.html
 
 --------------------------------------------------------------------------------
 
-112. Group: org.eclipse.jgit  Name: org.eclipse.jgit  Version: 5.13.1.202206130422-r
+121. Group: org.bouncycastle  Name: bcpkix-jdk15on  Version: 1.64
+
+POM Project URL: https://www.bouncycastle.org/java.html
+
+POM License: Bouncy Castle Licence - https://www.bouncycastle.org/licence.html
+
+--------------------------------------------------------------------------------
+
+122. Group: org.bouncycastle  Name: bcprov-jdk15on  Version: 1.64
+
+POM Project URL: https://www.bouncycastle.org/java.html
+
+POM License: Bouncy Castle Licence - https://www.bouncycastle.org/licence.html
+
+--------------------------------------------------------------------------------
+
+123. Group: org.checkerframework  Name: checker-compat-qual  Version: 2.5.5
+
+POM Project URL: https://checkerframework.org
+
+POM License: GNU General Public License, version 2 (GPL2), with the classpath exception - http://www.gnu.org/software/classpath/license.html
+
+POM License: The MIT License - http://opensource.org/licenses/MIT
+
+--------------------------------------------------------------------------------
+
+124. Group: org.eclipse.jgit  Name: org.eclipse.jgit  Version: 5.7.0.202003110725-r
 
 POM License: Eclipse Distribution License (New BSD License)--------------------------------------------------------------------------------
 
-113. Group: org.eclipse.jgit  Name: org.eclipse.jgit.ssh.jsch  Version: 5.13.1.202206130422-r
-
-POM License: Eclipse Distribution License (New BSD License)--------------------------------------------------------------------------------
-
-114. Group: org.flywaydb  Name: flyway-core  Version: 8.5.13
+125. Group: org.flywaydb  Name: flyway-core  Version: 8.5.13
 
 POM License: Apache License, Version 2.0 - https://flywaydb.org/licenses/flyway-community
 
@@ -8876,7 +10036,7 @@ Here is the info on how you can contribute in various ways to the project: https
 
 License
 -------
-Copyright © Red Gate Software Ltd 2010-2022
+Copyright � Red Gate Software Ltd 2010-2022
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -8896,7 +10056,7 @@ Flyway is a registered trademark of Boxfuse GmbH, owned by Red Gate Software Ltd
 
 --------------------------------------------------------------------------------
 
-115. Group: org.glassfish.jaxb  Name: jaxb-runtime  Version: 2.3.8
+126. Group: org.glassfish.jaxb  Name: jaxb-runtime  Version: 2.3.7
 
 Manifest Project URL: https://www.eclipse.org
 
@@ -9136,7 +10296,7 @@ permitted.
 
 --------------------------------------------------------------------------------
 
-116. Group: org.glassfish.jaxb  Name: txw2  Version: 2.3.8
+127. Group: org.glassfish.jaxb  Name: txw2  Version: 2.3.7
 
 POM Project URL: https://eclipse-ee4j.github.io/jaxb-ri/
 
@@ -9374,7 +10534,7 @@ permitted.
 
 --------------------------------------------------------------------------------
 
-117. Group: org.hdrhistogram  Name: HdrHistogram  Version: 2.1.12
+128. Group: org.hdrhistogram  Name: HdrHistogram  Version: 2.1.12
 
 POM Project URL: http://hdrhistogram.github.io/HdrHistogram/
 
@@ -9384,7 +10544,7 @@ POM License: Public Domain, per Creative Commons CC0 - http://creativecommons.or
 
 --------------------------------------------------------------------------------
 
-118. Group: org.hibernate  Name: hibernate-core  Version: 5.6.15.Final
+129. Group: org.hibernate  Name: hibernate-core  Version: 5.6.14.Final
 
 Manifest Project URL: https://hibernate.org/orm/5.6
 
@@ -9394,7 +10554,7 @@ POM License: GNU Library General Public License v2.1 or later - https://www.open
 
 --------------------------------------------------------------------------------
 
-119. Group: org.hibernate.common  Name: hibernate-commons-annotations  Version: 5.1.2.Final
+130. Group: org.hibernate.common  Name: hibernate-commons-annotations  Version: 5.1.2.Final
 
 POM Project URL: http://hibernate.org
 
@@ -9402,13 +10562,19 @@ POM License: GNU Library General Public License v2.1 or later - http://www.opens
 
 --------------------------------------------------------------------------------
 
-120. Group: org.hibernate.validator  Name: hibernate-validator  Version: 6.2.5.Final
+131. Group: org.hibernate.validator  Name: hibernate-validator  Version: 6.0.13.Final
 
 POM License: Apache License 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-121. Group: org.influxdb  Name: influxdb-java  Version: 2.22
+132. Group: org.hibernate.validator  Name: hibernate-validator  Version: 6.2.5.Final
+
+POM License: Apache License 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+
+--------------------------------------------------------------------------------
+
+133. Group: org.influxdb  Name: influxdb-java  Version: 2.15
 
 POM Project URL: http://www.influxdb.org
 
@@ -9416,11 +10582,11 @@ POM License: The MIT License (MIT) - http://www.opensource.org/licenses/mit-lice
 
 --------------------------------------------------------------------------------
 
-122. Group: org.javassist  Name: javassist  Version: 3.29.2-GA
+134. Group: org.javassist  Name: javassist  Version: 3.24.1-GA
 
 POM Project URL: http://www.javassist.org/
 
-POM License: Apache License 2.0 - https://www.apache.org/licenses/LICENSE-2.0
+POM License: Apache License 2.0 - http://www.apache.org/licenses/
 
 POM License: LGPL 2.1 - http://www.gnu.org/licenses/lgpl-2.1.html
 
@@ -9428,7 +10594,7 @@ POM License: MPL 1.1 - http://www.mozilla.org/MPL/MPL-1.1.html
 
 --------------------------------------------------------------------------------
 
-123. Group: org.jboss  Name: jandex  Version: 2.4.2.Final
+135. Group: org.jboss  Name: jandex  Version: 2.4.2.Final
 
 Manifest Project URL: http://www.jboss.org
 
@@ -9438,7 +10604,7 @@ POM License: Public Domain - http://repository.jboss.org/licenses/cc0-1.0.txt
 
 --------------------------------------------------------------------------------
 
-124. Group: org.jboss.logging  Name: jboss-logging  Version: 3.4.3.Final
+136. Group: org.jboss.logging  Name: jboss-logging  Version: 3.3.2.Final
 
 Project URL: http://www.jboss.org
 
@@ -9655,7 +10821,224 @@ Embedded license:
 
 --------------------------------------------------------------------------------
 
-125. Group: org.jetbrains  Name: annotations  Version: 13.0
+137. Group: org.jboss.logging  Name: jboss-logging  Version: 3.4.3.Final
+
+Project URL: http://www.jboss.org
+
+POM License: Apache License, version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+
+POM License: Public Domain - http://repository.jboss.org/licenses/cc0-1.0.txt
+
+Embedded license: 
+
+                    ****************************************                    
+
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+--------------------------------------------------------------------------------
+
+138. Group: org.jetbrains  Name: annotations  Version: 13.0
 
 POM Project URL: http://www.jetbrains.org
 
@@ -9663,7 +11046,7 @@ POM License: The Apache Software License, Version 2.0 - http://www.apache.org/li
 
 --------------------------------------------------------------------------------
 
-126. Group: org.jetbrains.kotlin  Name: kotlin-stdlib  Version: 1.6.21
+139. Group: org.jetbrains.kotlin  Name: kotlin-stdlib  Version: 1.6.20
 
 POM Project URL: https://kotlinlang.org/
 
@@ -9671,7 +11054,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-127. Group: org.jetbrains.kotlin  Name: kotlin-stdlib-common  Version: 1.6.21
+140. Group: org.jetbrains.kotlin  Name: kotlin-stdlib-common  Version: 1.6.20
 
 POM Project URL: https://kotlinlang.org/
 
@@ -9679,7 +11062,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-128. Group: org.jetbrains.kotlin  Name: kotlin-stdlib-jdk7  Version: 1.6.21
+141. Group: org.jetbrains.kotlin  Name: kotlin-stdlib-jdk7  Version: 1.5.31
 
 POM Project URL: https://kotlinlang.org/
 
@@ -9687,7 +11070,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-129. Group: org.jetbrains.kotlin  Name: kotlin-stdlib-jdk8  Version: 1.6.21
+142. Group: org.jetbrains.kotlin  Name: kotlin-stdlib-jdk8  Version: 1.5.31
 
 POM Project URL: https://kotlinlang.org/
 
@@ -9695,7 +11078,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-130. Group: org.latencyutils  Name: LatencyUtils  Version: 2.0.3
+143. Group: org.latencyutils  Name: LatencyUtils  Version: 2.0.3
 
 POM Project URL: http://latencyutils.github.io/LatencyUtils/
 
@@ -9703,15 +11086,15 @@ POM License: Public Domain, per Creative Commons CC0 - http://creativecommons.or
 
 --------------------------------------------------------------------------------
 
-131. Group: org.msgpack  Name: msgpack-core  Version: 0.9.0
+144. Group: org.msgpack  Name: msgpack-core  Version: 0.8.16
 
-POM Project URL: https://msgpack.org/
+POM Project URL: http://msgpack.org/
 
-POM License: APL2 - http://www.apache.org/licenses/LICENSE-2.0.txt
+POM License: Apache 2 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
 --------------------------------------------------------------------------------
 
-132. Group: org.slf4j  Name: jul-to-slf4j  Version: 1.7.36
+145. Group: org.slf4j  Name: jul-to-slf4j  Version: 1.7.36
 
 POM Project URL: http://www.slf4j.org
 
@@ -9719,7 +11102,7 @@ POM License: MIT License - http://www.opensource.org/licenses/mit-license.php
 
 --------------------------------------------------------------------------------
 
-133. Group: org.slf4j  Name: slf4j-api  Version: 1.7.36
+146. Group: org.slf4j  Name: slf4j-api  Version: 1.7.32
 
 POM Project URL: http://www.slf4j.org
 
@@ -9727,7 +11110,15 @@ POM License: MIT License - http://www.opensource.org/licenses/mit-license.php
 
 --------------------------------------------------------------------------------
 
-134. Group: org.springdoc  Name: springdoc-openapi-common  Version: 1.6.14
+147. Group: org.slf4j  Name: slf4j-api  Version: 1.7.36
+
+POM Project URL: http://www.slf4j.org
+
+POM License: MIT License - http://www.opensource.org/licenses/mit-license.php
+
+--------------------------------------------------------------------------------
+
+148. Group: org.springdoc  Name: springdoc-openapi-common  Version: 1.6.13
 
 POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0
 
@@ -9735,7 +11126,7 @@ POM License: The Apache License, Version 2.0 - https://www.apache.org/licenses/L
 
 --------------------------------------------------------------------------------
 
-135. Group: org.springdoc  Name: springdoc-openapi-ui  Version: 1.6.14
+149. Group: org.springdoc  Name: springdoc-openapi-ui  Version: 1.6.13
 
 POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0
 
@@ -9743,7 +11134,7 @@ POM License: The Apache License, Version 2.0 - https://www.apache.org/licenses/L
 
 --------------------------------------------------------------------------------
 
-136. Group: org.springdoc  Name: springdoc-openapi-webmvc-core  Version: 1.6.14
+150. Group: org.springdoc  Name: springdoc-openapi-webmvc-core  Version: 1.6.13
 
 POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0
 
@@ -9751,7 +11142,7 @@ POM License: The Apache License, Version 2.0 - https://www.apache.org/licenses/L
 
 --------------------------------------------------------------------------------
 
-137. Group: org.springframework  Name: spring-aop  Version: 5.3.25
+151. Group: org.springframework  Name: spring-aop  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -9965,9 +11356,9 @@ Embedded license:
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.25 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.24 SUBCOMPONENTS:
 
-Spring Framework 5.3.25 includes a number of subcomponents
+Spring Framework 5.3.24 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
@@ -10053,8 +11444,8 @@ may accompany the Software.
 
                     ****************************************                    
 
-Spring Framework 5.3.25
-Copyright (c) 2002-2023 Pivotal, Inc.
+Spring Framework 5.3.24
+Copyright (c) 2002-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -10067,7 +11458,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-138. Group: org.springframework  Name: spring-aspects  Version: 5.3.25
+152. Group: org.springframework  Name: spring-aspects  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -10281,9 +11672,9 @@ Embedded license:
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.25 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.24 SUBCOMPONENTS:
 
-Spring Framework 5.3.25 includes a number of subcomponents
+Spring Framework 5.3.24 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
@@ -10369,8 +11760,8 @@ may accompany the Software.
 
                     ****************************************                    
 
-Spring Framework 5.3.25
-Copyright (c) 2002-2023 Pivotal, Inc.
+Spring Framework 5.3.24
+Copyright (c) 2002-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -10383,7 +11774,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-139. Group: org.springframework  Name: spring-beans  Version: 5.3.25
+153. Group: org.springframework  Name: spring-beans  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -10597,9 +11988,9 @@ Embedded license:
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.25 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.24 SUBCOMPONENTS:
 
-Spring Framework 5.3.25 includes a number of subcomponents
+Spring Framework 5.3.24 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
@@ -10685,8 +12076,8 @@ may accompany the Software.
 
                     ****************************************                    
 
-Spring Framework 5.3.25
-Copyright (c) 2002-2023 Pivotal, Inc.
+Spring Framework 5.3.24
+Copyright (c) 2002-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -10699,7 +12090,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-140. Group: org.springframework  Name: spring-context  Version: 5.3.25
+154. Group: org.springframework  Name: spring-context  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -10913,9 +12304,9 @@ Embedded license:
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.25 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.24 SUBCOMPONENTS:
 
-Spring Framework 5.3.25 includes a number of subcomponents
+Spring Framework 5.3.24 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
@@ -11001,8 +12392,8 @@ may accompany the Software.
 
                     ****************************************                    
 
-Spring Framework 5.3.25
-Copyright (c) 2002-2023 Pivotal, Inc.
+Spring Framework 5.3.24
+Copyright (c) 2002-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -11015,7 +12406,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-141. Group: org.springframework  Name: spring-core  Version: 5.3.25
+155. Group: org.springframework  Name: spring-core  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -11229,9 +12620,9 @@ Embedded license:
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.25 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.24 SUBCOMPONENTS:
 
-Spring Framework 5.3.25 includes a number of subcomponents
+Spring Framework 5.3.24 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
@@ -11317,8 +12708,8 @@ may accompany the Software.
 
                     ****************************************                    
 
-Spring Framework 5.3.25
-Copyright (c) 2002-2023 Pivotal, Inc.
+Spring Framework 5.3.24
+Copyright (c) 2002-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -11331,7 +12722,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-142. Group: org.springframework  Name: spring-expression  Version: 5.3.25
+156. Group: org.springframework  Name: spring-expression  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -11545,9 +12936,9 @@ Embedded license:
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.25 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.24 SUBCOMPONENTS:
 
-Spring Framework 5.3.25 includes a number of subcomponents
+Spring Framework 5.3.24 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
@@ -11633,8 +13024,8 @@ may accompany the Software.
 
                     ****************************************                    
 
-Spring Framework 5.3.25
-Copyright (c) 2002-2023 Pivotal, Inc.
+Spring Framework 5.3.24
+Copyright (c) 2002-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -11647,7 +13038,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-143. Group: org.springframework  Name: spring-jcl  Version: 5.3.25
+157. Group: org.springframework  Name: spring-jcl  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -11861,9 +13252,9 @@ Embedded license:
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.25 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.24 SUBCOMPONENTS:
 
-Spring Framework 5.3.25 includes a number of subcomponents
+Spring Framework 5.3.24 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
@@ -11949,8 +13340,8 @@ may accompany the Software.
 
                     ****************************************                    
 
-Spring Framework 5.3.25
-Copyright (c) 2002-2023 Pivotal, Inc.
+Spring Framework 5.3.24
+Copyright (c) 2002-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -11963,7 +13354,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-144. Group: org.springframework  Name: spring-jdbc  Version: 5.3.25
+158. Group: org.springframework  Name: spring-jdbc  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -12177,9 +13568,9 @@ Embedded license:
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.25 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.24 SUBCOMPONENTS:
 
-Spring Framework 5.3.25 includes a number of subcomponents
+Spring Framework 5.3.24 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
@@ -12265,8 +13656,8 @@ may accompany the Software.
 
                     ****************************************                    
 
-Spring Framework 5.3.25
-Copyright (c) 2002-2023 Pivotal, Inc.
+Spring Framework 5.3.24
+Copyright (c) 2002-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -12279,7 +13670,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-145. Group: org.springframework  Name: spring-orm  Version: 5.3.25
+159. Group: org.springframework  Name: spring-orm  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -12493,9 +13884,9 @@ Embedded license:
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.25 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.24 SUBCOMPONENTS:
 
-Spring Framework 5.3.25 includes a number of subcomponents
+Spring Framework 5.3.24 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
@@ -12581,8 +13972,8 @@ may accompany the Software.
 
                     ****************************************                    
 
-Spring Framework 5.3.25
-Copyright (c) 2002-2023 Pivotal, Inc.
+Spring Framework 5.3.24
+Copyright (c) 2002-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -12595,7 +13986,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-146. Group: org.springframework  Name: spring-tx  Version: 5.3.25
+160. Group: org.springframework  Name: spring-tx  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -12809,9 +14200,9 @@ Embedded license:
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.25 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.24 SUBCOMPONENTS:
 
-Spring Framework 5.3.25 includes a number of subcomponents
+Spring Framework 5.3.24 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
@@ -12897,8 +14288,8 @@ may accompany the Software.
 
                     ****************************************                    
 
-Spring Framework 5.3.25
-Copyright (c) 2002-2023 Pivotal, Inc.
+Spring Framework 5.3.24
+Copyright (c) 2002-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -12911,7 +14302,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-147. Group: org.springframework  Name: spring-web  Version: 5.3.25
+161. Group: org.springframework  Name: spring-web  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -13125,9 +14516,9 @@ Embedded license:
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.25 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.24 SUBCOMPONENTS:
 
-Spring Framework 5.3.25 includes a number of subcomponents
+Spring Framework 5.3.24 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
@@ -13213,8 +14604,8 @@ may accompany the Software.
 
                     ****************************************                    
 
-Spring Framework 5.3.25
-Copyright (c) 2002-2023 Pivotal, Inc.
+Spring Framework 5.3.24
+Copyright (c) 2002-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -13227,7 +14618,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-148. Group: org.springframework  Name: spring-webmvc  Version: 5.3.25
+162. Group: org.springframework  Name: spring-webmvc  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -13441,9 +14832,9 @@ Embedded license:
 
 =======================================================================
 
-SPRING FRAMEWORK 5.3.25 SUBCOMPONENTS:
+SPRING FRAMEWORK 5.3.24 SUBCOMPONENTS:
 
-Spring Framework 5.3.25 includes a number of subcomponents
+Spring Framework 5.3.24 includes a number of subcomponents
 with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
@@ -13529,8 +14920,8 @@ may accompany the Software.
 
                     ****************************************                    
 
-Spring Framework 5.3.25
-Copyright (c) 2002-2023 Pivotal, Inc.
+Spring Framework 5.3.24
+Copyright (c) 2002-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
@@ -13543,7 +14934,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-149. Group: org.springframework.boot  Name: spring-boot  Version: 2.7.9
+163. Group: org.springframework.boot  Name: spring-boot  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -13757,15 +15148,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-150. Group: org.springframework.boot  Name: spring-boot-actuator  Version: 2.7.9
+164. Group: org.springframework.boot  Name: spring-boot-actuator  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -13979,15 +15370,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-151. Group: org.springframework.boot  Name: spring-boot-actuator-autoconfigure  Version: 2.7.9
+165. Group: org.springframework.boot  Name: spring-boot-actuator-autoconfigure  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -14201,15 +15592,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-152. Group: org.springframework.boot  Name: spring-boot-autoconfigure  Version: 2.7.9
+166. Group: org.springframework.boot  Name: spring-boot-autoconfigure  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -14423,15 +15814,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-153. Group: org.springframework.boot  Name: spring-boot-starter  Version: 2.7.9
+167. Group: org.springframework.boot  Name: spring-boot-starter  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -14645,15 +16036,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-154. Group: org.springframework.boot  Name: spring-boot-starter-actuator  Version: 2.7.9
+168. Group: org.springframework.boot  Name: spring-boot-starter-actuator  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -14867,15 +16258,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-155. Group: org.springframework.boot  Name: spring-boot-starter-aop  Version: 2.7.9
+169. Group: org.springframework.boot  Name: spring-boot-starter-aop  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -15089,15 +16480,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-156. Group: org.springframework.boot  Name: spring-boot-starter-data-jpa  Version: 2.7.9
+170. Group: org.springframework.boot  Name: spring-boot-starter-data-jpa  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -15311,15 +16702,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-157. Group: org.springframework.boot  Name: spring-boot-starter-jdbc  Version: 2.7.9
+171. Group: org.springframework.boot  Name: spring-boot-starter-jdbc  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -15533,15 +16924,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-158. Group: org.springframework.boot  Name: spring-boot-starter-json  Version: 2.7.9
+172. Group: org.springframework.boot  Name: spring-boot-starter-json  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -15755,15 +17146,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-159. Group: org.springframework.boot  Name: spring-boot-starter-logging  Version: 2.7.9
+173. Group: org.springframework.boot  Name: spring-boot-starter-logging  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -15977,15 +17368,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-160. Group: org.springframework.boot  Name: spring-boot-starter-tomcat  Version: 2.7.9
+174. Group: org.springframework.boot  Name: spring-boot-starter-tomcat  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -16199,15 +17590,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-161. Group: org.springframework.boot  Name: spring-boot-starter-validation  Version: 2.7.9
+175. Group: org.springframework.boot  Name: spring-boot-starter-validation  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -16421,15 +17812,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-162. Group: org.springframework.boot  Name: spring-boot-starter-web  Version: 2.7.9
+176. Group: org.springframework.boot  Name: spring-boot-starter-web  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -16643,15 +18034,15 @@ Embedded license:
    limitations under the License.
                     ****************************************                    
 
-Spring Boot 2.7.9
-Copyright (c) 2012-2023 VMware, Inc.
+Spring Boot 2.7.6
+Copyright (c) 2012-2022 Pivotal, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
 --------------------------------------------------------------------------------
 
-163. Group: org.springframework.data  Name: spring-data-commons  Version: 2.7.8
+177. Group: org.springframework.data  Name: spring-data-commons  Version: 2.7.6
 
 POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0
 
@@ -16877,7 +18268,7 @@ physical medium.  This offer to obtain a copy of the Source Files is valid for t
 years from the date you acquired this Software product.
                     ****************************************                    
 
-Spring Data Commons 2.7.8 (2021.2.8)
+Spring Data Commons 2.7.6 (2021.2.6)
 Copyright (c) [2010-2021] Pivotal Software, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0 (the "License").
@@ -16924,11 +18315,9 @@ conditions of the subcomponent's license, as noted in the LICENSE file.
 
 
 
-
-
 --------------------------------------------------------------------------------
 
-164. Group: org.springframework.data  Name: spring-data-jpa  Version: 2.7.8
+178. Group: org.springframework.data  Name: spring-data-jpa  Version: 2.7.6
 
 POM Project URL: https://spring.io/projects/spring-data-jpa
 
@@ -17156,7 +18545,7 @@ physical medium.  This offer to obtain a copy of the Source Files is valid for t
 years from the date you acquired this Software product.
                     ****************************************                    
 
-Spring Data JPA 2.7.8 (2021.2.8)
+Spring Data JPA 2.7.6 (2021.2.6)
 Copyright (c) [2011-2019] Pivotal Software, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0 (the "License").
@@ -17166,8 +18555,6 @@ This product may include a number of subcomponents with
 separate copyright notices and license terms. Your use of the source
 code for the these subcomponents is subject to the terms and
 conditions of the subcomponent's license, as noted in the LICENSE file.
-
-
 
 
 
@@ -17227,7 +18614,7 @@ Spring Data JPA on Stackoverflow: https://stackoverflow.com/questions/tagged/spr
 
 --------------------------------------------------------------------------------
 
-165. Group: org.springframework.ldap  Name: spring-ldap-core  Version: 2.4.1
+179. Group: org.springframework.ldap  Name: spring-ldap-core  Version: 2.4.1
 
 POM Project URL: https://spring.io/projects/spring-ldap
 
@@ -17235,7 +18622,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
-166. Group: org.springframework.security  Name: spring-security-config  Version: 5.7.7
+180. Group: org.springframework.security  Name: spring-security-config  Version: 5.7.5
 
 POM Project URL: https://spring.io/projects/spring-security
 
@@ -17243,7 +18630,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
-167. Group: org.springframework.security  Name: spring-security-core  Version: 5.7.7
+181. Group: org.springframework.security  Name: spring-security-core  Version: 5.7.5
 
 POM Project URL: https://spring.io/projects/spring-security
 
@@ -17251,7 +18638,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
-168. Group: org.springframework.security  Name: spring-security-crypto  Version: 5.7.7
+182. Group: org.springframework.security  Name: spring-security-crypto  Version: 5.7.5
 
 POM Project URL: https://spring.io/projects/spring-security
 
@@ -17259,7 +18646,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
-169. Group: org.springframework.security  Name: spring-security-ldap  Version: 5.7.7
+183. Group: org.springframework.security  Name: spring-security-ldap  Version: 5.7.5
 
 POM Project URL: https://spring.io/projects/spring-security
 
@@ -17267,7 +18654,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
-170. Group: org.springframework.security  Name: spring-security-web  Version: 5.7.7
+184. Group: org.springframework.security  Name: spring-security-web  Version: 5.7.5
 
 POM Project URL: https://spring.io/projects/spring-security
 
@@ -17275,7 +18662,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
-171. Group: org.webjars  Name: swagger-ui  Version: 4.15.5
+185. Group: org.webjars  Name: swagger-ui  Version: 4.15.5
 
 POM Project URL: http://webjars.org
 
@@ -17283,7 +18670,7 @@ POM License: Apache 2.0 - https://github.com/swagger-api/swagger-ui
 
 --------------------------------------------------------------------------------
 
-172. Group: org.webjars  Name: webjars-locator-core  Version: 0.50
+186. Group: org.webjars  Name: webjars-locator-core  Version: 0.50
 
 POM Project URL: http://webjars.org
 
@@ -17291,9 +18678,11 @@ POM License: MIT - https://github.com/webjars/webjars-locator-core/blob/master/L
 
 --------------------------------------------------------------------------------
 
-173. Group: org.xerial  Name: sqlite-jdbc  Version: 3.36.0.3
+187. Group: org.xerial  Name: sqlite-jdbc  Version: 3.40.0.0
 
-POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
+POM Project URL: https://github.com/xerial/sqlite-jdbc
+
+POM License: The Apache Software License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
 Embedded license: 
 
@@ -17531,7 +18920,7 @@ SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
 
-174. Group: org.yaml  Name: snakeyaml  Version: 1.33
+188. Group: org.yaml  Name: snakeyaml  Version: 1.33
 
 POM Project URL: https://bitbucket.org/snakeyaml/snakeyaml
 
@@ -17539,11 +18928,11 @@ POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENS
 
 --------------------------------------------------------------------------------
 
-175. Group: piccolo  Name: piccolo  Version: 1.0.3
+189. Group: piccolo  Name: piccolo  Version: 1.0.3
 
 --------------------------------------------------------------------------------
 
-176. Group: rocks.inspectit  Name: opencensus-influxdb-exporter  Version: 1.2
+190. Group: rocks.inspectit  Name: opencensus-influxdb-exporter  Version: 1.2
 
 POM Project URL: https://github.com/NovatecConsulting/opencensus-influx-exporter
 
@@ -17552,5 +18941,5 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 --------------------------------------------------------------------------------
 
 
-This report was generated at Wed Mar 15 16:45:26 CET 2023.
+This report was generated at Fri Jan 20 15:36:35 CET 2023.
 

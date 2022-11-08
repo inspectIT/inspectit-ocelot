@@ -136,7 +136,11 @@ dependencies {
             "org.springframework.security:spring-security-ldap",
             'org.springframework.boot:spring-boot-starter-actuator',
 
-            // spring related
+            // TODO check that dependency grpc
+            'net.devh:grpc-server-spring-boot-starter:2.13.1.RELEASE',
+            'com.google.protobuf:protobuf-java-util:3.19.2',
+
+            // spring releated
             "org.yaml:snakeyaml:${snakeYamlVersion}",
 
             'org.apache.httpcomponents:httpclient', //Required for PATCH-Requests
@@ -165,7 +169,9 @@ dependencies {
             // That version is important. If we stick to the version provided by Spring Boot Bom
             // database initialization scripts will fail.
             "com.h2database:h2:${h2Version}",
-            'org.awaitility:awaitility'
+            'org.awaitility:awaitility',
+            // TODO check that
+            'io.grpc:grpc-testing:1.45.0'
     )
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }

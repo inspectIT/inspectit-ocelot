@@ -5,9 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
-import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
+import rocks.inspectit.ocelot.grpc.Command;
+import rocks.inspectit.ocelot.grpc.CommandResponse;
+import rocks.inspectit.ocelot.grpc.ListClassesCommand;
+import rocks.inspectit.ocelot.grpc.PingCommand;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,31 +20,21 @@ public class PingCommandExecutorTest {
     @InjectMocks
     private PingCommandExecutor executor;
 
-
     @Nested
     public class CanExecute {
 
-        private class NonPingCommand extends Command {
-
-        }
-
         @Test
-        public void nullParam(){
-            boolean result = executor.canExecute(null);
+        public void nonPingCommand() {
+            boolean result = executor.canExecute(Command.newBuilder()
+                    .setListClasses(ListClassesCommand.newBuilder())
+                    .build());
 
             assertFalse(result);
         }
 
         @Test
-        public void nonPingCommand(){
-            boolean result = executor.canExecute(new NonPingCommand());
-
-            assertFalse(result);
-        }
-
-        @Test
-        public void pingCommand(){
-            boolean result = executor.canExecute(new PingCommand());
+        public void pingCommand() {
+            boolean result = executor.canExecute(Command.newBuilder().setPing(PingCommand.newBuilder()).build());
 
             assertTrue(result);
         }
@@ -51,12 +44,15 @@ public class PingCommandExecutorTest {
     public class execute {
 
         @Test
-        public void executes(){
-            PingCommand command = new PingCommand();
+        public void executes() {
+            Command command = Command.newBuilder()
+                    .setPing(PingCommand.newBuilder())
+                    .setCommandId(UUID.randomUUID().toString())
+                    .build();
 
             CommandResponse response = executor.execute(command);
 
-            assertTrue(response instanceof PingCommand.Response);
+            assertNotNull(response);
             assertEquals(response.getCommandId(), command.getCommandId());
         }
     }

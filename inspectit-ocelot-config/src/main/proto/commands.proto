@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "rocks.inspectit.ocelot.grpc";
+option java_outer_classname = "Commands";
+
+service AgentCommands{
+  rpc AskForCommands(stream CommandResponse) returns (stream Command);
+}
+
+message Command {
+  string commandId = 1;
+  oneof commandType {
+    PingCommand ping = 2;
+    ListClassesCommand listClasses = 3;
+    LogsCommand logs = 4;
+    EnvironmentCommand environment = 5;
+  }
+}
+
+message CommandResponse {
+  string commandId = 1;
+  oneof commandResponseType {
+    FirstResponse first = 2;
+    PingCommandResponse ping = 3;
+    ListClassesCommandResponse listClasses = 4;
+    LogsCommandResponse logs = 5;
+    ErrorResponse error = 6;
+    EnvironmentCommandResponse environment = 7;
+  }
+}
+
+message FirstResponse {
+  string agentId = 1;
+}
+
+message ErrorResponse {
+  string message = 1;
+}
+
+message PingCommand {}
+
+message PingCommandResponse {}
+
+message ListClassesCommand {
+  string filter = 1;
+}
+
+message ListClassesCommandResponse {
+  repeated TypeElement result = 1;
+}
+
+message LogsCommand {
+  string logFormat = 1;
+}
+message LogsCommandResponse {
+  string logs = 1;
+}
+
+message EnvironmentCommand {}
+
+message EnvironmentCommandResponse {}
+
+message TypeElement {
+  string name = 1;
+  string type = 2;
+  repeated string methods = 3;
+}

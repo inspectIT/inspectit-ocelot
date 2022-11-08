@@ -34,7 +34,7 @@ If your PR corresponds to an issue, the issue should be correctly labeled (e.g. 
 
 When you open your pull request, you should use the following format for the title:
 
-`Closes #{Issue ID} - {Description} (#{Pull Request ID})`
+`Closes #{Issue ID} - {Description} (#{Pull Request ID})`s
 
 Members from the inspectIT team will then review your changes and either request changes or approve your PR.
 In case changed were requested, please fix them (or discuss the changes) and then your PR will be reviewed again.

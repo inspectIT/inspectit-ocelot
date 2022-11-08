@@ -6,11 +6,12 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
-import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
 import rocks.inspectit.ocelot.core.selfmonitoring.LogPreloader;
+import rocks.inspectit.ocelot.grpc.Command;
+import rocks.inspectit.ocelot.grpc.CommandResponse;
+import rocks.inspectit.ocelot.grpc.LogsCommand;
+import rocks.inspectit.ocelot.grpc.LogsCommandResponse;
 
 /**
  * Executor for executing {@link LogsCommand}s.
@@ -30,7 +31,7 @@ public class LogsCommandExecutor implements CommandExecutor {
      */
     @Override
     public boolean canExecute(Command command) {
-        return command instanceof LogsCommand;
+        return command.hasLogs();
     }
 
     /**
@@ -48,22 +49,28 @@ public class LogsCommandExecutor implements CommandExecutor {
             throw new IllegalArgumentException(exceptionMessage);
         }
 
-        LogsCommand logsCommand = (LogsCommand) command;
+        LogsCommand logsCommand = command.getLogs();
         PatternLayout layout = new PatternLayout();
         layout.setPattern(logsCommand.getLogFormat());
         Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         layout.setContext(rootLogger.getLoggerContext());
         layout.start();
 
-        LogsCommand.Response response = new LogsCommand.Response();
-        response.setCommandId(command.getCommandId());
         StringBuilder logs = new StringBuilder();
         for (ILoggingEvent event : logPreloader.getPreloadedLogs()) {
             logs.append(layout.doLayout(event));
         }
 
-        response.setLogs(logs.toString());
+        CommandResponse response = CommandResponse.newBuilder()
+                .setCommandId(command.getCommandId())
+                .setLogs(LogsCommandResponse.newBuilder().setLogs(logs.toString()))
+                .build();
+
         layout.stop();
-        return response;
+
+        return CommandResponse.newBuilder()
+                .setCommandId(command.getCommandId())
+                .setLogs(LogsCommandResponse.newBuilder().setLogs(logs.toString()))
+                .build();
     }
 }
