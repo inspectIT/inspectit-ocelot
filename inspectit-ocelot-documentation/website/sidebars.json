@@ -54,7 +54,8 @@
       "config-server/user-authentication",
       "config-server/config-docs",
       "config-server/log-config",
-      "config-server/syntax-highlighting"
+      "config-server/syntax-highlighting",
+	  "config-server/status-table-view"
     ],
     "Breaking Changes": [
       "breaking-changes/Breaking Changes"
