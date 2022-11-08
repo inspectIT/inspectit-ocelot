@@ -59,7 +59,11 @@ message LogsCommandResponse {
 
 message EnvironmentCommand {}
 
-message EnvironmentCommandResponse {}
+message EnvironmentCommandResponse {
+  map<string,string> environmentVariables = 1;
+  map<string,string> systemProperties = 2;
+  repeated string jvmArguments = 3;
+}
 
 message TypeElement {
   string name = 1;
