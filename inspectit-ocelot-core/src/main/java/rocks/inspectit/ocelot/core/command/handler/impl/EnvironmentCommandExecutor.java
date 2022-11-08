@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.command.handler.impl;
 
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.commons.models.command.impl.EnvironmentCommand;
 import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
 import rocks.inspectit.ocelot.grpc.Command;
 import rocks.inspectit.ocelot.grpc.CommandResponse;
@@ -12,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Executor for executing {@link EnvironmentCommand}s.
+ * Executor for executing {@link rocks.inspectit.ocelot.grpc.EnvironmentCommand}s.
  */
 @Component
 public class EnvironmentCommandExecutor implements CommandExecutor {
