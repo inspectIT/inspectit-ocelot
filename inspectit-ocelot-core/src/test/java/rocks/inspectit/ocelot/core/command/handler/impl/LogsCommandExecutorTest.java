@@ -14,11 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.selfmonitoring.LogPreloader;
+import rocks.inspectit.ocelot.grpc.Command;
+import rocks.inspectit.ocelot.grpc.CommandResponse;
+import rocks.inspectit.ocelot.grpc.LogsCommand;
 
 import java.io.File;
 import java.io.IOException;
@@ -99,30 +101,34 @@ public class LogsCommandExecutorTest {
             Mockito.when(preloader.getPreloadedLogs())
                     .thenReturn(Arrays.asList(new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.ERROR, "Message", null, new String[]{}), new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.WARN, "Message {}", null, new String[]{"Foo"}), new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.ERROR, "Exception", new RuntimeException(), new String[]{})));
 
-            LogsCommand command = new LogsCommand();
-            command.setCommandId(UUID.randomUUID());
-            LogsCommand.Response response = (LogsCommand.Response) executor.execute(command);
+            // TODO: 15.03.2022 reviewable comment: not ideal that there are no default values possible in protobuf.. Maybe move logformat into executor instead?
+            Command command = Command.newBuilder()
+                    .setCommandId(UUID.randomUUID().toString())
+                    .setLogs(LogsCommand.newBuilder()
+                            .setLogFormat("%d{ISO8601} %-5p %-6r --- [inspectIT] [%15.15t] %-40.40logger{39} : %m%n%rEx"))
+                    .build();
+            CommandResponse response = executor.execute(command);
 
             // should have at least 3 rows, plus exception stack traces
-            assertThat(response.getLogs().split("\\n").length).isGreaterThanOrEqualTo(3);
+            assertThat(response.getLogs().getLogs().split("\\n").length).isGreaterThanOrEqualTo(3);
 
             // should contain log levels
-            assertThat(response.getLogs()).contains("WARN");
-            assertThat(response.getLogs()).contains("ERROR");
+            assertThat(response.getLogs().getLogs()).contains("WARN");
+            assertThat(response.getLogs().getLogs()).contains("ERROR");
 
             // should contain messages
-            assertThat(response.getLogs()).contains("Message");
-            assertThat(response.getLogs()).contains("Message Foo");
-            assertThat(response.getLogs()).contains("Exception");
+            assertThat(response.getLogs().getLogs()).contains("Message");
+            assertThat(response.getLogs().getLogs()).contains("Message Foo");
+            assertThat(response.getLogs().getLogs()).contains("Exception");
 
             // should contain the exception
-            assertThat(response.getLogs()).contains("RuntimeException");
+            assertThat(response.getLogs().getLogs()).contains("RuntimeException");
 
             // should contain class that logged the message
-            assertThat(response.getLogs()).contains("LogsCommandExecutorTest");
+            assertThat(response.getLogs().getLogs()).contains("LogsCommandExecutorTest");
 
             // should contain timestamps
-            assertThat(response.getLogs()).containsPattern("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}");
+            assertThat(response.getLogs().getLogs()).containsPattern("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}");
         }
 
     }

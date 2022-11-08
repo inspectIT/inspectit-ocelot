@@ -141,7 +141,8 @@ dependencies {
             "io.grpc:grpc-stub:${grpcVersion}",
             "org.influxdb:influxdb-java:${influxdbJavaVersion}",
             "io.apisense.embed.influx:embed-influxDB:${embedInfluxdbVersion}",
-
+            // TODO
+            "io.grpc:grpc-testing:${grpcVersion}",
             // for docker test containers
             "org.testcontainers:testcontainers:${testContainersVersion}",
             "org.testcontainers:junit-jupiter:${testContainersVersion}",

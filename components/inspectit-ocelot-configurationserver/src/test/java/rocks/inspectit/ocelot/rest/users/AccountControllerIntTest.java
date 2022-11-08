@@ -10,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import rocks.inspectit.ocelot.GrpcUnrelatedIntTest;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.rest.ErrorInfo;
 import rocks.inspectit.ocelot.user.User;
@@ -19,6 +20,7 @@ import rocks.inspectit.ocelot.user.UserService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static rocks.inspectit.ocelot.rest.users.AccountController.PasswordChangeRequest;
 
+@GrpcUnrelatedIntTest
 public class AccountControllerIntTest extends IntegrationTestBase {
 
     @Autowired

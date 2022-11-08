@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import rocks.inspectit.ocelot.GrpcUnrelatedIntTest;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
@@ -25,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test class for {@link HighlightRulesMapController}
  */
+@GrpcUnrelatedIntTest
 public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
 
     @Autowired

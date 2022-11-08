@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.config.model.command;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.net.URL;
 import java.time.Duration;
 
 @Data
@@ -16,38 +15,70 @@ public class AgentCommandSettings {
     private boolean enabled = false;
 
     /**
-     * The URL for fetching agent commands.
+     * Whether the agent commands URL should be derived from the HTTP configuration URL. This has priority over {@link #host}.
      */
-    private URL url;
+    private boolean deriveHostFromHttpConfigUrl = false;
 
     /**
-     * Whether the agent commands URL should be derived from the HTTP configuration URL.
+     * The hostname for getting agent commands over grpc, e.g. "localhost".
      */
-    private boolean deriveFromHttpConfigUrl = false;
+    private String host;
 
     /**
-     * Path which is used for the agent command URL in case it is derived from the HTTP configuration URL
+     * Port the agent will use to connect to the config-server over grpc, should correspond to grpc.server.port in config-server's properties
      */
-    private String agentCommandPath;
+    private int port;
 
     /**
-     * The timeout duration used for requests  when the agent is in discovery mode. Defining how long the agent will wait for
-     * new commands.
+     * Whether agent should use TLS to connect to config-server over grpc.
      */
-    private Duration liveSocketTimeout;
+    private boolean useTls = true;
 
     /**
-     * The timeout duration used for requests when the agent is in normal mode.
+     * Path to a collection of trusted certificates, needed for TLS for agent commands if server's certificate does not chain to a standard root.
      */
-    private Duration socketTimeout;
+    private String trustCertCollectionFilePath;
 
     /**
-     * The used interval for polling commands.
+     * If the server's certificate is not valid for the hostname which the agent uses to connect to,
+     * this option can be used to add that name.
+     *
+     * @see io.grpc.ManagedChannelBuilder#overrideAuthority(String)
      */
-    private Duration pollingInterval;
+    private String authorityOverride;
 
     /**
-     * How long the agent will staying in the live mode, before falling back to the normal mode.
+     * Path to certificate file for client, i.e. agent, needed only for mutual authentication.
+     * If set, {@link #clientPrivateKeyFilePath} also needs to be set.
      */
-    private Duration liveModeDuration;
+    private String clientCertChainFilePath;
+
+    /**
+     * Path to private key file for client, i.e. agent, needed only for mutual authentication.
+     * If set, {@link #clientCertChainFilePath} also needs to be set.
+     */
+    private String clientPrivateKeyFilePath;
+
+    /**
+     * Maximum size for inbound grpc messages, i.e. commands from config-server, in MiB.
+     * Commands probably will never exceed grpc's default of 4MiB that is also set as default here,
+     * but if your commands do you can configure it.
+     */
+    private int maxInboundMessageSize = 4;
+
+    /**
+     * Time after which the backoff between retries to re-establish the grpc connection between agent and config-server
+     * is reset to the lowest value.
+     */
+    private Duration backoffResetTime = Duration.ofSeconds(60);
+
+    /**
+     * How often the backoff between retries to re-establish the grpc connection between agent and config-server is increased for the next retry.
+     * Backoff is calculated as 2 to the power of how often the backoff has been increased plus 1, so a value of 4 means that the max backoff is 32 seconds.
+     * <p>
+     * This setting only sets a maximum for the backoff between retries, it does not affect the number of retries,
+     * the service will always continue to try reconnecting on errors unless disabled.
+     */
+    private int maxBackoffIncreases = 4;
+
 }

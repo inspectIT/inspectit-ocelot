@@ -12,8 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.handlers.CommandHandler;
-import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.grpc.CommandResponse;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -83,7 +83,7 @@ public class AgentCallbackManagerTest {
             DeferredResult<ResponseEntity<?>> testResult = new DeferredResult<>();
             UUID id = UUID.randomUUID();
             agentCallbackManager.resultCache.put(id, testResult);
-            CommandResponse response = mock(CommandResponse.class);
+            CommandResponse response = CommandResponse.newBuilder().build();
             CommandHandler mockHandler = mock(CommandHandler.class);
             when(mockHandler.canHandle(response)).thenReturn(true);
             List<CommandHandler> handlerList = new ArrayList<>();

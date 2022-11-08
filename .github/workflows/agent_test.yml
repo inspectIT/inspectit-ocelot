@@ -83,7 +83,10 @@ jobs:
   attach-alpine-jdk8:
     name: 'Runtime Attachment'
     runs-on: ubuntu-latest
-    container: eclipse-temurin:8-jdk-alpine
+    # The generateProto gradle Task needed for generating the classes for gRPC does not work on alpine image because
+    # it needs glibc. Alpine + glibc as described in https://github.com/sgerrand/alpine-pkg-glibc did not work.
+    # That's why this file uses a debian image
+    container: eclipse-temurin:8-jdk
     steps:
       - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
@@ -92,7 +95,7 @@ jobs:
         run: ./gradlew assemble
       - name: attach
         run: |
-          apk update && apk add curl
+          apt-get update && yes | apt-get install curl procps
           echo "class Dummy{public static void main(String[] args)throws InterruptedException{while (true){Thread.sleep(1000);}}}" > Dummy.java
           javac Dummy.java
           $(nohup java Dummy > out.txt &)

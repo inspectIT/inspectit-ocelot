@@ -6,6 +6,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import rocks.inspectit.ocelot.GrpcUnrelatedIntTest;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.file.FileMoveDescription;
 
@@ -13,6 +14,7 @@ import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@GrpcUnrelatedIntTest
 class MoveControllerIntTest extends IntegrationTestBase {
 
     @Nested

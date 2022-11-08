@@ -3,29 +3,28 @@ package rocks.inspectit.ocelot.agentcommunication;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.handlers.CommandHandler;
-import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.grpc.CommandResponse;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Manages the callbacks for asynchronous requests between the agent and the frontend.
  * Each callback is represented by an instance of {@link DeferredResult} and can be mapped by a UUID of the respective command.
  */
 @Component
-public class AgentCallbackManager implements RemovalListener<UUID, DeferredResult<ResponseEntity<?>>> {
+@Slf4j
+public class AgentCallbackManager {
 
     @Autowired
     private InspectitServerSettings configuration;
@@ -42,19 +41,7 @@ public class AgentCallbackManager implements RemovalListener<UUID, DeferredResul
         Duration responseTimeout = configuration.getAgentCommand().getResponseTimeout();
         long responseTimeoutMs = responseTimeout.toMillis();
 
-        resultCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(responseTimeoutMs, TimeUnit.MILLISECONDS)
-                .removalListener(this) // done so that deferred results which time out throw a timeout exception
-                .build();
-    }
-
-    @Override
-    public void onRemoval(RemovalNotification<UUID, DeferredResult<ResponseEntity<?>>> resultEntity) {
-        if (resultEntity.wasEvicted()) {
-            DeferredResult<ResponseEntity<?>> result = resultEntity.getValue();
-            TimeoutException exception = new TimeoutException(resultEntity.getCause().toString());
-            result.setErrorResult(exception);
-        }
+        resultCache = CacheBuilder.newBuilder().expireAfterWrite(responseTimeoutMs, TimeUnit.MILLISECONDS).build();
     }
 
     /**
@@ -62,7 +49,7 @@ public class AgentCallbackManager implements RemovalListener<UUID, DeferredResul
      * and adds it to the internal result cache. Throws an {@link IllegalArgumentException} when the given commandId is
      * null. Does nothing if the given commandResponse is null.
      *
-     * @param commandId       An instance of {@link UUID} which represents the UUID of a existing command.
+     * @param commandId       An instance of {@link UUID} which represents the UUID of an existing command.
      * @param commandResponse The instance of {@link DeferredResult} to which the result of the command should be written.
      *
      * @throws IllegalArgumentException when the given command id is null.
@@ -94,12 +81,18 @@ public class AgentCallbackManager implements RemovalListener<UUID, DeferredResul
         if (result != null) {
             resultCache.invalidate(commandId);
 
-            for (CommandHandler handler : handlers) {
-                if (handler.canHandle(response)) {
-                    handler.handleResponse(response, result);
+            if (response.hasError()) {
+                // If an exception was thrown while executing the command in the agent, the response will contain its message in error.
+                String errorMessage = response.getError().getMessage();
+                log.error("The agent has encountered an error while trying to process command '{}': {}", commandId, errorMessage);
+                result.setErrorResult(new RuntimeException(errorMessage));
+            } else {
+                for (CommandHandler handler : handlers) {
+                    if (handler.canHandle(response)) {
+                        handler.handleResponse(response, result);
+                    }
                 }
             }
         }
-
     }
 }
