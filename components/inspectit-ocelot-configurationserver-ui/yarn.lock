@@ -5656,6 +5656,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+
+"attr-accept@npm:^2.2.2":
+  version: 2.2.2
+  resolution: "attr-accept@npm:2.2.2"
+  checksum: 496f7249354ab53e522510c1dc8f67a1887382187adde4dc205507d2f014836a247073b05e9d9ea51e2e9c7f71b0d2aa21730af80efa9af2d68303e5f0565c4d
+
 "autodll-webpack-plugin@npm:0.4.2":
   version: 0.4.2
   resolution: "autodll-webpack-plugin@npm:0.4.2"
@@ -5690,6 +5696,7 @@ __metadata:
   bin:
     autoprefixer: ./bin/autoprefixer
   checksum: 9e977654e7d144bc3fc4638990ec8442e7a9eb3042de0f6e815863b6c28e989b779f3fcbb0f4e13505ab21da360833767c8bc8ba3c84660582e9cb29590a2554
+
   languageName: node
   linkType: hard
 
@@ -9196,6 +9203,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"file-selector@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "file-selector@npm:0.6.0"
+  dependencies:
+    tslib: ^2.4.0
+  checksum: 7d051b6e5d793f3c6e2ab287ba5e7c2c6a0971bccc9d56e044c8047ba483e18f60fc0b5771c951dc707c0d15f4f36ccb4f1f1aaf385d21ec8f7700dadf8325ba
+  languageName: node
+  linkType: hard
+
 "file-system-cache@npm:^1.0.5":
   version: 1.0.5
   resolution: "file-system-cache@npm:1.0.5"
@@ -10778,10 +10794,11 @@ __metadata:
     randexp: ^0.5.3
     react: ^16.13.1
     react-diff-viewer: ^3.1.1
-    react-dom: ^16.13.1
-    react-redux: ^7.2.0
-    react-syntax-highlighter: ^12.2.1
-    react-timeago: ^4.4.0
+    react-dom: ^16.14.0
+    react-dropzone: ^14.2.3
+    react-redux: ^8.0.2
+    react-syntax-highlighter: ^15.5.0
+    react-timeago: ^7.1.0
     react-tooltip: ^4.2.21
     react-transition-group: ^4.2.1
     redux: ^4.0.5
@@ -15398,9 +15415,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-element-to-jsx-string@npm:^14.3.2":
-  version: 14.3.2
-  resolution: "react-element-to-jsx-string@npm:14.3.2"
+"react-dropzone@npm:^14.2.3":
+  version: 14.2.3
+  resolution: "react-dropzone@npm:14.2.3"
+  dependencies:
+    attr-accept: ^2.2.2
+    file-selector: ^0.6.0
+    prop-types: ^15.8.1
+  peerDependencies:
+    react: ">= 16.8 || 18.0.0"
+  checksum: 174b744d5ca898cf3d84ec1aeb6cef5211c446697e45dc8ece8287a03d291f8d07253206d5a1247ef156fd385d65e7de666d4d5c2986020b8543b8f2434e8b40
+  languageName: node
+  linkType: hard
+
+"react-element-to-jsx-string@npm:^14.3.4":
+  version: 14.3.4
+  resolution: "react-element-to-jsx-string@npm:14.3.4"
+
   dependencies:
     "@base2/pretty-print-object": 1.0.0
     is-plain-object: 3.0.1
@@ -18031,10 +18062,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3":
-  version: 2.2.0
-  resolution: "tslib@npm:2.2.0"
-  checksum: a48c9639f7496fa701ea8ffe0561070fcb44c104a59632f7f845c0af00825c99b6373575ec59b2b5cdbfd7505875086dbe5dc83312304d8979f22ce571218ca3
+"tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "tslib@npm:2.4.0"
+  checksum: 8c4aa6a3c5a754bf76aefc38026134180c053b7bd2f81338cb5e5ebf96fefa0f417bff221592bf801077f5bf990562f6264fecbc42cd3309b33872cb6fc3b113
   languageName: node
   linkType: hard
 
