@@ -120,7 +120,7 @@ class ClassTransformerProxyGeneratorTest {
         }
 
         @Test
-        void isJavaProxyForJavaAndLater() {
+        void isProxyForJava9AndLater() {
             Assume.assumeThat(System.getProperty("java.version"), CoreMatchers.not(CoreMatchers.startsWith("1.8")));
 
             ClassFileTransformer cft = transformerProxy.createAndInstantiateClassTransformerProxy(transformer1);

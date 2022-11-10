@@ -53,7 +53,7 @@ public class SyncClassTransformer extends AbstractClassTransformer {
             temporaryInstrumentationConfigCache.asMap().keySet().forEach(k -> {
                 try {
                     instrumentedClasses.put(Class.forName(k.getClassName()), Boolean.TRUE);
-                } catch (ClassNotFoundException e) {
+                } catch (ClassNotFoundException ignored) {
                     //Should never happen since we saw this class loading
                 }
             });

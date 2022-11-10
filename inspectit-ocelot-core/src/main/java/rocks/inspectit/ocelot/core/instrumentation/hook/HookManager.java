@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import io.opencensus.common.Scope;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +33,11 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 public class HookManager {
+
+    /**
+     * Component named used for self monitoring metrics
+     */
+    private static final String LAZY_LOADING_HOOK_COMPONENT_NAME = "hookmanager-lazy-hooking";
 
     /**
      * Thread local flag for marking the current thread that it is currently in the execution/scope of agent actions.
@@ -66,12 +70,12 @@ public class HookManager {
     private volatile Map<Class<?>, Map<String, MethodHook>> hooks = Collections.emptyMap();
 
     /**
-     * Flag indicates that lazy loading is enabled. This is only possible if the configuration value
-     * {@code inspectit.instrumentation.internal.async} is {@ode false}.
-     * If lazy hooking is enabled, hooks will be generated on the fly while an instrumentation method asks for hooks.
+     * Flag indicates that lazy loading of hooks is enabled. This is only possible if the configuration value
+     * {@code inspectit.instrumentation.internal.async} is {@code false}.
+     * If hook loading is enabled, hooks will be generated on the fly while an instrumentation method asks for hooks.
      * Only one attempt for lazy loading hooks will be performed! If no hooks are generated, e.g. due to a missing or invalid
      * configuration, no further attempts will be performed. Assumption is that updated hook configurations will be
-     * considered while regular asynchronous updates.
+     * considered during regular asynchronous updates.
      */
     private boolean isLazyHookingEnabled;
 
@@ -82,7 +86,8 @@ public class HookManager {
     private final Map<Class<?>, Map<String, MethodHook>> lazyLoadedHooks = new ConcurrentHashMap<>();
 
     /**
-     * Stores for which classes hooks were lazy loaded.
+     * Saves for which classes the hooks were lazy loaded and acts as a lock for all further attempts.
+     * Lazy loading hooks will only be done once per class!
      */
     private final Set<Class<?>> lazyHookingPerformed = ConcurrentHashMap.newKeySet();
 
@@ -137,9 +142,7 @@ public class HookManager {
             return lazyLoadedHooks.get(clazz);
         }
         synchronized (clazz) {
-            // Lock lazy hooking for this class. We only try to lazy hooking once
-            lazyHookingPerformed.add(clazz);
-            try (Scope sm = selfMonitoring.withDurationSelfMonitoring("hookmanager-lazy-hooking")) {
+            try (Scope sm = selfMonitoring.withDurationSelfMonitoring(LAZY_LOADING_HOOK_COMPONENT_NAME)) {
                 Map<MethodDescription, MethodHookConfiguration> hookConfigs = configResolver.getHookConfigurations(clazz);
 
                 HashMap<String, MethodHook> lazyHooks = Maps.newHashMap();
@@ -156,7 +159,7 @@ public class HookManager {
                     }
                 });
 
-                if (lazyHooks.size() > 0) {
+                if (!lazyHooks.isEmpty()) {
                     Map<String, MethodHook> methodHooks = hooks.get(clazz);
                     if (methodHooks != null) {
                         // It seems async hooking triggered from InstrumentationTrigger kicked in between
@@ -164,6 +167,8 @@ public class HookManager {
                         return methodHooks;
                     } else {
                         lazyLoadedHooks.put(clazz, lazyHooks);
+                        // Lock lazy loading hooks for this class. We only try to lazy hooking once
+                        lazyHookingPerformed.add(clazz);
                         return lazyHooks;
                     }
                 }

@@ -20,8 +20,6 @@ import rocks.inspectit.ocelot.core.instrumentation.config.model.ClassInstrumenta
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationScope;
 import rocks.inspectit.ocelot.core.instrumentation.event.ClassInstrumentedEvent;
-import rocks.inspectit.ocelot.core.instrumentation.injection.JigsawModuleInstrumenter;
-import rocks.inspectit.ocelot.core.instrumentation.special.ClassLoaderDelegation;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
 import rocks.inspectit.ocelot.core.testutils.Dummy;
@@ -53,16 +51,8 @@ public class SyncClassTransformerTest {
     @Mock
     InstrumentationConfigurationResolver configResolver;
 
-    @Mock
-    ClassLoaderDelegation classLoaderDelegation;
-
-    @Mock
-    JigsawModuleInstrumenter moduleManager;
-
     @InjectMocks
     SyncClassTransformer transformer = new SyncClassTransformer();
-
-    private static byte[] bytecodeOfTest;
 
     private static byte[] bytecodeOfDummy;
 
@@ -70,7 +60,6 @@ public class SyncClassTransformerTest {
 
     @BeforeAll
     static void readByteCode() {
-        bytecodeOfTest = DummyClassLoader.readByteCode(SyncClassTransformerTest.class);
         bytecodeOfDummy = DummyClassLoader.readByteCode(DummyClassLoader.class);
     }
 
@@ -88,7 +77,7 @@ public class SyncClassTransformerTest {
             InspectitConfig conf = new InspectitConfig();
             conf.setInstrumentation(settings);
             when(env.getCurrentConfig()).thenReturn(conf);
-            
+
             SpecialSensor mockSensor = Mockito.mock(SpecialSensor.class);
             when(mockSensor.instrument(any(), any(), any())).then(invocation -> invocation.getArgument(2));
             InstrumentationScope scope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.any());
@@ -102,6 +91,7 @@ public class SyncClassTransformerTest {
 
             transformer.transform(Thread.currentThread()
                     .getContextClassLoader(), className, null, null, bytecodeOfDummy);
+
             assertThat(transformer.temporaryInstrumentationConfigCache.size()).isEqualTo(1);
             verify(mockSensor).instrument(any(), any(), any());
 

@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * the configured {@link  ClassTransformer}.
  * <p>
  * We decided to introduce this indirection to support runtimes <= and >= Java8. Since {@link ClassFileTransformer}
- * has a new method since Java9 to support Jigsaw module system, we created the instance on the fly and will receive
+ * has a second transform method signature since Java9 to support Jigsaw module system, we created the instance on the fly and will receive
  * an implementation for the current runtime.
  */
 @Component
@@ -59,7 +59,7 @@ public class ClassTransformerProxyGenerator {
     }
 
     /**
-     * Creates ByteBuddy instance of {@link ClassFileTransformer} and delegates all class to our {@link ClassTransformer}
+     * Creates ByteBuddy instance of {@link ClassFileTransformer} and delegates all calls to our {@link ClassTransformer}
      * implementation
      *
      * @param delegate The {@link ClassTransformer} instance
@@ -73,7 +73,7 @@ public class ClassTransformerProxyGenerator {
         try {
             return new ByteBuddy().subclass(ClassFileTransformer.class)
                     .method(ElementMatchers.named("transform"))
-                    .intercept(MethodDelegation.to(delegate))
+                    .intercept(MethodDelegation.to(delegate, ClassTransformer.class))
                     .make()
                     .load(getClass().getClassLoader())
                     .getLoaded()

@@ -7,9 +7,9 @@ import net.bytebuddy.pool.TypePool;
 import rocks.inspectit.ocelot.core.AgentImpl;
 
 /**
- * Container for {@link TypeDescription}s and {@link ClassLoader} pairs.
- * The purpose of this container is to have common type for already loaded classes and for classes loading for the first time
- * when no class object is available.
+ * Represents a combination of {@link TypeDescription}, {@link ClassLoader} and a {@link  Class} represented by the {@link TypeDescription}.
+ * The purpose if this triumvirate is to have a one  type object which works for async as well as sync instrumentation.
+ * In sync instrumentation scenarios we can only rely on {@link TypeDescription} and {@link ClassLoader} since no class object is available yet.
  */
 @EqualsAndHashCode
 public class TypeDescriptionWithClassLoader {
@@ -20,11 +20,12 @@ public class TypeDescriptionWithClassLoader {
     @Getter
     private final ClassLoader loader;
 
-    @Getter
     /**
-     * The class represented by the {@link TypeDescriptionWithClassLoader#type}. 
+     * The class represented by the {@link TypeDescriptionWithClassLoader#type}.
      * Can be null if async instrumentation mode is disabled!
-     */ private final Class<?> relatedClass;
+     */
+    @Getter
+    private final Class<?> relatedClass;
 
     private TypeDescriptionWithClassLoader(TypeDescription type, ClassLoader loader, Class<?> relatedClass) {
         this.type = type;

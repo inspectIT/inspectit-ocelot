@@ -9,7 +9,7 @@ import java.security.ProtectionDomain;
 public interface ClassTransformer {
 
     /**
-     * @return true, if transformer should be enabled, false otherwise
+     * @return true, if transformer is enabled, false otherwise
      */
     boolean isEnabled();
 
@@ -18,12 +18,15 @@ public interface ClassTransformer {
      *
      * @see java.lang.instrument.ClassFileTransformer#transform(ClassLoader, String, Class, ProtectionDomain, byte[])
      */
-    byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException;
+    default byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+        // delegate to our Java 9 compatible transform method
+        return transform(null, loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
+    }
 
     /**
-     * After Java9 ClassFileTransformer#transform implementation
-     *
-     * @see java.lang.instrument.ClassFileTransformer#transform(Module, ClassLoader, String, Class, ProtectionDomain, byte[])
+     * After Java9+ ClassFileTransformer#transform implementation
+     * <p>
+     * Java 9 Signature:  java.lang.instrument.ClassFileTransformer#transform(Module, ClassLoader, String, Class, ProtectionDomain, byte[])
      */
     byte[] transform(Object module, ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException;
 

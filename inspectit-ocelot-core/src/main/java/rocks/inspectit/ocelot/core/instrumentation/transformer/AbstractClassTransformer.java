@@ -4,7 +4,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -105,16 +104,6 @@ public abstract class AbstractClassTransformer implements ClassTransformer {
         return doTransform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
     }
 
-    @Override
-    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-        String classNameInDotNotation = className.replace("/", ".");
-        if (InstrumentationConfigurationResolver.isClassFromIgnoredPackage(env.getCurrentConfig()
-                .getInstrumentation(), classNameInDotNotation, loader)) {
-            return classfileBuffer;
-        }
-        return doTransform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
-    }
-
     /**
      * Entry point for subclasses to implemented their transformation
      */
@@ -123,9 +112,10 @@ public abstract class AbstractClassTransformer implements ClassTransformer {
     /**
      * Applies the {@link ClassInstrumentationConfiguration} to the provided bytecode. If modification fails, uninstrumented bytecode is returned.
      *
-     * @param typeWithLoader The {@link TypeDescriptionWithClassLoader} representing this class to be instrumented
-     * @param bytecode       The bytecode to by modified
-     * @param classConf      The {@link ClassInstrumentationConfiguration} for the class to be instrumented
+     * @param typeWithLoader      The {@link TypeDescriptionWithClassLoader} representing this class to be instrumented
+     * @param classBeingRedefined If this is triggered by a redefine or retransform, the class being redefined or retransformed; if this is a class load, null
+     * @param bytecode            The bytecode to by modified
+     * @param classConf           The {@link ClassInstrumentationConfiguration} for the class to be instrumented
      *
      * @return The modified bytecode
      */
@@ -261,12 +251,12 @@ public abstract class AbstractClassTransformer implements ClassTransformer {
     }
 
     /**
-     * Derives the {@link ClassInstrumentationConfiguration} based on the latest environment configuration for a given type.
+     * Derives the {@link ClassInstrumentationConfiguration} based on the latest environment configuration for a given class.
      * In addition the class is added to {@link #instrumentedClasses} if it is instrumented or removed from the set otherwise.
      * If the class transformer is shutting down, this returns {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION}
      * for every class (= all classes should be deinstrumented).
      *
-     * @param classBeingRedefined the {@link  TypeDescriptionWithClassLoader}
+     * @param classBeingRedefined the {@link  Class}
      *
      * @return Then updated {@link  ClassInstrumentationConfiguration}
      */

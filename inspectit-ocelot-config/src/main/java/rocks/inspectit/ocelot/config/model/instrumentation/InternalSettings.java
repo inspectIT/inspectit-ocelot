@@ -58,9 +58,9 @@ public class InternalSettings {
     private boolean recyclingOldActionClasses = true;
 
     /**
-     * Flag ensures synchronous instrumentation of class. This means, each class is instrumented on first class load.
+     * Flag enables asynchronous instrumentation.
      * <p>
-     * Important: In Java runtimes lower than 9, this results in a significant boot time performance degradation! See: <a href="https://bugs.openjdk.java.net/browse/JDK-7018422">JDK-7018422</a>"
+     * Important: If disabled in java version lower than 9, this results in a significant boot time performance degradation! See: <a href="https://bugs.openjdk.java.net/browse/JDK-7018422">JDK-7018422</a>"
      */
     private boolean async = true;
 

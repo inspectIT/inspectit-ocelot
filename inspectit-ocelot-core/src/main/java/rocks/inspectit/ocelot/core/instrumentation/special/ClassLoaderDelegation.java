@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 /**
- * This component performs an instrumentation of {@link ClassLoader}s if.
+ * This component performs an instrumentation of {@link ClassLoader}s.
  * This is required to make our bootstrap classes accessible in custom module systems, such as OSGi.
  * <p>
  * The instrumentation is triggered through the {@link InstrumentationTriggerer},
@@ -46,7 +46,7 @@ public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryList
      * We never deinstrument a classloader after we instrument it, even if {@link SpecialSensorSettings#isClassLoaderDelegation()}
      * is changed to false.
      */
-    private final InstrumentedClassLoaders instrumentedClassLoaders = new InstrumentedClassLoaders();
+    private final InstrumentedClassLoaderCache instrumentedClassLoaderCache = new InstrumentedClassLoaderCache();
 
     private final ElementMatcher<MethodDescription> LOAD_CLASS_MATCHER = named("loadClass").and(takesArguments(String.class, boolean.class).or(takesArguments(String.class)));
 
@@ -55,7 +55,7 @@ public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryList
 
     @Override
     public void onNewClassesDiscovered(Set<Class<?>> newClasses) {
-        instrumentedClassLoaders.onNewClassesDiscovered(newClasses);
+        instrumentedClassLoaderCache.onNewClassesDiscovered(newClasses);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryList
         boolean isClassLoader = CLASS_LOADER_MATCHER.matches(typeWithLoader.getType());
         boolean cldEnabled = settings.getSource().getSpecial().isClassLoaderDelegation();
         //we never de instrument a classloader we previously instrumented
-        return instrumentedClassLoaders.contains(typeWithLoader) || (isClassLoader && cldEnabled);
+        return instrumentedClassLoaderCache.contains(typeWithLoader) || (isClassLoader && cldEnabled);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryList
     @Override
     public DynamicType.Builder instrument(TypeDescriptionWithClassLoader typeWithLoader, InstrumentationConfiguration settings, DynamicType.Builder builder) {
         //remember that this classloader was instrumented
-        instrumentedClassLoaders.add(typeWithLoader);
+        instrumentedClassLoaderCache.add(typeWithLoader);
         return builder.visit(Advice.to(ClassloaderDelegationAdvice.class).on(LOAD_CLASS_MATCHER));
     }
 
@@ -103,7 +103,7 @@ public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryList
         }
 
         TypeDescriptionWithClassLoader typeWithLoader = TypeDescriptionWithClassLoader.of(classLoaderClass);
-        if (!instrumentedClassLoaders.contains(typeWithLoader) && CLASS_LOADER_MATCHER.matches(typeWithLoader.getType())) {
+        if (!instrumentedClassLoaderCache.contains(typeWithLoader) && CLASS_LOADER_MATCHER.matches(typeWithLoader.getType())) {
             ClassLoader loadingClassLoader = classLoaderClass.getClassLoader();
             if (loadingClassLoader != null) {
                 getClassLoaderClassesRequiringRetransformation(loadingClassLoader.getClass(), result);
@@ -155,7 +155,7 @@ public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryList
      * and on reload the same ClassLoader will be instrumented again.
      */
     @Slf4j
-    private static class InstrumentedClassLoaders implements IClassDiscoveryListener {
+    private static class InstrumentedClassLoaderCache implements IClassDiscoveryListener {
 
         /**
          * Temporary cache to store instrumented ClassLoader class names with the related ClassLoader
@@ -175,6 +175,7 @@ public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryList
         }
 
         public void add(TypeDescriptionWithClassLoader typeWithLoader) {
+            // only possible if async instrumentation is enabled
             if (typeWithLoader.getRelatedClass() != null) {
                 instrumentedClassLoaderClasses.add(typeWithLoader.getRelatedClass());
             } else {

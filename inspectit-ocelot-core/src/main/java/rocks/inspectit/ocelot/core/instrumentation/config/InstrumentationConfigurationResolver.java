@@ -72,7 +72,7 @@ public class InstrumentationConfigurationResolver {
 
     /**
      * Builds the {@link ClassInstrumentationConfiguration} based on the currently active global instrumentation configuration
-     * for the given class.
+     * for the {@link TypeDescription} of the given {@link TypeDescriptionWithClassLoader}.
      *
      * @param typeWithLoader the {@link  TypeDescriptionWithClassLoader} for which the configuration shall lbe queried
      *
@@ -114,7 +114,8 @@ public class InstrumentationConfigurationResolver {
     }
 
     /**
-     * Finds out for each method of the given class which rules apply and builds a {@link MethodHookConfiguration} for each instrumented method.
+     * Finds out for each method of the given {@link TypeDescription} of the given {@link TypeDescriptionWithClassLoader}
+     * which rules apply and builds a {@link MethodHookConfiguration} for each instrumented method.
      *
      * @param typeWithLoader the {@link  TypeDescriptionWithClassLoader} to check
      *
@@ -249,8 +250,8 @@ public class InstrumentationConfigurationResolver {
     /**
      * Checks if the given class should not be instrumented based on the given configuration.
      *
-     * @param clazz  the class to check
-     * @param config configuration to check for
+     * @param typeWithLoader the {@link  java.lang.reflect.Type} to check
+     * @param config         configuration to check for
      *
      * @return true, if the class is ignored (=it should not be instrumented)
      */

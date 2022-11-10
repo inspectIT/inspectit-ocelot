@@ -33,6 +33,9 @@ public class AgentImpl implements IAgent {
      */
     public static final ClassLoader AGENT_CLASS_LOADER = AgentImpl.class.getClassLoader();
 
+    /**
+     * Default {@link net.bytebuddy.pool.TypePool} to avoid recreating the pool on every request.
+     */
     public static final TypePool AGENT_CLASS_LOADER_TYPE_POOL = TypePool.Default.of(AGENT_CLASS_LOADER);
 
     /**
@@ -70,7 +73,6 @@ public class AgentImpl implements IAgent {
      * The date the agent was built.
      */
     private String agentBuildDate;
-
 
     @Override
     public void start(String cmdArgs, Instrumentation instrumentation) {

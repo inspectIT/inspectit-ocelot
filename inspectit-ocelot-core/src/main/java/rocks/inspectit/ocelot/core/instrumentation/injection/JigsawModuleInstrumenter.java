@@ -85,12 +85,20 @@ public class JigsawModuleInstrumenter {
         coreModule = getModuleOfClass(JigsawModuleInstrumenter.class);
     }
 
+    /**
+     * Redefines all modules to ensure modules can access boostrap and core inspectIT modules.
+     * Extra reads and writes are added to modules by utilizing Instrumentation.redefineModule()
+     *
+     * @param module The module to be redefined
+     */
     public synchronized void openModule(Object module) {
         if (isModuleSystemAvailable()) {
             if (enhancedModules.getIfPresent(module) == null) {
                 Set<String> packages = getPackagesOfModule(module);
                 if (isNamed(module)) {
-                    log.info("Gaining access to package '{}' of module '{}'", StringUtils.join(packages, ", "), module);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Gaining access to package '{}' of module '{}'", StringUtils.join(packages, ", "), module);
+                    }
                     Set<Object> extraReads = Collections.singleton(bootstrapModule);
                     Map<String, Set<Object>> extraOpens = packages.stream()
                             .collect(Collectors.toMap(Object::toString, x -> Collections.singleton(coreModule)));
@@ -147,6 +155,13 @@ public class JigsawModuleInstrumenter {
         }
     }
 
+    /**
+     * Invokes the java 9 Module.isNamed() function
+     *
+     * @param module The Module instance
+     *
+     * @return true if it is a named module, false otherwise
+     */
     private boolean isNamed(Object module) {
         try {
             return (boolean) moduleIsNamed.invoke(module);
@@ -155,6 +170,13 @@ public class JigsawModuleInstrumenter {
         }
     }
 
+    /**
+     * Invokes the java 9 Module.getPackages() function
+     *
+     * @param module The Module instance
+     *
+     * @return Returns the set of package names for the packages in this module.
+     */
     private Set<String> getPackagesOfModule(Object module) {
         try {
             Set<String> packages = (Set<String>) moduleGetPackages.invoke(module);

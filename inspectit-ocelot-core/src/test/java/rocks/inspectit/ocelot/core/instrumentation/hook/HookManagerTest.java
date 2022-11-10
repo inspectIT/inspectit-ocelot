@@ -96,6 +96,24 @@ public class HookManagerTest {
 
         final Method testCase_methodA = LazyHooking.class.getDeclaredMethod("methodA");
 
+        private MethodHook dummyHook;
+
+        private String methodASignature;
+
+        private void initLazyHooking() {
+            MethodDescription description = new MethodDescription.ForLoadedMethod(testCase_methodA);
+            MethodHookConfiguration hookConfiguration = MethodHookConfiguration.builder().build();
+            HashMap<MethodDescription, MethodHookConfiguration> hookConfigs = new HashMap<>();
+            hookConfigs.put(description, hookConfiguration);
+            methodASignature = CoreUtils.getSignature(description);
+            dummyHook = MethodHook.builder().actionScopeFactory(mock(ActionScopeFactory.class)).build();
+
+            when(configResolver.getHookConfigurations(any(Class.class))).thenReturn(hookConfigs);
+            when(hookGenerator.buildHook(any(), any(), any())).thenReturn(dummyHook);
+
+            ReflectionTestUtils.setField(manager, "isLazyHookingEnabled", true);
+        }
+
         public void methodA() {
 
         }
@@ -106,17 +124,7 @@ public class HookManagerTest {
         @Test
         void testHooksLoadLazy() {
 
-            MethodDescription description = new MethodDescription.ForLoadedMethod(testCase_methodA);
-            MethodHookConfiguration hookConfiguration = MethodHookConfiguration.builder().build();
-            HashMap<MethodDescription, MethodHookConfiguration> hookConfigs = new HashMap<>();
-            hookConfigs.put(description, hookConfiguration);
-            String methodASignature = CoreUtils.getSignature(description);
-            MethodHook dummyHook = MethodHook.builder().actionScopeFactory(mock(ActionScopeFactory.class)).build();
-
-            when(configResolver.getHookConfigurations(any(Class.class))).thenReturn(hookConfigs);
-            when(hookGenerator.buildHook(any(), any(), any())).thenReturn(dummyHook);
-
-            ReflectionTestUtils.setField(manager, "isLazyHookingEnabled", true);
+            initLazyHooking();
 
             IMethodHook lazyHook = manager.getHook(HookManagerTest.class, methodASignature);
 
@@ -131,17 +139,7 @@ public class HookManagerTest {
         @Test
         void testLazyHooksMergedIntoHooksMap() {
 
-            MethodDescription description = new MethodDescription.ForLoadedMethod(testCase_methodA);
-            MethodHookConfiguration hookConfiguration = MethodHookConfiguration.builder().build();
-            HashMap<MethodDescription, MethodHookConfiguration> hookConfigs = new HashMap<>();
-            hookConfigs.put(description, hookConfiguration);
-            String methodASignature = CoreUtils.getSignature(description);
-            MethodHook dummyHook = MethodHook.builder().actionScopeFactory(mock(ActionScopeFactory.class)).build();
-
-            when(configResolver.getHookConfigurations(any(Class.class))).thenReturn(hookConfigs);
-            when(hookGenerator.buildHook(any(), any(), any())).thenReturn(dummyHook);
-
-            ReflectionTestUtils.setField(manager, "isLazyHookingEnabled", true);
+            initLazyHooking();
 
             IMethodHook lazyHook = manager.getHook(HookManagerTest.class, methodASignature);
 

@@ -72,17 +72,6 @@ public class AsyncClassTransformerTest {
         transformer.classDefinitionListeners = new ArrayList<>();
     }
 
-   /* @Nested
-    public class Init {
-
-        @Test
-        void testTransfomerSetup() {
-            transformer.init();
-            verify(instrumentation).addTransformer(transformer, true);
-        }
-
-    }*/
-
     @Nested
     public class Destroy {
 
@@ -219,13 +208,17 @@ public class AsyncClassTransformerTest {
     @Nested
     public class Transform {
 
-        @Test
-        void verifyClassInstrumentedEventPublished() throws Exception {
-
+        private void prepareConfig() {
             InstrumentationSettings settings = new InstrumentationSettings();
             InspectitConfig conf = new InspectitConfig();
             conf.setInstrumentation(settings);
             when(env.getCurrentConfig()).thenReturn(conf);
+        }
+
+        @Test
+        void verifyClassInstrumentedEventPublished() throws Exception {
+
+            prepareConfig();
 
             when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any())).thenReturn(new LinkedHashSet<>());
 
@@ -249,10 +242,7 @@ public class AsyncClassTransformerTest {
         @Test
         void testDefinitionListenersInvokedForNewClasses() throws Exception {
 
-            InstrumentationSettings settings = new InstrumentationSettings();
-            InspectitConfig conf = new InspectitConfig();
-            conf.setInstrumentation(settings);
-            when(env.getCurrentConfig()).thenReturn(conf);
+            prepareConfig();
 
             IClassDefinitionListener listener = Mockito.mock(IClassDefinitionListener.class);
             transformer.classDefinitionListeners = Arrays.asList(listener);
@@ -271,10 +261,8 @@ public class AsyncClassTransformerTest {
         @Test
         void testDefinitionListenersNotInvokedForExistingClasses() throws Exception {
 
-            InstrumentationSettings settings = new InstrumentationSettings();
-            InspectitConfig conf = new InspectitConfig();
-            conf.setInstrumentation(settings);
-            when(env.getCurrentConfig()).thenReturn(conf);
+            prepareConfig();
+
             when(classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(any(), any())).thenReturn(new LinkedHashSet<>());
             IClassDefinitionListener listener = Mockito.mock(IClassDefinitionListener.class);
             transformer.classDefinitionListeners = Arrays.asList(listener);
