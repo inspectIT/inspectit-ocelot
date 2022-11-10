@@ -114,7 +114,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
         }
         catch ( IllegalArgumentException e) {
             preferredTemporality = AggregationTemporality.CUMULATIVE;
-            log.error("Unable to set preferred Temporality of value {}. Falling back to {}. Valid values are {}", otlp.getPreferredTemporality(), preferredTemporality, AggregationTemporality.values());
+            log.warn("Unable to set preferred Temporality of value {}. Falling back to {}. Valid values are {}", otlp.getPreferredTemporality(), preferredTemporality, AggregationTemporality.values());
         }
         return preferredTemporality;
     }

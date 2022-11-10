@@ -89,9 +89,12 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
     @Test
     void invalidPreferredTemporalitySet() {
         updateProperties(props -> {
+            props.setProperty("inspectit.exporters.metrics.otlp.enabled", ExporterEnabledState.ENABLED);
+            props.setProperty("inspectit.exporters.metrics.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_GRPC_PORT));
+            props.setProperty("inspectit.exporters.metrics.otlp.protocol", TransportProtocol.GRPC);
             props.setProperty("inspectit.exporters.metrics.otlp.preferredTemporality", "invalid");
         });
-        warnLogs.assertContains("'preferredTemporality'");
+        warnLogs.assertContains("invalid");
     }
 
     @DirtiesContext
