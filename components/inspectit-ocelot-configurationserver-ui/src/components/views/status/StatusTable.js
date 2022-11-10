@@ -184,15 +184,8 @@ class StatusTable extends React.Component {
             overflow-wrap: break-word;
             text-overflow: unset;
           }
-
-          .this :global(.might-overflow):hover {
-            overflow: visible;
-            white-space: normal;
-            text-overflow: unset;
-            overflow-wrap: break-word;
-          }
         `}</style>
-        <span className="might-overflow" title={`${name} (${agentId})`}>
+        <span className="might-overflow">
           {name} {agentIdElement}
         </span>
         {rowData.count > 1 ? (
