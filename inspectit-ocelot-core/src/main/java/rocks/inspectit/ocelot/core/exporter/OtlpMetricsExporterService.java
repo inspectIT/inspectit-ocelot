@@ -1,7 +1,10 @@
 package rocks.inspectit.ocelot.core.exporter;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
@@ -18,6 +21,7 @@ import rocks.inspectit.ocelot.config.model.exporters.metrics.OtlpMetricsExporter
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service for {@link io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter}/{@link io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter}.
@@ -29,10 +33,11 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
 
     private final List<TransportProtocol> SUPPORTED_PROTOCOLS = Arrays.asList(TransportProtocol.GRPC, TransportProtocol.HTTP_PROTOBUF);
 
+    @VisibleForTesting
     /**
      * The {@link MetricExporter} for exporting metrics via OTLP
      */
-    private MetricExporter metricExporter;
+    MetricExporter metricExporter;
 
     /**
      * The {@link PeriodicMetricReaderBuilder} for reading metrics to the log
@@ -76,19 +81,33 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
         try {
             OtlpMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlp();
 
-            AggregationTemporality preferredTemporality = getPreferredTemporality(otlp);
+            AggregationTemporality preferredTemporality = otlp.getPreferredTemporality();
 
             switch (otlp.getProtocol()) {
                 case GRPC: {
-                    metricExporter = OtlpGrpcMetricExporter.builder()
+                    OtlpGrpcMetricExporterBuilder metricExporterBuilder = OtlpGrpcMetricExporter.builder()
                             .setPreferredTemporality(preferredTemporality)
-                            .setEndpoint(otlp.getEndpoint()).build();
+                            .setEndpoint(otlp.getEndpoint()).setCompression(otlp.getCompression().toString())
+                            .setTimeout(otlp.getTimeout());
+                    if (otlp.getHeaders() != null) {
+                        for (Map.Entry<String, String> headerEntry : otlp.getHeaders().entrySet()) {
+                            metricExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
+                        }
+                    }
+                    metricExporter = metricExporterBuilder.build();
                     break;
                 }
                 case HTTP_PROTOBUF: {
-                    metricExporter = OtlpHttpMetricExporter.builder()
+                    OtlpHttpMetricExporterBuilder metricExporterBuilder = OtlpHttpMetricExporter.builder()
                             .setPreferredTemporality(preferredTemporality)
-                            .setEndpoint(otlp.getEndpoint()).build();
+                            .setEndpoint(otlp.getEndpoint()).setCompression(otlp.getCompression().toString())
+                            .setTimeout(otlp.getTimeout());
+                    if (otlp.getHeaders() != null) {
+                        for (Map.Entry<String, String> headerEntry : otlp.getHeaders().entrySet()) {
+                            metricExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
+                        }
+                    }
+                    metricExporter = metricExporterBuilder.build();
                     break;
                 }
             }
@@ -102,21 +121,9 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
             }
             return success;
         } catch (Exception e) {
-            log.error("Error creatig OTLP metrics exporter service", e);
+            log.error("Error creating OTLP metrics exporter service", e);
             return false;
         }
-    }
-
-    private static AggregationTemporality getPreferredTemporality(OtlpMetricsExporterSettings otlp) {
-        AggregationTemporality preferredTemporality;
-        try {
-           preferredTemporality = AggregationTemporality.valueOf(otlp.getPreferredTemporality());
-        }
-        catch ( IllegalArgumentException e) {
-            preferredTemporality = AggregationTemporality.CUMULATIVE;
-            log.warn("Unable to set preferred Temporality of value {}. Falling back to {}. Valid values are {}", otlp.getPreferredTemporality(), preferredTemporality, AggregationTemporality.values());
-        }
-        return preferredTemporality;
     }
 
     @Override

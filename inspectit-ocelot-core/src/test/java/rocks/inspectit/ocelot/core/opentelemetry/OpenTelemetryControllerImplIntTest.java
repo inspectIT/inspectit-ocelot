@@ -18,13 +18,11 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.core.SLF4JBridgeHandlerUtils;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.exporter.LoggingTraceExporterService;
-import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import java.io.IOException;
