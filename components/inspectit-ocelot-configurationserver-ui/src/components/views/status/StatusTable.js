@@ -166,14 +166,28 @@ class StatusTable extends React.Component {
           .this :global(.badge) {
             width: 1.2rem;
             height: 1.2rem;
+            position: absolute;
+            right: 3rem;
+            top: 0;
             background: #007ad9;
             border-radius: 25%;
             display: inline-flex;
             justify-content: center;
             color: white;
           }
+
+          .this :global(.might-overflow) {
+            max-width: 19rem;
+            display: inline-block;
+            white-space: normal;
+            overflow: visible;
+            overflow-wrap: break-word;
+            text-overflow: unset;
+          }
         `}</style>
-        {name} {agentIdElement}{' '}
+        <span className="might-overflow">
+          {name} {agentIdElement}
+        </span>
         {rowData.count > 1 ? (
           <span className="badge">
             <b>{rowData.count}</b>
