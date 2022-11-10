@@ -16,11 +16,25 @@ import java.util.Map;
 @Component
 public class EnvironmentCommandExecutor implements CommandExecutor {
 
+    /**
+     * Checks if the given {@link Command} is an instance of {@link rocks.inspectit.ocelot.grpc.EnvironmentCommand}.
+     *
+     * @param command The {@link Command} to be checked.
+     * @return True if the given {@link Command} is an instance of {@link rocks.inspectit.ocelot.grpc.EnvironmentCommand}.
+     */
     @Override
     public boolean canExecute(Command command) {
         return command.hasEnvironment();
     }
 
+    /**
+     * Executes the given {@link Command}. Throws an {@link IllegalArgumentException} if the given command is either null
+     * or not handled by this implementation.
+     * Populates an instance of {@link rocks.inspectit.ocelot.grpc.EnvironmentCommand} with the respective values from the agent.
+     *
+     * @param command The command to be executed.
+     * @return An instance of {@link rocks.inspectit.ocelot.grpc.EnvironmentCommand} and the id of the given command.
+     */
     @Override
     public CommandResponse execute(Command command) {
         if (!canExecute(command)) {
