@@ -18,16 +18,36 @@ import rocks.inspectit.ocelot.grpc.EnvironmentCommandResponse;
 @Component
 public class EnvironmentCommandHandler  implements CommandHandler {
 
+    /**
+     * Checks if the given {@link Command} is an instance of {@link rocks.inspectit.ocelot.grpc.EnvironmentCommand}.
+     *
+     * @param command The command which should be checked.
+     * @return True if the given command is an instance of {@link rocks.inspectit.ocelot.grpc.EnvironmentCommand}.
+     */
     @Override
     public boolean canHandle(Command command) {
         return command.hasEnvironment();
     }
 
+    /**
+     * Checks if the given {@link CommandResponse} is an instance of {@link rocks.inspectit.ocelot.grpc.EnvironmentCommandResponse}.
+     *
+     * @param response The response which should be checked.
+     * @return True if the given response is an instance of {@link rocks.inspectit.ocelot.grpc.EnvironmentCommandResponse}.
+     */
     @Override
     public boolean canHandle(CommandResponse response) {
         return response.hasEnvironment();
     }
 
+    /**
+     * Takes an instance of {@link CommandResponse} as well as an instance of {@link DeferredResult}.
+     * Sets the {@link ResponseEntity} of the {@link DeferredResult} according to the
+     * Environment Information received from the respective Agent.
+     *
+     * @param response The {@link CommandResponse} to be handled.
+     * @param result   The {@link DeferredResult} the response should be written in.
+     */
     @Override
     public void handleResponse(CommandResponse response, DeferredResult<ResponseEntity<?>> result) {
 
