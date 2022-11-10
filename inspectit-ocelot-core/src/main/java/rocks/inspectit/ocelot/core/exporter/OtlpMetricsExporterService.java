@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.exporter;
 
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
@@ -75,13 +76,19 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
         try {
             OtlpMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlp();
 
+            AggregationTemporality preferredTemporality = getPreferredTemporality(otlp);
+
             switch (otlp.getProtocol()) {
                 case GRPC: {
-                    metricExporter = OtlpGrpcMetricExporter.builder().setEndpoint(otlp.getEndpoint()).build();
+                    metricExporter = OtlpGrpcMetricExporter.builder()
+                            .setPreferredTemporality(preferredTemporality)
+                            .setEndpoint(otlp.getEndpoint()).build();
                     break;
                 }
                 case HTTP_PROTOBUF: {
-                    metricExporter = OtlpHttpMetricExporter.builder().setEndpoint(otlp.getEndpoint()).build();
+                    metricExporter = OtlpHttpMetricExporter.builder()
+                            .setPreferredTemporality(preferredTemporality)
+                            .setEndpoint(otlp.getEndpoint()).build();
                     break;
                 }
             }
@@ -98,6 +105,18 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
             log.error("Error creatig OTLP metrics exporter service", e);
             return false;
         }
+    }
+
+    private static AggregationTemporality getPreferredTemporality(OtlpMetricsExporterSettings otlp) {
+        AggregationTemporality preferredTemporality;
+        try {
+           preferredTemporality = AggregationTemporality.valueOf(otlp.getPreferredTemporality());
+        }
+        catch ( IllegalArgumentException e) {
+            preferredTemporality = AggregationTemporality.CUMULATIVE;
+            log.error("Unable to set preferred Temporality of value {}. Falling back to {}. Valid values are {}", otlp.getPreferredTemporality(), preferredTemporality, AggregationTemporality.values());
+        }
+        return preferredTemporality;
     }
 
     @Override

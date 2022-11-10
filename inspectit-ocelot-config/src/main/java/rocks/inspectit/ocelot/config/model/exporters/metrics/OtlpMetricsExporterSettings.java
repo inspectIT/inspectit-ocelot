@@ -34,4 +34,9 @@ public class OtlpMetricsExporterSettings {
     @DurationMin(millis = 1)
     private Duration exportInterval;
 
+    /**
+     * The time period over which metrics should be aggregated.
+     * Valid values are CUMULATIVE and DELTA
+     */
+    private String preferredTemporality;
 }
