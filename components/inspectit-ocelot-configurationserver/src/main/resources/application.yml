@@ -82,7 +82,7 @@ inspectit-config-server:
     # timeout how long a command will wait for a response from the agent
     response-timeout: 30s
     # maximum size for inbound grpc messages, i.e. responses from agents, in MiB. Default is 4MiB.
-    max-inbound-message-size: 4
+    max-inbound-message-size: 5000
 
   # Settings for connecting the configuration server to remote Git repositories.
   remote-configurations:
