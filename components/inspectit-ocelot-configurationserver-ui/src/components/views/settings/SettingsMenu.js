@@ -43,6 +43,7 @@ class SettingsMenu extends React.Component {
             height: 2.8rem;
           }
           .this :global(.p-tabmenu-nav .p-tabmenuitem .p-menuitem-link) {
+            #b6b6b6 
             border: solid #ddd 1px;
           }
         `}</style>

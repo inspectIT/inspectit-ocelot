@@ -1,43 +1,42 @@
-const withCSS = require('@zeit/next-css')
+const withCSS = require('@zeit/next-css');
 const isProduction = process.env.NODE_ENV === 'production';
 
 module.exports = withCSS({
-    distDir: '../.next',
-    basePath: '/',
+  distDir: '../.next',
+  basePath: '',
 
-    // Each page will be exported as a directory
-    trailingSlash: true,
+  // Each page will be exported as a directory
+  trailingSlash: true,
 
-    assetPrefix: isProduction ? '/ui' : '',
+  assetPrefix: isProduction ? '/ui' : '',
 
-    // Will only be available on the server side
-    serverRuntimeConfig: {
-    },
+  // Will only be available on the server side
+  serverRuntimeConfig: {},
 
-    // Will be available on both server and client
-    publicRuntimeConfig: {
-        // used in '/components/basics/Link.js', for more details go to the component itself
-        linkPrefix: isProduction ? '/ui' : ''
-    },
+  // Will be available on both server and client
+  publicRuntimeConfig: {
+    // used in '/components/basics/Link.js', for more details go to the component itself
+    linkPrefix: isProduction ? '/ui' : '',
+  },
 
-    // Required for successfully importing CSS files (e.g. from PrimeReact)
-    // See: https://github.com/zeit/next-plugins/issues/273#issuecomment-430597241
-    webpack: function (config) {
-        config.module.rules.push({
-            test: /\.(eot|woff|woff2|ttf|svg|png|jpg|gif)$/,
-            use: {
-                loader: 'url-loader',
-                options: {
-                    limit: 100000,
-                    name: '[name].[ext]'
-                }
-            }
-        })
-        return config
-    },
+  // Required for successfully importing CSS files (e.g. from PrimeReact)
+  // See: https://github.com/zeit/next-plugins/issues/273#issuecomment-430597241
+  webpack: function (config) {
+    config.module.rules.push({
+      test: /\.(eot|woff|woff2|ttf|svg|png|jpg|gif)$/,
+      use: {
+        loader: 'url-loader',
+        options: {
+          limit: 100000,
+          name: '[name].[ext]',
+        },
+      },
+    });
+    return config;
+  },
 
-    env: {
-        VERSION: process.env.CIRCLE_TAG || "SNAPSHOT",
-        BUILD_DATE: new Date().toUTCString()
-    }
-})
+  env: {
+    VERSION: process.env.CIRCLE_TAG || 'SNAPSHOT',
+    BUILD_DATE: new Date().toUTCString(),
+  },
+});

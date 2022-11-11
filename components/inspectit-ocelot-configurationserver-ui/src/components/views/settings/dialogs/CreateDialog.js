@@ -101,7 +101,7 @@ class CreateDialog extends React.Component {
   componentDidUpdate(prevProps) {
     if (!prevProps.visible && this.props.visible) {
       if (this.input.current) {
-        this.input.current.element.focus();
+        this.input.current.focus();
       }
       this.setState({ ...initialState });
     }
