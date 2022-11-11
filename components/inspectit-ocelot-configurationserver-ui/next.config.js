@@ -3,7 +3,6 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 module.exports = withCSS({
   distDir: '../.next',
-  basePath: '',
 
   // Each page will be exported as a directory
   trailingSlash: true,
