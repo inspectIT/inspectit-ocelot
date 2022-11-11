@@ -158,7 +158,8 @@ public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryList
     private static class InstrumentedClassLoaderCache implements IClassDiscoveryListener {
 
         /**
-         * Temporary cache to store instrumented ClassLoader class names with the related ClassLoader
+         * Temporary cache to store instrumented ClassLoader class names with the related ClassLoader.
+         * We opted for {@link Set} instead of {@link java.util.Map}, as it is possibly to have different class loaders with the same name, see also https://tomcat.apache.org/tomcat-7.0-doc/class-loader-howto.html.
          */
         private final Set<Pair<String, ClassLoader>> instrumentedClassLoadersByName = Collections.newSetFromMap(new ConcurrentHashMap<>());
 

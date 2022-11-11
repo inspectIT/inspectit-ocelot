@@ -72,7 +72,7 @@ public class HookManager {
     /**
      * Flag indicates that lazy loading of hooks is enabled. This is only possible if the configuration value
      * {@code inspectit.instrumentation.internal.async} is {@code false}.
-     * If hook loading is enabled, hooks will be generated on the fly while an instrumentation method asks for hooks.
+     * If lazy hook loading is enabled, hooks will be generated on the fly while an instrumentation method asks for hooks.
      * Only one attempt for lazy loading hooks will be performed! If no hooks are generated, e.g. due to a missing or invalid
      * configuration, no further attempts will be performed. Assumption is that updated hook configurations will be
      * considered during regular asynchronous updates.

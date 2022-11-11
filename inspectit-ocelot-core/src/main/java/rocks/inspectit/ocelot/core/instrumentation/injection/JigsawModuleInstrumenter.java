@@ -86,8 +86,8 @@ public class JigsawModuleInstrumenter {
     }
 
     /**
-     * Redefines all modules to ensure modules can access boostrap and core inspectIT modules.
-     * Extra reads and writes are added to modules by utilizing Instrumentation.redefineModule()
+     * Redefines all modules to ensure modules can access bootstrap and core inspectIT modules.
+     * Extra reads and writes are added to modules by utilizing {@link #redefineModule(Object, Set, Map)}, which uses {@link Instrumentation#redefineModule(Module, Set, Map, Map, Set, Map)} under the hood.
      *
      * @param module The module to be redefined
      */
@@ -156,7 +156,7 @@ public class JigsawModuleInstrumenter {
     }
 
     /**
-     * Invokes the java 9 Module.isNamed() function
+     * Invokes the Java 9 {@link Module#isNamed()} function
      *
      * @param module The Module instance
      *
@@ -171,7 +171,7 @@ public class JigsawModuleInstrumenter {
     }
 
     /**
-     * Invokes the java 9 Module.getPackages() function
+     * Invokes the Java 9 {@link Module#getPackages()} function
      *
      * @param module The Module instance
      *
