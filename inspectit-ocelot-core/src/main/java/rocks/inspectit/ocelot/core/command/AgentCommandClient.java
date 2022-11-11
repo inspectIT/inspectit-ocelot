@@ -67,7 +67,7 @@ public class AgentCommandClient {
                 @Override
                 public void onNext(Command command) {
                     try {
-                        log.debug("Received command '{}' from config-server.", command.getCommandId());
+                        log.debug("Received command '{}' from inspectIT config server.", command.getCommandId());
                         commandResponseObserver.onNext(commandDelegator.delegate(command));
                         log.debug("Answered to command '{}'.", command.getCommandId());
                     } catch (Exception exception) {
@@ -89,7 +89,7 @@ public class AgentCommandClient {
                     if (commandResponseObserver == null) {
                         log.error("Error while trying to send onCompleted() to server. Will end connection without retrying.", t);
                     } else {
-                        log.error("Encountered error in askForCommands ending the stream connection with config-Server.", t);
+                        log.error("Encountered error in askForCommands ending the stream connection with inspectIT config server.", t);
                         reestablishConnection(settings, commandDelegator);
                     }
                 }
@@ -135,7 +135,10 @@ public class AgentCommandClient {
         }
 
         // Re-try establishing the connection after backoff.
-        ScheduledFuture<Boolean> restartFuture = reconnectExecutor.schedule(() -> startAskForCommandsConnection(settings, commandDelegator), (long) Math.pow(2, retriesAttempted + 1), TimeUnit.SECONDS);
+        ScheduledFuture<Boolean> restartFuture = reconnectExecutor.schedule(() ->
+                startAskForCommandsConnection(settings, commandDelegator),
+                (long) Math.pow(2, retriesAttempted + 1),
+                TimeUnit.SECONDS);
 
         // Raise retries attempted if set maximum has not been reached yet.
         if (retriesAttempted < settings.getMaxBackoffIncreases()) {
