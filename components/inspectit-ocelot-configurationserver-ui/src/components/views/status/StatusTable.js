@@ -190,7 +190,7 @@ class StatusTable extends React.Component {
           }
 
           .this :global(.might-overflow) {
-            max-width: 19rem;
+            max-width: 17.8rem;
             display: inline-block;
             white-space: normal;
             overflow: visible;
