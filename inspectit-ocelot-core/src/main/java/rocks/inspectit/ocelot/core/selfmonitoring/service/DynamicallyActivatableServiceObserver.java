@@ -29,19 +29,6 @@ public class DynamicallyActivatableServiceObserver {
         serviceStateMap.put(service.getName(), service.isEnabled());
     }
 
-    public String MapToJson() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = "{}";
-
-        try {
-            json = objectMapper.writeValueAsString(serviceStateMap);
-        } catch (Exception e) {
-            System.out.println(e.getMessage()); //Add proper logging
-        }
-
-        return json;
-    }
-
     public static String asJson() {
         ObjectMapper objectMapper = new ObjectMapper();
         String json = "{}";
