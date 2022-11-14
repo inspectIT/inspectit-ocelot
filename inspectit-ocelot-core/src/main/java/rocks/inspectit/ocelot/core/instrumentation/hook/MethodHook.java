@@ -173,7 +173,7 @@ public class MethodHook implements IMethodHook {
     /**
      * @return An exact copy of this method hook but with all deactivated actions reactivated.
      */
-    public MethodHook getResettedCopy() {
+    public MethodHook getResetCopy() {
         return new MethodHook(sourceConfiguration, inspectitContextManager, entryActions, exitActions, methodInformation, actionScopeFactory);
     }
 

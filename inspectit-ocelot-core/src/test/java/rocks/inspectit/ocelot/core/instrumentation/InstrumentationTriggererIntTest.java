@@ -10,6 +10,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.core.SpringTestBase;
+import rocks.inspectit.ocelot.core.instrumentation.transformer.AsyncClassTransformer;
 import rocks.inspectit.ocelot.core.testutils.DummyClassLoader;
 
 import java.util.Arrays;

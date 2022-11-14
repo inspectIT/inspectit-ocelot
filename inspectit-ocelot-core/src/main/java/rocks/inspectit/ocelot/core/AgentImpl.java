@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core;
 
 import io.opencensus.tags.Tags;
+import net.bytebuddy.pool.TypePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
@@ -31,6 +32,11 @@ public class AgentImpl implements IAgent {
      * Reference to the class loader of the current agent implementation.
      */
     public static final ClassLoader AGENT_CLASS_LOADER = AgentImpl.class.getClassLoader();
+
+    /**
+     * Default {@link net.bytebuddy.pool.TypePool} to avoid recreating the pool on every request.
+     */
+    public static final TypePool AGENT_CLASS_LOADER_TYPE_POOL = TypePool.Default.of(AGENT_CLASS_LOADER);
 
     /**
      * Logger that is initialized in the static init block
@@ -73,8 +79,8 @@ public class AgentImpl implements IAgent {
         LOGGER.info("Starting inspectIT Ocelot Agent...");
         LOGGER.info("\tVersion: {}", getVersion());
         LOGGER.info("\tBuild Date: {}", getBuildDate());
-        logOpenTelemetryClassLoader();
 
+        logOpenTelemetryClassLoader();
         ctx = new AnnotationConfigApplicationContext();
         ctx.setClassLoader(AGENT_CLASS_LOADER);
         InspectitEnvironment environment = new InspectitEnvironment(ctx, Optional.ofNullable(cmdArgs));
