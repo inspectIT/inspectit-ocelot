@@ -119,6 +119,13 @@ class StatusTable extends React.Component {
     let agentCommandsEnabled = false;
     let serviceStatesAvailable = false;
 
+    if (agentVersionTokens.length == 2 || agentVersionTokens.length == 3) {
+      const agentVersionNumber =
+        agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length == 3 ? agentVersionTokens[2] * 1 : 0);
+      logAvailable = agentVersionNumber > 11500;
+      serviceStatesAvailable = agentVersionNumber >= 22000;
+    }
+
     let name = '-';
     let agentIdElement;
     let agentId = null;
@@ -129,13 +136,6 @@ class StatusTable extends React.Component {
       }
       agentId = metaInformation.agentId;
       agentIdElement = <span style={{ color: 'gray' }}>({agentId})</span>;
-
-      if (agentVersionTokens.length == 2 || agentVersionTokens.length == 3) {
-        const agentVersionNumber =
-          agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length == 3 ? agentVersionTokens[2] * 1 : 0);
-        logAvailable = agentVersionNumber > 11500;
-        serviceStatesAvailable = agentVersionNumber >= 22000;
-      }
 
       try {
         serviceStates = JSON.parse(metaInformation.serviceStates);
