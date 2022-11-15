@@ -286,9 +286,16 @@ class StatusTable extends React.Component {
     const { onShowDownloadDialog } = this.props;
     const { health, metaInformation } = rowData;
 
-    let serviceStates = JSON.parse(metaInformation.serviceStates);
-    let agentCommandsEnabled = serviceStates.AgentCommandService;
+    let serviceStates = '{}';
+    let agentCommandsEnabled = false;
 
+    try {
+      serviceStates = JSON.parse(metaInformation.serviceStates);
+      agentCommandsEnabled = serviceStates.AgentCommandService;
+    }catch (e){
+      //ignore 
+    }
+    
     let healthInfo;
     let iconClass;
     let iconColor;
