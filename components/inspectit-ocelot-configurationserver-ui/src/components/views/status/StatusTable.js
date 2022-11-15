@@ -145,8 +145,7 @@ class StatusTable extends React.Component {
 
         serviceStatesAvailable = true;
       } catch (e) {
-        serviceStates = '{}';
-        serviceStatesAvailable = false;
+        //ignore
       }
     }
 
