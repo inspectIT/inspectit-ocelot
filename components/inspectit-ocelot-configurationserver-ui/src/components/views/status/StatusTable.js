@@ -291,10 +291,10 @@ class StatusTable extends React.Component {
     try {
       serviceStates = JSON.parse(metaInformation.serviceStates);
       agentCommandsEnabled = serviceStates.AgentCommandService;
-    }catch (e){
-      //ignore 
+    } catch (e) {
+      //ignore
     }
-    
+
     let healthInfo;
     let iconClass;
     let iconColor;
