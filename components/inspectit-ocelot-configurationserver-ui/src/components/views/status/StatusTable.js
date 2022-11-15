@@ -117,11 +117,7 @@ class StatusTable extends React.Component {
     const agentVersionTokens = agentVersion.split('.');
     let logAvailable = false;
     let agentCommandsEnabled = false;
-    if (agentVersionTokens.length == 2 || agentVersionTokens.length == 3) {
-      const agentVersionNumber =
-        agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length == 3 ? agentVersionTokens[2] * 1 : 0);
-      logAvailable = agentVersionNumber > 11500;
-    }
+    let serviceStatesAvailable = false;
 
     let name = '-';
     let agentIdElement;
@@ -134,9 +130,24 @@ class StatusTable extends React.Component {
       agentId = metaInformation.agentId;
       agentIdElement = <span style={{ color: 'gray' }}>({agentId})</span>;
 
-      serviceStates = JSON.parse(metaInformation.serviceStates);
-      logAvailable = serviceStates.LogPreloader;
-      agentCommandsEnabled = serviceStates.AgentCommandService;
+      if (agentVersionTokens.length == 2 || agentVersionTokens.length == 3) {
+        const agentVersionNumber =
+          agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length == 3 ? agentVersionTokens[2] * 1 : 0);
+        logAvailable = agentVersionNumber > 11500;
+        serviceStatesAvailable = agentVersionNumber >= 22000;
+      }
+
+      try {
+        serviceStates = JSON.parse(metaInformation.serviceStates);
+
+        logAvailable = serviceStates.LogPreloader;
+        agentCommandsEnabled = serviceStates.AgentCommandService;
+
+        serviceStatesAvailable = true;
+      } catch (e) {
+        serviceStates = '{}';
+        serviceStatesAvailable = false;
+      }
     }
 
     return (
@@ -210,8 +221,9 @@ class StatusTable extends React.Component {
           className="service-state-button"
           icon="pi pi-sliders-h"
           onClick={() => onShowServiceStateDialog(serviceStates)}
-          tooltip="Service States"
-          tooltipOptions={{ showDeleay: 500 }}
+          tooltip={serviceStatesAvailable ? 'Service States' : 'Service States are available for agent versions 2.2.0 and above'}
+          tooltipOptions={{ showDelay: 500 }}
+          disabled={!serviceStatesAvailable}
         />
         <Button
           className="config-info-button"
@@ -227,7 +239,7 @@ class StatusTable extends React.Component {
           tooltip={
             logAvailable && agentCommandsEnabled
               ? 'Show Logs'
-              : "<b>Logs not available!</b>\nMake sure to enable 'log-preloading' and 'agent-commands' in the config, and configure the URL for the agent commands."
+              : "<b>Logs not available!</b>\nMake sure to enable 'log-preloading' and 'agent-commands' in the config, and configure the URL for the agent commands.\nAvailable for agent versions 1.1.5 and above"
           }
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable || !agentCommandsEnabled}
