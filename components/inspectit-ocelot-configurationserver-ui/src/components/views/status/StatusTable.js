@@ -102,10 +102,11 @@ class StatusTable extends React.Component {
   state = {
     configurationValue: '',
     logValue: '',
+    showServiceStateDialog: false,
   };
 
   nameTemplate = (rowData) => {
-    const { onShowDownloadDialog } = this.props;
+    const { onShowDownloadDialog, onShowServiceStateDialog } = this.props;
     const {
       metaInformation,
       attributes,
@@ -125,6 +126,7 @@ class StatusTable extends React.Component {
     let name = '-';
     let agentIdElement;
     let agentId = null;
+    let serviceStates = '{}';
     if (metaInformation) {
       if (service) {
         name = service;
@@ -132,10 +134,11 @@ class StatusTable extends React.Component {
       agentId = metaInformation.agentId;
       agentIdElement = <span style={{ color: 'gray' }}>({agentId})</span>;
 
-      let settingStates = JSON.parse(metaInformation.settingStates);
-      logAvailable = settingStates.LogPreloader;
-      agentCommandsEnabled = settingStates.AgentCommandService;
+      serviceStates = JSON.parse(metaInformation.serviceStates);
+      logAvailable = serviceStates.LogPreloader;
+      agentCommandsEnabled = serviceStates.AgentCommandService;
     }
+
     return (
       <div className="this">
         <style jsx>{`
@@ -163,11 +166,21 @@ class StatusTable extends React.Component {
             border-color: #ddd;
           }
 
-          .this :global(.badge) {
+          .this :global(.service-state-button) {
             width: 1.2rem;
             height: 1.2rem;
             position: absolute;
             right: 3rem;
+            top: 0;
+            background: #ddd;
+            border-color: #ddd;
+          }
+
+          .this :global(.badge) {
+            width: 1.2rem;
+            height: 1.2rem;
+            position: absolute;
+            right: 4.5rem;
             top: 0;
             background: #007ad9;
             border-radius: 25%;
@@ -177,7 +190,7 @@ class StatusTable extends React.Component {
           }
 
           .this :global(.might-overflow) {
-            max-width: 19rem;
+            max-width: 17.8rem;
             display: inline-block;
             white-space: normal;
             overflow: visible;
@@ -194,6 +207,13 @@ class StatusTable extends React.Component {
           </span>
         ) : null}
         <Button
+          className="service-state-button"
+          icon="pi pi-sliders-h"
+          onClick={() => onShowServiceStateDialog(serviceStates)}
+          tooltip="Service States"
+          tooltipOptions={{ showDeleay: 500 }}
+        />
+        <Button
           className="config-info-button"
           icon="pi pi-cog"
           onClick={() => onShowDownloadDialog(agentId, attributes, 'config')}
@@ -207,13 +227,19 @@ class StatusTable extends React.Component {
           tooltip={
             logAvailable && agentCommandsEnabled
               ? 'Show Logs'
-              : "Please enable 'log-preloading' and 'agent-commands' in the config! Make sure to pass the right url for the agent commands!"
+              : "<b>Logs not available!</b>\nMake sure to enable 'log-preloading' and 'agent-commands' in the config, and configure the URL for the agent commands."
           }
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable || !agentCommandsEnabled}
         />
       </div>
     );
+  };
+
+  setServiceStateDialogShown = (showDialog) => {
+    this.setState({
+      showServiceStateDialog: showDialog,
+    });
   };
 
   iconTemplate = (rowData) => {
@@ -248,8 +274,8 @@ class StatusTable extends React.Component {
     const { onShowDownloadDialog } = this.props;
     const { health, metaInformation } = rowData;
 
-    let settingStates = JSON.parse(metaInformation.settingStates);
-    let agentCommandsEnabled = settingStates.AgentCommandService;
+    let serviceStates = JSON.parse(metaInformation.serviceStates);
+    let agentCommandsEnabled = serviceStates.AgentCommandService;
 
     let healthInfo;
     let iconClass;
@@ -301,7 +327,7 @@ class StatusTable extends React.Component {
               tooltip={
                 agentCommandsEnabled
                   ? 'Download Support Archive'
-                  : "Make sure to enabled 'agent-commands' in the config and set the right URL!"
+                  : "<b>Support archive not available!</b>\nMake sure to enable 'agent-commands' in the config and configure the URL for the agent commands."
               }
               tooltipOptions={{ showDelay: 500 }}
               disabled={!agentCommandsEnabled}

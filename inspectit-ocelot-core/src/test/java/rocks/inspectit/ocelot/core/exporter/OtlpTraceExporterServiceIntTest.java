@@ -7,10 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import rocks.inspectit.ocelot.config.model.exporters.CompressionMethod;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.config.model.exporters.trace.OtlpTraceExporterSettings;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -99,6 +103,35 @@ public class OtlpTraceExporterServiceIntTest extends ExporterServiceIntegrationT
         assertThat(otlp.getEnabled().equals(ExporterEnabledState.IF_CONFIGURED));
         assertThat(otlp.getEndpoint()).isNullOrEmpty();
         assertThat(otlp.getProtocol()).isNull();
+        assertThat(otlp.getHeaders()).isNullOrEmpty();
+        assertThat(otlp.getCompression()).isEqualTo(CompressionMethod.NONE);
+        assertThat(otlp.getTimeout()).isEqualTo(Duration.ofSeconds(10));
     }
 
+    @DirtiesContext
+    @Test
+    void testHeaders(){
+        updateProperties(properties -> {
+            properties.setProperty("inspectit.exporters.tracing.otlp.protocol", TransportProtocol.HTTP_PROTOBUF);
+            properties.setProperty("inspectit.exporters.tracing.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_HTTP_PORT, OTLP_TRACING_PATH));
+            properties.setProperty("inspectit.exporters.tracing.otlp.enabled", ExporterEnabledState.ENABLED);
+            properties.setProperty("inspectit.exporters.tracing.otlp.headers", new HashMap<String, String>(){{put("my-header-key","my-header-value");}});
+
+        });
+        assertThat(service.isEnabled()).isTrue();
+        assertThat(environment.getCurrentConfig().getExporters().getTracing().getOtlp().getHeaders()).containsEntry("my-header-key","my-header-value");
+    }
+
+    @DirtiesContext
+    @Test
+    void testCompression() {
+        updateProperties(properties -> {
+            properties.setProperty("inspectit.exporters.tracing.otlp.protocol", TransportProtocol.GRPC);
+            properties.setProperty("inspectit.exporters.tracing.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_HTTP_PORT, OTLP_TRACING_PATH));
+            properties.setProperty("inspectit.exporters.tracing.otlp.enabled", ExporterEnabledState.ENABLED);
+            properties.setProperty("inspectit.exporters.tracing.otlp.compression", CompressionMethod.GZIP);
+        });
+        assertThat(service.isEnabled()).isTrue();
+        assertThat(environment.getCurrentConfig().getExporters().getTracing().getOtlp().getCompression()).isEqualTo(CompressionMethod.GZIP);
+    }
 }
