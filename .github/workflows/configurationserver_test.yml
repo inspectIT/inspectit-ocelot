@@ -26,3 +26,6 @@ jobs:
       - name: test
         run: ../../gradlew test
         working-directory: ${{env.working-directory}}
+      - name: Build jar with frontend
+        working-directory: ${{env.working-directory}}
+        run: ../../gradlew bootJarWithFrontend
