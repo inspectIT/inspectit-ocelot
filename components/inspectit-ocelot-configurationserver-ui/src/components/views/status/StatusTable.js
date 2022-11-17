@@ -105,6 +105,26 @@ class StatusTable extends React.Component {
     showServiceStateDialog: false,
   };
 
+  resolveServiceAvailability = (agentVersion) => {
+    const agentVersionTokens = agentVersion.split('.');
+    let logAvailable = false;
+    let agentCommandsEnabled = false;
+    let serviceStatesAvailable = false;
+    // Support Archive ab 20200
+    if (agentVersionTokens.length === 2 || agentVersionTokens.length === 3) {
+      const agentVersionNumber =
+        agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length === 3 ? agentVersionTokens[2] * 1 : 0);
+      logAvailable = agentVersionNumber > 11500;
+      serviceStatesAvailable = agentVersionNumber >= 20200;
+    }
+
+    return {
+      "logAvailable": logAvailable,
+      "agentCommandsEnabled": agentCommandsEnabled,
+      "serviceStatesAvailable": serviceStatesAvailable
+    };
+  };
+
   nameTemplate = (rowData) => {
     const { onShowDownloadDialog, onShowServiceStateDialog } = this.props;
     const {
@@ -112,20 +132,8 @@ class StatusTable extends React.Component {
       attributes,
       attributes: { service },
     } = rowData;
-    const { agentVersion } = metaInformation;
-
-    const agentVersionTokens = agentVersion.split('.');
-    let logAvailable = false;
-    let agentCommandsEnabled = false;
-    let serviceStatesAvailable = false;
-
-    if (agentVersionTokens.length == 2 || agentVersionTokens.length == 3) {
-      const agentVersionNumber =
-        agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length == 3 ? agentVersionTokens[2] * 1 : 0);
-      logAvailable = agentVersionNumber > 11500;
-      serviceStatesAvailable = agentVersionNumber >= 22000;
-    }
-
+    const { agentVersion } = metaInformation
+    let { logAvailable, agentCommandsEnabled, serviceStatesAvailable } = this.resolveServiceAvailability(agentVersion);
     let name = '-';
     let agentIdElement;
     let agentId = null;
@@ -137,15 +145,19 @@ class StatusTable extends React.Component {
       agentId = metaInformation.agentId;
       agentIdElement = <span style={{ color: 'gray' }}>({agentId})</span>;
 
-      try {
-        serviceStates = JSON.parse(metaInformation.serviceStates);
+      if(serviceStatesAvailable) {
+        try {
+          serviceStates = JSON.parse(metaInformation.serviceStates);
 
-        logAvailable = serviceStates.LogPreloader;
-        agentCommandsEnabled = serviceStates.AgentCommandService;
+          logAvailable = serviceStates.LogPreloader;
+          agentCommandsEnabled = serviceStates.AgentCommandService;
 
-        serviceStatesAvailable = true;
-      } catch (e) {
-        //ignore
+          serviceStatesAvailable = true;
+        } catch (e) {
+          //ignore
+        }
+      } else {
+
       }
     }
 
@@ -238,7 +250,7 @@ class StatusTable extends React.Component {
           tooltip={
             logAvailable && agentCommandsEnabled
               ? 'Show Logs'
-              : "<b>Logs not available!</b>\nMake sure to enable 'log-preloading' and 'agent-commands' in the config, and configure the URL for the agent commands.\nAvailable for agent versions 1.1.5 and above"
+              : "<b>Logs not available!</b>\nMake sure to enable 'log-preloading' and 'agent-commands' in the config, and configure the URL for the agent commands.\nThis feature is only available for agent versions 1.15.0 and above"
           }
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable || !agentCommandsEnabled}
@@ -284,15 +296,18 @@ class StatusTable extends React.Component {
   agentHealthTemplate = (rowData) => {
     const { onShowDownloadDialog } = this.props;
     const { health, metaInformation } = rowData;
+    const { agentVersion } = metaInformation
+
+    let { agentCommandsEnabled, serviceStatesAvailable } = this.resolveServiceAvailability(agentVersion);
 
     let serviceStates = '{}';
-    let agentCommandsEnabled = false;
-
-    try {
-      serviceStates = JSON.parse(metaInformation.serviceStates);
-      agentCommandsEnabled = serviceStates.AgentCommandService;
-    } catch (e) {
-      //ignore
+    if (serviceStatesAvailable) {
+      try {
+        serviceStates = JSON.parse(metaInformation.serviceStates);
+        agentCommandsEnabled = serviceStates.AgentCommandService;
+      } catch (e) {
+        //ignore
+      }
     }
 
     let healthInfo;
@@ -345,7 +360,7 @@ class StatusTable extends React.Component {
               tooltip={
                 agentCommandsEnabled
                   ? 'Download Support Archive'
-                  : "<b>Support archive not available!</b>\nMake sure to enable 'agent-commands' in the config and configure the URL for the agent commands."
+                  : "<b>Support archive not available!</b>\nMake sure to enable 'agent-commands' in the config and configure the URL for the agent commands. \n This feature is only available for agent versions 1.15.0 and above."
               }
               tooltipOptions={{ showDelay: 500 }}
               disabled={!agentCommandsEnabled}
