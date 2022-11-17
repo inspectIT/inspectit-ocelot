@@ -110,18 +110,28 @@ class StatusTable extends React.Component {
     let logAvailable = false;
     let agentCommandsEnabled = false;
     let serviceStatesAvailable = false;
-    // Support Archive ab 20200
-    if (agentVersionTokens.length === 2 || agentVersionTokens.length === 3) {
+    let supportArchiveAvailable = false;
+
+    // in case of snapshot version, assume we are up to date
+    if (agentVersion == "SNAPSHOT"){
+      logAvailable = agentCommandsEnabled = serviceStatesAvailable = supportArchiveAvailable = true;
+    }
+    else if (agentVersionTokens.length === 2 || agentVersionTokens.length === 3) {
       const agentVersionNumber =
         agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length === 3 ? agentVersionTokens[2] * 1 : 0);
+      // logs are available at version 1.15+
       logAvailable = agentVersionNumber > 11500;
-      serviceStatesAvailable = agentVersionNumber >= 20200;
+      // support archive is available at version 2.20+
+      supportArchiveAvailable = agentVersionNumber >= 22000;
+      // service states are available at version 2.20+
+      serviceStatesAvailable = agentVersionNumber >= 22000;
     }
 
     return {
       "logAvailable": logAvailable,
       "agentCommandsEnabled": agentCommandsEnabled,
-      "serviceStatesAvailable": serviceStatesAvailable
+      "serviceStatesAvailable": serviceStatesAvailable,
+      "supportArchiveAvailable": supportArchiveAvailable
     };
   };
 
@@ -148,16 +158,12 @@ class StatusTable extends React.Component {
       if(serviceStatesAvailable) {
         try {
           serviceStates = JSON.parse(metaInformation.serviceStates);
-
           logAvailable = serviceStates.LogPreloader;
           agentCommandsEnabled = serviceStates.AgentCommandService;
-
           serviceStatesAvailable = true;
         } catch (e) {
           //ignore
         }
-      } else {
-
       }
     }
 
@@ -250,7 +256,7 @@ class StatusTable extends React.Component {
           tooltip={
             logAvailable && agentCommandsEnabled
               ? 'Show Logs'
-              : "<b>Logs not available!</b>\nMake sure to enable 'log-preloading' and 'agent-commands' in the config, and configure the URL for the agent commands.\nThis feature is only available for agent versions 1.15.0 and above"
+              : "<b>Logs not available!</b>\nMake sure to enable 'log-preloading' and 'agent-commands' in the config, and configure the URL for the agent commands.\nThis feature is only available for agent versions 1.15.0 and higher"
           }
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable || !agentCommandsEnabled}
@@ -298,13 +304,14 @@ class StatusTable extends React.Component {
     const { health, metaInformation } = rowData;
     const { agentVersion } = metaInformation
 
-    let { agentCommandsEnabled, serviceStatesAvailable } = this.resolveServiceAvailability(agentVersion);
+    let { agentCommandsEnabled, serviceStatesAvailable, supportArchiveAvailable } = this.resolveServiceAvailability(agentVersion);
 
     let serviceStates = '{}';
     if (serviceStatesAvailable) {
       try {
         serviceStates = JSON.parse(metaInformation.serviceStates);
         agentCommandsEnabled = serviceStates.AgentCommandService;
+        supportArchiveAvailable = agentCommandsEnabled;
       } catch (e) {
         //ignore
       }
@@ -358,7 +365,7 @@ class StatusTable extends React.Component {
               icon="pi pi-cloud-download"
               onClick={() => onShowDownloadDialog(metaInformation.agentId, metaInformation.agentVersion, 'archive')}
               tooltip={
-                agentCommandsEnabled
+                agentCommandsEnabled && supportArchiveAvailable
                   ? 'Download Support Archive'
                   : "<b>Support archive not available!</b>\nMake sure to enable 'agent-commands' in the config and configure the URL for the agent commands. \n This feature is only available for agent versions 1.15.0 and above."
               }
