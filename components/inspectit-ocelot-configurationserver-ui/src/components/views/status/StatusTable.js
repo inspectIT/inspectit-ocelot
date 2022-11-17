@@ -123,9 +123,9 @@ class StatusTable extends React.Component {
         agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length === 3 ? agentVersionTokens[2] * 1 : 0);
       // logs are available at version 1.15+
       logAvailable = agentVersionNumber > 11500;
-      // support archive is available at version 2.20+
+      // support archive is available at version 2.2.0+
       supportArchiveAvailable = agentVersionNumber >= 20200;
-      // service states are available at version 2.20+
+      // service states are available at version 2.2.0+
       serviceStatesAvailable = agentVersionNumber >= 20200;
     }
 
