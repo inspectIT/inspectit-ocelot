@@ -105,12 +105,14 @@ class StatusTable extends React.Component {
     showServiceStateDialog: false,
   };
 
-  resolveServiceAvailability = (agentVersion) => {
+  resolveServiceAvailability = (metaInformation) => {
+    const {agentVersion} = metaInformation;
     const agentVersionTokens = agentVersion.split('.');
     let logAvailable = false;
     let agentCommandsEnabled = false;
     let serviceStatesAvailable = false;
     let supportArchiveAvailable = false;
+    let serviceStates =  '{}'
 
     // in case of snapshot version, assume we are up to date
     if (agentVersion == "SNAPSHOT"){
@@ -127,11 +129,21 @@ class StatusTable extends React.Component {
       serviceStatesAvailable = agentVersionNumber >= 22000;
     }
 
+    if (serviceStatesAvailable) {
+      try {
+        serviceStates = JSON.parse(metaInformation.serviceStates);
+        agentCommandsEnabled = serviceStates.AgentCommandService;
+        supportArchiveAvailable = agentCommandsEnabled;
+      } catch (e) {
+        //ignore
+      }
+    }
     return {
       "logAvailable": logAvailable,
       "agentCommandsEnabled": agentCommandsEnabled,
       "serviceStatesAvailable": serviceStatesAvailable,
-      "supportArchiveAvailable": supportArchiveAvailable
+      "supportArchiveAvailable": supportArchiveAvailable,
+      "serviceStates" : serviceStates
     };
   };
 
@@ -143,28 +155,16 @@ class StatusTable extends React.Component {
       attributes: { service },
     } = rowData;
     const { agentVersion } = metaInformation
-    let { logAvailable, agentCommandsEnabled, serviceStatesAvailable } = this.resolveServiceAvailability(agentVersion);
+    let { logAvailable, agentCommandsEnabled, serviceStatesAvailable, serviceStates } = this.resolveServiceAvailability(metaInformation);
     let name = '-';
     let agentIdElement;
     let agentId = null;
-    let serviceStates = '{}';
     if (metaInformation) {
       if (service) {
         name = service;
       }
       agentId = metaInformation.agentId;
       agentIdElement = <span style={{ color: 'gray' }}>({agentId})</span>;
-
-      if(serviceStatesAvailable) {
-        try {
-          serviceStates = JSON.parse(metaInformation.serviceStates);
-          logAvailable = serviceStates.LogPreloader;
-          agentCommandsEnabled = serviceStates.AgentCommandService;
-          serviceStatesAvailable = true;
-        } catch (e) {
-          //ignore
-        }
-      }
     }
 
     return (
@@ -304,18 +304,7 @@ class StatusTable extends React.Component {
     const { health, metaInformation } = rowData;
     const { agentVersion } = metaInformation
 
-    let { agentCommandsEnabled, serviceStatesAvailable, supportArchiveAvailable } = this.resolveServiceAvailability(agentVersion);
-
-    let serviceStates = '{}';
-    if (serviceStatesAvailable) {
-      try {
-        serviceStates = JSON.parse(metaInformation.serviceStates);
-        agentCommandsEnabled = serviceStates.AgentCommandService;
-        supportArchiveAvailable = agentCommandsEnabled;
-      } catch (e) {
-        //ignore
-      }
-    }
+    let { agentCommandsEnabled, serviceStatesAvailable, supportArchiveAvailable, serviceStates } = this.resolveServiceAvailability(metaInformation);
 
     let healthInfo;
     let iconClass;
