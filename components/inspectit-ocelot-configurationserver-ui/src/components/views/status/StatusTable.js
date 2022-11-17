@@ -109,7 +109,7 @@ class StatusTable extends React.Component {
     const {agentVersion} = metaInformation;
     const agentVersionTokens = agentVersion.split('.');
     let logAvailable = false;
-    let agentCommandsEnabled = false;
+    let agentCommandsEnabled = true;
     let serviceStatesAvailable = false;
     let supportArchiveAvailable = false;
     let serviceStates =  '{}'
