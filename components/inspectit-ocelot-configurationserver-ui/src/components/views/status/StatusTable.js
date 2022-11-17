@@ -124,14 +124,15 @@ class StatusTable extends React.Component {
       // logs are available at version 1.15+
       logAvailable = agentVersionNumber > 11500;
       // support archive is available at version 2.20+
-      supportArchiveAvailable = agentVersionNumber >= 22000;
+      supportArchiveAvailable = agentVersionNumber >= 20200;
       // service states are available at version 2.20+
-      serviceStatesAvailable = agentVersionNumber >= 22000;
+      serviceStatesAvailable = agentVersionNumber >= 20200;
     }
 
     if (serviceStatesAvailable) {
       try {
         serviceStates = JSON.parse(metaInformation.serviceStates);
+        logAvailable = serviceStates.LogPreloader;
         agentCommandsEnabled = serviceStates.AgentCommandService;
         supportArchiveAvailable = agentCommandsEnabled;
       } catch (e) {
