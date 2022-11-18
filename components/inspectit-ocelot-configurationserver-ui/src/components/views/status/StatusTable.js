@@ -106,19 +106,18 @@ class StatusTable extends React.Component {
   };
 
   resolveServiceAvailability = (metaInformation) => {
-    const {agentVersion} = metaInformation;
+    const { agentVersion } = metaInformation;
     const agentVersionTokens = agentVersion.split('.');
     let logAvailable = false;
     let agentCommandsEnabled = true;
     let serviceStatesAvailable = false;
     let supportArchiveAvailable = false;
-    let serviceStates =  '{}'
+    let serviceStates = '{}';
 
     // in case of snapshot version, assume we are up to date
-    if (agentVersion == "SNAPSHOT"){
+    if (agentVersion == 'SNAPSHOT') {
       logAvailable = agentCommandsEnabled = serviceStatesAvailable = supportArchiveAvailable = true;
-    }
-    else if (agentVersionTokens.length === 2 || agentVersionTokens.length === 3) {
+    } else if (agentVersionTokens.length === 2 || agentVersionTokens.length === 3) {
       const agentVersionNumber =
         agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length === 3 ? agentVersionTokens[2] * 1 : 0);
       // logs are available at version 1.15+
@@ -140,11 +139,11 @@ class StatusTable extends React.Component {
       }
     }
     return {
-      "logAvailable": logAvailable,
-      "agentCommandsEnabled": agentCommandsEnabled,
-      "serviceStatesAvailable": serviceStatesAvailable,
-      "supportArchiveAvailable": supportArchiveAvailable,
-      "serviceStates" : serviceStates
+      logAvailable: logAvailable,
+      agentCommandsEnabled: agentCommandsEnabled,
+      serviceStatesAvailable: serviceStatesAvailable,
+      supportArchiveAvailable: supportArchiveAvailable,
+      serviceStates: serviceStates,
     };
   };
 
@@ -155,7 +154,7 @@ class StatusTable extends React.Component {
       attributes,
       attributes: { service },
     } = rowData;
-    const { agentVersion } = metaInformation
+    const { agentVersion } = metaInformation;
     let { logAvailable, agentCommandsEnabled, serviceStatesAvailable, serviceStates } = this.resolveServiceAvailability(metaInformation);
     let name = '-';
     let agentIdElement;
@@ -303,9 +302,10 @@ class StatusTable extends React.Component {
   agentHealthTemplate = (rowData) => {
     const { onShowDownloadDialog } = this.props;
     const { health, metaInformation } = rowData;
-    const { agentVersion } = metaInformation
+    const { agentVersion } = metaInformation;
 
-    let { agentCommandsEnabled, serviceStatesAvailable, supportArchiveAvailable, serviceStates } = this.resolveServiceAvailability(metaInformation);
+    let { agentCommandsEnabled, serviceStatesAvailable, supportArchiveAvailable, serviceStates } =
+      this.resolveServiceAvailability(metaInformation);
 
     let healthInfo;
     let iconClass;
