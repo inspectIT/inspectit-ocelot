@@ -15,7 +15,8 @@ const siteConfig = {
   title: 'inspectIT Ocelot Documentation', // Title for your website.
   tagline: 'Documentation of the inspectIT Ocelot Java Agent',
   url: 'https://inspectit.github.io', // Your website URL
-  baseUrl: '/inspectit-ocelot/', // Base URL for your project */
+  baseUrl: process.env.IS_LOCAL ? '/inspectit-ocelot/docs/next/doc1' : '/inspectit-ocelot/',
+  //baseUrl: '/inspectit-ocelot/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
   //   baseUrl: '/test-site/',
