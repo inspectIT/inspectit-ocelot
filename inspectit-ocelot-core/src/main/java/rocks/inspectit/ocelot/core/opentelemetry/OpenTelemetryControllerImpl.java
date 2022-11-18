@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
@@ -147,17 +148,20 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @VisibleForTesting
     void init() {
         initOtel(env.getCurrentConfig());
-
-        // close the tracer provider when the JVM is shutting down
-        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
-
         Instances.openTelemetryController = this;
     }
 
     @EventListener(ContextRefreshedEvent.class)
-    @Order(Ordered.LOWEST_PRECEDENCE)
-    synchronized private void startAtStartup(ContextRefreshedEvent event) {
+    @Order()
+    synchronized private void startAtStartup() {
         start();
+    }
+
+    @EventListener(ContextClosedEvent.class)
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    public void handleContextClosed() {
+        flush();
+        shutdown();
     }
 
     /**
@@ -169,7 +173,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      * @return
      */
     @EventListener(InspectitConfigChangedEvent.class)
-    @Order(Ordered.LOWEST_PRECEDENCE)
+    @Order()
     @VisibleForTesting
     synchronized boolean configureOpenTelemetry() {
         if (shutdown) {
@@ -238,7 +242,10 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      */
     @Override
     public void flush() {
+        log.info("Flush pending OTEL data.");
+        long start = System.nanoTime();
         openTelemetry.flush();
+        log.info("Flushing process took {} ms", (System.nanoTime() - start) / 1000000);
     }
 
     /**
@@ -333,13 +340,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         sampler = new DynamicSampler(sampleProbability);
         multiSpanExporter = DynamicMultiSpanExporter.create();
         // @formatter:off
-        Resource tracerProviderAttributes = Resource.create(Attributes.of(
-                ResourceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName(),
-                AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion(),
-                ResourceAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion(),
-                ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java",
-                ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"
-        ));
+        Resource tracerProviderAttributes = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters()
+                .getTracing()
+                .getServiceName(), AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion(), ResourceAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion(), ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java", ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"));
         // @formatter:on
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)
                 .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())

@@ -70,8 +70,7 @@ export default function ServiceStateDialog({ visible, onHide, serviceStateMap })
       onHide={onHide}
       footer={
         <div>
-          <Button label="Go Back" onClick={onHide} className="p-button-secondary" />
-          <Button label="Accept" onClick={onHide} className="p-button-primary" />
+          <Button label="Close" onClick={onHide} className="p-button-secondary" />
         </div>
       }
     >

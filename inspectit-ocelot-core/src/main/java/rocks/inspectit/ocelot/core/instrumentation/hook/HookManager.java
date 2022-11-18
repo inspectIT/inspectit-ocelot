@@ -1,8 +1,9 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
+import io.opencensus.common.Scope;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import rocks.inspectit.ocelot.bootstrap.instrumentation.IHookManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IMethodHook;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopHookManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopMethodHook;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
@@ -19,7 +21,9 @@ import rocks.inspectit.ocelot.core.utils.CoreUtils;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implementation for {@link IHookManager}.
@@ -29,6 +33,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class HookManager {
+
+    /**
+     * Component named used for self monitoring metrics
+     */
+    private static final String LAZY_LOADING_HOOK_COMPONENT_NAME = "hookmanager-lazy-hooking";
 
     /**
      * Thread local flag for marking the current thread that it is currently in the execution/scope of agent actions.
@@ -46,6 +55,9 @@ public class HookManager {
     @Autowired
     private MethodHookGenerator hookGenerator;
 
+    @Autowired
+    private InspectitEnvironment env;
+
     /**
      * Holds the currently active hooks.
      * The keys of the map are Classes for which hooks are present.
@@ -57,8 +69,31 @@ public class HookManager {
      */
     private volatile Map<Class<?>, Map<String, MethodHook>> hooks = Collections.emptyMap();
 
+    /**
+     * Flag indicates that lazy loading of hooks is enabled. This is only possible if the configuration value
+     * {@code inspectit.instrumentation.internal.async} is {@code false}.
+     * If lazy hook loading is enabled, hooks will be generated on the fly while an instrumentation method asks for hooks.
+     * Only one attempt for lazy loading hooks will be performed! If no hooks are generated, e.g. due to a missing or invalid
+     * configuration, no further attempts will be performed. Assumption is that updated hook configurations will be
+     * considered during regular asynchronous updates.
+     */
+    private boolean isLazyHookingEnabled;
+
+    /**
+     * Holds the latest lazy loaded hooks.
+     * All lazy loaded hooks will be merged to regular {@link HookManager#hooks} map during next {@link  HookUpdate}.
+     */
+    private final Map<Class<?>, Map<String, MethodHook>> lazyLoadedHooks = new ConcurrentHashMap<>();
+
+    /**
+     * Saves for which classes the hooks were lazy loaded and acts as a lock for all further attempts.
+     * Lazy loading hooks will only be done once per class!
+     */
+    private final Set<Class<?>> lazyHookingPerformed = ConcurrentHashMap.newKeySet();
+
     @PostConstruct
     void init() {
+        isLazyHookingEnabled = !env.getCurrentConfig().getInstrumentation().getInternal().isAsync();
         Instances.hookManager = this::getHook;
     }
 
@@ -79,6 +114,9 @@ public class HookManager {
     IMethodHook getHook(Class<?> clazz, String methodSignature) {
         if (!RECURSION_GATE.get()) {
             Map<String, MethodHook> methodHooks = hooks.get(clazz);
+            if (isLazyHookingEnabled && methodHooks == null) {
+                methodHooks = lazyHookGeneration(clazz);
+            }
             if (methodHooks != null) {
                 MethodHook hook = methodHooks.get(methodSignature);
                 if (hook != null) {
@@ -88,6 +126,56 @@ public class HookManager {
         }
 
         return NoopMethodHook.INSTANCE;
+    }
+
+    /**
+     * Creates {@link  MethodHook}s lazy if hooks are not yet created for an instrumented class.
+     * Lazy loaded hooks are merged to {@link HookManager#hooks} map during next regular {@link HookUpdate}.
+     * This method will only be called during JVM ramp up phase as long as not all classes are loaded.
+     *
+     * @param clazz the name of the class to which the method to query the hook for belongs
+     *
+     * @return the method hooks for the specified class if a valid hook configurations is available, null otherwise
+     */
+    private Map<String, MethodHook> lazyHookGeneration(Class<?> clazz) {
+        if (lazyHookingPerformed.contains(clazz)) {
+            return lazyLoadedHooks.get(clazz);
+        }
+        synchronized (clazz) {
+            try (Scope sm = selfMonitoring.withDurationSelfMonitoring(LAZY_LOADING_HOOK_COMPONENT_NAME)) {
+                Map<MethodDescription, MethodHookConfiguration> hookConfigs = configResolver.getHookConfigurations(clazz);
+
+                HashMap<String, MethodHook> lazyHooks = Maps.newHashMap();
+                hookConfigs.forEach((method, config) -> {
+                    String signature = CoreUtils.getSignature(method);
+                    try {
+                        MethodHook methodHook = hookGenerator.buildHook(clazz, method, config);
+                        lazyHooks.put(signature, methodHook);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Lazy loading hooks for {} of {}.", signature, clazz.getName());
+                        }
+                    } catch (Throwable throwable) {
+                        log.error("Error generating hook for {} of {}. Method will not be hooked.", signature, clazz.getName(), throwable);
+                    }
+                });
+
+                if (!lazyHooks.isEmpty()) {
+                    Map<String, MethodHook> methodHooks = hooks.get(clazz);
+                    if (methodHooks != null) {
+                        // It seems async hooking triggered from InstrumentationTrigger kicked in between
+                        // Drop lazy hooks and go on
+                        return methodHooks;
+                    } else {
+                        lazyLoadedHooks.put(clazz, lazyHooks);
+                        // Lock lazy loading hooks for this class. We only try to lazy hooking once
+                        lazyHookingPerformed.add(clazz);
+                        return lazyHooks;
+                    }
+                }
+                return null;
+
+            }
+        }
     }
 
     /**
@@ -119,21 +207,27 @@ public class HookManager {
          * <p>
          * The structure of the map is the same as for {@link #hooks}.
          */
-        private WeakHashMap<Class<?>, Map<String, MethodHook>> newHooks;
+        private final WeakHashMap<Class<?>, Map<String, MethodHook>> newHooks;
 
         private boolean committed = false;
 
         /**
          * Copies the currently active hooks into a mutable, local state.
-         * The hooks are reset when copied to reenable actions which have been deactivated due to runtime errors.
+         * The hooks are reset when copied to re-enable actions which have been deactivated due to runtime errors.
          */
         private HookUpdate() {
-            try (val sm = selfMonitoring.withDurationSelfMonitoring("hookmanager-copy-existing-hooks")) {
+            try (Scope sm = selfMonitoring.withDurationSelfMonitoring("hookmanager-copy-existing-hooks")) {
+
+                // Merge regular and lazy loaded hooks. Regular hooks take precedence
+                WeakHashMap<Class<?>, Map<String, MethodHook>> mergedHooks = Stream.of(hooks, lazyLoadedHooks)
+                        .flatMap(map -> map.entrySet().stream())
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1, WeakHashMap::new));
+
                 newHooks = new WeakHashMap<>();
-                for (Map.Entry<Class<?>, Map<String, MethodHook>> existingMethodHooks : hooks.entrySet()) {
+                for (Map.Entry<Class<?>, Map<String, MethodHook>> existingMethodHooks : mergedHooks.entrySet()) {
                     HashMap<String, MethodHook> newMethodHooks = new HashMap<>();
                     existingMethodHooks.getValue()
-                            .forEach((signature, hook) -> newMethodHooks.put(signature, hook.getResettedCopy()));
+                            .forEach((signature, hook) -> newMethodHooks.put(signature, hook.getResetCopy()));
                     newHooks.put(existingMethodHooks.getKey(), newMethodHooks);
                 }
             }
@@ -146,7 +240,7 @@ public class HookManager {
          */
         public void updateHooksForClass(Class<?> clazz) {
             ensureNotCommitted();
-            try (val sm = selfMonitoring.withDurationSelfMonitoring("hookmanager-update-class")) {
+            try (Scope sm = selfMonitoring.withDurationSelfMonitoring("hookmanager-update-class")) {
                 Map<MethodDescription, MethodHookConfiguration> hookConfigs = configResolver.getHookConfigurations(clazz);
                 removeObsoleteHooks(clazz, hookConfigs.keySet());
                 addOrReplaceHooks(clazz, hookConfigs);
@@ -161,6 +255,14 @@ public class HookManager {
         public void commitUpdate() {
             ensureNotCommitted();
             hooks = newHooks;
+            // Remove all updated hooks from lazy loaded map
+            if (lazyLoadedHooks.size() > 0) {
+                lazyLoadedHooks.forEach((k, v) -> {
+                    if (hooks.containsKey(k)) {
+                        lazyLoadedHooks.remove(k);
+                    }
+                });
+            }
             committed = true;
         }
 
