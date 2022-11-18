@@ -154,7 +154,7 @@ class StatusTable extends React.Component {
       attributes,
       attributes: { service },
     } = rowData;
-    const { agentVersion } = metaInformation;
+
     let { logAvailable, agentCommandsEnabled, serviceStatesAvailable, serviceStates } = this.resolveServiceAvailability(metaInformation);
     let name = '-';
     let agentIdElement;
@@ -302,10 +302,8 @@ class StatusTable extends React.Component {
   agentHealthTemplate = (rowData) => {
     const { onShowDownloadDialog } = this.props;
     const { health, metaInformation } = rowData;
-    const { agentVersion } = metaInformation;
 
-    let { agentCommandsEnabled, serviceStatesAvailable, supportArchiveAvailable, serviceStates } =
-      this.resolveServiceAvailability(metaInformation);
+    let { agentCommandsEnabled, supportArchiveAvailable } = this.resolveServiceAvailability(metaInformation);
 
     let healthInfo;
     let iconClass;
