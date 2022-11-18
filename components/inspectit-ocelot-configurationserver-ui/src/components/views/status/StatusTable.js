@@ -123,9 +123,9 @@ class StatusTable extends React.Component {
       // logs are available at version 1.15+
       logAvailable = agentVersionNumber > 11500;
       // support archive is available at version 2.2.0+
-      supportArchiveAvailable = agentVersionNumber >= 22000;
+      supportArchiveAvailable = agentVersionNumber >= 20200;
       // service states are available at version 2.2.0+
-      serviceStatesAvailable = agentVersionNumber >= 22000;
+      serviceStatesAvailable = agentVersionNumber >= 20200;
     }
 
     if (serviceStatesAvailable) {
@@ -355,7 +355,7 @@ class StatusTable extends React.Component {
               tooltip={
                 agentCommandsEnabled && supportArchiveAvailable
                   ? 'Download Support Archive'
-                  : "<b>Support archive not available!</b>\nMake sure to enable 'agent-commands' in the config and configure the URL for the agent commands. \n This feature is only available for agent versions 2.2.0 and above."
+                  : "<b>Support archive not available!</b>\nMake sure to enable 'agent-commands' in the config and configure the URL for the agent commands. \n This feature is only available for agent versions 1.15.0 and above."
               }
               tooltipOptions={{ showDelay: 500 }}
               disabled={!agentCommandsEnabled}
