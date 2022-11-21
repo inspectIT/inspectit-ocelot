@@ -12,18 +12,18 @@
 const users = [];
 
 const siteConfig = {
-  title: 'inspectIT Ocelot Documentation', // Title for your website.
-  tagline: 'Documentation of the inspectIT Ocelot Java Agent',
-  url: 'https://inspectit.github.io', // Your website URL
-  baseUrl: process.env.IS_LOCAL ? '/inspectit-ocelot/docs/next/doc1' : '/inspectit-ocelot/',
+  title: "inspectIT Ocelot Documentation", // Title for your website.
+  tagline: "Documentation of the inspectIT Ocelot Java Agent",
+  url: "https://inspectit.github.io", // Your website URL
+  baseUrl: "/inspectit-ocelot/",
   //baseUrl: '/inspectit-ocelot/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
   //   baseUrl: '/test-site/',
 
   // Used for publishing and more
-  projectName: 'inspectit-ocelot',
-  organizationName: 'inspectIT',
+  projectName: "inspectit-ocelot",
+  organizationName: "inspectIT",
   // For top-level user or org sites, the organization is still the same.
   // e.g., for the https://JoelMarcey.github.io site, it would be set like...
   //   organizationName: 'JoelMarcey'
@@ -31,21 +31,24 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     { href: "https://inspectit.rocks/", label: "inspectIT Ocelot Website" },
-    { href: "https://github.com/inspectIT/inspectit-ocelot", label: "GitHub Repository" },
+    {
+      href: "https://github.com/inspectIT/inspectit-ocelot",
+      label: "GitHub Repository",
+    },
   ],
 
   // If you have users set above, you add it here:
   users,
 
   /* path to images for header/footer */
-  headerIcon: 'img/ocelot_head_sil_logo.svg',
-  footerIcon: 'img/ocelot_head_sil_logo.svg',
-  favicon: 'img/favicon.ico',
+  headerIcon: "img/ocelot_head_sil_logo.svg",
+  footerIcon: "img/ocelot_head_sil_logo.svg",
+  favicon: "img/favicon.ico",
 
   /* Colors for website */
   colors: {
-    primaryColor: '#de6f00',
-    secondaryColor: '#126e14',
+    primaryColor: "#de6f00",
+    secondaryColor: "#126e14",
   },
 
   /* Custom fonts for website */
@@ -66,20 +69,20 @@ const siteConfig = {
   copyright: `Copyright © ${new Date().getFullYear()} Novatec Consulting GmbH`,
 
   highlight: {
-    theme: 'atom-one-dark',
+    theme: "atom-one-dark",
   },
 
   // Add custom scripts here that would be placed in <script> tags.
-  scripts: ['https://buttons.github.io/buttons.js'],
+  scripts: ["https://buttons.github.io/buttons.js"],
 
   // On page navigation for the current documentation page.
-  onPageNav: 'separate',
+  onPageNav: "separate",
   // No .html extensions for paths.
   cleanUrl: true,
 
   // Open Graph and Twitter card images.
-  ogImage: 'img/undraw_online.svg',
-  twitterImage: 'img/undraw_tweetstorm.svg',
+  ogImage: "img/undraw_online.svg",
+  twitterImage: "img/undraw_tweetstorm.svg",
 
   // Show documentation's last contributor's name.
   enableUpdateBy: true,
@@ -98,21 +101,22 @@ const siteConfig = {
 
   docsSideNavCollapsible: true,
 
-  editUrl: "https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/",
+  editUrl:
+    "https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/",
 
   algolia: {
-    apiKey: 'd499024131bf8d92e6d469a6c14f4798',
-    appId: 'P7JV0ZK66K',
-    indexName: 'inspectit-ocelot',
+    apiKey: "d499024131bf8d92e6d469a6c14f4798",
+    appId: "P7JV0ZK66K",
+    indexName: "inspectit-ocelot",
     algoliaOptions: {
-      facetFilters: ["version:VERSION"]
-    }
+      facetFilters: ["version:VERSION"],
+    },
   },
 
   markdownPlugins: [
     // Highlight admonitions.
-    require('remarkable-admonitions')({ icon: 'svg-inline' })
-  ]
+    require("remarkable-admonitions")({ icon: "svg-inline" }),
+  ],
 };
 
 module.exports = siteConfig;

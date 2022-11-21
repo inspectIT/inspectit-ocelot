@@ -1,14 +1,24 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en-US">
   <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=docs/doc1">
+    <meta charset="UTF-8" />
+    <meta http-equiv="refresh" content="0; url=docs/doc1" />
     <script type="text/javascript">
-      window.location.href = 'docs/next/doc1';
+      // When the process is local we want to get the '/inspectit-ocelot/docs/next/doc1' to see the changes we just did.
+      // If we wouldn't do that the URL on startup would be '/inspectit-ocelot/docs/doc1' showing us the documentation
+      // from the latest release
+      let re = new RegExp("(inspectit.github.io)|(www.inspectit.rocks)");
+      console.log("OUTPUT: ", re.test(window.location.href));
+      if (re.test(window.location.href)) {
+        window.location.href = "docs/doc1";
+      } else {
+        window.location.href = "docs/next/doc1";
+      }
     </script>
     <title>Your Site Title Here</title>
   </head>
   <body>
-    If you are not redirected automatically, follow this <a href="docs/doc1">link</a>.
+    If you are not redirected automatically, follow this
+    <a href="docs/doc1">link</a>.
   </body>
 </html>
