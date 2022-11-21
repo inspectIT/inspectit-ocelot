@@ -9,3 +9,10 @@ website/translated_docs
 website/build/
 website/node_modules
 website/i18n/*
+
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

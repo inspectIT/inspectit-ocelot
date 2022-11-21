@@ -23,11 +23,17 @@ $ yarn
 $ yarn start
 ```
 
-2.1 Access the preview version:
+2.1 Access the documentation of the latest release version:
+
+You can access the documentation of the latest release at [http://localhost:3000/inspectit-ocelot/docs/doc1](http://localhost:3000/inspectit-ocelot/docs/doc1).
+
+2.1 Access the preview version (default for local development):
 
 You can access the preview version of the documentation at
 [http://localhost:3000/inspectit-ocelot/docs/next/doc1](http://localhost:3000/inspectit-ocelot/docs/next/doc1)
-(note the **/next/** sub-path).
+(note the **/next/** sub-path). 
+
+This is the default for local deveopment.
 
 ## Directory Structure
 
