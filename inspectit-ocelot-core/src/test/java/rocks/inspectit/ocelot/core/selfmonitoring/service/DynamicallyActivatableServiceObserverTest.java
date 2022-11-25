@@ -66,7 +66,7 @@ public class DynamicallyActivatableServiceObserverTest {
         @Test
         public void testAsJson() {
             setupTest();
-            String expectedJson = "{\"AgentCommandService\":false,\"LogPreloader\":false,\"PrometheusExporterService\":false,\"JaegerExporterService\":false}";
+            String expectedJson = "{\"LoggingMetricExporterService\":false,\"MemoryMetricsRecorder\":true,\"HttpConfigurationPoller\":true,\"OtlpTraceExporterService\":false,\"DiskMetricsRecorder\":true,\"ActionMetricsRecorder\":false,\"PrometheusExporterService\":false,\"LoggingTraceExporterService\":false,\"GCMetricsRecorder\":true,\"InfluxExporterService\":false,\"OtlpMetricsExporterService\":false,\"JmxMetricsRecorder\":false,\"JaegerExporterService\":false,\"ProcessorMetricsRecorder\":true,\"ThreadMetricsRecorder\":true,\"AgentCommandService\":false,\"ConfigurationDirectoriesPoller\":false,\"LogPreloader\":false,\"ClassLoaderMetricsRecorder\":true,\"ZipkinExporterService\":false}";
 
             assertThat(serviceObserver.asJson()).isEqualTo(expectedJson);
         }
