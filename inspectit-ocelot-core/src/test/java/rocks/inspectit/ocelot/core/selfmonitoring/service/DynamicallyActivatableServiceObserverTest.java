@@ -62,5 +62,13 @@ public class DynamicallyActivatableServiceObserverTest {
             assertThat(resultMap.containsKey(jaegerExpoService.getName()));
             assertThat(resultMap.get(jaegerExpoService.getName())).isEqualTo(jaegerExpoService.isEnabled());
         }
+
+        @Test
+        public void testAsJson() {
+            setupTest();
+            String expectedJson = "{\"AgentCommandService\":false,\"LogPreloader\":false,\"PrometheusExporterService\":false,\"JaegerExporterService\":false}";
+
+            assertThat(serviceObserver.asJson()).isEqualTo(expectedJson);
+        }
     }
 }
