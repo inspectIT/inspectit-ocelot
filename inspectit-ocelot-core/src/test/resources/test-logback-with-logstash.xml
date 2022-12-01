@@ -1,0 +1,21 @@
+<configuration>
+    <appender name="file" class="ch.qos.logback.core.FileAppender">
+        <file>test-agent.log</file>
+        <immediateFlush>true</immediateFlush>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <pattern>
+                        { "loglevel": "%level", "datetime": "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}", "type":
+                        "message", "loggerName": "%logger","thread": "%thread","message": "%message", "exception":
+                        "%exception" }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+    <root level="debug">
+        <appender-ref ref="file"/>
+    </root>
+</configuration>
+
