@@ -1,12 +1,15 @@
 package rocks.inspectit.ocelot.config.model.exporters.metrics;
 
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.time.DurationMin;
+import rocks.inspectit.ocelot.config.model.exporters.CompressionMethod;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 
 import java.time.Duration;
+import java.util.Map;
 
 /**
  * Settings for {@link rocks.inspectit.ocelot.core.exporter.OtlpMetricsExporterService}
@@ -34,4 +37,26 @@ public class OtlpMetricsExporterSettings {
     @DurationMin(millis = 1)
     private Duration exportInterval;
 
+    /**
+     * The time period over which metrics should be aggregated.
+     * Valid values are CUMULATIVE and DELTA
+     */
+    private AggregationTemporality preferredTemporality;
+
+    /**
+     * Key-value pairs to be used as headers associated with gRPC or HTTP requests.
+     */
+    private Map<String, String> headers;
+
+
+    /**
+     * The compression method.
+     */
+    private CompressionMethod compression;
+
+    /**
+     * Maximum time the OTLP exporter will wait for each batch export.
+     */
+    @DurationMin(millis = 1)
+    private Duration timeout;
 }

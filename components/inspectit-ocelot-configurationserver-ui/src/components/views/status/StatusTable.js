@@ -102,26 +102,60 @@ class StatusTable extends React.Component {
   state = {
     configurationValue: '',
     logValue: '',
+    showServiceStateDialog: false,
+  };
+
+  resolveServiceAvailability = (metaInformation) => {
+    const { agentVersion } = metaInformation;
+    const agentVersionTokens = agentVersion.split('.');
+    let logAvailable = false;
+    let agentCommandsEnabled = true;
+    let serviceStatesAvailable = false;
+    let supportArchiveAvailable = false;
+    let serviceStates = '{}';
+
+    // in case of snapshot version, assume we are up to date
+    if (agentVersion == 'SNAPSHOT') {
+      logAvailable = agentCommandsEnabled = serviceStatesAvailable = supportArchiveAvailable = true;
+    } else if (agentVersionTokens.length === 2 || agentVersionTokens.length === 3) {
+      const agentVersionNumber =
+        agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length === 3 ? agentVersionTokens[2] * 1 : 0);
+      // logs are available at version 1.15+
+      logAvailable = agentVersionNumber > 11500;
+      // support archive is available at version 2.2.0+
+      supportArchiveAvailable = agentVersionNumber >= 20200;
+      // service states are available at version 2.2.0+
+      serviceStatesAvailable = agentVersionNumber >= 20200;
+    }
+
+    if (serviceStatesAvailable) {
+      try {
+        serviceStates = JSON.parse(metaInformation.serviceStates);
+        logAvailable = serviceStates.LogPreloader;
+        agentCommandsEnabled = serviceStates.AgentCommandService;
+        supportArchiveAvailable = agentCommandsEnabled;
+      } catch (e) {
+        //ignore
+      }
+    }
+    return {
+      logAvailable: logAvailable,
+      agentCommandsEnabled: agentCommandsEnabled,
+      serviceStatesAvailable: serviceStatesAvailable,
+      supportArchiveAvailable: supportArchiveAvailable,
+      serviceStates: serviceStates,
+    };
   };
 
   nameTemplate = (rowData) => {
-    const { onShowDownloadDialog } = this.props;
+    const { onShowDownloadDialog, onShowServiceStateDialog } = this.props;
     const {
       metaInformation,
       attributes,
       attributes: { service },
     } = rowData;
-    const { agentVersion } = metaInformation;
 
-    const agentVersionTokens = agentVersion.split('.');
-    let logAvailable = false;
-    let agentCommandsEnabled = false;
-    if (agentVersionTokens.length == 2 || agentVersionTokens.length == 3) {
-      const agentVersionNumber =
-        agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length == 3 ? agentVersionTokens[2] * 1 : 0);
-      logAvailable = agentVersionNumber > 11500;
-    }
-
+    let { logAvailable, agentCommandsEnabled, serviceStatesAvailable, serviceStates } = this.resolveServiceAvailability(metaInformation);
     let name = '-';
     let agentIdElement;
     let agentId = null;
@@ -131,11 +165,8 @@ class StatusTable extends React.Component {
       }
       agentId = metaInformation.agentId;
       agentIdElement = <span style={{ color: 'gray' }}>({agentId})</span>;
-
-      let settingStates = JSON.parse(metaInformation.settingStates);
-      logAvailable = settingStates.LogPreloader;
-      agentCommandsEnabled = settingStates.AgentCommandService;
     }
+
     return (
       <div className="this">
         <style jsx>{`
@@ -163,22 +194,54 @@ class StatusTable extends React.Component {
             border-color: #ddd;
           }
 
+          .this :global(.service-state-button) {
+            width: 1.2rem;
+            height: 1.2rem;
+            position: absolute;
+            right: 3rem;
+            top: 0;
+            background: #ddd;
+            border-color: #ddd;
+          }
+
           .this :global(.badge) {
             width: 1.2rem;
             height: 1.2rem;
+            position: absolute;
+            right: 4.5rem;
+            top: 0;
             background: #007ad9;
             border-radius: 25%;
             display: inline-flex;
             justify-content: center;
             color: white;
           }
+
+          .this :global(.might-overflow) {
+            max-width: 17.8rem;
+            display: inline-block;
+            white-space: normal;
+            overflow: visible;
+            overflow-wrap: break-word;
+            text-overflow: unset;
+          }
         `}</style>
-        {name} {agentIdElement}{' '}
+        <span className="might-overflow">
+          {name} {agentIdElement}
+        </span>
         {rowData.count > 1 ? (
           <span className="badge">
             <b>{rowData.count}</b>
           </span>
         ) : null}
+        <Button
+          className="service-state-button"
+          icon="pi pi-sliders-h"
+          onClick={() => onShowServiceStateDialog(serviceStates)}
+          tooltip={serviceStatesAvailable ? 'Service States' : 'Service States are available for agent versions 2.2.0 and above'}
+          tooltipOptions={{ showDelay: 500 }}
+          disabled={!serviceStatesAvailable}
+        />
         <Button
           className="config-info-button"
           icon="pi pi-cog"
@@ -193,13 +256,19 @@ class StatusTable extends React.Component {
           tooltip={
             logAvailable && agentCommandsEnabled
               ? 'Show Logs'
-              : "Please enable 'log-preloading' and 'agent-commands' in the config! Make sure to pass the right url for the agent commands!"
+              : "<b>Logs not available!</b>\nMake sure to enable 'log-preloading' and 'agent-commands' in the config, and configure the URL for the agent commands.\nThis feature is only available for agent versions 1.15.0 and higher"
           }
           tooltipOptions={{ showDelay: 500 }}
           disabled={!logAvailable || !agentCommandsEnabled}
         />
       </div>
     );
+  };
+
+  setServiceStateDialogShown = (showDialog) => {
+    this.setState({
+      showServiceStateDialog: showDialog,
+    });
   };
 
   iconTemplate = (rowData) => {
@@ -234,8 +303,7 @@ class StatusTable extends React.Component {
     const { onShowDownloadDialog } = this.props;
     const { health, metaInformation } = rowData;
 
-    let settingStates = JSON.parse(metaInformation.settingStates);
-    let agentCommandsEnabled = settingStates.AgentCommandService;
+    let { agentCommandsEnabled, supportArchiveAvailable } = this.resolveServiceAvailability(metaInformation);
 
     let healthInfo;
     let iconClass;
@@ -285,9 +353,9 @@ class StatusTable extends React.Component {
               icon="pi pi-cloud-download"
               onClick={() => onShowDownloadDialog(metaInformation.agentId, metaInformation.agentVersion, 'archive')}
               tooltip={
-                agentCommandsEnabled
+                agentCommandsEnabled && supportArchiveAvailable
                   ? 'Download Support Archive'
-                  : "Make sure to enabled 'agent-commands' in the config and set the right URL!"
+                  : "<b>Support archive not available!</b>\nMake sure to enable 'agent-commands' in the config and configure the URL for the agent commands. \n This feature is only available for agent versions 1.15.0 and above."
               }
               tooltipOptions={{ showDelay: 500 }}
               disabled={!agentCommandsEnabled}

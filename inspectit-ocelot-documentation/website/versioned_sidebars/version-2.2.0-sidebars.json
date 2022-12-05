@@ -1,0 +1,64 @@
+{
+  "version-2.2.0-docs": {
+    "Getting Started": [
+      "version-2.2.0-doc1",
+      "version-2.2.0-getting-started/quick-start",
+      "version-2.2.0-getting-started/docker-examples",
+      "version-2.2.0-getting-started/installation"
+    ],
+    "Configuration": [
+      "version-2.2.0-configuration/configuration-sources",
+      "version-2.2.0-configuration/external-configuration-sources",
+      "version-2.2.0-configuration/logging-configuration",
+      "version-2.2.0-configuration/open-census-configuration",
+      "version-2.2.0-configuration/plugin-configuration",
+      "version-2.2.0-configuration/agent-command-configuration"
+    ],
+    "Metrics": [
+      "version-2.2.0-metrics/metrics",
+      "version-2.2.0-metrics/metric-recorders",
+      "version-2.2.0-metrics/metric-exporters",
+      "version-2.2.0-metrics/common-tags",
+      "version-2.2.0-metrics/custom-metrics",
+      "version-2.2.0-metrics/self-monitoring"
+    ],
+    "Tracing": [
+      "version-2.2.0-tracing/tracing",
+      "version-2.2.0-tracing/trace-exporters",
+      "version-2.2.0-tracing/log-correlation",
+      "version-2.2.0-tracing/privacy",
+      "version-2.2.0-tracing/tracing-self-monitoring"
+    ],
+    "Instrumentation": [
+      "version-2.2.0-instrumentation/instrumentation",
+      "version-2.2.0-instrumentation/scopes",
+      "version-2.2.0-instrumentation/rules",
+      "version-2.2.0-instrumentation/code-style",
+      "version-2.2.0-instrumentation/special-sensors",
+      "version-2.2.0-instrumentation/process"
+    ],
+    "End User Monitoring": [
+      "version-2.2.0-enduser-monitoring/enduser-monitoring-server",
+      "version-2.2.0-enduser-monitoring/eum-server-setup",
+      "version-2.2.0-enduser-monitoring/eum-server-configuration",
+      "version-2.2.0-enduser-monitoring/install-eum-agent"
+    ],
+    "Configuration Server": [
+      "version-2.2.0-config-server/overview",
+      "version-2.2.0-config-server/cs-configuration",
+      "version-2.2.0-config-server/managing-configurations",
+      "version-2.2.0-config-server/configuration-files-staging",
+      "version-2.2.0-config-server/agent-mappings",
+      "version-2.2.0-config-server/scope-wizard",
+      "version-2.2.0-config-server/class-browser",
+      "version-2.2.0-config-server/user-authentication",
+      "version-2.2.0-config-server/config-docs",
+      "version-2.2.0-config-server/log-config",
+      "version-2.2.0-config-server/syntax-highlighting",
+      "version-2.2.0-config-server/status-table-view"
+    ],
+    "Breaking Changes": [
+      "version-2.2.0-breaking-changes/Breaking Changes"
+    ]
+  }
+}

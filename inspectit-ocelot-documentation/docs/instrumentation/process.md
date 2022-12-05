@@ -44,3 +44,21 @@ inspectit:
     internal:
       use-inspectit-protection-domain: false
 ```
+
+## Synchronous instrumentation (BETA!)
+:::caution
+Enabling synchronous instrumentation in Java 8 environments will result in significant boot time performance degradation!
+See See: <a href="https://bugs.openjdk.java.net/browse/JDK-7018422">JDK-7018422</a>
+:::
+
+By default, all instrumentation is performed purely asynchronously in the background. There may be situations where this is not appropriate and a class must be instrumented directly at the first load, 
+e.g. in batch processes.
+
+InspectIT can be configured to instrumented classes on first class load by updating the following configuration:
+```yaml
+inspectit:
+  instrumentation:
+    internal:
+      async: false
+```
+

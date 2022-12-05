@@ -7,6 +7,7 @@ import StatusFooterToolbar from './StatusFooterToolbar';
 import axios from '../../../lib/axios-api';
 import { isEqual, map } from 'lodash';
 import DownloadDialogue from '../dialogs/DownloadDialogue';
+import ServiceStateDialog from '../dialogs/ServiceStateDialog';
 import { downloadArchiveFromJson } from '../../../functions/export-selection.function';
 
 /**
@@ -23,6 +24,8 @@ class StatusView extends React.Component {
       useServiceMerge: true,
       error: false,
       agentsToShow: props.agents,
+      isServiceStateDialogShown: false,
+      serviceStates: '{}',
       isDownloadDialogShown: false,
       attributes: '',
       contentValue: '',
@@ -233,7 +236,12 @@ class StatusView extends React.Component {
             />
           </div>
           <div className="data-table">
-            <StatusTable data={agentsToShow} filter={filter} onShowDownloadDialog={this.showDownloadDialog} />
+            <StatusTable
+              data={agentsToShow}
+              filter={filter}
+              onShowDownloadDialog={this.showDownloadDialog}
+              onShowServiceStateDialog={this.showServiceStateDialog}
+            />
           </div>
           <div>
             <StatusFooterToolbar fullData={agents} filteredData={agentsToShow} />
@@ -246,6 +254,11 @@ class StatusView extends React.Component {
             contentValue={contentValue}
             contentType={contentType}
             contextName={'Agent ' + agentId}
+          />
+          <ServiceStateDialog
+            visible={this.state.isServiceStateDialogShown}
+            onHide={() => this.setServiceStateDialogShown(false)}
+            serviceStateMap={this.state.serviceStates}
           />
         </div>
       </>
@@ -268,6 +281,25 @@ class StatusView extends React.Component {
     }
   };
 
+  /*
+   * SERVICE STATE DIALOG
+   */
+  setServiceStateDialogShown = (showDialog) => {
+    this.setState({
+      isServiceStateDialogShown: showDialog,
+    });
+  };
+
+  showServiceStateDialog = (serviceStates) => {
+    this.setServiceStateDialogShown(true);
+    this.setState({
+      serviceStates: serviceStates,
+    });
+  };
+
+  /*
+   * DOWNLOAD DIALOG
+   */
   setDownloadDialogShown = (showDialog) => {
     this.setState({
       isDownloadDialogShown: showDialog,
