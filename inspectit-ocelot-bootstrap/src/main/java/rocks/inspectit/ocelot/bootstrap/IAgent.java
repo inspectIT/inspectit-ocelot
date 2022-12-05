@@ -42,5 +42,4 @@ public interface IAgent {
      * @return string representing when the date the agent has been built
      */
     String getBuildDate();
-
 }

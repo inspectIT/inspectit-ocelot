@@ -1,12 +1,14 @@
 package rocks.inspectit.ocelot.core.instrumentation.event;
 
+
 import lombok.Getter;
 import net.bytebuddy.description.type.TypeDescription;
 import org.springframework.context.ApplicationEvent;
+import rocks.inspectit.ocelot.core.instrumentation.AsyncClassTransformer;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 
 /**
- * Fired by a {@link rocks.inspectit.ocelot.core.instrumentation.transformer.ClassTransformer} whenever a class has been instrumented or deinstrumented.
+ * Fired by the {@link AsyncClassTransformer} whenever a class has been instrumented or deinstrumented.
  * Note that this event is executed at the end of the {@link java.lang.instrument.ClassFileTransformer}.
  * This means that performed instrumentation is not active at the time this event is fired.
  */

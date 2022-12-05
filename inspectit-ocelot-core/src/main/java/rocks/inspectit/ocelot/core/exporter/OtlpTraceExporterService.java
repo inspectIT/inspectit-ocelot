@@ -1,9 +1,7 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
-import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporterBuilder;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
-import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporterBuilder;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +16,6 @@ import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Service for {@link io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter}/{@link io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter}.
@@ -65,26 +62,11 @@ public class OtlpTraceExporterService extends DynamicallyActivatableService {
 
             switch (otlp.getProtocol()) {
                 case GRPC: {
-                    OtlpGrpcSpanExporterBuilder otlpGrpcSpanExporterBuilder =OtlpGrpcSpanExporter.builder().setEndpoint(otlp.getEndpoint())
-                            .setCompression(otlp.getCompression().toString())
-                            .setTimeout(otlp.getTimeout());
-                    if(otlp.getHeaders() != null){
-                        for (Map.Entry<String, String> headerEntry : otlp.getHeaders().entrySet()) {
-                            otlpGrpcSpanExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
-                        }
-                    }
-                    spanExporter = otlpGrpcSpanExporterBuilder.build();
+                    spanExporter = OtlpGrpcSpanExporter.builder().setEndpoint(otlp.getEndpoint()).build();
                     break;
                 }
                 case HTTP_PROTOBUF: {
-                    OtlpHttpSpanExporterBuilder otlpHttpSpanExporterBuilder =OtlpHttpSpanExporter.builder().setEndpoint(otlp.getEndpoint()).setCompression(otlp.getCompression().toString())
-                            .setTimeout(otlp.getTimeout());
-                    if(otlp.getHeaders() != null){
-                        for (Map.Entry<String, String> headerEntry : otlp.getHeaders().entrySet()) {
-                            otlpHttpSpanExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
-                        }
-                    }
-                    spanExporter = otlpHttpSpanExporterBuilder.build();
+                    spanExporter = OtlpHttpSpanExporter.builder().setEndpoint(otlp.getEndpoint()).build();
                     break;
                 }
             }

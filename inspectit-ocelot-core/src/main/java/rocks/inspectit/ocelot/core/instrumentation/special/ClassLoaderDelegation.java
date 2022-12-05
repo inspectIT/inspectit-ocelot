@@ -7,25 +7,20 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.ClassLoaderDelegationMarker;
 import rocks.inspectit.ocelot.config.model.instrumentation.SpecialSensorSettings;
 import rocks.inspectit.ocelot.core.instrumentation.InstrumentationTriggerer;
-import rocks.inspectit.ocelot.core.instrumentation.TypeDescriptionWithClassLoader;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
-import rocks.inspectit.ocelot.core.instrumentation.event.IClassDiscoveryListener;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 /**
- * This component performs an instrumentation of {@link ClassLoader}s.
+ * This component performs an instrumentation of {@link ClassLoader}s if.
  * This is required to make our bootstrap classes accessible in custom module systems, such as OSGi.
  * <p>
  * The instrumentation is triggered through the {@link InstrumentationTriggerer},
@@ -34,7 +29,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  */
 @Component
 @Slf4j
-public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryListener {
+public class ClassLoaderDelegation implements SpecialSensor {
 
     static {
         //ensure that this bootstrap class is loaded BEFORE any classloader is instrumented
@@ -46,36 +41,36 @@ public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryList
      * We never deinstrument a classloader after we instrument it, even if {@link SpecialSensorSettings#isClassLoaderDelegation()}
      * is changed to false.
      */
-    private final InstrumentedClassLoaderCache instrumentedClassLoaderCache = new InstrumentedClassLoaderCache();
+    private final Set<Class<?>> instrumentedClassloaderClasses = Collections.newSetFromMap(
+            CacheBuilder.newBuilder().weakKeys().<Class<?>, Boolean>build().asMap());
 
-    private final ElementMatcher<MethodDescription> LOAD_CLASS_MATCHER = named("loadClass").and(takesArguments(String.class, boolean.class).or(takesArguments(String.class)));
+    private final ElementMatcher<MethodDescription> LOAD_CLASS_MATCHER =
+            named("loadClass").and(
+                    takesArguments(String.class, boolean.class)
+                            .or(takesArguments(String.class)));
 
-    private final ElementMatcher<TypeDescription> CLASS_LOADER_MATCHER = isSubTypeOf(ClassLoader.class).and(not(nameStartsWith("java.")))
-            .and(declaresMethod(LOAD_CLASS_MATCHER));
+    private final ElementMatcher<TypeDescription> CLASS_LOADER_MATCHER =
+            isSubTypeOf(ClassLoader.class)
+                    .and(not(nameStartsWith("java.")))
+                    .and(declaresMethod(LOAD_CLASS_MATCHER));
 
     @Override
-    public void onNewClassesDiscovered(Set<Class<?>> newClasses) {
-        instrumentedClassLoaderCache.onNewClassesDiscovered(newClasses);
-    }
-
-    @Override
-    public boolean shouldInstrument(TypeDescriptionWithClassLoader typeWithLoader, InstrumentationConfiguration settings) {
-
-        boolean isClassLoader = CLASS_LOADER_MATCHER.matches(typeWithLoader.getType());
+    public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
+        boolean isClassLoader = CLASS_LOADER_MATCHER.matches(TypeDescription.ForLoadedType.of(clazz));
         boolean cldEnabled = settings.getSource().getSpecial().isClassLoaderDelegation();
         //we never de instrument a classloader we previously instrumented
-        return instrumentedClassLoaderCache.contains(typeWithLoader) || (isClassLoader && cldEnabled);
+        return instrumentedClassloaderClasses.contains(clazz) || (isClassLoader && cldEnabled);
     }
 
     @Override
-    public boolean requiresInstrumentationChange(TypeDescriptionWithClassLoader typeWithLoader, InstrumentationConfiguration first, InstrumentationConfiguration second) {
+    public boolean requiresInstrumentationChange(Class<?> clazz, InstrumentationConfiguration first, InstrumentationConfiguration second) {
         return false;
     }
 
     @Override
-    public DynamicType.Builder instrument(TypeDescriptionWithClassLoader typeWithLoader, InstrumentationConfiguration settings, DynamicType.Builder builder) {
+    public DynamicType.Builder instrument(Class<?> clazz, InstrumentationConfiguration settings, DynamicType.Builder builder) {
         //remember that this classloader was instrumented
-        instrumentedClassLoaderCache.add(typeWithLoader);
+        instrumentedClassloaderClasses.add(clazz);
         return builder.visit(Advice.to(ClassloaderDelegationAdvice.class).on(LOAD_CLASS_MATCHER));
     }
 
@@ -102,8 +97,8 @@ public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryList
             getClassLoaderClassesRequiringRetransformation(superClass, result);
         }
 
-        TypeDescriptionWithClassLoader typeWithLoader = TypeDescriptionWithClassLoader.of(classLoaderClass);
-        if (!instrumentedClassLoaderCache.contains(typeWithLoader) && CLASS_LOADER_MATCHER.matches(typeWithLoader.getType())) {
+        TypeDescription desc = TypeDescription.ForLoadedType.of(classLoaderClass);
+        if (!instrumentedClassloaderClasses.contains(classLoaderClass) && CLASS_LOADER_MATCHER.matches(desc)) {
             ClassLoader loadingClassLoader = classLoaderClass.getClassLoader();
             if (loadingClassLoader != null) {
                 getClassLoaderClassesRequiringRetransformation(loadingClassLoader.getClass(), result);
@@ -146,70 +141,4 @@ public class ClassLoaderDelegation implements SpecialSensor, IClassDiscoveryList
             }
         }
     }
-
-    /**
-     * Utility class to keep track of implemented ClassLoaders.
-     * We need a two-step caching here to support instrumenting ClassLoaders on first load, hence we have no class to cache with weak keys.
-     * This will only happen if async instrumentation is disabled!
-     * If the instrumented ClassLoader is finally loaded, it is moved to a final cache to ensure unloaded ClassLoaders will be removed from cache
-     * and on reload the same ClassLoader will be instrumented again.
-     */
-    @Slf4j
-    private static class InstrumentedClassLoaderCache implements IClassDiscoveryListener {
-
-        /**
-         * Temporary cache to store instrumented ClassLoader class names with the related ClassLoader.
-         * We opted for {@link Set} instead of {@link java.util.Map}, as it is possibly to have different class loaders with the same name, see also https://tomcat.apache.org/tomcat-7.0-doc/class-loader-howto.html.
-         */
-        private final Set<Pair<String, ClassLoader>> instrumentedClassLoadersByName = Collections.newSetFromMap(new ConcurrentHashMap<>());
-
-        /**
-         * Final cache to store weak references of the instrumented ClassLoaders
-         */
-        private final Set<Class<?>> instrumentedClassLoaderClasses = Collections.newSetFromMap(CacheBuilder.newBuilder()
-                .weakKeys()
-                .<Class<?>, Boolean>build()
-                .asMap());
-
-        public boolean contains(TypeDescriptionWithClassLoader typeWithLoader) {
-            return instrumentedClassLoadersByName.contains(toPair(typeWithLoader)) || instrumentedClassLoaderClasses.contains(typeWithLoader.getRelatedClass());
-        }
-
-        public void add(TypeDescriptionWithClassLoader typeWithLoader) {
-            // only possible if async instrumentation is enabled
-            if (typeWithLoader.getRelatedClass() != null) {
-                instrumentedClassLoaderClasses.add(typeWithLoader.getRelatedClass());
-            } else {
-                instrumentedClassLoadersByName.add(toPair(typeWithLoader));
-            }
-        }
-
-        /**
-         * Moves all instrumented ClassLoaders from {@link #instrumentedClassLoadersByName} to {@link #instrumentedClassLoaderClasses}
-         *
-         * @param newClasses the set of newly discovered classes
-         */
-        @Override
-        public void onNewClassesDiscovered(Set<Class<?>> newClasses) {
-            newClasses.forEach(clazz -> {
-                Pair<String, ClassLoader> tmp = Pair.of(clazz.getName(), clazz.getClassLoader());
-                if (instrumentedClassLoadersByName.contains(tmp)) {
-                    instrumentedClassLoaderClasses.add(clazz);
-                    instrumentedClassLoadersByName.remove(tmp);
-                }
-            });
-            if (log.isDebugEnabled()) {
-                if (instrumentedClassLoadersByName.size() > 0) {
-                    log.debug("Pending ClassLoaders to be transferred to final class cache:{}", instrumentedClassLoadersByName.stream()
-                            .map(Pair::getLeft)
-                            .collect(Collectors.joining(", ")));
-                }
-            }
-        }
-
-        private Pair<String, ClassLoader> toPair(TypeDescriptionWithClassLoader typeWithLoader) {
-            return Pair.of(typeWithLoader.getName(), typeWithLoader.getLoader());
-        }
-    }
-
 }

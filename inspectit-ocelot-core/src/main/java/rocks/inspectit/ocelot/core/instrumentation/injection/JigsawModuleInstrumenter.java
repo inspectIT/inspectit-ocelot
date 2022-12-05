@@ -1,9 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.injection;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
@@ -11,14 +8,11 @@ import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
 import javax.annotation.PostConstruct;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
- * When using Java9+, classes are bundled in modules with access restrictions.
- * This class can be used to redefine the modules in order to make them accessible to inspectIT without {@code illegal access} warnings.
+ * When using Java9+ classes are bundeld in modules with access restrictions.
+ * This class can be used to redefine the modules in order to make them accessible to inspectIT without illegal-access warnings.
  */
 @Component
 @Slf4j
@@ -28,10 +22,6 @@ public class JigsawModuleInstrumenter {
      * Reference to Class.getModule() (introduced in Java 9)
      */
     private Method classGetModule;
-
-    private Method moduleGetPackages;
-
-    private Method moduleIsNamed;
 
     /**
      * Reference to Instrumentation.redefineModule (introduced in Java 9)
@@ -49,9 +39,10 @@ public class JigsawModuleInstrumenter {
     private Object coreModule;
 
     /**
-     * Caches which modules have already been opened.
+     * Maps modules to the set of packages which have already been opened to the {@link #coreModule}.
+     * Prevents unnecessary duplicate invocations of {@link #instrumentationRedefineModule}
      */
-    private final Cache<Object, Boolean> enhancedModules = CacheBuilder.newBuilder().weakKeys().build();
+    private WeakHashMap<Object, Set<String>> enhancedModules = new WeakHashMap<>();
 
     @Autowired
     private Instrumentation instrumentation;
@@ -73,8 +64,6 @@ public class JigsawModuleInstrumenter {
 
         try {
             classGetModule = Class.class.getMethod("getModule");
-            moduleGetPackages = moduleClass.getMethod("getPackages");
-            moduleIsNamed = moduleClass.getMethod("isNamed");
             instrumentationRedefineModule = Instrumentation.class.getMethod("redefineModule", moduleClass, Set.class, Map.class, Map.class, Set.class, Map.class);
         } catch (NoSuchMethodException e) {
             log.error("Your JRE contains java.lang.Module but not the required methods!", e);
@@ -86,31 +75,6 @@ public class JigsawModuleInstrumenter {
     }
 
     /**
-     * Redefines all modules to ensure modules can access bootstrap and core inspectIT modules.
-     * Extra reads and writes are added to modules by utilizing {@link #redefineModule(Object, Set, Map)}, which uses {@link Instrumentation#redefineModule(Module, Set, Map, Map, Set, Map)} under the hood.
-     *
-     * @param module The module to be redefined
-     */
-    public synchronized void openModule(Object module) {
-        if (isModuleSystemAvailable()) {
-            if (enhancedModules.getIfPresent(module) == null) {
-                Set<String> packages = getPackagesOfModule(module);
-                if (isNamed(module)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Gaining access to package '{}' of module '{}'", StringUtils.join(packages, ", "), module);
-                    }
-                    Set<Object> extraReads = Collections.singleton(bootstrapModule);
-                    Map<String, Set<Object>> extraOpens = packages.stream()
-                            .collect(Collectors.toMap(Object::toString, x -> Collections.singleton(coreModule)));
-                    redefineModule(module, extraReads, extraOpens);
-                }
-                enhancedModules.put(module, true);
-            }
-
-        }
-    }
-
-    /**
      * Instruments the module containing the given class in order to gain the required access rights.
      * Is a NOOP if the Java Version is 8.
      *
@@ -118,8 +82,16 @@ public class JigsawModuleInstrumenter {
      */
     public synchronized void openModule(Class<?> containedClass) {
         if (isModuleSystemAvailable()) {
+            String packageName = containedClass.getPackage().getName();
             Object module = getModuleOfClass(containedClass);
-            openModule(module);
+            Set<String> openedPackages = enhancedModules.computeIfAbsent(module, (m) -> new HashSet<>());
+            if (!openedPackages.contains(packageName)) {
+                log.debug("Gaining access to package '{}' of module '{}'", packageName, module);
+                Set<Object> extraReads = Collections.singleton(bootstrapModule);
+                Map<String, Set<Object>> extraOpens = Collections.singletonMap(packageName, Collections.singleton(coreModule));
+                redefineModule(module, extraReads, extraOpens);
+                openedPackages.add(packageName);
+            }
         }
     }
 
@@ -132,9 +104,18 @@ public class JigsawModuleInstrumenter {
      * @param extraReads The set of Module to add as readable
      * @param extraOpens Maps packages to modules to which these packages shall be run-time visible (E.g. via deep reflection)
      */
-    private void redefineModule(Object module, Set<Object> extraReads, Map<String, Set<Object>> extraOpens) {
+    private void redefineModule(Object module,
+                                Set<Object> extraReads,
+                                Map<String, Set<Object>> extraOpens) {
         try {
-            instrumentationRedefineModule.invoke(instrumentation, module, extraReads, Collections.emptyMap(), extraOpens, Collections.emptySet(), Collections.emptyMap());
+            instrumentationRedefineModule.invoke(instrumentation,
+                    module,
+                    extraReads,
+                    Collections.emptyMap(),
+                    extraOpens,
+                    Collections.emptySet(),
+                    Collections.emptyMap()
+            );
         } catch (Exception e) {
             log.error("Error redefining module {}", module, e);
         }
@@ -144,43 +125,11 @@ public class JigsawModuleInstrumenter {
      * Invokes the java 9 Class.getModule() function (never returns null)
      *
      * @param clazz the class to query the module of
-     *
      * @return the module of the given class, never null
      */
     private Object getModuleOfClass(Class<?> clazz) {
         try {
             return classGetModule.invoke(clazz);
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    /**
-     * Invokes the Java 9 {@link Module#isNamed()} function
-     *
-     * @param module The Module instance
-     *
-     * @return true if it is a named module, false otherwise
-     */
-    private boolean isNamed(Object module) {
-        try {
-            return (boolean) moduleIsNamed.invoke(module);
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    /**
-     * Invokes the Java 9 {@link Module#getPackages()} function
-     *
-     * @param module The Module instance
-     *
-     * @return Returns the set of package names for the packages in this module.
-     */
-    private Set<String> getPackagesOfModule(Object module) {
-        try {
-            Set<String> packages = (Set<String>) moduleGetPackages.invoke(module);
-            return packages;
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

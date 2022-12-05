@@ -7,7 +7,6 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.core.instrumentation.TypeDescriptionWithClassLoader;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationConfiguration;
 
 import java.util.concurrent.Executor;
@@ -25,19 +24,19 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
     private static final ElementMatcher<TypeDescription> EXECUTER_CLASSES_MATCHER = isSubTypeOf(Executor.class);
 
     @Override
-    public boolean shouldInstrument(TypeDescriptionWithClassLoader typeWithLoader, InstrumentationConfiguration settings) {
-        TypeDescription type = typeWithLoader.getType();
+    public boolean shouldInstrument(Class<?> clazz, InstrumentationConfiguration settings) {
+        TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
         return settings.getSource().getSpecial().isExecutorContextPropagation() &&
                 EXECUTER_CLASSES_MATCHER.matches(type);
     }
 
     @Override
-    public boolean requiresInstrumentationChange(TypeDescriptionWithClassLoader typeWithLoader, InstrumentationConfiguration first, InstrumentationConfiguration second) {
+    public boolean requiresInstrumentationChange(Class<?> clazz, InstrumentationConfiguration first, InstrumentationConfiguration second) {
         return false; //if the sensor stays active it never requires changes
     }
 
     @Override
-    public DynamicType.Builder instrument(TypeDescriptionWithClassLoader typeWithLoader, InstrumentationConfiguration conf, DynamicType.Builder builder) {
+    public DynamicType.Builder instrument(Class<?> clazz, InstrumentationConfiguration conf, DynamicType.Builder builder) {
         return builder.visit(ExecutorAdvice.TARGET);
     }
 

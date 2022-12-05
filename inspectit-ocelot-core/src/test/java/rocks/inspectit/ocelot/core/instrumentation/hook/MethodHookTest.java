@@ -124,7 +124,7 @@ public class MethodHookTest {
             verify(actionScopeFactory).createScope(action);
             verifyNoMoreInteractions(actionScopeFactory, action);
 
-            MethodHook copy = hook.getResetCopy();
+            MethodHook copy = hook.getResettedCopy();
 
             ctx = copy.onEnter(null, null);
             copy.onExit(null, null, null, null, ctx);
@@ -217,7 +217,7 @@ public class MethodHookTest {
             verify(actionScopeFactory).createScope(action);
             verifyNoMoreInteractions(actionScopeFactory, action);
 
-            MethodHook copy = hook.getResetCopy();
+            MethodHook copy = hook.getResettedCopy();
 
             ctx = copy.onEnter(null, null);
             copy.onExit(null, null, null, null, ctx);

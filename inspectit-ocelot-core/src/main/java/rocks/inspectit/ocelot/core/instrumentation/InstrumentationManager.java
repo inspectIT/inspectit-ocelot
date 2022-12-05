@@ -13,7 +13,7 @@ import rocks.inspectit.ocelot.core.instrumentation.event.ClassInstrumentedEvent;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
 
 /**
- * This class is responsible for (a) storing the active instrumentation configurations for each class
+ * This class is responsible for (a) storing the active isntrumentatiuon configurations for each class
  * and (b) determining if a class requires an instrumentation change.
  */
 @Service
@@ -30,9 +30,8 @@ public class InstrumentationManager {
      * For each class we remember the applied instrumentation.
      * This allows us to check if a retransformation is required.
      */
-    private final Cache<Class<?>, ClassInstrumentationConfiguration> activeInstrumentations = CacheBuilder.newBuilder()
-            .weakKeys()
-            .build();
+    private Cache<Class<?>, ClassInstrumentationConfiguration> activeInstrumentations =
+            CacheBuilder.newBuilder().weakKeys().build();
 
     @EventListener
     private void classInstrumented(ClassInstrumentedEvent event) {

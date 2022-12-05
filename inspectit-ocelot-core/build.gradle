@@ -133,8 +133,8 @@ dependencies {
             'io.apisense.embed.influx:embed-influxDB:1.2.1',
 
             // for docker test containers
-            'org.testcontainers:testcontainers:1.16.3',
-            'org.testcontainers:junit-jupiter:1.16.3',
+            'org.testcontainers:testcontainers:1.15.2',
+            'org.testcontainers:junit-jupiter:1.15.2',
 
             // ServerExtension
             'com.linecorp.armeria:armeria-junit5:1.14.1',

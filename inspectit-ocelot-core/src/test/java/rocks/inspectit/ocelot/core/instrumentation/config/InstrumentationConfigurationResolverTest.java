@@ -16,7 +16,6 @@ import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.FakeExecutor;
-import rocks.inspectit.ocelot.core.instrumentation.TypeDescriptionWithClassLoader;
 import rocks.inspectit.ocelot.core.instrumentation.config.dummy.LambdaTestProvider;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
@@ -90,7 +89,8 @@ class InstrumentationConfigurationResolverTest {
 
             assertThat(result).isNotNull();
             assertThat(result.getActiveSpecialSensors()).isEmpty();
-            assertThat(result.getActiveRules()).hasSize(1)
+            assertThat(result.getActiveRules())
+                    .hasSize(1)
                     .flatExtracting(InstrumentationRule::getScopes)
                     .flatExtracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
                     .containsExactly(ElementMatchers.any(), ElementMatchers.any());
@@ -108,7 +108,8 @@ class InstrumentationConfigurationResolverTest {
 
             assertThat(result).isNotNull();
             assertThat(result.getActiveSpecialSensors()).isEmpty();
-            assertThat(result.getActiveRules()).hasSize(1)
+            assertThat(result.getActiveRules())
+                    .hasSize(1)
                     .flatExtracting(InstrumentationRule::getScopes)
                     .flatExtracting(InstrumentationScope::getTypeMatcher, InstrumentationScope::getMethodMatcher)
                     .containsExactly(ElementMatchers.nameEndsWithIgnoreCase("object"), ElementMatchers.any());
@@ -130,11 +131,11 @@ class InstrumentationConfigurationResolverTest {
         }
     }
 
+
     @Nested
     class GetHookConfigurations {
 
         final Method testCase_methodA = TestCase.class.getDeclaredMethod("methodA");
-
         final Method testCase_methodB = TestCase.class.getDeclaredMethod("methodB");
 
         Class<?> testCaseClass;
@@ -152,6 +153,7 @@ class InstrumentationConfigurationResolverTest {
             InstrumentationScope noMethodScope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.none());
             InstrumentationRule r1 = InstrumentationRule.builder().name("r1").scope(noMethodScope).build();
 
+
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
@@ -166,6 +168,7 @@ class InstrumentationConfigurationResolverTest {
             InstrumentationScope noMethodScope = new InstrumentationScope(ElementMatchers.none(), ElementMatchers.any());
             InstrumentationRule r1 = InstrumentationRule.builder().name("r1").scope(noMethodScope).build();
 
+
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
@@ -175,6 +178,7 @@ class InstrumentationConfigurationResolverTest {
             verify(hookResolver, never()).buildHookConfiguration(any(), any());
         }
 
+
         @Test
         void testSingleRuleForMethodMatches() throws Exception {
             ElementMatcher.Junction<MethodDescription> method = ElementMatchers.is(testCase_methodA);
@@ -182,6 +186,7 @@ class InstrumentationConfigurationResolverTest {
             InstrumentationScope noMethodScope = new InstrumentationScope(ElementMatchers.any(), ElementMatchers.none());
             InstrumentationRule r1 = InstrumentationRule.builder().name("r1").scope(methodScope).build();
             InstrumentationRule r2 = InstrumentationRule.builder().name("r2").scope(noMethodScope).build();
+
 
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
@@ -193,12 +198,14 @@ class InstrumentationConfigurationResolverTest {
             verifyNoMoreInteractions(hookResolver);
         }
 
+
         @Test
         void testMultipleRulesWithSameScopeMatching() throws Exception {
             ElementMatcher.Junction<MethodDescription> method = ElementMatchers.is(testCase_methodA);
             InstrumentationScope methodScope = new InstrumentationScope(ElementMatchers.any(), method);
             InstrumentationRule r1 = InstrumentationRule.builder().name("r1").scope(methodScope).build();
             InstrumentationRule r2 = InstrumentationRule.builder().name("r2").scope(methodScope).build();
+
 
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
@@ -210,6 +217,7 @@ class InstrumentationConfigurationResolverTest {
             verifyNoMoreInteractions(hookResolver);
         }
 
+
         @Test
         void testMultipleRulesWithDifferentScopeMatching() throws Exception {
             ElementMatcher.Junction<MethodDescription> methodA = ElementMatchers.is(testCase_methodA);
@@ -219,27 +227,28 @@ class InstrumentationConfigurationResolverTest {
             InstrumentationRule r1 = InstrumentationRule.builder().name("r1").scope(methodScope).build();
             InstrumentationRule r2 = InstrumentationRule.builder().name("r2").scope(allScope).build();
 
+
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
 
             Map<MethodDescription, MethodHookConfiguration> result = resolver.getHookConfigurations(testCaseClass);
 
             assertThat(result).hasSize(2);
-            verify(hookResolver, times(1)).buildHookConfiguration(same(config), eq(new HashSet<>(Arrays.asList(r1, r2))));
-            verify(hookResolver, times(1)).buildHookConfiguration(same(config), eq(new HashSet<>(Arrays.asList(r2))));
+            verify(hookResolver, times(1))
+                    .buildHookConfiguration(same(config), eq(new HashSet<>(Arrays.asList(r1, r2))));
+            verify(hookResolver, times(1))
+                    .buildHookConfiguration(same(config), eq(new HashSet<>(Arrays.asList(r2))));
             verifyNoMoreInteractions(hookResolver);
         }
+
 
         @Test
         void testRuleIncludes() throws Exception {
             ElementMatcher.Junction<MethodDescription> method = ElementMatchers.is(testCase_methodA);
             InstrumentationScope methodScope = new InstrumentationScope(ElementMatchers.any(), method);
-            InstrumentationRule r1 = InstrumentationRule.builder()
-                    .name("r1")
-                    .scope(methodScope)
-                    .includedRuleName("r2")
-                    .build();
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").scope(methodScope).includedRuleName("r2").build();
             InstrumentationRule r2 = InstrumentationRule.builder().name("r2").build();
+
 
             config = InstrumentationConfiguration.builder().source(settings).rule(r1).rule(r2).build();
             FieldUtils.writeDeclaredField(resolver, "currentConfig", config, true);
@@ -262,7 +271,9 @@ class InstrumentationConfigurationResolverTest {
             InstrumentationRule r2 = InstrumentationRule.builder().name("r2").build();
             InstrumentationRule r3 = InstrumentationRule.builder().name("r3").build();
 
-            config = InstrumentationConfiguration.builder().source(settings).rules(Arrays.asList(r1, r2, r3)).build();
+            config = InstrumentationConfiguration.builder().source(settings)
+                    .rules(Arrays.asList(r1, r2, r3))
+                    .build();
 
             Set<InstrumentationRule> result = resolver.resolveIncludes(config, Arrays.asList(r1, r2));
 
@@ -276,12 +287,15 @@ class InstrumentationConfigurationResolverTest {
             InstrumentationRule r3 = InstrumentationRule.builder().name("r3").build();
             InstrumentationRule r4 = InstrumentationRule.builder().name("r4").build();
 
-            config = InstrumentationConfiguration.builder().source(settings).rules(Arrays.asList(r1, r2, r3)).build();
+            config = InstrumentationConfiguration.builder().source(settings)
+                    .rules(Arrays.asList(r1, r2, r3))
+                    .build();
 
             Set<InstrumentationRule> result = resolver.resolveIncludes(config, Arrays.asList(r1, r2));
 
             assertThat(result).containsExactlyInAnyOrder(r1, r2, r3);
         }
+
 
         @Test
         void nonExistingInclude() {
@@ -289,7 +303,9 @@ class InstrumentationConfigurationResolverTest {
             InstrumentationRule r2 = InstrumentationRule.builder().name("r2").includedRuleName("I don't exist").build();
             InstrumentationRule r3 = InstrumentationRule.builder().name("r3").build();
 
-            config = InstrumentationConfiguration.builder().source(settings).rules(Arrays.asList(r1, r2, r3)).build();
+            config = InstrumentationConfiguration.builder().source(settings)
+                    .rules(Arrays.asList(r1, r2, r3))
+                    .build();
 
             Set<InstrumentationRule> result = resolver.resolveIncludes(config, Arrays.asList(r1));
 
@@ -298,16 +314,14 @@ class InstrumentationConfigurationResolverTest {
 
         @Test
         void multipleIncludes() {
-            InstrumentationRule r1 = InstrumentationRule.builder()
-                    .name("r1")
-                    .includedRuleName("r2")
-                    .includedRuleName("r3")
-                    .build();
+            InstrumentationRule r1 = InstrumentationRule.builder().name("r1").includedRuleName("r2").includedRuleName("r3").build();
             InstrumentationRule r2 = InstrumentationRule.builder().name("r2").build();
             InstrumentationRule r3 = InstrumentationRule.builder().name("r3").build();
             InstrumentationRule r4 = InstrumentationRule.builder().name("r4").build();
 
-            config = InstrumentationConfiguration.builder().source(settings).rules(Arrays.asList(r1, r2, r3)).build();
+            config = InstrumentationConfiguration.builder().source(settings)
+                    .rules(Arrays.asList(r1, r2, r3))
+                    .build();
 
             Set<InstrumentationRule> result = resolver.resolveIncludes(config, Arrays.asList(r1));
 
@@ -321,7 +335,9 @@ class InstrumentationConfigurationResolverTest {
             InstrumentationRule r3 = InstrumentationRule.builder().name("r3").includedRuleName("r1").build();
             InstrumentationRule r4 = InstrumentationRule.builder().name("r4").build();
 
-            config = InstrumentationConfiguration.builder().source(settings).rules(Arrays.asList(r1, r2, r3)).build();
+            config = InstrumentationConfiguration.builder().source(settings)
+                    .rules(Arrays.asList(r1, r2, r3))
+                    .build();
 
             Set<InstrumentationRule> result = resolver.resolveIncludes(config, Arrays.asList(r1));
 
@@ -333,15 +349,24 @@ class InstrumentationConfigurationResolverTest {
     class IsIgnoredClass {
 
         @Test
-        void testInspectitClassesIgnored() {
-            assertThat(resolver.isIgnoredClass(TypeDescriptionWithClassLoader.of(InstrumentationSettings.class), config)).isTrue();
+        void testNonModifiableCLassesIgnored() {
+            when(instrumentation.isModifiableClass(same(String.class))).thenReturn(false);
+
+            assertThat(resolver.isIgnoredClass(String.class, config)).isTrue();
+            assertThat(resolver.isIgnoredClass(Integer.class, config)).isFalse();
         }
+
+        @Test
+        void testInspectitClassesIgnored() {
+            assertThat(resolver.isIgnoredClass(InstrumentationSettings.class, config)).isTrue();
+        }
+
 
         @Test
         void testBootstrapPackagesIgnoresWork() {
             when(settings.getIgnoredBootstrapPackages()).thenReturn(Collections.singletonMap("java.util.", true));
-            assertThat(resolver.isIgnoredClass(TypeDescriptionWithClassLoader.of(Map.class), config)).isTrue();
-            assertThat(resolver.isIgnoredClass(TypeDescriptionWithClassLoader.of(String.class), config)).isFalse();
+            assertThat(resolver.isIgnoredClass(Map.class, config)).isTrue();
+            assertThat(resolver.isIgnoredClass(String.class, config)).isFalse();
         }
 
         @Test
@@ -351,11 +376,11 @@ class InstrumentationConfigurationResolverTest {
             String packagename = copied.getName();
             packagename = packagename.substring(0, packagename.length() - copied.getSimpleName().length());
 
-            assertThat(resolver.isIgnoredClass(TypeDescriptionWithClassLoader.of(copied), config)).isFalse();
+            assertThat(resolver.isIgnoredClass(copied, config)).isFalse();
 
             when(settings.getIgnoredPackages()).thenReturn(Collections.singletonMap(packagename, true));
 
-            assertThat(resolver.isIgnoredClass(TypeDescriptionWithClassLoader.of(copied), config)).isTrue();
+            assertThat(resolver.isIgnoredClass(copied, config)).isTrue();
         }
 
         @Test
@@ -364,8 +389,8 @@ class InstrumentationConfigurationResolverTest {
             Class<?> ignored = Class.forName(IgnoredClass.class.getName(), false, dcl);
             Class<?> notIgnored = Class.forName(NotIgnoredClass.class.getName(), false, dcl);
 
-            assertThat(resolver.isIgnoredClass(TypeDescriptionWithClassLoader.of(ignored), config)).isTrue();
-            assertThat(resolver.isIgnoredClass(TypeDescriptionWithClassLoader.of(notIgnored), config)).isFalse();
+            assertThat(resolver.isIgnoredClass(ignored, config)).isTrue();
+            assertThat(resolver.isIgnoredClass(notIgnored, config)).isFalse();
         }
 
         @Test
@@ -373,10 +398,9 @@ class InstrumentationConfigurationResolverTest {
             DummyClassLoader dcl = new DummyClassLoader(getClass().getClassLoader(), LambdaTestProvider.class);
             Class<?> lambdasProvider = dcl.loadClass(LambdaTestProvider.class.getName());
 
-            Class<?> lambdaWithDefault = (Class<?>) lambdasProvider.getMethod("getLambdaWithDefaultMethod")
-                    .invoke(null);
+            Class<?> lambdaWithDefault = (Class<?>) lambdasProvider.getMethod("getLambdaWithDefaultMethod").invoke(null);
 
-            assertThat(resolver.isIgnoredClass(TypeDescriptionWithClassLoader.of(lambdaWithDefault), config)).isTrue();
+            assertThat(resolver.isIgnoredClass(lambdaWithDefault, config)).isTrue();
         }
 
         @Test
@@ -386,24 +410,23 @@ class InstrumentationConfigurationResolverTest {
             DummyClassLoader dcl = new DummyClassLoader(getClass().getClassLoader(), LambdaTestProvider.class);
             Class<?> lambdasProvider = dcl.loadClass(LambdaTestProvider.class.getName());
 
-            Class<?> lambdaWithDefault = (Class<?>) lambdasProvider.getMethod("getLambdaWithDefaultMethod")
-                    .invoke(null);
+            Class<?> lambdaWithDefault = (Class<?>) lambdasProvider.getMethod("getLambdaWithDefaultMethod").invoke(null);
 
-            assertThat(resolver.isIgnoredClass(TypeDescriptionWithClassLoader.of(lambdaWithDefault), config)).isFalse();
+            assertThat(resolver.isIgnoredClass(lambdaWithDefault, config)).isFalse();
         }
+
 
         @Test
         void testIgnoredClassloader() throws Exception {
             DummyClassLoader dcl = new IgnoredDummyClassLoader(FakeExecutor.class);
             Class<?> copied = Class.forName(FakeExecutor.class.getName(), false, dcl);
-            assertThat(resolver.isIgnoredClass(TypeDescriptionWithClassLoader.of(copied), config)).isTrue();
+            assertThat(resolver.isIgnoredClass(copied, config)).isTrue();
         }
     }
 
 }
 
 class IgnoredDummyClassLoader extends DummyClassLoader implements DoNotInstrumentMarker {
-
     public IgnoredDummyClassLoader(Class<?>... classesToCopy) {
         super(classesToCopy);
     }

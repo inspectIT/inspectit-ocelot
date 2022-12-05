@@ -44,10 +44,6 @@ public class AgentMain {
 
     private static final String PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY = "inspectit.publishOpenTelemetryToBootstrap";
 
-    private static final String ASYNC_INSTRUMENTATION_PROPERTY = "inspectit.instrumentation.internal.async";
-
-    private static final String ASYNC_INSTRUMENTATION_ENV_PROPERTY = "INSPECTIT_INSTRUMENTATION_INTERNAL_ASYNC";
-
     /**
      * Main method for attaching the agent itself to a running JVM.
      *
@@ -65,16 +61,11 @@ public class AgentMain {
         AgentAttacher.attach(Integer.parseInt(args[0]), agentProperties);
     }
 
-    // invoked if agent is started after the instrumented application
     public static void agentmain(String agentArgs, Instrumentation inst) {
         //TODO: currently replacing the agent does not really work as all Agent versions share the same namespace in the same classpath
-        if (!isAsyncInstrumentationEnabled()) {
-            System.out.println(ASYNC_INSTRUMENTATION_PROPERTY + " and " + ASYNC_INSTRUMENTATION_ENV_PROPERTY + " are ignored when when attaching agent to a running application!");
-        }
         startAgent(agentArgs, inst, true);
     }
 
-    // invoked if agent is started before the instrumented application
     public static void premain(String agentArgs, Instrumentation inst) {
         boolean loadOpenTelemetryJarToBootstrap = null != System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY) ? "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY)) : "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY));
         // check for deprecated JVM property
@@ -88,16 +79,8 @@ public class AgentMain {
                 inst.appendToBootstrapClassLoaderSearch(new JarFile(otelJarFile.toFile()));
             }
 
-            if (isAsyncInstrumentationEnabled()) {
-                // we make sure that the startup of inspectIT is asynchronous
-                new Thread(() -> startAgent(agentArgs, inst, !loadOpenTelemetryJarToBootstrap)).start();
-            } else {
-                String javaVersion = System.getProperty("java.version");
-                if (javaVersion.startsWith("1.8")) {
-                    System.err.println("Asynchronous instrumentation is disabled in a pre Java 9 environment! This results in a significant boot time performance degradation! See: https://bugs.openjdk.java.net/browse/JDK-7018422");
-                }
-                startAgent(agentArgs, inst, !loadOpenTelemetryJarToBootstrap);
-            }
+            // we make sure that the startup of inspectIT is asynchronous
+            new Thread(() -> startAgent(agentArgs, inst, !loadOpenTelemetryJarToBootstrap)).start();
         } catch (Exception e) {
             System.err.println("Error starting inspectIT Agent!");
             e.printStackTrace();
@@ -112,11 +95,6 @@ public class AgentMain {
             System.err.println("Error starting inspectIT Agent!");
             e.printStackTrace();
         }
-    }
-
-    private static boolean isAsyncInstrumentationEnabled() {
-        String isAsyncInstrumentationPropertyValue = null != System.getProperty(ASYNC_INSTRUMENTATION_PROPERTY) ? System.getProperty(ASYNC_INSTRUMENTATION_PROPERTY) : System.getenv(ASYNC_INSTRUMENTATION_ENV_PROPERTY);
-        return null == isAsyncInstrumentationPropertyValue || "true".equalsIgnoreCase(isAsyncInstrumentationPropertyValue);
     }
 
     /**
@@ -168,10 +146,6 @@ public class AgentMain {
      * private inspectIT classloader to ensure our classes are hidden from other application classes
      */
     public static class InspectITClassLoader extends URLClassLoader {
-
-        static {
-            ClassLoader.registerAsParallelCapable();
-        }
 
         InspectITClassLoader(URL[] urls) {
             super(urls, findParentClassLoader());

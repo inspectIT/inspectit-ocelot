@@ -82,15 +82,11 @@ To enable the OTLP exporters, it is only required to specify the `url`.
 
 The following properties are nested properties below the `inspectit.exporters.metrics.otlp-grpc` property:
 
-| Property                | Default         | Description                                                                                                                                                                                                                  |
-|-------------------------|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `.enabled`              | `IF_CONFIGURED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC metrics exporter.                                                                                                                |
-| `.endpoint`             | `null`          | Target to which the exporter is going to send metrics, e.g. `http://localhost:4317`                                                                                                                                          |
-| `.protocol`             | `null`          | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`.                                              |
-| `.preferredTemporality` | `CUMULATIVE`    | The preferred output aggregation temporality, see [OTEL documentation](https://github.com/open-telemetry/opentelemetry-java/blob/main/sdk-extensions/autoconfigure/README.md). Supported values are `CUMULATIVE` and `DELTA`.| 
-| `.headers`              | `null`          | Key-value pairs to be used as headers associated with gRPC or HTTP requests, see [OTEL documentation](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md).|
-| `.compression` | `NONE`          | The compression method, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported compression methods are `gzip` and `none`.                                   |
-| `.timeout`     | `10s`           | Maximum time the OTLP exporter will wait for each batch export, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/).                           |
+| Property    | Default         | Description                                                                                                                                                                     |
+| ----------- |-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.enabled`  | `IF_CONFIGURED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC metrics exporter.                                                                   |
+| `.endpoint` | `null`          | Target to which the exporter is going to send metrics, e.g. `http://localhost:4317`                                                                                             |
+| `.protocol` | `null`          | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`. |
 
 To make inspectIT Ocelot push the metris via OTLP to, e.g. an OpenTelemetry Collector running on the same machine as the agent, the following JVM property can be used:
 

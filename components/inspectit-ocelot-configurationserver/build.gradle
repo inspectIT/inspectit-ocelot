@@ -12,13 +12,13 @@ apply plugin: 'io.spring.dependency-management'
 
 node {
     // Version of node to use.
-    version = '12.22.0'
+    version = '12.16.1'
 
     // Version of npm to use.
     npmVersion = '6.13.4'
 
     // Version of Yarn to use.
-    yarnVersion = '1.22.0'
+    yarnVersion = '1.16.0'
 
     // If true, it will download node using above parameters.
     // If false, it will try to use globally installed node.
@@ -122,7 +122,7 @@ dependencies {
 
             'org.apache.httpcomponents:httpclient:4.5.12', //Required for PATCH-Requests
 
-            'org.xerial:sqlite-jdbc:3.39.3.0',
+            "org.xerial:sqlite-jdbc:3.28.0",
             "com.github.gwenn:sqlite-dialect:0.1.0",
             'io.jsonwebtoken:jjwt-api:0.10.5',
             'io.jsonwebtoken:jjwt-impl:0.10.5',

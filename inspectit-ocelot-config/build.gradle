@@ -44,9 +44,6 @@ dependencies {
     // the api is included as compile only because the open census api has to be decoupled
     // from the inspectIT core to allow it to be pushed to the bootstrap
     compileOnly (
-            "io.opencensus:opencensus-api:${openCensusVersion}",
-            // OpenTelemetry
-            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
-            "io.opentelemetry:opentelemetry-sdk-metrics",
+            "io.opencensus:opencensus-api:${openCensusVersion}"
     )
 }
