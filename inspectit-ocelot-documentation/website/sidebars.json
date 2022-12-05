@@ -57,8 +57,6 @@
       "config-server/syntax-highlighting",
       "config-server/status-table-view"
     ],
-    "Breaking Changes": [
-      "breaking-changes/Breaking Changes"
-    ]
+    "Breaking Changes": ["breaking-changes/Breaking Changes"]
   }
 }
