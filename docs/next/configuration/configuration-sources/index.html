@@ -81,20 +81,20 @@ In this fallback configuration, the agent is inactive with the exception of list
 <p>You can pass a JSON object as string to the agent via its command line arguments.
 For example, to override the service name used to identify your application reporting the performance data,
 you can change the <code>inspectit.service-name</code> property as follows:</p>
-<pre><code class="hljs css language-bash">$ java -javaagent:/path/to/inspectit-ocelot-agent-1.17.0.jar=<span class="hljs-string">"{ \"inspectit\": { \"service-name\": \"My Custom Service\" }}"</span> -jar my-java-program.jar
+<pre><code class="hljs css language-bash">$ java -javaagent:/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar=<span class="hljs-string">"{ \"inspectit\": { \"service-name\": \"My Custom Service\" }}"</span> -jar my-java-program.jar
 </code></pre>
 <p>Note that you have to escape the quotes within your JSON string. On linux you can just use the more readable single quotes notation:</p>
-<pre><code class="hljs css language-bash">$ java -javaagent:/path/to/inspectit-ocelot-agent-1.17.0.jar=<span class="hljs-string">'{ "inspectit": { "service-name": "My Custom Service" }}'</span> -jar my-java-program.jar
+<pre><code class="hljs css language-bash">$ java -javaagent:/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar=<span class="hljs-string">'{ "inspectit": { "service-name": "My Custom Service" }}'</span> -jar my-java-program.jar
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="java-system-properties"></a><a href="#java-system-properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Java System Properties</h3>
 <p>You can pass any configuration property as the Java System property to the Java command that you use to start your Java application.
 Using this approach you can change the <code>inspectit.service-name</code> property as follows:</p>
-<pre><code class="hljs css language-bash">$ java -Dinspectit.service-name=<span class="hljs-string">"My Custom Service"</span> -javaagent:/path/to/inspectit-ocelot-agent-1.17.0.jar -jar my-java-program.jar
+<pre><code class="hljs css language-bash">$ java -Dinspectit.service-name=<span class="hljs-string">"My Custom Service"</span> -javaagent:/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar -jar my-java-program.jar
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="os-environment-variables"></a><a href="#os-environment-variables" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>OS Environment Variables</h3>
 <p>Similar to the Java System properties, inspectIT Ocelot will also consider all the available operating system environment variables.
 Due to the relaxed bindings, you can use upper case format, which is recommended when using system environment variables.</p>
-<pre><code class="hljs css language-bash">$ INSPECTIT_SERVICE_NAME=<span class="hljs-string">"My Custom Service"</span> java -javaagent:/path/to/inspectit-ocelot-agent-1.17.0.jar -jar my-java-program.jar
+<pre><code class="hljs css language-bash">$ INSPECTIT_SERVICE_NAME=<span class="hljs-string">"My Custom Service"</span> java -javaagent:/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar -jar my-java-program.jar
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="relaxed-bindings"></a><a href="#relaxed-bindings" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Relaxed Bindings</h2>
 <p>Note that due to the Spring-powered configuration approach, the inspectIT Ocelot agent uses Spring support for relaxed bindings.
