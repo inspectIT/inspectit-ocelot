@@ -62,5 +62,13 @@ public class DynamicallyActivatableServiceObserverTest {
             assertThat(resultMap.containsKey(jaegerExpoService.getName()));
             assertThat(resultMap.get(jaegerExpoService.getName())).isEqualTo(jaegerExpoService.isEnabled());
         }
+
+        @Test
+        public void testAsJson() {
+            setupTest();
+            String expectedJson = "{\"LoggingMetricExporterService\":false,\"MemoryMetricsRecorder\":true,\"HttpConfigurationPoller\":true,\"OtlpTraceExporterService\":false,\"DiskMetricsRecorder\":true,\"ActionMetricsRecorder\":false,\"PrometheusExporterService\":false,\"LoggingTraceExporterService\":false,\"GCMetricsRecorder\":true,\"InfluxExporterService\":false,\"OtlpMetricsExporterService\":false,\"JmxMetricsRecorder\":false,\"JaegerExporterService\":false,\"ProcessorMetricsRecorder\":true,\"ThreadMetricsRecorder\":true,\"AgentCommandService\":false,\"ConfigurationDirectoriesPoller\":false,\"LogPreloader\":false,\"ClassLoaderMetricsRecorder\":true,\"ZipkinExporterService\":false}";
+
+            assertThat(serviceObserver.asJson()).isEqualTo(expectedJson);
+        }
     }
 }
