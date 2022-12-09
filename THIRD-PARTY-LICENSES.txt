@@ -17173,10 +17173,15 @@ subcomponent's license, as noted in the license.txt file.
 --------------------------------------------------------------------------------
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 180. Group: org.springframework  Name: spring-aop  Version: 5.3.14
 =======
 183. Group: org.springframework  Name: spring-aop  Version: 5.3.24
 >>>>>>> aa8f747c8 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+<<<<<<< HEAD
+185. Group: org.springframework  Name: spring-beans  Version: 5.3.24
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -18804,7 +18809,13 @@ subcomponent's license, as noted in the license.txt file.
 =======
 186. Group: org.springframework  Name: spring-beans  Version: 5.3.24
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+185. Group: org.springframework  Name: spring-beans  Version: 5.3.24
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -19120,6 +19131,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -19131,11 +19143,19 @@ subcomponent's license, as noted in the license.txt file.
 188. Group: org.springframework  Name: spring-core  Version: 5.3.12
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 188. Group: org.springframework  Name: spring-core  Version: 5.3.12
 =======
 187. Group: org.springframework  Name: spring-context  Version: 5.3.12
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+186. Group: org.springframework  Name: spring-context  Version: 5.3.12
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -19451,6 +19471,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -19462,11 +19483,19 @@ subcomponent's license, as noted in the license.txt file.
 189. Group: org.springframework  Name: spring-core  Version: 5.3.24
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 189. Group: org.springframework  Name: spring-core  Version: 5.3.24
 =======
 188. Group: org.springframework  Name: spring-context  Version: 5.3.24
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+187. Group: org.springframework  Name: spring-context  Version: 5.3.24
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -19782,6 +19811,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -19793,11 +19823,19 @@ subcomponent's license, as noted in the license.txt file.
 190. Group: org.springframework  Name: spring-expression  Version: 5.3.12
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 190. Group: org.springframework  Name: spring-expression  Version: 5.3.12
 =======
 189. Group: org.springframework  Name: spring-core  Version: 5.3.12
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+188. Group: org.springframework  Name: spring-core  Version: 5.3.12
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -20113,6 +20151,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -20124,11 +20163,19 @@ subcomponent's license, as noted in the license.txt file.
 191. Group: org.springframework  Name: spring-expression  Version: 5.3.24
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 191. Group: org.springframework  Name: spring-expression  Version: 5.3.24
 =======
 190. Group: org.springframework  Name: spring-core  Version: 5.3.24
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+189. Group: org.springframework  Name: spring-core  Version: 5.3.24
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -20444,6 +20491,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -20455,11 +20503,19 @@ subcomponent's license, as noted in the license.txt file.
 192. Group: org.springframework  Name: spring-jcl  Version: 5.3.12
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 192. Group: org.springframework  Name: spring-jcl  Version: 5.3.12
 =======
 191. Group: org.springframework  Name: spring-expression  Version: 5.3.12
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+190. Group: org.springframework  Name: spring-expression  Version: 5.3.12
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -20775,6 +20831,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -20786,11 +20843,19 @@ subcomponent's license, as noted in the license.txt file.
 193. Group: org.springframework  Name: spring-jcl  Version: 5.3.24
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 193. Group: org.springframework  Name: spring-jcl  Version: 5.3.24
 =======
 192. Group: org.springframework  Name: spring-expression  Version: 5.3.24
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+191. Group: org.springframework  Name: spring-expression  Version: 5.3.24
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -21106,6 +21171,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -21117,11 +21183,19 @@ subcomponent's license, as noted in the license.txt file.
 194. Group: org.springframework  Name: spring-jdbc  Version: 5.3.12
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 194. Group: org.springframework  Name: spring-jdbc  Version: 5.3.12
 =======
 193. Group: org.springframework  Name: spring-jcl  Version: 5.3.12
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+192. Group: org.springframework  Name: spring-jcl  Version: 5.3.12
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -21440,6 +21514,7 @@ subcomponent's license, as noted in the license.txt file.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 193. Group: org.springframework  Name: spring-orm  Version: 5.3.12
 =======
 196. Group: org.springframework  Name: spring-orm  Version: 5.3.12
@@ -21448,9 +21523,14 @@ subcomponent's license, as noted in the license.txt file.
 195. Group: org.springframework  Name: spring-orm  Version: 5.3.12
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 195. Group: org.springframework  Name: spring-orm  Version: 5.3.12
 =======
 194. Group: org.springframework  Name: spring-jcl  Version: 5.3.24
+=======
+193. Group: org.springframework  Name: spring-jcl  Version: 5.3.24
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -21766,9 +21846,16 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 195. Group: org.springframework  Name: spring-jdbc  Version: 5.3.12
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+194. Group: org.springframework  Name: spring-jdbc  Version: 5.3.12
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -22084,6 +22171,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -22095,11 +22183,19 @@ subcomponent's license, as noted in the license.txt file.
 196. Group: org.springframework  Name: spring-tx  Version: 5.3.12
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 196. Group: org.springframework  Name: spring-tx  Version: 5.3.12
 =======
 196. Group: org.springframework  Name: spring-orm  Version: 5.3.12
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+195. Group: org.springframework  Name: spring-orm  Version: 5.3.12
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -22415,6 +22511,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -22426,11 +22523,19 @@ subcomponent's license, as noted in the license.txt file.
 197. Group: org.springframework  Name: spring-web  Version: 5.3.12
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 197. Group: org.springframework  Name: spring-web  Version: 5.3.12
 =======
 197. Group: org.springframework  Name: spring-tx  Version: 5.3.12
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+196. Group: org.springframework  Name: spring-tx  Version: 5.3.12
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -22749,6 +22854,7 @@ subcomponent's license, as noted in the license.txt file.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 196. Group: org.springframework  Name: spring-web  Version: 5.3.14
 =======
 199. Group: org.springframework  Name: spring-web  Version: 5.3.24
@@ -22756,6 +22862,326 @@ subcomponent's license, as noted in the license.txt file.
 =======
 =======
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+197. Group: org.springframework  Name: spring-web  Version: 5.3.12
+
+POM Project URL: https://github.com/spring-projects/spring-framework
+
+POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0
+
+Embedded license: 
+
+                    ****************************************                    
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        https://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       https://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+=======================================================================
+
+SPRING FRAMEWORK 5.3.12 SUBCOMPONENTS:
+
+Spring Framework 5.3.12 includes a number of subcomponents
+with separate copyright notices and license terms. The product that
+includes this file does not necessarily use all the open source
+subcomponents referred to below. Your use of the source
+code for these subcomponents is subject to the terms and
+conditions of the following licenses.
+
+
+>>> ASM 9.1 (org.ow2.asm:asm:9.1, org.ow2.asm:asm-commons:9.1):
+
+Copyright (c) 2000-2011 INRIA, France Telecom
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holders nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+THE POSSIBILITY OF SUCH DAMAGE.
+
+Copyright (c) 1999-2009, OW2 Consortium <https://www.ow2.org/>
+
+
+>>> CGLIB 3.3 (cglib:cglib:3.3):
+
+Per the LICENSE file in the CGLIB JAR distribution downloaded from
+https://github.com/cglib/cglib/releases/download/RELEASE_3_3_0/cglib-3.3.0.jar,
+CGLIB 3.3 is licensed under the Apache License, version 2.0, the text of which
+is included above.
+
+
+>>> Objenesis 3.1 (org.objenesis:objenesis:3.1):
+
+Per the LICENSE file in the Objenesis ZIP distribution downloaded from
+http://objenesis.org/download.html, Objenesis 3.1 is licensed under the
+Apache License, version 2.0, the text of which is included above.
+
+Per the NOTICE file in the Objenesis ZIP distribution downloaded from
+http://objenesis.org/download.html and corresponding to section 4d of the
+Apache License, Version 2.0, in this case for Objenesis:
+
+Objenesis
+Copyright 2006-2019 Joe Walnes, Henri Tremblay, Leonardo Mesquita
+
+
+===============================================================================
+
+To the extent any open source components are licensed under the EPL and/or
+other similar licenses that require the source code and/or modifications to
+source code to be made available (as would be noted above), you may obtain a
+copy of the source code corresponding to the binaries for such open source
+components and modifications thereto, if any, (the "Source Files"), by
+downloading the Source Files from https://spring.io/projects, Pivotal's website
+at https://network.pivotal.io/open-source, or by sending a request, with your
+name and address to: Pivotal Software, Inc., 875 Howard Street, 5th floor, San
+Francisco, CA 94103, Attention: General Counsel. All such requests should
+clearly specify: OPEN SOURCE FILES REQUEST, Attention General Counsel. Pivotal
+can mail a copy of the Source Files to you on a CD or equivalent physical
+medium.
+
+This offer to obtain a copy of the Source Files is valid for three years from
+the date you acquired this Software product. Alternatively, the Source Files
+may accompany the Software.
+
+                    ****************************************                    
+
+Spring Framework 5.3.12
+Copyright (c) 2002-2021 Pivotal, Inc.
+
+This product is licensed to you under the Apache License, Version 2.0
+(the "License"). You may not use this product except in compliance with
+the License.
+
+This product may include a number of subcomponents with separate
+copyright notices and license terms. Your use of the source code for
+these subcomponents is subject to the terms and conditions of the
+subcomponent's license, as noted in the license.txt file.
+
+--------------------------------------------------------------------------------
+
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 198. Group: org.springframework  Name: spring-web  Version: 5.3.24
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
@@ -23082,8 +23508,11 @@ subcomponent's license, as noted in the license.txt file.
 =======
 199. Group: org.springframework  Name: spring-webmvc  Version: 5.3.12
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
 198. Group: org.springframework  Name: spring-web  Version: 5.3.12
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
@@ -23748,6 +24177,8 @@ subcomponent's license, as noted in the license.txt file.
 201. Group: org.springframework.boot  Name: spring-boot  Version: 2.5.6
 =======
 200. Group: org.springframework  Name: spring-webmvc  Version: 5.3.12
+=======
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -24063,7 +24494,7 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
-201. Group: org.springframework  Name: spring-webmvc  Version: 5.3.24
+200. Group: org.springframework  Name: spring-webmvc  Version: 5.3.24
 
 POM Project URL: https://github.com/spring-projects/spring-framework
 
@@ -24379,9 +24810,16 @@ subcomponent's license, as noted in the license.txt file.
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 202. Group: org.springframework.boot  Name: spring-boot  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+201. Group: org.springframework.boot  Name: spring-boot  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -24603,6 +25041,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -24614,11 +25053,19 @@ the License.
 202. Group: org.springframework.boot  Name: spring-boot  Version: 2.7.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 202. Group: org.springframework.boot  Name: spring-boot  Version: 2.7.6
 =======
 203. Group: org.springframework.boot  Name: spring-boot  Version: 2.7.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+202. Group: org.springframework.boot  Name: spring-boot  Version: 2.7.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -24840,6 +25287,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -24851,11 +25299,19 @@ the License.
 203. Group: org.springframework.boot  Name: spring-boot-actuator  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 203. Group: org.springframework.boot  Name: spring-boot-actuator  Version: 2.5.6
 =======
 204. Group: org.springframework.boot  Name: spring-boot-actuator  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+203. Group: org.springframework.boot  Name: spring-boot-actuator  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -25077,6 +25533,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -25088,11 +25545,19 @@ the License.
 204. Group: org.springframework.boot  Name: spring-boot-actuator-autoconfigure  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 204. Group: org.springframework.boot  Name: spring-boot-actuator-autoconfigure  Version: 2.5.6
 =======
 205. Group: org.springframework.boot  Name: spring-boot-actuator-autoconfigure  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+204. Group: org.springframework.boot  Name: spring-boot-actuator-autoconfigure  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -25314,6 +25779,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -25325,11 +25791,19 @@ the License.
 205. Group: org.springframework.boot  Name: spring-boot-autoconfigure  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 205. Group: org.springframework.boot  Name: spring-boot-autoconfigure  Version: 2.5.6
 =======
 206. Group: org.springframework.boot  Name: spring-boot-autoconfigure  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+205. Group: org.springframework.boot  Name: spring-boot-autoconfigure  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -25551,6 +26025,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -25562,11 +26037,19 @@ the License.
 206. Group: org.springframework.boot  Name: spring-boot-autoconfigure  Version: 2.7.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 206. Group: org.springframework.boot  Name: spring-boot-autoconfigure  Version: 2.7.6
 =======
 207. Group: org.springframework.boot  Name: spring-boot-autoconfigure  Version: 2.7.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+206. Group: org.springframework.boot  Name: spring-boot-autoconfigure  Version: 2.7.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -25788,6 +26271,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -25799,11 +26283,19 @@ the License.
 207. Group: org.springframework.boot  Name: spring-boot-starter  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 207. Group: org.springframework.boot  Name: spring-boot-starter  Version: 2.5.6
 =======
 208. Group: org.springframework.boot  Name: spring-boot-starter  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+207. Group: org.springframework.boot  Name: spring-boot-starter  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -26025,6 +26517,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -26036,11 +26529,19 @@ the License.
 208. Group: org.springframework.boot  Name: spring-boot-starter  Version: 2.7.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 208. Group: org.springframework.boot  Name: spring-boot-starter  Version: 2.7.6
 =======
 209. Group: org.springframework.boot  Name: spring-boot-starter  Version: 2.7.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+208. Group: org.springframework.boot  Name: spring-boot-starter  Version: 2.7.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -26262,6 +26763,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -26273,11 +26775,19 @@ the License.
 209. Group: org.springframework.boot  Name: spring-boot-starter-actuator  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 209. Group: org.springframework.boot  Name: spring-boot-starter-actuator  Version: 2.5.6
 =======
 210. Group: org.springframework.boot  Name: spring-boot-starter-actuator  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+209. Group: org.springframework.boot  Name: spring-boot-starter-actuator  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -26499,6 +27009,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -26510,11 +27021,19 @@ the License.
 210. Group: org.springframework.boot  Name: spring-boot-starter-aop  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 210. Group: org.springframework.boot  Name: spring-boot-starter-aop  Version: 2.5.6
 =======
 211. Group: org.springframework.boot  Name: spring-boot-starter-aop  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+210. Group: org.springframework.boot  Name: spring-boot-starter-aop  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -26736,6 +27255,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -26747,11 +27267,19 @@ the License.
 211. Group: org.springframework.boot  Name: spring-boot-starter-data-jpa  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 211. Group: org.springframework.boot  Name: spring-boot-starter-data-jpa  Version: 2.5.6
 =======
 212. Group: org.springframework.boot  Name: spring-boot-starter-data-jpa  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+211. Group: org.springframework.boot  Name: spring-boot-starter-data-jpa  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -26973,6 +27501,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -26984,11 +27513,19 @@ the License.
 212. Group: org.springframework.boot  Name: spring-boot-starter-jdbc  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 212. Group: org.springframework.boot  Name: spring-boot-starter-jdbc  Version: 2.5.6
 =======
 213. Group: org.springframework.boot  Name: spring-boot-starter-jdbc  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+212. Group: org.springframework.boot  Name: spring-boot-starter-jdbc  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -27210,6 +27747,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -27221,11 +27759,19 @@ the License.
 213. Group: org.springframework.boot  Name: spring-boot-starter-json  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 213. Group: org.springframework.boot  Name: spring-boot-starter-json  Version: 2.5.6
 =======
 214. Group: org.springframework.boot  Name: spring-boot-starter-json  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+213. Group: org.springframework.boot  Name: spring-boot-starter-json  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -27447,6 +27993,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -27458,11 +28005,19 @@ the License.
 214. Group: org.springframework.boot  Name: spring-boot-starter-json  Version: 2.7.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 214. Group: org.springframework.boot  Name: spring-boot-starter-json  Version: 2.7.6
 =======
 215. Group: org.springframework.boot  Name: spring-boot-starter-json  Version: 2.7.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+214. Group: org.springframework.boot  Name: spring-boot-starter-json  Version: 2.7.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -27684,6 +28239,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -27695,11 +28251,19 @@ the License.
 215. Group: org.springframework.boot  Name: spring-boot-starter-logging  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 215. Group: org.springframework.boot  Name: spring-boot-starter-logging  Version: 2.5.6
 =======
 216. Group: org.springframework.boot  Name: spring-boot-starter-logging  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+215. Group: org.springframework.boot  Name: spring-boot-starter-logging  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -27921,6 +28485,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -27932,11 +28497,19 @@ the License.
 216. Group: org.springframework.boot  Name: spring-boot-starter-logging  Version: 2.7.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 216. Group: org.springframework.boot  Name: spring-boot-starter-logging  Version: 2.7.6
 =======
 217. Group: org.springframework.boot  Name: spring-boot-starter-logging  Version: 2.7.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+216. Group: org.springframework.boot  Name: spring-boot-starter-logging  Version: 2.7.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -28158,6 +28731,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -28169,11 +28743,19 @@ the License.
 217. Group: org.springframework.boot  Name: spring-boot-starter-tomcat  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 217. Group: org.springframework.boot  Name: spring-boot-starter-tomcat  Version: 2.5.6
 =======
 218. Group: org.springframework.boot  Name: spring-boot-starter-tomcat  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+217. Group: org.springframework.boot  Name: spring-boot-starter-tomcat  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -28395,6 +28977,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -28406,11 +28989,19 @@ the License.
 218. Group: org.springframework.boot  Name: spring-boot-starter-tomcat  Version: 2.7.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 218. Group: org.springframework.boot  Name: spring-boot-starter-tomcat  Version: 2.7.6
 =======
 219. Group: org.springframework.boot  Name: spring-boot-starter-tomcat  Version: 2.7.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+218. Group: org.springframework.boot  Name: spring-boot-starter-tomcat  Version: 2.7.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -28632,6 +29223,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -28643,11 +29235,19 @@ the License.
 219. Group: org.springframework.boot  Name: spring-boot-starter-validation  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 219. Group: org.springframework.boot  Name: spring-boot-starter-validation  Version: 2.5.6
 =======
 220. Group: org.springframework.boot  Name: spring-boot-starter-validation  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+219. Group: org.springframework.boot  Name: spring-boot-starter-validation  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -28869,6 +29469,7 @@ This product is licensed to you under the Apache License, Version 2.0
 the License.
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -28880,11 +29481,19 @@ the License.
 220. Group: org.springframework.boot  Name: spring-boot-starter-web  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 220. Group: org.springframework.boot  Name: spring-boot-starter-web  Version: 2.5.6
 =======
 221. Group: org.springframework.boot  Name: spring-boot-starter-web  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+220. Group: org.springframework.boot  Name: spring-boot-starter-web  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -29109,6 +29718,7 @@ the License.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 219. Group: org.springframework.boot  Name: spring-boot-starter-web  Version: 2.6.2
 =======
 222. Group: org.springframework.boot  Name: spring-boot-starter-web  Version: 2.7.6
@@ -29117,11 +29727,19 @@ the License.
 221. Group: org.springframework.boot  Name: spring-boot-starter-web  Version: 2.7.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 221. Group: org.springframework.boot  Name: spring-boot-starter-web  Version: 2.7.6
 =======
 222. Group: org.springframework.boot  Name: spring-boot-starter-web  Version: 2.7.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+221. Group: org.springframework.boot  Name: spring-boot-starter-web  Version: 2.7.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-boot
 
@@ -29346,6 +29964,7 @@ the License.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 220. Group: org.springframework.data  Name: spring-data-commons  Version: 2.5.6
 =======
 223. Group: org.springframework.data  Name: spring-data-commons  Version: 2.5.6
@@ -29354,11 +29973,19 @@ the License.
 222. Group: org.springframework.data  Name: spring-data-commons  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 222. Group: org.springframework.data  Name: spring-data-commons  Version: 2.5.6
 =======
 223. Group: org.springframework.data  Name: spring-data-commons  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+222. Group: org.springframework.data  Name: spring-data-commons  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0
 
@@ -29625,6 +30252,7 @@ conditions of the subcomponent's license, as noted in the LICENSE file.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 221. Group: org.springframework.data  Name: spring-data-jpa  Version: 2.5.6
 =======
 224. Group: org.springframework.data  Name: spring-data-jpa  Version: 2.5.6
@@ -29633,11 +30261,19 @@ conditions of the subcomponent's license, as noted in the LICENSE file.
 223. Group: org.springframework.data  Name: spring-data-jpa  Version: 2.5.6
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 223. Group: org.springframework.data  Name: spring-data-jpa  Version: 2.5.6
 =======
 224. Group: org.springframework.data  Name: spring-data-jpa  Version: 2.5.6
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+223. Group: org.springframework.data  Name: spring-data-jpa  Version: 2.5.6
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://projects.spring.io/spring-data-jpa
 
@@ -29926,6 +30562,7 @@ Spring Data JPA on Stackoverflow: https://stackoverflow.com/questions/tagged/spr
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 222. Group: org.springframework.ldap  Name: spring-ldap-core  Version: 2.3.4.RELEASE
 =======
 225. Group: org.springframework.ldap  Name: spring-ldap-core  Version: 2.3.4.RELEASE
@@ -29934,11 +30571,19 @@ Spring Data JPA on Stackoverflow: https://stackoverflow.com/questions/tagged/spr
 224. Group: org.springframework.ldap  Name: spring-ldap-core  Version: 2.3.4.RELEASE
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 224. Group: org.springframework.ldap  Name: spring-ldap-core  Version: 2.3.4.RELEASE
 =======
 225. Group: org.springframework.ldap  Name: spring-ldap-core  Version: 2.3.4.RELEASE
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+224. Group: org.springframework.ldap  Name: spring-ldap-core  Version: 2.3.4.RELEASE
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://www.springframework.org/ldap
 
@@ -30174,6 +30819,7 @@ Embedded license:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 223. Group: org.springframework.plugin  Name: spring-plugin-core  Version: 1.2.0.RELEASE
 =======
 226. Group: org.springframework.plugin  Name: spring-plugin-core  Version: 1.2.0.RELEASE
@@ -30182,16 +30828,25 @@ Embedded license:
 225. Group: org.springframework.plugin  Name: spring-plugin-core  Version: 1.2.0.RELEASE
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 225. Group: org.springframework.plugin  Name: spring-plugin-core  Version: 1.2.0.RELEASE
 =======
 226. Group: org.springframework.plugin  Name: spring-plugin-core  Version: 1.2.0.RELEASE
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+225. Group: org.springframework.plugin  Name: spring-plugin-core  Version: 1.2.0.RELEASE
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -30203,16 +30858,25 @@ POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENS
 226. Group: org.springframework.plugin  Name: spring-plugin-metadata  Version: 1.2.0.RELEASE
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 226. Group: org.springframework.plugin  Name: spring-plugin-metadata  Version: 1.2.0.RELEASE
 =======
 227. Group: org.springframework.plugin  Name: spring-plugin-metadata  Version: 1.2.0.RELEASE
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+226. Group: org.springframework.plugin  Name: spring-plugin-metadata  Version: 1.2.0.RELEASE
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -30224,11 +30888,19 @@ POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENS
 227. Group: org.springframework.security  Name: spring-security-config  Version: 5.1.5.RELEASE
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 227. Group: org.springframework.security  Name: spring-security-config  Version: 5.1.5.RELEASE
 =======
 228. Group: org.springframework.security  Name: spring-security-config  Version: 5.1.5.RELEASE
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+227. Group: org.springframework.security  Name: spring-security-config  Version: 5.1.5.RELEASE
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/spring-security
 
@@ -30236,6 +30908,7 @@ POM License: The Apache Software License, Version 2.0 - https://www.apache.org/l
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -30247,11 +30920,19 @@ POM License: The Apache Software License, Version 2.0 - https://www.apache.org/l
 228. Group: org.springframework.security  Name: spring-security-core  Version: 5.5.3
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 228. Group: org.springframework.security  Name: spring-security-core  Version: 5.5.3
 =======
 229. Group: org.springframework.security  Name: spring-security-core  Version: 5.5.3
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+228. Group: org.springframework.security  Name: spring-security-core  Version: 5.5.3
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-security
 
@@ -30259,6 +30940,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -30270,11 +30952,19 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 229. Group: org.springframework.security  Name: spring-security-crypto  Version: 5.5.3
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 229. Group: org.springframework.security  Name: spring-security-crypto  Version: 5.5.3
 =======
 230. Group: org.springframework.security  Name: spring-security-crypto  Version: 5.5.3
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+229. Group: org.springframework.security  Name: spring-security-crypto  Version: 5.5.3
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-security
 
@@ -30282,6 +30972,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -30293,11 +30984,19 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 230. Group: org.springframework.security  Name: spring-security-ldap  Version: 5.5.3
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 230. Group: org.springframework.security  Name: spring-security-ldap  Version: 5.5.3
 =======
 231. Group: org.springframework.security  Name: spring-security-ldap  Version: 5.5.3
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+230. Group: org.springframework.security  Name: spring-security-ldap  Version: 5.5.3
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/projects/spring-security
 
@@ -30305,6 +31004,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -30316,11 +31016,19 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 231. Group: org.springframework.security  Name: spring-security-web  Version: 5.1.5.RELEASE
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 231. Group: org.springframework.security  Name: spring-security-web  Version: 5.1.5.RELEASE
 =======
 232. Group: org.springframework.security  Name: spring-security-web  Version: 5.1.5.RELEASE
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+231. Group: org.springframework.security  Name: spring-security-web  Version: 5.1.5.RELEASE
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://spring.io/spring-security
 
@@ -30328,6 +31036,7 @@ POM License: The Apache Software License, Version 2.0 - https://www.apache.org/l
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -30339,11 +31048,19 @@ POM License: The Apache Software License, Version 2.0 - https://www.apache.org/l
 232. Group: org.xerial  Name: sqlite-jdbc  Version: 3.28.0
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 232. Group: org.xerial  Name: sqlite-jdbc  Version: 3.28.0
 =======
 233. Group: org.xerial  Name: sqlite-jdbc  Version: 3.28.0
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+232. Group: org.xerial  Name: sqlite-jdbc  Version: 3.28.0
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM License: The Apache Software License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.txt
 
@@ -30586,6 +31303,7 @@ SUCH DAMAGE.
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 231. Group: org.yaml  Name: snakeyaml  Version: 1.29
 
 POM Project URL: http://www.snakeyaml.org
@@ -30602,11 +31320,19 @@ POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENS
 233. Group: org.yaml  Name: snakeyaml  Version: 1.33
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 233. Group: org.yaml  Name: snakeyaml  Version: 1.33
 =======
 234. Group: org.yaml  Name: snakeyaml  Version: 1.33
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+233. Group: org.yaml  Name: snakeyaml  Version: 1.33
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://bitbucket.org/snakeyaml/snakeyaml
 
@@ -30614,6 +31340,7 @@ POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENS
 
 --------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -30632,6 +31359,8 @@ POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENS
 =======
 =======
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 234. Group: piccolo  Name: piccolo  Version: 1.0.3
 
 --------------------------------------------------------------------------------
@@ -30647,7 +31376,17 @@ POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENS
 
 236. Group: rocks.inspectit  Name: opencensus-influxdb-exporter  Version: 1.2
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+234. Group: piccolo  Name: piccolo  Version: 1.0.3
+
+--------------------------------------------------------------------------------
+
+235. Group: rocks.inspectit  Name: opencensus-influxdb-exporter  Version: 1.2
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
 POM Project URL: https://github.com/NovatecConsulting/opencensus-influx-exporter
 
@@ -30659,6 +31398,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 This report was generated at Tue Aug 30 16:03:49 CEST 2022.
 =======
 This report was generated at Fri Dec 09 09:34:07 CET 2022.
@@ -30667,9 +31407,17 @@ This report was generated at Fri Dec 09 09:34:07 CET 2022.
 This report was generated at Fri Dec 09 10:08:20 CET 2022.
 >>>>>>> df49fb79f (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 =======
+=======
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 This report was generated at Fri Dec 09 10:08:20 CET 2022.
 =======
 This report was generated at Fri Dec 09 09:34:07 CET 2022.
 >>>>>>> b72360d5c (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+<<<<<<< HEAD
 >>>>>>> 9d1b2b802 (fix(dependencies): upgrade snakeyaml, logback, and jacksondatabind [#1553])
+=======
+=======
+This report was generated at Fri Dec 09 10:08:20 CET 2022.
+>>>>>>> 555a1597e (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
+>>>>>>> 181de4410 (fix(dependencies): adjust spring-beans version in configuration-server [#1553])
 
