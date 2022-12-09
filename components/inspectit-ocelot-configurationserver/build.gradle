@@ -118,7 +118,7 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-actuator',
 
             // spring releated
-            "org.yaml:snakeyaml:1.30",
+            "org.yaml:snakeyaml:${snakeYamlVersion}",
 
             'org.apache.httpcomponents:httpclient:4.5.12', //Required for PATCH-Requests
 

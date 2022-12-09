@@ -27,11 +27,11 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 
     implementation(
-            "org.springframework.boot:spring-boot:${springVersion}",
+            "org.springframework.boot:spring-boot:${springBootVersion}",
             'org.hibernate.validator:hibernate-validator:6.0.13.Final',
             'org.apache.commons:commons-lang3:3.9',
             'commons-io:commons-io:2.5',
-            'com.fasterxml.jackson.core:jackson-databind:2.8.9',
+            "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}",
 
             // logging
             "ch.qos.logback:logback-classic:${logbackVersion}",
