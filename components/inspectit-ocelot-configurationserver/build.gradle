@@ -116,6 +116,8 @@ dependencies {
             "org.springframework.ldap:spring-ldap-core",
             "org.springframework.security:spring-security-ldap",
             'org.springframework.boot:spring-boot-starter-actuator',
+            // use non-vulnerable spring-beans version
+            "org.springframework:spring-beans:${springbeans_version}",
 
             // spring releated
             "org.yaml:snakeyaml:${snakeYamlVersion}",
