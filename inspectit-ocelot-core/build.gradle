@@ -116,7 +116,7 @@ dependencies {
             'org.mockito:mockito-junit-jupiter:4.2.0',
 
             // to make use of SpyBean
-            "org.springframework.boot:spring-boot-test:2.1.4.RELEASE",
+            "org.springframework.boot:spring-boot-test:${springBootVersion}",
 
             'org.apache.httpcomponents:httpclient:4.5.6',
             "org.mockito:mockito-core:${mockitoVersion}",
