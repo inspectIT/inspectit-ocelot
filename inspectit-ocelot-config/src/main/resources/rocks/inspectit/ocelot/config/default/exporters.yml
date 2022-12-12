@@ -53,6 +53,14 @@ inspectit:
         endpoint: null
         # the transport protocol, e.g., 'grpc' or 'http/protobuf'
         protocol:
+        # headers
+        headers: {}
+        # the aggregation temporality, e.g., CUMULATIVE or DELTA
+        preferredTemporality: CUMULATIVE
+        # compression method
+        compression: NONE
+        # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
+        timeout: 10s
 
     # settings for trace exporters
     tracing:
@@ -85,3 +93,9 @@ inspectit:
         endpoint: null
         # the transport protocol, e.g., 'http/thrift' or 'grpc'
         protocol:
+        # headers
+        headers: {}
+        # compression method
+        compression: NONE
+        # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
+        timeout: 10s

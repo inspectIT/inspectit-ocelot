@@ -17,6 +17,7 @@ const FileToolbar = ({
   showCreateDirectoryDialog,
   showMoveDialog,
   showDeleteFileDialog,
+  showUploadDialog,
   showSearchDialog,
   toggleShowHiddenFiles,
 }) => {

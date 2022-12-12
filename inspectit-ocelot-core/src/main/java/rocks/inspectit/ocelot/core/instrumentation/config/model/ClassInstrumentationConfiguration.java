@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.config.model;
 import lombok.Getter;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.utils.ConfigUtils;
+import rocks.inspectit.ocelot.core.instrumentation.TypeDescriptionWithClassLoader;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 
 import java.util.Collections;
@@ -40,6 +41,21 @@ public class ClassInstrumentationConfiguration {
         this.activeConfiguration = activeConfiguration;
     }
 
+    public boolean isSameAs(TypeDescriptionWithClassLoader typeWithLoader, ClassInstrumentationConfiguration other) {
+        if (!ConfigUtils.contentsEqual(activeSpecialSensors, other.activeSpecialSensors)) {
+            return false;
+        }
+        if (!ConfigUtils.contentsEqual(getActiveRules(), other.getActiveRules())) {
+            return false;
+        }
+        for (SpecialSensor sensor : activeSpecialSensors) {
+            if (sensor.requiresInstrumentationChange(typeWithLoader, activeConfiguration, other.activeConfiguration)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Compares this instrumentation configuration against another.
      * Two instrumentations are considered to be the "same" if they result in the same bytecode changes.
@@ -48,21 +64,11 @@ public class ClassInstrumentationConfiguration {
      *
      * @param clazz the type for which this configuration is meant.
      * @param other the other configuration to compare against
+     *
      * @return true if both are the same, false otherwise
      */
     public boolean isSameAs(Class<?> clazz, ClassInstrumentationConfiguration other) {
-        if (!ConfigUtils.contentsEqual(activeSpecialSensors, other.activeSpecialSensors)) {
-            return false;
-        }
-        if (!ConfigUtils.contentsEqual(getActiveRules(), other.getActiveRules())) {
-            return false;
-        }
-        for (SpecialSensor sensor : activeSpecialSensors) {
-            if (sensor.requiresInstrumentationChange(clazz, activeConfiguration, other.activeConfiguration)) {
-                return false;
-            }
-        }
-        return true;
+        return isSameAs(TypeDescriptionWithClassLoader.of(clazz), other);
     }
 
     /**

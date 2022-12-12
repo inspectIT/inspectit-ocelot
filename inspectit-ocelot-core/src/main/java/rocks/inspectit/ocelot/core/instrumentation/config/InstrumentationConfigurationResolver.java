@@ -16,14 +16,14 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.instrumentation.AsyncClassTransformer;
+import rocks.inspectit.ocelot.core.instrumentation.TypeDescriptionWithClassLoader;
 import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
+import rocks.inspectit.ocelot.core.instrumentation.transformer.AsyncClassTransformer;
 import rocks.inspectit.ocelot.core.utils.CoreUtils;
 
 import javax.annotation.PostConstruct;
-import java.lang.instrument.Instrumentation;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,9 +42,6 @@ public class InstrumentationConfigurationResolver {
 
     @Autowired
     private ApplicationContext ctx;
-
-    @Autowired
-    private Instrumentation instrumentation;
 
     @Autowired
     private List<SpecialSensor> specialSensors;
@@ -75,50 +72,62 @@ public class InstrumentationConfigurationResolver {
 
     /**
      * Builds the {@link ClassInstrumentationConfiguration} based on the currently active global instrumentation configuration
-     * for the given class.
+     * for the {@link TypeDescription} of the given {@link TypeDescriptionWithClassLoader}.
      *
-     * @param clazz the class for which the configuration shal lbe queried
+     * @param typeWithLoader the {@link  TypeDescriptionWithClassLoader} for which the configuration shall lbe queried
      *
      * @return the configuration or {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION} if this class should not be instrumented
      */
-    public ClassInstrumentationConfiguration getClassInstrumentationConfiguration(Class<?> clazz) {
+    public ClassInstrumentationConfiguration getClassInstrumentationConfiguration(TypeDescriptionWithClassLoader typeWithLoader) {
         InstrumentationConfiguration config = currentConfig;
         try {
-            if (!config.getSource().isEnabled() || isIgnoredClass(clazz, config)) {
+            if (!config.getSource().isEnabled() || isIgnoredClass(typeWithLoader, config)) {
                 return ClassInstrumentationConfiguration.NO_INSTRUMENTATION;
             } else {
-                TypeDescription description = TypeDescription.ForLoadedType.of(clazz);
                 Set<SpecialSensor> activeSensors = specialSensors.stream()
-                        .filter(s -> s.shouldInstrument(clazz, config))
+                        .filter(s -> s.shouldInstrument(typeWithLoader, config))
                         .collect(Collectors.toSet());
 
-                Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(description, config);
+                Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(typeWithLoader.getType(), config);
 
                 return new ClassInstrumentationConfiguration(activeSensors, narrowedRules, config);
 
             }
         } catch (NoClassDefFoundError e) {
-            //the class contains a reference to an not loadable class
+            //the class contains a reference to a not loadable class
             //this the case for example for very many spring boot classes
-            log.trace("Ignoring class {} for instrumentation as it is not initializable ", clazz.getName(), e);
+            log.trace("Ignoring class {} for instrumentation as it is not initializable ", typeWithLoader.getName(), e);
             return ClassInstrumentationConfiguration.NO_INSTRUMENTATION;
         }
     }
 
     /**
-     * Finds out for each method of the given class which rules apply and builds a {@link MethodHookConfiguration} for each instrumented method.
+     * Builds the {@link ClassInstrumentationConfiguration} based on the currently active global instrumentation configuration
+     * for the given class.
      *
-     * @param clazz the class to check
+     * @param clazz the {@link  Class} for which the configuration shall lbe queried
+     *
+     * @return the configuration or {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION} if this class should not be instrumented
+     */
+    public ClassInstrumentationConfiguration getClassInstrumentationConfiguration(Class<?> clazz) {
+        return getClassInstrumentationConfiguration(TypeDescriptionWithClassLoader.of(clazz));
+    }
+
+    /**
+     * Finds out for each method of the given {@link TypeDescription} of the given {@link TypeDescriptionWithClassLoader}
+     * which rules apply and builds a {@link MethodHookConfiguration} for each instrumented method.
+     *
+     * @param typeWithLoader the {@link  TypeDescriptionWithClassLoader} to check
      *
      * @return a map mapping hook configurations to the methods which they should be applied on.
      */
-    public Map<MethodDescription, MethodHookConfiguration> getHookConfigurations(Class<?> clazz) {
+    public Map<MethodDescription, MethodHookConfiguration> getHookConfigurations(TypeDescriptionWithClassLoader typeWithLoader) {
         val config = currentConfig;
-        if (isIgnoredClass(clazz, config)) {
+        if (isIgnoredClass(typeWithLoader, config)) {
             return Collections.emptyMap();
         }
         try {
-            TypeDescription type = TypeDescription.ForLoadedType.of(clazz);
+            TypeDescription type = typeWithLoader.getType();
             Set<InstrumentationRule> narrowedRules = getNarrowedRulesFor(type, config);
 
             if (!narrowedRules.isEmpty()) {
@@ -134,7 +143,7 @@ public class InstrumentationConfigurationResolver {
                             Set<InstrumentationRule> matchedAndIncludedRules = resolveIncludes(config, rulesMatchingOnMethod);
                             result.put(method, hookResolver.buildHookConfiguration(config, matchedAndIncludedRules));
                         } catch (Exception e) {
-                            log.error("Could not build hook for {} of class {}", CoreUtils.getSignature(method), clazz.getName(), e);
+                            log.error("Could not build hook for {} of class {}", CoreUtils.getSignature(method), typeWithLoader.getName(), e);
                         }
                     }
                 }
@@ -143,9 +152,20 @@ public class InstrumentationConfigurationResolver {
         } catch (NoClassDefFoundError e) {
             //the class contains a reference to an not loadable class
             //this the case for example for very many spring boot classes
-            log.trace("Ignoring class {} for hooking as it is not initializable ", clazz.getName(), e);
+            log.trace("Ignoring class {} for hooking as it is not initializable ", typeWithLoader.getName(), e);
         }
         return Collections.emptyMap();
+    }
+
+    /**
+     * Finds out for each method of the given class which rules apply and builds a {@link MethodHookConfiguration} for each instrumented method.
+     *
+     * @param clazz the class to check
+     *
+     * @return a map mapping hook configurations to the methods which they should be applied on.
+     */
+    public Map<MethodDescription, MethodHookConfiguration> getHookConfigurations(Class<?> clazz) {
+        return getHookConfigurations(TypeDescriptionWithClassLoader.of(clazz));
 
     }
 
@@ -230,21 +250,22 @@ public class InstrumentationConfigurationResolver {
     /**
      * Checks if the given class should not be instrumented based on the given configuration.
      *
-     * @param clazz  the class to check
-     * @param config configuration to check for
+     * @param typeWithLoader the {@link  java.lang.reflect.Type} to check
+     * @param config         configuration to check for
      *
      * @return true, if the class is ignored (=it should not be instrumented)
      */
     @VisibleForTesting
-    boolean isIgnoredClass(Class<?> clazz, InstrumentationConfiguration config) {
+    boolean isIgnoredClass(TypeDescriptionWithClassLoader typeWithLoader, InstrumentationConfiguration config) {
 
-        ClassLoader loader = clazz.getClassLoader();
+        ClassLoader loader = typeWithLoader.getLoader();
+        TypeDescription type = typeWithLoader.getType();
 
-        if (!instrumentation.isModifiableClass(clazz)) {
+        if (type.isPrimitive() || type.isArray()) {
             return true;
         }
 
-        if (DoNotInstrumentMarker.class.isAssignableFrom(clazz)) {
+        if (type.isAssignableTo(DoNotInstrumentMarker.class)) {
             return true;
         }
 
@@ -256,32 +277,28 @@ public class InstrumentationConfigurationResolver {
             return true;
         }
 
-        if (config.getSource().isExcludeLambdas() && clazz.getName().contains("$$Lambda$")) {
+        if (config.getSource().isExcludeLambdas() && type.getName().contains("$$Lambda$")) {
             return true;
         }
+        return isClassFromIgnoredPackage(config.getSource(), type.getName(), loader);
+    }
 
-        String name = clazz.getName();
-
-        boolean isIgnored = config.getSource()
-                .getIgnoredPackages()
+    public static boolean isClassFromIgnoredPackage(InstrumentationSettings settings, String className, ClassLoader loader) {
+        boolean isIgnored = settings.getIgnoredPackages()
                 .entrySet()
                 .stream()
                 .filter(Map.Entry::getValue)
-                .anyMatch(e -> name.startsWith(e.getKey()));
+                .anyMatch(e -> className.startsWith(e.getKey()));
         if (isIgnored) {
             return true;
         }
 
-        if (clazz.getClassLoader() == null) {
-            boolean isIgnoredOnBootstrap = config.getSource()
-                    .getIgnoredBootstrapPackages()
+        if (loader == null) {
+            return settings.getIgnoredBootstrapPackages()
                     .entrySet()
                     .stream()
                     .filter(Map.Entry::getValue)
-                    .anyMatch(e -> name.startsWith(e.getKey()));
-            if (isIgnoredOnBootstrap) {
-                return true;
-            }
+                    .anyMatch(e -> className.startsWith(e.getKey()));
         }
         return false;
     }
