@@ -136,6 +136,7 @@ dependencies {
             'io.jsonwebtoken:jjwt-impl:0.10.5',
             'io.jsonwebtoken:jjwt-jackson:0.10.5',
             "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.9",
+            "com.fasterxml.jackson.core:jackson-databind:2.14.1",
             "commons-io:commons-io:2.6",
             "org.apache.commons:commons-lang3:3.+",
             "org.flywaydb:flyway-core",
