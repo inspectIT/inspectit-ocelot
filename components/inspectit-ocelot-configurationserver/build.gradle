@@ -140,7 +140,7 @@ dependencies {
             "org.apache.commons:commons-lang3:3.+",
             "org.flywaydb:flyway-core",
             "org.eclipse.jgit:org.eclipse.jgit:5.7.0.202003110725-r",
-            "com.google.code.gson:gson:2.8.5",
+            "com.google.code.gson:gson:2.10",
 
             // swagger
             "io.springfox:springfox-swagger2:2.9.2",
