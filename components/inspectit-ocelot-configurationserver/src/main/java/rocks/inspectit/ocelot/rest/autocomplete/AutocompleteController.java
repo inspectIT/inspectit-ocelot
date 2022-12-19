@@ -1,9 +1,7 @@
 package rocks.inspectit.ocelot.rest.autocomplete;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.Example;
-import io.swagger.annotations.ExampleProperty;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,13 +23,19 @@ public class AutocompleteController extends AbstractBaseController {
     @Autowired
     private List<AutoCompleter> completers;
 
-    @ApiOperation(value = "String which should be autocompleted")
-    @ApiResponse(code = 200, message = "The options which you can enter into the string", examples =
+    @Operation(summary = "String which should be autocompleted")
+    @ApiResponse(responseCode = "200", description = "The options which you can enter into the string"
+            // TODO: map the 'examples' to openAPI
+            /*
+            , examples =
+
     @Example(value = @ExampleProperty(value = "[\"interfaces\",\n" +
             "    \"superclass\",\n" +
             "    \"type\",\n" +
             "    \"methods\",\n" +
-            "    \"advanced\"]", mediaType = "text/plain")))
+            "    \"advanced\"]", mediaType = "text/plain"))
+            */)
+
     @PostMapping("/autocomplete")
     public List<String> getPossibleProperties(@RequestBody AutoCompleteRequest request) {
         return completers.stream()

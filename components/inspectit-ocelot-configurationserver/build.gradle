@@ -144,10 +144,7 @@ dependencies {
             "com.google.code.gson:gson:2.10",
 
             // swagger
-            "io.springfox:springfox-swagger2:2.9.2",
-            "io.springfox:springfox-swagger-ui:2.9.2",
-
-            //"org.springdoc:springdoc-openapi-ui:1.6.13",
+            "org.springdoc:springdoc-openapi-ui:1.6.13",
 
 
             "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",

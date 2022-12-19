@@ -15,7 +15,7 @@ import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.config.model.instrumentation.scope.AdvancedScopeSettings;
-import springfox.documentation.spring.web.json.Json;
+
 
 import java.util.List;
 import java.util.Map;
@@ -41,14 +41,14 @@ public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
             final String JSON = gson.toJson(controller.generateMap(InspectitConfig.class));
 
             // get expected JSON
-            JsonObject expected = jsonParser.parse(JSON).getAsJsonObject();
+            JsonObject expected = jsonParser.parseString(JSON).getAsJsonObject();
 
             // get highlighting rules map
             ResponseEntity<Object> result = authRest.getForEntity("/api/v1/highlight-rules", Object.class);
 
             // parse to JSON
             final String RESPONSE_JSON = gson.toJson(result.getBody());
-            JsonObject obj = jsonParser.parse(RESPONSE_JSON).getAsJsonObject();
+            JsonObject obj = jsonParser.parseString(RESPONSE_JSON).getAsJsonObject();
 
             // assert that the returned body is a JsonObject and that it equals the expected JSON
             assertThat(obj.isJsonObject()).isTrue();
