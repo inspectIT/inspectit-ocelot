@@ -29,8 +29,8 @@ dependencies {
     implementation(
             "org.springframework.boot:spring-boot:${springBootVersion}",
             'org.hibernate.validator:hibernate-validator:6.0.13.Final',
-            'org.apache.commons:commons-lang3:3.9',
-            'commons-io:commons-io:2.5',
+            "org.apache.commons:commons-lang3:${commonsLangVersion}",
+            "commons-io:commons-io:${commonsIoVersion}",
             "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}",
 
             // logging
