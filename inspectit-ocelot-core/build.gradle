@@ -46,6 +46,7 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     implementation(
+            platform("com.fasterxml.jackson:jackson-bom:${jacksonBomVersion}"),
             project(':inspectit-ocelot-config'),
             project(':inspectit-ocelot-sdk'),
 
@@ -62,12 +63,12 @@ dependencies {
             "ch.qos.logback:logback-classic:${logbackVersion}",
 
             // utils
-            "org.apache.commons:commons-lang3:3.+",
+            "org.apache.commons:commons-lang3:${commonsLangVersion}",
             'org.apache.commons:commons-math3:3.6.1',
             'org.apache.httpcomponents:httpclient:4.5.8',
-            'commons-io:commons-io:2.6',
+            "commons-io:commons-io:${commonsIoVersion}",
             'piccolo:piccolo:1.0.3',
-            "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}",
+            "com.fasterxml.jackson.core:jackson-databind",
 
             'org.javassist:javassist:3.24.1-GA',
 

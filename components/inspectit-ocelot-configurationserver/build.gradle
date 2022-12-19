@@ -110,8 +110,8 @@ dependencies {
 }
 
 dependencies {
-    platform("com.fasterxml.jackson:jackson-bom:${jacksonBomVersion}")
     implementation(
+            platform("com.fasterxml.jackson:jackson-bom:${jacksonBomVersion}"),
             project(':inspectit-ocelot-config'),
             project(':inspectit-ocelot-configdocsgenerator'),
 
