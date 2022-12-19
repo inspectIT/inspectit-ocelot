@@ -63,6 +63,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 "/ui/**",
                 "/actuator/**",
                 "/swagger*/**",
+                "/v3/api-docs/**",
                 "/webjars/**",
                 "/api/v1/agent/configuration",
                 "/api/v1/agent/command",
