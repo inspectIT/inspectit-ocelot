@@ -52,12 +52,6 @@ class ConfigParserTest {
 
             InspectitConfig result = configParser.parseConfig(configYaml);
 
-            // Build the expected result by hand
-            Map<String, Boolean> enabledMap = new HashMap<>();
-            enabledMap.put("free", true);
-            StandardPollingMetricsRecorderSettings pollingSettingsMock = Mockito.mock(StandardPollingMetricsRecorderSettings.class);
-            when(pollingSettingsMock.getEnabled()).thenReturn(enabledMap);
-
             MetricDefinitionSettings metricDefinitionMock = Mockito.mock(MetricDefinitionSettings.class);
             when(metricDefinitionMock.isEnabled()).thenReturn(true);
             when(metricDefinitionMock.getType()).thenReturn(MetricDefinitionSettings.MeasureType.LONG);
@@ -67,6 +61,15 @@ class ConfigParserTest {
 
             assertThat(result.getMetrics().getDefinitions().get("disk/free")).usingRecursiveComparison()
                     .isEqualTo(metricDefinitionMock);
+          // Build the expected result by hand
+            Map<String, Boolean> enabledMap = new HashMap<>();
+            enabledMap.put("free", true);
+          // TODO: Why was a mock used here? An upgrade to a newer Mockito version caused
+          // pollingSettingsMock.getFrequency to return a java.time.Duration of 0s instead of null.
+//            StandardPollingMetricsRecorderSettings pollingSettingsMock = Mockito.mock(StandardPollingMetricsRecorderSettings.class);
+//            when(pollingSettingsMock.getEnabled()).thenReturn(enabledMap);
+            StandardPollingMetricsRecorderSettings pollingSettingsMock = new StandardPollingMetricsRecorderSettings();
+            pollingSettingsMock.setEnabled(enabledMap);
             assertThat(result.getMetrics().getDisk()).usingRecursiveComparison().isEqualTo(pollingSettingsMock);
         }
 
