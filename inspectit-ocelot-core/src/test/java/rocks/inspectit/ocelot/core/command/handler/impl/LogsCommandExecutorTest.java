@@ -101,7 +101,6 @@ public class LogsCommandExecutorTest {
             Mockito.when(preloader.getPreloadedLogs())
                     .thenReturn(Arrays.asList(new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.ERROR, "Message", null, new String[]{}), new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.WARN, "Message {}", null, new String[]{"Foo"}), new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.ERROR, "Exception", new RuntimeException(), new String[]{})));
 
-            // TODO: 15.03.2022 reviewable comment: not ideal that there are no default values possible in protobuf.. Maybe move logformat into executor instead?
             Command command = Command.newBuilder()
                     .setCommandId(UUID.randomUUID().toString())
                     .setLogs(LogsCommand.newBuilder()

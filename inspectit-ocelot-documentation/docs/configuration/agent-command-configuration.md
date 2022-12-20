@@ -22,7 +22,7 @@ It is important to note that depending on the complexity of the agent commands, 
 
 For security reasons, **all communication with the agents is initiated by the agents themselves**.
 This means that the agent must always initiate communication and not vice versa.  
-However, since version `1.16/2.0? todo` agent commands can still be sent from the configuration server to the agent without any delay.
+However, since version `3.0.0` agent commands can still be sent from the configuration server to the agent without any delay.
 This works using a bidirectional streaming gRPC connection, that the agent opens once and that then is used for all communication regarding agent commands.
 The server sends commands over that connection as soon as they come in, and then the agent executes the command and responds over the same connection.
 

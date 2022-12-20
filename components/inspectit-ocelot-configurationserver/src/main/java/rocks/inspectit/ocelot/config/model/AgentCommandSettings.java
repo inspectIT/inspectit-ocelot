@@ -24,5 +24,5 @@ public class AgentCommandSettings {
      * Default is 4MiB which is also grpc's default.
      */
     @Builder.Default
-    private int maxInboundMessageSize = 5000;
+    private int maxInboundMessageSize = 1000;
 }
