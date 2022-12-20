@@ -113,8 +113,8 @@ dependencies {
             // matching the spring-core version used in the currently used version of spring boot version
             'org.springframework:spring-test:5.3.14',
 
-            'org.junit.jupiter:junit-jupiter-api:5.8.2',
-            'org.mockito:mockito-junit-jupiter:4.2.0',
+            "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}",
+            "org.mockito:mockito-junit-jupiter:${mockitoVersion}",
 
             // to make use of SpyBean
             "org.springframework.boot:spring-boot-test:${springBootVersion}",
@@ -146,7 +146,7 @@ dependencies {
             "org.slf4j:jul-to-slf4j:1.7.5",
     )
     testRuntimeOnly(
-            'org.junit.jupiter:junit-jupiter-engine:5.8.2',
+            "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}",
             // LogCapturer
             'io.github.netmikey.logunit:logunit-logback:1.1.3',
     )
