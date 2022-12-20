@@ -405,7 +405,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
             // register metric reader for each service
             for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {
-                builder.registerMetricReader(OpenCensusMetrics.attachTo(metricsExportService.getNewMetricReader()));//OpenCensusMetrics.attachTo(metricsExportService.getNewMetricReader()));
+                builder.registerMetricReader(OpenCensusMetrics.attachTo(metricsExportService.getNewMetricReader()));
             }
 
             return builder.build();
