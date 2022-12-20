@@ -25,17 +25,17 @@ dependencies {
             'org.junit.jupiter:junit-jupiter:5.7.2',
             "io.opencensus:opencensus-api:${openCensusVersion}",
             'org.mockito:mockito-junit-jupiter:2.23.0',
-            "org.assertj:assertj-core:3.19.0"
+            "org.assertj:assertj-core:3.19.0",
+            'com.google.guava:guava:31.1-jre'
     )
 
     // This dependency is used by the application.
     implementation(
             project(':inspectit-ocelot-config'),
             "ch.qos.logback:logback-classic:${logbackVersion}",
-            'org.apache.commons:commons-lang3:3.12.0',
+            "org.apache.commons:commons-lang3:${commonsLangVersion}",
             'org.apache.commons:commons-text:1.10.0',
             'commons-beanutils:commons-beanutils:1.9.4',
-            'com.google.guava:guava:31.0.1-jre',
 
             "org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
             // override snakeyaml due to vulnerabilities in v1.29 used by the SpringBoot version used in this module
