@@ -86,7 +86,7 @@ There are no breaking changes for version 1.15.2.
 There are no breaking changes for version 1.15.1.
 
 
-## Breaking changes in 1.16.0 / 2.0? todo
+## Breaking changes in 3.0.0
 
 ### Agent commands now use grpc
 
