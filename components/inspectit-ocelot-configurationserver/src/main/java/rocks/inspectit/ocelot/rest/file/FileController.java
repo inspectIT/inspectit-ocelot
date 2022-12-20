@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.aspectj.weaver.IClassFileProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -36,15 +39,19 @@ public class FileController extends FileBaseController {
     @Operation(summary = "Write a file", description = "Creates or overwrites a file with the provided text content")
     @Parameter(name = "Path", schema = @Schema(type = "string"), description = "The part of the url after /files/ defines the path to the file to write.")
     @PutMapping(value = "files/**")
-    public void writeFile(HttpServletRequest request, @Parameter(description = "If true, the request body is not parsed as json and is instead written directly to" + " the result file.") @RequestParam(defaultValue = "false") boolean raw, @Parameter(description = "The content to write, either raw or a json"
-            // TODO: map 'example' to openAPI
-            /*
-            , examples = @Example(value = {@ExampleProperty(mediaType = "application/json", value = "{ 'content' : 'This is the" + " file content' }"), @ExampleProperty(mediaType = "text/plain", value = "This is the file content")})
-            */
-    )
-
-
-    @RequestBody(required = false) String content) throws IOException {
+    public void writeFile(HttpServletRequest request,
+        @Parameter(description = "If true, the request body is not parsed as json and is instead written directly to the result file.")
+        @RequestParam(defaultValue = "false")
+        boolean raw,
+        @Parameter(description = "The content to write, either raw or a json",
+            content = { 
+                @Content(mediaType = "text/plain", examples = @ExampleObject("This is the file content")),
+                @Content(mediaType = "application/json", examples = @ExampleObject("{ 'content' : 'This is the file content' }"))
+            }
+        )
+        @RequestBody(required = false)
+        String content
+    ) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
 
         String fileContent;
@@ -60,13 +67,10 @@ public class FileController extends FileBaseController {
 
     @Operation(summary = "Read a file", description = "Returns the contents of the given file.")
     @Parameter(name = "Path", schema = @Schema(type = "string"), description = "The part of the url after /files/ defines the path to the file to read.")
-    @ApiResponse(responseCode = "200", description = "Ok"
-            // TODO: map 'examples' to openAPI
-            /*
-           , examples = @Example(value = {@ExampleProperty(mediaType = "application/json", value = "{ 'content' : 'This is the file content' }"),
-
-            @ExampleProperty(mediaType = "text/plain", value = "This is the file content")})
-            */)
+    @ApiResponse(responseCode = "200", description = "Ok", content = {
+        @Content(mediaType = "application/json", examples = @ExampleObject("{ 'content' : 'This is the file content' }")),
+        @Content(mediaType = "text/plain", examples = @ExampleObject("This is the file content"))
+    })
     @GetMapping(value = "files/**")
     public Object readFile(HttpServletRequest request, @Parameter(description = "If true, the response body is not formatted as json and is instead the plain text" + " content of the file.") @RequestParam(defaultValue = "false") boolean raw, @RequestParam(value = "version", required = false) String commitId) {
         String path = RequestUtil.getRequestSubPath(request);

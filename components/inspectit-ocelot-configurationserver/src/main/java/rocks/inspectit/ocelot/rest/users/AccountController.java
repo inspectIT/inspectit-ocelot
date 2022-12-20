@@ -2,6 +2,8 @@ package rocks.inspectit.ocelot.rest.users;
 
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AllArgsConstructor;
@@ -56,13 +58,7 @@ public class AccountController extends AbstractBaseController {
             " Instead of using User and Password based HTTP authentication, the user can then user the header 'Authorization: Bearer <TOKEN>' for authentication." +
             "The token expires after the time specified by ${inspectit.token-lifespan}, which by default is 60 minutes." +
             "In case of a server restart, all previously issued tokens become invalid.")
-    @ApiResponse(responseCode = "200", description = "The access token"
-            // TODO: map 'examples' to openAPI
-            /*
-            ,examples =
-    @Example(value = @ExampleProperty(value = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU2MTYyODE1NH0.KelDW1OXg9xlMjSiblwZqui7sya4Crq833b-98p8UZ4", mediaType = "text/plain"))
-    */
-    )
+    @ApiResponse(responseCode = "200", description = "The access token", content = @Content(mediaType = "text/plain", examples = @ExampleObject("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU2MTYyODE1NH0.KelDW1OXg9xlMjSiblwZqui7sya4Crq833b-98p8UZ4"))    )
     @GetMapping("account/token")
     public String acquireNewAccessToken(Authentication auth) {
         Optional<User> userOptional = userService.getUserByName(auth.getName());
