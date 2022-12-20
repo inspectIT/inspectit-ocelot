@@ -62,6 +62,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 "/",
                 "/ui/**",
                 "/actuator/**",
+                // the following two patterns allow unauthenticated access to Swagger-UI
                 "/swagger*/**",
                 "/v3/api-docs/**",
                 "/webjars/**",
