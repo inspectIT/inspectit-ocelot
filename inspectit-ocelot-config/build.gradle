@@ -21,10 +21,11 @@ dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testImplementation (
-            'org.junit.jupiter:junit-jupiter-api:5.3.1',
-            'org.mockito:mockito-junit-jupiter:2.23.0'
+            'org.junit.jupiter:junit-jupiter-api',
+            'org.mockito:mockito-junit-jupiter',
+            'org.assertj:assertj-core'
     )
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
     implementation(
             platform("com.fasterxml.jackson:jackson-bom:${jacksonBomVersion}"),
@@ -36,10 +37,6 @@ dependencies {
 
             // logging
             "ch.qos.logback:logback-classic:${logbackVersion}",
-    )
-
-    testImplementation(
-            'org.assertj:assertj-core:3.11.1'
     )
 
     // the api is included as compile only because the open census api has to be decoupled

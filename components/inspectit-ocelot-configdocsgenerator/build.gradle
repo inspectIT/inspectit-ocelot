@@ -22,10 +22,10 @@ repositories {
 dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation(
-            'org.junit.jupiter:junit-jupiter:5.7.2',
+            'org.junit.jupiter:junit-jupiter',
             "io.opencensus:opencensus-api:${openCensusVersion}",
-            'org.mockito:mockito-junit-jupiter:2.23.0',
-            "org.assertj:assertj-core:3.19.0",
+            'org.mockito:mockito-junit-jupiter',
+            "org.assertj:assertj-core",
             'com.google.guava:guava:31.1-jre'
     )
 
