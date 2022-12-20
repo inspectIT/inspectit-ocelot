@@ -21,11 +21,11 @@ dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testImplementation (
-            'org.junit.jupiter:junit-jupiter-api',
-            'org.mockito:mockito-junit-jupiter',
-            'org.assertj:assertj-core'
+            "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}",
+            "org.mockito:mockito-junit-jupiter:${mockitoVersion}",
+            'org.assertj:assertj-core:3.11.1'
     )
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}'
 
     implementation(
             platform("com.fasterxml.jackson:jackson-bom:${jacksonBomVersion}"),
