@@ -111,7 +111,6 @@ dependencies {
 
 dependencies {
     implementation(
-            platform("com.fasterxml.jackson:jackson-bom:${jacksonBomVersion}"),
             project(':inspectit-ocelot-config'),
             project(':inspectit-ocelot-configdocsgenerator'),
 
@@ -129,7 +128,7 @@ dependencies {
 
             'org.apache.httpcomponents:httpclient', //Required for PATCH-Requests
 
-            'org.xerial:sqlite-jdbc:3.39.3.0',
+            'org.xerial:sqlite-jdbc:3.40.0.0',
             "com.github.gwenn:sqlite-dialect:0.1.0",
             "io.jsonwebtoken:jjwt-api:${jsonWebTokenVersion}",
             "io.jsonwebtoken:jjwt-impl:${jsonWebTokenVersion}",
