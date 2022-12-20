@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.opentelemetry.exporter.logging.LoggingMetricExporter;
-import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +77,7 @@ public class LoggingMetricExporterService extends DynamicallyActivatableMetricsE
     }
 
     @Override
-    public MetricReaderFactory getNewMetricReaderFactory() {
-        return metricReaderBuilder.newMetricReaderFactory();
+    public MetricReader getNewMetricReader() {
+        return metricReaderBuilder.build();
     }
 }

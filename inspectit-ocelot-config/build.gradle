@@ -46,7 +46,7 @@ dependencies {
     compileOnly (
             "io.opencensus:opencensus-api:${openCensusVersion}",
             // OpenTelemetry
-            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
+            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
             "io.opentelemetry:opentelemetry-sdk-metrics",
     )
 }

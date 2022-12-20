@@ -6,7 +6,7 @@ import io.opentelemetry.api.metrics.MeterProvider;
 import io.opentelemetry.api.trace.TracerProvider;
 import io.opentelemetry.exporter.logging.LoggingMetricExporter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
-import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -291,8 +291,8 @@ class OpenTelemetryControllerImplTest {
         class TestMetricsExporterService extends DynamicallyActivatableMetricsExporterService {
 
             @Override
-            public MetricReaderFactory getNewMetricReaderFactory() {
-                return PeriodicMetricReader.newMetricReaderFactory(LoggingMetricExporter.create());
+            public MetricReader getNewMetricReader() {
+                return PeriodicMetricReader.create(LoggingMetricExporter.create());
             }
 
             @Override
