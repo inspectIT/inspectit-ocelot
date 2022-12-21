@@ -137,3 +137,6 @@ management:
 springdoc:
   packages-to-scan: ["rocks.inspectit.ocelot.rest"]
   paths-to-match: "/**"
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: alpha
