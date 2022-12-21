@@ -5,7 +5,7 @@ plugins {
     id 'org.springframework.boot' version "${springBootVersion}"
     id "org.cyclonedx.bom" version "1.7.2"
     // Add the plugin in the existing plugins block
-    id "org.owasp.dependencycheck" version "5.2.4"
+    id "org.owasp.dependencycheck" version "7.4.1"
 }
 
 apply plugin: 'idea'
