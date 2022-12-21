@@ -13,10 +13,16 @@ After that install all dependencies using yarn:
 yarn
 ```
 
-Using the following command, a development server can be started which serves the frontend and provides useful features like hot-reloading (changes will be immediatly updated in the browser - no refresh is required).
+Using the following command, a development server can be started which serves the frontend and provides useful features like hot-reloading (changes will be immediately updated in the browser - no refresh is required).
 ```bash
 yarn dev
 ```
+
+If the command above fails due to SSL options, executing the following _before_ might help ([source](https://stackoverflow.com/a/69699772)). But be aware this is just a workaround. 
+```
+export NODE_OPTIONS=--openssl-legacy-provider
+```
+
 
 The development server can be reached at [http://localhost:3000](http://localhost:3000).
 

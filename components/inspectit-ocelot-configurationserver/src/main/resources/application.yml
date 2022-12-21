@@ -132,3 +132,11 @@ management:
   health:
     # Whether to enable LDAP health check.
     ldap.enabled: ${inspectit-config-server.security.ldap-authentication}
+
+# OpenAPI springdoc
+springdoc:
+  packages-to-scan: ["rocks.inspectit.ocelot.rest"]
+  paths-to-match: "/**"
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: alpha

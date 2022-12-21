@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.rest.versioning;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class VersioningController extends AbstractBaseController {
     private FileManager fileManager;
 
     @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
-    @ApiOperation(value = "List versions", notes = "Lists all versions which are existing in the configuration server. By default, only versions in the workspace branch will be considered.")
+    @Operation(summary = "List versions", description = "Lists all versions which are existing in the configuration server. By default, only versions in the workspace branch will be considered.")
     @GetMapping(value = "versions")
     public List<WorkspaceVersion> listVersions(@RequestParam(name = "limit", required = false) Integer limit) throws IOException, GitAPIException {
         if (limit == null || limit < 0) {

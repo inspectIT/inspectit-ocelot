@@ -1,7 +1,8 @@
 package rocks.inspectit.ocelot.rest.users;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -48,11 +49,11 @@ public class UserController extends AbstractBaseController {
     private UserService userService;
 
     @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
-    @ApiOperation(value = "Select users", notes = "Fetches the list of registered users." +
+    @Operation(summary = "Select users", description = "Fetches the list of registered users." +
             " If a username query parameter is given, the list is filtered to contain only the user matching the given username." +
             " If none match, an empty list is returned.")
     @GetMapping("users")
-    public List<User> selectUsers(@ApiParam("If specified only the user with the given name is returned")
+    public List<User> selectUsers(@Parameter(description = "If specified only the user with the given name is returned")
                                   @RequestParam(required = false) String username) {
         if (!StringUtils.isEmpty(username)) {
             return userService.getUserByName(username)
@@ -65,9 +66,9 @@ public class UserController extends AbstractBaseController {
     }
 
     @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
-    @ApiOperation(value = "Fetch a single user", notes = "Fetches a single user based on his ID.")
+    @Operation(summary = "Fetch a single user", description = "Fetches a single user based on his ID.")
     @GetMapping("users/{id}")
-    public ResponseEntity<?> getUser(@ApiParam("The ID of the user")
+    public ResponseEntity<?> getUser(@Parameter(description = "The ID of the user")
                                      @PathVariable long id) {
         return userService.getUserById(id)
                 .map(ResponseEntity::<Object>ok)
@@ -76,10 +77,10 @@ public class UserController extends AbstractBaseController {
 
 
     @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
-    @ApiOperation(value = "Add a new user", notes = "Registers a user with a given username and password.")
+    @Operation(summary = "Add a new user", description = "Registers a user with a given username and password.")
     @PostMapping("users")
     public ResponseEntity<?> addUser(
-            @ApiParam("The user to add, must only contain username and the password")
+            @Parameter(description = "The user to add, must only contain username and the password")
             @RequestBody User user, UriComponentsBuilder builder) {
         if (StringUtils.isEmpty(user.getUsername())) {
             return ResponseEntity.badRequest().body(NO_USERNAME_ERROR);
@@ -104,9 +105,9 @@ public class UserController extends AbstractBaseController {
 
 
     @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
-    @ApiOperation(value = "Delete a user", notes = "Deletes a user based on his id. After he is deleted, he immediately is unauthorized.")
+    @Operation(summary = "Delete a user", description = "Deletes a user based on his id. After he is deleted, he immediately is unauthorized.")
     @DeleteMapping("users/{id}")
-    public ResponseEntity<?> deleteUser(@ApiParam("The is of the user to delete")
+    public ResponseEntity<?> deleteUser(@Parameter(description = "The is of the user to delete")
                                         @PathVariable long id) {
         try {
             userService.deleteUserById(id);

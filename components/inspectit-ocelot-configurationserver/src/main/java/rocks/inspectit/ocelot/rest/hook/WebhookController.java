@@ -1,7 +1,8 @@
 package rocks.inspectit.ocelot.rest.hook;
 
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,8 @@ public class WebhookController extends AbstractBaseController {
     @Autowired
     private FileManager fileManager;
 
-    @ApiOperation(value = "Triggers a synchronization of the workspace branch with a configured remote configuration source.")
-    @ApiImplicitParam(name = "token", type = "string", value = "Token for authenticating the request.")
+    @Operation(summary = "Triggers a synchronization of the workspace branch with a configured remote configuration source.")
+    @Parameter(name = "token", schema = @Schema(type = "string"), description = "Token for authenticating the request.")
     @RequestMapping(path = "/hook/synchronize-workspace", method = {RequestMethod.PUT, RequestMethod.POST, RequestMethod.GET})
     public ResponseEntity<?> synchronizeWorkspace() throws GitAPIException, IOException {
         fileManager.synchronizeWorkspace();

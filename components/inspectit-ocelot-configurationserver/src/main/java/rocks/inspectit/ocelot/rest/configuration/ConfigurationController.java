@@ -2,8 +2,8 @@ package rocks.inspectit.ocelot.rest.configuration;
 
 import inspectit.ocelot.configdocsgenerator.ConfigDocsGenerator;
 import inspectit.ocelot.configdocsgenerator.model.ConfigDocumentation;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +62,7 @@ public class ConfigurationController extends AbstractBaseController {
      * Reloads all configuration files present in the servers working directory.
      */
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @ApiOperation(value = "Reloads all configuration files.", notes = "Reloads all configuration files present in the " + "servers working directory and adds them to the workspace revision.")
+    @Operation(summary = "Reloads all configuration files.", description = "Reloads all configuration files present in the " + "servers working directory and adds them to the workspace revision.")
     @GetMapping(value = "configuration/reload", produces = "application/x-yaml")
     public void reloadConfiguration() throws GitAPIException {
         fileManager.commitWorkingDirectory();
@@ -77,9 +77,9 @@ public class ConfigurationController extends AbstractBaseController {
      *
      * @return The configuration mapped on the given agent name
      */
-    @ApiOperation(value = "Fetch the Agent Configuration without logging the access.", notes = "Reads the configuration for the given agent and returns it as a yaml string." + "Does not log the access in the agent status.")
+    @Operation(summary = "Fetch the Agent Configuration without logging the access.", description = "Reads the configuration for the given agent and returns it as a yaml string." + "Does not log the access in the agent status.")
     @GetMapping(value = "configuration/agent-configuration", produces = "application/x-yaml")
-    public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes) {
+    public ResponseEntity<String> fetchConfiguration(@Parameter(description = "The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes) {
         AgentConfiguration configuration = configManager.getConfiguration(attributes);
         if (configuration == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -95,9 +95,9 @@ public class ConfigurationController extends AbstractBaseController {
      *
      * @return ConfigDocumentation for the configuration matching the given AgentMapping.
      */
-    @ApiOperation(value = "Get the full configuration documentation of an AgentMappings config, based on the AgentMapping name.")
+    @Operation(summary = "Get the full configuration documentation of an AgentMappings config, based on the AgentMapping name.")
     @GetMapping(value = "configuration/documentation", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getConfigDocumentation(@ApiParam("The name of the AgentMapping the configuration documentation should be for.") @RequestParam(name = "agent-mapping") String mappingName, @ApiParam("Whether the shown documentation should include the merged in Default Config as well.") @RequestParam(name = "include-default") Boolean includeDefault) {
+    public ResponseEntity<Object> getConfigDocumentation(@Parameter(description = "The name of the AgentMapping the configuration documentation should be for.") @RequestParam(name = "agent-mapping") String mappingName, @Parameter(description = "Whether the shown documentation should include the merged in Default Config as well.") @RequestParam(name = "include-default") Boolean includeDefault) {
 
         ConfigDocumentation configDocumentation = null;
 

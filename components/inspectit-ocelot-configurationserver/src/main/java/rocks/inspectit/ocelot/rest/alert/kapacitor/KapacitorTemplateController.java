@@ -1,8 +1,8 @@
 package rocks.inspectit.ocelot.rest.alert.kapacitor;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,12 +23,10 @@ public class KapacitorTemplateController extends KapacitorBaseController {
         super(settings);
     }
 
-    @ApiOperation(value = "Provides a list with basic information about each kapacitor template")
+    @Operation(description = "Provides a list with basic information about each kapacitor template")
     @GetMapping("/alert/kapacitor/templates")
     public List<Template> getAllTemplates() {
-        ObjectNode response = kapacitor()
-                .getForEntity("/kapacitor/v1/templates", ObjectNode.class)
-                .getBody();
+        ObjectNode response = kapacitor().getForEntity("/kapacitor/v1/templates", ObjectNode.class).getBody();
 
         if (response == null) {
             return Collections.emptyList();
@@ -39,11 +37,10 @@ public class KapacitorTemplateController extends KapacitorBaseController {
                 .collect(Collectors.toList());
     }
 
-    @ApiOperation(value = "Provides detailed information about a given kapacitor template")
+    @Operation(description = "Provides detailed information about a given kapacitor template")
     @GetMapping("/alert/kapacitor/templates/{templateId}")
-    public Template getTemplate(@PathVariable @ApiParam("The id of the template to query") String templateId) {
-        ObjectNode response = kapacitor()
-                .getForEntity("/kapacitor/v1/templates/{templateId}", ObjectNode.class, templateId)
+    public Template getTemplate(@PathVariable @Parameter(description = "The id of the template to query") String templateId) {
+        ObjectNode response = kapacitor().getForEntity("/kapacitor/v1/templates/{templateId}", ObjectNode.class, templateId)
                 .getBody();
 
         return Template.fromKapacitorResponse(response);

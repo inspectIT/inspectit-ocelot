@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.rest.file;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,7 +19,7 @@ import java.io.IOException;
 public class MoveController extends FileBaseController {
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @ApiOperation(value = "Move or rename a file or directory")
+    @Operation(summary = "Move or rename a file or directory")
     @PutMapping(value = "move")
     public void moveFileOrDirectory(@RequestBody FileMoveDescription moveDescription) throws IOException {
         String source = removeLeadingSlash(moveDescription.getSource());

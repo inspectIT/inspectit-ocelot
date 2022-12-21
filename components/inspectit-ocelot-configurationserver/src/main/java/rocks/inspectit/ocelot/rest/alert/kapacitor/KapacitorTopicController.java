@@ -2,8 +2,8 @@ package rocks.inspectit.ocelot.rest.alert.kapacitor;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +25,7 @@ public class KapacitorTopicController extends KapacitorBaseController {
         super(settings);
     }
 
-    @ApiOperation(value = "Provides a list of all available topics")
+    @Operation(summary = "Provides a list of all available topics")
     @GetMapping("/alert/kapacitor/topics")
     public List<Topic> getTopics() {
         ObjectNode response = kapacitor()
@@ -41,9 +41,9 @@ public class KapacitorTopicController extends KapacitorBaseController {
                 .collect(Collectors.toList());
     }
 
-    @ApiOperation(value = "Provides a list of all available topics")
+    @Operation(summary = "Provides a list of all available topics")
     @GetMapping("/alert/kapacitor/topics/{topicId}/handlers")
-    public List<Handler> getHandlers(@PathVariable @ApiParam("The id of the topic whose handlers will be queried") String topicId) {
+    public List<Handler> getHandlers(@PathVariable @Parameter(description = "The id of the topic whose handlers will be queried") String topicId) {
         ObjectNode response = kapacitor()
                 .getForEntity("/kapacitor/v1/alerts/topics/{topicId}/handlers", ObjectNode.class, topicId)
                 .getBody();
@@ -58,9 +58,9 @@ public class KapacitorTopicController extends KapacitorBaseController {
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @ApiOperation(value = "Adds a new Handler to a topic")
+    @Operation(summary = "Adds a new Handler to a topic")
     @PostMapping("/alert/kapacitor/topics/{topicId}/handlers")
-    public Handler addHandler(@PathVariable @ApiParam("The id of the topic to which the handler will be added") String topicId,
+    public Handler addHandler(@PathVariable @Parameter(description = "The id of the topic to which the handler will be added") String topicId,
                               @RequestBody Handler handler) {
         ObjectNode response = kapacitor()
                 .postForEntity("/kapacitor/v1/alerts/topics/{topicId}/handlers", handler.toKapacitorRequest(), ObjectNode.class, topicId)
@@ -70,10 +70,10 @@ public class KapacitorTopicController extends KapacitorBaseController {
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @ApiOperation(value = "Replaced a handler of a given topic")
+    @Operation(summary = "Replaced a handler of a given topic")
     @PutMapping("/alert/kapacitor/topics/{topicId}/handlers/{handlerId}")
-    public void replaceHandler(@PathVariable @ApiParam("The id of the topic which owns the handler") String topicId,
-                               @PathVariable @ApiParam("The id of the handler to update") String handlerId,
+    public void replaceHandler(@PathVariable @Parameter(description = "The id of the topic which owns the handler") String topicId,
+                               @PathVariable @Parameter(description = "The id of the handler to update") String handlerId,
                                @RequestBody Handler handler) {
         if (handler.getId() == null) {
             handler.setId(handlerId);
@@ -83,10 +83,10 @@ public class KapacitorTopicController extends KapacitorBaseController {
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @ApiOperation(value = "Removes a handler from a topic")
+    @Operation(summary = "Removes a handler from a topic")
     @DeleteMapping("/alert/kapacitor/topics/{topicId}/handlers/{handlerId}")
-    public void removeHandler(@PathVariable @ApiParam("The id of the topic which owns the handler") String topicId,
-                              @PathVariable @ApiParam("The id of the handler") String handlerId) {
+    public void removeHandler(@PathVariable @Parameter(description = "The id of the topic which owns the handler") String topicId,
+                              @PathVariable @Parameter(description = "The id of the handler") String handlerId) {
         kapacitorRestTemplate.delete("/kapacitor/v1/alerts/topics/{topicId}/handlers/{handlerId}", topicId, handlerId);
     }
 
