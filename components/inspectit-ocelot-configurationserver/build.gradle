@@ -133,6 +133,8 @@ dependencies {
             "io.jsonwebtoken:jjwt-api:${jsonWebTokenVersion}",
             "io.jsonwebtoken:jjwt-impl:${jsonWebTokenVersion}",
             "io.jsonwebtoken:jjwt-jackson:${jsonWebTokenVersion}",
+            // If a version from a dependency is not specified explicitly, it is managed via plugin
+            // 'io.spring.dependency-management' and the version matches the ones from Spring Boot Bom.
             "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
             "com.fasterxml.jackson.core:jackson-databind",
             "commons-io:commons-io:${commonsIoVersion}",
@@ -155,8 +157,7 @@ dependencies {
             // That version is important. If we stick to the version provided by Spring Boot Bom
             // database initialization scripts will fail.
             'com.h2database:h2:1.4.194',
-            'org.awaitility:awaitility',
-
+            'org.awaitility:awaitility'
     )
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
