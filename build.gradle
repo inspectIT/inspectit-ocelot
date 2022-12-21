@@ -19,7 +19,7 @@ allprojects {
     apply plugin: 'java'
     apply plugin: 'jacoco'
 
-    if (!project.hasProperty('') || project.getProperty('buildVersion').empty) {
+    if (!project.hasProperty('buildVersion') || project.getProperty('buildVersion').empty) {
         ext.buildVersion = 'SNAPSHOT'
     }
 
