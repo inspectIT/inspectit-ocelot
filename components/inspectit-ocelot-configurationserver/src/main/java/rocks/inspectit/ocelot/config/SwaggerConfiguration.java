@@ -20,8 +20,7 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
         return  new OpenAPI()
                 .info(new Info().title("Configuration Server API")
                         .description("inspectIT Ocelot Configuration Server")
-                        // TODO: retrieve version properly
-                        .version("v2.2.0")
+                        // we explicitly do not give a version. We do not have a version REST-API at the moment
                         .license(new License().name("Apache 2.0").url("https://inspectit.rocks")))
                 .externalDocs(new ExternalDocumentation()
                         .description("Configuration Server Documentation")
