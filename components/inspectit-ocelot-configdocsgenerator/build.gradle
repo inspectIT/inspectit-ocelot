@@ -32,17 +32,17 @@ dependencies {
     // This dependency is used by the application.
     implementation(
             project(':inspectit-ocelot-config'),
-            "ch.qos.logback:logback-classic:${logbackVersion}",
+            "ch.qos.logback:logback-classic",
             "org.apache.commons:commons-lang3:${commonsLangVersion}",
             'commons-beanutils:commons-beanutils:1.9.4',
 
-            "org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
+            "org.springframework.boot:spring-boot-starter-web",
             // override snakeyaml due to vulnerabilities in v1.29 used by the SpringBoot version used in this module
             "org.yaml:snakeyaml:${snakeYamlVersion}"
     )
 
-    compileOnly "org.projectlombok:lombok:${lombokVersion}"
-    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
 }
 
 application {
