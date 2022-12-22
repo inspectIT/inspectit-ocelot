@@ -1,14 +1,15 @@
 package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.implcore.internal.TimestampConverter;
-import io.opencensus.implcore.trace.RecordEventsSpanImpl;
 import io.opencensus.trace.AttributeValue;
 import io.opencensus.trace.Span;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.sdk.trace.OcelotSpanUtils;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.MethodEntryEvent;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.MethodExitEvent;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.StackTraceSampledEvent;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.TraceEvent;
+import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -136,7 +137,7 @@ public class SampledTrace {
     }
 
     /**
-     * Should be called when an instrumented method is called within this trace, which however does continue an exisitign span instead of creating a new one.
+     * Should be called when an instrumented method is called within this trace, which however does continue an existing span instead of creating a new one.
      * This ensures that the method is correctly placed between the sampled method calls.
      *
      * @param span       the span which was continued
@@ -198,14 +199,17 @@ public class SampledTrace {
             }
         } else {
             if (!invoc.isHidden()) {
-                span = CustomSpanBuilder.builder("*" + getSimpleName(invoc.getSampledMethod()), parentSpan)
+                io.opentelemetry.api.trace.Span otelSpan = CustomSpanBuilder.builder("*" + getSimpleName(invoc.getSampledMethod()), OpenCensusShimUtils.castToOpenTelemetrySpanImpl(parentSpan))
                         .customTiming(invoc.getStart().getTimestamp(), invoc.getEnd()
                                 .getTimestamp(), getTimestampConverter())
                         .startSpan();
-                span.putAttribute("java.sampled", AttributeValue.booleanAttributeValue(true));
-                span.putAttribute("java.fqn", AttributeValue.stringAttributeValue(getFullName(invoc.getSampledMethod())));
-                addHiddenParentsAttribute(span, invoc);
-                span.end();
+
+                otelSpan.setAttribute(AttributeKey.booleanKey("java.sampled"), true);
+                otelSpan.setAttribute(AttributeKey.stringKey("java.fqn"), getFullName(invoc.getSampledMethod()));
+                addHiddenParentsAttribute(otelSpan, invoc);
+                otelSpan.end();
+
+                span = OpenCensusShimUtils.convertSpan(otelSpan);
             } else {
                 span = parentSpan;
             }
@@ -231,8 +235,24 @@ public class SampledTrace {
         }
     }
 
-    private TimestampConverter getTimestampConverter() {
-        return CustomSpanBuilder.getTimestampConverter((RecordEventsSpanImpl) rootSpan);
+    private void addHiddenParentsAttribute(io.opentelemetry.api.trace.Span span, Invocation invoc) {
+        List<Invocation> hiddenParents = new ArrayList<>();
+        Invocation parent = invoc.getParent();
+        while (parent != null && parent.isHidden()) {
+            hiddenParents.add(parent);
+            parent = parent.getParent();
+        }
+        if (!hiddenParents.isEmpty()) {
+            Collections.reverse(hiddenParents);
+            String parents = hiddenParents.stream()
+                    .map(inv -> inv.getSampledMethod().toString())
+                    .collect(Collectors.joining("\n"));
+            span.setAttribute(AttributeKey.stringKey("java.hidden_parents"), parents);
+        }
+    }
+
+    private Object getTimestampConverter() {
+        return OcelotSpanUtils.getAnchoredClock(rootSpan);
     }
 
     private String getSimpleName(StackTraceElement element) {

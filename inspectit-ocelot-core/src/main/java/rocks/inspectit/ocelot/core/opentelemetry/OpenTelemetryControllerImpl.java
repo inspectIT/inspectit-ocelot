@@ -29,6 +29,7 @@ import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.IOpenTelemetryController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.tracing.SampleMode;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
@@ -335,9 +336,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      * @return A new {@link SdkTracerProvider} based on the {@link InspectitConfig}
      */
     private SdkTracerProvider buildTracerProvider(InspectitConfig configuration) {
-        double sampleProbability = configuration.getTracing().getSampleProbability();
-
-        sampler = new DynamicSampler(sampleProbability);
+        sampler = new DynamicSampler(configuration.getTracing().getSampleMode(), configuration.getTracing()
+                .getSampleProbability());
         multiSpanExporter = DynamicMultiSpanExporter.create();
         // @formatter:off
         Resource tracerProviderAttributes = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters()
@@ -381,7 +381,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             return null;
         }
         try {
-            sampler.setSampleProbability(configuration.getTracing().getSampleProbability());
+            sampler.setSampleProbability(configuration.getTracing().getSampleMode(), configuration.getTracing()
+                    .getSampleProbability());
             return tracerProvider;
 
         } catch (Exception e) {
@@ -421,6 +422,15 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             log.error("Failed to configure MeterProvider", e);
             return null;
         }
+    }
+
+    @VisibleForTesting
+    @Override
+    public boolean registerTraceExporterService(Object spanExporter, String serviceName) {
+        if (!(spanExporter instanceof SpanExporter)) {
+            throw new RuntimeException(String.format("Cannot register trace exporter service. The object '%s' is not instance of '%s'", spanExporter.getClass(), SpanExporter.class));
+        }
+        return registerTraceExporterService((SpanExporter) spanExporter, serviceName);
     }
 
     /**
@@ -526,5 +536,11 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      */
     public boolean unregisterMetricExporterService(DynamicallyActivatableMetricsExporterService service) {
         return unregisterMetricExporterService(service.getName());
+    }
+
+    @Override
+    public void setSampler(String sampleMode, double sampleProbability) {
+        SampleMode sm = SampleMode.valueOf(sampleMode);
+        sampler.setSampleProbability(sm, sampleProbability);
     }
 }

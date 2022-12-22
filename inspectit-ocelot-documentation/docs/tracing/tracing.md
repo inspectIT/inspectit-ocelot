@@ -20,11 +20,16 @@ It is possible to globally regulate the number of traces generated through [samp
 You can configure the probability with which a trace ends up being collected via `inspectit.tracing.sampleProbability`.
 E.g. setting the value to `0.1` will record only 10% of all traces.
 
-Note that this setting only has an effect if **no sampling decision** has been made yet.
+The global sampling is also influenced by the `sample-mode` that can be set in `inspectit.tracing.sampleMode`, see the table below.
+By default, `PARENT_BASED` is used.
+
+In case of `PARENT_BASED`, the setting of the `sampleProbability` only has an effect if **no sampling decision** has been made yet.
 If a parent span has already decided that a trace is sampled or not sampled, this decision will continue to be used.
 This means that, for example, a method within a trace that has already been started will always be recorded, even if the sample setting has been set to `0`.
 This also applies to the opposite case where a span has decided not to sample and the sampling rate has been set to `1`.
 In this case the method will **not** be recorded!
+
+In case of `TRACE_ID_RATIO_BASED`, the sampling decision is made for each span, regardless of the parent span's sampling decision.
 
 By default, the sample probability is `1.0`, meaning 100% (each trace is recorded).
 
@@ -39,6 +44,7 @@ You can additionally define the following global properties (`inspectit.tracing-
 
 |Property|Default|Description|
 |---|---|---|
+|`sample-mode`|`PARENT_BASED`|The root sample mode to be used for sampling, see above. Supported modes are `PARENT_BASED` and `TRACE_ID_RATIO_BASED`|
 |`max-export-batch-size`|512|The max export batch size for every export, i.e., the maximum number of spans exported by the used `BatchSpanProcessor`|
 |`schedule-delay-millis`|5000|The delay interval between two consecutive exports in milliseconds.
 

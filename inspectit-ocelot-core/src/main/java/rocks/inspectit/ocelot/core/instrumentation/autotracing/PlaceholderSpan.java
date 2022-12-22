@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
 import io.opencensus.implcore.internal.TimestampConverter;
 import io.opencensus.trace.*;
+import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -11,10 +12,10 @@ import java.util.function.Supplier;
 
 /**
  * A {@link Span}, which acts as a placeholder.
- * This span can be actiavated via {@link Tracer#withSpan(Span)} normally and act as a parent of other spans.
+ * This span can be activated via {@link Tracer#withSpan(Span)} normally and act as a parent of other spans.
  * <p>
- * However, when {@link #end(EndSpanOptions)} is called, the span is not exported immidately.
- * Instead it will only be exported after both {@link #end(EndSpanOptions)} and {@link #exportWithParent(Span, TimestampConverter)} have been called.
+ * However, when {@link #end(EndSpanOptions)} is called, the span is not exported immediately.
+ * Instead, it will only be exported after both {@link #end(EndSpanOptions)} and {@link #exportWithParent(Span, TimestampConverter)} have been called.
  */
 public class PlaceholderSpan extends Span {
 
@@ -42,7 +43,7 @@ public class PlaceholderSpan extends Span {
 
     private boolean exported = false;
 
-    private TimestampConverter converter;
+    private Object converter;
 
     PlaceholderSpan(SpanContext defaultParent, String spanName, Span.Kind kind, Supplier<Long> clock) {
         super(generateContext(defaultParent), EnumSet.of(Span.Options.RECORD_EVENTS));
@@ -54,8 +55,7 @@ public class PlaceholderSpan extends Span {
 
     private static SpanContext generateContext(SpanContext parentContext) {
         SpanId id = SpanId.generateRandomId(RANDOM);
-        return SpanContext.create(parentContext.getTraceId(), id, parentContext.getTraceOptions(), parentContext
-                .getTracestate());
+        return SpanContext.create(parentContext.getTraceId(), id, parentContext.getTraceOptions(), parentContext.getTracestate());
     }
 
     @Override
@@ -97,7 +97,7 @@ public class PlaceholderSpan extends Span {
      * @param newParent the parent to use
      * @param converter the timestamp converter to use
      */
-    public synchronized void exportWithParent(Span newParent, TimestampConverter converter) {
+    public synchronized void exportWithParent(Span newParent, Object converter) {
         this.converter = converter;
         this.newParent = newParent;
         if (endTime != 0) {
@@ -108,11 +108,11 @@ public class PlaceholderSpan extends Span {
     private void export() {
         if (!exported) {
             exported = true;
-            Span span = CustomSpanBuilder.builder(spanName, newParent)
-                    .kind(spanKind)
+            Span span = OpenCensusShimUtils.convertSpan(CustomSpanBuilder.builder(spanName, OpenCensusShimUtils.castToOpenTelemetrySpanImpl(newParent))
+                    .kind(OpenCensusShimUtils.mapKind(spanKind))
                     .customTiming(startTime, endTime, converter)
-                    .spanId(getContext().getSpanId())
-                    .startSpan();
+                    .spanId(getContext().getSpanId().toLowerBase16())
+                    .startSpan());
             span.putAttributes(attributes);
             span.end();
         }

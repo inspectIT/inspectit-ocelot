@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.utils;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -106,7 +107,7 @@ public class OpenTelemetryUtils {
     public static OpenTelemetry getGlobalOpenTelemetry() {
         OpenTelemetry openTelemetry = null;
         try {
-            Field field = ReflectionUtils.getPrivateField(GlobalOpenTelemetry.class, "globalOpenTelemetry");
+            Field field = ReflectionUtils.getFieldAndMakeAccessible(GlobalOpenTelemetry.class, "globalOpenTelemetry");
             openTelemetry = (OpenTelemetry) field.get(null);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
@@ -117,7 +118,17 @@ public class OpenTelemetryUtils {
     /**
      * {@link Instances#openTelemetryController#flush() flushes} all pending spans and metrics waits for it to complete.
      */
-    public static void flush(){
+    public static void flush() {
         Instances.openTelemetryController.flush();
     }
+
+    /**
+     * Gets the current {@link Tracer} registered at {@link GlobalOpenTelemetry#getTracer(String, String)} under the instrumentationScopeName 'rocks.inspectit.ocelot'
+     *
+     * @return
+     */
+    public static Tracer getTracer() {
+        return getGlobalOpenTelemetry().getTracer("rocks.inspectit.ocelot", "0.0.1");
+    }
+
 }

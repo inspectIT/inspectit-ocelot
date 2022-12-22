@@ -11,7 +11,7 @@ public class NoopOpenTelemetryController implements IOpenTelemetryController {
     public boolean isActive() {
         return false;
     }
-    
+
     @Override
     public boolean start() {
         return true;
@@ -40,5 +40,15 @@ public class NoopOpenTelemetryController implements IOpenTelemetryController {
     @Override
     public void notifyMetricsSettingsChanged() {
 
+    }
+
+    @Override
+    public boolean registerTraceExporterService(Object spanExporter, String serviceName) {
+        return false;
+    }
+
+    @Override
+    public void setSampler(String sampleMode, double sampleProbability) {
+        
     }
 }

@@ -1,8 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.correlation.log;
 
-import io.opencensus.trace.SpanContext;
-import io.opencensus.trace.TraceId;
-import io.opencensus.trace.Tracing;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -33,11 +32,11 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
 
     @Override
     public AutoCloseable startCorrelatedSpanScope(Supplier<? extends AutoCloseable> spanScopeStarter) {
-        TraceId oldId = Tracing.getTracer().getCurrentSpan().getContext().getTraceId();
+        String oldId = Span.current().getSpanContext().getTraceId();
         AutoCloseable spanScope = spanScopeStarter.get();
-        SpanContext newContext = Tracing.getTracer().getCurrentSpan().getContext();
-        TraceId newId = newContext.getTraceId();
-        if (oldId.equals(newId) || !newContext.isValid() || !newContext.getTraceOptions().isSampled()) {
+        io.opentelemetry.api.trace.SpanContext newContext = Span.current().getSpanContext();
+        String newId = newContext.getTraceId();
+        if (oldId.equals(newId) || !newContext.isValid() || !newContext.getTraceFlags().isSampled()) {
             return spanScope;
         } else {
             InjectionScope injectionScope = injectTraceContextInMdc(newContext);
@@ -56,9 +55,9 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
      * @return an {@link InjectionScope} to revert the injection and restore the initial state of the MDC
      */
     private InjectionScope injectTraceContextInMdc(SpanContext context) {
-        if (context.getTraceId().isValid() && context.getTraceOptions().isSampled()) {
+        if (context.isValid() && context.getTraceFlags().isSampled()) {
             log.trace("Adding trace correlation information to MDC.");
-            return mdcAccess.injectValue(traceIdKey, context.getTraceId().toLowerBase16());
+            return mdcAccess.injectValue(traceIdKey, context.getTraceId());
         } else {
             return mdcAccess.injectValue(traceIdKey, null);
         }
@@ -84,7 +83,7 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
 
     @Override
     public InjectionScope injectTraceIdIntoMdc() {
-        return injectTraceContextInMdc(Tracing.getTracer().getCurrentSpan().getContext());
+        return injectTraceContextInMdc(Span.current().getSpanContext());
     }
 }
 

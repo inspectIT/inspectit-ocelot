@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * After a trace is reconstructed from a lsit of {@link TraceEvent},
+ * After a trace is reconstructed from a •list of {@link TraceEvent},
  * the individual method calls are represented by an {@link Invocation} each.
  * <p>
  * Afterwards, only a subset of {@link Invocation} are exported as actual spans,
@@ -132,12 +132,12 @@ public class Invocation {
 
     /**
      * To preserve clarity of exported traces, we "hide" certain invocations, meaning that they will not be exported.
-     * We hide invocation which fullfill all of the following conditions:
+     * We hide invocation which fulfill all of the following conditions:
      * - the invocation was generated based on stack trace samples (and NOT via instrumentation!) (A)
      * - the invocation has exactly one child-invocation (B)
-     * - the start and end of the invocation matches it's only child (C)
+     * - the start and end of the invocation matches its only child (C)
      *
-     * @return true, if this invocaiton should be hidden when exported.
+     * @return true, if this invocation should be hidden when exported.
      */
     public boolean isHidden() {
         return !(sampledMethod == null // A

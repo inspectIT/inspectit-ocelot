@@ -54,34 +54,36 @@ public class ReflectionUtils {
     }
 
     /**
-     * Gets the field for the given {@link Class}, makes it accessible
+     * Gets the (private) {@link Field} for the given {@link Class}, makes it accessible
      *
      * @param clazz     The {@link Class} that contains the final static field
      * @param fieldName The name of the field
      *
      * @return the specified field of the given class
+     *
+     * @throws NoSuchFieldException
      */
 
-    public static Field getAccessibleField(Class clazz, String fieldName) throws NoSuchFieldException, IllegalAccessException {
+    public static Field getFieldAndMakeAccessible(Class clazz, String fieldName) throws NoSuchFieldException {
         Field field = clazz.getDeclaredField(fieldName);
         field.setAccessible(true);
         return field;
     }
 
     /**
-     * Gets the {@link Field} for the given private field of the given {@link Class}
+     * Gets the (private) {@link Field} for the {@link Class} with the given name, and makes it accessible
      *
-     * @param clazz     The {@link Class}
-     * @param fieldName The name of the private field
+     * @param className The name of the {@link Class}
+     * @param fieldName The name of the {@link Field}
      *
      * @return
      *
+     * @throws ClassNotFoundException
      * @throws NoSuchFieldException
      */
-    public static Field getPrivateField(Class clazz, String fieldName) throws NoSuchFieldException {
-        Field field = clazz.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field;
+    public static Field getFieldAndMakeAccessible(String className, String fieldName) throws ClassNotFoundException, NoSuchFieldException {
+        Class clazz = Class.forName(className);
+        return getFieldAndMakeAccessible(clazz, fieldName);
     }
 
 }

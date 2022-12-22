@@ -7,6 +7,7 @@ import io.opentelemetry.sdk.trace.data.StatusData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.List;
@@ -352,17 +353,17 @@ public class TraceSettingsTest extends TraceTestBase {
 
         @Test
         void testNestedOneSamplingProbability() {
-            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
-
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 30, TimeUnit.SECONDS);
+            Instances.openTelemetryController.setSampler("TRACE_ID_RATIO_BASED", 1.0);
             nestedSamplingTestRoot(0.0, 1.0);
 
             samplingTestEndMarker("nested_one_end");
-
+            Instances.openTelemetryController.flush();
+            Instances.openTelemetryController.setSampler("PARENT_BASED", 1.0);
             //wait for the end marker, this ensures that all sampled spans are also exported
             assertTraceExported((spans) -> assertThat(spans).anySatisfy((sp) -> {
                 assertThat(sp.getName()).isEqualTo("nested_one_end");
             }));
-
             assertThat(getExportedSpans()).noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot"))
                     .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNestedDefault"))
                     .anySatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested"));

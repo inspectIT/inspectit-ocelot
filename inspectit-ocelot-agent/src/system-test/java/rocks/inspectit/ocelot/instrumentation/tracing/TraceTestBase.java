@@ -31,7 +31,7 @@ public class TraceTestBase extends InstrumentationSysTestBase {
     }
 
     @AfterEach
-    void destroyExporter() {
+    void resetExporter() {
         spanExporter.reset();
     }
 

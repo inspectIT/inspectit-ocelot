@@ -64,8 +64,7 @@ public class StackTrace {
      */
     public static Map<Thread, StackTrace> createFor(Collection<Thread> threads) {
         long[] ids = threads.stream().mapToLong(Thread::getId).toArray();
-        Map<Long, Thread> idsToThreads = threads.stream()
-                .collect(Collectors.toMap(Thread::getId, thread -> thread));
+        Map<Long, Thread> idsToThreads = threads.stream().collect(Collectors.toMap(Thread::getId, thread -> thread));
 
         ThreadInfo[] threadInfos = THREAD_BEAN.getThreadInfo(ids, MAX_DEPTH);
 
@@ -97,9 +96,10 @@ public class StackTrace {
     }
 
     private boolean isHiddenTop(StackTraceElement element) {
-        return element.getClassName().startsWith("rocks.inspectit.ocelot.core.")
-                || element.getClassName().startsWith("rocks.inspectit.ocelot.bootstrap.")
-                || isLambda(element);
+        return element.getClassName().startsWith("rocks.inspectit.ocelot.core.") || element.getClassName()
+                .startsWith("rocks.inspectit.ocelot.bootstrap.") || isLambda(element)
+                // starting with v2.0+ (use of OpenTelemetry-OpenCensus-Shim), we find '<unknown class>.get(Unknown Source)' entries
+                || element.getClassName().startsWith("<unknown class>");
     }
 
     private boolean isLambda(StackTraceElement element) {

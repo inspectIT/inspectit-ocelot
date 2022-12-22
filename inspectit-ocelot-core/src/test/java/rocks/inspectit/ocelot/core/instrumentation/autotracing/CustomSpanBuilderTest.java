@@ -1,42 +1,39 @@
 package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
-import io.opencensus.implcore.trace.RecordEventsSpanImpl;
-import io.opencensus.trace.Span;
-import io.opencensus.trace.Tracing;
-import io.opencensus.trace.samplers.Samplers;
-import org.junit.jupiter.api.Disabled;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.core.SpringTestBase;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled // TODO: fix CustomSpanBuilder with OTEL
 public class CustomSpanBuilderTest {
 
-
     @Nested
-    class Timestamps {
+    class Timestamps extends SpringTestBase {
 
         @Test
         void verifyTimingsChanged() {
-
-            Span parent = Tracing.getTracer().spanBuilder("root")
-                    .setSampler(Samplers.alwaysSample())
+            // TODO: enable sampling for CustomSpanBuilder
+            Span parent = OpenTelemetryUtils.getTracer().spanBuilder("root")
+                    //.setSampler(Samplers.alwaysSample())
                     .startSpan();
 
-            Span mySpan = CustomSpanBuilder.builder("foo", parent)
-                    .customTiming(42, 142, null)
-                    .startSpan();
+            Span mySpan = CustomSpanBuilder.builder("foo", parent).customTiming(42, 142, null).startSpan();
 
-            RecordEventsSpanImpl spanImpl = (RecordEventsSpanImpl) mySpan;
+            ReadWriteSpan spanImpl = (ReadWriteSpan) mySpan;
+            spanImpl.end();
+            // spanImpl.end(142, TimeUnit.NANOSECONDS);
             assertThat(spanImpl.getName()).isEqualTo("foo");
-            assertThat(spanImpl.getContext().getSpanId()).isNotEqualTo(parent.getContext().getSpanId());
-            assertThat(spanImpl.getContext().getTraceId()).isEqualTo(parent.getContext().getTraceId());
-            assertThat(spanImpl.getContext().getTraceOptions()).isEqualTo(parent.getContext().getTraceOptions());
-            assertThat(spanImpl.getContext().getTracestate()).isEqualTo(parent.getContext().getTracestate());
-            assertThat(spanImpl.toSpanData().getParentSpanId()).isEqualTo(parent.getContext().getSpanId());
-            assertThat(spanImpl.getEndNanoTime()).isEqualTo(142);
-            assertThat(spanImpl.getLatencyNs()).isEqualTo(100);
+            assertThat(spanImpl.getSpanContext().getSpanId()).isNotEqualTo(parent.getSpanContext().getSpanId());
+            assertThat(spanImpl.getSpanContext().getTraceId()).isEqualTo(parent.getSpanContext().getTraceId());
+            assertThat(spanImpl.getSpanContext().getTraceFlags()).isEqualTo(parent.getSpanContext().getTraceFlags());
+            assertThat(spanImpl.getSpanContext().getTraceState()).isEqualTo(parent.getSpanContext().getTraceState());
+            assertThat(spanImpl.toSpanData().getParentSpanId()).isEqualTo(parent.getSpanContext().getSpanId());
+            assertThat(spanImpl.toSpanData().getEndEpochNanos()).isEqualTo(142);
+            assertThat(spanImpl.getLatencyNanos()).isEqualTo(100);
         }
     }
 

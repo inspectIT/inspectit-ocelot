@@ -49,9 +49,30 @@ public interface IOpenTelemetryController {
 
     /**
      * Returns the name of this {@link IOpenTelemetryController}
+     *
      * @return The name of this {@link IOpenTelemetryController}
      */
-    default String getName(){
+    default String getName() {
         return getClass().getSimpleName();
     }
+
+    /**
+     * Registers a new {@link rocks.inspectit.ocelot.core.service.DynamicallyActivatableService trace exporter service} that is used to export {@link io.opentelemetry.sdk.trace.data.SpanData} for sampled {@link io.opentelemetry.api.trace.Span}s
+     * This method should ONLY be used in tests of the {@code agent} package.
+     *
+     * @param spanExporter The {@link SpanExporter} of the {@link rocks.inspectit.ocelot.core.service.DynamicallyActivatableService trace exporter service}
+     * @param serviceName  The name of the trace exporter service
+     *
+     * @return Whether the registration was successful
+     */
+
+    boolean registerTraceExporterService(Object spanExporter, String serviceName);
+
+    /**
+     * Sets the sampler. This method should ONY be used in tests of the {@code agent} package.
+     *
+     * @param sampleMode        The string value of the {@code SampleMode}
+     * @param sampleProbability the sample probability
+     */
+    void setSampler(String sampleMode, double sampleProbability);
 }
