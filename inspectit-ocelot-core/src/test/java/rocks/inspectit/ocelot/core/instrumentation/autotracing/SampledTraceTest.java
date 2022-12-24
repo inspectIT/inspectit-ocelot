@@ -54,7 +54,7 @@ public class SampledTraceTest {
         protected void tracedCall(String name, Runnable action) {
             long entryTime = fakeTime++;
             PlaceholderSpan span = Mockito.mock(PlaceholderSpan.class);
-            doReturn(entryTime).when(span).getStartTime();
+            doReturn(entryTime).when(span).getStartNanoTime();
             doReturn(name).when(span).getSpanName();
 
             currentStack.add(name); //add to fake call-stack
@@ -97,10 +97,10 @@ public class SampledTraceTest {
         @Override
         public void accept(Invocation invocation) {
             if (invocation.getSampledMethod() != null) {
-                assertThat(invocation.getSampledMethod().getClassName())
-                        .isEqualTo(expectedName.substring(0, expectedName.lastIndexOf('.')));
-                assertThat(invocation.getSampledMethod().getMethodName())
-                        .isEqualTo(expectedName.substring(expectedName.lastIndexOf('.') + 1));
+                assertThat(invocation.getSampledMethod()
+                        .getClassName()).isEqualTo(expectedName.substring(0, expectedName.lastIndexOf('.')));
+                assertThat(invocation.getSampledMethod()
+                        .getMethodName()).isEqualTo(expectedName.substring(expectedName.lastIndexOf('.') + 1));
             } else {
                 assertThat(invocation.getPlaceholderSpan().getSpanName()).isEqualTo(expectedName);
             }
@@ -135,9 +135,7 @@ public class SampledTraceTest {
 
             Iterable<Invocation> invocations = trace.generateInvocations();
             assertThat(invocations).hasSize(1);
-            assertThat(invocations).first().satisfies(
-                    new InvocationCheck("Top.firstMethod", 0, 1)
-            );
+            assertThat(invocations).first().satisfies(new InvocationCheck("Top.firstMethod", 0, 1));
         }
 
         @Test
@@ -164,12 +162,8 @@ public class SampledTraceTest {
 
             Iterable<Invocation> invocations = trace.generateInvocations();
             assertThat(invocations).hasSize(1);
-            assertThat(invocations).first().satisfies(
-                    new InvocationCheck("Top.firstMethod", 1, 5,
-                            new InvocationCheck("Child.meth1", 2, 3),
-                            new InvocationCheck("Child.meth2", 4, 5)
-                    )
-            );
+            assertThat(invocations).first()
+                    .satisfies(new InvocationCheck("Top.firstMethod", 1, 5, new InvocationCheck("Child.meth1", 2, 3), new InvocationCheck("Child.meth2", 4, 5)));
         }
 
         @Test
@@ -188,12 +182,8 @@ public class SampledTraceTest {
 
             Iterable<Invocation> invocations = trace.generateInvocations();
             assertThat(invocations).hasSize(2);
-            assertThat(invocations).first().satisfies(
-                    new InvocationCheck("Top.firstMethod", 0, 1)
-            );
-            assertThat(invocations).last().satisfies(
-                    new InvocationCheck("Hello.secondMethod", 2, 3)
-            );
+            assertThat(invocations).first().satisfies(new InvocationCheck("Top.firstMethod", 0, 1));
+            assertThat(invocations).last().satisfies(new InvocationCheck("Hello.secondMethod", 2, 3));
         }
 
         @Test
@@ -215,11 +205,8 @@ public class SampledTraceTest {
 
             Iterable<Invocation> invocations = trace.generateInvocations();
             assertThat(invocations).hasSize(1);
-            assertThat(invocations).first().satisfies(
-                    new InvocationCheck("Instr.methA", 0, 4,
-                            new InvocationCheck("Sampled.methB", 1, 3,
-                                    new InvocationCheck("Sampled.methC", 2, 3)))
-            );
+            assertThat(invocations).first()
+                    .satisfies(new InvocationCheck("Instr.methA", 0, 4, new InvocationCheck("Sampled.methB", 1, 3, new InvocationCheck("Sampled.methC", 2, 3))));
         }
 
         @Test
@@ -240,13 +227,8 @@ public class SampledTraceTest {
 
             Iterable<Invocation> invocations = trace.generateInvocations();
             assertThat(invocations).hasSize(1);
-            assertThat(invocations).first().satisfies(
-                    new InvocationCheck("Top.firstMethod", 0, 5,
-                            new InvocationCheck("A.a1", 1, 5,
-                                    new InvocationCheck("B.b1", 2, 4)
-                            )
-                    )
-            );
+            assertThat(invocations).first()
+                    .satisfies(new InvocationCheck("Top.firstMethod", 0, 5, new InvocationCheck("A.a1", 1, 5, new InvocationCheck("B.b1", 2, 4))));
         }
 
         @Test
@@ -264,11 +246,8 @@ public class SampledTraceTest {
 
             Iterable<Invocation> invocations = trace.generateInvocations();
             assertThat(invocations).hasSize(1);
-            assertThat(invocations).first().satisfies(
-                    new InvocationCheck("Top.firstMethod", 0, 2,
-                            new InvocationCheck("A.a1", 0, 2)
-                    )
-            );
+            assertThat(invocations).first()
+                    .satisfies(new InvocationCheck("Top.firstMethod", 0, 2, new InvocationCheck("A.a1", 0, 2)));
         }
 
         @Test
@@ -288,13 +267,8 @@ public class SampledTraceTest {
 
             Iterable<Invocation> invocations = trace.generateInvocations();
             assertThat(invocations).hasSize(1);
-            assertThat(invocations).first().satisfies(
-                    new InvocationCheck("Top.firstMethod", 0, 2,
-                            new InvocationCheck("Blub.secondMethod", 0, 2,
-                                    new InvocationCheck("A.a1", 0, 2)
-                            )
-                    )
-            );
+            assertThat(invocations).first()
+                    .satisfies(new InvocationCheck("Top.firstMethod", 0, 2, new InvocationCheck("Blub.secondMethod", 0, 2, new InvocationCheck("A.a1", 0, 2))));
         }
 
         @Test
@@ -314,11 +288,8 @@ public class SampledTraceTest {
 
             Iterable<Invocation> invocations = trace.generateInvocations();
             assertThat(invocations).hasSize(1);
-            assertThat(invocations).first().satisfies(
-                    new InvocationCheck("Top.firstMethod", 0, 4,
-                            new InvocationCheck("A.a1", 0, 2)
-                    )
-            );
+            assertThat(invocations).first()
+                    .satisfies(new InvocationCheck("Top.firstMethod", 0, 4, new InvocationCheck("A.a1", 0, 2)));
         }
 
         @Test
@@ -340,14 +311,8 @@ public class SampledTraceTest {
 
             Iterable<Invocation> invocations = trace.generateInvocations();
             assertThat(invocations).hasSize(1);
-            assertThat(invocations).first().satisfies(
-                    new InvocationCheck("Top.firstMethod", 0, 4,
-                            new InvocationCheck("Do.recurse", 0, 4,
-                                    new InvocationCheck("Middle.myMethod", 1, 3,
-                                            new InvocationCheck("Do.recurse", 1, 3))
-                            )
-                    )
-            );
+            assertThat(invocations).first()
+                    .satisfies(new InvocationCheck("Top.firstMethod", 0, 4, new InvocationCheck("Do.recurse", 0, 4, new InvocationCheck("Middle.myMethod", 1, 3, new InvocationCheck("Do.recurse", 1, 3)))));
         }
 
     }

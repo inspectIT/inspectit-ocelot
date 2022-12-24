@@ -128,7 +128,7 @@ public class SampledTrace {
      */
     public synchronized MethodExitNotifier newSpanStarted(PlaceholderSpan span, String className, String methodName) {
         if (!isFinished) {
-            MethodEntryEvent entryEvent = new MethodEntryEvent(span, null, span.getStartTime(), className, methodName, null);
+            MethodEntryEvent entryEvent = new MethodEntryEvent(span, null, span.getStartNanoTime(), className, methodName, null);
             events.add(entryEvent);
             return (exitTime) -> addExit(entryEvent, exitTime);
         }
@@ -191,9 +191,10 @@ public class SampledTrace {
         Span span;
         if (invoc.getSampledMethod() == null) {
             if (invoc.getPlaceholderSpan() != null) {
-                span = invoc.getPlaceholderSpan();
+                span = OpenCensusShimUtils.convertSpan(invoc.getPlaceholderSpan());
                 addHiddenParentsAttribute(span, invoc);
-                invoc.getPlaceholderSpan().exportWithParent(parentSpan, getTimestampConverter());
+                invoc.getPlaceholderSpan()
+                        .exportWithParent(OpenCensusShimUtils.castToOpenTelemetrySpanImpl(parentSpan), getAnchoredClock());
             } else {
                 span = invoc.getContinuedSpan();
             }
@@ -201,7 +202,7 @@ public class SampledTrace {
             if (!invoc.isHidden()) {
                 io.opentelemetry.api.trace.Span otelSpan = CustomSpanBuilder.builder("*" + getSimpleName(invoc.getSampledMethod()), OpenCensusShimUtils.castToOpenTelemetrySpanImpl(parentSpan))
                         .customTiming(invoc.getStart().getTimestamp(), invoc.getEnd()
-                                .getTimestamp(), getTimestampConverter())
+                                .getTimestamp(), getAnchoredClock())
                         .startSpan();
 
                 otelSpan.setAttribute(AttributeKey.booleanKey("java.sampled"), true);
@@ -251,7 +252,7 @@ public class SampledTrace {
         }
     }
 
-    private Object getTimestampConverter() {
+    private Object getAnchoredClock() {
         return OcelotSpanUtils.getAnchoredClock(rootSpan);
     }
 

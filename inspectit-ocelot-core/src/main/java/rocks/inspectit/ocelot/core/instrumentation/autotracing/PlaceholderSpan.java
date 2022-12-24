@@ -1,106 +1,90 @@
 package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
-import io.opencensus.implcore.internal.TimestampConverter;
-import io.opencensus.trace.*;
-import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.context.ImplicitContextKeyed;
+import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.trace.IdGenerator;
+import lombok.Getter;
 
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
- * A {@link Span}, which acts as a placeholder.
- * This span can be activated via {@link Tracer#withSpan(Span)} normally and act as a parent of other spans.
+ * A {@link io.opentelemetry.api.trace.Span}, which acts as a placeholder.
+ * This span can be activated via {@link io.opentelemetry.context.Context#with(ImplicitContextKeyed)}} normally and act as a parent of other spans.
  * <p>
- * However, when {@link #end(EndSpanOptions)} is called, the span is not exported immediately.
- * Instead, it will only be exported after both {@link #end(EndSpanOptions)} and {@link #exportWithParent(Span, TimestampConverter)} have been called.
+ * However, when {@link #end()}/{@link #end(long, TimeUnit)} is called, the span is not exported immediately.
+ * Instead, it will only be exported after both {@link #end()}/{@link #end(long, TimeUnit)} and {@link #exportWithParent(Span, Object)} have been called.
  */
-public class PlaceholderSpan extends Span {
-
-    /**
-     * Used for generating a span-ids
-     */
-    private static final Random RANDOM = new Random();
+public class PlaceholderSpan implements Span {
 
     /**
      * Stores the attributes added to this span.
      */
-    private Map<String, AttributeValue> attributes = new HashMap<>();
+    private Attributes attributes = Attributes.empty();
 
     private String spanName;
 
-    private Span.Kind spanKind;
+    private SpanKind spanKind;
 
     private Supplier<Long> clock;
 
-    private long startTime;
+    /**
+     * Start time in nanoTime, see {@link Clock#nanoTime()}
+     */
+    private long startNanoTime;
 
-    private long endTime = 0L;
+    /**
+     * End time in nanoTime, see {@link Clock#nanoTime()}
+     */
+    private long endNanoTime = 0L;
 
     private Span newParent;
 
+    @Getter
+    private SpanContext spanContext;
+
     private boolean exported = false;
 
-    private Object converter;
+    private TimeUnit timeUnit = TimeUnit.NANOSECONDS;
 
-    PlaceholderSpan(SpanContext defaultParent, String spanName, Span.Kind kind, Supplier<Long> clock) {
-        super(generateContext(defaultParent), EnumSet.of(Span.Options.RECORD_EVENTS));
+    private Object anchoredClock;
+
+    PlaceholderSpan(SpanContext defaultParent, String spanName, SpanKind kind, Supplier<Long> clock) {
+        spanContext = generateContext(defaultParent);
+        //, EnumSet.of(Span.Options.RECORD_EVENTS));
         this.spanName = spanName;
         spanKind = kind;
         this.clock = clock;
-        startTime = clock.get();
+        startNanoTime = clock.get();
     }
 
     private static SpanContext generateContext(SpanContext parentContext) {
-        SpanId id = SpanId.generateRandomId(RANDOM);
-        return SpanContext.create(parentContext.getTraceId(), id, parentContext.getTraceOptions(), parentContext.getTracestate());
+        String id = IdGenerator.random().generateSpanId();
+        return SpanContext.create(parentContext.getTraceId(), id, parentContext.getTraceFlags(), parentContext.getTraceState());
     }
 
     @Override
-    public void putAttribute(String key, AttributeValue value) {
-        attributes.put(key, value);
-    }
-
-    @Override
-    public void putAttributes(Map<String, AttributeValue> attributes) {
-        this.attributes.putAll(attributes);
-    }
-
-    @Override
-    public void addAnnotation(String description, Map<String, AttributeValue> attributes) {
-        //not supported yet
-    }
-
-    @Override
-    public void addAnnotation(Annotation annotation) {
-        //not supported yet
-    }
-
-    @Override
-    public void addLink(Link link) {
-        //not supported yet
-    }
-
-    @Override
-    public synchronized void end(EndSpanOptions options) {
-        endTime = clock.get();
-        if (newParent != null) {
-            export();
-        }
+    public Span setAttribute(AttributeKey key, Object value) {
+        attributes.toBuilder().put(key, value);
+        return this;
     }
 
     /**
      * Alters the parent of this span. May only be called exactly once.
      *
-     * @param newParent the parent to use
-     * @param converter the timestamp converter to use
+     * @param newParent     the parent to use
+     * @param anchoredClock the timestamp converter to use
      */
-    public synchronized void exportWithParent(Span newParent, Object converter) {
-        this.converter = converter;
+    public synchronized void exportWithParent(Span newParent, Object anchoredClock) {
+        this.anchoredClock = anchoredClock;
         this.newParent = newParent;
-        if (endTime != 0) {
+        if (endNanoTime != 0) {
             export();
         }
     }
@@ -108,21 +92,73 @@ public class PlaceholderSpan extends Span {
     private void export() {
         if (!exported) {
             exported = true;
-            Span span = OpenCensusShimUtils.convertSpan(CustomSpanBuilder.builder(spanName, OpenCensusShimUtils.castToOpenTelemetrySpanImpl(newParent))
-                    .kind(OpenCensusShimUtils.mapKind(spanKind))
-                    .customTiming(startTime, endTime, converter)
-                    .spanId(getContext().getSpanId().toLowerBase16())
-                    .startSpan());
-            span.putAttributes(attributes);
+            Span span = CustomSpanBuilder.builder(spanName, newParent)
+                    .kind(spanKind)
+                    .customTiming(startNanoTime, endNanoTime, anchoredClock)
+                    .spanId(getSpanContext().getSpanId())
+                    .attributes(attributes)
+                    .startSpan();
             span.end();
         }
     }
 
-    public long getStartTime() {
-        return startTime;
+    public long getStartNanoTime() {
+        return startNanoTime;
     }
 
     public String getSpanName() {
         return spanName;
+    }
+
+    @Override
+    public Span addEvent(String name, Attributes attributes) {
+        // not yet implemented
+        return this;
+    }
+
+    @Override
+    public Span addEvent(String name, Attributes attributes, long timestamp, TimeUnit unit) {
+        // not yet implemented
+        return this;
+    }
+
+    @Override
+    public Span setStatus(StatusCode statusCode, String description) {
+        // not yet implemented
+        return this;
+    }
+
+    @Override
+    public Span recordException(Throwable exception, Attributes additionalAttributes) {
+        // not yet implemented
+        return this;
+    }
+
+    @Override
+    public Span updateName(String name) {
+        spanName = name;
+        return this;
+    }
+
+    @Override
+    public void end() {
+        endNanoTime = clock.get();
+        if (newParent != null) {
+            export();
+        }
+    }
+
+    @Override
+    public void end(long timestamp, TimeUnit unit) {
+        endNanoTime = timestamp;
+        timeUnit = unit;
+        if (newParent != null) {
+            export();
+        }
+    }
+
+    @Override
+    public boolean isRecording() {
+        return false;
     }
 }

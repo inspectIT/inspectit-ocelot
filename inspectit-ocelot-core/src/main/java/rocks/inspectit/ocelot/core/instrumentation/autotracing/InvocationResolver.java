@@ -80,7 +80,7 @@ public class InvocationResolver {
                     assignStackTracesToMethodEntries(methodEvents.subList(1, methodEvents.size() - 1), durations, currentDepth + 1, output);
                     output.add(newExit); //add the new end-event
                 } else {
-                    //no stack trace occured between method start and end, keep the events as-is
+                    //no stack trace occurred between method start and end, keep the events as-is
                     output.addAll(methodEvents);
                 }
                 offset += duration + 1; //point after the exit event!

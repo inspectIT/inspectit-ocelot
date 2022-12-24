@@ -1,11 +1,11 @@
 package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
-import io.opencensus.common.Clock;
 import io.opencensus.common.Scope;
 import io.opencensus.trace.*;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.api.trace.TraceStateBuilder;
+import io.opentelemetry.sdk.common.Clock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -15,6 +15,7 @@ import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
 import rocks.inspectit.ocelot.core.utils.HighPrecisionTimer;
+import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -88,7 +89,7 @@ public class StackTraceSampler {
      * The clock used for timing the stack-traces.
      * This clock must be the same as used for OpenCensus {@link Span}s, to make sure that the timings are consistent.
      */
-    private Clock clock = Tracing.getClock();
+    private Clock clock = Clock.getDefault();
 
     @PostConstruct
     void init() {
@@ -205,12 +206,12 @@ public class StackTraceSampler {
     }
 
     private AutoCloseable continueSamplingAwareSpan(Span spanToContinue, MethodReflectionInformation actualMethod, SampledTrace activeSampling) {
-        SampledTrace.MethodExitNotifier exitCallback = activeSampling.spanContinued(spanToContinue, clock.nowNanos(), actualMethod.getDeclaringClass()
+        SampledTrace.MethodExitNotifier exitCallback = activeSampling.spanContinued(spanToContinue, clock.nanoTime(), actualMethod.getDeclaringClass()
                 .getName(), actualMethod.getName());
         Scope ctx = Tracing.getTracer().withSpan(spanToContinue);
         return () -> {
             ctx.close();
-            exitCallback.methodFinished(clock.nowNanos());
+            exitCallback.methodFinished(clock.nanoTime());
         };
     }
 
@@ -240,17 +241,18 @@ public class StackTraceSampler {
     }
 
     private AutoCloseable createSamplingAwareSpan(String name, SpanContext remoteParent, Span.Kind kind, MethodReflectionInformation actualMethod, SampledTrace activeSampling) {
-        SpanContext parent = remoteParent;
+        io.opentelemetry.api.trace.SpanContext parent = OpenCensusShimUtils.mapSpanContext(remoteParent);
         if (remoteParent == null) {
-            parent = Tracing.getTracer().getCurrentSpan().getContext();
+            parent = io.opentelemetry.api.trace.Span.current().getSpanContext();
         }
-        PlaceholderSpan span = new PlaceholderSpan(parent, name, kind, clock::nowNanos);
+        PlaceholderSpan span = new PlaceholderSpan(parent, name, OpenCensusShimUtils.mapKind(kind), clock::nanoTime);
+
         SampledTrace.MethodExitNotifier exitCallback = activeSampling.newSpanStarted(span, actualMethod.getDeclaringClass()
                 .getName(), actualMethod.getName());
-        Scope ctx = Tracing.getTracer().withSpan(span);
+        io.opentelemetry.context.Scope ctx = span.makeCurrent();
         return () -> {
             ctx.close();
-            exitCallback.methodFinished(clock.nowNanos());
+            exitCallback.methodFinished(clock.nanoTime());
         };
     }
 
@@ -300,7 +302,7 @@ public class StackTraceSampler {
                 .filter(trace -> !samplingsCopy.get(trace).isPaused())
                 .collect(Collectors.toSet());
 
-        long timestamp = clock.nowNanos();
+        long timestamp = clock.nanoTime();
         Map<Thread, StackTrace> stackTraces = StackTrace.createFor(threadsToSample);
 
         boolean anySampled = false;

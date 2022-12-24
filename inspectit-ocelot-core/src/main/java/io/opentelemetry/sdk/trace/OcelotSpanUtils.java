@@ -8,7 +8,6 @@ import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 import rocks.inspectit.ocelot.core.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 /**
  * Utility class for creating {@link SpanData} instances from {@link Span} ones. This class is in the OpenTelemetry package
@@ -38,9 +37,10 @@ public class OcelotSpanUtils {
     private final static Class<?> ANCHOREDCLOCK_CLASS;
 
     /**
-     * The {@link AnchoredClock#create(Clock)} method of {@link AnchoredClock}
+     * The {@link io.opentelemetry.api.internal.AutoValue_ImmutableSpanContext#spanId spanId} member of the {@link io.opentelemetry.api.internal.AutoValue_ImmutableSpanContext spanContext}
      */
-    private final static Method ANCHOREDCLOCK_CREATE;
+
+    private static Field SPANCONTEXT_SPANID;
 
     static {
         try {
@@ -51,8 +51,7 @@ public class OcelotSpanUtils {
             SDKSPAN_CLOCK = ReflectionUtils.getFieldAndMakeAccessible(SDKSPAN_CLASS, "clock");
 
             ANCHOREDCLOCK_CLASS = Class.forName("io.opentelemetry.sdk.trace.AnchoredClock");
-            ANCHOREDCLOCK_CREATE = ANCHOREDCLOCK_CLASS.getDeclaredMethod("create", Clock.class);
-            ANCHOREDCLOCK_CREATE.setAccessible(true);
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -88,18 +87,24 @@ public class OcelotSpanUtils {
     }
 
     /**
-     * Creates an {@link AnchoredClock} for the given {@link Clock}
+     * Returns the {@link AnchoredClock#startTime()} for the given {@link SdkSpan}
      *
-     * @param clock the {@link Clock} to be used to read the current epoch time and nanoTime.
+     * @param span
      *
-     * @return a {@code MonotonicClock}
+     * @return
      */
-    public static Object createAnchoredClock(Clock clock) {
-        try {
-            return ANCHOREDCLOCK_CREATE.invoke(null, clock);
-        } catch (Exception e) {
-            throw new RuntimeException("Could not create AnchoredClock (" + ANCHOREDCLOCK_CREATE.getDeclaringClass() + "." + ANCHOREDCLOCK_CREATE.getName() + ")", e);
-        }
+    public static long getAnchoredClockStartTime(Span span) {
+        return AnchoredClockUtils.getStartTime(getAnchoredClock(span));
+    }
+
+    /**
+     * Sets the {@link AnchoredClock#clock} of {@link SdkSpan#clock}
+     *
+     * @param span
+     * @param clock
+     */
+    public static void setAnchoredClockClock(Span span, Clock clock) {
+        AnchoredClockUtils.setClock(getAnchoredClock(span), clock);
     }
 
     /**
@@ -121,6 +126,26 @@ public class OcelotSpanUtils {
             SDKSPAN_CLOCK.set(span, anchoredClock);
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Could not set AnchoredClock", e);
+        }
+    }
+
+    /**
+     * Sets the span id of the {@link Span#getSpanContext() span context} ({@link io.opentelemetry.api.internal.AutoValue_ImmutableSpanContext#spanId}) for the given {@link Span}
+     *
+     * @param span
+     * @param spanId
+     */
+    public static void setSpanId(Span span, String spanId) {
+        try {
+            // get the spanId field in case this has not been set yet.
+            // we get the field in runtime as the underlying class (currently AutoValue_ImmutableSpanContext) may change
+            if (null == SPANCONTEXT_SPANID) {
+                SPANCONTEXT_SPANID = ReflectionUtils.getFieldAndMakeAccessible(span.getSpanContext()
+                        .getClass(), "spanId");
+            }
+            SPANCONTEXT_SPANID.set(span.getSpanContext(), spanId);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot set spanId for " + span.getSpanContext(), e);
         }
     }
 

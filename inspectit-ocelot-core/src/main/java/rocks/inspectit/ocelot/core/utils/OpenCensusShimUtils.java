@@ -1,10 +1,10 @@
 package rocks.inspectit.ocelot.core.utils;
 
 import io.opencensus.trace.BlankSpan;
+import io.opencensus.trace.SpanContext;
+import io.opencensus.trace.Tracestate;
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Constructor;
@@ -156,4 +156,22 @@ public class OpenCensusShimUtils {
             throw new RuntimeException(e);
         }
     }
+
+    // copied from SpanConverter
+    // TODO: just call the SpanConverter methods via Reflection
+    public static io.opentelemetry.api.trace.SpanContext mapSpanContext(SpanContext ocSpanContext) {
+        if (null == ocSpanContext) {
+            return null;
+        }
+        return io.opentelemetry.api.trace.SpanContext.create(ocSpanContext.getTraceId()
+                .toLowerBase16(), ocSpanContext.getSpanId().toLowerBase16(), ocSpanContext.getTraceOptions()
+                .isSampled() ? TraceFlags.getSampled() : TraceFlags.getDefault(), mapTracestate(ocSpanContext.getTracestate()));
+    }
+
+    public static TraceState mapTracestate(Tracestate tracestate) {
+        TraceStateBuilder builder = TraceState.builder();
+        tracestate.getEntries().forEach(entry -> builder.put(entry.getKey(), entry.getValue()));
+        return builder.build();
+    }
+
 }
