@@ -1,6 +1,10 @@
 package io.opentelemetry.sdk.trace;
 
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import lombok.extern.slf4j.Slf4j;
@@ -12,14 +16,16 @@ import java.lang.reflect.Field;
 /**
  * Utility class for creating {@link SpanData} instances from {@link Span} ones. This class is in the OpenTelemetry package
  * because it requires access to package-local classes, e.g. {@link SdkSpan} or {@link AnchoredClock}.
+ * <p>
+ * Currently, we are accessing everything via reflection, as we encounter 'Illegal access' exceptions if OpenTelemetry is published to the bootstrap classloader when we use the 'real' classes and members.
  */
 @Slf4j
 public class OcelotSpanUtils {
 
     /**
-     * The {@link io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl#otelSpan otelSpan} member of {@link io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl}
+     * The class of {@link io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl}
      */
-    private static final Field OPENTELEMETRYSPANIMPL_OTELSPAN;
+    private static final Class<Span> OPENTELEMETRYSPANIMPL_CLASS;
 
     /**
      * The {@link io.opentelemetry.sdk.trace.AnchoredClock clock} member of {@link io.opentelemetry.sdk.trace.SdkSpan}
@@ -44,67 +50,33 @@ public class OcelotSpanUtils {
 
     static {
         try {
-
-            OPENTELEMETRYSPANIMPL_OTELSPAN = ReflectionUtils.getFieldAndMakeAccessible("io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl", "otelSpan");
+            OPENTELEMETRYSPANIMPL_CLASS = (Class<Span>) Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl");
 
             SDKSPAN_CLASS = (Class<Span>) Class.forName("io.opentelemetry.sdk.trace.SdkSpan");
             SDKSPAN_CLOCK = ReflectionUtils.getFieldAndMakeAccessible(SDKSPAN_CLASS, "clock");
 
             ANCHOREDCLOCK_CLASS = Class.forName("io.opentelemetry.sdk.trace.AnchoredClock");
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * Returns the {@link AnchoredClock} for the given {@link SdkSpan}
+     * Returns the {@link AnchoredClock} for the given {@link SdkSpan} or {@link io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl#otelSpan}
      *
      * @param span
      *
      * @return
      */
     public static Object getAnchoredClock(Span span) {
-        if (!SDKSPAN_CLASS.isInstance(span)) {
-            throw new IllegalArgumentException(span.getClass() + " is no of type " + SDKSPAN_CLASS.getDeclaringClass());
+        if (!SDKSPAN_CLASS.isInstance(span) && !OPENTELEMETRYSPANIMPL_CLASS.isInstance(span)) {
+            throw new IllegalArgumentException(span.getClass() + " is not of type " + SDKSPAN_CLASS + " or " + OPENTELEMETRYSPANIMPL_CLASS);
         }
         try {
-            return SDKSPAN_CLOCK.get(span);
+            return SDKSPAN_CLOCK.get(SDKSPAN_CLASS.isInstance(span) ? span : OpenCensusShimUtils.getOtelSpan((io.opencensus.trace.Span) span));
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Gets the {@link AnchoredClock} for the given {@link io.opencensus.trace.Span span}, which is assumed to be an instance of {@link io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl}
-     *
-     * @param ocSpan
-     *
-     * @return
-     */
-    public static Object getAnchoredClock(io.opencensus.trace.Span ocSpan) {
-        return getAnchoredClock(OpenCensusShimUtils.getOtelSpan(ocSpan));
-    }
-
-    /**
-     * Returns the {@link AnchoredClock#startTime()} for the given {@link SdkSpan}
-     *
-     * @param span
-     *
-     * @return
-     */
-    public static long getAnchoredClockStartTime(Span span) {
-        return AnchoredClockUtils.getStartTime(getAnchoredClock(span));
-    }
-
-    /**
-     * Sets the {@link AnchoredClock#clock} of {@link SdkSpan#clock}
-     *
-     * @param span
-     * @param clock
-     */
-    public static void setAnchoredClockClock(Span span, Clock clock) {
-        AnchoredClockUtils.setClock(getAnchoredClock(span), clock);
     }
 
     /**
@@ -117,10 +89,10 @@ public class OcelotSpanUtils {
      */
     public static void setAnchoredClock(Span span, Object anchoredClock) {
         if (!SDKSPAN_CLASS.isInstance(span)) {
-            throw new IllegalArgumentException(span.getClass() + " is not of type SdkSpan (" + SDKSPAN_CLASS.getDeclaringClass() + ")");
+            throw new IllegalArgumentException(span.getClass() + " is not of type SdkSpan (" + SDKSPAN_CLASS + ")");
         }
         if (!ANCHOREDCLOCK_CLASS.isInstance(anchoredClock)) {
-            throw new IllegalArgumentException(anchoredClock.getClass() + " is not of type AnchoredClock (" + ANCHOREDCLOCK_CLASS.getDeclaringClass() + ")");
+            throw new IllegalArgumentException(anchoredClock.getClass() + " is not of type AnchoredClock (" + ANCHOREDCLOCK_CLASS + ")");
         }
         try {
             SDKSPAN_CLOCK.set(span, anchoredClock);
@@ -147,6 +119,12 @@ public class OcelotSpanUtils {
         } catch (Exception e) {
             throw new RuntimeException("Cannot set spanId for " + span.getSpanContext(), e);
         }
+    }
+
+    public static Span startSpan(SpanContext context, String name, SpanKind kind, Span parent, Clock clock, Attributes attributes, long startEpochNanos) {
+        TracerSharedState tracerSharedState = null;
+        return SdkSpan.startSpan(context, name, null, kind, parent, Context.current()
+                .with(parent), tracerSharedState.getSpanLimits(), tracerSharedState.getActiveSpanProcessor(), clock, tracerSharedState.getResource(), null, null, 0, startEpochNanos);
     }
 
 }

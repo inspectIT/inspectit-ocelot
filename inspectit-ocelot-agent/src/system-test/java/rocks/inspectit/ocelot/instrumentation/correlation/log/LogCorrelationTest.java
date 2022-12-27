@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.instrumentation.correlation.log;
 
-import io.opencensus.trace.Tracing;
+import io.opentelemetry.api.trace.Span;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.*;
@@ -71,7 +71,7 @@ public class LogCorrelationTest {
     @BeforeAll
     private static void beforeAll() throws Exception {
         Class<?> testMdcClass = new IsolatedMdcClassLoader().loadClass("org.slf4j.MDC");
-        final Method getMethod = testMdcClass.getMethod("get", String.class);
+        Method getMethod = testMdcClass.getMethod("get", String.class);
 
         getTestMdc = (key) -> {
             try {
@@ -81,20 +81,12 @@ public class LogCorrelationTest {
             }
         };
 
-
         //load the MDC classes
         MDC.get("test");
         org.apache.log4j.MDC.get("test");
         ThreadContext.get("test");
 
-        TestUtils.waitForClassInstrumentations(
-                Thread.class,
-                AbstractExecutorService.class,
-                ThreadPoolExecutor.class,
-                ScheduledThreadPoolExecutor.class,
-                LogCorrelationTest.class,
-                TestRunnable.class,
-                TestCallable.class);
+        TestUtils.waitForClassInstrumentations(Thread.class, AbstractExecutorService.class, ThreadPoolExecutor.class, ScheduledThreadPoolExecutor.class, LogCorrelationTest.class, TestRunnable.class, TestCallable.class);
         TestUtils.waitForClassHooks(LogCorrelationTest.class);
     }
 
@@ -150,7 +142,7 @@ public class LogCorrelationTest {
     }
 
     private String currentTraceId() {
-        return Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
+        return Span.current().getSpanContext().getTraceId();
     }
 
     @Nested
@@ -160,7 +152,7 @@ public class LogCorrelationTest {
         void verifyCorrelation() {
             assertMDCContainTraceId(null);
             traced(() -> {
-                String currentTraceId = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
+                String currentTraceId = currentTraceId();
                 assertMDCContainTraceId(currentTraceId);
             }, 1.0);
             assertMDCContainTraceId(null);
@@ -170,7 +162,7 @@ public class LogCorrelationTest {
         void verifyNoCorrelationForUnsampled() {
             assertMDCContainTraceId(null);
             traced(() -> {
-                assertThat(Tracing.getTracer().getCurrentSpan().getContext().isValid()).isTrue();
+                assertThat(Span.current().getSpanContext().isValid()).isTrue();
                 assertMDCContainTraceId(null);
             }, 0.0);
             assertMDCContainTraceId(null);
@@ -186,7 +178,7 @@ public class LogCorrelationTest {
             MutableBoolean isExpectedTraceId = new MutableBoolean();
 
             traced(() -> {
-                String trace = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
+                String trace = currentTraceId();
 
                 Thread thread = new Thread(() -> {
                     isExpectedTraceId.setValue(isMdcTraceIdEqualTo(trace));
@@ -209,7 +201,7 @@ public class LogCorrelationTest {
             MutableBoolean isExpectedTraceId = new MutableBoolean();
 
             traced(() -> {
-                String trace = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
+                String trace = currentTraceId();
 
                 Thread thread = new Thread() {
                     @Override
@@ -237,7 +229,7 @@ public class LogCorrelationTest {
 
             traced(() -> {
                 newThread.set(new Thread(() -> {
-                    isValidTrace.setValue(Tracing.getTracer().getCurrentSpan().getContext().isValid());
+                    isValidTrace.setValue(Span.current().getSpanContext().isValid());
                     isExpectedTraceId.setValue(isMdcTraceIdEqualTo(null));
                 }));
             }, 0.0);
@@ -515,8 +507,7 @@ public class LogCorrelationTest {
             while (deque.peek() != null && !deque.peek()) {
                 deque.pop();
             }
-            assertThat(deque).extracting(Boolean::booleanValue)
-                    .containsOnly(true);
+            assertThat(deque).extracting(Boolean::booleanValue).containsOnly(true);
         }
 
         @Test
@@ -539,8 +530,7 @@ public class LogCorrelationTest {
             latch.await();
 
             assertThat(deque).size().isGreaterThanOrEqualTo(5);
-            assertThat(deque).extracting(Boolean::booleanValue)
-                    .containsOnly(true);
+            assertThat(deque).extracting(Boolean::booleanValue).containsOnly(true);
         }
 
         @Test
@@ -561,8 +551,7 @@ public class LogCorrelationTest {
             latch.await();
 
             assertThat(deque).size().isGreaterThanOrEqualTo(5);
-            assertThat(deque).extracting(Boolean::booleanValue)
-                    .containsOnly(true);
+            assertThat(deque).extracting(Boolean::booleanValue).containsOnly(true);
         }
     }
 

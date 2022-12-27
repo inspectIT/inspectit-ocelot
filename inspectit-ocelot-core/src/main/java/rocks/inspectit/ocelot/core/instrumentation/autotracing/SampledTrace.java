@@ -1,15 +1,13 @@
 package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.sdk.trace.OcelotSpanUtils;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.MethodEntryEvent;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.MethodExitEvent;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.StackTraceSampledEvent;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.TraceEvent;
-import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -191,16 +189,15 @@ public class SampledTrace {
         Span span;
         if (invoc.getSampledMethod() == null) {
             if (invoc.getPlaceholderSpan() != null) {
-                span = OpenCensusShimUtils.convertSpan(invoc.getPlaceholderSpan());
+                span = invoc.getPlaceholderSpan();
                 addHiddenParentsAttribute(span, invoc);
-                invoc.getPlaceholderSpan()
-                        .exportWithParent(OpenCensusShimUtils.castToOpenTelemetrySpanImpl(parentSpan), getAnchoredClock());
+                invoc.getPlaceholderSpan().exportWithParent(parentSpan, getAnchoredClock());
             } else {
                 span = invoc.getContinuedSpan();
             }
         } else {
             if (!invoc.isHidden()) {
-                io.opentelemetry.api.trace.Span otelSpan = CustomSpanBuilder.builder("*" + getSimpleName(invoc.getSampledMethod()), OpenCensusShimUtils.castToOpenTelemetrySpanImpl(parentSpan))
+                Span otelSpan = CustomSpanBuilder.builder("*" + getSimpleName(invoc.getSampledMethod()), parentSpan)
                         .customTiming(invoc.getStart().getTimestamp(), invoc.getEnd()
                                 .getTimestamp(), getAnchoredClock())
                         .startSpan();
@@ -210,7 +207,7 @@ public class SampledTrace {
                 addHiddenParentsAttribute(otelSpan, invoc);
                 otelSpan.end();
 
-                span = OpenCensusShimUtils.convertSpan(otelSpan);
+                span = otelSpan;
             } else {
                 span = parentSpan;
             }
@@ -232,22 +229,6 @@ public class SampledTrace {
             String parents = hiddenParents.stream()
                     .map(inv -> inv.getSampledMethod().toString())
                     .collect(Collectors.joining("\n"));
-            span.putAttribute("java.hidden_parents", AttributeValue.stringAttributeValue(parents));
-        }
-    }
-
-    private void addHiddenParentsAttribute(io.opentelemetry.api.trace.Span span, Invocation invoc) {
-        List<Invocation> hiddenParents = new ArrayList<>();
-        Invocation parent = invoc.getParent();
-        while (parent != null && parent.isHidden()) {
-            hiddenParents.add(parent);
-            parent = parent.getParent();
-        }
-        if (!hiddenParents.isEmpty()) {
-            Collections.reverse(hiddenParents);
-            String parents = hiddenParents.stream()
-                    .map(inv -> inv.getSampledMethod().toString())
-                    .collect(Collectors.joining("\n"));
             span.setAttribute(AttributeKey.stringKey("java.hidden_parents"), parents);
         }
     }
@@ -256,12 +237,12 @@ public class SampledTrace {
         return OcelotSpanUtils.getAnchoredClock(rootSpan);
     }
 
-    private String getSimpleName(StackTraceElement element) {
+    private static String getSimpleName(StackTraceElement element) {
         String className = element.getClassName();
         return className.substring(className.lastIndexOf('.') + 1) + "." + element.getMethodName();
     }
 
-    private String getFullName(StackTraceElement element) {
+    private static String getFullName(StackTraceElement element) {
         String className = element.getClassName();
         return className + "." + element.getMethodName();
     }

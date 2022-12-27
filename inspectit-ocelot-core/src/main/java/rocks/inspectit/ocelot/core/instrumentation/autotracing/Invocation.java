@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
-import io.opencensus.trace.Span;
+import io.opentelemetry.api.trace.Span;
 import lombok.Getter;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.TraceEvent;
 

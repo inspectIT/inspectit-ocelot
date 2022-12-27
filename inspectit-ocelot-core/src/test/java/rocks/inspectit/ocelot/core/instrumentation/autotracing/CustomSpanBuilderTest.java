@@ -1,6 +1,8 @@
 package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.sdk.trace.AnchoredClockUtils;
+import io.opentelemetry.sdk.trace.OcelotSpanUtils;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,17 +24,18 @@ public class CustomSpanBuilderTest {
                     .startSpan();
 
             Span mySpan = CustomSpanBuilder.builder("foo", parent).customTiming(42, 142, null).startSpan();
+            Object anchoredClock = OcelotSpanUtils.getAnchoredClock(mySpan);
 
             ReadWriteSpan spanImpl = (ReadWriteSpan) mySpan;
             spanImpl.end();
-            // spanImpl.end(142, TimeUnit.NANOSECONDS);
             assertThat(spanImpl.getName()).isEqualTo("foo");
             assertThat(spanImpl.getSpanContext().getSpanId()).isNotEqualTo(parent.getSpanContext().getSpanId());
             assertThat(spanImpl.getSpanContext().getTraceId()).isEqualTo(parent.getSpanContext().getTraceId());
             assertThat(spanImpl.getSpanContext().getTraceFlags()).isEqualTo(parent.getSpanContext().getTraceFlags());
             assertThat(spanImpl.getSpanContext().getTraceState()).isEqualTo(parent.getSpanContext().getTraceState());
             assertThat(spanImpl.toSpanData().getParentSpanId()).isEqualTo(parent.getSpanContext().getSpanId());
-            assertThat(spanImpl.toSpanData().getEndEpochNanos()).isEqualTo(142);
+            assertThat(spanImpl.toSpanData()
+                    .getEndEpochNanos()).isEqualTo(AnchoredClockUtils.getStartTime(anchoredClock) + (142 - AnchoredClockUtils.getNanoTime(anchoredClock)));
             assertThat(spanImpl.getLatencyNanos()).isEqualTo(100);
         }
     }

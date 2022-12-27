@@ -19,10 +19,12 @@ public class OpenCensusShimUtils {
 
     private static final Constructor<Span> OPENTELEMETRYSPANIMPL_CONSTRUCTOR;
 
+    private static final Class<Span> OPENTELEMETRYNORECORDEVENTSSPANIMPL_CLASS;
+
     static {
         try {
             OPENTELEMETRYSPANIMPL_CLASS = (Class<Span>) Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl");
-
+            OPENTELEMETRYNORECORDEVENTSSPANIMPL_CLASS = (Class<Span>) Class.forName("io.opentelemetry.opencensusshim.OpenTelemetryNoRecordEventsSpanImpl");
             OPENTELEMETRYSPANIMPL_OTELSPAN = ReflectionUtils.getFieldAndMakeAccessible(OPENTELEMETRYSPANIMPL_CLASS, "otelSpan");
 
             OPENTELEMETRYSPANIMPL_CONSTRUCTOR = OPENTELEMETRYSPANIMPL_CLASS.getDeclaredConstructor(io.opentelemetry.api.trace.Span.class);
@@ -127,18 +129,17 @@ public class OpenCensusShimUtils {
     }
 
     /**
-     * Casts the given {@link io.opencensus.trace.Span} to {@link io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl}
+     * Casts the given {@link io.opencensus.trace.Span} to {@link io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl} or {@link io.opentelemetry.opencensusshim.OpenTelemetryNoRecordEventsSpanImpl}
      *
      * @param ocSpan
      *
      * @return
      */
     public static Span castToOpenTelemetrySpanImpl(io.opencensus.trace.Span ocSpan) {
-        if (!OPENTELEMETRYSPANIMPL_CLASS.isInstance(ocSpan)) {
-            throw new RuntimeException(String.format("Span '%s' is not instanceof %s", ocSpan.getClass()
-                    .getName(), OPENTELEMETRYSPANIMPL_CLASS.getDeclaringClass().getName()));
+        if (!OPENTELEMETRYSPANIMPL_CLASS.isInstance(ocSpan) && !OPENTELEMETRYNORECORDEVENTSSPANIMPL_CLASS.isInstance(ocSpan)) {
+            throw new RuntimeException(String.format("Span '%s' is not instanceof %s or %s", ocSpan.getClass(), OPENTELEMETRYSPANIMPL_CLASS, OPENTELEMETRYNORECORDEVENTSSPANIMPL_CLASS));
         }
-        return OPENTELEMETRYSPANIMPL_CLASS.cast(ocSpan);
+        return OPENTELEMETRYSPANIMPL_CLASS.isInstance(ocSpan) ? OPENTELEMETRYSPANIMPL_CLASS.cast(ocSpan) : OPENTELEMETRYNORECORDEVENTSSPANIMPL_CLASS.cast(ocSpan);
     }
 
     /**
@@ -150,10 +151,14 @@ public class OpenCensusShimUtils {
      */
     public static Span getOtelSpan(io.opencensus.trace.Span ocSpan) {
         Span otelSpan = castToOpenTelemetrySpanImpl(ocSpan);
+        if (!OPENTELEMETRYSPANIMPL_CLASS.isInstance(otelSpan)) {
+            throw new RuntimeException(String.format("Span %s is not of class %s and thus we cannot get the 'otelSpan' field", ocSpan.getClass(), OPENTELEMETRYSPANIMPL_CLASS));
+        }
         try {
             return (Span) OPENTELEMETRYSPANIMPL_OTELSPAN.get(otelSpan);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
+
         }
     }
 

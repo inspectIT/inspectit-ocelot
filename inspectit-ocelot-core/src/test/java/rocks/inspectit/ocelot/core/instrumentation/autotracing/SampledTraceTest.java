@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
-import io.opencensus.trace.Span;
+import io.opentelemetry.api.trace.Span;
 import org.apache.commons.lang3.ArrayUtils;
 import org.assertj.core.util.IterableUtil;
 import org.junit.jupiter.api.Nested;

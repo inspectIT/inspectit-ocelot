@@ -1,8 +1,10 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.span;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.trace.*;
+import io.opencensus.trace.Sampler;
+import io.opencensus.trace.SpanContext;
 import io.opencensus.trace.samplers.Samplers;
+import io.opentelemetry.api.trace.Span;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +40,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
     /**
      * The span kind to use when beginning a new span, can be null.
      */
-    private final Span.Kind spanKind;
+    private final io.opencensus.trace.Span.Kind spanKind;
 
     /**
      * The data key to read for continuing a span.
@@ -117,17 +119,16 @@ public class ContinueOrStartSpanAction implements IHookAction {
             SpanContext remoteParent = ctx.getAndClearCurrentRemoteSpanContext();
             boolean hasLocalParent = false;
             if (remoteParent == null) {
-                Span currentSpan = Tracing.getTracer().getCurrentSpan();
+                Span currentSpan = Span.current();
 
                 // the span has a local parent if the currentSpan is either not BlankSpan.INSTANCE (when using OC) or does not have a valid context (when using OTel)
-                hasLocalParent = !(currentSpan == BlankSpan.INSTANCE || !currentSpan.getContext().isValid());
+                hasLocalParent = !(currentSpan == Span.getInvalid() || !currentSpan.getSpanContext().isValid());
             }
 
             Sampler sampler = getSampler(context);
             AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> stackTraceSampler.createAndEnterSpan(spanName, remoteParent, sampler, spanKind, methodInfo, autoTrace));
             ctx.setSpanScope(spanCtx);
-            commonTagsToAttributesManager.writeCommonTags(Tracing.getTracer()
-                    .getCurrentSpan(), remoteParent != null, hasLocalParent);
+            commonTagsToAttributesManager.writeCommonTags(Span.current(), remoteParent != null, hasLocalParent);
 
         }
     }
