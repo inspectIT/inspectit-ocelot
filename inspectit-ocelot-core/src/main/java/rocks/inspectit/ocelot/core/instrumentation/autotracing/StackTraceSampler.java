@@ -1,15 +1,13 @@
 package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
-import io.opencensus.trace.Sampler;
-import io.opencensus.trace.SpanBuilder;
-import io.opencensus.trace.SpanContext;
-import io.opencensus.trace.Tracing;
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.TraceFlags;
-import io.opentelemetry.api.trace.TraceState;
-import io.opentelemetry.api.trace.TraceStateBuilder;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -18,8 +16,9 @@ import rocks.inspectit.ocelot.config.model.tracing.AutoTracingSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
+import rocks.inspectit.ocelot.core.opentelemetry.OpenTelemetryControllerImpl;
 import rocks.inspectit.ocelot.core.utils.HighPrecisionTimer;
-import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -44,7 +43,7 @@ public class StackTraceSampler {
     public static final int EXPORT_INTERVAL_MILLIS = 200;
 
     /**
-     * The change to apply to the state of the sampler when invoking {@link #createAndEnterSpan(String, SpanContext, Sampler, Span.Kind, MethodReflectionInformation, Mode)}
+     * The change to apply to the state of the sampler when invoking {@link #createAndEnterSpan(String, SpanContext, Sampler, io.opentelemetry.api.trace.SpanKind, MethodReflectionInformation, Mode)}
      * or {@link #continueSpan(Span, MethodReflectionInformation, Mode)}.
      */
     public enum Mode {
@@ -135,7 +134,7 @@ public class StackTraceSampler {
      *
      * @return The generated span is activated via {@link Span#makeCurrent()}. The resulting context is wrapped with a context which terminates the stack-trace-sampling.
      */
-    public AutoCloseable createAndEnterSpan(String name, SpanContext remoteParent, Sampler sampler, io.opencensus.trace.Span.Kind kind, MethodReflectionInformation actualMethod, Mode mode) {
+    public AutoCloseable createAndEnterSpan(String name, SpanContext remoteParent, Sampler sampler, SpanKind kind, MethodReflectionInformation actualMethod, Mode mode) {
         Thread self = Thread.currentThread();
         SampledTrace activeSampling = activeSamplings.get(self);
         if (activeSampling == null) {
@@ -219,7 +218,7 @@ public class StackTraceSampler {
         };
     }
 
-    private AutoCloseable startSampling(String name, SpanContext remoteParent, Sampler sampler, io.opencensus.trace.Span.Kind kind) {
+    private AutoCloseable startSampling(String name, SpanContext remoteParent, Sampler sampler, SpanKind kind) {
         Span rootSpan = createNormalSpan(name, remoteParent, sampler, kind);
         return startSampling(rootSpan);
     }
@@ -246,12 +245,12 @@ public class StackTraceSampler {
         }
     }
 
-    private AutoCloseable createSamplingAwareSpan(String name, SpanContext remoteParent, io.opencensus.trace.Span.Kind kind, MethodReflectionInformation actualMethod, SampledTrace activeSampling) {
-        io.opentelemetry.api.trace.SpanContext parent = OpenCensusShimUtils.mapSpanContext(remoteParent);
+    private AutoCloseable createSamplingAwareSpan(String name, SpanContext remoteParent, SpanKind kind, MethodReflectionInformation actualMethod, SampledTrace activeSampling) {
+        SpanContext parent = remoteParent;
         if (remoteParent == null) {
             parent = Span.current().getSpanContext();
         }
-        PlaceholderSpan span = new PlaceholderSpan(parent, name, OpenCensusShimUtils.mapKind(kind), clock::nanoTime);
+        PlaceholderSpan span = new PlaceholderSpan(parent, name, kind, clock::nanoTime);
 
         SampledTrace.MethodExitNotifier exitCallback = activeSampling.newSpanStarted(span, actualMethod.getDeclaringClass()
                 .getName(), actualMethod.getName());
@@ -262,37 +261,32 @@ public class StackTraceSampler {
         };
     }
 
-    private Span createNormalSpan(String name, SpanContext remoteParent, Sampler sampler, io.opencensus.trace.Span.Kind kind) {
+    @Autowired
+    OpenTelemetryControllerImpl openTelemetryController;
+
+    private Span createNormalSpan(String name, SpanContext remoteParent, Sampler sampler, SpanKind kind) {
         SpanBuilder builder;
-        if (remoteParent != null) {
-            // rebuild the io.opentelemetry.api.trace.SpanContext manually from OC remoteParent span context
-            // this is done because Tracing.getTracer.spanBuilderWithRemoteParent does not work as expected. The remote parent span is **not** added to the OTEL context (see io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl#startSpan and io.opentelemetry.sdk.trace.SdkSpanBuilder#startSpan)
-            TraceStateBuilder tsBuilder = TraceState.builder();
-            remoteParent.getTracestate().getEntries().forEach(entry -> tsBuilder.put(entry.getKey(), entry.getValue()));
-            TraceState traceState = tsBuilder.build();
 
-            // rebuild SpanContext
-            TraceFlags flags = remoteParent.getTraceOptions()
-                    .isSampled() ? TraceFlags.getSampled() : TraceFlags.getDefault();
-            io.opentelemetry.api.trace.SpanContext fromRemoteParent = io.opentelemetry.api.trace.SpanContext.createFromRemoteParent(remoteParent.getTraceId()
-                    .toLowerBase16(), remoteParent.getSpanId().toLowerBase16(), flags, traceState);
-
-            // get a non-recording OTEL span from the manually rebuilt span context
-            Span span = Span.wrap(fromRemoteParent);
-            try (// add the span to io.openTelemetry.Context
-                 io.opentelemetry.context.Scope scope = span.makeCurrent()) {
-                // get the SpanBuilder
-                builder = Tracing.getTracer().spanBuilder(name);
-            }
+        boolean openTelemetryControllerSamplerUpdated = false;
+        // get a custom tracer in case a custom sampler has been provided
+        if (null != sampler) {
+            // update the sampler
+            openTelemetryController.setSampler(sampler);
+            builder = OpenTelemetryUtils.getTracer().spanBuilder(name);
+            openTelemetryControllerSamplerUpdated = true;
         } else {
-            builder = Tracing.getTracer().spanBuilder(name);
+            builder = OpenTelemetryUtils.getTracer().spanBuilder(name);
         }
         builder.setSpanKind(kind);
-        if (sampler != null) {
-            builder.setSampler(sampler);
+        if (remoteParent != null) {
+            builder.setParent(Context.current().with(Span.wrap(remoteParent)));
         }
-        io.opencensus.trace.Span span = builder.startSpan();
-        return OpenCensusShimUtils.castToOpenTelemetrySpanImpl(span);
+        Span span = builder.startSpan();
+        // reset the sampler if applicable
+        if (openTelemetryControllerSamplerUpdated) {
+            openTelemetryController.resetSampler();
+        }
+        return span;
     }
 
     /**

@@ -14,6 +14,7 @@ import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -29,11 +30,11 @@ import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.IOpenTelemetryController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.model.tracing.SampleMode;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
+import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.DynamicSampler;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
@@ -126,16 +127,20 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
     @Autowired
     @VisibleForTesting
+    @Getter(AccessLevel.PACKAGE)
     CustomIdGenerator idGenerator;
 
     /**
      * The {@link DynamicSampler} used for tracing
      */
+    @VisibleForTesting
+    @Getter(AccessLevel.PACKAGE)
     private DynamicSampler sampler;
 
     /**
      * The {@link BatchSpanProcessor} used to process all spans
      */
+    @Getter(AccessLevel.PACKAGE)
     private SpanProcessor spanProcessor;
 
     /**
@@ -144,6 +149,12 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @VisibleForTesting
     @Setter(AccessLevel.PACKAGE)
     private DynamicMultiSpanExporter multiSpanExporter;
+
+    /**
+     * {@link Resource} containing  tracer provider attributes.
+     */
+    @Getter(AccessLevel.PACKAGE)
+    private Resource tracerProviderAttributes;
 
     @PostConstruct
     @VisibleForTesting
@@ -339,11 +350,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         sampler = new DynamicSampler(configuration.getTracing().getSampleMode(), configuration.getTracing()
                 .getSampleProbability());
         multiSpanExporter = DynamicMultiSpanExporter.create();
-        // @formatter:off
-        Resource tracerProviderAttributes = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters()
-                .getTracing()
-                .getServiceName(), AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion(), ResourceAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion(), ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java", ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"));
-        // @formatter:on
+        tracerProviderAttributes = getTracerProviderAttributes(configuration);
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)
                 .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
                 .setScheduleDelay(configuration.getTracing().getScheduleDelayMillis(), TimeUnit.MILLISECONDS)
@@ -356,6 +363,22 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                 .setIdGenerator(idGenerator);
 
         return builder.build();
+    }
+
+    /**
+     * Gets a {@link Resource} for the tracer provider attributes.
+     *
+     * @param configuration
+     *
+     * @return
+     */
+    private static Resource getTracerProviderAttributes(InspectitConfig configuration) {
+        // @formatter:off
+        Resource tracerProviderAttributes = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters()
+                .getTracing()
+                .getServiceName(), AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion(), ResourceAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion(), ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java", ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"));
+        // @formatter:on
+        return tracerProviderAttributes;
     }
 
     /**
@@ -381,7 +404,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             return null;
         }
         try {
-            sampler.setSampleProbability(configuration.getTracing().getSampleMode(), configuration.getTracing()
+            sampler.setSampler(configuration.getTracing().getSampleMode(), configuration.getTracing()
                     .getSampleProbability());
             return tracerProvider;
 
@@ -539,8 +562,19 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     }
 
     @Override
-    public void setSampler(String sampleMode, double sampleProbability) {
-        SampleMode sm = SampleMode.valueOf(sampleMode);
-        sampler.setSampleProbability(sm, sampleProbability);
+    public void setSampler(Object sampler) {
+        if (sampler instanceof Sampler) {
+            this.sampler.setSampler((Sampler) sampler);
+        }
     }
+
+    /***
+     * Resets the {@link #sampler} to the current configuration.
+     */
+    public void resetSampler() {
+        sampler.setSampler(env.getCurrentConfig().getTracing().getSampleMode(), env.getCurrentConfig()
+                .getTracing()
+                .getSampleProbability());
+    }
+
 }

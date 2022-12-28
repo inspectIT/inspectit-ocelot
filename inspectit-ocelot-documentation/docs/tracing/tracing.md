@@ -31,6 +31,9 @@ In this case the method will **not** be recorded!
 
 In case of `TRACE_ID_RATIO_BASED`, the sampling decision is made for each span, regardless of the parent span's sampling decision.
 
+In case of `HYBRID_PARENT_TRACE_ID_RATIO_BASED`, the span is sampled if the parent span has been sampled, otherwise applies a [TraceIdRatioBasedSampler](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#sampler).
+This behavior is similar to the previously used [ProbabilitySampler](https://github.com/census-instrumentation/opencensus-java/blob/master/api/src/main/java/io/opencensus/trace/samplers/ProbabilitySampler.java) from OpenCensus.
+
 By default, the sample probability is `1.0`, meaning 100% (each trace is recorded).
 
 :::tip
@@ -40,13 +43,13 @@ For example, with this technique it can be achieved that a method (e.g. HTTP ent
 
 ### Additional Properties
 
-You can additionally define the following global properties (`inspectit.tracing-property`)
+You can additionally define the following global properties (`inspectit.tracing`-property)
 
-|Property|Default|Description|
-|---|---|---|
-|`sample-mode`|`PARENT_BASED`|The root sample mode to be used for sampling, see above. Supported modes are `PARENT_BASED` and `TRACE_ID_RATIO_BASED`|
-|`max-export-batch-size`|512|The max export batch size for every export, i.e., the maximum number of spans exported by the used `BatchSpanProcessor`|
-|`schedule-delay-millis`|5000|The delay interval between two consecutive exports in milliseconds.
+|Property|Default| Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+|---|---|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`sample-mode`|`PARENT_BASED`| The root sample mode to be used for sampling, see above. Supported modes are [`PARENT_BASED`](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#parentbased), [`TRACE_ID_RATIO_BASED`](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#parentbased) and `HYBRID_PARENT_TRACE_ID_RATIO_BASED` (similar to [OpenCensus ProbabilitySampler](https://github.com/census-instrumentation/opencensus-java/blob/master/api/src/main/java/io/opencensus/trace/samplers/ProbabilitySampler.java)). For more information visit the [official documentation](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#sampler). |
+|`max-export-batch-size`|512| The max export batch size for every export, i.e., the maximum number of spans exported by the used `BatchSpanProcessor`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|`schedule-delay-millis`|5000| The delay interval between two consecutive exports in milliseconds.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 
 :::warning
 These properties take only effect once when the agent is starting. If you change these properties while the agent is running, they will not take effect until the agent retarted.

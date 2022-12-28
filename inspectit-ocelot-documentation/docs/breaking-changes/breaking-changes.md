@@ -2,6 +2,25 @@
 id: Breaking Changes
 title: Breaking Changes
 ---
+
+## Breaking changes in 2.4.0
+
+### Sampling adjusted
+
+Moving from OpenCensus to OpenTelemetry, the [global sampling](tracing/tracing.md#global-sampling-rate) and [rule-based sampling](instrumentation/rules.md#trace-sampling) has slightly changed.
+We now offer three different sampling modes that can be set to `inspectit.tracing.sample-mode` and under the `tracing.sample-mode` property in individual rules.
+
+Previously, a mix of the [ProbabilitySampler](https://github.com/census-instrumentation/opencensus-java/blob/master/api/src/main/java/io/opencensus/trace/samplers/ProbabilitySampler.java)
+and [SpanBuilderImpl](https://github.com/census-instrumentation/opencensus-java/blob/52f38e48e2ac6cb65e28dcd97b4f7e9650357bba/impl_core/src/main/java/io/opencensus/implcore/trace/SpanBuilderImpl.java#L71) 
+from OpenCensus was used. This resulted in *child* spans being sampled if the parent span was not sampled but a sample probability was specified for a rule.
+It may be the case that you need to set the `sample-mode` in your individual rules in case `PARENT_BASED` is set globally and parent spans would not be sampled, but individual child spans should be sampled.
+
+| Sample mode                          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `PARENT_BASED` (default)             | The setting of the `sample-probability` only has an effect if **no sampling decision** has been made yet. If a parent span has already decided that a trace is sampled or not sampled, this decision will continue to be used. This means that, for example, a method within a trace that has already been started will always be recorded, even if the sample setting has been set to `0`. This also applies to the opposite case where a span has decided not to sample and the sampling rate has been set to `1`. In this case the method will **not** be recorded!. See also the [official documentation of OpenTelemetry](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#parentbased). |
+| `TRACE_ID_RATIO_BASED`               | The sampling decision is made for each span, regardless of the parent span's sampling decision, see also the [official documentation of OpenTelemetry](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#parentbased).                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `HYBRID_PARENT_TRACE_ID_RATIO_BASED` | The span is sampled if the parent span has been sampled, otherwise applies a [TraceIdRatioBasedSampler](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#sampler). This behavior is similar to the previously used [ProbabilitySampler](https://github.com/census-instrumentation/opencensus-java/blob/master/api/src/main/java/io/opencensus/trace/samplers/ProbabilitySampler.java) from OpenCensus.                                                                                                                                                                                                                                                                                        |
+
 ## Breaking changes in 2.0.0
 
 ### Integration of the OpenTelemetry OpenCensus Shim

@@ -50,19 +50,21 @@ public class MethodHookConfigurationResolver {
         result.postExitActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getPostExitActions));
 
         // @formatter:off
-        boolean traceEntryHook = Stream.of(
-                    matchedRules.stream().map(InstrumentationRule::getPreEntryActions).flatMap(Collection::stream),
-                    matchedRules.stream().map(InstrumentationRule::getEntryActions).flatMap(Collection::stream),
-                    matchedRules.stream().map(InstrumentationRule::getPostEntryActions).flatMap(Collection::stream))
-                .flatMap(s -> s)
-                .anyMatch(ActionCallConfig::isActionTracing);
+        boolean traceEntryHook = Stream.of(matchedRules.stream()
+                .map(InstrumentationRule::getPreEntryActions)
+                .flatMap(Collection::stream), matchedRules.stream()
+                .map(InstrumentationRule::getEntryActions)
+                .flatMap(Collection::stream), matchedRules.stream()
+                .map(InstrumentationRule::getPostEntryActions)
+                .flatMap(Collection::stream)).flatMap(s -> s).anyMatch(ActionCallConfig::isActionTracing);
 
-        boolean traceExitHook = Stream.of(
-                    matchedRules.stream().map(InstrumentationRule::getPreExitActions).flatMap(Collection::stream),
-                    matchedRules.stream().map(InstrumentationRule::getExitActions).flatMap(Collection::stream),
-                    matchedRules.stream().map(InstrumentationRule::getPostExitActions).flatMap(Collection::stream))
-                .flatMap(s -> s)
-                .anyMatch(ActionCallConfig::isActionTracing);
+        boolean traceExitHook = Stream.of(matchedRules.stream()
+                .map(InstrumentationRule::getPreExitActions)
+                .flatMap(Collection::stream), matchedRules.stream()
+                .map(InstrumentationRule::getExitActions)
+                .flatMap(Collection::stream), matchedRules.stream()
+                .map(InstrumentationRule::getPostExitActions)
+                .flatMap(Collection::stream)).flatMap(s -> s).anyMatch(ActionCallConfig::isActionTracing);
         // @formatter:on
 
         result.traceEntryHook(traceEntryHook);
@@ -153,7 +155,7 @@ public class MethodHookConfigurationResolver {
         builder.endSpan(endSpan);
         if (endSpan) {
             builder.endSpanConditions(Optional.ofNullable(getAndDetectConflicts(rulesDefiningEndSpan, r -> r.getTracing()
-                    .getEndSpanConditions(), ALWAYS_TRUE, "end span conditions"))
+                            .getEndSpanConditions(), ALWAYS_TRUE, "end span conditions"))
                     .orElse(new ConditionalActionSettings()));
         }
     }
@@ -176,6 +178,8 @@ public class MethodHookConfigurationResolver {
                     .getKind(), Objects::nonNull, "the span kind"));
             builder.sampleProbability(getAndDetectConflicts(matchedRules, r -> r.getTracing()
                     .getSampleProbability(), n -> !StringUtils.isEmpty(n), "the trace sample probability"));
+            builder.sampleMode(getAndDetectConflicts(matchedRules, r -> r.getTracing()
+                    .getSampleMode(), n -> null != n, "the trace sample mode"));
         }
     }
 

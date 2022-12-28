@@ -80,7 +80,7 @@ public class OcelotSpanUtils {
     }
 
     /**
-     * Sets a new {@link SdkSpan#clock clock} of the {@link io.opentelemetry.sdk.trace.SdkSpan span}
+     * Sets the {@link SdkSpan#clock} for the given {@link SdkSpan span} with the given {@link AnchoredClock}
      *
      * @param span
      * @param anchoredClock

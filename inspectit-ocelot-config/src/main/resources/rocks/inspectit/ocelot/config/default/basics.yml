@@ -28,7 +28,7 @@ inspectit:
     # global sample probability used to decide if a trace shall be sampled or not
     # this value can be overridden by the tracing settings of individual instrumentation rules.
     sample-probability: 1.0
-    # global default sample mode used to decide if a trace shall be sampled or not. Can either be 'PARENT_BASED' or 'TRACE_ID_RATIO_BASED'
+    # global default sample mode used to decide if a trace shall be sampled or not. Can either be 'PARENT_BASED', 'TRACE_ID_RATIO_BASED' or 'HYBRID_PARENT_TRACE_ID_RATIO_BASED'
     sample-mode: PARENT_BASED
     # the format for propagating correlation headers.
     # options are: B3, TRACE_CONTEXT, DATADOG

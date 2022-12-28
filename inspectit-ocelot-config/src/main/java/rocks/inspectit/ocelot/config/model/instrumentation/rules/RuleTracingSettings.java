@@ -1,11 +1,13 @@
 package rocks.inspectit.ocelot.config.model.instrumentation.rules;
 
-import io.opencensus.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
+import rocks.inspectit.ocelot.config.model.tracing.SampleMode;
+import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -51,7 +53,7 @@ public class RuleTracingSettings {
      * If this field is set to true, all sub-invocations of the instrumented method will be traced via stack-trace sampling.
      * This only takes effect if either {@link #startSpan} or {@link #continueSpan} is configured and the current method is actually traced.
      * <p>
-     * In addition this field can be set to false. In this case if any parent method has started a stack-trace sampling session,
+     * In addition, this field can be set to false. In this case if any parent method has started a stack-trace sampling session,
      * it will be paused for the duration of this method.
      * This means effectively children of this method will be excluded from being traced using stack trace sampling.
      * <p>
@@ -93,10 +95,15 @@ public class RuleTracingSettings {
     private String sampleProbability;
 
     /**
+     * The default {@link SampleMode sample mode} used for the {@link #sampleProbability}. Defaults to {@link TracingSettings#getSampleMode() inspectit.tracing.sample-mode}  if not set and {@link #sampleProbability} is used.
+     */
+    private SampleMode sampleMode;
+
+    /**
      * The kind of the span, e.g. SERVER or CLIENT.
      * Can be null, in which case it is a span of unspecified kind.
      */
-    private Span.Kind kind;
+    private SpanKind kind;
 
     /**
      * Maps names of span attributes to data keys.
@@ -114,31 +121,24 @@ public class RuleTracingSettings {
      * Defines conditions which make the start-span flag conditional.
      */
     @Builder.Default
-    @Valid
-    @NotNull
-    ConditionalActionSettings startSpanConditions = new ConditionalActionSettings();
+    @Valid @NotNull ConditionalActionSettings startSpanConditions = new ConditionalActionSettings();
 
     /**
      * Defines conditions which make the end-span flag conditional.
      */
     @Builder.Default
-    @Valid
-    @NotNull
-    ConditionalActionSettings endSpanConditions = new ConditionalActionSettings();
+    @Valid @NotNull ConditionalActionSettings endSpanConditions = new ConditionalActionSettings();
 
     /**
      * Defines conditions which make the continue-span flag conditional.
      */
     @Builder.Default
-    @Valid
-    @NotNull
-    ConditionalActionSettings continueSpanConditions = new ConditionalActionSettings();
+    @Valid @NotNull ConditionalActionSettings continueSpanConditions = new ConditionalActionSettings();
 
     /**
      * Defines conditions which make the attribute definitions conditional.
      */
     @Builder.Default
-    @Valid
-    @NotNull
-    ConditionalActionSettings attributeConditions = new ConditionalActionSettings();
+    @Valid @NotNull ConditionalActionSettings attributeConditions = new ConditionalActionSettings();
+
 }

@@ -48,7 +48,7 @@ public class NoopOpenTelemetryController implements IOpenTelemetryController {
     }
 
     @Override
-    public void setSampler(String sampleMode, double sampleProbability) {
-        
+    public void setSampler(Object sampler) {
+
     }
 }

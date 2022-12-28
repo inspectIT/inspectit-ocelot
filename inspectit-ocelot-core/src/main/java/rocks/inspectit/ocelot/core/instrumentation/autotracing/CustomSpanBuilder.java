@@ -5,7 +5,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.Clock;
-import io.opentelemetry.sdk.trace.AnchoredClockUtils;
+import io.opentelemetry.sdk.trace.OcelotAnchoredClockUtils;
 import io.opentelemetry.sdk.trace.OcelotSpanUtils;
 import lombok.Setter;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
@@ -78,10 +78,10 @@ public class CustomSpanBuilder {
             if (parent.isRecording()) {
                 this.anchoredClock = OcelotSpanUtils.getAnchoredClock(parent);
             } else {
-                throw new IllegalArgumentException("converter may only be null if the parent is a SdkSpan");
+                throw new IllegalArgumentException("converter may only be null if the parent is a SdkSpan and is sampled");
             }
         } else {
-            if (!AnchoredClockUtils.isInstance(anchoredClock)) {
+            if (!OcelotAnchoredClockUtils.isInstance(anchoredClock)) {
                 throw new IllegalArgumentException("expected AnchoredClock but received {} " + anchoredClock.getClass()
                         .getName());
             }
@@ -112,7 +112,6 @@ public class CustomSpanBuilder {
 
             DummyAnchoredClock clock = DummyAnchoredClock.create(anchoredClock);
             clock.setNanoTime(entryNanos);
-
             Span result = OpenTelemetryUtils.getTracer()
                     .spanBuilder(name)
                     .setSpanKind(kind)
@@ -127,7 +126,8 @@ public class CustomSpanBuilder {
             clock.setNanoTime(exitNanos);
 
             // set the Span's AnchoredClock via reflection.
-            OcelotSpanUtils.setAnchoredClock(result, AnchoredClockUtils.create(clock, clock.epochNanos, clock.startNanoTime));
+            // this is ALWAYS necessary, as the SdkSpan overrides the clock by the parent span's clock
+            OcelotSpanUtils.setAnchoredClock(result, OcelotAnchoredClockUtils.create(clock, clock.epochNanos, clock.startNanoTime));
             return result;
         } else {
             return OpenTelemetryUtils.getTracer()
@@ -146,7 +146,6 @@ public class CustomSpanBuilder {
         /**
          * Reference nano time
          */
-        @Setter
         private long startNanoTime;
 
         /**
@@ -158,7 +157,6 @@ public class CustomSpanBuilder {
         /**
          * The start time in epoch nanos.
          */
-        @Setter
         private long epochNanos;
 
         @Override
@@ -179,12 +177,8 @@ public class CustomSpanBuilder {
          * @return
          */
         static DummyAnchoredClock create(Object anchoredClock) {
-            DummyAnchoredClock clock = new DummyAnchoredClock(AnchoredClockUtils.getStartTime(anchoredClock), AnchoredClockUtils.getNanoTime(anchoredClock));
+            DummyAnchoredClock clock = new DummyAnchoredClock(OcelotAnchoredClockUtils.getStartTime(anchoredClock), OcelotAnchoredClockUtils.getNanoTime(anchoredClock));
             return clock;
-        }
-
-        DummyAnchoredClock() {
-
         }
 
         DummyAnchoredClock(long epochNanos, long startNanoTime) {

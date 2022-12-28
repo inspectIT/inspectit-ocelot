@@ -1,10 +1,10 @@
 package rocks.inspectit.ocelot.core.utils;
 
 import io.opencensus.trace.BlankSpan;
-import io.opencensus.trace.SpanContext;
-import io.opencensus.trace.Tracestate;
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.*;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.Tracer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Constructor;
@@ -129,6 +129,26 @@ public class OpenCensusShimUtils {
     }
 
     /**
+     * Maps {@link SpanKind} to {@link io.opencensus.trace.Span.Kind}
+     *
+     * @param otKind
+     *
+     * @return
+     */
+    public static io.opencensus.trace.Span.Kind mapKind(SpanKind otKind) {
+        if (null == otKind || SpanKind.INTERNAL == otKind) {
+            return null;
+        }
+        switch (otKind) {
+            case CLIENT:
+                return io.opencensus.trace.Span.Kind.CLIENT;
+            case SERVER:
+                return io.opencensus.trace.Span.Kind.SERVER;
+        }
+        return null;
+    }
+
+    /**
      * Casts the given {@link io.opencensus.trace.Span} to {@link io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl} or {@link io.opentelemetry.opencensusshim.OpenTelemetryNoRecordEventsSpanImpl}
      *
      * @param ocSpan
@@ -161,22 +181,4 @@ public class OpenCensusShimUtils {
 
         }
     }
-
-    // copied from SpanConverter
-    // TODO: just call the SpanConverter methods via Reflection
-    public static io.opentelemetry.api.trace.SpanContext mapSpanContext(SpanContext ocSpanContext) {
-        if (null == ocSpanContext) {
-            return null;
-        }
-        return io.opentelemetry.api.trace.SpanContext.create(ocSpanContext.getTraceId()
-                .toLowerBase16(), ocSpanContext.getSpanId().toLowerBase16(), ocSpanContext.getTraceOptions()
-                .isSampled() ? TraceFlags.getSampled() : TraceFlags.getDefault(), mapTracestate(ocSpanContext.getTracestate()));
-    }
-
-    public static TraceState mapTracestate(Tracestate tracestate) {
-        TraceStateBuilder builder = TraceState.builder();
-        tracestate.getEntries().forEach(entry -> builder.put(entry.getKey(), entry.getValue()));
-        return builder.build();
-    }
-
 }

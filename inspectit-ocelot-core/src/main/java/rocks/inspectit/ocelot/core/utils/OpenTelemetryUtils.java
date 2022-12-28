@@ -2,14 +2,27 @@ package rocks.inspectit.ocelot.core.utils;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.internal.AttributesMap;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.SpanLimits;
+import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.core.opentelemetry.CustomTracer;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -122,13 +135,40 @@ public class OpenTelemetryUtils {
         Instances.openTelemetryController.flush();
     }
 
+    public final static String DEFAULT_INSTRUMENTATION_SCOPE_INFO = "rocks.inspectit.ocelot";
+
+    public final static String DEFAULT_INSTRUMENTATION_SCOPE_VERSION = "0.0.1";
+
     /**
      * Gets the current {@link Tracer} registered at {@link GlobalOpenTelemetry#getTracer(String, String)} under the instrumentationScopeName 'rocks.inspectit.ocelot'
      *
      * @return
      */
     public static Tracer getTracer() {
-        return getGlobalOpenTelemetry().getTracer("rocks.inspectit.ocelot", "0.0.1");
+        return getGlobalOpenTelemetry().getTracer(DEFAULT_INSTRUMENTATION_SCOPE_INFO, DEFAULT_INSTRUMENTATION_SCOPE_VERSION);
+    }
+
+    /**
+     * Gets a custom {@link Tracer tracer} with custom {@link Sampler sampler}
+     *
+     * @param customSampler
+     *
+     * @return
+     */
+    public static Tracer getTracer(Sampler customSampler) {
+        return CustomTracer.builder().sampler(customSampler).build();
+    }
+
+    /**
+     * Gets a {@link CustomTracer custom tracer} which holds the given {@link Clock} in {@link io.opentelemetry.sdk.trace.TracerSharedState#clock}
+     * <br>IMPORTANT: </b> The custom {@link Clock} only takes effect when the new span is not a child span, as otherwise the clock is overridden by the parent span's clock in {@link io.opentelemetry.sdk.trace.SdkSpan#startSpan(SpanContext, String, InstrumentationScopeInfo, SpanKind, Span, Context, SpanLimits, SpanProcessor, Clock, Resource, AttributesMap, List, int, long)}
+     *
+     * @param customClock
+     *
+     * @return
+     */
+    public static Tracer getTracer(Clock customClock) {
+        return CustomTracer.builder().clock(customClock).build();
     }
 
 }

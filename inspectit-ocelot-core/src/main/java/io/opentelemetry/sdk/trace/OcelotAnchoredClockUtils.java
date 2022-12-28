@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 /**
  * Utility class for the {@link AnchoredClock}, which is package-private.
  */
-public class AnchoredClockUtils {
+public class OcelotAnchoredClockUtils {
 
     /**
      * The class of {@link AnchoredClock}
@@ -36,6 +36,11 @@ public class AnchoredClockUtils {
     private final static Field ANCHOREDCLOCK_NANOTIME;
 
     /**
+     * The {@link AnchoredClock#now()} method of {@link AnchoredClock}
+     */
+    private final static Method ANCHOREDCLOCK_NOW;
+
+    /**
      * The {@link AnchoredClock#clock clock} member of {@link AnchoredClock}
      */
     private final static Field ANCHOREDCLOCK_CLOCK;
@@ -56,6 +61,8 @@ public class AnchoredClockUtils {
             ANCHOREDCLOCK_CLOCK = ReflectionUtils.getFieldAndMakeAccessible(ANCHOREDCLOCK_CLASS, "clock");
 
             ANCHOREDCLOCK_NANOTIME = ReflectionUtils.getFieldAndMakeAccessible(ANCHOREDCLOCK_CLASS, "nanoTime");
+            ANCHOREDCLOCK_NOW = ANCHOREDCLOCK_CLASS.getDeclaredMethod("now");
+            ANCHOREDCLOCK_NOW.setAccessible(true);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -92,7 +99,21 @@ public class AnchoredClockUtils {
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Could not get nanoTime of AnchoredClock", e);
         }
+    }
 
+    /**
+     * Returns the {@link AnchoredClock#now()} for the given {@link AnchoredClock}
+     *
+     * @param anchoredClock
+     *
+     * @return
+     */
+    public static long getNow(Object anchoredClock) {
+        try {
+            return (long) ANCHOREDCLOCK_NOW.invoke(anchoredClock);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not get now of AnchoredClock", e);
+        }
     }
 
     /**

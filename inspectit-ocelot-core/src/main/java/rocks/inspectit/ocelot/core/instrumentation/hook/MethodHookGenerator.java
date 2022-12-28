@@ -1,8 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.trace.Sampler;
-import io.opencensus.trace.samplers.Samplers;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.ActionTracingMode;
+import rocks.inspectit.ocelot.config.model.tracing.SampleMode;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.StackTraceSampler;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
@@ -25,6 +25,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAcce
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
 import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.OcelotSamplerUtils;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
@@ -173,9 +174,15 @@ public class MethodHookGenerator {
     private void configureSampling(RuleTracingSettings tracing, ContinueOrStartSpanAction.ContinueOrStartSpanActionBuilder actionBuilder) {
         String sampleProbability = tracing.getSampleProbability();
         if (!StringUtils.isBlank(sampleProbability)) {
+
+            // set the sample mode. If unset, use the sample mode set in inspectit.tracing.sample-mode
+            SampleMode sampleMode = null != tracing.getSampleMode() ? tracing.getSampleMode() : environment.getCurrentConfig()
+                    .getTracing()
+                    .getSampleMode();
+            actionBuilder.sampleMode(sampleMode);
             try {
                 double constantProbability = Double.parseDouble(sampleProbability);
-                Sampler sampler = Samplers.probabilitySampler(Math.max(0.0, Math.min(1.0, constantProbability)));
+                Sampler sampler = OcelotSamplerUtils.create(sampleMode, constantProbability);
                 actionBuilder.staticSampler(sampler);
             } catch (NumberFormatException e) {
                 VariableAccessor probabilityAccessor = variableAccessorFactory.getVariableAccessor(sampleProbability);

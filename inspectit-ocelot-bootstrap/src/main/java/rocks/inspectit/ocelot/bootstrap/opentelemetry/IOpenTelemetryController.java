@@ -69,10 +69,9 @@ public interface IOpenTelemetryController {
     boolean registerTraceExporterService(Object spanExporter, String serviceName);
 
     /**
-     * Sets the sampler. This method should ONY be used in tests of the {@code agent} package.
+     * Sets the sampler that will be handed over to the DynamicSampler.
      *
-     * @param sampleMode        The string value of the {@code SampleMode}
-     * @param sampleProbability the sample probability
+     * @param sampler
      */
-    void setSampler(String sampleMode, double sampleProbability);
+    void setSampler(Object sampler);
 }
