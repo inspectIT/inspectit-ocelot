@@ -2,8 +2,9 @@ package rocks.inspectit.ocelot.core.exporter;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.github.netmikey.logunit.api.LogCapturer;
-import io.opencensus.trace.Tracing;
-import io.opencensus.trace.samplers.Samplers;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -20,6 +21,7 @@ import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.config.model.exporters.trace.JaegerExporterSettings;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -49,7 +51,7 @@ public class JaegerExporterServiceIntTest {
      */
     @DirtiesContext
     @Nested
-    @TestPropertySource(properties = {"inspectit.exporters.tracing.jaeger.endpoint=http://localhost:14268/api/traces", "inspectit.exporters.tracing.jaeger.protocol=http/thrift", "inspectit.tracing.max-export-batch-size=1"})
+    @TestPropertySource(properties = {"inspectit.exporters.tracing.jaeger.endpoint=http://localhost:14268/api/traces", "inspectit.exporters.tracing.jaeger.protocol=http/thrift", "inspectit.exporters.tracing.jaeger.enabled=ENABLED", "inspectit.tracing.max-export-batch-size=1"})
     class JaegerThriftExporterServiceIntTest extends SpringTestBase {
 
         private WireMockServer wireMockServer;
@@ -69,10 +71,13 @@ public class JaegerExporterServiceIntTest {
         }
 
         @Test
-        void verifyTraceSent() throws InterruptedException {
-            Tracing.getTracer().spanBuilder("jaegerspan").setSampler(Samplers.alwaysSample()).startSpanAndRun(() -> {
+        void verifyTraceSent() {
+            Span span = OpenTelemetryUtils.getTracer(Sampler.alwaysOn()).spanBuilder("zipkinspan").startSpan();
+            try (Scope s = span.makeCurrent()) {
                 System.out.println("dummy runnable");
-            });
+            } finally {
+                span.end();
+            }
 
             await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
                 Instances.openTelemetryController.flush();

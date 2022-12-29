@@ -1,8 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.span;
 
-import io.opencensus.common.Scope;
-import io.opencensus.trace.Span;
-import io.opencensus.trace.Tracing;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -29,9 +28,7 @@ public class WriteSpanAttributesTest {
     IObfuscatory obfuscatory;
 
     @Spy
-    // get the current span. We need to use @Spy instead of @Mock when using the opencensus-shim as mocking the span collides with OTel's implementation of the Span.
-    // see also the discussion at https://github.com/inspectIT/inspectit-ocelot/pull/1270
-    Span span = Tracing.getTracer().getCurrentSpan();
+    Span span;
 
     @BeforeEach
     void setupMock() {
@@ -49,7 +46,7 @@ public class WriteSpanAttributesTest {
                     .attributeAccessor("foo", (exec) -> "bar")
                     .build();
 
-            try (Scope s = Tracing.getTracer().withSpan(span)) {
+            try (Scope s = span.makeCurrent()) {
                 action.execute(executionContext);
             }
 
@@ -66,7 +63,7 @@ public class WriteSpanAttributesTest {
                     .attributeAccessor("iAmNull", (exec) -> null)
                     .build();
 
-            try (Scope s = Tracing.getTracer().withSpan(span)) {
+            try (Scope s = span.makeCurrent()) {
                 action.execute(executionContext);
             }
 

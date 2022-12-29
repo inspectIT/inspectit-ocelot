@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.core.privacy.obfuscation;
 
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Span;
 
 public interface IObfuscatory {
 
@@ -15,20 +15,20 @@ public interface IObfuscatory {
      * @param value attribute value
      */
     default void putSpanAttribute(Span span, String key, Object value) {
-        AttributeValue attributeValue;
-        if(value instanceof String){
-            attributeValue = AttributeValue.stringAttributeValue((String)value);
-        } else if(value instanceof Double || value instanceof Float){
-            attributeValue = AttributeValue.doubleAttributeValue(((Number)value).doubleValue());
-        } else if (value instanceof Number){
-            attributeValue = AttributeValue.longAttributeValue(((Number)value).longValue());
-        } else if (value instanceof Boolean){
-            attributeValue = AttributeValue.booleanAttributeValue((Boolean)value);
+        AttributeKey attributeKey;
+        if (value instanceof String) {
+            attributeKey = AttributeKey.stringKey(key);
+        } else if (value instanceof Double || value instanceof Float) {
+            attributeKey = AttributeKey.doubleKey(key);
+        } else if (value instanceof Number) {
+            attributeKey = AttributeKey.longKey(key);
+        } else if (value instanceof Boolean) {
+            attributeKey = AttributeKey.booleanKey(key);
         } else {
-            attributeValue = AttributeValue.stringAttributeValue(value.toString());
+            attributeKey = AttributeKey.stringKey(key);
         }
 
-        span.putAttribute(key, attributeValue);
+        span.setAttribute(attributeKey, value);
     }
 
 }

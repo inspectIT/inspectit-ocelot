@@ -1,8 +1,8 @@
 package rocks.inspectit.ocelot.core.privacy.obfuscation;
 
 import io.opencensus.internal.NoopScope;
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Span;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -45,9 +45,7 @@ class ObfuscationManagerTest {
         @Test
         public void obfuscatoryNotNull() {
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
-            assertThat(obfuscatorySupplier.get())
-                    .isNotNull()
-                    .isInstanceOf(NoopObfuscatory.class);
+            assertThat(obfuscatorySupplier.get()).isNotNull().isInstanceOf(NoopObfuscatory.class);
         }
     }
 
@@ -77,9 +75,7 @@ class ObfuscationManagerTest {
             obfuscationManager.update();
 
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
-            assertThat(obfuscatorySupplier.get())
-                    .isNotNull()
-                    .isInstanceOf(NoopObfuscatory.class);
+            assertThat(obfuscatorySupplier.get()).isNotNull().isInstanceOf(NoopObfuscatory.class);
         }
 
         @Test
@@ -93,9 +89,7 @@ class ObfuscationManagerTest {
             obfuscationManager.update();
 
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
-            assertThat(obfuscatorySupplier.get())
-                    .isNotNull()
-                    .isInstanceOf(NoopObfuscatory.class);
+            assertThat(obfuscatorySupplier.get()).isNotNull().isInstanceOf(NoopObfuscatory.class);
         }
 
         @Test
@@ -115,9 +109,7 @@ class ObfuscationManagerTest {
 
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
             IObfuscatory obfuscatory = obfuscatorySupplier.get();
-            assertThat(obfuscatory)
-                    .isNotNull()
-                    .isInstanceOf(PatternObfuscatory.class);
+            assertThat(obfuscatory).isNotNull().isInstanceOf(PatternObfuscatory.class);
 
             // there is no way for me to test the correct patterns passed to the obfuscatory
             // then to actually invoke the obfuscatory
@@ -127,9 +119,9 @@ class ObfuscationManagerTest {
             obfuscatory.putSpanAttribute(span, "ABC", "abc");
             obfuscatory.putSpanAttribute(span, "DEF", "123");
 
-            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("***"));
-            verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("abc"));
-            verify(span).putAttribute("DEF", AttributeValue.stringAttributeValue("***"));
+            verify(span).setAttribute(AttributeKey.stringKey("abc"), "***");
+            verify(span).setAttribute(AttributeKey.stringKey("ABC"), "abc");
+            verify(span).setAttribute(AttributeKey.stringKey("DEF"), "***");
             verifyNoMoreInteractions(span);
         }
 
@@ -148,9 +140,7 @@ class ObfuscationManagerTest {
 
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
             IObfuscatory obfuscatory = obfuscatorySupplier.get();
-            assertThat(obfuscatory)
-                    .isNotNull()
-                    .isInstanceOf(PatternObfuscatory.class);
+            assertThat(obfuscatory).isNotNull().isInstanceOf(PatternObfuscatory.class);
 
             // there is no way for me to test the correct patterns passed to the obfuscatory
             // then to actually invoke the obfuscatory
@@ -160,9 +150,9 @@ class ObfuscationManagerTest {
             obfuscatory.putSpanAttribute(span, "ABC", "abc");
             obfuscatory.putSpanAttribute(span, "DEF", "123");
 
-            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("***"));
-            verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("abc"));
-            verify(span).putAttribute("DEF", AttributeValue.stringAttributeValue("123"));
+            verify(span).setAttribute(AttributeKey.stringKey("abc"), "***");
+            verify(span).setAttribute(AttributeKey.stringKey("ABC"), "abc");
+            verify(span).setAttribute(AttributeKey.stringKey("DEF"), "123");
         }
 
         @Test
@@ -179,9 +169,7 @@ class ObfuscationManagerTest {
 
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
             IObfuscatory obfuscatory = obfuscatorySupplier.get();
-            assertThat(obfuscatory)
-                    .isNotNull()
-                    .isInstanceOf(PatternObfuscatory.class);
+            assertThat(obfuscatory).isNotNull().isInstanceOf(PatternObfuscatory.class);
 
             // there is no way for me to test the correct patterns passed to the obfuscatory
             // then to actually invoke the obfuscatory
@@ -190,10 +178,10 @@ class ObfuscationManagerTest {
             obfuscatory.putSpanAttribute(span, "abc", "abc");
             obfuscatory.putSpanAttribute(span, "ABC", "abc");
 
-            verify(span, never()).putAttribute("abc", AttributeValue.stringAttributeValue("abc"));
-            verify(span, never()).putAttribute("ABC", AttributeValue.stringAttributeValue("abc"));
-            verify(span).putAttribute(eq("abc"), any());
-            verify(span).putAttribute(eq("ABC"), any());
+            verify(span, never()).setAttribute(AttributeKey.stringKey("abc"), "abc");
+            verify(span, never()).setAttribute(AttributeKey.stringKey("ABC"), "abc");
+            verify(span).setAttribute(eq(AttributeKey.stringKey("abc")), any());
+            verify(span).setAttribute(eq(AttributeKey.stringKey("ABC")), any());
         }
 
         @Test
@@ -215,9 +203,7 @@ class ObfuscationManagerTest {
 
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
             IObfuscatory obfuscatory = obfuscatorySupplier.get();
-            assertThat(obfuscatory)
-                    .isNotNull()
-                    .isInstanceOf(SelfMonitoringDelegatingObfuscatory.class);
+            assertThat(obfuscatory).isNotNull().isInstanceOf(SelfMonitoringDelegatingObfuscatory.class);
 
             // there is no way for me to test the correct patterns passed to the obfuscatory
             // then to actually invoke the obfuscatory
@@ -227,9 +213,9 @@ class ObfuscationManagerTest {
             obfuscatory.putSpanAttribute(span, "ABC", "abc");
             obfuscatory.putSpanAttribute(span, "DEF", "123");
 
-            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("***"));
-            verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("abc"));
-            verify(span).putAttribute("DEF", AttributeValue.stringAttributeValue("***"));
+            verify(span).setAttribute(AttributeKey.stringKey("abc"), "***");
+            verify(span).setAttribute(AttributeKey.stringKey("ABC"), "abc");
+            verify(span).setAttribute(AttributeKey.stringKey("DEF"), "***");
             verifyNoMoreInteractions(span);
 
             verify(selfMonitoringService).isSelfMonitoringEnabled();

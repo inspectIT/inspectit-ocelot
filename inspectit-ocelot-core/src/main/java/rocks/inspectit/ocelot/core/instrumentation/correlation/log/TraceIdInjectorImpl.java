@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.correlation.log;
 
-import io.opencensus.trace.SpanContext;
-import io.opencensus.trace.Tracing;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import rocks.inspectit.ocelot.bootstrap.correlation.TraceIdInjector;
 
 /**
@@ -44,9 +44,9 @@ public class TraceIdInjectorImpl implements TraceIdInjector {
      * Returns the current trace id or `null` if non exists.
      */
     private String getTraceId() {
-        SpanContext context = Tracing.getTracer().getCurrentSpan().getContext();
+        SpanContext context = Span.current().getSpanContext();
         if (context != null && context.isValid()) {
-            return context.getTraceId().toLowerBase16();
+            return context.getTraceId();
         } else {
             return null;
         }

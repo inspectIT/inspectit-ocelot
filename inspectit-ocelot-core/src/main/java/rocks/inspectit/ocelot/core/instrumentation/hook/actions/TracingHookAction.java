@@ -1,13 +1,14 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
 
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
-import io.opencensus.trace.SpanBuilder;
-import io.opencensus.trace.Tracing;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.context.Context;
 import lombok.NonNull;
 import lombok.Value;
 import rocks.inspectit.ocelot.core.instrumentation.actions.bound.BoundGenericAction;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class TracingHookAction implements IHookAction {
     /**
      * Attribute value for `null` values in span attributes.
      */
-    private static final AttributeValue NULL_STRING_ATTRIBUTE = AttributeValue.stringAttributeValue("<NULL>");
+    private static final String NULL_STRING_ATTRIBUTE = "<NULL>";
 
     /**
      * Prefix used for span attributes in method hook spans.
@@ -52,7 +53,7 @@ public class TracingHookAction implements IHookAction {
 
     @Override
     public void execute(ExecutionContext context) {
-        if (!Tracing.getTracer().getCurrentSpan().getContext().isValid()) {
+        if (!Span.current().getSpanContext().isValid()) {
             action.execute(context);
             return;
         }
@@ -60,9 +61,11 @@ public class TracingHookAction implements IHookAction {
         String spanName = DEBUG_SPAN_NAME_PREFIX + "action<" + action.getName() + ">";
         SpanBuilder spanBuilder;
         if (context.getMethodHookSpan() == null) {
-            spanBuilder = Tracing.getTracer().spanBuilder(spanName);
+            spanBuilder = OpenTelemetryUtils.getTracer().spanBuilder(spanName);
         } else {
-            spanBuilder = Tracing.getTracer().spanBuilderWithExplicitParent(spanName, context.getMethodHookSpan());
+            spanBuilder = OpenTelemetryUtils.getTracer()
+                    .spanBuilder(spanName)
+                    .setParent(Context.current().with(context.getMethodHookSpan()));
         }
 
         Span span = spanBuilder.startSpan();
@@ -87,7 +90,7 @@ public class TracingHookAction implements IHookAction {
             }
 
             if (action instanceof BoundGenericAction) {
-                BoundGenericAction boundAction = (BoundGenericAction) this.action;
+                BoundGenericAction boundAction = (BoundGenericAction) action;
 
                 recordAttribute(span, "data-key", boundAction.getDataKey());
 
@@ -124,6 +127,6 @@ public class TracingHookAction implements IHookAction {
     }
 
     private void recordAttribute(Span span, String name, Object value) {
-        span.putAttribute(SPAN_ATTRIBUTE_PREFIX + name, value != null ? AttributeValue.stringAttributeValue(value.toString()) : NULL_STRING_ATTRIBUTE);
+        span.setAttribute(AttributeKey.stringKey(SPAN_ATTRIBUTE_PREFIX + name), value != null ? value.toString() : NULL_STRING_ATTRIBUTE);
     }
 }

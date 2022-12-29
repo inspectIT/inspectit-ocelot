@@ -1,8 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
-import io.opencensus.trace.Tracing;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Span;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
@@ -16,6 +15,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.TracingHookAction;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 import rocks.inspectit.ocelot.core.selfmonitoring.IActionScope;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public class MethodHook implements IMethodHook {
     /**
      * Attribute value for `null` values in span attributes.
      */
-    private static final AttributeValue NULL_STRING_ATTRIBUTE = AttributeValue.stringAttributeValue("<NULL>");
+    private static final String NULL_STRING_ATTRIBUTE = "<NULL>";
 
     /**
      * The configuration on which this hook is based.
@@ -117,8 +117,7 @@ public class MethodHook implements IMethodHook {
                 try (IActionScope scope = actionScopeFactory.createScope(action)) {
                     action.execute(executionContext);
                 } catch (Throwable t) {
-                    log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation
-                            .getMethodFQN(), t);
+                    log.error("Entry action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
                     activeEntryActions.remove(action);
                 }
             }
@@ -152,8 +151,7 @@ public class MethodHook implements IMethodHook {
                 try (IActionScope scope = actionScopeFactory.createScope(action)) {
                     action.execute(executionContext);
                 } catch (Throwable t) {
-                    log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation
-                            .getMethodFQN(), t);
+                    log.error("Exit action {} executed for method {} threw an exception and from now on is disabled!", action, methodInformation.getMethodFQN(), t);
                     activeExitActions.remove(action);
                 }
             }
@@ -200,7 +198,7 @@ public class MethodHook implements IMethodHook {
     }
 
     private Span getHookTracingSpan(String hookName) {
-        return Tracing.getTracer()
+        return OpenTelemetryUtils.getTracer()
                 .spanBuilder(TracingHookAction.DEBUG_SPAN_NAME_PREFIX + hookName + "<" + methodInformation.getMethodFQN() + ">")
                 .startSpan();
     }
@@ -222,6 +220,6 @@ public class MethodHook implements IMethodHook {
     }
 
     private void recordAttribute(Span span, String name, Object value) {
-        span.putAttribute(SPAN_ATTRIBUTE_PREFIX + name, value != null ? AttributeValue.stringAttributeValue(value.toString()) : NULL_STRING_ATTRIBUTE);
+        span.setAttribute(AttributeKey.stringKey(SPAN_ATTRIBUTE_PREFIX + name), value != null ? value.toString() : NULL_STRING_ATTRIBUTE);
     }
 }

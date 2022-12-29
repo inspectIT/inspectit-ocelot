@@ -1,7 +1,9 @@
 package rocks.inspectit.ocelot.instrumentation.special.logging;
 
-import io.opencensus.common.Scope;
-import io.opencensus.trace.Tracing;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.AbstractMessageFactory;
@@ -18,9 +20,12 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
     private static final Logger LOGGER = LogManager.getLogger(Log4J2TraceIdAutoInjectorTest.class);
 
+    private static Tracer tracer;
+
     @BeforeAll
     public static void waitForInstrumentation() {
         TestUtils.waitForClassInstrumentations(AbstractMessageFactory.class, MessageFactory.class);
+        tracer = GlobalOpenTelemetry.getTracer("rocks.inspectit.ocelot.test", "0.0.1");
     }
 
     @Test
@@ -29,9 +34,12 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
         String message = "This is a traced String in {}.";
         String traceId;
 
-        try (Scope scope = Tracing.getTracer().spanBuilder("test").startScopedSpan()) {
-            traceId = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
+        Span span = tracer.spanBuilder("test").startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            traceId = Span.current().getSpanContext().getTraceId();
             LOGGER.info(message, "Log4J2");
+        } finally {
+            span.end();
         }
 
         assertThat(Log4J2LoggingRecorder.loggingEvents).hasSize(1);
@@ -45,11 +53,12 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
         Log4J2LoggingRecorder.loggingEvents.clear();
         CharSequence message = "This is a traced CharSequence in Log4J2.";
         String traceId;
-
-        try (Scope scope = Tracing.getTracer().spanBuilder("test").startScopedSpan()) {
-            traceId = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
-
+        Span span = tracer.spanBuilder("test").startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            traceId = Span.current().getSpanContext().getTraceId();
             LOGGER.info(message);
+        } finally {
+            span.end();
         }
 
         assertThat(Log4J2LoggingRecorder.loggingEvents).hasSize(1);
@@ -65,10 +74,12 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
         Object message = "This is a traced Object in Log4J2.";
         String traceId;
 
-        try (Scope scope = Tracing.getTracer().spanBuilder("test").startScopedSpan()) {
-            traceId = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
-
+        Span span = tracer.spanBuilder("test").startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            traceId = Span.current().getSpanContext().getTraceId();
             LOGGER.info(message);
+        } finally {
+            span.end();
         }
 
         assertThat(Log4J2LoggingRecorder.loggingEvents).hasSize(1);
@@ -83,10 +94,12 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
         Object message = null;
         String traceId;
 
-        try (Scope scope = Tracing.getTracer().spanBuilder("test").startScopedSpan()) {
-            traceId = Tracing.getTracer().getCurrentSpan().getContext().getTraceId().toLowerBase16();
-
+        Span span = tracer.spanBuilder("test").startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            traceId = Span.current().getSpanContext().getTraceId();
             LOGGER.info(message);
+        } finally {
+            span.end();
         }
 
         assertThat(Log4J2LoggingRecorder.loggingEvents).hasSize(1);
