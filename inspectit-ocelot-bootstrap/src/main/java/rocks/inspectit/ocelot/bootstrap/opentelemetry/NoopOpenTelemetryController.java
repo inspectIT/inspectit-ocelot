@@ -47,8 +47,4 @@ public class NoopOpenTelemetryController implements IOpenTelemetryController {
         return false;
     }
 
-    @Override
-    public void setSampler(Object sampler) {
-
-    }
 }

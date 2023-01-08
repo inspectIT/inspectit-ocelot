@@ -10,6 +10,7 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An alternative to the {@link io.opentelemetry.sdk.trace.samplers.TraceIdRatioBasedSampler} that always samples if the parent span was sampled, and otherwise applies the underlying {@link io.opentelemetry.sdk.trace.samplers.TraceIdRatioBasedSampler root sampler}
@@ -79,5 +80,10 @@ public class HybridParentTraceIdRatioBasedSampler implements Sampler {
         }
         HybridParentTraceIdRatioBasedSampler otherSampler = (HybridParentTraceIdRatioBasedSampler) other;
         return root.equals(otherSampler.root);
+    }
+
+    @Override
+    public int hashCode() {
+        return 29 * Objects.hash(root);
     }
 }

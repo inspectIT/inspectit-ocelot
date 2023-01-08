@@ -22,15 +22,18 @@ public class CustomSpanBuilderTest {
         void verifyTimingsChanged() {
             Span parent = OpenTelemetryUtils.getTracer(Sampler.traceIdRatioBased(1.0)).spanBuilder("root").startSpan();
 
+            long clockNow = Clock.getDefault().now();
             long entryNanos = Clock.getDefault().nanoTime() + 42;
             long exitNanos = entryNanos + 100;
             Span mySpan = CustomSpanBuilder.builder("foo", parent)
                     .customTiming(entryNanos, exitNanos, null)
                     .startSpan();
-            Object anchoredClock = OcelotSpanUtils.getAnchoredClock(mySpan);
 
             ReadWriteSpan spanImpl = (ReadWriteSpan) mySpan;
             spanImpl.end();
+
+            Object anchoredClock = OcelotSpanUtils.getAnchoredClock(mySpan);
+
             assertThat(spanImpl.getName()).isEqualTo("foo");
             assertThat(spanImpl.getSpanContext().getSpanId()).isNotEqualTo(parent.getSpanContext().getSpanId());
             assertThat(spanImpl.getSpanContext().getTraceId()).isEqualTo(parent.getSpanContext().getTraceId());
@@ -40,6 +43,9 @@ public class CustomSpanBuilderTest {
             assertThat(spanImpl.toSpanData()
                     .getEndEpochNanos()).isEqualTo(OcelotAnchoredClockUtils.getStartTime(anchoredClock) + (exitNanos - OcelotAnchoredClockUtils.getNanoTime(anchoredClock)));
             assertThat(spanImpl.getLatencyNanos()).isEqualTo(100);
+
+            assertThat(clockNow - OcelotAnchoredClockUtils.getNow(anchoredClock)).isLessThan(10000);
+            System.out.println("elapsed: " + (clockNow - OcelotAnchoredClockUtils.getNow(anchoredClock)));
         }
     }
 

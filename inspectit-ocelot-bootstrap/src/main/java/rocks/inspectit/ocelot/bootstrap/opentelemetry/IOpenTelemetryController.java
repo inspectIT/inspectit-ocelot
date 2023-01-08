@@ -67,11 +67,4 @@ public interface IOpenTelemetryController {
      */
 
     boolean registerTraceExporterService(Object spanExporter, String serviceName);
-
-    /**
-     * Sets the sampler that will be handed over to the DynamicSampler.
-     *
-     * @param sampler
-     */
-    void setSampler(Object sampler);
 }

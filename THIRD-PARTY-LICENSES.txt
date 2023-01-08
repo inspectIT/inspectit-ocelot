@@ -6947,7 +6947,7 @@ modification, are permitted provided that the following conditions are met:
       be used to endorse or promote products derived from this software without
       specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ‚ÄúAS IS‚Äù AND ANY
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ‚ÄúAS IS‚Ä? AND ANY
 EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY
@@ -6969,8 +6969,8 @@ This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
 
 This product includes software developed for Orekit by
-CS Syst√®mes d'Information (http://www.c-s.fr/)
-Copyright 2010-2012 CS Syst√®mes d'Information
+CS SystËmes d'Information (http://www.c-s.fr/)
+Copyright 2010-2012 CS SystËmes d'Information
 
 --------------------------------------------------------------------------------
 
@@ -10026,7 +10026,7 @@ Here is the info on how you can contribute in various ways to the project: https
 
 License
 -------
-Copyright ¬© Red Gate Software Ltd 2010-2022
+Copyright © Red Gate Software Ltd 2010-2022
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18931,5 +18931,5 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 --------------------------------------------------------------------------------
 
 
-This report was generated at Fri Dec 23 19:03:53 CET 2022.
+This report was generated at Sun Jan 08 12:48:23 CET 2023.
 

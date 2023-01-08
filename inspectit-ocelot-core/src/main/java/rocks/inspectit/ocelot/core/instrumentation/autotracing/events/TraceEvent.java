@@ -34,7 +34,7 @@ public interface TraceEvent {
     StackTrace getStackTrace();
 
     /**
-     * @return the time at which this event occurred.
+     * @return the nano time at which this event occurred.
      */
     long getTimestamp();
 }

@@ -270,10 +270,7 @@ public class StackTraceSampler {
         boolean openTelemetryControllerSamplerUpdated = false;
         // get a custom tracer in case a custom sampler has been provided
         if (null != sampler) {
-            // update the sampler
-            openTelemetryController.setSampler(sampler);
-            builder = OpenTelemetryUtils.getTracer().spanBuilder(name);
-            openTelemetryControllerSamplerUpdated = true;
+            builder = OpenTelemetryUtils.getTracer(sampler).spanBuilder(name);
         } else {
             builder = OpenTelemetryUtils.getTracer().spanBuilder(name);
         }
@@ -282,10 +279,6 @@ public class StackTraceSampler {
             builder.setParent(Context.current().with(Span.wrap(remoteParent)));
         }
         Span span = builder.startSpan();
-        // reset the sampler if applicable
-        if (openTelemetryControllerSamplerUpdated) {
-            openTelemetryController.resetSampler();
-        }
         return span;
     }
 

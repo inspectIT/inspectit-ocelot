@@ -530,18 +530,9 @@ Instead of specifying a fixed value, you can also specify a data key here, just 
 In this case, the value from the given data key is read and used as sampling probability.
 This allows you for example to vary the sample probability based on the HTTP url.
 
-The `sample-mode` can either be `PARENT_BASED`, `TRACE_ID_RATIO_BASED`, or `HYBRID_PARENT_TRACE_ID_RATIO_BASED`, see [tracing](tracing/tracing.md). By default, the global value specified at `inspectit.tracing.sample-mode` is used if `sample-mode` is unset and the `sample-probability` has been specified.
+The `sample-mode` is explained at [tracing](tracing/tracing.md) and can either be `PARENT_BASED`, `TRACE_ID_RATIO_BASED`, or `HYBRID_PARENT_TRACE_ID_RATIO_BASED`. 
 
-In case of `PARENT_BASED`, the setting of the `sampleProbability` only has an effect if **no sampling decision** has been made yet.
-If a parent span has already decided that a trace is sampled or not sampled, this decision will continue to be used.
-This means that, for example, a method within a trace that has already been started will always be recorded, even if the sample setting has been set to `0`.
-This also applies to the opposite case where a span has decided not to sample and the sampling rate has been set to `1`.
-In this case the method will **not** be recorded!
-
-In case of `TRACE_ID_RATIO_BASED`, the sampling decision is made for each span, regardless of the parent span's sampling decision.
-
-In case of `HYBRID_PARENT_TRACE_ID_RATIO_BASED`, the span is sampled if the parent span has been sampled, otherwise applies a [TraceIdRatioBasedSampler](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#sampler).
-This behavior is similar to the previously used [ProbabilitySampler](https://github.com/census-instrumentation/opencensus-java/blob/master/api/src/main/java/io/opencensus/trace/samplers/ProbabilitySampler.java) from OpenCensus.
+By default, `HYBRID_PARENT_TRACE_ID_RATIO_BASED` sampler is used if `sample-mode` is unset and the `sample-probability` has been specified.
 
 If no sample probability is defined for a rule, the [default probability](tracing/tracing.md) is used.
 

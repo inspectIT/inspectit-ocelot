@@ -14,7 +14,6 @@ import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -560,21 +559,4 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     public boolean unregisterMetricExporterService(DynamicallyActivatableMetricsExporterService service) {
         return unregisterMetricExporterService(service.getName());
     }
-
-    @Override
-    public void setSampler(Object sampler) {
-        if (sampler instanceof Sampler) {
-            this.sampler.setSampler((Sampler) sampler);
-        }
-    }
-
-    /***
-     * Resets the {@link #sampler} to the current configuration.
-     */
-    public void resetSampler() {
-        sampler.setSampler(env.getCurrentConfig().getTracing().getSampleMode(), env.getCurrentConfig()
-                .getTracing()
-                .getSampleProbability());
-    }
-
 }

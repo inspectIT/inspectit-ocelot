@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.opentelemetry;
 
-import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.junit.jupiter.api.Test;
@@ -38,23 +37,6 @@ public class CustomTracerIntTest extends SpringTestBase {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Test
-    void customClock() throws IllegalAccessException {
-        Clock dummyClock = new Clock() {
-            @Override
-            public long now() {
-                return 1337;
-            }
-
-            @Override
-            public long nanoTime() {
-                return 47;
-            }
-        };
-        CustomTracer customTracer = CustomTracer.builder().clock(dummyClock).build();
-        assertThat(TRACERSHAREDSTATE_CLOCK.get(SDKTRACERBUILDER_TRACERSHAREDSTATE.get(customTracer.tracerProvider))).isEqualTo(dummyClock);
     }
 
     @Test

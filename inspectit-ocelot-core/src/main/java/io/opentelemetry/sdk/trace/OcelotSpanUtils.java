@@ -14,10 +14,13 @@ import rocks.inspectit.ocelot.core.utils.ReflectionUtils;
 import java.lang.reflect.Field;
 
 /**
- * Utility class for creating {@link SpanData} instances from {@link Span} ones. This class is in the OpenTelemetry package
+ * Utility class for creating {@link SpanData} instances from {@link Span} ones.
+ * This class was originally in the {@code io.opentelemetry.sdk.trace} package,
  * because it requires access to package-local classes, e.g. {@link SdkSpan} or {@link AnchoredClock}.
  * <p>
- * Currently, we are accessing everything via reflection, as we encounter 'Illegal access' exceptions if OpenTelemetry is published to the bootstrap classloader when we use the 'real' classes and members.
+ * However, when OpenTelemetry is loaded to the bootstrap class loader via {@link rocks.inspectit.ocelot.config.model.InspectitConfig#publishOpenTelemetryToBootstrap}, we encounter the issue
+ * that this class is in the {@link rocks.inspectit.ocelot.core} jar library, trying to access package private OpenTelemetry classes. This results in 'Illegal access' runtime errors (not exceptions).
+ * Because of this, we use reflection in this class and not direct access to the required classes.
  */
 @Slf4j
 public class OcelotSpanUtils {

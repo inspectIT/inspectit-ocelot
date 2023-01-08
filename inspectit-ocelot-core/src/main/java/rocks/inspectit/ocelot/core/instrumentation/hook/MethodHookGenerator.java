@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.ActionTracingMode;
-import rocks.inspectit.ocelot.config.model.tracing.SampleMode;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.StackTraceSampler;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
@@ -174,15 +173,11 @@ public class MethodHookGenerator {
     private void configureSampling(RuleTracingSettings tracing, ContinueOrStartSpanAction.ContinueOrStartSpanActionBuilder actionBuilder) {
         String sampleProbability = tracing.getSampleProbability();
         if (!StringUtils.isBlank(sampleProbability)) {
-
-            // set the sample mode. If unset, use the sample mode set in inspectit.tracing.sample-mode
-            SampleMode sampleMode = null != tracing.getSampleMode() ? tracing.getSampleMode() : environment.getCurrentConfig()
-                    .getTracing()
-                    .getSampleMode();
-            actionBuilder.sampleMode(sampleMode);
+            
+            actionBuilder.sampleMode(tracing.getSampleMode());
             try {
                 double constantProbability = Double.parseDouble(sampleProbability);
-                Sampler sampler = OcelotSamplerUtils.create(sampleMode, constantProbability);
+                Sampler sampler = OcelotSamplerUtils.create(tracing.getSampleMode(), constantProbability);
                 actionBuilder.staticSampler(sampler);
             } catch (NumberFormatException e) {
                 VariableAccessor probabilityAccessor = variableAccessorFactory.getVariableAccessor(sampleProbability);

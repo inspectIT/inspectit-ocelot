@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 
 /**
  * Utility class for the {@link AnchoredClock}, which is package-private.
+ * We are using reflection instead of accessing the OpenTelemetry package private classes as we encounter runtime errors when {@link rocks.inspectit.ocelot.config.model.InspectitConfig#publishOpenTelemetryToBootstrap} is set (see also {@link OcelotSpanUtils}).
  */
 public class OcelotAnchoredClockUtils {
 
