@@ -41,18 +41,11 @@ public class HybridParentTraceIdRatioBasedSampler implements Sampler {
     @Override
     public SamplingResult shouldSample(Context parentContext, String traceId, String name, SpanKind spanKind, Attributes attributes, List<LinkData> parentLinks) {
         SpanContext parentSpanContext = Span.fromContext(parentContext).getSpanContext();
-        // If the parent is sampled keep the sampling decision.
-        if (parentSpanContext.isValid() && parentSpanContext.isSampled()) {
+        // If the parent or any parent link has been sampled keep, the sampling decision.
+        if ((parentSpanContext.isValid() && parentSpanContext.isSampled()) || isAnyParentLinkSampled(parentLinks)) {
             return SamplingResult.recordAndSample();
         }
-
-        boolean isAnyParentLinkSampled = isAnyParentLinkSampled(parentLinks);
-
-        // if any parent link has been sampled, keep the sampling decision.
-        if (isAnyParentLinkSampled) {
-            return SamplingResult.recordAndSample();
-        }
-
+        
         return root.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
     }
 

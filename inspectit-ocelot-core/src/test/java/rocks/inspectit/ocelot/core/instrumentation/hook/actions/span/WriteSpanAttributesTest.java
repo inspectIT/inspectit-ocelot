@@ -27,6 +27,7 @@ public class WriteSpanAttributesTest {
     @Mock
     IObfuscatory obfuscatory;
 
+    // dummy span. We need to use @Spy instead of @Mock as we otherwise have a PropagatedSpan
     @Spy
     Span span;
 
