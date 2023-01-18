@@ -84,7 +84,6 @@ public class OcelotAnchoredClockUtils {
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     /**

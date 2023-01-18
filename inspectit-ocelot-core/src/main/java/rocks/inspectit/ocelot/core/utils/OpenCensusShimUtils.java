@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.core.utils;
 import io.opencensus.trace.BlankSpan;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -87,8 +86,6 @@ public class OpenCensusShimUtils {
         }
     }
 
-    // TODO: über Reflection auf die Copy-Helper-Methode zuzugreifen, anstatt diese zu kopieren
-
     /**
      * Converts an {@link Span OTEL span} to an {@link io.opencensus.trace.Span OC span}
      *
@@ -105,47 +102,6 @@ public class OpenCensusShimUtils {
         } catch (Exception e) {
             throw new RuntimeException("Could not convert span to OpenTelemetrySpanImpl", e);
         }
-    }
-
-    /**
-     * Maps {@link io.opencensus.trace.Span.Kind oc Span.Kind} to {@link SpanKind otel SpanKind}
-     * Copied from {@link SpanConverter}.
-     *
-     * @param ocKind
-     *
-     * @return
-     */
-    public static SpanKind mapKind(io.opencensus.trace.Span.Kind ocKind) {
-        if (ocKind == null) {
-            return SpanKind.INTERNAL;
-        }
-        switch (ocKind) {
-            case CLIENT:
-                return SpanKind.CLIENT;
-            case SERVER:
-                return SpanKind.SERVER;
-        }
-        return SpanKind.INTERNAL;
-    }
-
-    /**
-     * Maps {@link SpanKind} to {@link io.opencensus.trace.Span.Kind}
-     *
-     * @param otKind
-     *
-     * @return
-     */
-    public static io.opencensus.trace.Span.Kind mapKind(SpanKind otKind) {
-        if (null == otKind || SpanKind.INTERNAL == otKind) {
-            return null;
-        }
-        switch (otKind) {
-            case CLIENT:
-                return io.opencensus.trace.Span.Kind.CLIENT;
-            case SERVER:
-                return io.opencensus.trace.Span.Kind.SERVER;
-        }
-        return null;
     }
 
     /**
