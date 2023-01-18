@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import io.github.netmikey.logunit.api.LogCapturer;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -61,7 +60,7 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
 
     @Test
     void verifyTraceSent() {
-        Span span = OpenTelemetryUtils.getTracer(Sampler.alwaysOn()).spanBuilder("zipkinspan").startSpan();
+        Span span = OpenTelemetryUtils.getTracer().spanBuilder("zipkinspan").startSpan();
         try (Scope s = span.makeCurrent()) {
         } finally {
             span.end();

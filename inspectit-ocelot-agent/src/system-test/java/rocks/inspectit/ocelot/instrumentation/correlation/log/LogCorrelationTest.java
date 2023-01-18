@@ -134,7 +134,12 @@ public class LogCorrelationTest {
         }
     }
 
-    private String currentTraceId() {
+    /**
+     * Gets the {@link Span#current() current Span's} trace id
+     *
+     * @return
+     */
+    private static String currentTraceId() {
         return Span.current().getSpanContext().getTraceId();
     }
 

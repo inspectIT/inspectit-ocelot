@@ -173,7 +173,6 @@ public class MethodHookGenerator {
     private void configureSampling(RuleTracingSettings tracing, ContinueOrStartSpanAction.ContinueOrStartSpanActionBuilder actionBuilder) {
         String sampleProbability = tracing.getSampleProbability();
         if (!StringUtils.isBlank(sampleProbability)) {
-            
             actionBuilder.sampleMode(tracing.getSampleMode());
             try {
                 double constantProbability = Double.parseDouble(sampleProbability);
