@@ -208,13 +208,13 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
                     .untilAsserted(() -> assertThat(spanLogs.size()).isEqualTo(numEvents + 2));
         }
 
-        private io.opencensus.trace.Tracer getTracer() {
+        private io.opencensus.trace.Tracer getOCTracer() {
             return Tracing.getTracer();
         }
 
         private void makeSpansAndFlush() {
             // get OC tracer and start spans
-            io.opencensus.trace.Tracer tracer = getTracer();
+            io.opencensus.trace.Tracer tracer = getOCTracer();
 
             // start span and nested span
             try (io.opencensus.common.Scope scope = tracer.spanBuilder("openCensusParent").startScopedSpan()) {

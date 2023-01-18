@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.core.privacy.obfuscation.impl;
 
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Span;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +24,7 @@ class PatternObfuscatoryTest {
         Span span;
 
         Pattern p1 = Pattern.compile("[a-z]+");
+
         Pattern p2 = Pattern.compile("[0-9]+");
 
         @Test
@@ -35,7 +36,7 @@ class PatternObfuscatoryTest {
 
             patternObfuscatory.putSpanAttribute(span, "011", "belgrade");
 
-            verify(span).putAttribute("011", AttributeValue.stringAttributeValue("belgrade"));
+            verify(span).setAttribute(AttributeKey.stringKey("011"), "belgrade");
             verifyNoMoreInteractions(span);
         }
 
@@ -48,7 +49,7 @@ class PatternObfuscatoryTest {
 
             patternObfuscatory.putSpanAttribute(span, "abc", "belgrade");
 
-            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("***"));
+            verify(span).setAttribute(AttributeKey.stringKey("abc"), "***");
             verifyNoMoreInteractions(span);
         }
 
@@ -61,12 +62,12 @@ class PatternObfuscatoryTest {
 
             patternObfuscatory.putSpanAttribute(span, "abc", "belgrade");
 
-            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("***"));
+            verify(span).setAttribute(AttributeKey.stringKey("abc"), "***");
             verifyNoMoreInteractions(span);
 
             patternObfuscatory.putSpanAttribute(span, "abc", "stuttgart");
 
-            verify(span, times(2)).putAttribute("abc", AttributeValue.stringAttributeValue("***"));
+            verify(span, times(2)).setAttribute(AttributeKey.stringKey("abc"), "***");
             verifyNoMoreInteractions(span);
         }
 
@@ -80,7 +81,7 @@ class PatternObfuscatoryTest {
 
             patternObfuscatory.putSpanAttribute(span, "abc", "belgrade");
 
-            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("***"));
+            verify(span).setAttribute(AttributeKey.stringKey("abc"), "***");
             verifyNoMoreInteractions(span);
         }
 
@@ -93,7 +94,7 @@ class PatternObfuscatoryTest {
 
             patternObfuscatory.putSpanAttribute(span, "belgrade", "011");
 
-            verify(span).putAttribute("belgrade", AttributeValue.stringAttributeValue("011"));
+            verify(span).setAttribute(AttributeKey.stringKey("belgrade"), "011");
             verifyNoMoreInteractions(span);
         }
 
@@ -106,7 +107,7 @@ class PatternObfuscatoryTest {
 
             patternObfuscatory.putSpanAttribute(span, "belgrade", "abc");
 
-            verify(span).putAttribute("belgrade", AttributeValue.stringAttributeValue("***"));
+            verify(span).setAttribute(AttributeKey.stringKey("belgrade"), "***");
             verifyNoMoreInteractions(span);
         }
 
@@ -120,7 +121,7 @@ class PatternObfuscatoryTest {
 
             patternObfuscatory.putSpanAttribute(span, "belgrade", "abc");
 
-            verify(span).putAttribute("belgrade", AttributeValue.stringAttributeValue("***"));
+            verify(span).setAttribute(AttributeKey.stringKey("belgrade"), "***");
             verifyNoMoreInteractions(span);
         }
 
@@ -146,17 +147,16 @@ class PatternObfuscatoryTest {
             patternObfuscatory.putSpanAttribute(span, "345", "678");
             patternObfuscatory.putSpanAttribute(span, "ABC", "234");
 
-            verify(span).putAttribute("abc", AttributeValue.stringAttributeValue("***"));
-            verify(span).putAttribute("efg", AttributeValue.stringAttributeValue("***"));
-            verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("abc"));
-            verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("ABC"));
-            verify(span).putAttribute("012", AttributeValue.stringAttributeValue("***"));
-            verify(span).putAttribute("345", AttributeValue.stringAttributeValue("***"));
-            verify(span).putAttribute("ABC", AttributeValue.stringAttributeValue("***"));
+            verify(span).setAttribute(AttributeKey.stringKey("abc"), "***");
+            verify(span).setAttribute(AttributeKey.stringKey("efg"), "***");
+            verify(span).setAttribute(AttributeKey.stringKey("ABC"), "abc");
+            verify(span).setAttribute(AttributeKey.stringKey("ABC"), "ABC");
+            verify(span).setAttribute(AttributeKey.stringKey("012"), "***");
+            verify(span).setAttribute(AttributeKey.stringKey("345"), "***");
+            verify(span).setAttribute(AttributeKey.stringKey("ABC"), "***");
             verifyNoMoreInteractions(span);
         }
 
     }
-
 
 }

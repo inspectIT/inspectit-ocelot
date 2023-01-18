@@ -148,7 +148,7 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
      *
      * @return The {@link Tracer} registered at {@link GlobalOpenTelemetry}
      */
-    static Tracer getTracer() {
+    static Tracer getOtelTracer() {
         return GlobalOpenTelemetry.getTracer(INSTRUMENTATION_NAME, INSTRUMENTATION_VERSION);
     }
 
@@ -183,9 +183,9 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
      */
     void makeSpansAndFlush(String parentSpanName, String childSpanName) {
         // start span and nested span
-        Span parentSpan = getTracer().spanBuilder(parentSpanName).startSpan();
+        Span parentSpan = getOtelTracer().spanBuilder(parentSpanName).startSpan();
         try (Scope scope = parentSpan.makeCurrent()) {
-            Span childSpan = getTracer().spanBuilder(childSpanName).startSpan();
+            Span childSpan = getOtelTracer().spanBuilder(childSpanName).startSpan();
             try (Scope child = childSpan.makeCurrent()) {
                 // do sth
             } finally {

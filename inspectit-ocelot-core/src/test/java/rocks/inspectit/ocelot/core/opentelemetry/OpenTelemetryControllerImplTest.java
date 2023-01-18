@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.tracing.SampleMode;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
@@ -53,6 +54,8 @@ class OpenTelemetryControllerImplTest {
     void initOpenTelemetryController() {
         // mock max-export-batch-size to avoid exceptions
         when(env.getCurrentConfig().getTracing().getMaxExportBatchSize()).thenReturn(512);
+        // mock SampleMode to avoid NullPointer exceptions
+        when(env.getCurrentConfig().getTracing().getSampleMode()).thenReturn(SampleMode.PARENT_BASED);
         openTelemetryController.env = env;
         openTelemetryController.idGenerator = idGenerator;
         openTelemetryController.init();

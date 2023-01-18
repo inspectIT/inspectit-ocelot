@@ -1,7 +1,9 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
 import com.google.common.collect.ImmutableMap;
-import io.opencensus.trace.*;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,15 +36,18 @@ public class ContextPropagationUtilTest {
 
     private static final String SPAN_ID_DATADOG = "7310043301236410303";
 
-    private static final Tracestate TRACESTATE_DEFAULT = Tracestate.builder().build();
-    private static final TraceOptions TRACE_OPTIONS = TraceOptions.DEFAULT;
+    private static final TraceState TRACESTATE_DEFAULT = TraceState.getDefault();
+
+    private static final TraceFlags TRACE_OPTIONS = TraceFlags.getDefault();
 
     private static final String X_B3_TRACE_ID = "X-B3-TraceId";
+
     private static final String X_B3_SPAN_ID = "X-B3-SpanId";
 
     private static final String TRACEPARENT = "traceparent";
 
     private static final String X_DATADOG_TRACE_ID = "X-Datadog-Trace-ID";
+
     private static final String X_DATADOG_PARENT_ID = "X-Datadog-Parent-ID";
 
     @Mock
@@ -61,8 +66,7 @@ public class ContextPropagationUtilTest {
 
         @Test
         public void testSingleString() {
-            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
-                    enc("my_val\u00FC") + " =  " + enc("stra\u00DFe=15") + ";someprop=42");
+            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER, enc("my_val\u00FC") + " =  " + enc("stra\u00DFe=15") + ";someprop=42");
 
             ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
@@ -72,8 +76,7 @@ public class ContextPropagationUtilTest {
 
         @Test
         public void testSingleLong() {
-            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
-                    enc("x") + " =  " + enc("42") + "; type = l");
+            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER, enc("x") + " =  " + enc("42") + "; type = l");
 
             ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
@@ -83,8 +86,7 @@ public class ContextPropagationUtilTest {
 
         @Test
         public void testSingleDouble() {
-            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
-                    enc("pi") + " =  " + enc(String.valueOf(Math.PI)) + "; blub=halloooo; type = d");
+            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER, enc("pi") + " =  " + enc(String.valueOf(Math.PI)) + "; blub=halloooo; type = d");
 
             ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
@@ -94,8 +96,7 @@ public class ContextPropagationUtilTest {
 
         @Test
         public void testBooleanAndString() {
-            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
-                    "is_something=true;type=b,hello=world");
+            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER, "is_something=true;type=b,hello=world");
 
             ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
@@ -104,11 +105,9 @@ public class ContextPropagationUtilTest {
             verifyNoMoreInteractions(inspectitContext);
         }
 
-
         @Test
         public void testInvalidTypeIgnored() {
-            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER,
-                    "is_something=true;type=blub;type=x");
+            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER, "is_something=true;type=blub;type=x");
 
             ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
@@ -118,7 +117,6 @@ public class ContextPropagationUtilTest {
 
     }
 
-
     @Nested
     class BuildPropagationHeaderMap {
 
@@ -127,10 +125,10 @@ public class ContextPropagationUtilTest {
 
             Map<String, Object> data = ImmutableMap.of("my_val\u00FC", "stra\u00DFe=15");
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), null);
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet()
+                    .stream(), null);
 
-            assertThat(result)
-                    .hasSize(1)
+            assertThat(result).hasSize(1)
                     .containsEntry(CORRELATION_CONTEXT_HEADER, enc("my_val\u00FC") + "=" + enc("stra\u00DFe=15"));
         }
 
@@ -138,29 +136,28 @@ public class ContextPropagationUtilTest {
         public void testSingleLong() {
             Map<String, Object> data = ImmutableMap.of("x", 42L);
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), null);
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet()
+                    .stream(), null);
 
-            assertThat(result)
-                    .hasSize(1)
-                    .containsEntry(CORRELATION_CONTEXT_HEADER, "x=42;type=l");
+            assertThat(result).hasSize(1).containsEntry(CORRELATION_CONTEXT_HEADER, "x=42;type=l");
         }
 
         @Test
         public void testSingleDouble() {
             Map<String, Object> data = ImmutableMap.of("Pi", Math.PI);
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), null);
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet()
+                    .stream(), null);
 
-            assertThat(result)
-                    .hasSize(1)
-                    .containsEntry(CORRELATION_CONTEXT_HEADER, "Pi=" + Math.PI + ";type=d");
+            assertThat(result).hasSize(1).containsEntry(CORRELATION_CONTEXT_HEADER, "Pi=" + Math.PI + ";type=d");
         }
 
         @Test
         public void testInvalidTypeIgnored() {
             Map<String, Object> data = ImmutableMap.of("Pi", new ArrayList<>());
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), null);
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet()
+                    .stream(), null);
 
             assertThat(result).hasSize(0);
         }
@@ -169,10 +166,10 @@ public class ContextPropagationUtilTest {
         public void testBooleanAndString() {
             Map<String, Object> data = ImmutableMap.of("hello", "world", "is_something", true);
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), null);
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet()
+                    .stream(), null);
 
-            assertThat(result)
-                    .hasSize(1)
+            assertThat(result).hasSize(1)
                     .containsEntry(CORRELATION_CONTEXT_HEADER, "hello=world,is_something=true;type=b");
         }
 
@@ -181,9 +178,10 @@ public class ContextPropagationUtilTest {
             ContextPropagationUtil.setPropagationFormat(PropagationFormat.B3);
 
             Map<String, Object> data = Collections.emptyMap();
-            SpanContext spanContext = SpanContext.create(TraceId.fromLowerBase16(TRACE_ID), SpanId.fromLowerBase16(SPAN_ID), TRACE_OPTIONS, TRACESTATE_DEFAULT);
+            SpanContext spanContext = SpanContext.create(TRACE_ID, SPAN_ID, TRACE_OPTIONS, TRACESTATE_DEFAULT);
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), spanContext);
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet()
+                    .stream(), spanContext);
 
             assertThat(result).contains(entry(X_B3_TRACE_ID, TRACE_ID));
             assertThat(result).contains(entry(X_B3_SPAN_ID, SPAN_ID));
@@ -194,9 +192,10 @@ public class ContextPropagationUtilTest {
             ContextPropagationUtil.setPropagationFormat(PropagationFormat.TRACE_CONTEXT);
 
             Map<String, Object> data = Collections.emptyMap();
-            SpanContext spanContext = SpanContext.create(TraceId.fromLowerBase16(TRACE_ID), SpanId.fromLowerBase16(SPAN_ID), TRACE_OPTIONS, TRACESTATE_DEFAULT);
+            SpanContext spanContext = SpanContext.create(TRACE_ID, SPAN_ID, TRACE_OPTIONS, TRACESTATE_DEFAULT);
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), spanContext);
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet()
+                    .stream(), spanContext);
 
             String header = "00-" + TRACE_ID + "-" + SPAN_ID + "-00";
             assertThat(result).contains(entry(TRACEPARENT, header));
@@ -209,9 +208,10 @@ public class ContextPropagationUtilTest {
             ContextPropagationUtil.setPropagationFormat(PropagationFormat.DATADOG);
 
             Map<String, Object> data = Collections.emptyMap();
-            SpanContext spanContext = SpanContext.create(TraceId.fromLowerBase16(TRACE_ID), SpanId.fromLowerBase16(SPAN_ID), TRACE_OPTIONS, TRACESTATE_DEFAULT);
+            SpanContext spanContext = SpanContext.create(TRACE_ID, SPAN_ID, TRACE_OPTIONS, TRACESTATE_DEFAULT);
 
-            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet().stream(), spanContext);
+            Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet()
+                    .stream(), spanContext);
 
             assertThat(result).contains(entry(X_DATADOG_TRACE_ID, TRACE_ID_DATADOG));
             assertThat(result).contains(entry(X_DATADOG_PARENT_ID, SPAN_ID_DATADOG));
@@ -276,9 +276,9 @@ public class ContextPropagationUtilTest {
 
             SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
 
-            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
-            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
-            assertThat(spanContext.getTraceOptions().isSampled()).isTrue();
+            assertThat(spanContext.getTraceId()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceFlags().isSampled()).isTrue();
         }
 
         @Test
@@ -287,9 +287,9 @@ public class ContextPropagationUtilTest {
 
             SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
 
-            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
-            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
-            assertThat(spanContext.getTraceOptions().isSampled()).isFalse();
+            assertThat(spanContext.getTraceId()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceFlags().isSampled()).isFalse();
         }
 
         @Test
@@ -298,9 +298,9 @@ public class ContextPropagationUtilTest {
 
             SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
 
-            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
-            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
-            assertThat(spanContext.getTraceOptions().isSampled()).isFalse();
+            assertThat(spanContext.getTraceId()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceFlags().isSampled()).isFalse();
         }
 
         @Test
@@ -310,9 +310,9 @@ public class ContextPropagationUtilTest {
 
             SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
 
-            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
-            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
-            assertThat(spanContext.getTraceOptions().isSampled()).isTrue();
+            assertThat(spanContext.getTraceId()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceFlags().isSampled()).isTrue();
         }
 
         @Test
@@ -322,9 +322,9 @@ public class ContextPropagationUtilTest {
 
             SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
 
-            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
-            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
-            assertThat(spanContext.getTraceOptions().isSampled()).isFalse();
+            assertThat(spanContext.getTraceId()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceFlags().isSampled()).isFalse();
         }
 
         @Test
@@ -333,9 +333,9 @@ public class ContextPropagationUtilTest {
 
             SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
 
-            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
-            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
-            assertThat(spanContext.getTraceOptions().isSampled()).isTrue();
+            assertThat(spanContext.getTraceId()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceFlags().isSampled()).isTrue();
         }
 
         @Test
@@ -344,9 +344,9 @@ public class ContextPropagationUtilTest {
 
             SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
 
-            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
-            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
-            assertThat(spanContext.getTraceOptions().isSampled()).isFalse();
+            assertThat(spanContext.getTraceId()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceFlags().isSampled()).isFalse();
         }
 
         @Test
@@ -355,9 +355,9 @@ public class ContextPropagationUtilTest {
 
             SpanContext spanContext = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(data);
 
-            assertThat(spanContext.getTraceId().toLowerBase16()).isEqualTo(TRACE_ID);
-            assertThat(spanContext.getSpanId().toLowerBase16()).isEqualTo(SPAN_ID);
-            assertThat(spanContext.getTraceOptions().isSampled()).isFalse();
+            assertThat(spanContext.getTraceId()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceFlags().isSampled()).isFalse();
         }
     }
 }

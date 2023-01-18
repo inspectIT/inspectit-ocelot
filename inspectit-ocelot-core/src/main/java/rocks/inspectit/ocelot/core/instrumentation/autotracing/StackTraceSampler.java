@@ -1,11 +1,13 @@
 package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
-import io.opencensus.common.Clock;
-import io.opencensus.common.Scope;
-import io.opencensus.trace.*;
-import io.opentelemetry.api.trace.TraceFlags;
-import io.opentelemetry.api.trace.TraceState;
-import io.opentelemetry.api.trace.TraceStateBuilder;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -14,7 +16,9 @@ import rocks.inspectit.ocelot.config.model.tracing.AutoTracingSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
+import rocks.inspectit.ocelot.core.opentelemetry.OpenTelemetryControllerImpl;
 import rocks.inspectit.ocelot.core.utils.HighPrecisionTimer;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -39,7 +43,7 @@ public class StackTraceSampler {
     public static final int EXPORT_INTERVAL_MILLIS = 200;
 
     /**
-     * The change to apply to the state of the sampler when invoking {@link #createAndEnterSpan(String, SpanContext, Sampler, Span.Kind, MethodReflectionInformation, Mode)}
+     * The change to apply to the state of the sampler when invoking {@link #createAndEnterSpan(String, SpanContext, Sampler, io.opentelemetry.api.trace.SpanKind, MethodReflectionInformation, Mode)}
      * or {@link #continueSpan(Span, MethodReflectionInformation, Mode)}.
      */
     public enum Mode {
@@ -86,9 +90,9 @@ public class StackTraceSampler {
 
     /**
      * The clock used for timing the stack-traces.
-     * This clock must be the same as used for OpenCensus {@link Span}s, to make sure that the timings are consistent.
+     * This clock must be the same as used for OpenTelemetry {@link io.opentelemetry.api.trace.Span}s, to make sure that the timings are consistent.
      */
-    private Clock clock = Tracing.getClock();
+    private Clock clock = Clock.getDefault();
 
     @PostConstruct
     void init() {
@@ -128,16 +132,16 @@ public class StackTraceSampler {
      * @param actualMethod the actual method for which this span is created.
      * @param mode         the mode to use for Stack-Trace sampling.
      *
-     * @return The generated span is activated via {@link Tracer#withSpan(Span)}. The resulting context is wrapped with a context which terminates the stack-trace-sampling.
+     * @return The generated span is activated via {@link Span#makeCurrent()}. The resulting context is wrapped with a context which terminates the stack-trace-sampling.
      */
-    public AutoCloseable createAndEnterSpan(String name, SpanContext remoteParent, Sampler sampler, Span.Kind kind, MethodReflectionInformation actualMethod, Mode mode) {
+    public AutoCloseable createAndEnterSpan(String name, SpanContext remoteParent, Sampler sampler, SpanKind kind, MethodReflectionInformation actualMethod, Mode mode) {
         Thread self = Thread.currentThread();
         SampledTrace activeSampling = activeSamplings.get(self);
         if (activeSampling == null) {
             if (mode == Mode.ENABLE) {
                 return startSampling(name, remoteParent, sampler, kind);
             } else {
-                return Tracing.getTracer().withSpan(createNormalSpan(name, remoteParent, sampler, kind));
+                return createNormalSpan(name, remoteParent, sampler, kind).makeCurrent();
             }
         } else {
             AutoCloseable samplingAwareSpanContext = createSamplingAwareSpan(name, remoteParent, kind, actualMethod, activeSampling);
@@ -160,7 +164,7 @@ public class StackTraceSampler {
      * @param actualMethod the actual method for which this span is made active
      * @param mode         the mode to use for stack trace sampling.
      *
-     * @return The span is activated via {@link Tracer#withSpan(Span)}. The resulting context is wrapped with a context which terminates the stack-trace-sampling.
+     * @return The span is activated via {@link Span#makeCurrent()}. The resulting context is wrapped with a context which terminates the stack-trace-sampling.
      */
     public AutoCloseable continueSpan(Span span, MethodReflectionInformation actualMethod, Mode mode) {
         Thread self = Thread.currentThread();
@@ -169,7 +173,7 @@ public class StackTraceSampler {
             if (mode == Mode.ENABLE) {
                 return startSampling(span);
             } else {
-                return Tracing.getTracer().withSpan(span);
+                return span.makeCurrent();
             }
         } else {
             AutoCloseable samplingAwareSpanContext = continueSamplingAwareSpan(span, actualMethod, activeSampling);
@@ -205,31 +209,33 @@ public class StackTraceSampler {
     }
 
     private AutoCloseable continueSamplingAwareSpan(Span spanToContinue, MethodReflectionInformation actualMethod, SampledTrace activeSampling) {
-        SampledTrace.MethodExitNotifier exitCallback = activeSampling.spanContinued(spanToContinue, clock.nowNanos(), actualMethod.getDeclaringClass()
+        SampledTrace.MethodExitNotifier exitCallback = activeSampling.spanContinued(spanToContinue, clock.nanoTime(), actualMethod.getDeclaringClass()
                 .getName(), actualMethod.getName());
-        Scope ctx = Tracing.getTracer().withSpan(spanToContinue);
+        Scope ctx = spanToContinue.makeCurrent();
         return () -> {
             ctx.close();
-            exitCallback.methodFinished(clock.nowNanos());
+            exitCallback.methodFinished(clock.nanoTime());
         };
     }
 
-    private AutoCloseable startSampling(String name, SpanContext remoteParent, Sampler sampler, Span.Kind kind) {
+    private AutoCloseable startSampling(String name, SpanContext remoteParent, Sampler sampler, SpanKind kind) {
         Span rootSpan = createNormalSpan(name, remoteParent, sampler, kind);
         return startSampling(rootSpan);
     }
 
     private AutoCloseable startSampling(Span rootSpan) {
-        boolean spanExists = rootSpan.getContext().isValid() && rootSpan.getContext().getTraceOptions().isSampled();
+        boolean spanExists = rootSpan.getSpanContext().isValid() && rootSpan.getSpanContext()
+                .getTraceFlags()
+                .isSampled();
         if (!spanExists) {
-            return Tracing.getTracer().withSpan(rootSpan);
+            return rootSpan.makeCurrent();
         } else {
             Throwable stackTrace = new Throwable(); //the constructor collects the current stack-trace
             SampledTrace sampledTrace = new SampledTrace(rootSpan, () -> StackTrace.createFromThrowable(stackTrace));
             Thread selfThread = Thread.currentThread();
             activeSamplings.put(selfThread, sampledTrace);
             sampleTimer.start();
-            AutoCloseable spanScope = Tracing.getTracer().withSpan(rootSpan);
+            AutoCloseable spanScope = rootSpan.makeCurrent();
             return () -> {
                 spanScope.close();
                 activeSamplings.remove(selfThread);
@@ -239,49 +245,38 @@ public class StackTraceSampler {
         }
     }
 
-    private AutoCloseable createSamplingAwareSpan(String name, SpanContext remoteParent, Span.Kind kind, MethodReflectionInformation actualMethod, SampledTrace activeSampling) {
+    private AutoCloseable createSamplingAwareSpan(String name, SpanContext remoteParent, SpanKind kind, MethodReflectionInformation actualMethod, SampledTrace activeSampling) {
         SpanContext parent = remoteParent;
         if (remoteParent == null) {
-            parent = Tracing.getTracer().getCurrentSpan().getContext();
+            parent = Span.current().getSpanContext();
         }
-        PlaceholderSpan span = new PlaceholderSpan(parent, name, kind, clock::nowNanos);
+        PlaceholderSpan span = new PlaceholderSpan(parent, name, kind, clock::nanoTime);
+
         SampledTrace.MethodExitNotifier exitCallback = activeSampling.newSpanStarted(span, actualMethod.getDeclaringClass()
                 .getName(), actualMethod.getName());
-        Scope ctx = Tracing.getTracer().withSpan(span);
+        io.opentelemetry.context.Scope ctx = span.makeCurrent();
         return () -> {
             ctx.close();
-            exitCallback.methodFinished(clock.nowNanos());
+            exitCallback.methodFinished(clock.nanoTime());
         };
     }
 
-    private Span createNormalSpan(String name, SpanContext remoteParent, Sampler sampler, Span.Kind kind) {
+    @Autowired
+    OpenTelemetryControllerImpl openTelemetryController;
+
+    private Span createNormalSpan(String name, SpanContext remoteParent, Sampler sampler, SpanKind kind) {
         SpanBuilder builder;
-        if (remoteParent != null) {
-            // rebuild the io.opentelemetry.api.trace.SpanContext manually from OC remoteParent span context
-            // this is done because Tracing.getTracer.spanBuilderWithRemoteParent does not work as expected. The remote parent span is **not** added to the OTEL context (see io.opentelemetry.opencensusshim.OpenTelemetrySpanBuilderImpl#startSpan and io.opentelemetry.sdk.trace.SdkSpanBuilder#startSpan)
-            TraceStateBuilder tsBuilder = TraceState.builder();
-            remoteParent.getTracestate().getEntries().forEach(entry -> tsBuilder.put(entry.getKey(), entry.getValue()));
-            TraceState traceState = tsBuilder.build();
 
-            // rebuild SpanContext
-            TraceFlags flags = remoteParent.getTraceOptions()
-                    .isSampled() ? TraceFlags.getSampled() : TraceFlags.getDefault();
-            io.opentelemetry.api.trace.SpanContext fromRemoteParent = io.opentelemetry.api.trace.SpanContext.createFromRemoteParent(remoteParent.getTraceId()
-                    .toLowerBase16(), remoteParent.getSpanId().toLowerBase16(), flags, traceState);
-
-            // get a non-recording OTEL span from the manually rebuilt span context
-            io.opentelemetry.api.trace.Span span = io.opentelemetry.api.trace.Span.wrap(fromRemoteParent);
-            try (// add the span to io.openTelemetry.Context
-                 io.opentelemetry.context.Scope scope = span.makeCurrent()) {
-                // get the SpanBuilder
-                builder = Tracing.getTracer().spanBuilder(name);
-            }
+        boolean openTelemetryControllerSamplerUpdated = false;
+        // get a custom tracer in case a custom sampler has been provided
+        if (null != sampler) {
+            builder = OpenTelemetryUtils.getTracer(sampler).spanBuilder(name);
         } else {
-            builder = Tracing.getTracer().spanBuilder(name);
+            builder = OpenTelemetryUtils.getTracer().spanBuilder(name);
         }
         builder.setSpanKind(kind);
-        if (sampler != null) {
-            builder.setSampler(sampler);
+        if (remoteParent != null) {
+            builder.setParent(Context.current().with(Span.wrap(remoteParent)));
         }
         Span span = builder.startSpan();
         return span;
@@ -300,7 +295,7 @@ public class StackTraceSampler {
                 .filter(trace -> !samplingsCopy.get(trace).isPaused())
                 .collect(Collectors.toSet());
 
-        long timestamp = clock.nowNanos();
+        long timestamp = clock.nanoTime();
         Map<Thread, StackTrace> stackTraces = StackTrace.createFor(threadsToSample);
 
         boolean anySampled = false;

@@ -2,8 +2,8 @@ package rocks.inspectit.ocelot.core.exporter;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.github.netmikey.logunit.api.LogCapturer;
-import io.opencensus.trace.Tracing;
-import io.opencensus.trace.samplers.Samplers;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -20,6 +20,7 @@ import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.trace.ZipkinExporterSettings;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -58,16 +59,15 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
     }
 
     @Test
-    void verifyTraceSent() throws InterruptedException {
-        Tracing.getTracer().spanBuilder("zipkinspan").setSampler(Samplers.alwaysSample()).startSpanAndRun(() -> {
-        });
-
-        logger.info("Wait for Jaeger to process the span...");
-        Thread.sleep(1100L);
-
-        Instances.openTelemetryController.flush();
+    void verifyTraceSent() {
+        Span span = OpenTelemetryUtils.getTracer().spanBuilder("zipkinspan").startSpan();
+        try (Scope s = span.makeCurrent()) {
+        } finally {
+            span.end();
+        }
 
         await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
+            Instances.openTelemetryController.flush();
             verify(postRequestedFor(urlPathEqualTo(ZIPKIN_PATH)).withRequestBody(containing("zipkinspan")));
         });
     }

@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.span;
 
-import io.opencensus.trace.Span;
-import io.opencensus.trace.Tracing;
+import io.opentelemetry.api.trace.Span;
 import lombok.AllArgsConstructor;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
@@ -20,7 +19,7 @@ public class EndSpanAction implements IHookAction {
     public void execute(ExecutionContext context) {
         InspectitContextImpl ctx = context.getInspectitContext();
         if (ctx.hasEnteredSpan() && condition.test(context)) {
-            Span current = Tracing.getTracer().getCurrentSpan();
+            Span current = Span.current();
             current.end();
         }
     }
