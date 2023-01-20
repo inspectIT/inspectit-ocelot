@@ -61,7 +61,7 @@ dependencies {
             // logging
             "ch.qos.logback:logback-classic:${logbackVersion}",
             // logstash support (JSON logging)
-            "net.logstash.logback:logstash-logback-encoder:7.0.1",
+            "net.logstash.logback:logstash-logback-encoder:7.2",
 
             // utils
             "org.apache.commons:commons-lang3:3.+",
