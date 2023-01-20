@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.AgentCallbackManager;
 import rocks.inspectit.ocelot.agentcommunication.AgentCommandManager;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
@@ -20,6 +21,7 @@ import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 /**
  * The rest controller providing the interface used by the agent for configuration fetching.
@@ -39,6 +41,9 @@ public class AgentController extends AbstractBaseController {
 
     @Autowired
     private AgentCallbackManager agentCallbackManager;
+
+    @Autowired
+    private AgentService agentService;
 
     @ExceptionHandler
     public void e(Exception e) {
@@ -96,5 +101,18 @@ public class AgentController extends AbstractBaseController {
         } else {
             return ResponseEntity.ok().body(nextCommand);
         }
+    }
+
+    /**
+     * Returns the data for building the downloadable support archive for the agent with the given name in the frontend.
+     *
+     * @param attributes the attributes of the agents used to select the appropriate data.
+     *
+     * @return The data used in the support archive.
+     */
+    @ApiOperation(value = "Fetch an Agents Data for Downloading a Support Archive", notes = "Bundles useful information for debugging issues raised in support tickets.")
+    @GetMapping(value = "agent/supportArchive", produces = "application/json")
+    public DeferredResult<ResponseEntity<?>> fetchSupportArchive(@ApiParam("The agent attributes used to retrieve the correct data") @RequestParam Map<String, String> attributes) throws ExecutionException {
+        return agentService.buildSupportArchive(attributes, configManager);
     }
 }

@@ -51,6 +51,11 @@ public class AgentMetaInformation {
     private static final String HEADER_VM_VENDOR = HEADER_PREFIX + "vm-vendor";
 
     /**
+     *  Name of the service states header.
+     */
+    private static final String HEADER_SERVICE_STATES = HEADER_PREFIX + "service-states-map";
+
+    /**
      * Generates a {@link AgentMetaInformation} instance based on the given map which represents the used HTTP headers.
      * The headers will be considered to be sent by an agent if the give map contains an entry with key
      * <code>x-ocelot-agent-id</code>. In case the given headers are not belonging to an agent (e.g. the configuration
@@ -98,6 +103,11 @@ public class AgentMetaInformation {
      */
     private String vmVendor;
 
+    /**
+     * The current setting states in a json string
+     */
+    private String serviceStates;
+
     private AgentMetaInformation(Map<String, String> headers) {
         Preconditions.checkArgument(StringUtils.isNotBlank(headers.get(HEADER_AGENT_ID)), "It is required that the given map contains an agent header!");
 
@@ -107,5 +117,6 @@ public class AgentMetaInformation {
         startTime = headers.get(HEADER_START_TIME);
         vmName = headers.get(HEADER_VM_NAME);
         vmVendor = headers.get(HEADER_VM_VENDOR);
+        serviceStates = headers.get(HEADER_SERVICE_STATES);
     }
 }

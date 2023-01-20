@@ -6,6 +6,7 @@ import { notificationActions } from '../../../redux/ducks/notification';
 import EditorView from '../../editor/EditorView';
 import CreateDialog from './dialogs/CreateDialog';
 import DeleteDialog from './dialogs/DeleteDialog';
+import UploadDialog from './dialogs/UploadDialog';
 import MoveDialog from './dialogs/MoveDialog';
 import FileToolbar from './FileToolbar';
 import FileTree from './FileTree';
@@ -59,6 +60,7 @@ const EditorHeader = ({ icon, path, name, isContentModified, readOnly }) => (
 class ConfigurationView extends React.Component {
   state = {
     isDeleteFileDialogShown: false,
+    isUploadDialogShown: false,
     isCreateDialogShown: false,
     isDirectoryMode: false,
     configurationType: CONFIGURATION_TYPES.YAML,
@@ -120,13 +122,27 @@ class ConfigurationView extends React.Component {
 
   hideDeleteFileDialog = () => this.setState({ isDeleteFileDialogShown: false, filePath: null });
 
+  showUploadDialog = () => this.setState({ isUploadDialogShown: true });
+
+  hideUploadDialog = () => this.setState({ isUploadDialogShown: false });
+
   showCreateFileDialog = (filePath, configurationType) =>
-    this.setState({ isCreateDialogShown: true, isDirectoryMode: false, configurationType: configurationType, filePath });
+    this.setState({
+      isCreateDialogShown: true,
+      isDirectoryMode: false,
+      configurationType: configurationType,
+      filePath,
+    });
 
   hideCreateDialog = () => this.setState({ isCreateDialogShown: false, isDirectoryMode: false, filePath: null });
 
   showCreateDirectoryDialog = (filePath) =>
-    this.setState({ isCreateDialogShown: true, isDirectoryMode: true, configurationType: CONFIGURATION_TYPES.YAML, filePath });
+    this.setState({
+      isCreateDialogShown: true,
+      isDirectoryMode: true,
+      configurationType: CONFIGURATION_TYPES.YAML,
+      filePath,
+    });
 
   showMoveDialog = (filePath) => this.setState({ isMoveDialogShown: true, filePath });
 
@@ -149,10 +165,14 @@ class ConfigurationView extends React.Component {
    * If no version is specified, the latest version will be selected.
    */
   openFile = (filename, versionId = null) => {
-    if (this.props.selectedVersion != versionId) {
+    if (this.props.selectedVersion !== versionId) {
       this.props.selectVersion(versionId, false);
     }
     this.props.selectFile(filename);
+  };
+
+  toggleShowHiddenFiles = () => {
+    this.props.toggleShowHiddenFiles();
   };
 
   render() {
@@ -171,7 +191,6 @@ class ConfigurationView extends React.Component {
       canWrite,
     } = this.props;
     const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
-
     const { path, name } = this.parsePath(selection, selectedDefaultConfigFile);
     const icon = 'pi-' + (isDirectory ? 'folder' : 'file');
     const showHeader = !!name;
@@ -179,7 +198,6 @@ class ConfigurationView extends React.Component {
     const readOnly = !canWrite || !!selectedDefaultConfigFile || !isLatestVersion;
 
     const fileContentWithoutFirstLine = fileContent ? fileContent.split('\n').slice(1).join('\n') : '';
-
     return (
       <div className="this">
         <style jsx>{`
@@ -212,15 +230,18 @@ class ConfigurationView extends React.Component {
           <FileToolbar
             readOnly={readOnly}
             showDeleteFileDialog={this.showDeleteFileDialog}
+            showUploadDialog={this.showUploadDialog}
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
             selectedVersionChange={this.selectedVersionChange}
             showSearchDialog={this.showSearchDialog}
+            toggleShowHiddenFiles={this.toggleShowHiddenFiles}
           />
           <FileTree
             className="fileTree"
             showDeleteFileDialog={this.showDeleteFileDialog}
+            showUploadDialog={this.showUploadDialog}
             showCreateFileDialog={this.showCreateFileDialog}
             showCreateDirectoryDialog={this.showCreateDirectoryDialog}
             showMoveDialog={this.showMoveDialog}
@@ -256,6 +277,7 @@ class ConfigurationView extends React.Component {
         </EditorView>
 
         <DeleteDialog visible={this.state.isDeleteFileDialogShown} onHide={this.hideDeleteFileDialog} filePath={this.state.filePath} />
+        <UploadDialog visible={this.state.isUploadDialogShown} onHide={this.hideUploadDialog} />
         <CreateDialog
           directoryMode={this.state.isDirectoryMode}
           visible={this.state.isCreateDialogShown}
@@ -290,7 +312,7 @@ class ConfigurationView extends React.Component {
 
 const getYamlError = (content) => {
   try {
-    yaml.safeLoad(content);
+    yaml.load(content);
     return null;
   } catch (error) {
     if (error.message) {
@@ -343,6 +365,7 @@ const mapDispatchToProps = {
   toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView,
   selectFile: configurationActions.selectFile,
   fetchVersions: configurationActions.fetchVersions,
+  toggleShowHiddenFiles: configurationActions.toggleShowHiddenFiles,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationView);

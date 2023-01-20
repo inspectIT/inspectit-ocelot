@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.metrics;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import io.opencensus.tags.TagContext;
@@ -112,6 +113,7 @@ public class MeasureTagValueGuard {
                 if (tagValues.size() > tagValueLimit) {
                     blockedTagKeysByMeasure.computeIfAbsent(tagKey, blocked -> Maps.newHashMap())
                             .putIfAbsent(tagKey, true);
+                    agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(), String.format(tagOverFlowMessageTemplate, tagKey));
                 } else {
                     tagValues.add(tagValue);
                 }
@@ -146,7 +148,7 @@ public class MeasureTagValueGuard {
             } else {
                 String overflowReplacement = env.getCurrentConfig().getMetrics().getTagGuard().getOverflowReplacement();
                 tags.put(key, TagUtils.createTagValueAsString(key, overflowReplacement));
-                agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(), String.format(tagOverFlowMessageTemplate, key));
+
             }
         });
 
@@ -158,7 +160,6 @@ public class MeasureTagValueGuard {
             } else {
                 String overflowReplacement = env.getCurrentConfig().getMetrics().getTagGuard().getOverflowReplacement();
                 tags.put(key, TagUtils.createTagValueAsString(key, overflowReplacement));
-                agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(), String.format(tagOverFlowMessageTemplate, key));
             }
         });
 
@@ -197,7 +198,7 @@ public class MeasureTagValueGuard {
                 if (Files.exists(path)) {
                     try {
                         byte[] content = Files.readAllBytes(path);
-                        @SuppressWarnings("unchecked") Map<String, Map<String, Set<String>>> tags = mapper.readValue(content, Map.class);
+                        @SuppressWarnings("unchecked") Map<String, Map<String, Set<String>>> tags = mapper.readValue(content, new TypeReference<Map<String, Map<String, Set<String>>>>() {});
                         return tags;
                     } catch (Exception e) {
                         log.error("Error loading tag value database from persistence file '{}'", fileName, e);

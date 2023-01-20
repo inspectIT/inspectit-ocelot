@@ -24,6 +24,8 @@ const configuration = {
   versions: [],
   /** The existing configuration files. */
   files: [],
+  /** Indicates if hidden files ares shown. */
+  showHiddenFiles: false,
   /**
    * The history of file-move operations which were executed successfully.
    * When the files are refetched, it can occur that the selection points to a non existing file.

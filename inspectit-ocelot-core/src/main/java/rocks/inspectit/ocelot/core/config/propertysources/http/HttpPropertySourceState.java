@@ -1,5 +1,8 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +20,11 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
-import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
+import rocks.inspectit.ocelot.commons.models.health.AgentHealthState;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.util.InvalidPropertiesException;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
+import rocks.inspectit.ocelot.core.selfmonitoring.service.DynamicallyActivatableServiceObserver;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -97,7 +101,7 @@ public class HttpPropertySourceState {
     @Getter
     private boolean firstFileWriteAttemptSuccessful = true;
 
-    private AgentHealth agentHealth = AgentHealth.OK;
+    private AgentHealthState agentHealth = AgentHealthState.defaultState();
 
     /**
      * Constructor.
@@ -141,7 +145,7 @@ public class HttpPropertySourceState {
      *
      * @param newHealth The new agent health
      */
-    public void updateAgentHealth(@NonNull AgentHealth newHealth) {
+    public void updateAgentHealthState(@NonNull AgentHealthState newHealth) {
         agentHealth = newHealth;
     }
 
@@ -249,13 +253,22 @@ public class HttpPropertySourceState {
     private void setAgentMetaHeaders(HttpGet httpGet) {
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String agentHealthJson;
+        try {
+            agentHealthJson = ow.writeValueAsString(agentHealth);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
         httpGet.setHeader(META_HEADER_PREFIX + "AGENT-ID", runtime.getName());
         httpGet.setHeader(META_HEADER_PREFIX + "AGENT-VERSION", AgentManager.getAgentVersion());
         httpGet.setHeader(META_HEADER_PREFIX + "JAVA-VERSION", System.getProperty("java.version"));
         httpGet.setHeader(META_HEADER_PREFIX + "VM-NAME", runtime.getVmName());
         httpGet.setHeader(META_HEADER_PREFIX + "VM-VENDOR", runtime.getVmVendor());
         httpGet.setHeader(META_HEADER_PREFIX + "START-TIME", String.valueOf(runtime.getStartTime()));
-        httpGet.setHeader(META_HEADER_PREFIX + "HEALTH", agentHealth.name());
+        httpGet.setHeader(META_HEADER_PREFIX + "HEALTH", agentHealthJson);
+        httpGet.setHeader(META_HEADER_PREFIX + "SERVICE-STATES-MAP", DynamicallyActivatableServiceObserver.asJson());
     }
 
     /**

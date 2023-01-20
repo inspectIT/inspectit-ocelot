@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG_TREE_KEY, VERSION_LIMIT } from '../../../data/constants';
+import { DEFAULT_CONFIG_TREE_KEY, HIDDEN_FILES_NAME_PATTERN, VERSION_LIMIT } from '../../../data/constants';
 import axios from '../../../lib/axios-api';
 import { configurationUtils } from '.';
 import { notificationActions } from '../notification';
@@ -34,7 +34,7 @@ export const fetchVersions = () => {
  */
 export const fetchFiles = (newSelectionOnSuccess) => {
   return (dispatch, getState) => {
-    const { selectedVersion } = getState().configuration;
+    const { selectedVersion, showHiddenFiles } = getState().configuration;
 
     const params = {};
     if (selectedVersion) {
@@ -47,12 +47,15 @@ export const fetchFiles = (newSelectionOnSuccess) => {
       .then((payload) => {
         const files = payload;
         sortFiles(files);
+        if (!showHiddenFiles) {
+          hideFilesRecursively(files, HIDDEN_FILES_NAME_PATTERN);
+        }
         dispatch({ type: types.FETCH_FILES_SUCCESS, payload: { files } });
         if (newSelectionOnSuccess) {
           dispatch(selectFile(newSelectionOnSuccess));
         }
       })
-      .catch(dispatch({ type: types.FETCH_FILES_FAILURE }));
+      .catch(() => dispatch({ type: types.FETCH_FILES_FAILURE }));
   };
 };
 
@@ -239,7 +242,7 @@ export const exportSelection = (fetchFilesOnSuccess, selectedFile = null) => {
           downloadSelection(fileContent, file.name);
           dispatch({ type: types.FETCH_FILE_SUCCESS, payload: { fileContent } });
         })
-        .catch(dispatch({ type: types.FETCH_FILE_FAILURE }));
+        .catch(() => dispatch({ type: types.FETCH_FILE_FAILURE }));
     } else {
       getDirectories(params)
         .then((payload) => {
@@ -254,6 +257,34 @@ export const exportSelection = (fetchFilesOnSuccess, selectedFile = null) => {
         });
     }
   };
+};
+
+/**
+ * Either removes files that start with '.' or fetches files depending on if files are hidden.
+ */
+export const toggleShowHiddenFiles = () => {
+  return (dispatch) => {
+    dispatch({ type: types.TOGGLE_SHOW_HIDDEN_FILES });
+    dispatch(fetchFiles());
+  };
+};
+
+/**
+ * Recursively removes files that match the regex
+ * @param {array} files - the array of files
+ * @param {string} regex
+ */
+const hideFilesRecursively = (files, regex) => {
+  for (let i = 0; i <= files.length; i++) {
+    if (!files[i]) {
+      continue;
+    }
+    if (files[i].name.match(regex)) {
+      files.splice(i--, 1);
+    } else if (files[i].children) {
+      hideFilesRecursively(files[i].children, regex);
+    }
+  }
 };
 
 /**
@@ -378,7 +409,7 @@ export const selectedFileContentsChanged = (content) => ({
  */
 export const selectVersion = (version, reloadFiles = true) => {
   return (dispatch) => {
-    // chaning the selected version
+    // changing the selected version
     dispatch({
       type: types.SELECT_VERSION,
       payload: {

@@ -35,6 +35,7 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 public class LogHealthMonitorTest {
+    //TODO check tests what they need
 
     private static final long VALIDITY_PERIOD_MILLIS = 500;
 

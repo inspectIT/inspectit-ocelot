@@ -15,8 +15,8 @@ repositories {
 }
 
 group = 'rocks.inspectit.ocelot'
-sourceCompatibility = 1.8
-
+sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
+targetCompatibility = 1.8 // Java version to generate classes for.
 dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
@@ -32,7 +32,7 @@ dependencies {
             'org.apache.commons:commons-lang3:3.9',
             'commons-io:commons-io:2.5',
             'com.fasterxml.jackson.core:jackson-databind:2.8.9',
-
+            'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0',
             // logging
             "ch.qos.logback:logback-classic:${logbackVersion}",
     )
@@ -44,6 +44,9 @@ dependencies {
     // the api is included as compile only because the open census api has to be decoupled
     // from the inspectIT core to allow it to be pushed to the bootstrap
     compileOnly (
-            "io.opencensus:opencensus-api:${openCensusVersion}"
+            "io.opencensus:opencensus-api:${openCensusVersion}",
+            // OpenTelemetry
+            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
+            "io.opentelemetry:opentelemetry-sdk-metrics",
     )
 }

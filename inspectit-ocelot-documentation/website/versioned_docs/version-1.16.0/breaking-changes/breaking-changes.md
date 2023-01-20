@@ -8,7 +8,7 @@ original_id: Breaking Changes
 
 ### Configuration sources only accept valid `YAML`, `JSON` (keys must be wrapped in double quotes) or `properties` notation 
 
-As of version 1.16.0, the [configuration sources](/configuration/configuration-sources.md) only accept valid `YAML`, `JSON` or `properties` notation. The "mix and match" of JSON and YAML should be avoided. For JSON, all keys need to be wrapped in double quotes. 
+As of version 1.16.0, the [configuration sources](configuration/configuration-sources.md) only accept valid `YAML`, `JSON` or `properties` notation. The "mix and match" of JSON and YAML should be avoided. For JSON, all keys need to be wrapped in double quotes. 
 Upgrading to version 1.16.0 may break your startup routines if the JSON passed as command line arguments is invalid. For example, the following code will **not** work anymore and cause an exception:  
 
 ```bash

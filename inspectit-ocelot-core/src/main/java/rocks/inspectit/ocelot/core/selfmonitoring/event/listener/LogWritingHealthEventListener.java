@@ -1,8 +1,11 @@
 package rocks.inspectit.ocelot.core.selfmonitoring.event.listener;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.core.selfmonitoring.event.models.AgentHealthChangedEvent;
 
+@Component
 @Slf4j
 public class LogWritingHealthEventListener implements HealthEventListener {
 
@@ -10,11 +13,10 @@ public class LogWritingHealthEventListener implements HealthEventListener {
 
     @Override
     public void onAgentHealthEvent(AgentHealthChangedEvent event) {
-
         if (event.getNewHealth().isMoreSevereOrEqualTo(event.getOldHealth())) {
-            log.warn(LOG_CHANGE_STATUS, event.getOldHealth(), event.getOldHealth(), event.getMessage());
+            log.warn(LOG_CHANGE_STATUS, event.getOldHealth(), event.getNewHealth(), event.getMessage());
         } else {
-            log.info(LOG_CHANGE_STATUS, event.getOldHealth(), event.getOldHealth(), event.getMessage());
+            log.info(LOG_CHANGE_STATUS, event.getOldHealth(), event.getNewHealth(), event.getMessage());
         }
 
     }

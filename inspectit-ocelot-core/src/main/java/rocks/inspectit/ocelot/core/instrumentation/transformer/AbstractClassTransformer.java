@@ -1,11 +1,9 @@
-package rocks.inspectit.ocelot.core.instrumentation;
+package rocks.inspectit.ocelot.core.instrumentation.transformer;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
@@ -16,112 +14,73 @@ import net.bytebuddy.matcher.ElementMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.instrumentation.TypeDescriptionWithClassLoader;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.ClassInstrumentationConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationScope;
 import rocks.inspectit.ocelot.core.instrumentation.event.ClassInstrumentedEvent;
-import rocks.inspectit.ocelot.core.instrumentation.event.IClassDefinitionListener;
 import rocks.inspectit.ocelot.core.instrumentation.event.TransformerShutdownEvent;
 import rocks.inspectit.ocelot.core.instrumentation.hook.DispatchHookAdvices;
 import rocks.inspectit.ocelot.core.instrumentation.injection.JigsawModuleInstrumenter;
-import rocks.inspectit.ocelot.core.instrumentation.special.ClassLoaderDelegation;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
 import rocks.inspectit.ocelot.core.utils.CoreUtils;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.*;
 
 /**
- * A class transformer applying all inspectIT instrumentations.
- * This transform only instrument classes when they are redefined / retransformed!.
+ * Base for all classes which should act as {@link java.lang.instrument.ClassFileTransformer}s. Anyway, we introduced
+ * a custom {@link ClassTransformer} interface to ease Java8 and Java9 interoperability.
  */
-@Component
 @Slf4j
-public class AsyncClassTransformer implements ClassFileTransformer {
+public abstract class AbstractClassTransformer implements ClassTransformer {
+
+    /**
+     * A lock for safely accessing {@link #shuttingDown} in combination with {@link #instrumentedClasses}.
+     */
+    protected final Object shutDownLock = new Object();
 
     @Autowired
-    private InspectitEnvironment env;
+    protected ApplicationContext ctx;
 
     @Autowired
-    private ApplicationContext ctx;
+    protected Instrumentation instrumentation;
 
     @Autowired
-    private Instrumentation instrumentation;
+    protected InstrumentationConfigurationResolver configResolver;
 
     @Autowired
-    private InstrumentationConfigurationResolver configResolver;
+    protected InspectitEnvironment env;
 
     @Autowired
     private SelfMonitoringService selfMonitoring;
 
     @Autowired
-    @VisibleForTesting
-    List<IClassDefinitionListener> classDefinitionListeners;
-
-    @Autowired
     private JigsawModuleInstrumenter moduleManager;
-
-    @Autowired
-    private ClassLoaderDelegation classLoaderDelegation;
 
     /**
      * Detects if the instrumenter is in the process of shutting down.
      * When it is shutting down, no new instrumentations are added anymore, instead all existing instrumentations are removed.
      */
     @Getter
-    private volatile boolean shuttingDown = false;
-
-    /**
-     * A lock for safely accessing {@link #shuttingDown} in combination with {@link #instrumentedClasses}.
-     */
-    private final Object shutDownLock = new Object();
+    protected volatile boolean shuttingDown = false;
 
     /**
      * Stores all classes which have been instrumented with a configuration different
-     * than {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION}.
+     * form {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION}.
      * <p>
      * Package private for testing.
      */
     Cache<Class<?>, Boolean> instrumentedClasses = CacheBuilder.newBuilder().weakKeys().build();
 
     @Override
-    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] bytecode) throws IllegalClassFormatException {
-        if (classBeingRedefined == null) { // class is not loaded yet! we only redefine only loaded classes to prevent blocking
-            classDefinitionListeners.forEach(lis -> lis.onNewClassDefined(className, loader));
-            return bytecode; //leave the class unchanged for now
-
-        }
-
-        //retransforms can be triggered by other agents where the classloader delegation has not been applied yet
-        if (!classLoaderDelegation.getClassLoaderClassesRequiringRetransformation(loader, configResolver.getCurrentConfig())
-                .isEmpty()) {
-            log.debug("Skipping instrumentation of {} as bootstrap classes were not made available yet for the class", className);
-            return bytecode; //leave the class unchanged for now
-        } else {
-            return instrumentBytecode(classBeingRedefined, bytecode);
-        }
-    }
-
-    @PostConstruct
-    void init() {
-        instrumentation.addTransformer(this, true);
-    }
-
-    /**
-     * Removes all applied instrumentations if the JVM is not shutting down but the agent is.
-     */
-    @PreDestroy
-    void destroy() {
+    public void destroy() {
         // this lock guarantees through updateAndGetActiveConfiguration that no instrumentation is added after the lock is released
         synchronized (shutDownLock) {
             shuttingDown = true;
@@ -130,15 +89,92 @@ public class AsyncClassTransformer implements ClassFileTransformer {
         if (!CoreUtils.isJVMShuttingDown()) {
             deinstrumentAllClasses();
         }
-        instrumentation.removeTransformer(this);
+    }
+
+    @Override
+    public byte[] transform(Object module, ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+        String classNameInDotNotation = className.replace("/", ".");
+        if (InstrumentationConfigurationResolver.isClassFromIgnoredPackage(env.getCurrentConfig()
+                .getInstrumentation(), classNameInDotNotation, loader)) {
+            return classfileBuffer;
+        }
+        if (module != null) {
+            moduleManager.openModule(module);
+        }
+        return doTransform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
+    }
+
+    /**
+     * Entry point for subclasses to implemented their transformation
+     */
+    public abstract byte[] doTransform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException;
+
+    /**
+     * Applies the {@link ClassInstrumentationConfiguration} to the provided bytecode. If modification fails, uninstrumented bytecode is returned.
+     *
+     * @param typeWithLoader      The {@link TypeDescriptionWithClassLoader} representing this class to be instrumented
+     * @param classBeingRedefined If this is triggered by a redefine or retransform, the class being redefined or retransformed; if this is a class load, null
+     * @param bytecode            The bytecode to by modified
+     * @param classConf           The {@link ClassInstrumentationConfiguration} for the class to be instrumented
+     *
+     * @return The modified bytecode
+     */
+    protected byte[] instrumentByteCode(TypeDescriptionWithClassLoader typeWithLoader, Class<?> classBeingRedefined, byte[] bytecode, ClassInstrumentationConfiguration classConf) {
+        try {
+            if (classConf.isNoInstrumentation()) {
+                return bytecode;
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Redefining class: {}", typeWithLoader.getName());
+            }
+
+            // Make a ByteBuddy builder based on the input bytecode
+            ClassFileLocator bytecodeClassFileLocator = ClassFileLocator.Simple.of(typeWithLoader.getName(), bytecode);
+            // See https://github.com/raphw/byte-buddy/issues/1095 and https://github.com/raphw/byte-buddy/issues/1040
+            // why we are using the different method graph and decorate function here
+            DynamicType.Builder<?> builder = new ByteBuddy().with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE)
+                    .decorate(typeWithLoader.getType(), bytecodeClassFileLocator);
+
+            // Apply the actual instrumentation onto the builders
+            for (SpecialSensor specialSensor : classConf.getActiveSpecialSensors()) {
+                builder = specialSensor.instrument(typeWithLoader, classConf.getActiveConfiguration(), builder);
+            }
+
+            // Apply the instrumentation hook
+            ElementMatcher.Junction<MethodDescription> methodMatcher = getCombinedMethodMatcher(typeWithLoader.getType(), classConf);
+            if (methodMatcher != null) {
+                builder = DispatchHookAdvices.adviceOn(builder, methodMatcher);
+            }
+
+            // "Compile" the builder to bytecode
+            DynamicType.Unloaded<?> instrumentedClass = builder.make();
+
+            if (classBeingRedefined != null) {
+                dispatchClassInstrumentedEvent(classBeingRedefined, typeWithLoader.getType(), classConf);
+            }
+
+            return instrumentedClass.getBytes();
+        } catch (Throwable throwable) {
+            log.warn("Could not instrument class '{}' due to an error during bytecode generation.", typeWithLoader.getName(), throwable);
+            return bytecode;
+        }
+    }
+
+    protected void dispatchClassInstrumentedEvent(Class<?> clazz, TypeDescription type, ClassInstrumentationConfiguration classConf) {
+        if (!shuttingDown) {
+            //Notify listeners that this class has been instrumented (or deinstrumented)
+            ClassInstrumentedEvent event = new ClassInstrumentedEvent(this, clazz, type, classConf);
+            ctx.publishEvent(event);
+        }
     }
 
     /**
      * Triggers a retransformation for all instrumented classes until none is instrumented anymore.
-     * Therefore this class expects that {@link #shuttingDown} is already set to true.
+     * Therefore, this class expects that {@link #shuttingDown} is already set to true.
      * When {@link #shuttingDown} is true, for every retransformed class any instrumentation is removed automatically.
      */
-    private void deinstrumentAllClasses() {
+    protected void deinstrumentAllClasses() {
         //we deinstrument classloaders last to prevent classloading issues with the classloader delegation
         Set<Class<?>> instrumentedClassLoaders = new HashSet<>();
 
@@ -188,67 +224,15 @@ public class AsyncClassTransformer implements ClassFileTransformer {
         }
     }
 
-    private byte[] instrumentBytecode(Class<?> targetClass, byte[] bytecode) {
-        try {
-            //load the type description and the desired instrumentation
-            TypeDescription type = TypeDescription.ForLoadedType.of(targetClass);
-            ClassInstrumentationConfiguration classConf = updateAndGetActiveConfiguration(targetClass, type);
-
-            byte[] instrumentedBytecode;
-            if (classConf.isNoInstrumentation()) {
-                // we do not want to instrument this class -> we return the original bytecode
-                instrumentedBytecode = bytecode;
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Redefining class: {}", type.getName());
-                }
-                moduleManager.openModule(targetClass);
-
-                // Make a ByteBuddy builder based on the input bytecode
-                ClassFileLocator bytecodeClassFileLocator = ClassFileLocator.Simple.of(type.getName(), bytecode);
-                // See https://github.com/raphw/byte-buddy/issues/1095 and https://github.com/raphw/byte-buddy/issues/1040
-                // why we are using the different method graph and decorate function here
-                DynamicType.Builder<?> builder = new ByteBuddy().with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE)
-                        .decorate(type, bytecodeClassFileLocator);
-
-                // Apply the actual instrumentation onto the builders
-                for (SpecialSensor specialSensor : classConf.getActiveSpecialSensors()) {
-                    builder = specialSensor.instrument(targetClass, classConf.getActiveConfiguration(), builder);
-                }
-
-                // Apply the instrumentation hook
-                ElementMatcher.Junction<MethodDescription> methodMatcher = getCombinedMethodMatcher(targetClass, classConf);
-                if (methodMatcher != null) {
-                    builder = DispatchHookAdvices.adviceOn(builder, methodMatcher);
-                }
-
-                // "Compile" the builder to bytecode
-                DynamicType.Unloaded<?> instrumentedClass = builder.make();
-                instrumentedBytecode = instrumentedClass.getBytes();
-            }
-
-            if (!shuttingDown) {
-                //Notify listeners that this class has been instrumented (or deinstrumented)
-                val event = new ClassInstrumentedEvent(this, targetClass, type, classConf);
-                ctx.publishEvent(event);
-            }
-
-            return instrumentedBytecode;
-        } catch (Throwable e) {
-            log.warn("Could not instrument class '{}' due to an error during bytecode generation.", targetClass.getName(), e);
-            return bytecode;
-        }
-    }
-
     /**
      * Combining all method matchers of the matching rules in order to prevent multiple injections of the advice.
      */
-    private ElementMatcher.Junction<MethodDescription> getCombinedMethodMatcher(Class<?> clazz, ClassInstrumentationConfiguration classConfig) {
+    private ElementMatcher.Junction<MethodDescription> getCombinedMethodMatcher(TypeDescription type, ClassInstrumentationConfiguration classConfig) {
         ElementMatcher.Junction<MethodDescription> methodMatcher = null;
 
         for (InstrumentationRule rule : classConfig.getActiveRules()) {
             if (log.isDebugEnabled()) {
-                log.debug("Added hook to {} due to rule '{}'.", clazz, rule.getName());
+                log.debug("Added hook to {} due to rule '{}'.", type.getName(), rule.getName());
             }
             for (InstrumentationScope scope : rule.getScopes()) {
                 if (log.isTraceEnabled()) {
@@ -267,17 +251,16 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     }
 
     /**
-     * Derives the {@link ClassInstrumentationConfiguration} based on the latest environment configuration for a given type.
+     * Derives the {@link ClassInstrumentationConfiguration} based on the latest environment configuration for a given class.
      * In addition the class is added to {@link #instrumentedClasses} if it is instrumented or removed from the set otherwise.
      * If the class transformer is shutting down, this returns {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION}
      * for every class (= all classes should be deinstrumented).
      *
-     * @param classBeingRedefined the class to check for
-     * @param type                the classes type description
+     * @param classBeingRedefined the {@link  Class}
      *
-     * @return
+     * @return Then updated {@link  ClassInstrumentationConfiguration}
      */
-    private ClassInstrumentationConfiguration updateAndGetActiveConfiguration(Class<?> classBeingRedefined, TypeDescription type) {
+    protected ClassInstrumentationConfiguration updateAndGetActiveConfiguration(Class<?> classBeingRedefined) {
         ClassInstrumentationConfiguration classConf = configResolver.getClassInstrumentationConfiguration(classBeingRedefined);
 
         synchronized (shutDownLock) {
@@ -302,5 +285,4 @@ public class AsyncClassTransformer implements ClassFileTransformer {
     private void selfMonitorInstrumentedClassesCount() {
         selfMonitoring.recordMeasurement("instrumented-classes", instrumentedClasses.size());
     }
-
 }

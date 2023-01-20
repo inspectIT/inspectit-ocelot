@@ -5,8 +5,11 @@ import StatusTable from './StatusTable';
 import StatusToolbar from './StatusToolbar';
 import StatusFooterToolbar from './StatusFooterToolbar';
 import axios from '../../../lib/axios-api';
-import { map, isEqual } from 'lodash';
+import { isEqual, map } from 'lodash';
 import DownloadDialogue from '../dialogs/DownloadDialogue';
+import ServiceStateDialog from '../dialogs/ServiceStateDialog';
+import { downloadArchiveFromJson } from '../../../functions/export-selection.function';
+import AgentHealthStateDialogue from "./dialogs/AgentHealthStateDialogue";
 
 /**
  * The view presenting a list of connected agents, their mapping and when they last connected to the server.
@@ -22,7 +25,10 @@ class StatusView extends React.Component {
       useServiceMerge: true,
       error: false,
       agentsToShow: props.agents,
-      isDownloadDialogShown: false,
+      showDownloadDialog: false,
+      showHealthStateDialog: false,
+      isServiceStateDialogShown: false,
+      serviceStates: '{}',
       attributes: '',
       contentValue: '',
       contentType: '',
@@ -76,7 +82,6 @@ class StatusView extends React.Component {
           const agentFilter = this.getAgentFilter(agent);
           return this.checkRegex(agentFilter, regex);
         });
-
         this.setState(
           {
             error: false,
@@ -134,10 +139,9 @@ class StatusView extends React.Component {
         }
         return result;
       }, {});
-
       this.setState({
         error: false,
-        agentsToShow: mergedMap,
+        agentsToShow: Object.values(mergedMap),
       });
     }
   };
@@ -198,11 +202,11 @@ class StatusView extends React.Component {
       useServiceMerge,
       error,
       readOnly,
-      isDownloadDialogShown,
+      showDownloadDialog,
+      showHealthStateDialog,
       contentValue,
       contentType,
       contentLoadingFailed,
-      isLoading,
       agentId,
     } = this.state;
 
@@ -234,19 +238,36 @@ class StatusView extends React.Component {
             />
           </div>
           <div className="data-table">
-            <StatusTable data={agentsToShow} filter={filter} onShowDownloadDialog={this.showDownloadDialog} />
+            <StatusTable
+              data={agentsToShow}
+              filter={filter}
+              onShowDownloadDialog={this.showDownloadDialog}
+              onShowServiceStateDialog={this.showServiceStateDialog}
+              onShowHealthStateDialog={this.showHealthStateDialog}
+            />
           </div>
           <div>
             <StatusFooterToolbar fullData={agents} filteredData={agentsToShow} />
           </div>
           <DownloadDialogue
-            visible={isDownloadDialogShown}
-            onHide={() => this.setDownloadDialogShown(false)}
+            visible={showDownloadDialog}
+            onHide={() => this.setShowDownloadDialog(false)}
             error={contentLoadingFailed}
             loading={isLoading}
             contentValue={contentValue}
             contentType={contentType}
             contextName={'Agent ' + agentId}
+          />
+          <AgentHealthStateDialogue
+              visible={showHealthStateDialog}
+              onHide={() => this.setShowHealthStateDialog(false)}
+              contentValue={this.state.attributes}
+              contextName={'Agent ' + agentId}
+          />
+          <ServiceStateDialog
+            visible={this.state.isServiceStateDialogShown}
+            onHide={() => this.setServiceStateDialogShown(false)}
+            serviceStateMap={this.state.serviceStates}
           />
         </div>
       </>
@@ -269,14 +290,39 @@ class StatusView extends React.Component {
     }
   };
 
-  setDownloadDialogShown = (showDialog) => {
+  /*
+   * SERVICE STATE DIALOG
+   */
+  setServiceStateDialogShown = (showDialog) => {
     this.setState({
-      isDownloadDialogShown: showDialog,
+      isServiceStateDialogShown: showDialog,
+    });
+  };
+
+  showServiceStateDialog = (serviceStates) => {
+    this.setServiceStateDialogShown(true);
+    this.setState({
+      serviceStates: serviceStates,
+    });
+  };
+
+  /*
+   * DOWNLOAD DIALOG
+   */
+  setShowDownloadDialog = (showDialog) => {
+    this.setState({
+      showDownloadDialog: showDialog,
+    });
+  };
+
+  setShowHealthStateDialog = (showDialog) => {
+    this.setState({
+      showHealthStateDialog: showDialog,
     });
   };
 
   showDownloadDialog = (agentId, attributes, contentType) => {
-    this.setDownloadDialogShown(true);
+    this.setShowDownloadDialog(true);
     this.setState(
       {
         agentId,
@@ -292,10 +338,51 @@ class StatusView extends React.Component {
           case 'log':
             this.fetchLog(agentId);
             break;
+          case 'archive':
+            this.downloadSupportArchive(agentId, attributes);
+            break;
           default:
-            this.setDownloadDialogShown(false);
+            this.setShowDownloadDialog(false);
             break;
         }
+      }
+    );
+  };
+
+  showHealthStateDialog = (agentId, attributes) => {
+    this.setShowHealthStateDialog(true);
+    this.setState(
+        {
+          agentId,
+          attributes,
+        },
+    );
+  };
+
+  downloadSupportArchive = (agentId, agentVersion) => {
+    this.setState(
+      {
+        isLoading: true,
+      },
+      () => {
+        axios
+          .get('/agent/supportArchive', {
+            params: { 'agent-id': agentId },
+          })
+          .then((res) => {
+            this.setState({
+              isLoading: false,
+            });
+            downloadArchiveFromJson(res.data, agentId, agentVersion);
+            this.setDownloadDialogShown(false);
+          })
+          .catch(() => {
+            this.setState({
+              contentValue: null,
+              contentLoadingFailed: true,
+              isLoading: false,
+            });
+          });
       }
     );
   };

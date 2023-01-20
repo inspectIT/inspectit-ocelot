@@ -26,7 +26,8 @@
       "tracing/tracing",
       "tracing/trace-exporters",
       "tracing/log-correlation",
-      "tracing/privacy"
+      "tracing/privacy",
+      "tracing/tracing-self-monitoring"
     ],
     "Instrumentation": [
       "instrumentation/instrumentation",
@@ -53,7 +54,8 @@
       "config-server/user-authentication",
       "config-server/config-docs",
       "config-server/log-config",
-      "config-server/syntax-highlighting"
+      "config-server/syntax-highlighting",
+      "config-server/status-table-view"
     ],
     "Breaking Changes": [
       "breaking-changes/Breaking Changes"

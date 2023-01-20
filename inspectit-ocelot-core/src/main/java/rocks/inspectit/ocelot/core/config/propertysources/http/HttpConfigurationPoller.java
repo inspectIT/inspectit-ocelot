@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
+import rocks.inspectit.ocelot.commons.models.health.AgentHealthState;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
@@ -84,9 +85,9 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
         }
     }
 
-    public void updateAgentHealth(AgentHealth agentHealth) {
+    public void updateAgentHealthState(AgentHealthState agentHealth) {
         if (currentState != null) {
-            currentState.updateAgentHealth(agentHealth);
+            currentState.updateAgentHealthState(agentHealth);
         }
     }
 }

@@ -54,3 +54,9 @@ export const TOOLTIP_OPTIONS = {
   showDelay: 1000,
   position: 'top',
 };
+
+/**
+ * Name pattern for hidden files.
+ * @type {string}
+ */
+export const HIDDEN_FILES_NAME_PATTERN = '^\\.';

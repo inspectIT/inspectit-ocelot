@@ -82,3 +82,31 @@ function loadAndCompressSubFolderContent(subFolderPath, subFolderName, subFolder
     }
   });
 }
+
+export function downloadArchiveFromJson(json, agentId, agentVersion) {
+  for (let key of Object.keys(json)) {
+    let content = json[key];
+    let mimetype = 'text/plain;charset=utf-8';
+    let fileExtension = '.txt';
+
+    switch (key) {
+      case 'currentConfig':
+        mimetype = 'text/x-yaml;charset=utf-8';
+        fileExtension = '.yml';
+        break;
+      case 'logs':
+        fileExtension = '.log';
+        break;
+    }
+
+    if (typeof content === 'object') {
+      content = JSON.stringify(content, null, 2);
+    }
+    const file = new Blob([content], { type: mimetype });
+    zip.file(`${key}${fileExtension}`, file);
+  }
+  zip
+    .generateAsync({ type: 'blob' })
+    .then((archive) => saveAs(archive, `${agentId}_${agentVersion}.zip`))
+    .finally((zip = new JSZip()));
+}

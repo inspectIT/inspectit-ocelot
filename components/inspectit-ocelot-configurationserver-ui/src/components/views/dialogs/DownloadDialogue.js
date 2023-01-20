@@ -21,6 +21,20 @@ const DownloadDialogue = ({ visible, onHide, error, loading, contentValue, conte
     return window.URL.createObjectURL(blob);
   };
 
+  const renderError = (errorType) => {
+    switch (errorType) {
+      case 'log':
+        return `${dialogueSettings.header} could not be loaded due to an unexpected error.\n
+                Ensure that both agent-commands and log-preloading are enabled and the agent-commands URL is correct in your agent
+                configuration.\nThis feature is only available for agent versions 1.15.0 and higher`;
+      case 'archive':
+        return `Downloading the Support Archive for ${contextName} failed. Make sure agent-commands are enabled and the agent-commands URL is correct in your agent configuration.\n
+                This feature is only available for agent versions 2.2.0 and higher`;
+      default:
+        return `${dialogueSettings.header} could not be loaded due to an unexpected error.`;
+    }
+  };
+
   return (
     <>
       <Dialog
@@ -41,16 +55,7 @@ const DownloadDialogue = ({ visible, onHide, error, loading, contentValue, conte
         {loading ? (
           <ProgressBar mode="indeterminate" />
         ) : error ? (
-          <div>
-            {dialogueSettings.header} could not be loaded due to an unexpected error.
-            {contentType === 'log' ? (
-              <span>
-                <br />
-                Ensure that both agent-commands and log-preloading are enabled and the agent-commands URL is correct in your agent
-                configuration.
-              </span>
-            ) : null}
-          </div>
+          renderError(contentType)
         ) : (
           <SyntaxHighlighter
             customStyle={{ maxHeight: '50vh' }}
