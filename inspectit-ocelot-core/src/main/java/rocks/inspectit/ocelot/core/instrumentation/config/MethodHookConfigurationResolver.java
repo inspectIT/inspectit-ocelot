@@ -178,8 +178,11 @@ public class MethodHookConfigurationResolver {
                     .getKind(), Objects::nonNull, "the span kind"));
             builder.sampleProbability(getAndDetectConflicts(matchedRules, r -> r.getTracing()
                     .getSampleProbability(), n -> !StringUtils.isEmpty(n), "the trace sample probability"));
-            builder.sampleMode(getAndDetectConflicts(matchedRules, r -> r.getTracing()
-                    .getSampleMode(), n -> null != n, "the trace sample mode"));
+            // sample-mode. If all specified rules use the default sample-mode, just apply it. Otherwise, detect conflicts among rules non-default sample-mode.
+            builder.sampleMode(matchedRules.stream()
+                    .anyMatch(instrumentationRule -> RuleTracingSettings.DEFAULT_SAMPLE_MODE != instrumentationRule.getTracing()
+                            .getSampleMode()) ? getAndDetectConflicts(matchedRules, r -> r.getTracing()
+                    .getSampleMode(), n -> RuleTracingSettings.DEFAULT_SAMPLE_MODE != n, "the trace sample mode") : RuleTracingSettings.DEFAULT_SAMPLE_MODE);
         }
     }
 

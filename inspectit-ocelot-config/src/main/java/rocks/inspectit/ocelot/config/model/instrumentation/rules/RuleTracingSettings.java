@@ -95,9 +95,15 @@ public class RuleTracingSettings {
     private String sampleProbability;
 
     /**
+     * The default {@link SampleMode} used for {@link #sampleMode}
+     */
+    public static final SampleMode DEFAULT_SAMPLE_MODE = SampleMode.HYBRID_PARENT_TRACE_ID_RATIO_BASED;
+
+    /**
      * The default {@link SampleMode sample mode} used for the {@link #sampleProbability}. Defaults to {@link TracingSettings#getSampleMode() inspectit.tracing.sample-mode}  if not set and {@link #sampleProbability} is used.
      */
-    private SampleMode sampleMode = SampleMode.HYBRID_PARENT_TRACE_ID_RATIO_BASED;
+    @Builder.Default
+    private SampleMode sampleMode = DEFAULT_SAMPLE_MODE;
 
     /**
      * The kind of the span, e.g. SERVER or CLIENT.
