@@ -171,7 +171,7 @@ public class MethodHookConfigurationResolver {
         if (startSpan) {
             builder.startSpanConditions(getAndDetectConflicts(rulesDefiningStartSpan, r -> r.getTracing()
                     .getStartSpanConditions(), ALWAYS_TRUE, "start span conditions"));
-            //name, kind and sample probability can be defined by rules which do not start a span themselves
+            //name, kind, sample probability and sample mode can be defined by rules which do not start a span themselves
             builder.name(getAndDetectConflicts(matchedRules, r -> r.getTracing()
                     .getName(), n -> !StringUtils.isEmpty(n), "the span name"));
             builder.kind(getAndDetectConflicts(matchedRules, r -> r.getTracing()
@@ -179,8 +179,18 @@ public class MethodHookConfigurationResolver {
             builder.sampleProbability(getAndDetectConflicts(matchedRules, r -> r.getTracing()
                     .getSampleProbability(), n -> !StringUtils.isEmpty(n), "the trace sample probability"));
             builder.sampleMode(getAndDetectConflicts(matchedRules, r -> r.getTracing()
-                    .getSampleMode(), n -> null != n, "the trace sample mode"));
+                    .getSampleMode(), n -> RuleTracingSettings.DEFAULT_SAMPLE_MODE != n, "the trace sample mode", RuleTracingSettings.DEFAULT_SAMPLE_MODE));
         }
+    }
+
+    /**
+     * Utility function for merging configurations from multiple rules and detecting conflicts.
+     * <p>
+     * The same as calling {@link #getAndDetectConflicts(Collection, Function, Predicate, String, Object) getAndDetectConflicts(rules, getter, filter, exceptionMessage, null)}
+     * </p>
+     */
+    private <T> T getAndDetectConflicts(Collection<InstrumentationRule> rules, Function<InstrumentationRule, T> getter, Predicate<? super T> filter, String exceptionMessage) throws ConflictingDefinitionsException {
+        return getAndDetectConflicts(rules, getter, filter, exceptionMessage, null);
     }
 
     /**
@@ -193,14 +203,14 @@ public class MethodHookConfigurationResolver {
      * @param getter           the getter function to call on each rule
      * @param filter           the predicate to filter the results of the getters with, e.g. Objects#nonNull
      * @param exceptionMessage the name of the setting to print in an exception message
+     * @param defaultValue     the value which is returned, if filter does not match for any element of rules
      * @param <T>              the type of the value which is being queried
      *
-     * @return null if none of the rules have a setting matching the given filter. Otherwise returns the setting found.
+     * @return the {@code defaultValue} if none of the rules have a setting matching the given filter. Otherwise, returns the setting found.
      *
      * @throws ConflictingDefinitionsException thrown if a conflicting setting is detected
      */
-    private <T> T getAndDetectConflicts(Collection<InstrumentationRule> rules, Function<InstrumentationRule, T> getter, Predicate<? super T> filter, String exceptionMessage) throws ConflictingDefinitionsException {
-
+    private <T> T getAndDetectConflicts(Collection<InstrumentationRule> rules, Function<InstrumentationRule, T> getter, Predicate<? super T> filter, String exceptionMessage, T defaultValue) throws ConflictingDefinitionsException {
         Optional<InstrumentationRule> firstMatch = rules.stream().filter(r -> filter.test(getter.apply(r))).findFirst();
         if (firstMatch.isPresent()) {
             T value = getter.apply(firstMatch.get());
@@ -215,7 +225,7 @@ public class MethodHookConfigurationResolver {
                 return value;
             }
         } else {
-            return null;
+            return defaultValue;
         }
     }
 
