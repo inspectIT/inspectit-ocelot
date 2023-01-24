@@ -89,6 +89,27 @@ inspectit-eum-server:
         enabled: true
         grpc: localhost:14250
         service-name: browser-js
+  security:
+    # Enable/Disable Security
+    enabled: false
+    # Change name of authentication header if required
+    authorization-header: Authorization
+    # White list certain urls which must not be secured
+    permitted-urls:
+      - "/actuator/health"
+      - "/boomerang/**"
+    auth-provider:
+      simple:
+        # Enable/Disable Provider
+        enabled: false
+        # Flag indicates if the directory should be watched for changes and tokens reloaded
+        watch: true
+        # How often directory should be watched for changes
+        frequency: 60s
+        # The directory where token files are stored. Empty by default to force users to provide one
+        token-directory: ""
+        # The name of the initial token file. If a name is provided file will be created with an initial token
+        default-file-name: "default-token-file.yaml"
 ```
 
 ## Metrics Definition
@@ -637,3 +658,96 @@ Currently, the following self monitoring metrics are available.
 | `inspectit_eum_self_traces_received_count` | Counts the number of received traces | 
 | `inspectit_eum_self_traces_received_duration_sum` | The total duration needed for trace exports | 
 | `inspectit_eum_self_traces_span_size_sum` | The number of exported spans per trace | 
+
+## Security
+In order to allow only authorized instead of public access, EUM-Server offers a simple, shared secret solution.
+
+The following configuration snippet shows the default configuration for security.
+```yaml
+inspectit-eum-server:
+  security:
+    # Enable/Disable Security
+    enabled: false
+    # Change name of authentication header if required
+    authorization-header: Authorization
+    # White list certain urls which must not be secured
+    permitted-urls:
+      - "/actuator/health"
+      - "/boomerang/**"
+    auth-provider:
+      simple:
+        # Enable/Disable Provider
+        enabled: false
+        # Flag indicates if the directory should be watched for changes and tokens reloaded
+        watch: true
+        # How often directory should be watched for changes
+        frequency: 60s
+        # The directory where token files are stored. Empty by default to force users to provide one
+        token-directory: ""
+        # The name of the initial token file. If a name is provided file will be created with an initial token
+        default-file-name: "default-token-file.yaml"
+```
+
+### Configuration options
+
+All properties share the common prefix `inspectit-eum-server.security`.
+
+| Property name          | Description                                                                                                                                                              |
+|------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `enabled`              | If `true` access to EUM-Server is secured. Default value is `false`                                                                                                      |
+| `authorization-header` | The HTTP-Header EUM-Server uses the fetch the authorization information from. Default value is `Authorization`.                                                          |
+| `permitted-urls`       | A list of whitelisted url patterns. These URLs are publicly available without Authorization. By default the URLs `/actuator/health` and `/boomerang/**` are whitelisted. |
+| `auth-provider`        | Allows to configure different AuthenticationProviders that EUM-Server supports. Currently only `simple` is supported.                                                    |
+
+Please note, that if security is enabled at least one AuthenticationProvider has to be enabled. Otherwise, all endpoints of EUM-Server are not accessible except for the whitelisted ones.
+
+#### AuthenticationProvider `simple`
+The AuthenticationProvider `simple` supports to secure EUM-Server using shared secrets aka tokens.
+
+If this AuthenticationProvider is enabled, every client request needs to contain a known token as HTTP header (see `authorization-header` above). Otherwise, the request is rejected with a `403 - Forbidden` status code.
+
+The known tokens are stored in yaml files below a configurable directory. Each file may contain multiple shared secrets.
+
+Such a token consist of a name and a token value. `name` allows to identify the token. `token` is the actual shared secret.
+
+Example:
+```yaml
+  # Allows grouping of tokens. E.g. you can document which application, person, organization, etc. knows about this token. It has no influence on security.
+- name: "Name for first token"
+  # The value of the token. If an HTTP-request contains this value (without opening and closing double quotes), access is allowed.
+  token: "755f3e71-e43f-4715-bd26-b6e112fd30dd"
+  # You man specify as many elements as you like
+- name: "Name of other token"
+  token: "any token value you like"
+```
+
+If this AuthenticationProvider is enabled, a default token file containing a generated token will be created, if that file does not yet exist.
+
+It is possible to add, change and remove tokens without a restart. All files below the token directory will be scanned regularly by default. 
+
+The following table describes the configuration options for the AuthenticationProvider `simple`.
+
+All properties share the common prefix `inspectit-eum-server.security.auth-provider.simple`.
+
+| Property name       | Description                                                                                                                                                                                                 |
+|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `enabled`           | If `true` this AuthenticationProvider is enabled. Default value ist `false`.                                                                                                                                |
+| `token-directory`   | The directory where token files are stored. This value is empty by default. If this authentication provider is enabled this value must not be empty. Otherwise the application will not start successfully. |
+| `default-file-name` | The name of the default token file name. Default value is `default-token-file.yaml`.                                                                                                                        |
+| `watch`             | If `true` the token directory is scanned for changes regularly. Default value is `true`.                                                                                                                    |
+| `frequency`         | The frequency how often the token directory is scanned for changes. Default value is `60s`.                                                                                                                 |
+#### Client configuration
+You need to configure your client to use one of the known tokens during requests to EUM-Server.
+
+You should make sure to connect via https. Otherwise, it is trivial to intercept the token.
+
+Example configuration using boomerang.js:
+```javascript
+BOOMR.init({
+  beacon_url: "http://your.target.url",
+  // for other beacon_types boomerang never sends an authorization header 
+  beacon_type: "POST",
+  // this must be one of your known tokens configured in EUM-Server
+  beacon_auth_token: "fancy but secret token"
+})
+```
