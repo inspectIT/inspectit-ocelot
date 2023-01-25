@@ -24,6 +24,8 @@ dependencies {
     testImplementation(
             'org.junit.jupiter:junit-jupiter',
             "io.opencensus:opencensus-api:${openCensusVersion}",
+            "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
+
             'org.mockito:mockito-junit-jupiter',
             "org.assertj:assertj-core",
             'com.google.guava:guava:31.1-jre'
