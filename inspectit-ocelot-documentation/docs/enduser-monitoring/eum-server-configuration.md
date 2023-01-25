@@ -473,7 +473,7 @@ However, they are located under the `inspectit-eum-server.exporters.metrics` con
 #### Prometheus
 By default, the prometheus exporter is disabled.
 
-The following configuration snippet shows the default configuration of the prometheus-exporter, exposing on port `8888`:
+The following configuration snippet shows makes the prometheus-exporter exposing the metrics on port `8888`:
 ```YAML
 inspectit-eum-server:
   exporters:
