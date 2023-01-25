@@ -1,7 +1,7 @@
 ---
 id: eum-server-configuration
-title: EUM Server and Metrics Configuration
-sidebar_label: Server and Metrics Configuration
+title: EUM Server, Metrics and Exporter Configuration
+sidebar_label: Server, Metrics and Exporter Configuration
 ---
 
 The configuration file defines the mapping between the concrete Boomerang metric and a OpenCensus metric, as the following sample configuration file shows:
@@ -466,21 +466,21 @@ inspectit-eum-server:
 
 ### Metrics
 
-The EUM server comes with the same Prometheus and InfluxDB exporter as the Ocelot agent.
+The EUM server comes with the same Prometheus, InfluxDB and OTLP metrics exporter as the Ocelot agent.
 The exporter's configurations options are the same as for the [agent](metrics/metric-exporters.md).
 However, they are located under the `inspectit-eum-server.exporters.metrics` configuration path.
 
 #### Prometheus
-By default, the prometheus exporter is enabled and available on port `8888`.
+By default, the prometheus exporter is disabled.
 
-The following configuration snippet shows the default configuration of the prometheus-exporter:
+The following configuration snippet shows how to make the prometheus-exporter expose the metrics on port `8888`:
 ```YAML
 inspectit-eum-server:
   exporters:
     metrics:
       prometheus:
         # Determines whether the prometheus exporter is enabled.
-        enabled: true
+        enabled: ENABLED
 
         # The host of the prometheus HTTP endpoint.
         host: localhost
@@ -490,7 +490,7 @@ inspectit-eum-server:
 ```
 
 #### InfluxDB
-By default, the InfluxDB exporter is enabled, but it is not active since the url-property is not set. The property can be set via `inspectit-eum-server.exporters.metrics.influx.url`.
+By default, the InfluxDB exporter is enabled, but it is not active since the `endpoint`-property is not set. The property can be set via `inspectit-eum-server.exporters.metrics.influx.endpoint`.
 
 The following configuration snippet makes the InfluxDB Exporter send every 15 seconds metrics to an InfluxDB available under `localhost:8086` to the database `inspectit`:
 ```YAML
@@ -499,14 +499,14 @@ inspectit-eum-server:
     metrics:
       influx:
         # Determines whether the InfluxDB exporter is enabled.
-        enabled: true
+        enabled: IF_CONFIGURED
 
         # the export interval of the metrics.
         export-interval: 15s
 
         # The http url of influx.
         # If this property is not set, the InfluxDB exporter will not be started.
-        url: "http://localhost:8086"
+        endpoint: "http://localhost:8086"
 
         # The database to write to.
         # If this property is not set, the InfluxDB exporter will not be started.
@@ -536,6 +536,30 @@ inspectit-eum-server:
         buffer-size: 40
 ```
 
+#### OTLP (Metrics)
+By default, the OTLP exporter is enabled, but is not active as the `endpoint`-property is not set.
+The property can be set via `inspectit-eum-server.exporters.metrics.otlp.endpoint`.
+
+The following configuration snipped makes the OTLP exporter send metrics every 15s to an OTLP receiver located at `localhost:4317`:
+
+```yaml
+inspectit-eum-server:
+  exporters:
+    metrics:
+      # settings for the OtlpGrpcMetricExporter used in OtlpGrpcMetricExporterService
+      otlp:
+        enabled: ENABLED
+        # the export interval of the metrics
+        export-interval: 15s
+        # the URL endpoint, e.g., http://127.0.0.1:4317
+        endpoint: http://localhost:4317
+        # the transport protocol, e.g., 'grpc' or 'http/protobuf'
+        protocol: grpc
+        # headers
+        headers: { }
+        # the aggregation temporality, e.g., CUMULATIVE or DELTA
+        preferredTemporality: CUMULATIVE
+```
 ### Tracing
 
 :::note
@@ -545,9 +569,23 @@ To capture traces with Boomerang, a special tracing plugin must be used.
 More information can be found in the chapter on [installing the EUM agent](https://inspectit.github.io/inspectit-ocelot/docs/enduser-monitoring/install-eum-agent#tracing).
 :::
 
-The EUM server supports trace data forwarding to the Jaeger exporter.
-The exporter is using the [Jaeger Protobuf via gRPC API](https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable) in order to forward trace data.
-By default, the Jaeger exporter is enabled, but it is not active since the `grpc` property is not set.
+#### Trace Exporter
+The EUM server comes with the same Jaeger and OTLP trace exporter as the Ocelot agent.
+The exporter's configurations options are the same as for the [agent](tracing/trace-exporters.md).
+However, they are located under the `inspectit-eum-server.exporters.tracing` configuration path.
+
+##### General Trace Exporter Settings
+
+These settings apply to all trace exporters and can set below the `inspectit-eum-server.exporters.tracing` property.
+
+| Property        | Default                     | Description                                                                                                                                                               |
+|-----------------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.service-name` | `${inspectit.service-name}` | The value of this property will be used to identify the service a trace came from. Please note that changes of this property only take effect after restarting the agent. |
+
+##### Jaeger
+InspectIT EUM Server supports thrift and gRPC Jaeger exporter.
+
+By default, the Jaeger exporter is enabled, but it is not active since the `endpoint` property is not set.
 
 The following configuration snippet makes the Jaeger exporter send traces to a Jaeger instance avialable under `localhost:14250`.
 
@@ -557,21 +595,35 @@ inspectit-eum-server:
     tracing:
       jaeger:
       # If jaeger exporter for the OT received spans is enabled.
-      enabled: true
+      enabled: ENABLED
 
       # Location of the jaeger gRPC API.
       # Either a valid NameResolver-compliant URI, or an authority string.
       # If this property is not set, the jaeger-exporter will not be started.
-      grpc: localhost:14250
-
+      endpoint: localhost:14250
+      # the transport protocol, e.g., 'grpc' or 'http/protobuf'
+      protocol: grpc
       # service name for all exported spans.
       service-name: browser-js
 ```
 
-:::note
-The GRPC property needs to be set without protocol (e.g. `localhost:14250`)!
-:::
+##### OTLP (tracing)
+By default, the OTLP exporter is enabled, but is not active as the `endpoint`-property is not set.
+The property can be set via `inspectit-eum-server.exporters.tracing.otlp.endpoint`.
 
+The following configuration snippet makes the OTLP exporter send traces to an OTLP receiver available under `localhost:4317`.
+```yaml
+inspectit-eum-server:
+  exporters:
+    tracing:
+      otlp:
+        # If OTLP exporter for the OT received spans is enabled.
+        enabled: ENABLED
+        # the URL endpoint, e.g., http://127.0.0.1:4317
+        endpoint: localhost:4317
+        # the transport protocol, e.g., 'http/thrift' or 'grpc'
+        protocol: grpc
+```
 #### Additional Span Attributes
 
 The EUM server is able to enrich a received span with additional attributes.
