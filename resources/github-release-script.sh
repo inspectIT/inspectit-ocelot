@@ -20,7 +20,7 @@ github_changelog_generator \
   --no-author \
   --no-unreleased \
   --header-label "## Changelog" \
-  --max-issues 500
+  --max-issues 100
 
 sed -i -e '3,5d' CHANGELOG.md
 sed -i '$ d' CHANGELOG.md
