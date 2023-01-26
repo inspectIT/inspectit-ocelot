@@ -179,6 +179,11 @@ jobs:
             git add versions.json versioned_docs versioned_sidebars
             git commit -m "[skip ci] Publish documentation v${CIRCLE_TAG}"
             git push
+      - run:
+          name: Deploying to GitHub Pages
+          no_output_timeout: 20m
+          working_directory: ~/inspectit/inspectit-ocelot-documentation/website
+          command: |
             GIT_USER=NTTechnicalUser CUSTOM_COMMIT_MESSAGE="[skip ci] Publish documentation v${CIRCLE_TAG}" npm run publish-gh-pages
 
 # ###############################################
