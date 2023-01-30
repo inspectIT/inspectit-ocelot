@@ -23,7 +23,7 @@ jobs:
     name: 'Build and Release'
     runs-on: ubuntu-latest
     environment: release
-    needs: [agent_test, configdocsgenerator_test, configurationserver_test, configuration_ui_test]
+    needs: [configdocsgenerator_test, configurationserver_test, configuration_ui_test]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -41,6 +41,17 @@ jobs:
           cp ./components/inspectit-ocelot-configurationserver/build/reports/bom.json ./boms/inspectit-ocelot-configurationserver-bom.json
           cp ./components/inspectit-ocelot-configurationserver/build/reports/bom.xml ./boms/inspectit-ocelot-configurationserver-bom.xml
           zip -r ./artifacts/software-bill-of-materials.zip ./boms
+      # Uploading jars to create docker images
+      - name: Upload inspectit-ocelot-agent jar
+        uses: actions/upload-artifact@v3
+        with:
+          name: inspectit-ocelot-agent-jar
+          path: artifacts/inspectit-ocelot-agent-${{ github.ref_name }}.jar
+      - name: Upload inspectit-ocelot-configurationserver jar
+        uses: actions/upload-artifact@v3
+        with:
+          name: inspectit-ocelot-configurationserver-jar
+          path: artifacts/inspectit-ocelot-configurationserver-${{ github.ref_name }}.jar 
       - name: Calculate checksums of release artifacts
         working-directory: ./artifacts
         run: for f in *; do sha256sum "$f" >> inspectit-ocelot-sha256-checksums.txt; done
@@ -50,30 +61,63 @@ jobs:
           tag_name: ${{ github.event.inputs.boomerang-version }}
           files: artifacts/*
           generate_release_notes: true
-          token: ${{ secrets.RELEASE_USER_TOKEN }}
+          token: ${{ github.token }}
           name: Version ${{ github.ref_name }}
           body: "You can also find the corresponding documentation online under the following link: [inspectIT Ocelot Documentation](http://docs.inspectit.rocks)"
 
-
-  build_and_publish_docker_images:
-    name: 'Build and Push Docker Images'
+  publish_docker_image:
+    name: "Publish docker image"
     runs-on: ubuntu-latest
-    needs: build_and_release
-    environment: release
+    needs: [build_and_release]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Build Docker Images
-        run: ./gradlew dockerTag -PbuildVersion=${{ github.ref_name }}
-      - name: Push Docker Images
+      # Downloading jars to create docker image
+      - name: Download inspectit-ocelot-agent jar
+        uses: actions/download-artifact@v3
+        with: 
+          name: inspectit-ocelot-agent-jar # name as reference
+          path: inspectit-ocelot-agent/docker/
+      - name: Download inspectit-ocelot-configurationserver jar
+        uses: actions/download-artifact@v3
+        with: 
+          name: inspectit-ocelot-configurationserver-jar # name as reference
+          path: components/inspectit-ocelot-configurationserver/docker/
+      - name: Check if inspectit-ocelot-agent jar exists and rename it
         run: |
-          docker login -u ${{ secrets.DOCKER_HUB_USER }} -p  ${{ secrets.DOCKER_HUB_PASSWORD }}
-          docker push aaronweikru/inspectit-ocelot-agent:${{ github.ref_name }}
-          docker push aaronweikru/inspectit-ocelot-agent:latest
-          docker push aaronweikru/inspectit-ocelot-configurationserver:${{ github.ref_name }}
-          docker push aaronweikru/inspectit-ocelot-configurationserver:latest
+          cd inspectit-ocelot-agent/docker
+          mv inspectit-ocelot-agent-${{ github.ref_name }}.jar inspectit-ocelot-agent.jar
+          ls
+      - name: Check if inspectit-ocelot-configurations jar exists and rename it
+        run: |
+          cd components/inspectit-ocelot-configurationserver/docker
+          mv inspectit-ocelot-configurationserver-${{ github.ref_name }}.jar inspectit-ocelot-configurationserver.jar
+          ls
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push inspectit-ocelot-agent image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: inspectit/inspectit-ocelot-agent:${{ github.ref_name }}, inspectit/inspectit-ocelot-agent:latest
+          file: ./inspectit-ocelot-agent/docker/Dockerfile
+      - name: Build and push inspectit-ocelot-configurationserver image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: inspectit/inspectit-ocelot-configurationserver:${{ github.ref_name }}, inspectit/inspectit-ocelot-configurationserver:latest
+          file: ./components/inspectit-ocelot-configurationserver/docker/Dockerfile
 
   build_documentation:
     name: "Build and Publish Release Documentation"
@@ -105,7 +149,7 @@ jobs:
           git config --global user.name 'NTTechnicalUser'
           git config --global user.email 'NTTechnicalUser@users.noreply.github.com'
           git commit -m "Publish documentation for release ${{ github.ref_name }}"
-          git push origin HEAD:master
+          git push -f origin HEAD:master
       - name: Install Build Dependencies
         run: yarn install --frozen-lockfile
       - name: Build Website
