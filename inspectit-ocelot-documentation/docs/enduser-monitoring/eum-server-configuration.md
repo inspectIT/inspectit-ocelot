@@ -780,18 +780,25 @@ All properties share the common prefix `inspectit-eum-server.security.auth-provi
 | `default-file-name` | `default-token-file.yaml` | The name of the default token file name.                                                                                                                                     |
 | `watch`             | `true`                    | If `true` the token directory is scanned for changes regularly.                                                                                                              |
 | `frequency`         | `60s`                     | The frequency how often the token directory is scanned for changes.                                                                                                          |
-#### Client configuration
+### Client configuration
 You need to configure your client to use one of the known tokens during requests to EUM-Server.
 
 You should make sure to connect via https. Otherwise, it is trivial to intercept the token.
 
 Example configuration using boomerang.js:
 ```javascript
+// this must be one of your known tokens configured in EUM-Server
+var token = "fancy but secret token";
 BOOMR.init({
   beacon_url: "http://your.target.url",
-  // for other beacon_types boomerang never sends an authorization header 
-  beacon_type: "POST",
-  // this must be one of your known tokens configured in EUM-Server
-  beacon_auth_token: "fancy but secret token"
+  // the following two options are necesssary to configure Authorization for sending of beacons
+  beacon_type: "POST", // for other beacon_types boomerang never sends an authorization header
+  beacon_auth_token: token,
+  // the following configures the Authorization for sending of spans
+  OpenTelemetry: {
+    collectorConfiguration: {
+      headers: {"Authorization": token}
+    }
+  }
 })
 ```
