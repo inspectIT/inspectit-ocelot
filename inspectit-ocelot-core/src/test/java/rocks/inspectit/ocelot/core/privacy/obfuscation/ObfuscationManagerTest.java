@@ -223,6 +223,87 @@ class ObfuscationManagerTest {
             verifyNoMoreInteractions(selfMonitoringService);
         }
 
+        @Test
+        public void testSupportedValues() {
+            ObfuscationPattern obfuscationPattern1 = new ObfuscationPattern();
+            obfuscationPattern1.setPattern("username");
+
+            when(obfuscationSettings.isEnabled()).thenReturn(true);
+            when(obfuscationSettings.getPatterns()).thenReturn(Collections.singletonList(obfuscationPattern1));
+
+            obfuscationManager.update();
+
+            Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
+            IObfuscatory obfuscatory = obfuscatorySupplier.get();
+            assertThat(obfuscatory).isNotNull().isInstanceOf(PatternObfuscatory.class);
+
+            // there is no way for me to test the correct patterns passed to the obfuscatory
+            // then to actually invoke the obfuscatory
+            Span span = mock(Span.class);
+
+            // String
+            obfuscatory.putSpanAttribute(span, "username", "abc");
+            verify(span).setAttribute(AttributeKey.stringKey("username"), "***");
+            verifyNoMoreInteractions(span);
+
+            // exception
+            obfuscatory.putSpanAttribute(span, "exception", new RuntimeException("runtime exception"));
+            verify(span).setAttribute(AttributeKey.stringKey("exception"), "java.lang.RuntimeException: runtime exception");
+            verifyNoMoreInteractions(span);
+
+            // Long and Integer
+            obfuscatory.putSpanAttribute(span, "long", Long.valueOf(42));
+            verify(span).setAttribute(AttributeKey.longKey("long"), 42l);
+            obfuscatory.putSpanAttribute(span, "integer", Integer.valueOf(1337));
+            verify(span).setAttribute(AttributeKey.longKey("integer"), 1337l);
+            verifyNoMoreInteractions(span);
+
+            // Double and Float
+            obfuscatory.putSpanAttribute(span, "double", Double.valueOf(1.338d));
+            verify(span).setAttribute(AttributeKey.doubleKey("double"), 1.338d);
+            obfuscatory.putSpanAttribute(span, "float", Float.valueOf(1.337f));
+            // TODO: do we want to avoid the 'added' precision by double? Then we need to change it accordingly in the IObfuscatory.
+            verify(span).setAttribute(eq(AttributeKey.doubleKey("float")), anyDouble());
+            verifyNoMoreInteractions(span);
+
+            // Number -> Double
+            obfuscatory.putSpanAttribute(span, "number", new Number() {
+                @Override
+                public int intValue() {
+                    return 55;
+                }
+
+                @Override
+                public long longValue() {
+                    return 55;
+                }
+
+                @Override
+                public float floatValue() {
+                    return 55;
+                }
+
+                @Override
+                public double doubleValue() {
+                    return 55;
+                }
+            });
+            verify(span).setAttribute(AttributeKey.doubleKey("number"), 55.0d);
+            verifyNoMoreInteractions(span);
+
+            // TODO: Boolean
+
+            // Object -> String
+            obfuscatory.putSpanAttribute(span, "object", new Object() {
+                @Override
+                public String toString() {
+                    return "this-is-object";
+                }
+            });
+            verify(span).setAttribute(AttributeKey.stringKey("object"), "this-is-object");
+
+            verifyNoMoreInteractions(span);
+        }
     }
 
 }
