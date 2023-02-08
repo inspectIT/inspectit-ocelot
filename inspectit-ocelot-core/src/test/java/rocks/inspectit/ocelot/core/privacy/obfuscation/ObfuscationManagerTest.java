@@ -291,7 +291,6 @@ class ObfuscationManagerTest {
             verify(span).setAttribute(AttributeKey.doubleKey("number"), 55.0d);
             verifyNoMoreInteractions(span);
 
-            // TODO: Boolean
             // Boolean
             obfuscatory.putSpanAttribute(span, "boolean", Boolean.TRUE);
             verify(span).setAttribute(AttributeKey.booleanKey("boolean"), true);

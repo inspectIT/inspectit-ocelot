@@ -100,10 +100,6 @@ public class JaegerExporterService extends DynamicallyActivatableService {
             boolean hasEndpoint = StringUtils.hasText(settings.getEndpoint());
             String endpoint = hasEndpoint ? settings.getEndpoint() : hasUrl ? settings.getUrl() : settings.getGrpc();
 
-            // OTEL expects that the URI starts with 'http://' or 'https://'
-            if (!endpoint.startsWith("http")) {
-                endpoint = String.format("http://%s", endpoint);
-            }
             switch (getProtocol(settings)) {
                 case GRPC: {
                     spanExporter = JaegerGrpcSpanExporter.builder().setEndpoint(endpoint).build();

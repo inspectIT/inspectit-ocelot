@@ -85,9 +85,9 @@ public class DynamicallyActivatableServiceObserverIntTest extends SpringTestBase
         //Update Props 3 - Wrong input
         try {
             updateProperties(props -> {
-                props.setProperty("inspectit.exporters.tracing.jaeger.endpoint", "xxx/asd/a:21" );
+                props.setProperty("inspectit.exporters.tracing.jaeger.protocol", TransportProtocol.HTTP_PROTOBUF);
             });
-        }catch (Exception e){
+        } catch (Exception e) {
             //ignore
         }
 
@@ -95,14 +95,14 @@ public class DynamicallyActivatableServiceObserverIntTest extends SpringTestBase
         assertExpectedServices();
     }
 
-    void assertExpectedServices(){
-        try{
+    void assertExpectedServices() {
+        try {
             Map<String, Boolean> serviceStateMap = serviceObserver.getServiceStateMap();
 
             for (String serviceName : expectedServiceStates.keySet()) {
                 assertThat(serviceStateMap.get(serviceName)).isEqualTo(expectedServiceStates.get(serviceName));
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             //ignore
         }
     }

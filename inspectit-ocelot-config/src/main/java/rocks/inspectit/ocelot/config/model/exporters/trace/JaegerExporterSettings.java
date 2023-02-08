@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
+import rocks.inspectit.ocelot.config.utils.EndpointUtils;
 
 @Data
 @NoArgsConstructor
@@ -41,4 +42,22 @@ public class JaegerExporterSettings {
      * The service name. Used in {@link rocks.inspectit.oce.eum.server.exporters.configuration.TraceExportersConfiguration}
      */
     private String serviceName;
+
+    /**
+     * Gets the URL endpoint. The endpoint is padded with 'http' to meet OTEL's requirement that the URI needs to start with 'http://' or 'https://'.
+     * E.g., if you set the endpoint to 'localhost:4317', it will be returned as 'http://localhost:4317'.
+     *
+     * @return
+     */
+    public String getEndpoint() {
+        return EndpointUtils.padEndpoint(endpoint);
+    }
+
+    public String getGrpc() {
+        return EndpointUtils.padEndpoint(grpc);
+    }
+
+    public String getUrl() {
+        return EndpointUtils.padEndpoint(url);
+    }
 }

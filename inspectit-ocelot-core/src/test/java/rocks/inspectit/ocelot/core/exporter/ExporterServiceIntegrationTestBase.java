@@ -294,7 +294,7 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
                     return false;
                 }
 
-                return (childSpan.get().getParentSpanId().equals(parentSpan.get().getSpanId()));
+                return childSpan.get().getParentSpanId().equals(parentSpan.get().getSpanId());
 
             })).isTrue();
 
