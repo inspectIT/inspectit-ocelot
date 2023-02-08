@@ -263,7 +263,7 @@ class ObfuscationManagerTest {
             verify(span).setAttribute(AttributeKey.doubleKey("double"), 1.338d);
             obfuscatory.putSpanAttribute(span, "float", Float.valueOf(1.337f));
             // TODO: do we want to avoid the 'added' precision by double? Then we need to change it accordingly in the IObfuscatory.
-            verify(span).setAttribute(eq(AttributeKey.doubleKey("float")), anyDouble());
+            verify(span).setAttribute(AttributeKey.doubleKey("float"), 1.337d);
             verifyNoMoreInteractions(span);
 
             // Number -> Double
@@ -292,6 +292,10 @@ class ObfuscationManagerTest {
             verifyNoMoreInteractions(span);
 
             // TODO: Boolean
+            // Boolean
+            obfuscatory.putSpanAttribute(span, "boolean", Boolean.TRUE);
+            verify(span).setAttribute(AttributeKey.booleanKey("boolean"), true);
+            verifyNoMoreInteractions(span);
 
             // Object -> String
             obfuscatory.putSpanAttribute(span, "object", new Object() {

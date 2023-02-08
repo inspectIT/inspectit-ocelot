@@ -63,12 +63,19 @@ public class OtlpTraceExporterService extends DynamicallyActivatableService {
         try {
             OtlpTraceExporterSettings otlp = configuration.getExporters().getTracing().getOtlp();
 
+            String endpoint = otlp.getEndpoint();
+            // OTEL expects that the URI starts with 'http://' or 'https://'
+            if (!endpoint.startsWith("http")) {
+                endpoint = String.format("http://%s", endpoint);
+            }
+
             switch (otlp.getProtocol()) {
                 case GRPC: {
-                    OtlpGrpcSpanExporterBuilder otlpGrpcSpanExporterBuilder =OtlpGrpcSpanExporter.builder().setEndpoint(otlp.getEndpoint())
+                    OtlpGrpcSpanExporterBuilder otlpGrpcSpanExporterBuilder = OtlpGrpcSpanExporter.builder()
+                            .setEndpoint(endpoint)
                             .setCompression(otlp.getCompression().toString())
                             .setTimeout(otlp.getTimeout());
-                    if(otlp.getHeaders() != null){
+                    if (otlp.getHeaders() != null) {
                         for (Map.Entry<String, String> headerEntry : otlp.getHeaders().entrySet()) {
                             otlpGrpcSpanExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
                         }
@@ -77,9 +84,11 @@ public class OtlpTraceExporterService extends DynamicallyActivatableService {
                     break;
                 }
                 case HTTP_PROTOBUF: {
-                    OtlpHttpSpanExporterBuilder otlpHttpSpanExporterBuilder =OtlpHttpSpanExporter.builder().setEndpoint(otlp.getEndpoint()).setCompression(otlp.getCompression().toString())
+                    OtlpHttpSpanExporterBuilder otlpHttpSpanExporterBuilder = OtlpHttpSpanExporter.builder()
+                            .setEndpoint(endpoint)
+                            .setCompression(otlp.getCompression().toString())
                             .setTimeout(otlp.getTimeout());
-                    if(otlp.getHeaders() != null){
+                    if (otlp.getHeaders() != null) {
                         for (Map.Entry<String, String> headerEntry : otlp.getHeaders().entrySet()) {
                             otlpHttpSpanExporterBuilder.addHeader(headerEntry.getKey(), headerEntry.getValue());
                         }
@@ -91,7 +100,7 @@ public class OtlpTraceExporterService extends DynamicallyActivatableService {
 
             boolean success = openTelemetryController.registerTraceExporterService(spanExporter, getName());
             if (success) {
-                log.info("Starting OTLP Trace Exporter with endpoint {}", otlp.getEndpoint());
+                log.info("Starting OTLP Trace Exporter with protocol {} on endpoint {}", otlp.getProtocol(), endpoint);
             } else {
                 log.error("Failed to register {} at the OpenTelemetry controller!", getName());
             }

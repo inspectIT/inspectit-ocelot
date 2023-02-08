@@ -27,9 +27,10 @@ public class VariableAccessorFactory {
     /**
      * Creates a {@link VariableAccessor} for a given fixed variable.
      * If the variable is a special variable (it starts with an underscore), {@link #getSpecialVariableAccessor(String)} will be returned.
-     * Otherwise a {@link VariableAccessor} is created which performs a lookup of the given variable in the {@link rocks.inspectit.ocelot.bootstrap.exposed.InspectitContext}.
+     * Otherwise, a {@link VariableAccessor} is created which performs a lookup of the given variable in the {@link rocks.inspectit.ocelot.bootstrap.exposed.InspectitContext}.
      *
      * @param variable the name of the variable to create an accessor for
+     *
      * @return the {@link VariableAccessor} for the given variable, never null
      */
     public VariableAccessor getVariableAccessor(String variable) {
@@ -49,6 +50,7 @@ public class VariableAccessorFactory {
      * Creates a {@link VariableAccessor} which always returns the given value.
      *
      * @param value the value to return
+     *
      * @return an accessor returning the given value.
      */
     public VariableAccessor getConstantAccessor(Object value) {
@@ -59,6 +61,7 @@ public class VariableAccessorFactory {
      * Creates a {@link VariableAccessor} for the given special variable.
      *
      * @param variable the name of the special variable
+     *
      * @return the {@link VariableAccessor} for the given variable or null if "variable" does not denote a special variable
      */
     public VariableAccessor getSpecialVariableAccessor(String variable) {
@@ -97,14 +100,15 @@ public class VariableAccessorFactory {
      * Given the name of a special variable, this method returns it's value if it is constant.
      * "Constant" hereby means that the special variable is not runtime-dependent.
      * For example, for a given method hook the values "_methodName" and "_attachments" do never change and therefore are "constant".
-     * In contrast "_arg0" for example is dependendent on the current context and therefore NOT constant.
+     * In contrast, "_arg0" for example depends on the current context and therefore NOT constant.
      * <p>
-     * It is allowed to store references to these constant variables within the inspectit classloader.
+     * It is allowed to store references to these constant variables within the inspectIT classloader.
      * This is guaranteed to not cause a memory leak.
      * For this reason "_class" is not a constant special variable, as its storage can cause a memory leak.
      *
      * @param variable      the name of the special variable
      * @param contextMethod the method for which the constant value is being derived
+     *
      * @return the value of the special variable if it is a constant, null otherwise
      */
     public Object getConstantSpecialVariable(String variable, MethodReflectionInformation contextMethod) {

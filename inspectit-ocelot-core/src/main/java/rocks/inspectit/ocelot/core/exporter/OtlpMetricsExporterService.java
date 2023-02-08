@@ -78,11 +78,18 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
         try {
             OtlpMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlp();
             AggregationTemporalitySelector aggregationTemporalitySelector = otlp.getPreferredTemporality() == AggregationTemporality.DELTA ? AggregationTemporalitySelector.deltaPreferred() : AggregationTemporalitySelector.alwaysCumulative();
+
+            String endpoint = otlp.getEndpoint();
+            // OTEL expects that the URI starts with 'http://' or 'https://'
+            if (!endpoint.startsWith("http")) {
+                endpoint = String.format("http://%s", endpoint);
+            }
+
             switch (otlp.getProtocol()) {
                 case GRPC: {
                     OtlpGrpcMetricExporterBuilder metricExporterBuilder = OtlpGrpcMetricExporter.builder()
                             .setAggregationTemporalitySelector(aggregationTemporalitySelector)
-                            .setEndpoint(otlp.getEndpoint())
+                            .setEndpoint(endpoint)
                             .setCompression(otlp.getCompression().toString())
                             .setTimeout(otlp.getTimeout());
                     if (otlp.getHeaders() != null) {
@@ -96,7 +103,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
                 case HTTP_PROTOBUF: {
                     OtlpHttpMetricExporterBuilder metricExporterBuilder = OtlpHttpMetricExporter.builder()
                             .setAggregationTemporalitySelector(aggregationTemporalitySelector)
-                            .setEndpoint(otlp.getEndpoint())
+                            .setEndpoint(endpoint)
                             .setCompression(otlp.getCompression().toString())
                             .setTimeout(otlp.getTimeout());
                     if (otlp.getHeaders() != null) {
@@ -112,7 +119,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
 
             boolean success = openTelemetryController.registerMetricExporterService(this);
             if (success) {
-                log.info("Starting {}", getName());
+                log.info("Starting {} with protocol {} on endpoint {}", getName(), otlp.getProtocol(), endpoint);
             } else {
                 log.error("Failed to register {} at the OpenTelemetry controller!", getName());
             }

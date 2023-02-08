@@ -65,8 +65,7 @@ public class JaegerExporterService extends DynamicallyActivatableService {
             TransportProtocol exporterProtocol = getProtocol(jaeger);
 
             if (jaeger.getProtocol() != exporterProtocol) {
-                log.warn("The property 'protocol' was not set. Based on the set property '{}' we assume the protocol '{}'. This fallback will be removed in future releases. Please make sure to use the property 'protocol' in future.", hasUrl ? "url" : "grpc", hasUrl ? TransportProtocol.HTTP_THRIFT
-                        .getConfigRepresentation() : TransportProtocol.GRPC.getConfigRepresentation());
+                log.warn("The property 'protocol' was not set. Based on the set property '{}' we assume the protocol '{}'. This fallback will be removed in future releases. Please make sure to use the property 'protocol' in future.", hasUrl ? "url" : "grpc", hasUrl ? TransportProtocol.HTTP_THRIFT.getConfigRepresentation() : TransportProtocol.GRPC.getConfigRepresentation());
             }
 
             if (SUPPORTED_PROTOCOLS.contains(exporterProtocol)) {
@@ -101,6 +100,10 @@ public class JaegerExporterService extends DynamicallyActivatableService {
             boolean hasEndpoint = StringUtils.hasText(settings.getEndpoint());
             String endpoint = hasEndpoint ? settings.getEndpoint() : hasUrl ? settings.getUrl() : settings.getGrpc();
 
+            // OTEL expects that the URI starts with 'http://' or 'https://'
+            if (!endpoint.startsWith("http")) {
+                endpoint = String.format("http://%s", endpoint);
+            }
             switch (getProtocol(settings)) {
                 case GRPC: {
                     spanExporter = JaegerGrpcSpanExporter.builder().setEndpoint(endpoint).build();
