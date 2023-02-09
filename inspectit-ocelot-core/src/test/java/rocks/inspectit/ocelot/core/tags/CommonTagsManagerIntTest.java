@@ -27,7 +27,7 @@ class CommonTagsManagerIntTest {
         public void contextAvailable() {
             TagContext commonTagContext = provider.getCommonTagContext();
 
-            assertThat(InternalUtils.getTags(commonTagContext)).isNotEmpty();
+            assertThat(InternalUtils.getTags(commonTagContext)).toIterable().isNotEmpty();
         }
 
         public void tagKeysCorrect() {
@@ -35,7 +35,7 @@ class CommonTagsManagerIntTest {
             List<TagKey> commonTagKeys = provider.getCommonTagKeys();
 
             assertThat(InternalUtils.getTags(commonTagContext))
-                    .allSatisfy(tag -> assertThat(commonTagKeys.contains(tag.getKey())).isTrue());
+                    .toIterable().allSatisfy(tag -> assertThat(commonTagKeys.contains(tag.getKey())).isTrue());
         }
 
         public void scopeAvailable() {
@@ -59,7 +59,7 @@ class CommonTagsManagerIntTest {
             TagContext commonTagContext = provider.getCommonTagContext();
 
             assertThat(InternalUtils.getTags(commonTagContext))
-                    .anySatisfy(tag -> {
+                    .toIterable().anySatisfy(tag -> {
                         assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
                         assertThat(tag.getValue()).isEqualTo(TagValue.create("my-service-name"));
                     });
@@ -89,7 +89,7 @@ class CommonTagsManagerIntTest {
             TagContext commonTagContext = provider.getCommonTagContext();
 
             assertThat(InternalUtils.getTags(commonTagContext))
-                    .anySatisfy(tag -> {
+                    .toIterable().anySatisfy(tag -> {
                         assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
                         assertThat(tag.getValue()).isEqualTo(TagValue.create("my-service-name"));
                     })
@@ -115,7 +115,7 @@ class CommonTagsManagerIntTest {
             TagContext commonTagContext = provider.getCommonTagContext();
 
             assertThat(InternalUtils.getTags(commonTagContext))
-                    .anySatisfy(tag -> {
+                    .toIterable().anySatisfy(tag -> {
                         assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
                         assertThat(tag.getValue()).isEqualTo(TagValue.create("<invalid>"));
                     });

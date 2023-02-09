@@ -62,7 +62,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
             taskFuture.get();
 
-            assertThat(refTags.get()).hasSize(1)
+            assertThat(refTags.get()).toIterable().hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue));
         }
@@ -82,7 +82,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
             }
             taskFuture.get();
 
-            assertThat(refTags.get()).hasSize(1)
+            assertThat(refTags.get()).toIterable().hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue));
         }
@@ -101,7 +101,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
             }
             taskFuture.get();
 
-            assertThat(refTags.get()).hasSize(1)
+            assertThat(refTags.get()).toIterable().hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue));
         }
@@ -128,7 +128,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
             latch.await();
 
-            assertThat(refTags.get()).hasSize(1)
+            assertThat(refTags.get()).toIterable().hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue));
         }
@@ -155,7 +155,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
             latch.await();
 
-            assertThat(refTags.get()).hasSize(1)
+            assertThat(refTags.get()).toIterable().hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue));
         }
@@ -178,7 +178,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
             latch.await();
 
-            assertThat(refTags.get()).hasSize(1)
+            assertThat(refTags.get()).toIterable().hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue));
         }
@@ -199,7 +199,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
                 result = executorService.submit(callable);
             }
 
-            assertThat(result.get()).hasSize(1)
+            assertThat(result.get()).toIterable().hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue));
         }
@@ -217,7 +217,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
                 result = executorService.submit(callable);
             }
 
-            assertThat(result.get()).hasSize(1)
+            assertThat(result.get()).toIterable().hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue));
         }
@@ -234,7 +234,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
                 result = executorService.submit(callable);
             }
 
-            assertThat(result.get()).hasSize(1)
+            assertThat(result.get()).toIterable().hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue));
         }
