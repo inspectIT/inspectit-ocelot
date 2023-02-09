@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.time.DurationMin;
 import rocks.inspectit.ocelot.config.model.exporters.CompressionMethod;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
+import rocks.inspectit.ocelot.config.utils.EndpointUtils;
 
 import java.time.Duration;
 import java.util.Map;
@@ -45,4 +46,14 @@ public class OtlpTraceExporterSettings {
      */
     @DurationMin(millis = 1)
     private Duration timeout;
+
+    /**
+     * Gets the OTLP traces endpoint. The endpoint is padded with 'http' to meet OTEL's requirement that the URI needs to start with 'http://' or 'https://'.
+     * E.g., if you set the endpoint to 'localhost:4317', it will be returned as 'http://localhost:4317'.
+     *
+     * @return
+     */
+    public String getEndpoint() {
+        return EndpointUtils.padEndpoint(endpoint);
+    }
 }

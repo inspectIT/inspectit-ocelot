@@ -78,6 +78,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
         try {
             OtlpMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlp();
             AggregationTemporalitySelector aggregationTemporalitySelector = otlp.getPreferredTemporality() == AggregationTemporality.DELTA ? AggregationTemporalitySelector.deltaPreferred() : AggregationTemporalitySelector.alwaysCumulative();
+
             switch (otlp.getProtocol()) {
                 case GRPC: {
                     OtlpGrpcMetricExporterBuilder metricExporterBuilder = OtlpGrpcMetricExporter.builder()
@@ -112,7 +113,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
 
             boolean success = openTelemetryController.registerMetricExporterService(this);
             if (success) {
-                log.info("Starting {}", getName());
+                log.info("Starting {} with protocol {} on endpoint {}", getName(), otlp.getProtocol(), otlp.getEndpoint());
             } else {
                 log.error("Failed to register {} at the OpenTelemetry controller!", getName());
             }
