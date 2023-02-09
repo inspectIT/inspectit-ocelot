@@ -58,7 +58,7 @@ public class OpenTelemetryControllerImplIntTest extends SpringTestBase {
     }
 
     @BeforeAll
-    private static void initTestClient() {
+    static void initTestClient() {
         RequestConfig.Builder requestBuilder = RequestConfig.custom();
         requestBuilder = requestBuilder.setConnectTimeout(1000);
         requestBuilder = requestBuilder.setConnectionRequestTimeout(1000);

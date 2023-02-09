@@ -12,7 +12,6 @@ import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.bootstrap.correlation.LogTraceCorrelator;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 
@@ -28,7 +27,7 @@ public class ScheduledExecutorContextPropagationSensorTest {
     private LogTraceCorrelator logTraceCorrelator;
 
     @BeforeEach
-    private void beforeEach() {
+    void beforeEach() {
         Instances.contextManager = contextManager;
         Instances.logTraceCorrelator = logTraceCorrelator;
     }
@@ -49,7 +48,7 @@ public class ScheduledExecutorContextPropagationSensorTest {
         public void correlationIsInProgress() throws Exception {
             when(contextManager.enterCorrelation()).thenReturn(false);
 
-            invokeTestMethod( mockRunnable);
+            invokeTestMethod(mockRunnable);
 
             verify(contextManager).enterCorrelation();
             verifyNoMoreInteractions(contextManager);
@@ -62,9 +61,10 @@ public class ScheduledExecutorContextPropagationSensorTest {
             Runnable wrapLog = mock(Runnable.class);
             when(logTraceCorrelator.wrap(any(Runnable.class))).thenReturn(wrapLog);
 
-            mockRunnable = () -> {};
+            mockRunnable = () -> {
+            };
 
-            invokeTestMethod( mockRunnable);
+            invokeTestMethod(mockRunnable);
 
             verify(contextManager).enterCorrelation();
             verify(contextManager).wrap(wrapLog);
@@ -82,7 +82,7 @@ public class ScheduledExecutorContextPropagationSensorTest {
                 }
             };
 
-            invokeTestMethod( mockRunnable);
+            invokeTestMethod(mockRunnable);
 
             verify(contextManager).enterCorrelation();
             verify(contextManager).storeContext(mockRunnable, true);
@@ -107,7 +107,7 @@ public class ScheduledExecutorContextPropagationSensorTest {
         public void correlationIsInProgress() throws Exception {
             when(contextManager.enterCorrelation()).thenReturn(false);
 
-            invokeTestMethod( mockRunnable);
+            invokeTestMethod(mockRunnable);
 
             verify(contextManager).enterCorrelation();
             verifyNoMoreInteractions(contextManager);
@@ -120,9 +120,10 @@ public class ScheduledExecutorContextPropagationSensorTest {
             Runnable wrapLog = mock(Runnable.class);
             when(logTraceCorrelator.wrap(any(Runnable.class))).thenReturn(wrapLog);
 
-            mockRunnable = () -> {};
+            mockRunnable = () -> {
+            };
 
-            invokeTestMethod( mockRunnable);
+            invokeTestMethod(mockRunnable);
 
             verify(contextManager).enterCorrelation();
             verify(contextManager).wrap(wrapLog);
@@ -140,7 +141,7 @@ public class ScheduledExecutorContextPropagationSensorTest {
                 }
             };
 
-            invokeTestMethod( mockRunnable);
+            invokeTestMethod(mockRunnable);
 
             verify(contextManager).enterCorrelation();
             verify(contextManager).storeContext(mockRunnable, false);
