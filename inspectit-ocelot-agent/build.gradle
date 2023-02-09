@@ -1,7 +1,7 @@
 plugins {
-    id "me.champeau.gradle.jmh" version "0.5.3"
+    id "me.champeau.jmh" version "${jmhVersion}"
     id 'maven-publish'
-    id 'com.palantir.docker' version "0.34.0"
+    id 'com.palantir.docker' version "${palantirDockerVersion}"
 }
 
 evaluationDependsOn(':inspectit-ocelot-bootstrap')
@@ -38,11 +38,11 @@ dependencies {
     )
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     testImplementation (
-            'org.junit.jupiter:junit-jupiter-api:5.3.1',
-            'org.mockito:mockito-junit-jupiter:2.23.0',
+            "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}",
+            "org.mockito:mockito-junit-jupiter:${mockitoVersion}",
             "ch.qos.logback:logback-classic:${logbackVersion}",
     )
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
 }
 
 task copyAgent(type: Copy) {
@@ -135,23 +135,23 @@ dependencies {
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             "io.opentelemetry:opentelemetry-semconv",
 
-            'org.junit.jupiter:junit-jupiter-engine:5.3.1',
-            'org.junit.jupiter:junit-jupiter-api:5.3.1',
+            "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}",
+            "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}",
 
-            'org.assertj:assertj-core:3.11.1',
-            'org.awaitility:awaitility:3.1.5',
-            "com.github.tomakehurst:wiremock:2.25.1",
+            "org.assertj:assertj-core:${assertjVersion}",
+            "org.awaitility:awaitility:${awaitilityVersion}",
+            "com.github.tomakehurst:wiremock-jre8:${wiremockVersion}",
 
-            'org.apache.httpcomponents:httpclient:4.5.6',
-            'org.eclipse.jetty:jetty-server:9.4.3.v20170317',
-            'org.eclipse.jetty:jetty-servlet:9.4.3.v20170317',
+            "org.apache.httpcomponents:httpclient:${httpClientVersion}",
+            "org.eclipse.jetty:jetty-server:${jettyVersion}",
+            "org.eclipse.jetty:jetty-servlet:${jettyVersion}",
 
-            'com.h2database:h2:1.4.199',
+            "com.h2database:h2:${h2Version}",
 
             // only used for log-correlation tests
-            'org.apache.logging.log4j:log4j-api:2.15.0',
-            'org.apache.logging.log4j:log4j-core:2.15.0',
-            'log4j:log4j:1.2.16',
+            "org.apache.logging.log4j:log4j-api:${log4j2Version}",
+            "org.apache.logging.log4j:log4j-core:${log4j2Version}",
+            "log4j:log4j:${log4j1Version}",
             "ch.qos.logback:logback-classic:${logbackVersion}" // Used for SLF4J Correlation
 
     )

@@ -1,11 +1,10 @@
 plugins {
     id("com.github.node-gradle.node") version "2.2.1"
     id "com.moowork.node" version "1.3.1"
-    id 'com.palantir.docker' version "0.34.0"
+    id 'com.palantir.docker' version "${palantirDockerVersion}"
     id 'org.springframework.boot' version "${springBootVersion}"
-    id "org.cyclonedx.bom" version "1.7.2"
-    // Add the plugin in the existing plugins block
-    id "org.owasp.dependencycheck" version "7.4.1"
+    id "org.cyclonedx.bom" version "${cyclonedxBomVersion}"
+    id "org.owasp.dependencycheck" version "${owaspDependencycheckVersion}"
 }
 
 apply plugin: 'idea'
@@ -156,7 +155,7 @@ dependencies {
             'org.mockito:mockito-junit-jupiter',
             // That version is important. If we stick to the version provided by Spring Boot Bom
             // database initialization scripts will fail.
-            'com.h2database:h2:1.4.194',
+            "com.h2database:h2:${h2Version}",
             'org.awaitility:awaitility'
     )
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'

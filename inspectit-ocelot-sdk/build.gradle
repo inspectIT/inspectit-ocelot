@@ -11,7 +11,7 @@ sourceCompatibility = 1.8 // Java version compatibility to use when compiling Ja
 targetCompatibility = 1.8 // Java version to generate classes for.
 dependencies {
     implementation project(':inspectit-ocelot-config')
-    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"

@@ -23,14 +23,14 @@ dependencies {
     testImplementation (
             "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}",
             "org.mockito:mockito-junit-jupiter:${mockitoVersion}",
-            'org.assertj:assertj-core:3.11.1'
+            "org.assertj:assertj-core:${assertjVersion}"
     )
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}'
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
 
     implementation(
             platform("com.fasterxml.jackson:jackson-bom:${jacksonBomVersion}"),
             "org.springframework.boot:spring-boot:${springBootVersion}",
-            'org.hibernate.validator:hibernate-validator:6.0.13.Final',
+            "org.hibernate.validator:hibernate-validator:${hibernateValidatorVersion}",
             "org.apache.commons:commons-lang3:${commonsLangVersion}",
             "commons-io:commons-io:${commonsIoVersion}",
             "com.fasterxml.jackson.core:jackson-databind",
