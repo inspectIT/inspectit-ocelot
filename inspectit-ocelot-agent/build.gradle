@@ -1,7 +1,17 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
-    id "me.champeau.gradle.jmh" version "0.5.3"
+    id 'me.champeau.jmh' version "${jmhVersion}"
     id 'maven-publish'
-    id 'com.palantir.docker' version "0.34.0"
+    id 'com.palantir.docker' version "${palantirDockerVersion}"
+    id 'org.springframework.boot' version "${springBootVersion}" apply false
+    id 'io.spring.dependency-management' version "${springDependencyManangementVersion}"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom(SpringBootPlugin.BOM_COORDINATES)
+    }
 }
 
 evaluationDependsOn(':inspectit-ocelot-bootstrap')
@@ -28,7 +38,7 @@ configurations {
 dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
-            "org.projectlombok:lombok:${lombokVersion}"
+            "org.projectlombok:lombok"
     )
 
     opentelemetry(
@@ -36,13 +46,13 @@ dependencies {
         "io.opentelemetry:opentelemetry-opencensus-shim:${openTelemetryAlphaVersion}",
         "io.opencensus:opencensus-impl:${openCensusVersion}",
     )
-    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok"
     testImplementation (
-            'org.junit.jupiter:junit-jupiter-api:5.3.1',
-            'org.mockito:mockito-junit-jupiter:2.23.0',
-            "ch.qos.logback:logback-classic:${logbackVersion}",
+            "org.junit.jupiter:junit-jupiter-api",
+            "org.mockito:mockito-junit-jupiter",
+            "ch.qos.logback:logback-classic",
     )
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
 }
 
 task copyAgent(type: Copy) {
@@ -135,24 +145,33 @@ dependencies {
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             "io.opentelemetry:opentelemetry-semconv",
 
-            'org.junit.jupiter:junit-jupiter-engine:5.3.1',
-            'org.junit.jupiter:junit-jupiter-api:5.3.1',
+            "org.junit.jupiter:junit-jupiter-engine",
+            "org.junit.jupiter:junit-jupiter-api",
 
-            'org.assertj:assertj-core:3.11.1',
-            'org.awaitility:awaitility:3.1.5',
-            "com.github.tomakehurst:wiremock:2.25.1",
+            "org.assertj:assertj-core",
+            "org.awaitility:awaitility",
+            "com.github.tomakehurst:wiremock-jre8:${wiremockVersion}",
 
-            'org.apache.httpcomponents:httpclient:4.5.6',
-            'org.eclipse.jetty:jetty-server:9.4.3.v20170317',
-            'org.eclipse.jetty:jetty-servlet:9.4.3.v20170317',
+            "org.apache.httpcomponents:httpclient",
+            // Switching to spring-boot dependency management excludes somehow magically the transitive
+            // dependency commons-logging:commons-logging of org.apache.httpcomponents:httpclient.
+            // Spring-Boot applications include org.springframework:spring-jcl, which provides a better
+            // version of commons-logging
+            // (see https://docs.spring.io/spring-framework/docs/5.3.25/javadoc-api/org/apache/commons/logging/package-summary.html)
+            // In our special setup spring-jcl is not on the classpath, hence we need to add it manually.
+            // For inspectit-ocelot-core it is pulled in via the manually declared spring-boot dependency.
+            // For inspectit-configurationserver it is pulled in as it is a full blown spring-boot application.
+            "org.springframework:spring-jcl",
+            "org.eclipse.jetty:jetty-server",
+            "org.eclipse.jetty:jetty-servlet",
 
-            'com.h2database:h2:1.4.199',
+            "com.h2database:h2:${h2Version}",
 
             // only used for log-correlation tests
-            'org.apache.logging.log4j:log4j-api:2.15.0',
-            'org.apache.logging.log4j:log4j-core:2.15.0',
-            'log4j:log4j:1.2.16',
-            "ch.qos.logback:logback-classic:${logbackVersion}" // Used for SLF4J Correlation
+            "org.apache.logging.log4j:log4j-api",
+            "org.apache.logging.log4j:log4j-core",
+            "log4j:log4j:${log4j1Version}",
+            "ch.qos.logback:logback-classic" // Used for SLF4J Correlation
 
     )
 
