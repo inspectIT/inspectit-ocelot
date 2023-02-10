@@ -9,6 +9,8 @@ on:
       - '.github/workflows/configurationserver_test.yml'
       - 'components/inspectit-ocelot-configurationserver/**'
       - '!components/inspectit-ocelot-configurationserver/README.md'
+  workflow_call:
+
 jobs:
   test:
     name: Assemble & Test
