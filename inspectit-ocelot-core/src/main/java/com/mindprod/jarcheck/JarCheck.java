@@ -122,6 +122,19 @@ public final class JarCheck
                         // ignore anything but a .final class file
                         continue;
                     }
+
+                    if(elementName.equals("module-info.class")) {
+                        // Allows jar files that are compatible to  Java 8 and Java 9+ at the same time.
+                        // Problem was discovered as JarCheck failed for tomcat-embed-el-9.0.71.jar.
+                        // Evidences why this should work:
+                        // * https://stackoverflow.com/a/47359176 (last paragraph)
+                        // * According to https://tomcat.apache.org/whichversion.html that 9.x is
+                        //   compatible to Java 8.
+                        // * The Spring guys include tomcat-embed-el-9.0.71.jar in SpringBoot 2.7.8, too
+                        //   and claim to be Java 8 compatible.
+                        out.println("Ignoring module-info.class for "+ elementName);
+                        continue ;
+                    }
                     byte[] chunk = new byte[ chunkLength ];
                     int bytesRead = zip.read( chunk, 0, chunkLength );
                     zip.closeEntry();
