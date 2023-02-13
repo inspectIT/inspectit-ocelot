@@ -1,11 +1,25 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins {
+    id 'maven-publish'
+    id 'org.springframework.boot' version "${springBootVersion}" apply false
+    id 'io.spring.dependency-management' version "${springDependencyManangementVersion}"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom(SpringBootPlugin.BOM_COORDINATES)
+    }
+}
+
 dependencies {
-    compileOnly "org.projectlombok:lombok:${lombokVersion}"
-    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
     testImplementation (
-            "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}",
-            "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+            "org.junit.jupiter:junit-jupiter-api",
+            "org.mockito:mockito-junit-jupiter"
     )
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
 }
 
 test {

@@ -15,15 +15,15 @@ dependencies {
 
             'org.mockito:mockito-junit-jupiter',
             "org.assertj:assertj-core",
-            'com.google.guava:guava:31.1-jre'
+            "com.google.guava:guava:${guavaVersion}"
     )
 
     // This dependency is used by the application.
     implementation(
             project(':inspectit-ocelot-config'),
             "ch.qos.logback:logback-classic",
-            "org.apache.commons:commons-lang3:${commonsLangVersion}",
-            'commons-beanutils:commons-beanutils:1.9.4',
+            "org.apache.commons:commons-lang3",
+            "commons-beanutils:commons-beanutils:${commonsBeanUtilsVersion}",
 
             "org.springframework.boot:spring-boot-starter-web",
             // override snakeyaml due to vulnerabilities in v1.29 used by the SpringBoot version used in this module
