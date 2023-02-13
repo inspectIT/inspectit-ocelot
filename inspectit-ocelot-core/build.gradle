@@ -1,7 +1,17 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
     id "me.champeau.jmh" version "${jmhVersion}"
     id "org.cyclonedx.bom" version "${cyclonedxBomVersion}"
     id "org.owasp.dependencycheck" version "${owaspDependencycheckVersion}"
+    id "org.springframework.boot" version "${springBootVersion}" apply false
+    id "io.spring.dependency-management" version "${springDependencyManangementVersion}"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom(SpringBootPlugin.BOM_COORDINATES)
+    }
 }
 
 configurations {
@@ -30,7 +40,7 @@ targetCompatibility = 1.8 // Java version to generate classes for.
 dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
-            "org.projectlombok:lombok:${lombokVersion}",
+            "org.projectlombok:lombok",
 
             // OpenTelemetry
             platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
@@ -44,31 +54,31 @@ dependencies {
 
 
     )
-    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok"
 
     implementation(
-            platform("com.fasterxml.jackson:jackson-bom:${jacksonBomVersion}"),
+//            platform("com.fasterxml.jackson:jackson-bom:${jacksonBomVersion}"),
             project(':inspectit-ocelot-config'),
             project(':inspectit-ocelot-sdk'),
 
             // spring related
-            "org.springframework.boot:spring-boot:${springBootVersion}",
+            "org.springframework.boot:spring-boot",
             "org.yaml:snakeyaml:${snakeYamlVersion}",
-            "javax.annotation:javax.annotation-api:${javaxAnnotationApiVersion}", //Required for @PostConstruct and @PreDestroy to work in Java9+
+            "javax.annotation:javax.annotation-api", //Required for @PostConstruct and @PreDestroy to work in Java9+
 
             // data validation
-            "org.apache.tomcat.embed:tomcat-embed-el:${tomcatEmbedElVersion}",
-            "org.hibernate.validator:hibernate-validator:${hibernateValidatorVersion}",
+            "org.apache.tomcat.embed:tomcat-embed-el",
+            "org.hibernate.validator:hibernate-validator",
 
             // logging
-            "ch.qos.logback:logback-classic:${logbackVersion}",
+            "ch.qos.logback:logback-classic",
             // logstash support (JSON logging)
             "net.logstash.logback:logstash-logback-encoder:${logstashLogBackEncoderVersion}",
 
             // utils
-            "org.apache.commons:commons-lang3:${commonsLangVersion}",
+            "org.apache.commons:commons-lang3",
             "org.apache.commons:commons-math3:${commonsMathVersion}",
-            "org.apache.httpcomponents:httpclient:${httpClientVersion}",
+            "org.apache.httpcomponents:httpclient",
             "commons-io:commons-io:${commonsIoVersion}",
             "piccolo:piccolo:${piccoloVersion}",
             "com.fasterxml.jackson.core:jackson-databind",
@@ -99,7 +109,7 @@ dependencies {
             "rocks.inspectit:opencensus-influxdb-exporter:${opencensusInfluxdbExporter}",
 
             // bytecode manipulation
-            "net.bytebuddy:byte-buddy:${byteBuddyVersion}"
+            "net.bytebuddy:byte-buddy"
     )
 
     testImplementation(
@@ -113,19 +123,18 @@ dependencies {
             "io.opentelemetry:opentelemetry-sdk-testing",
             "io.opentelemetry:opentelemetry-proto:${opentelemetryProtoVersion}",
 
-            // matching the spring-core version used in the currently used version of spring boot version
-            'org.springframework:spring-test:5.3.14',
+            'org.springframework:spring-test',
 
-            "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}",
-            "org.mockito:mockito-junit-jupiter:${mockitoVersion}",
+            "org.junit.jupiter:junit-jupiter-api",
+            "org.mockito:mockito-junit-jupiter",
 
             // to make use of SpyBean
-            "org.springframework.boot:spring-boot-test:${springBootVersion}",
+            "org.springframework.boot:spring-boot-test",
 
-            "org.mockito:mockito-core:${mockitoVersion}",
-            "org.assertj:assertj-core:${assertjVersion}",
+            "org.mockito:mockito-core",
+            "org.assertj:assertj-core",
             "org.assertj:assertj-guava:${assertjGuavaVersion}",
-            "org.awaitility:awaitility:${awaitilityVersion}",
+            "org.awaitility:awaitility",
             "com.github.tomakehurst:wiremock-jre8:${wiremockVersion}",
             "io.grpc:grpc-netty-shaded:${grpcVersion}",
             "io.grpc:grpc-stub:${grpcVersion}",
@@ -145,10 +154,10 @@ dependencies {
             // LogCapturer
             "io.github.netmikey.logunit:logunit-core:${logUnitVersion}",
             // jul-slf4j bridge needed to redirect OTEL logs using java.util.logging to logback
-            "org.slf4j:jul-to-slf4j:${slf4jVersion}",
+            "org.slf4j:jul-to-slf4j",
     )
     testRuntimeOnly(
-            "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}",
+            "org.junit.jupiter:junit-jupiter-engine",
             // LogCapturer
             "io.github.netmikey.logunit:logunit-logback:${logUnitVersion}",
     )
