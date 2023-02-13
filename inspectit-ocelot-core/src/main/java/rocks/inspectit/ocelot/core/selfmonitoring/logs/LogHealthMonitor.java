@@ -5,19 +5,13 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
 import rocks.inspectit.ocelot.core.selfmonitoring.AgentHealthManager;
-import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.time.Duration;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -25,10 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class LogHealthMonitor implements InternalProcessingAppender.LogEventConsumer {
 
     @Autowired
-    AgentHealthManager agentHealthManager;
-
-    public LogHealthMonitor(ApplicationContext applicationContext, ScheduledExecutorService scheduledExecutorService, InspectitEnvironment inspectitEnvironment, SelfMonitoringService selfMonitoringService) {
-    }
+    final AgentHealthManager agentHealthManager;
 
     @Override
     public void onLoggingEvent(ILoggingEvent event, Class<?> invalidator) {
@@ -37,7 +28,7 @@ public class LogHealthMonitor implements InternalProcessingAppender.LogEventCons
             return;
         }
         AgentHealth eventHealth = AgentHealth.fromLogLevel(event.getLevel());
-        agentHealthManager.handleInvalidatableHealth(eventHealth, invalidator, event.getMessage());
+        agentHealthManager.notifyAgentHealth(eventHealth, invalidator,event.getLoggerName(), event.getMessage());
     }
 
     @Override
@@ -56,6 +47,5 @@ public class LogHealthMonitor implements InternalProcessingAppender.LogEventCons
     void unregisterFromAppender() {
         InternalProcessingAppender.unregister(this);
     }
-
 
 }

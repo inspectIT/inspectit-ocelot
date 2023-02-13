@@ -36,10 +36,8 @@ public class MetricDefinitionSettings {
     @NotBlank
     private String unit;
 
-    //TODO Make this defaultvalue higher
-    @Min(1)
     @Builder.Default
-    private int tagValueLimit = 1;
+    private int maxValuesPerTag = -1;
 
     @NotNull
     @Builder.Default

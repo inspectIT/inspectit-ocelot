@@ -2,22 +2,23 @@ package rocks.inspectit.ocelot.core.metrics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
+import rocks.inspectit.ocelot.config.model.metrics.TagGuardSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MeasureTagValueGuardTest {
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private InspectitEnvironment environment;
 
     @Mock
@@ -57,8 +58,17 @@ class MeasureTagValueGuardTest {
         return measure2TagKeys;
     }
 
-
-
+    private static String generateTempFilePath() {
+        try {
+            Path tempFile = Files.createTempFile("inspectit", "");
+            System.out.println(tempFile);
+            Files.delete(tempFile);
+            tempFile.toFile().deleteOnExit();
+            return tempFile.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Nested
     public class ReaderWrite {
@@ -84,18 +94,73 @@ class MeasureTagValueGuardTest {
                     .containsExactlyInAnyOrder("value1", "value2", "value3");
 
         }
-
     }
 
-    private static String generateTempFilePath() {
-        try {
-            Path tempFile = Files.createTempFile("inspectit", "");
-            System.out.println(tempFile);
-            Files.delete(tempFile);
-            tempFile.toFile().deleteOnExit();
-            return tempFile.toString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    @Nested
+    public class getMaxValuesPerTag {
+
+        final private static int defaultMaxValuePerTag = 42;
+
+        private void setupTagGuard(Map<String, Integer> maxValuesPerTagByMeasure, MetricDefinitionSettings settings) {
+            TagGuardSettings tagGuardSettings = new TagGuardSettings();
+            tagGuardSettings.setEnabled(true);
+            tagGuardSettings.setMaxValuesPerTag(defaultMaxValuePerTag);
+            if (maxValuesPerTagByMeasure != null) {
+                tagGuardSettings.setMaxValuesPerTagByMeasure(maxValuesPerTagByMeasure);
+            }
+
+            when(environment.getCurrentConfig().getMetrics().getTagGuard()).thenReturn(tagGuardSettings);
+            if (settings != null) {
+                when(environment.getCurrentConfig()
+                        .getMetrics()
+                        .getDefinitions()
+                        .get("measure")).thenReturn(settings);
+            }
         }
+
+        @Test
+        public void getMaxValuesPerTagByDefault() {
+            setupTagGuard(null, null);
+
+            assertThat(guard.getMaxValuesPerTag("measure", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerTag);
+        }
+
+        @Test
+        public void getMaxValuesPerTagByMeasure() {
+            Map<String, Integer> maxValuesPerTagByMeasure = new HashMap<>();
+            maxValuesPerTagByMeasure.put("measure", 43);
+            setupTagGuard(maxValuesPerTagByMeasure, null);
+
+            assertThat(guard.getMaxValuesPerTag("measure", environment.getCurrentConfig())).isEqualTo(43);
+            assertThat(guard.getMaxValuesPerTag("measure1", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerTag);
+        }
+
+        @Test
+        public void getMaxValuesPerTagByMetricDefinitionSettings() {
+            MetricDefinitionSettings settings = new MetricDefinitionSettings();
+            settings.setMaxValuesPerTag(43);
+            setupTagGuard(null, settings);
+
+            assertThat(guard.getMaxValuesPerTag("measure", environment.getCurrentConfig())).isEqualTo(43);
+            assertThat(guard.getMaxValuesPerTag("measure1", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerTag);
+        }
+
+        @Test
+        public void getMaxValuesPerTagWhenAllSettingsAreSet() {
+            Map<String, Integer> maxValuesPerTagByMeasure = new HashMap<>();
+            maxValuesPerTagByMeasure.put("measure", 43);
+            maxValuesPerTagByMeasure.put("measure2", 48);
+
+            MetricDefinitionSettings settings = new MetricDefinitionSettings();
+            settings.setMaxValuesPerTag(44);
+
+            setupTagGuard(maxValuesPerTagByMeasure, settings);
+
+            assertThat(guard.getMaxValuesPerTag("measure", environment.getCurrentConfig())).isEqualTo(44);
+            assertThat(guard.getMaxValuesPerTag("measure2", environment.getCurrentConfig())).isEqualTo(48);
+            assertThat(guard.getMaxValuesPerTag("measure3", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerTag);
+        }
+
     }
+
 }

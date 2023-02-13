@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
-import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -11,15 +10,12 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.selfmonitoring.event.models.AgentHealthChangedEvent;
 import rocks.inspectit.ocelot.core.utils.RingBuffer;
 
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Manages the {@link AgentHealth} and publishes {@link AgentHealthChangedEvent}s when it changes.
@@ -30,8 +26,6 @@ import java.util.concurrent.TimeUnit;
 public class AgentHealthManager {
 
     private final ApplicationContext ctx;
-
-    private final ScheduledExecutorService executor;
 
     /**
      * Map of {@code eventClass -> agentHealth}, whereas the {@code agentHealth} is reset whenever an event of type
@@ -52,45 +46,38 @@ public class AgentHealthManager {
 
     private final RingBuffer<AgentHealthIncident> healthIncidentBuffer = new RingBuffer<>(10); //TODO make this configurable
 
-    @PostConstruct
-    @VisibleForTesting
-    void startHealthCheckScheduler() {
-        checkHealthAndSchedule();
-    }
-
     public List<AgentHealthIncident> getHistory() {
         return this.healthIncidentBuffer.asList();
     }
 
-    public void update(AgentHealth eventHealth, Class<?> invalidator, String message) {
+    public void notifyAgentHealth(AgentHealth eventHealth, Class<?> invalidator, String loggerName, String message) { //TODO test to check if the healthstate changes.
+
         if (invalidator == null) {
-            handleTimeoutHealth(eventHealth);
+            handleTimeoutHealth(eventHealth, loggerName, message);
         } else {
             handleInvalidatableHealth(eventHealth, invalidator, message);
         }
-
-        triggerEvent(invalidator, message);
-
     }
 
     public void handleInvalidatableHealth(AgentHealth eventHealth, Class<?> invalidator, String eventMessage) {
         invalidatableHealth.merge(invalidator, eventHealth, AgentHealth::mostSevere);
-        triggerEvent(invalidator, eventMessage);
+        triggerEvent(invalidator.getTypeName(), eventMessage);
     }
 
-    private void handleTimeoutHealth(AgentHealth eventHealth) {
+    private void handleTimeoutHealth(AgentHealth eventHealth, String loggerName, String eventMassage) {
         Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod();
 
         if (eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING)) {
             generalHealthTimeouts.put(eventHealth, LocalDateTime.now().plus(validityPeriod));
         }
+        triggerEvent(loggerName, eventMassage + " This status is valid for " + validityPeriod);
     }
 
     public void invalidateIncident(Class eventClass, String eventMessage) {
         invalidatableHealth.remove(eventClass);
     }
 
-    private void triggerEvent( Class<?> invalidator, String message) {
+    private void triggerEvent( String incidentSource, String message) {
         synchronized (this) {
             boolean changedHealth = false;
             AgentHealth currHealth = getCurrentHealth();
@@ -98,23 +85,22 @@ public class AgentHealthManager {
             if(healthChanged()) {
                 changedHealth = true;
                 lastNotifiedHealth = currHealth;
+                AgentHealthChangedEvent event = new AgentHealthChangedEvent(this, lastHealth, currHealth, message);
+                ctx.publishEvent(event);
             }
 
-            AgentHealthIncident incident = new AgentHealthIncident(LocalDateTime.now().toString(), currHealth, invalidator.getTypeName() , message, changedHealth);
+            AgentHealthIncident incident = new AgentHealthIncident(LocalDateTime.now().toString(), currHealth, incidentSource, message, changedHealth);
             healthIncidentBuffer.put(incident);
-
-            AgentHealthChangedEvent event = new AgentHealthChangedEvent(this, lastHealth, currHealth, message);
-            ctx.publishEvent(event);
         }
-
     }
 
+    /**
+     * Checks whether the current health has changed since last check.
+     *
+     * @return true if the health state changed
+     */
     private boolean healthChanged() {
-        if (getCurrentHealth() != lastNotifiedHealth) {
-            AgentHealth currHealth = getCurrentHealth();
-            return currHealth != lastNotifiedHealth;
-        }
-        return false;
+        return getCurrentHealth() != lastNotifiedHealth;
     }
 
     /**
@@ -136,41 +122,4 @@ public class AgentHealthManager {
                 .orElse(AgentHealth.OK);
         return AgentHealth.mostSevere(generalHealth, invHealth);
     }
-
-    /**
-     * Checks whether the current health has changed since last check and schedules another check.
-     * The next check will run dependent on the earliest status timeout in the future:
-     * <ul>
-     *     <li>does not exist -> run again after validity period</li>
-     *     <li>exists -> run until that timeout is over</li>
-     * </ul>validityPeriod
-     */
-    private void checkHealthAndSchedule() {
-        Duration delay = getNextHealthTimeoutDuration();
-
-        if (log.isDebugEnabled()) {
-            log.debug("Schedule health check in {} minutes", delay.toMinutes());
-        }
-
-        executor.schedule(this::checkHealthAndSchedule, delay.toMillis(), TimeUnit.MILLISECONDS);
-    }
-
-
-    public Duration getNextHealthTimeoutDuration() {
-        Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod();
-        Duration delay = generalHealthTimeouts.values()
-                .stream()
-                .filter(d -> d.isAfter(LocalDateTime.now()))
-                .max(Comparator.naturalOrder())
-                .map(d -> Duration.between(d, LocalDateTime.now()).abs())
-                .orElse(validityPeriod);
-
-        delay = Duration.ofMillis(Math.max(delay.toMillis(), env.getCurrentConfig()
-                .getSelfMonitoring()
-                .getAgentHealth()
-                .getMinHealthCheckDelay()
-                .toMillis()));
-        return delay;
-    }
-
 }

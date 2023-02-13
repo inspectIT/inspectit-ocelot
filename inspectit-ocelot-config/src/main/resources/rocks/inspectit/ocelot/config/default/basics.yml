@@ -77,6 +77,8 @@ inspectit:
     enabled: true
 
     tag-guard:
+      enabled: true
+      max-values-per-tag: 1000
       schedule-delay: 30s
       database-file : ${inspectit.env.agent-dir}/${inspectit.service-name}/tag-guard-database.json
       overflow-replacement: "TAG_LIMIT_EXCEEDED"

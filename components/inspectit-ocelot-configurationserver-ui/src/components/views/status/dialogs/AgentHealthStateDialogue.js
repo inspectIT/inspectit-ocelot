@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  */
 const AgentHealthStateDialogue = ({ visible, onHide, error, contentValue, contextName }) => {
 
-  const { health,  source, message, history } = contentValue
+  const { health, source, message, history } = contentValue
   const { healthInfo, iconColor } =  resolveHealthState(health);
 
   let latestIncidentElement = <>There are no incidents.</>
@@ -21,8 +21,7 @@ const AgentHealthStateDialogue = ({ visible, onHide, error, contentValue, contex
         </h3>
       </div>
       <div>
-              <span style={{fontFamily: "monospace"
-              }}>{source}:</span> <span className="italic">{message}</span>
+        <span style={{fontFamily: "monospace"}}>{source}:</span> <span className="italic">{message}</span>
       </div>
       <div className="line"/>
     </>

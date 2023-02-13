@@ -351,9 +351,11 @@ class StatusTable extends React.Component {
           
         `}</style>
         {health ? (
-          <div className="state" onClick={ () => onShowHealthStateDialog(agentId, healthState)}>
-            <i className={classNames('pi pi-fw', iconClass)} style={{ color: iconColor }}></i>
-            <span>{healthInfo}</span>
+          <div className="state">
+            <div className="health-state" onClick={ () => onShowHealthStateDialog(agentId, healthState)}>
+              <i className={classNames('pi pi-fw', iconClass)} style={{ color: iconColor }}></i>
+              <span>{healthInfo}</span>
+            </div>
             <Button
               className="archive-button"
               icon="pi pi-cloud-download"

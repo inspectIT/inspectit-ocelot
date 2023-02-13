@@ -32,10 +32,14 @@ class StatusView extends React.Component {
       attributes: '',
       contentValue: '',
       contentType: '',
-      errorConifg: false,
+      errorConfig: false,
       isLoading: false,
+      isDownloadDialogFooterHidden: false,
     };
   }
+
+  axiosAbortController = new AbortController();
+
 
   componentDidUpdate(prevProps) {
     if (!isEqual(prevProps.agents, this.props.agents)) {
@@ -207,7 +211,9 @@ class StatusView extends React.Component {
       contentValue,
       contentType,
       contentLoadingFailed,
+      isLoading,
       agentId,
+      isDownloadDialogFooterHidden: isDownloadDialogFooterHidden,
     } = this.state;
 
     return (
@@ -257,6 +263,8 @@ class StatusView extends React.Component {
             contentValue={contentValue}
             contentType={contentType}
             contextName={'Agent ' + agentId}
+            isDownloadDialogFooterHidden={isDownloadDialogFooterHidden}
+            onCancel={() => {this.setShowDownloadDialog(false); this.axiosAbortController.abort()}}
           />
           <AgentHealthStateDialogue
               visible={showHealthStateDialog}
@@ -359,28 +367,33 @@ class StatusView extends React.Component {
     );
   };
 
+
   downloadSupportArchive = (agentId, agentVersion) => {
     this.setState(
       {
         isLoading: true,
+        isDownloadDialogFooterHidden: true,
       },
       () => {
         axios
           .get('/agent/supportArchive', {
+            signal: this.axiosAbortController.signal,
             params: { 'agent-id': agentId },
           })
           .then((res) => {
+            downloadArchiveFromJson(res.data, agentId, agentVersion);
+            this.setShowDownloadDialog(false);
             this.setState({
               isLoading: false,
+              isDownloadDialogFooterHidden: false,
             });
-            downloadArchiveFromJson(res.data, agentId, agentVersion);
-            this.setDownloadDialogShown(false);
           })
           .catch(() => {
             this.setState({
-              contentValue: null,
+              contentValue: "",
               contentLoadingFailed: true,
               isLoading: false,
+              isDownloadDialogFooterHidden: false,
             });
           });
       }
@@ -399,6 +412,7 @@ class StatusView extends React.Component {
       () => {
         axios
           .get('/configuration/agent-configuration', {
+            signal: this.axiosAbortController.signal,
             params: { ...requestParams },
           })
           .then((res) => {
@@ -427,6 +441,7 @@ class StatusView extends React.Component {
       () => {
         axios
           .get('/command/logs', {
+            signal: this.axiosAbortController.signal,
             params: { 'agent-id': agentId },
           })
           .then((res) => {

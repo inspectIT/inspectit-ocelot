@@ -100,11 +100,11 @@ public class AgentStatusManager {
         attributesToAgentStatusCache.put(statusKey, agentStatus);
     }
 
-    private void logHealthIfChanged(Object statusKey, AgentHealthState agentHealth) {
+    private void logHealthIfChanged(Object statusKey, AgentHealthState agentHealthState) {
         AgentStatus lastStatus = attributesToAgentStatusCache.getIfPresent(statusKey);
 
-        if (lastStatus == null || lastStatus.getHealthState().getHealth() != agentHealth.getHealth()) {
-            log.info("Health of agent {} changed to {}.", statusKey, agentHealth);
+        if (lastStatus == null || lastStatus.getHealthState().getHealth() != agentHealthState.getHealth()) {
+            log.info("Health of agent {} changed to {}.", statusKey, agentHealthState);
         }
     }
 
