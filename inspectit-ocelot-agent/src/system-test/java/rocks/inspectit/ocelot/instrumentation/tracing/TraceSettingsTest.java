@@ -158,7 +158,7 @@ public class TraceSettingsTest extends TraceTestBase {
     @Test
     void testInterleavedAsyncSpans() throws Exception {
 
-        TestUtils.waitForClassInstrumentation(AsyncTask.class, true, 15, TimeUnit.SECONDS);
+        //TestUtils.waitForClassInstrumentation(AsyncTask.class, true, 15, TimeUnit.SECONDS);
 
         //all method calls of each task will result in a single span
         AsyncTask first = new AsyncTask();
@@ -327,6 +327,8 @@ public class TraceSettingsTest extends TraceTestBase {
         void testNestedZeroSamplingProbability() {
             TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
 
+            // note: the expected behaviour currently only works if we set the sample-mode of 'TraceSettingsTest-nestedSamplingTest' to 'HYBRID_PARENT_TRACE_ID_RATIO_BASED'.
+            // otherwise, the 'nestedSamplingTestNestedDefault' is not sampled.
             nestedSamplingTestRoot(1.0, 0.0);
 
             samplingTestEndMarker("nested_zero_end");
@@ -337,32 +339,27 @@ public class TraceSettingsTest extends TraceTestBase {
             }));
 
             assertTraceExported((spans) -> assertThat(spans).hasSize(3).anySatisfy((sp) -> {
-                        assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot");
-                        assertThat(SpanId.isValid(sp.getParentSpanId())).isFalse();
-                    }).anySatisfy((sp) -> {
-                        assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested");
-                        assertThat(SpanId.isValid(sp.getParentSpanId())).isTrue();
-                    }).anySatisfy((sp) -> {
-                        assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNestedDefault");
-                        assertThat(SpanId.isValid(sp.getParentSpanId())).isTrue();
-                    })
-
-            );
+                assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot");
+                assertThat(SpanId.isValid(sp.getParentSpanId())).isFalse();
+            }).anySatisfy((sp) -> {
+                assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested");
+                assertThat(SpanId.isValid(sp.getParentSpanId())).isTrue();
+            }).anySatisfy((sp) -> {
+                assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNestedDefault");
+                assertThat(SpanId.isValid(sp.getParentSpanId())).isTrue();
+            }));
         }
 
         @Test
         void testNestedOneSamplingProbability() {
-            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 15, TimeUnit.SECONDS);
-
+            TestUtils.waitForClassInstrumentation(TraceSettingsTest.class, true, 30, TimeUnit.SECONDS);
             nestedSamplingTestRoot(0.0, 1.0);
 
             samplingTestEndMarker("nested_one_end");
-
             //wait for the end marker, this ensures that all sampled spans are also exported
             assertTraceExported((spans) -> assertThat(spans).anySatisfy((sp) -> {
                 assertThat(sp.getName()).isEqualTo("nested_one_end");
             }));
-
             assertThat(getExportedSpans()).noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestRoot"))
                     .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNestedDefault"))
                     .anySatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested"));

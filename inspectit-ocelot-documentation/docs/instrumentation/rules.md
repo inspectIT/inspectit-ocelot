@@ -512,7 +512,7 @@ The name must exist at the end of the entry section and cannot be set in the exi
 #### Trace Sampling
 
 It is often desirable to not capture every trace, but instead [sample](https://opencensus.io/tracing/sampling/) only a subset.
-This can be configured using the `sample-probability` setting under the `tracing` section:
+This can be configured using the `sample-probability` and `sample-mode` setting under the `tracing` section:
 
 ```yaml
 inspectit:
@@ -522,6 +522,7 @@ inspectit:
         tracing:
           start-span: true
           sample-probability: '0.2'
+          sample-mode: PARENT_BASED
 ```
 
 The example shown above will ensure that only 20% of all traces starting at the given rule will actually be exported.
@@ -529,9 +530,9 @@ Instead of specifying a fixed value, you can also specify a data key here, just 
 In this case, the value from the given data key is read and used as sampling probability.
 This allows you for example to vary the sample probability based on the HTTP url.
 
-Note that this setting only has an effect if no sampling decision has been made yet.
-If a parent span has already decided that a trace is sampled or not sampled, this decision will continue to be used.
-This means that, for example, a method within a trace that has already been started will always be recorded, even if the sample setting has been set to 0.
+The `sample-mode` is explained at [tracing](tracing/tracing.md) and can either be `PARENT_BASED`, `TRACE_ID_RATIO_BASED`, or `HYBRID_PARENT_TRACE_ID_RATIO_BASED`. 
+
+By default, `HYBRID_PARENT_TRACE_ID_RATIO_BASED` sampler is used if `sample-mode` is unset and the `sample-probability` has been specified.
 
 If no sample probability is defined for a rule, the [default probability](tracing/tracing.md) is used.
 

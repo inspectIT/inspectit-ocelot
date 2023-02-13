@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.instrumentation.tracing;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
@@ -11,11 +10,10 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled // TODO: fix StackTraceSampling and AutoTracing with OTEL
 public class AutoTracingTest extends TraceTestBase {
 
     @BeforeAll
-    static void waitForInstrumentation() {
+    static void setup() {
         TestUtils.waitForClassInstrumentation(AutoTracingTest.class, true, 30, TimeUnit.SECONDS);
     }
 

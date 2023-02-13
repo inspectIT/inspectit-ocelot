@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.tags;
 
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Span;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -88,7 +88,7 @@ class CommonTagsToAttributesManagerTest {
 
             manager.writeCommonTags(span, false, false);
 
-            verify(span).putAttribute("key", AttributeValue.stringAttributeValue("value"));
+            verify(span).setAttribute(AttributeKey.stringKey("key"), "value");
             verify(commonTagsManager).getCommonTagValueMap();
             verifyNoMoreInteractions(span, commonTagsManager);
         }
@@ -118,14 +118,13 @@ class CommonTagsToAttributesManagerTest {
             manager.update();
         }
 
-
         @Test
         void newSpan() {
             when(commonTagsManager.getCommonTagValueMap()).thenReturn(Collections.singletonMap("key", "value"));
 
             manager.writeCommonTags(span, false, false);
 
-            verify(span).putAttribute("key", AttributeValue.stringAttributeValue("value"));
+            verify(span).setAttribute(AttributeKey.stringKey("key"), "value");
             verify(commonTagsManager).getCommonTagValueMap();
             verifyNoMoreInteractions(span, commonTagsManager);
         }
@@ -136,7 +135,7 @@ class CommonTagsToAttributesManagerTest {
 
             manager.writeCommonTags(span, true, false);
 
-            verify(span).putAttribute("key", AttributeValue.stringAttributeValue("value"));
+            verify(span).setAttribute(AttributeKey.stringKey("key"), "value");
             verify(commonTagsManager).getCommonTagValueMap();
             verifyNoMoreInteractions(span, commonTagsManager);
         }
@@ -164,7 +163,7 @@ class CommonTagsToAttributesManagerTest {
         void newSpan() {
             manager.writeCommonTags(span, false, false);
 
-            verify(span).putAttribute("key", AttributeValue.stringAttributeValue("value"));
+            verify(span).setAttribute(AttributeKey.stringKey("key"), "value");
             verify(commonTagsManager).getCommonTagValueMap();
             verifyNoMoreInteractions(span, commonTagsManager);
         }
@@ -173,7 +172,7 @@ class CommonTagsToAttributesManagerTest {
         void remoteParent() {
             manager.writeCommonTags(span, true, false);
 
-            verify(span).putAttribute("key", AttributeValue.stringAttributeValue("value"));
+            verify(span).setAttribute(AttributeKey.stringKey("key"), "value");
             verify(commonTagsManager).getCommonTagValueMap();
             verifyNoMoreInteractions(span, commonTagsManager);
         }
@@ -182,12 +181,11 @@ class CommonTagsToAttributesManagerTest {
         void localParent() {
             manager.writeCommonTags(span, false, true);
 
-            verify(span).putAttribute("key", AttributeValue.stringAttributeValue("value"));
+            verify(span).setAttribute(AttributeKey.stringKey("key"), "value");
             verify(commonTagsManager).getCommonTagValueMap();
             verifyNoMoreInteractions(span, commonTagsManager);
         }
 
     }
-
 
 }

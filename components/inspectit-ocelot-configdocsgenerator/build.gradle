@@ -9,8 +9,10 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+    // spring dependency manager
+    id 'org.springframework.boot' version "${springBootVersion}"
 }
-
+apply plugin: 'io.spring.dependency-management'
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
@@ -20,27 +22,29 @@ repositories {
 dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation(
-            'org.junit.jupiter:junit-jupiter:5.7.2',
+            'org.junit.jupiter:junit-jupiter',
             "io.opencensus:opencensus-api:${openCensusVersion}",
-            'org.mockito:mockito-junit-jupiter:2.23.0',
-            "org.assertj:assertj-core:3.19.0"
+            "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
+
+            'org.mockito:mockito-junit-jupiter',
+            "org.assertj:assertj-core",
+            'com.google.guava:guava:31.1-jre'
     )
 
     // This dependency is used by the application.
     implementation(
             project(':inspectit-ocelot-config'),
-            'ch.qos.logback:logback-classic:0.9.26',
-            'org.apache.commons:commons-lang3:3.12.0',
-            'org.apache.commons:commons-text:1.9',
+            "ch.qos.logback:logback-classic",
+            "org.apache.commons:commons-lang3:${commonsLangVersion}",
             'commons-beanutils:commons-beanutils:1.9.4',
-            'com.google.guava:guava:31.0.1-jre',
 
-            "org.springframework.boot:spring-boot-starter-web:${springVersion}",
-
+            "org.springframework.boot:spring-boot-starter-web",
+            // override snakeyaml due to vulnerabilities in v1.29 used by the SpringBoot version used in this module
+            "org.yaml:snakeyaml:${snakeYamlVersion}"
     )
 
-    compileOnly "org.projectlombok:lombok:${lombokVersion}"
-    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
 }
 
 application {

@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.opentelemetry;
+package rocks.inspectit.ocelot.core.opentelemetry.trace.samplers;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;

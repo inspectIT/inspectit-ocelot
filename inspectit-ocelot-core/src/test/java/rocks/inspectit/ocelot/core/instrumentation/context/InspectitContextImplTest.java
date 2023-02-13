@@ -1,10 +1,10 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
-import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
-import io.opencensus.trace.Span;
-import io.opencensus.trace.SpanContext;
-import io.opencensus.trace.Tracing;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -20,6 +20,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.testutils.GcUtils;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;
@@ -57,7 +58,7 @@ public class InspectitContextImplTest extends SpringTestBase {
 
         @Test
         void verifyCleared() {
-            SpanContext span = Tracing.getTracer().spanBuilder("blub").startSpan().getContext();
+            SpanContext span = OpenTelemetryUtils.getTracer().spanBuilder("blub").startSpan().getSpanContext();
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
             ctx.setData(InternalInspectitContext.REMOTE_PARENT_SPAN_CONTEXT_KEY, span);
 
@@ -88,22 +89,22 @@ public class InspectitContextImplTest extends SpringTestBase {
 
         @Test
         void spanEntered() {
-            Span mySpan = Tracing.getTracer().spanBuilder("blub").startSpan();
+            Span mySpan = OpenTelemetryUtils.getTracer().spanBuilder("blub").startSpan();
 
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
             assertThat(ctx.hasEnteredSpan()).isFalse();
 
-            Scope scope = Tracing.getTracer().withSpan(mySpan);
+            Scope scope = mySpan.makeCurrent();
             ctx.setSpanScope(scope);
 
             ctx.makeActive();
 
             assertThat(ctx.hasEnteredSpan()).isTrue();
-            assertThat(Tracing.getTracer().getCurrentSpan()).isSameAs(mySpan);
+            assertThat(Span.current()).isSameAs(mySpan);
 
             ctx.close();
 
-            assertThat(Tracing.getTracer().getCurrentSpan()).isNotSameAs(mySpan);
+            assertThat(Span.current()).isNotSameAs(mySpan);
         }
 
     }
@@ -599,7 +600,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             TagContextBuilder tcb = Tags.getTagger()
                     .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
-            try (Scope tc = tcb.buildScoped()) {
+            try (io.opencensus.common.Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
 
@@ -621,7 +622,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             TagContextBuilder tcb = Tags.getTagger()
                     .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
-            try (Scope tc = tcb.buildScoped()) {
+            try (io.opencensus.common.Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 ctxA.makeActive();
 
@@ -654,7 +655,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             TagContextBuilder tcb = Tags.getTagger()
                     .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
-            try (Scope tc = tcb.buildScoped()) {
+            try (io.opencensus.common.Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
 
@@ -686,7 +687,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             TagContextBuilder tcb = Tags.getTagger()
                     .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
-            try (Scope tc = tcb.buildScoped()) {
+            try (io.opencensus.common.Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 ctxA.makeActive();
 
@@ -719,12 +720,12 @@ public class InspectitContextImplTest extends SpringTestBase {
             TagContextBuilder tcb = Tags.getTagger()
                     .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
-            try (Scope tc = tcb.buildScoped()) {
+            try (io.opencensus.common.Scope tc = tcb.buildScoped()) {
                 InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
                 ctxA.setData("rootKey", "childValue");
                 ctxA.makeActive();
 
-                try (Scope subScope = ctxA.enterFullTagScope()) {
+                try (io.opencensus.common.Scope subScope = ctxA.enterFullTagScope()) {
 
                     assertThat(getCurrentTagsAsMap()).hasSize(2);
                     assertThat(getCurrentTagsAsMap()).containsEntry("myTag", "myValue");
@@ -772,7 +773,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             TagContextBuilder tcb = Tags.getTagger()
                     .currentBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
-            try (Scope tc = tcb.buildScoped()) {
+            try (io.opencensus.common.Scope tc = tcb.buildScoped()) {
 
                 Map<String, String> currentTagsAsMap = getCurrentTagsAsMap();
                 assertThat(currentTagsAsMap).containsEntry("longKey", "42");
@@ -824,7 +825,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             assertThat(getCurrentTagsAsMap()).hasSize(1);
             assertThat(getCurrentTagsAsMap()).containsEntry("global", "globalValue");
 
-            try (Scope scope = ctx.enterFullTagScope()) {
+            try (io.opencensus.common.Scope scope = ctx.enterFullTagScope()) {
                 assertThat(getCurrentTagsAsMap()).hasSize(2)
                         .containsEntry("local", "localValue")
                         .containsEntry("global", "globalValue");
@@ -864,7 +865,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             assertThat(getCurrentTagsAsMap()).containsEntry("rootKey1", "rootValue1");
             assertThat(getCurrentTagsAsMap()).containsEntry("rootKey2", "rootValue2");
 
-            try (Scope sc = ctx.enterFullTagScope()) {
+            try (io.opencensus.common.Scope sc = ctx.enterFullTagScope()) {
                 assertThat(getCurrentTagsAsMap()).hasSize(3)
                         .containsEntry("rootKey1", "nestedValue1")
                         .containsEntry("rootKey2", "rootValue2")
@@ -900,7 +901,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             assertThat(getCurrentTagsAsMap()).containsEntry("d3", "2");
             assertThat(getCurrentTagsAsMap()).containsEntry("d4", "2.0");
 
-            try (Scope scope = ctx.enterFullTagScope()) {
+            try (io.opencensus.common.Scope scope = ctx.enterFullTagScope()) {
                 assertThat(getCurrentTagsAsMap()).hasSize(4)
                         .containsEntry("d1", "string")
                         .containsEntry("d2", "1")
@@ -923,14 +924,14 @@ public class InspectitContextImplTest extends SpringTestBase {
         @Test
         void verifySpanAttachedAndDetached() {
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
-            Span sp = Tracing.getTracer().spanBuilder("blub").startSpan();
-            ctx.setSpanScope(Tracing.getTracer().withSpan(sp));
+            Span sp = OpenTelemetryUtils.getTracer().spanBuilder("blub").startSpan();
+            ctx.setSpanScope(Context.current().with(sp).makeCurrent());
             ctx.makeActive();
 
-            Span span = Tracing.getTracer().getCurrentSpan();
+            Span span = Span.current();
 
             ctx.close();
-            Span endSpan = Tracing.getTracer().getCurrentSpan();
+            Span endSpan = Span.current();
 
             assertThat(span).isSameAs(sp);
             assertThat(endSpan).isNotSameAs(sp);

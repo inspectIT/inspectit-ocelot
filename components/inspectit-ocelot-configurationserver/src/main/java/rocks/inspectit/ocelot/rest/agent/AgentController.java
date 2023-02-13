@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.rest.agent;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,9 +58,9 @@ public class AgentController extends AbstractBaseController {
      *
      * @return The configuration mapped on the given agent name
      */
-    @ApiOperation(value = "Fetch the Agent Configuration", notes = "Reads the configuration for the given agent and returns it as a yaml string")
+    @Operation(summary = "Fetch the Agent Configuration", description = "Reads the configuration for the given agent and returns it as a yaml string")
     @GetMapping(value = "agent/configuration", produces = "application/x-yaml")
-    public ResponseEntity<String> fetchConfiguration(@ApiParam("The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes, @RequestHeader Map<String, String> headers) {
+    public ResponseEntity<String> fetchConfiguration(@Parameter(description = "The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes, @RequestHeader Map<String, String> headers) {
         log.debug("Fetching the agent configuration for agent ({})", attributes.toString());
         AgentConfiguration configuration = configManager.getConfiguration(attributes);
         statusManager.notifyAgentConfigurationFetched(attributes, headers, configuration);
@@ -110,9 +110,9 @@ public class AgentController extends AbstractBaseController {
      *
      * @return The data used in the support archive.
      */
-    @ApiOperation(value = "Fetch an Agents Data for Downloading a Support Archive", notes = "Bundles useful information for debugging issues raised in support tickets.")
+    @Operation(summary = "Fetch an Agents Data for Downloading a Support Archive", description = "Bundles useful information for debugging issues raised in support tickets.")
     @GetMapping(value = "agent/supportArchive", produces = "application/json")
-    public DeferredResult<ResponseEntity<?>> fetchSupportArchive(@ApiParam("The agent attributes used to retrieve the correct data") @RequestParam Map<String, String> attributes) throws ExecutionException {
+    public DeferredResult<ResponseEntity<?>> fetchSupportArchive(@Parameter(description = "The agent attributes used to retrieve the correct data") @RequestParam Map<String, String> attributes) throws ExecutionException {
         return agentService.buildSupportArchive(attributes, configManager);
     }
 }

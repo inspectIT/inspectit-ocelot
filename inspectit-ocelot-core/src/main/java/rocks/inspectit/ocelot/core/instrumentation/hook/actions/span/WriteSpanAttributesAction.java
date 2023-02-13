@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.span;
 
-import io.opencensus.trace.Span;
-import io.opencensus.trace.Tracing;
+import io.opentelemetry.api.trace.Span;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Singular;
@@ -28,7 +27,7 @@ public class WriteSpanAttributesAction implements IHookAction {
     @Override
     public void execute(ExecutionContext context) {
         if (context.getInspectitContext().hasEnteredSpan()) {
-            Span span = Tracing.getTracer().getCurrentSpan();
+            Span span = Span.current();
             for (val entry : attributeAccessors.entrySet()) {
                 Object value = entry.getValue().get(context);
                 if (value != null) {

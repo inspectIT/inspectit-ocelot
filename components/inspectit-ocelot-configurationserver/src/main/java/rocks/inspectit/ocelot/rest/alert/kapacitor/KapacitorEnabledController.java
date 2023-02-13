@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.rest.alert.kapacitor;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class KapacitorEnabledController extends KapacitorBaseController {
         super(settings);
     }
 
-    @ApiOperation(value = "Provides Information about the configured Kapacitor connection.")
+    @Operation(summary = "Provides Information about the configured Kapacitor connection.")
     @GetMapping("/alert/kapacitor")
     public KapacitorState getState() {
         boolean kapacitorEnabled = isKapacitorEnabled();

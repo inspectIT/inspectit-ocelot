@@ -1,8 +1,8 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.tags;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Span;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -43,7 +43,7 @@ public class CommonTagsToAttributesManager {
     public CommonTagsToAttributesManager(InspectitEnvironment env, CommonTagsManager commonTagsManager) {
         this.env = env;
         this.commonTagsManager = commonTagsManager;
-        this.addCommonTags = TracingSettings.AddCommonTags.NEVER;
+        addCommonTags = TracingSettings.AddCommonTags.NEVER;
     }
 
     /**
@@ -56,7 +56,7 @@ public class CommonTagsToAttributesManager {
         InspectitConfig configuration = env.getCurrentConfig();
         TracingSettings tracing = configuration.getTracing();
         if (!Objects.equals(tracing.getAddCommonTags(), addCommonTags)) {
-            this.addCommonTags = tracing.getAddCommonTags();
+            addCommonTags = tracing.getAddCommonTags();
         }
     }
 
@@ -69,8 +69,7 @@ public class CommonTagsToAttributesManager {
      */
     public void writeCommonTags(Span span, boolean hasRemoteParent, boolean hasLocalParent) {
         if (shouldAdd(hasRemoteParent, hasLocalParent)) {
-            commonTagsManager.getCommonTagValueMap()
-                    .forEach((k, v) -> span.putAttribute(k, AttributeValue.stringAttributeValue(v)));
+            commonTagsManager.getCommonTagValueMap().forEach((k, v) -> span.setAttribute(AttributeKey.stringKey(k), v));
         }
     }
 

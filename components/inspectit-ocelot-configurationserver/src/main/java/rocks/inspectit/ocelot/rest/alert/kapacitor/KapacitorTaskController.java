@@ -1,8 +1,8 @@
 package rocks.inspectit.ocelot.rest.alert.kapacitor;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +43,7 @@ public class KapacitorTaskController extends KapacitorBaseController {
         super(settings);
     }
 
-    @ApiOperation(value = "Provides a list with basic information about each kapacitor task. Only tasks based on templates will be listed.")
+    @Operation(summary = "Provides a list with basic information about each kapacitor task. Only tasks based on templates will be listed.")
     @GetMapping(ALERT_PATH_TASKS)
     public List<Task> getAllTasks() {
         ObjectNode response = kapacitor().getForEntity(KAPACITOR_PATH_TASKS, ObjectNode.class).getBody();
@@ -57,17 +57,17 @@ public class KapacitorTaskController extends KapacitorBaseController {
                 .collect(Collectors.toList());
     }
 
-    @ApiOperation(value = "Provides detailed information about a given kapacitor task")
+    @Operation(summary = "Provides detailed information about a given kapacitor task")
 
     @GetMapping(ALERT_PATH_TASKS_ID)
-    public Task getTask(@PathVariable @ApiParam("The id of the task to query") String taskId) {
+    public Task getTask(@PathVariable @Parameter(description = "The id of the task to query") String taskId) {
         ObjectNode response = kapacitor().getForEntity(KAPACITOR_PATH_TASKS_ID, ObjectNode.class, taskId).getBody();
 
         return Task.fromKapacitorResponse(response);
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @ApiOperation(value = "Inserts a new Kapacitor task")
+    @Operation(summary = "Inserts a new Kapacitor task")
     @PostMapping(ALERT_PATH_TASKS)
     public Task addTask(@RequestBody Task task) {
         ObjectNode response = kapacitor().postForEntity(KAPACITOR_PATH_TASKS, task.toKapacitorRequest(), ObjectNode.class)
@@ -77,9 +77,9 @@ public class KapacitorTaskController extends KapacitorBaseController {
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @ApiOperation(value = "Updates one or more settings of a kapacitor task")
+    @Operation(summary = "Updates one or more settings of a kapacitor task")
     @PatchMapping(ALERT_PATH_TASKS_ID)
-    public Task updateTask(@PathVariable @ApiParam("The id of the task to update") String taskId, @RequestBody Task task) {
+    public Task updateTask(@PathVariable @Parameter(description = "The id of the task to update") String taskId, @RequestBody Task task) {
         ObjectNode response = kapacitor().patchForObject(KAPACITOR_PATH_TASKS_ID, task.toKapacitorRequest(), ObjectNode.class, taskId);
         triggerTaskReload(task);
 
@@ -87,9 +87,9 @@ public class KapacitorTaskController extends KapacitorBaseController {
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @ApiOperation(value = "Removes a task")
+    @Operation(summary = "Removes a task")
     @DeleteMapping(ALERT_PATH_TASKS_ID)
-    public void removeTask(@PathVariable @ApiParam("The id of the task to delete") String taskId) {
+    public void removeTask(@PathVariable @Parameter(description = "The id of the task to delete") String taskId) {
         kapacitorRestTemplate.delete(KAPACITOR_PATH_TASKS_ID, taskId);
     }
 

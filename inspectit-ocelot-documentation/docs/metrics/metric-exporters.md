@@ -50,14 +50,14 @@ The following properties are nested properties below the `inspectit.exporters.me
 
 ## InfluxDB Exporter
 If enabled, metrics are pushed at a specified interval directly to a given InfluxDB v1.x instance.
-To enable the InfluxDB Exporters, it is only required to specify the `url`.
+To enable the InfluxDB Exporters, it is only required to specify the `endpoint`.
 
 The InfluxDB exporter provides a special handling for counter and sum metrics which is enabled by default and can be disabled using the `counters-as-differences` option.
 Usually, the absolute value of such counters is irrelevant when querying the data, instead you want to have the increase of it over a certain period of time.
 With the `counters-as-differences` option enabled, counters are preprocessed before being exported.
 
 Instead of writing the absolute value of each counter into the InfluxDB, only the increase since the last export will be written.
-In addition no value will be exported, if the counter has not changed since the last export.
+In addition, no value will be exported, if the counter has not changed since the last export.
 This can greatly reduce the amount of data written into the InfluxDB, especially if the metrics are quite constant and won't change much.
 
 The following properties are nested properties below the `inspectit.exporters.metrics.influx` property:
@@ -78,7 +78,7 @@ The following properties are nested properties below the `inspectit.exporters.me
 ## OTLP Exporter (Metrics)
 
 The OpenTelemetry Protocol (OTLP) exporters export the metrics to the desired endpoint at a specified interval. 
-To enable the OTLP exporters, it is only required to specify the `url`.
+To enable the OTLP exporters, it is only required to specify the `endpoint`.
 
 The following properties are nested properties below the `inspectit.exporters.metrics.otlp-grpc` property:
 

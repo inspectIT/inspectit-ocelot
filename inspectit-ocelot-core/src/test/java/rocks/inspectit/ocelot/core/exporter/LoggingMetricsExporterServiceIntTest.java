@@ -47,11 +47,11 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
 
     @BeforeEach
     void enableService() {
-        localSwitch(ExporterEnabledState.ENABLED);
         Awaitility.await()
                 .atMost(15, TimeUnit.SECONDS)
                 .pollInterval(1, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(Instances.openTelemetryController.isActive()).isTrue());
+        localSwitch(ExporterEnabledState.ENABLED);
     }
 
     @AfterEach
@@ -62,6 +62,9 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
     private void localSwitch(ExporterEnabledState enabled) {
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.metrics.logging.enabled", enabled);
+            if (!enabled.isDisabled()) {
+                props.setProperty("inspectit.exporters.metrics.logging.export-interval", "500ms");
+            }
         });
     }
 
@@ -91,11 +94,6 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
         @DirtiesContext
         @Test
         void verifyOpenTelemetryMetricsWritten() {
-            // change export interval
-            updateProperties(props -> {
-                props.setProperty("inspectit.exporters.metrics.logging.export-interval", "500ms");
-            });
-
             assertThat(service.isEnabled()).isTrue();
 
             // get the meter and create a counter
@@ -130,14 +128,12 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
         @DirtiesContext
         @Test
         void verifyOpenCensusMetricsWritten() throws InterruptedException {
-            // change export interval
-            updateProperties(props -> {
-                props.setProperty("inspectit.exporters.metrics.logging.export-interval", "500ms");
-            });
             assertThat(service.isEnabled()).isTrue();
 
             // capture some metrics
             captureOpenCensusMetrics();
+
+            Instances.openTelemetryController.flush();
 
             // wait until the metrics are exported
             Awaitility.waitAtMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {

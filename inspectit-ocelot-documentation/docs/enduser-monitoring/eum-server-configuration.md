@@ -1,7 +1,7 @@
 ---
 id: eum-server-configuration
-title: EUM Server and Metrics Configuration
-sidebar_label: Server and Metrics Configuration
+title: EUM Server, Metrics and Exporter Configuration
+sidebar_label: Server, Metrics and Exporter Configuration
 ---
 
 The configuration file defines the mapping between the concrete Boomerang metric and a OpenCensus metric, as the following sample configuration file shows:
@@ -89,6 +89,19 @@ inspectit-eum-server:
         enabled: true
         grpc: localhost:14250
         service-name: browser-js
+  security:
+    enabled: false
+    authorization-header: Authorization
+    permitted-urls:
+      - "/actuator/health"
+      - "/boomerang/**"
+    auth-provider:
+      simple:
+        enabled: false
+        watch: true
+        frequency: 60s
+        token-directory: ""
+        default-file-name: "default-token-file.yaml"
 ```
 
 ## Metrics Definition
@@ -453,21 +466,21 @@ inspectit-eum-server:
 
 ### Metrics
 
-The EUM server comes with the same Prometheus and InfluxDB exporter as the Ocelot agent.
+The EUM server comes with the same Prometheus, InfluxDB and OTLP metrics exporter as the Ocelot agent.
 The exporter's configurations options are the same as for the [agent](metrics/metric-exporters.md).
 However, they are located under the `inspectit-eum-server.exporters.metrics` configuration path.
 
 #### Prometheus
-By default, the prometheus exporter is enabled and available on port `8888`.
+By default, the prometheus exporter is disabled.
 
-The following configuration snippet shows the default configuration of the prometheus-exporter:
+The following configuration snippet shows how to make the prometheus-exporter expose the metrics on port `8888`:
 ```YAML
 inspectit-eum-server:
   exporters:
     metrics:
       prometheus:
         # Determines whether the prometheus exporter is enabled.
-        enabled: true
+        enabled: ENABLED
 
         # The host of the prometheus HTTP endpoint.
         host: localhost
@@ -477,7 +490,7 @@ inspectit-eum-server:
 ```
 
 #### InfluxDB
-By default, the InfluxDB exporter is enabled, but it is not active since the url-property is not set. The property can be set via `inspectit-eum-server.exporters.metrics.influx.url`.
+By default, the InfluxDB exporter is enabled, but it is not active since the `endpoint`-property is not set. The property can be set via `inspectit-eum-server.exporters.metrics.influx.endpoint`.
 
 The following configuration snippet makes the InfluxDB Exporter send every 15 seconds metrics to an InfluxDB available under `localhost:8086` to the database `inspectit`:
 ```YAML
@@ -486,14 +499,14 @@ inspectit-eum-server:
     metrics:
       influx:
         # Determines whether the InfluxDB exporter is enabled.
-        enabled: true
+        enabled: IF_CONFIGURED
 
         # the export interval of the metrics.
         export-interval: 15s
 
         # The http url of influx.
         # If this property is not set, the InfluxDB exporter will not be started.
-        url: "http://localhost:8086"
+        endpoint: "http://localhost:8086"
 
         # The database to write to.
         # If this property is not set, the InfluxDB exporter will not be started.
@@ -523,6 +536,30 @@ inspectit-eum-server:
         buffer-size: 40
 ```
 
+#### OTLP (Metrics)
+By default, the OTLP exporter is enabled, but is not active as the `endpoint`-property is not set.
+The property can be set via `inspectit-eum-server.exporters.metrics.otlp.endpoint`.
+
+The following configuration snipped makes the OTLP exporter send metrics every 15s to an OTLP receiver located at `localhost:4317`:
+
+```yaml
+inspectit-eum-server:
+  exporters:
+    metrics:
+      # settings for the OtlpGrpcMetricExporter used in OtlpGrpcMetricExporterService
+      otlp:
+        enabled: ENABLED
+        # the export interval of the metrics
+        export-interval: 15s
+        # the URL endpoint, e.g., http://127.0.0.1:4317
+        endpoint: http://localhost:4317
+        # the transport protocol, e.g., 'grpc' or 'http/protobuf'
+        protocol: grpc
+        # headers
+        headers: { }
+        # the aggregation temporality, e.g., CUMULATIVE or DELTA
+        preferredTemporality: CUMULATIVE
+```
 ### Tracing
 
 :::note
@@ -532,9 +569,23 @@ To capture traces with Boomerang, a special tracing plugin must be used.
 More information can be found in the chapter on [installing the EUM agent](https://inspectit.github.io/inspectit-ocelot/docs/enduser-monitoring/install-eum-agent#tracing).
 :::
 
-The EUM server supports trace data forwarding to the Jaeger exporter.
-The exporter is using the [Jaeger Protobuf via gRPC API](https://www.jaegertracing.io/docs/1.16/apis/#protobuf-via-grpc-stable) in order to forward trace data.
-By default, the Jaeger exporter is enabled, but it is not active since the `grpc` property is not set.
+#### Trace Exporter
+The EUM server comes with the same Jaeger and OTLP trace exporter as the Ocelot agent.
+The exporter's configurations options are the same as for the [agent](tracing/trace-exporters.md).
+However, they are located under the `inspectit-eum-server.exporters.tracing` configuration path.
+
+##### General Trace Exporter Settings
+
+These settings apply to all trace exporters and can set below the `inspectit-eum-server.exporters.tracing` property.
+
+| Property        | Default                     | Description                                                                                                                                                               |
+|-----------------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.service-name` | `${inspectit.service-name}` | The value of this property will be used to identify the service a trace came from. Please note that changes of this property only take effect after restarting the agent. |
+
+##### Jaeger
+InspectIT EUM Server supports thrift and gRPC Jaeger exporter.
+
+By default, the Jaeger exporter is enabled, but it is not active since the `endpoint` property is not set.
 
 The following configuration snippet makes the Jaeger exporter send traces to a Jaeger instance avialable under `localhost:14250`.
 
@@ -544,21 +595,35 @@ inspectit-eum-server:
     tracing:
       jaeger:
       # If jaeger exporter for the OT received spans is enabled.
-      enabled: true
+      enabled: ENABLED
 
       # Location of the jaeger gRPC API.
       # Either a valid NameResolver-compliant URI, or an authority string.
       # If this property is not set, the jaeger-exporter will not be started.
-      grpc: localhost:14250
-
+      endpoint: localhost:14250
+      # the transport protocol, e.g., 'grpc' or 'http/protobuf'
+      protocol: grpc
       # service name for all exported spans.
       service-name: browser-js
 ```
 
-:::note
-The GRPC property needs to be set without protocol (e.g. `localhost:14250`)!
-:::
+##### OTLP (tracing)
+By default, the OTLP exporter is enabled, but is not active as the `endpoint`-property is not set.
+The property can be set via `inspectit-eum-server.exporters.tracing.otlp.endpoint`.
 
+The following configuration snippet makes the OTLP exporter send traces to an OTLP receiver available under `localhost:4317`.
+```yaml
+inspectit-eum-server:
+  exporters:
+    tracing:
+      otlp:
+        # If OTLP exporter for the OT received spans is enabled.
+        enabled: ENABLED
+        # the URL endpoint, e.g., http://127.0.0.1:4317
+        endpoint: localhost:4317
+        # the transport protocol, e.g., 'http/thrift' or 'grpc'
+        protocol: grpc
+```
 #### Additional Span Attributes
 
 The EUM server is able to enrich a received span with additional attributes.
@@ -637,3 +702,103 @@ Currently, the following self monitoring metrics are available.
 | `inspectit_eum_self_traces_received_count` | Counts the number of received traces | 
 | `inspectit_eum_self_traces_received_duration_sum` | The total duration needed for trace exports | 
 | `inspectit_eum_self_traces_span_size_sum` | The number of exported spans per trace | 
+
+## Security
+In order to allow only authorized instead of public access, EUM-Server offers a simple, shared secret solution.
+
+The following configuration snippet shows the default configuration for security.
+```yaml
+inspectit-eum-server:
+  security:
+    # Enable/Disable Security
+    enabled: false
+    # Change name of authentication header if required
+    authorization-header: Authorization
+    # White list certain urls which will not be secured
+    permitted-urls:
+      - "/actuator/health"
+      - "/boomerang/**"
+    auth-provider:
+      simple:
+        # Enable/Disable Provider
+        enabled: false
+        # The directory where token files are stored. Empty by default to force users to provide one
+        token-directory: ""
+        # Flag indicates if token-directory should be watched for changes and tokens reloaded
+        # The name of the initial token file. If a name is provided file will be created with an initial token
+        default-file-name: "default-token-file.yaml"
+        watch: true
+        # How often token-directory should be watched for changes
+        frequency: 60s
+```
+
+### Configuration options
+
+All properties share the common prefix `inspectit-eum-server.security`.
+
+| Property               | Default                                | Description                                                                                                                |
+|------------------------|----------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| `enabled`              | `false`                                | If `true` access to EUM-Server is secured.                                                                                 |
+| `authorization-header` | `Authorization`                        | The HTTP-Header EUM-Server uses to the fetch the authorization information from.                                           |
+| `permitted-urls`       | `/actuator/health` and `/boomerang/**` | A list of whitelisted url patterns. These URLs are publicly available without Authorization.                               |
+| `auth-provider`        |                                        | Allows to configure different AuthenticationProviders that EUM-Server supports. <br/>Currently only `simple` is supported. |
+
+Please note that if security is enabled, at least one AuthenticationProvider has to be enabled. Otherwise, all endpoints of EUM-Server are not accessible except for the whitelisted ones.
+
+#### AuthenticationProvider `simple`
+The AuthenticationProvider `simple` supports to secure EUM-Server using shared secrets aka tokens.
+
+If this AuthenticationProvider is enabled, every client request needs to contain a known token as HTTP header (see `authorization-header` above). Otherwise, the request is rejected with a `403 - Forbidden` status code.
+
+The known tokens are stored in yaml files below a configurable directory. Each file may contain multiple shared secrets.
+
+Such a token consists of a name and a token value. `name` allows to identify the token. `token` is the actual shared secret.
+
+Example:
+```yaml
+  # Identifies a token. E.g. you can document which application, person, organization, etc. knows about this token. It has no influence on security.
+- name: "Name for first token"
+  # The value of the token. If an HTTP-request contains this value (without opening and closing double quotes), access is allowed.
+  token: "755f3e71-e43f-4715-bd26-b6e112fd30dd"
+  # You man specify as many elements as you like
+- name: "Name of other token"
+  token: "any token value you like"
+```
+
+If this AuthenticationProvider is enabled, a default token file containing a generated token will be created, if that file does not yet exist.
+
+It is possible to add, change and remove tokens without a restart. All files below the token directory will be scanned regularly by default. 
+
+The following table describes the configuration options for the AuthenticationProvider `simple`.
+
+All properties share the common prefix `inspectit-eum-server.security.auth-provider.simple`.
+
+| Property name       | Default                   | Description                                                                                                                                                                  |
+|---------------------|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `enabled`           | `false`                   | If `true` this AuthenticationProvider is enabled.                                                                                                                            |
+| `token-directory`   |                           | The directory where token files are stored. If this authentication provider is enabled this value must not be empty. Otherwise, the application will not start successfully. |
+| `default-file-name` | `default-token-file.yaml` | The name of the default token file name.                                                                                                                                     |
+| `watch`             | `true`                    | If `true` the token directory is scanned for changes regularly.                                                                                                              |
+| `frequency`         | `60s`                     | The frequency how often the token directory is scanned for changes.                                                                                                          |
+### Client configuration
+You need to configure your client to use one of the known tokens during requests to EUM-Server.
+
+You should make sure to connect via https. Otherwise, it is trivial to intercept the token.
+
+Example configuration using boomerang.js:
+```javascript
+// this must be one of your known tokens configured in EUM-Server
+var token = "fancy but secret token";
+BOOMR.init({
+  beacon_url: "http://your.target.url",
+  // the following two options are necesssary to configure Authorization for sending of beacons
+  beacon_type: "POST", // for other beacon_types boomerang never sends an authorization header
+  beacon_auth_token: token,
+  // the following configures the Authorization for sending of spans
+  OpenTelemetry: {
+    collectorConfiguration: {
+      headers: {"Authorization": token}
+    }
+  }
+})
+```

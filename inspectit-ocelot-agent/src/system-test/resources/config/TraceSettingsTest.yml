@@ -229,6 +229,7 @@ inspectit:
         tracing:
           start-span: true
           sample-probability: _arg0
+          sample-mode: HYBRID_PARENT_TRACE_ID_RATIO_BASED
 
       TraceSettingsTest-withErrorStatus:
         scopes:

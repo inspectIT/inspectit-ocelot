@@ -2,11 +2,14 @@ package rocks.inspectit.ocelot.core.utils;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.core.opentelemetry.CustomTracer;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.CountDownLatch;
@@ -106,7 +109,7 @@ public class OpenTelemetryUtils {
     public static OpenTelemetry getGlobalOpenTelemetry() {
         OpenTelemetry openTelemetry = null;
         try {
-            Field field = ReflectionUtils.getPrivateField(GlobalOpenTelemetry.class, "globalOpenTelemetry");
+            Field field = ReflectionUtils.getFieldAndMakeAccessible(GlobalOpenTelemetry.class, "globalOpenTelemetry");
             openTelemetry = (OpenTelemetry) field.get(null);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
@@ -117,7 +120,32 @@ public class OpenTelemetryUtils {
     /**
      * {@link Instances#openTelemetryController#flush() flushes} all pending spans and metrics waits for it to complete.
      */
-    public static void flush(){
+    public static void flush() {
         Instances.openTelemetryController.flush();
     }
+
+    public final static String DEFAULT_INSTRUMENTATION_SCOPE_INFO = "rocks.inspectit.ocelot";
+
+    public final static String DEFAULT_INSTRUMENTATION_SCOPE_VERSION = "0.0.1";
+
+    /**
+     * Gets the current {@link Tracer} registered at {@link GlobalOpenTelemetry#getTracer(String, String)} under the instrumentationScopeName 'rocks.inspectit.ocelot'
+     *
+     * @return
+     */
+    public static Tracer getTracer() {
+        return getGlobalOpenTelemetry().getTracer(DEFAULT_INSTRUMENTATION_SCOPE_INFO, DEFAULT_INSTRUMENTATION_SCOPE_VERSION);
+    }
+
+    /**
+     * Gets a custom {@link Tracer tracer} with custom {@link Sampler sampler}
+     *
+     * @param customSampler
+     *
+     * @return
+     */
+    public static Tracer getTracer(Sampler customSampler) {
+        return CustomTracer.builder().sampler(customSampler).build();
+    }
+
 }

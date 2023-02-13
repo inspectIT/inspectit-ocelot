@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.rest.yamlhighlighter;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CaseFormat;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.util.ReflectionUtils;
@@ -169,7 +169,7 @@ public class HighlightRulesMapController extends AbstractBaseController {
         return Arrays.stream(currentEnum.getEnumConstants()).map(Object::toString).collect(Collectors.toList());
     }
 
-    @ApiOperation(value = "Get JSON for Highlight Rules Generation", notes = "")
+    @Operation(summary = "Get JSON for Highlight Rules Generation", description = "")
     @GetMapping(value = "highlight-rules", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> getHighlightRulesMap() {
         return generateMap(InspectitConfig.class);

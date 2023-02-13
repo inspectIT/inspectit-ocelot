@@ -1,42 +1,51 @@
 package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
-import io.opencensus.implcore.trace.RecordEventsSpanImpl;
-import io.opencensus.trace.Span;
-import io.opencensus.trace.Tracing;
-import io.opencensus.trace.samplers.Samplers;
-import org.junit.jupiter.api.Disabled;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.trace.OcelotAnchoredClockUtils;
+import io.opentelemetry.sdk.trace.OcelotSpanUtils;
+import io.opentelemetry.sdk.trace.ReadWriteSpan;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.core.SpringTestBase;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled // TODO: fix CustomSpanBuilder with OTEL
 public class CustomSpanBuilderTest {
 
-
     @Nested
-    class Timestamps {
+    class Timestamps extends SpringTestBase {
 
         @Test
         void verifyTimingsChanged() {
+            Span parent = OpenTelemetryUtils.getTracer(Sampler.traceIdRatioBased(1.0)).spanBuilder("root").startSpan();
 
-            Span parent = Tracing.getTracer().spanBuilder("root")
-                    .setSampler(Samplers.alwaysSample())
-                    .startSpan();
-
+            long clockNow = Clock.getDefault().now();
+            long entryNanos = Clock.getDefault().nanoTime() + 42;
+            long exitNanos = entryNanos + 100;
             Span mySpan = CustomSpanBuilder.builder("foo", parent)
-                    .customTiming(42, 142, null)
+                    .customTiming(entryNanos, exitNanos, null)
                     .startSpan();
 
-            RecordEventsSpanImpl spanImpl = (RecordEventsSpanImpl) mySpan;
+            ReadWriteSpan spanImpl = (ReadWriteSpan) mySpan;
+            spanImpl.end();
+
+            Object anchoredClock = OcelotSpanUtils.getAnchoredClock(mySpan);
+
             assertThat(spanImpl.getName()).isEqualTo("foo");
-            assertThat(spanImpl.getContext().getSpanId()).isNotEqualTo(parent.getContext().getSpanId());
-            assertThat(spanImpl.getContext().getTraceId()).isEqualTo(parent.getContext().getTraceId());
-            assertThat(spanImpl.getContext().getTraceOptions()).isEqualTo(parent.getContext().getTraceOptions());
-            assertThat(spanImpl.getContext().getTracestate()).isEqualTo(parent.getContext().getTracestate());
-            assertThat(spanImpl.toSpanData().getParentSpanId()).isEqualTo(parent.getContext().getSpanId());
-            assertThat(spanImpl.getEndNanoTime()).isEqualTo(142);
-            assertThat(spanImpl.getLatencyNs()).isEqualTo(100);
+            assertThat(spanImpl.getSpanContext().getSpanId()).isNotEqualTo(parent.getSpanContext().getSpanId());
+            assertThat(spanImpl.getSpanContext().getTraceId()).isEqualTo(parent.getSpanContext().getTraceId());
+            assertThat(spanImpl.getSpanContext().getTraceFlags()).isEqualTo(parent.getSpanContext().getTraceFlags());
+            assertThat(spanImpl.getSpanContext().getTraceState()).isEqualTo(parent.getSpanContext().getTraceState());
+            assertThat(spanImpl.toSpanData().getParentSpanId()).isEqualTo(parent.getSpanContext().getSpanId());
+            assertThat(spanImpl.toSpanData()
+                    .getEndEpochNanos()).isEqualTo(OcelotAnchoredClockUtils.getStartTime(anchoredClock) + (exitNanos - OcelotAnchoredClockUtils.getNanoTime(anchoredClock)));
+            assertThat(spanImpl.getLatencyNanos()).isEqualTo(100);
+
+            assertThat(clockNow - OcelotAnchoredClockUtils.getNow(anchoredClock)).isLessThan(10000);
+            System.out.println("elapsed: " + (clockNow - OcelotAnchoredClockUtils.getNow(anchoredClock)));
         }
     }
 

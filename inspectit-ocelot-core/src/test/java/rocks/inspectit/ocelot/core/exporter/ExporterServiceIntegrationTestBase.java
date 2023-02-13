@@ -39,6 +39,7 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -148,7 +149,7 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
      *
      * @return The {@link Tracer} registered at {@link GlobalOpenTelemetry}
      */
-    static Tracer getTracer() {
+    static Tracer getOtelTracer() {
         return GlobalOpenTelemetry.getTracer(INSTRUMENTATION_NAME, INSTRUMENTATION_VERSION);
     }
 
@@ -183,9 +184,9 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
      */
     void makeSpansAndFlush(String parentSpanName, String childSpanName) {
         // start span and nested span
-        Span parentSpan = getTracer().spanBuilder(parentSpanName).startSpan();
+        Span parentSpan = getOtelTracer().spanBuilder(parentSpanName).startSpan();
         try (Scope scope = parentSpan.makeCurrent()) {
-            Span childSpan = getTracer().spanBuilder(childSpanName).startSpan();
+            Span childSpan = getOtelTracer().spanBuilder(childSpanName).startSpan();
             try (Scope child = childSpan.makeCurrent()) {
                 // do sth
             } finally {
@@ -278,16 +279,25 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
                                     .map(ils -> ils.getSpansList())));
 
             // assert that parent and child span are present and that the parent's spanId equals the child's parentSpanId
-            assertThat(spansLis.anyMatch(s -> s.stream()
-                    .filter(span -> span.getName().equals(childSpanName))
-                    .findFirst()
-                    .orElse(io.opentelemetry.proto.trace.v1.Span.getDefaultInstance())
-                    .getParentSpanId()
-                    .equals(s.stream()
-                            .filter(span -> span.getName().equals(parentSpanName))
-                            .findFirst()
-                            .orElse(io.opentelemetry.proto.trace.v1.Span.getDefaultInstance())
-                            .getSpanId()))).isTrue();
+            assertThat(spansLis.anyMatch(s -> {
+                Optional<io.opentelemetry.proto.trace.v1.Span> childSpan = s.stream()
+                        .filter(span -> span.getName().equals(childSpanName))
+                        .findFirst();
+                if (!childSpan.isPresent()) {
+                    return false;
+                }
+
+                Optional<io.opentelemetry.proto.trace.v1.Span> parentSpan = s.stream()
+                        .filter(span -> span.getName().equals(parentSpanName))
+                        .findFirst();
+                if (!parentSpan.isPresent()) {
+                    return false;
+                }
+
+                return childSpan.get().getParentSpanId().equals(parentSpan.get().getSpanId());
+
+            })).isTrue();
+
         });
 
     }

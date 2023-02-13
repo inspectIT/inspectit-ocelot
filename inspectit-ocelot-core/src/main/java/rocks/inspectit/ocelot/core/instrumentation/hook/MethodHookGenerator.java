@@ -1,8 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.trace.Sampler;
-import io.opencensus.trace.samplers.Samplers;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.bytebuddy.description.method.MethodDescription;
@@ -25,6 +24,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAcce
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
 import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.OcelotSamplerUtils;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
@@ -173,9 +173,10 @@ public class MethodHookGenerator {
     private void configureSampling(RuleTracingSettings tracing, ContinueOrStartSpanAction.ContinueOrStartSpanActionBuilder actionBuilder) {
         String sampleProbability = tracing.getSampleProbability();
         if (!StringUtils.isBlank(sampleProbability)) {
+            actionBuilder.sampleMode(tracing.getSampleMode());
             try {
                 double constantProbability = Double.parseDouble(sampleProbability);
-                Sampler sampler = Samplers.probabilitySampler(Math.max(0.0, Math.min(1.0, constantProbability)));
+                Sampler sampler = OcelotSamplerUtils.create(tracing.getSampleMode(), constantProbability);
                 actionBuilder.staticSampler(sampler);
             } catch (NumberFormatException e) {
                 VariableAccessor probabilityAccessor = variableAccessorFactory.getVariableAccessor(sampleProbability);

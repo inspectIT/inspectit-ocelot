@@ -1,8 +1,8 @@
 package rocks.inspectit.ocelot.rest.file;
 
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileInfo;
@@ -19,10 +19,10 @@ import java.util.Collection;
 @RestController
 public class DirectoryController extends FileBaseController {
 
-    @ApiOperation(value = "List directory contents", notes = "Can be used to get a list of the contents of a given directory. In addition, the branch can be specified which will be used as basis for the listing.")
-    @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path to the directory whose contents shall be read.")
+    @Operation(summary = "List directory contents", description = "Can be used to get a list of the contents of a given directory. In addition, the branch can be specified which will be used as basis for the listing.")
+    @Parameter(name = "Path", description = "The part of the url after /directories/ define the path to the directory whose contents shall be read.")
     @GetMapping(value = "directories/**")
-    public Collection<FileInfo> listContents(@ApiParam("The id of the version which should be listed. If it is empty, the lastest workspace version is used. Can be 'live' fir listing the latest live version.") @RequestParam(value = "version", required = false) String commitId, HttpServletRequest request) {
+    public Collection<FileInfo> listContents(@Parameter(description = "The id of the version which should be listed. If it is empty, the lastest workspace version is used. Can be 'live' fir listing the latest live version.") @RequestParam(value = "version", required = false) String commitId, HttpServletRequest request) {
         String path = RequestUtil.getRequestSubPath(request);
 
         if (commitId == null) {
@@ -36,8 +36,8 @@ public class DirectoryController extends FileBaseController {
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @ApiOperation(value = "Create a directory", notes = "Creates a new, empty directory including its parent folders. Does nothing if the directory already exists.")
-    @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path of the directory to create.")
+    @Operation(summary = "Create a directory", description = "Creates a new, empty directory including its parent folders. Does nothing if the directory already exists.")
+    @Parameter(name = "Path", description = "The part of the url after /directories/ define the path of the directory to create.")
     @PutMapping(value = "directories/**")
     public void createNewDirectory(HttpServletRequest request) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);
@@ -45,8 +45,8 @@ public class DirectoryController extends FileBaseController {
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @ApiOperation(value = "Delete a directory", notes = "Deletes a directory including its contents.")
-    @ApiImplicitParam(name = "Path", value = "The part of the url after /directories/ define the path of the directory to delete.")
+    @Operation(summary = "Delete a directory", description = "Deletes a directory including its contents.")
+    @Parameter(name = "Path", description = "The part of the url after /directories/ define the path of the directory to delete.")
     @DeleteMapping(value = "directories/**")
     public void deleteDirectory(HttpServletRequest request) throws IOException {
         String path = RequestUtil.getRequestSubPath(request);

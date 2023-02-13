@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
- * {@link SpanExporter} that forwards all received spans to a list of {@link SpanExporter}, similar to {@link io.opentelemetry.sdk.trace.export.MultiSpanExporter}. In contrast to {@link io.opentelemetry.sdk.trace.export.MultiSpanExporter}, {@link SpanExporter}s can by dynamically registered and unregisted.
+ * {@link SpanExporter} that forwards all received spans to a list of {@link SpanExporter}, similar to {@link io.opentelemetry.sdk.trace.export.MultiSpanExporter}. In contrast to {@link io.opentelemetry.sdk.trace.export.MultiSpanExporter}, {@link SpanExporter}s can by dynamically registered and unregistered.
  *
  * <p>Can be used to export to multiple backends using the same {@link io.opentelemetry.sdk.trace.SpanProcessor} like {@link io.opentelemetry.sdk.trace.export.SimpleSpanProcessor} or {@link io.opentelemetry.sdk.trace.export.BatchSpanProcessor}
  */
@@ -23,9 +23,10 @@ public class DynamicMultiSpanExporter implements SpanExporter {
 
     /**
      * Returns a new {@link DynamicMultiSpanExporter}
+     *
      * @return
      */
-    public static DynamicMultiSpanExporter create(){
+    public static DynamicMultiSpanExporter create() {
         return new DynamicMultiSpanExporter();
     }
 

@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LogbackInitializerIntTest {
 
     private static final String EXCEPTIONS_LOG_FILE = "exceptions.log";
+
     private static final String AGENT_LOG_FILE = "agent.log";
 
     @Nested
@@ -50,7 +51,8 @@ class LogbackInitializerIntTest {
 
             assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_LEVEL)).isNull();
             assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_PATH)).isNull();
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_SERVICE_NAME)).isEqualTo("[" + environment.getCurrentConfig().getServiceName() + "]");
+            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_SERVICE_NAME)).isEqualTo("[" + environment.getCurrentConfig()
+                    .getServiceName() + "]");
             assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_CONSOLE_PATTERN)).isNull();
             assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_FILE_PATTERN)).isNull();
 
@@ -67,32 +69,24 @@ class LogbackInitializerIntTest {
             logger.info(testMessage);
 
             Path output = Paths.get(tempDirectory.toString(), "inspectit-ocelot");
-            Optional<Path> agentLog = Files.walk(output)
-                    .filter(p -> p.endsWith(AGENT_LOG_FILE))
-                    .findFirst();
-            assertThat(agentLog)
-                    .isPresent()
-                    .hasValueSatisfying(p -> {
-                        try {
-                            assertThat(Files.lines(p).anyMatch(l -> l.contains(testMessage))).isTrue();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+            Optional<Path> agentLog = Files.walk(output).filter(p -> p.endsWith(AGENT_LOG_FILE)).findFirst();
+            assertThat(agentLog).isPresent().hasValueSatisfying(p -> {
+                try {
+                    assertThat(Files.lines(p).anyMatch(l -> l.contains(testMessage))).isTrue();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
             // nothing to error log due to the level
-            Optional<Path> errorLog = Files.walk(output)
-                    .filter(p -> p.endsWith(EXCEPTIONS_LOG_FILE))
-                    .findFirst();
-            assertThat(errorLog)
-                    .isPresent()
-                    .hasValueSatisfying(p -> {
-                        try {
-                            assertThat(Files.readAllLines(p)).isEmpty();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+            Optional<Path> errorLog = Files.walk(output).filter(p -> p.endsWith(EXCEPTIONS_LOG_FILE)).findFirst();
+            assertThat(errorLog).isPresent().hasValueSatisfying(p -> {
+                try {
+                    assertThat(Files.readAllLines(p)).isEmpty();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
 
         @Test
@@ -106,35 +100,27 @@ class LogbackInitializerIntTest {
             logger.warn(testMessage, exception);
 
             Path output = Paths.get(tempDirectory.toString(), "inspectit-ocelot");
-            Optional<Path> agentLog = Files.walk(output)
-                    .filter(p -> p.endsWith(AGENT_LOG_FILE))
-                    .findFirst();
-            assertThat(agentLog)
-                    .isPresent()
-                    .hasValueSatisfying(p -> {
-                        try {
-                            List<String> lines = Files.readAllLines(p);
-                            assertThat(lines.stream().anyMatch(l -> l.contains(testMessage))).isTrue();
-                            assertThat(lines.stream().anyMatch(l -> l.contains(exceptionMessage))).isTrue();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+            Optional<Path> agentLog = Files.walk(output).filter(p -> p.endsWith(AGENT_LOG_FILE)).findFirst();
+            assertThat(agentLog).isPresent().hasValueSatisfying(p -> {
+                try {
+                    List<String> lines = Files.readAllLines(p);
+                    assertThat(lines.stream().anyMatch(l -> l.contains(testMessage))).isTrue();
+                    assertThat(lines.stream().anyMatch(l -> l.contains(exceptionMessage))).isTrue();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
-            Optional<Path> errorLog = Files.walk(output)
-                    .filter(p -> p.endsWith(EXCEPTIONS_LOG_FILE))
-                    .findFirst();
-            assertThat(errorLog)
-                    .isPresent()
-                    .hasValueSatisfying(p -> {
-                        try {
-                            List<String> lines = Files.readAllLines(p);
-                            assertThat(lines.stream().anyMatch(l -> l.contains(testMessage))).isTrue();
-                            assertThat(lines.stream().anyMatch(l -> l.contains(exceptionMessage))).isTrue();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+            Optional<Path> errorLog = Files.walk(output).filter(p -> p.endsWith(EXCEPTIONS_LOG_FILE)).findFirst();
+            assertThat(errorLog).isPresent().hasValueSatisfying(p -> {
+                try {
+                    List<String> lines = Files.readAllLines(p);
+                    assertThat(lines.stream().anyMatch(l -> l.contains(testMessage))).isTrue();
+                    assertThat(lines.stream().anyMatch(l -> l.contains(exceptionMessage))).isTrue();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
 
         @Test
@@ -147,32 +133,24 @@ class LogbackInitializerIntTest {
             logger.trace(testMessage);
 
             Path output = Paths.get(tempDirectory.toString(), "inspectit-ocelot");
-            Optional<Path> agentLog = Files.walk(output)
-                    .filter(p -> p.endsWith(AGENT_LOG_FILE))
-                    .findFirst();
-            assertThat(agentLog)
-                    .isPresent()
-                    .hasValueSatisfying(p -> {
-                        try {
-                            assertThat(Files.lines(p).anyMatch(l -> l.contains(testMessage))).isTrue();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+            Optional<Path> agentLog = Files.walk(output).filter(p -> p.endsWith(AGENT_LOG_FILE)).findFirst();
+            assertThat(agentLog).isPresent().hasValueSatisfying(p -> {
+                try {
+                    assertThat(Files.lines(p).anyMatch(l -> l.contains(testMessage))).isTrue();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
             // nothing to error log due to the level
-            Optional<Path> errorLog = Files.walk(output)
-                    .filter(p -> p.endsWith(EXCEPTIONS_LOG_FILE))
-                    .findFirst();
-            assertThat(errorLog)
-                    .isPresent()
-                    .hasValueSatisfying(p -> {
-                        try {
-                            assertThat(Files.readAllLines(p)).isEmpty();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+            Optional<Path> errorLog = Files.walk(output).filter(p -> p.endsWith(EXCEPTIONS_LOG_FILE)).findFirst();
+            assertThat(errorLog).isPresent().hasValueSatisfying(p -> {
+                try {
+                    assertThat(Files.readAllLines(p)).isEmpty();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
 
         @AfterEach
@@ -198,15 +176,7 @@ class LogbackInitializerIntTest {
     }
 
     @Nested
-    @TestPropertySource(properties = {
-            "inspectit.logging.trace=true",
-            "inspectit.logging.debug=true",
-            "inspectit.logging.console.enabled=false",
-            "inspectit.logging.console.pattern=my-console-pattern",
-            "inspectit.logging.file.enabled=false",
-            "inspectit.logging.file.pattern=my-file-pattern",
-            "inspectit.logging.file.include-service-name=false",
-    })
+    @TestPropertySource(properties = {"inspectit.logging.trace=true", "inspectit.logging.debug=true", "inspectit.logging.console.enabled=false", "inspectit.logging.console.pattern=my-console-pattern", "inspectit.logging.file.enabled=false", "inspectit.logging.file.pattern=my-file-pattern", "inspectit.logging.file.include-service-name=false",})
     @DirtiesContext
     class OverwrittenDefaults extends SpringTestBase {
 
@@ -226,7 +196,8 @@ class LogbackInitializerIntTest {
             LogbackInitializer.initLogging(environment.getCurrentConfig());
 
             assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_LEVEL)).isEqualTo("TRACE");
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_PATH)).isEqualTo(tempDirectory.toAbsolutePath().toString());
+            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_PATH)).isEqualTo(tempDirectory.toAbsolutePath()
+                    .toString());
             assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_SERVICE_NAME)).isEmpty();
             assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_CONSOLE_PATTERN)).isEqualTo("my-console-pattern");
             assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_FILE_PATTERN)).isEqualTo("my-file-pattern");
@@ -243,20 +214,16 @@ class LogbackInitializerIntTest {
             Logger logger = LoggerFactory.getLogger(OverwrittenDefaults.class);
             logger.info(testMessage);
 
-            Optional<Path> agentLog = Files.walk(tempDirectory)
-                    .filter(p -> p.endsWith(AGENT_LOG_FILE))
-                    .findFirst();
+            Optional<Path> agentLog = Files.walk(tempDirectory).filter(p -> p.endsWith(AGENT_LOG_FILE)).findFirst();
 
             // nothing written
-            assertThat(agentLog)
-                    .isPresent()
-                    .hasValueSatisfying(p -> {
-                        try {
-                            assertThat(Files.readAllLines(p)).isEmpty();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+            assertThat(agentLog).isPresent().hasValueSatisfying(p -> {
+                try {
+                    assertThat(Files.readAllLines(p)).isEmpty();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
 
         @AfterEach
@@ -275,27 +242,9 @@ class LogbackInitializerIntTest {
     }
 
     @Nested
-    @TestPropertySource(properties = {
-            "inspectit.logging.config-file=src/test/resources/test-logback.xml"
-    })
-    @DirtiesContext
-    class CustomLogFile extends SpringTestBase {
+    class CustomLogFiles {
 
         private final Path OUTPUT_FILE = Paths.get("test-agent.log");
-
-        @Autowired
-        InspectitEnvironment environment;
-
-        @Test
-        void logMessage() throws Exception {
-            LogbackInitializer.initLogging(environment.getCurrentConfig());
-
-            String testMessage = "test message with custom config file";
-            Logger logger = LoggerFactory.getLogger(CustomLogFile.class);
-            logger.info(testMessage);
-
-            assertThat(Files.lines(OUTPUT_FILE).anyMatch(l -> l.contains(testMessage))).isTrue();
-        }
 
         @AfterEach
         void clean() throws Exception {
@@ -311,6 +260,45 @@ class LogbackInitializerIntTest {
             Files.deleteIfExists(OUTPUT_FILE);
         }
 
-    }
+        @Nested
+        @TestPropertySource(properties = {"inspectit.logging.config-file=src/test/resources/test-logback.xml"})
+        @DirtiesContext
+        class CustomLogFile extends SpringTestBase {
 
+            @Autowired
+            InspectitEnvironment environment;
+
+            @Test
+            void logMessage() throws Exception {
+                LogbackInitializer.initLogging(environment.getCurrentConfig());
+
+                String testMessage = "test message with custom config file";
+                Logger logger = LoggerFactory.getLogger(CustomLogFile.class);
+                logger.info(testMessage);
+
+                assertThat(Files.lines(OUTPUT_FILE).anyMatch(l -> l.contains(testMessage))).isTrue();
+            }
+
+        }
+
+        @Nested
+        @TestPropertySource(properties = {"inspectit.logging.config-file=src/test/resources/test-logback-with-logstash.xml"})
+        @DirtiesContext
+        class CustomLogFileWithLogstash extends SpringTestBase {
+
+            @Autowired
+            InspectitEnvironment environment;
+
+            @Test
+            void logMessageJson() throws Exception {
+                LogbackInitializer.initLogging(environment.getCurrentConfig());
+
+                String testMessage = "test message with custom config file that contains logstash encoders";
+                Logger logger = LoggerFactory.getLogger(CustomLogFileWithLogstash.class);
+                logger.info(testMessage);
+                String regex = "\\{.*" + testMessage + ".*}";
+                assertThat(Files.lines(OUTPUT_FILE).anyMatch(l -> l.matches(regex))).isTrue();
+            }
+        }
+    }
 }

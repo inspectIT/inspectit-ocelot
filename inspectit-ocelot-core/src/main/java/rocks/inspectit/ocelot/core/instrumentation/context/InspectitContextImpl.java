@@ -1,12 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
-import io.opencensus.common.Function;
-import io.opencensus.common.Scope;
 import io.opencensus.tags.*;
-import io.opencensus.trace.ContextHandle;
-import io.opencensus.trace.Span;
-import io.opencensus.trace.SpanContext;
-import io.opencensus.trace.Tracing;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +23,7 @@ import java.util.stream.Stream;
  * <p>
  * When a method is entered, the entry hook is executed.
  * In this phase a new InspectitContextImpl is created but not yet made active.
- * This context inherits all down-propagated data from the currently active context as well as all tags from the active TagContext.
+ * This context inherits all down-propagated data from the currently active context as well as all tags from the active {@link TagContext}.
  * In the entry phase, the contexts data can be altered via {@link #setData(String, Object)}, even though the context is not yet active.
  * <p>
  * When {@link #makeActive()} is called, the current context transitions from the "Entry" to the "Active" state.
@@ -62,13 +57,13 @@ import java.util.stream.Stream;
  * It does not contain any up-propagated data, neither does it contain any changes performed during the exit phase.
  * For this reason, an up-to-date tag context can be acquired using {@link #enterFullTagScope()} within which then metrics can be collected.
  * <p>
- * Finally a context finishes the exit phase with a call to {@link #close()}
+ * Finally, a context finishes the exit phase with a call to {@link #close()}
  * If the context is synchronous, it will perform its up-propagation.
  * In addition ,the tag-context opened by the call to makeActive will be closed and the
  * previous parent will be registered back in GRPC as active context.
  * <p>
  * In addition, an {@link InspectitContextImpl} instance can be used for tracing. Hereby, one instance can record exactly one span.
- * To do this {@link #enterSpan(Span)} must be called BEFORE {@link #makeActive()}.
+ * To do this {@link #setSpanScope(AutoCloseable)} must be called BEFORE {@link #makeActive()}.
  * The span is automatically finished when {@link #close()} is called.
  */
 @Slf4j
@@ -98,7 +93,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * Defines whether the context should interact with TagContexts opened by the instrumented application.
      * <p>
      * If this is true, the context will inherit all values from the current {@link TagContext} which was opened by the target application.
-     * In addition if this value is true makeActive will open a TagContext containing all down propagated tags stored in this InspectIT context.
+     * In addition, if this value is true makeActive will open a TagContext containing all down propagated tags stored in this InspectIT context.
      */
     private final boolean interactWithApplicationTagContexts;
 
@@ -119,7 +114,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private io.opentelemetry.context.Scope currentOtelScope;
 
     /**
-     * The span which was (potentially) opened by invoking {@link #enterSpan(Span)}
+     * The span scope which was (potentially) opened by invoking {@link #setSpanScope(AutoCloseable)}
      */
     private AutoCloseable currentSpanScope;
 
@@ -145,7 +140,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * If this context opened a new {@link #activePhaseDownPropagationTagContext} during {@link #makeActive()},
      * the corresponding scope is stored in this variable and will be used in {@link #close()} to clean up the context.
      */
-    private Scope openedDownPropagationScope;
+    private io.opencensus.common.Scope openedDownPropagationScope;
 
     /**
      * When a new context is created, this map contains the down-propagated data it inherited from its parent context.
@@ -212,7 +207,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * The created context will be a synchronous or asynchronous child of the currently active context.
      *
      * @param commonTags                         the common tags used to populate the data if this is a root context
-     * @param defaultPropagation                 the data propagation settings to use if this is a root context. Otherwise the parent context's settings will be inherited.
+     * @param defaultPropagation                 the data propagation settings to use if this is a root context. Otherwise, the parent context's settings will be inherited.
      * @param interactWithApplicationTagContexts if true, data from the currently active {@link TagContext} will be inherited and makeActive will publish the data as a TagContext
      *
      * @return the newly created context
@@ -238,7 +233,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     }
 
     /**
-     * @return true, if {@link #enterSpan(Span, Function)} was called
+     * @return true, if {@link #setSpanScope(AutoCloseable)} was called
      */
     public boolean hasEnteredSpan() {
         return currentSpanScope != null;
@@ -261,7 +256,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     }
 
     /**
-     * Terminates this contexts entry-phase and makes it the currently active context.
+     * Terminates this context's entry-phase and makes it the currently active context.
      */
     @Override
     public void makeActive() {
@@ -337,7 +332,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * @return the newly opened tag scope.
      * // TODO Remove? This becomes obsolete now
      */
-    public Scope enterFullTagScope() {
+    public io.opencensus.common.Scope enterFullTagScope() {
         TagContextBuilder builder = Tags.getTagger().emptyBuilder();
         dataTagsStream().forEach(e -> builder.putLocal(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getKey(), e.getValue()
                 .toString())));
@@ -383,7 +378,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     /**
      * Closes this context.
      * If any {@link TagContext} was opened during {@link #makeActive()}, this context is also closed.
-     * In addition up-propagation is performed if this context is not asynchronous.
+     * In addition, up-propagation is performed if this context is not asynchronous.
      */
     @Override
     public void close() {
@@ -397,7 +392,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         }
 
         // detach the overridden GRPC context
-        if (null != overriddenGrpcContext){
+        if (null != overriddenGrpcContext) {
             ContextUtil.currentGrpc().detach(overriddenGrpcContext);
         }
 
@@ -440,7 +435,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
 
     @Override
     public Map<String, String> getDownPropagationHeaders() {
-        SpanContext spanContext = Tracing.getTracer().getCurrentSpan().getContext();
+        SpanContext spanContext = io.opentelemetry.api.trace.Span.current().getSpanContext();
         if (!spanContext.isValid()) {
             Object remoteParent = getData(REMOTE_PARENT_SPAN_CONTEXT_KEY);
             if (remoteParent instanceof SpanContext) {
@@ -518,7 +513,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * Checks if the given key is already configured in {@link #propagation} for down-propagation and as a tag.
      * If it is the case, the passed in builder is returned without changes.
      * <p>
-     * Otherwise the key is configured in the given builder to be down-propagated JVM-locally and to be a tag.
+     * Otherwise, the key is configured in the given builder to be down-propagated JVM-locally and to be a tag.
      *
      * @param tagKey          the key of the found tag
      * @param existingBuilder an existing builder to which the settings shall be added. If it is null, a builder is created using copy() on {@link #propagation}.

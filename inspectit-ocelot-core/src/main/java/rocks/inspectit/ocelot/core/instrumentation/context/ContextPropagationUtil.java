@@ -1,15 +1,21 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.trace.SpanContext;
-import io.opencensus.trace.Tracing;
-import io.opencensus.trace.propagation.TextFormat;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.propagation.TextMapGetter;
+import io.opentelemetry.context.propagation.TextMapPropagator;
+import io.opentelemetry.context.propagation.TextMapSetter;
+import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
 import rocks.inspectit.ocelot.core.instrumentation.context.propagation.DatadogFormat;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 
+import javax.annotation.Nullable;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
@@ -52,18 +58,23 @@ public class ContextPropagationUtil {
     private static final Set<String> PROPAGATION_FIELDS = new HashSet<>();
 
     /**
-     * The currently used propagation format. Defaults to B3.
+     * The currently used propagation format. Defaults to {@link B3Propagator#injectingMultiHeaders()} ()}
      */
-    private static TextFormat propagationFormat = Tracing.getPropagationComponent().getB3Format();
+    private static TextMapPropagator propagationFormat = B3Propagator.injectingMultiHeaders();
 
-    public static final TextFormat.Setter<Map<String, String>> MAP_INJECTOR = new TextFormat.Setter<Map<String, String>>() {
+    public static final TextMapSetter<Map<String, String>> MAP_INJECTOR = new TextMapSetter<Map<String, String>>() {
         @Override
-        public void put(Map<String, String> carrier, String key, String value) {
+        public void set(@Nullable Map<String, String> carrier, String key, String value) {
             carrier.put(key, value);
         }
     };
 
-    public static final TextFormat.Getter<Map<String, String>> MAP_EXTRACTOR = new TextFormat.Getter<Map<String, String>>() {
+    public static final TextMapGetter<Map<String, String>> MAP_EXTRACTOR = new TextMapGetter<Map<String, String>>() {
+        @Override
+        public Iterable<String> keys(Map<String, String> carrier) {
+            return carrier.keySet();
+        }
+
         @Override
         public String get(Map<String, String> carrier, String key) {
             return carrier.get(key);
@@ -72,8 +83,9 @@ public class ContextPropagationUtil {
 
     static {
         PROPAGATION_FIELDS.add(CORRELATION_CONTEXT_HEADER);
-        PROPAGATION_FIELDS.addAll(Tracing.getPropagationComponent().getB3Format().fields());
-        PROPAGATION_FIELDS.addAll(Tracing.getPropagationComponent().getTraceContextFormat().fields());
+        PROPAGATION_FIELDS.addAll(B3Propagator.injectingSingleHeader().fields());
+        PROPAGATION_FIELDS.addAll(B3Propagator.injectingMultiHeaders().fields());
+        PROPAGATION_FIELDS.addAll(W3CTraceContextPropagator.getInstance().fields());
         PROPAGATION_FIELDS.addAll(DatadogFormat.INSTANCE.fields());
     }
 
@@ -119,10 +131,10 @@ public class ContextPropagationUtil {
         String contextCorrelationData = buildCorrelationContextHeader(dataToPropagate);
         HashMap<String, String> result = new HashMap<>();
         if (spanToPropagate != null) {
-            propagationFormat.inject(spanToPropagate, result, MAP_INJECTOR);
+            propagationFormat.inject(Context.current().with(Span.wrap(spanToPropagate)), result, MAP_INJECTOR);
 
             if (CustomIdGenerator.isUsing64Bit()) {
-                String traceid = spanToPropagate.getTraceId().toLowerBase16();
+                String traceid = spanToPropagate.getTraceId();
                 // do nothing in case trace ID is already 64bit
                 if (traceid.length() > 16) {
                     for (Map.Entry<String, String> entry : result.entrySet()) {
@@ -192,32 +204,29 @@ public class ContextPropagationUtil {
      *
      * @param propagationMap the headers to decode
      *
-     * @return if the data contained any trace correlation, the SpanContext is returned. Otherwise returns null
+     * @return the {@code SpanContext} if the data contained any trace correlation, {@code null} otherwise.
      */
     public static SpanContext readPropagatedSpanContextFromHeaderMap(Map<String, String> propagationMap) {
-
-        boolean anyB3Header = Tracing.getPropagationComponent()
-                .getB3Format()
+        boolean anyB3Header = B3Propagator.injectingMultiHeaders()
                 .fields()
                 .stream()
-                .anyMatch(propagationMap::containsKey);
+                .anyMatch(s -> propagationMap.containsKey(s) && s.startsWith(B3_HEADER_PREFIX));
         if (anyB3Header) {
             try {
-                return Tracing.getPropagationComponent().getB3Format().extract(propagationMap, MAP_EXTRACTOR);
+                return extractPropagatedSpanContext(B3Propagator.injectingMultiHeaders(), propagationMap);
             } catch (Throwable t) {
                 String headerString = getB3HeadersAsString(propagationMap);
                 log.error("Error reading trace correlation data from B3 headers: {}", headerString, t);
             }
         }
 
-        boolean anyTraceContextHeader = Tracing.getPropagationComponent()
-                .getTraceContextFormat()
+        boolean anyTraceContextHeader = W3CTraceContextPropagator.getInstance()
                 .fields()
                 .stream()
                 .anyMatch(propagationMap::containsKey);
         if (anyTraceContextHeader) {
             try {
-                return Tracing.getPropagationComponent().getTraceContextFormat().extract(propagationMap, MAP_EXTRACTOR);
+                return extractPropagatedSpanContext(W3CTraceContextPropagator.getInstance(), propagationMap);
             } catch (Throwable t) {
                 log.error("Error reading trace correlation data from the trace context headers.", t);
             }
@@ -226,13 +235,26 @@ public class ContextPropagationUtil {
         boolean anyDatadogHeader = DatadogFormat.INSTANCE.fields().stream().anyMatch(propagationMap::containsKey);
         if (anyDatadogHeader) {
             try {
-                return DatadogFormat.INSTANCE.extract(propagationMap, MAP_EXTRACTOR);
+                return extractPropagatedSpanContext(DatadogFormat.INSTANCE, propagationMap);
             } catch (Throwable t) {
                 log.error("Error reading trace correlation data from the Datadog headers.", t);
             }
         }
 
         return null;
+    }
+
+    /**
+     * Extracts the {@link SpanContext} from the given {@code propagator}
+     *
+     * @param propagator
+     * @param carrier    holds the propagation fields
+     *
+     * @return
+     */
+
+    private static SpanContext extractPropagatedSpanContext(TextMapPropagator propagator, Map<String, String> carrier) {
+        return Span.fromContext(propagator.extract(Context.current(), carrier, MAP_EXTRACTOR)).getSpanContext();
     }
 
     /**
@@ -324,11 +346,11 @@ public class ContextPropagationUtil {
         switch (format) {
             case B3:
                 log.info("Using B3 format for context propagation.");
-                propagationFormat = Tracing.getPropagationComponent().getB3Format();
+                propagationFormat = B3Propagator.injectingMultiHeaders();
                 break;
             case TRACE_CONTEXT:
                 log.info("Using TraceContext format for context propagation.");
-                propagationFormat = Tracing.getPropagationComponent().getTraceContextFormat();
+                propagationFormat = W3CTraceContextPropagator.getInstance();
                 break;
             case DATADOG:
                 log.info("Using Datadog format for context propagation.");
@@ -336,7 +358,7 @@ public class ContextPropagationUtil {
                 break;
             default:
                 log.warn("The specified propagation format {} is not supported. Falling back to B3 format.", format);
-                propagationFormat = Tracing.getPropagationComponent().getB3Format();
+                propagationFormat = B3Propagator.injectingMultiHeaders();
         }
     }
 }

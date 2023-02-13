@@ -1,23 +1,19 @@
 package rocks.inspectit.ocelot.instrumentation.special;
 
 import io.opencensus.common.Scope;
-import io.opencensus.tags.*;
 import io.opencensus.tags.Tag;
 import io.opencensus.tags.Tags;
+import io.opencensus.tags.*;
 import org.junit.jupiter.api.*;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
 import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestCallable;
 import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestRunnable;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -29,7 +25,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
     private ScheduledExecutorService executorService;
 
     @BeforeAll
-    public static void beforeAll() throws ClassNotFoundException {
+    public static void beforeAll() {
         Executors.newSingleThreadScheduledExecutor().schedule(Math::random, 1, TimeUnit.MILLISECONDS);
         TestUtils.waitForClassInstrumentations(ScheduledThreadPoolExecutor.class, TestRunnable.class, TestCallable.class);
     }
@@ -64,9 +60,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             }
             schedule.get();
 
-            assertThat(refTags.get()).hasSize(1)
-                    .extracting("key", "value")
-                    .contains(tuple(tagKey, tagValue));
+            assertThat(refTags.get()).hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
         }
 
         @Test
@@ -84,9 +78,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             }
             schedule.get();
 
-            assertThat(refTags.get()).hasSize(1)
-                    .extracting("key", "value")
-                    .contains(tuple(tagKey, tagValue));
+            assertThat(refTags.get()).hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
         }
 
         @Test
@@ -103,9 +95,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             }
             schedule.get();
 
-            assertThat(refTags.get()).hasSize(1)
-                    .extracting("key", "value")
-                    .contains(tuple(tagKey, tagValue));
+            assertThat(refTags.get()).hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
         }
     }
 
@@ -125,9 +115,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             }
             Iterator<Tag> result = future.get();
 
-            assertThat(result).hasSize(1)
-                    .extracting("key", "value")
-                    .contains(tuple(tagKey, tagValue));
+            assertThat(result).hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
         }
 
         @Test
@@ -144,9 +132,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             }
             Iterator<Tag> result = future.get();
 
-            assertThat(result).hasSize(1)
-                    .extracting("key", "value")
-                    .contains(tuple(tagKey, tagValue));
+            assertThat(result).hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
         }
 
         @Test
@@ -162,9 +148,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             }
             Iterator<Tag> result = future.get();
 
-            assertThat(result).hasSize(1)
-                    .extracting("key", "value")
-                    .contains(tuple(tagKey, tagValue));
+            assertThat(result).hasSize(1).extracting("key", "value").contains(tuple(tagKey, tagValue));
         }
     }
 
@@ -197,8 +181,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             executorService.shutdown();
 
             assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-            iteratorList.forEach(tagIterator -> assertThat(tagIterator)
-                    .hasSize(1)
+            iteratorList.forEach(tagIterator -> assertThat(tagIterator).hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue)));
         }
@@ -233,8 +216,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             executorService.shutdown();
 
             assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-            iteratorList.forEach(tagIterator -> assertThat(tagIterator)
-                    .hasSize(1)
+            iteratorList.forEach(tagIterator -> assertThat(tagIterator).hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue)));
         }
@@ -266,8 +248,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             executorService.shutdown();
 
             assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-            iteratorList.forEach(tagIterator -> assertThat(tagIterator)
-                    .hasSize(1)
+            iteratorList.forEach(tagIterator -> assertThat(tagIterator).hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue)));
         }
@@ -302,8 +283,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             executorService.shutdown();
 
             assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-            iteratorList.forEach(tagIterator -> assertThat(tagIterator)
-                    .hasSize(1)
+            iteratorList.forEach(tagIterator -> assertThat(tagIterator).hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue)));
         }
@@ -338,8 +318,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             executorService.shutdown();
 
             assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-            iteratorList.forEach(tagIterator -> assertThat(tagIterator)
-                    .hasSize(1)
+            iteratorList.forEach(tagIterator -> assertThat(tagIterator).hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue)));
         }
@@ -370,8 +349,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
             executorService.shutdown();
 
             assertThat(iteratorList).size().isGreaterThanOrEqualTo(iterations);
-            iteratorList.forEach(tagIterator -> assertThat(tagIterator)
-                    .hasSize(1)
+            iteratorList.forEach(tagIterator -> assertThat(tagIterator).hasSize(1)
                     .extracting("key", "value")
                     .contains(tuple(tagKey, tagValue)));
         }

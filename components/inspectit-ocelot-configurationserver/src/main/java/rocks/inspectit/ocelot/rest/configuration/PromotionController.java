@@ -1,8 +1,8 @@
 package rocks.inspectit.ocelot.rest.configuration;
 
 import com.google.gson.JsonObject;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,18 +44,18 @@ public class PromotionController extends AbstractBaseController {
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    @ApiOperation(value = "Fetch promotion files", notes = "Fetches all configuration files which are ready for promotion.")
+    @Operation(summary = "Fetch promotion files", description = "Fetches all configuration files which are ready for promotion.")
     @GetMapping(value = "configuration/promotions")
-    public WorkspaceDiff getPromotions(@ApiParam("Specifies whether the old and new content of each files should also be returned.") @RequestParam(defaultValue = "false", name = "include-content") boolean includeContent, Authentication authentication) throws IOException, GitAPIException {
+    public WorkspaceDiff getPromotions(@Parameter(description = "Specifies whether the old and new content of each files should also be returned.") @RequestParam(defaultValue = "false", name = "include-content") boolean includeContent, Authentication authentication) throws IOException, GitAPIException {
         WorkspaceDiff workspaceDiff = fileManager.getWorkspaceDiff(includeContent);
         workspaceDiff.setCanPromoteOwnChanges(allowSelfPromotion(authentication));
         return workspaceDiff;
     }
 
     @Secured(UserRoleConfiguration.PROMOTE_ACCESS_ROLE)
-    @ApiOperation(value = "Promote configurations", notes = "Promotes the specified configuration files.")
+    @Operation(summary = "Promote configurations", description = "Promotes the specified configuration files.")
     @PostMapping(value = "configuration/promote")
-    public ResponseEntity<String> promoteConfiguration(@ApiParam("The definition that contains the information about which files to promote.") @RequestBody ConfigurationPromotion promotion, Authentication authentication) throws GitAPIException {
+    public ResponseEntity<String> promoteConfiguration(@Parameter(description = "The definition that contains the information about which files to promote.") @RequestBody ConfigurationPromotion promotion, Authentication authentication) throws GitAPIException {
         boolean allowSelfPromotion = allowSelfPromotion(authentication);
         if (promotion.getCommitMessage() == null || promotion.getCommitMessage().isEmpty()) {
             return ResponseEntity.badRequest().build();

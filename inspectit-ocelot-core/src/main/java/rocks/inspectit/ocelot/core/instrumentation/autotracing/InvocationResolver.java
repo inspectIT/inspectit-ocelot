@@ -80,7 +80,7 @@ public class InvocationResolver {
                     assignStackTracesToMethodEntries(methodEvents.subList(1, methodEvents.size() - 1), durations, currentDepth + 1, output);
                     output.add(newExit); //add the new end-event
                 } else {
-                    //no stack trace occured between method start and end, keep the events as-is
+                    //no stack trace occurred between method start and end, keep the events as-is
                     output.addAll(methodEvents);
                 }
                 offset += duration + 1; //point after the exit event!
@@ -191,7 +191,7 @@ public class InvocationResolver {
     /**
      * Given a list of events and a range [startIndex,endIndex] within it.
      * This method extends endIndex, in case method calls where started within this range and not finished.
-     * This ensures that no method calls are started but not finsihed within the range [startIndex,resultIndex].
+     * This ensures that no method calls are started but not finished within the range [startIndex,resultIndex].
      *
      * @param events     the list to scan
      * @param startIndex the start of the range to (potentially) extend (inclusive)
@@ -215,10 +215,7 @@ public class InvocationResolver {
 
     private static boolean stackTraceElementsEqual(StackTraceElement first, StackTraceElement parentOfFirst, StackTraceElement second, StackTraceElement parentOfSecond) {
         // @formatter:off
-        return Objects.equals(first.getMethodName(), second.getMethodName())
-                && Objects.equals(first.getClassName(), second.getClassName())
-                && Objects.equals(parentOfFirst.getFileName(), parentOfSecond.getFileName())
-                && parentOfFirst.getLineNumber() == parentOfSecond.getLineNumber();
+        return Objects.equals(first.getMethodName(), second.getMethodName()) && Objects.equals(first.getClassName(), second.getClassName()) && Objects.equals(parentOfFirst.getFileName(), parentOfSecond.getFileName()) && parentOfFirst.getLineNumber() == parentOfSecond.getLineNumber();
         // @formatter:on
     }
 

@@ -1,9 +1,11 @@
 package rocks.inspectit.ocelot.rest.users;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.Example;
-import io.swagger.annotations.ExampleProperty;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -52,12 +54,11 @@ public class AccountController extends AbstractBaseController {
     @Autowired
     private JwtTokenManager tokenManager;
 
-    @ApiOperation(value = "Create an access token", notes = "Creates a fresh access token for the user making this request." +
+    @Operation(summary = "Create an access token", description = "Creates a fresh access token for the user making this request." +
             " Instead of using User and Password based HTTP authentication, the user can then user the header 'Authorization: Bearer <TOKEN>' for authentication." +
             "The token expires after the time specified by ${inspectit.token-lifespan}, which by default is 60 minutes." +
             "In case of a server restart, all previously issued tokens become invalid.")
-    @ApiResponse(code = 200, message = "The access token", examples =
-    @Example(value = @ExampleProperty(value = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU2MTYyODE1NH0.KelDW1OXg9xlMjSiblwZqui7sya4Crq833b-98p8UZ4", mediaType = "text/plain")))
+    @ApiResponse(responseCode = "200", description = "The access token", content = @Content(mediaType = "text/plain", examples = @ExampleObject("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU2MTYyODE1NH0.KelDW1OXg9xlMjSiblwZqui7sya4Crq833b-98p8UZ4"))    )
     @GetMapping("account/token")
     public String acquireNewAccessToken(Authentication auth) {
         Optional<User> userOptional = userService.getUserByName(auth.getName());
@@ -70,7 +71,7 @@ public class AccountController extends AbstractBaseController {
         return tokenManager.createToken(auth.getName());
     }
 
-    @ApiOperation(value = "Change Password", notes = "Changes the password of the logged in user." +
+    @Operation(summary = "Change Password", description = "Changes the password of the logged in user." +
             " This endpoint does not work with token-based authentication, only HTTP basic auth is allowed.")
     @PutMapping("account/password")
     public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest newPassword, Authentication auth) {
@@ -90,8 +91,8 @@ public class AccountController extends AbstractBaseController {
         return ResponseEntity.ok().build();
     }
 
-    @ApiOperation(value = "Get the user's permissions", notes = "Queries the permissions of the currently logged-in user.")
-    @ApiResponse(code = 200, message = "The permissions of the user")
+    @Operation(summary = "Get the user's permissions", description = "Queries the permissions of the currently logged-in user.")
+    @ApiResponse(responseCode = "200", description = "The permissions of the user")
     @GetMapping("account/permissions")
     public UserPermissions getPermissions(Authentication auth) {
         Set<String> roles = auth.getAuthorities().stream()

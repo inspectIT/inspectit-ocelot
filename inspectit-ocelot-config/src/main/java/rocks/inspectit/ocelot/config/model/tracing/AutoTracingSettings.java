@@ -24,7 +24,7 @@ public class AutoTracingSettings {
      * When the first method executes with auto-tracing enabled, a separate Thread is started as a timer for taking stack trace samples.
      * If at some point no more methods with stack-trace sampling are executed, this thread spins unnecessarily.
      * <p>
-     * Therefore if no samples has been taken for at least the duration of {@link #shutdownDelay}, the timer will be shutdown.
+     * Therefore, if no samples has been taken for at least the duration of {@link #shutdownDelay}, the timer will be shutdown.
      * If a span requests sampling after the timer has shutdown, it will restart it.
      */
     private Duration shutdownDelay;

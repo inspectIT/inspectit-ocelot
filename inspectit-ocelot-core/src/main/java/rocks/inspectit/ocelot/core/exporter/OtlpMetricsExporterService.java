@@ -6,10 +6,7 @@ import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporterBuilder
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporterBuilder;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
-import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.opentelemetry.sdk.metrics.export.MetricReaderFactory;
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
+import io.opentelemetry.sdk.metrics.export.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -37,7 +34,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
     /**
      * The {@link MetricExporter} for exporting metrics via OTLP
      */
-    MetricExporter metricExporter;
+            MetricExporter metricExporter;
 
     /**
      * The {@link PeriodicMetricReaderBuilder} for reading metrics to the log
@@ -80,14 +77,14 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
     protected boolean doEnable(InspectitConfig configuration) {
         try {
             OtlpMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlp();
-
-            AggregationTemporality preferredTemporality = otlp.getPreferredTemporality();
+            AggregationTemporalitySelector aggregationTemporalitySelector = otlp.getPreferredTemporality() == AggregationTemporality.DELTA ? AggregationTemporalitySelector.deltaPreferred() : AggregationTemporalitySelector.alwaysCumulative();
 
             switch (otlp.getProtocol()) {
                 case GRPC: {
                     OtlpGrpcMetricExporterBuilder metricExporterBuilder = OtlpGrpcMetricExporter.builder()
-                            .setPreferredTemporality(preferredTemporality)
-                            .setEndpoint(otlp.getEndpoint()).setCompression(otlp.getCompression().toString())
+                            .setAggregationTemporalitySelector(aggregationTemporalitySelector)
+                            .setEndpoint(otlp.getEndpoint())
+                            .setCompression(otlp.getCompression().toString())
                             .setTimeout(otlp.getTimeout());
                     if (otlp.getHeaders() != null) {
                         for (Map.Entry<String, String> headerEntry : otlp.getHeaders().entrySet()) {
@@ -99,8 +96,9 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
                 }
                 case HTTP_PROTOBUF: {
                     OtlpHttpMetricExporterBuilder metricExporterBuilder = OtlpHttpMetricExporter.builder()
-                            .setPreferredTemporality(preferredTemporality)
-                            .setEndpoint(otlp.getEndpoint()).setCompression(otlp.getCompression().toString())
+                            .setAggregationTemporalitySelector(aggregationTemporalitySelector)
+                            .setEndpoint(otlp.getEndpoint())
+                            .setCompression(otlp.getCompression().toString())
                             .setTimeout(otlp.getTimeout());
                     if (otlp.getHeaders() != null) {
                         for (Map.Entry<String, String> headerEntry : otlp.getHeaders().entrySet()) {
@@ -115,7 +113,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
 
             boolean success = openTelemetryController.registerMetricExporterService(this);
             if (success) {
-                log.info("Starting {}", getName());
+                log.info("Starting {} with protocol {} on endpoint {}", getName(), otlp.getProtocol(), otlp.getEndpoint());
             } else {
                 log.error("Failed to register {} at the OpenTelemetry controller!", getName());
             }
@@ -139,7 +137,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
     }
 
     @Override
-    public MetricReaderFactory getNewMetricReaderFactory() {
-        return metricReaderBuilder.newMetricReaderFactory();
+    public MetricReader getNewMetricReader() {
+        return metricReaderBuilder.build();
     }
 }

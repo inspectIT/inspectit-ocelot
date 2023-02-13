@@ -37,6 +37,12 @@ public class TracingSettings {
     private double sampleProbability;
 
     /**
+     * The default {@link SampleMode sample mode} used for the {@link #sampleProbability}. Defaults to {@link SampleMode#PARENT_BASED}.
+     */
+    @Valid
+    private SampleMode sampleMode;
+
+    /**
      * Settings for log correlation.
      */
     @Valid

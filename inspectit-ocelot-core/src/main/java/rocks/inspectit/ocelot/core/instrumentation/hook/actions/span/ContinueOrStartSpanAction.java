@@ -1,20 +1,25 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.span;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.trace.*;
-import io.opencensus.trace.samplers.Samplers;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.exposed.InspectitContext;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
+import rocks.inspectit.ocelot.config.model.tracing.SampleMode;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.StackTraceSampler;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
+import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.HybridParentTraceIdRatioBasedSampler;
+import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.OcelotSamplerUtils;
 
 import java.util.function.Predicate;
 
@@ -38,7 +43,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
     /**
      * The span kind to use when beginning a new span, can be null.
      */
-    private final Span.Kind spanKind;
+    private final SpanKind spanKind;
 
     /**
      * The data key to read for continuing a span.
@@ -47,6 +52,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
 
     /**
      * If the sample probability is fixed, this attribute holds the corresponding sampler.
+     * The sampler will either be a {@link io.opentelemetry.sdk.trace.samplers.ParentBasedSampler}, {@link io.opentelemetry.sdk.trace.samplers.TraceIdRatioBasedSampler}, or {@link HybridParentTraceIdRatioBasedSampler}.
      * If a dynamic sample probability is used, this value is null and {@link #dynamicSampleProbabilityAccessor} is not null.
      * If both {@link #staticSampler} and {@link #dynamicSampleProbabilityAccessor} are null, no span-scoped sampler will be used.
      */
@@ -59,6 +65,11 @@ public class ContinueOrStartSpanAction implements IHookAction {
      * If both {@link #staticSampler} and {@link #dynamicSampleProbabilityAccessor} are null, no span-scoped sampler will be used.
      */
     private final VariableAccessor dynamicSampleProbabilityAccessor;
+
+    /**
+     * The {@link SampleMode} used in case {@link #dynamicSampleProbabilityAccessor} is set.
+     */
+    private final SampleMode sampleMode;
 
     /**
      * The condition which defines if this actions attempts to continue the span defined by {@link #continueSpanDataKey}.
@@ -117,17 +128,16 @@ public class ContinueOrStartSpanAction implements IHookAction {
             SpanContext remoteParent = ctx.getAndClearCurrentRemoteSpanContext();
             boolean hasLocalParent = false;
             if (remoteParent == null) {
-                Span currentSpan = Tracing.getTracer().getCurrentSpan();
+                Span currentSpan = Span.current();
 
                 // the span has a local parent if the currentSpan is either not BlankSpan.INSTANCE (when using OC) or does not have a valid context (when using OTel)
-                hasLocalParent = !(currentSpan == BlankSpan.INSTANCE || !currentSpan.getContext().isValid());
+                hasLocalParent = !(currentSpan == Span.getInvalid() || !currentSpan.getSpanContext().isValid());
             }
 
             Sampler sampler = getSampler(context);
             AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> stackTraceSampler.createAndEnterSpan(spanName, remoteParent, sampler, spanKind, methodInfo, autoTrace));
             ctx.setSpanScope(spanCtx);
-            commonTagsToAttributesManager.writeCommonTags(Tracing.getTracer()
-                    .getCurrentSpan(), remoteParent != null, hasLocalParent);
+            commonTagsToAttributesManager.writeCommonTags(Span.current(), remoteParent != null, hasLocalParent);
 
         }
     }
@@ -146,7 +156,8 @@ public class ContinueOrStartSpanAction implements IHookAction {
         if (dynamicSampleProbabilityAccessor != null) {
             Object probability = dynamicSampleProbabilityAccessor.get(context);
             if (probability instanceof Number) {
-                sampler = Samplers.probabilitySampler(Math.min(1, Math.max(0, ((Number) probability).doubleValue())));
+                double sampleProbability = Math.min(1, Math.max(0, ((Number) probability).doubleValue()));
+                sampler = OcelotSamplerUtils.create(sampleMode, sampleProbability);
             }
         }
         return sampler;

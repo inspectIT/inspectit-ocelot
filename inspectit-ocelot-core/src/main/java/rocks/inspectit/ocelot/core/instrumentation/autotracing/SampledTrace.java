@@ -1,10 +1,9 @@
 package rocks.inspectit.ocelot.core.instrumentation.autotracing;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.implcore.internal.TimestampConverter;
-import io.opencensus.implcore.trace.RecordEventsSpanImpl;
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.sdk.trace.OcelotSpanUtils;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.MethodEntryEvent;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.MethodExitEvent;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.events.StackTraceSampledEvent;
@@ -127,7 +126,7 @@ public class SampledTrace {
      */
     public synchronized MethodExitNotifier newSpanStarted(PlaceholderSpan span, String className, String methodName) {
         if (!isFinished) {
-            MethodEntryEvent entryEvent = new MethodEntryEvent(span, null, span.getStartTime(), className, methodName, null);
+            MethodEntryEvent entryEvent = new MethodEntryEvent(span, null, span.getStartNanoTime(), className, methodName, null);
             events.add(entryEvent);
             return (exitTime) -> addExit(entryEvent, exitTime);
         }
@@ -136,7 +135,7 @@ public class SampledTrace {
     }
 
     /**
-     * Should be called when an instrumented method is called within this trace, which however does continue an exisitign span instead of creating a new one.
+     * Should be called when an instrumented method is called within this trace, which however does continue an existing span instead of creating a new one.
      * This ensures that the method is correctly placed between the sampled method calls.
      *
      * @param span       the span which was continued
@@ -192,20 +191,23 @@ public class SampledTrace {
             if (invoc.getPlaceholderSpan() != null) {
                 span = invoc.getPlaceholderSpan();
                 addHiddenParentsAttribute(span, invoc);
-                invoc.getPlaceholderSpan().exportWithParent(parentSpan, getTimestampConverter());
+                invoc.getPlaceholderSpan().exportWithParent(parentSpan, getAnchoredClock());
             } else {
                 span = invoc.getContinuedSpan();
             }
         } else {
             if (!invoc.isHidden()) {
-                span = CustomSpanBuilder.builder("*" + getSimpleName(invoc.getSampledMethod()), parentSpan)
+                Span otelSpan = CustomSpanBuilder.builder("*" + getSimpleName(invoc.getSampledMethod()), parentSpan)
                         .customTiming(invoc.getStart().getTimestamp(), invoc.getEnd()
-                                .getTimestamp(), getTimestampConverter())
+                                .getTimestamp(), getAnchoredClock())
                         .startSpan();
-                span.putAttribute("java.sampled", AttributeValue.booleanAttributeValue(true));
-                span.putAttribute("java.fqn", AttributeValue.stringAttributeValue(getFullName(invoc.getSampledMethod())));
-                addHiddenParentsAttribute(span, invoc);
-                span.end();
+
+                otelSpan.setAttribute(AttributeKey.booleanKey("java.sampled"), true);
+                otelSpan.setAttribute(AttributeKey.stringKey("java.fqn"), getFullName(invoc.getSampledMethod()));
+                addHiddenParentsAttribute(otelSpan, invoc);
+                otelSpan.end();
+
+                span = otelSpan;
             } else {
                 span = parentSpan;
             }
@@ -227,20 +229,20 @@ public class SampledTrace {
             String parents = hiddenParents.stream()
                     .map(inv -> inv.getSampledMethod().toString())
                     .collect(Collectors.joining("\n"));
-            span.putAttribute("java.hidden_parents", AttributeValue.stringAttributeValue(parents));
+            span.setAttribute(AttributeKey.stringKey("java.hidden_parents"), parents);
         }
     }
 
-    private TimestampConverter getTimestampConverter() {
-        return CustomSpanBuilder.getTimestampConverter((RecordEventsSpanImpl) rootSpan);
+    private Object getAnchoredClock() {
+        return OcelotSpanUtils.getAnchoredClock(rootSpan);
     }
 
-    private String getSimpleName(StackTraceElement element) {
+    private static String getSimpleName(StackTraceElement element) {
         String className = element.getClassName();
         return className.substring(className.lastIndexOf('.') + 1) + "." + element.getMethodName();
     }
 
-    private String getFullName(StackTraceElement element) {
+    private static String getFullName(StackTraceElement element) {
         String className = element.getClassName();
         return className + "." + element.getMethodName();
     }
