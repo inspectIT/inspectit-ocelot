@@ -16,7 +16,7 @@ import java.util.Map;
 public class TagGuardSettings {
 
     /**
-     *
+     * The schedule delay of the {@code TagValueGuard}
      */
     private Duration scheduleDelay;
 

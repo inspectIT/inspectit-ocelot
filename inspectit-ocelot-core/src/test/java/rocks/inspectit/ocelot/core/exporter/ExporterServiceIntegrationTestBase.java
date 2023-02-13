@@ -23,6 +23,7 @@ import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import jdk.nashorn.internal.objects.annotations.Getter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,13 +56,13 @@ import static org.testcontainers.Testcontainers.exposeHostPorts;
  * This class is based on the {@link io.opentelemetry.integrationtest.OtlpExporterIntegrationTest}
  */
 @Testcontainers(disabledWithoutDocker = true)
-abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
+public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
 
     static final String COLLECTOR_TAG = "0.58.0";
 
     static final String COLLECTOR_IMAGE = "otel/opentelemetry-collector-contrib:" + COLLECTOR_TAG;
 
-    static final Integer COLLECTOR_OTLP_GRPC_PORT = 4317;
+    protected static final Integer COLLECTOR_OTLP_GRPC_PORT = 4317;
 
     static final Integer COLLECTOR_OTLP_HTTP_PORT = 4318;
 
@@ -171,7 +172,7 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
      *
      * @return the constructed endpoint for the {@link #collector}
      */
-    static String getEndpoint(Integer originalPort) {
+    protected static String getEndpoint(Integer originalPort) {
         return String.format("http://%s:%d", collector.getHost(), collector.getMappedPort(originalPort));
     }
 
@@ -213,7 +214,7 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
      * @param tagKey the key of the tag
      * @param tagVal the value of the tag
      */
-    void recordMetricsAndFlush(int value, String tagKey, String tagVal) {
+    protected void recordMetricsAndFlush(int value, String tagKey, String tagVal) {
         // get the meter and create a counter
         Meter meter = GlobalOpenTelemetry.getMeterProvider()
                 .meterBuilder("rocks.inspectit.ocelot")
@@ -235,7 +236,7 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
      * @param tagKey
      * @param tagVal
      */
-    void awaitMetricsExported(int value, String tagKey, String tagVal) {
+    protected void awaitMetricsExported(int value, String tagKey, String tagVal) {
         // create the attribute that we will use to verify that the metric has been written
         KeyValue attribute = KeyValue.newBuilder()
                 .setKey(tagKey)
@@ -295,7 +296,7 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
     /**
      * OpenTelemetry Protocol gRPC Server
      */
-    static class OtlpGrpcServer extends ServerExtension {
+    public static class OtlpGrpcServer extends ServerExtension {
 
         final List<ExportTraceServiceRequest> traceRequests = new ArrayList<>();
 
@@ -307,6 +308,10 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
             traceRequests.clear();
             metricRequests.clear();
             logRequests.clear();
+        }
+
+        public List<ExportMetricsServiceRequest> getMetricRequests() {
+            return metricRequests;
         }
 
         @Override
@@ -346,6 +351,10 @@ abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
             });
             sb.http(0);
         }
+    }
+
+    public OtlpGrpcServer getGrpcServer() {
+        return grpcServer;
     }
 
 }

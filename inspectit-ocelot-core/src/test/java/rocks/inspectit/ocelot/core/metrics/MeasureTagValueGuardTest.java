@@ -160,7 +160,6 @@ class MeasureTagValueGuardTest {
             assertThat(guard.getMaxValuesPerTag("measure2", environment.getCurrentConfig())).isEqualTo(48);
             assertThat(guard.getMaxValuesPerTag("measure3", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerTag);
         }
-
     }
 
 }
