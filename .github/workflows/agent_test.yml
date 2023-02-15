@@ -30,7 +30,7 @@ jobs:
           - 'eclipse-temurin:17'
     container: ${{ matrix.dockerimage }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: assemble
@@ -56,7 +56,7 @@ jobs:
     container: eclipse-temurin:8-jdk
     needs: [ pr-check ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Run code coverage
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     container: eclipse-temurin:8-jdk
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: jmhCompile
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     container: eclipse-temurin:8-jdk-alpine
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: assemble
