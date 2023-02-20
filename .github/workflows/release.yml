@@ -46,9 +46,9 @@ jobs:
         working-directory: ./artifacts
         run: for f in *; do sha256sum "$f" >> inspectit-ocelot-sha256-checksums.txt; done
       - name: "Get previous tag"
-          id: previoustag
-          # this gets the tag of the previous release based on the tags in the repo
-          run: echo "tag=$(git ls-remote --tags | cut --delimiter='/' --fields=3  | tail --lines=2 | head  -n -1)" >> $GITHUB_OUTPUT
+        id: previoustag
+        # this gets the tag of the previous release based on the tags in the repo
+        run: echo "tag=$(git ls-remote --tags | cut --delimiter='/' --fields=3  | tail --lines=2 | head  -n -1)" >> $GITHUB_OUTPUT
       - name: "Build Changelog"
         id: build_changelog
         uses: heinrichreimer/github-changelog-generator-action@v2.3
