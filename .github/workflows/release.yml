@@ -23,8 +23,7 @@ jobs:
     name: 'Build and Release'
     runs-on: ubuntu-latest
     environment: release
-    #needs: [configdocsgenerator_test, configurationserver_test, configuration_ui_test] - disabled for quick testing!
-    needs: []
+    needs: [configdocsgenerator_test, configurationserver_test, configuration_ui_test] 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
