@@ -23,7 +23,7 @@ jobs:
     name: 'Build and Release'
     runs-on: ubuntu-latest
     environment: release
-    needs: [configdocsgenerator_test, configurationserver_test, configuration_ui_test]
+    needs: [configdocsgenerator_test, configurationserver_test, configuration_ui_test] 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -44,12 +44,22 @@ jobs:
       - name: Calculate checksums of release artifacts
         working-directory: ./artifacts
         run: for f in *; do sha256sum "$f" >> inspectit-ocelot-sha256-checksums.txt; done
-      - name: Build Changelog
+      - name: "Get previous tag"
+        id: previoustag
+        # this gets the tag of the previous release based on the tags in the repo
+        run: echo "tag=$(git ls-remote --tags | cut --delimiter='/' --fields=3  | tail --lines=2 | head  -n -1)" >> $GITHUB_OUTPUT
+      - name: "Build Changelog"
         id: build_changelog
-        uses: mikepenz/release-changelog-builder-action@v3.5.0
+        uses: heinrichreimer/github-changelog-generator-action@v2.3
         with:
-          # Config for the Changelog, reference: https://github.com/marketplace/actions/release-changelog-builder
-          configuration: ".github/workflows/changelog-release-config.json"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          sinceTag: ${{ steps.previoustag.outputs.tag }} 
+          dateFormat: 
+          maxIssues: 500
+          unreleased: false
+          author: false
+          headerLabel: "## Changelog"
+          stripGeneratorNotice: true
       - name: Create Release
         uses: softprops/action-gh-release@v0.1.14
         with:
