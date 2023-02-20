@@ -10,6 +10,8 @@ import DownloadDialogue from '../dialogs/DownloadDialogue';
 import ServiceStateDialog from '../dialogs/ServiceStateDialog';
 import { downloadArchiveFromJson } from '../../../functions/export-selection.function';
 
+let controller = new AbortController(); // Controller to abort axios requests, when the dialog that triggered them have been aborted
+
 /**
  * The view presenting a list of connected agents, their mapping and when they last connected to the server.
  * The view is automatically refreshed and can also be refreshed manually using a refresh button.
@@ -301,6 +303,11 @@ class StatusView extends React.Component {
    * DOWNLOAD DIALOG
    */
   setDownloadDialogShown = (showDialog) => {
+    if(showDialog == false) {
+      controller.abort();
+      controller = new AbortController(); // A new instance has to be created in order for new requests to be accepted
+    }
+
     this.setState({
       isDownloadDialogShown: showDialog,
     });
@@ -343,6 +350,7 @@ class StatusView extends React.Component {
         axios
           .get('/agent/supportArchive', {
             params: { 'agent-id': agentId },
+            signal: controller.signal,
           })
           .then((res) => {
             this.setState({
@@ -375,6 +383,7 @@ class StatusView extends React.Component {
         axios
           .get('/configuration/agent-configuration', {
             params: { ...requestParams },
+            signal: controller.signal,
           })
           .then((res) => {
             this.setState({
@@ -403,6 +412,7 @@ class StatusView extends React.Component {
         axios
           .get('/command/logs', {
             params: { 'agent-id': agentId },
+            signal: controller.signal,
           })
           .then((res) => {
             this.setState({
