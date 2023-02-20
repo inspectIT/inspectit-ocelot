@@ -303,7 +303,7 @@ class StatusView extends React.Component {
    * DOWNLOAD DIALOG
    */
   setDownloadDialogShown = (showDialog) => {
-    if(showDialog == false) {
+    if (showDialog == false) {
       controller.abort();
       controller = new AbortController(); // A new instance has to be created in order for new requests to be accepted
     }
