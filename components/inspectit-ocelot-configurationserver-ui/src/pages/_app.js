@@ -31,6 +31,7 @@ class OcelotConfigurationUI extends App {
           {`
             .p-component {
               font-size: 14px;
+              font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
             }
             .p-button {
               font-size: 14px;
@@ -38,6 +39,10 @@ class OcelotConfigurationUI extends App {
             body {
               margin: 0;
               font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
+            }
+
+            .pi {
+              font-size: 1.2em;
             }
           `}
         </style>
