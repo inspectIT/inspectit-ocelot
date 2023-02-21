@@ -113,7 +113,7 @@ class StatusToolbar extends React.Component {
                 <Checkbox onChange={onModeChange} checked={useRegexFilter} />
               </div>
               <div className="p-inputgroup checkbox-group">
-                <label style={{ width: '175px' }}>Combine duplicate services</label>
+                <label style={{ width: 'max-content' }}>Combine duplicate services</label>
                 <Checkbox onChange={onServiceMergeChange} checked={useServiceMerge} />
                 <span
                   data-tip="Combine agents with the same name into a single entry.<br>
