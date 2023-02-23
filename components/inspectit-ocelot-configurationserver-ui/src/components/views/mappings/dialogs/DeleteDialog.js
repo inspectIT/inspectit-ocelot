@@ -36,12 +36,6 @@ class DeleteDialog extends React.Component {
     this.props.onHide();
     this.props.deleteMapping(this.props.mappingName);
   };
-
-  componentDidUpdate(prevProps) {
-    if (!prevProps.visible && this.props.visible) {
-      //this.deleteButton.current.focus(); -> caused an error, because the delete button cannot be focused beforehand, could be fixed with autoFocus
-    }
-  }
 }
 
 const mapDispatchToProps = {
