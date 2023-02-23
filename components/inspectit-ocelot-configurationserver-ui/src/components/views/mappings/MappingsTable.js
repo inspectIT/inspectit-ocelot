@@ -240,27 +240,33 @@ class MappingsTable extends React.Component {
           }
 
           .drag-icon-col {
-            width: 5%;
+            width: 10rem;
           }
 
           .mapping-name-col {
-            width: -moz-available;
+            width: -moz-available;          /* WebKit-based browsers will ignore this. */
+            width: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+            width: fill-available;
           }
 
           .source-branch-col {
-            width: 24%;
+            width:  40rem;
           }
 
           .sources-col {
-            width: -moz-available;
+            width: -moz-available;          /* WebKit-based browsers will ignore this. */
+            width: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+            width: fill-available;
           }
 
           .attributes-col {
-            width: -moz-available;
+            width: -moz-available;          /* WebKit-based browsers will ignore this. */
+            width: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+            width: fill-available;
           }
 
           .buttons-col {
-            width: 10%;
+            width: 15rem;
           }
         `}</style>
         <div ref={(el) => (this.mappingsTable = el)}>
