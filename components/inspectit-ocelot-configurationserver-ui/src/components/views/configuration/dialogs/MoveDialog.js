@@ -73,7 +73,7 @@ class MoveDialog extends React.Component {
       const { targetPath } = this.state;
       const selStart = targetPath.lastIndexOf('/') + 1;
       const selEnd = targetPath.length;
-      const inputElem = this.input.current.element;
+      const inputElem = this.input.current;
       inputElem.focus();
       inputElem.setSelectionRange(selStart, selEnd);
       this.setState({ resetSelection: false });

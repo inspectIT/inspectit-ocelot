@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { Growl } from 'primereact/growl';
+import { Toast } from 'primereact/toast';
 
 /** ID of the last show notification */
 let lastNotificationId = -1;
@@ -10,7 +10,7 @@ let lastNotificationId = -1;
  * Handles showing of notification messages.
  */
 class NotificationHandler extends React.Component {
-  growl = React.createRef();
+  toast = React.createRef();
 
   componentDidMount = () => {
     this.showNotifications();
@@ -25,16 +25,16 @@ class NotificationHandler extends React.Component {
 
     if (notification && notification.id !== lastNotificationId) {
       lastNotificationId = notification.id;
-      this.growl.show(notification);
+      this.toast.show(notification);
     }
   };
 
   render() {
     return (
       <>
-        <Growl
+        <Toast
           ref={(el) => {
-            this.growl = el;
+            this.toast = el;
           }}
         />
         {this.props.children}

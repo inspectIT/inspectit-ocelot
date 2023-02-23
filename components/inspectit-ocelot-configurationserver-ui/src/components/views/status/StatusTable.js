@@ -67,6 +67,7 @@ class AgentMappingCell extends React.Component {
           .show-attributes {
             float: right;
             cursor: pointer;
+            color: #007ad9;
           }
 
           .attributes {

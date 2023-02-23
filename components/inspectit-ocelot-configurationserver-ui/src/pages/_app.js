@@ -1,4 +1,4 @@
-import App, { Container } from 'next/app';
+import App from 'next/app';
 import Head from 'next/head';
 import React from 'react';
 import withReduxStore from '../lib/with-redux-store';
@@ -8,12 +8,11 @@ import { Provider } from 'react-redux';
 import AuthenticationRouter from '../components/common/AuthenticationRouter';
 import NotificationHandler from '../components/common/NotificationHandler';
 import UnsavedChangesGate from '../components/common/UnsavedChangesGate';
-
 import { BASE_PAGE_TITLE } from '../data/constants';
 import { linkPrefix } from '../lib/configuration';
 
 // importing required css files for primereact
-import 'primereact/resources/themes/nova-dark/theme.css';
+import 'primereact/resources/themes/nova-alt/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
@@ -27,12 +26,23 @@ class OcelotConfigurationUI extends App {
   render() {
     const { Component, pageProps, reduxStore } = this.props;
     return (
-      <Container>
+      <React.Fragment>
         <style global jsx>
           {`
+            .p-component {
+              font-size: 14px;
+              font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
+            }
+            .p-button {
+              font-size: 14px;
+            }
             body {
               margin: 0;
               font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
+            }
+
+            .pi {
+              font-size: 1.2em;
             }
           `}
         </style>
@@ -52,7 +62,7 @@ class OcelotConfigurationUI extends App {
             </NotificationHandler>
           </PersistGate>
         </Provider>
-      </Container>
+      </React.Fragment>
     );
   }
 }

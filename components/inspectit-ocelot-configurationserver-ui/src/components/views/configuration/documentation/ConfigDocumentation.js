@@ -1,12 +1,12 @@
 import React, { useRef } from 'react';
 import BaseDocsElement from './BaseDocsElement';
 import DocsElementTypes from './DocsElementTypes';
-import { Growl } from 'primereact/growl';
+import { Toast } from 'primereact/toast';
 import _ from 'lodash';
 
 const ConfigDocumentation = React.memo(({ configurationDocs }) => {
-  // growl for showing notifications
-  const growl = useRef(null);
+  // toast for showing notifications
+  const toast = useRef(null);
 
   // not managed by state
   const elementRefs = {};
@@ -22,7 +22,7 @@ const ConfigDocumentation = React.memo(({ configurationDocs }) => {
     if (_.has(elementRefs, elementName)) {
       elementRefs[elementName].scrollIntoView();
     } else {
-      growl.current.show({
+      toast.current.show({
         severity: 'warn',
         summary: 'Element Does Not Exist',
         detail: (
@@ -38,7 +38,7 @@ const ConfigDocumentation = React.memo(({ configurationDocs }) => {
     <>
       <style jsx>
         {`
-          .docs-containger :global(.p-growl) {
+          .docs-containger :global(.p-toast) {
             widht: 25rem;
           }
           .docs-container {
@@ -64,7 +64,7 @@ const ConfigDocumentation = React.memo(({ configurationDocs }) => {
       </style>
 
       <div className="docs-container">
-        <Growl ref={growl} />
+        <Toast ref={toast} />
 
         <div className="doc-section">
           <div className="section-heading">Scopes</div>

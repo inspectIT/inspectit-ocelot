@@ -22,7 +22,7 @@ class Menubar extends React.Component {
 
   render() {
     return (
-      <Toolbar id="toolbar">
+      <div>
         <style global jsx>{`
           #toolbar {
             height: 4rem;
@@ -62,21 +62,27 @@ class Menubar extends React.Component {
             cursor: pointer;
           }
         `}</style>
-        <div className="p-toolbar-group-left flex-v-center">
-          <img className="ocelot-head" src={linkPrefix + '/static/images/inspectit-ocelot-head.svg'} />
-          <div className="ocelot-text">inspectIT Ocelot</div>
-        </div>
-
-        <div className="p-toolbar-group-right flex-v-center">
-          <label className="documentation-icon">
-            <i className="pi pi-info-circle" onClick={this.openDocumentation} title="Open Documentation"></i>
-          </label>
-          <div className="user-description">
-            Logged in as <b>{this.props.username}</b>
-          </div>
-          <Button label="Logout" onClick={this.logout} icon="pi pi-power-off" style={{ marginLeft: 4 }} />
-        </div>
-      </Toolbar>
+        <Toolbar
+          id="toolbar"
+          left={
+            <div className="p-toolbar-group-left flex-v-center">
+              <img className="ocelot-head" src={linkPrefix + '/static/images/inspectit-ocelot-head.svg'} />
+              <div className="ocelot-text">inspectIT Ocelot</div>
+            </div>
+          }
+          right={
+            <div className="p-toolbar-group-right flex-v-center">
+              <label className="documentation-icon">
+                <i className="pi pi-info-circle" onClick={this.openDocumentation} title="Open Documentation"></i>
+              </label>
+              <div className="user-description">
+                Logged in as <b>{this.props.username}</b>
+              </div>
+              <Button label="Logout" onClick={this.logout} icon="pi pi-power-off" style={{ marginLeft: 4 }} />
+            </div>
+          }
+        />
+      </div>
     );
   }
 }

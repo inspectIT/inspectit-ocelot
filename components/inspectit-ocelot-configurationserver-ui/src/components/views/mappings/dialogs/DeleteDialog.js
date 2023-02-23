@@ -22,7 +22,7 @@ class DeleteDialog extends React.Component {
         onHide={this.props.onHide}
         footer={
           <div>
-            <Button label="Delete" ref={this.deleteButton} className="p-button-danger" onClick={this.handleClick} />
+            <Button label="Delete" ref={this.deleteButton} className="p-button-danger" onClick={this.handleClick} autoFocus={true} />
             <Button label="Cancel" className="p-button-secondary" onClick={this.props.onHide} />
           </div>
         }
@@ -36,12 +36,6 @@ class DeleteDialog extends React.Component {
     this.props.onHide();
     this.props.deleteMapping(this.props.mappingName);
   };
-
-  componentDidUpdate(prevProps) {
-    if (!prevProps.visible && this.props.visible) {
-      this.deleteButton.current.element.focus();
-    }
-  }
 }
 
 const mapDispatchToProps = {

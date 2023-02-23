@@ -140,7 +140,7 @@ const SearchDialog = ({ visible, onHide, openFile }) => {
 
   // sets the focus on the query input
   const focusQueryInput = () => {
-    queryInputRef.current.element.focus();
+    queryInputRef.current.focus();
   };
 
   // focus the query input if the loading state of the request is changing. necessary because the focus is lost during loading

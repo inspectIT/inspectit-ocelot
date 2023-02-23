@@ -43,11 +43,11 @@ class SettingsMenu extends React.Component {
             height: 2.8rem;
           }
           .this :global(.p-tabmenu-nav .p-tabmenuitem .p-menuitem-link) {
-            background-color: #b6b6b6;
+            #b6b6b6 
             border: solid #ddd 1px;
           }
         `}</style>
-        <TabMenu model={this.state.navItems} activeItem={this.state.activeItem} onTabChange={(e) => this.onTabChange(e.value)} />
+        <TabMenu model={this.state.navItems} activeitem={this.state.activeItem} onTabChange={(e) => this.onTabChange(e.value)} />
       </div>
     );
   }
