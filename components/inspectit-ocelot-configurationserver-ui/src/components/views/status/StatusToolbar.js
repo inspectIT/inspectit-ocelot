@@ -80,7 +80,7 @@ class StatusToolbar extends React.Component {
           .hint-badge {
             display: inline-flex;
             height: 1.2rem;
-            width: 1.7rem;
+            width: 1.2rem;
             margin-left: 0.5rem;
             border-radius: 50%;
             background-color: #a4a3a3;
