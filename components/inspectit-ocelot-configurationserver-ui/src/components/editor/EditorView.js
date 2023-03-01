@@ -11,6 +11,7 @@ import { configurationSelectors, configurationActions } from '../../redux/ducks/
 import { getConfigurationType } from '../../lib/configuration-utils';
 import { CONFIGURATION_TYPES } from '../../data/constants';
 import MethodConfigurationEditor from './method-configuration-editor/MethodConfigurationEditor';
+import { TabView, TabPanel } from 'primereact/tabview';
 
 const AceEditor = dynamic(() => import('./yaml-editor/AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./visual-editor/TreeTableEditor'), { ssr: false });
@@ -93,6 +94,16 @@ const EditorView = ({
       />
     );
   }
+
+  let path;
+  let name;
+  try {
+    path = children.props.path;
+    name = children.props.name;
+  }catch(e){
+
+  }
+  
 
   return (
     <div className="this">
@@ -201,8 +212,14 @@ const EditorView = ({
             </div>
           )}
 
-          {showEditor && <div className="editor-container">{editorContent}</div>}
-          {!showEditor && <SelectionInformation hint={hint} />}
+          <TabView>
+            <TabPanel header={ path + "" + name}>
+              {console.log(editorContent)}
+              {console.log(children)}
+              {showEditor && <div className="editor-container">{editorContent}</div>}
+              {!showEditor && <SelectionInformation hint={hint} />}
+            </TabPanel>  
+          </TabView>
         </div>
 
         {sidebar}
