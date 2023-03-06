@@ -78,7 +78,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
 
         latch.await(5, TimeUnit.SECONDS);
 
-        assertThat(refTags.get()).hasSize(1)
+        assertThat(refTags.get()).toIterable().hasSize(1)
                 .extracting("key", "value")
                 .contains(tuple(tagKey, tagValue));
     }
@@ -102,7 +102,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
 
         latch.await(5, TimeUnit.SECONDS);
 
-        assertThat(refTags.get()).hasSize(1)
+        assertThat(refTags.get()).toIterable().hasSize(1)
                 .extracting("key", "value")
                 .contains(tuple(tagKey, tagValue));
     }
@@ -131,7 +131,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
 
         latch.await(5, TimeUnit.SECONDS);
 
-        assertThat(refTags.get()).hasSize(1)
+        assertThat(refTags.get()).toIterable().hasSize(1)
                 .extracting("key", "value")
                 .contains(tuple(tagKey, tagValue));
     }
@@ -157,7 +157,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
 
         latch.await(5, TimeUnit.SECONDS);
 
-        assertThat(refTags.get()).hasSize(0);
+        assertThat(refTags.get()).toIterable().hasSize(0);
     }
 
     @Test
@@ -179,9 +179,9 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
         Future<?> taskFuture = executorService.submit(runnableSecond); // have to be empty!
         taskFuture.get();
 
-        assertThat(refTagsInner.get()).hasSize(1)
+        assertThat(refTagsInner.get()).toIterable().hasSize(1)
                 .extracting("key", "value")
                 .contains(tuple(tagKey, tagValue));
-        assertThat(refTagsOuter.get()).isEmpty();
+        assertThat(refTagsOuter.get()).toIterable().isEmpty();
     }
 }

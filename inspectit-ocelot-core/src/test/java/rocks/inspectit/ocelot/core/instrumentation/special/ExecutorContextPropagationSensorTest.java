@@ -26,7 +26,7 @@ public class ExecutorContextPropagationSensorTest {
     private LogTraceCorrelator logTraceCorrelator;
 
     @BeforeEach
-    private void beforeEach() {
+    void beforeEach() {
         Instances.contextManager = contextManager;
         Instances.logTraceCorrelator = logTraceCorrelator;
     }

@@ -61,7 +61,7 @@ class JmxMetricsRecorderTest {
             jmxMetricsRecorder.recordBean("my.domain", new LinkedHashMap<>(), new LinkedList<>(), "att", null, "desc", value);
 
             TagContext tagContext = tagContextBuilder.build();
-            assertThat(InternalUtils.getTags(tagContext)).isEmpty();
+            assertThat(InternalUtils.getTags(tagContext)).toIterable().isEmpty();
 
             verify(measuresManager).getMeasureDouble(expectedMeasureName);
             verify(tagger).currentBuilder();
@@ -80,7 +80,7 @@ class JmxMetricsRecorderTest {
             jmxMetricsRecorder.recordBean("my.domain", new LinkedHashMap<>(), new LinkedList<>(), "attbool", null, "desc", Boolean.TRUE);
 
             TagContext tagContext = tagContextBuilder.build();
-            assertThat(InternalUtils.getTags(tagContext)).isEmpty();
+            assertThat(InternalUtils.getTags(tagContext)).toIterable().isEmpty();
 
             verify(measuresManager).getMeasureDouble(expectedMeasureName);
             verify(tagger).currentBuilder();
@@ -99,7 +99,7 @@ class JmxMetricsRecorderTest {
             jmxMetricsRecorder.recordBean("my.domain", new LinkedHashMap<>(), new LinkedList<>(), "attbool", null, "desc", Boolean.FALSE);
 
             TagContext tagContext = tagContextBuilder.build();
-            assertThat(InternalUtils.getTags(tagContext)).isEmpty();
+            assertThat(InternalUtils.getTags(tagContext)).toIterable().isEmpty();
 
             verify(measuresManager).getMeasureDouble(expectedMeasureName);
             verify(tagger).currentBuilder();
@@ -120,7 +120,7 @@ class JmxMetricsRecorderTest {
             jmxMetricsRecorder.recordBean("my.domain", new LinkedHashMap<>(), new LinkedList<>(), "att", null, "desc", value);
 
             TagContext tagContext = tagContextBuilder.build();
-            assertThat(InternalUtils.getTags(tagContext)).isEmpty();
+            assertThat(InternalUtils.getTags(tagContext)).toIterable().isEmpty();
 
             verify(measuresManager, times(2)).getMeasureDouble(expectedMeasureName);
             verify(measuresManager).addOrUpdateAndCacheMeasureWithViews(eq(expectedMeasureName), definitionCaptor.capture());
@@ -157,7 +157,7 @@ class JmxMetricsRecorderTest {
             jmxMetricsRecorder.recordBean("my.domain", beanProps, attributes, "att", null, "desc", value);
 
             TagContext tagContext = tagContextBuilder.build();
-            assertThat(InternalUtils.getTags(tagContext)).hasSize(2)
+            assertThat(InternalUtils.getTags(tagContext)).toIterable().hasSize(2)
                     .anySatisfy(tag -> {
                         assertThat(tag.getKey().getName()).isEqualTo("prop2");
                         assertThat(tag.getValue().asString()).isEqualTo("Prop2Value");
