@@ -106,11 +106,17 @@ dependencies {
             // The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
             // See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
             "io.netty:netty-tcnative-boringssl-static:${tcnativeVersion}",
+            "io.grpc:grpc-stub:${grpcVersion}",
+            "com.google.protobuf:protobuf-java:${protobufVersion}",
 
             "rocks.inspectit:opencensus-influxdb-exporter:${opencensusInfluxdbExporter}",
 
             // bytecode manipulation
             "net.bytebuddy:byte-buddy"
+    )
+
+    runtimeOnly(
+            "io.grpc:grpc-netty:${grpcVersion}"
     )
 
     testImplementation(
@@ -122,7 +128,7 @@ dependencies {
             "io.opentelemetry:opentelemetry-opencensus-shim",
             "io.opentelemetry:opentelemetry-semconv",
             "io.opentelemetry:opentelemetry-sdk-testing",
-            "io.opentelemetry:opentelemetry-proto:${opentelemetryProtoVersion}",
+            "io.opentelemetry:opentelemetry-proto:${openTelemetryProtoVersion}",
 
             'org.springframework:spring-test',
 
@@ -141,7 +147,6 @@ dependencies {
             "io.grpc:grpc-stub:${grpcVersion}",
             "org.influxdb:influxdb-java:${influxdbJavaVersion}",
             "io.apisense.embed.influx:embed-influxDB:${embedInfluxdbVersion}",
-            // TODO
             "io.grpc:grpc-testing:${grpcVersion}",
             // for docker test containers
             "org.testcontainers:testcontainers:${testContainersVersion}",
@@ -150,8 +155,6 @@ dependencies {
             // ServerExtension
             "com.linecorp.armeria:armeria-junit5:${armeriaVersion}",
             "com.linecorp.armeria:armeria-grpc-protocol:${armeriaVersion}",
-
-            "com.google.protobuf:protobuf-java-util:${protobufJavaUtilVersion}",
 
             // LogCapturer
             "io.github.netmikey.logunit:logunit-core:${logUnitVersion}",
