@@ -4,9 +4,7 @@ plugins {
     id 'maven-publish'
     id 'org.springframework.boot' version "${springBootVersion}" apply false
     id 'io.spring.dependency-management' version "${springDependencyManangementVersion}"
-    // TODO
-    id 'idea'
-    id 'com.google.protobuf' version '0.8.18'
+    id 'com.google.protobuf' version "${protobufPluginVersion}"
 }
 
 test {
@@ -19,7 +17,7 @@ test {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.19.2"
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
     }
     plugins {
         grpc {
@@ -43,8 +41,6 @@ dependencyManagement {
 }
 dependencies {
     compileOnly "org.projectlombok:lombok"
-    // TODO verify that
-    compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
     annotationProcessor "org.projectlombok:lombok"
     testImplementation (
             "org.junit.jupiter:junit-jupiter-api",
@@ -60,9 +56,11 @@ dependencies {
             "commons-io:commons-io:${commonsIoVersion}",
             "com.fasterxml.jackson.core:jackson-databind",
 
-            // grpc TODO
-            'io.grpc:grpc-stub:1.45.0',
-            'io.grpc:grpc-protobuf:1.45.0',
+            // Generated protobuf code needs this if build or run on Java 9+
+            "javax.annotation:javax.annotation-api:${javaxAnnotationApiVersion}",
+
+            "io.grpc:grpc-stub:${grpcVersion}",
+            "io.grpc:grpc-protobuf:${grpcVersion}",
 
             // logging
             "ch.qos.logback:logback-classic",
