@@ -221,6 +221,8 @@ jar.dependsOn checkDependencyJavaVersions
 jar.dependsOn generateVersionFile
 
 jar {
+    // Do not change this strategy lightheartedly.
+    // For details see resources/META-INF/services/io.grpc.NameResolverProvider
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     archiveName = "${project.name}.jar"
