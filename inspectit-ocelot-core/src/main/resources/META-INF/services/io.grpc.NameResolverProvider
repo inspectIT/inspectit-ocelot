@@ -1,0 +1,23 @@
+# This file ensures that a io.grpc.NameResolverProvider is used that is able to
+# connect via TCP.
+# Both dependencies grpc-core and grpc-netty-shaded provide such a NameResolverProvider:
+# * io.grpc.internal.DnsNameResolverProvider (grpc-core)
+# * io.grpc.netty.shaded.io.grpc.netty.UdsNameResolverProvider (grpc-netty-shaded)
+# inspectit-ocelot-core.jar is packaged as a fat-jar in order to work together
+# with InspecitITClassloader. Depending on the order in which the dependencies
+# are merged into the fat-jar and which DuplicatesStrategy is used it may happen
+# that sometimes the NameResolverProvider of grpc-netty-shaded wins and sometimes
+# the Provider of grpc-core.
+# Hence, we provide this file manually to ensure both Providers are available.
+# Additionally, we use DuplicatesStrategy.EXCLUDE to guarantee that this file
+# always ends up in the fat-jar, since it is the first one added.
+#
+# This is a poor man's version of the Gradle Shadow Plugin. Especially
+# https://imperceptiblethoughts.com/shadow/configuration/merging/#merging-service-descriptor-files
+# But it works and saves us the burden to switch to that plugin, which might cause
+# other problems.
+#
+# In a standard project set up the default Classloader reads service files from both jars.
+io.grpc.internal.DnsNameResolverProvider
+io.grpc.netty.shaded.io.grpc.netty.UdsNameResolverProvider
+
