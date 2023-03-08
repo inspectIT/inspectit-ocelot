@@ -103,9 +103,6 @@ dependencies {
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             "io.opentelemetry:opentelemetry-exporter-prometheus",
 
-            // The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
-            // See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
-            "io.netty:netty-tcnative-boringssl-static:${tcnativeVersion}",
             "io.grpc:grpc-stub:${grpcVersion}",
             "com.google.protobuf:protobuf-java:${protobufVersion}",
 
@@ -116,7 +113,7 @@ dependencies {
     )
 
     runtimeOnly(
-            "io.grpc:grpc-netty:${grpcVersion}"
+            "io.grpc:grpc-netty-shaded:${grpcVersion}"
     )
 
     testImplementation(
