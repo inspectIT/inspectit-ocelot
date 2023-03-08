@@ -55,7 +55,9 @@ inspectit:
 ```
 
 :::warning
-By default the agent commands and responses are sent as plaintext without encryption. To use TLS, at least a certificate for the config-server needs to be provided. See [Using TLS](#using-tls) for further info.
+By default the agent commands and responses are sent encrypted via TLS. This needs additional configuration as mentioned in [Using TLS](#using-tls).
+
+Alternatively, you may use unencrypted, plaintext communication by specifying `inspectit-agent.commands.use-tls=false`. We do not recommend to use this in production environments. 
 :::
 
 ### Dynamic Agent Command URL
