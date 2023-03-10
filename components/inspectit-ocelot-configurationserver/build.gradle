@@ -12,7 +12,7 @@ apply plugin: 'java'
 
 node {
     // Version of node to use.
-    version = '12.22.0'
+    version = '18.14.2'
 
     // Version of npm to use.
     npmVersion = '6.13.4'
@@ -49,6 +49,7 @@ task installFrontend(type: YarnTask) {
  */
 task buildFrontend(type: YarnTask) {
     args = ['export']
+    environment = [NODE_OPTIONS: "--openssl-legacy-provider"]
 }
 buildFrontend.dependsOn installFrontend
 
