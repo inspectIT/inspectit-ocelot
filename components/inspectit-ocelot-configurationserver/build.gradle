@@ -40,19 +40,28 @@ node {
 /**
  * Task for installing the frontend dependencies.
  */
-task installFrontend(type: YarnTask) {
+def installFrontend = tasks.register('installFrontend', YarnTask) {
     args = ['install']
+}
+
+def lintFrontend = tasks.register('lintFrontend', YarnTask) {
+    dependsOn installFrontend
+    args = ['lint']
+}
+
+def checkCodeStyleFrontend = tasks.register('checkCodeStyleFrontend', YarnTask) {
+    dependsOn installFrontend
+    args = ['format']
 }
 
 /**
  * Task for building the frontend and copying it to the configuration-server project.
  */
-task buildFrontend(type: YarnTask) {
+tasks.register('buildFrontend', YarnTask) {
+    dependsOn lintFrontend, checkCodeStyleFrontend
     args = ['export']
     environment = [NODE_OPTIONS: "--openssl-legacy-provider"]
 }
-buildFrontend.dependsOn installFrontend
-
 
 def serverMainClass = 'rocks.inspectit.ocelot.ConfigurationServer'
 
