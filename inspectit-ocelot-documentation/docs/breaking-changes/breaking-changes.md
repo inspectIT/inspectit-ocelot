@@ -3,6 +3,16 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
+## Breaking changes in 3.0.0
+
+### Agent commands now use gRPC
+
+Previously, agents polled the configuration server repeatedly over a REST-endpoint for new commands.
+Now, agents start a gRPC stream connection once and the configuration server sends new commands to agents and agents
+their responses over this connection.
+
+This means that new agents are not able to exchange agent commands with old config-servers and vice versa.
+
 ## Breaking changes in 2.4.0
 
 ### Sampling adjusted
@@ -84,16 +94,6 @@ There are no breaking changes for version 1.15.2.
 ## Breaking changes in 1.15.1
 
 There are no breaking changes for version 1.15.1.
-
-
-## Breaking changes in 3.0.0
-
-### Agent commands now use grpc
-
-Formerly agents polled the configuration server repeatedly over a REST-endpoint for new commands. 
-Now agents start a grpc stream connection once and the configuration server sends new commands to agents and agents their responses over this connection.
-
-This means that new agents are not able to exchange agent commands with old config-servers and vice versa.
 
 ## Breaking changes in 1.15.0
 
