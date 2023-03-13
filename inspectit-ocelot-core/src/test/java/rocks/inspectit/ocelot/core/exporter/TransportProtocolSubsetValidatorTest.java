@@ -27,7 +27,7 @@ public class TransportProtocolSubsetValidatorTest {
     private Validator validator;
 
     @BeforeEach
-    private void beforeEach() {
+    void beforeEach() {
         validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 

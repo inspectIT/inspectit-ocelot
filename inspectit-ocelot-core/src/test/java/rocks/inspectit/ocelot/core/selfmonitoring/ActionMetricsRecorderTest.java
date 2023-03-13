@@ -31,7 +31,7 @@ public class ActionMetricsRecorderTest extends SpringTestBase {
     class ActionMetrics extends SpringTestBase {
 
         @BeforeEach
-        private void disableAllActionsMetrics() {
+        void disableAllActionsMetrics() {
             updateProperties((mp) -> {
                 mp.setProperty("inspectit.selfMonitoring.actionMetrics.enabled", "false");
             });
