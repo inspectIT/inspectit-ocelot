@@ -200,6 +200,10 @@ class ConfigurationView extends React.Component {
 
     const fileContentWithoutFirstLine = fileContent ? fileContent.split('\n').slice(1).join('\n') : '';
 
+    console.log("Test", path + "" + name);
+    console.log("Selection", selection);
+    console.log("File content", fileContent);
+
     return (
       <div className="this">
         <style jsx>{`

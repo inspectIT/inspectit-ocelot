@@ -12,6 +12,7 @@ import { getConfigurationType } from '../../lib/configuration-utils';
 import { CONFIGURATION_TYPES } from '../../data/constants';
 import MethodConfigurationEditor from './method-configuration-editor/MethodConfigurationEditor';
 import { TabView, TabPanel } from 'primereact/tabview';
+import { Button } from 'primereact/button';
 
 const AceEditor = dynamic(() => import('./yaml-editor/AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./visual-editor/TreeTableEditor'), { ssr: false });
@@ -42,6 +43,7 @@ const EditorView = ({
   readOnly,
   showVisualConfigurationView,
   onToggleVisualConfigurationView,
+  tabs,
   sidebar,
 }) => {
   const dispatch = useDispatch();
@@ -60,7 +62,23 @@ const EditorView = ({
     dispatch(configurationActions.selectVersion(null));
   };
 
+  // header template for the tab + click handler
+  const tabHeaderTemplate = (path, name) => {
+    return (
+      <div>
+        <label>{path}{name}</label>
+        <i class='pi pi-times' onClick={closeTabHandler(path, name)}></i>
+      </div>
+    );
+  }
+
+  const closeTabHandler = (path, name) => {
+    tabs = tabs.filter(tab => tab.path != path && tab.name != name);
+  }
+
   let editorContent;
+
+  console.log('Value', value);
 
   if (configurationType == CONFIGURATION_TYPES.METHOD_CONFIGURATION) {
     editorContent = <MethodConfigurationEditor yamlConfiguration={value} />;
@@ -94,16 +112,31 @@ const EditorView = ({
       />
     );
   }
+  
+  console.log("Tabs", tabs);
 
   let path;
   let name;
+  let activeIndex = 0;
   try {
     path = children.props.path;
     name = children.props.name;
-  }catch(e){
-
+  } catch (e) {
+    path = '';
+    name = '';
   }
-  
+
+  // Check if the file is already opened in a tab or not
+  let unique = true;
+  tabs.map((tab) => {
+    if(tab.path == path && tab.name == name) {
+      unique = false;
+    }
+  });
+
+  if(unique && path != '' && name != '') {
+    tabs.push({path: path, name: name, content: editorContent});
+  }
 
   return (
     <div className="this">
@@ -212,13 +245,30 @@ const EditorView = ({
             </div>
           )}
 
-          <TabView>
-            <TabPanel header={ path + "" + name}>
-              {console.log(editorContent)}
-              {console.log(children)}
-              {showEditor && <div className="editor-container">{editorContent}</div>}
-              {!showEditor && <SelectionInformation hint={hint} />}
-            </TabPanel>  
+          {showEditor && <div className="editor-container">{editorContent}</div>}
+          {!showEditor && <SelectionInformation hint={hint} />}
+
+          <TabView scrollable>
+            {tabs.map((tab) => {
+              console.log(tab);
+              return (
+                <TabPanel key={tab.title} header={tabHeaderTemplate(path, name)}>
+                  <p className="m-0">{tab.content}</p>
+                  <p>Test</p>
+                </TabPanel>
+              );
+            })}
+            <TabPanel headerTemplate={tabHeaderTemplate(path, name)} closable>
+              <div>
+                here it should be
+                <div>
+                  {showEditor && <div className="editor-container">{editorContent}</div>}
+                  {!showEditor && <SelectionInformation hint={hint} />}
+                </div>
+                <p>TEST</p>
+                <input type="text" />
+              </div>
+            </TabPanel>
           </TabView>
         </div>
 
@@ -277,6 +327,8 @@ EditorView.propTypes = {
   showVisualConfigurationView: PropTypes.bool,
   /** Function to react on the change of the enable disable visual configuration view */
   onToggleVisualConfigurationView: PropTypes.func,
+  /** Array to save all the open tabs in the editor */
+  tabs: PropTypes.array,
 };
 
 EditorView.defaultProps = {
@@ -285,6 +337,7 @@ EditorView.defaultProps = {
   canSave: true,
   loading: false,
   showVisualConfigurationView: false,
+  tabs: new Array(),
 };
 
 export default EditorView;
