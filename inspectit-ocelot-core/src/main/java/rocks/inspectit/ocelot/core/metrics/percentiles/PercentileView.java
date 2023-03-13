@@ -8,6 +8,7 @@ import io.opencensus.metrics.export.*;
 import io.opencensus.tags.InternalUtils;
 import io.opencensus.tags.Tag;
 import io.opencensus.tags.TagContext;
+import io.opentelemetry.api.common.Attributes;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -170,13 +171,10 @@ public class PercentileView {
         }
     }
 
-    private void validateConfiguration(boolean includeMin, boolean includeMax, Set<Double> percentiles, long timeWindowMillis,
-                                       String baseViewName, String unit, String description, int bufferLimit) {
-        percentiles.stream()
-                .filter(p -> p <= 0.0 || p >= 1.0)
-                .forEach(p -> {
-                    throw new IllegalArgumentException("Percentiles must be in range (0,1)");
-                });
+    private void validateConfiguration(boolean includeMin, boolean includeMax, Set<Double> percentiles, long timeWindowMillis, String baseViewName, String unit, String description, int bufferLimit) {
+        percentiles.stream().filter(p -> p <= 0.0 || p >= 1.0).forEach(p -> {
+            throw new IllegalArgumentException("Percentiles must be in range (0,1)");
+        });
         if (StringUtils.isBlank(baseViewName)) {
             throw new IllegalArgumentException("View name must not be blank!");
         }
@@ -229,9 +227,47 @@ public class PercentileView {
             } else {
                 if (!overflowWarningPrinted) {
                     overflowWarningPrinted = true;
-                    log.warn("Dropping points for Percentiles-View '{}' because the buffer limit has been reached!" +
-                            " Quantiles/Min/Max will be meaningless." +
-                            " This warning will not be shown for future drops!", viewName);
+                    log.warn("Dropping points for Percentiles-View '{}' because the buffer limit has been reached!" + " Quantiles/Min/Max will be meaningless." + " This warning will not be shown for future drops!", viewName);
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Adds the provided value to the sliding window of data.
+     *
+     * @param value      the value of the measure
+     * @param time       the timestamp when this value was observed
+     * @param tagContext the tags with which this value was observed
+     * @param attributes the attributes with which this value was observed
+     *
+     * @return true, if the point could be added, false otherwise.
+     */
+    public boolean insertValue(double value, Timestamp time, TagContext tagContext, Attributes attributes) {
+        removeStalePointsIfTimeThresholdExceeded(time);
+        List<String> attributeValues = Collections.emptyList();
+        // OC
+        if (null != tagContext) {
+            attributeValues = getTagsList(tagContext);
+        }
+        // OTEL
+        else if (null != attributes) {
+            attributeValues = getAttributesList(attributes);
+        }
+        WindowedDoubleQueue queue = seriesValues.computeIfAbsent(attributeValues, (key) -> new WindowedDoubleQueue(timeWindowMillis));
+        synchronized (queue) {
+            long timeMillis = getInMillis(time);
+            int removed = queue.removeStaleValues(timeMillis);
+            int currentSize = numberOfPoints.addAndGet(-removed);
+            if (currentSize < bufferLimit) {
+                numberOfPoints.incrementAndGet();
+                queue.insert(value, timeMillis);
+            } else {
+                if (!overflowWarningPrinted) {
+                    overflowWarningPrinted = true;
+                    log.warn("Dropping points for Percentiles-View '{}' because the buffer limit has been reached!" + " Quantiles/Min/Max will be meaningless." + " This warning will not be shown for future drops!", viewName);
                 }
                 return false;
             }
@@ -387,11 +423,27 @@ public class PercentileView {
         return Arrays.asList(tagValues);
     }
 
+    /**
+     * Returns an ordered list of the values for the given attributes according to the indices of {@link #tagIndices}.
+     *
+     * @param attributes
+     *
+     * @return
+     */
+    private List<String> getAttributesList(Attributes attributes) {
+        String[] attributeValues = new String[tagIndices.size()];
+        Arrays.fill(attributeValues, "");
+        attributes.forEach((attributeKey, attributeValue) -> {
+            Integer index = tagIndices.get(attributeKey);
+            if (null != index) {
+                attributeValues[index] = attributeValue.toString();
+            }
+        });
+        return Arrays.asList(attributeValues);
+    }
+
     private List<LabelValue> toLabelValues(List<String> tagValues) {
-        return tagValues
-                .stream()
-                .map(LabelValue::create)
-                .collect(Collectors.toList());
+        return tagValues.stream().map(LabelValue::create).collect(Collectors.toList());
     }
 
     private List<LabelValue> toLabelValuesWithPercentile(List<String> tagValues, double percentile) {

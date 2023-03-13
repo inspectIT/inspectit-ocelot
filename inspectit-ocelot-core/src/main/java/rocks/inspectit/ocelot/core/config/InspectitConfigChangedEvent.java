@@ -7,7 +7,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 public class InspectitConfigChangedEvent extends ApplicationEvent {
 
     /**
-     * The configuration before the change occured.
+     * The configuration before the change occurred.
      */
     @Getter
     private final InspectitConfig oldConfig;
@@ -17,7 +17,6 @@ public class InspectitConfigChangedEvent extends ApplicationEvent {
      */
     @Getter
     private final InspectitConfig newConfig;
-
 
     InspectitConfigChangedEvent(Object source, InspectitConfig oldConfig, InspectitConfig newConfig) {
         super(source);

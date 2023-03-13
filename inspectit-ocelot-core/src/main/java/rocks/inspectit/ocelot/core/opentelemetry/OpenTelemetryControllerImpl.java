@@ -1,13 +1,16 @@
 package rocks.inspectit.ocelot.core.opentelemetry;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.opencensusshim.metrics.OpenCensusMetrics;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.metrics.InstrumentSelector;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
+import io.opentelemetry.sdk.metrics.View;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
@@ -20,11 +23,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.IOpenTelemetryController;
@@ -49,6 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <b>Important note:</b> {@link #shutdown() shutting down} the {@link OpenTelemetryControllerImpl} is final and cannot be revoked.
  */
 @Slf4j
+@Component
 public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
     public static final String BEAN_NAME = "openTelemetryController";
@@ -68,6 +74,11 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      * Whether something in {@link rocks.inspectit.ocelot.config.model.metrics.MetricsSettings} or any of the {@link rocks.inspectit.ocelot.config.model.exporters.metrics.MetricsExportersSettings} of the {@link InspectitConfig} changed
      */
     private boolean metricSettingsChanged = false;
+
+    /**
+     * Whether {@link View} were registered or unregistered from {@link #registeredViews}
+     */
+    private boolean viewsChanged = false;
 
     /**
      * whether {@link GlobalOpenTelemetry} has been successfully been configured and is active.
@@ -98,6 +109,12 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @VisibleForTesting
     @Getter(AccessLevel.PACKAGE)
     Map<String, DynamicallyActivatableMetricsExporterService> registeredMetricExporterServices = new ConcurrentHashMap<>();
+
+    /**
+     * The registered {@link View}
+     */
+    @Getter
+    Map<InstrumentSelector, View> registeredViews = new ConcurrentHashMap<>();
 
     /**
      * The {@link OpenTelemetryImpl} that wraps {@link OpenTelemetrySdk}
@@ -155,6 +172,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @Getter(AccessLevel.PACKAGE)
     private Resource tracerProviderAttributes;
 
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @PostConstruct
     @VisibleForTesting
     void init() {
@@ -178,13 +198,13 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     /**
      * Configures and registers {@link io.opentelemetry.api.OpenTelemetry}, triggered by the {@link rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent} triggered
      * For tracing, the {@link SdkTracerProvider} is reconfigured and updated in the {@link GlobalOpenTelemetry}.
-     * For metrics, the {@link SdkMeterProvider} is reconfigured and updated in the {@link GlobalOpenTelemetry}.     *
+     * For metrics, the {@link SdkMeterProvider} is reconfigured and updated in the {@link GlobalOpenTelemetry}.
      * Using the {@link Order} annotation, we make sure this method called after the individual services have (un)-registered.
      *
      * @return
      */
     @EventListener(InspectitConfigChangedEvent.class)
-    @Order()
+    @Order(value = Ordered.LOWEST_PRECEDENCE)
     @VisibleForTesting
     synchronized boolean configureOpenTelemetry() {
         if (shutdown) {
@@ -209,10 +229,10 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             SdkTracerProvider sdkTracerProvider = !(tracingSettingsChanged || !active) ? tracerProvider : configureTracing(configuration);
 
             // configure meter provider (metrics) if not configured or when metrics settings changed
-            SdkMeterProvider sdkMeterProvider = !(metricSettingsChanged || !active) ? meterProvider : configureMeterProvider();
+            SdkMeterProvider sdkMeterProvider = !(metricSettingsChanged || viewsChanged || !active) ? meterProvider : configureMeterProvider();
 
             // only if metrics settings changed or OTEL has not been configured and is running, we need to rebuild the OpenTelemetrySdk
-            if (metricSettingsChanged || !active) {
+            if (metricSettingsChanged || viewsChanged || !active) {
 
                 OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                         .setTracerProvider(sdkTracerProvider)
@@ -234,6 +254,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         isConfiguring.set(false);
         tracingSettingsChanged = false;
         metricSettingsChanged = false;
+
+        // TODO: do we need async publishers as in FileManager?
+        applicationEventPublisher.publishEvent(new OpenTelemetryConfiguredEvent(this, success, openTelemetry));
         return success;
     }
 
@@ -307,6 +330,11 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @Override
     synchronized public void notifyMetricsSettingsChanged() {
         metricSettingsChanged = true;
+    }
+
+    @Override
+    public void notifyViewsChanged() {
+        viewsChanged = true;
     }
 
     /**
@@ -438,6 +466,11 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                 builder.registerMetricReader(OpenCensusMetrics.attachTo(metricsExportService.getNewMetricReader()));
             }
 
+            // register views
+            for (Map.Entry<InstrumentSelector, View> entry : registeredViews.entrySet()) {
+                builder.registerView(entry.getKey(), entry.getValue());
+            }
+
             return builder.build();
 
         } catch (Exception e) {
@@ -558,5 +591,44 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      */
     public boolean unregisterMetricExporterService(DynamicallyActivatableMetricsExporterService service) {
         return unregisterMetricExporterService(service.getName());
+    }
+
+    /**
+     * Registers a {@link View} for the given {@code instrumentSelector}
+     *
+     * @param instrumentSelector
+     * @param view
+     *
+     * @return
+     */
+    public synchronized boolean registerView(InstrumentSelector instrumentSelector, View view) {
+        Preconditions.checkNotNull(view, "view");
+        if (!registeredViews.containsKey(instrumentSelector)) {
+            registeredViews.put(instrumentSelector, view);
+            log.info("The view '{}' for the instrument selector '{}' was successfully registered", view.getName(), instrumentSelector);
+            notifyViewsChanged();
+            return true;
+        } else {
+            log.warn("A view for the instrument selector '{}' was already registered under the view '{}'. Unregister the previous view before the new view can be registered.", instrumentSelector, view.getName());
+            return false;
+        }
+    }
+
+    /**
+     * Unregisters a {@link View} for the given {@code  selector}
+     *
+     * @param selector
+     *
+     * @return
+     */
+    public synchronized boolean unregisterView(InstrumentSelector selector) {
+        if (null != registeredViews.remove(selector)) {
+            log.info("The view for the instrument selector '{}' was successfully removed.", selector);
+            notifyViewsChanged();
+            return true;
+        } else {
+            log.warn("There was no view registered for the instrument selector '{}'", selector);
+            return false;
+        }
     }
 }

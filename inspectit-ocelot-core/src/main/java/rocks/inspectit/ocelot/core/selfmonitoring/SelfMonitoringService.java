@@ -4,6 +4,8 @@ import io.opencensus.common.Scope;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.Tags;
+import io.opentelemetry.api.metrics.DoubleHistogram;
+import io.opentelemetry.api.metrics.LongHistogram;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -20,6 +22,7 @@ import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -47,10 +50,10 @@ public class SelfMonitoringService {
     /**
      * Provides an auto-closable that can be used in try-with-resource form.
      * <p>
-     * If self monitoring is enabled the {@link SelfMonitoringScope} instance is create that handles time measuring and measure recording.
+     * If self monitoring is enabled the {@link SelfMonitoringScope} instance is created that handles time measuring and measure recording.
      * If self monitoring is disabled, returns a no-ops closable.
      *
-     * @param componentName the human readable name of the component of which the time is measured, is used as tag value
+     * @param componentName the human-readable name of the component of which the time is measured, is used as tag value
      *
      * @return the scope performing the measurement
      */
@@ -104,6 +107,12 @@ public class SelfMonitoringService {
                     statsRecorder.newMeasureMap().put(m, value).record();
                 }
             });
+
+            // OTEL
+            Optional<DoubleHistogram> instrument = measureManager.getInstrumentDouble(fullMeasureName);
+            instrument.ifPresent(m -> {
+                m.record(value, commonTags.getCommonAttributes().toBuilder().put("debug", "otel").build());
+            });
         }
     }
 
@@ -137,6 +146,12 @@ public class SelfMonitoringService {
                 try (val ct = commonTags.withCommonTagScope(customTags)) {
                     statsRecorder.newMeasureMap().put(m, value).record();
                 }
+            });
+
+            // OTEL
+            Optional<LongHistogram> instrument = measureManager.getInstrumentLong(fullMeasureName);
+            instrument.ifPresent(m -> {
+                m.record(value, commonTags.getCommonAttributes().toBuilder().put("debug", "otel").build());
             });
         }
     }

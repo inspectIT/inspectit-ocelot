@@ -30,6 +30,7 @@ public class ViewDefinitionSettings {
 
         @Getter
         private String readableName;
+
     }
 
     @Builder.Default
@@ -102,7 +103,7 @@ public class ViewDefinitionSettings {
      */
     @Builder.Default
     private boolean withCommonTags = true;
-    
+
     /**
      * Specifies which tags should be used for this view.
      */
@@ -148,4 +149,28 @@ public class ViewDefinitionSettings {
         return !enabled || aggregation != Aggregation.QUANTILES || quantiles.stream().noneMatch(q -> q < 0 || q > 1);
     }
 
+    /**
+     * Returns the inspectIT Ocelot {@link Aggregation} as an {@link io.opentelemetry.sdk.metrics.Aggregation OpenTelemetry Aggregation}
+     *
+     * @return
+     */
+    public io.opentelemetry.sdk.metrics.Aggregation getAggregationAsOpenTelemetryAggregation() {
+        switch (aggregation) {
+            case SUM:
+                return io.opentelemetry.sdk.metrics.Aggregation.sum();
+            case COUNT:
+                break;
+            case HISTOGRAM:
+                return io.opentelemetry.sdk.metrics.Aggregation.explicitBucketHistogram(bucketBoundaries);
+            case QUANTILES:
+                break;
+            case LAST_VALUE:
+                return io.opentelemetry.sdk.metrics.Aggregation.lastValue();
+            case SMOOTHED_AVERAGE:
+                break;
+        }
+
+        throw new RuntimeException(String.format("Aggregation '%s' not supported by OpenTelemetry", aggregation));
+
+    }
 }

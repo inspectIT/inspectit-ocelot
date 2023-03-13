@@ -2,9 +2,13 @@ package rocks.inspectit.ocelot.core.utils;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.ObservableMeasurement;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.internal.descriptor.InstrumentDescriptor;
+import io.opentelemetry.sdk.metrics.internal.state.SdkObservableMeasurement;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +24,27 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class OpenTelemetryUtils {
+
+    // TODO: move to another class (e.g., MeasurementUtils), single-responsibility!
+
+    /**
+     * The {@link InstrumentDescriptor #instrumentDescriptor} member of {@link SdkObservableMeasurement}
+     */
+    private static final Field SDKOBSERVABLEMEASUREMENT_INSTRUMENTDESCRIPTOR;
+
+    private static final Field ABSTRACTINSTRUMENT_INSTRUMENTDESCRIPTOR;
+
+    private static final Class ABSTRACTINSTRUMENT_CLASS;
+
+    static {
+        try {
+            SDKOBSERVABLEMEASUREMENT_INSTRUMENTDESCRIPTOR = ReflectionUtils.getFieldAndMakeAccessible(SdkObservableMeasurement.class, "instrumentDescriptor");
+            ABSTRACTINSTRUMENT_CLASS = Class.forName("io.opentelemetry.sdk.metrics.AbstractInstrument");
+            ABSTRACTINSTRUMENT_INSTRUMENTDESCRIPTOR = ReflectionUtils.getFieldAndMakeAccessible(ABSTRACTINSTRUMENT_CLASS, "descriptor");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * {@link SdkMeterProvider#close() closes} the given {@link SdkMeterProvider} and blocks waiting for it to complete.
@@ -138,6 +163,15 @@ public class OpenTelemetryUtils {
     }
 
     /**
+     * Gets the current {@link io.opentelemetry.api.metrics.Meter} registered at {@link GlobalOpenTelemetry#getMeter(String)} under the instrumentationScopeName {@link #DEFAULT_INSTRUMENTATION_SCOPE_INFO}
+     *
+     * @return
+     */
+    public static Meter getMeter() {
+        return getGlobalOpenTelemetry().getMeter(DEFAULT_INSTRUMENTATION_SCOPE_INFO);
+    }
+
+    /**
      * Gets a custom {@link Tracer tracer} with custom {@link Sampler sampler}
      *
      * @param customSampler
@@ -146,6 +180,49 @@ public class OpenTelemetryUtils {
      */
     public static Tracer getTracer(Sampler customSampler) {
         return CustomTracer.builder().sampler(customSampler).build();
+    }
+
+    /**
+     * Gets the {@link InstrumentDescriptor} for a given {@link SdkObservableMeasurement}
+     *
+     * @param observableMeasurement
+     *
+     * @return
+     */
+    private static InstrumentDescriptor getInstrumentDescriptor(ObservableMeasurement observableMeasurement) {
+        if (!(observableMeasurement instanceof SdkObservableMeasurement)) {
+            throw new IllegalArgumentException(observableMeasurement.getClass() + " is not of type " + SdkObservableMeasurement.class.getName());
+        }
+        try {
+            return (InstrumentDescriptor) SDKOBSERVABLEMEASUREMENT_INSTRUMENTDESCRIPTOR.get(observableMeasurement);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Could not extract InstrumentDescriptor", e);
+        }
+    }
+
+    /**
+     * Gets the {@link InstrumentDescriptor} for a given {@link io.opentelemetry.sdk.metrics.AbstractInstrument} or {@link ObservableMeasurement}
+     *
+     * @param instrument the instrument
+     *
+     * @return
+     *
+     * @throws IllegalAccessException
+     */
+    public static InstrumentDescriptor getInstrumentDescriptor(Object instrument) {
+        if (ABSTRACTINSTRUMENT_CLASS.isInstance(instrument)) {
+            try {
+                return (InstrumentDescriptor) ABSTRACTINSTRUMENT_INSTRUMENTDESCRIPTOR.get(instrument);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Could not extract InstrumentDescriptor", e);
+            }
+        } else if (instrument instanceof ObservableMeasurement) {
+            return getInstrumentDescriptor((ObservableMeasurement) instrument);
+        } else {
+            throw new RuntimeException(String.format("Cold not extract %s for class %s", InstrumentDescriptor.class.getName(), instrument.getClass()
+                    .getName()));
+        }
+
     }
 
 }

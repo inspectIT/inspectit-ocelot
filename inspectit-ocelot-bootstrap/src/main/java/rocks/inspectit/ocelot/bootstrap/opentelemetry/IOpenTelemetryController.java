@@ -48,6 +48,11 @@ public interface IOpenTelemetryController {
     void notifyMetricsSettingsChanged();
 
     /**
+     * Notifies the {@link IOpenTelemetryController} that {@code Views} were registered or unregistered.
+     */
+    void notifyViewsChanged();
+
+    /**
      * Returns the name of this {@link IOpenTelemetryController}
      *
      * @return The name of this {@link IOpenTelemetryController}

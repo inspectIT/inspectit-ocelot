@@ -4,6 +4,9 @@ import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.Tags;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
@@ -47,6 +50,9 @@ public class MetricsRecorder implements IHookAction {
                 // this allows to disable the recording of a metric depending on the results of action executions
                 TagContext tagContext = getTagContext(context, metricAccessor);
                 metricsManager.tryRecordingMeasurement(metricAccessor.getName(), (Number) value, tagContext);
+
+                // OTEL
+                metricsManager.tryRecordingMeasurement(metricAccessor.getName(), (Number) value, getAttributes(context, metricAccessor));
             }
         }
     }
@@ -57,21 +63,46 @@ public class MetricsRecorder implements IHookAction {
         // create builder
         TagContextBuilder builder = Tags.getTagger().emptyBuilder();
 
-        // first common tags to allow overwrite by constant or data tags
+        // first common tags to allow to overwrite by constant or data tags
         commonTagsManager.getCommonTagKeys()
                 .forEach(commonTagKey -> Optional.ofNullable(inspectitContext.getData(commonTagKey.getName()))
-                        .ifPresent(value -> builder.putLocal(commonTagKey, TagUtils.createTagValue(commonTagKey.getName(), value
-                                .toString()))));
+                        .ifPresent(value -> builder.putLocal(commonTagKey, TagUtils.createTagValue(commonTagKey.getName(), value.toString()))));
 
-        // then constant tags to allow overwrite by data
+        // then constant tags to allow to overwrite by data
         metricAccessor.getConstantTags()
                 .forEach((key, value) -> builder.putLocal(TagKey.create(key), TagUtils.createTagValue(key, value)));
 
         // go over data tags and match the value to the key from the contextTags (if available)
         metricAccessor.getDataTagAccessors()
                 .forEach((key, accessor) -> Optional.ofNullable(accessor.get(context))
-                        .ifPresent(tagValue -> builder.putLocal(TagKey.create(key), TagUtils.createTagValue(key, tagValue
-                                .toString()))));
+                        .ifPresent(tagValue -> builder.putLocal(TagKey.create(key), TagUtils.createTagValue(key, tagValue.toString()))));
+
+        // build and return
+        return builder.build();
+    }
+
+    private Attributes getAttributes(ExecutionContext context, MetricAccessor metricAccessor) {
+        InspectitContextImpl inspectitContext = context.getInspectitContext();
+
+        AttributesBuilder builder = Attributes.builder();
+
+        // TODO: do we need to have a type differentiation for the value to, e.g., type the key in StringKey, LongKey etc.?
+        // first common tags to allow to overwrite by constant or data tags
+        commonTagsManager.getCommonAttributeKeys()
+                .forEach(key -> Optional.ofNullable(inspectitContext.getData(key.getKey()))
+                        .ifPresent(value -> builder.put(key, TagUtils.createAttributeValue(key, value.toString()))));
+
+        // then constant tags to allow to overwrite by data
+        metricAccessor.getConstantTags()
+                .forEach((key, value) -> builder.put(AttributeKey.stringKey(key), TagUtils.createAttributeValue(key, value)));
+
+        // go over data tags and match the value to the key from the contextTags (if available)
+        metricAccessor.getDataTagAccessors()
+                .forEach((key, accessor) -> Optional.ofNullable(accessor.get(context))
+                        .ifPresent(value -> builder.put(AttributeKey.stringKey(key), TagUtils.createAttributeValue(key, value.toString()))));
+
+        // TODO: remove this debug attribute later
+        builder.put(AttributeKey.stringKey("debug"), "otel-metric");
 
         // build and return
         return builder.build();

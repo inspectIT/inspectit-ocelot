@@ -518,7 +518,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * @param tagKey          the key of the found tag
      * @param existingBuilder an existing builder to which the settings shall be added. If it is null, a builder is created using copy() on {@link #propagation}.
      *
-     * @return exisitingBuilder or the newly created builder if it was null.
+     * @return existing Builder or the newly created builder if it was null.
      */
     private PropagationMetaData.Builder configureTagPropagation(String tagKey, PropagationMetaData.Builder existingBuilder) {
         PropagationMetaData.Builder result = existingBuilder;

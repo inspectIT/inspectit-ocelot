@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.tags;
 import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.internal.StringUtils;
 import io.opencensus.tags.TagValue;
+import io.opentelemetry.api.common.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -58,6 +59,69 @@ public final class TagUtils {
 
     private static boolean isTagValueValid(String value) {
         return value.length() <= TagValue.MAX_LENGTH && StringUtils.isPrintableString(value);
+    }
+
+    /**
+     * Constructs an attribute value (String)  from the given string.
+     * If the string is not valid an <code>&lt;invalid&gt;</code> value is created.
+     *
+     * @param attributeKey the attribute key
+     * @param value        the value
+     *
+     * @return the created TagValue with 'v' or '&lt;invalid&gt;'
+     */
+    public static String createAttributeValue(String attributeKey, String value) {
+        if (isAttributeValueValid(value)) {
+            return value;
+        }
+        printWarning(attributeKey, value);
+        return "<invalid>";
+    }
+
+    /**
+     * Constructs an attribute value (String)  from the given string.
+     * If the string is not valid an <code>&lt;invalid&gt;</code> value is created.
+     *
+     * @param attributeKey the attribute key
+     * @param value        the value
+     *
+     * @return the created TagValue with 'v' or '&lt;invalid&gt;'
+     */
+    public static String createAttributeValue(AttributeKey attributeKey, String value) {
+        return createAttributeValue(attributeKey.getKey(), value);
+    }
+
+    private final static int ATTRIBUTE_MAX_LENGTH = 255;
+
+    private static boolean isAttributeValueValid(String value) {
+        // TODO: get value from the current SdkTracerProvider. This does not work currently as the OpenTelemetryController registers the OpenTelemetry after the CommonTagsManager initializes
+        int maxLength = ATTRIBUTE_MAX_LENGTH; //openTelemetryController.getSpanLimits().getMaxAttributeValueLength();
+        return value.length() <= maxLength && isPrintableString(value);
+    }
+
+    /**
+     * This method was copied from {@link io.opencensus.internal}.
+     * <p>
+     * Determines whether the {@code String} contains only printable characters.
+     *
+     * @param str the {@code String} to be validated.
+     *
+     * @return whether the {@code String} contains only printable characters.
+     */
+    public static boolean isPrintableString(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            if (!isPrintableChar(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * This class was copied from {@link io.opencensus.internal}.
+     */
+    private static boolean isPrintableChar(char ch) {
+        return ch >= ' ' && ch <= '~';
     }
 
     private static void printWarning(String tagKey, String value) {

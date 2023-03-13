@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.config.model.metrics.definition;
 
+import io.opentelemetry.sdk.metrics.InstrumentValueType;
 import lombok.*;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
@@ -20,14 +21,27 @@ import java.util.Map;
 public class MetricDefinitionSettings {
 
     public enum MeasureType {
-        LONG, DOUBLE
+        LONG, DOUBLE;
+
+        // TODO: should this rather be in a helper/util class?
+        public InstrumentValueType toOpenTelemetryInstrumentValueType() {
+            switch (this) {
+                case LONG:
+                    return InstrumentValueType.LONG;
+                case DOUBLE:
+                    return InstrumentValueType.DOUBLE;
+                default:
+                    throw new RuntimeException(String.format("MeasureType %s has no representation in %s (supported values are: %s)", this, InstrumentValueType.class.getName(), InstrumentValueType.values()
+                            .toString()));
+            }
+        }
     }
 
     /**
      * Defines if this metric is enabled.
      * If this metric is disabled:
      * - no views for it are created
-     * - no measurements for it are collected in the instrumentation. However the actions are still executed!
+     * - no measurements for it are collected in the instrumentation. However, the actions are still executed!
      */
     @Builder.Default
     private boolean enabled = true;

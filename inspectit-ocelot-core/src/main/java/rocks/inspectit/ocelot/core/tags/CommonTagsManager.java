@@ -5,6 +5,9 @@ import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.Tags;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +32,7 @@ public class CommonTagsManager {
 
     /**
      * Defines with which @{@link Order} the event listener for updating the common tags in reaction to an updated configuration is executed.
-     * The Common tags manager defines highest precedence to ensure that all other registered listeners have access to the updated tags.
+     * The Common tags manager defines the highest precedence to ensure that all other registered listeners have access to the updated tags.
      */
     public static final int CONFIG_EVENT_LISTENER_ORDER_PRIORITY = Ordered.HIGHEST_PRECEDENCE;
 
@@ -58,6 +61,18 @@ public class CommonTagsManager {
      * List of common tag keys that can be used when creating the views.
      */
     private List<TagKey> commonTagKeys = Collections.emptyList();
+
+    /**
+     * List of common {@link Attributes}
+     */
+    @Getter
+    private Attributes commonAttributes = Attributes.empty();
+
+    /**
+     * List of common attribute keys that can be used when creating the views.
+     */
+    @Getter
+    private List<AttributeKey> commonAttributeKeys = Collections.emptyList();
 
     /**
      * Returns common tags keys that all view should register.
@@ -104,13 +119,12 @@ public class CommonTagsManager {
         tags.putAll(customTagMap);
         tags.entrySet()
                 .stream()
-                .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagUtils.createTagValue(entry
-                        .getKey(), entry.getValue())));
+                .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagUtils.createTagValue(entry.getKey(), entry.getValue())));
         return tagContextBuilder.buildScoped();
     }
 
     /**
-     * Processes all {@link #providers} and creates common context based on the providers priority.
+     * Processes all {@link #providers} and creates common context based on the providers' priority.
      */
     @EventListener(InspectitConfigChangedEvent.class)
     @Order(CONFIG_EVENT_LISTENER_ORDER_PRIORITY)
@@ -125,15 +139,21 @@ public class CommonTagsManager {
 
         // then create key/value tags pairs for resolved map
         List<TagKey> newCommonTagKeys = new ArrayList<>();
+        List<AttributeKey> newCommonAttributeKeys = new ArrayList<>();
+        AttributesBuilder newAttributesBuilder = Attributes.builder();
         TagContextBuilder tagContextBuilder = Tags.getTagger().emptyBuilder();
         newCommonTagValueMap.forEach((k, v) -> {
             TagKey key = TagKey.create(k);
             newCommonTagKeys.add(key);
             tagContextBuilder.putLocal(key, TagUtils.createTagValue(key.getName(), v));
+            newAttributesBuilder.put(AttributeKey.stringKey(k), v);
+            newCommonAttributeKeys.add(AttributeKey.stringKey(k));
         });
         commonTagKeys = newCommonTagKeys;
         commonTagValueMap = newCommonTagValueMap;
         commonTagContext = tagContextBuilder.build();
+        commonAttributes = newAttributesBuilder.build();
+        commonAttributeKeys = newCommonAttributeKeys;
     }
 
 }

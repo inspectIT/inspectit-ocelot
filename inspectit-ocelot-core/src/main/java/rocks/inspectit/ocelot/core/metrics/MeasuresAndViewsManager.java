@@ -5,6 +5,12 @@ import io.opencensus.stats.*;
 import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.Tags;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.DoubleHistogram;
+import io.opentelemetry.api.metrics.LongHistogram;
+import io.opentelemetry.sdk.metrics.InstrumentSelector;
+import io.opentelemetry.sdk.metrics.internal.descriptor.InstrumentDescriptor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +23,10 @@ import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSett
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.metrics.percentiles.PercentileViewManager;
+import rocks.inspectit.ocelot.core.opentelemetry.OpenTelemetryConfiguredEvent;
+import rocks.inspectit.ocelot.core.opentelemetry.OpenTelemetryControllerImpl;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -47,10 +56,19 @@ public class MeasuresAndViewsManager {
     @Autowired
     private InspectitEnvironment env;
 
+    @Autowired
+    private OpenTelemetryControllerImpl openTelemetryController;
+
     /**
      * Caches all created measures.
      */
     private final ConcurrentHashMap<String, Measure> cachedMeasures = new ConcurrentHashMap<>();
+
+    /**
+     * Caches all created {@link io.opentelemetry.sdk.metrics.AbstractInstrument}.
+     * As we cannot access the {@link io.opentelemetry.sdk.metrics.AbstractInstrument}, we store it as an {@link Object}
+     */
+    private final ConcurrentHashMap<String, Map.Entry<Object, InstrumentDescriptor>> cachedInstruments = new ConcurrentHashMap<>();
 
     /**
      * Caches the definition which was used to build the measures and views for a given metric.
@@ -106,6 +124,53 @@ public class MeasuresAndViewsManager {
     }
 
     /**
+     * If an {@link io.opentelemetry.sdk.metrics.AbstractInstrument} with the given name is defined via {@link MetricsSettings#getDefinitions()},
+     * it is returned by this method.
+     * You should not cache the result of this method to make sure that dynamic updates are not missed.
+     *
+     * @param name the name of the instrument (=the name of the {@link MetricDefinitionSettings}
+     *
+     * @return the instrument if it is registered, an empty optional otherwise
+     */
+    public Optional<Object> getInstrument(String name) {
+        return Optional.ofNullable(cachedInstruments.get(name).getKey());
+    }
+
+    /**
+     * If an instrument with type double and the given name is defined via {@link MetricsSettings#getDefinitions()},
+     * it is returned by this method.
+     * You should not cache the result of this method to make sure that dynamic updates are not missed.
+     *
+     * @param name the name of the measure (=the name of the {@link MetricDefinitionSettings}
+     *
+     * @return the instrument if it is registered and has type double, an empty optional otherwise
+     */
+    public Optional<DoubleHistogram> getInstrumentDouble(String name) {
+        Object instrument = cachedInstruments.get(name).getKey();
+        if (instrument instanceof DoubleHistogram) {
+            return Optional.of((DoubleHistogram) instrument);
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * If an instrument with type long and the given name is defined via {@link MetricsSettings#getDefinitions()},
+     * it is returned by this method.
+     * You should not cache the result of this method to make sure that dynamic updates are not missed.
+     *
+     * @param name the name of the measure (=the name of the {@link MetricDefinitionSettings}
+     *
+     * @return the instrument if it is registered and has type long, an empty optional otherwise
+     */
+    public Optional<LongHistogram> getInstrumentLong(String name) {
+        Object measure = cachedInstruments.get(name).getKey();
+        if (measure instanceof LongHistogram) {
+            return Optional.of((LongHistogram) measure);
+        }
+        return Optional.empty();
+    }
+
+    /**
      * Records a measurement for the given measure, if it exists.
      * Depending on the measure type either {@link Number#doubleValue()}
      * or {@link Number#longValue()} is used.
@@ -117,6 +182,14 @@ public class MeasuresAndViewsManager {
         tryRecordingMeasurement(measureName, value, Tags.getTagger().getCurrentTagContext());
     }
 
+    /**
+     * Records a measurement for the given measure, if it exists.
+     * Depending on the measure type either {@link Number#doubleValue()} or {@link Number#longValue()} is used.
+     *
+     * @param measureName the name of the measure
+     * @param value       the measurement value for this measure
+     * @param tags        the tags to add to the measurement
+     */
     public void tryRecordingMeasurement(String measureName, Number value, TagContext tags) {
         val measure = getMeasure(measureName);
         if (measure.isPresent()) {
@@ -132,6 +205,27 @@ public class MeasuresAndViewsManager {
             }
         }
         percentileViewManager.recordMeasurement(measureName, value.doubleValue(), tags);
+    }
+
+    /**
+     * Records a measurement for the given instrument, if it exists.
+     * Depending on the instrument type either {@link Number#doubleValue()} or {@link Number#longValue()} is used.
+     *
+     * @param measureName the name of the instrument
+     * @param value       the measurement value for this instrument
+     * @param attributes  the list of attributes to add to the measurement
+     */
+    public void tryRecordingMeasurement(String measureName, Number value, Attributes attributes) {
+        Optional<Object> optMeasurement = getInstrument(measureName);
+        if (optMeasurement.isPresent()) {
+            Object measurement = optMeasurement.get();
+            if (measurement instanceof DoubleHistogram) {
+                ((DoubleHistogram) measurement).record(value.doubleValue(), attributes);
+            } else if (measurement instanceof LongHistogram) {
+                ((LongHistogram) measurement).record(value.longValue(), attributes);
+            }
+        }
+        percentileViewManager.recordMeasurement(measureName, value.doubleValue(), attributes);
     }
 
     /**
@@ -158,25 +252,41 @@ public class MeasuresAndViewsManager {
     }
 
     /**
-     * Tries to create a measure based on on the given definition, with checking measures and views reported by {@link #viewManager}.
+     * Tries to create a measure based on the given definition, with checking measures and views reported by {@link #viewManager}.
      * <p>
      * If the measure or a view already exists, info messages are printed out
      *
      * @param measureName the name of the measure
      * @param definition  the definition of the measure and its views. The defaults must be already populated using {@link MetricDefinitionSettings#getCopyWithDefaultsPopulated(String)}!
      *
-     * @see #addOrUpdateAndCacheMeasureWithViews(String, MetricDefinitionSettings, Map, Map)
+     * @see #addOrUpdateAndCacheInstrumentsWithViews(String, MetricDefinitionSettings, Map, Map)
      */
     public void addOrUpdateAndCacheMeasureWithViews(String measureName, MetricDefinitionSettings definition) {
         val registeredViews = viewManager.getAllExportedViews()
                 .stream()
                 .collect(Collectors.toMap(v -> v.getName().asString(), v -> v));
-        val registeredMeasures = registeredViews.values().stream()
+        val registeredMeasures = registeredViews.values()
+                .stream()
                 .map(View::getMeasure)
                 .distinct()
                 .collect(Collectors.toMap(Measure::getName, m -> m));
 
         addOrUpdateAndCacheMeasureWithViews(measureName, definition, registeredMeasures, registeredViews);
+
+        // OTEL
+        Map<String, io.opentelemetry.sdk.metrics.View> registeredOtelViews = openTelemetryController.getRegisteredViews()
+                .values()
+                .stream()
+                .collect(Collectors.toMap(io.opentelemetry.sdk.metrics.View::getName, view -> view));
+
+        Map<String, InstrumentSelector> registeredInstrumentSelectors = new HashMap<>();
+        openTelemetryController.getRegisteredViews()
+                .keySet()
+                .stream()
+                .distinct()
+                .forEach(instrumentSelector -> registeredInstrumentSelectors.put(instrumentSelector.getInstrumentName(), instrumentSelector));
+
+        addOrUpdateAndCacheInstrumentsWithViews(measureName, definition, registeredInstrumentSelectors, registeredOtelViews);
     }
 
     /**
@@ -200,6 +310,8 @@ public class MeasuresAndViewsManager {
             }
             val resultMeasure = measure;
 
+            InstrumentSelector selector = InstrumentSelector.builder().setName(measureName).build();
+
             val metricViews = definition.getViews();
             metricViews.forEach((name, view) -> {
                 if (view.isEnabled()) {
@@ -220,19 +332,104 @@ public class MeasuresAndViewsManager {
         }
     }
 
+    /**
+     * Tries to create an instrument based on the given definition as well as its views.
+     * If the measure or a view already exists, info messages are printed out
+     *
+     * @param instrumentName                the name of the instrument
+     * @param definition                    the definition of the instrument and its views. The defaults
+     *                                      must be already populated using {@link MetricDefinitionSettings#getCopyWithDefaultsPopulated(String)}!
+     * @param registeredInstrumentSelectors a map of which {@link InstrumentSelector} are already registered at the OpenTelemetry API via {@link OpenTelemetryControllerImpl#registeredViews). Maps the names to the instrument selectors. Used to detect if the instrument to create already exists.
+     * @param registeredViews               same as registeredMeasures, but maps the view names to the corresponding registered views.
+     */
+    @VisibleForTesting
+    void addOrUpdateAndCacheInstrumentsWithViews(String instrumentName, MetricDefinitionSettings definition, Map<String, InstrumentSelector> registeredInstrumentSelectors, Map<String, io.opentelemetry.sdk.metrics.View> registeredViews) {
+        try {
+            // update views first, as they need to be registered before we can create new instruments.
+            Map<String, ViewDefinitionSettings> metricViews = definition.getViews();
+
+            // get the instrument selector or create a new one if not yet registered.
+            InstrumentSelector instrumentSelector = registeredInstrumentSelectors.containsKey(instrumentName) ? registeredInstrumentSelectors.get(instrumentName) : InstrumentSelector.builder()
+                    .setName(instrumentName)
+                    .build();
+
+            metricViews.forEach((name, view) -> {
+                if (view.isEnabled()) {
+                    try {
+                        addAndRegisterOrUpdateView(name, instrumentSelector, view, instrumentName, definition, registeredViews);
+                    } catch (Exception e) {
+                        log.error("Error creating view '{}'!", name, e);
+                    }
+                }
+            });
+
+            currentMetricDefinitionSettings.put(instrumentName, definition);
+
+            openTelemetryConfiguredActionsQueue.offer(() -> {
+                try {
+                    // update or create the new instrument
+                    // we need to create the instruments asynchronously as the OpenTelemetryController creates the new MeterProvider
+                    // once all other classes finished their callbacks to the InspectitConfigChangedEvent.
+                    Object instrument;
+                    // TODO: do we allow updating an instrument?
+                    if (instrumentSelector != null) {
+                        instrument = cachedInstruments.get(instrumentName).getKey();
+                        updateInstrument(instrumentName, cachedInstruments.get(instrumentName).getValue(), definition);
+                    } else {
+                        instrument = createNewInstrument(instrumentName, definition);
+                    }
+                    Object resultInstrument = instrument;
+                    cachedInstruments.put(instrumentName, new AbstractMap.SimpleEntry(resultInstrument, OpenTelemetryUtils.getInstrumentDescriptor(resultInstrument)));
+                } catch (Exception e) {
+                    log.error("Error creating instrument", e);
+                }
+            });
+        } catch (Exception e) {
+            log.error("Error creating metric", e);
+        }
+    }
+
+    /**
+     * Queue of actions that will be executed the next time that {@link OpenTelemetryControllerImpl#configureOpenTelemetry()} has finished.
+     */
+    private Queue<Runnable> openTelemetryConfiguredActionsQueue = new LinkedList<>();
+
+    @EventListener(OpenTelemetryConfiguredEvent.class)
+    private void runActionsAfterOpenTelemetryConfigured() {
+        log.info("OpenTelemetry has been configured. Running " + openTelemetryConfiguredActionsQueue.size() + " actions");
+        while (!openTelemetryConfiguredActionsQueue.isEmpty()) {
+            openTelemetryConfiguredActionsQueue.poll().run();
+        }
+    }
+
     private Measure createNewMeasure(String measureName, MetricDefinitionSettings fullDefinition) {
-        Measure measure;
         switch (fullDefinition.getType()) {
             case LONG:
-                measure = Measure.MeasureLong.create(measureName, fullDefinition.getDescription(), fullDefinition.getUnit());
-                break;
+                return Measure.MeasureLong.create(measureName, fullDefinition.getDescription(), fullDefinition.getUnit());
             case DOUBLE:
-                measure = Measure.MeasureDouble.create(measureName, fullDefinition.getDescription(), fullDefinition.getUnit());
-                break;
+                return Measure.MeasureDouble.create(measureName, fullDefinition.getDescription(), fullDefinition.getUnit());
             default:
                 throw new RuntimeException("Unhandled measure type: " + fullDefinition.getType());
         }
-        return measure;
+    }
+
+    /**
+     * Creates a new {@link io.opentelemetry.sdk.metrics.AbstractInstrument} with the given definition.
+     *
+     * @param instrumentName the name of the instrument
+     * @param fullDefinition the definitions used to create the instrument
+     *
+     * @return
+     */
+    private Object createNewInstrument(String instrumentName, MetricDefinitionSettings fullDefinition) {
+        switch (fullDefinition.getType()) {
+            case LONG:
+                return OpenTelemetryUtils.getMeter().histogramBuilder(instrumentName).ofLongs().build();
+            case DOUBLE:
+                return OpenTelemetryUtils.getMeter().histogramBuilder(instrumentName).build();
+            default:
+                throw new RuntimeException(String.format("Unhandled instrument type: ", fullDefinition.getType()));
+        }
     }
 
     private void updateMeasure(String measureName, Measure measure, MetricDefinitionSettings fullDefinition) {
@@ -242,15 +439,26 @@ public class MeasuresAndViewsManager {
         if (!fullDefinition.getUnit().equals(measure.getUnit())) {
             log.warn("Cannot update unit of measure '{}' because it has been already registered in OpenCensus!", measureName);
         }
-        if ((measure instanceof Measure.MeasureLong && fullDefinition.getType() != MetricDefinitionSettings.MeasureType.LONG)
-                || (measure instanceof Measure.MeasureDouble && fullDefinition.getType() != MetricDefinitionSettings.MeasureType.DOUBLE)) {
+        if ((measure instanceof Measure.MeasureLong && fullDefinition.getType() != MetricDefinitionSettings.MeasureType.LONG) || (measure instanceof Measure.MeasureDouble && fullDefinition.getType() != MetricDefinitionSettings.MeasureType.DOUBLE)) {
             log.warn("Cannot update type of measure '{}' because it has been already registered in OpenCensus!", measureName);
         }
     }
 
+    private void updateInstrument(String instrumentName, InstrumentDescriptor descriptor, MetricDefinitionSettings fullDefinition) {
+        if (!fullDefinition.getDescription().equals(descriptor.getDescription())) {
+            log.warn("Cannot update description of instrument '{}' because it has been already registered in OpenTelemetry!", instrumentName);
+        }
+        if (!fullDefinition.getUnit().equals(descriptor.getUnit())) {
+            log.warn("Cannot update unit of instrument '{}' because it has been already registered in OpenTelemetry!", instrumentName);
+        }
+        if (fullDefinition.getType().toOpenTelemetryInstrumentValueType() != descriptor.getValueType()) {
+            log.warn("Cannot update type of instrument '{}' because it has been already registered in OpenTelemetry!", instrumentName);
+        }
+    }
+
     /**
-     * Creates a view if does not exist yet.
-     * Otherwise prints info messages indicating that updating the view is not possible.
+     * Creates a view if it does not exist yet.
+     * Otherwise, prints info messages indicating that updating the view is not possible.
      *
      * @param viewName        the name of the view
      * @param measure         the measure which is used for the view
@@ -271,34 +479,115 @@ public class MeasuresAndViewsManager {
         }
     }
 
+    /**
+     * Creates a view if it does not exist yet.
+     * Otherwise, prints info messages indicating that updating the view is not possible.
+     *
+     * @param viewName           the name of the view
+     * @param instrumentSelector the {@link InstrumentSelector} of the view
+     * @param viewDef            the definition of the view, on which
+     *                           {@link ViewDefinitionSettings#getCopyWithDefaultsPopulated(String, String, String)} was already called.
+     * @param instrumentName     the name of the instrument corresponding to the view
+     * @param metricDef          the definition of the metric corresponding to the view
+     * @param registeredViews    a map of which views are already registered at the OpenTelemetry API. Maps the view names to the views.
+     */
+    private void addAndRegisterOrUpdateView(String viewName, InstrumentSelector instrumentSelector, ViewDefinitionSettings viewDef, String instrumentName, MetricDefinitionSettings metricDef, Map<String, io.opentelemetry.sdk.metrics.View> registeredViews) {
+        io.opentelemetry.sdk.metrics.View view = registeredViews.get(viewName);
+        if (view != null) {
+            updateOpenTelemetryView(viewName, viewDef, instrumentSelector, view);
+        } else {
+            // TODO: do we need to have the percentile view manager?
+            /*if (percentileViewManager.isViewRegistered(instrumentSelector.getInstrumentName(), viewName) || viewDef.getAggregation() == ViewDefinitionSettings.Aggregation.QUANTILES) {
+                addOrUpdatePercentileView(instrumentName, metricDef, viewName, viewDef);
+            } else {
+                registerNewView(viewName, viewDef, instrumentSelector);
+            }*/
+            registerNewView(viewName, viewDef, instrumentSelector);
+        }
+    }
+
+    /**
+     * Updates the {@link io.opentelemetry.sdk.metrics.View} registered at the {@link OpenTelemetryControllerImpl}.
+     * For this, the previews {@code View} gets unregistered, a new {@code View} is built and {@link OpenTelemetryControllerImpl#registerView(InstrumentSelector, io.opentelemetry.sdk.metrics.View)}  registered}
+     *
+     * @param viewName
+     * @param def
+     * @param instrumentSelector
+     * @param view
+     */
+    // TODO: do we allow updating of Views in general? Theoretically, individual fields can also be updated in the previous View using reflection (e.g., the AttributesFilter etc.)
+    private void updateOpenTelemetryView(String viewName, ViewDefinitionSettings def, InstrumentSelector instrumentSelector, io.opentelemetry.sdk.metrics.View view) {
+        // TODO: do we allow changing aggregation, description etc. of the view or not? see updateOpenCensusView for reference
+
+        openTelemetryController.unregisterView(instrumentSelector);
+        // TODO: do we need to rebuild the view or can we use the previous view? I.e., does the View gets "destroyed" when we rebuild the SdkMeterProvider in the OpenTelmetryControllerImpl?
+        registerNewView(viewName, def, instrumentSelector);
+    }
+
     private void addOrUpdatePercentileView(Measure measure, String viewName, ViewDefinitionSettings def) {
         if (def.getAggregation() != ViewDefinitionSettings.Aggregation.QUANTILES) {
             log.warn("Cannot switch aggregation type for View '{}' from QUANTILES to {}", viewName, def.getAggregation());
             return;
         }
         Set<TagKey> viewTags = getTagKeysForView(def);
-        Set<String> tagsAsStrings = viewTags.stream()
-                .map(TagKey::getName)
-                .collect(Collectors.toSet());
+        Set<String> tagsAsStrings = viewTags.stream().map(TagKey::getName).collect(Collectors.toSet());
         boolean minEnabled = def.getQuantiles().contains(0.0);
         boolean maxEnabled = def.getQuantiles().contains(1.0);
-        List<Double> percentilesFiltered = def.getQuantiles().stream()
+        List<Double> percentilesFiltered = def.getQuantiles()
+                .stream()
                 .filter(p -> p > 0 && p < 1)
                 .collect(Collectors.toList());
-        percentileViewManager.createOrUpdateView(measure.getName(), viewName, measure.getUnit(), def.getDescription(),
-                minEnabled, maxEnabled, percentilesFiltered, def.getTimeWindow()
-                        .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
+        percentileViewManager.createOrUpdateView(measure.getName(), viewName, measure.getUnit(), def.getDescription(), minEnabled, maxEnabled, percentilesFiltered, def.getTimeWindow()
+                .toMillis(), tagsAsStrings, def.getMaxBufferedPoints());
+    }
+
+    private void addOrUpdatePercentileView(String measureName, MetricDefinitionSettings metricDef, String viewName, ViewDefinitionSettings viewDef) {
+        // TODO: fix
+        if (true) {
+            throw new RuntimeException("not yet implemented");
+        }
+
+        if (viewDef.getAggregation() != ViewDefinitionSettings.Aggregation.QUANTILES) {
+            log.warn("Cannot switch aggregation type for View '{}' from QUANTILES to {}", viewName, viewDef.getAggregation());
+            return;
+        }
+        // TODO: change to OTEL attributes
+        Set<TagKey> viewTags = getTagKeysForView(viewDef);
+        Set<String> tagsAsStrings = viewTags.stream().map(TagKey::getName).collect(Collectors.toSet());
+        boolean minEnabled = viewDef.getQuantiles().contains(0.0);
+        boolean maxEnabled = viewDef.getQuantiles().contains(1.0);
+        List<Double> percentilesFiltered = viewDef.getQuantiles()
+                .stream()
+                .filter(p -> p > 0 && p < 1)
+                .collect(Collectors.toList());
+        percentileViewManager.createOrUpdateView(measureName, viewName, metricDef.getUnit(), viewDef.getDescription(), minEnabled, maxEnabled, percentilesFiltered, viewDef.getTimeWindow()
+                .toMillis(), tagsAsStrings, viewDef.getMaxBufferedPoints());
     }
 
     private void registerNewView(String viewName, Measure measure, ViewDefinitionSettings def) {
         Set<TagKey> viewTags = getTagKeysForView(def);
-        View view = View.create(
-                View.Name.create(viewName),
-                def.getDescription(),
-                measure,
-                createAggregation(def),
-                new ArrayList<>(viewTags));
+        View view = View.create(View.Name.create(viewName), def.getDescription(), measure, createAggregation(def), new ArrayList<>(viewTags));
         viewManager.registerView(view);
+    }
+
+    /**
+     * Registers a new {@link io.opentelemetry.sdk.metrics.View} with the given {@code name}, {@code definitions}, and {@code selector}
+     *
+     * @param name
+     * @param def
+     * @param selector
+     */
+    private void registerNewView(String name, ViewDefinitionSettings def, InstrumentSelector selector) {
+
+        Set<AttributeKey> allowedAttributeKeys = getAttributeKeysForView(def);
+        io.opentelemetry.sdk.metrics.View view = io.opentelemetry.sdk.metrics.View.builder()
+                .setDescription(def.getDescription())
+                .setAggregation(def.getAggregationAsOpenTelemetryAggregation())
+                .setName(name)
+                .setAttributeFilter(s -> allowedAttributeKeys.contains(s))
+                .build();
+
+        openTelemetryController.registerView(selector, view);
     }
 
     private void updateOpenCensusView(String viewName, ViewDefinitionSettings def, View view) {
@@ -313,12 +602,10 @@ public class MeasuresAndViewsManager {
         Set<TagKey> viewTags = getTagKeysForView(def);
         presentTagKeys.stream()
                 .filter(t -> !viewTags.contains(t))
-                .forEach(tag -> log.warn("Cannot remove tag '{}' from view '{}' because it has been already registered in OpenCensus!", tag
-                        .getName(), viewName));
+                .forEach(tag -> log.warn("Cannot remove tag '{}' from view '{}' because it has been already registered in OpenCensus!", tag.getName(), viewName));
         viewTags.stream()
                 .filter(t -> !presentTagKeys.contains(t))
-                .forEach(tag -> log.warn("Cannot add tag '{}' to view '{}' because it has been already registered in OpenCensus!", tag
-                        .getName(), viewName));
+                .forEach(tag -> log.warn("Cannot add tag '{}' to view '{}' because it has been already registered in OpenCensus!", tag.getName(), viewName));
     }
 
     /**
@@ -334,14 +621,47 @@ public class MeasuresAndViewsManager {
     private Set<TagKey> getTagKeysForView(ViewDefinitionSettings def) {
         Set<TagKey> viewTags = new HashSet<>();
         if (def.isWithCommonTags()) {
-            commonTags.getCommonTagKeys().stream()
+            commonTags.getCommonTagKeys()
+                    .stream()
                     .filter(t -> def.getTags().get(t.getName()) != Boolean.FALSE)
                     .forEach(viewTags::add);
         }
-        def.getTags().entrySet().stream()
+        def.getTags()
+                .entrySet()
+                .stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .map(TagKey::create)
+                .forEach(viewTags::add);
+        return viewTags;
+    }
+
+    /**
+     * Collects the attributes which should be used for the given view.
+     * This function includes the common tags if requested,
+     * then applies the {@link ViewDefinitionSettings#getTags()}
+     * and finally converts them to {@link io.opentelemetry.api.common.AttributeKey}s.
+     *
+     * @param def the view definition for which the attributes should be collected.
+     *
+     * @return the set of tag keys
+     */
+    private Set<AttributeKey> getAttributeKeysForView(ViewDefinitionSettings def) {
+        Set<AttributeKey> viewTags = new HashSet<>();
+
+        // first add enabled common attributes
+        if (def.isWithCommonTags()) {
+            commonTags.getCommonAttributeKeys()
+                    .stream()
+                    .filter(t -> def.getTags().get(t.getKey()) != Boolean.FALSE)
+                    .forEach(viewTags::add);
+        }
+        // then attributes specified for the view
+        def.getTags()
+                .entrySet()
+                .stream()
+                .filter(Map.Entry::getValue)
+                .map(entry -> AttributeKey.stringKey(entry.getKey()))
                 .forEach(viewTags::add);
         return viewTags;
     }
@@ -353,8 +673,8 @@ public class MeasuresAndViewsManager {
             case SUM:
                 return instance instanceof Aggregation.Sum;
             case HISTOGRAM:
-                return instance instanceof Aggregation.Distribution &&
-                        ((Aggregation.Distribution) instance).getBucketBoundaries().equals(view.getBucketBoundaries());
+                return instance instanceof Aggregation.Distribution && ((Aggregation.Distribution) instance).getBucketBoundaries()
+                        .equals(view.getBucketBoundaries());
             case LAST_VALUE:
                 return instance instanceof Aggregation.LastValue;
             default:

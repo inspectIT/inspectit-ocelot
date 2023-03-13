@@ -8,6 +8,7 @@ import io.opencensus.metrics.export.MetricProducer;
 import io.opencensus.stats.MeasureMap;
 import io.opencensus.tags.TagContext;
 import io.opencensus.tags.Tags;
+import io.opentelemetry.api.common.Attributes;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -36,7 +37,7 @@ public class PercentileViewManager {
     /**
      * Computation of percentiles can be expensive.
      * For this reason we cache computed metrics for 1 second before recomputing them.
-     * Otherwise e.g. spamming F5 on the prometheus endpoint could lead to an increased CPU usage.
+     * Otherwise, e.g. spamming F5 on the prometheus endpoint could lead to an increased CPU usage.
      */
     private final MetricProducer producer = new CachingMetricProducer(this::computeMetrics, Duration.ofSeconds(1));
 
@@ -101,6 +102,21 @@ public class PercentileViewManager {
         if (areAnyViewsRegisteredForMeasure(measureName)) {
             synchronized (this) {
                 worker.record(measureName, value, getCurrentTime(), tags);
+            }
+        }
+    }
+
+    /**
+     * Records a measurement observation for a given measure
+     *
+     * @param measureName the name of the measure, e.g. http/responsetime
+     * @param value       the observation to record
+     * @param attributes  the {@link Attributes} to use
+     */
+    public void recordMeasurement(String measureName, double value, Attributes attributes) {
+        if (areAnyViewsRegisteredForMeasure(measureName)) {
+            synchronized (this) {
+                worker.record(measureName, value, getCurrentTime(), attributes);
             }
         }
     }
@@ -205,11 +221,12 @@ public class PercentileViewManager {
      * @param value      the observed value
      * @param time       the timestamp of the observation
      * @param tagContext the tag context of the observation
+     * @param attributes the attributes of the observation
      */
-    private void recordSynchronous(String measure, double value, Timestamp time, TagContext tagContext) {
+    private void recordSynchronous(String measure, double value, Timestamp time, TagContext tagContext, Attributes attributes) {
         List<PercentileView> views = measuresToViewsMap.get(measure);
         if (views != null) {
-            views.forEach(view -> view.insertValue(value, time, tagContext));
+            views.forEach(view -> view.insertValue(value, time, tagContext, attributes));
         }
     }
 
