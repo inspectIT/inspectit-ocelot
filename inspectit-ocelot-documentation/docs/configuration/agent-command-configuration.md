@@ -4,46 +4,56 @@ title: Agent Command Configuration
 sidebar_label: Agent Command Configuration
 ---
 
-Since version `1.10.0` the inspectIT Ocelot agent provides the _Agent Commands_ feature, which allows interacting with a specific agent.
+Since version `1.10.0` the inspectIT Ocelot agent provides the _Agent Commands_ feature, which allows interacting with a
+specific agent.
 Using this feature is only possible if the agent is used together with the inspectIT Ocelot Configuration-Server.
 
-With this feature it is possible to send specific commands or operations to the agent via the configuration server, which the agent should execute.
+With this feature it is possible to send specific commands or operations to the agent via the configuration server,
+which the agent should execute.
 Subsequently, the result of these commands is returned.
 
-Simple commands can be executed, such as a "ping" command whether an agent exists or more complex commands, such as loading the class structure of the application in which the agent is integrated.
+Simple commands can be executed, such as a "ping" command whether an agent exists or more complex commands, such as
+loading the class structure of the application in which the agent is integrated.
 Some new functionality of the configuration server interface is based on this feature, e.g. the _class browser_.
 These functions work only if this feature is enabled.
 
 :::warning
-It is important to note that depending on the complexity of the agent commands, they may have a negative impact on the performance of the target application.
+It is important to note that depending on the complexity of the agent commands, they may have a negative impact on the
+performance of the target application.
 :::
 
 ## How it works
 
 For security reasons, **all communication with the agents is initiated by the agents themselves**.
 This means that the agent must always initiate communication and not vice versa.  
-However, since version `3.0.0` agent commands can still be sent from the configuration server to the agent without any delay.
-This works using a bidirectional streaming gRPC connection, that the agent opens once and that then is used for all communication regarding agent commands.
-The server sends commands over that connection as soon as they come in, and then the agent executes the command and responds over the same connection.
+However, since version `3.0.0` agent commands can still be sent from the configuration server to the agent without any
+delay.
+This works using a bidirectional streaming gRPC connection, that the agent opens once and that then is used for all
+communication regarding agent commands.
+The server sends commands over that connection as soon as they come in, and then the agent executes the command and
+responds over the same connection.
 
 In order to use the agent commands feature, it must first be enabled, as it is disabled by default.
 See [General Configuration](#general-configuration) below for more information.
 
 Once the feature is enabled, specific agent commands can be triggered via the configuration server.
-The configuration server offers a certain [set of endpoints](https://github.com/inspectIT/inspectit-ocelot/blob/master/components/inspectit-ocelot-configurationserver/src/main/java/rocks/inspectit/ocelot/rest/command/AgentCommandController.java) for this purpose.
+The configuration server offers a
+certain [set of endpoints](https://github.com/inspectIT/inspectit-ocelot/blob/master/components/inspectit-ocelot-configurationserver/src/main/java/rocks/inspectit/ocelot/rest/command/AgentCommandController.java)
+for this purpose.
 
 ### Existing Commands
+
 |  Name       | Description                                                                                                                                                                                                      | Endpoint                     | Parameters      |
 |-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|-----------------|
 | Ping        | Simple ping command to see if an agent exists and is available.                                                                                                                                                  | /api/v1/ping                 | agent-id        |
 | ListClasses | Requests a list of classes available in the application the agent is attached to. <br>The full class set is filtered using a query. <br>Also provides info about the classes' types and a list of their methods. | /api/v1/command/list/classes | agent-id, query |
 | Logs        | Retrieves logs from an agent. <br> See also its command-specific [configuration section](#log-preloading-for-logs-command).                                                                                      | /api/v1/logs                 | agent-id        |
 
-
 ## General Configuration
 
 The agent command feature is disabled by default and must be enabled on the agent side using the `enabled` property.  
-Furthermore, the agent needs to know where it can reach the configuration server to establish the connection for receiving the commands, this is set in the `host` property.
+Furthermore, the agent needs to know where it can reach the configuration server to establish the connection for
+receiving the commands, this is set in the `host` property.
 
 The complete configuration for activating the agent commands thus looks as follows.
 
@@ -55,23 +65,28 @@ inspectit:
 ```
 
 :::warning
-By default the agent commands and responses are sent encrypted via TLS. This needs additional configuration as mentioned in [Using TLS](#using-tls).
+By default the agent commands and responses are sent encrypted via TLS. This needs additional configuration as mentioned
+in [Using TLS](#using-tls).
 
-Alternatively, you may use unencrypted, plaintext communication by specifying `inspectit-agent.commands.use-tls=false`. We do not recommend to use this in production environments. 
+Alternatively, you may use unencrypted, plaintext communication by specifying `inspectit-agent.commands.use-tls=false`.
+We do not recommend to use this in production environments.
 :::
 
 ### Dynamic Agent Command URL
 
-In larger environments, where many agents exist and these reach the configuration server under different addresses, it can be cumbersome and difficult to successfully configure the agent command host.
-Especially if the configuration server HTTP address is already successfully set up, e.g. via JVM properties, you do not want to have to configure the agent command URL additionally.
+In larger environments, where many agents exist and these reach the configuration server under different addresses, it
+can be cumbersome and difficult to successfully configure the agent command host.
+Especially if the configuration server HTTP address is already successfully set up, e.g. via JVM properties, you do not
+want to have to configure the agent command URL additionally.
 
-For this purpose, there is the possibility that the agent derives the agent command host based on the configured URL for retrieving the agent configuration via HTTP.
+For this purpose, there is the possibility that the agent derives the agent command host based on the configured URL for
+retrieving the agent configuration via HTTP.
 This possibility can be activated by using the following configuration:
 
 ```YAML
 inspectit:
   agent-commands:
-    derive-from-http-config-url: true
+    derive-host-from-http-config-url: true
 ```
 
 :::tip
@@ -79,24 +94,30 @@ This setting takes the URL defined under `inspectit.config.http.url` as a basis.
 :::
 
 This setting has a higher priority than manually specifying the host.
-If an agent command host is configured and the `derive-from-http-config-url` option is enabled, the host is ignored if it is possible to derive the agent command host based on the HTTP configuration URL.
+If an agent command host is configured and the `derive-host-from-http-config-url` option is enabled, the host is ignored
+if it is possible to derive the agent command host based on the HTTP configuration URL.
 
 ### Using TLS
 
-To use TLS you will at least need a valid certificate and private key for your configuration server. 
+To use TLS you will at least need a valid certificate and private key for your configuration server.
 Depending on your needs you might have to change additional settings too.
 
 :::tip
-The [Trouble-Shooting section](https://yidongnan.github.io/grpc-spring-boot-starter/en/trouble-shooting.html#network-closed-for-unknown-reason) of the library the configuration server uses to set up the gRPC service can help with problems with setting up TLS.
+The [Trouble-Shooting section](https://yidongnan.github.io/grpc-spring-boot-starter/en/trouble-shooting.html#network-closed-for-unknown-reason)
+of the library the configuration server uses to set up the gRPC service can help with problems with setting up TLS.
 :::
 
 #### Enabling TLS on the configuration server
 
-The configuration server uses [grpc-spring-boot-starter](https://github.com/yidongnan/grpc-spring-boot-starter), so the [Server Security](https://yidongnan.github.io/grpc-spring-boot-starter/en/server/security.html) section of their documentation is the base for the server-side part of this documentation.
+The configuration server uses [grpc-spring-boot-starter](https://github.com/yidongnan/grpc-spring-boot-starter), so
+the [Server Security](https://yidongnan.github.io/grpc-spring-boot-starter/en/server/security.html) section of their
+documentation is the base for the server-side part of this documentation.
 
 To enable TLS on the configuration server the property `security.enabled` needs to be set to `true`.  
-To make TLS work, the properties `certificate-chain` and `private-key` need to be set as well to a path to your certificate and the corresponding private key.  
+To make TLS work, the properties `certificate-chain` and `private-key` need to be set as well to a path to your
+certificate and the corresponding private key.  
 So in the end a configuration for the configuration server could look like this:
+
 ```YAML
 grpc:
   server:
@@ -107,9 +128,12 @@ grpc:
 ```
 
 On the agent-side you need to set the property `use-tls` to `true`.  
-If the issuing certificate authority of the server's certificate is not known to the agent, then you also need to set the property `trust-cert-collection-file-path` to the path to a file containing a collection of trusted certificates.  
-Finally, if the server's certificate is not valid for the hostname the agent uses to connect itself, you can also provide that hostname to fix the problem under `authority-override`.  
+If the issuing certificate authority of the server's certificate is not known to the agent, then you also need to set
+the property `trust-cert-collection-file-path` to the path to a file containing a collection of trusted certificates.  
+Finally, if the server's certificate is not valid for the hostname the agent uses to connect itself, you can also
+provide that hostname to fix the problem under `authority-override`.  
 So in the end a configuration for the agent could look like this:
+
 ```YAML
 inspectit:
   agent-commands:
@@ -120,10 +144,14 @@ inspectit:
 
 #### Mutual authentication
 
-To use [mutual authentication](https://en.wikipedia.org/wiki/Mutual_authentication) the following needs to be done additionally to the settings in the previous section.
+To use [mutual authentication](https://en.wikipedia.org/wiki/Mutual_authentication) the following needs to be done
+additionally to the settings in the previous section.
 
-In the configuration server's configuration you need to set the property `client-auth` to either `OPTIONAL` or rather `REQUIRED`, since only the latter enforces mutual authentication.  
-Furthermore `trust-cert-collection` needs to be set to a collection of trusted certificates, so the server knows which client certificates are trusted:
+In the configuration server's configuration you need to set the property `client-auth` to either `OPTIONAL` or
+rather `REQUIRED`, since only the latter enforces mutual authentication.  
+Furthermore `trust-cert-collection` needs to be set to a collection of trusted certificates, so the server knows which
+client certificates are trusted:
+
 ```YAML
 grpc:
   server:
@@ -132,7 +160,9 @@ grpc:
       trust-cert-collection: file:certificates/ca.pem
 ```
 
-In the agent's configuration you need to set the properties `client-cert-chain-file-path` and `client-private-key-file-path` to a certificate and corresponding key for the agent:
+In the agent's configuration you need to set the properties `client-cert-chain-file-path`
+and `client-private-key-file-path` to a certificate and corresponding key for the agent:
+
 ```YAML
 inspectit:
   agent-commands:
@@ -168,7 +198,8 @@ Some agent commands need specific configuration to work, which is described in t
 ### Log Preloading for Logs Command
 
 The Logs Command allows retrieving the agent logs via the configuration server.
-For that, the agent preloads its own logs into a memory buffer, from which log entries are then retrieved by the command.
+For that, the agent preloads its own logs into a memory buffer, from which log entries are then retrieved by the
+command.
 
 Log preloading is disabled by default and can be enabled as follows:
 
@@ -186,5 +217,6 @@ Preloading can be further configured, using the following properties below `insp
 | `buffer-size`         | `128`         | The maximum number of log messages to preload. When reaching the size, oldest messages are dropped first.                                                                        |
 
 :::warning
-Please note that any change to the log preloading configuration will cause all previously preloaded messages to be dropped.
+Please note that any change to the log preloading configuration will cause all previously preloaded messages to be
+dropped.
 :::
