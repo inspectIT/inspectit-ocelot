@@ -20,6 +20,13 @@ public class AgentCommandSettings {
     private boolean deriveHostFromHttpConfigUrl = false;
 
     /**
+     * Deprecated as of 3.0. Use {@link #deriveHostFromHttpConfigUrl} instead.
+     * Whether the agent commands URL should be derived from the HTTP configuration URL.
+     */
+    @Deprecated
+    private boolean deriveFromHttpConfigUrl = false;
+
+    /**
      * The hostname for getting agent commands over grpc, e.g. "localhost".
      */
     private String host;

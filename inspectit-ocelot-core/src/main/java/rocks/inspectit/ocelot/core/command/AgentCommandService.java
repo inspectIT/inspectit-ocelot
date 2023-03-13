@@ -56,7 +56,10 @@ public class AgentCommandService extends DynamicallyActivatableService {
         }
 
         // only actually enable the feature if the url is based on the HTTP config URL OR the url is specified directly
-        if (settings.isDeriveHostFromHttpConfigUrl()) {
+        if (settings.isDeriveHostFromHttpConfigUrl() || settings.isDeriveFromHttpConfigUrl()) {
+            if (settings.isDeriveFromHttpConfigUrl()) {
+                log.warn("You are using the deprecated property 'inspectit.agent-commands.derive-from-http-config-url'. Please use the property 'inspectit.agent-commands.derive-host-from-http-config-url' instead. " + "This property will not be available in future ocelot releases.");
+            }
             return true;
         } else {
             return StringUtils.isNotEmpty(settings.getHost());
@@ -117,7 +120,7 @@ public class AgentCommandService extends DynamicallyActivatableService {
     String getCommandHost(InspectitConfig configuration) {
         AgentCommandSettings settings = configuration.getAgentCommands();
 
-        if (settings.isDeriveHostFromHttpConfigUrl()) {
+        if (settings.isDeriveHostFromHttpConfigUrl() || settings.isDeriveFromHttpConfigUrl()) {
             URL url = configuration.getConfig().getHttp().getUrl();
             if (url == null) {
                 throw new IllegalStateException("The URL cannot be derived from the HTTP configuration URL because it is null.");
