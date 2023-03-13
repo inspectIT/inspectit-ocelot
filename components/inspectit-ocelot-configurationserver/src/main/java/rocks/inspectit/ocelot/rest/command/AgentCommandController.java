@@ -16,6 +16,9 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Controller providing functionality to use agent commands.
+ * <p>
+ *     This controller is called from the UI in order to execute a command on a specific agent.
+ * </p>
  */
 @RestController
 @Slf4j
