@@ -120,6 +120,9 @@ dependencies {
 dependencies {
     implementation(
             project(':inspectit-ocelot-config'),
+            // this is necessary as inspectit-ocelot-config needs it, but can
+            // only use a compile-only (see details over there)
+            "io.opentelemetry:opentelemetry-sdk-metrics:${openTelemetryVersion}",
             project(':inspectit-ocelot-configdocsgenerator'),
 
             "org.springframework.boot:spring-boot-starter-web",
@@ -147,12 +150,10 @@ dependencies {
             "org.eclipse.jgit:org.eclipse.jgit:${eclipseJgitVersion}",
             "org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:${eclipseJgitVersion}",
             "com.google.code.gson:gson",
+            "com.google.guava:guava:${guavaVersion}",
 
             // swagger
             "org.springdoc:springdoc-openapi-ui:${springdocOopenapiUiVersion}",
-
-            "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
-            "io.opentelemetry:opentelemetry-opencensus-shim:${openTelemetryAlphaVersion}"
     )
     testImplementation(
             'org.springframework.boot:spring-boot-starter-test',
