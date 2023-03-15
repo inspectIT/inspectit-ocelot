@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
     id 'com.github.node-gradle.node' version "${nodeGradleVersion}"
     id 'com.palantir.docker' version "${palantirDockerVersion}"
@@ -25,16 +27,16 @@ node {
     download = true
 
     // Set the work directory for unpacking node
-    workDir = file("${project.buildDir}/nodejs")
+    workDir.set(project.layout.buildDirectory.dir("nodejs"))
 
     // Set the work directory for NPM
-    npmWorkDir = file("${project.buildDir}/npm")
+    npmWorkDir.set(project.layout.buildDirectory.dir("npm"))
 
     // Set the work directory for Yarn
-    yarnWorkDir = file("${project.buildDir}/yarn")
+    yarnWorkDir.set(project.layout.buildDirectory.dir("yarn"))
 
     // Set the work directory where node_modules should be located
-    nodeModulesDir = file("${project.projectDir}/../inspectit-ocelot-configurationserver-ui")
+    nodeProjectDir.set(project.layout.projectDirectory.dir("../inspectit-ocelot-configurationserver-ui"))
 }
 
 /**
@@ -66,8 +68,8 @@ tasks.register('buildFrontend', YarnTask) {
 def serverMainClass = 'rocks.inspectit.ocelot.ConfigurationServer'
 
 bootJar {
-    archivesBaseName = 'inspectit-ocelot-configurationserver-noui'
-    version = "${buildVersion}"
+    archiveBaseName = 'inspectit-ocelot-configurationserver-noui'
+    archiveVersion = "${buildVersion}"
 
     mainClass = "${serverMainClass}"
 }
@@ -75,10 +77,10 @@ bootJar {
 /**
  * Builds the configuration server and the web frontend.
  */
-task bootJarWithFrontend(type: org.springframework.boot.gradle.tasks.bundling.BootJar) {
+tasks.register('bootJarWithFrontend', BootJar) {
     group = "build"
-    archivesBaseName = 'inspectit-ocelot-configurationserver'
-    version = "${buildVersion}"
+    archiveBaseName = 'inspectit-ocelot-configurationserver'
+    archiveVersion = "${buildVersion}"
 
     from("${project.projectDir}/../inspectit-ocelot-configurationserver-ui/out") {
         into('static/ui')
@@ -168,7 +170,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
-task copyServerJar(type: Copy) {
+tasks.register('copyServerJar', Copy) {
     dependsOn bootJarWithFrontend
     from("${buildDir}/libs/inspectit-ocelot-configurationserver-${version}.jar")
     into("${buildDir}/docker-jar")
