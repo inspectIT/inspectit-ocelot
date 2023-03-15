@@ -1,7 +1,7 @@
 import com.github.jk1.license.render.TextReportRenderer
 
 plugins {
-    id 'com.github.jk1.dependency-license-report' version '2.0'
+    id "com.github.jk1.dependency-license-report" version "${licenseReportVersion}"
 }
 
 licenseReport {
@@ -26,7 +26,7 @@ allprojects {
     version = "$buildVersion"
 }
 
-task codeCoverageReport(type: JacocoReport) {
+tasks.register('codeCoverageReport', JacocoReport) {
     group = 'Verification'
     description = 'Generates a combined report from all subprojects'
 
