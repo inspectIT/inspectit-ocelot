@@ -33,7 +33,6 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
 
     implementation(
-//            enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonBomVersion}"),
             "org.springframework.boot:spring-boot",
             "org.hibernate.validator:hibernate-validator",
             "org.apache.commons:commons-lang3",
