@@ -51,7 +51,7 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.boomerang-version }}
           files: artifacts/*
-          generate_release_notes: true
+          generate_release_notes: false
           token: ${{ github.token }}
           name: Version ${{ github.ref_name }}
           body: |
