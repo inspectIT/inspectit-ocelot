@@ -50,7 +50,7 @@
     "react-timeago": "^7.1.0",
     "react-tooltip": "^4.5.1",
     "react-transition-group": "^4.4.2",
-    "redux": "^4.2.0",
+    "redux": "^4.2.1",
     "redux-devtools-extension": "^2.13.2",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.4.1",
