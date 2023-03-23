@@ -179,14 +179,6 @@ task compileJarCheck(type: JavaCompile){
 
 // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
 task checkDependencyJavaVersions {
-    def excludes = ["byte-buddy",
-                    // exclude OpenTelemetry as they guarantee JDK 8 support
-                    "opentelemetry",
-                    // exclude jackson which is being used by OTel
-                    "jackson",
-                    // exclude kotlin-stdlib which is being used by opentelemetry-exporter-jaeger-thrift
-                    "kotlin-stdlib"]
-
     def jarCheckPath = "$buildDir/jarCheck"
     outputs.dir jarCheckPath
 
@@ -195,10 +187,7 @@ task checkDependencyJavaVersions {
         jarCheckOutput.mkdirs()
         configurations.runtimeClasspath.each { file ->
             def name = file.name
-            def isExcluded = excludes.stream().anyMatch({ excl ->
-                name.contains(excl)
-            })
-            if (!isExcluded && file.exists()) {
+            if (file.exists()) {
                 javaexec {
                     mainClass = 'com.mindprod.jarcheck.JarCheck'
                     classpath = sourceSets.main.runtimeClasspath
