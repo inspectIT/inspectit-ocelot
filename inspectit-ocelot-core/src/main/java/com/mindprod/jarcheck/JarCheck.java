@@ -135,6 +135,12 @@ public final class JarCheck
                         out.println("Ignoring module-info.class for "+ elementName);
                         continue ;
                     }
+                    if(elementName.startsWith("META-INF/versions")) {
+                        // We can safely ignore class files for newer versions than 8
+                        // See: https://docs.oracle.com/javase/10/docs/specs/jar/jar.html#multi-release-jar-files
+                        out.println("Ignoring multi-release jar files for " + elementName);
+                        continue;
+                    }
                     byte[] chunk = new byte[ chunkLength ];
                     int bytesRead = zip.read( chunk, 0, chunkLength );
                     zip.closeEntry();
