@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/configurationserver_test.yml'
       - 'components/inspectit-ocelot-configurationserver/**'
+      - 'gradle.properties'
       - '!components/inspectit-ocelot-configurationserver/README.md'
   workflow_call:
 
