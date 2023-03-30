@@ -109,7 +109,7 @@ const AttributesCell = ({ attributes = {}, appendRef }) => {
   const keys = Object.keys(attributes);
   return (
     <div>
-      <style>{` p{ margin: 0.2em; } `}</style>
+      <style>{` p{ margin: 0.2em; text-align: left; } `}</style>
       {keys && keys.length <= 5 ? (
         keys.map((key) => <p key={key}>{`${key}: ${attributes[key]}`}</p>)
       ) : (
