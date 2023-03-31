@@ -19,6 +19,9 @@ spring:
     baselineOnMigrate: true
     baselineVersion: 1
 
+context:
+  initializer:
+    classes: "rocks.inspectit.ocelot.security.GrpcSslConfiguration"
 # server properties - see https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#server-properties
 server:
   port: 8090

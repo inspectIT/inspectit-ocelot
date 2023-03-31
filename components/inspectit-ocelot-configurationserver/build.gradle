@@ -158,7 +158,8 @@ dependencies {
             "com.google.guava:guava:${guavaVersion}",
 
             // swagger
-            "org.springdoc:springdoc-openapi-ui:${springDocOpenApiUiVersion}"
+            "org.springdoc:springdoc-openapi-ui:${springDocOpenApiUiVersion}",
+            "org.bouncycastle:bcprov-jdk18on:${bouncyCastleVersion}"
     )
     testImplementation(
             'org.springframework.boot:spring-boot-starter-test',

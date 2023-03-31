@@ -32,7 +32,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
-@TestPropertySource(properties = {"spring.datasource.url=jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1", "spring.datasource.driver-class-name=org.h2.Driver", "spring.datasource.username=sa", "spring.datasource.password=", "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect", "spring.jpa.hibernate.ddl-auto=create",})
+@TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
+        "spring.jpa.hibernate.ddl-auto=create",
+        // the following setting enables a dynamic port for gRPC server
+        // Since we start several Spring contexts that are cached, using the same
+        // port would lead to some test failures as the gRPC port is already bound.
+        "grpc.server.port=0"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = IntegrationTestBase.Initializer.class)
 public class IntegrationTestBase {
