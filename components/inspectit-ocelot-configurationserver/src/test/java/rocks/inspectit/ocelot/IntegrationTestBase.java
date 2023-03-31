@@ -8,7 +8,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -17,7 +16,6 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.file.FileManager;
@@ -34,7 +32,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
-@ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = {"spring.datasource.url=jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1", "spring.datasource.driver-class-name=org.h2.Driver", "spring.datasource.username=sa", "spring.datasource.password=", "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect", "spring.jpa.hibernate.ddl-auto=create",})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = IntegrationTestBase.Initializer.class)
@@ -48,8 +45,8 @@ public class IntegrationTestBase {
                 Path tempDirectory = Files.createTempDirectory("ocelot");
                 FileUtils.forceDeleteOnExit(tempDirectory.toFile());
 
-                TestPropertyValues.of("inspectit-config-server.working-directory=" + tempDirectory.toAbsolutePath()
-                        .toString()).applyTo(context.getEnvironment());
+                TestPropertyValues.of("inspectit-config-server.working-directory=" + tempDirectory.toAbsolutePath())
+                        .applyTo(context.getEnvironment());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -72,7 +69,7 @@ public class IntegrationTestBase {
 
     @BeforeEach
     void setup() throws GitAPIException, IOException {
-        // enforce a the same state for each test
+        // enforce at the same state for each test
         FileUtils.cleanDirectory(new File(settings.getWorkingDirectory()));
 
         authRest = rest.withBasicAuth(settings.getDefaultUser().getName(), settings.getDefaultUser().getPassword());
@@ -80,7 +77,7 @@ public class IntegrationTestBase {
         // we clean the working directory after each test, thus, we have to reinitialize the working directory, otherwise
         // it is not a git repository anymore
 
-        // recreate the default agent mappings - the AgentMappingSerializer is not used because its depending on the version manager
+        // recreate the default agent mappings - the AgentMappingSerializer is not used because it depends on the version manager
         AgentMapping defaultMapping = (AgentMapping) ReflectionTestUtils.getField(AgentMappingManager.class, "DEFAULT_MAPPING");
         ObjectMapper ymlMapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         ymlMapper.findAndRegisterModules();
@@ -93,7 +90,6 @@ public class IntegrationTestBase {
         versioningManager.initialize();
 
         ((CachingWorkingDirectoryAccessor) fileManager.getWorkingDirectory()).invalidateCache();
-
 
     }
 
