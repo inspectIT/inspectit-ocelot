@@ -135,7 +135,7 @@ const EditorView = ({
   });
 
   if(unique && path != '' && name != '') {
-    tabs.push({path: path, name: name, content: editorContent});
+    tabs.push({path: path, name: name, content: editorContent, id: tabs.length});
   }
 
   return (
@@ -249,16 +249,14 @@ const EditorView = ({
           {!showEditor && <SelectionInformation hint={hint} />}
 
           <TabView scrollable>
-            {tabs.map((tab) => {
-              console.log(tab);
-              return (
-                <TabPanel key={tab.title} header={tabHeaderTemplate(path, name)}>
-                  <p className="m-0">{tab.content}</p>
-                  <p>Test</p>
-                </TabPanel>
-              );
+            {tabs.forEach((tab) => {
+              console.log("in loop", tab);
+              (<TabPanel key={tab.id} header={tabHeaderTemplate(path, name)}>
+                <p>{tab.content}</p>
+                <p>Test</p>
+              </TabPanel>)   
             })}
-            <TabPanel headerTemplate={tabHeaderTemplate(path, name)} closable>
+            {/* <TabPanel headerTemplate={tabHeaderTemplate(path, name)} closable>
               <div>
                 here it should be
                 <div>
@@ -268,7 +266,7 @@ const EditorView = ({
                 <p>TEST</p>
                 <input type="text" />
               </div>
-            </TabPanel>
+            </TabPanel> */}
           </TabView>
         </div>
 
