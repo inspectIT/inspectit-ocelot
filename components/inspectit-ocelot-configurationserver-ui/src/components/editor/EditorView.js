@@ -63,17 +63,20 @@ const EditorView = ({
   };
 
   // header template for the tab + click handler
-  const tabHeaderTemplate = (path, name) => {
+  const tabHeaderTemplate = (path, name, id) => {
     return (
       <div>
         <label>{path}{name}</label>
-        <i class='pi pi-times' onClick={closeTabHandler(path, name)}></i>
+        <i class='pi pi-times' onClick={closeTabHandler(id)}></i>
       </div>
     );
   }
 
-  const closeTabHandler = (path, name) => {
-    tabs = tabs.filter(tab => tab.path != path && tab.name != name);
+  const closeTabHandler = (id) => {
+    console.log("This tabs", tabs);
+    let newTabs = tabs.filter(tab => tab.id != id);
+    tabs = newTabs;
+    console.log("new tabs", newTabs);
   }
 
   let editorContent;
@@ -249,12 +252,14 @@ const EditorView = ({
           {!showEditor && <SelectionInformation hint={hint} />}
 
           <TabView scrollable>
-            {tabs.forEach((tab) => {
+            {tabs.map((tab) => {
               console.log("in loop", tab);
-              (<TabPanel key={tab.id} header={tabHeaderTemplate(path, name)}>
+              return (
+              <TabPanel key={tab.id} header={tabHeaderTemplate(tab.path, tab.name, tab.id)}>
                 <p>{tab.content}</p>
                 <p>Test</p>
-              </TabPanel>)   
+              </TabPanel>
+              );
             })}
             {/* <TabPanel headerTemplate={tabHeaderTemplate(path, name)} closable>
               <div>
