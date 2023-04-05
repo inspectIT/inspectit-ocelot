@@ -6,24 +6,10 @@ on:
       - "[0-9]*.[0-9]*.[0-9]**"
 
 jobs:
-
-  agent_test:
-    uses: ./.github/workflows/agent_test.yml
-
-  configdocsgenerator_test:
-    uses: ./.github/workflows/configdocsgenerator_test.yml
-
-  configurationserver_test:
-    uses: ./.github/workflows/configurationserver_test.yml
-
-  configuration_ui_test:
-    uses: ./.github/workflows/configuration_ui_test.yml
-
   build_and_release:
     name: 'Build and Release'
     runs-on: ubuntu-latest
     environment: release
-    needs: [configdocsgenerator_test, configurationserver_test, configuration_ui_test] 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -65,7 +51,7 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.boomerang-version }}
           files: artifacts/*
-          generate_release_notes: true
+          generate_release_notes: false
           token: ${{ github.token }}
           name: Version ${{ github.ref_name }}
           body: |
