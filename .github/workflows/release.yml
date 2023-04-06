@@ -36,7 +36,7 @@ jobs:
         run: echo "tag=$(git ls-remote --tags | cut --delimiter='/' --fields=3  | tail --lines=2 | head  -n -1)" >> $GITHUB_OUTPUT
       - name: "Build Changelog"
         id: build_changelog
-        uses: heinrichreimer/github-changelog-generator-action@v2.3
+        uses: danipaniii/action-github-changelog-generator@v1.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           sinceTag: ${{ steps.previoustag.outputs.tag }} 
