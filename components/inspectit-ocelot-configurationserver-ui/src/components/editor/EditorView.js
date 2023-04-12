@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
 import PropTypes from 'prop-types';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import editorConfig from '../../data/yaml-editor-config.json';
 import EditorToolbar from './EditorToolbar';
@@ -19,6 +19,7 @@ const TreeTableEditor = dynamic(() => import('./visual-editor/TreeTableEditor'),
 
 let tabId = 0
 let tabs = []
+let activeIndex = 0
 
 /**
  * Editor view consisting of the AceEditor and a toolbar.
@@ -85,7 +86,7 @@ const EditorView = ({
     }
 
     console.log("new tabs", tabs);
-    updateTabView(newTabs)
+    //updateTabView(newTabs)
   }
 
   const changeTabHandler = (e) => {
@@ -98,6 +99,10 @@ const EditorView = ({
       console.log("Selected File Name", selectedFileName)
 
       configurationActions.selectFile(selectedFileName)
+
+      activeIndex = selectedTab[0].id
+      console.log(activeIndex)
+      updateTabView(tabs)
     }catch(e) {
     
     }
@@ -105,7 +110,7 @@ const EditorView = ({
 
   const updateTabView = (tabs) => {
     return (
-      <TabView scrollable>
+      <TabView scrollable activeIndex={activeIndex} onTabClose={(e) => closeTabHandler(e)} onTabChange={(e) => changeTabHandler(e)}>
             {tabs.map((tab) => {
               console.log("in loop", tab);
               return (
@@ -335,7 +340,7 @@ const EditorView = ({
           {!showEditor && <SelectionInformation hint={hint} />}
           {/*updateTabView(tabs)*/}
 
-          <TabView scrollable onTabClose={(e) => closeTabHandler(e)} onTabChange={(e) => changeTabHandler(e)}>
+          <TabView scrollable activeIndex={activeIndex} onTabClose={(e) => closeTabHandler(e)} onTabChange={(e) => changeTabHandler(e)}>
             {tabs.map((tab) => {
               console.log("in loop", tab);
               return (
