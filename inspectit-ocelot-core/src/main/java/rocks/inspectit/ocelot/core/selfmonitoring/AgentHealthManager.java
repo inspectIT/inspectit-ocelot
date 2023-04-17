@@ -159,21 +159,30 @@ public class AgentHealthManager implements InternalProcessingAppender.LogEventCo
 
     private void triggerEventAndMetricIfHealthChanged() {
         if (getCurrentHealth() != lastNotifiedHealth) {
+            AgentHealthChangedEvent event = null;
             synchronized (this) {
                 AgentHealth currHealth = getCurrentHealth();
                 if (currHealth != lastNotifiedHealth) {
                     AgentHealth lastHealth = lastNotifiedHealth;
                     lastNotifiedHealth = currHealth;
-                    if (currHealth.isMoreSevereOrEqualTo(lastHealth)) {
-                        log.warn(LOG_CHANGE_STATUS, lastHealth, currHealth);
-                    } else {
-                        log.info(LOG_CHANGE_STATUS, lastHealth, currHealth);
-                    }
 
                     selfMonitoringService.recordMeasurement("health", currHealth.ordinal());
 
-                    AgentHealthChangedEvent event = new AgentHealthChangedEvent(this, lastHealth, currHealth);
+                    event = new AgentHealthChangedEvent(this, lastHealth, currHealth);
                     ctx.publishEvent(event);
+                }
+            }
+
+            // It is important that logging happens outside the synchronized block above.
+            // Otherwise, a deadlock may happen since _this_ is via Interface
+            // InternalProcessingAppender.LogEventConsumer indirectly a part of the logback infrastructure
+            if (event != null) {
+                AgentHealth newHealth = event.getNewHealth();
+                AgentHealth oldHealth = event.getOldHealth();
+                if(newHealth.isMoreSevereOrEqualTo(oldHealth)) {
+                    log.warn(LOG_CHANGE_STATUS, oldHealth, newHealth);
+                } else {
+                    log.info(LOG_CHANGE_STATUS, oldHealth, newHealth);
                 }
             }
         }
