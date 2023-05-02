@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import classNames from 'classnames';
+import classnames from 'classnames';
 import _, { uniq } from 'lodash';
 import PropTypes from 'prop-types';
 import { Tree } from 'primereact/tree';
 import { ContextMenu } from 'primereact/contextmenu';
 import { alertingActions } from '../../../../../redux/ducks/alerting';
-import classnames from 'classnames';
 import { ruleIcon, templateIcon, topicIcon } from '../../constants';
 
 /**
@@ -16,7 +16,7 @@ const AlertingRulesTree = ({ rules, templates, unsavedRules, onSelectionChanged,
   const dispatch = useDispatch();
 
   // state variables
-  const [contextMenu, setContextMenu] = useState(null);
+  const contextMenuRef = useRef(null);
   const [treeIndex, setTreeIndex] = useState({});
   const [treeData, setTreeData] = useState(null);
 
@@ -42,12 +42,24 @@ const AlertingRulesTree = ({ rules, templates, unsavedRules, onSelectionChanged,
     {
       label: 'Group by Notification Channel',
       icon: 'pi pi-fw ' + (groupByTopics ? 'pi-check' : ''),
-      command: () => dispatch(alertingActions.changeRuleGroupingOptions({ groupByTemplates, groupByTopics: !groupByTopics })),
+      command: () =>
+        dispatch(
+          alertingActions.changeRuleGroupingOptions({
+            groupByTemplates,
+            groupByTopics: !groupByTopics,
+          })
+        ),
     },
     {
       label: 'Group by Templates',
       icon: 'pi pi-fw ' + (groupByTemplates ? 'pi-check' : ''),
-      command: () => dispatch(alertingActions.changeRuleGroupingOptions({ groupByTemplates: !groupByTemplates, groupByTopics })),
+      command: () =>
+        dispatch(
+          alertingActions.changeRuleGroupingOptions({
+            groupByTemplates: !groupByTemplates,
+            groupByTopics,
+          })
+        ),
     },
   ];
 
@@ -69,6 +81,11 @@ const AlertingRulesTree = ({ rules, templates, unsavedRules, onSelectionChanged,
     onSelectionChanged(newSelection);
   };
 
+  const showContextMenu = (event) => {
+    event.originalEvent.persist();
+    contextMenuRef.current.show(event.originalEvent);
+  };
+
   return (
     <>
       <style jsx>{`
@@ -76,18 +93,23 @@ const AlertingRulesTree = ({ rules, templates, unsavedRules, onSelectionChanged,
           overflow: auto;
           flex-grow: 1;
         }
+
         .this :global(.p-treenode-label) {
           width: 80%;
         }
+
         .this :global(.p-treenode-content:not(.p-highlight) .green) {
           color: #4caf50;
         }
+
         .this :global(.p-treenode-content:not(.p-highlight) .grey) {
           color: #9e9e9e;
         }
+
         .this :global(.p-treenode-content:not(.p-highlight) .red) {
           color: #f44336;
         }
+
         .this :global(.rule-label) {
           display: flex;
           flex-direction: row;
@@ -102,10 +124,10 @@ const AlertingRulesTree = ({ rules, templates, unsavedRules, onSelectionChanged,
       `}</style>
 
       <div className="this">
-        <ContextMenu className="context-menu" model={contextMenuItems} ref={(el) => setContextMenu(el)} />
+        <ContextMenu className="p-contextmenu" model={contextMenuItems} ref={contextMenuRef} />
 
         <Tree
-          onContextMenu={(event) => contextMenu.show(event.originalEvent)}
+          onContextMenu={showContextMenu}
           filter={true}
           filterBy="label"
           value={treeData}
@@ -124,7 +146,7 @@ const AlertingRulesTree = ({ rules, templates, unsavedRules, onSelectionChanged,
  */
 const nodeTemplate = (node) => {
   if (node.type === 'rule') {
-    var classNames = 'pi ';
+    let classNames = 'pi ';
     if (node.data.status === 'enabled' && !node.data.error) {
       classNames = classNames + 'pi-circle-on green';
     } else if (node.data.status === 'enabled' && node.data.error) {
