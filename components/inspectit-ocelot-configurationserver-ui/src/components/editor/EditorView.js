@@ -12,14 +12,11 @@ import { getConfigurationType } from '../../lib/configuration-utils';
 import { CONFIGURATION_TYPES } from '../../data/constants';
 import MethodConfigurationEditor from './method-configuration-editor/MethodConfigurationEditor';
 import { TabView, TabPanel } from 'primereact/tabview';
-import { Button } from 'primereact/button';
 
 const AceEditor = dynamic(() => import('./yaml-editor/AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./visual-editor/TreeTableEditor'), { ssr: false });
 
 let tabId = 0
-let tabs = []
-let activeIndex = 0
 
 /**
  * Editor view consisting of the AceEditor and a toolbar.
@@ -57,6 +54,10 @@ const EditorView = ({
   const currentVersion = useSelector((state) => state.configuration.selectedVersion);
   const isLatest = useSelector(configurationSelectors.isLatestVersion);
 
+  // state variables
+  const [activeIndex, setActiveTab] = useState(0);
+  const [tabs, setTabs] = useState([])
+
   // derived variables
   const isLiveSelected = currentVersion === 'live';
   const configurationType = getConfigurationType(value);
@@ -71,55 +72,6 @@ const EditorView = ({
       <div>
         <label>{tab.path}{tab.name}</label>
       </div>
-    );
-  }
-
-  const closeTabHandler = (id) => {
-    console.log("CLOSED", id)
-    console.log("INDEX", id.index)
-    // console.log("This tabs", tabs);
-    let newTabs = tabs.filter(tab => tab.id != id.index);
-    tabs = []
-    tabs = [...newTabs]
-    if(tabs.length == 0) {
-      tabId = 0
-    }
-
-    console.log("new tabs", tabs);
-    //updateTabView(newTabs)
-  }
-
-  const changeTabHandler = (e) => {
-    console.log("CHANGED", e)
-
-    let selectedTab = tabs.filter((tab) => tab.id == e.index)
-
-    try {
-      let selectedFileName = selectedTab[0].path + selectedTab[0].name
-      console.log("Selected File Name", selectedFileName)
-
-      configurationActions.selectFile(selectedFileName)
-
-      activeIndex = selectedTab[0].id
-      console.log(activeIndex)
-      updateTabView(tabs)
-    }catch(e) {
-    
-    }
-  }
-
-  const updateTabView = (tabs) => {
-    return (
-      <TabView scrollable activeIndex={activeIndex} onTabClose={(e) => closeTabHandler(e)} onTabChange={(e) => changeTabHandler(e)}>
-            {tabs.map((tab) => {
-              console.log("in loop", tab);
-              return (
-              <TabPanel key={tab.id} header={tabHeaderTemplate(tab)} closable>
-                <div style={{ height: "500px"}}>{displayContent(tab)}</div>
-              </TabPanel>
-              );
-            })}
-      </TabView>
     );
   }
 
@@ -204,28 +156,45 @@ const EditorView = ({
   }
 
   // Check if the file is already opened in a tab or not
-  let unique = true;
-  tabs.map((tab) => {
-    console.log("IN MAP", tab)
-    if(tab.path == path && tab.name == name) {
-      tab.value = value
-      unique = false;
-    }
-  });
+  // let unique = true;
+  // tabs.map((tab) => {
+  //   console.log("IN MAP", tab)
+  //   if(tab.path == path && tab.name == name) {
+  //     tab.value = value
+  //     unique = false;
+  //   }
+  // });
 
-  console.log("unique", unique)
-  console.log("path", path)
-  console.log("name", name)
-  console.log("value", value)
-  console.log(unique && path != '' && name != '')
-  if(unique && path != '' && name != '') {
-    console.log("IN IF")
-    let tab = {path: path, name: name, content: editorContent, id: tabId, value: ""}
-    console.log('Value: \n', value);
-    tab.value = value
-    tabs.push(tab);
-    tabId++
-  }
+  // // console.log("unique", unique)
+  // console.log("path", path)
+  // console.log("name", name)
+  // console.log("value", value)
+  // // console.log(unique && path != '' && name != '')
+  // if(path != '' && name != '') {
+  //   console.log("IN IF")
+  //   let tab = {path: path, name: name, content: editorContent, id: tabId, value: ""}
+  //   console.log('Value: \n', value);
+  //   tab.value = value
+  //   setTabs((tab) => {
+  //     let unique = true;
+  //     tabs.map((tab) => {
+  //       console.log("IN MAP", tab)
+  //       if(tab.path == path && tab.name == name) {
+  //         tab.value = value
+  //         unique = false;
+  //       }
+  //     });
+
+  //     if(unique) {
+  //       tabs.push(tab)
+  //     }
+  //   })
+  //   tabId++
+  // }
+
+  let tab = {path: path, name: name, content: editorContent, id: tabId, value: ""}
+  console.log(tab)
+  setTabs(tabs => [...tabs, tab])
 
   console.log("Tabs", tabs);
 
@@ -338,9 +307,8 @@ const EditorView = ({
 
           {showEditor && <div className="editor-container">{editorContent}</div>}
           {!showEditor && <SelectionInformation hint={hint} />}
-          {/*updateTabView(tabs)*/}
 
-          <TabView scrollable activeIndex={activeIndex} onTabClose={(e) => closeTabHandler(e)} onTabChange={(e) => changeTabHandler(e)}>
+          <TabView scrollable activeIndex={activeIndex} onTabClose={(e) => setTabs(tabs.filter((tab) => tab.id == e.index))} onTabChange={(e) => setActiveTab(e.index)}>
             {tabs.map((tab) => {
               console.log("in loop", tab);
               return (
@@ -349,17 +317,6 @@ const EditorView = ({
               </TabPanel>
               );
             })}
-            {/* <TabPanel headerTemplate={tabHeaderTemplate(path, name)} closable>
-              <div>
-                here it should be
-                <div>
-                  {showEditor && <div className="editor-container">{editorContent}</div>}
-                  {!showEditor && <SelectionInformation hint={hint} />}
-                </div>
-                <p>TEST</p>
-                <input type="text" />
-              </div>
-            </TabPanel> */}
           </TabView>
         </div>
 
