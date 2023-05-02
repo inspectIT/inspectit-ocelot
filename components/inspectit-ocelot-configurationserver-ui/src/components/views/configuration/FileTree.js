@@ -88,7 +88,7 @@ class FileTree extends React.Component {
       event.originalEvent.stopPropagation();
       return;
     }
-
+    event.originalEvent.persist();
     this.setState({ contextMenuModel: this.getContextMenuModel(newSelection) });
     this.contextMenuRef.current.show(event.originalEvent || event);
   };

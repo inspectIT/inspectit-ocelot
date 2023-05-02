@@ -113,7 +113,7 @@ const AlertingView = () => {
         }
       `}</style>
       <div className="this">
-        <TabMenu className="menu" model={items} activeItem={activeTab} onTabChange={(e) => setActiveTab(e.value)} />
+        <TabMenu className="menu" model={items} activeitem={activeTab} onTabChange={(e) => setActiveTab(e.value)} />
 
         {activeTab === items[0] && (
           <AlertingRulesView
