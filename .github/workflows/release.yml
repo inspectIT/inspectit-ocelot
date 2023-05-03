@@ -81,6 +81,7 @@ jobs:
   build_documentation:
     name: "Build and Publish Release Documentation"
     runs-on: ubuntu-latest
+    environment: release
     defaults:
       run:
         working-directory: inspectit-ocelot-documentation/website
