@@ -62,7 +62,7 @@ jobs:
       - name: Run code coverage
         run: ./gradlew codeCoverageReport
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           name: codecov-ocelot-agent
           files: ./build/reports/jacoco/report.xml
