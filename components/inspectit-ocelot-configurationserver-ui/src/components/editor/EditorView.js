@@ -16,8 +16,6 @@ import { TabView, TabPanel } from 'primereact/tabview';
 const AceEditor = dynamic(() => import('./yaml-editor/AceEditor'), { ssr: false });
 const TreeTableEditor = dynamic(() => import('./visual-editor/TreeTableEditor'), { ssr: false });
 
-let tabId = 0
-
 /**
  * Editor view consisting of the AceEditor and a toolbar.
  *
@@ -73,6 +71,42 @@ const EditorView = ({
         <label>{tab.path}{tab.name}</label>
       </div>
     );
+  }
+
+  const tabChangeHandler = (tab) => {
+    console.log("INSIDE TAB CHANGE HANDLER")
+    console.log(tab.index)
+
+    try {
+      let thisTab = tabs.filter(t => t.id == tab.index)
+      let path = thisTab[0].path + thisTab[0].name;
+
+      setActiveTab(tab.index)
+      dispatch(configurationActions.selectFile(path))
+    }catch(e) {
+
+    }
+  }
+
+  const tabCloseHandler = (tab) => {
+    console.log("INSIDE TAB CLOSE HANDLER")
+    console.log(tab)
+
+    try {
+      let newTabs = tabs.filter(t => t.id != tab.index)
+
+      setTabs(newTabs)
+
+      for(let i = 0; i < tabs.length; i++) {
+        tabs[i].id = i
+      }
+
+      children.props.path = ""
+      children.props.name = ""
+
+    }catch(e) {
+
+    }
   }
 
   const displayContent = (tab) => {
@@ -156,45 +190,30 @@ const EditorView = ({
   }
 
   // Check if the file is already opened in a tab or not
-  // let unique = true;
-  // tabs.map((tab) => {
-  //   console.log("IN MAP", tab)
-  //   if(tab.path == path && tab.name == name) {
-  //     tab.value = value
-  //     unique = false;
-  //   }
-  // });
+  let unique = true;
+  tabs.map((tab) => {
+    console.log("IN MAP", tab)
+    if(tab.path == path && tab.name == name) {
+      tab.value = value
+      unique = false;
+    }
+  });
 
-  // // console.log("unique", unique)
+  console.log("unique", unique)
   // console.log("path", path)
   // console.log("name", name)
   // console.log("value", value)
-  // // console.log(unique && path != '' && name != '')
-  // if(path != '' && name != '') {
-  //   console.log("IN IF")
-  //   let tab = {path: path, name: name, content: editorContent, id: tabId, value: ""}
-  //   console.log('Value: \n', value);
-  //   tab.value = value
-  //   setTabs((tab) => {
-  //     let unique = true;
-  //     tabs.map((tab) => {
-  //       console.log("IN MAP", tab)
-  //       if(tab.path == path && tab.name == name) {
-  //         tab.value = value
-  //         unique = false;
-  //       }
-  //     });
-
-  //     if(unique) {
-  //       tabs.push(tab)
-  //     }
-  //   })
-  //   tabId++
-  // }
-
-  let tab = {path: path, name: name, content: editorContent, id: tabId, value: ""}
-  console.log(tab)
-  setTabs(tabs => [...tabs, tab])
+  // console.log(unique && path != '' && name != '')
+  if(path != '' && name != '') {
+    console.log("IN IF")
+    let tab = {path: path, name: name, content: editorContent, id: tabs.length, value: ""}
+    console.log('Value: \n', value);
+    tab.value = value
+    
+      if(unique) {
+        setTabs(tabs => [...tabs, tab]);
+      }   
+    }
 
   console.log("Tabs", tabs);
 
@@ -308,7 +327,7 @@ const EditorView = ({
           {showEditor && <div className="editor-container">{editorContent}</div>}
           {!showEditor && <SelectionInformation hint={hint} />}
 
-          <TabView scrollable activeIndex={activeIndex} onTabClose={(e) => setTabs(tabs.filter((tab) => tab.id == e.index))} onTabChange={(e) => setActiveTab(e.index)}>
+          <TabView scrollable activeIndex={activeIndex} onTabClose={(e) => tabCloseHandler(e)} onTabChange={(e) => tabChangeHandler(e)}>
             {tabs.map((tab) => {
               console.log("in loop", tab);
               return (
