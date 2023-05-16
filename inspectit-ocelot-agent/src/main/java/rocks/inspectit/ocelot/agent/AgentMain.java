@@ -48,6 +48,10 @@ public class AgentMain {
 
     private static final String ASYNC_INSTRUMENTATION_ENV_PROPERTY = "INSPECTIT_INSTRUMENTATION_INTERNAL_ASYNC";
 
+    private static final String START_DELAY_PROPERTY = "inspectit.start.delay";
+
+    private static final String START_DELAY_ENV_PROPERTY = "INSPECTIT_START_DELAY";
+
     /**
      * Main method for attaching the agent itself to a running JVM.
      *
@@ -105,12 +109,40 @@ public class AgentMain {
     }
 
     private static void startAgent(String agentArgs, Instrumentation inst, boolean includeOpencensusInInspectitLoader) {
+        delayAgentStart();
+
         try {
             InspectITClassLoader icl = initializeInspectitLoader(inst, includeOpencensusInInspectitLoader);
             AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
         } catch (Exception e) {
             System.err.println("Error starting inspectIT Agent!");
             e.printStackTrace();
+        }
+    }
+
+    private static void delayAgentStart() {
+        String startDelayViaSystemProperty = System.getProperty(START_DELAY_PROPERTY);
+        String startDelayViaEnvironmentVariable = System.getenv(START_DELAY_ENV_PROPERTY);
+        if (startDelayViaSystemProperty != null) {
+            delayAgentStart(startDelayViaSystemProperty, "Value '%s' of system property " + START_DELAY_PROPERTY + " does not contain a positive integer value. Continuing without delay.");
+        } else if (startDelayViaEnvironmentVariable != null) {
+            delayAgentStart(startDelayViaEnvironmentVariable, "Value '%s' of environment variable " + START_DELAY_ENV_PROPERTY + " does not contain a positive integer value. Continuing without delay.");
+        }
+    }
+
+    private static void delayAgentStart(String startDelay, String errorMessageFormat) {
+        try {
+            int delayInMilliseconds = Integer.parseInt(startDelay);
+            if (delayInMilliseconds > 0) {
+                System.out.println("Delaying start of InspectIT for " + delayInMilliseconds + " ms.");
+                Thread.sleep(delayInMilliseconds);
+            } else {
+                System.err.printf(errorMessageFormat + "%n", startDelay);
+            }
+        } catch (InterruptedException ie) {
+            System.err.println("Interrupted while delaying initialization");
+        } catch (NumberFormatException nfe) {
+            System.err.printf(errorMessageFormat + "%n", startDelay);
         }
     }
 

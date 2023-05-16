@@ -4,7 +4,7 @@ import java.lang.instrument.Instrumentation;
 
 /**
  * Controller interface for the Agent. Its implementation is {@link rocks.inspectit.ocelot.core.AgentImpl}.
- * The implementation must provide a default cosntructor without side effects!
+ * The implementation must provide a default constructor without side effects!
  * The actual initialization should happen in {@link #start(String, Instrumentation)}, which is called by {@link AgentManager}
  */
 public interface IAgent {
