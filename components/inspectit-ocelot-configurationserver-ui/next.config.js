@@ -35,7 +35,7 @@ module.exports = withCSS({
   },
 
   env: {
-    VERSION: process.env.CIRCLE_TAG || 'SNAPSHOT',
+    VERSION: process.env.RELEASE_TAG || 'SNAPSHOT',
     BUILD_DATE: new Date().toUTCString(),
   },
 });
