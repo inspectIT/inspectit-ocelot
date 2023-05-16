@@ -35,7 +35,7 @@ module.exports = withCSS({
   },
 
   env: {
-    VERSION: process.env.CIRCLE_TAG || 'SNAPSHOT',
+    VERSION: process.env.GITHUB_REF_NAME || 'SNAPSHOT',
     BUILD_DATE: new Date().toUTCString(),
   },
 });
