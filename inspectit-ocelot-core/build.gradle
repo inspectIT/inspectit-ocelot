@@ -81,6 +81,7 @@ dependencies {
             "commons-io:commons-io:${commonsIoVersion}",
             "piccolo:piccolo:${piccoloVersion}",
             "com.fasterxml.jackson.core:jackson-databind",
+            "io.github.resilience4j:resilience4j-retry:${resilience4jVersion}",
 
             "org.javassist:javassist:${javassistVersion}",
 

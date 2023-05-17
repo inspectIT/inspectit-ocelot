@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+import javax.validation.Valid;
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -56,6 +57,12 @@ public class HttpConfigSettings {
      * The socket timeout to use - the time waiting for data after establishing the connection; maximum time of inactivity between two data packets.
      */
     private Duration socketTimeout;
+
+    /**
+     * Settings how retries are handled regarding fetching an HTTP property source.
+     */
+    @Valid
+    private RetrySettings retry;
 
     @AssertFalse(message = "The specified timeout values should not be negative!")
     public boolean isNegativeTimeout() {
