@@ -1,5 +1,8 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
+import io.github.resilience4j.core.IntervalFunction;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +15,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -19,6 +23,7 @@ import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
+import rocks.inspectit.ocelot.config.model.config.RetrySettings;
 import rocks.inspectit.ocelot.core.config.util.InvalidPropertiesException;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 import rocks.inspectit.ocelot.core.selfmonitoring.service.DynamicallyActivatableServiceObserver;
@@ -56,12 +61,12 @@ public class HttpPropertySourceState {
      * The name used for the property source.
      */
     @Getter
-    private String name;
+    private final String name;
 
     /**
      * The currently used settings.
      */
-    private HttpConfigSettings currentSettings;
+    private final HttpConfigSettings currentSettings;
 
     /**
      * The value of the latest 'Last-Modified' header.
@@ -77,7 +82,7 @@ public class HttpPropertySourceState {
      * The latest property source.
      */
     @Getter
-    private PropertySource currentPropertySource;
+    private PropertiesPropertySource currentPropertySource;
 
     /**
      * Number of unsuccessful connection attempts.
@@ -167,7 +172,7 @@ public class HttpPropertySourceState {
      *
      * @return A new {@link HttpClient} instance.
      */
-    private HttpClient createHttpClient() {
+    private CloseableHttpClient createHttpClient() {
         RequestConfig.Builder configBuilder = RequestConfig.custom();
 
         if (currentSettings.getConnectionTimeout() != null) {
@@ -184,23 +189,67 @@ public class HttpPropertySourceState {
         return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
     }
 
-    /**
-     * Fetches the configuration by executing a HTTP request against the configured HTTP endpoint. The request contains
-     * the 'If-Modified-Since' header if a previous response returned a 'Last-Modified' header.
-     *
-     * @return The request's response body representing the configuration in a JSON/YAML format. null is returned if request fails or the
-     * server returns 304 (not modified).
-     */
     private String fetchConfiguration(boolean fallBackToFile) {
         HttpGet httpGet;
         try {
-            URI uri = getEffectiveRequestUri();
-            log.debug("Updating configuration via HTTP from URL: {}", uri.toString());
-            httpGet = new HttpGet(uri);
-        } catch (URISyntaxException e) {
-            log.error("Error building HTTP URI for fetching configuration!", e);
+            httpGet = buildRequest();
+        } catch (URISyntaxException ex) {
+            log.error("Error building HTTP URI for fetching configuration!", ex);
             return null;
         }
+
+        String configuration = null;
+        boolean isError = true;
+        // We create the httpClient outside the retry as it is a rather expensive object, but we create it for each call
+        // again, because the configuration may have changed. The "but" is currently pure speculation. Ideally we would
+        // recreate it only if configuration has changed.
+        try (CloseableHttpClient httpClient = createHttpClient()) {
+            Retry retry = buildRetry();
+            if (retry != null) {
+                configuration = retry.executeCallable(() -> fetchConfiguration(httpClient, httpGet));
+            } else {
+                configuration = fetchConfiguration(httpClient, httpGet);
+            }
+            isError = false;
+        } catch (ClientProtocolException e) {
+            logFetchError("HTTP protocol error occurred while fetching configuration.", e);
+        } catch (IOException e) {
+            logFetchError("A IO problem occurred while fetching configuration.", e);
+        } catch (Exception e) {
+            logFetchError("Exception occurred while fetching configuration.", e);
+        }
+
+        if (configuration != null) {
+            // each new configuration will be stored in a file
+            writePersistenceFile(configuration);
+        }
+        if (isError && fallBackToFile) {
+            // if there was an error, and we need to fall back to a file, we do so
+            configuration = readPersistenceFile();
+        }
+        return configuration;
+    }
+
+    private Retry buildRetry() {
+        RetrySettings retrySettings = currentSettings.getRetry();
+        if (retrySettings != null) {
+            RetryConfig retryConfig = RetryConfig.custom()
+                    .maxAttempts(retrySettings.getMaxAttempts())
+                    .intervalFunction(IntervalFunction
+                            .ofExponentialRandomBackoff(
+                                    retrySettings.getInitialIntervalMillis(),
+                                    retrySettings.getMultiplier(),
+                                    retrySettings.getRandomizationFactor()))
+                    .build();
+            return Retry.of("http-property-source", retryConfig);
+        }
+        return null;
+    }
+
+    private HttpGet buildRequest() throws URISyntaxException {
+        URI uri = getEffectiveRequestUri();
+        log.debug("Updating configuration via HTTP from URL: {}", uri.toString());
+        HttpGet httpGet = new HttpGet(uri);
 
         if (latestLastModified != null) {
             httpGet.setHeader("If-Modified-Since", latestLastModified);
@@ -211,33 +260,18 @@ public class HttpPropertySourceState {
 
         setAgentMetaHeaders(httpGet);
 
-        String configuration = null;
-        boolean isError = true;
-        try {
-            HttpResponse response = createHttpClient().execute(httpGet);
+        return httpGet;
+    }
 
-            // get the config from the response
-            configuration = processHttpResponse(response);
-            isError = false;
-            if (errorCounter != 0) {
-                log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
-                errorCounter = 0;
-            }
-        } catch (ClientProtocolException e) {
-            logFetchError("HTTP protocol error occurred while fetching configuration.", e);
-        } catch (IOException e) {
-            logFetchError("A IO problem occurred while fetching configuration.", e);
-        } catch (Exception e) {
-            logFetchError("Exception occurred while fetching configuration.", e);
-        } finally {
-            httpGet.releaseConnection();
+    private String fetchConfiguration(HttpClient client, HttpGet request) throws IOException {
+        HttpResponse response = client.execute(request);
+        // get the config from the response
+        String configuration = processHttpResponse(response);
+        if (errorCounter != 0) {
+            log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
+            errorCounter = 0;
         }
 
-        if (!isError && configuration != null) {
-            writePersistenceFile(configuration);
-        } else if (isError && fallBackToFile) {
-            configuration = readPersistenceFile();
-        }
         return configuration;
     }
 

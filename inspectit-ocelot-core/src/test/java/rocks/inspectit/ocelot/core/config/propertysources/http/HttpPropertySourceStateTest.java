@@ -1,19 +1,20 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.MappingBuilder;
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.http.MultiValue;
+import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.google.common.collect.ImmutableMap;
 import org.apache.http.entity.ContentType;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
+import rocks.inspectit.ocelot.config.model.config.RetrySettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -251,6 +253,88 @@ class HttpPropertySourceStateTest {
 
             assertThat(state.getEffectiveRequestUri()
                     .toString()).isEqualTo("http://localhost:4242/endpoint?fixed=something&service=myservice");
+        }
+    }
+
+    @Nested
+    public class Retries {
+
+        private WireMockServer mockServer;
+
+        private final MappingBuilder getHttpConfigurationMapping = get(urlEqualTo("/"));
+
+        private final ResponseDefinitionBuilder successfulResponse = aResponse().withStatus(200)
+                .withBody("inspectit:\n  service-name: test-name")
+                .withHeader("Content-Type", "application/x-yaml");
+
+        private final ResponseDefinitionBuilder unsuccessfulResponse = aResponse().withStatus(500);
+
+        @BeforeEach
+        public void setup() throws MalformedURLException {
+            mockServer = new WireMockServer(options().dynamicPort());
+            mockServer.start();
+
+            HttpConfigSettings httpSettings = new HttpConfigSettings();
+            httpSettings.setUrl(new URL("http://localhost:" + mockServer.port() + "/"));
+            httpSettings.setAttributes(new HashMap<>());
+            RetrySettings retrySettings = new RetrySettings();
+            retrySettings.setMaxAttempts(2);
+            retrySettings.setInitialIntervalMillis(5);
+            retrySettings.setMultiplier(1);
+            retrySettings.setRandomizationFactor(0.1);
+            httpSettings.setRetry(retrySettings);
+            state = new HttpPropertySourceState("retry-test-state", httpSettings);
+        }
+
+        @AfterEach
+        public void tearDown() {
+            mockServer.stop();
+        }
+
+        @Test
+        void updateReturnsTrueIfAvailable() {
+            mockServer.stubFor(getHttpConfigurationMapping.willReturn(successfulResponse));
+
+            boolean successfulUpdate = state.update(false);
+
+            assertThat(successfulUpdate).isTrue();
+        }
+
+        @Test
+        void updateReturnsTrueAfterSuccessfulRetry() {
+            // First request fails
+            String retryScenario = "Retry Scenario";
+            mockServer.stubFor(getHttpConfigurationMapping.inScenario(retryScenario)
+                    .whenScenarioStateIs(Scenario.STARTED)
+                    .willReturn(unsuccessfulResponse)
+                    .willSetStateTo("SUCCESS"));
+
+            // Second request succeeds
+            mockServer.stubFor(getHttpConfigurationMapping.inScenario(retryScenario)
+                    .whenScenarioStateIs("SUCCESS")
+                    .willReturn(successfulResponse));
+
+            boolean successfulUpdate = state.update(false);
+
+            assertThat(successfulUpdate).isTrue();
+        }
+
+        @Test
+        void failsIfMaxAttemptsIsReached() {
+            mockServer.stubFor(getHttpConfigurationMapping.willReturn(unsuccessfulResponse));
+
+            boolean unsuccessfulUpdate = state.update(false);
+
+            assertThat(unsuccessfulUpdate).isFalse();
+        }
+
+        @Test
+        void failsIfServerIsNotAvailable() {
+            mockServer.stop();
+
+            boolean unsuccessfulUpdate = state.update(false);
+
+            assertThat(unsuccessfulUpdate).isFalse();
         }
     }
 
