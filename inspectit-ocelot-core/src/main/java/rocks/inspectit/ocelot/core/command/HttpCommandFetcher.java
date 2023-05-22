@@ -18,6 +18,7 @@ import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.config.model.command.AgentCommandSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -89,12 +90,14 @@ public class HttpCommandFetcher {
     /**
      * Fetches a {@link Command} by sending the given {@link CommandResponse} as payload and uses the given timeout-int as timeout.
      *
-     * @param commandResponse The payload to be send.
+     * @param commandResponse The payload to be sent.
      * @param waitForCommand  Whether the agent should wait for commands.
      *
-     * @return returns null if any error occurred before/while sending the request.
+     * @return returns An HttpResponse or <code>null</code> if any error occurred before sending the request.
+     *
+     * @throws IOException if communication with the server was not successful.
      */
-    public HttpResponse fetchCommand(CommandResponse commandResponse, boolean waitForCommand) {
+    public HttpResponse fetchCommand(CommandResponse commandResponse, boolean waitForCommand) throws IOException {
         HttpPost httpPost;
         try {
             URIBuilder uriBuilder = new URIBuilder(commandUri);
@@ -125,20 +128,18 @@ public class HttpCommandFetcher {
         setAgentMetaHeaders(httpPost);
         httpPost.setHeader("Content-Type", "application/json");
 
+        HttpClient httpClient = getHttpClient(waitForCommand);
+
         try {
-            return getHttpClient(waitForCommand).execute(httpPost);
-        } catch (Exception e) {
-            log.error("An error occurred while fetching an agent command.", e);
+            return httpClient.execute(httpPost);
         } finally {
             httpPost.releaseConnection();
         }
-
-        return null;
     }
 
     /**
-     * Injects all the agent's meta information headers, which should be send when fetching a command,
-     * into the given request request.
+     * Injects all the agent's meta information headers, which should be sent when fetching a command,
+     * into the given request.
      *
      * @param httpPost the request to inject the meta information headers
      */

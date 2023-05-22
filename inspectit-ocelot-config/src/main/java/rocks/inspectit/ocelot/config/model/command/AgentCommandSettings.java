@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.config.model.command;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import rocks.inspectit.ocelot.config.model.config.RetrySettings;
 
 import java.net.URL;
 import java.time.Duration;
@@ -47,7 +48,12 @@ public class AgentCommandSettings {
     private Duration pollingInterval;
 
     /**
-     * How long the agent will staying in the live mode, before falling back to the normal mode.
+     * How long the agent will stay in the live mode, before falling back to the normal mode.
      */
     private Duration liveModeDuration;
+
+    /**
+     * Settings how retries are handled regarding fetching an agent command.
+     */
+    private RetrySettings retry;
 }

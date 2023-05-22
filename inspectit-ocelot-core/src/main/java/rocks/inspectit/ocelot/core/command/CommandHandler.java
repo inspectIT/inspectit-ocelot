@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.command;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import io.github.resilience4j.retry.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -12,7 +13,9 @@ import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.config.model.command.AgentCommandSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.utils.RetryUtils;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -58,8 +61,8 @@ public class CommandHandler {
     }
 
     /**
-     * Tries fetching and executing a new agent command from the server. The given command response will be send with the
-     * request as a piggy-back payload. In case the server returns any command, it will be executed and the handler may
+     * Tries fetching and executing a new agent command from the server. The given command response will be sent with the
+     * request as a piggyback payload. In case the server returns any command, it will be executed and the handler may
      * switch to live mode where it executes more requests in order to get further agent commands.
      *
      * @param payload a {@link CommandResponse} to send with the next request
@@ -69,8 +72,7 @@ public class CommandHandler {
 
         do {
             // fetch and execute next command and return optional payload
-            HttpResponse response = commandFetcher.fetchCommand(commandResponse, liveMode);
-            Command command = processHttpResponse(response);
+            Command command = getCommandWithRetry(commandResponse);
             commandResponse = executeCommand(command);
 
             if (commandResponse != null) {
@@ -99,15 +101,38 @@ public class CommandHandler {
         return System.currentTimeMillis() >= liveModeStart + settings.getLiveModeDuration().toMillis();
     }
 
+    private Command getCommandWithRetry(CommandResponse commandResponse) {
+        Retry retry = buildRetry();
+        if (retry != null) {
+            return retry.executeSupplier(() -> getCommand(commandResponse));
+        } else {
+            return getCommand(commandResponse);
+        }
+    }
+
+    private Retry buildRetry() {
+        return RetryUtils.buildRetry(environment.getCurrentConfig()
+                .getAgentCommands()
+                .getRetry(), "agent-commands");
+    }
+
     /**
-     * Takes a HttpResponse as a parameter and processes it. If the response contains an instance of {@link Command}, the
-     * the command is returned.
+     * Fetches a command and processes the response.
      *
-     * @param response the response to process
+     * @param commandResponse A CommandResponse
      *
-     * @return an instance of {@link Command}, or null if the response was empty
+     * @return The command
+     *
+     * @throws IllegalStateException If communication was not successful.
      */
-    private Command processHttpResponse(HttpResponse response) {
+    private Command getCommand(CommandResponse commandResponse) {
+        HttpResponse response;
+        try {
+            response = commandFetcher.fetchCommand(commandResponse, liveMode);
+        } catch (IOException ioe) {
+            throw new IllegalStateException("IOException while fetching command", ioe);
+        }
+        // response is null if some configurations are not correct. commandFetcher will log an error in this case.
         if (response == null) {
             return null;
         }
@@ -124,12 +149,12 @@ public class CommandHandler {
                 return objectMapper.readValue(content, Command.class);
             } catch (Exception exception) {
                 log.error("Exception during agent command deserialization.", exception);
+                return null;
             }
         } else {
             throw new IllegalStateException("Couldn't successfully fetch an agent command. Server returned " + response.getStatusLine()
                     .getStatusCode());
         }
-        return null;
     }
 
     /**
