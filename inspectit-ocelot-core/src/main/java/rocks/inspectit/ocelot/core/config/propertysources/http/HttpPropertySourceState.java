@@ -302,10 +302,7 @@ public class HttpPropertySourceState {
      */
     private void logFetchError(String message, Exception exception) {
         errorCounter++;
-        //check if errorCounter is a power of 2
-        if (((errorCounter & (errorCounter - 1)) == 0)) {
-            log.error(message, exception);
-        }
+        log.error(message, exception);
     }
 
     /**
