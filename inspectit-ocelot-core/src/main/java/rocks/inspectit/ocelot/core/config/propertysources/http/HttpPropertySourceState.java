@@ -1,8 +1,6 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
-import io.github.resilience4j.core.IntervalFunction;
 import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryConfig;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -23,10 +21,10 @@ import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
-import rocks.inspectit.ocelot.config.model.config.RetrySettings;
 import rocks.inspectit.ocelot.core.config.util.InvalidPropertiesException;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 import rocks.inspectit.ocelot.core.selfmonitoring.service.DynamicallyActivatableServiceObserver;
+import rocks.inspectit.ocelot.core.utils.RetryUtils;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -231,19 +229,7 @@ public class HttpPropertySourceState {
     }
 
     private Retry buildRetry() {
-        RetrySettings retrySettings = currentSettings.getRetry();
-        if (retrySettings != null) {
-            RetryConfig retryConfig = RetryConfig.custom()
-                    .maxAttempts(retrySettings.getMaxAttempts())
-                    .intervalFunction(IntervalFunction
-                            .ofExponentialRandomBackoff(
-                                    retrySettings.getInitialIntervalMillis(),
-                                    retrySettings.getMultiplier(),
-                                    retrySettings.getRandomizationFactor()))
-                    .build();
-            return Retry.of("http-property-source", retryConfig);
-        }
-        return null;
+        return RetryUtils.buildRetry(currentSettings.getRetry(), "http-property-source");
     }
 
     private HttpGet buildRequest() throws URISyntaxException {
