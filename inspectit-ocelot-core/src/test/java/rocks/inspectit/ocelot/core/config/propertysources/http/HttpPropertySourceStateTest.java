@@ -18,6 +18,7 @@ import rocks.inspectit.ocelot.config.model.config.RetrySettings;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -32,7 +33,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -280,8 +280,8 @@ class HttpPropertySourceStateTest {
             RetrySettings retrySettings = new RetrySettings();
             retrySettings.setMaxAttempts(2);
             retrySettings.setInitialIntervalMillis(5);
-            retrySettings.setMultiplier(1);
-            retrySettings.setRandomizationFactor(0.1);
+            retrySettings.setMultiplier(BigDecimal.ONE);
+            retrySettings.setRandomizationFactor(BigDecimal.valueOf(0.1));
             httpSettings.setRetry(retrySettings);
             state = new HttpPropertySourceState("retry-test-state", httpSettings);
         }
