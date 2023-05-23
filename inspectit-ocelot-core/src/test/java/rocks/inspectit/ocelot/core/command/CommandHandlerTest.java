@@ -22,6 +22,7 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -109,8 +110,8 @@ public class CommandHandlerTest {
             RetrySettings retrySettings = new RetrySettings();
             retrySettings.setMaxAttempts(2);
             retrySettings.setInitialIntervalMillis(5);
-            retrySettings.setMultiplier(1);
-            retrySettings.setRandomizationFactor(0.1);
+            retrySettings.setMultiplier(BigDecimal.ONE);
+            retrySettings.setRandomizationFactor(BigDecimal.valueOf(0.1));
             environment.getCurrentConfig().getAgentCommands().setRetry(retrySettings);
         }
 
@@ -147,9 +148,7 @@ public class CommandHandlerTest {
         void failsWithExceptionIfReachesMaxAttempts() throws IOException {
             when(commandFetcher.fetchCommand(any(), anyBoolean())).thenReturn(unsuccessfulResponse);
 
-            assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
-                handler.nextCommand();
-            });
+            assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> handler.nextCommand());
         }
     }
 

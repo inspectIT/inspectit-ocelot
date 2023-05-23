@@ -18,8 +18,8 @@ public final class RetryUtils {
                     .intervalFunction(IntervalFunction
                             .ofExponentialRandomBackoff(
                                     retrySettings.getInitialIntervalMillis(),
-                                    retrySettings.getMultiplier(),
-                                    retrySettings.getRandomizationFactor()))
+                                    retrySettings.getMultiplier().doubleValue(),
+                                    retrySettings.getRandomizationFactor().doubleValue()))
                     .build();
             return Retry.of(retryName, retryConfig);
         }

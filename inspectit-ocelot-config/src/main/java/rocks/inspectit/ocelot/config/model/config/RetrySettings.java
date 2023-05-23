@@ -3,6 +3,12 @@ package rocks.inspectit.ocelot.config.model.config;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+
 /**
  * This class contains all settings that you can configure to retry an operation using exponential backoff.
  */
@@ -11,16 +17,25 @@ import lombok.NoArgsConstructor;
 public class RetrySettings {
 
     /** the maximum number of retry attempts. May not be lower than 1. */
+    @Min(1)
     private int maxAttempts;
 
     /** the initial interval in milliseconds to wait before retrying. May not be lower than 1. */
+    @Min(1)
     private long initialIntervalMillis;
 
     /** the value the current interval to wait for the next retry is multiplied with. May not be lower than 1.0. */
-    private double multiplier;
+    // We use a BigDecimal as there is no support for double in hibernate validator
+    @DecimalMin("1.0")
+    @NotNull
+    private BigDecimal multiplier;
 
     /**
-     * factor to have variance in the calculated retry intervals. Must be greater than 0.0 and less than or equal 1.0.
+     * Random factor to have variance in the calculated retry intervals. Must be greater than 0.0 and less than or equal 1.0.
      */
-    private double randomizationFactor;
+    @DecimalMin(value = "0.0", inclusive = false)
+    @DecimalMax("1.0")
+    @NotNull
+    // We use a BigDecimal as there is no support for double in hibernate validator
+    private BigDecimal randomizationFactor;
 }
