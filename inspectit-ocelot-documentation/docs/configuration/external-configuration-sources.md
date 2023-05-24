@@ -48,13 +48,17 @@ The HTTP-based configuration periodically fetches a specified HTTP endpoint in o
 The HTTP endpoint is expected to either provide a JSON or YAML file.
 This configuration source can be used when using the [inspectIT Ocelot Configuration Server](config-server/overview.md).
 
-| Property | Default | Description |
-| --- | --- | --- |
-|`inspectit.config.http.url`|-| The url of the http endpoint to query the configuration.|
-|`inspectit.config.http.enabled`|`true`| Whether the http property source should be used.|
-|`inspectit.config.http.frequency`|`30s`| The frequency of polling the http endpoint to check for configuration changes. |
-|`inspectit.config.http.attributes`|`service: ${inspectit.service-name},` <br/> `id: ${inspectit.env.pid}@${inspectit.env.hostname}` | The following attributes will be sent as http query parameters when fetching the configuration. These are used to map agents to certain configurations. See the section on [Agent Mappings](config-server/agent-mappings.md). |
-|`inspectit.config.http.persistence-file`|`${inspectit.env.jar-dir}/${inspectit.service-name}/last-http-config.yml`| The agent will save the last fetched configuration in this file. |
+| Property                                           | Default                                                                                          | Description                                                                                                                                                                                                                                             |
+|----------------------------------------------------|--------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `inspectit.config.http.url`                        | -                                                                                                | The url of the http endpoint to query the configuration.                                                                                                                                                                                                |
+| `inspectit.config.http.enabled`                    | `true`                                                                                           | Whether the http property source should be used.                                                                                                                                                                                                        |
+| `inspectit.config.http.frequency`                  | `30s`                                                                                            | The frequency of polling the http endpoint to check for configuration changes.                                                                                                                                                                          |
+| `inspectit.config.http.attributes`                 | `service: ${inspectit.service-name},` <br/> `id: ${inspectit.env.pid}@${inspectit.env.hostname}` | The following attributes will be sent as http query parameters when fetching the configuration. These are used to map agents to certain configurations. See the section on [Agent Mappings](config-server/agent-mappings.md).                           |
+| `inspectit.config.http.persistence-file`           | `${inspectit.env.jar-dir}/${inspectit.service-name}/last-http-config.yml`                        | The agent will save the last fetched configuration in this file.                                                                                                                                                                                        |
+| `inspectit.config.http.retry.max-attempts`         | `7`                                                                                              | The maximum number of attempts to try to fetch the configuration. Integer must be greater or equal to 1.                                                                                                                                                |
+| `inspectit.config.http.retry.initial-interval`     | `30s`                                                                                            | The initial interval to wait after the first failed attempt. Durations must be are greater or equal to 1 ms.                                                                                                                                            |
+| `inspectit.config.http.retry.multiplier`           | `2`                                                                                              | For each retry the last interval to wait is multiplied with this number to calculate the next interval to wait. Decimals must be greater or equal to 1.0.                                                                                               |
+| `inspectit.config.http.retry.randomization-factor` | `0.1`                                                                                            | This factor introduces randomness to what the actual wait interval will be. This prevents that a lot of agents will issue requests towards the configuration server at the same time. Decimals between 0.0 (exclusive) and 1.0 (inclusive) are allowed. |
 
 > Due to security reasons, the HTTP-based configuration has the lowest priority, thus, cannot override configuration properties set by different configuration sources.
 
@@ -63,6 +67,10 @@ To use the [inspectIT Ocelot Configuration Server](config-server/overview.md), y
 The Ocelot agent will poll the given HTTP URL with the given frequency and reload the configuration if required.
 This polling uses HTTP ETags and last-modified headers to ensure that the configuration is only refetched in case it actually changed.
 If the HTTP request does not succeed, the last successfully fetched configuration will be kept loaded.
+
+In case the specified HTTP endpoint is temporarily not available, inspectit applies by default a retry mechanism with
+exponential backoff in order to save resources. If Ocelot agent cannot reload the configuration successfully after the
+maximum number of attempts the reason is logged and the standard polling mechanism starts again. This may cause a new retry cycle to start. Turn retries off by removing all properties starting with `inspectit.config.http.retry`.
 
 Every time the configuration is successfully fetched, it is also persisted in the file specified via `persistence-file`.
 By default, the agent will create a folder next to the agent's JAR with the name of the service and create a file within this folder.
