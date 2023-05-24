@@ -109,7 +109,7 @@ public class CommandHandlerTest {
         void setup() {
             RetrySettings retrySettings = new RetrySettings();
             retrySettings.setMaxAttempts(2);
-            retrySettings.setInitialIntervalMillis(5);
+            retrySettings.setInitialInterval(Duration.ofMillis(5));
             retrySettings.setMultiplier(BigDecimal.ONE);
             retrySettings.setRandomizationFactor(BigDecimal.valueOf(0.1));
             environment.getCurrentConfig().getAgentCommands().setRetry(retrySettings);

@@ -24,6 +24,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -279,7 +280,7 @@ class HttpPropertySourceStateTest {
             httpSettings.setAttributes(new HashMap<>());
             RetrySettings retrySettings = new RetrySettings();
             retrySettings.setMaxAttempts(2);
-            retrySettings.setInitialIntervalMillis(5);
+            retrySettings.setInitialInterval(Duration.ofMillis(5));
             retrySettings.setMultiplier(BigDecimal.ONE);
             retrySettings.setRandomizationFactor(BigDecimal.valueOf(0.1));
             httpSettings.setRetry(retrySettings);
