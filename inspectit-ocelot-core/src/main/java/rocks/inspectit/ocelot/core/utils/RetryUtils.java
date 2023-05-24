@@ -23,12 +23,12 @@ public final class RetryUtils {
                     .maxAttempts(retrySettings.getMaxAttempts())
                     .intervalFunction(IntervalFunction
                             .ofExponentialRandomBackoff(
-                                    retrySettings.getInitialIntervalMillis(),
+                                    retrySettings.getInitialInterval(),
                                     retrySettings.getMultiplier().doubleValue(),
                                     retrySettings.getRandomizationFactor().doubleValue()))
                     .build();
             Retry retry = Retry.of(retryName, retryConfig);
-            retry.getEventPublisher().onRetry( event -> LOGGER.info("Retrying for {} in {} ms.", retryName, event.getWaitInterval().get(ChronoUnit.MILLIS)));
+            retry.getEventPublisher().onRetry( event -> LOGGER.info("Retrying for {} in {}.", retryName, event.getWaitInterval()));
             return retry;
         }
         return null;
