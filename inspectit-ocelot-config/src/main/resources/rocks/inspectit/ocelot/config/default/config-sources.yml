@@ -31,3 +31,8 @@ inspectit:
       attributes:
         service: ${inspectit.service-name}
         id: ${inspectit.env.pid}@${inspectit.env.hostname}
+      retry:
+        initial-interval: 30s
+        max-attempts: 7
+        multiplier: 2
+        randomization-factor: 0.1
