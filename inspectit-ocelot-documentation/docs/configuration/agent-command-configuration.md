@@ -105,12 +105,20 @@ inspectit:
 
 The agent command feature can be more precisely configured to the needs with the following optional parameters which are defined bellow the property `inspectit.agent-commands`:
 
-| Property | Default Value | Description |
-| --- | --- | --- |
-| <nobr>`live-socket-timeout`</nobr> | `30s` | The timeout duration used when the agent is in discovery mode. Defining how long the agent will wait for new commands. |
-| `socket-timeout` | `5s` | The timeout duration used for requests when the agent is in normal mode. |
-| `polling-interval` | `15s` | The used interval for polling agent commands. |
-| `live-mode-duration` | `2m` | How long the agent will staying in the live mode, before falling back to the normal mode. |
+| Property                           | Default Value | Description                                                                                                                                                                                                                              |
+|------------------------------------|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| <nobr>`live-socket-timeout`</nobr> | `30s`         | The timeout duration used when the agent is in discovery mode. Defining how long the agent will wait for new commands.                                                                                                                   |
+| `socket-timeout`                   | `5s`          | The timeout duration used for requests when the agent is in normal mode.                                                                                                                                                                 |
+| `polling-interval`                 | `15s`         | The used interval for polling agent commands.                                                                                                                                                                                            |
+| `live-mode-duration`               | `2m`          | How long the agent will staying in the live mode, before falling back to the normal mode.                                                                                                                                                |
+| `retry.max-attempts`               | `7`           | The maximum number of attempts to try to fetch the configuration. Integer values are that are greater or equal to 1.                                                                                                                     |
+| `retry.initial-interval`           | `30s`         | The initial interval to wait after the first failed attempt. Durations are allowed that are greater or equal to 1 ms.                                                                                                                    |
+| `retry.multiplier`                 | `2`           | For each retry the last interval to wait is multiplied with this number to calculate the next interval to wait. Decimals are allowed that are greater or equal to 1.0.                                                                   |
+| `retry.randomization-factor`       | `0.1`         | This factor introduces randomness what the actual wait interval will be. This prevents that a lot of agents will issue requests towards the configuration server at the same time. Decimals between 0.0 (exclusive) and 1.0 are allowed. |
+
+In case the specified HTTP endpoint is temporarily not available, inspectit applies by default a retry mechanism with
+exponential backoff in order to save resources. If Ocelot agent cannot reload the configuration successfully after the
+maximum number of attempts the reason is logged and the standard polling mechanism starts again. This may cause a new retry cycle to start. Turn retries off by removing all properties starting with `inspectit.agent-commands.retry`.
 
 ## Command-specific Configuration
 
