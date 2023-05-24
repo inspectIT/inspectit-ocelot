@@ -129,9 +129,13 @@ inspectit:
     # how long the agent will staying in the live mode, before falling back to the normal mode
     live-mode-duration: 2m
     retry:
-      initial-interval: 15s
+      # The maximum number of attempts to try to fetch the configuration
       max-attempts: 7
+      # The initial interval to wait after the first failed attempt.
+      initial-interval: 15s
+      # For each retry the last interval to wait is multiplied with this number to calculate the next interval to wait
       multiplier: 2
+      # This factor introduces randomness what the actual wait interval will be. This prevents that a lot of agents will issue requests towards the configuration server at the same time.
       randomization-factor: 0.1
 
   log-preloading:
