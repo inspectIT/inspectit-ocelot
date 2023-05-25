@@ -202,7 +202,15 @@ public class HttpPropertySourceState {
         // again, because the configuration may have changed. The "but" is currently pure speculation. Ideally we would
         // recreate it only if configuration has changed.
         try (CloseableHttpClient httpClient = createHttpClient()) {
-            Retry retry = buildRetry();
+            Retry retry;
+            if (fallBackToFile) {
+                // In this case the agent started and want to fail fast and use the possibly existing backup file as
+                // soon as possible. If there is no backup, standard polling mechanism kicks in and the agent will soon
+                // try again with fallBackToFile == false
+                retry = null;
+            } else {
+                retry = buildRetry();
+            }
             if (retry != null) {
                 configuration = retry.executeCallable(() -> fetchConfiguration(httpClient, httpGet));
             } else {
