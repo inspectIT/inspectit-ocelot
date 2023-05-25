@@ -8,7 +8,10 @@ import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.google.common.collect.ImmutableMap;
 import org.apache.http.entity.ContentType;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -260,7 +263,7 @@ class HttpPropertySourceStateTest {
     @Nested
     public class Retries {
 
-        private WireMockServer mockServer;
+        private final WireMockServer mockServer = new WireMockServer(options().dynamicPort());;
 
         private final MappingBuilder getHttpConfigurationMapping = get(urlEqualTo("/"));
 
@@ -272,7 +275,6 @@ class HttpPropertySourceStateTest {
 
         @BeforeEach
         public void setup() throws MalformedURLException {
-            mockServer = new WireMockServer(options().dynamicPort());
             mockServer.start();
 
             HttpConfigSettings httpSettings = new HttpConfigSettings();
@@ -284,6 +286,7 @@ class HttpPropertySourceStateTest {
             retrySettings.setMultiplier(BigDecimal.ONE);
             retrySettings.setRandomizationFactor(BigDecimal.valueOf(0.1));
             httpSettings.setRetry(retrySettings);
+
             state = new HttpPropertySourceState("retry-test-state", httpSettings);
         }
 
@@ -336,6 +339,15 @@ class HttpPropertySourceStateTest {
             boolean unsuccessfulUpdate = state.update(false);
 
             assertThat(unsuccessfulUpdate).isFalse();
+        }
+
+        @Test
+        void noRetriesIfFallingBackToFile() {
+            mockServer.stubFor(getHttpConfigurationMapping.willReturn(unsuccessfulResponse));
+
+            state.update(true);
+
+            mockServer.verify(1, anyRequestedFor(anyUrl()));
         }
     }
 
