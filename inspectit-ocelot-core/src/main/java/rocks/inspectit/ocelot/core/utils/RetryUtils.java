@@ -18,7 +18,7 @@ public final class RetryUtils {
     }
 
     public static Retry buildRetry(RetrySettings retrySettings, String retryName) {
-        if (retrySettings != null) {
+        if (retrySettings != null && retrySettings.isEnabled()) {
             RetryConfig retryConfig = RetryConfig.custom()
                     .maxAttempts(retrySettings.getMaxAttempts())
                     .intervalFunction(IntervalFunction
