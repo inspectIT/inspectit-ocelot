@@ -111,6 +111,7 @@ The agent command feature can be more precisely configured to the needs with the
 | `socket-timeout`                   | `5s`          | The timeout duration used for requests when the agent is in normal mode.                                                                                                                                                                                |
 | `polling-interval`                 | `15s`         | The used interval for polling agent commands.                                                                                                                                                                                                           |
 | `live-mode-duration`               | `2m`          | How long the agent will staying in the live mode, before falling back to the normal mode.                                                                                                                                                               |
+| `retry.enabled`                    | `true`        | `true` if retries are enabled, `false` otherwise.                                                                                                                                                                                                       |
 | `retry.max-attempts`               | `7`           | The maximum number of attempts to try to fetch the configuration. Integers must be greater or equal to 1.                                                                                                                                               |
 | `retry.initial-interval`           | `30s`         | The initial interval to wait after the first failed attempt. Durations must be greater or equal to 1 ms.                                                                                                                                                |
 | `retry.multiplier`                 | `2`           | For each retry the last interval to wait is multiplied with this number to calculate the next interval to wait. Decimals must be greater or equal to 1.0.                                                                                               |
@@ -118,7 +119,8 @@ The agent command feature can be more precisely configured to the needs with the
 
 In case the specified HTTP endpoint is temporarily not available, inspectit applies by default a retry mechanism with
 exponential backoff in order to save resources. If Ocelot agent cannot reload the configuration successfully after the
-maximum number of attempts the reason is logged and the standard polling mechanism starts again. This may cause a new retry cycle to start. Turn retries off by removing all properties starting with `inspectit.agent-commands.retry`.
+maximum number of attempts the reason is logged and the standard polling mechanism starts again. This may cause a new
+retry cycle to start. Turn retries off by setting `inspectit.agent-commands.retry.enabled` to `false`.
 
 ## Command-specific Configuration
 

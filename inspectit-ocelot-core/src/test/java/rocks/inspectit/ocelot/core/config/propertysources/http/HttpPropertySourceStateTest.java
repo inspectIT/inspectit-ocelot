@@ -281,6 +281,7 @@ class HttpPropertySourceStateTest {
             httpSettings.setUrl(new URL("http://localhost:" + mockServer.port() + "/"));
             httpSettings.setAttributes(new HashMap<>());
             RetrySettings retrySettings = new RetrySettings();
+            retrySettings.setEnabled(true);
             retrySettings.setMaxAttempts(2);
             retrySettings.setInitialInterval(Duration.ofMillis(5));
             retrySettings.setMultiplier(BigDecimal.ONE);

@@ -32,6 +32,8 @@ inspectit:
         service: ${inspectit.service-name}
         id: ${inspectit.env.pid}@${inspectit.env.hostname}
       retry:
+        # true if retries are enabled, false otherwise
+        enabled: true
         # The maximum number of attempts to try to fetch the configuration
         max-attempts: 7
         # The initial interval to wait after the first failed attempt.

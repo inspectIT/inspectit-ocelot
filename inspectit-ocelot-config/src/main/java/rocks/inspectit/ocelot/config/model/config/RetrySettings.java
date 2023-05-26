@@ -17,6 +17,8 @@ import java.time.Duration;
 @Data
 @NoArgsConstructor
 public class RetrySettings {
+    /** true, if retries are enabled, false otherwise */
+    private boolean enabled;
 
     /** the maximum number of retry attempts. May not be lower than 1. */
     @Min(1)
