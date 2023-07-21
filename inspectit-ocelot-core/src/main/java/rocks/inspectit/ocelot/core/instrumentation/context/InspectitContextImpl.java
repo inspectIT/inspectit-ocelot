@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
+import rocks.inspectit.ocelot.core.exporter.GlobalPropagationDataStorage;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.tags.TagUtils;
 
@@ -192,6 +193,9 @@ public class InspectitContextImpl implements InternalInspectitContext {
 
         if (parent == null) {
             postEntryPhaseDownPropagatedData = Collections.emptyMap();
+            // Add down-propagated data from remote service to inspectIt
+            GlobalPropagationDataStorage dataStorage = GlobalPropagationDataStorage.getInstance();
+            dataOverwrites.putAll(dataStorage.readData());
         } else {
             if (isInDifferentThreadThanParentOrIsParentClosed()) {
                 postEntryPhaseDownPropagatedData = parent.postEntryPhaseDownPropagatedData;
@@ -407,6 +411,13 @@ public class InspectitContextImpl implements InternalInspectitContext {
         if (parent != null && !isInDifferentThreadThanParentOrIsParentClosed()) {
             parent.performUpPropagation(dataOverwrites);
         }
+
+        // Write global up propagation data
+        if(parent == null) {
+            GlobalPropagationDataStorage dataStorage = GlobalPropagationDataStorage.getInstance();
+            dataStorage.writeData(readGlobalUpPropagationData());
+        }
+
         //clear the references to prevent memory leaks
         openedDownPropagationScope = null;
         currentSpanScope = null;
@@ -467,6 +478,19 @@ public class InspectitContextImpl implements InternalInspectitContext {
     @Override
     public Set<String> getPropagationHeaderNames() {
         return ContextPropagationUtil.getPropagationHeaderNames();
+    }
+
+    private Map<String, Object> readGlobalUpPropagationData() {
+        Map<String,Object> globalUpPropagationData = new HashMap<>();
+
+        for (Map.Entry<String, Object> data : dataOverwrites.entrySet()) {
+            String key = data.getKey();
+            if(propagation.isPropagatedUpGlobally(key)) {
+                Object value = getData(key);
+                globalUpPropagationData.put(key, value);
+            }
+        }
+        return globalUpPropagationData;
     }
 
     /**

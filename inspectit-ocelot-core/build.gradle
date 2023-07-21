@@ -74,6 +74,10 @@ dependencies {
             // logstash support (JSON logging)
             "net.logstash.logback:logstash-logback-encoder:${logstashLogBackEncoderVersion}",
 
+            // jetty HTTP server
+            'org.eclipse.jetty:jetty-server:9.4.51.v20230217',
+            'org.eclipse.jetty:jetty-servlet:9.4.51.v20230217',
+
             // utils
             "org.apache.commons:commons-lang3",
             "org.apache.commons:commons-math3:${commonsMathVersion}",
