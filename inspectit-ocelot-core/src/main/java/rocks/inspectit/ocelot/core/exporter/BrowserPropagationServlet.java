@@ -30,35 +30,35 @@ public class BrowserPropagationServlet extends HttpServlet {
     private int responseCode;
 
     public BrowserPropagationServlet() {
-        this.mapper = new ObjectMapper();
-        this.dataStorage = BrowserPropagationDataStorage.getInstance();
+        mapper = new ObjectMapper();
+        dataStorage = BrowserPropagationDataStorage.getInstance();
     }
 
     private void setResponseCode(int code) {
-        this.responseCode = code;
+        responseCode = code;
     }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.info("Tags HTTP-server received GET-request");
-        this.setResponseCode(HttpServletResponse.SC_OK);
-        Map<String, Object> propagationData = this.dataStorage.readData();
+        setResponseCode(HttpServletResponse.SC_OK);
+        Map<String, Object> propagationData = dataStorage.readData();
         String res = mapper.writeValueAsString(propagationData.entrySet());
 
         response.setContentType("application/json");
-        response.setStatus(this.responseCode);
+        response.setStatus(responseCode);
         response.getWriter().write(res);
     }
 
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.info("Tags HTTP-server received PUT-request");
-        this.setResponseCode(HttpServletResponse.SC_OK);
-        Map<String, Object> newPropagationData = this.getRequestBody(request);
+        setResponseCode(HttpServletResponse.SC_OK);
+        Map<String, Object> newPropagationData = getRequestBody(request);
 
-        if(!newPropagationData.isEmpty()) this.dataStorage.writeData(newPropagationData);
+        if(!newPropagationData.isEmpty()) dataStorage.writeData(newPropagationData);
 
-        response.setStatus(this.responseCode);
+        response.setStatus(responseCode);
     }
 
     private Map<String, Object> getRequestBody(HttpServletRequest request) {
@@ -68,7 +68,7 @@ public class BrowserPropagationServlet extends HttpServlet {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (Exception e) {
             log.info("Request failed");
-            this.setResponseCode(HttpServletResponse.SC_BAD_REQUEST);
+            setResponseCode(HttpServletResponse.SC_BAD_REQUEST);
             return Collections.emptyMap();
         }
     }

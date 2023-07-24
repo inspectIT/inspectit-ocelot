@@ -13,7 +13,7 @@ public class BrowserPropagationDataStorage {
     private final ConcurrentMap<String, Object> propagationData;
 
     private BrowserPropagationDataStorage() {
-        this.propagationData = new ConcurrentHashMap<>();
+        propagationData = new ConcurrentHashMap<>();
     }
 
     public static synchronized BrowserPropagationDataStorage getInstance() {
@@ -22,10 +22,10 @@ public class BrowserPropagationDataStorage {
     }
 
     public void writeData(Map<String, Object> newPropagationData) {
-        this.propagationData.putAll(newPropagationData);
+        propagationData.putAll(newPropagationData);
     }
 
     public Map<String, Object> readData() {
-        return this.propagationData;
+        return propagationData;
     }
 }
