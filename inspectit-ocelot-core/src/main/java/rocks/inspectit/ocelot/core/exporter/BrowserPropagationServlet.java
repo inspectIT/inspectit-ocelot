@@ -12,6 +12,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * REST-API to expose browser propagation data
+ * Additionally, data can be overwritten from outside
+ */
 @Slf4j
 public class BrowserPropagationServlet extends HttpServlet {
 
@@ -29,12 +33,6 @@ public class BrowserPropagationServlet extends HttpServlet {
         log.info("Tags HTTP-server received GET-request");
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
-
-        response.setHeader("Access-Control-Allow-Origin", "*"); // Replace * with specific origin
-        response.setHeader("Access-Control-Allow-Methods", "GET, PUT");
-        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-        response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
 
         String res = mapper.writeValueAsString(this.dataStorage.readData());
         response.getWriter().write(res);

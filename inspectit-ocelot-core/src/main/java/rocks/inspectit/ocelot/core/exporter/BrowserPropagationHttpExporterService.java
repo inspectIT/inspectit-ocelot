@@ -12,6 +12,12 @@ import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 import javax.servlet.http.HttpServlet;
 import java.net.InetSocketAddress;
 
+/**
+ * Tags HTTP-Server to "export" data-tags to browsers
+ * The server contains two endpoints:
+ *  1. GET: To query propagation data
+ *  2. PUT: To overwrite propagation data
+ */
 @Component
 @Slf4j
 public class BrowserPropagationHttpExporterService extends DynamicallyActivatableService {
@@ -47,9 +53,10 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
 
         try {
             server.start();
-            log.info("Starting Tags HTTP-Server with endpoint: {}:{}{} ", host, port, path);
+            log.info("Starting Tags HTTP-Server on {}:{}{} ", host, port, path);
         } catch (Exception e) {
             log.error("Starting of Tags HTTP-Server failed");
+            return false;
         }
         return true;
     }

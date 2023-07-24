@@ -184,18 +184,20 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     private Map<String, Object> cachedActivePhaseDownPropagatedData = null;
 
+    private final BrowserPropagationDataStorage browserPropagationDataStorage;
+
     private InspectitContextImpl(InspectitContextImpl parent, PropagationMetaData defaultPropagation, boolean interactWithApplicationTagContexts) {
         this.parent = parent;
         propagation = parent == null ? defaultPropagation : parent.propagation;
         this.interactWithApplicationTagContexts = interactWithApplicationTagContexts;
         dataOverwrites = new HashMap<>();
         openingThread = Thread.currentThread();
+        browserPropagationDataStorage = BrowserPropagationDataStorage.getInstance();
 
         if (parent == null) {
-            postEntryPhaseDownPropagatedData = Collections.emptyMap();
-            // Add down-propagated data from remote service to inspectIt
-            BrowserPropagationDataStorage dataStorage = BrowserPropagationDataStorage.getInstance();
-            dataOverwrites.putAll(dataStorage.readData());
+            postEntryPhaseDownPropagatedData = new HashMap<>();
+            // Add down-propagated data from browser to inspectIT
+            postEntryPhaseDownPropagatedData.putAll(browserPropagationDataStorage.readData());
         } else {
             if (isInDifferentThreadThanParentOrIsParentClosed()) {
                 postEntryPhaseDownPropagatedData = parent.postEntryPhaseDownPropagatedData;
@@ -412,11 +414,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
             parent.performUpPropagation(dataOverwrites);
         }
 
-        // Write global up propagation data
-        if(parent == null) {
-            BrowserPropagationDataStorage dataStorage = BrowserPropagationDataStorage.getInstance();
-            dataStorage.writeData(readGlobalUpPropagationData());
-        }
+        // Write browser propagation data to storage
+        browserPropagationDataStorage.writeData(getBrowserPropagationData(dataOverwrites));
 
         //clear the references to prevent memory leaks
         openedDownPropagationScope = null;
@@ -442,6 +441,18 @@ public class InspectitContextImpl implements InternalInspectitContext {
                 }
             }
         }
+    }
+
+    private Map<String, Object> getBrowserPropagationData(Map<String, Object> writtenData) {
+        Map<String, Object> browserPropagationData = new HashMap<>();
+        for (Map.Entry<String,Object> entry : writtenData.entrySet()) {
+            if(propagation.isPropagatedWithBrowser(entry.getKey())) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                browserPropagationData.put(key, value);
+            }
+        }
+        return browserPropagationData;
     }
 
     @Override
@@ -478,19 +489,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
     @Override
     public Set<String> getPropagationHeaderNames() {
         return ContextPropagationUtil.getPropagationHeaderNames();
-    }
-
-    private Map<String, Object> readGlobalUpPropagationData() {
-        Map<String,Object> globalUpPropagationData = new HashMap<>();
-
-        for (Map.Entry<String, Object> data : dataOverwrites.entrySet()) {
-            String key = data.getKey();
-            if(propagation.isPropagatedUpGlobally(key)) {
-                Object value = getData(key);
-                globalUpPropagationData.put(key, value);
-            }
-        }
-        return globalUpPropagationData;
     }
 
     /**

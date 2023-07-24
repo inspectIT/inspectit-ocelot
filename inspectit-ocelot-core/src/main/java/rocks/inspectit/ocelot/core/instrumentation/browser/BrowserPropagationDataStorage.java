@@ -4,10 +4,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * Singleton DatStorage for all tags, that should be propagated to browser
+ */
 public class BrowserPropagationDataStorage {
 
     private static BrowserPropagationDataStorage instance;
-    private ConcurrentMap<String, Object> propagationData;
+    private final ConcurrentMap<String, Object> propagationData;
 
     private BrowserPropagationDataStorage() {
         this.propagationData = new ConcurrentHashMap<>();
