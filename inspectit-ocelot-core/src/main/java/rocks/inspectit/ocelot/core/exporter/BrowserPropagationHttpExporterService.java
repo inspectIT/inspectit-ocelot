@@ -6,6 +6,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.exporters.tags.HttpExporterSettings;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.servlet.http.HttpServlet;
@@ -13,40 +14,43 @@ import java.net.InetSocketAddress;
 
 @Component
 @Slf4j
-public class GlobalPropagationHttpExporterService extends DynamicallyActivatableService {
+public class BrowserPropagationHttpExporterService extends DynamicallyActivatableService {
     private Server server;
 
-    public GlobalPropagationHttpExporterService() {
-        super("exporters.tags.http", "tags.enabled");
-    }
-
-    public void start() {
-        if(this.server == null) return;
-        try {
-            this.server.start();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public BrowserPropagationHttpExporterService() {
+        super("exporters.tags.http");
     }
 
     @Override
     protected boolean checkEnabledForConfig(InspectitConfig configuration) {
-        return true;
+        return !configuration.getExporters()
+                .getTags()
+                .getHttp()
+                .getEnabled()
+                .isDisabled();
     }
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        String host = "0.0.0.0";
-        int port = 9001;
-        String path = "/inspectit";
-        HttpServlet httpServlet = new GlobalPropagationServlet();
+        HttpExporterSettings settings = configuration.getExporters().getTags().getHttp();
+
+        String host = settings.getHost();
+        int port = settings.getPort();
+        String path = settings.getPath();
+        HttpServlet httpServlet = new BrowserPropagationServlet();
 
         server = new Server(new InetSocketAddress(host, port));
-        ServletContextHandler contextHandler = new ServletContextHandler(server, "");
+        String contextPath = "";
+        ServletContextHandler contextHandler = new ServletContextHandler(server, contextPath);
         contextHandler.addServlet(new ServletHolder(httpServlet), path);
         server.setStopAtShutdown(true);
-        this.start();
 
+        try {
+            server.start();
+            log.info("Starting Tags HTTP-Server with endpoint: {}:{}{} ", host, port, path);
+        } catch (Exception e) {
+            log.error("Starting of Tags HTTP-Server failed");
+        }
         return true;
     }
 
@@ -55,6 +59,7 @@ public class GlobalPropagationHttpExporterService extends DynamicallyActivatable
         if(server != null) {
             try {
                 server.stop();
+                log.info("Stopping Tags HTTP-Server");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

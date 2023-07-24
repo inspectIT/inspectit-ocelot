@@ -1,20 +1,20 @@
-package rocks.inspectit.ocelot.core.exporter;
+package rocks.inspectit.ocelot.core.instrumentation.browser;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class GlobalPropagationDataStorage {
+public class BrowserPropagationDataStorage {
 
-    private static GlobalPropagationDataStorage instance;
+    private static BrowserPropagationDataStorage instance;
     private ConcurrentMap<String, Object> propagationData;
 
-    private GlobalPropagationDataStorage() {
+    private BrowserPropagationDataStorage() {
         this.propagationData = new ConcurrentHashMap<>();
     }
 
-    public static synchronized GlobalPropagationDataStorage getInstance() {
-        if(instance == null) instance = new GlobalPropagationDataStorage();
+    public static synchronized BrowserPropagationDataStorage getInstance() {
+        if(instance == null) instance = new BrowserPropagationDataStorage();
         return instance;
     }
 

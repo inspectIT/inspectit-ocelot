@@ -99,3 +99,15 @@ inspectit:
         compression: NONE
         # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
         timeout: 10s
+
+    # settings for tags exporters
+    tags:
+      # settings for the http-server exporter
+      http:
+        enabled: DISABLED
+        # the host of the http-server
+        host: 0.0.0.0
+        # the port of the http-server
+        port: 9000
+        # the path for the endpoint of the http-server
+        path: "/inspectit"

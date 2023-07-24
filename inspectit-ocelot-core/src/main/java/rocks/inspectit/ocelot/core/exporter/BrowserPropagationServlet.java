@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.exporter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationDataStorage;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -12,19 +13,20 @@ import java.io.IOException;
 import java.util.Map;
 
 @Slf4j
-public class GlobalPropagationServlet extends HttpServlet {
+public class BrowserPropagationServlet extends HttpServlet {
 
     private final ObjectMapper mapper;
 
-    private final GlobalPropagationDataStorage dataStorage;
+    private final BrowserPropagationDataStorage dataStorage;
 
-    public GlobalPropagationServlet() {
+    public BrowserPropagationServlet() {
         this.mapper = new ObjectMapper();
-        this.dataStorage = GlobalPropagationDataStorage.getInstance();
+        this.dataStorage = BrowserPropagationDataStorage.getInstance();
     }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        log.info("Tags HTTP-server received GET-request");
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
 
@@ -40,6 +42,7 @@ public class GlobalPropagationServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        log.info("Tags HTTP-server received PUT-request");
         Map<String, Object> newPropagationData = this.getRequestBody(request);
         this.dataStorage.writeData(newPropagationData);
 

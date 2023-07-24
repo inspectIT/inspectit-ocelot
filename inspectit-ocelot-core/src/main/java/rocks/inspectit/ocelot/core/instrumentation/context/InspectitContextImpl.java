@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
-import rocks.inspectit.ocelot.core.exporter.GlobalPropagationDataStorage;
+import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationDataStorage;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.tags.TagUtils;
 
@@ -194,7 +194,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         if (parent == null) {
             postEntryPhaseDownPropagatedData = Collections.emptyMap();
             // Add down-propagated data from remote service to inspectIt
-            GlobalPropagationDataStorage dataStorage = GlobalPropagationDataStorage.getInstance();
+            BrowserPropagationDataStorage dataStorage = BrowserPropagationDataStorage.getInstance();
             dataOverwrites.putAll(dataStorage.readData());
         } else {
             if (isInDifferentThreadThanParentOrIsParentClosed()) {
@@ -414,7 +414,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
 
         // Write global up propagation data
         if(parent == null) {
-            GlobalPropagationDataStorage dataStorage = GlobalPropagationDataStorage.getInstance();
+            BrowserPropagationDataStorage dataStorage = BrowserPropagationDataStorage.getInstance();
             dataStorage.writeData(readGlobalUpPropagationData());
         }
 
