@@ -444,6 +444,11 @@ public class InspectitContextImpl implements InternalInspectitContext {
         }
     }
 
+    /**
+     * Returns a Map with key-value pairs, for all keys configured with browser-propagation
+     * @param data Map with key-value pairs
+     * @return Map with all entries of data, whose keys are configured with browser-propagation
+     */
     private Map<String, Object> getBrowserPropagationData(Map<String, Object> data) {
         Map<String, Object> browserPropagationData = new HashMap<>();
         for (Map.Entry<String,Object> entry : data.entrySet()) {

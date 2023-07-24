@@ -55,7 +55,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
             server.start();
             log.info("Starting Tags HTTP-Server on {}:{}{} ", host, port, path);
         } catch (Exception e) {
-            log.error("Starting of Tags HTTP-Server failed");
+            log.warn("Starting of Tags HTTP-Server failed");
             return false;
         }
         return true;
@@ -68,7 +68,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
                 server.stop();
                 log.info("Stopping Tags HTTP-Server");
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                log.error("Error disabling Tags HTTP-Server", e);
             }
         }
         return true;
