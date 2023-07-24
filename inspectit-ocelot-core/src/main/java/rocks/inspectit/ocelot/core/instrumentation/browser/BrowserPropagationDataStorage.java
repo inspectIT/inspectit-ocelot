@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Singleton DatStorage for all tags, that should be propagated to browser
+ * Singleton DataStorage for all tags, that should be propagated to browser
  */
 public class BrowserPropagationDataStorage {
 
