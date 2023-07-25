@@ -28,4 +28,8 @@ public class BrowserPropagationDataStorage {
     public Map<String, Object> readData() {
         return propagationData;
     }
+
+    public void clearData() {
+        propagationData.clear();
+    }
 }

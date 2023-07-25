@@ -197,8 +197,9 @@ public class InspectitContextImpl implements InternalInspectitContext {
         if (parent == null) {
             postEntryPhaseDownPropagatedData = new HashMap<>();
             // Add down-propagated data from browser to inspectIT
-            Map<String, Object> downPropagatedBrowserData = getBrowserPropagationData(browserPropagationDataStorage.readData());
-            postEntryPhaseDownPropagatedData.putAll(downPropagatedBrowserData);
+            Map<String, Object> browserPropagationData = getBrowserPropagationData(browserPropagationDataStorage.readData());
+            Map<String ,Object> downPropagationBrowserData = getDownPropagationData(browserPropagationData);
+            dataOverwrites.putAll(downPropagationBrowserData);
         } else {
             if (isInDifferentThreadThanParentOrIsParentClosed()) {
                 postEntryPhaseDownPropagatedData = parent.postEntryPhaseDownPropagatedData;
@@ -459,6 +460,18 @@ public class InspectitContextImpl implements InternalInspectitContext {
             }
         }
         return browserPropagationData;
+    }
+
+    private Map<String, Object> getDownPropagationData(Map<String, Object> data) {
+        Map<String, Object> downPropagationData = new HashMap<>();
+        for (Map.Entry<String,Object> entry : data.entrySet()) {
+            if(propagation.isPropagatedDownWithinJVM(entry.getKey())) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                downPropagationData.put(key, value);
+            }
+        }
+        return downPropagationData;
     }
 
     @Override

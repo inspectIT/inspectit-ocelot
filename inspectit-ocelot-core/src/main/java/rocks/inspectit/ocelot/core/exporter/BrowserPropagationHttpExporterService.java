@@ -45,20 +45,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         String path = settings.getPath();
         HttpServlet httpServlet = new BrowserPropagationServlet();
 
-        server = new Server(new InetSocketAddress(host, port));
-        String contextPath = "";
-        ServletContextHandler contextHandler = new ServletContextHandler(server, contextPath);
-        contextHandler.addServlet(new ServletHolder(httpServlet), path);
-        server.setStopAtShutdown(true);
-
-        try {
-            server.start();
-            log.info("Starting Tags HTTP-Server on {}:{}{} ", host, port, path);
-        } catch (Exception e) {
-            log.warn("Starting of Tags HTTP-Server failed");
-            return false;
-        }
-        return true;
+        return startServer(host, port, path, httpServlet);
     }
 
     @Override
@@ -70,6 +57,23 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
             } catch (Exception e) {
                 log.error("Error disabling Tags HTTP-Server", e);
             }
+        }
+        return true;
+    }
+
+    protected boolean startServer(String host, int port, String path, HttpServlet servlet) {
+        server = new Server(new InetSocketAddress(host, port));
+        String contextPath = "";
+        ServletContextHandler contextHandler = new ServletContextHandler(server, contextPath);
+        contextHandler.addServlet(new ServletHolder(servlet), path);
+        server.setStopAtShutdown(true);
+
+        try {
+            server.start();
+            log.info("Starting Tags HTTP-Server on {}:{}{} ", host, port, path);
+        } catch (Exception e) {
+            log.warn("Starting of Tags HTTP-Server failed");
+            return false;
         }
         return true;
     }
