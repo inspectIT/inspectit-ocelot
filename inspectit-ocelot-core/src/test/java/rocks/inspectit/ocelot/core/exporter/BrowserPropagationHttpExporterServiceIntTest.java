@@ -33,7 +33,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
 
     BrowserPropagationDataStorage dataStorage;
 
-    private static CloseableHttpClient testClient;
+    private CloseableHttpClient testClient;
     private final String host = "127.0.0.1";
     private int port;
     private final String path = "/inspectit";
@@ -42,7 +42,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
     @BeforeEach
     void prepareTest() throws IOException {
         startServer();
-        createHttpClient();
+        testClient = createHttpClient();
         Map<String, Object> data = new HashMap<>();
         data.put("key", "value");
         dataStorage = BrowserPropagationDataStorage.getInstance();
@@ -55,11 +55,11 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         exporterService.startServer(host, port, path, servlet);
     }
 
-    void createHttpClient(){
+    CloseableHttpClient createHttpClient(){
         RequestConfig.Builder requestBuilder = RequestConfig.custom();
         HttpClientBuilder builder = HttpClientBuilder.create();
         builder.setDefaultRequestConfig(requestBuilder.build());
-        testClient = builder.build();
+        return builder.build();
     }
 
     @Test

@@ -27,38 +27,33 @@ public class BrowserPropagationServlet extends HttpServlet {
 
     private final ObjectMapper mapper;
     private final BrowserPropagationDataStorage dataStorage;
-    private int responseCode;
 
     public BrowserPropagationServlet() {
         mapper = new ObjectMapper();
         dataStorage = BrowserPropagationDataStorage.getInstance();
     }
 
-    private void setResponseCode(int code) {
-        responseCode = code;
-    }
-
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.info("Tags HTTP-server received GET-request");
-        setResponseCode(HttpServletResponse.SC_OK);
         Map<String, Object> propagationData = dataStorage.readData();
         String res = mapper.writeValueAsString(propagationData.entrySet());
 
         response.setContentType("application/json");
-        response.setStatus(responseCode);
+        response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().write(res);
     }
 
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.info("Tags HTTP-server received PUT-request");
-        setResponseCode(HttpServletResponse.SC_OK);
         Map<String, Object> newPropagationData = getRequestBody(request);
 
-        if(!newPropagationData.isEmpty()) dataStorage.writeData(newPropagationData);
-
-        response.setStatus(responseCode);
+        if(newPropagationData != null) {
+            dataStorage.writeData(newPropagationData);
+            response.setStatus(HttpServletResponse.SC_OK);
+        }
+        else response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
 
     private Map<String, Object> getRequestBody(HttpServletRequest request) {
@@ -68,8 +63,7 @@ public class BrowserPropagationServlet extends HttpServlet {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (Exception e) {
             log.info("Request failed");
-            setResponseCode(HttpServletResponse.SC_BAD_REQUEST);
-            return Collections.emptyMap();
+            return null;
         }
     }
 }
