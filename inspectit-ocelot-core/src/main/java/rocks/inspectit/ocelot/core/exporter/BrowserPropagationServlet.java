@@ -29,10 +29,9 @@ public class BrowserPropagationServlet extends HttpServlet {
     private final ObjectMapper mapper;
     private final BrowserPropagationSessionStorage sessionStorage;
 
-    public BrowserPropagationServlet(int timeToLive) {
+    public BrowserPropagationServlet() {
         mapper = new ObjectMapper();
         sessionStorage = BrowserPropagationSessionStorage.getInstance();
-        sessionStorage.setTimeToLive(timeToLive);
     }
 
     @Override

@@ -4,9 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.tags.HttpExporterSettings;
+import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.servlet.http.HttpServlet;
@@ -18,10 +21,23 @@ import java.net.InetSocketAddress;
  *  1. GET: To query propagation data
  *  2. PUT: To overwrite propagation data
  */
-@Component
+
 @Slf4j
+@Component
+@EnableScheduling
 public class BrowserPropagationHttpExporterService extends DynamicallyActivatableService {
     private Server server;
+    private BrowserPropagationServlet httpServlet;
+
+    /**
+     * Delay to rerun the scheduled method after the method finished in milliseconds
+     */
+    private final int FIXED_DELAY = 10000;
+
+    /**
+     * Time to live for browser propagation data in seconds
+     */
+    private int timeToLive = 30;
 
     public BrowserPropagationHttpExporterService() {
         super("exporters.tags.http");
@@ -43,8 +59,8 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         String host = settings.getHost();
         int port = settings.getPort();
         String path = settings.getPath();
-        int timeToLive = settings.getTimeToLive();
-        HttpServlet httpServlet = new BrowserPropagationServlet(timeToLive);
+        timeToLive = settings.getTimeToLive();
+        httpServlet = new BrowserPropagationServlet();
 
         return startServer(host, port, path, httpServlet);
     }
@@ -77,5 +93,16 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
             return false;
         }
         return true;
+    }
+
+    /**
+     * Browser propagation data is cached for a specific amount of time (timeToLive)
+     * If the time expires, clean up the storage
+     */
+    @Scheduled(fixedDelay = FIXED_DELAY)
+    public void cleanUpSessionStorage() {
+        if(httpServlet == null) return;
+        BrowserPropagationSessionStorage sessionStorage = BrowserPropagationSessionStorage.getInstance();
+        sessionStorage.cleanUpData(timeToLive);
     }
 }

@@ -267,7 +267,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         String currentSessionID = getData(REMOTE_SESSION_ID).toString();
         if(currentSessionID != null) {
             BrowserPropagationSessionStorage sessionStorage = BrowserPropagationSessionStorage.getInstance();
-            browserPropagationDataStorage = sessionStorage.getDataOrCreateStorage(currentSessionID);
+            browserPropagationDataStorage = sessionStorage.getOrCreateDataStorage(currentSessionID);
         }
 
 
@@ -432,8 +432,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
         if(browserPropagationDataStorage != null)
             browserPropagationDataStorage.writeData(getBrowserPropagationData(dataOverwrites));
 
-        BrowserPropagationSessionStorage session = BrowserPropagationSessionStorage.getInstance();
-
         // Delete session ID after root span is closed
         if(parent == null) {
             setData(REMOTE_SESSION_ID, null);
@@ -482,13 +480,18 @@ public class InspectitContextImpl implements InternalInspectitContext {
         return browserPropagationData;
     }
 
+    /**
+     * Returns a Map with key-value pairs, for all keys configured with down-propagation
+     * @param data Map with key-value pairs
+     * @return Map with all entries of data, whose keys are configured with down-propagation
+     */
     private Map<String, Object> getDownPropagationData(Map<String, Object> data) {
         Map<String, Object> downPropagationData = new HashMap<>();
         for (Map.Entry<String,Object> entry : data.entrySet()) {
             if(propagation.isPropagatedDownWithinJVM(entry.getKey())) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
-                downPropagationData.put(key, value);
+                if (value != null) downPropagationData.put(key, value);
             }
         }
         return downPropagationData;

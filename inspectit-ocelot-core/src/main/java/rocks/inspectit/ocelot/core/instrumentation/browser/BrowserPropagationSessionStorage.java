@@ -1,28 +1,20 @@
 package rocks.inspectit.ocelot.core.instrumentation.browser;
 
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Singleton storage for multiple {@link BrowserPropagationDataStorage}-objects,
+ * Singleton storage for multiple {@link BrowserPropagationDataStorage} objects,
  * which are referenced by a session-ID, normally provided by a remote browser
  */
 
-@Component
-@EnableScheduling
 @Slf4j
 public class BrowserPropagationSessionStorage {
 
     private static BrowserPropagationSessionStorage instance;
     private final ConcurrentMap<String, BrowserPropagationDataStorage> dataStorages;
-    @Setter
-    private int timeToLive = 300000;
 
     private BrowserPropagationSessionStorage() {
         dataStorages = new ConcurrentHashMap<>();
@@ -33,7 +25,7 @@ public class BrowserPropagationSessionStorage {
         return instance;
     }
 
-    public BrowserPropagationDataStorage getDataOrCreateStorage(String sessionID) {
+    public BrowserPropagationDataStorage getOrCreateDataStorage(String sessionID) {
         BrowserPropagationDataStorage dataStorage = dataStorages.get(sessionID);
         if(dataStorage == null) dataStorages.put(sessionID, new BrowserPropagationDataStorage());
         return dataStorages.get(sessionID);
@@ -43,21 +35,19 @@ public class BrowserPropagationSessionStorage {
         return dataStorages.get(sessionID);
     }
 
-    public void clearStorages() {
+    public void clearDataStorages() {
         dataStorages.clear();
     }
 
-    @Scheduled(fixedDelay = 5000) //10000
-    private void checkLiveTime() {
+    /**
+     * Checks if data storages are expired and removes them
+     * @param timeToLive How long should data be stored in seconds
+     */
+    public void cleanUpData(int timeToLive) {
         long currentTime = System.currentTimeMillis();
-        log.info("SCHEDULER WORKING");
         dataStorages.forEach((id, storage) -> {
-            log.info("Active Session: " + id + "\n with size: " + storage.readData().size());
-            int elapsedTime = storage.calculateElapsedTime(currentTime);
-            if(timeToLive < elapsedTime) {
-                dataStorages.remove(id);
-                log.info("Session removed: " + id);
-            }
+            long elapsedTime = storage.calculateElapsedTime(currentTime) / 1000;
+            if(timeToLive < elapsedTime) dataStorages.remove(id);
         });
     }
 }

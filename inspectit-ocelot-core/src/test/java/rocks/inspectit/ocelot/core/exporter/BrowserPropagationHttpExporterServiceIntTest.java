@@ -50,12 +50,12 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
 
     @AfterEach
     void clearDataStorage() {
-        sessionStorage.clearStorages();
+        sessionStorage.clearDataStorages();
     }
 
     void startServer() throws IOException {
         port = Network.getFreeServerPort();
-        HttpServlet servlet = new BrowserPropagationServlet(300000);
+        HttpServlet servlet = new BrowserPropagationServlet();
         exporterService.startServer(host, port, path, servlet);
     }
 
@@ -70,7 +70,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         Map<String, Object> data = new HashMap<>();
         data.put("key", "value");
         sessionStorage = BrowserPropagationSessionStorage.getInstance();
-        sessionStorage.getDataOrCreateStorage(sessionID).writeData(data);
+        sessionStorage.getOrCreateDataStorage(sessionID).writeData(data);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         int statusCode = response.getStatusLine().getStatusCode();
 
         assertThat(statusCode).isEqualTo(200);
-        assertThat(sessionStorage.getDataOrCreateStorage(sessionID).readData()).containsEntry("newKey", "newValue");
+        assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).containsEntry("newKey", "newValue");
         response.close();
     }
 
@@ -159,7 +159,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         int statusCode = response.getStatusLine().getStatusCode();
 
         assertThat(statusCode).isEqualTo(400);
-        assertThat(sessionStorage.getDataOrCreateStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
+        assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
         response.close();
     }
 
@@ -176,7 +176,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         int statusCode = response.getStatusLine().getStatusCode();
 
         assertThat(statusCode).isEqualTo(404);
-        assertThat(sessionStorage.getDataOrCreateStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
+        assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
         response.close();
     }
 }

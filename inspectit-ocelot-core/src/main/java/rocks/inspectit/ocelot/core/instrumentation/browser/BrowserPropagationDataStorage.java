@@ -30,7 +30,12 @@ public class BrowserPropagationDataStorage {
         latestTimestamp = newTimestamp;
     }
 
-    public int calculateElapsedTime(long timestamp) {
-        return (int) (timestamp - latestTimestamp)/1000;
+    /**
+     * Calculates the elapsed time since latestTimestamp
+     * @param currentTime current time in milliseconds
+     * @return Elapsed time since latestTimestamp in milliseconds
+     */
+    public long calculateElapsedTime(long currentTime) {
+        return currentTime - latestTimestamp;
     }
 }
