@@ -4,13 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationDataStorage;
+import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 /**
  * REST-API to expose browser propagation data
  * Additionally, data can be overwritten from outside
+ * To access a data storage, a sessionID has to be provided, which references a data storage
  *
  * The expected data format to receive and export data are EntrySets, for example:
  * [{"key1": "123"}, {"key2": "321"}]
@@ -26,34 +27,65 @@ import java.util.stream.Collectors;
 public class BrowserPropagationServlet extends HttpServlet {
 
     private final ObjectMapper mapper;
-    private final BrowserPropagationDataStorage dataStorage;
+    private final BrowserPropagationSessionStorage sessionStorage;
 
-    public BrowserPropagationServlet() {
+    public BrowserPropagationServlet(int timeToLive) {
         mapper = new ObjectMapper();
-        dataStorage = BrowserPropagationDataStorage.getInstance();
+        sessionStorage = BrowserPropagationSessionStorage.getInstance();
+        sessionStorage.setTimeToLive(timeToLive);
     }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.info("Tags HTTP-server received GET-request");
-        Map<String, Object> propagationData = dataStorage.readData();
-        String res = mapper.writeValueAsString(propagationData.entrySet());
+        String sessionID = request.getHeader("cookie");
+        if(sessionID == null) {
+            log.warn("Request misses session ID");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        }
+        else {
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionID);
 
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write(res);
+            if(dataStorage == null) {
+                log.warn("Data storage with session id " + sessionID + " not found");
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            }
+            else {
+                dataStorage.updateTimestamp(System.currentTimeMillis());
+                Map<String, Object> propagationData = dataStorage.readData();
+                String res = mapper.writeValueAsString(propagationData.entrySet());
+                response.setContentType("application/json");
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.getWriter().write(res);
+            }
+        }
     }
 
     @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) {
         log.info("Tags HTTP-server received PUT-request");
-        Map<String, Object> newPropagationData = getRequestBody(request);
-
-        if(newPropagationData != null) {
-            dataStorage.writeData(newPropagationData);
-            response.setStatus(HttpServletResponse.SC_OK);
+        String sessionID = request.getHeader("cookie");
+        if(sessionID == null) {
+            log.warn("Request misses session ID");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
-        else response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        else {
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionID);
+
+            if(dataStorage == null) {
+                log.warn("Data storage with session id " + sessionID + " not found");
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            }
+            else {
+                dataStorage.updateTimestamp(System.currentTimeMillis());
+                Map<String, Object> newPropagationData = getRequestBody(request);
+                if(newPropagationData != null) {
+                    dataStorage.writeData(newPropagationData);
+                    response.setStatus(HttpServletResponse.SC_OK);
+                }
+                else response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+        }
     }
 
     private Map<String, Object> getRequestBody(HttpServletRequest request) {

@@ -10,13 +10,13 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.core.SpringTestBase;
-import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationDataStorage;
+import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
 
 import javax.servlet.http.HttpServlet;
 import java.io.IOException;
@@ -31,7 +31,9 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
     @Autowired
     BrowserPropagationHttpExporterService exporterService;
 
-    BrowserPropagationDataStorage dataStorage;
+    BrowserPropagationSessionStorage sessionStorage;
+
+    final String sessionID = "test-session-cookie";
 
     private CloseableHttpClient testClient;
     private final String host = "127.0.0.1";
@@ -43,15 +45,17 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
     void prepareTest() throws IOException {
         startServer();
         testClient = createHttpClient();
-        Map<String, Object> data = new HashMap<>();
-        data.put("key", "value");
-        dataStorage = BrowserPropagationDataStorage.getInstance();
-        dataStorage.writeData(data);
+        writeDataIntoStorage();
+    }
+
+    @AfterEach
+    void clearDataStorage() {
+        sessionStorage.clearStorages();
     }
 
     void startServer() throws IOException {
         port = Network.getFreeServerPort();
-        HttpServlet servlet = new BrowserPropagationServlet();
+        HttpServlet servlet = new BrowserPropagationServlet(300000);
         exporterService.startServer(host, port, path, servlet);
     }
 
@@ -62,10 +66,20 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         return builder.build();
     }
 
+    void writeDataIntoStorage() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("key", "value");
+        sessionStorage = BrowserPropagationSessionStorage.getInstance();
+        sessionStorage.getDataOrCreateStorage(sessionID).writeData(data);
+    }
+
     @Test
     void verifyGetEndpoint() throws IOException {
         String url = "http://" + host + ":" + port + path;
-        CloseableHttpResponse response = testClient.execute(new HttpGet(url));
+        HttpGet getRequest = new HttpGet(url);
+        getRequest.setHeader("cookie", sessionID);
+        CloseableHttpResponse response = testClient.execute(getRequest);
+
         int statusCode = response.getStatusLine().getStatusCode();
         HttpEntity entity = response.getEntity();
         String responseBody = EntityUtils.toString(entity);
@@ -77,18 +91,43 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
     }
 
     @Test
+    void verifyGetEndpointWithoutSessionID() throws IOException {
+        String url = "http://" + host + ":" + port + path;
+        HttpGet getRequest = new HttpGet(url);
+
+        CloseableHttpResponse response = testClient.execute(getRequest);
+
+        int statusCode = response.getStatusLine().getStatusCode();
+        assertThat(statusCode).isEqualTo(400);
+        response.close();
+    }
+
+    @Test
+    void verifyGetEndpointWithWrongSessionID() throws IOException {
+        String url = "http://" + host + ":" + port + path;
+        HttpGet getRequest = new HttpGet(url);
+        getRequest.setHeader("cookie", "###WrongSessionID###");
+        CloseableHttpResponse response = testClient.execute(getRequest);
+
+        int statusCode = response.getStatusLine().getStatusCode();
+        assertThat(statusCode).isEqualTo(404);
+        response.close();
+    }
+
+    @Test
     void verifyPutEndpointWithCorrectData() throws IOException {
         String url = "http://" + host + ":" + port + path;
         HttpPut putRequest = new HttpPut(url);
         String requestBody = "[{\"newKey\":\"newValue\"}]";
         StringEntity requestEntity = new StringEntity(requestBody);
         putRequest.setEntity(requestEntity);
+        putRequest.setHeader("cookie", sessionID);
 
         CloseableHttpResponse response = testClient.execute(putRequest);
         int statusCode = response.getStatusLine().getStatusCode();
 
         assertThat(statusCode).isEqualTo(200);
-        assertThat(dataStorage.readData()).containsEntry("newKey", "newValue");
+        assertThat(sessionStorage.getDataOrCreateStorage(sessionID).readData()).containsEntry("newKey", "newValue");
         response.close();
     }
 
@@ -99,11 +138,45 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         String requestBody = "##WrongDataFormat##";
         StringEntity requestEntity = new StringEntity(requestBody);
         putRequest.setEntity(requestEntity);
+        putRequest.setHeader("cookie", sessionID);
 
         CloseableHttpResponse response = testClient.execute(putRequest);
         int statusCode = response.getStatusLine().getStatusCode();
 
         assertThat(statusCode).isEqualTo(400);
+        response.close();
+    }
+
+    @Test
+    void verifyPutEndpointWithoutSessionID() throws IOException {
+        String url = "http://" + host + ":" + port + path;
+        HttpPut putRequest = new HttpPut(url);
+        String requestBody = "[{\"newKey\":\"newValue\"}]";
+        StringEntity requestEntity = new StringEntity(requestBody);
+        putRequest.setEntity(requestEntity);
+
+        CloseableHttpResponse response = testClient.execute(putRequest);
+        int statusCode = response.getStatusLine().getStatusCode();
+
+        assertThat(statusCode).isEqualTo(400);
+        assertThat(sessionStorage.getDataOrCreateStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
+        response.close();
+    }
+
+    @Test
+    void verifyPutEndpointWithWrongSessionID() throws IOException {
+        String url = "http://" + host + ":" + port + path;
+        HttpPut putRequest = new HttpPut(url);
+        String requestBody = "[{\"newKey\":\"newValue\"}]";
+        StringEntity requestEntity = new StringEntity(requestBody);
+        putRequest.setEntity(requestEntity);
+        putRequest.setHeader("cookie", "###WrongSessionID###");
+
+        CloseableHttpResponse response = testClient.execute(putRequest);
+        int statusCode = response.getStatusLine().getStatusCode();
+
+        assertThat(statusCode).isEqualTo(404);
+        assertThat(sessionStorage.getDataOrCreateStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
         response.close();
     }
 }

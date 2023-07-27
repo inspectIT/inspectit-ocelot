@@ -9,6 +9,7 @@ import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationDataStorage;
+import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.tags.TagUtils;
 
@@ -184,7 +185,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     private Map<String, Object> cachedActivePhaseDownPropagatedData = null;
 
-    private final BrowserPropagationDataStorage browserPropagationDataStorage;
+    private BrowserPropagationDataStorage browserPropagationDataStorage;
 
     private InspectitContextImpl(InspectitContextImpl parent, PropagationMetaData defaultPropagation, boolean interactWithApplicationTagContexts) {
         this.parent = parent;
@@ -192,14 +193,9 @@ public class InspectitContextImpl implements InternalInspectitContext {
         this.interactWithApplicationTagContexts = interactWithApplicationTagContexts;
         dataOverwrites = new HashMap<>();
         openingThread = Thread.currentThread();
-        browserPropagationDataStorage = BrowserPropagationDataStorage.getInstance();
 
         if (parent == null) {
             postEntryPhaseDownPropagatedData = new HashMap<>();
-            // Add down-propagated data from browser to inspectIT
-            Map<String, Object> browserPropagationData = getBrowserPropagationData(browserPropagationDataStorage.readData());
-            Map<String ,Object> downPropagationBrowserData = getDownPropagationData(browserPropagationData);
-            dataOverwrites.putAll(downPropagationBrowserData);
         } else {
             if (isInDifferentThreadThanParentOrIsParentClosed()) {
                 postEntryPhaseDownPropagatedData = parent.postEntryPhaseDownPropagatedData;
@@ -268,6 +264,22 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     @Override
     public void makeActive() {
+        String currentSessionID = getData(REMOTE_SESSION_ID).toString();
+        if(currentSessionID != null) {
+            BrowserPropagationSessionStorage sessionStorage = BrowserPropagationSessionStorage.getInstance();
+            browserPropagationDataStorage = sessionStorage.getDataOrCreateStorage(currentSessionID);
+        }
+
+
+        if(parent == null) {
+            // Add down-propagated data from browser to inspectIT
+            if(browserPropagationDataStorage != null) {
+                Map<String, Object> browserPropagationData = getBrowserPropagationData(browserPropagationDataStorage.readData());
+                Map<String, Object> downPropagationBrowserData = getDownPropagationData(browserPropagationData);
+                dataOverwrites.putAll(downPropagationBrowserData);
+            }
+        }
+
         boolean anyDownPropagatedDataOverwritten = anyDownPropagatedDataOverridden();
 
         //only copy if any down-propagating value has been written
@@ -417,7 +429,15 @@ public class InspectitContextImpl implements InternalInspectitContext {
         }
 
         // Write browser propagation data to storage
-        browserPropagationDataStorage.writeData(getBrowserPropagationData(dataOverwrites));
+        if(browserPropagationDataStorage != null)
+            browserPropagationDataStorage.writeData(getBrowserPropagationData(dataOverwrites));
+
+        BrowserPropagationSessionStorage session = BrowserPropagationSessionStorage.getInstance();
+
+        // Delete session ID after root span is closed
+        if(parent == null) {
+            setData(REMOTE_SESSION_ID, null);
+        }
 
         //clear the references to prevent memory leaks
         openedDownPropagationScope = null;
@@ -456,7 +476,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
             if(propagation.isPropagatedWithBrowser(entry.getKey())) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
-                browserPropagationData.put(key, value);
+                if(value != null) browserPropagationData.put(key, value);
             }
         }
         return browserPropagationData;
@@ -503,6 +523,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
         ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, this);
         SpanContext remote_span = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(headers);
         setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, remote_span);
+        String sessionID = headers.get("cookie");
+        setData(REMOTE_SESSION_ID, sessionID);
     }
 
     @Override

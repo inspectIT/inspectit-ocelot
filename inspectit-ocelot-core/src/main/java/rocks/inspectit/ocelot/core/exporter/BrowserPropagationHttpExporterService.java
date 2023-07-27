@@ -43,7 +43,8 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         String host = settings.getHost();
         int port = settings.getPort();
         String path = settings.getPath();
-        HttpServlet httpServlet = new BrowserPropagationServlet();
+        int timeToLive = settings.getTimeToLive();
+        HttpServlet httpServlet = new BrowserPropagationServlet(timeToLive);
 
         return startServer(host, port, path, httpServlet);
     }

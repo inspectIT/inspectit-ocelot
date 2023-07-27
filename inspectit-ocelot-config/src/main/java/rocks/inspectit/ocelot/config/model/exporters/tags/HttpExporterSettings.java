@@ -28,4 +28,9 @@ public class HttpExporterSettings {
      * The path for the endpoint of the HTTP-server
      */
     private String path;
+
+    /**
+     * How long the data should be stored in the server
+     */
+    private int timeToLive;
 }

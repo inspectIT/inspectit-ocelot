@@ -47,3 +47,5 @@ inspectit:
       # used for storing a received remote span id
       remote_parent_span_context:
         down-propagation: JVM_LOCAL
+      remote_session_id:
+        down-propagation: JVM_LOCAL
