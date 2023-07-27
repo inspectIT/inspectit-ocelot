@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * REST-API to expose browser propagation data
  * Additionally, data can be overwritten from outside
  * To access a data storage, a sessionID has to be provided, which references a data storage
- *
+ * <p>
  * The expected data format to receive and export data are EntrySets, for example:
  * [{"key1": "123"}, {"key2": "321"}]
  */

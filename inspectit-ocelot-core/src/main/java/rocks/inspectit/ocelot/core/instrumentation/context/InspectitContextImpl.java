@@ -264,10 +264,10 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     @Override
     public void makeActive() {
-        String currentSessionID = getData(REMOTE_SESSION_ID).toString();
+        Object currentSessionID = getData(REMOTE_SESSION_ID);
         if(currentSessionID != null) {
             BrowserPropagationSessionStorage sessionStorage = BrowserPropagationSessionStorage.getInstance();
-            browserPropagationDataStorage = sessionStorage.getOrCreateDataStorage(currentSessionID);
+            browserPropagationDataStorage = sessionStorage.getOrCreateDataStorage(currentSessionID.toString());
         }
 
 
@@ -527,7 +527,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         SpanContext remote_span = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(headers);
         setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, remote_span);
         String sessionID = headers.get("cookie");
-        setData(REMOTE_SESSION_ID, sessionID);
+        if(sessionID != null) setData(REMOTE_SESSION_ID, sessionID);
     }
 
     @Override
