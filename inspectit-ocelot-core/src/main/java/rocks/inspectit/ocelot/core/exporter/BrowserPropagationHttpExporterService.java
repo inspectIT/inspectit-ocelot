@@ -27,12 +27,13 @@ import java.net.InetSocketAddress;
 @EnableScheduling
 public class BrowserPropagationHttpExporterService extends DynamicallyActivatableService {
     private Server server;
+    private BrowserPropagationSessionStorage sessionStorage;
     private BrowserPropagationServlet httpServlet;
 
     /**
      * Delay to rerun the scheduled method after the method finished in milliseconds
      */
-    private final int FIXED_DELAY = 10000;
+    private static final int FIXED_DELAY = 10000;
 
     /**
      * Time to live for browser propagation data in seconds
@@ -59,7 +60,10 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         String host = settings.getHost();
         int port = settings.getPort();
         String path = settings.getPath();
+        int sessionLimit = settings.getSessionLimit();
         timeToLive = settings.getTimeToLive();
+        sessionStorage = BrowserPropagationSessionStorage.getInstance();
+        sessionStorage.setSessionLimit(sessionLimit);
         httpServlet = new BrowserPropagationServlet();
 
         return startServer(host, port, path, httpServlet);
@@ -69,8 +73,9 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
     protected boolean doDisable() {
         if(server != null) {
             try {
-                server.stop();
                 log.info("Stopping Tags HTTP-Server");
+                server.stop();
+                sessionStorage.clearDataStorages();
             } catch (Exception e) {
                 log.error("Error disabling Tags HTTP-Server", e);
             }
@@ -86,8 +91,8 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         server.setStopAtShutdown(true);
 
         try {
-            server.start();
             log.info("Starting Tags HTTP-Server on {}:{}{} ", host, port, path);
+            server.start();
         } catch (Exception e) {
             log.warn("Starting of Tags HTTP-Server failed");
             return false;
@@ -102,7 +107,6 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
     @Scheduled(fixedDelay = FIXED_DELAY)
     public void cleanUpSessionStorage() {
         if(httpServlet == null) return;
-        BrowserPropagationSessionStorage sessionStorage = BrowserPropagationSessionStorage.getInstance();
         sessionStorage.cleanUpData(timeToLive);
     }
 }

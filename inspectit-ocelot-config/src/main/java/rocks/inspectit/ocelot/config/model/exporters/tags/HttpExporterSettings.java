@@ -30,6 +30,11 @@ public class HttpExporterSettings {
     private String path;
 
     /**
+     * How many sessions can be stored at the same time
+     */
+    private int sessionLimit;
+
+    /**
      * How long the data should be stored in the server
      */
     private int timeToLive;

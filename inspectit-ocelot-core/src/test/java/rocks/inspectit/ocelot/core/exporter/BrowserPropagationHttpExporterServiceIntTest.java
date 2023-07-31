@@ -29,17 +29,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase {
 
     @Autowired
-    BrowserPropagationHttpExporterService exporterService;
-
-    BrowserPropagationSessionStorage sessionStorage;
-
-    final String sessionID = "test-session-cookie";
-
+    private BrowserPropagationHttpExporterService exporterService;
+    private BrowserPropagationSessionStorage sessionStorage;
     private CloseableHttpClient testClient;
-    private final String host = "127.0.0.1";
-    private int port;
-    private final String path = "/inspectit";
 
+    private static final String sessionID = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
+    private static final String host = "127.0.0.1";
+    private static int port;
+    private static final String path = "/inspectit";
 
     @BeforeEach
     void prepareTest() throws IOException {

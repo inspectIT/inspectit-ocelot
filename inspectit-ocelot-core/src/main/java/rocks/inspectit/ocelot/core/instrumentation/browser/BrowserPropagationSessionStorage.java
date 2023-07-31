@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.browser;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,10 +10,14 @@ import java.util.concurrent.ConcurrentMap;
  * Singleton storage for multiple {@link BrowserPropagationDataStorage} objects,
  * which are referenced by a session-ID, normally provided by a remote browser
  */
-
 @Slf4j
 public class BrowserPropagationSessionStorage {
 
+    private static final int KEY_MIN_SIZE = 64;
+    private static final int KEY_MAX_SIZE = 512;
+
+    @Setter
+    private int sessionLimit = 32;
     private static BrowserPropagationSessionStorage instance;
     private final ConcurrentMap<String, BrowserPropagationDataStorage> dataStorages;
 
@@ -26,9 +31,17 @@ public class BrowserPropagationSessionStorage {
     }
 
     public BrowserPropagationDataStorage getOrCreateDataStorage(String sessionID) {
-        BrowserPropagationDataStorage dataStorage = dataStorages.get(sessionID);
-        if(dataStorage == null) dataStorages.put(sessionID, new BrowserPropagationDataStorage());
-        return dataStorages.get(sessionID);
+        return dataStorages.computeIfAbsent(sessionID, key -> {
+            if(!validateSessionIdLength(key)) {
+                log.warn("Unable to create session: Invalid key length");
+                return null;
+            }
+            if(dataStorages.size() >= sessionLimit) {
+                log.warn("Unable to create session: Session limit exceeded");
+                return null;
+            }
+            return new BrowserPropagationDataStorage();
+        });
     }
 
     public BrowserPropagationDataStorage getDataStorage(String sessionID) {
@@ -49,5 +62,10 @@ public class BrowserPropagationSessionStorage {
             long elapsedTime = storage.calculateElapsedTime(currentTime) / 1000;
             if(timeToLive < elapsedTime) dataStorages.remove(id);
         });
+    }
+
+    private boolean validateSessionIdLength(String sessionID) {
+        int keyLength = sessionID.length();
+        return keyLength <= KEY_MAX_SIZE && keyLength >= KEY_MIN_SIZE;
     }
 }

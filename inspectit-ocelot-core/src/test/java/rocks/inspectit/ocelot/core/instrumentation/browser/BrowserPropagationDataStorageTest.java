@@ -11,9 +11,10 @@ import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.not;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +28,7 @@ public class BrowserPropagationDataStorageTest {
 
     Map<String, String> headers;
 
-    private final String sessionID = "test-session-cookie";
+    private static final String sessionID = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
 
     @BeforeEach
     void prepareTest() {
@@ -108,6 +109,26 @@ public class BrowserPropagationDataStorageTest {
             assertThat(dataStorage.readData()).doesNotContainValue("value2");
             assertThat(dataStorage.readData()).containsEntry("keyA", "value1");
             assertThat(ContextUtil.currentInspectitContext()).isNull();
+        }
+
+        @Test
+        void verifyAttributeCountLimit() {
+            when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionID);
+            Map<String, Object> dummyMap = IntStream.rangeClosed(1, 128)
+                    .boxed()
+                    .collect(Collectors.toMap(i -> "key"+i, i -> "value"+i));
+            dataStorage.writeData(dummyMap);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            ctx.readDownPropagationHeaders(headers);
+            ctx.makeActive();
+
+            ctx.setData("keyABC", "valueABC");
+            assertThat(dataStorage.readData()).doesNotContainEntry("keyABC", "valueABC");
+
+            ctx.close();
+            assertThat(dataStorage.readData()).doesNotContainEntry("keyABC", "valueABC");
+            assertThat(dataStorage.readData().size()).isEqualTo(128);
         }
     }
 

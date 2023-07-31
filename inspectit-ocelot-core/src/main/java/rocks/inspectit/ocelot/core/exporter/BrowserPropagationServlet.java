@@ -36,7 +36,7 @@ public class BrowserPropagationServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        log.info("Tags HTTP-server received GET-request");
+        log.debug("Tags HTTP-server received GET-request");
         String sessionID = request.getHeader("cookie");
         if(sessionID == null) {
             log.warn("Request misses session ID");
@@ -62,7 +62,7 @@ public class BrowserPropagationServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {
-        log.info("Tags HTTP-server received PUT-request");
+        log.debug("Tags HTTP-server received PUT-request");
         String sessionID = request.getHeader("cookie");
         if(sessionID == null) {
             log.warn("Request misses session ID");

@@ -77,8 +77,8 @@ dependencies {
             // jetty HTTP server for REST-API
             // we use jetty instead of Spring-Boot-Web since it's more lightweight and
             // it 's easier to adapt changes from the config-server
-            'org.eclipse.jetty:jetty-server:9.4.51.v20230217',
-            'org.eclipse.jetty:jetty-servlet:9.4.51.v20230217',
+            "org.eclipse.jetty:jetty-server:${eclipseJettyVersion}",
+            "org.eclipse.jetty:jetty-servlet:${eclipseJettyVersion}",
 
             // utils
             "org.apache.commons:commons-lang3",
