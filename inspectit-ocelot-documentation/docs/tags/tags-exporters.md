@@ -29,7 +29,7 @@ The following properties are nested properties below the `inspectit.exporters.ta
 | `.host`          | `0.0.0.0`    |The hostname or network address to which the HTTP server should bind.
 | `.port`          | `9000`       |The port the HTTP server should use.
 | `.path`          | `/inspectit` |The path on which the HTTP endpoints will be available.
-| `.session-limit` | `32`         |How many sessions can be stored in the server at the same time.
+| `.session-limit` | `100`        |How many sessions can be stored in the server at the same time.
 | `.time-to-live`  | `300`        |How long the data should be stored in the server in seconds.
 
 

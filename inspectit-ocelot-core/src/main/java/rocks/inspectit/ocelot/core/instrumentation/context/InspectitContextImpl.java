@@ -185,6 +185,9 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     private Map<String, Object> cachedActivePhaseDownPropagatedData = null;
 
+    /**
+     * Data storage for all tags that should be propagated up to or down from the browser
+     */
     private BrowserPropagationDataStorage browserPropagationDataStorage;
 
     private InspectitContextImpl(InspectitContextImpl parent, PropagationMetaData defaultPropagation, boolean interactWithApplicationTagContexts) {

@@ -12,9 +12,11 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
 
@@ -22,9 +24,11 @@ import javax.servlet.http.HttpServlet;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@TestPropertySource(properties = {"inspectit.exporters.tags.http.time-to-live=8"})
 @DirtiesContext
 public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase {
 
@@ -70,110 +74,135 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         sessionStorage.getOrCreateDataStorage(sessionID).writeData(data);
     }
 
-    @Test
-    void verifyGetEndpoint() throws IOException {
-        String url = "http://" + host + ":" + port + path;
-        HttpGet getRequest = new HttpGet(url);
-        getRequest.setHeader("cookie", sessionID);
-        CloseableHttpResponse response = testClient.execute(getRequest);
+    @Nested
+    class GetEndpoint {
+        @Test
+        void verifyGetEndpoint() throws IOException {
+            String url = "http://" + host + ":" + port + path;
+            HttpGet getRequest = new HttpGet(url);
+            getRequest.setHeader("cookie", sessionID);
+            CloseableHttpResponse response = testClient.execute(getRequest);
 
-        int statusCode = response.getStatusLine().getStatusCode();
-        HttpEntity entity = response.getEntity();
-        String responseBody = EntityUtils.toString(entity);
+            int statusCode = response.getStatusLine().getStatusCode();
+            HttpEntity entity = response.getEntity();
+            String responseBody = EntityUtils.toString(entity);
 
-        assertThat(statusCode).isEqualTo(200);
-        assertThat(responseBody).isEqualTo("[{\"key\":\"value\"}]");
-        EntityUtils.consume(entity);
-        response.close();
+            assertThat(statusCode).isEqualTo(200);
+            assertThat(responseBody).isEqualTo("[{\"key\":\"value\"}]");
+            EntityUtils.consume(entity);
+            response.close();
+        }
+
+        @Test
+        void verifyGetEndpointWithoutSessionID() throws IOException {
+            String url = "http://" + host + ":" + port + path;
+            HttpGet getRequest = new HttpGet(url);
+
+            CloseableHttpResponse response = testClient.execute(getRequest);
+
+            int statusCode = response.getStatusLine().getStatusCode();
+            assertThat(statusCode).isEqualTo(400);
+            response.close();
+        }
+
+        @Test
+        void verifyGetEndpointWithWrongSessionID() throws IOException {
+            String url = "http://" + host + ":" + port + path;
+            HttpGet getRequest = new HttpGet(url);
+            getRequest.setHeader("cookie", "###WrongSessionID###");
+            CloseableHttpResponse response = testClient.execute(getRequest);
+
+            int statusCode = response.getStatusLine().getStatusCode();
+            assertThat(statusCode).isEqualTo(404);
+            response.close();
+        }
     }
 
-    @Test
-    void verifyGetEndpointWithoutSessionID() throws IOException {
-        String url = "http://" + host + ":" + port + path;
-        HttpGet getRequest = new HttpGet(url);
+    @Nested
+    class PutEndpoint {
 
-        CloseableHttpResponse response = testClient.execute(getRequest);
+        @Test
+        void verifyPutEndpointWithCorrectData() throws IOException {
+            String url = "http://" + host + ":" + port + path;
+            HttpPut putRequest = new HttpPut(url);
+            String requestBody = "[{\"newKey\":\"newValue\"}]";
+            StringEntity requestEntity = new StringEntity(requestBody);
+            putRequest.setEntity(requestEntity);
+            putRequest.setHeader("cookie", sessionID);
 
-        int statusCode = response.getStatusLine().getStatusCode();
-        assertThat(statusCode).isEqualTo(400);
-        response.close();
-    }
+            CloseableHttpResponse response = testClient.execute(putRequest);
+            int statusCode = response.getStatusLine().getStatusCode();
 
-    @Test
-    void verifyGetEndpointWithWrongSessionID() throws IOException {
-        String url = "http://" + host + ":" + port + path;
-        HttpGet getRequest = new HttpGet(url);
-        getRequest.setHeader("cookie", "###WrongSessionID###");
-        CloseableHttpResponse response = testClient.execute(getRequest);
+            assertThat(statusCode).isEqualTo(200);
+            assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).containsEntry("newKey", "newValue");
+            response.close();
+        }
 
-        int statusCode = response.getStatusLine().getStatusCode();
-        assertThat(statusCode).isEqualTo(404);
-        response.close();
-    }
+        @Test
+        void verifyPutEndpointWithIncorrectData() throws IOException {
+            String url = "http://" + host + ":" + port + path;
+            HttpPut putRequest = new HttpPut(url);
+            String requestBody = "##WrongDataFormat##";
+            StringEntity requestEntity = new StringEntity(requestBody);
+            putRequest.setEntity(requestEntity);
+            putRequest.setHeader("cookie", sessionID);
 
-    @Test
-    void verifyPutEndpointWithCorrectData() throws IOException {
-        String url = "http://" + host + ":" + port + path;
-        HttpPut putRequest = new HttpPut(url);
-        String requestBody = "[{\"newKey\":\"newValue\"}]";
-        StringEntity requestEntity = new StringEntity(requestBody);
-        putRequest.setEntity(requestEntity);
-        putRequest.setHeader("cookie", sessionID);
+            CloseableHttpResponse response = testClient.execute(putRequest);
+            int statusCode = response.getStatusLine().getStatusCode();
 
-        CloseableHttpResponse response = testClient.execute(putRequest);
-        int statusCode = response.getStatusLine().getStatusCode();
+            assertThat(statusCode).isEqualTo(400);
+            response.close();
+        }
 
-        assertThat(statusCode).isEqualTo(200);
-        assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).containsEntry("newKey", "newValue");
-        response.close();
-    }
+        @Test
+        void verifyPutEndpointWithoutSessionID() throws IOException {
+            String url = "http://" + host + ":" + port + path;
+            HttpPut putRequest = new HttpPut(url);
+            String requestBody = "[{\"newKey\":\"newValue\"}]";
+            StringEntity requestEntity = new StringEntity(requestBody);
+            putRequest.setEntity(requestEntity);
 
-    @Test
-    void verifyPutEndpointWithIncorrectData() throws IOException {
-        String url = "http://" + host + ":" + port + path;
-        HttpPut putRequest = new HttpPut(url);
-        String requestBody = "##WrongDataFormat##";
-        StringEntity requestEntity = new StringEntity(requestBody);
-        putRequest.setEntity(requestEntity);
-        putRequest.setHeader("cookie", sessionID);
+            CloseableHttpResponse response = testClient.execute(putRequest);
+            int statusCode = response.getStatusLine().getStatusCode();
 
-        CloseableHttpResponse response = testClient.execute(putRequest);
-        int statusCode = response.getStatusLine().getStatusCode();
+            assertThat(statusCode).isEqualTo(400);
+            assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
+            response.close();
+        }
 
-        assertThat(statusCode).isEqualTo(400);
-        response.close();
-    }
+        @Test
+        void verifyPutEndpointWithWrongSessionID() throws IOException {
+            String url = "http://" + host + ":" + port + path;
+            HttpPut putRequest = new HttpPut(url);
+            String requestBody = "[{\"newKey\":\"newValue\"}]";
+            StringEntity requestEntity = new StringEntity(requestBody);
+            putRequest.setEntity(requestEntity);
+            putRequest.setHeader("cookie", "###WrongSessionID###");
 
-    @Test
-    void verifyPutEndpointWithoutSessionID() throws IOException {
-        String url = "http://" + host + ":" + port + path;
-        HttpPut putRequest = new HttpPut(url);
-        String requestBody = "[{\"newKey\":\"newValue\"}]";
-        StringEntity requestEntity = new StringEntity(requestBody);
-        putRequest.setEntity(requestEntity);
+            CloseableHttpResponse response = testClient.execute(putRequest);
+            int statusCode = response.getStatusLine().getStatusCode();
 
-        CloseableHttpResponse response = testClient.execute(putRequest);
-        int statusCode = response.getStatusLine().getStatusCode();
+            assertThat(statusCode).isEqualTo(404);
+            assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
+            response.close();
+        }
 
-        assertThat(statusCode).isEqualTo(400);
-        assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
-        response.close();
-    }
+        @Test
+        void verifyPutEndpointTimeToLive() throws IOException, InterruptedException {
+            String url = "http://" + host + ":" + port + path;
+            HttpPut putRequest = new HttpPut(url);
+            String requestBody = "[{\"newKey\":\"newValue\"}]";
+            StringEntity requestEntity = new StringEntity(requestBody);
+            putRequest.setEntity(requestEntity);
+            putRequest.setHeader("cookie", sessionID);
 
-    @Test
-    void verifyPutEndpointWithWrongSessionID() throws IOException {
-        String url = "http://" + host + ":" + port + path;
-        HttpPut putRequest = new HttpPut(url);
-        String requestBody = "[{\"newKey\":\"newValue\"}]";
-        StringEntity requestEntity = new StringEntity(requestBody);
-        putRequest.setEntity(requestEntity);
-        putRequest.setHeader("cookie", "###WrongSessionID###");
+            CloseableHttpResponse response = testClient.execute(putRequest);
+            //assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).containsEntry("newKey", "newValue");
 
-        CloseableHttpResponse response = testClient.execute(putRequest);
-        int statusCode = response.getStatusLine().getStatusCode();
-
-        assertThat(statusCode).isEqualTo(404);
-        assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
-        response.close();
+            // 10s (Clean-Up-Frequency) + 5s (Buffer)
+            TimeUnit.SECONDS.sleep(15);
+            assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).isEmpty();
+            response.close();
+        }
     }
 }

@@ -2,7 +2,10 @@ package rocks.inspectit.ocelot.core.instrumentation.browser;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -15,6 +18,8 @@ public class BrowserPropagationDataStorage {
 
     // Default AttributeCountLimit of OpenTelemetry is 128
     private static final int ATTRIBUTE_COUNT_LIMIT = 128;
+    private static final int MAX_KEY_SIZE = 128;
+    private static final int MAX_VALUE_SIZE = 2048;
     private long latestTimestamp;
     private final ConcurrentMap<String, Object> propagationData;
 
@@ -23,16 +28,18 @@ public class BrowserPropagationDataStorage {
         propagationData = new ConcurrentHashMap<>();
     }
 
-    public void writeData(Map<String, Object> newPropagationData) {
-        if(!validateAttributeLength(newPropagationData)) {
-            log.warn("Unable to write data: Data count limit was exceeded");
+    public void writeData(Map<String, ?> newPropagationData) {
+        Map <String, Object> validatedData = validateEntries(newPropagationData);
+
+        if(!validateAttributeLength(validatedData)) {
+            log.debug("Unable to write data: Data count limit was exceeded");
             return;
         }
-        propagationData.putAll(newPropagationData);
+        propagationData.putAll(validatedData);
     }
 
     public Map<String, Object> readData() {
-        return propagationData;
+        return new HashMap<>(propagationData);
     }
 
     public void updateTimestamp(long newTimestamp) {
@@ -48,7 +55,25 @@ public class BrowserPropagationDataStorage {
         return currentTime - latestTimestamp;
     }
 
-    private boolean validateAttributeLength(Map<String, Object> newPropagationData) {
-        return propagationData.size() + newPropagationData.size() <= ATTRIBUTE_COUNT_LIMIT;
+    private boolean validateAttributeLength(Map<String, ?> newPropagationData) {
+        Set<String> keySet = new HashSet<>(propagationData.keySet());
+        keySet.retainAll(newPropagationData.keySet());
+        //Add size of both maps and subtract the common keys
+        return propagationData.size() + newPropagationData.size() - keySet.size() <= ATTRIBUTE_COUNT_LIMIT;
+    }
+
+    private Map<String, Object> validateEntries(Map<String, ?> newPropagationData) {
+        Map<String, Object> validatedData = new HashMap<>();
+        newPropagationData.forEach((k,v) -> {
+            if(validateEntry(k,v)) validatedData.put(k,v);
+            else log.debug("Invalid data entry {} will not be stored", k);
+        });
+        return validatedData;
+    }
+
+    private boolean validateEntry(String key, Object value) {
+        return value instanceof String &&
+                key.length() <= MAX_KEY_SIZE &&
+                ((String) value).length() <= MAX_VALUE_SIZE;
     }
 }

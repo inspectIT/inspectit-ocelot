@@ -77,7 +77,7 @@ public class BrowserPropagationServlet extends HttpServlet {
             }
             else {
                 dataStorage.updateTimestamp(System.currentTimeMillis());
-                Map<String, Object> newPropagationData = getRequestBody(request);
+                Map<String, String> newPropagationData = getRequestBody(request);
                 if(newPropagationData != null) {
                     dataStorage.writeData(newPropagationData);
                     response.setStatus(HttpServletResponse.SC_OK);
@@ -87,9 +87,9 @@ public class BrowserPropagationServlet extends HttpServlet {
         }
     }
 
-    private Map<String, Object> getRequestBody(HttpServletRequest request) {
+    private Map<String, String> getRequestBody(HttpServletRequest request) {
         try (BufferedReader reader = request.getReader()) {
-            Set<Map.Entry<String,Object>> entrySet = mapper.readValue(reader, new TypeReference<Set<Map.Entry<String,Object>>>() {});
+            Set<Map.Entry<String,String>> entrySet = mapper.readValue(reader, new TypeReference<Set<Map.Entry<String,String>>>() {});
             return entrySet.stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (Exception e) {

@@ -115,20 +115,41 @@ public class BrowserPropagationDataStorageTest {
         void verifyAttributeCountLimit() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
             BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionID);
-            Map<String, Object> dummyMap = IntStream.rangeClosed(1, 128)
-                    .boxed()
+            Map<String, Object> dummyMap = IntStream.rangeClosed(1, 128).boxed()
                     .collect(Collectors.toMap(i -> "key"+i, i -> "value"+i));
             dataStorage.writeData(dummyMap);
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctx.readDownPropagationHeaders(headers);
             ctx.makeActive();
 
+            ctx.setData("key1", "value321");
             ctx.setData("keyABC", "valueABC");
+            assertThat(dataStorage.readData()).doesNotContainEntry("key1", "value321");
             assertThat(dataStorage.readData()).doesNotContainEntry("keyABC", "valueABC");
 
             ctx.close();
+            assertThat(dataStorage.readData()).doesNotContainEntry("key1", "value321");
             assertThat(dataStorage.readData()).doesNotContainEntry("keyABC", "valueABC");
             assertThat(dataStorage.readData().size()).isEqualTo(128);
+        }
+
+        @Test
+        void verifyValidEntries() {
+            when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionID);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            ctx.readDownPropagationHeaders(headers);
+            ctx.makeActive();
+            String dummyKey = IntStream.range(1, 130).mapToObj(i -> "x").collect(Collectors.joining());
+            String dummyValue = IntStream.range(1,2050).mapToObj(i -> "y").collect(Collectors.joining());
+
+            System.out.println(dummyKey.length() + " : " + dummyValue.length());
+
+            ctx.setData(dummyKey, dummyValue);
+            assertThat(dataStorage.readData()).doesNotContainEntry(dummyKey, dummyValue);
+
+            ctx.close();
+            assertThat(dataStorage.readData()).doesNotContainEntry(dummyKey, dummyValue);
         }
     }
 

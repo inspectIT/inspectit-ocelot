@@ -17,7 +17,7 @@ public class BrowserPropagationSessionStorage {
     private static final int KEY_MAX_SIZE = 512;
 
     @Setter
-    private int sessionLimit = 32;
+    private int sessionLimit = 100;
     private static BrowserPropagationSessionStorage instance;
     private final ConcurrentMap<String, BrowserPropagationDataStorage> dataStorages;
 
@@ -33,11 +33,11 @@ public class BrowserPropagationSessionStorage {
     public BrowserPropagationDataStorage getOrCreateDataStorage(String sessionID) {
         return dataStorages.computeIfAbsent(sessionID, key -> {
             if(!validateSessionIdLength(key)) {
-                log.warn("Unable to create session: Invalid key length");
+                log.debug("Unable to create session: Invalid key length");
                 return null;
             }
             if(dataStorages.size() >= sessionLimit) {
-                log.warn("Unable to create session: Session limit exceeded");
+                log.debug("Unable to create session: Session limit exceeded");
                 return null;
             }
             return new BrowserPropagationDataStorage();
