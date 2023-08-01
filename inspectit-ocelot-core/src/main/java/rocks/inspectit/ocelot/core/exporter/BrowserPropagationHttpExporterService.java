@@ -38,7 +38,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
     /**
      * Time to live for browser propagation data in seconds
      */
-    private int timeToLive = 30;
+    private int timeToLive = 300;
 
     public BrowserPropagationHttpExporterService() {
         super("exporters.tags.http");

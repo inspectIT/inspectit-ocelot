@@ -33,11 +33,11 @@ public class BrowserPropagationSessionStorage {
     public BrowserPropagationDataStorage getOrCreateDataStorage(String sessionID) {
         return dataStorages.computeIfAbsent(sessionID, key -> {
             if(!validateSessionIdLength(key)) {
-                log.debug("Unable to create session: Invalid key length");
+                log.warn("Unable to create session: Invalid key length");
                 return null;
             }
             if(dataStorages.size() >= sessionLimit) {
-                log.debug("Unable to create session: Session limit exceeded");
+                log.warn("Unable to create session: Session limit exceeded");
                 return null;
             }
             return new BrowserPropagationDataStorage();

@@ -32,7 +32,7 @@ public class BrowserPropagationDataStorage {
         Map <String, Object> validatedData = validateEntries(newPropagationData);
 
         if(!validateAttributeLength(validatedData)) {
-            log.debug("Unable to write data: Data count limit was exceeded");
+            log.warn("Unable to write data: Data count limit was exceeded");
             return;
         }
         propagationData.putAll(validatedData);
@@ -66,7 +66,7 @@ public class BrowserPropagationDataStorage {
         Map<String, Object> validatedData = new HashMap<>();
         newPropagationData.forEach((k,v) -> {
             if(validateEntry(k,v)) validatedData.put(k,v);
-            else log.debug("Invalid data entry {} will not be stored", k);
+            else log.warn("Invalid data entry {} will not be stored", k);
         });
         return validatedData;
     }
