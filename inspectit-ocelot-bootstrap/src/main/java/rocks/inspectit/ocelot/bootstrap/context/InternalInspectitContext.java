@@ -14,6 +14,13 @@ public interface InternalInspectitContext extends AutoCloseable, InspectitContex
     String REMOTE_PARENT_SPAN_CONTEXT_KEY = "remote_parent_span_context";
 
     /**
+     * Special data key which stores the remote session id if any is present
+     * The remains the same within one trace. Usually the data key will be down-propagated.
+     * The data will be cleared as soon as the root span is closed
+     */
+    String REMOTE_SESSION_ID = "remote_session_id";
+
+    /**
      * Makes this context the active one.
      * This means all new contexts created from this point will use this context as a parent.
      * Async context will see down-propagated data in the state it was when this method was calle.

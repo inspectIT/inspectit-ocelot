@@ -60,15 +60,20 @@ This data is then used on method exit: using the action `a_timing_elapsedMillis`
 ## Data Propagation
 
 As illustrated by the previous example, we can collect any amount of data in both the entry and the exit section of an instrumented method. Each data is hereby identified by its name, the _data key_.
-Internally, inspectIT creates a dictionary like Object each time an instrumented method is executed. This object is basically a local variable for the method. Whenever data is written, inspectIT stores the value under the given data key in this dictionary. Similarly, whenever data is read, inspectIT looks it up based on the data key in the dictionary. This dictionary is called _inspectIT context_.
+Internally, inspectIT creates a dictionary like Object each time **an instrumented method is executed**. This object is basically a local variable for the method. **Whenever data is written**, inspectIT stores the value under the given data key in this dictionary. Similarly, whenever data is read, inspectIT looks it up based on the data key in the dictionary. This dictionary is called _inspectIT context_.
 
 If the inspectIT context was truly implemented as explained above, all data would be only visible in the method where it was collected. This however often is not the desired behaviour.
 Consider the following example: you instrument the entry method of your HTTP server and collect the request URL as data there. You now of course want this data to be visible as tag for metrics collected in methods called by your entry point. With the implementation above, the request URL would only be visible within the HTTP entry method.
 
-For this reason the inspectIT context implements _data propagation_. The propagation can happen in two directions:
+For this reason the inspectIT context implements _data propagation_.
 
 * **Down Propagation:** Data collected in your instrumented method will also be visible to all methods directly or indirectly called by your method. This behaviour already comes [with the OpenCensus Library for tags](https://opencensus.io/tag/#propagation).
 * **Up Propagation:** Data collected in your instrumented method will be visible to the methods which caused the invocation of your method. This means that all methods which lie on the call stack will have access to the data written by your method
+* **Browser Propagation:** An additional form of propagation. Data collected in your instrumented method will be stored inside a data storage. This storage can be exposed via a REST-API, if [_exporters.tags.http_](../tags/tags-exporters.md#http-exporter) is enabled. A browser can read this data via GET-requests. 
+
+Additionally, a browser can write data into the storage via PUT-requests. If you enabled browser- as well as down-propagation for a data key, the data written by the browser will be stored in the _inspectIT context_.
+Please note, before writing or reading browser propagation data, you need to specify a session-ID inside the _inspectIT context_. After that, all data belonging to the current browser will be stored behind this session-ID.
+For more information, see [Tags-HTTP-Exporter](../tags/tags-exporters.md#http-exporter).
 
 Up- and down propagation can also be combined: in this case then the data is attached to the control flow, meaning that it will appear as if its value will be passed around with every method call and return.
 
@@ -96,16 +101,22 @@ inspectit:
       #this data will only be visible locally in the method where it is collected
       'http_method': {down-propagation: "NONE"}
       'http_status': {down-propagation: "NONE"}
+
+      #this data will be written to the inspectIT browser data storage
+      'database_tag': {browser-propagation: true}
+      #this data can be written by the browser
+      'transaction_id': {down-propagation: "JVM_LOCAL", browser-propagation: true}
 ```
 
 Under `inspectit.instrumentation.data`, the data keys are mapped to their desired behaviour.
 The configuration options are the following:
 
-|Config Property|Default| Description
-|---|---|---|
-| `down-propagation` | `JVM_LOCAL` if the data key is also a [common tag](metrics/common-tags.md), `NONE` otherwise | Configures if values for this data key propagate down and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place. | 
-| `up-propagation` |  `NONE` |  Configures if values for this data key propagate up and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no up propagation will take place. | 
-| `is-tag` | `true` if the data key is also a [common tag](metrics/common-tags.md) or is used as tag in any [metric definition](metrics/custom-metrics.md), `false` otherwise | If true, this data will act as a tag when metrics are recorded. This does not influence propagation. | 
+| Config Property       | Default                                                                                                                                                           | Description                                                                                                                                                                                             
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `down-propagation`    | `JVM_LOCAL` if the data key is also a [common tag](metrics/common-tags.md), `NONE` otherwise                                                                      | Configures if values for this data key propagate down and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place. | 
+| `up-propagation`      | `NONE`                                                                                                                                                            | Configures if values for this data key propagate up and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no up propagation will take place.     | 
+| `browser-propagation` | `false` | If true, this data will be written to the inspectIT browser data storage                                                                                                                                | 
+| `is-tag`              | `true` if the data key is also a [common tag](metrics/common-tags.md) or is used as tag in any [metric definition](metrics/custom-metrics.md), `false` otherwise  | If true, this data will act as a tag when metrics are recorded. This does not influence propagation.                                                                                                    | 
 
 Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. In this case simply all settings will have their default value.
 

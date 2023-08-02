@@ -99,3 +99,20 @@ inspectit:
         compression: NONE
         # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
         timeout: 10s
+
+    # settings for tags exporters
+    tags:
+      # settings for the http-server exporter
+      http:
+        enabled: DISABLED
+        # the host of the http-server
+        host: 0.0.0.0
+        # the port of the http-server
+        port: 9000
+        # the path for the endpoint of the http-server
+        path: "/inspectit"
+        # how many sessions can be stored at the same time
+        # Additional limitations: key-length -> 128, value-length -> 2048, attribute-count -> 128
+        session-limit: 100
+        # how long the data should be stored in the server in seconds
+        time-to-live: 300

@@ -74,6 +74,12 @@ dependencies {
             // logstash support (JSON logging)
             "net.logstash.logback:logstash-logback-encoder:${logstashLogBackEncoderVersion}",
 
+            // jetty HTTP server for REST-API
+            // we use jetty instead of Spring-Boot-Web since it's more lightweight and
+            // it 's easier to adapt changes from the config-server
+            "org.eclipse.jetty:jetty-server:${eclipseJettyVersion}",
+            "org.eclipse.jetty:jetty-servlet:${eclipseJettyVersion}",
+
             // utils
             "org.apache.commons:commons-lang3",
             "org.apache.commons:commons-math3:${commonsMathVersion}",
