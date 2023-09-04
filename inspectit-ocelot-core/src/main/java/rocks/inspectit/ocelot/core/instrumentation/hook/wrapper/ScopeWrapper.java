@@ -20,15 +20,13 @@ public class ScopeWrapper implements Scope {
 
     @Override
     public void close() {
-        // If present, call custom close()
-        if(autoCloseable != null) {
-            try {
-                autoCloseable.close();
-            } catch (Throwable e) {
-                log.error("Error closing span scope", e);
-            }
-        }
         // Call ordinary close()
         scope.close();
+        // Call custom close()
+        try {
+            autoCloseable.close();
+        } catch (Throwable e) {
+            log.error("Error closing span scope", e);
+        }
     }
 }

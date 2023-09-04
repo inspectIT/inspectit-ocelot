@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
 import io.opencensus.tags.*;
+import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
@@ -186,6 +187,11 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private Map<String, Object> cachedActivePhaseDownPropagatedData = null;
 
     /**
+     * Trace context of the current InspectitContext in the W3C-format
+     */
+    private String traceContext;
+
+    /**
      * Data storage for all tags that should be propagated up to or down from the browser
      */
     private BrowserPropagationDataStorage browserPropagationDataStorage;
@@ -237,6 +243,21 @@ public class InspectitContextImpl implements InternalInspectitContext {
 
     public void setSpanScope(AutoCloseable spanScope) {
         currentSpanScope = spanScope;
+    }
+
+    public void setTraceContext(Span span) {
+        SpanContext spanContext = span.getSpanContext();
+        String version = "00";
+        String traceId = spanContext.getTraceId();
+        String spanId = spanContext.getSpanId();
+        String traceFlags = spanContext.getTraceFlags().asHex();
+
+        this.traceContext = version + "-" + traceId + "-" + spanId + "-" + traceFlags;
+    }
+
+    @Override
+    public String getTraceContext() {
+        return this.traceContext;
     }
 
     /**

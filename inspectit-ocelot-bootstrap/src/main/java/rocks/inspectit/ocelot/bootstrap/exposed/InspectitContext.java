@@ -38,6 +38,10 @@ public interface InspectitContext {
      */
     Iterable<Map.Entry<String, Object>> getData();
 
+    /**
+     * @return The trace context of the current InspectitContext
+     */
+    String getTraceContext();
 
     /**
      * Generates a map representing the globally down-propagated data stored in this context.

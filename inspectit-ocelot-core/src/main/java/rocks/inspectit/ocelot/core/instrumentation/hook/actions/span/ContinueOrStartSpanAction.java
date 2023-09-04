@@ -108,7 +108,11 @@ public class ContinueOrStartSpanAction implements IHookAction {
             Object spanObj = ctx.getData(continueSpanDataKey);
             if (spanObj instanceof Span) {
                 MethodReflectionInformation methodInfo = context.getHook().getMethodInformation();
-                AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> stackTraceSampler.continueSpan((Span) spanObj, methodInfo, autoTrace));
+                AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> {
+                    Span span = stackTraceSampler.continueSpan((Span) spanObj, methodInfo, autoTrace);
+                    ctx.setTraceContext(span);
+                    return span.makeCurrent();
+                });
                 ctx.setSpanScope(spanCtx);
                 return true;
             }
@@ -135,7 +139,12 @@ public class ContinueOrStartSpanAction implements IHookAction {
             }
 
             Sampler sampler = getSampler(context);
-            AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> stackTraceSampler.createAndEnterSpan(spanName, remoteParent, sampler, spanKind, methodInfo, autoTrace));
+            AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> {
+                Span span = stackTraceSampler.createAndEnterSpan(spanName, remoteParent, sampler, spanKind, methodInfo, autoTrace);
+                ctx.setTraceContext(span);
+                return span.makeCurrent();
+
+            });
             ctx.setSpanScope(spanCtx);
             commonTagsToAttributesManager.writeCommonTags(Span.current(), remoteParent != null, hasLocalParent);
 
