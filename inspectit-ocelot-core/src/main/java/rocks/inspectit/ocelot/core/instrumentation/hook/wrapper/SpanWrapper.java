@@ -21,7 +21,7 @@ public class SpanWrapper implements Span {
     private Span span;
 
     /**
-     * Additional Autocloseable to define custom close()-functions
+     * Additional AutoCloseable to define custom close()-functions
      */
     private AutoCloseable autoCloseable;
 
