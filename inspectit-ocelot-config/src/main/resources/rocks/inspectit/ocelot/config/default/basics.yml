@@ -121,7 +121,8 @@ inspectit:
     agent-command-path: "/api/v1/agent/command"
     # the timeout duration used when the agent is in discovery mode. Defining how long the agent
     # will wait for new commands.
-    live-socket-timeout: 30s
+    # This value must be greater than the max response timeout from the config server.
+    live-socket-timeout: 40s
     # the timeout duration used for requests when the agent is in normal mode
     socket-timeout: 5s
     # the used interval for polling commands
