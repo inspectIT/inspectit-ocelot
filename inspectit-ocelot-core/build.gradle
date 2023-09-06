@@ -106,6 +106,8 @@ dependencies {
             "io.opentelemetry:opentelemetry-exporter-jaeger-thrift",
             "io.opentelemetry:opentelemetry-exporter-zipkin",
             "io.opentelemetry:opentelemetry-exporter-otlp",
+            // Update okio, due to security concerns
+            "com.squareup.okio:okio:${okioVersion}",
 
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             "io.opentelemetry:opentelemetry-exporter-prometheus",

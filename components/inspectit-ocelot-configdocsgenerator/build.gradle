@@ -24,6 +24,8 @@ dependencies {
             "ch.qos.logback:logback-classic",
             "org.apache.commons:commons-lang3",
             "commons-beanutils:commons-beanutils:${commonsBeanUtilsVersion}",
+            // Update dependency, due to Out-of-Support
+            "org.apache.commons:commons-collections4:${commonsCollectionsVersion}",
 
             "org.springframework.boot:spring-boot-starter-web",
             // override snakeyaml due to vulnerabilities in v1.29 used by the SpringBoot version used in this module
