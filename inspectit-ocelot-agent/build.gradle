@@ -153,6 +153,7 @@ dependencies {
             "org.assertj:assertj-core",
             "org.awaitility:awaitility",
             "com.github.tomakehurst:wiremock-jre8:${wiremockVersion}",
+            "org.yaml:snakeyaml:${snakeYamlVersion}",
 
             "org.apache.httpcomponents:httpclient",
             // Switching to spring-boot dependency management excludes somehow magically the transitive
