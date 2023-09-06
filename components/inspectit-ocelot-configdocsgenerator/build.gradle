@@ -15,7 +15,7 @@ dependencies {
 
             'org.mockito:mockito-junit-jupiter',
             "org.assertj:assertj-core",
-            "com.google.guava:guava:${guavaVersion}"
+            "com.google.guava:guava:${guavaVersionConfigServer}"
     )
 
     // This dependency is used by the application.
