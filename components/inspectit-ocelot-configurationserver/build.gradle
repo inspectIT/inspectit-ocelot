@@ -141,7 +141,7 @@ dependencies {
 
             'org.apache.httpcomponents:httpclient', //Required for PATCH-Requests
 
-            "org.xerial:sqlite-jdbc",
+            "org.xerial:sqlite-jdbc:${sqliteVersion}",
             "com.github.gwenn:sqlite-dialect:${sqliteDialect}",
             "io.jsonwebtoken:jjwt-api:${jsonWebTokenVersion}",
             "io.jsonwebtoken:jjwt-impl:${jsonWebTokenVersion}",
