@@ -95,7 +95,7 @@ dependencies {
             "io.prometheus:simpleclient_httpserver",
 
             // this overwrites version of guava that opencensus-impl pulls in transitively, too.
-            "com.google.guava:guava:${guavaVersion}",
+            "com.google.guava:guava:${guavaVersionAgent}",
             // we still need the OpenCensus SDK for the metric exporters to work, as the shim only includes opencensus-impl-core
             "io.opencensus:opencensus-impl:${openCensusVersion}",
 

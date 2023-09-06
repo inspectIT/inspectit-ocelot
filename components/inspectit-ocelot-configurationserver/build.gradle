@@ -152,7 +152,7 @@ dependencies {
             "org.eclipse.jgit:org.eclipse.jgit:${eclipseJgitVersion}",
             "org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:${eclipseJgitVersion}",
             "com.google.code.gson:gson",
-            "com.google.guava:guava:${guavaVersion}",
+            "com.google.guava:guava:${guavaVersionConfigServer}",
 
             // swagger
             "org.springdoc:springdoc-openapi-ui:${springdocOopenapiUiVersion}",
