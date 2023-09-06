@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.hook.wrapper;
+package rocks.inspectit.ocelot.core.instrumentation.context.wrapper;
 
 import io.opentelemetry.context.Scope;
 import lombok.AllArgsConstructor;
