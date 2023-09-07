@@ -46,7 +46,7 @@ public interface InspectitContext {
      *
      * @return The transaction trace context of the current InspectitContext in the W3C-format
      */
-    String createTransactionContext();
+    String createRemoteTransactionContext();
 
     /**
      * Generates a map representing the globally down-propagated data stored in this context.
