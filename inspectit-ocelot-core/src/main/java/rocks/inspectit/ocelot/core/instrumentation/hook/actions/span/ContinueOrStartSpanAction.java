@@ -110,7 +110,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
                 MethodReflectionInformation methodInfo = context.getHook().getMethodInformation();
                 AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> {
                     Span span = stackTraceSampler.continueSpan((Span) spanObj, methodInfo, autoTrace);
-                    ctx.setTraceContext(span);
+                    //ctx.setTraceContext(span);
                     return span.makeCurrent();
                 });
                 ctx.setSpanScope(spanCtx);
@@ -130,6 +130,10 @@ public class ContinueOrStartSpanAction implements IHookAction {
 
             // load remote parent if it exist
             SpanContext remoteParent = ctx.getAndClearCurrentRemoteSpanContext();
+
+            // if no remote parent span was down-propagated, look up the current transactionContext
+            if(remoteParent == null) remoteParent = ctx.getTransactionContext();
+
             boolean hasLocalParent = false;
             if (remoteParent == null) {
                 Span currentSpan = Span.current();
@@ -139,9 +143,11 @@ public class ContinueOrStartSpanAction implements IHookAction {
             }
 
             Sampler sampler = getSampler(context);
+            // This is necessary, since the lambda expression needs a final value
+            SpanContext finalRemoteParent = remoteParent;
             AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> {
-                Span span = stackTraceSampler.createAndEnterSpan(spanName, remoteParent, sampler, spanKind, methodInfo, autoTrace);
-                ctx.setTraceContext(span);
+                Span span = stackTraceSampler.createAndEnterSpan(spanName, finalRemoteParent, sampler, spanKind, methodInfo, autoTrace);
+                //ctx.setTraceContext(span);
                 return span.makeCurrent();
 
             });

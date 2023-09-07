@@ -207,9 +207,7 @@ public class StackTraceSampler {
     private Span continueSamplingAwareSpan(Span spanToContinue, MethodReflectionInformation actualMethod, SampledTrace activeSampling) {
         SampledTrace.MethodExitNotifier exitCallback = activeSampling.spanContinued(spanToContinue, clock.nanoTime(), actualMethod.getDeclaringClass()
                 .getName(), actualMethod.getName());
-        AutoCloseable autoCloseable = () -> {
-            exitCallback.methodFinished(clock.nanoTime());
-        };
+        AutoCloseable autoCloseable = () -> exitCallback.methodFinished(clock.nanoTime());
         return new SpanWrapper(spanToContinue, autoCloseable);
     }
 
