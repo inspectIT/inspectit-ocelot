@@ -5,6 +5,7 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import rocks.inspectit.ocelot.config.model.tracing.AutoTracingSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
-import rocks.inspectit.ocelot.core.instrumentation.context.wrapper.SpanWrapper;
 import rocks.inspectit.ocelot.core.opentelemetry.OpenTelemetryControllerImpl;
 import rocks.inspectit.ocelot.core.utils.HighPrecisionTimer;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
@@ -134,18 +134,18 @@ public class StackTraceSampler {
      *
      * @return The generated span is activated via {@link Span#makeCurrent()}. The resulting context is wrapped with a context which terminates the stack-trace-sampling.
      */
-    public Span createAndEnterSpan(String name, SpanContext remoteParent, Sampler sampler, SpanKind kind, MethodReflectionInformation actualMethod, Mode mode) {
+    public AutoCloseable createAndEnterSpan(String name, SpanContext remoteParent, Sampler sampler, SpanKind kind, MethodReflectionInformation actualMethod, Mode mode) {
         Thread self = Thread.currentThread();
         SampledTrace activeSampling = activeSamplings.get(self);
         if (activeSampling == null) {
             if (mode == Mode.ENABLE) {
                 return startSampling(name, remoteParent, sampler, kind);
             } else {
-                return createNormalSpan(name, remoteParent, sampler, kind);
+                return createNormalSpan(name, remoteParent, sampler, kind).makeCurrent();
             }
         } else {
-            Span samplingAwareSpan = createSamplingAwareSpan(name, remoteParent, kind, actualMethod, activeSampling);
-            return createPauseAdjustingContext(mode, activeSampling, samplingAwareSpan);
+            AutoCloseable samplingAwareSpanContext = createSamplingAwareSpan(name, remoteParent, kind, actualMethod, activeSampling);
+            return createPauseAdjustingContext(mode, activeSampling, samplingAwareSpanContext);
         }
     }
 
@@ -166,18 +166,18 @@ public class StackTraceSampler {
      *
      * @return The span is activated via {@link Span#makeCurrent()}. The resulting context is wrapped with a context which terminates the stack-trace-sampling.
      */
-    public Span continueSpan(Span span, MethodReflectionInformation actualMethod, Mode mode) {
+    public AutoCloseable continueSpan(Span span, MethodReflectionInformation actualMethod, Mode mode) {
         Thread self = Thread.currentThread();
         SampledTrace activeSampling = activeSamplings.get(self);
         if (activeSampling == null) {
             if (mode == Mode.ENABLE) {
                 return startSampling(span);
             } else {
-                return span;
+                return span.makeCurrent();
             }
         } else {
-            Span samplingAwareSpan = continueSamplingAwareSpan(span, actualMethod, activeSampling);
-            return createPauseAdjustingContext(mode, activeSampling, samplingAwareSpan);
+            AutoCloseable samplingAwareSpanContext = continueSamplingAwareSpan(span, actualMethod, activeSampling);
+            return createPauseAdjustingContext(mode, activeSampling, samplingAwareSpanContext);
         }
     }
 
@@ -190,54 +190,62 @@ public class StackTraceSampler {
      *
      * @return the wrapped span-context which alters the pause state accordingly.
      */
-    private Span createPauseAdjustingContext(Mode mode, SampledTrace activeSampling, Span spanContext) {
+    private AutoCloseable createPauseAdjustingContext(Mode mode, SampledTrace activeSampling, AutoCloseable spanContext) {
         if (activeSampling.isPaused() && mode == Mode.ENABLE) {
             activeSampling.setPaused(false);
-            AutoCloseable autoCloseable =  () -> activeSampling.setPaused(true);
-            return new SpanWrapper(spanContext, autoCloseable);
+            return () -> {
+                spanContext.close();
+                activeSampling.setPaused(true);
+            };
         } else if (!activeSampling.isPaused() && mode == Mode.DISABLE) {
             activeSampling.setPaused(true);
-            AutoCloseable autoCloseable = () -> activeSampling.setPaused(false);
-            return new SpanWrapper(spanContext, autoCloseable);
+            return () -> {
+                spanContext.close();
+                activeSampling.setPaused(false);
+            };
         } else {
             return spanContext;
         }
     }
 
-    private Span continueSamplingAwareSpan(Span spanToContinue, MethodReflectionInformation actualMethod, SampledTrace activeSampling) {
+    private AutoCloseable continueSamplingAwareSpan(Span spanToContinue, MethodReflectionInformation actualMethod, SampledTrace activeSampling) {
         SampledTrace.MethodExitNotifier exitCallback = activeSampling.spanContinued(spanToContinue, clock.nanoTime(), actualMethod.getDeclaringClass()
                 .getName(), actualMethod.getName());
-        AutoCloseable autoCloseable = () -> exitCallback.methodFinished(clock.nanoTime());
-        return new SpanWrapper(spanToContinue, autoCloseable);
+        Scope ctx = spanToContinue.makeCurrent();
+        return () -> {
+            ctx.close();
+            exitCallback.methodFinished(clock.nanoTime());
+        };
     }
 
-    private Span startSampling(String name, SpanContext remoteParent, Sampler sampler, SpanKind kind) {
+    private AutoCloseable startSampling(String name, SpanContext remoteParent, Sampler sampler, SpanKind kind) {
         Span rootSpan = createNormalSpan(name, remoteParent, sampler, kind);
         return startSampling(rootSpan);
     }
 
-    private Span startSampling(Span rootSpan) {
+    private AutoCloseable startSampling(Span rootSpan) {
         boolean spanExists = rootSpan.getSpanContext().isValid() && rootSpan.getSpanContext()
                 .getTraceFlags()
                 .isSampled();
         if (!spanExists) {
-            return rootSpan;
+            return rootSpan.makeCurrent();
         } else {
             Throwable stackTrace = new Throwable(); //the constructor collects the current stack-trace
             SampledTrace sampledTrace = new SampledTrace(rootSpan, () -> StackTrace.createFromThrowable(stackTrace));
             Thread selfThread = Thread.currentThread();
             activeSamplings.put(selfThread, sampledTrace);
             sampleTimer.start();
-            AutoCloseable autoCloseable = () -> {
+            AutoCloseable spanScope = rootSpan.makeCurrent();
+            return () -> {
+                spanScope.close();
                 activeSamplings.remove(selfThread);
                 sampledTrace.finish();
                 addToExportQueue(sampledTrace);
             };
-            return new SpanWrapper(rootSpan, autoCloseable);
         }
     }
 
-    private Span createSamplingAwareSpan(String name, SpanContext remoteParent, SpanKind kind, MethodReflectionInformation actualMethod, SampledTrace activeSampling) {
+    private AutoCloseable createSamplingAwareSpan(String name, SpanContext remoteParent, SpanKind kind, MethodReflectionInformation actualMethod, SampledTrace activeSampling) {
         SpanContext parent = remoteParent;
         if (remoteParent == null) {
             parent = Span.current().getSpanContext();
@@ -246,8 +254,11 @@ public class StackTraceSampler {
 
         SampledTrace.MethodExitNotifier exitCallback = activeSampling.newSpanStarted(span, actualMethod.getDeclaringClass()
                 .getName(), actualMethod.getName());
-        AutoCloseable autoCloseable = () -> exitCallback.methodFinished(clock.nanoTime());
-        return new SpanWrapper(span, autoCloseable);
+        io.opentelemetry.context.Scope ctx = span.makeCurrent();
+        return () -> {
+            ctx.close();
+            exitCallback.methodFinished(clock.nanoTime());
+        };
     }
 
     @Autowired

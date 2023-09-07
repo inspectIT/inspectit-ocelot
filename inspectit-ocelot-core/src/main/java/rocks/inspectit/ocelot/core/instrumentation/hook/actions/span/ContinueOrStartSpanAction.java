@@ -108,11 +108,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
             Object spanObj = ctx.getData(continueSpanDataKey);
             if (spanObj instanceof Span) {
                 MethodReflectionInformation methodInfo = context.getHook().getMethodInformation();
-                AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> {
-                    Span span = stackTraceSampler.continueSpan((Span) spanObj, methodInfo, autoTrace);
-                    //ctx.setTraceContext(span);
-                    return span.makeCurrent();
-                });
+                AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> stackTraceSampler.continueSpan((Span) spanObj, methodInfo, autoTrace));
                 ctx.setSpanScope(spanCtx);
                 return true;
             }
@@ -128,11 +124,11 @@ public class ContinueOrStartSpanAction implements IHookAction {
             MethodReflectionInformation methodInfo = context.getHook().getMethodInformation();
             String spanName = getSpanName(context, methodInfo);
 
-            // load remote parent if it exist
+            // load remote parent if it exists in dataOverwrites
             SpanContext remoteParent = ctx.getAndClearCurrentRemoteSpanContext();
 
             // if no remote parent span was down-propagated, look up the current transactionContext
-            if(remoteParent == null) remoteParent = ctx.getTransactionContext();
+            if(remoteParent == null) remoteParent = ctx.getRemoteTransactionContext();
 
             boolean hasLocalParent = false;
             if (remoteParent == null) {
@@ -142,18 +138,12 @@ public class ContinueOrStartSpanAction implements IHookAction {
                 hasLocalParent = !(currentSpan == Span.getInvalid() || !currentSpan.getSpanContext().isValid());
             }
 
-            Sampler sampler = getSampler(context);
             // This is necessary, since the lambda expression needs a final value
             SpanContext finalRemoteParent = remoteParent;
-            AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> {
-                Span span = stackTraceSampler.createAndEnterSpan(spanName, finalRemoteParent, sampler, spanKind, methodInfo, autoTrace);
-                //ctx.setTraceContext(span);
-                return span.makeCurrent();
-
-            });
+            Sampler sampler = getSampler(context);
+            AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> stackTraceSampler.createAndEnterSpan(spanName, finalRemoteParent, sampler, spanKind, methodInfo, autoTrace));
             ctx.setSpanScope(spanCtx);
             commonTagsToAttributesManager.writeCommonTags(Span.current(), remoteParent != null, hasLocalParent);
-
         }
     }
 

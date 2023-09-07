@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
 import io.opencensus.tags.*;
-import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
@@ -190,14 +189,27 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private Map<String, Object> cachedActivePhaseDownPropagatedData = null;
 
     /**
-     * Trace context of the current InspectitContext in the W3C-format
+     * This span context serves as a placeholder for a remote transaction span context.
+     * A transaction span is a root span, which contains all other spans created during one session.
+     * It normally starts with the document load in the frontend.
+     * <p>
+     * The documentLoad-span will always be created after the spans in the JVM are closed.
+     * Thus, it's context cannot be down propagated to the JVM.
+     * However, the documentLoad-span has to use the same trace-ID as the JVM-spans.
+     * Since the trace-IDs of the JVM-spans can't be altered afterward, the documentLoad-span has to use the trace-ID, which
+     * was generated in the JVM.
+     * Additionally, the documentLoad-span has to serve as a parent-span for the root-span in the JVM to link them correctly.
+     * Therefore, this placeholder context is created, so it can be used as a parent context in the JVM and stores the
+     * current trace-ID.
+     * <p>
+     * The remote transaction context can be transmitted to the frontend via the Http-response-header.
+     * After that, the frontend instrumentation can use the context to create the transaction span with the same trace-ID
+     * as the JVM-spans.
+     * The transaction span will also be linked to the JVM-span, since the JVM-span used this transaction context as parent context.
+     * <p>
+     * Note that this context will not be used as a parent context, if a REMOTE_PARENT_SPAN_CONTEXT_KEY was down-propagated
      */
-    private String traceContext;
-
-    /**
-     *
-     */
-    private SpanContext transactionContext;
+    private SpanContext remoteTransactionContext;
 
     /**
      * Data storage for all tags that should be propagated up to or down from the browser
@@ -254,20 +266,20 @@ public class InspectitContextImpl implements InternalInspectitContext {
     }
 
     @Override
-    public String createTransactionContext() {
+    public String createRemoteTransactionContext() {
         IdGenerator generator = IdGenerator.random();
         String traceId = generator.generateTraceId();
         String spanId = generator.generateSpanId();
         TraceFlags traceFlags = TraceFlags.getSampled();
         TraceState traceState = TraceState.getDefault();
-        this.transactionContext = SpanContext.create(traceId, spanId, traceFlags, traceState);
+        this.remoteTransactionContext = SpanContext.create(traceId, spanId, traceFlags, traceState);
 
         String traceContext = "00-" + traceId + "-" + spanId + "-" + traceFlags.asHex();
         return traceContext;
     }
 
-    public SpanContext getTransactionContext() {
-        return this.transactionContext;
+    public SpanContext getRemoteTransactionContext() {
+        return this.remoteTransactionContext;
     }
 
     /**

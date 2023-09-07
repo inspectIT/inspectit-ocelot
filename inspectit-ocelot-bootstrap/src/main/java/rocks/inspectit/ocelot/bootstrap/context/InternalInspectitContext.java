@@ -20,6 +20,8 @@ public interface InternalInspectitContext extends AutoCloseable, InspectitContex
      */
     String REMOTE_SESSION_ID = "remote_session_id";
 
+    String createRemoteTransactionContext();
+
     /**
      * Makes this context the active one.
      * This means all new contexts created from this point will use this context as a parent.
