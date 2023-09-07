@@ -3,8 +3,11 @@ package rocks.inspectit.ocelot.core.instrumentation.context;
 import io.opencensus.tags.*;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
+import io.opentelemetry.sdk.trace.IdGenerator;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
@@ -192,6 +195,11 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private String traceContext;
 
     /**
+     *
+     */
+    private SpanContext transactionContext;
+
+    /**
      * Data storage for all tags that should be propagated up to or down from the browser
      */
     private BrowserPropagationDataStorage browserPropagationDataStorage;
@@ -245,19 +253,21 @@ public class InspectitContextImpl implements InternalInspectitContext {
         currentSpanScope = spanScope;
     }
 
-    public void setTraceContext(Span span) {
-        SpanContext spanContext = span.getSpanContext();
-        String version = "00";
-        String traceId = spanContext.getTraceId();
-        String spanId = spanContext.getSpanId();
-        String traceFlags = spanContext.getTraceFlags().asHex();
+    @Override
+    public String createTransactionContext() {
+        IdGenerator generator = IdGenerator.random();
+        String traceId = generator.generateTraceId();
+        String spanId = generator.generateSpanId();
+        TraceFlags traceFlags = TraceFlags.getSampled();
+        TraceState traceState = TraceState.getDefault();
+        this.transactionContext = SpanContext.create(traceId, spanId, traceFlags, traceState);
 
-        this.traceContext = version + "-" + traceId + "-" + spanId + "-" + traceFlags;
+        String traceContext = "00-" + traceId + "-" + spanId + "-" + traceFlags.asHex();
+        return traceContext;
     }
 
-    @Override
-    public String getTraceContext() {
-        return this.traceContext;
+    public SpanContext getTransactionContext() {
+        return this.transactionContext;
     }
 
     /**

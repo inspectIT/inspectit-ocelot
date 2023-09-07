@@ -28,7 +28,7 @@ public class NoopContext implements InternalInspectitContext {
     }
 
     @Override
-    public String getTraceContext() {
+    public String createTransactionContext() {
         return null;
     }
 
