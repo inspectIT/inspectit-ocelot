@@ -28,7 +28,7 @@ public class NoopContext implements InternalInspectitContext {
     }
 
     @Override
-    public String createRemoteTransactionContext() {
+    public String createRemoteParentContext() {
         return null;
     }
 

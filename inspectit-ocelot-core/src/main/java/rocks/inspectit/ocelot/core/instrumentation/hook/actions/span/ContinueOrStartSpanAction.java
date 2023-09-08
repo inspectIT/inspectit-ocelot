@@ -127,8 +127,8 @@ public class ContinueOrStartSpanAction implements IHookAction {
             // load remote parent if it exists in dataOverwrites
             SpanContext remoteParent = ctx.getAndClearCurrentRemoteSpanContext();
 
-            // if no remote parent span was down-propagated, look up the current transactionContext
-            if(remoteParent == null) remoteParent = ctx.getRemoteTransactionContext();
+            // if no remote parent span was down-propagated, look up whether a remote parent context was created locally
+            if(remoteParent == null) remoteParent = ctx.getRemoteParentContext();
 
             boolean hasLocalParent = false;
             if (remoteParent == null) {
