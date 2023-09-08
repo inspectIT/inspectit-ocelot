@@ -177,7 +177,8 @@ public class ContinueOrStartSpanAction implements IHookAction {
             }
         }
         if (name == null) {
-            name = methodInfo.getDeclaringClass().getSimpleName() + "." + methodInfo.getName();
+            if(methodInfo != null)
+                name = methodInfo.getDeclaringClass().getSimpleName() + "." + methodInfo.getName();
         }
         return name;
     }
