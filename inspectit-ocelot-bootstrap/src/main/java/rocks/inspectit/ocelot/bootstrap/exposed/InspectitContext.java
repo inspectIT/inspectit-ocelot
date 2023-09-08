@@ -41,12 +41,12 @@ public interface InspectitContext {
     /**
      * This function should be called in the entry- or pre-entry-phase, to allow the created span to use the context
      *
-     * Creates a SpanContext, which the current InspectitContext can use as a remote-parent-span-context,
+     * Creates a SpanContext locally, which the current InspectitContext can use as a remote-parent-context,
      * as long as no REMOTE_PARENT_SPAN_CONTEXT_KEY was specified earlier by down-propagation
      *
-     * @return The transaction trace context of the current InspectitContext in the W3C-format
+     * @return The trace context of the created SpanContext in the W3C-format
      */
-    String createRemoteTransactionContext();
+    String createRemoteParentContext();
 
     /**
      * Generates a map representing the globally down-propagated data stored in this context.
