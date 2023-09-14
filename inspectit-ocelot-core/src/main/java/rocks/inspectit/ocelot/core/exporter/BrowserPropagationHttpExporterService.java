@@ -31,11 +31,6 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
     private BrowserPropagationServlet httpServlet;
 
     /**
-     * Stores a reference of the InspectITConfig to enable runtime updates of the session limit
-     */
-    private InspectitConfig inspectitConfig;
-
-    /**
      * Delay to rerun the scheduled method after the method finished in milliseconds
      */
     private static final int FIXED_DELAY = 10000;
@@ -65,12 +60,14 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         String host = settings.getHost();
         int port = settings.getPort();
         String path = settings.getPath();
-        int sessionLimit = settings.getSessionLimit();
         timeToLive = settings.getTimeToLive();
+
+        int sessionLimit = settings.getSessionLimit();
         sessionStorage = BrowserPropagationSessionStorage.getInstance();
         sessionStorage.setSessionLimit(sessionLimit);
-        httpServlet = new BrowserPropagationServlet();
-        inspectitConfig = configuration;
+
+        String sessionIdKey = settings.getSessionIdKey();
+        httpServlet = new BrowserPropagationServlet(sessionIdKey);
 
         return startServer(host, port, path, httpServlet);
     }
@@ -107,19 +104,13 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
     }
 
     /**
-     * Updates the session storage:
-     * 1.   Browser propagation data is cached for a specific amount of time (timeToLive)
-     *      If the time expires, clean up the storage
-     * 2.   Update the session limit
-     *      Note that this will not delete any active sessions, if the new session limit is exceeded
+     * Updates the session storage
+     * Browser propagation data is cached for a specific amount of time (timeToLive)
+     * If the time expires, clean up the storage
      */
     @Scheduled(fixedDelay = FIXED_DELAY)
     public void updateSessionStorage() {
         if(httpServlet == null) return;
         sessionStorage.cleanUpData(timeToLive);
-
-        if(inspectitConfig == null) return;
-        int sessionLimit = inspectitConfig.getExporters().getTags().getHttp().getSessionLimit();
-        sessionStorage.setSessionLimit(sessionLimit);
     }
 }

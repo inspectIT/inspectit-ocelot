@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.browser;
 
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,6 +17,7 @@ public class BrowserPropagationSessionStorage {
     private static final int KEY_MIN_SIZE = 64;
     private static final int KEY_MAX_SIZE = 512;
 
+    @Getter
     @Setter
     private int sessionLimit = 100;
     private static BrowserPropagationSessionStorage instance;

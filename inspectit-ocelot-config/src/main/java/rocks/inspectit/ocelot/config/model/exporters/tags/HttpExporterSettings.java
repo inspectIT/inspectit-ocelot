@@ -38,4 +38,9 @@ public class HttpExporterSettings {
      * How long the data should be stored in the server
      */
     private int timeToLive;
+
+    /**
+     * Key, which should be read during browser-propagation to receive the session-ID
+     */
+    private String sessionIdKey;
 }

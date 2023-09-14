@@ -26,18 +26,24 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BrowserPropagationServlet extends HttpServlet {
 
+    /**
+     * Key, which should be used to store the session-Ids
+     * Default-key: "Cookie"
+     */
+    private final String sessionIDKey;
     private final ObjectMapper mapper;
     private final BrowserPropagationSessionStorage sessionStorage;
 
-    public BrowserPropagationServlet() {
-        mapper = new ObjectMapper();
-        sessionStorage = BrowserPropagationSessionStorage.getInstance();
+    public BrowserPropagationServlet(String sessionIDKey) {
+        this.sessionIDKey = sessionIDKey;
+        this.mapper = new ObjectMapper();
+        this.sessionStorage = BrowserPropagationSessionStorage.getInstance();
     }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.debug("Tags HTTP-server received GET-request");
-        String sessionID = request.getHeader("cookie");
+        String sessionID = request.getHeader(sessionIDKey);
         if(sessionID == null) {
             log.warn("Request misses session ID");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -63,7 +69,7 @@ public class BrowserPropagationServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {
         log.debug("Tags HTTP-server received PUT-request");
-        String sessionID = request.getHeader("cookie");
+        String sessionID = request.getHeader(sessionIDKey);
         if(sessionID == null) {
             log.warn("Request misses session ID");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
