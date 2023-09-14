@@ -116,3 +116,5 @@ inspectit:
         session-limit: 100
         # how long the data should be stored in the server in seconds
         time-to-live: 300
+        # key, which should be read during browser-propagation to receive the session-ID
+        session-id-key: "Cookie"
