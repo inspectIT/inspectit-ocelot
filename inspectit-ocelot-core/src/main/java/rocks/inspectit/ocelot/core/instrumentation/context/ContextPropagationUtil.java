@@ -380,12 +380,20 @@ public class ContextPropagationUtil {
     }
 
     /**
-     * Updates the current session-id-key used for browser propagation
-     * @param sessionIdHeader new session-id-key
+     * Updates the current session-id-header used for browser propagation
+     * @param sessionIdHeader new session-id-header
      */
     public static void setSessionIdHeader(String sessionIdHeader) {
         PROPAGATION_FIELDS.remove(SESSION_ID_HEADER);
         SESSION_ID_HEADER = sessionIdHeader;
         PROPAGATION_FIELDS.add(SESSION_ID_HEADER);
+    }
+
+    /**
+     * Remove session-id-header
+     * For example, if the tags-http-exporter is disabled and thus no session-ids need to be extracted
+     */
+    public static void removeSessionIdHeader() {
+        PROPAGATION_FIELDS.remove(SESSION_ID_HEADER);
     }
 }

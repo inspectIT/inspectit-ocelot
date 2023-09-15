@@ -28,15 +28,20 @@ public class BrowserPropagationUtil {
 
     @PostConstruct
     public void initialize() {
-        setSessionIdHeader(env.getCurrentConfig().getExporters().getTags().getHttp().getSessionIdHeader());
+        if(isBrowserPropagationEnabled())
+            setSessionIdHeader(env.getCurrentConfig().getExporters().getTags().getHttp().getSessionIdHeader());
+        else
+            ContextPropagationUtil.removeSessionIdHeader();
     }
 
     @EventListener
     private void configEventListener(InspectitConfigChangedEvent event) {
-        String oldSessionIdHeader = event.getOldConfig().getExporters().getTags().getHttp().getSessionIdHeader();
-        String newSessionIdHeader = event.getNewConfig().getExporters().getTags().getHttp().getSessionIdHeader();
+        if(isBrowserPropagationEnabled()) {
+            String oldSessionIdHeader = event.getOldConfig().getExporters().getTags().getHttp().getSessionIdHeader();
+            String newSessionIdHeader = event.getNewConfig().getExporters().getTags().getHttp().getSessionIdHeader();
 
-        if(!oldSessionIdHeader.equals(newSessionIdHeader)) ContextPropagationUtil.setSessionIdHeader(newSessionIdHeader);
+            if(!oldSessionIdHeader.equals(newSessionIdHeader)) ContextPropagationUtil.setSessionIdHeader(newSessionIdHeader);
+        }
     }
 
     @VisibleForTesting
@@ -44,5 +49,9 @@ public class BrowserPropagationUtil {
         sessionIdHeader = key;
         log.info("Use of new session-id-header: " + sessionIdHeader);
         ContextPropagationUtil.setSessionIdHeader(sessionIdHeader);
+    }
+
+    private boolean isBrowserPropagationEnabled() {
+        return !env.getCurrentConfig().getExporters().getTags().getHttp().getEnabled().isDisabled();
     }
 }
