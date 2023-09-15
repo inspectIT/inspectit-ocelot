@@ -71,8 +71,9 @@ For this reason the inspectIT context implements _data propagation_.
 * **Up Propagation:** Data collected in your instrumented method will be visible to the methods which caused the invocation of your method. This means that all methods which lie on the call stack will have access to the data written by your method
 * **Browser Propagation:** An additional form of propagation. Data collected in your instrumented method will be stored inside a data storage. This storage can be exposed via a REST-API, if [_exporters.tags.http_](../tags/tags-exporters.md#http-exporter) is enabled. A browser can read this data via GET-requests. 
 
-Additionally, a browser can write data into the storage via PUT-requests. If you enabled browser- as well as down-propagation for a data key, the data written by the browser will be stored in the _inspectIT context_.
-Please note, before writing or reading browser propagation data, you need to specify a session-ID inside the _inspectIT context_. After that, all data belonging to the current browser will be stored behind this session-ID.
+Additionally, a browser can write data into the storage via PUT-requests. If browser- as well as down-propagation is enabled for a data key, the data written by the browser will be stored in the _inspectIT context_.
+Please note, before writing or reading browser propagation data, you need to provide a session-ID inside the request-header. 
+After that, all data belonging to the current session will be stored behind this session-ID.
 For more information, see [Tags-HTTP-Exporter](../tags/tags-exporters.md#http-exporter).
 
 Up- and down propagation can also be combined: in this case then the data is attached to the control flow, meaning that it will appear as if its value will be passed around with every method call and return.
