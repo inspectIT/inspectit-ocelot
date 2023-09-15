@@ -24,7 +24,7 @@ public class BrowserPropagationUtil {
     @Autowired
     private InspectitEnvironment env;
     @Getter
-    private static String sessionIdKey;
+    private static String sessionIdKey; //Works
 
     @PostConstruct
     public void initialize() {
