@@ -24,7 +24,7 @@ public class BrowserPropagationUtil {
     @Autowired
     private InspectitEnvironment env;
     @Getter
-    private static String sessionIdHeader;
+    private static String sessionIdHeader = "Cookie";
 
     @PostConstruct
     public void initialize() {
