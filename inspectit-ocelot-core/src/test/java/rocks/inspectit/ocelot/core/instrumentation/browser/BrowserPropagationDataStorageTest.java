@@ -4,6 +4,9 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
+import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextUtil;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
@@ -18,8 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {"inspectit.exporters.tags.http.enabled=true", "inspectit.exporters.tags.http.session-id-header=SessionKey"})
+@DirtiesContext
 @ExtendWith(MockitoExtension.class)
-public class BrowserPropagationDataStorageTest {
+public class BrowserPropagationDataStorageTest extends SpringTestBase {
 
     @Mock
     PropagationMetaData propagation;
@@ -28,7 +33,8 @@ public class BrowserPropagationDataStorageTest {
 
     Map<String, String> headers;
 
-    private static final String sessionID = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
+    private static final String sessionIdHeader = "SessionKey";
+    private static final String sessionId = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
 
     @BeforeEach
     void prepareTest() {
@@ -36,7 +42,7 @@ public class BrowserPropagationDataStorageTest {
         sessionStorage = BrowserPropagationSessionStorage.getInstance();
         // Create HTTP header to pass it to the initial InspectIT-Context
         headers = new HashMap<>();
-        headers.put("cookie", sessionID);
+        headers.put(sessionIdHeader, sessionId);
     }
 
     @AfterEach
@@ -50,7 +56,7 @@ public class BrowserPropagationDataStorageTest {
         @Test
         void verifyNoDataHasBeenWritten() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(false);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionID);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctx.readDownPropagationHeaders(headers);
             ctx.makeActive();
@@ -67,7 +73,7 @@ public class BrowserPropagationDataStorageTest {
         void verifyDataHasBeenWritten() {
             when(propagation.isPropagatedWithBrowser(anyString())).thenReturn(false);
             when(propagation.isPropagatedWithBrowser(eq("keyA"))).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionID);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctx.readDownPropagationHeaders(headers);
             ctx.makeActive();
@@ -87,7 +93,7 @@ public class BrowserPropagationDataStorageTest {
         void verifyDataHasBeenOverwritten() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionID);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             Map<String, Object> oldData = new HashMap<>();
             oldData.put("keyA", "value0");
             dataStorage.writeData(oldData);
@@ -114,7 +120,7 @@ public class BrowserPropagationDataStorageTest {
         @Test
         void verifyAttributeCountLimit() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionID);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             Map<String, Object> dummyMap = IntStream.rangeClosed(1, 128).boxed()
                     .collect(Collectors.toMap(i -> "key"+i, i -> "value"+i));
             dataStorage.writeData(dummyMap);
@@ -136,7 +142,7 @@ public class BrowserPropagationDataStorageTest {
         @Test
         void verifyValidEntries() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionID);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctx.readDownPropagationHeaders(headers);
             ctx.makeActive();
@@ -161,7 +167,7 @@ public class BrowserPropagationDataStorageTest {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(false);
             when(propagation.isPropagatedDownWithinJVM(eq("remote_session_id"))).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionID);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             Map<String, Object> data = new HashMap<>();
             data.put("keyA", "valueA");
             dataStorage.writeData(data);
@@ -186,7 +192,7 @@ public class BrowserPropagationDataStorageTest {
         void verifyDownPropagation() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionID);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             Map<String, Object> data = new HashMap<>();
             data.put("keyA", "valueA");
@@ -219,7 +225,7 @@ public class BrowserPropagationDataStorageTest {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
             when(propagation.isPropagatedUpWithinJVM(eq("keyB"))).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionID);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             Map<String, Object> data = new HashMap<>();
             data.put("keyA", "valueA");
