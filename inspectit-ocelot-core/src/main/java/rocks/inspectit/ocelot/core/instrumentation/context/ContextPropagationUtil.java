@@ -51,7 +51,7 @@ public class ContextPropagationUtil {
     /**
      * Session-ID-key to allow browser propagation
      */
-    public static String SESSION_ID_KEY = BrowserPropagationUtil.getSessionIdKey();
+    private static String SESSION_ID_HEADER = BrowserPropagationUtil.getSessionIdHeader();
 
     private static final String B3_HEADER_PREFIX = "X-B3-";
 
@@ -89,7 +89,7 @@ public class ContextPropagationUtil {
 
     static {
         PROPAGATION_FIELDS.add(CORRELATION_CONTEXT_HEADER);
-        PROPAGATION_FIELDS.add(SESSION_ID_KEY);
+        PROPAGATION_FIELDS.add(SESSION_ID_HEADER);
         PROPAGATION_FIELDS.addAll(B3Propagator.injectingSingleHeader().fields());
         PROPAGATION_FIELDS.addAll(B3Propagator.injectingMultiHeaders().fields());
         PROPAGATION_FIELDS.addAll(W3CTraceContextPropagator.getInstance().fields());
@@ -252,6 +252,16 @@ public class ContextPropagationUtil {
     }
 
     /**
+     * Reads the session-id from the map with the current session-id-key
+     *
+     * @param propagationMap the headers to decode
+     * @return session-id if existing, otherwise null
+     */
+    public static String readPropagatedSessionIdFromHeaderMap(Map<String,String> propagationMap) {
+        return propagationMap.get(ContextPropagationUtil.SESSION_ID_HEADER);
+    }
+
+    /**
      * Extracts the {@link SpanContext} from the given {@code propagator}
      *
      * @param propagator
@@ -371,11 +381,11 @@ public class ContextPropagationUtil {
 
     /**
      * Updates the current session-id-key used for browser propagation
-     * @param sessionIdKey new session-id-key
+     * @param sessionIdHeader new session-id-key
      */
-    public static void setSessionIdKey(String sessionIdKey) {
-        PROPAGATION_FIELDS.remove(SESSION_ID_KEY);
-        SESSION_ID_KEY = sessionIdKey;
-        PROPAGATION_FIELDS.add(SESSION_ID_KEY);
+    public static void setSessionIdHeader(String sessionIdHeader) {
+        PROPAGATION_FIELDS.remove(SESSION_ID_HEADER);
+        SESSION_ID_HEADER = sessionIdHeader;
+        PROPAGATION_FIELDS.add(SESSION_ID_HEADER);
     }
 }

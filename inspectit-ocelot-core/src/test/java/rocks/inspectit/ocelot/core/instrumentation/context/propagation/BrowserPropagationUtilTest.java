@@ -21,7 +21,7 @@ public class BrowserPropagationUtilTest {
 
     @BeforeEach
     void setUp() {
-        browserPropagationUtil.setSessionIdKey(key);
+        browserPropagationUtil.setSessionIdHeader(key);
     }
 
     @Test
@@ -37,7 +37,7 @@ public class BrowserPropagationUtilTest {
         assertThat(headers.contains(key)).isTrue();
 
         String newKey = "NewCookie";
-        browserPropagationUtil.setSessionIdKey(newKey);
+        browserPropagationUtil.setSessionIdHeader(newKey);
 
         assertThat(headers.contains(key)).isFalse();
         assertThat(headers.contains(newKey)).isTrue();

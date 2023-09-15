@@ -40,7 +40,7 @@ public class HttpExporterSettings {
     private int timeToLive;
 
     /**
-     * Key, which should be read during browser-propagation to receive the session-ID
+     * Header, which will be read during browser-propagation to receive the session-ID
      */
-    private String sessionIdKey;
+    private String sessionIdHeader;
 }

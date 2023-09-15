@@ -27,15 +27,15 @@ import java.util.stream.Collectors;
 public class BrowserPropagationServlet extends HttpServlet {
 
     /**
-     * Key, which should be used to store the session-Ids
+     * Header, which should be used to store the session-Ids
      * Default-key: "Cookie"
      */
-    private final String sessionIDKey;
+    private final String sessionIdHeader;
     private final ObjectMapper mapper;
     private final BrowserPropagationSessionStorage sessionStorage;
 
-    public BrowserPropagationServlet(String sessionIDKey) {
-        this.sessionIDKey = sessionIDKey;
+    public BrowserPropagationServlet(String sessionIdHeader) {
+        this.sessionIdHeader = sessionIdHeader;
         this.mapper = new ObjectMapper();
         this.sessionStorage = BrowserPropagationSessionStorage.getInstance();
     }
@@ -43,9 +43,14 @@ public class BrowserPropagationServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.debug("Tags HTTP-server received GET-request");
-        String sessionID = request.getHeader(sessionIDKey);
+        String origin = request.getHeader("Origin");
+        response.setHeader("Access-Control-Allow-Origin", origin);
+        response.setHeader("Access-Control-Allow-Methods", "GET");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+
+        String sessionID = request.getHeader(sessionIdHeader);
         if(sessionID == null) {
-            log.warn("Request misses session ID");
+            log.warn("Request to Tags HTTP-server misses session ID");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
         else {
@@ -69,9 +74,14 @@ public class BrowserPropagationServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) {
         log.debug("Tags HTTP-server received PUT-request");
-        String sessionID = request.getHeader(sessionIDKey);
+        String origin = request.getHeader("Origin");
+        response.setHeader("Access-Control-Allow-Origin", origin);
+        response.setHeader("Access-Control-Allow-Methods", "PUT");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+
+        String sessionID = request.getHeader(sessionIdHeader);
         if(sessionID == null) {
-            log.warn("Request misses session ID");
+            log.warn("Request to Tags HTTP-server misses session ID");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
         else {
@@ -93,13 +103,28 @@ public class BrowserPropagationServlet extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doOptions(HttpServletRequest request, HttpServletResponse response) {
+        log.debug("Tags HTTP-server received OPTIONS-request");
+        String origin = request.getHeader("Origin");
+        String accessControlRequestMethod = request.getHeader("Access-Control-Request-Method");
+
+        if (origin != null && accessControlRequestMethod != null) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Methods", "GET, PUT");
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setStatus(HttpServletResponse.SC_OK);
+        }
+        else response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+    }
+
     private Map<String, String> getRequestBody(HttpServletRequest request) {
         try (BufferedReader reader = request.getReader()) {
             Set<Map.Entry<String,String>> entrySet = mapper.readValue(reader, new TypeReference<Set<Map.Entry<String,String>>>() {});
             return entrySet.stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (Exception e) {
-            log.info("Request failed");
+            log.info("Request to Tags HTTP-server failed");
             return null;
         }
     }

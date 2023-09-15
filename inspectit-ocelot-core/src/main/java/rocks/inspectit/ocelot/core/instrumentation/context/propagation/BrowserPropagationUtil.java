@@ -24,25 +24,25 @@ public class BrowserPropagationUtil {
     @Autowired
     private InspectitEnvironment env;
     @Getter
-    private static String sessionIdKey;
+    private static String sessionIdHeader;
 
     @PostConstruct
     public void initialize() {
-        setSessionIdKey(env.getCurrentConfig().getExporters().getTags().getHttp().getSessionIdKey());
+        setSessionIdHeader(env.getCurrentConfig().getExporters().getTags().getHttp().getSessionIdHeader());
     }
 
     @EventListener
     private void configEventListener(InspectitConfigChangedEvent event) {
-        String oldSessionIdKey = event.getOldConfig().getExporters().getTags().getHttp().getSessionIdKey();
-        String newSessionIdKey = event.getNewConfig().getExporters().getTags().getHttp().getSessionIdKey();
+        String oldSessionIdHeader = event.getOldConfig().getExporters().getTags().getHttp().getSessionIdHeader();
+        String newSessionIdHeader = event.getNewConfig().getExporters().getTags().getHttp().getSessionIdHeader();
 
-        if(!oldSessionIdKey.equals(newSessionIdKey)) setSessionIdKey(newSessionIdKey);
+        if(!oldSessionIdHeader.equals(newSessionIdHeader)) ContextPropagationUtil.setSessionIdHeader(newSessionIdHeader);
     }
 
     @VisibleForTesting
-    void setSessionIdKey(String key) {
-        sessionIdKey = key;
-        ContextPropagationUtil.setSessionIdKey(sessionIdKey);
-        log.info("Use of new session-id-key: " + sessionIdKey);
+    void setSessionIdHeader(String key) {
+        sessionIdHeader = key;
+        log.info("Use of new session-id-header: " + sessionIdHeader);
+        ContextPropagationUtil.setSessionIdHeader(sessionIdHeader);
     }
 }

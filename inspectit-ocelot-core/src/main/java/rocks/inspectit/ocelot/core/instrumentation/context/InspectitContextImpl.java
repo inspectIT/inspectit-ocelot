@@ -566,8 +566,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
         ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, this);
         SpanContext remote_span = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(headers);
         setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, remote_span);
-        String sessionID = headers.get("cookie");
-        if(sessionID != null) setData(REMOTE_SESSION_ID, sessionID);
+        String sessionId = ContextPropagationUtil.readPropagatedSessionIdFromHeaderMap(headers);
+        if(sessionId != null) setData(REMOTE_SESSION_ID, sessionId);
     }
 
     @Override

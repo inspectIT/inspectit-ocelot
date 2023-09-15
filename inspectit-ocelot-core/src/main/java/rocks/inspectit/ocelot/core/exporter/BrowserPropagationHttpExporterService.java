@@ -66,8 +66,8 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         sessionStorage = BrowserPropagationSessionStorage.getInstance();
         sessionStorage.setSessionLimit(sessionLimit);
 
-        String sessionIdKey = settings.getSessionIdKey();
-        httpServlet = new BrowserPropagationServlet(sessionIdKey);
+        String sessionIdHeader = settings.getSessionIdHeader();
+        httpServlet = new BrowserPropagationServlet(sessionIdHeader);
 
         return startServer(host, port, path, httpServlet);
     }
