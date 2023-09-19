@@ -53,9 +53,10 @@ The following properties are nested properties below the `inspectit.exporters.ta
 | `.host`              | `0.0.0.0`    |The hostname or network address to which the HTTP server should bind.
 | `.port`              | `9000`       |The port the HTTP server should use.
 | `.path`              | `/inspectit` |The path on which the HTTP endpoints will be available.
+| `.allowed-origins`   | `["*"]`      |A list of allowed origins, which are able to access the http-server.
 | `.session-limit`     | `100`        |How many sessions can be stored in the server at the same time.
-| `.time-to-live`      | `300`        |How long sessions should be stored in the server in seconds.
 | `.session-id-header` | `Cookie`     |The header, which will be read during propagation to extract the session-ID from
+| `.time-to-live`      | `300`        |How long sessions should be stored in the server in seconds.
 
 
 The data of the HTTP exporter is stored inside internal data storages. Data tags will only be written to the storage

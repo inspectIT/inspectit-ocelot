@@ -14,6 +14,7 @@ import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.servlet.http.HttpServlet;
 import java.net.InetSocketAddress;
+import java.util.List;
 
 /**
  * Tags HTTP-Server to "export" data-tags to browsers
@@ -67,7 +68,8 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         sessionStorage.setSessionLimit(sessionLimit);
 
         String sessionIdHeader = settings.getSessionIdHeader();
-        httpServlet = new BrowserPropagationServlet(sessionIdHeader);
+        List<String> allowedOrigins = settings.getAllowedOrigins();
+        httpServlet = new BrowserPropagationServlet(sessionIdHeader, allowedOrigins);
 
         return startServer(host, port, path, httpServlet);
     }

@@ -19,12 +19,10 @@ import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@TestPropertySource(properties = {"inspectit.exporters.tags.http.time-to-live=10"})
 @DirtiesContext
 public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase {
 
@@ -35,10 +33,11 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
 
     private static final String sessionID = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
     private static final String host = "127.0.0.1";
-    private static int port;
-    private static final String path = "/inspectit";
+    private static String url;
 
+    private static final String path = "/inspectit";
     private static final String sessionIDHeader = "Cookie";
+    private static final String allowedOrigin = "localhost";
 
     @BeforeEach
     void prepareTest() throws IOException {
@@ -53,9 +52,10 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
     }
 
     void startServer() throws IOException {
-        port = Network.getFreeServerPort();
-        BrowserPropagationServlet servlet = new BrowserPropagationServlet(sessionIDHeader);
+        int port = Network.getFreeServerPort();
+        BrowserPropagationServlet servlet = new BrowserPropagationServlet(sessionIDHeader, Collections.singletonList(allowedOrigin));
         exporterService.startServer(host, port, path, servlet);
+        url = "http://" + host + ":" + port + path;
     }
 
     CloseableHttpClient createHttpClient(){
@@ -76,11 +76,11 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
     class GetEndpoint {
         @Test
         void verifyGetEndpoint() throws IOException {
-            String url = "http://" + host + ":" + port + path;
             HttpGet getRequest = new HttpGet(url);
+            getRequest.setHeader("Origin", allowedOrigin);
             getRequest.setHeader(sessionIDHeader, sessionID);
-            CloseableHttpResponse response = testClient.execute(getRequest);
 
+            CloseableHttpResponse response = testClient.execute(getRequest);
             int statusCode = response.getStatusLine().getStatusCode();
             HttpEntity entity = response.getEntity();
             String responseBody = EntityUtils.toString(entity);
@@ -93,37 +93,51 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
 
         @Test
         void verifyGetEndpointWithoutSessionID() throws IOException {
-            String url = "http://" + host + ":" + port + path;
             HttpGet getRequest = new HttpGet(url);
+            getRequest.setHeader("Origin", allowedOrigin);
 
             CloseableHttpResponse response = testClient.execute(getRequest);
-
             int statusCode = response.getStatusLine().getStatusCode();
+
             assertThat(statusCode).isEqualTo(400);
             response.close();
         }
 
         @Test
         void verifyGetEndpointWithWrongSessionID() throws IOException {
-            String url = "http://" + host + ":" + port + path;
             HttpGet getRequest = new HttpGet(url);
+            getRequest.setHeader("Origin", allowedOrigin);
             getRequest.setHeader(sessionIDHeader, "###WrongSessionID###");
-            CloseableHttpResponse response = testClient.execute(getRequest);
 
+            CloseableHttpResponse response = testClient.execute(getRequest);
             int statusCode = response.getStatusLine().getStatusCode();
+
             assertThat(statusCode).isEqualTo(404);
             response.close();
         }
 
         @Test
         void verifyGetEndpointWithoutCorrectSessionIDKey() throws IOException {
-            String url = "http://" + host + ":" + port + path;
             HttpGet getRequest = new HttpGet(url);
+            getRequest.setHeader("Origin", allowedOrigin);
             getRequest.setHeader(sessionIDHeader + "-1", sessionID);
-            CloseableHttpResponse response = testClient.execute(getRequest);
 
+            CloseableHttpResponse response = testClient.execute(getRequest);
             int statusCode = response.getStatusLine().getStatusCode();
+
             assertThat(statusCode).isEqualTo(400);
+            response.close();
+        }
+
+        @Test
+        void verifyGetEndpointWithoutAllowedOrigin() throws IOException {
+            HttpGet getRequest = new HttpGet(url);
+            getRequest.setHeader("Origin", "www.example.com");
+
+            CloseableHttpResponse response = testClient.execute(getRequest);
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            assertThat(statusCode).isEqualTo(403);
             response.close();
         }
     }
@@ -133,11 +147,11 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
 
         @Test
         void verifyPutEndpointWithCorrectData() throws IOException {
-            String url = "http://" + host + ":" + port + path;
             HttpPut putRequest = new HttpPut(url);
             String requestBody = "[{\"newKey\":\"newValue\"}]";
             StringEntity requestEntity = new StringEntity(requestBody);
             putRequest.setEntity(requestEntity);
+            putRequest.setHeader("Origin", allowedOrigin);
             putRequest.setHeader(sessionIDHeader, sessionID);
 
             CloseableHttpResponse response = testClient.execute(putRequest);
@@ -150,11 +164,11 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
 
         @Test
         void verifyPutEndpointWithIncorrectData() throws IOException {
-            String url = "http://" + host + ":" + port + path;
             HttpPut putRequest = new HttpPut(url);
             String requestBody = "##WrongDataFormat##";
             StringEntity requestEntity = new StringEntity(requestBody);
             putRequest.setEntity(requestEntity);
+            putRequest.setHeader("Origin", allowedOrigin);
             putRequest.setHeader(sessionIDHeader, sessionID);
 
             CloseableHttpResponse response = testClient.execute(putRequest);
@@ -166,11 +180,11 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
 
         @Test
         void verifyPutEndpointWithoutSessionID() throws IOException {
-            String url = "http://" + host + ":" + port + path;
             HttpPut putRequest = new HttpPut(url);
             String requestBody = "[{\"newKey\":\"newValue\"}]";
             StringEntity requestEntity = new StringEntity(requestBody);
             putRequest.setEntity(requestEntity);
+            putRequest.setHeader("Origin", allowedOrigin);
 
             CloseableHttpResponse response = testClient.execute(putRequest);
             int statusCode = response.getStatusLine().getStatusCode();
@@ -182,11 +196,11 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
 
         @Test
         void verifyPutEndpointWithWrongSessionID() throws IOException {
-            String url = "http://" + host + ":" + port + path;
             HttpPut putRequest = new HttpPut(url);
             String requestBody = "[{\"newKey\":\"newValue\"}]";
             StringEntity requestEntity = new StringEntity(requestBody);
             putRequest.setEntity(requestEntity);
+            putRequest.setHeader("Origin", allowedOrigin);
             putRequest.setHeader(sessionIDHeader, "###WrongSessionID###");
 
             CloseableHttpResponse response = testClient.execute(putRequest);
@@ -199,11 +213,11 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
 
         @Test
         void verifyPutEndpointWithoutCorrectSessionIDKey() throws IOException {
-            String url = "http://" + host + ":" + port + path;
             HttpPut putRequest = new HttpPut(url);
             String requestBody = "[{\"newKey\":\"newValue\"}]";
             StringEntity requestEntity = new StringEntity(requestBody);
             putRequest.setEntity(requestEntity);
+            putRequest.setHeader("Origin", allowedOrigin);
             putRequest.setHeader(sessionIDHeader + "-1", sessionID);
 
             CloseableHttpResponse response = testClient.execute(putRequest);
@@ -213,18 +227,29 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
             assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
             response.close();
         }
+
+        @Test
+        void verifyPutEndpointWithoutAllowedOrigin() throws IOException {
+            HttpPut putRequest = new HttpPut(url);
+            putRequest.setHeader("Origin", "www.example.com");
+
+            CloseableHttpResponse response = testClient.execute(putRequest);
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            assertThat(statusCode).isEqualTo(403);
+            response.close();
+        }
     }
 
     @Nested
     class OptionsEndpoint {
         @Test
         void verifyOptionsEndpointSuccessfulGet() throws IOException {
-            String url = "http://" + host + ":" + port + path;
             HttpOptions optionsRequest = new HttpOptions(url);
-            optionsRequest.setHeader("origin", "https://www.example.com");
+            optionsRequest.setHeader("Origin", allowedOrigin);
             optionsRequest.setHeader("access-control-request-method", "GET");
-            CloseableHttpResponse response = testClient.execute(optionsRequest);
 
+            CloseableHttpResponse response = testClient.execute(optionsRequest);
             int statusCode = response.getStatusLine().getStatusCode();
 
             assertThat(statusCode).isEqualTo(200);
@@ -233,12 +258,11 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
 
         @Test
         void verifyOptionsEndpointSuccessfulPut() throws IOException {
-            String url = "http://" + host + ":" + port + path;
             HttpOptions optionsRequest = new HttpOptions(url);
-            optionsRequest.setHeader("origin", "https://www.example.com");
+            optionsRequest.setHeader("Origin", allowedOrigin);
             optionsRequest.setHeader("access-control-request-method", "PUT");
-            CloseableHttpResponse response = testClient.execute(optionsRequest);
 
+            CloseableHttpResponse response = testClient.execute(optionsRequest);
             int statusCode = response.getStatusLine().getStatusCode();
 
             assertThat(statusCode).isEqualTo(200);
@@ -246,11 +270,23 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         }
 
         @Test
-        void verifyOptionsEndpointFailed() throws IOException {
-            String url = "http://" + host + ":" + port + path;
+        void verifyOptionsEndpointWithMissingHeader() throws IOException {
             HttpOptions optionsRequest = new HttpOptions(url);
-            CloseableHttpResponse response = testClient.execute(optionsRequest);
+            optionsRequest.setHeader("Origin", allowedOrigin);
 
+            CloseableHttpResponse response = testClient.execute(optionsRequest);
+            int statusCode = response.getStatusLine().getStatusCode();
+
+            assertThat(statusCode).isEqualTo(403);
+            response.close();
+        }
+
+        @Test
+        void verifyOptionsEndpointWithoutAllowedOrigin() throws IOException {
+            HttpOptions optionsRequest = new HttpOptions(url);
+            optionsRequest.setHeader("Origin", "www.example.com");
+
+            CloseableHttpResponse response = testClient.execute(optionsRequest);
             int statusCode = response.getStatusLine().getStatusCode();
 
             assertThat(statusCode).isEqualTo(403);
