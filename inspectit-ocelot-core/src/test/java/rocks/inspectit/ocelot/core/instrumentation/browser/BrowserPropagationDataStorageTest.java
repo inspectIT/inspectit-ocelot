@@ -38,6 +38,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
     void prepareTest() {
         // Create session storage to store BrowserPropagationDataStorages
         sessionStorage = BrowserPropagationSessionStorage.getInstance();
+        sessionStorage.setExporterActive(true);
         // Create HTTP header to pass it to the initial InspectIT-Context
         headers = new HashMap<>();
         headers.put(sessionIdHeader, sessionId);
@@ -144,6 +145,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctx.readDownPropagationHeaders(headers);
             ctx.makeActive();
+            // Create too long key and value
             String dummyKey = IntStream.range(1, 130).mapToObj(i -> "x").collect(Collectors.joining());
             String dummyValue = IntStream.range(1,2050).mapToObj(i -> "y").collect(Collectors.joining());
 

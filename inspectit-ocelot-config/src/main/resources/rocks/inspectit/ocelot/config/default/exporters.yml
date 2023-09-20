@@ -103,10 +103,11 @@ inspectit:
     # settings for tags exporters
     tags:
       # settings for the http-server exporter
+      # note that this server does not provide any encryption or performs any authentication
       http:
         enabled: DISABLED
         # the host of the http-server
-        host: 0.0.0.0
+        host: 127.0.0.1
         # the port of the http-server
         port: 9000
         # the path for the endpoint of the http-server

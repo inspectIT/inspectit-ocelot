@@ -66,6 +66,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         int sessionLimit = settings.getSessionLimit();
         sessionStorage = BrowserPropagationSessionStorage.getInstance();
         sessionStorage.setSessionLimit(sessionLimit);
+        sessionStorage.setExporterActive(true);
 
         String sessionIdHeader = settings.getSessionIdHeader();
         List<String> allowedOrigins = settings.getAllowedOrigins();
@@ -81,6 +82,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
                 log.info("Stopping Tags HTTP-Server");
                 server.stop();
                 sessionStorage.clearDataStorages();
+                sessionStorage.setExporterActive(false);
             } catch (Exception e) {
                 log.error("Error disabling Tags HTTP-Server", e);
             }

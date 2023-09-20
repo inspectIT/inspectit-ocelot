@@ -14,12 +14,17 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class BrowserPropagationSessionStorage {
 
-    private static final int KEY_MIN_SIZE = 64;
+    private static final int KEY_MIN_SIZE = 16;
     private static final int KEY_MAX_SIZE = 512;
 
-    @Getter
-    @Setter
+    @Getter @Setter
     private int sessionLimit = 100;
+    /**
+     * Boolean, which helps to create error messages, if browser propagation is tried, but exporter is disabled
+     */
+    @Getter @Setter
+    private boolean isExporterActive = false;
+
     private static BrowserPropagationSessionStorage instance;
     private final ConcurrentMap<String, BrowserPropagationDataStorage> dataStorages;
 

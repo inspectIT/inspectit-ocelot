@@ -17,10 +17,14 @@ One GET-endpoint to expose data to external applications and one PUT-endpoint to
 The server is by default started on the port `9000` and data can then be accessed or written by 
 calling 'http://localhost:9000/inspectit'
 
-#### Runtime Updates
+#### Production environment
 
-All properties of the HTTP-exporter can be updated during runtime. However, changing properties will result in a server
-restart, which also deletes all data currently stored in the server.
+The Tags HTTP exporter does not provide any encryption of data and does not perform any authentication.
+Thus, this server should not be exposed directly to the public in a production environment.
+It is recommended to set up a proxy in front of this server, which handles encryption and authentication.
+
+The server performs authorization with checking, whether the request origin is allowed to access the server. 
+Additionally, every request has to provide a session-ID to access their own session data.
 
 #### Session identification
 
@@ -43,14 +47,21 @@ Sessions will be deleted after their _time-to-live_ is expired.
 #### Session limits
 
 There are some limitations for every session to prevent excessive memory consumption.
-Every session is able to contain up to **128 data keys**. The maximum length for data keys are **128 chars**. The maximum length for data values are **2048 chars**.
+The length of the session-id is restricted to a minimum of 16 characters and a maximum of 512 characters.
+Furthermore, every session is able to contain up to **128 data keys**. 
+The maximum length for data keys are **128 chars**. The maximum length for data values are **2048 chars**.
+
+#### Runtime Updates
+
+All properties of the HTTP-exporter can be updated during runtime. However, changing properties will result in a server
+restart, which also deletes all data currently stored in the server.
 
 The following properties are nested properties below the `inspectit.exporters.tags.http` property:
 
 | Property             | Default      | Description
 |----------------------|--------------|---|
 | `.enabled`           | `DISABLED`   |If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the exporter and HTTP server.
-| `.host`              | `0.0.0.0`    |The hostname or network address to which the HTTP server should bind.
+| `.host`              | `127.0.0.1`  |The hostname or network address to which the HTTP server should bind.
 | `.port`              | `9000`       |The port the HTTP server should use.
 | `.path`              | `/inspectit` |The path on which the HTTP endpoints will be available.
 | `.allowed-origins`   | `["*"]`      |A list of allowed origins, which are able to access the http-server.
@@ -58,8 +69,7 @@ The following properties are nested properties below the `inspectit.exporters.ta
 | `.session-id-header` | `Cookie`     |The header, which will be read during propagation to extract the session-ID from
 | `.time-to-live`      | `300`        |How long sessions should be stored in the server in seconds.
 
-
-The data of the HTTP exporter is stored inside internal data storages. Data tags will only be written to the storage
+The data of the HTTP exporter is stored inside internal data storages. Data tags will only be written to the storage,
 if they are enabled for [browser propagation](../instrumentation/rules.md#data-propagation).
 
 ### Client Example
@@ -67,7 +77,7 @@ if they are enabled for [browser propagation](../instrumentation/rules.md#data-p
 This example should demonstrate, how you can call the REST-API in your frontend application.
 
 ```javascript
-// Send some requests to create data, which can be stored in the Tags HTTP-server
+// Send some requests to transfer the session-id to inspectIT
 callBackend();
 
 // Send GET-request
@@ -177,6 +187,8 @@ paths:
               example: '[{"key1": "value1"}, {"key2": "value2"}]'
         '400':
           description: Failure - Missing session-ID-header
+        '403':
+          description: Forbidden - Not allowed Origin header
         '404':
           description: Failure - Session-ID not found in session-ID-header
     put:
@@ -208,6 +220,8 @@ paths:
           description: Success - Data tags have been written
         '400':
           description: Failure - Invalid request body or missing session-ID-header
+        '403':
+          description: Forbidden - Not allowed Origin header
         '404':
           description: Failure - Session-ID not found in session-ID-header
     options:
@@ -248,7 +262,7 @@ components:
         ID of the current session. The session-ID-header-name can be configured in the InspectIT configuration-server.
         Per default, the Cookie-Header will be used as the session-ID-header.
 
-        The length of the session-id is restricted to a minimum of 64 characters and a maximum of 512 characters.
+        The length of the session-id is restricted to a minimum of 16 characters and a maximum of 512 characters.
       name: Cookie
       in: header
 externalDocs:
