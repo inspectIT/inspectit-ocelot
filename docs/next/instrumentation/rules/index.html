@@ -116,8 +116,9 @@ Consider the following example: you instrument the entry method of your HTTP ser
 <li><strong>Up Propagation:</strong> Data collected in your instrumented method will be visible to the methods which caused the invocation of your method. This means that all methods which lie on the call stack will have access to the data written by your method</li>
 <li><strong>Browser Propagation:</strong> An additional form of propagation. Data collected in your instrumented method will be stored inside a data storage. This storage can be exposed via a REST-API, if <a href="/inspectit-ocelot/docs/next/tags/tags-exporters#http-exporter"><em>exporters.tags.http</em></a> is enabled. A browser can read this data via GET-requests.</li>
 </ul>
-<p>Additionally, a browser can write data into the storage via PUT-requests. If you enabled browser- as well as down-propagation for a data key, the data written by the browser will be stored in the <em>inspectIT context</em>.
-Please note, before writing or reading browser propagation data, you need to specify a session-ID inside the <em>inspectIT context</em>. After that, all data belonging to the current browser will be stored behind this session-ID.
+<p>Additionally, a browser can write data into the storage via PUT-requests. If browser- as well as down-propagation is enabled for a data key, the data written by the browser will be stored in the <em>inspectIT context</em>.
+Please note, before writing or reading browser propagation data, you need to provide a session-ID inside the request-header.
+After that, all data belonging to the current session will be stored behind this session-ID.
 For more information, see <a href="/inspectit-ocelot/docs/next/tags/tags-exporters#http-exporter">Tags-HTTP-Exporter</a>.</p>
 <p>Up- and down propagation can also be combined: in this case then the data is attached to the control flow, meaning that it will appear as if its value will be passed around with every method call and return.</p>
 <p>The second aspect of propagation to consider is the <em>level</em>. Does the propagation happen within each Thread separately or is it propagated across threads? Also, what about propagation across JVM borders, e.g. one micro service calling another one via HTTP? In inspectIT Ocelot we provide the following two settings for the propagation level.</p>
@@ -643,6 +644,77 @@ By setting <code>end-span</code> to false, the span is kept open instead. It can
 In this case, the rule will first attempt to continue the existing span. Only if this fails (e.g. because the specified span does not exist yet or the conditions are not met) a new span is started.</p>
 <p>Again, conditions for the span continuing and span ending can be specified just like for the span starting.
 The properties <code>continue-span-conditions</code> and <code>end-span-conditions</code> work just like <code>start-span-conditions</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="distributed-tracing-with-remote-parent-context"></a><a href="#distributed-tracing-with-remote-parent-context" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Distributed Tracing with Remote Parent Context</h4>
+<p>There are two ways to use a remote parent context in distributed tracing. If the remote parent context exists before the current context,
+you can use <em>readDownPropagationHeaders()</em> inside your action. If the remote parent context will be created after your current context,
+you can use <em>createRemoteParentContext()</em> inside your action.</p>
+<p><em>readDownPropagationHeaders()</em></p>
+<p>The method takes a <em>Map&lt;String,String&gt;</em> as a parameter. This map should contain at least the trace context, which was sent by a Http request header.
+The remote parent trace context should be in either B3-format, W3C-format or datadog-format.
+The action, which uses this function, should be called in the pre-entry or entry phase.</p>
+<p>There is also a default-action in InspectIT, which uses the readDownPropagationHeaders()-function:</p>
+<pre><code class="hljs css language-yaml">  <span class="hljs-attr">'a_servletapi_downPropagation':</span>
+    <span class="hljs-attr">docs:</span>
+      <span class="hljs-attr">since:</span> <span class="hljs-string">'1.2.1'</span>
+      <span class="hljs-attr">description:</span> <span class="hljs-string">'Reads down-propagated data from the request HTTP headers.'</span>
+    <span class="hljs-attr">is-void:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-attr">imports:</span>
+     <span class="hljs-bullet">-</span> <span class="hljs-string">'java.util'</span>
+     <span class="hljs-bullet">-</span> <span class="hljs-string">'javax.servlet'</span>
+     <span class="hljs-bullet">-</span> <span class="hljs-string">'javax.servlet.http'</span>
+    <span class="hljs-attr">input:</span>
+     <span class="hljs-attr">_arg0:</span> <span class="hljs-string">'ServletRequest'</span>
+     <span class="hljs-attr">_context:</span> <span class="hljs-string">'InspectitContext'</span>
+    <span class="hljs-attr">value-body:</span> <span class="hljs-string">|
+     if (_arg0 instanceof HttpServletRequest) {
+       HttpServletRequest req = (HttpServletRequest) _arg0;
+       Collection headerKeys = _context.getPropagationHeaderNames();
+       Map presentHeaders = new HashMap();
+       Iterator it = headerKeys.iterator();
+       while (it.hasNext()) {
+         String name = (String) it.next();
+         java.util.Enumeration values = req.getHeaders(name);
+         if (values != null &amp;&amp; values.hasMoreElements()) {
+           presentHeaders.put(name, String.join(",", Collections.list(values)));
+         }
+       }
+       _context.readDownPropagationHeaders(presentHeaders);
+     }
+</span></code></pre>
+<p><em>createRemoteParentContext()</em></p>
+<p>The method takes no parameter. It can be used, if the remote context will be created after the current context, but should be used as a parent.
+The function creates a span context, which will be used as a parent for the current context. It returns a string, which contains
+the trace context of the remote parent in W3C-format. You can send the returned trace context to your remote service via http response header
+and use the information to create the remote parent context.</p>
+<p>Note that, if a remote parent context was down propagated via <em>readDownPropagationHeaders()</em>, InspectIT will use the down propagated context as a parent
+and ignore the context created with <em>createRemoteParentContext()</em>.</p>
+<p>The action, which uses this function, should be called in the pre-entry or entry phase.
+There is also a default-action in InspectIT, which uses the createRemoteParentContext()-function:</p>
+<pre><code class="hljs css language-yaml">  <span class="hljs-attr">'a_servletapi_remoteParentContext':</span>
+    <span class="hljs-attr">docs:</span>
+      <span class="hljs-attr">since:</span> <span class="hljs-string">'2.5.4'</span>
+      <span class="hljs-attr">description:</span> <span class="hljs-string">"Writes a parent trace context to the given HttpServletResponse's Server-Timing header"</span>
+      <span class="hljs-attr">inputs:</span>
+       <span class="hljs-attr">'response':</span> <span class="hljs-string">'The HttpServletResponse to write to.'</span>
+    <span class="hljs-attr">is-void:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-attr">imports:</span>
+     <span class="hljs-bullet">-</span> <span class="hljs-string">'javax.servlet'</span>
+     <span class="hljs-bullet">-</span> <span class="hljs-string">'javax.servlet.http'</span>
+    <span class="hljs-attr">input:</span>
+     <span class="hljs-attr">'response':</span> <span class="hljs-string">'ServletResponse'</span>
+     <span class="hljs-attr">_context:</span> <span class="hljs-string">'InspectitContext'</span>
+    <span class="hljs-attr">value-body:</span> <span class="hljs-string">|
+     if(response instanceof HttpServletResponse) {
+       HttpServletResponse res = (HttpServletResponse) response;
+       if(!res.isCommitted()) {
+       String traceContext = _context.createRemoteParentContext();
+         if(traceContext == null) return;
+         String key = "Server-Timing";
+         String value = "traceparent; desc=" + traceContext;
+         res.addHeader(key, value);
+       }
+     }
+</span></code></pre>
 <h3><a class="anchor" aria-hidden="true" id="modularizing-rules"></a><a href="#modularizing-rules" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Modularizing Rules</h3>
 <p>When writing complex instrumentation, it can happen that you want to reuse parts of your instrumentation across different rules.
 For example when instrumenting a HTTP library, you typically extract the HTTP path using custom actions. This HTTP path is meant
@@ -692,7 +764,7 @@ As a result, the <code>my_http_path</code> data variable will be populated.</p>
 <p>The key point is now that even if the rule is included multiple times for a given method, it will only be applied exactly once.
 This means that if both <code>myhttp_tracing</code> and <code>myhttp_record_metric</code> are enabled, the <code>myhttp_extract_path</code> will still only be applied once.
 This therefore solves the problem of accidentally doing the same work twice.</p>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 8/2/2023 by Eduard Schander</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/scopes"><span class="arrow-prev">← </span><span>Scopes</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/code-style"><span>Configuration Code Style</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#data-propagation">Data Propagation</a><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li></ul></li><li><a href="#actions">Actions</a><ul class="toc-headings"><li><a href="#input-parameters">Input Parameters</a></li><li><a href="#multiple-statements-and-imports">Multiple statements and Imports</a></li></ul></li><li><a href="#defining-rules">Defining Rules</a><ul class="toc-headings"><li><a href="#invoking-actions">Invoking Actions</a></li><li><a href="#collecting-metrics">Collecting Metrics</a></li><li><a href="#collecting-traces">Collecting Traces</a></li><li><a href="#modularizing-rules">Modularizing Rules</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2023 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 9/21/2023 by Eduard Schander</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/scopes"><span class="arrow-prev">← </span><span>Scopes</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/code-style"><span>Configuration Code Style</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#data-propagation">Data Propagation</a><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li></ul></li><li><a href="#actions">Actions</a><ul class="toc-headings"><li><a href="#input-parameters">Input Parameters</a></li><li><a href="#multiple-statements-and-imports">Multiple statements and Imports</a></li></ul></li><li><a href="#defining-rules">Defining Rules</a><ul class="toc-headings"><li><a href="#invoking-actions">Invoking Actions</a></li><li><a href="#collecting-metrics">Collecting Metrics</a></li><li><a href="#collecting-traces">Collecting Traces</a></li><li><a href="#modularizing-rules">Modularizing Rules</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2023 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
