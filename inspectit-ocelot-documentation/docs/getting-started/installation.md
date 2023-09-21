@@ -10,6 +10,8 @@ This section describes the installation details for the inspectIT Ocelot agent.
 The inspectIT Ocelot supports Java Runtime Environments in version 1.8.0 and above. You will not be able to use the agent with the lower Java versions.
 The agent works with different JRE distributions including Oracle, openJDK, Azul, etc.
 
+It is recommended to always use the latest minor release of your current Java Runtime Environment version in order to ensure straightforward operation.
+
 ## Adding the Agent to a JVM
 
 The best option for using the inspectIT Ocelot is to include it to the start of the JVM by using the `-javaagent` command-line option.

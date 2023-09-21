@@ -141,7 +141,7 @@ dependencies {
 
             'org.apache.httpcomponents:httpclient', //Required for PATCH-Requests
 
-            "org.xerial:sqlite-jdbc",
+            "org.xerial:sqlite-jdbc:${sqliteVersion}",
             "com.github.gwenn:sqlite-dialect:${sqliteDialect}",
             "io.jsonwebtoken:jjwt-api:${jsonWebTokenVersion}",
             "io.jsonwebtoken:jjwt-impl:${jsonWebTokenVersion}",
@@ -152,7 +152,7 @@ dependencies {
             "org.eclipse.jgit:org.eclipse.jgit:${eclipseJgitVersion}",
             "org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:${eclipseJgitVersion}",
             "com.google.code.gson:gson",
-            "com.google.guava:guava:${guavaVersion}",
+            "com.google.guava:guava:${guavaVersionConfigServer}",
 
             // swagger
             "org.springdoc:springdoc-openapi-ui:${springdocOopenapiUiVersion}",

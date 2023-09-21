@@ -12,6 +12,7 @@ import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.BrowserPropagationUtil;
 import rocks.inspectit.ocelot.core.instrumentation.context.propagation.DatadogFormat;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 
@@ -46,6 +47,11 @@ public class ContextPropagationUtil {
     private static final String ENCODING_CHARSET = java.nio.charset.StandardCharsets.UTF_8.toString();
 
     public static final String CORRELATION_CONTEXT_HEADER = "Correlation-Context";
+
+    /**
+     * Session-ID-key to allow browser propagation
+     */
+    private static String SESSION_ID_HEADER = BrowserPropagationUtil.getSessionIdHeader();
 
     private static final String B3_HEADER_PREFIX = "X-B3-";
 
@@ -83,6 +89,7 @@ public class ContextPropagationUtil {
 
     static {
         PROPAGATION_FIELDS.add(CORRELATION_CONTEXT_HEADER);
+        PROPAGATION_FIELDS.add(SESSION_ID_HEADER);
         PROPAGATION_FIELDS.addAll(B3Propagator.injectingSingleHeader().fields());
         PROPAGATION_FIELDS.addAll(B3Propagator.injectingMultiHeaders().fields());
         PROPAGATION_FIELDS.addAll(W3CTraceContextPropagator.getInstance().fields());
@@ -245,6 +252,16 @@ public class ContextPropagationUtil {
     }
 
     /**
+     * Reads the session-id from the map with the current session-id-key
+     *
+     * @param propagationMap the headers to decode
+     * @return session-id if existing, otherwise null
+     */
+    public static String readPropagatedSessionIdFromHeaderMap(Map<String,String> propagationMap) {
+        return propagationMap.get(ContextPropagationUtil.SESSION_ID_HEADER);
+    }
+
+    /**
      * Extracts the {@link SpanContext} from the given {@code propagator}
      *
      * @param propagator
@@ -360,5 +377,23 @@ public class ContextPropagationUtil {
                 log.warn("The specified propagation format {} is not supported. Falling back to B3 format.", format);
                 propagationFormat = B3Propagator.injectingMultiHeaders();
         }
+    }
+
+    /**
+     * Updates the current session-id-header used for browser propagation
+     * @param sessionIdHeader new session-id-header
+     */
+    public static void setSessionIdHeader(String sessionIdHeader) {
+        PROPAGATION_FIELDS.remove(SESSION_ID_HEADER);
+        SESSION_ID_HEADER = sessionIdHeader;
+        PROPAGATION_FIELDS.add(SESSION_ID_HEADER);
+    }
+
+    /**
+     * Remove session-id-header
+     * For example, if the tags-http-exporter is disabled and thus no session-ids need to be extracted
+     */
+    public static void removeSessionIdHeader() {
+        PROPAGATION_FIELDS.remove(SESSION_ID_HEADER);
     }
 }

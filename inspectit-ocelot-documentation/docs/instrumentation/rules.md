@@ -71,8 +71,9 @@ For this reason the inspectIT context implements _data propagation_.
 * **Up Propagation:** Data collected in your instrumented method will be visible to the methods which caused the invocation of your method. This means that all methods which lie on the call stack will have access to the data written by your method
 * **Browser Propagation:** An additional form of propagation. Data collected in your instrumented method will be stored inside a data storage. This storage can be exposed via a REST-API, if [_exporters.tags.http_](../tags/tags-exporters.md#http-exporter) is enabled. A browser can read this data via GET-requests. 
 
-Additionally, a browser can write data into the storage via PUT-requests. If you enabled browser- as well as down-propagation for a data key, the data written by the browser will be stored in the _inspectIT context_.
-Please note, before writing or reading browser propagation data, you need to specify a session-ID inside the _inspectIT context_. After that, all data belonging to the current browser will be stored behind this session-ID.
+Additionally, a browser can write data into the storage via PUT-requests. If browser- as well as down-propagation is enabled for a data key, the data written by the browser will be stored in the _inspectIT context_.
+Please note, before writing or reading browser propagation data, you need to provide a session-ID inside the request-header. 
+After that, all data belonging to the current session will be stored behind this session-ID.
 For more information, see [Tags-HTTP-Exporter](../tags/tags-exporters.md#http-exporter).
 
 Up- and down propagation can also be combined: in this case then the data is attached to the control flow, meaning that it will appear as if its value will be passed around with every method call and return.
@@ -717,6 +718,90 @@ In this case, the rule will first attempt to continue the existing span. Only if
 
 Again, conditions for the span continuing and span ending can be specified just like for the span starting.
 The properties `continue-span-conditions` and `end-span-conditions` work just like `start-span-conditions`.
+
+#### Distributed Tracing with Remote Parent Context
+
+There are two ways to use a remote parent context in distributed tracing. If the remote parent context exists before the current context,
+you can use _readDownPropagationHeaders()_ inside your action. If the remote parent context will be created after your current context,
+you can use _createRemoteParentContext()_ inside your action.
+
+_readDownPropagationHeaders()_
+
+The method takes a _Map<String,String>_ as a parameter. This map should contain at least the trace context, which was sent by a Http request header.
+The remote parent trace context should be in either B3-format, W3C-format or datadog-format.
+The action, which uses this function, should be called in the pre-entry or entry phase.
+
+There is also a default-action in InspectIT, which uses the readDownPropagationHeaders()-function:
+
+```yaml
+  'a_servletapi_downPropagation':
+    docs:
+      since: '1.2.1'
+      description: 'Reads down-propagated data from the request HTTP headers.'
+    is-void: true
+    imports:
+     - 'java.util'
+     - 'javax.servlet'
+     - 'javax.servlet.http'
+    input:
+     _arg0: 'ServletRequest'
+     _context: 'InspectitContext'
+    value-body: |
+     if (_arg0 instanceof HttpServletRequest) {
+       HttpServletRequest req = (HttpServletRequest) _arg0;
+       Collection headerKeys = _context.getPropagationHeaderNames();
+       Map presentHeaders = new HashMap();
+       Iterator it = headerKeys.iterator();
+       while (it.hasNext()) {
+         String name = (String) it.next();
+         java.util.Enumeration values = req.getHeaders(name);
+         if (values != null && values.hasMoreElements()) {
+           presentHeaders.put(name, String.join(",", Collections.list(values)));
+         }
+       }
+       _context.readDownPropagationHeaders(presentHeaders);
+     }
+```
+
+_createRemoteParentContext()_
+
+The method takes no parameter. It can be used, if the remote context will be created after the current context, but should be used as a parent.
+The function creates a span context, which will be used as a parent for the current context. It returns a string, which contains
+the trace context of the remote parent in W3C-format. You can send the returned trace context to your remote service via http response header
+and use the information to create the remote parent context.
+
+Note that, if a remote parent context was down propagated via _readDownPropagationHeaders()_, InspectIT will use the down propagated context as a parent
+and ignore the context created with _createRemoteParentContext()_.
+
+The action, which uses this function, should be called in the pre-entry or entry phase.
+There is also a default-action in InspectIT, which uses the createRemoteParentContext()-function:
+
+```yaml
+  'a_servletapi_remoteParentContext':
+    docs:
+      since: '2.5.4'
+      description: "Writes a parent trace context to the given HttpServletResponse's Server-Timing header"
+      inputs:
+       'response': 'The HttpServletResponse to write to.'
+    is-void: true
+    imports:
+     - 'javax.servlet'
+     - 'javax.servlet.http'
+    input:
+     'response': 'ServletResponse'
+     _context: 'InspectitContext'
+    value-body: |
+     if(response instanceof HttpServletResponse) {
+       HttpServletResponse res = (HttpServletResponse) response;
+       if(!res.isCommitted()) {
+       String traceContext = _context.createRemoteParentContext();
+         if(traceContext == null) return;
+         String key = "Server-Timing";
+         String value = "traceparent; desc=" + traceContext;
+         res.addHeader(key, value);
+       }
+     }
+```
 
 ### Modularizing Rules
 

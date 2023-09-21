@@ -38,6 +38,15 @@ public interface InspectitContext {
      */
     Iterable<Map.Entry<String, Object>> getData();
 
+    /**
+     * This function should be called in the entry- or pre-entry-phase, to allow the created span to use the context
+     *
+     * Creates a SpanContext locally, which the current InspectitContext can use as a remote-parent-context,
+     * as long as no REMOTE_PARENT_SPAN_CONTEXT_KEY was specified earlier by down-propagation
+     *
+     * @return The trace context of the created SpanContext in the W3C-format
+     */
+    String createRemoteParentContext();
 
     /**
      * Generates a map representing the globally down-propagated data stored in this context.

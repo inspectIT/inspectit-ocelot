@@ -124,8 +124,12 @@ public class ContinueOrStartSpanAction implements IHookAction {
             MethodReflectionInformation methodInfo = context.getHook().getMethodInformation();
             String spanName = getSpanName(context, methodInfo);
 
-            // load remote parent if it exist
+            // load remote parent if it exists in dataOverwrites
             SpanContext remoteParent = ctx.getAndClearCurrentRemoteSpanContext();
+
+            // if no remote parent span was down-propagated, look up whether a remote parent context was created locally
+            if(remoteParent == null) remoteParent = ctx.getRemoteParentContext();
+
             boolean hasLocalParent = false;
             if (remoteParent == null) {
                 Span currentSpan = Span.current();
@@ -134,11 +138,12 @@ public class ContinueOrStartSpanAction implements IHookAction {
                 hasLocalParent = !(currentSpan == Span.getInvalid() || !currentSpan.getSpanContext().isValid());
             }
 
+            // This is necessary, since the lambda expression needs a final value
+            SpanContext finalRemoteParent = remoteParent;
             Sampler sampler = getSampler(context);
-            AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> stackTraceSampler.createAndEnterSpan(spanName, remoteParent, sampler, spanKind, methodInfo, autoTrace));
+            AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> stackTraceSampler.createAndEnterSpan(spanName, finalRemoteParent, sampler, spanKind, methodInfo, autoTrace));
             ctx.setSpanScope(spanCtx);
             commonTagsToAttributesManager.writeCommonTags(Span.current(), remoteParent != null, hasLocalParent);
-
         }
     }
 
@@ -171,7 +176,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
                 name = data.toString();
             }
         }
-        if (name == null) {
+        if (name == null && methodInfo != null) {
             name = methodInfo.getDeclaringClass().getSimpleName() + "." + methodInfo.getName();
         }
         return name;

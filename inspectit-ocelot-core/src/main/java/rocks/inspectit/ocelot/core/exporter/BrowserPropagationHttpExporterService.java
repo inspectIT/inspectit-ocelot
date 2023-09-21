@@ -14,6 +14,7 @@ import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.servlet.http.HttpServlet;
 import java.net.InetSocketAddress;
+import java.util.List;
 
 /**
  * Tags HTTP-Server to "export" data-tags to browsers
@@ -29,11 +30,6 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
     private Server server;
     private BrowserPropagationSessionStorage sessionStorage;
     private BrowserPropagationServlet httpServlet;
-
-    /**
-     * Stores a reference of the InspectITConfig to enable runtime updates of the session limit
-     */
-    private InspectitConfig inspectitConfig;
 
     /**
      * Delay to rerun the scheduled method after the method finished in milliseconds
@@ -65,12 +61,16 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         String host = settings.getHost();
         int port = settings.getPort();
         String path = settings.getPath();
-        int sessionLimit = settings.getSessionLimit();
         timeToLive = settings.getTimeToLive();
+
+        int sessionLimit = settings.getSessionLimit();
         sessionStorage = BrowserPropagationSessionStorage.getInstance();
         sessionStorage.setSessionLimit(sessionLimit);
-        httpServlet = new BrowserPropagationServlet();
-        inspectitConfig = configuration;
+        sessionStorage.setExporterActive(true);
+
+        String sessionIdHeader = settings.getSessionIdHeader();
+        List<String> allowedOrigins = settings.getAllowedOrigins();
+        httpServlet = new BrowserPropagationServlet(sessionIdHeader, allowedOrigins);
 
         return startServer(host, port, path, httpServlet);
     }
@@ -82,6 +82,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
                 log.info("Stopping Tags HTTP-Server");
                 server.stop();
                 sessionStorage.clearDataStorages();
+                sessionStorage.setExporterActive(false);
             } catch (Exception e) {
                 log.error("Error disabling Tags HTTP-Server", e);
             }
@@ -107,19 +108,13 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
     }
 
     /**
-     * Updates the session storage:
-     * 1.   Browser propagation data is cached for a specific amount of time (timeToLive)
-     *      If the time expires, clean up the storage
-     * 2.   Update the session limit
-     *      Note that this will not delete any active sessions, if the new session limit is exceeded
+     * Updates the session storage
+     * Browser propagation data is cached for a specific amount of time (timeToLive)
+     * If the time expires, clean up the storage
      */
     @Scheduled(fixedDelay = FIXED_DELAY)
     public void updateSessionStorage() {
         if(httpServlet == null) return;
         sessionStorage.cleanUpData(timeToLive);
-
-        if(inspectitConfig == null) return;
-        int sessionLimit = inspectitConfig.getExporters().getTags().getHttp().getSessionLimit();
-        sessionStorage.setSessionLimit(sessionLimit);
     }
 }

@@ -95,7 +95,7 @@ dependencies {
             "io.prometheus:simpleclient_httpserver",
 
             // this overwrites version of guava that opencensus-impl pulls in transitively, too.
-            "com.google.guava:guava:${guavaVersion}",
+            "com.google.guava:guava:${guavaVersionAgent}",
             // we still need the OpenCensus SDK for the metric exporters to work, as the shim only includes opencensus-impl-core
             "io.opencensus:opencensus-impl:${openCensusVersion}",
 
@@ -106,6 +106,8 @@ dependencies {
             "io.opentelemetry:opentelemetry-exporter-jaeger-thrift",
             "io.opentelemetry:opentelemetry-exporter-zipkin",
             "io.opentelemetry:opentelemetry-exporter-otlp",
+            // Update okio, due to security concerns
+            "com.squareup.okio:okio:${okioVersion}",
 
             platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
             "io.opentelemetry:opentelemetry-exporter-prometheus",

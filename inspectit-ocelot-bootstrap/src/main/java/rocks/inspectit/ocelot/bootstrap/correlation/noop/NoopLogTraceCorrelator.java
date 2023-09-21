@@ -11,7 +11,8 @@ public class NoopLogTraceCorrelator implements LogTraceCorrelator {
 
     @Override
     public AutoCloseable startCorrelatedSpanScope(Supplier<? extends AutoCloseable> spanScopeStarter) {
-        return spanScopeStarter.get();
+        if(spanScopeStarter != null) return spanScopeStarter.get();
+        return null;
     }
 
     @Override

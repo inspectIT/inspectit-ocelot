@@ -2,8 +2,11 @@ package rocks.inspectit.ocelot.core.instrumentation.context;
 
 import io.opencensus.tags.*;
 import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
+import io.opentelemetry.sdk.trace.IdGenerator;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
@@ -186,6 +189,25 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private Map<String, Object> cachedActivePhaseDownPropagatedData = null;
 
     /**
+     * This span context serves as a placeholder for a remote parent context.
+     * This can be useful, if the local SpanContext is created before the actual remote context.
+     * Thus, the remote context could not be down-propagated.
+     * <p>
+     * If a remote parent context was specified, the locally created SpanContext will use it as a remote parent.
+     * Later on, you can transmit the remote parent context via http-response-header to your remote service and create
+     * a new span with the provided context.
+     * <p>
+     * Note that the remote parent context will not be used as a remote parent, if a REMOTE_PARENT_SPAN_CONTEXT_KEY was
+     * specified by down-propagation.
+     */
+    private SpanContext remoteParentContext;
+
+    /**
+     * Session storage for all data storages that should be created for each session
+     */
+    private BrowserPropagationSessionStorage browserPropagationSessionStorage;
+
+    /**
      * Data storage for all tags that should be propagated up to or down from the browser
      */
     private BrowserPropagationDataStorage browserPropagationDataStorage;
@@ -196,6 +218,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         this.interactWithApplicationTagContexts = interactWithApplicationTagContexts;
         dataOverwrites = new HashMap<>();
         openingThread = Thread.currentThread();
+        browserPropagationSessionStorage = BrowserPropagationSessionStorage.getInstance();
 
         if (parent == null) {
             postEntryPhaseDownPropagatedData = new HashMap<>();
@@ -239,6 +262,26 @@ public class InspectitContextImpl implements InternalInspectitContext {
         currentSpanScope = spanScope;
     }
 
+    @Override
+    public String createRemoteParentContext() {
+        IdGenerator generator = IdGenerator.random();
+        String traceId = generator.generateTraceId();
+        String spanId = generator.generateSpanId();
+        TraceFlags traceFlags = TraceFlags.getSampled();
+        TraceState traceState = TraceState.getDefault();
+        this.remoteParentContext = SpanContext.create(traceId, spanId, traceFlags, traceState);
+
+        String traceContext = "00-" + traceId + "-" + spanId + "-" + traceFlags.asHex();
+        return traceContext;
+    }
+
+    /**
+     * @return A remote parent context, that was created via {@link #createRemoteParentContext()}
+     */
+    public SpanContext getRemoteParentContext() {
+        return this.remoteParentContext;
+    }
+
     /**
      * @return true, if {@link #setSpanScope(AutoCloseable)} was called
      */
@@ -269,8 +312,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     public void makeActive() {
         Object currentSessionID = getData(REMOTE_SESSION_ID);
         if(currentSessionID != null) {
-            BrowserPropagationSessionStorage sessionStorage = BrowserPropagationSessionStorage.getInstance();
-            browserPropagationDataStorage = sessionStorage.getOrCreateDataStorage(currentSessionID.toString());
+            browserPropagationDataStorage = browserPropagationSessionStorage.getOrCreateDataStorage(currentSessionID.toString());
         }
 
 
@@ -432,8 +474,13 @@ public class InspectitContextImpl implements InternalInspectitContext {
         }
 
         // Write browser propagation data to storage
+        Map<String, Object> browserPropagationData = getBrowserPropagationData(dataOverwrites);
         if(browserPropagationDataStorage != null)
-            browserPropagationDataStorage.writeData(getBrowserPropagationData(dataOverwrites));
+            browserPropagationDataStorage.writeData(browserPropagationData);
+
+        //If there is browser propagation data, but exporter is disabled, write error message
+        if(!browserPropagationData.isEmpty() && !browserPropagationSessionStorage.isExporterActive())
+            log.error("Unable to propagate data: {} Browser propagation is disabled, since no Tags-exporter is enabled", browserPropagationData);
 
         // Delete session ID after root span is closed
         if(parent == null) {
@@ -529,8 +576,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
         ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, this);
         SpanContext remote_span = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(headers);
         setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, remote_span);
-        String sessionID = headers.get("cookie");
-        if(sessionID != null) setData(REMOTE_SESSION_ID, sessionID);
+        String sessionId = ContextPropagationUtil.readPropagatedSessionIdFromHeaderMap(headers);
+        if(sessionId != null) setData(REMOTE_SESSION_ID, sessionId);
     }
 
     @Override
