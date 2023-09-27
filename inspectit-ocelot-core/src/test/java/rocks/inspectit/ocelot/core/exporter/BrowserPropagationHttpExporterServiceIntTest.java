@@ -36,7 +36,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
     private static String url;
 
     private static final String path = "/inspectit";
-    private static final String sessionIDHeader = "Cookie";
+    private static final String sessionIDHeader = "Session-Id";
     private static final String allowedOrigin = "localhost";
 
     @BeforeEach

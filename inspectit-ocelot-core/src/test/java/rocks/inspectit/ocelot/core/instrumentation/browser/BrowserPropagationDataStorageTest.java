@@ -31,7 +31,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
 
     Map<String, String> headers;
 
-    private static final String sessionIdHeader = "Cookie";
+    private static final String sessionIdHeader = "Session-Id";
     private static final String sessionId = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
 
     @BeforeEach

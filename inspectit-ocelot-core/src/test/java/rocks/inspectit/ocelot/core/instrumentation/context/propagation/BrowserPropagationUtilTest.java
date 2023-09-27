@@ -17,7 +17,7 @@ public class BrowserPropagationUtilTest {
     @InjectMocks
     BrowserPropagationUtil browserPropagationUtil;
 
-    final static String key = "Cookie";
+    final static String key = "Session-Id";
 
     @BeforeEach
     void setUp() {
