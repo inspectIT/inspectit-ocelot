@@ -147,7 +147,7 @@ info:
     All data tags created by this request, will be stored behind the provided session-ID as long as they are enabled for browser-propagation.
 
     To access specific data tags on the server via this API, requests will also need to contain the corresponding session-ID inside their header.
-    Which header should be used to read the session-ID, can be configured in the InspectIT configuration server. Per default, the Cookie-header will be used.
+    Which header should be used to read the session-ID, can be configured in the InspectIT configuration server. By default, the header "Session-Id" will be used.
     Data tags are only cached for a specific amount of time, which is also defined in the InspectIT configuration server.
   contact:
     name: Novatec-Consulting GmbH
@@ -171,8 +171,17 @@ paths:
         Data tags will only be stored in the tags-server, if they are enabled for browser-propagation.
 
         Note that all data tags are only cached for a specific amount of time, which can be configured in the InspectIT configuration server.
-      security:
-        - session_id: []
+      parameters:
+        - name: Session-Id
+          in: header
+          description: |
+            Custom header with the ID of the current session. The session-ID-header-name can be configured in the InspectIT configuration-server.
+            By default, "Session-Id" will be used as the session-ID-header-name.
+
+            The length of the session-id is restricted to a minimum of 16 characters and a maximum of 512 characters.
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Success - Response contains all current data tags
@@ -188,7 +197,7 @@ paths:
         '400':
           description: Failure - Missing session-ID-header
         '403':
-          description: Forbidden - Not allowed Origin header
+          description: Forbidden - Not allowed CORS headers
         '404':
           description: Failure - Session-ID not found in session-ID-header
     put:
@@ -201,8 +210,17 @@ paths:
         It is not possible to create new data tag storages through this API, but only within the InspectIT-java-agent, by sending request to the target application.
 
         Note that these new data tags also have to be enabled for browser-propagation as well as down-propagation in the InspectIT configuration server.
-      security:
-        - session_id: []
+      parameters:
+        - name: Session-Id
+          in: header
+          description: |
+            Custom header with the ID of the current session. The session-ID-header-name can be configured in the InspectIT configuration-server.
+            By default, "Session-Id" will be used as the session-ID-header-name.
+
+            The length of the session-id is restricted to a minimum of 16 characters and a maximum of 512 characters.
+          required: true
+          schema:
+            type: string
       requestBody:
         description: data tags should be written or overwritten
         required: true
@@ -221,7 +239,7 @@ paths:
         '400':
           description: Failure - Invalid request body or missing session-ID-header
         '403':
-          description: Forbidden - Not allowed Origin header
+          description: Forbidden - Not allowed CORS headers
         '404':
           description: Failure - Session-ID not found in session-ID-header
     options:
@@ -249,22 +267,14 @@ paths:
             Access-Control-Allow-Methods:
               schema:
                 type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
             Access-Control-Allow-Credentials:
               schema:
                 type: boolean
         '403':
           description: Forbidden - Missing required headers
-components:
-  securitySchemes:
-    session_id:
-      type: apiKey
-      description: |
-        ID of the current session. The session-ID-header-name can be configured in the InspectIT configuration-server.
-        Per default, the Cookie-Header will be used as the session-ID-header.
-
-        The length of the session-id is restricted to a minimum of 16 characters and a maximum of 512 characters.
-      name: Cookie
-      in: header
 externalDocs:
   description: More information about the Exporter API
   url: https://inspectit.github.io/inspectit-ocelot/docs/tags/tags-exporters
