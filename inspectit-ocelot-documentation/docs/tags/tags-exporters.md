@@ -33,8 +33,7 @@ The session-ID will be read from a specific request-header. The _**session-id-he
 to specify, which exact header should be used to read the session-ID from. 
 
 The default-instrumentation of InspectIT will check the specified _session-id-header_ for a valid session-ID. 
-Thus, there is no additional configuration necessary to read session-ID from HTTP-headers. 
-The length of a session-ID is restricted to a minimum of 64 characters and a maximum of 512 characters.
+Thus, there is no additional configuration necessary to read session-ID from HTTP-headers.
 
 Behind every session-ID, there is a data storage containing all data tags for this session, as long as they are enabled for browser propagation.
 These data storages can only be created, by sending requests to the target application, which the Ocelot-agent is attached to.
@@ -47,7 +46,7 @@ Sessions will be deleted after their _time-to-live_ is expired.
 #### Session limits
 
 There are some limitations for every session to prevent excessive memory consumption.
-The length of the session-id is restricted to a minimum of 16 characters and a maximum of 512 characters.
+The length of the session-ID is restricted to a minimum of 16 characters and a maximum of 512 characters.
 Furthermore, every session is able to contain up to **128 data keys**. 
 The maximum length for data keys are **128 chars**. The maximum length for data values are **2048 chars**.
 
@@ -66,7 +65,7 @@ The following properties are nested properties below the `inspectit.exporters.ta
 | `.path`              | `/inspectit` |The path on which the HTTP endpoints will be available.
 | `.allowed-origins`   | `["*"]`      |A list of allowed origins, which are able to access the http-server.
 | `.session-limit`     | `100`        |How many sessions can be stored in the server at the same time.
-| `.session-id-header` | `Cookie`     |The header, which will be read during propagation to extract the session-ID from
+| `.session-id-header` | `Session-Id` |The header, which will be read during propagation to extract the session-ID from
 | `.time-to-live`      | `300`        |How long sessions should be stored in the server in seconds.
 
 The data of the HTTP exporter is stored inside internal data storages. Data tags will only be written to the storage,
@@ -92,7 +91,7 @@ function getTags() {
     const url = "http://localhost:9000/inspectit";
 
     xhr.open("GET", url);
-    xhr.withCredentials = true; // Send cookies with the request
+    xhr.setRequestHeader("Session-Id", "my-very-awesome-session-id");
 
     xhr.onreadystatechange = () => {
         if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -115,7 +114,8 @@ function putTags() {
     const url = "http://localhost:9000/inspectit";
 
     xhr.open("PUT", url);
-    xhr.withCredentials = true; // Send cookies with the request
+    xhr.setRequestHeader("Session-Id", "my-very-awesome-session-id");
+    
     xhr.onreadystatechange = () => {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {

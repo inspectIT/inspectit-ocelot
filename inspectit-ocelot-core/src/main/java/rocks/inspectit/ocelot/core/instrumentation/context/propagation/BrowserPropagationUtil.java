@@ -15,7 +15,7 @@ import javax.annotation.PostConstruct;
 /**
  * Class to regulate the currently used session-id-key.
  * The session-id-key is used to extract session-ids from http-request-headers to allow browser propagation.
- * The session-id-key can change during runtime and needs to updated inside the PROPAGATION_FIELDS in ContextPropagationUtil.
+ * The session-id-key can change during runtime and needs to be updated inside the PROPAGATION_FIELDS in ContextPropagationUtil.
  */
 @Slf4j
 @Component
@@ -24,7 +24,7 @@ public class BrowserPropagationUtil {
     @Autowired
     private InspectitEnvironment env;
     @Getter
-    private static String sessionIdHeader = "Cookie";
+    private static String sessionIdHeader = "Session-Id";
 
     @PostConstruct
     public void initialize() {
@@ -40,7 +40,7 @@ public class BrowserPropagationUtil {
             String oldSessionIdHeader = event.getOldConfig().getExporters().getTags().getHttp().getSessionIdHeader();
             String newSessionIdHeader = event.getNewConfig().getExporters().getTags().getHttp().getSessionIdHeader();
 
-            if(!oldSessionIdHeader.equals(newSessionIdHeader)) ContextPropagationUtil.setSessionIdHeader(newSessionIdHeader);
+            if(!oldSessionIdHeader.equals(newSessionIdHeader)) setSessionIdHeader(newSessionIdHeader);
         }
     }
 
