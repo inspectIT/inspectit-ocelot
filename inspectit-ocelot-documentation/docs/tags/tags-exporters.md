@@ -23,6 +23,9 @@ The Tags HTTP exporter does not provide any encryption of data and does not perf
 Thus, this server should not be exposed directly to the public in a production environment.
 It is recommended to set up a proxy in front of this server, which handles encryption and authentication.
 
+Furthermore, please make sure to enabled port forwarding, if you use servlet-containers like tomcat.
+Also make sure, that your firewall is not blocking the HTTP-server address.
+
 The server performs authorization with checking, whether the request origin is allowed to access the server. 
 Additionally, every request has to provide a session-ID to access their own session data.
 
@@ -41,7 +44,8 @@ You cannot create new data storages for example by pushing data into the HTTP-se
 If a request to the REST-API contains a session-ID, which does not exist in InspectIT, the API will always return 404.
 
 The HTTP-exporter can only store a specific amount of sessions, which can be configured in the configuration server.
-Sessions will be deleted after their _time-to-live_ is expired.
+Sessions will be deleted after their _time-to-live_ is expired. Their time-to-live will be reset everytime a request
+the HTTP-server receives a successfull request.
 
 #### Session limits
 
@@ -57,16 +61,16 @@ restart, which also deletes all data currently stored in the server.
 
 The following properties are nested properties below the `inspectit.exporters.tags.http` property:
 
-| Property             | Default      | Description
-|----------------------|--------------|---|
-| `.enabled`           | `DISABLED`   |If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the exporter and HTTP server.
-| `.host`              | `127.0.0.1`  |The hostname or network address to which the HTTP server should bind.
-| `.port`              | `9000`       |The port the HTTP server should use.
-| `.path`              | `/inspectit` |The path on which the HTTP endpoints will be available.
-| `.allowed-origins`   | `["*"]`      |A list of allowed origins, which are able to access the http-server.
-| `.session-limit`     | `100`        |How many sessions can be stored in the server at the same time.
-| `.session-id-header` | `Session-Id` |The header, which will be read during propagation to extract the session-ID from
-| `.time-to-live`      | `300`        |How long sessions should be stored in the server in seconds.
+| Property             | Default      | Description                                                                                                 |
+|----------------------|--------------|-------------------------------------------------------------------------------------------------------------|
+| `.enabled`           | `DISABLED`   | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the exporter and HTTP server. |
+| `.host`              | `127.0.0.1`  | The hostname or network address to which the HTTP server should bind.                                       |
+| `.port`              | `9000`       | The port the HTTP server should use.                                                                        |
+| `.path`              | `/inspectit` | The path on which the HTTP endpoints will be available.                                                     |
+| `.allowed-origins`   | `["*"]`      | A list of allowed origins, which are able to access the http-server.                                        |
+| `.session-limit`     | `100`        | How many sessions can be stored in the server at the same time.                                             |
+| `.session-id-header` | `Session-Id` | The header, which will be read during propagation to extract the session-ID from                            |
+| `.time-to-live`      | `300`        | How long sessions should be stored in the server in seconds.                                                |
 
 The data of the HTTP exporter is stored inside internal data storages. Data tags will only be written to the storage,
 if they are enabled for [browser propagation](../instrumentation/rules.md#data-propagation).
@@ -253,6 +257,11 @@ paths:
           schema:
             type: string
         - name: Access-Control-Request-Method
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: Access-Control-Request-Headers
           in: header
           required: true
           schema:
