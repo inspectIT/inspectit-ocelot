@@ -64,7 +64,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             assertThat(dataStorage.readData()).isEmpty();
 
             ctx.close();
-            assertThat(dataStorage.readData()).isEmpty();
+            assertThat(dataStorage.getStorageSize()).isZero();
             assertThat(ContextUtil.currentInspectitContext()).isNull();
         }
 
@@ -135,7 +135,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             ctx.close();
             assertThat(dataStorage.readData()).doesNotContainEntry("key1", "value321");
             assertThat(dataStorage.readData()).doesNotContainEntry("keyABC", "valueABC");
-            assertThat(dataStorage.readData().size()).isEqualTo(128);
+            assertThat(dataStorage.getStorageSize()).isEqualTo(128);
         }
 
         @Test

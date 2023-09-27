@@ -79,7 +79,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
     protected boolean doDisable() {
         if(server != null) {
             try {
-                log.info("Stopping Tags HTTP-Server");
+                log.info("Stopping Tags HTTP-Server - All sessions will be removed");
                 server.stop();
                 sessionStorage.clearDataStorages();
                 sessionStorage.setExporterActive(false);
@@ -101,7 +101,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
             log.info("Starting Tags HTTP-Server on {}:{}{} ", host, port, path);
             server.start();
         } catch (Exception e) {
-            log.warn("Starting of Tags HTTP-Server failed");
+            log.error("Starting of Tags HTTP-Server failed", e);
             return false;
         }
         return true;
