@@ -56,7 +56,6 @@ public class BrowserPropagationServlet extends HttpServlet {
         if(allowedOrigins.contains("*") || allowedOrigins.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Access-Control-Allow-Methods", "GET");
-            response.setHeader("Access-Control-Allow-Headers", sessionIdHeader);
             response.setHeader("Access-Control-Allow-Credentials", "true");
 
             String sessionID = request.getHeader(sessionIdHeader);
@@ -94,7 +93,6 @@ public class BrowserPropagationServlet extends HttpServlet {
         if(allowedOrigins.contains("*") || allowedOrigins.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Access-Control-Allow-Methods", "PUT");
-            response.setHeader("Access-Control-Allow-Headers", sessionIdHeader);
             response.setHeader("Access-Control-Allow-Credentials", "true");
 
             String sessionID = request.getHeader(sessionIdHeader);
@@ -141,6 +139,7 @@ public class BrowserPropagationServlet extends HttpServlet {
             response.setHeader("Access-Control-Allow-Methods", "GET, PUT");
             response.setHeader("Access-Control-Allow-Headers", sessionIdHeader);
             response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Max-Age", "3600");
             response.setStatus(HttpServletResponse.SC_OK);
         }
         else response.setStatus(HttpServletResponse.SC_FORBIDDEN);
