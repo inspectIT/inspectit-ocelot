@@ -1,69 +1,14 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id 'com.github.node-gradle.node' version "${nodeGradleVersion}"
     id 'com.palantir.docker' version "${palantirDockerVersion}"
     id 'org.springframework.boot' version "${springBootVersion}"
     id 'org.cyclonedx.bom' version "${cyclonedxBomVersion}"
-    id 'org.owasp.dependencycheck' version "${owaspDependencycheckVersion}"
     id 'io.spring.dependency-management' version "${springDependencyManangementVersion}"
 }
 
 apply plugin: 'idea'
 apply plugin: 'java'
-
-node {
-    // Version of node to use.
-    version = '18.14.2'
-
-    // Version of npm to use.
-    npmVersion = '6.13.4'
-
-    // Version of Yarn to use.
-    yarnVersion = '1.22.0'
-
-    // If true, it will download node using above parameters.
-    // If false, it will try to use globally installed node.
-    download = true
-
-    // Set the work directory for unpacking node
-    workDir.set(project.layout.buildDirectory.dir("nodejs"))
-
-    // Set the work directory for NPM
-    npmWorkDir.set(project.layout.buildDirectory.dir("npm"))
-
-    // Set the work directory for Yarn
-    yarnWorkDir.set(project.layout.buildDirectory.dir("yarn"))
-
-    // Set the work directory where node_modules should be located
-    nodeProjectDir.set(project.layout.projectDirectory.dir("../inspectit-ocelot-configurationserver-ui"))
-}
-
-/**
- * Task for installing the frontend dependencies.
- */
-def installFrontend = tasks.register('installFrontend', YarnTask) {
-    args = ['install']
-}
-
-def lintFrontend = tasks.register('lintFrontend', YarnTask) {
-    dependsOn installFrontend
-    args = ['lint']
-}
-
-def checkCodeStyleFrontend = tasks.register('checkCodeStyleFrontend', YarnTask) {
-    dependsOn installFrontend
-    args = ['format']
-}
-
-/**
- * Task for building the frontend and copying it to the configuration-server project.
- */
-tasks.register('buildFrontend', YarnTask) {
-    dependsOn lintFrontend, checkCodeStyleFrontend
-    args = ['export']
-    environment = [NODE_OPTIONS: "--openssl-legacy-provider"]
-}
 
 def serverMainClass = 'rocks.inspectit.ocelot.ConfigurationServer'
 
@@ -90,7 +35,7 @@ tasks.register('bootJarWithFrontend', BootJar) {
 
     with bootJar
 }
-bootJarWithFrontend.dependsOn buildFrontend
+bootJarWithFrontend.dependsOn ':inspectit-ocelot-configurationserver-ui:buildFrontend'
 
 cyclonedxBom {
     includeConfigs = ["runtimeClasspath"]

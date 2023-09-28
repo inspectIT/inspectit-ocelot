@@ -3,7 +3,6 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 plugins {
     id "me.champeau.jmh" version "${jmhVersion}"
     id "org.cyclonedx.bom" version "${cyclonedxBomVersion}"
-    id "org.owasp.dependencycheck" version "${owaspDependencycheckVersion}"
     id "org.springframework.boot" version "${springBootVersion}" apply false
     id "io.spring.dependency-management" version "${springDependencyManangementVersion}"
 }

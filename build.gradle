@@ -2,6 +2,8 @@ import com.github.jk1.license.render.TextReportRenderer
 
 plugins {
     id "com.github.jk1.dependency-license-report" version "${licenseReportVersion}"
+    id("org.owasp.dependencycheck") version "${owaspDependencycheckVersion}" apply false
+    id("com.github.ben-manes.versions") version "${versionsPluginVersion}" apply false
 }
 
 licenseReport {
@@ -18,12 +20,46 @@ allprojects {
 
     apply plugin: 'java'
     apply plugin: 'jacoco'
+    apply plugin: 'org.owasp.dependencycheck'
+    apply plugin: 'com.github.ben-manes.versions'
 
     if (!project.hasProperty('buildVersion') || project.getProperty('buildVersion').empty) {
         ext.buildVersion = 'SNAPSHOT'
     }
 
     version = "$buildVersion"
+
+    dependencyCheck {
+        //failBuildOnCVSS = 6
+        scanProjects = [
+                ':inspectit-ocelot-agent',
+                ':inspectit-ocelot-core',
+                ':inspectit-ocelot-sdk',
+                ':inspectit-ocelot-bootstrap',
+                ':inspectit-ocelot-configurationserver',
+                ':inspectit-ocelot-configurationserver-ui'
+        ]
+        skipConfigurations = ["jmh", "jmhCompileClasspath", "systemTest", "systemTestCompileClasspath", "systemTestRuntimeClasspath"]
+        analyzers {
+            assemblyEnabled = false
+            ossIndex {
+                enabled = true
+            }
+            nodeAudit {
+                yarnEnabled = false
+            }
+        }
+    }
+
+    tasks.named("dependencyUpdates").configure {
+        revision = 'milestone'
+        gradleReleaseChannel = "current"
+        checkConstraints = true
+        checkBuildEnvironmentConstraints = true
+        outputFormatter = 'plain'
+        outputDir = 'build/reports'
+        reportfileName = 'dependencyUpdates'
+    }
 }
 
 tasks.register('codeCoverageReport', JacocoReport) {

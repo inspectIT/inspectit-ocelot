@@ -1,0 +1,72 @@
+import org.gradle.internal.os.OperatingSystem
+
+plugins {
+    id 'com.github.node-gradle.node' version "${nodeGradleVersion}"
+}
+
+apply plugin: 'idea'
+
+node {
+    // Version of node to use.
+    version = '18.14.2'
+
+    // Version of npm to use.
+    npmVersion = '6.13.4'
+
+    // Version of Yarn to use.
+    yarnVersion = '1.22.0'
+
+    // If true, it will download node using above parameters.
+    // If false, it will try to use globally installed node.
+    download = true
+
+    // Set the work directory for unpacking node
+    workDir.set(project.layout.buildDirectory.dir("nodejs"))
+
+    // Set the work directory for NPM
+    npmWorkDir.set(project.layout.buildDirectory.dir("npm"))
+
+    // Set the work directory for Yarn
+    yarnWorkDir.set(project.layout.buildDirectory.dir("yarn"))
+
+    // Set the work directory where node_modules should be located
+    nodeProjectDir.set(project.layout.projectDirectory.dir("./"))
+}
+
+dependencyCheck {
+    analyzers {
+        nodeAudit {
+            yarnEnabled = true
+            yarnPath = "${buildDir}/yarn/yarn-v${node.yarnVersion.get()}/yarn${OperatingSystem.current() == OperatingSystem.WINDOWS?".cmd":""}"
+        }
+    }
+}
+
+/**
+ * Task for installing the frontend dependencies.
+ */
+def installFrontend = tasks.register('installFrontend', YarnTask) {
+    args = ['install']
+}
+
+def lintFrontend = tasks.register('lintFrontend', YarnTask) {
+    dependsOn installFrontend
+    args = ['lint']
+}
+
+def checkCodeStyleFrontend = tasks.register('checkCodeStyleFrontend', YarnTask) {
+    dependsOn installFrontend
+    args = ['format']
+}
+
+tasks.register('buildFrontend', YarnTask) {
+    inputs.files(fileTree('node_modules'))
+    inputs.files(fileTree('src'))
+    inputs.file('package.json')
+
+    outputs.dir('out')
+
+    dependsOn lintFrontend, checkCodeStyleFrontend
+    args = ['export']
+    environment = [NODE_OPTIONS: "--openssl-legacy-provider"]
+}
