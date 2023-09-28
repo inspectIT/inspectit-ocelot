@@ -33,7 +33,7 @@ test {
 sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
 targetCompatibility = 1.8 // Java version to generate classes for.
 jar {
-    archiveName = "${project.name}.jar"
+    archiveFileName = "${project.name}.jar"
 
     //include all "implementation" dependencies in fat jar
     from {

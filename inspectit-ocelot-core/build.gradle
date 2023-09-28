@@ -182,7 +182,7 @@ task compileJarCheck(type: JavaCompile){
     source = sourceSets.main.java.srcDirs
     include 'com/mindprod/jarcheck/JarCheck.java'
     classpath = sourceSets.main.compileClasspath
-    destinationDir =  new File("${buildDir}/classes/java/main")
+    destinationDirectory =  new File("${buildDir}/classes/java/main")
 }
 
 // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
@@ -230,7 +230,7 @@ jar.dependsOn generateVersionFile
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    archiveName = "${project.name}.jar"
+    archiveFileName = "${project.name}.jar"
 
     // include version file
     from generateVersionFile.versionFile
