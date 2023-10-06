@@ -1,7 +1,7 @@
 import org.gradle.internal.os.OperatingSystem
 
 plugins {
-    id 'com.github.node-gradle.node' version "${nodeGradleVersion}"
+    alias(libs.plugins.comGithubNodeGradleNode)
 }
 
 apply plugin: 'idea'
@@ -69,4 +69,20 @@ tasks.register('buildFrontend', YarnTask) {
     dependsOn lintFrontend, checkCodeStyleFrontend
     args = ['export']
     environment = [NODE_OPTIONS: "--openssl-legacy-provider"]
+}
+
+tasks.register('outdated', YarnTask) {
+    args = ['outdated']
+}
+
+//tasks.register('npmCheckUpdates', NpxTask) {
+//    command = 'npm-check-updates'
+//}
+
+tasks.register('upgradeInteractive', YarnTask) {
+    args = ['upgradeInteractive']
+}
+
+tasks.register('upgradeInteractiveLatest', YarnTask) {
+    args = ['upgradeInteractive', '--latest']
 }

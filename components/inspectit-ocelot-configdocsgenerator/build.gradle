@@ -2,38 +2,45 @@ plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
     // spring dependency manager
-    id 'org.springframework.boot' version "${springBootVersion}"
+    alias(libs.plugins.orgSpringframeworkBoot)
 }
 apply plugin: 'io.spring.dependency-management'
 
 dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation(
-            'org.junit.jupiter:junit-jupiter',
-            "io.opencensus:opencensus-api:${openCensusVersion}",
-            "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}",
+            libs.orgJunitJupiterJunitJupiter,
+            libs.ioOpencensusOpencensusApi,
+            libs.ioOpentelemetryOpentelemetryApi,
 
-            'org.mockito:mockito-junit-jupiter',
-            "org.assertj:assertj-core",
-            "com.google.guava:guava:${guavaVersionConfigServer}"
+            libs.orgMockitoMockitoJunitJupiter,
+            libs.orgAssertjAssertjCore,
+            libs.comGoogleGuava
     )
 
     // This dependency is used by the application.
     implementation(
             project(':inspectit-ocelot-config'),
-            "ch.qos.logback:logback-classic",
-            "org.apache.commons:commons-lang3",
-            "commons-beanutils:commons-beanutils:${commonsBeanUtilsVersion}",
+            libs.chQosLogbackLogbackClassic,
+            libs.orgApacheCommonsCommonsLang3,
+            libs.commonsBeanutils,
             // Update dependency, due to Out-of-Support
-            "org.apache.commons:commons-collections4:${commonsCollectionsVersion}",
+            libs.orgApacheCommonsCommonsCollections4,
 
-            "org.springframework.boot:spring-boot-starter-web",
-            // override snakeyaml due to vulnerabilities in v1.29 used by the SpringBoot version used in this module
-            "org.yaml:snakeyaml:${snakeYamlVersion}"
+            libs.orgSpringframeworkBootSpringBootStarterWeb,
+            libs.orgYamlSnakeyaml
     )
 
-    compileOnly "org.projectlombok:lombok"
-    annotationProcessor "org.projectlombok:lombok"
+    constraints {
+        implementation(libs.orgYamlSnakeyaml) {
+            because 'vulnerabilities in v1.29 used by the SpringBoot version used in this module'
+        }
+        testImplementation(libs.comGoogleGuava) {
+            because 'security issues'
+        }
+    }
+    compileOnly libs.orgProjectlombokLombok
+    annotationProcessor libs.orgProjectlombokLombok
 }
 
 application {

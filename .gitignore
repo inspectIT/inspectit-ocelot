@@ -32,3 +32,4 @@
 /.nb-gradle/
 
 /working_directory/
+/gradle/*.versions.updates.toml
