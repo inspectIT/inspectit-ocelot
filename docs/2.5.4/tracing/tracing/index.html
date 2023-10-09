@@ -1,0 +1,186 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Tracing · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="This section provides all the information on trace collection with inspectIT Ocelot."/><meta name="docsearch:version" content="2.5.4"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Tracing · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content="This section provides all the information on trace collection with inspectIT Ocelot."/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>2.5.4</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Tracing</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Getting Started<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/doc1">Hello World</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/getting-started/quick-start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/getting-started/docker-examples">Demo Application</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/getting-started/installation">Installation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/configuration/configuration-sources">Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/configuration/external-configuration-sources">External Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/configuration/logging-configuration">Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/configuration/open-census-configuration">OpenCensus Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/configuration/plugin-configuration">Plugin Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/configuration/agent-command-configuration">Agent Command Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Metrics<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/metrics/metrics">Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/metrics/metric-recorders">Metrics Recorders</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/metrics/metric-exporters">Metrics Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/metrics/common-tags">Common Tags</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/metrics/custom-metrics">Custom Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/metrics/self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tracing<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem navListItemActive"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/tracing/tracing">Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/tracing/trace-exporters">Trace Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/tracing/log-correlation">Log Correlation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/tracing/privacy">Data Privacy</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/tracing/tracing-self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tags<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/tags/tags-exporters">Tags Exporters</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/instrumentation/instrumentation">Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/instrumentation/scopes">Scopes</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/instrumentation/rules">Rules &amp; Actions</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/instrumentation/code-style">Configuration Code Style</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/instrumentation/special-sensors">Special Sensors</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/instrumentation/process">Instrumentation Process</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">End User Monitoring<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/enduser-monitoring/enduser-monitoring-server">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/enduser-monitoring/eum-server-setup">Server Setup</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/enduser-monitoring/eum-server-configuration">Server, Metrics and Exporter Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/enduser-monitoring/install-eum-agent">Install EUM Agent</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration Server<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/cs-configuration">Server Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/managing-configurations">Managing Configuration Files</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/configuration-files-staging">Configuration Files Staging</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/agent-mappings">Agent Mappings</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/scope-wizard">Scope Wizard</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/class-browser">Class Browser</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/user-authentication">User Authentication</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/config-docs">Configuration Docs</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/log-config">Server Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/syntax-highlighting">YAML Editor Syntax Highlighting</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/status-table-view">Agent Status Table View</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Breaking Changes<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/breaking-changes/Breaking Changes">Breaking Changes</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/tracing/tracing.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Tracing</h1></header><article><div><span><p>This section provides all the information on trace collection with inspectIT Ocelot.</p>
+<p>The inspectIT Ocelot configuration has a master switch for tracing, which can be used to completely disable anything that has to do with trace collection and exporting.
+Tracing in the agent can be completely disabled by setting the <code>inspectit.tracing.enabled</code> property to <code>false</code>.
+This way any default inspectIT setting or anything else defined for trace collection will be overruled.
+If used, the switch makes sure that the inspectIT Ocelot agent:</p>
+<ul>
+<li>disables all trace exporters</li>
+<li>removes tracing from all <a href="/inspectit-ocelot/docs/2.5.4/instrumentation/rules">instrumentation rules</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="global-sampling-rate"></a><a href="#global-sampling-rate" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Global Sampling Rate</h3>
+<p>It is possible to globally regulate the number of traces generated through <a href="https://opencensus.io/tracing/sampling/">sampling</a>.
+You can configure the probability with which a trace ends up being collected via <code>inspectit.tracing.sampleProbability</code>.
+E.g. setting the value to <code>0.1</code> will record only 10% of all traces.</p>
+<p>The global sampling is also influenced by the <code>sample-mode</code> that can be set in <code>inspectit.tracing.sampleMode</code>, see the table below.
+By default, <code>PARENT_BASED</code> is used.</p>
+<table>
+<thead>
+<tr><th>Sample mode</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>PARENT_BASED</code> (default for <code>inspectit.tracing.sample-mode</code>)</td><td>The setting of the <code>sample-probability</code> only has an effect if <strong>no sampling decision</strong> has been made yet. If a parent span has already decided that a trace is sampled or not sampled, this decision will continue to be used. This means that, for example, a method within a trace that has already been started will always be recorded, even if the sample setting has been set to <code>0</code>. This also applies to the opposite case where a span has decided not to sample and the sampling rate has been set to <code>1</code>. In this case the method will <strong>not</strong> be recorded!. See also the <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#parentbased">official documentation of OpenTelemetry</a>.</td></tr>
+<tr><td><code>TRACE_ID_RATIO_BASED</code></td><td>The sampling decision is made for each span, regardless of the parent span's sampling decision, see also the <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#parentbased">official documentation of OpenTelemetry</a>.</td></tr>
+<tr><td><code>HYBRID_PARENT_TRACE_ID_RATIO_BASED</code> (default for <code>inspectit.instrumentation.rules.[name-of-rule].tracing.sample-mode</code>)</td><td>The span is sampled if the parent span has been sampled, otherwise applies a <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#sampler">TraceIdRatioBasedSampler</a>. This behavior is similar to the previously used <a href="https://github.com/census-instrumentation/opencensus-java/blob/master/api/src/main/java/io/opencensus/trace/samplers/ProbabilitySampler.java">ProbabilitySampler</a> from OpenCensus.</td></tr>
+</tbody>
+</table>
+<p>By default, the sample probability is <code>1.0</code>, meaning 100% (each trace is recorded).</p>
+
+    <div class="admonition admonition-tip">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16"><path fill-rule="evenodd" d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z"/></svg></div> tip</h5>
+      </div>
+      <div class="admonition-content">
+    <p>This global setting only acts as a default value and can be <strong>overridden</strong> by <a href="/inspectit-ocelot/docs/2.5.4/instrumentation/rules#trace-sampling">individual rules</a>.</p>
+<p>For example, with this technique it can be achieved that a method (e.g. HTTP entrypoint) uses different sampling rates depending on the parameters (e.g. current HTTP path).</p>
+</div></div><h3><a class="anchor" aria-hidden="true" id="additional-properties"></a><a href="#additional-properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Additional Properties</h3>
+<p>You can additionally define the following global properties (<code>inspectit.tracing</code>-property)</p>
+<table>
+<thead>
+<tr><th>Property</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>sample-mode</code></td><td><code>PARENT_BASED</code></td><td>The root sample mode to be used for sampling, see above. Supported modes are <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#parentbased"><code>PARENT_BASED</code></a>, <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#parentbased"><code>TRACE_ID_RATIO_BASED</code></a> and <code>HYBRID_PARENT_TRACE_ID_RATIO_BASED</code> (similar to <a href="https://github.com/census-instrumentation/opencensus-java/blob/master/api/src/main/java/io/opencensus/trace/samplers/ProbabilitySampler.java">OpenCensus ProbabilitySampler</a>). For more information visit the <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#sampler">official documentation</a>.</td></tr>
+<tr><td><code>max-export-batch-size</code></td><td>512</td><td>The max export batch size for every export, i.e., the maximum number of spans exported by the used <code>BatchSpanProcessor</code></td></tr>
+<tr><td><code>schedule-delay-millis</code></td><td>5000</td><td>The delay interval between two consecutive exports in milliseconds.</td></tr>
+</tbody>
+</table>
+
+    <div class="admonition admonition-warning">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></div> warning</h5>
+      </div>
+      <div class="admonition-content">
+    <p>These properties take only effect once when the agent is starting. If you change these properties while the agent is running, they will not take effect until the agent retarted.</p>
+</div></div><h3><a class="anchor" aria-hidden="true" id="common-tags-as-attributes"></a><a href="#common-tags-as-attributes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Common Tags as Attributes</h3>
+<p>Globally defined <a href="/inspectit-ocelot/docs/2.5.4/metrics/common-tags">common tags</a> used when recording metrics can also be inserted as attributes in traces.
+The property <code>inspectit.tracing.add-common-tags</code> defines the behavior of this feature.
+Available options are:</p>
+<ul>
+<li><code>NEVER</code> - Never add common tags as attributes to spans.</li>
+<li><code>ON_GLOBAL_ROOT</code> - Add common tags only to a global span root. Thus, only to the first span of each trace.</li>
+<li><code>ON_LOCAL_ROOT</code> (default) - Add common tags to local span roots. If a trace spans over several JVMs, then attributes will be set on the first span of each JVM.</li>
+<li><code>ALWAYS</code> - Add common tags as attributes to all spans.</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="trace-correlation-and-distributed-tracing"></a><a href="#trace-correlation-and-distributed-tracing" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Trace Correlation and Distributed Tracing</h3>
+<p>The inspectIT Ocelot agent supports out-of-the-box distributed tracing, which allows traces to be correlated across multiple components to trace the entire flow through a system.
+By default, the agent supports correlating a communication via HTTP and JMS.
+To achieve this, correlation information is exchanged during the communication (for example by injecting additional headers into requests), for which the <strong>B3 Propagation format is used by default</strong>.</p>
+<p>If you want to use the agent together with other components that also perform distributed tracing but do not support the correlation information in B3 format, this can be adjusted with the following configuration:</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">tracing:</span>
+    <span class="hljs-attr">propagation-format:</span> <span class="hljs-string">B3</span> <span class="hljs-comment"># the format for propagating correlation headers</span>
+</code></pre>
+<p>Currently the following formats are supported for sending correlation information:</p>
+<table>
+<thead>
+<tr><th>Property</th><th>Format</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B3</code> <em>(default)</em></td><td><a href="https://github.com/openzipkin/b3-propagation/blob/master/README.md">B3 Propagation</a></td><td>B3 Propagation used by, e.g. Zipkin.</td></tr>
+<tr><td><code>TRACE_CONTEXT</code></td><td><a href="https://www.w3.org/TR/trace-context/#traceparent-header">W3C Trace Context</a></td><td>Standard headers and a value format to propagate context information.</td></tr>
+<tr><td><code>DATADOG</code></td><td><a href="https://github.com/inspectIT/inspectit-ocelot/issues/792">Datadog Format</a></td><td>Headers used by Datadog for context correlation.</td></tr>
+</tbody>
+</table>
+
+    <div class="admonition admonition-important">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"/></svg></div> important</h5>
+      </div>
+      <div class="admonition-content">
+    <p>It is important to note that this configuration refers to the format of the correlation information used to <strong>send this data</strong>. When processing correlation information that the agent receives, it automatically uses the correct format.</p>
+</div></div><h3><a class="anchor" aria-hidden="true" id="using-64-bit-trace-ids"></a><a href="#using-64-bit-trace-ids" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Using 64-Bit Trace IDs</h3>
+<p>Since version 2.0.0, the inspectIT Ocelot Agent is able to generate trace IDs with a size of 64 bits instead of the 128 bit trace IDs used by default by the agent.
+The functionality that trace IDs with a length of 64 bits are generated can be activated with the following configuration:</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">tracing:</span>
+    <span class="hljs-attr">use-64-bit-trace-ids:</span> <span class="hljs-literal">true</span>
+</code></pre>
+
+    <div class="admonition admonition-important">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"/></svg></div> important</h5>
+      </div>
+      <div class="admonition-content">
+    <p>Please note that some propagation formats do not support 64-bit Ids, such as the W3C &quot;Trace Context&quot;. In this case the 64-bit trace IDs are padded with leading zeros.</p>
+</div></div></span></div></article></div><div class="docLastUpdate"><em>Last updated on 10/9/2023 by Eduard Schander</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/2.5.4/metrics/self-monitoring"><span class="arrow-prev">← </span><span>Self-Monitoring</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/2.5.4/tracing/trace-exporters"><span>Trace Exporters</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2023 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'P7JV0ZK66K',
+                apiKey: 'd499024131bf8d92e6d469a6c14f4798',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:2.5.4"]}
+              });
+            </script></body></html>

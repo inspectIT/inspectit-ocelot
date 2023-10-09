@@ -1,0 +1,332 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Tags Exporters · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Tags exporters represent special exporters of InspectIT, which allow to export internal tags to external applications like browsers."/><meta name="docsearch:version" content="2.5.4"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Tags Exporters · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content="Tags exporters represent special exporters of InspectIT, which allow to export internal tags to external applications like browsers."/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>2.5.4</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Tags</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Getting Started<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/doc1">Hello World</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/getting-started/quick-start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/getting-started/docker-examples">Demo Application</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/getting-started/installation">Installation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/configuration/configuration-sources">Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/configuration/external-configuration-sources">External Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/configuration/logging-configuration">Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/configuration/open-census-configuration">OpenCensus Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/configuration/plugin-configuration">Plugin Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/configuration/agent-command-configuration">Agent Command Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Metrics<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/metrics/metrics">Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/metrics/metric-recorders">Metrics Recorders</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/metrics/metric-exporters">Metrics Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/metrics/common-tags">Common Tags</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/metrics/custom-metrics">Custom Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/metrics/self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tracing<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/tracing/tracing">Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/tracing/trace-exporters">Trace Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/tracing/log-correlation">Log Correlation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/tracing/privacy">Data Privacy</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/tracing/tracing-self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tags<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem navListItemActive"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/tags/tags-exporters">Tags Exporters</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/instrumentation/instrumentation">Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/instrumentation/scopes">Scopes</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/instrumentation/rules">Rules &amp; Actions</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/instrumentation/code-style">Configuration Code Style</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/instrumentation/special-sensors">Special Sensors</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/instrumentation/process">Instrumentation Process</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">End User Monitoring<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/enduser-monitoring/enduser-monitoring-server">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/enduser-monitoring/eum-server-setup">Server Setup</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/enduser-monitoring/eum-server-configuration">Server, Metrics and Exporter Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/enduser-monitoring/install-eum-agent">Install EUM Agent</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration Server<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/cs-configuration">Server Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/managing-configurations">Managing Configuration Files</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/configuration-files-staging">Configuration Files Staging</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/agent-mappings">Agent Mappings</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/scope-wizard">Scope Wizard</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/class-browser">Class Browser</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/user-authentication">User Authentication</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/config-docs">Configuration Docs</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/log-config">Server Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/syntax-highlighting">YAML Editor Syntax Highlighting</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/config-server/status-table-view">Agent Status Table View</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Breaking Changes<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.5.4/breaking-changes/Breaking Changes">Breaking Changes</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/tags/tags-exporters.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Tags Exporters</h1></header><article><div><span><p>Tags exporters represent special exporters of InspectIT, which allow to export internal tags to external applications like browsers.
+Currently, there is only one tags exporter:</p>
+<table>
+<thead>
+<tr><th>Exporter</th><th>Supports run-time updates</th><th>Push / Pull</th><th>Enabled by default</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="#http-exporter">HTTP Exporter</a></td><td>Yes</td><td>Push &amp; Pull</td><td>No</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="http-exporter"></a><a href="#http-exporter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>HTTP Exporter</h2>
+<p>The HTTP exporter exports tags via a REST-API running on an HTTP-server. The server provides two endpoints.
+One GET-endpoint to expose data to external applications and one PUT-endpoint to receive data from external applications.
+The server is by default started on the port <code>9000</code> and data can then be accessed or written by
+calling '<a href="http://localhost:9000/inspectit'">http://localhost:9000/inspectit'</a></p>
+<h4><a class="anchor" aria-hidden="true" id="production-environment"></a><a href="#production-environment" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Production environment</h4>
+<p>The Tags HTTP exporter does not provide any encryption of data and does not perform any authentication.
+Thus, this server should not be exposed directly to the public in a production environment.
+It is recommended to set up a proxy in front of this server, which handles encryption and authentication.</p>
+<p>The server performs authorization with checking, whether the request origin is allowed to access the server.
+Additionally, every request has to provide a session-ID to access their own session data.</p>
+<h4><a class="anchor" aria-hidden="true" id="session-identification"></a><a href="#session-identification" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Session identification</h4>
+<p>Data tags will always be stored behind a provided session-ID to ensure data correlation with its browser.
+The session-ID will be read from a specific request-header. The <em><strong>session-id-header</strong></em>-property in the HTTP-exporter allows
+to specify, which exact header should be used to read the session-ID from.</p>
+<p>The default-instrumentation of InspectIT will check the specified <em>session-id-header</em> for a valid session-ID.
+Thus, there is no additional configuration necessary to read session-ID from HTTP-headers.
+The length of a session-ID is restricted to a minimum of 64 characters and a maximum of 512 characters.</p>
+<p>Behind every session-ID, there is a data storage containing all data tags for this session, as long as they are enabled for browser propagation.
+These data storages can only be created, by sending requests to the target application, which the Ocelot-agent is attached to.
+You cannot create new data storages for example by pushing data into the HTTP-server by using the API.
+If a request to the REST-API contains a session-ID, which does not exist in InspectIT, the API will always return 404.</p>
+<p>The HTTP-exporter can only store a specific amount of sessions, which can be configured in the configuration server.
+Sessions will be deleted after their <em>time-to-live</em> is expired.</p>
+<h4><a class="anchor" aria-hidden="true" id="session-limits"></a><a href="#session-limits" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Session limits</h4>
+<p>There are some limitations for every session to prevent excessive memory consumption.
+The length of the session-id is restricted to a minimum of 16 characters and a maximum of 512 characters.
+Furthermore, every session is able to contain up to <strong>128 data keys</strong>.
+The maximum length for data keys are <strong>128 chars</strong>. The maximum length for data values are <strong>2048 chars</strong>.</p>
+<h4><a class="anchor" aria-hidden="true" id="runtime-updates"></a><a href="#runtime-updates" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Runtime Updates</h4>
+<p>All properties of the HTTP-exporter can be updated during runtime. However, changing properties will result in a server
+restart, which also deletes all data currently stored in the server.</p>
+<p>The following properties are nested properties below the <code>inspectit.exporters.tags.http</code> property:</p>
+<table>
+<thead>
+<tr><th>Property</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>.enabled</code></td><td><code>DISABLED</code></td><td>If <code>ENABLED</code> or <code>IF_CONFIGURED</code>, the inspectIT Ocelot agent will try to start the exporter and HTTP server.</td></tr>
+<tr><td><code>.host</code></td><td><code>127.0.0.1</code></td><td>The hostname or network address to which the HTTP server should bind.</td></tr>
+<tr><td><code>.port</code></td><td><code>9000</code></td><td>The port the HTTP server should use.</td></tr>
+<tr><td><code>.path</code></td><td><code>/inspectit</code></td><td>The path on which the HTTP endpoints will be available.</td></tr>
+<tr><td><code>.allowed-origins</code></td><td><code>[&quot;*&quot;]</code></td><td>A list of allowed origins, which are able to access the http-server.</td></tr>
+<tr><td><code>.session-limit</code></td><td><code>100</code></td><td>How many sessions can be stored in the server at the same time.</td></tr>
+<tr><td><code>.session-id-header</code></td><td><code>Cookie</code></td><td>The header, which will be read during propagation to extract the session-ID from</td></tr>
+<tr><td><code>.time-to-live</code></td><td><code>300</code></td><td>How long sessions should be stored in the server in seconds.</td></tr>
+</tbody>
+</table>
+<p>The data of the HTTP exporter is stored inside internal data storages. Data tags will only be written to the storage,
+if they are enabled for <a href="/inspectit-ocelot/docs/2.5.4/instrumentation/rules#data-propagation">browser propagation</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="client-example"></a><a href="#client-example" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Client Example</h3>
+<p>This example should demonstrate, how you can call the REST-API in your frontend application.</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-comment">// Send some requests to transfer the session-id to inspectIT</span>
+callBackend();
+
+<span class="hljs-comment">// Send GET-request</span>
+getTags();
+
+<span class="hljs-comment">// Send PUT-request</span>
+putTags();
+
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getTags</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> xhr = <span class="hljs-keyword">new</span> XMLHttpRequest();
+    <span class="hljs-keyword">const</span> url = <span class="hljs-string">"http://localhost:9000/inspectit"</span>;
+
+    xhr.open(<span class="hljs-string">"GET"</span>, url);
+    xhr.withCredentials = <span class="hljs-literal">true</span>; <span class="hljs-comment">// Send cookies with the request</span>
+
+    xhr.onreadystatechange = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-keyword">if</span> (xhr.readyState === XMLHttpRequest.DONE) {
+            <span class="hljs-keyword">if</span> (xhr.status === <span class="hljs-number">200</span>) {
+                <span class="hljs-keyword">let</span> receivedData = xhr.responseText; <span class="hljs-comment">// Read received data</span>
+                <span class="hljs-built_in">console</span>.info(receivedData);
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-built_in">console</span>.error(<span class="hljs-string">"Error fetching data: "</span>, xhr.status);
+            }
+        }
+    };
+    xhr.send();
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">putTags</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">const</span> data = [
+        {<span class="hljs-string">"service"</span>: <span class="hljs-string">"test-01"</span>}, {<span class="hljs-string">"url"</span>: <span class="hljs-string">"www.example.com"</span>}
+    ]
+    <span class="hljs-keyword">const</span> xhr = <span class="hljs-keyword">new</span> XMLHttpRequest();
+    <span class="hljs-keyword">const</span> url = <span class="hljs-string">"http://localhost:9000/inspectit"</span>;
+
+    xhr.open(<span class="hljs-string">"PUT"</span>, url);
+    xhr.withCredentials = <span class="hljs-literal">true</span>; <span class="hljs-comment">// Send cookies with the request</span>
+    xhr.onreadystatechange = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        <span class="hljs-keyword">if</span> (xhr.readyState === XMLHttpRequest.DONE) {
+            <span class="hljs-keyword">if</span> (xhr.status === <span class="hljs-number">200</span>) {
+                <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Data fetched successfully!"</span>);
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-built_in">console</span>.error(<span class="hljs-string">"Error fetching data: "</span>, xhr.status);
+            }
+        }
+    };
+    xhr.send(<span class="hljs-built_in">JSON</span>.stringify(data));
+}
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="openapi-documentation"></a><a href="#openapi-documentation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>OpenAPI documentation</h3>
+<p>Below you can see the OpenAPI documentation for the REST-API in YAML-format:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">openapi:</span> <span class="hljs-number">3.0</span><span class="hljs-number">.0</span>
+<span class="hljs-attr">info:</span>
+  <span class="hljs-attr">title:</span> <span class="hljs-string">Tags</span> <span class="hljs-string">Http</span> <span class="hljs-string">Exporter</span>
+  <span class="hljs-attr">description:</span> <span class="hljs-string">|
+    The API provides access to data tags, which are stored on the Tags HTTP-server of a InspectIT-java-agent. One data tag consists of a key-value-pair.
+    Data Tags will be stored in the server, if they are enabled for browser-propagation in the InspectIT configuration server. 
+    Using the API, those tags can be read, written and overwritten. However, every data tag will be stored behind a session-ID by InspectIT.
+</span>
+    <span class="hljs-string">In</span> <span class="hljs-string">order</span> <span class="hljs-string">to</span> <span class="hljs-string">use</span> <span class="hljs-string">a</span> <span class="hljs-string">session-ID</span> <span class="hljs-string">for</span> <span class="hljs-string">storing</span> <span class="hljs-string">data</span> <span class="hljs-string">tags,</span> <span class="hljs-string">a</span> <span class="hljs-string">request</span> <span class="hljs-string">has</span> <span class="hljs-string">to</span> <span class="hljs-string">been</span> <span class="hljs-string">sent</span> <span class="hljs-string">to</span> <span class="hljs-string">the</span> <span class="hljs-string">target</span> <span class="hljs-string">application,</span> <span class="hljs-string">which</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT-java-agent</span> <span class="hljs-string">is</span> <span class="hljs-string">attached</span> <span class="hljs-string">to.</span>
+    <span class="hljs-string">This</span> <span class="hljs-string">request</span> <span class="hljs-string">should</span> <span class="hljs-string">contain</span> <span class="hljs-string">the</span> <span class="hljs-string">session-ID</span> <span class="hljs-string">in</span> <span class="hljs-string">it's</span> <span class="hljs-string">headers.</span> 
+    <span class="hljs-string">All</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span> <span class="hljs-string">created</span> <span class="hljs-string">by</span> <span class="hljs-string">this</span> <span class="hljs-string">request,</span> <span class="hljs-string">will</span> <span class="hljs-string">be</span> <span class="hljs-string">stored</span> <span class="hljs-string">behind</span> <span class="hljs-string">the</span> <span class="hljs-string">provided</span> <span class="hljs-string">session-ID</span> <span class="hljs-string">as</span> <span class="hljs-string">long</span> <span class="hljs-string">as</span> <span class="hljs-string">they</span> <span class="hljs-string">are</span> <span class="hljs-string">enabled</span> <span class="hljs-string">for</span> <span class="hljs-string">browser-propagation.</span>
+
+    <span class="hljs-string">To</span> <span class="hljs-string">access</span> <span class="hljs-string">specific</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span> <span class="hljs-string">on</span> <span class="hljs-string">the</span> <span class="hljs-string">server</span> <span class="hljs-string">via</span> <span class="hljs-string">this</span> <span class="hljs-string">API,</span> <span class="hljs-string">requests</span> <span class="hljs-string">will</span> <span class="hljs-string">also</span> <span class="hljs-string">need</span> <span class="hljs-string">to</span> <span class="hljs-string">contain</span> <span class="hljs-string">the</span> <span class="hljs-string">corresponding</span> <span class="hljs-string">session-ID</span> <span class="hljs-string">inside</span> <span class="hljs-string">their</span> <span class="hljs-string">header.</span>
+    <span class="hljs-string">Which</span> <span class="hljs-string">header</span> <span class="hljs-string">should</span> <span class="hljs-string">be</span> <span class="hljs-string">used</span> <span class="hljs-string">to</span> <span class="hljs-string">read</span> <span class="hljs-string">the</span> <span class="hljs-string">session-ID,</span> <span class="hljs-string">can</span> <span class="hljs-string">be</span> <span class="hljs-string">configured</span> <span class="hljs-string">in</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT</span> <span class="hljs-string">configuration</span> <span class="hljs-string">server.</span> <span class="hljs-string">Per</span> <span class="hljs-string">default,</span> <span class="hljs-string">the</span> <span class="hljs-string">Cookie-header</span> <span class="hljs-string">will</span> <span class="hljs-string">be</span> <span class="hljs-string">used.</span>
+    <span class="hljs-string">Data</span> <span class="hljs-string">tags</span> <span class="hljs-string">are</span> <span class="hljs-string">only</span> <span class="hljs-string">cached</span> <span class="hljs-string">for</span> <span class="hljs-string">a</span> <span class="hljs-string">specific</span> <span class="hljs-string">amount</span> <span class="hljs-string">of</span> <span class="hljs-string">time,</span> <span class="hljs-string">which</span> <span class="hljs-string">is</span> <span class="hljs-string">also</span> <span class="hljs-string">defined</span> <span class="hljs-string">in</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT</span> <span class="hljs-string">configuration</span> <span class="hljs-string">server.</span>
+  <span class="hljs-attr">contact:</span>
+    <span class="hljs-attr">name:</span> <span class="hljs-string">Novatec-Consulting</span> <span class="hljs-string">GmbH</span>
+    <span class="hljs-attr">url:</span> <span class="hljs-string">https://inspectit.rocks/</span>
+    <span class="hljs-attr">email:</span> <span class="hljs-string">vhv-team@novatec-gmbh.de</span>
+  <span class="hljs-attr">license:</span>
+    <span class="hljs-attr">name:</span> <span class="hljs-string">Apache</span> <span class="hljs-number">2.0</span>
+    <span class="hljs-attr">url:</span> <span class="hljs-string">http://www.apache.org/licenses/LICENSE-2.0</span>
+  <span class="hljs-attr">version:</span> <span class="hljs-number">1.0</span><span class="hljs-number">.0</span>
+<span class="hljs-attr">servers:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">url:</span> <span class="hljs-string">http://localhost:9000/inspectit</span>
+    <span class="hljs-attr">description:</span> <span class="hljs-string">default-URL</span> <span class="hljs-string">of</span> <span class="hljs-string">the</span> <span class="hljs-string">API.</span> <span class="hljs-string">However,</span> <span class="hljs-string">the</span> <span class="hljs-string">host,</span> <span class="hljs-string">port</span> <span class="hljs-string">and</span> <span class="hljs-string">path</span> <span class="hljs-string">can</span> <span class="hljs-string">be</span> <span class="hljs-string">configured</span> <span class="hljs-string">in</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT</span> <span class="hljs-string">configuration-server</span>
+<span class="hljs-attr">paths:</span>
+  <span class="hljs-string">/inspectit:</span>
+    <span class="hljs-attr">summary:</span> <span class="hljs-string">Single</span> <span class="hljs-string">path</span> <span class="hljs-string">of</span> <span class="hljs-string">the</span> <span class="hljs-string">API</span>
+    <span class="hljs-attr">description:</span> <span class="hljs-string">Single</span> <span class="hljs-string">path</span> <span class="hljs-string">of</span> <span class="hljs-string">the</span> <span class="hljs-string">API,</span> <span class="hljs-string">which</span> <span class="hljs-string">can</span> <span class="hljs-string">be</span> <span class="hljs-string">configured</span> <span class="hljs-string">in</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT</span> <span class="hljs-string">configuration-server</span>
+    <span class="hljs-attr">get:</span>
+      <span class="hljs-attr">summary:</span> <span class="hljs-string">Read</span> <span class="hljs-string">currently</span> <span class="hljs-string">stored</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span>
+      <span class="hljs-attr">description:</span> <span class="hljs-string">|
+        Provides all currently stored data tags for the specified session in the session-ID. data tags will be returend as a set of map-entries.
+        Data tags will only be stored in the tags-server, if they are enabled for browser-propagation.
+</span>
+        <span class="hljs-string">Note</span> <span class="hljs-string">that</span> <span class="hljs-string">all</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span> <span class="hljs-string">are</span> <span class="hljs-string">only</span> <span class="hljs-string">cached</span> <span class="hljs-string">for</span> <span class="hljs-string">a</span> <span class="hljs-string">specific</span> <span class="hljs-string">amount</span> <span class="hljs-string">of</span> <span class="hljs-string">time,</span> <span class="hljs-string">which</span> <span class="hljs-string">can</span> <span class="hljs-string">be</span> <span class="hljs-string">configured</span> <span class="hljs-string">in</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT</span> <span class="hljs-string">configuration</span> <span class="hljs-string">server.</span>
+      <span class="hljs-attr">security:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">session_id:</span> <span class="hljs-string">[]</span>
+      <span class="hljs-attr">responses:</span>
+        <span class="hljs-attr">'200':</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">Success</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Response</span> <span class="hljs-string">contains</span> <span class="hljs-string">all</span> <span class="hljs-string">current</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span>
+          <span class="hljs-attr">content:</span>
+            <span class="hljs-attr">application/json:</span>
+              <span class="hljs-attr">schema:</span>
+                <span class="hljs-attr">type:</span> <span class="hljs-string">array</span>
+                <span class="hljs-attr">items:</span>
+                  <span class="hljs-attr">type:</span> <span class="hljs-string">object</span>
+                  <span class="hljs-attr">additionalProperties:</span>
+                    <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>
+              <span class="hljs-attr">example:</span> <span class="hljs-string">'[{"key1": "value1"}, {"key2": "value2"}]'</span>
+        <span class="hljs-attr">'400':</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">Failure</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Missing</span> <span class="hljs-string">session-ID-header</span>
+        <span class="hljs-attr">'403':</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">Forbidden</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Not</span> <span class="hljs-string">allowed</span> <span class="hljs-string">Origin</span> <span class="hljs-string">header</span>
+        <span class="hljs-attr">'404':</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">Failure</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Session-ID</span> <span class="hljs-string">not</span> <span class="hljs-string">found</span> <span class="hljs-string">in</span> <span class="hljs-string">session-ID-header</span>
+    <span class="hljs-attr">put:</span>
+      <span class="hljs-attr">summary:</span> <span class="hljs-string">Write</span> <span class="hljs-string">or</span> <span class="hljs-string">overwrite</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span>
+      <span class="hljs-attr">description:</span> <span class="hljs-string">|
+        Overwrites data tags that are already stored in the Tags HTTP-server for the specified session-ID.
+        Alternatively, write new data tags into the storage, to allow the InspectIT-java-agent to use tags, which are not available inside the JVM. 
+</span>
+        <span class="hljs-string">However,</span> <span class="hljs-string">new</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span> <span class="hljs-string">can</span> <span class="hljs-string">only</span> <span class="hljs-string">be</span> <span class="hljs-string">written,</span> <span class="hljs-string">if</span> <span class="hljs-string">there</span> <span class="hljs-string">already</span> <span class="hljs-string">exists</span> <span class="hljs-string">a</span> <span class="hljs-string">data</span> <span class="hljs-string">tag</span> <span class="hljs-string">storage</span> <span class="hljs-string">for</span> <span class="hljs-string">the</span> <span class="hljs-string">provided</span> <span class="hljs-string">session-ID.</span>
+        <span class="hljs-string">It</span> <span class="hljs-string">is</span> <span class="hljs-string">not</span> <span class="hljs-string">possible</span> <span class="hljs-string">to</span> <span class="hljs-string">create</span> <span class="hljs-string">new</span> <span class="hljs-string">data</span> <span class="hljs-string">tag</span> <span class="hljs-string">storages</span> <span class="hljs-string">through</span> <span class="hljs-string">this</span> <span class="hljs-string">API,</span> <span class="hljs-string">but</span> <span class="hljs-string">only</span> <span class="hljs-string">within</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT-java-agent,</span> <span class="hljs-string">by</span> <span class="hljs-string">sending</span> <span class="hljs-string">request</span> <span class="hljs-string">to</span> <span class="hljs-string">the</span> <span class="hljs-string">target</span> <span class="hljs-string">application.</span>
+
+        <span class="hljs-string">Note</span> <span class="hljs-string">that</span> <span class="hljs-string">these</span> <span class="hljs-string">new</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span> <span class="hljs-string">also</span> <span class="hljs-string">have</span> <span class="hljs-string">to</span> <span class="hljs-string">be</span> <span class="hljs-string">enabled</span> <span class="hljs-string">for</span> <span class="hljs-string">browser-propagation</span> <span class="hljs-string">as</span> <span class="hljs-string">well</span> <span class="hljs-string">as</span> <span class="hljs-string">down-propagation</span> <span class="hljs-string">in</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT</span> <span class="hljs-string">configuration</span> <span class="hljs-string">server.</span>
+      <span class="hljs-attr">security:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">session_id:</span> <span class="hljs-string">[]</span>
+      <span class="hljs-attr">requestBody:</span>
+        <span class="hljs-attr">description:</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span> <span class="hljs-string">should</span> <span class="hljs-string">be</span> <span class="hljs-string">written</span> <span class="hljs-string">or</span> <span class="hljs-string">overwritten</span>
+        <span class="hljs-attr">required:</span> <span class="hljs-literal">true</span>
+        <span class="hljs-attr">content:</span>
+          <span class="hljs-attr">application/json:</span>
+            <span class="hljs-attr">schema:</span>
+              <span class="hljs-attr">type:</span> <span class="hljs-string">array</span>
+              <span class="hljs-attr">items:</span>
+                <span class="hljs-attr">type:</span> <span class="hljs-string">object</span>
+                <span class="hljs-attr">additionalProperties:</span>
+                  <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>
+            <span class="hljs-attr">example:</span> <span class="hljs-string">'[{"key1": "value1"}, {"key2": "value2"}]'</span>
+      <span class="hljs-attr">responses:</span>
+        <span class="hljs-attr">'200':</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">Success</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Data</span> <span class="hljs-string">tags</span> <span class="hljs-string">have</span> <span class="hljs-string">been</span> <span class="hljs-string">written</span>
+        <span class="hljs-attr">'400':</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">Failure</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Invalid</span> <span class="hljs-string">request</span> <span class="hljs-string">body</span> <span class="hljs-string">or</span> <span class="hljs-string">missing</span> <span class="hljs-string">session-ID-header</span>
+        <span class="hljs-attr">'403':</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">Forbidden</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Not</span> <span class="hljs-string">allowed</span> <span class="hljs-string">Origin</span> <span class="hljs-string">header</span>
+        <span class="hljs-attr">'404':</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">Failure</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Session-ID</span> <span class="hljs-string">not</span> <span class="hljs-string">found</span> <span class="hljs-string">in</span> <span class="hljs-string">session-ID-header</span>
+    <span class="hljs-attr">options:</span>
+      <span class="hljs-attr">summary:</span> <span class="hljs-string">Cross-Origin</span> <span class="hljs-string">safety</span> <span class="hljs-string">check</span>
+      <span class="hljs-attr">description:</span> <span class="hljs-string">|
+        Allows to send pre-flight-requests to the API before actual requests. The usage is voluntary.
+</span>      <span class="hljs-attr">parameters:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Origin</span>
+          <span class="hljs-attr">in:</span> <span class="hljs-string">header</span>
+          <span class="hljs-attr">required:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">schema:</span>
+            <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Access-Control-Request-Method</span>
+          <span class="hljs-attr">in:</span> <span class="hljs-string">header</span>
+          <span class="hljs-attr">required:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">schema:</span>
+            <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>
+      <span class="hljs-attr">responses:</span>
+        <span class="hljs-attr">'200':</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">Success</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Pre-flight</span> <span class="hljs-string">response</span> <span class="hljs-string">with</span> <span class="hljs-string">CORS</span> <span class="hljs-string">headers</span>
+          <span class="hljs-attr">headers:</span>
+            <span class="hljs-attr">Access-Control-Allow-Origin:</span>
+              <span class="hljs-attr">schema:</span>
+                <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>
+            <span class="hljs-attr">Access-Control-Allow-Methods:</span>
+              <span class="hljs-attr">schema:</span>
+                <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>
+            <span class="hljs-attr">Access-Control-Allow-Credentials:</span>
+              <span class="hljs-attr">schema:</span>
+                <span class="hljs-attr">type:</span> <span class="hljs-string">boolean</span>
+        <span class="hljs-attr">'403':</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">Forbidden</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Missing</span> <span class="hljs-string">required</span> <span class="hljs-string">headers</span>
+<span class="hljs-attr">components:</span>
+  <span class="hljs-attr">securitySchemes:</span>
+    <span class="hljs-attr">session_id:</span>
+      <span class="hljs-attr">type:</span> <span class="hljs-string">apiKey</span>
+      <span class="hljs-attr">description:</span> <span class="hljs-string">|
+        ID of the current session. The session-ID-header-name can be configured in the InspectIT configuration-server.
+        Per default, the Cookie-Header will be used as the session-ID-header.
+</span>
+        <span class="hljs-string">The</span> <span class="hljs-string">length</span> <span class="hljs-string">of</span> <span class="hljs-string">the</span> <span class="hljs-string">session-id</span> <span class="hljs-string">is</span> <span class="hljs-string">restricted</span> <span class="hljs-string">to</span> <span class="hljs-string">a</span> <span class="hljs-string">minimum</span> <span class="hljs-string">of</span> <span class="hljs-number">16</span> <span class="hljs-string">characters</span> <span class="hljs-string">and</span> <span class="hljs-string">a</span> <span class="hljs-string">maximum</span> <span class="hljs-string">of</span> <span class="hljs-number">512</span> <span class="hljs-string">characters.</span>
+      <span class="hljs-attr">name:</span> <span class="hljs-string">Cookie</span>
+      <span class="hljs-attr">in:</span> <span class="hljs-string">header</span>
+<span class="hljs-attr">externalDocs:</span>
+  <span class="hljs-attr">description:</span> <span class="hljs-string">More</span> <span class="hljs-string">information</span> <span class="hljs-string">about</span> <span class="hljs-string">the</span> <span class="hljs-string">Exporter</span> <span class="hljs-string">API</span>
+  <span class="hljs-attr">url:</span> <span class="hljs-string">https://inspectit.github.io/inspectit-ocelot/docs/tags/tags-exporters</span>
+</code></pre>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 10/9/2023 by Eduard Schander</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/2.5.4/tracing/tracing-self-monitoring"><span class="arrow-prev">← </span><span>Self-Monitoring</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/2.5.4/instrumentation/instrumentation"><span>Instrumentation</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#http-exporter">HTTP Exporter</a><ul class="toc-headings"><li><a href="#client-example">Client Example</a></li><li><a href="#openapi-documentation">OpenAPI documentation</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2023 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'P7JV0ZK66K',
+                apiKey: 'd499024131bf8d92e6d469a6c14f4798',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:2.5.4"]}
+              });
+            </script></body></html>
