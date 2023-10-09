@@ -31,7 +31,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
 
     Map<String, String> headers;
 
-    private static final String sessionIdHeader = "Cookie";
+    private static final String sessionIdHeader = "Session-Id";
     private static final String sessionId = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
 
     @BeforeEach
@@ -64,7 +64,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             assertThat(dataStorage.readData()).isEmpty();
 
             ctx.close();
-            assertThat(dataStorage.readData()).isEmpty();
+            assertThat(dataStorage.getStorageSize()).isZero();
             assertThat(ContextUtil.currentInspectitContext()).isNull();
         }
 
@@ -135,7 +135,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             ctx.close();
             assertThat(dataStorage.readData()).doesNotContainEntry("key1", "value321");
             assertThat(dataStorage.readData()).doesNotContainEntry("keyABC", "valueABC");
-            assertThat(dataStorage.readData().size()).isEqualTo(128);
+            assertThat(dataStorage.getStorageSize()).isEqualTo(128);
         }
 
         @Test

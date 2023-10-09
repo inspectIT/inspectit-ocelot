@@ -29,12 +29,11 @@ public class BrowserPropagationServlet extends HttpServlet {
 
     /**
      * Header, which should be used to store the session-Ids
-     * Default-key: "Cookie"
      */
     private final String sessionIdHeader;
 
     /**
-     * List of allowed Orgins, which are able to access the HTTP-server
+     * List of allowed Origins, which are able to access the HTTP-server
      */
     private final List<String> allowedOrigins;
     private final ObjectMapper mapper;
@@ -54,7 +53,7 @@ public class BrowserPropagationServlet extends HttpServlet {
 
         //If wildcard is used, allow every origin
         //Alternatively, check if current origin is allowed
-        if(this.allowedOrigins.contains("*") || this.allowedOrigins.contains(origin)) {
+        if(allowedOrigins.contains("*") || allowedOrigins.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Access-Control-Allow-Methods", "GET");
             response.setHeader("Access-Control-Allow-Credentials", "true");
@@ -91,7 +90,7 @@ public class BrowserPropagationServlet extends HttpServlet {
 
         //If wildcard is used, allow every origin
         //Alternatively, check if current origin is allowed
-        if(this.allowedOrigins.contains("*") || this.allowedOrigins.contains(origin)) {
+        if(allowedOrigins.contains("*") || allowedOrigins.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Access-Control-Allow-Methods", "PUT");
             response.setHeader("Access-Control-Allow-Credentials", "true");
@@ -127,13 +126,20 @@ public class BrowserPropagationServlet extends HttpServlet {
         log.debug("Tags HTTP-server received OPTIONS-request");
         String origin = request.getHeader("Origin");
         String accessControlRequestMethod = request.getHeader("Access-Control-Request-Method");
+        String accessControlRequestHeaders = request.getHeader("Access-Control-Request-Headers");
 
-        if (origin != null && accessControlRequestMethod != null &&
-                (this.allowedOrigins.contains("*") || this.allowedOrigins.contains(origin))
+        if (
+                origin != null &&
+                accessControlRequestMethod != null &&
+                accessControlRequestHeaders != null &&
+                (allowedOrigins.contains("*") || allowedOrigins.contains(origin)) &&
+                accessControlRequestHeaders.equalsIgnoreCase(sessionIdHeader)
         ) {
             response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Access-Control-Allow-Methods", "GET, PUT");
+            response.setHeader("Access-Control-Allow-Headers", sessionIdHeader);
             response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Max-Age", "3600");
             response.setStatus(HttpServletResponse.SC_OK);
         }
         else response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -145,7 +151,7 @@ public class BrowserPropagationServlet extends HttpServlet {
             return entrySet.stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (Exception e) {
-            log.info("Request to Tags HTTP-server failed");
+            log.warn("Request to Tags HTTP-server failed", e);
             return null;
         }
     }

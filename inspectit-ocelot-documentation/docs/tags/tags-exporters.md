@@ -23,6 +23,11 @@ The Tags HTTP exporter does not provide any encryption of data and does not perf
 Thus, this server should not be exposed directly to the public in a production environment.
 It is recommended to set up a proxy in front of this server, which handles encryption and authentication.
 
+Furthermore, please make sure to enable port forwarding, if you use servlet-containers like tomcat.
+You should also set _-Dinspectit.expoters.tags.http.host=0.0.0.0_ as parameter in the tomcat start configuration.
+
+Additionally, make sure that your firewall is not blocking the HTTP-server address.
+
 The server performs authorization with checking, whether the request origin is allowed to access the server. 
 Additionally, every request has to provide a session-ID to access their own session data.
 
@@ -33,8 +38,7 @@ The session-ID will be read from a specific request-header. The _**session-id-he
 to specify, which exact header should be used to read the session-ID from. 
 
 The default-instrumentation of InspectIT will check the specified _session-id-header_ for a valid session-ID. 
-Thus, there is no additional configuration necessary to read session-ID from HTTP-headers. 
-The length of a session-ID is restricted to a minimum of 64 characters and a maximum of 512 characters.
+Thus, there is no additional configuration necessary to read session-ID from HTTP-headers.
 
 Behind every session-ID, there is a data storage containing all data tags for this session, as long as they are enabled for browser propagation.
 These data storages can only be created, by sending requests to the target application, which the Ocelot-agent is attached to.
@@ -42,12 +46,13 @@ You cannot create new data storages for example by pushing data into the HTTP-se
 If a request to the REST-API contains a session-ID, which does not exist in InspectIT, the API will always return 404.
 
 The HTTP-exporter can only store a specific amount of sessions, which can be configured in the configuration server.
-Sessions will be deleted after their _time-to-live_ is expired.
+Sessions will be deleted after their _time-to-live_ is expired. Their time-to-live will be reset everytime a request
+the HTTP-server receives a successful request.
 
 #### Session limits
 
 There are some limitations for every session to prevent excessive memory consumption.
-The length of the session-id is restricted to a minimum of 16 characters and a maximum of 512 characters.
+The length of the session-ID is restricted to a minimum of 16 characters and a maximum of 512 characters.
 Furthermore, every session is able to contain up to **128 data keys**. 
 The maximum length for data keys are **128 chars**. The maximum length for data values are **2048 chars**.
 
@@ -58,16 +63,16 @@ restart, which also deletes all data currently stored in the server.
 
 The following properties are nested properties below the `inspectit.exporters.tags.http` property:
 
-| Property             | Default      | Description
-|----------------------|--------------|---|
-| `.enabled`           | `DISABLED`   |If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the exporter and HTTP server.
-| `.host`              | `127.0.0.1`  |The hostname or network address to which the HTTP server should bind.
-| `.port`              | `9000`       |The port the HTTP server should use.
-| `.path`              | `/inspectit` |The path on which the HTTP endpoints will be available.
-| `.allowed-origins`   | `["*"]`      |A list of allowed origins, which are able to access the http-server.
-| `.session-limit`     | `100`        |How many sessions can be stored in the server at the same time.
-| `.session-id-header` | `Cookie`     |The header, which will be read during propagation to extract the session-ID from
-| `.time-to-live`      | `300`        |How long sessions should be stored in the server in seconds.
+| Property             | Default      | Description                                                                                                 |
+|----------------------|--------------|-------------------------------------------------------------------------------------------------------------|
+| `.enabled`           | `DISABLED`   | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the exporter and HTTP server. |
+| `.host`              | `127.0.0.1`  | The hostname or network address to which the HTTP server should bind.                                       |
+| `.port`              | `9000`       | The port the HTTP server should use.                                                                        |
+| `.path`              | `/inspectit` | The path on which the HTTP endpoints will be available.                                                     |
+| `.allowed-origins`   | `["*"]`      | A list of allowed origins, which are able to access the http-server.                                        |
+| `.session-limit`     | `100`        | How many sessions can be stored in the server at the same time.                                             |
+| `.session-id-header` | `Session-Id` | The header, which will be read during propagation to extract the session-ID from                            |
+| `.time-to-live`      | `300`        | How long sessions should be stored in the server in seconds.                                                |
 
 The data of the HTTP exporter is stored inside internal data storages. Data tags will only be written to the storage,
 if they are enabled for [browser propagation](../instrumentation/rules.md#data-propagation).
@@ -92,7 +97,7 @@ function getTags() {
     const url = "http://localhost:9000/inspectit";
 
     xhr.open("GET", url);
-    xhr.withCredentials = true; // Send cookies with the request
+    xhr.setRequestHeader("Session-Id", "my-very-awesome-session-id");
 
     xhr.onreadystatechange = () => {
         if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -115,7 +120,8 @@ function putTags() {
     const url = "http://localhost:9000/inspectit";
 
     xhr.open("PUT", url);
-    xhr.withCredentials = true; // Send cookies with the request
+    xhr.setRequestHeader("Session-Id", "my-very-awesome-session-id");
+    
     xhr.onreadystatechange = () => {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
@@ -147,7 +153,7 @@ info:
     All data tags created by this request, will be stored behind the provided session-ID as long as they are enabled for browser-propagation.
 
     To access specific data tags on the server via this API, requests will also need to contain the corresponding session-ID inside their header.
-    Which header should be used to read the session-ID, can be configured in the InspectIT configuration server. Per default, the Cookie-header will be used.
+    Which header should be used to read the session-ID, can be configured in the InspectIT configuration server. By default, the header "Session-Id" will be used.
     Data tags are only cached for a specific amount of time, which is also defined in the InspectIT configuration server.
   contact:
     name: Novatec-Consulting GmbH
@@ -171,8 +177,17 @@ paths:
         Data tags will only be stored in the tags-server, if they are enabled for browser-propagation.
 
         Note that all data tags are only cached for a specific amount of time, which can be configured in the InspectIT configuration server.
-      security:
-        - session_id: []
+      parameters:
+        - name: Session-Id
+          in: header
+          description: |
+            Custom header with the ID of the current session. The session-ID-header-name can be configured in the InspectIT configuration-server.
+            By default, "Session-Id" will be used as the session-ID-header-name.
+
+            The length of the session-id is restricted to a minimum of 16 characters and a maximum of 512 characters.
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Success - Response contains all current data tags
@@ -188,7 +203,7 @@ paths:
         '400':
           description: Failure - Missing session-ID-header
         '403':
-          description: Forbidden - Not allowed Origin header
+          description: Forbidden - Not allowed CORS headers
         '404':
           description: Failure - Session-ID not found in session-ID-header
     put:
@@ -201,8 +216,17 @@ paths:
         It is not possible to create new data tag storages through this API, but only within the InspectIT-java-agent, by sending request to the target application.
 
         Note that these new data tags also have to be enabled for browser-propagation as well as down-propagation in the InspectIT configuration server.
-      security:
-        - session_id: []
+      parameters:
+        - name: Session-Id
+          in: header
+          description: |
+            Custom header with the ID of the current session. The session-ID-header-name can be configured in the InspectIT configuration-server.
+            By default, "Session-Id" will be used as the session-ID-header-name.
+
+            The length of the session-id is restricted to a minimum of 16 characters and a maximum of 512 characters.
+          required: true
+          schema:
+            type: string
       requestBody:
         description: data tags should be written or overwritten
         required: true
@@ -221,7 +245,7 @@ paths:
         '400':
           description: Failure - Invalid request body or missing session-ID-header
         '403':
-          description: Forbidden - Not allowed Origin header
+          description: Forbidden - Not allowed CORS headers
         '404':
           description: Failure - Session-ID not found in session-ID-header
     options:
@@ -239,6 +263,11 @@ paths:
           required: true
           schema:
             type: string
+        - name: Access-Control-Request-Headers
+          in: header
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Success - Pre-flight response with CORS headers
@@ -249,22 +278,14 @@ paths:
             Access-Control-Allow-Methods:
               schema:
                 type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
             Access-Control-Allow-Credentials:
               schema:
                 type: boolean
         '403':
           description: Forbidden - Missing required headers
-components:
-  securitySchemes:
-    session_id:
-      type: apiKey
-      description: |
-        ID of the current session. The session-ID-header-name can be configured in the InspectIT configuration-server.
-        Per default, the Cookie-Header will be used as the session-ID-header.
-
-        The length of the session-id is restricted to a minimum of 16 characters and a maximum of 512 characters.
-      name: Cookie
-      in: header
 externalDocs:
   description: More information about the Exporter API
   url: https://inspectit.github.io/inspectit-ocelot/docs/tags/tags-exporters

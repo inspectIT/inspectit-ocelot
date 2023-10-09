@@ -67,7 +67,14 @@ public class BrowserPropagationSessionStorage {
         long currentTime = System.currentTimeMillis();
         dataStorages.forEach((id, storage) -> {
             long elapsedTime = storage.calculateElapsedTime(currentTime) / 1000;
-            if(timeToLive < elapsedTime) dataStorages.remove(id);
+            if(timeToLive < elapsedTime) {
+                dataStorages.remove(id);
+                log.debug("Time to Live expired for the following session: " + id);
+            }
+            else {
+                int storageSize = storage.getStorageSize();
+                log.debug("There are " + storageSize + " data entries stored in session: " + id);
+            }
         });
     }
 

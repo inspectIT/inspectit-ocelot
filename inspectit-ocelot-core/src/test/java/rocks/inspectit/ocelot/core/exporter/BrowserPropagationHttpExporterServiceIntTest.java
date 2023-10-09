@@ -36,7 +36,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
     private static String url;
 
     private static final String path = "/inspectit";
-    private static final String sessionIDHeader = "Cookie";
+    private static final String sessionIDHeader = "Session-Id";
     private static final String allowedOrigin = "localhost";
 
     @BeforeEach
@@ -248,6 +248,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
             HttpOptions optionsRequest = new HttpOptions(url);
             optionsRequest.setHeader("Origin", allowedOrigin);
             optionsRequest.setHeader("access-control-request-method", "GET");
+            optionsRequest.setHeader("access-control-request-headers", sessionIDHeader);
 
             CloseableHttpResponse response = testClient.execute(optionsRequest);
             int statusCode = response.getStatusLine().getStatusCode();
@@ -261,6 +262,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
             HttpOptions optionsRequest = new HttpOptions(url);
             optionsRequest.setHeader("Origin", allowedOrigin);
             optionsRequest.setHeader("access-control-request-method", "PUT");
+            optionsRequest.setHeader("access-control-request-headers", sessionIDHeader);
 
             CloseableHttpResponse response = testClient.execute(optionsRequest);
             int statusCode = response.getStatusLine().getStatusCode();
@@ -270,7 +272,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         }
 
         @Test
-        void verifyOptionsEndpointWithMissingHeader() throws IOException {
+        void verifyOptionsEndpointWithMissingHeaders() throws IOException {
             HttpOptions optionsRequest = new HttpOptions(url);
             optionsRequest.setHeader("Origin", allowedOrigin);
 

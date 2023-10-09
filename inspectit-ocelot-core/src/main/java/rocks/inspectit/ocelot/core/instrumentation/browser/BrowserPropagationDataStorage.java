@@ -31,7 +31,7 @@ public class BrowserPropagationDataStorage {
     public void writeData(Map<String, ?> newPropagationData) {
         Map <String, Object> validatedData = validateEntries(newPropagationData);
 
-        if(!validateAttributeLength(validatedData)) {
+        if(!validateAttributeCount(validatedData)) {
             log.warn("Unable to write data: Data count limit was exceeded");
             return;
         }
@@ -40,6 +40,10 @@ public class BrowserPropagationDataStorage {
 
     public Map<String, Object> readData() {
         return new HashMap<>(propagationData);
+    }
+
+    public int getStorageSize() {
+        return propagationData.size();
     }
 
     public void updateTimestamp(long newTimestamp) {
@@ -55,7 +59,7 @@ public class BrowserPropagationDataStorage {
         return currentTime - latestTimestamp;
     }
 
-    private boolean validateAttributeLength(Map<String, ?> newPropagationData) {
+    private boolean validateAttributeCount(Map<String, ?> newPropagationData) {
         Set<String> keySet = new HashSet<>(propagationData.keySet());
         keySet.retainAll(newPropagationData.keySet());
         //Add size of both maps and subtract the common keys
