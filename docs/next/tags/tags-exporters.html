@@ -79,6 +79,9 @@ calling '<a href="http://localhost:9000/inspectit'">http://localhost:9000/inspec
 <p>The Tags HTTP exporter does not provide any encryption of data and does not perform any authentication.
 Thus, this server should not be exposed directly to the public in a production environment.
 It is recommended to set up a proxy in front of this server, which handles encryption and authentication.</p>
+<p>Furthermore, please make sure to enable port forwarding, if you use servlet-containers like tomcat.
+You should also set <em>-Dinspectit.expoters.tags.http.host=0.0.0.0</em> as parameter in the tomcat start configuration.</p>
+<p>Additionally, make sure that your firewall is not blocking the HTTP-server address.</p>
 <p>The server performs authorization with checking, whether the request origin is allowed to access the server.
 Additionally, every request has to provide a session-ID to access their own session data.</p>
 <h4><a class="anchor" aria-hidden="true" id="session-identification"></a><a href="#session-identification" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Session identification</h4>
@@ -86,17 +89,17 @@ Additionally, every request has to provide a session-ID to access their own sess
 The session-ID will be read from a specific request-header. The <em><strong>session-id-header</strong></em>-property in the HTTP-exporter allows
 to specify, which exact header should be used to read the session-ID from.</p>
 <p>The default-instrumentation of InspectIT will check the specified <em>session-id-header</em> for a valid session-ID.
-Thus, there is no additional configuration necessary to read session-ID from HTTP-headers.
-The length of a session-ID is restricted to a minimum of 64 characters and a maximum of 512 characters.</p>
+Thus, there is no additional configuration necessary to read session-ID from HTTP-headers.</p>
 <p>Behind every session-ID, there is a data storage containing all data tags for this session, as long as they are enabled for browser propagation.
 These data storages can only be created, by sending requests to the target application, which the Ocelot-agent is attached to.
 You cannot create new data storages for example by pushing data into the HTTP-server by using the API.
 If a request to the REST-API contains a session-ID, which does not exist in InspectIT, the API will always return 404.</p>
 <p>The HTTP-exporter can only store a specific amount of sessions, which can be configured in the configuration server.
-Sessions will be deleted after their <em>time-to-live</em> is expired.</p>
+Sessions will be deleted after their <em>time-to-live</em> is expired. Their time-to-live will be reset everytime a request
+the HTTP-server receives a successful request.</p>
 <h4><a class="anchor" aria-hidden="true" id="session-limits"></a><a href="#session-limits" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Session limits</h4>
 <p>There are some limitations for every session to prevent excessive memory consumption.
-The length of the session-id is restricted to a minimum of 16 characters and a maximum of 512 characters.
+The length of the session-ID is restricted to a minimum of 16 characters and a maximum of 512 characters.
 Furthermore, every session is able to contain up to <strong>128 data keys</strong>.
 The maximum length for data keys are <strong>128 chars</strong>. The maximum length for data values are <strong>2048 chars</strong>.</p>
 <h4><a class="anchor" aria-hidden="true" id="runtime-updates"></a><a href="#runtime-updates" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Runtime Updates</h4>
@@ -114,7 +117,7 @@ restart, which also deletes all data currently stored in the server.</p>
 <tr><td><code>.path</code></td><td><code>/inspectit</code></td><td>The path on which the HTTP endpoints will be available.</td></tr>
 <tr><td><code>.allowed-origins</code></td><td><code>[&quot;*&quot;]</code></td><td>A list of allowed origins, which are able to access the http-server.</td></tr>
 <tr><td><code>.session-limit</code></td><td><code>100</code></td><td>How many sessions can be stored in the server at the same time.</td></tr>
-<tr><td><code>.session-id-header</code></td><td><code>Cookie</code></td><td>The header, which will be read during propagation to extract the session-ID from</td></tr>
+<tr><td><code>.session-id-header</code></td><td><code>Session-Id</code></td><td>The header, which will be read during propagation to extract the session-ID from</td></tr>
 <tr><td><code>.time-to-live</code></td><td><code>300</code></td><td>How long sessions should be stored in the server in seconds.</td></tr>
 </tbody>
 </table>
@@ -137,7 +140,7 @@ putTags();
     <span class="hljs-keyword">const</span> url = <span class="hljs-string">"http://localhost:9000/inspectit"</span>;
 
     xhr.open(<span class="hljs-string">"GET"</span>, url);
-    xhr.withCredentials = <span class="hljs-literal">true</span>; <span class="hljs-comment">// Send cookies with the request</span>
+    xhr.setRequestHeader(<span class="hljs-string">"Session-Id"</span>, <span class="hljs-string">"my-very-awesome-session-id"</span>);
 
     xhr.onreadystatechange = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
         <span class="hljs-keyword">if</span> (xhr.readyState === XMLHttpRequest.DONE) {
@@ -160,7 +163,8 @@ putTags();
     <span class="hljs-keyword">const</span> url = <span class="hljs-string">"http://localhost:9000/inspectit"</span>;
 
     xhr.open(<span class="hljs-string">"PUT"</span>, url);
-    xhr.withCredentials = <span class="hljs-literal">true</span>; <span class="hljs-comment">// Send cookies with the request</span>
+    xhr.setRequestHeader(<span class="hljs-string">"Session-Id"</span>, <span class="hljs-string">"my-very-awesome-session-id"</span>);
+    
     xhr.onreadystatechange = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
         <span class="hljs-keyword">if</span> (xhr.readyState === XMLHttpRequest.DONE) {
             <span class="hljs-keyword">if</span> (xhr.status === <span class="hljs-number">200</span>) {
@@ -188,7 +192,7 @@ putTags();
     <span class="hljs-string">All</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span> <span class="hljs-string">created</span> <span class="hljs-string">by</span> <span class="hljs-string">this</span> <span class="hljs-string">request,</span> <span class="hljs-string">will</span> <span class="hljs-string">be</span> <span class="hljs-string">stored</span> <span class="hljs-string">behind</span> <span class="hljs-string">the</span> <span class="hljs-string">provided</span> <span class="hljs-string">session-ID</span> <span class="hljs-string">as</span> <span class="hljs-string">long</span> <span class="hljs-string">as</span> <span class="hljs-string">they</span> <span class="hljs-string">are</span> <span class="hljs-string">enabled</span> <span class="hljs-string">for</span> <span class="hljs-string">browser-propagation.</span>
 
     <span class="hljs-string">To</span> <span class="hljs-string">access</span> <span class="hljs-string">specific</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span> <span class="hljs-string">on</span> <span class="hljs-string">the</span> <span class="hljs-string">server</span> <span class="hljs-string">via</span> <span class="hljs-string">this</span> <span class="hljs-string">API,</span> <span class="hljs-string">requests</span> <span class="hljs-string">will</span> <span class="hljs-string">also</span> <span class="hljs-string">need</span> <span class="hljs-string">to</span> <span class="hljs-string">contain</span> <span class="hljs-string">the</span> <span class="hljs-string">corresponding</span> <span class="hljs-string">session-ID</span> <span class="hljs-string">inside</span> <span class="hljs-string">their</span> <span class="hljs-string">header.</span>
-    <span class="hljs-string">Which</span> <span class="hljs-string">header</span> <span class="hljs-string">should</span> <span class="hljs-string">be</span> <span class="hljs-string">used</span> <span class="hljs-string">to</span> <span class="hljs-string">read</span> <span class="hljs-string">the</span> <span class="hljs-string">session-ID,</span> <span class="hljs-string">can</span> <span class="hljs-string">be</span> <span class="hljs-string">configured</span> <span class="hljs-string">in</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT</span> <span class="hljs-string">configuration</span> <span class="hljs-string">server.</span> <span class="hljs-string">Per</span> <span class="hljs-string">default,</span> <span class="hljs-string">the</span> <span class="hljs-string">Cookie-header</span> <span class="hljs-string">will</span> <span class="hljs-string">be</span> <span class="hljs-string">used.</span>
+    <span class="hljs-string">Which</span> <span class="hljs-string">header</span> <span class="hljs-string">should</span> <span class="hljs-string">be</span> <span class="hljs-string">used</span> <span class="hljs-string">to</span> <span class="hljs-string">read</span> <span class="hljs-string">the</span> <span class="hljs-string">session-ID,</span> <span class="hljs-string">can</span> <span class="hljs-string">be</span> <span class="hljs-string">configured</span> <span class="hljs-string">in</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT</span> <span class="hljs-string">configuration</span> <span class="hljs-string">server.</span> <span class="hljs-string">By</span> <span class="hljs-string">default,</span> <span class="hljs-string">the</span> <span class="hljs-string">header</span> <span class="hljs-string">"Session-Id"</span> <span class="hljs-string">will</span> <span class="hljs-string">be</span> <span class="hljs-string">used.</span>
     <span class="hljs-string">Data</span> <span class="hljs-string">tags</span> <span class="hljs-string">are</span> <span class="hljs-string">only</span> <span class="hljs-string">cached</span> <span class="hljs-string">for</span> <span class="hljs-string">a</span> <span class="hljs-string">specific</span> <span class="hljs-string">amount</span> <span class="hljs-string">of</span> <span class="hljs-string">time,</span> <span class="hljs-string">which</span> <span class="hljs-string">is</span> <span class="hljs-string">also</span> <span class="hljs-string">defined</span> <span class="hljs-string">in</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT</span> <span class="hljs-string">configuration</span> <span class="hljs-string">server.</span>
   <span class="hljs-attr">contact:</span>
     <span class="hljs-attr">name:</span> <span class="hljs-string">Novatec-Consulting</span> <span class="hljs-string">GmbH</span>
@@ -212,8 +216,17 @@ putTags();
         Data tags will only be stored in the tags-server, if they are enabled for browser-propagation.
 </span>
         <span class="hljs-string">Note</span> <span class="hljs-string">that</span> <span class="hljs-string">all</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span> <span class="hljs-string">are</span> <span class="hljs-string">only</span> <span class="hljs-string">cached</span> <span class="hljs-string">for</span> <span class="hljs-string">a</span> <span class="hljs-string">specific</span> <span class="hljs-string">amount</span> <span class="hljs-string">of</span> <span class="hljs-string">time,</span> <span class="hljs-string">which</span> <span class="hljs-string">can</span> <span class="hljs-string">be</span> <span class="hljs-string">configured</span> <span class="hljs-string">in</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT</span> <span class="hljs-string">configuration</span> <span class="hljs-string">server.</span>
-      <span class="hljs-attr">security:</span>
-        <span class="hljs-bullet">-</span> <span class="hljs-attr">session_id:</span> <span class="hljs-string">[]</span>
+      <span class="hljs-attr">parameters:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Session-Id</span>
+          <span class="hljs-attr">in:</span> <span class="hljs-string">header</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">|
+            Custom header with the ID of the current session. The session-ID-header-name can be configured in the InspectIT configuration-server.
+            By default, "Session-Id" will be used as the session-ID-header-name.
+</span>
+            <span class="hljs-string">The</span> <span class="hljs-string">length</span> <span class="hljs-string">of</span> <span class="hljs-string">the</span> <span class="hljs-string">session-id</span> <span class="hljs-string">is</span> <span class="hljs-string">restricted</span> <span class="hljs-string">to</span> <span class="hljs-string">a</span> <span class="hljs-string">minimum</span> <span class="hljs-string">of</span> <span class="hljs-number">16</span> <span class="hljs-string">characters</span> <span class="hljs-string">and</span> <span class="hljs-string">a</span> <span class="hljs-string">maximum</span> <span class="hljs-string">of</span> <span class="hljs-number">512</span> <span class="hljs-string">characters.</span>
+          <span class="hljs-attr">required:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">schema:</span>
+            <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>
       <span class="hljs-attr">responses:</span>
         <span class="hljs-attr">'200':</span>
           <span class="hljs-attr">description:</span> <span class="hljs-string">Success</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Response</span> <span class="hljs-string">contains</span> <span class="hljs-string">all</span> <span class="hljs-string">current</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span>
@@ -229,7 +242,7 @@ putTags();
         <span class="hljs-attr">'400':</span>
           <span class="hljs-attr">description:</span> <span class="hljs-string">Failure</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Missing</span> <span class="hljs-string">session-ID-header</span>
         <span class="hljs-attr">'403':</span>
-          <span class="hljs-attr">description:</span> <span class="hljs-string">Forbidden</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Not</span> <span class="hljs-string">allowed</span> <span class="hljs-string">Origin</span> <span class="hljs-string">header</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">Forbidden</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Not</span> <span class="hljs-string">allowed</span> <span class="hljs-string">CORS</span> <span class="hljs-string">headers</span>
         <span class="hljs-attr">'404':</span>
           <span class="hljs-attr">description:</span> <span class="hljs-string">Failure</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Session-ID</span> <span class="hljs-string">not</span> <span class="hljs-string">found</span> <span class="hljs-string">in</span> <span class="hljs-string">session-ID-header</span>
     <span class="hljs-attr">put:</span>
@@ -242,8 +255,17 @@ putTags();
         <span class="hljs-string">It</span> <span class="hljs-string">is</span> <span class="hljs-string">not</span> <span class="hljs-string">possible</span> <span class="hljs-string">to</span> <span class="hljs-string">create</span> <span class="hljs-string">new</span> <span class="hljs-string">data</span> <span class="hljs-string">tag</span> <span class="hljs-string">storages</span> <span class="hljs-string">through</span> <span class="hljs-string">this</span> <span class="hljs-string">API,</span> <span class="hljs-string">but</span> <span class="hljs-string">only</span> <span class="hljs-string">within</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT-java-agent,</span> <span class="hljs-string">by</span> <span class="hljs-string">sending</span> <span class="hljs-string">request</span> <span class="hljs-string">to</span> <span class="hljs-string">the</span> <span class="hljs-string">target</span> <span class="hljs-string">application.</span>
 
         <span class="hljs-string">Note</span> <span class="hljs-string">that</span> <span class="hljs-string">these</span> <span class="hljs-string">new</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span> <span class="hljs-string">also</span> <span class="hljs-string">have</span> <span class="hljs-string">to</span> <span class="hljs-string">be</span> <span class="hljs-string">enabled</span> <span class="hljs-string">for</span> <span class="hljs-string">browser-propagation</span> <span class="hljs-string">as</span> <span class="hljs-string">well</span> <span class="hljs-string">as</span> <span class="hljs-string">down-propagation</span> <span class="hljs-string">in</span> <span class="hljs-string">the</span> <span class="hljs-string">InspectIT</span> <span class="hljs-string">configuration</span> <span class="hljs-string">server.</span>
-      <span class="hljs-attr">security:</span>
-        <span class="hljs-bullet">-</span> <span class="hljs-attr">session_id:</span> <span class="hljs-string">[]</span>
+      <span class="hljs-attr">parameters:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Session-Id</span>
+          <span class="hljs-attr">in:</span> <span class="hljs-string">header</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">|
+            Custom header with the ID of the current session. The session-ID-header-name can be configured in the InspectIT configuration-server.
+            By default, "Session-Id" will be used as the session-ID-header-name.
+</span>
+            <span class="hljs-string">The</span> <span class="hljs-string">length</span> <span class="hljs-string">of</span> <span class="hljs-string">the</span> <span class="hljs-string">session-id</span> <span class="hljs-string">is</span> <span class="hljs-string">restricted</span> <span class="hljs-string">to</span> <span class="hljs-string">a</span> <span class="hljs-string">minimum</span> <span class="hljs-string">of</span> <span class="hljs-number">16</span> <span class="hljs-string">characters</span> <span class="hljs-string">and</span> <span class="hljs-string">a</span> <span class="hljs-string">maximum</span> <span class="hljs-string">of</span> <span class="hljs-number">512</span> <span class="hljs-string">characters.</span>
+          <span class="hljs-attr">required:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">schema:</span>
+            <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>
       <span class="hljs-attr">requestBody:</span>
         <span class="hljs-attr">description:</span> <span class="hljs-string">data</span> <span class="hljs-string">tags</span> <span class="hljs-string">should</span> <span class="hljs-string">be</span> <span class="hljs-string">written</span> <span class="hljs-string">or</span> <span class="hljs-string">overwritten</span>
         <span class="hljs-attr">required:</span> <span class="hljs-literal">true</span>
@@ -262,7 +284,7 @@ putTags();
         <span class="hljs-attr">'400':</span>
           <span class="hljs-attr">description:</span> <span class="hljs-string">Failure</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Invalid</span> <span class="hljs-string">request</span> <span class="hljs-string">body</span> <span class="hljs-string">or</span> <span class="hljs-string">missing</span> <span class="hljs-string">session-ID-header</span>
         <span class="hljs-attr">'403':</span>
-          <span class="hljs-attr">description:</span> <span class="hljs-string">Forbidden</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Not</span> <span class="hljs-string">allowed</span> <span class="hljs-string">Origin</span> <span class="hljs-string">header</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">Forbidden</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Not</span> <span class="hljs-string">allowed</span> <span class="hljs-string">CORS</span> <span class="hljs-string">headers</span>
         <span class="hljs-attr">'404':</span>
           <span class="hljs-attr">description:</span> <span class="hljs-string">Failure</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Session-ID</span> <span class="hljs-string">not</span> <span class="hljs-string">found</span> <span class="hljs-string">in</span> <span class="hljs-string">session-ID-header</span>
     <span class="hljs-attr">options:</span>
@@ -280,6 +302,11 @@ putTags();
           <span class="hljs-attr">required:</span> <span class="hljs-literal">true</span>
           <span class="hljs-attr">schema:</span>
             <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Access-Control-Request-Headers</span>
+          <span class="hljs-attr">in:</span> <span class="hljs-string">header</span>
+          <span class="hljs-attr">required:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">schema:</span>
+            <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>
       <span class="hljs-attr">responses:</span>
         <span class="hljs-attr">'200':</span>
           <span class="hljs-attr">description:</span> <span class="hljs-string">Success</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Pre-flight</span> <span class="hljs-string">response</span> <span class="hljs-string">with</span> <span class="hljs-string">CORS</span> <span class="hljs-string">headers</span>
@@ -290,27 +317,19 @@ putTags();
             <span class="hljs-attr">Access-Control-Allow-Methods:</span>
               <span class="hljs-attr">schema:</span>
                 <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>
+            <span class="hljs-attr">Access-Control-Allow-Headers:</span>
+              <span class="hljs-attr">schema:</span>
+                <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>
             <span class="hljs-attr">Access-Control-Allow-Credentials:</span>
               <span class="hljs-attr">schema:</span>
                 <span class="hljs-attr">type:</span> <span class="hljs-string">boolean</span>
         <span class="hljs-attr">'403':</span>
           <span class="hljs-attr">description:</span> <span class="hljs-string">Forbidden</span> <span class="hljs-bullet">-</span> <span class="hljs-string">Missing</span> <span class="hljs-string">required</span> <span class="hljs-string">headers</span>
-<span class="hljs-attr">components:</span>
-  <span class="hljs-attr">securitySchemes:</span>
-    <span class="hljs-attr">session_id:</span>
-      <span class="hljs-attr">type:</span> <span class="hljs-string">apiKey</span>
-      <span class="hljs-attr">description:</span> <span class="hljs-string">|
-        ID of the current session. The session-ID-header-name can be configured in the InspectIT configuration-server.
-        Per default, the Cookie-Header will be used as the session-ID-header.
-</span>
-        <span class="hljs-string">The</span> <span class="hljs-string">length</span> <span class="hljs-string">of</span> <span class="hljs-string">the</span> <span class="hljs-string">session-id</span> <span class="hljs-string">is</span> <span class="hljs-string">restricted</span> <span class="hljs-string">to</span> <span class="hljs-string">a</span> <span class="hljs-string">minimum</span> <span class="hljs-string">of</span> <span class="hljs-number">16</span> <span class="hljs-string">characters</span> <span class="hljs-string">and</span> <span class="hljs-string">a</span> <span class="hljs-string">maximum</span> <span class="hljs-string">of</span> <span class="hljs-number">512</span> <span class="hljs-string">characters.</span>
-      <span class="hljs-attr">name:</span> <span class="hljs-string">Cookie</span>
-      <span class="hljs-attr">in:</span> <span class="hljs-string">header</span>
 <span class="hljs-attr">externalDocs:</span>
   <span class="hljs-attr">description:</span> <span class="hljs-string">More</span> <span class="hljs-string">information</span> <span class="hljs-string">about</span> <span class="hljs-string">the</span> <span class="hljs-string">Exporter</span> <span class="hljs-string">API</span>
   <span class="hljs-attr">url:</span> <span class="hljs-string">https://inspectit.github.io/inspectit-ocelot/docs/tags/tags-exporters</span>
 </code></pre>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 9/21/2023 by NTTechnicalUser</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/tracing/tracing-self-monitoring"><span class="arrow-prev">← </span><span>Self-Monitoring</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/instrumentation"><span>Instrumentation</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#http-exporter">HTTP Exporter</a><ul class="toc-headings"><li><a href="#client-example">Client Example</a></li><li><a href="#openapi-documentation">OpenAPI documentation</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2023 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 10/9/2023 by Eduard Schander</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/tracing/tracing-self-monitoring"><span class="arrow-prev">← </span><span>Self-Monitoring</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/instrumentation"><span>Instrumentation</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#http-exporter">HTTP Exporter</a><ul class="toc-headings"><li><a href="#client-example">Client Example</a></li><li><a href="#openapi-documentation">OpenAPI documentation</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2023 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
