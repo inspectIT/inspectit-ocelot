@@ -55,12 +55,12 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
         @Test
         void verifyNoDataHasBeenWritten() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(false);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctx.readDownPropagationHeaders(headers);
             ctx.makeActive();
             ctx.setData("keyA", "valueA");
 
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
             assertThat(dataStorage.readData()).isEmpty();
 
             ctx.close();
@@ -72,14 +72,13 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
         void verifyDataHasBeenWritten() {
             when(propagation.isPropagatedWithBrowser(anyString())).thenReturn(false);
             when(propagation.isPropagatedWithBrowser(eq("keyA"))).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctx.readDownPropagationHeaders(headers);
             ctx.makeActive();
             ctx.setData("keyA", "valueA");
             ctx.setData("keyB", "valueB");
 
-
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
             assertThat(dataStorage.readData()).isEmpty();
 
             ctx.close();
@@ -141,7 +140,6 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
         @Test
         void verifyValidEntries() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctx.readDownPropagationHeaders(headers);
             ctx.makeActive();
@@ -152,10 +150,33 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             System.out.println(dummyKey.length() + " : " + dummyValue.length());
 
             ctx.setData(dummyKey, dummyValue);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
             assertThat(dataStorage.readData()).doesNotContainEntry(dummyKey, dummyValue);
 
             ctx.close();
             assertThat(dataStorage.readData()).doesNotContainEntry(dummyKey, dummyValue);
+        }
+
+        @Test
+        void verifyDataHasBeenDownPropagatedToLateDataStorage() {
+            when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
+            when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            ctxA.setData("keyA", "valueA");
+            ctxA.makeActive();
+
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            ctxB.readDownPropagationHeaders(headers);
+            ctxB.setData("keyB", "valueB");
+            ctxB.makeActive();
+            ctxB.close();
+
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
+            assertThat(dataStorage.readData()).containsEntry("keyA", "valueA");
+            assertThat(dataStorage.readData()).containsEntry("keyB", "valueB");
+
+            ctxA.close();
+            assertThat(ContextUtil.currentInspectitContext()).isNull();
         }
     }
 

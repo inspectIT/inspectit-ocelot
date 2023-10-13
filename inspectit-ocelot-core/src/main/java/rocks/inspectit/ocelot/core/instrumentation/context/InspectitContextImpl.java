@@ -17,6 +17,7 @@ import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.Prop
 import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -474,9 +475,12 @@ public class InspectitContextImpl implements InternalInspectitContext {
         }
 
         // Write browser propagation data to storage
-        Map<String, Object> browserPropagationData = getBrowserPropagationData(dataOverwrites);
-        if(browserPropagationDataStorage != null)
+        Map<String, Object> propagationData = getDataAsStream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Object> browserPropagationData = getBrowserPropagationData(propagationData);
+        if(browserPropagationDataStorage != null){
             browserPropagationDataStorage.writeData(browserPropagationData);
+        }
+
 
         //If there is browser propagation data, but exporter is disabled, write error message
         if(!browserPropagationData.isEmpty() && !browserPropagationSessionStorage.isExporterActive())
