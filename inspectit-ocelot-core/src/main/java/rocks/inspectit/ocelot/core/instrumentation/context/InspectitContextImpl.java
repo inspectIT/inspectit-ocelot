@@ -477,10 +477,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
         // Write browser propagation data to storage
         Map<String, Object> propagationData = getDataAsStream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         Map<String, Object> browserPropagationData = getBrowserPropagationData(propagationData);
-        if(browserPropagationDataStorage != null){
+        if(browserPropagationDataStorage != null)
             browserPropagationDataStorage.writeData(browserPropagationData);
-        }
-
 
         //If there is browser propagation data, but exporter is disabled, write error message
         if(!browserPropagationData.isEmpty() && !browserPropagationSessionStorage.isExporterActive())
