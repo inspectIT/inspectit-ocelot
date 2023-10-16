@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextUtil;
@@ -48,7 +49,6 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
     void clearDataStorage() {
         sessionStorage.clearDataStorages();
     }
-
 
     @Nested
     public class WriteBrowserPropagationData {
@@ -95,6 +95,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             Map<String, Object> oldData = new HashMap<>();
             oldData.put("keyA", "value0");
             dataStorage.writeData(oldData);
+
             InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctxA.readDownPropagationHeaders(headers);
             ctxA.makeActive();
@@ -122,6 +123,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             Map<String, Object> dummyMap = IntStream.rangeClosed(1, 128).boxed()
                     .collect(Collectors.toMap(i -> "key"+i, i -> "value"+i));
             dataStorage.writeData(dummyMap);
+
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             ctx.readDownPropagationHeaders(headers);
             ctx.makeActive();
@@ -166,7 +168,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             ctxA.makeActive();
 
             InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
-            ctxB.readDownPropagationHeaders(headers);
+            ctxB.setData(InternalInspectitContext.REMOTE_SESSION_ID, sessionId);
             ctxB.setData("keyB", "valueB");
             ctxB.makeActive();
             ctxB.close();
@@ -187,7 +189,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
         void verifyNoDownPropagation() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(false);
-            when(propagation.isPropagatedDownWithinJVM(eq("remote_session_id"))).thenReturn(true);
+            when(propagation.isPropagatedDownWithinJVM(eq(InternalInspectitContext.REMOTE_SESSION_ID))).thenReturn(true);
             BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             Map<String, Object> data = new HashMap<>();
             data.put("keyA", "valueA");

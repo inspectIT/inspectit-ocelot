@@ -78,6 +78,8 @@ For more information, see [Tags-HTTP-Exporter](../tags/tags-exporters.md#http-ex
 
 Up- and down propagation can also be combined: in this case then the data is attached to the control flow, meaning that it will appear as if its value will be passed around with every method call and return.
 
+Also note, that you should only assign Java Objects into data keys and not native data types, like _boolean_.
+
 The second aspect of propagation to consider is the _level_. Does the propagation happen within each Thread separately or is it propagated across threads? Also, what about propagation across JVM borders, e.g. one micro service calling another one via HTTP? In inspectIT Ocelot we provide the following two settings for the propagation level.
 
 * **JVM local:** The data is propagated within the JVM, even across thread borders. The behaviour when data moves from one thread to another is defined through [Special Sensors](instrumentation/special-sensors.md).
@@ -382,27 +384,39 @@ If multiple conditions are given for the same action invocation, the invocation 
 
 #### Execution Order
 
-As we can use data values for input parameters and for conditions, action invocations can depend on another. This means that a defined order on action executions within each phase is required for rules to work as expected.
+As we can use data values for input parameters and for conditions, action invocations can depend on another. 
+This means that a defined order on action executions within each phase is required for rules to work as expected.
 
-As all invocations are specified under the `entry` or the `exit` config options which are YAML dictionaries, the order they are given in the config file does not matter. YAML dictionaries do not maintain or define an order of their entries.
+As all invocations are specified under the `entry` or the `exit` config options as well as the 
+`pre-entry`, `post-entry`, `pre-exit` and `post-exit` config options which are YAML dictionaries, 
+the order they are given in the config file does not matter. YAML dictionaries do not maintain or define an order 
+of their entries.
 
 However, inspectIT Ocelot _automatically_ orders the invocations for you correctly.
-For each instrumented method the agent first finds all rules which have scopes matching the given method. Afterwards, these rules get combined into one "super"-rule by simply merging the `entry`, `exit` and `metrics` phases.
+For each instrumented method the agent first finds all rules which have scopes matching the given method. 
+Afterward, these rules get combined into one "super"-rule by simply merging the 
+`entry`, `exit`, `pre-entry`, `post-entry`, `pre-exit` and `post-exit` and `metrics` phases.
 
-Within the `entry` and the `exit` phase, actions are now automatically ordered based on their dependencies. E.g. if the invocation writing `data_b` uses `data_a` as input, the invocation writing `data_a` is guaranteed to be executed first! Whenever you use a data value as value for a parameter or in a condition, this will be counted as a dependency.
+Within the `entry` and the `exit` phase, actions are now automatically ordered based on their dependencies.
+`pre-entry` and `pre-exit` actions will be executed before their particular phase.
+`post-entry` and `post-exit` actions will be executed after their particular phase.
 
-In some rare cases you might want to change this behaviour. E.g. in tracing context you want to store the [down propagated](#data-propagation) `span_id` in `parent_span`, before the current method assigns a new `span_id`. This can easily be realized using the `before` config option for action invocations:
+If for example, the invocation writing `data_b` uses `data_a` as input, the invocation writing `data_a` is guaranteed to 
+be executed first! Whenever you use a data value as value for a parameter or in a condition, this will be counted 
+as a dependency.
+
+In some rare cases you might want to change this behaviour. E.g. in tracing context you want to store 
+the [down propagated](#data-propagation) `span_id` in `parent_span`, before the current method assigns 
+a new `span_id`. This can easily be realized using the `pre-entry` phase for action invocations:
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
 'r_example_rule':
-  entry:
+  pre-entry:
     'parent_span':
       action: 'a_assign_value'
       data-input:
         'value': 'span_id'
-    'before':
-      'span_id': true
 ```
 
 ### Collecting Metrics
