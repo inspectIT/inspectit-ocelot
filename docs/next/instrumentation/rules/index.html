@@ -121,6 +121,7 @@ Please note, before writing or reading browser propagation data, you need to pro
 After that, all data belonging to the current session will be stored behind this session-ID.
 For more information, see <a href="/inspectit-ocelot/docs/next/tags/tags-exporters#http-exporter">Tags-HTTP-Exporter</a>.</p>
 <p>Up- and down propagation can also be combined: in this case then the data is attached to the control flow, meaning that it will appear as if its value will be passed around with every method call and return.</p>
+<p>Also note, that you should only assign Java Objects into data keys and not native data types, like <em>boolean</em>.</p>
 <p>The second aspect of propagation to consider is the <em>level</em>. Does the propagation happen within each Thread separately or is it propagated across threads? Also, what about propagation across JVM borders, e.g. one micro service calling another one via HTTP? In inspectIT Ocelot we provide the following two settings for the propagation level.</p>
 <ul>
 <li><strong>JVM local:</strong> The data is propagated within the JVM, even across thread borders. The behaviour when data moves from one thread to another is defined through <a href="/inspectit-ocelot/docs/next/instrumentation/special-sensors">Special Sensors</a>.</li>
@@ -370,21 +371,32 @@ You can also mix which parameters you assign from data and which from constants:
 to <code>&quot;My-Application&quot;</code>. However, this assignment is only performed if <code>application_name</code> previously was null, meaning that no value has been assigned yet. This mechanism is in particular useful when <code>application_name</code> is <a href="#data-propagation">down propagated</a>.</p>
 <p>If multiple conditions are given for the same action invocation, the invocation is only executed if <em>all</em> conditions are met.</p>
 <h4><a class="anchor" aria-hidden="true" id="execution-order"></a><a href="#execution-order" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Execution Order</h4>
-<p>As we can use data values for input parameters and for conditions, action invocations can depend on another. This means that a defined order on action executions within each phase is required for rules to work as expected.</p>
-<p>As all invocations are specified under the <code>entry</code> or the <code>exit</code> config options which are YAML dictionaries, the order they are given in the config file does not matter. YAML dictionaries do not maintain or define an order of their entries.</p>
+<p>As we can use data values for input parameters and for conditions, action invocations can depend on another.
+This means that a defined order on action executions within each phase is required for rules to work as expected.</p>
+<p>As all invocations are specified under the <code>entry</code> or the <code>exit</code> config options as well as the
+<code>pre-entry</code>, <code>post-entry</code>, <code>pre-exit</code> and <code>post-exit</code> config options which are YAML dictionaries,
+the order they are given in the config file does not matter. YAML dictionaries do not maintain or define an order
+of their entries.</p>
 <p>However, inspectIT Ocelot <em>automatically</em> orders the invocations for you correctly.
-For each instrumented method the agent first finds all rules which have scopes matching the given method. Afterwards, these rules get combined into one &quot;super&quot;-rule by simply merging the <code>entry</code>, <code>exit</code> and <code>metrics</code> phases.</p>
-<p>Within the <code>entry</code> and the <code>exit</code> phase, actions are now automatically ordered based on their dependencies. E.g. if the invocation writing <code>data_b</code> uses <code>data_a</code> as input, the invocation writing <code>data_a</code> is guaranteed to be executed first! Whenever you use a data value as value for a parameter or in a condition, this will be counted as a dependency.</p>
-<p>In some rare cases you might want to change this behaviour. E.g. in tracing context you want to store the <a href="#data-propagation">down propagated</a> <code>span_id</code> in <code>parent_span</code>, before the current method assigns a new <code>span_id</code>. This can easily be realized using the <code>before</code> config option for action invocations:</p>
+For each instrumented method the agent first finds all rules which have scopes matching the given method.
+Afterward, these rules get combined into one &quot;super&quot;-rule by simply merging the
+<code>entry</code>, <code>exit</code>, <code>pre-entry</code>, <code>post-entry</code>, <code>pre-exit</code> and <code>post-exit</code> and <code>metrics</code> phases.</p>
+<p>Within the <code>entry</code> and the <code>exit</code> phase, actions are now automatically ordered based on their dependencies.
+<code>pre-entry</code> and <code>pre-exit</code> actions will be executed before their particular phase.
+<code>post-entry</code> and <code>post-exit</code> actions will be executed after their particular phase.</p>
+<p>If for example, the invocation writing <code>data_b</code> uses <code>data_a</code> as input, the invocation writing <code>data_a</code> is guaranteed to
+be executed first! Whenever you use a data value as value for a parameter or in a condition, this will be counted
+as a dependency.</p>
+<p>In some rare cases you might want to change this behaviour. E.g. in tracing context you want to store
+the <a href="#data-propagation">down propagated</a> <code>span_id</code> in <code>parent_span</code>, before the current method assigns
+a new <code>span_id</code>. This can easily be realized using the <code>pre-entry</code> phase for action invocations:</p>
 <pre><code class="hljs css language-yaml"><span class="hljs-comment">#inspectit.instrumentation.rules is omitted here</span>
 <span class="hljs-attr">'r_example_rule':</span>
-  <span class="hljs-attr">entry:</span>
+  <span class="hljs-attr">pre-entry:</span>
     <span class="hljs-attr">'parent_span':</span>
       <span class="hljs-attr">action:</span> <span class="hljs-string">'a_assign_value'</span>
       <span class="hljs-attr">data-input:</span>
         <span class="hljs-attr">'value':</span> <span class="hljs-string">'span_id'</span>
-    <span class="hljs-attr">'before':</span>
-      <span class="hljs-attr">'span_id':</span> <span class="hljs-literal">true</span>
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="collecting-metrics"></a><a href="#collecting-metrics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Collecting Metrics</h3>
 <p>Metrics collection is done in the metrics phase of a rule, which can be configured using the <code>metrics</code> option:</p>
@@ -764,7 +776,7 @@ As a result, the <code>my_http_path</code> data variable will be populated.</p>
 <p>The key point is now that even if the rule is included multiple times for a given method, it will only be applied exactly once.
 This means that if both <code>myhttp_tracing</code> and <code>myhttp_record_metric</code> are enabled, the <code>myhttp_extract_path</code> will still only be applied once.
 This therefore solves the problem of accidentally doing the same work twice.</p>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 10/9/2023 by NTTechnicalUser</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/scopes"><span class="arrow-prev">← </span><span>Scopes</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/code-style"><span>Configuration Code Style</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#data-propagation">Data Propagation</a><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li></ul></li><li><a href="#actions">Actions</a><ul class="toc-headings"><li><a href="#input-parameters">Input Parameters</a></li><li><a href="#multiple-statements-and-imports">Multiple statements and Imports</a></li></ul></li><li><a href="#defining-rules">Defining Rules</a><ul class="toc-headings"><li><a href="#invoking-actions">Invoking Actions</a></li><li><a href="#collecting-metrics">Collecting Metrics</a></li><li><a href="#collecting-traces">Collecting Traces</a></li><li><a href="#modularizing-rules">Modularizing Rules</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2023 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 10/19/2023 by Eduard Schander</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/scopes"><span class="arrow-prev">← </span><span>Scopes</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/code-style"><span>Configuration Code Style</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#data-propagation">Data Propagation</a><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li></ul></li><li><a href="#actions">Actions</a><ul class="toc-headings"><li><a href="#input-parameters">Input Parameters</a></li><li><a href="#multiple-statements-and-imports">Multiple statements and Imports</a></li></ul></li><li><a href="#defining-rules">Defining Rules</a><ul class="toc-headings"><li><a href="#invoking-actions">Invoking Actions</a></li><li><a href="#collecting-metrics">Collecting Metrics</a></li><li><a href="#collecting-traces">Collecting Traces</a></li><li><a href="#modularizing-rules">Modularizing Rules</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2023 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
