@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.rest.configuration;
+package rocks.inspectit.ocelot.rest.promotion;
 
 import com.google.gson.JsonObject;
 import io.swagger.v3.oas.annotations.Operation;

@@ -750,7 +750,22 @@ public class VersioningManager {
      * @return a revision which either modifies or adds the given file.
      */
     private RevisionAccess findLastChangingRevision(String file, RevisionAccess baseRevision) {
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
+            return findLastChangingRevisionForAgentMappings(baseRevision);
+        else
+            return findLastChangingRevisionForConfiguration(file, baseRevision);
+    }
+
+    private RevisionAccess findLastChangingRevisionForConfiguration(String file, RevisionAccess baseRevision) {
         while (!baseRevision.isConfigurationFileAdded(file) && !baseRevision.isConfigurationFileModified(file)) {
+            baseRevision = baseRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
+        }
+        return baseRevision;
+    }
+
+    private RevisionAccess findLastChangingRevisionForAgentMappings(RevisionAccess baseRevision) {
+        while (!baseRevision.isAgentMappingsAdded() && !baseRevision.isAgentMappingsModified()) {
             baseRevision = baseRevision.getPreviousRevision()
                     .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
         }
@@ -860,7 +875,7 @@ public class VersioningManager {
         if (promotion == null || CollectionUtils.isEmpty(promotion.getFiles())) {
             throw new IllegalArgumentException("ConfigurationPromotion must not be null and has to promote at least one file!");
         }
-
+        //TODO Hier gucken, ob das mit dem Mapping geht
         log.info("User '{}' promotes {} configuration files.", author.getName(), promotion.getFiles().size());
 
         PromotionResult result = PromotionResult.OK;
@@ -960,11 +975,12 @@ public class VersioningManager {
      * @return the file path including the files directory
      */
     private String prefixRelativeFile(String file) {
-        if (file.startsWith("/")) {
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
+            return file;
+        else if (file.startsWith("/"))
             return AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + file;
-        } else {
+        else
             return AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/" + file;
-        }
     }
 
     /**
