@@ -180,6 +180,40 @@ public class RevisionAccess extends AbstractFileAccessor {
         return parent.isPresent() && parent.get().configurationFileExists(path);
     }
 
+    /**
+     * Checks if the agent mappings exist in this revision but not in the parent revision.
+     *
+     * @return true, if the agent mappings were added in this revision.
+     */
+    public boolean isAgentMappingsAdded() {
+        if (!agentMappingsExist()) {
+            return false;
+        }
+        Optional<RevisionAccess> parent = getPreviousRevision();
+        return !parent.isPresent() || !parent.get().agentMappingsExist();
+    }
+
+    /**
+     * Checks, if the agent mappings exist and if it's content in both this revision and the parent revision
+     * has changed.
+     *
+     * @return true, if the agent mappings exist both in this and the parent revision but with different contents.
+     */
+    public boolean isAgentMappingsModified() {
+        if (!agentMappingsExist()) {
+            return false;
+        }
+        Optional<RevisionAccess> parent = getPreviousRevision();
+        if (!parent.isPresent() || !parent.get().agentMappingsExist()) {
+            return false;
+        }
+        String currentContent = readAgentMappings().orElseThrow(() -> new IllegalStateException("Expected agent mappings to exist"));
+        String previousContent = parent.get()
+                .readAgentMappings()
+                .orElseThrow(() -> new IllegalStateException("Expected agent mappings to exist"));
+        return !currentContent.equals(previousContent);
+    }
+
     @Override
     protected String verifyPath(String relativeBasePath, String relativePath) throws IllegalArgumentException {
         if (relativePath.startsWith("/")) {

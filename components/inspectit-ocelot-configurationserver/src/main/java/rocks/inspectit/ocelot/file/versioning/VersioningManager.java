@@ -542,7 +542,6 @@ public class VersioningManager {
         // the diff entries are converted into custom ones
         List<SimpleDiffEntry> simpleDiffEntries = diffEntries.stream()
                 .map(SimpleDiffEntry::of)
-                .filter(entry -> entry.getFile().startsWith(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))
                 .map(SimpleDiffEntry::shortenName)
                 .collect(Collectors.toList());
 
@@ -604,8 +603,16 @@ public class VersioningManager {
         //move "baseRevision" to the last commit where this file was touched (potentially the root commit).
         baseRevision = findLastChangingRevision(file, baseRevision);
 
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
+            return findModifyingAuthorsForAgentMappings(file, newRevision, baseRevision);
+        else
+            return findModifyingAuthorsForConfiguration(file, newRevision, baseRevision);
+    }
+
+    private Collection<String> findModifyingAuthorsForConfiguration(String file, RevisionAccess newRevision, RevisionAccess baseRevision) {
         Set<String> authors = new HashSet<>();
         String baseContent = baseRevision.readConfigurationFile(file).get();
+
         //Find all persons who added or modified the file since the last promotion.
         RevisionAccess commonAncestor = newRevision.getCommonAncestor(baseRevision);
         while (!newRevision.getRevisionId().equals(commonAncestor.getRevisionId())) {
@@ -626,6 +633,30 @@ public class VersioningManager {
         return authors;
     }
 
+    private Collection<String> findModifyingAuthorsForAgentMappings(String file, RevisionAccess newRevision, RevisionAccess baseRevision) {
+        Set<String> authors = new HashSet<>();
+        String baseContent = baseRevision.readAgentMappings().get();
+
+        //Find all persons who added or modified the file since the last promotion.
+        RevisionAccess commonAncestor = newRevision.getCommonAncestor(baseRevision);
+        while (!newRevision.getRevisionId().equals(commonAncestor.getRevisionId())) {
+            if (newRevision.isAgentMappingsModified()) {
+                authors.add(newRevision.getAuthorName());
+            } else if (newRevision.isAgentMappingsAdded()) {
+                authors.add(newRevision.getAuthorName());
+                break; //THe file has been added, no need to take previous changes into account
+            }
+            newRevision = newRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
+            if (newRevision.agentMappingsExist() && newRevision.readAgentMappings()
+                    .get()
+                    .equals(baseContent)) {
+                break; // we have reached a revision where the content is in the original state, no need to look further
+            }
+        }
+        return authors;
+    }
+
     /**
      * Walks back in history to the point where the given file was added.
      * On the way, all authors which have modifies the file are remembered.
@@ -637,10 +668,32 @@ public class VersioningManager {
      */
     private Collection<String> findAuthorsSinceAddition(String file, RevCommit newCommit) {
         RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
+
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
+            return findAuthorsSinceAdditionForAgentMappings(newRevision);
+        else
+            return findAuthorsSinceAdditionForConfiguration(file, newRevision);
+    }
+
+    private Collection<String> findAuthorsSinceAdditionForConfiguration(String file, RevisionAccess newRevision) {
         Set<String> authors = new HashSet<>();
         //Find all persons who edited the file since it was added
         while (!newRevision.isConfigurationFileAdded(file)) {
             if (newRevision.isConfigurationFileModified(file)) {
+                authors.add(newRevision.getAuthorName());
+            }
+            newRevision = newRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
+        }
+        authors.add(newRevision.getAuthorName()); //Also add the name of the person who added the file
+        return authors;
+    }
+
+    private Collection<String> findAuthorsSinceAdditionForAgentMappings(RevisionAccess newRevision) {
+        Set<String> authors = new HashSet<>();
+        //Find all persons who edited the file since it was added
+        while (!newRevision.isAgentMappingsAdded()) {
+            if (newRevision.isAgentMappingsModified()) {
                 authors.add(newRevision.getAuthorName());
             }
             newRevision = newRevision.getPreviousRevision()
@@ -663,6 +716,9 @@ public class VersioningManager {
      * @return the author of the revision which is responsible for the deletion.
      */
     private String findDeletingAuthor(String file, RevCommit baseCommit, RevCommit newCommit) {
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
+            throw new IllegalStateException(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME + " must not be delete");
+
         RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
         RevisionAccess baseRevision = new RevisionAccess(git.getRepository(), baseCommit);
         //move "baseRevision" to the last commit where this file was touched (potentially the root commit).
@@ -710,6 +766,15 @@ public class VersioningManager {
      */
     private void fillFileContent(SimpleDiffEntry entry, RevisionAccess oldRevision, RevisionAccess newRevision) {
         String file = entry.getFile();
+
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
+            fillAgentMappingsFileContent(entry, oldRevision, newRevision);
+        else
+            fillConfigurationFileContent(entry, oldRevision, newRevision);
+    }
+
+    private void fillConfigurationFileContent(SimpleDiffEntry entry, RevisionAccess oldRevision, RevisionAccess newRevision) {
+        String file = entry.getFile();
         String oldContent = null;
         String newContent = null;
 
@@ -720,6 +785,23 @@ public class VersioningManager {
             newContent = newRevision.readConfigurationFile(file).orElse(null);
         } else if (entry.getType() == DiffEntry.ChangeType.DELETE) {
             oldContent = oldRevision.readConfigurationFile(file).orElse(null);
+        }
+
+        entry.setOldContent(oldContent);
+        entry.setNewContent(newContent);
+    }
+
+    private void fillAgentMappingsFileContent(SimpleDiffEntry entry, RevisionAccess oldRevision, RevisionAccess newRevision) {
+        String oldContent = null;
+        String newContent = null;
+
+        if (entry.getType() == DiffEntry.ChangeType.ADD) {
+            newContent = newRevision.readAgentMappings().orElse(null);
+        } else if (entry.getType() == DiffEntry.ChangeType.MODIFY) {
+            oldContent = oldRevision.readAgentMappings().orElse(null);
+            newContent = newRevision.readAgentMappings().orElse(null);
+        } else if (entry.getType() == DiffEntry.ChangeType.DELETE) {
+            oldContent = oldRevision.readAgentMappings().orElse(null);
         }
 
         entry.setOldContent(oldContent);
