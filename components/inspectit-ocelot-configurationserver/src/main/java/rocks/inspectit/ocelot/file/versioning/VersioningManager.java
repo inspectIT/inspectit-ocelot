@@ -875,7 +875,7 @@ public class VersioningManager {
         if (promotion == null || CollectionUtils.isEmpty(promotion.getFiles())) {
             throw new IllegalArgumentException("ConfigurationPromotion must not be null and has to promote at least one file!");
         }
-        //TODO Hier gucken, ob das mit dem Mapping geht
+
         log.info("User '{}' promotes {} configuration files.", author.getName(), promotion.getFiles().size());
 
         PromotionResult result = PromotionResult.OK;

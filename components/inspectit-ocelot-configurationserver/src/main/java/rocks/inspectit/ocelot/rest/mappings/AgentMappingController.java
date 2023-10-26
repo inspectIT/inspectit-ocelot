@@ -2,10 +2,12 @@ package rocks.inspectit.ocelot.rest.mappings;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
@@ -20,6 +22,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
+import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 /**
  * Controller for managing the agent mappings.
@@ -128,5 +132,51 @@ public class AgentMappingController extends AbstractBaseController {
 
         auditLogger.logEntityCreation(agentMapping);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Sets the source branch for the agent mappings file itself, which means that the actual agent mappings will be read from
+     * the agent mappings file, which is located in the specified branch.
+     * There exist only two possible branches, namely WORKSPACE and LIVE.
+     * <p>
+     * This does not affect the sourceBranch property, which is specified inside the agent mappings to configure the
+     * source branch for the agent configurations.
+     *
+     * @param branch the branch, which should be used as source branch for the agent mappings file
+     * @return 200 in case the operation was successful
+     */
+    @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
+    @PostMapping(value = "mappings/source")
+    public ResponseEntity setMappingSourceBranch(@RequestParam String branch) {
+        assert branch != null;
+        branch = branch.toLowerCase();
+
+        if(!branch.equals(WORKSPACE.getBranchName()) || !branch.equals(LIVE.getBranchName()))
+            return ResponseEntity.badRequest().build();
+
+        switch (branch) {
+            case "live":
+                mappingManager.setSourceBranch(LIVE);
+                break;
+            case "workspace":
+                mappingManager.setSourceBranch(WORKSPACE);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unhandled branch: " + branch);
+        }
+        // TODO: Wird die Config automatisch aktualisiert (Event-based) oder muss ich noch was machen?
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Returns the current set source branch for the agent mappings file itself.
+     *
+     * @return Current source branch for the agent mappings file
+     */
+    @GetMapping(value = "mappings/source")
+    public ResponseEntity<String> getMappingSourceBranch() {
+        String branch = mappingManager.getSourceBranch().getBranchName();
+        return new ResponseEntity<>(branch, HttpStatus.OK);
     }
 }

@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
+import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import javax.annotation.PostConstruct;
@@ -49,11 +51,28 @@ public class AgentMappingManager {
      */
     @PostConstruct
     public void postConstruct() throws IOException {
-        if (!fileManager.getWorkspaceRevision().agentMappingsExist()) {
+        RevisionAccess revisionAccess = serializer.getRevisionAccess();
+
+        if (!revisionAccess.agentMappingsExist()) {
             log.info("Generating default agent mappings");
             List<AgentMapping> defaultMappings = Collections.singletonList(DEFAULT_MAPPING);
             serializer.writeAgentMappings(defaultMappings, fileManager.getWorkingDirectory());
         }
+    }
+
+    /**
+     * @return The current source branch for the agent mapping file itself.
+     */
+    public synchronized Branch getSourceBranch() {
+        return serializer.getSourceBranch();
+    }
+
+    /**
+     * Sets the source branch, from which the agent mapping file will be reade
+     * @param sourceBranch new source branch
+     */
+    public synchronized void setSourceBranch(Branch sourceBranch) {
+        serializer.setSourceBranch(sourceBranch);
     }
 
     /**
@@ -62,7 +81,8 @@ public class AgentMappingManager {
      * @return A list of {@link AgentMapping}
      */
     public synchronized List<AgentMapping> getAgentMappings() {
-        return serializer.readAgentMappings(fileManager.getWorkspaceRevision());
+        RevisionAccess revisionAccess = serializer.getRevisionAccess();
+        return serializer.readAgentMappings(revisionAccess);
     }
 
     /**
