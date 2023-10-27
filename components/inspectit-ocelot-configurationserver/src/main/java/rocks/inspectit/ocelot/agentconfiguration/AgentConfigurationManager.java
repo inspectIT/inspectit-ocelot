@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.events.AgentMappingSourceBranchChangedEvent;
 import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
@@ -72,7 +73,7 @@ public class AgentConfigurationManager {
         reloadConfigurationAsync();
     }
 
-    @EventListener({ConfigurationPromotionEvent.class, WorkspaceChangedEvent.class})
+    @EventListener({ConfigurationPromotionEvent.class, WorkspaceChangedEvent.class, AgentMappingSourceBranchChangedEvent.class})
     private synchronized void reloadConfigurationAsync() {
         if (reloadTask != null) {
             reloadTask.cancel();

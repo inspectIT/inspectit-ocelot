@@ -16,6 +16,8 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
+import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 /**
  * The manager class to handle and manage the agent mappings.
@@ -51,10 +53,8 @@ public class AgentMappingManager {
      */
     @PostConstruct
     public void postConstruct() throws IOException {
-        RevisionAccess revisionAccess = serializer.getRevisionAccess();
-
-        if (!revisionAccess.agentMappingsExist()) {
-            log.info("Generating default agent mappings");
+        if (!fileManager.getWorkspaceRevision().agentMappingsExist()) {
+            log.info("Generating default agent mappings for workspace branch");
             List<AgentMapping> defaultMappings = Collections.singletonList(DEFAULT_MAPPING);
             serializer.writeAgentMappings(defaultMappings, fileManager.getWorkingDirectory());
         }
@@ -71,18 +71,31 @@ public class AgentMappingManager {
      * Sets the source branch, from which the agent mapping file will be reade
      * @param sourceBranch new source branch
      */
-    public synchronized void setSourceBranch(Branch sourceBranch) {
-        serializer.setSourceBranch(sourceBranch);
+    public synchronized void setSourceBranch(String sourceBranch) {
+        checkArgument(sourceBranch != null, "The set source branch cannot be null");
+        sourceBranch = sourceBranch.toLowerCase();
+
+        // TODO: Check, if in the new Branch, a mapping exists -> Otherwise, DONT CHANGE Branch!
+        switch (sourceBranch) {
+            case "live":
+                serializer.setSourceBranch(LIVE);
+                break;
+            case "workspace":
+                serializer.setSourceBranch(WORKSPACE);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unhandled branch: " + sourceBranch);
+        }
     }
 
     /**
-     * Returns a unmodifiable representation of the current agent mappings list.
+     * Returns an unmodifiable representation of the current agent mappings list.
+     * The method  returns the agent mappings from the workspace branch to always show the current changes.
      *
      * @return A list of {@link AgentMapping}
      */
     public synchronized List<AgentMapping> getAgentMappings() {
-        RevisionAccess revisionAccess = serializer.getRevisionAccess();
-        return serializer.readAgentMappings(revisionAccess);
+        return serializer.readAgentMappings(fileManager.getWorkspaceRevision());
     }
 
     /**

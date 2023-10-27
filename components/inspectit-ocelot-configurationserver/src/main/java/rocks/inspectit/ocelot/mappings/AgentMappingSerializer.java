@@ -7,7 +7,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.events.AgentMappingSourceBranchChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
+import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 /**
  * Utility for reading and writing the Agent Mappings.
@@ -36,6 +39,9 @@ public class AgentMappingSerializer {
 
     @Autowired
     private FileManager fileManager;
+
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
     /**
      * SourceBranch for the action mapping file itself. This does not affect the SourceBranch property inside the agent mappings!
@@ -53,7 +59,7 @@ public class AgentMappingSerializer {
 
         mappingsListType = ymlMapper.getTypeFactory().constructCollectionType(List.class, AgentMapping.class);
 
-        sourceBranch = LIVE; // TODO Soll der source Branch bei jedem Start initial pauschal auf LIVE gesetzt werden?
+        sourceBranch = LIVE; // TODO: Soll der source Branch bei jedem Start initial pauschal gesetzt werden? Theoretisch ist dadurch garantiert, dass es ein Mapping gibt. Aber so kann das Mapping auch überschrieben werden bei "pull-at-start"!
     }
 
     /**
@@ -92,12 +98,14 @@ public class AgentMappingSerializer {
      * @param sourceBranch new source branch
      */
     public void setSourceBranch(Branch sourceBranch) {
-        log.debug("Setting source branch for {} to {}", AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, sourceBranch);
+        log.info("Setting source branch for {} to {}", AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, sourceBranch);
         this.sourceBranch = sourceBranch;
+        // Publish event to trigger configuration reload
+        publisher.publishEvent(new AgentMappingSourceBranchChangedEvent(this));
     }
 
     /**
-     * @return The branch, which should be used to access a commit
+     * @return The branch, which is currently used to access the agent mappings
      */
     public RevisionAccess getRevisionAccess() {
         switch (getSourceBranch()) {

@@ -141,6 +141,8 @@ public class AgentMappingController extends AbstractBaseController {
      * <p>
      * This does not affect the sourceBranch property, which is specified inside the agent mappings to configure the
      * source branch for the agent configurations.
+     * <p>
+     * The configuration will automatically be reloaded, after the agent mappings have been changed
      *
      * @param branch the branch, which should be used as source branch for the agent mappings file
      * @return 200 in case the operation was successful
@@ -148,24 +150,7 @@ public class AgentMappingController extends AbstractBaseController {
     @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
     @PostMapping(value = "mappings/source")
     public ResponseEntity setMappingSourceBranch(@RequestParam String branch) {
-        assert branch != null;
-        branch = branch.toLowerCase();
-
-        if(!branch.equals(WORKSPACE.getBranchName()) || !branch.equals(LIVE.getBranchName()))
-            return ResponseEntity.badRequest().build();
-
-        switch (branch) {
-            case "live":
-                mappingManager.setSourceBranch(LIVE);
-                break;
-            case "workspace":
-                mappingManager.setSourceBranch(WORKSPACE);
-                break;
-            default:
-                throw new UnsupportedOperationException("Unhandled branch: " + branch);
-        }
-        // TODO: Wird die Config automatisch aktualisiert (Event-based) oder muss ich noch was machen?
-
+        mappingManager.setSourceBranch(branch);
         return ResponseEntity.ok().build();
     }
 
