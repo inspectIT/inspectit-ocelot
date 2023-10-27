@@ -60,7 +60,7 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         RevisionAccess fileAccess = mappingsSerializer.getRevisionAccess();
 
         if (!fileAccess.agentMappingsExist()) {
-            log.error("No agent mappings file was found on the current branch! Please add '{}' to the current branch.",
+            log.error("No agent mappings file was found on the current branch! Please add '{}' to the current agent mapping source branch.",
                     AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             onTaskSuccess(Collections.emptyList());
             return;

@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME;
 import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
 import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
@@ -59,7 +60,7 @@ public class AgentMappingSerializer {
 
         mappingsListType = ymlMapper.getTypeFactory().constructCollectionType(List.class, AgentMapping.class);
 
-        sourceBranch = LIVE; // TODO: Soll der source Branch bei jedem Start initial pauschal gesetzt werden? Theoretisch ist dadurch garantiert, dass es ein Mapping gibt. Aber so kann das Mapping auch überschrieben werden bei "pull-at-start"!
+        sourceBranch = WORKSPACE; // TODO: Soll der source Branch bei jedem Start initial pauschal gesetzt werden? Theoretisch ist dadurch garantiert, dass es ein Mapping gibt. Aber so kann das Mapping auch überschrieben werden bei "pull-at-start"!
     }
 
     /**
@@ -98,10 +99,18 @@ public class AgentMappingSerializer {
      * @param sourceBranch new source branch
      */
     public void setSourceBranch(Branch sourceBranch) {
-        log.info("Setting source branch for {} to {}", AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, sourceBranch);
+        log.info("Setting source branch for {} to {}", AGENT_MAPPINGS_FILE_NAME, sourceBranch);
+        Branch oldBranch = this.sourceBranch;
         this.sourceBranch = sourceBranch;
-        // Publish event to trigger configuration reload
-        publisher.publishEvent(new AgentMappingSourceBranchChangedEvent(this));
+
+        if(getRevisionAccess().agentMappingsExist()) {
+            // Publish event to trigger configuration reload
+            publisher.publishEvent(new AgentMappingSourceBranchChangedEvent(this));
+        }
+        else {
+            log.error("Source branch for {} cannot be set to {}, since no file was found", AGENT_MAPPINGS_FILE_NAME, sourceBranch);
+            this.sourceBranch = oldBranch;
+        }
     }
 
     /**

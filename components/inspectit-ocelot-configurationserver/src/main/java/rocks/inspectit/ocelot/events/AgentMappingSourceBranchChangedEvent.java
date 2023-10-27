@@ -16,6 +16,5 @@ public class AgentMappingSourceBranchChangedEvent extends ApplicationEvent {
      */
     public AgentMappingSourceBranchChangedEvent(Object source) {
         super(source);
-
     }
 }
