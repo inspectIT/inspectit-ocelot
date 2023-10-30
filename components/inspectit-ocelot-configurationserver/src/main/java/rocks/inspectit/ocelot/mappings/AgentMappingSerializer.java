@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.events.AgentMappingSourceBranchChangedEvent;
+import rocks.inspectit.ocelot.events.AgentMappingsSourceBranchChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
@@ -25,7 +27,6 @@ import java.util.Optional;
 
 import static rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME;
 import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
-import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 /**
  * Utility for reading and writing the Agent Mappings.
@@ -38,17 +39,22 @@ public class AgentMappingSerializer {
 
     private CollectionType mappingsListType;
 
-    @Autowired
     private FileManager fileManager;
 
-    @Autowired
     private ApplicationEventPublisher publisher;
 
     /**
-     * SourceBranch for the action mapping file itself. This does not affect the SourceBranch property inside the agent mappings!
+     * SourceBranch for the agent mapping file itself. This does not affect the SourceBranch property inside the agent mappings!
      */
     @Getter
     private Branch sourceBranch;
+
+    @VisibleForTesting
+    @Autowired
+    AgentMappingSerializer(FileManager fileManager, ApplicationEventPublisher publisher) {
+        this.fileManager = fileManager;
+        this.publisher = publisher;
+    }
 
     /**
      * Post construct for initializing the mapper objects.
@@ -60,7 +66,7 @@ public class AgentMappingSerializer {
 
         mappingsListType = ymlMapper.getTypeFactory().constructCollectionType(List.class, AgentMapping.class);
 
-        sourceBranch = WORKSPACE; // TODO: Soll der source Branch bei jedem Start initial pauschal gesetzt werden? Theoretisch ist dadurch garantiert, dass es ein Mapping gibt. Aber so kann das Mapping auch überschrieben werden bei "pull-at-start"!
+        sourceBranch = LIVE; // TODO: Soll der source Branch bei jedem Start initial pauschal auf LIVE gesetzt werden?
     }
 
     /**
@@ -95,7 +101,7 @@ public class AgentMappingSerializer {
     }
 
     /**
-     * Sets the source branch, from which the agent mapping file will be reade
+     * Sets the source branch, from which the agent mappings file will be read
      * @param sourceBranch new source branch
      */
     public void setSourceBranch(Branch sourceBranch) {
@@ -103,9 +109,10 @@ public class AgentMappingSerializer {
         Branch oldBranch = this.sourceBranch;
         this.sourceBranch = sourceBranch;
 
-        if(getRevisionAccess().agentMappingsExist()) {
+        RevisionAccess currentRevisionAccess = getRevisionAccess();
+        if(currentRevisionAccess.agentMappingsExist()) {
             // Publish event to trigger configuration reload
-            publisher.publishEvent(new AgentMappingSourceBranchChangedEvent(this));
+            publisher.publishEvent(new AgentMappingsSourceBranchChangedEvent(this));
         }
         else {
             log.error("Source branch for {} cannot be set to {}, since no file was found", AGENT_MAPPINGS_FILE_NAME, sourceBranch);

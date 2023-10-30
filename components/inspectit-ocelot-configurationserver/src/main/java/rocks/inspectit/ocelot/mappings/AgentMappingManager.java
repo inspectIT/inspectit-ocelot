@@ -39,14 +39,19 @@ public class AgentMappingManager {
     /**
      * Object mapper utils.
      */
-    @Autowired
     private AgentMappingSerializer serializer;
 
     /**
      * Object mapper utils.
      */
-    @Autowired
     private FileManager fileManager;
+
+    @VisibleForTesting
+    @Autowired
+    AgentMappingManager(AgentMappingSerializer serializer, FileManager fileManager) {
+        this.serializer = serializer;
+        this.fileManager = fileManager;
+    }
 
     /**
      * Post construct. Initially reading the agent mappings if the mappings file exists.
@@ -72,10 +77,9 @@ public class AgentMappingManager {
      * @param sourceBranch new source branch
      */
     public synchronized void setSourceBranch(String sourceBranch) {
-        checkArgument(sourceBranch != null, "The set source branch cannot be null");
+        checkArgument(sourceBranch != null, "The set source branch cannot be null.");
         sourceBranch = sourceBranch.toLowerCase();
 
-        // TODO: Check, if in the new Branch, a mapping exists -> Otherwise, DONT CHANGE Branch!
         switch (sourceBranch) {
             case "live":
                 serializer.setSourceBranch(LIVE);
