@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import static rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME;
 import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
+import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 /**
  * Utility for reading and writing the Agent Mappings.
@@ -66,7 +67,7 @@ public class AgentMappingSerializer {
 
         mappingsListType = ymlMapper.getTypeFactory().constructCollectionType(List.class, AgentMapping.class);
 
-        sourceBranch = LIVE; // TODO: Soll der source Branch bei jedem Start initial pauschal auf LIVE gesetzt werden?
+        sourceBranch = WORKSPACE; // TODO: Read the initials source Branch from application properties
     }
 
     /**

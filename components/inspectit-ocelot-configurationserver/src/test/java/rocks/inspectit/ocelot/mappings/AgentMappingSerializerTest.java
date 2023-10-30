@@ -23,6 +23,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
+import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
 import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,7 +54,7 @@ public class AgentMappingSerializerTest {
             AgentMapping mapping = AgentMapping.builder()
                     .name("mapping")
                     .source("/any-source")
-                    .sourceBranch(Branch.LIVE)
+                    .sourceBranch(LIVE)
                     .attribute("key", "val")
                     .build();
 
@@ -93,7 +94,7 @@ public class AgentMappingSerializerTest {
             assertThat(mapping.getName()).isEqualTo("mapping");
             assertThat(mapping.getSources()).containsExactly("/any-source");
             assertThat(mapping.getAttributes()).containsEntry("key", "val");
-            assertThat(mapping.getSourceBranch()).isEqualTo(Branch.LIVE);
+            assertThat(mapping.getSourceBranch()).isEqualTo(LIVE);
         }
     }
 
@@ -102,11 +103,11 @@ public class AgentMappingSerializerTest {
 
         @Test
         void verifySourceBranchHasChanged() {
-            when(fileManager.getWorkspaceRevision()).thenReturn(revisionAccess);
+            when(fileManager.getLiveRevision()).thenReturn(revisionAccess);
             when(revisionAccess.agentMappingsExist()).thenReturn(true);
 
             Branch oldBranch = serializer.getSourceBranch();
-            serializer.setSourceBranch(WORKSPACE);
+            serializer.setSourceBranch(LIVE);
             Branch newBranch = serializer.getSourceBranch();
 
             verify(eventPublisher, times(1)).publishEvent(any(AgentMappingsSourceBranchChangedEvent.class));
@@ -115,11 +116,11 @@ public class AgentMappingSerializerTest {
 
         @Test
         void verifySourceBranchHasNotChanged() {
-            when(fileManager.getWorkspaceRevision()).thenReturn(revisionAccess);
+            when(fileManager.getLiveRevision()).thenReturn(revisionAccess);
             when(revisionAccess.agentMappingsExist()).thenReturn(false);
 
             Branch oldBranch = serializer.getSourceBranch();
-            serializer.setSourceBranch(WORKSPACE);
+            serializer.setSourceBranch(LIVE);
             Branch newBranch = serializer.getSourceBranch();
 
             verify(eventPublisher, times(0)).publishEvent(any(AgentMappingsSourceBranchChangedEvent.class));

@@ -546,10 +546,11 @@ public class AgentMappingManagerTest {
 
         @Test
         public void verifySourceBranchHasChanged() {
+            when(fileManager.getLiveRevision()).thenReturn(readAccessor);
             when(readAccessor.agentMappingsExist()).thenReturn(true);
 
             Branch oldBranch = manager.getSourceBranch();
-            manager.setSourceBranch("WORKSPACE");
+            manager.setSourceBranch("LIVE");
             Branch newBranch = manager.getSourceBranch();
 
             verify(publisher, times(1)).publishEvent(any(AgentMappingsSourceBranchChangedEvent.class));
