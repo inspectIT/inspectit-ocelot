@@ -110,7 +110,7 @@ class VersioningManagerTest extends FileTestBase {
             assertThat(clean).isTrue();
             assertThat(before).isFalse();
             assertThat(after).isTrue();
-            assertThat(count).isEqualTo(2); // Initializing Git repository + committing agent mappings
+            assertThat(count).isEqualTo(1); // Initializing Git repo + committing agent mappings happens in one commit
         }
 
         @Test
@@ -129,14 +129,14 @@ class VersioningManagerTest extends FileTestBase {
             int secondCount = versioningManager.getCommitCount();
             assertThat(initSecond).isTrue();
             assertThat(cleanFirst).isTrue();
-            assertThat(secondCount).isEqualTo(2); // Initializing Git repository + committing agent mappings
+            assertThat(secondCount).isEqualTo(1); // Initializing Git repo + committing agent mappings happens in one commit
 
             versioningManager.initialize();
 
             boolean cleanSecond = versioningManager.isClean();
             int thirdCount = versioningManager.getCommitCount();
             assertThat(cleanSecond).isTrue();
-            assertThat(thirdCount).isEqualTo(2);
+            assertThat(thirdCount).isEqualTo(1);
         }
 
         @Test
@@ -155,7 +155,7 @@ class VersioningManagerTest extends FileTestBase {
             int secondCount = versioningManager.getCommitCount();
             assertThat(initSecond).isTrue();
             assertThat(cleanFirst).isTrue();
-            assertThat(secondCount).isEqualTo(2); // Initializing Git repository + committing agent mappings
+            assertThat(secondCount).isEqualTo(1); // Initializing Git repo + committing agent mappings happens in one commit
 
             // edit file
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
@@ -165,7 +165,7 @@ class VersioningManagerTest extends FileTestBase {
             boolean cleanSecond = versioningManager.isClean();
             int thirdCount = versioningManager.getCommitCount();
             assertThat(cleanSecond).isTrue();
-            assertThat(thirdCount).isEqualTo(3);
+            assertThat(thirdCount).isEqualTo(2);
         }
     }
 
@@ -497,10 +497,11 @@ class VersioningManagerTest extends FileTestBase {
     }
 
     @Nested
-    class PromoteConfiguration {
+    class PromoteFile {
 
         @Test
         public void promoteEverything() throws GitAPIException, IOException {
+            createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
@@ -516,7 +517,8 @@ class VersioningManagerTest extends FileTestBase {
             ConfigurationPromotion promotion = new ConfigurationPromotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
-            promotion.setFiles(Arrays.asList("/file_added.yml", "/file_modified.yml", "/file_removed.yml"));
+            promotion.setFiles(Arrays.asList(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME,
+                    "/file_added.yml", "/file_modified.yml", "/file_removed.yml"));
 
             versioningManager.promoteConfiguration(promotion, true);
 
@@ -829,6 +831,26 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
+        void agentMappingsAddedInMostRecentChange() throws Exception {
+            buildDummyHistory();
+
+            createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
+            doReturn("creating_user").when(authentication).getName();
+            versioningManager.commitAllChanges("new commit");
+
+            SimpleDiffEntry diff = SimpleDiffEntry.builder()
+                    .file(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME)
+                    .type(DiffEntry.ChangeType.ADD)
+                    .build();
+
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+                    .get()
+                    .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
+
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("creating_user");
+        }
+
+        @Test
         void fileAddedAndModifiedBeforeLastPromotion() throws Exception {
             buildDummyHistory();
 
@@ -900,6 +922,31 @@ class VersioningManagerTest extends FileTestBase {
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
             assertThat(modifyingAuthors).containsExactlyInAnyOrder("creating_user", "second_editing_user");
+        }
+
+        @Test
+        void agentMappingsModified() throws Exception {
+            buildDummyHistory();
+
+            createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
+            doReturn("editing_user").when(authentication).getName();
+            versioningManager.commitAllChanges("com1");
+            promote(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
+
+            doReturn("editing_user").when(authentication).getName();
+            createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME + "=modified");
+            versioningManager.commitAllChanges("com2");
+
+            SimpleDiffEntry diff = SimpleDiffEntry.builder()
+                    .file(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME)
+                    .type(DiffEntry.ChangeType.MODIFY)
+                    .build();
+
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+                    .get()
+                    .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
+
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("editing_user");
         }
 
         @Test

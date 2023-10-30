@@ -142,7 +142,7 @@ public class VersioningManager {
                 setCurrentBranchToTarget();
             }
 
-            stageFiles(false); // the agent mapping file should not be committed to the live branch
+            stageFiles();
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", false);
 
             if (getCommitCount() <= 0) {
@@ -157,13 +157,10 @@ public class VersioningManager {
             // create the branches which will be used
             git.branchRename().setNewName(Branch.WORKSPACE.getBranchName()).call();
             git.branchCreate().setName(Branch.LIVE.getBranchName()).call();
-
-            stageFiles(true);
-            commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing agent mappings during startup", false);
         } else if (!isClean()) {
             log.info("Changes in the configuration or agent mapping files have been detected and will be committed to the repository.");
 
-            stageFiles(true);
+            stageFiles();
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
         }
 
@@ -265,7 +262,7 @@ public class VersioningManager {
         }
         log.info("Staging and committing of external changes to the configuration files or agent mappings");
 
-        stageFiles(true);
+        stageFiles();
         commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes", false);
     }
 
@@ -296,7 +293,7 @@ public class VersioningManager {
 
         PersonIdent author = getCurrentAuthor();
 
-        stageFiles(true);
+        stageFiles();
 
         if (commitAllFiles(author, message, author != GIT_SYSTEM_AUTHOR)) {
             eventPublisher.publishEvent(new WorkspaceChangedEvent(this, getWorkspaceRevision()));
@@ -344,17 +341,12 @@ public class VersioningManager {
 
     /**
      * Stage all modified/added/removed configuration files and, if specified, the agent mapping file.
-     *
-     * @param includeAgentMappings Flag indicating whether the agent mapping file should be staged as well
      */
-    private void stageFiles(boolean includeAgentMappings) throws GitAPIException {
-        log.debug("Staging all configuration files{}.", includeAgentMappings ? " and agent mappings" : "");
+    private void stageFiles() throws GitAPIException {
+        log.debug("Staging all configuration files and agent mappings.");
 
         AddCommand addCommand = git.add().addFilepattern(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
-
-        if (includeAgentMappings) {
-            addCommand.addFilepattern(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
-        }
+        addCommand.addFilepattern(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
 
         addCommand.call();
     }
@@ -710,14 +702,14 @@ public class VersioningManager {
      * Returns the author of this revision.
      *
      * @param file       the file to check
-     * @param baseCommit the commit to comapre agains, usually the live branch
+     * @param baseCommit the commit to compare against, usually the live branch
      * @param newCommit  the commit in which the provided file does not exist anymore, usually on the workspace
      *
      * @return the author of the revision which is responsible for the deletion.
      */
     private String findDeletingAuthor(String file, RevCommit baseCommit, RevCommit newCommit) {
         if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
-            throw new IllegalStateException(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME + " must not be delete");
+            throw new IllegalStateException(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME + " must not be deleted!");
 
         RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
         RevisionAccess baseRevision = new RevisionAccess(git.getRepository(), baseCommit);

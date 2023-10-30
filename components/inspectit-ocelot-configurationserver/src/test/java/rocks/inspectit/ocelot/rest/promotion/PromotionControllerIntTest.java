@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.rest.configuration;
+package rocks.inspectit.ocelot.rest.promotion;
 
 import org.eclipse.jgit.diff.DiffEntry;
 import org.junit.jupiter.api.Nested;
