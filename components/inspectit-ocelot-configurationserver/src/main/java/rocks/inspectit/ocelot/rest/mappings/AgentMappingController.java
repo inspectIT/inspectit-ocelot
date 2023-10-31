@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.rest.mappings;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -7,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
@@ -22,8 +22,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
-import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 /**
  * Controller for managing the agent mappings.
@@ -44,8 +42,9 @@ public class AgentMappingController extends AbstractBaseController {
      * @return List of {@link AgentMapping}s.
      */
     @GetMapping(value = "mappings")
-    public List<AgentMapping> getMappings() {
-        return mappingManager.getAgentMappings();
+    public List<AgentMapping> getMappings(@Parameter(description = "The id of the version which should be listed. If it is empty, the lastest workspace version is used. Can be 'live' for listing the latest live version.") @RequestParam(value = "version", required = false) String commitId) {
+        List<AgentMapping> agentMappings = mappingManager.getAgentMappings(commitId);
+        return agentMappings;
     }
 
     /**

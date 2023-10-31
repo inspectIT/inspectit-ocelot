@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.file.FileManager;
-import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
@@ -93,13 +92,26 @@ public class AgentMappingManager {
     }
 
     /**
-     * Returns an unmodifiable representation of the current agent mappings list.
-     * The method  returns the agent mappings from the workspace branch to always show the current changes.
+     * Returns an unmodifiable representation of the agent mappings list.
+     *
+     * @param version The id of the version, which should be listed.
+     *                If it is empty, the latest workspace version is used.
+     *                Can be 'live' fir listing the latest live version.
      *
      * @return A list of {@link AgentMapping}
      */
+    public synchronized List<AgentMapping> getAgentMappings(String version) {
+        if (version == null) {
+            return serializer.readAgentMappings(fileManager.getWorkspaceRevision());
+        } else if (version.equals("live")) {
+            return serializer.readAgentMappings(fileManager.getLiveRevision());
+        } else {
+            return serializer.readAgentMappings(fileManager.getCommitWithId(version));
+        }
+    }
+
     public synchronized List<AgentMapping> getAgentMappings() {
-        return serializer.readAgentMappings(fileManager.getWorkspaceRevision());
+        return getAgentMappings(null);
     }
 
     /**
