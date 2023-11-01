@@ -550,8 +550,7 @@ public class AgentMappingManagerTest {
             when(readAccessor.agentMappingsExist()).thenReturn(true);
 
             Branch oldBranch = manager.getSourceBranch();
-            manager.setSourceBranch("LIVE");
-            Branch newBranch = manager.getSourceBranch();
+            Branch newBranch = manager.setSourceBranch("LIVE");
 
             verify(publisher, times(1)).publishEvent(any(AgentMappingsSourceBranchChangedEvent.class));
             assertThat(oldBranch.equals(newBranch)).isFalse();

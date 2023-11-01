@@ -74,18 +74,17 @@ public class AgentMappingManager {
     /**
      * Sets the source branch, from which the agent mapping file will be reade
      * @param sourceBranch new source branch
+     * @return The set source branch
      */
-    public synchronized void setSourceBranch(String sourceBranch) {
+    public synchronized Branch setSourceBranch(String sourceBranch) {
         checkArgument(sourceBranch != null, "The set source branch cannot be null.");
         sourceBranch = sourceBranch.toLowerCase();
 
         switch (sourceBranch) {
             case "live":
-                serializer.setSourceBranch(LIVE);
-                break;
+                return serializer.setSourceBranch(LIVE);
             case "workspace":
-                serializer.setSourceBranch(WORKSPACE);
-                break;
+                return serializer.setSourceBranch(WORKSPACE);
             default:
                 throw new UnsupportedOperationException("Unhandled branch: " + sourceBranch);
         }

@@ -101,3 +101,51 @@ export const deleteMapping = (mapping) => {
       });
   };
 };
+
+/**
+ * Send the new source branch for the agent mappings file itself
+ * @param branch new source branch
+ */
+export const putMappingsSourceBranch = (branch, onComplete = () => {}) => {
+  return (dispatch) => {
+    dispatch({ type: types.PUT_MAPPING_STARTED });
+
+    axios
+      .put(
+        `/mappings/source`,
+        {},
+        {
+          headers: { 'content-type': 'application/json' },
+          params: { branch: branch },
+        }
+      )
+      .then(() => {
+        dispatch({ type: types.PUT_MAPPING_SUCCESS });
+        onComplete(true);
+        //dispatch(fetchMappingsSourceBranch());
+      })
+      .catch(() => {
+        dispatch({ type: types.PUT_MAPPING_FAILURE });
+        onComplete(false);
+      });
+  };
+};
+
+/**
+ * Fetches the current source branch for the agent mappings file itself
+ */
+export const fetchMappingsSourceBranch = () => {
+  return (dispatch) => {
+    dispatch({ type: types.FETCH_MAPPINGS_STARTED });
+
+    axios
+      .get('/mappings/source')
+      .then((response) => {
+        const currentBranch = response.data;
+        dispatch({ type: types.FETCH_MAPPINGS_SUCCESS, payload: { currentBranch } });
+      })
+      .catch(() => {
+        dispatch({ type: types.FETCH_MAPPINGS_FAILURE });
+      });
+  };
+};

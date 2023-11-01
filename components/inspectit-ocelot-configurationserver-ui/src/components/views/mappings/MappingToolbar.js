@@ -3,13 +3,28 @@ import { connect } from 'react-redux';
 import { mappingsActions } from '../../../redux/ducks/mappings';
 import { Toolbar } from 'primereact/toolbar';
 import { InputText } from 'primereact/inputtext';
+import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
+import PropTypes from 'prop-types';
 
 const searchFieldTooltipText =
   'Enter a mapping name, a source or an attribute key/value pair to filter matching mappings. The filter is not case sensitive.';
 
 /** Toolbar for mappingsView for changing mappings filter, downloading config files, reloading & adding mappings */
 class MappingToolbar extends React.Component {
+  state = { sourceBranch: 'LIVE' };
+  onChange = (event) => {
+    const selectedBranch = event.target.value;
+    if (selectedBranch) {
+      this.props.putSourceBranch(selectedBranch);
+    }
+  };
+  /**
+   * Fetch the source branch for the agent mappings config file
+   */
+  componentDidMount = () => {
+    //this.props.fetchSourceBranch();
+  };
   render() {
     const { filterValue, onChangeFilter, onAddNewMapping, onDownload, fetchMappings, readOnly } = this.props;
     return (
@@ -30,23 +45,40 @@ class MappingToolbar extends React.Component {
               color: #aaa;
               margin-right: 1rem;
             }
+            .dropdown {
+              display: flex;
+              align-items: center;
+              font-size: 1.25rem;
+              margin-right: 1rem;
+            }
           `}
         </style>
         <Toolbar
           style={{ border: '0', backgroundColor: '#eee' }}
           left={
-            <div className="p-toolbar-group-left">
-              <div className="searchbox">
-                <i className="pi pi-sitemap" />
-                <h4 style={{ fontWeight: 'small', marginRight: '1rem' }}>Agent Mappings</h4>
-                <InputText
-                  placeholder="Search"
-                  value={filterValue}
-                  onChange={(e) => onChangeFilter(e.target.value)}
-                  tooltip={searchFieldTooltipText}
-                />
+            <>
+              <div className="p-toolbar-group-left">
+                <div className="searchbox">
+                  <i className="pi pi-sitemap" />
+                  <h4 style={{ fontWeight: 'small', marginRight: '1rem' }}>Agent Mappings</h4>
+                  <InputText
+                    placeholder="Search"
+                    value={filterValue}
+                    onChange={(e) => onChangeFilter(e.target.value)}
+                    tooltip={searchFieldTooltipText}
+                  />
+                </div>
               </div>
-            </div>
+              <div className="p-toolbar-group-right">
+                <div className="dropdown">
+                  <Dropdown //
+                    value={this.state.sourceBranch}
+                    onChange={(e) => this.onChange(e)}
+                    options={['WORKSPACE', 'LIVE']}
+                  />
+                </div>
+              </div>
+            </>
           }
           right={
             <div className="p-toolbar-group-right">
@@ -62,8 +94,19 @@ class MappingToolbar extends React.Component {
   }
 }
 
+MappingToolbar.propTypes = {
+  /** text */
+  sourceBranch: PropTypes.string,
+  /** text */
+  fetchSourceBranch: PropTypes.func,
+  /** text */
+  putSourceBranch: PropTypes.func,
+};
+
 const mapDispatchToProps = {
   fetchMappings: mappingsActions.fetchMappings,
+  fetchSourceBranch: mappingsActions.fetchMappingsSourceBranch,
+  putSourceBranch: mappingsActions.putMappingsSourceBranch,
 };
 
 export default connect(null, mapDispatchToProps)(MappingToolbar);

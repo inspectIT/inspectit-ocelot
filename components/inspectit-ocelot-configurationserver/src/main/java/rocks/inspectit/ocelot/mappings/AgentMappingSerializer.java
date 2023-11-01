@@ -103,8 +103,9 @@ public class AgentMappingSerializer {
     /**
      * Sets the source branch, from which the agent mappings file will be read
      * @param sourceBranch new source branch
+     * @return the set source branch
      */
-    public void setSourceBranch(Branch sourceBranch) {
+    public Branch setSourceBranch(Branch sourceBranch) {
         log.info("Setting source branch for {} to {}", AGENT_MAPPINGS_FILE_NAME, sourceBranch);
         Branch oldBranch = this.sourceBranch;
         this.sourceBranch = sourceBranch;
@@ -118,6 +119,7 @@ public class AgentMappingSerializer {
             log.error("Source branch for {} cannot be set to {}, since no file was found", AGENT_MAPPINGS_FILE_NAME, sourceBranch);
             this.sourceBranch = oldBranch;
         }
+        return this.sourceBranch;
     }
 
     /**

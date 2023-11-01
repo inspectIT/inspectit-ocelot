@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
@@ -147,10 +148,10 @@ public class AgentMappingController extends AbstractBaseController {
      * @return 200 in case the operation was successful
      */
     @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
-    @PostMapping(value = "mappings/source")
-    public ResponseEntity setMappingSourceBranch(@RequestParam String branch) {
-        mappingManager.setSourceBranch(branch);
-        return ResponseEntity.ok().build();
+    @PutMapping (value = "mappings/source")
+    public ResponseEntity<String> setMappingSourceBranch(@RequestParam String branch) {
+        Branch setBranch = mappingManager.setSourceBranch(branch);
+        return new ResponseEntity<>(setBranch.getBranchName(), HttpStatus.OK);
     }
 
     /**

@@ -107,8 +107,7 @@ public class AgentMappingSerializerTest {
             when(revisionAccess.agentMappingsExist()).thenReturn(true);
 
             Branch oldBranch = serializer.getSourceBranch();
-            serializer.setSourceBranch(LIVE);
-            Branch newBranch = serializer.getSourceBranch();
+            Branch newBranch = serializer.setSourceBranch(LIVE);
 
             verify(eventPublisher, times(1)).publishEvent(any(AgentMappingsSourceBranchChangedEvent.class));
             assertThat(oldBranch.equals(newBranch)).isFalse();
@@ -120,8 +119,7 @@ public class AgentMappingSerializerTest {
             when(revisionAccess.agentMappingsExist()).thenReturn(false);
 
             Branch oldBranch = serializer.getSourceBranch();
-            serializer.setSourceBranch(LIVE);
-            Branch newBranch = serializer.getSourceBranch();
+            Branch newBranch = serializer.setSourceBranch(LIVE);
 
             verify(eventPublisher, times(0)).publishEvent(any(AgentMappingsSourceBranchChangedEvent.class));
             assertThat(oldBranch.equals(newBranch)).isTrue();
