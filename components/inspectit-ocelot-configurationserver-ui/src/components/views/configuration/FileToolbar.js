@@ -30,7 +30,7 @@ const FileToolbar = ({
   const showHiddenFiles = useSelector((state) => state.configuration.showHiddenFiles) || '';
 
   const reloadFiles = () => {
-    dispatch(configurationActions.selectVersion(null));
+    dispatch(configurationActions.selectConfigurationVersion(null));
   };
 
   return (

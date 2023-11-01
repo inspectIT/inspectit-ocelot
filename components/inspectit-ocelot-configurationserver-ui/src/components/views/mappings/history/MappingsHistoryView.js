@@ -1,30 +1,30 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { configurationActions } from '../../../../redux/ducks/configuration';
-import VersionItem from './VersionItem';
+import VersionItem from '../../configuration/history/VersionItem';
 import { VERSION_LIMIT } from '../../../../data/constants';
+import { mappingsActions } from '../../../../redux/ducks/mappings';
 
 /**
- * The sidebar panel for showing existing versions of the configuration files.
+ * The sidebar panel for showing existing versions of the agent mappings.
  */
-const HistoryView = () => {
+const MappingsHistoryView = () => {
   const dispatch = useDispatch();
 
   // global state variables
-  const versions = useSelector((state) => state.configuration.versions);
-  const currentVersion = useSelector((state) => state.configuration.selectedVersion);
+  const versions = useSelector((state) => state.mappings.versions);
+  const currentVersion = useSelector((state) => state.mappings.selectedVersion);
 
   // derived variables
   const limitReached = versions.length >= VERSION_LIMIT;
 
   useEffect(() => {
     if (versions.length === 0) {
-      dispatch(configurationActions.fetchVersions());
+      dispatch(mappingsActions.fetchMappingsVersions());
     }
   }, []);
 
   const selectVersion = (versionId) => {
-    dispatch(configurationActions.selectVersion(versionId));
+    dispatch(mappingsActions.selectMappingsVersion(versionId));
   };
 
   const createVersionItem = (item, index) => {
@@ -78,10 +78,10 @@ const HistoryView = () => {
       </style>
 
       <div className="items">
-        <div className="branch">Live Configuration</div>
+        <div className="branch">Live Agent Mappings</div>
         <VersionItem versionName="Latest" isSelected={currentVersion === 'live'} onClick={() => selectVersion('live')} isLatest={false} />
 
-        <div className="branch">Workspace Configuration</div>
+        <div className="branch">Workspace Agent Mappings</div>
 
         {versions.map(createVersionItem)}
 
@@ -91,4 +91,4 @@ const HistoryView = () => {
   );
 };
 
-export default HistoryView;
+export default MappingsHistoryView;

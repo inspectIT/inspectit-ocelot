@@ -1,16 +1,22 @@
 import * as types from './types';
 import axios from '../../../lib/axios-api';
 import { notificationActions } from '../notification';
+import { VERSION_LIMIT } from '../../../data/constants';
 
 /**
  * Fetches the agent mappings from the server.
  */
 export const fetchMappings = () => {
-  return (dispatch) => {
-    dispatch({ type: types.FETCH_MAPPINGS_STARTED });
+  return (dispatch, getState) => {
+    const { selectedVersion } = getState().mappings;
 
+    const params = {};
+    if (selectedVersion) {
+      params.version = selectedVersion;
+    }
+    dispatch({ type: types.FETCH_MAPPINGS_STARTED });
     axios
-      .get('/mappings')
+      .get('/mappings', { params })
       .then((response) => {
         const mappings = response.data;
         dispatch({ type: types.FETCH_MAPPINGS_SUCCESS, payload: { mappings } });
@@ -103,6 +109,48 @@ export const deleteMapping = (mapping) => {
 };
 
 /**
+ * Fetches all existing versions.
+ */
+export const fetchMappingsVersions = () => {
+  return (dispatch) => {
+    dispatch({ type: types.FETCH_VERSIONS_STARTED });
+
+    const params = {
+      limit: VERSION_LIMIT,
+    };
+
+    axios('/versions', { params })
+      .then((res) => {
+        const versions = res.data;
+        dispatch({ type: types.FETCH_VERSIONS_SUCCESS, payload: { versions } });
+      })
+      .catch(() => {
+        dispatch({ type: types.FETCH_VERSIONS_FAILURE });
+      });
+  };
+};
+
+/**
+ * Selects the version with the given id.
+ */
+export const selectMappingsVersion = (version, reloadMappings = true) => {
+  return (dispatch) => {
+    // changing the selected version
+    dispatch({
+      type: types.SELECT_VERSION,
+      payload: {
+        version,
+      },
+    });
+
+    if (reloadMappings) {
+      // fetching the content of the selected version
+      dispatch(fetchMappings());
+    }
+  };
+};
+
+/**
  * Send the new source branch for the agent mappings file itself
  * @param branch new source branch
  */
@@ -149,3 +197,10 @@ export const fetchMappingsSourceBranch = () => {
       });
   };
 };
+
+/**
+ * Shows or hides the history view.
+ */
+export const toggleHistoryView = () => ({
+  type: types.TOGGLE_HISTORY_VIEW,
+});

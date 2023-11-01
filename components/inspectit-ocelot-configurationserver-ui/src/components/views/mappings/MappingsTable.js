@@ -205,7 +205,7 @@ class MappingsTable extends React.Component {
   hideDeleteMappingDialog = () => this.setState({ isDeleteDialogShown: false, selectedMappingName: null });
 
   render() {
-    const { readOnly, filterValue, maxHeight, mappings, putMappings } = this.props;
+    const { readOnly, filterValue, maxHeight, mappings, putMappings, sidebar } = this.props;
 
     const mappingValues = mappings.map((mapping) => {
       //build a dummy string to allow filtering
@@ -319,6 +319,8 @@ class MappingsTable extends React.Component {
               )}
             />
           </DataTable>
+
+          {sidebar}
           <DeleteDialog
             visible={this.state.isDeleteDialogShown}
             onHide={this.hideDeleteMappingDialog}

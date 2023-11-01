@@ -6,6 +6,7 @@ import MappingsTable from './MappingsTable';
 
 import EditDialog from './dialogs/EditDialog';
 import DownloadDialog from './dialogs/DownloadDialog';
+import MappingSidebar from './MappingSidebar';
 
 /** View to display and change mappings */
 const AgentMappingView = () => {
@@ -52,6 +53,7 @@ const AgentMappingView = () => {
           onDuplicateMapping={showEditMappingDialog}
           maxHeight={`calc(${contentHeight} - 2.5em)`}
           readOnly={readOnly}
+          sidebar={<MappingSidebar />}
         />
       </div>
       <EditDialog visible={isEditDialogShown} onHide={() => setEditDialogShown(false)} mapping={mappingToEdit} />
