@@ -75,6 +75,8 @@ const mappings = {
   mappings: [],
   /** The date when the agent mappings have been fetched. */
   updateDate: null,
+  /** The source branch for the agent mappings file itself */
+  sourceBranch: '',
 };
 
 const alerting = {

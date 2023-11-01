@@ -12,21 +12,17 @@ const searchFieldTooltipText =
 
 /** Toolbar for mappingsView for changing mappings filter, downloading config files, reloading & adding mappings */
 class MappingToolbar extends React.Component {
-  state = { sourceBranch: 'LIVE' };
+  componentDidMount = () => {
+    this.props.fetchSourceBranch();
+  };
   onChange = (event) => {
     const selectedBranch = event.target.value;
     if (selectedBranch) {
       this.props.putSourceBranch(selectedBranch);
     }
   };
-  /**
-   * Fetch the source branch for the agent mappings config file
-   */
-  componentDidMount = () => {
-    //this.props.fetchSourceBranch();
-  };
   render() {
-    const { filterValue, onChangeFilter, onAddNewMapping, onDownload, fetchMappings, readOnly } = this.props;
+    const { filterValue, onChangeFilter, onAddNewMapping, onDownload, fetchMappings, readOnly, sourceBranch } = this.props;
     return (
       <div className="this">
         <style jsx>
@@ -71,11 +67,7 @@ class MappingToolbar extends React.Component {
               </div>
               <div className="p-toolbar-group-right">
                 <div className="dropdown">
-                  <Dropdown //
-                    value={this.state.sourceBranch}
-                    onChange={(e) => this.onChange(e)}
-                    options={['WORKSPACE', 'LIVE']}
-                  />
+                  <Dropdown value={sourceBranch} onChange={(e) => this.onChange(e)} options={['WORKSPACE', 'LIVE']} />
                 </div>
               </div>
             </>
@@ -95,12 +87,19 @@ class MappingToolbar extends React.Component {
 }
 
 MappingToolbar.propTypes = {
-  /** text */
+  /** The source branch for the agent mappings file itself */
   sourceBranch: PropTypes.string,
-  /** text */
+  /** Fetch current source branch */
   fetchSourceBranch: PropTypes.func,
-  /** text */
+  /** Update current source branch */
   putSourceBranch: PropTypes.func,
+};
+
+const mapStateToProps = (state) => {
+  let sourceBranch = state.mappings.sourceBranch;
+  return {
+    sourceBranch: sourceBranch,
+  };
 };
 
 const mapDispatchToProps = {
@@ -109,4 +108,4 @@ const mapDispatchToProps = {
   putSourceBranch: mappingsActions.putMappingsSourceBranch,
 };
 
-export default connect(null, mapDispatchToProps)(MappingToolbar);
+export default connect(mapStateToProps, mapDispatchToProps)(MappingToolbar);

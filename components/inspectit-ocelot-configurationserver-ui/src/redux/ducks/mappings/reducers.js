@@ -80,6 +80,46 @@ const mappingsReducer = createReducer(initialState)({
       pendingRequests: state.pendingRequests - 1,
     };
   },
+  [types.FETCH_MAPPINGS_SOURCE_BRANCH_STARTED]: (state) => {
+    return {
+      ...state,
+      pendingRequests: state.pendingRequests + 1,
+    };
+  },
+  [types.FETCH_MAPPINGS_SOURCE_BRANCH_SUCCESS]: (state, action) => {
+    const sourceBranch = action.payload.sourceBranch;
+    return {
+      ...state,
+      sourceBranch,
+      pendingRequests: state.pendingRequests - 1,
+    };
+  },
+  [types.FETCH_MAPPINGS_SOURCE_BRANCH_FAILURE]: (state) => {
+    return {
+      ...state,
+      pendingRequests: state.pendingRequests - 1,
+    };
+  },
+  [types.PUT_MAPPINGS_SOURCE_BRANCH_STARTED]: (state) => {
+    return {
+      ...state,
+      pendingRequests: state.pendingRequests + 1,
+    };
+  },
+  [types.PUT_MAPPINGS_SOURCE_BRANCH_SUCCESS]: (state, action) => {
+    const sourceBranch = action.payload.sourceBranch;
+    return {
+      ...state,
+      sourceBranch,
+      pendingRequests: state.pendingRequests - 1,
+    };
+  },
+  [types.PUT_MAPPINGS_SOURCE_BRANCH_FAILURE]: (state) => {
+    return {
+      ...state,
+      pendingRequests: state.pendingRequests - 1,
+    };
+  },
 });
 
 export default mappingsReducer;

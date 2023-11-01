@@ -108,7 +108,7 @@ export const deleteMapping = (mapping) => {
  */
 export const putMappingsSourceBranch = (branch, onComplete = () => {}) => {
   return (dispatch) => {
-    dispatch({ type: types.PUT_MAPPING_STARTED });
+    dispatch({ type: types.PUT_MAPPINGS_SOURCE_BRANCH_STARTED });
 
     axios
       .put(
@@ -119,13 +119,13 @@ export const putMappingsSourceBranch = (branch, onComplete = () => {}) => {
           params: { branch: branch },
         }
       )
-      .then(() => {
-        dispatch({ type: types.PUT_MAPPING_SUCCESS });
+      .then((response) => {
+        const sourceBranch = response.data;
+        dispatch({ type: types.PUT_MAPPINGS_SOURCE_BRANCH_SUCCESS, payload: { sourceBranch } });
         onComplete(true);
-        //dispatch(fetchMappingsSourceBranch());
       })
       .catch(() => {
-        dispatch({ type: types.PUT_MAPPING_FAILURE });
+        dispatch({ type: types.PUT_MAPPINGS_SOURCE_BRANCH_FAILURE });
         onComplete(false);
       });
   };
@@ -136,16 +136,16 @@ export const putMappingsSourceBranch = (branch, onComplete = () => {}) => {
  */
 export const fetchMappingsSourceBranch = () => {
   return (dispatch) => {
-    dispatch({ type: types.FETCH_MAPPINGS_STARTED });
+    dispatch({ type: types.FETCH_MAPPINGS_SOURCE_BRANCH_STARTED });
 
     axios
       .get('/mappings/source')
       .then((response) => {
-        const currentBranch = response.data;
-        dispatch({ type: types.FETCH_MAPPINGS_SUCCESS, payload: { currentBranch } });
+        const sourceBranch = response.data;
+        dispatch({ type: types.FETCH_MAPPINGS_SOURCE_BRANCH_SUCCESS, payload: { sourceBranch } });
       })
       .catch(() => {
-        dispatch({ type: types.FETCH_MAPPINGS_FAILURE });
+        dispatch({ type: types.FETCH_MAPPINGS_SOURCE_BRANCH_FAILURE });
       });
   };
 };

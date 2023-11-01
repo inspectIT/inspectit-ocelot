@@ -149,9 +149,9 @@ public class AgentMappingController extends AbstractBaseController {
      */
     @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
     @PutMapping (value = "mappings/source")
-    public ResponseEntity<String> setMappingSourceBranch(@RequestParam String branch) {
+    public ResponseEntity<Branch> setMappingSourceBranch(@RequestParam String branch) {
         Branch setBranch = mappingManager.setSourceBranch(branch);
-        return new ResponseEntity<>(setBranch.getBranchName(), HttpStatus.OK);
+        return new ResponseEntity<>(setBranch, HttpStatus.OK);
     }
 
     /**
@@ -160,8 +160,8 @@ public class AgentMappingController extends AbstractBaseController {
      * @return Current source branch for the agent mappings file
      */
     @GetMapping(value = "mappings/source")
-    public ResponseEntity<String> getMappingSourceBranch() {
-        String branch = mappingManager.getSourceBranch().getBranchName();
+    public ResponseEntity<Branch> getMappingSourceBranch() {
+        Branch branch = mappingManager.getSourceBranch();
         return new ResponseEntity<>(branch, HttpStatus.OK);
     }
 }
