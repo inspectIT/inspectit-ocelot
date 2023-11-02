@@ -22,12 +22,11 @@ const MappingSidebar = () => {
       <style jsx>
         {`
           .sidebar {
+            display: flex;
             border: 0;
             border-radius: 0;
             background-color: #eee;
             border-left: 1px solid #ddd;
-            flex: 0;
-            display: flex;
             background-color: #eeeeee;
           }
           .vert-button {

@@ -231,103 +231,109 @@ class MappingsTable extends React.Component {
             display: flex;
             text-align: center;
           }
-
           .cell-text {
             display: inline-block;
             white-space: normal;
             overflow: visible;
             overflow-wrap: anywhere;
           }
-
+          .table-and-sidebar {
+            display: flex;
+            flex: 1 1 auto;
+            overflow: auto;
+            position: inherit;
+          }
+          .table {
+            flex: 1;
+          }
+          .versioning-sidebar {
+            flex: 0;
+          }
           .drag-icon-col {
             width: 10rem;
           }
-
           .mapping-name-col {
             width: -moz-available;
             width: -webkit-fill-available;
             width: fill-available;
           }
-
           .source-branch-col {
             width: 40rem;
           }
-
           .sources-col {
             width: -moz-available;
             width: -webkit-fill-available;
             width: fill-available;
           }
-
           .attributes-col {
             width: -moz-available;
             width: -webkit-fill-available;
             width: fill-available;
           }
-
           .buttons-col {
             width: 15rem;
           }
         `}</style>
-        <div ref={(el) => (this.mappingsTable = el)}>
-          <DataTable
-            value={mappingValues}
-            reorderableRows={!readOnly}
-            scrollable={true}
-            scrollHeight={maxHeight ? maxHeight : '100%'}
-            onRowReorder={(e) => {
-              putMappings(e.value);
-            }}
-            globalFilter={filterValue}
-          >
-            {!readOnly && <Column className="drag-icon-col" rowReorder={!filterValue} />}
-            <Column className="mapping-name-col cell-text" columnKey="name" field="name" header="Mapping Name" />
-            <Column
-              className="source-branch-col cell-text"
-              columnKey="branch"
-              field="branch"
-              header="Source Branch"
-              body={(data) => <BranchCell branch={data.sourceBranch} />}
+        <div className="table-and-sidebar">
+          <div className="table" ref={(el) => (this.mappingsTable = el)}>
+            <DataTable
+              value={mappingValues}
+              reorderableRows={!readOnly}
+              scrollable={true}
+              scrollHeight={maxHeight ? maxHeight : '100%'}
+              onRowReorder={(e) => {
+                putMappings(e.value);
+              }}
+              globalFilter={filterValue}
+            >
+              {!readOnly && <Column className="drag-icon-col" rowReorder={!filterValue} />}
+              <Column className="mapping-name-col cell-text" columnKey="name" field="name" header="Mapping Name" />
+              <Column
+                className="source-branch-col cell-text"
+                columnKey="branch"
+                field="branch"
+                header="Source Branch"
+                body={(data) => <BranchCell branch={data.sourceBranch} />}
+              />
+              <Column
+                className="sources-col cell-text"
+                columnKey="sources"
+                field="sources"
+                body={(data) => <SourceCell sources={data.sources} appendRef={this.mappingsTable} />}
+                header="Sources"
+              />
+              <Column
+                className="attributes-col cell-text"
+                columnKey="attributes"
+                field="attributesSearchString"
+                body={(data) => <AttributesCell attributes={data.attributes} appendRef={this.mappingsTable} />}
+                header="Attributes"
+              />
+              <Column
+                className="buttons-col cell-text"
+                columnKey="buttons"
+                body={(data) => (
+                  <ButtonCell
+                    readOnly={readOnly}
+                    mapping={data}
+                    onEdit={this.props.onEditMapping}
+                    onDelete={this.showDeleteMappingDialog}
+                    onDownload={this.configDownload.download}
+                    onDuplicate={this.duplicateMapping}
+                    appendRef={this.mappingsTable}
+                  />
+                )}
+              />
+            </DataTable>
+            <DeleteDialog
+              visible={this.state.isDeleteDialogShown}
+              onHide={this.hideDeleteMappingDialog}
+              mappingName={this.state.selectedMappingName}
             />
-            <Column
-              className="sources-col cell-text"
-              columnKey="sources"
-              field="sources"
-              body={(data) => <SourceCell sources={data.sources} appendRef={this.mappingsTable} />}
-              header="Sources"
-            />
-            <Column
-              className="attributes-col cell-text"
-              columnKey="attributes"
-              field="attributesSearchString"
-              body={(data) => <AttributesCell attributes={data.attributes} appendRef={this.mappingsTable} />}
-              header="Attributes"
-            />
-            <Column
-              className="buttons-col cell-text"
-              columnKey="buttons"
-              body={(data) => (
-                <ButtonCell
-                  readOnly={readOnly}
-                  mapping={data}
-                  onEdit={this.props.onEditMapping}
-                  onDelete={this.showDeleteMappingDialog}
-                  onDownload={this.configDownload.download}
-                  onDuplicate={this.duplicateMapping}
-                  appendRef={this.mappingsTable}
-                />
-              )}
-            />
-          </DataTable>
-
-          {sidebar}
-          <DeleteDialog
-            visible={this.state.isDeleteDialogShown}
-            onHide={this.hideDeleteMappingDialog}
-            mappingName={this.state.selectedMappingName}
-          />
-          {/** reference is used for calling onDownload within ButtonCell component */}
-          <ConfigurationDownload onRef={(ref) => (this.configDownload = ref)} />
+            {/** reference is used for calling onDownload within ButtonCell component */}
+            <ConfigurationDownload onRef={(ref) => (this.configDownload = ref)} />
+          </div>
+          <div className="versioning-sidebar">{sidebar}</div>
         </div>
       </>
     );

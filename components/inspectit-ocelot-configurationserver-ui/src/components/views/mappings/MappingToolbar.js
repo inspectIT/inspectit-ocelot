@@ -82,7 +82,7 @@ class MappingToolbar extends React.Component {
                 </div>
                 <span
                   data-tip="Specify the branch, which should be used as source for the agent mappings configuration itself.<br>
-                  This <b>does not affect</b> the source branch in each individual agent mapping.<br>
+                  This <u><b>does not affect</b></u> the source branch in each individual agent mapping.<br>
                   All specified agent mappings are stored in one single file, which can use either the WORKSPACE or LIVE branch as its source.<br>"
                   className="hint-badge"
                 >

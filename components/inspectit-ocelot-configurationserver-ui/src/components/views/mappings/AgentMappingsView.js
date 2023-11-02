@@ -35,7 +35,7 @@ const AgentMappingView = () => {
     setEditDialogShown(true);
   };
 
-  const contentHeight = 'calc(100vh - 7rem)';
+  const contentHeight = 'calc(100vh - 10rem)';
   // Disable editing, if not latest workspace is selected
   readOnly = !isLatest ? true : readOnly;
   return (
@@ -44,7 +44,7 @@ const AgentMappingView = () => {
         .fixed-toolbar {
           position: static;
           top: 4rem;
-          width: calc(100vw - 5rem);
+          width: calc(100vw - 4rem);
         }
         .content {
           height: ${contentHeight};
