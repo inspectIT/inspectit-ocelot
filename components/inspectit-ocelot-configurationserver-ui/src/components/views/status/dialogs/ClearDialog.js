@@ -14,7 +14,7 @@ class ClearDialog extends React.Component {
   render() {
     return (
       <Dialog
-        header={'Clear History of all Agents' + this.props.type}
+        header={'Clear History of all Agents'}
         modal={true}
         focusOnShow={false}
         visible={this.props.visible}

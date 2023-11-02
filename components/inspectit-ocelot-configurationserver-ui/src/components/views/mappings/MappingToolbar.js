@@ -7,20 +7,26 @@ import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
+import ChangeSourceBranchDialog from './dialogs/ChangeSourceBranchDialog';
 
 const searchFieldTooltipText =
   'Enter a mapping name, a source or an attribute key/value pair to filter matching mappings. The filter is not case sensitive.';
 
 /** Toolbar for mappingsView for changing mappings filter, downloading config files, reloading & adding mappings */
 class MappingToolbar extends React.Component {
-  componentDidMount = () => {
-    this.props.fetchSourceBranch();
+  state = {
+    isChangeSourceBranchDialogShown: false,
+    selectedSourceBranch: '',
   };
   onChange = (event) => {
     const selectedBranch = event.target.value;
     if (selectedBranch) {
-      this.props.putSourceBranch(selectedBranch);
+      this.setState({ isChangeSourceBranchDialogShown: true });
+      this.setState({ selectedSourceBranch: selectedBranch });
     }
+  };
+  componentDidMount = () => {
+    this.props.fetchSourceBranch();
   };
   render() {
     const { filterValue, onChangeFilter, onAddNewMapping, onDownload, fetchMappings, readOnly, isAdmin, sourceBranch } = this.props;
@@ -101,6 +107,11 @@ class MappingToolbar extends React.Component {
             </div>
           }
         />
+        <ChangeSourceBranchDialog
+          visible={this.state.isChangeSourceBranchDialogShown}
+          onHide={() => this.setState({ isChangeSourceBranchDialogShown: false })}
+          selectedSourceBranch={this.state.selectedSourceBranch}
+        />
       </div>
     );
   }
@@ -125,7 +136,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = {
   fetchMappings: mappingsActions.fetchMappings,
   fetchSourceBranch: mappingsActions.fetchMappingsSourceBranch,
-  putSourceBranch: mappingsActions.putMappingsSourceBranch,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(MappingToolbar);
