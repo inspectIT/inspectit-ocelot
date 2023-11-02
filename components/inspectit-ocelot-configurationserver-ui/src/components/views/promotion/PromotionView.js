@@ -97,9 +97,7 @@ const PromotionView = () => {
         setPromotionResult(data.result);
       }
 
-      dispatch(
-        notificationActions.showSuccessMessage('File Promoted', 'The approved files have been successfully promoted.')
-      );
+      dispatch(notificationActions.showSuccessMessage('File Promoted', 'The approved files have been successfully promoted.'));
       refreshData();
     } catch (error) {
       if (error.response && error.response.status === 409) {
