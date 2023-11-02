@@ -19,7 +19,7 @@
       "alwaysEnabled": true
     },
     {
-      "name": "Configuration Promotion",
+      "name": "Promotion",
       "icon": "pi-cloud-upload",
       "href": "/promotion",
       "alwaysEnabled": true

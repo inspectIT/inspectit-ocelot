@@ -9,13 +9,13 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * Container class for the configuration promotion.
+ * Container class for file promotions.
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ConfigurationPromotion {
+public class Promotion {
 
     /**
      * A short message describing the commit.

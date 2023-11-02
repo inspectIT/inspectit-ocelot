@@ -45,7 +45,7 @@ const PromotionToolbar = ({ onRefresh, onPromote, loading, enabled, canPromote }
           <div className="p-toolbar-group-left">
             <div className="searchbox">
               <i className="pi pi-cloud-upload" />
-              <h4 className="headline">Configuration Promotion</h4>
+              <h4 className="headline">File Promotion</h4>
             </div>
           </div>
         }
@@ -58,7 +58,7 @@ const PromotionToolbar = ({ onRefresh, onPromote, loading, enabled, canPromote }
               icon={'pi pi-refresh' + (loading ? ' pi-spin' : '')}
               onClick={onRefresh}
             />
-            {canPromote && <Button disabled={!enabled} icon="pi pi-cloud-upload" label="Promote Configurations" onClick={onPromote} />}
+            {canPromote && <Button disabled={!enabled} icon="pi pi-cloud-upload" label="Promote Files" onClick={onPromote} />}
           </div>
         }
       />

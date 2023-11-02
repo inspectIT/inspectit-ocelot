@@ -23,12 +23,12 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
-import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
+import rocks.inspectit.ocelot.events.PromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.CachingRevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
-import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
+import rocks.inspectit.ocelot.file.versioning.model.Promotion;
 import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
@@ -840,35 +840,35 @@ public class VersioningManager {
     }
 
     /**
-     * Promoting the configuration files according to the specified {@link ConfigurationPromotion} definition.
+     * Promoting the files according to the specified {@link Promotion} definition.
      *
      * @param promotion          the promotion definition
      * @param allowSelfPromotion whether users can promote their own files
      *
      * @return Additional information of the promotion in case the promotion was successful. This might contain additional
-     * information about warning or errors which did not affected the promotion itself.
+     * information about warning or errors which did not affect the promotion itself.
      *
-     * @throws SelfPromotionNotAllowedException in case the user tries to promote its own files but it is prohibited
-     * @throws ConcurrentModificationException  in case there was a commit on the live branch in the mean time
+     * @throws SelfPromotionNotAllowedException in case the user tries to promote its own files, but it is prohibited
+     * @throws ConcurrentModificationException  in case there was a commit on the live branch in the meantime
      * @throws PromotionFailedException         in case the promotion has been failed
      */
-    public PromotionResult promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion) throws GitAPIException {
-        return promoteConfiguration(promotion, allowSelfPromotion, getCurrentAuthor());
+    public PromotionResult promote(Promotion promotion, boolean allowSelfPromotion) throws GitAPIException {
+        return promote(promotion, allowSelfPromotion, getCurrentAuthor());
     }
 
     /**
-     * Promoting the configuration files according to the specified {@link ConfigurationPromotion} definition.
+     * Promoting the files according to the specified {@link Promotion} definition.
      *
      * @param promotion          the promotion definition
      * @param allowSelfPromotion whether users can promote their own files
      * @param author             the author used for the resulting promotion commit
      */
-    public synchronized PromotionResult promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion, PersonIdent author) throws GitAPIException {
+    public synchronized PromotionResult promote(Promotion promotion, boolean allowSelfPromotion, PersonIdent author) throws GitAPIException {
         if (promotion == null || CollectionUtils.isEmpty(promotion.getFiles())) {
-            throw new IllegalArgumentException("ConfigurationPromotion must not be null and has to promote at least one file!");
+            throw new IllegalArgumentException("Promotion must not be null and has to promote at least one file!");
         }
 
-        log.info("User '{}' promotes {} configuration files.", author.getName(), promotion.getFiles().size());
+        log.info("User '{}' promotes {} files.", author.getName(), promotion.getFiles().size());
 
         PromotionResult result = PromotionResult.OK;
         try {
@@ -929,20 +929,20 @@ public class VersioningManager {
                 }
             }
         } catch (IOException | GitAPIException ex) {
-            throw new PromotionFailedException("Configuration promotion has failed.", ex);
+            throw new PromotionFailedException("Promotion has failed.", ex);
         } finally {
-            log.info("Configuration promotion was successful.");
+            log.info("Promotion was successful.");
 
             // checkout workspace branch
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
 
-            eventPublisher.publishEvent(new ConfigurationPromotionEvent(this, getLiveRevision()));
+            eventPublisher.publishEvent(new PromotionEvent(this, getLiveRevision()));
         }
 
         return result;
     }
 
-    private boolean containsSelfPromotion(ConfigurationPromotion promotion, WorkspaceDiff diff) {
+    private boolean containsSelfPromotion(Promotion promotion, WorkspaceDiff diff) {
         PersonIdent currentAuthor = getCurrentAuthor();
         if (currentAuthor == GIT_SYSTEM_AUTHOR) {
             return false;
@@ -1127,14 +1127,14 @@ public class VersioningManager {
                     .map(SimpleDiffEntry::getFile)
                     .collect(Collectors.toList());
 
-            ConfigurationPromotion promotion = ConfigurationPromotion.builder()
+            Promotion promotion = Promotion.builder()
                     .commitMessage("Auto-promotion due to workspace remote synchronization.")
                     .workspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName())
                     .liveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName())
                     .files(diffFiles)
                     .build();
 
-            promoteConfiguration(promotion, true, GIT_SYSTEM_AUTHOR);
+            promote(promotion, true, GIT_SYSTEM_AUTHOR);
         }
 
     }

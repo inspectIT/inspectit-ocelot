@@ -36,7 +36,7 @@ const PromotionView = () => {
   const currentUser = useSelector((state) => state.authentication.username);
 
   // fetching promotion data
-  const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/configuration/promotions', { 'include-content': 'true' });
+  const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/promotions', { 'include-content': 'true' });
 
   // derived variables
   const canSelfApprove = _.get(data, 'canPromoteOwnChanges', false); // whether the user can approve self-made changes
@@ -79,7 +79,7 @@ const PromotionView = () => {
   /**
    * Promotes the currently approved files.
    */
-  const promoteConfigurations = async (commitMessage) => {
+  const promoteFiles = async (commitMessage) => {
     const payload = {
       files: currentApprovals,
       workspaceCommitId,
@@ -90,7 +90,7 @@ const PromotionView = () => {
     setIsPromoting(true);
 
     try {
-      const { data } = await axios.post('/configuration/promote', payload);
+      const { data } = await axios.post('/promote', payload);
 
       if (data.result && data.result != 'OK') {
         setShowWarningDialog(true);
@@ -98,7 +98,7 @@ const PromotionView = () => {
       }
 
       dispatch(
-        notificationActions.showSuccessMessage('Configuration Promoted', 'The approved configurations have been successfully promoted.')
+        notificationActions.showSuccessMessage('File Promoted', 'The approved files have been successfully promoted.')
       );
       refreshData();
     } catch (error) {
@@ -153,7 +153,7 @@ const PromotionView = () => {
       <PromotionApprovalDialog
         visible={showPromotionDialog}
         onHide={() => setShowPromotionDialog(false)}
-        onPromote={promoteConfigurations}
+        onPromote={promoteFiles}
         approvedFiles={currentApprovals}
         isLoading={isPromoting}
       />

@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
+import rocks.inspectit.ocelot.events.PromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
@@ -56,7 +56,7 @@ public class ExternalChangeDetector {
     synchronized void checkForUpdates() {
         RevisionAccess currentLiveRevision = fileManager.getLiveRevision();
         if (!currentLiveRevision.getRevisionId().equals(latestLiveId)) {
-            publisher.publishEvent(new ConfigurationPromotionEvent(this, currentLiveRevision));
+            publisher.publishEvent(new PromotionEvent(this, currentLiveRevision));
         }
 
         RevisionAccess currentWorkspaceRevision = fileManager.getWorkspaceRevision();
@@ -71,7 +71,7 @@ public class ExternalChangeDetector {
      * @param event
      */
     @EventListener
-    synchronized void configurationPromoted(ConfigurationPromotionEvent event) {
+    synchronized void configurationPromoted(PromotionEvent event) {
         latestLiveId = event.getLiveRevision().getRevisionId();
     }
 
