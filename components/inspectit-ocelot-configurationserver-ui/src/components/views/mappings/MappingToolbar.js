@@ -28,8 +28,8 @@ class MappingToolbar extends React.Component {
         <style jsx>
           {`
             .this :global(.p-toolbar) {
-              padding-top: 0.5rem;
-              padding-bottom: 0.5rem;
+              padding-top: 0;
+              padding-bottom: 0;
             }
             .searchbox {
               display: flex;
@@ -66,7 +66,8 @@ class MappingToolbar extends React.Component {
                 </div>
               </div>
               <div className="p-toolbar-group-right">
-                <div className="dropdown">
+                <h4 style={{ fontWeight: 'small', marginRight: '1rem', marginLeft: '1rem' }}>Source Branch</h4>
+                <div className="dropdown" style={{ marginTop: '.2rem' }}>
                   <Dropdown value={sourceBranch} onChange={(e) => this.onChange(e)} options={['WORKSPACE', 'LIVE']} />
                 </div>
               </div>

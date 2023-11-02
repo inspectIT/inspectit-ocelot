@@ -40,7 +40,9 @@ class ClearDialog extends React.Component {
     if (!prevProps.visible && this.props.visible) {
       /**Timeout is needed for .focus() to be triggered correctly. */
       setTimeout(() => {
-        this.clearButton.current.element.focus();
+        if (this.clearButton?.current?.element) {
+          this.clearButton.current.element.focus();
+        }
       }, 0);
     }
   }
