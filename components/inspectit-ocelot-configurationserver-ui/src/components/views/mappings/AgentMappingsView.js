@@ -12,7 +12,8 @@ import { mappingsActions, mappingsSelectors } from '../../../redux/ducks/mapping
 /** View to display and change mappings */
 const AgentMappingView = () => {
   const dispatch = useDispatch();
-  let readOnly = useSelector((state) => !state.authentication.permissions.write);
+  let isAdmin = useSelector((state) => state.authentication.permissions.admin);
+  let readOnly = useSelector((state) => !state.authentication.permissions.write && !isAdmin);
 
   const [mappingsFilter, setMappingsFilter] = useState('');
   const [mappingToEdit, setMappingToEdit] = useState(null);
@@ -76,6 +77,7 @@ const AgentMappingView = () => {
           onAddNewMapping={showEditMappingDialog}
           onDownload={() => setDownloadDialogShown(true)}
           readOnly={readOnly}
+          isAdmin={isAdmin}
         />
       </div>
       {!isLatest && (

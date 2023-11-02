@@ -6,6 +6,7 @@ import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import PropTypes from 'prop-types';
+import ReactTooltip from 'react-tooltip';
 
 const searchFieldTooltipText =
   'Enter a mapping name, a source or an attribute key/value pair to filter matching mappings. The filter is not case sensitive.';
@@ -22,7 +23,7 @@ class MappingToolbar extends React.Component {
     }
   };
   render() {
-    const { filterValue, onChangeFilter, onAddNewMapping, onDownload, fetchMappings, readOnly, sourceBranch } = this.props;
+    const { filterValue, onChangeFilter, onAddNewMapping, onDownload, fetchMappings, readOnly, isAdmin, sourceBranch } = this.props;
     return (
       <div className="this">
         <style jsx>
@@ -47,6 +48,15 @@ class MappingToolbar extends React.Component {
               font-size: 1.25rem;
               margin-right: 1rem;
             }
+            .hint-badge {
+              display: inline-flex;
+              height: 1.2rem;
+              width: 1.2rem;
+              border-radius: 60%;
+              background-color: #a4a3a3;
+              justify-content: center;
+              color: white;
+            }
           `}
         </style>
         <Toolbar
@@ -68,8 +78,17 @@ class MappingToolbar extends React.Component {
               <div className="p-toolbar-group-right">
                 <h4 style={{ fontWeight: 'small', marginRight: '1rem', marginLeft: '1rem' }}>Source Branch</h4>
                 <div className="dropdown" style={{ marginTop: '.2rem' }}>
-                  <Dropdown value={sourceBranch} onChange={(e) => this.onChange(e)} options={['WORKSPACE', 'LIVE']} />
+                  <Dropdown value={sourceBranch} disabled={!isAdmin} onChange={(e) => this.onChange(e)} options={['WORKSPACE', 'LIVE']} />
                 </div>
+                <span
+                  data-tip="Specify the branch, which should be used as source for the agent mappings configuration itself.<br>
+                  This <b>does not affect</b> the source branch in each individual agent mapping.<br>
+                  All specified agent mappings are stored in one single file, which can use either the WORKSPACE or LIVE branch as its source.<br>"
+                  className="hint-badge"
+                >
+                  ?
+                </span>
+                <ReactTooltip place="bottom" effect="solid" type="info" html={true} />
               </div>
             </>
           }
