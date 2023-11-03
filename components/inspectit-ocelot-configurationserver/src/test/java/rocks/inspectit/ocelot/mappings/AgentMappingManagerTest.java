@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.events.AgentMappingsSourceBranchChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
@@ -49,7 +50,8 @@ public class AgentMappingManagerTest {
 
     @BeforeEach
     public void init() {
-        serializer = Mockito.spy(new AgentMappingSerializer(fileManager, publisher));
+        InspectitServerSettings settings = InspectitServerSettings.builder().initialAgentMappingsSourceBranch("workspace").build();
+        serializer = Mockito.spy(new AgentMappingSerializer(settings, fileManager, publisher));
         serializer.postConstruct();
 
         manager = new AgentMappingManager(serializer, fileManager);

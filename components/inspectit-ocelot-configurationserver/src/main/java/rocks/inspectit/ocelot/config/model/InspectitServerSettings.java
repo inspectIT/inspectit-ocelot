@@ -29,6 +29,11 @@ public class InspectitServerSettings {
     private String workingDirectory;
 
     /**
+     * Source branch for agent mappings, which should be used during start up
+     */
+    private String initialAgentMappingsSourceBranch;
+
+    /**
      * The mail suffix used for internal users.
      */
     private String mailSuffix;

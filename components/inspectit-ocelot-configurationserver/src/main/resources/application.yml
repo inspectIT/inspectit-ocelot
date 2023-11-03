@@ -26,6 +26,8 @@ server:
 inspectit-config-server:
   # the directory which is used as working directory
   working-directory: working_directory
+  # source branch for agent mappings, which should be used during start up
+  initial-agent-mappings-source-branch: WORKSPACE
   # the expiration duration of JWT tokens
   token-lifespan: 60m
   # the e-mail suffix used for internal users

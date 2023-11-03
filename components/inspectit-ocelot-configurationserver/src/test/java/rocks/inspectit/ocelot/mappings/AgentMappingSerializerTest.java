@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.events.AgentMappingsSourceBranchChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
@@ -39,10 +40,10 @@ public class AgentMappingSerializerTest {
     @Mock
     RevisionAccess revisionAccess;
 
-
     @BeforeEach
     public void setup() {
-        serializer = new AgentMappingSerializer(fileManager, eventPublisher);
+        InspectitServerSettings settings = InspectitServerSettings.builder().initialAgentMappingsSourceBranch("workspace").build();
+        serializer = new AgentMappingSerializer(settings, fileManager, eventPublisher);
         serializer.postConstruct();
     }
 

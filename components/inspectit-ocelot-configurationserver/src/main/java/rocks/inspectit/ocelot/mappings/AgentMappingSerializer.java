@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.events.AgentMappingsSourceBranchChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
@@ -51,9 +52,11 @@ public class AgentMappingSerializer {
 
     @VisibleForTesting
     @Autowired
-    AgentMappingSerializer(FileManager fileManager, ApplicationEventPublisher publisher) {
+    AgentMappingSerializer(InspectitServerSettings settings, FileManager fileManager, ApplicationEventPublisher publisher) {
         this.fileManager = fileManager;
         this.publisher = publisher;
+        String initialBranch = settings.getInitialAgentMappingsSourceBranch().toUpperCase();
+        this.sourceBranch = Branch.valueOf(initialBranch);
     }
 
     /**
@@ -65,8 +68,6 @@ public class AgentMappingSerializer {
         ymlMapper.findAndRegisterModules();
 
         mappingsListType = ymlMapper.getTypeFactory().constructCollectionType(List.class, AgentMapping.class);
-
-        sourceBranch = WORKSPACE; // TODO: Read the initials source Branch from application properties
     }
 
     /**
