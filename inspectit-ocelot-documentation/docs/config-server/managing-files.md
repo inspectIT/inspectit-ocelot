@@ -1,23 +1,38 @@
 ---
-id: managing-configurations
-title: Managing Configuration Files
+id: managing-files
+title: Managing Files
+sidebar_label: Managing Files
 ---
 
-The configuration server internally uses Git to manage its working directory. This allows a versioning of configurations, so that it is possible to track when and how a configuration was created, changed or deleted. Additionally, it allows unwanted changes to be reverted and configuration files to be restored that would otherwise be lost.
+The configuration server internally uses Git to manage its working directory. 
+This allows a versioning of configurations as well as the agent mappings, so that it is possible to track when and how a file was created, 
+changed or deleted. Additionally, it allows unwanted changes to be reverted and configuration files to be restored that 
+would otherwise be lost.
 
-Furthermore, a staging of configurations is possible. By default, the configuration server has two branches (`WORKSPACE` and `LIVE`) which contain the configuration files and which can be used as the basis for the configuration to be delivered. All changes made by users to the configuration files affect the `WORKSPACE` branch. The `LIVE` branch cannot be changed directly by users. A change to the `LIVE` branch is only possible by transferring an already done change to the `WORKSPACE` branch to the `LIVE` branch - in this case called "promotion".
+Furthermore, a staging of configurations and agent mappings is possible. By default, the configuration server has two 
+branches (`WORKSPACE` and `LIVE`)  which can be used as the basis for the configurations to be delivered. 
+All changes made by users to the configuration files and the agent mappings affect the `WORKSPACE` branch. 
+The `LIVE` branch cannot be changed directly by users. A change to the `LIVE` branch is only possible by transferring 
+an already done change to the `WORKSPACE` branch to the `LIVE` branch - in this case called "promotion".
 
 :::tip
-It is possible for agents to obtain the configurations exclusively from the `LIVE` branch. As a result, users can now edit configuration files without having to deliver these - possibly incomplete changes - directly, thus preventing warnings due to invalid configurations.
+It is possible for agents to obtain the configurations exclusively from the `LIVE` branch. As a result, users can now 
+edit configuration files without having to deliver these - possibly incomplete changes - directly, thus preventing 
+warnings due to invalid configurations.
+
+You can achieve this by setting the source branch for a specific agent mapping to `LIVE`.
 :::
 
-In order to deliver specific configurations to agents, so-called "agent mappings" can be used. These can be used to define precisely which files and from which branch an agent should receive.
+**Agent Mappings** can be used, in order to deliver specific configurations to agents.
+They can also be used to define precisely which files and from which branch an agent should receive.
 
 ![Configuration Server Workspace Architecture](assets/configuration-server-branches.png)
 
-## Promoting Configuration Files
+## Promoting Files
 
-Changes to configuration files by users only affect the `WORKSPACE` branch. If a user wants to make a change to a configuration file, but the version of the `LIVE` branch is delivered to the agent, the user must do the following:
+Changes to configuration files or agent mappings by users only affect the `WORKSPACE` branch. 
+If a user wants to make a change to a configuration file, but the version of the `LIVE` branch is delivered to the agent,
+the user must do the following:
 
 * First, the user must perform the change, which allows the change to be tracked on the workspace branch.
 * Afterwards the change must be approved and promoted by a user who has promotion rights. Only through promotion the changes to a file will be transferred to the `LIVE` branch.
@@ -40,8 +55,8 @@ In the following screenshot, the configuration server's promotion user interface
 ## Four-Eyes Promoting Restriction
 
 By default, any user with promotion rights can promote any changes.
-In some setups it can be beneficial to enforce peer-reviews before promoting configuration changes.
-The configuration server offers a mechanism to enforce a four eyes principle for configuration changes which can be enabled using the following setting:
+In some setups it can be beneficial to enforce peer-reviews before promoting changes.
+The configuration server offers a mechanism to enforce a four eyes principle for changes which can be enabled using the following setting:
 
 ```YAML
 inspectit-config-server:
@@ -49,7 +64,7 @@ inspectit-config-server:
     four-eyes-promotion: true
 ```
 
-When this setting is enabled, users with promotion rights will no longer be able to promote their own configuration changes.
+When this setting is enabled, users with promotion rights will no longer be able to promote their own changes.
 
 :::note
 This restriction is only applied to non-admin users! Users with admin rights will still be able to promote their own changes.
@@ -70,7 +85,7 @@ inspectit-config-server:
 
 ## External Changes
 
-While it is not recommended, it is possible to directly change the configuration files in the filesystem instead of via the
+While it is not recommended, it is possible to directly change the files in the filesystem instead of via the
 configuration server's UI or REST-API.
 
 In order for your changes in the file-system to become active, you need to let the configuration server know about the external changes.

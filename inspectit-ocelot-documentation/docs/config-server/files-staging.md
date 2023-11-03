@@ -1,16 +1,16 @@
 ---
-id: configuration-files-staging
-title: Configuration Files Staging Using Remote Git
-sidebar_label: Configuration Files Staging
+id: files-staging
+title: File Staging Using Remote Git
+sidebar_label: File Staging
 ---
 
 :::tip
-It is recommended to first familiarize yourself with [how the configuration server manages configuration](config-server/managing-configurations.md) files before reading this chapter.
+It is recommended to first familiarize yourself with [how the configuration server manages files](config-server/managing-files.md) before reading this chapter.
 :::
 
 Since version `1.11.0` the Configuration Server offers the possibility that external Git repositories can be connected.
 This allows configuration files to be obtained from an external Git repository and also transferred to it.
-This allows us to secure configuration files (e.g. for creating backups), initialize configuration servers with a specific set of configuration files or chain several configuration servers together.
+This allows us to secure configuration files and agent mappings (e.g. for creating backups), initialize configuration servers with a specific set of configuration files or chain several configuration servers together.
 The latter can be used, for example, to cover more complex scenarios, such as synchronizing configuration files across multiple system stages.
 
 :::important
