@@ -27,9 +27,8 @@ dependencies {
     annotationProcessor libs.orgProjectlombokLombok
     testImplementation (
             libs.orgJunitJupiterJunitJupiterApi,
-            libs.orgJunitJupiterJunitJupiter,
-            libs.orgAssertjAssertjCore,
-            libs.orgMockitoMockitoJunitJupiter
+            libs.orgMockitoMockitoJunitJupiter,
+            libs.orgAssertjAssertjCore
     )
     testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 

@@ -17,7 +17,7 @@ dependencies {
     annotationProcessor libs.orgProjectlombokLombok
     testImplementation (
             libs.orgJunitJupiterJunitJupiterApi,
-            libs.orgJunitJupiterJunitJupiter
+            libs.orgMockitoMockitoJunitJupiter
     )
     testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 }

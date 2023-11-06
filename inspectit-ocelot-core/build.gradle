@@ -135,7 +135,7 @@ dependencies {
             libs.orgSpringframeworkSpringTest,
 
             libs.orgJunitJupiterJunitJupiterApi,
-            libs.orgJunitJupiterJunitJupiter,
+            libs.orgMockitoMockitoJunitJupiter,
 
             // to make use of SpyBean
             libs.orgSpringframeworkBootSpringBootTest,
