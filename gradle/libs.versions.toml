@@ -62,7 +62,7 @@ ioOpentelemetryOpentelemetryExporterOtlp = { module = "io.opentelemetry:opentele
 ioOpentelemetryOpentelemetryExporterPrometheus = { module = "io.opentelemetry:opentelemetry-exporter-prometheus", version = { strictly = "1.25.0-alpha" } }
 ioOpentelemetryOpentelemetryExporterZipkin = { module = "io.opentelemetry:opentelemetry-exporter-zipkin", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryOpencensusShim = { module = "io.opentelemetry:opentelemetry-opencensus-shim", version = { strictly = "1.25.0-alpha" } }
-ioOpentelemetryOpentelemetryProto = { module = "io.opentelemetry:opentelemetry-proto", version = { strictly = "1.25.0-alpha" } }
+ioOpentelemetryOpentelemetryProto = { module = "io.opentelemetry:opentelemetry-proto", version = { strictly = "1.7.1-alpha" } }
 ioOpentelemetryOpentelemetrySdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetrySdkMetrics = { module = "io.opentelemetry:opentelemetry-sdk-metrics", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetrySdkTesting = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "ioOpentelemetry" }

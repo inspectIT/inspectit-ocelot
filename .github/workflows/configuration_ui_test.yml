@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     container: openjdk:8-jdk
     env:
-      working-directory: ./components/inspectit-ocelot-configurationserver
+      working-directory: ./components/inspectit-ocelot-configurationserver-ui
     steps:
       - uses: actions/checkout@v3
       - name: Build frontend
