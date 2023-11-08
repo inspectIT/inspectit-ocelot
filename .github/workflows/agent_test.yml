@@ -75,6 +75,9 @@ jobs:
     container: eclipse-temurin:8-jdk
     needs: [ pr-check ]
     steps:
+      - uses: actions/checkout@v3
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
       - name: Scan dependencies inspectit-ocelot-sdk
         run: ./gradlew :inspectit-ocelot-sdk:dependencyCheckAnalyze
       - name: Scan dependencies inspectit-ocelot-config
