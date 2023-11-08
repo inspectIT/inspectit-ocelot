@@ -121,8 +121,8 @@ If you need additional or in-depth information on the actual implementation of i
 
 ## How to Release
 
-Important tasks to check first are `dependencyUpdates` and `dependencyUpdates[Major|Minor]` for newer (patch, minor, major)
-versions and `dependencyCheckAnalyze` or `dependencyCheckAggregate` for security issues in the used dependencies.
+Important tasks to check first are `dependencyUpdates` or `dependencyUpdates[Major|Minor]` for newer (patch, minor, major)
+versions, the `outdated` task for node modules and `dependencyCheckAnalyze` or `dependencyCheckAggregate` for security issues in the used dependencies (including node modules).
 
 ## FAQ
 
