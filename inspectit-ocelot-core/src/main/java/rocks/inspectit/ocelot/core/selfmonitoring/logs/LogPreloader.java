@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.selfmonitoring;
+package rocks.inspectit.ocelot.core.selfmonitoring.logs;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;

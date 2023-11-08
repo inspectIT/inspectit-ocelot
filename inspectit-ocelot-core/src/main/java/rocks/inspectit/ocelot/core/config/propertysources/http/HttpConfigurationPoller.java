@@ -2,12 +2,11 @@ package rocks.inspectit.ocelot.core.config.propertysources.http;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import rocks.inspectit.ocelot.commons.models.health.AgentHealthState;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentHealthChangedEvent;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -83,10 +82,9 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
         }
     }
 
-    @EventListener
-    void agentHealthChanged(AgentHealthChangedEvent event) {
+    public void updateAgentHealthState(AgentHealthState agentHealth) {
         if (currentState != null) {
-            currentState.updateAgentHealth(event.getNewHealth());
+            currentState.updateAgentHealthState(agentHealth);
         }
     }
 }

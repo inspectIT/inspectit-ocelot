@@ -38,7 +38,7 @@ dependencies {
             "org.apache.commons:commons-lang3",
             "commons-io:commons-io:${commonsIoVersion}",
             "com.fasterxml.jackson.core:jackson-databind",
-
+            'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0',
             // logging
             "ch.qos.logback:logback-classic",
     )

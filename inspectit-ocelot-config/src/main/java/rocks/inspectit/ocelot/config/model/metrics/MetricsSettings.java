@@ -38,6 +38,8 @@ public class MetricsSettings {
      */
     private Duration frequency;
 
+    private TagGuardSettings tagGuard;
+
     @NotNull
     private Map<@NotBlank String, @NotNull @Valid MetricDefinitionSettings> definitions = Collections.emptyMap();
 
@@ -83,8 +85,6 @@ public class MetricsSettings {
     @Valid
     @NotNull
     private JmxMetricsRecorderSettings jmx;
-
-
 
     @AdditionalValidation
     public void noDuplicateViewNames(ViolationBuilder vios) {

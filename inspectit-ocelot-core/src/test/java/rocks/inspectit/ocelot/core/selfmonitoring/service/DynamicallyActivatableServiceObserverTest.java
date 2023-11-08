@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Nested;
 import rocks.inspectit.ocelot.core.command.AgentCommandService;
 import rocks.inspectit.ocelot.core.exporter.JaegerExporterService;
 import rocks.inspectit.ocelot.core.exporter.PrometheusExporterService;
-import rocks.inspectit.ocelot.core.selfmonitoring.LogPreloader;
+import rocks.inspectit.ocelot.core.selfmonitoring.logs.LogPreloader;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.util.ArrayList;
