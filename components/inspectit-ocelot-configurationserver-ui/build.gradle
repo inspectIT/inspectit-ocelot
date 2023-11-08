@@ -38,6 +38,7 @@ dependencyCheck {
         nodeAudit {
             yarnEnabled = true
             yarnPath = "${buildDir}/yarn/yarn-v${node.yarnVersion.get()}/yarn${OperatingSystem.current() == OperatingSystem.WINDOWS?".cmd":""}"
+            println("Using yarnPath: ${yarnPath}")
         }
     }
 }
@@ -47,6 +48,10 @@ dependencyCheck {
  */
 def installFrontend = tasks.register('installFrontend', YarnTask) {
     args = ['install']
+    doLast {
+        var dir = new File("${buildDir}/yarn")
+        dir.eachDir {d -> println("Installed yarn version: ${d}")}
+    }
 }
 
 def lintFrontend = tasks.register('lintFrontend', YarnTask) {
