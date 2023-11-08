@@ -24,3 +24,14 @@ jobs:
       - name: test
         run: ../../gradlew test
         working-directory: ${{env.working-directory}}
+
+  dependency-scan:
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./components/inspectit-ocelot-configdocsgenerator
+    container: openjdk:8-jdk
+    steps:
+      - name: Scan dependencies
+        working-directory: ${{env.working-directory}}
+        run: ../../gradlew :inspectit-ocelot-configdocsgenerator:dependencyCheckAnalyze

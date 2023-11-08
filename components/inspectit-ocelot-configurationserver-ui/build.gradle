@@ -86,3 +86,11 @@ tasks.register('upgradeInteractive', YarnTask) {
 tasks.register('upgradeInteractiveLatest', YarnTask) {
     args = ['upgradeInteractive', '--latest']
 }
+
+tasks.named("dependencyCheckAnalyze").configure {
+    dependsOn installFrontend
+}
+
+tasks.named("dependencyCheckAggregate").configure {
+    dependsOn installFrontend
+}

@@ -119,6 +119,11 @@ If you need additional or in-depth information on the actual implementation of i
   <img src="https://contributors-img.web.app/image?repo=inspectit/inspectit-ocelot" />
 </a>
 
+## How to Release
+
+Important tasks to check first are `dependencyUpdates` and `dependencyUpdates[Major|Minor]` for newer (patch, minor, major)
+versions and `dependencyCheckAnalyze` or `dependencyCheckAggregate` for security issues in the used dependencies.
+
 ## FAQ
 
 #### Is it pronounced inspect-"IT" or "it"?

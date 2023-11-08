@@ -21,3 +21,14 @@ jobs:
       - name: Build frontend
         working-directory: ${{env.working-directory}}
         run: ../../gradlew buildFrontend
+
+  dependency-scan:
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./components/inspectit-ocelot-configurationserver-ui
+    container: openjdk:8-jdk
+    steps:
+      - name: Scan dependencies
+        working-directory: ${{env.working-directory}}
+        run: ../../gradlew :inspectit-ocelot-configurationserver-ui:dependencyCheckAnalyze
