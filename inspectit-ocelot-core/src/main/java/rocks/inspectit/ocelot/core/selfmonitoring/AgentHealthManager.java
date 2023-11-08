@@ -75,6 +75,7 @@ public class AgentHealthManager {
 
     public void invalidateIncident(Class eventClass, String eventMessage) {
         invalidatableHealth.remove(eventClass);
+        triggerEvent(eventClass.getTypeName(), eventMessage);
     }
 
     private void triggerEvent( String incidentSource, String message) {

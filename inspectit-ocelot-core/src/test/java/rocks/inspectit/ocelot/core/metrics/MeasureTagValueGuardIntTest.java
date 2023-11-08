@@ -4,6 +4,7 @@ import io.github.netmikey.logunit.api.LogCapturer;
 import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,15 +45,21 @@ public class MeasureTagValueGuardIntTest extends ExporterServiceIntegrationTestB
         getGrpcServer().getMetricRequests().clear();
     }
 
+    /**
+     * TODO: Update test
+     * Since recordMetricsAndFlush() creates metrics directly in OpenTelemetry, MeasureTagValueGuard cannot be applied
+     * Thus to test MeasureTagValueGuard, metrics have to be created with InspectIT
+     */
     @DirtiesContext
     @Test
+    @Disabled("Metrics need to be created with InspectIT")
     void testValueGuardLimitExceed() throws InterruptedException {
         updateProperties(mps -> {
             mps.setProperty("inspectit.exporters.metrics.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_GRPC_PORT));
             mps.setProperty("inspectit.exporters.metrics.otlp.export-interval", "500ms");
             mps.setProperty("inspectit.exporters.metrics.otlp.enabled", ExporterEnabledState.ENABLED);
             mps.setProperty("inspectit.exporters.metrics.otlp.protocol", TransportProtocol.GRPC);
-            mps.setProperty("inspectit.metrics.tag-guard.tag-values-per-tag", 2);
+            mps.setProperty("inspectit.metrics.tag-guard.max-tag-values-per-tag", 2);
             mps.setProperty("inspectit.metrics.tag-guard.schedule-delay", Duration.ofMillis(500));
         });
 

@@ -33,7 +33,7 @@ public class LogHealthMonitorTest {
     private ILoggingEvent createLoggingEvent(Class<?> loggedClass) {
         return new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(loggedClass), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
     }
-        //TODO testen mit allen Levels (WARN, ERROR, OK, INFO, DEBUG)
+    //TODO testen mit allen Levels (WARN, ERROR, OK, INFO, DEBUG)
     @Nested
     class OnLoggingEvent {
 
@@ -48,13 +48,14 @@ public class LogHealthMonitorTest {
 
         @Test
         void triggerAgentHealthManagerNotifyAgentHealthEvent() {
-            ILoggingEvent loggingEvent = createLoggingEvent(LogHealthMonitor.class);
+            Class<?> loggerClass = LogHealthMonitor.class;
+            ILoggingEvent loggingEvent = createLoggingEvent(loggerClass);
             Class<?> invalidatorMock = PropertySourcesReloadEvent.class;
             AgentHealth eventHealth = AgentHealth.fromLogLevel(loggingEvent.getLevel());
 
             healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
 
-            verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, invalidatorMock.getCanonicalName(), loggingEvent.getMessage());
+            verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getMessage());
         }
     }
 }
