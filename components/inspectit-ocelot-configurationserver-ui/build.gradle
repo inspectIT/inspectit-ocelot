@@ -37,7 +37,7 @@ dependencyCheck {
     analyzers {
         nodeAudit {
             yarnEnabled = true
-            yarnPath = "${buildDir}/yarn/yarn-v${node.yarnVersion.get()}/yarn${OperatingSystem.current() == OperatingSystem.WINDOWS?".cmd":""}"
+            yarnPath = "${buildDir}/yarn/yarn-v${node.yarnVersion.get()}/${OperatingSystem.current() == OperatingSystem.WINDOWS?"yarn.cmd":"bin/yarn"}"
             println("Using yarnPath: ${yarnPath}")
         }
     }
@@ -52,12 +52,12 @@ def installFrontend = tasks.register('installFrontend', YarnTask) {
         var dir = new File("${buildDir}/yarn")
         dir.eachDir {d ->
             println("Installed yarn version: ${d}")
-            d.eachFile {f -> println("Yarn containing file: ${f}")}
-            var yarn = new File(dir, "yarn")
-            if(yarn.exists()) {
-                println("Setting executable on: ${yarn}")
-                yarn.setExecutable(true, false)
-            }
+            d.eachFileRecurse {f -> println("Yarn containing file: ${f}")}
+            //var yarn = new File(dir, "yarn")
+            //if(yarn.exists()) {
+            //    println("Setting executable on: ${yarn}")
+            //    yarn.setExecutable(true, false)
+            //}
         }
     }
 }
