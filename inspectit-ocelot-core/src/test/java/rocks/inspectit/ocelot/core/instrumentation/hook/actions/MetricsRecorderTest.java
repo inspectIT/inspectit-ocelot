@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.ocelot.core.SpringTestBase;
+import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
@@ -25,7 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class MetricsRecorderTest {
+public class MetricsRecorderTest extends SpringTestBase {
 
     @Mock
     CommonTagsManager commonTagsManager;
@@ -43,12 +45,13 @@ public class MetricsRecorderTest {
     @Mock
     InspectitContextImpl inspectitContext;
 
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private InspectitEnvironment environment;
+
     @BeforeEach
     void setupMock() {
         when(commonTagsManager.getCommonTagKeys()).thenReturn(Collections.emptyList());
         when(executionContext.getInspectitContext()).thenReturn(inspectitContext);
-       
-
     }
 
     @Nested
