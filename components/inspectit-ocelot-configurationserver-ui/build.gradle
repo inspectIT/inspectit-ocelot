@@ -52,8 +52,12 @@ def installFrontend = tasks.register('installFrontend', YarnTask) {
         var dir = new File("${buildDir}/yarn")
         dir.eachDir {d ->
             println("Installed yarn version: ${d}")
+            d.eachFile {f -> println("Yarn containing file: ${f}")}
             var yarn = new File(dir, "yarn")
-            if(yarn.exists()) yarn.setExecutable(true, false)
+            if(yarn.exists()) {
+                println("Setting executable on: ${yarn}")
+                yarn.setExecutable(true, false)
+            }
         }
     }
 }
