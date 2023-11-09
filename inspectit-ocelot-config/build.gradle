@@ -2,8 +2,8 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
     id 'maven-publish'
-    id 'org.springframework.boot' version "${springBootVersion}" apply false
-    id 'io.spring.dependency-management' version "${springDependencyManangementVersion}"
+    alias(libs.plugins.orgSpringframeworkBoot) apply false
+    alias(libs.plugins.ioSpringDependencyManagement)
 }
 
 test {
@@ -23,14 +23,14 @@ dependencyManagement {
     }
 }
 dependencies {
-    compileOnly "org.projectlombok:lombok"
-    annotationProcessor "org.projectlombok:lombok"
+    compileOnly libs.orgProjectlombokLombok
+    annotationProcessor libs.orgProjectlombokLombok
     testImplementation (
-            "org.junit.jupiter:junit-jupiter-api",
-            "org.mockito:mockito-junit-jupiter",
-            "org.assertj:assertj-core"
+            libs.orgJunitJupiterJunitJupiterApi,
+            libs.orgMockitoMockitoJunitJupiter,
+            libs.orgAssertjAssertjCore
     )
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 
     implementation(
             "org.springframework.boot:spring-boot",
@@ -40,15 +40,15 @@ dependencies {
             "com.fasterxml.jackson.core:jackson-databind",
             'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0',
             // logging
-            "ch.qos.logback:logback-classic",
+            libs.chQosLogbackLogbackClassic,
     )
 
     // the api is included as compile only because the open census api has to be decoupled
     // from the inspectIT core to allow it to be pushed to the bootstrap
     compileOnly (
-            "io.opencensus:opencensus-api:${openCensusVersion}",
+            libs.ioOpencensusOpencensusApi,
             // OpenTelemetry
-            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
-            "io.opentelemetry:opentelemetry-sdk-metrics",
+            platform(libs.ioOpentelemetryOpentelemetryBom),
+            libs.ioOpentelemetryOpentelemetrySdkMetrics,
     )
 }

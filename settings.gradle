@@ -4,7 +4,9 @@ include 'inspectit-ocelot-core'
 include "inspectit-ocelot-agent"
 include 'inspectit-ocelot-documentation'
 include 'inspectit-ocelot-configurationserver'
+include 'inspectit-ocelot-configurationserver-ui'
 include 'inspectit-ocelot-sdk'
 include 'inspectit-ocelot-configdocsgenerator'
 project(':inspectit-ocelot-configurationserver').projectDir = new File('./components/inspectit-ocelot-configurationserver')
+project(':inspectit-ocelot-configurationserver-ui').projectDir = new File('./components/inspectit-ocelot-configurationserver-ui')
 project(':inspectit-ocelot-configdocsgenerator').projectDir = new File('./components/inspectit-ocelot-configdocsgenerator')

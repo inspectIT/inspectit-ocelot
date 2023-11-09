@@ -1,11 +1,11 @@
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
-    id 'me.champeau.jmh' version "${jmhVersion}"
+    alias(libs.plugins.meChampeauJmh)
     id 'maven-publish'
-    id 'com.palantir.docker' version "${palantirDockerVersion}"
-    id 'org.springframework.boot' version "${springBootVersion}" apply false
-    id 'io.spring.dependency-management' version "${springDependencyManangementVersion}"
+    alias(libs.plugins.comPalantirDocker)
+    alias(libs.plugins.orgSpringframeworkBoot) apply false
+    alias(libs.plugins.ioSpringDependencyManagement)
 }
 
 dependencyManagement {
@@ -38,22 +38,28 @@ configurations {
 dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
-            "org.projectlombok:lombok"
+            libs.orgProjectlombokLombok
     )
 
     opentelemetry(
-        "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}",
-        "io.opentelemetry:opentelemetry-opencensus-shim:${openTelemetryAlphaVersion}",
-        "io.opencensus:opencensus-impl:${openCensusVersion}",
-        "com.google.guava:guava:${guavaVersionAgent}",
+        libs.ioOpentelemetryOpentelemetrySdk,
+        libs.ioOpentelemetryOpentelemetryOpencensusShim,
+        libs.ioOpencensusOpencensusImpl,
+        libs.comGoogleGuava
     )
-    annotationProcessor "org.projectlombok:lombok"
+    annotationProcessor libs.orgProjectlombokLombok
     testImplementation (
-            "org.junit.jupiter:junit-jupiter-api",
-            "org.mockito:mockito-junit-jupiter",
-            "ch.qos.logback:logback-classic",
+            libs.orgJunitJupiterJunitJupiterApi,
+            libs.orgMockitoMockitoJunitJupiter,
+            libs.chQosLogbackLogbackClassic,
     )
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
+
+    constraints {
+        opentelemetry(libs.comGoogleGuava) {
+            because 'security issues'
+        }
+    }
 }
 
 task copyAgent(type: Copy) {
@@ -126,36 +132,36 @@ configurations {
 dependencies {
 
     systemTestCompileOnly(
-            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
-            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
-            "io.opentelemetry:opentelemetry-sdk",
-            "io.opentelemetry:opentelemetry-opencensus-shim",
-            "io.opencensus:opencensus-impl:${openCensusVersion}",
+            platform(libs.ioOpentelemetryOpentelemetryBom),
+            platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
+            libs.ioOpentelemetryOpentelemetrySdk,
+            libs.ioOpentelemetryOpentelemetryOpencensusShim,
+            libs.ioOpencensusOpencensusImpl,
 
             project(':inspectit-ocelot-bootstrap')
     )
 
     systemTestImplementation(
-            "io.opencensus:opencensus-testing:${openCensusVersion}",
-            "io.opencensus:opencensus-api:${openCensusVersion}",
-            "com.google.guava:guava:${guavaVersionAgent}",
+            libs.ioOpencensusOpencensusTesting,
+            libs.ioOpencensusOpencensusApi,
+            libs.comGoogleGuava,
 
             // for InMemorySpanExporter
-            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
-            "io.opentelemetry:opentelemetry-sdk-testing",
-            "io.opentelemetry:opentelemetry-exporter-logging",
-            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
-            "io.opentelemetry:opentelemetry-semconv",
+            platform(libs.ioOpentelemetryOpentelemetryBom),
+            libs.ioOpentelemetryOpentelemetrySdkTesting,
+            libs.ioOpentelemetryOpentelemetryExporterLogging,
+            platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
+            libs.ioOpentelemetryOpentelemetrySemconv,
 
-            "org.junit.jupiter:junit-jupiter-engine",
-            "org.junit.jupiter:junit-jupiter-api",
+            libs.orgJunitJupiterJunitJupiterEngine,
+            libs.orgJunitJupiterJunitJupiterApi,
 
-            "org.assertj:assertj-core",
-            "org.awaitility:awaitility",
-            "com.github.tomakehurst:wiremock-jre8:${wiremockVersion}",
-            "org.yaml:snakeyaml:${snakeYamlVersion}",
+            libs.orgAssertjAssertjCore,
+            libs.orgAwaitility,
+            libs.comGithubTomakehurstWiremockJre8,
+            libs.orgYamlSnakeyaml,
 
-            "org.apache.httpcomponents:httpclient",
+            libs.orgApacheHttpcomponentsHttpclient,
             // Switching to spring-boot dependency management excludes somehow magically the transitive
             // dependency commons-logging:commons-logging of org.apache.httpcomponents:httpclient.
             // Spring-Boot applications include org.springframework:spring-jcl, which provides a better
@@ -164,17 +170,17 @@ dependencies {
             // In our special setup spring-jcl is not on the classpath, hence we need to add it manually.
             // For inspectit-ocelot-core it is pulled in via the manually declared spring-boot dependency.
             // For inspectit-configurationserver it is pulled in as it is a full blown spring-boot application.
-            "org.springframework:spring-jcl",
-            "org.eclipse.jetty:jetty-server",
-            "org.eclipse.jetty:jetty-servlet",
+            libs.orgSpringframeworkSpringJcl,
+            libs.orgEclipseJettyJettyServer,
+            libs.orgeclipseJettyJettyServlet,
 
-            "com.h2database:h2:${h2Version}",
+            libs.comH2databaseH2,
 
             // only used for log-correlation tests
-            "org.apache.logging.log4j:log4j-api",
-            "org.apache.logging.log4j:log4j-core",
-            "log4j:log4j:${log4j1Version}",
-            "ch.qos.logback:logback-classic" // Used for SLF4J Correlation
+            libs.orgApacheLoggingLog4jLog4jApi,
+            libs.orgApacheLoggingLog4jLog4jCore,
+            libs.log4j,
+            libs.chQosLogbackLogbackClassic // Used for SLF4J Correlation
 
     )
 
@@ -182,6 +188,12 @@ dependencies {
             sourceSets.systemTest.output,
             project(':inspectit-ocelot-bootstrap')
     )
+
+    constraints {
+        systemTestImplementation(libs.comGoogleGuava) {
+            because 'security issues'
+        }
+    }
 }
 
 if (!project.hasProperty("systemTestJavaHomes")) {

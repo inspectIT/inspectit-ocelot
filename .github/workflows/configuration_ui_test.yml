@@ -15,9 +15,23 @@ jobs:
     runs-on: ubuntu-latest
     container: openjdk:8-jdk
     env:
-      working-directory: ./components/inspectit-ocelot-configurationserver
+      working-directory: ./components/inspectit-ocelot-configurationserver-ui
     steps:
       - uses: actions/checkout@v3
       - name: Build frontend
         working-directory: ${{env.working-directory}}
         run: ../../gradlew buildFrontend
+
+  dependency-scan:
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./components/inspectit-ocelot-configurationserver-ui
+    container: openjdk:8-jdk
+    steps:
+      - uses: actions/checkout@v3
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Scan dependencies
+        working-directory: ${{env.working-directory}}
+        run: ../../gradlew :inspectit-ocelot-configurationserver-ui:dependencyCheckAnalyze
