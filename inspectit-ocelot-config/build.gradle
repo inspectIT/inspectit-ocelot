@@ -33,12 +33,11 @@ dependencies {
     testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 
     implementation(
-            "org.springframework.boot:spring-boot",
-            "org.hibernate.validator:hibernate-validator",
-            "org.apache.commons:commons-lang3",
-            "commons-io:commons-io:${commonsIoVersion}",
-            "com.fasterxml.jackson.core:jackson-databind",
-            'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.0',
+            libs.orgSpringframeworkBootSpringBoot,
+            libs.orgHibernateValidatorHibernateValidator,
+            libs.orgApacheCommonsCommonsLang3,
+            libs.commonsIo,
+            libs.comFasterxmlJacksonCoreJacksonDatabind,
             // logging
             libs.chQosLogbackLogbackClassic,
     )
