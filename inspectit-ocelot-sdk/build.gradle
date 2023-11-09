@@ -2,8 +2,8 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
     id 'maven-publish'
-    id 'org.springframework.boot' version "${springBootVersion}" apply false
-    id 'io.spring.dependency-management' version "${springDependencyManangementVersion}"
+    alias(libs.plugins.orgSpringframeworkBoot) apply false
+    alias(libs.plugins.ioSpringDependencyManagement)
 }
 
 dependencyManagement {
@@ -17,8 +17,8 @@ sourceCompatibility = 1.8 // Java version compatibility to use when compiling Ja
 targetCompatibility = 1.8 // Java version to generate classes for.
 dependencies {
     implementation project(':inspectit-ocelot-config')
-    implementation "org.slf4j:slf4j-api"
+    implementation libs.orgSlf4jslf4jApi
 
-    compileOnly "org.projectlombok:lombok"
-    annotationProcessor "org.projectlombok:lombok"
+    compileOnly libs.orgProjectlombokLombok
+    annotationProcessor libs.orgProjectlombokLombok
 }
