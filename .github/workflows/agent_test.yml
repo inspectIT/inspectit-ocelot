@@ -80,10 +80,10 @@ jobs:
       - name: jmhCompile
         run: ./gradlew jmhCompile
 
-  attach-alpine-jdk8:
+  attach-jdk8:
     name: 'Runtime Attachment'
     runs-on: ubuntu-latest
-    container: eclipse-temurin:8-jdk-alpine
+    container: eclipse-temurin:8-jdk
     steps:
       - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
