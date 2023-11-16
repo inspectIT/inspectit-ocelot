@@ -4,10 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.google.common.annotations.VisibleForTesting;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.events.AgentMappingsSourceBranchChangedEvent;
+import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
+import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDirectoryAccessor;
+import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import javax.annotation.PostConstruct;
@@ -15,6 +24,10 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import static rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME;
+import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
+import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 /**
  * Utility for reading and writing the Agent Mappings.
@@ -26,6 +39,25 @@ public class AgentMappingSerializer {
     private ObjectMapper ymlMapper;
 
     private CollectionType mappingsListType;
+
+    private FileManager fileManager;
+
+    private ApplicationEventPublisher publisher;
+
+    /**
+     * SourceBranch for the agent mapping file itself. This does not affect the SourceBranch property inside the agent mappings!
+     */
+    @Getter
+    private Branch sourceBranch;
+
+    @VisibleForTesting
+    @Autowired
+    AgentMappingSerializer(InspectitServerSettings settings, FileManager fileManager, ApplicationEventPublisher publisher) {
+        this.fileManager = fileManager;
+        this.publisher = publisher;
+        String initialBranch = settings.getInitialAgentMappingsSourceBranch().toUpperCase();
+        this.sourceBranch = Branch.valueOf(initialBranch);
+    }
 
     /**
      * Post construct for initializing the mapper objects.
@@ -67,5 +99,41 @@ public class AgentMappingSerializer {
      */
     public void writeAgentMappings(List<AgentMapping> agentMappings, AbstractWorkingDirectoryAccessor fileAccess) throws IOException {
         fileAccess.writeAgentMappings(ymlMapper.writeValueAsString(agentMappings));
+    }
+
+    /**
+     * Sets the source branch, from which the agent mappings file will be read
+     * @param sourceBranch new source branch
+     * @return the set source branch
+     */
+    public Branch setSourceBranch(Branch sourceBranch) {
+        log.info("Setting source branch for {} to {}", AGENT_MAPPINGS_FILE_NAME, sourceBranch);
+        Branch oldBranch = this.sourceBranch;
+        this.sourceBranch = sourceBranch;
+
+        RevisionAccess currentRevisionAccess = getRevisionAccess();
+        if(currentRevisionAccess.agentMappingsExist()) {
+            // Publish event to trigger configuration reload
+            publisher.publishEvent(new AgentMappingsSourceBranchChangedEvent(this));
+        }
+        else {
+            log.error("Source branch for {} cannot be set to {}, since no file was found", AGENT_MAPPINGS_FILE_NAME, sourceBranch);
+            this.sourceBranch = oldBranch;
+        }
+        return this.sourceBranch;
+    }
+
+    /**
+     * @return The branch, which is currently used to access the agent mappings
+     */
+    public RevisionAccess getRevisionAccess() {
+        switch (getSourceBranch()) {
+            case LIVE:
+                return fileManager.getLiveRevision();
+            case WORKSPACE:
+                return fileManager.getWorkspaceRevision();
+            default:
+                throw new UnsupportedOperationException("Unhandled branch: " + getSourceBranch());
+        }
     }
 }

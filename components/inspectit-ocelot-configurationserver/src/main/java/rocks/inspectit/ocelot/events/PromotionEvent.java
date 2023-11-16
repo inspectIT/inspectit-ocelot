@@ -4,9 +4,9 @@ import org.springframework.context.ApplicationEvent;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 
 /**
- * This event is fired when configurations have been promoted.
+ * This event is fired when files have been promoted.
  */
-public class ConfigurationPromotionEvent extends ApplicationEvent {
+public class PromotionEvent extends ApplicationEvent {
 
     private final RevisionAccess liveRevision;
 
@@ -15,7 +15,7 @@ public class ConfigurationPromotionEvent extends ApplicationEvent {
      *
      * @param source the object on which the event initially occurred (never {@code null})
      */
-    public ConfigurationPromotionEvent(Object source, RevisionAccess liveRevision) {
+    public PromotionEvent(Object source, RevisionAccess liveRevision) {
         super(source);
         this.liveRevision = liveRevision;
     }

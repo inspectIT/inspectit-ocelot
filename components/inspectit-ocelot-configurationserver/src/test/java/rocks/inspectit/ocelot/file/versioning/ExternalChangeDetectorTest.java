@@ -8,7 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
+import rocks.inspectit.ocelot.events.PromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
@@ -78,7 +78,7 @@ public class ExternalChangeDetectorTest {
         @Test
         public void internalLiveChange() {
             when(liveRevision.getRevisionId()).thenReturn("newLive");
-            detector.configurationPromoted(new ConfigurationPromotionEvent(this, liveRevision));
+            detector.configurationPromoted(new PromotionEvent(this, liveRevision));
 
             detector.checkForUpdates();
 
@@ -91,9 +91,9 @@ public class ExternalChangeDetectorTest {
 
             detector.checkForUpdates();
 
-            ArgumentCaptor<ConfigurationPromotionEvent> eventCaptor = ArgumentCaptor.forClass(ConfigurationPromotionEvent.class);
+            ArgumentCaptor<PromotionEvent> eventCaptor = ArgumentCaptor.forClass(PromotionEvent.class);
             verify(publisher).publishEvent(eventCaptor.capture());
-            ConfigurationPromotionEvent event = eventCaptor.getValue();
+            PromotionEvent event = eventCaptor.getValue();
             assertThat(event.getLiveRevision()).isSameAs(liveRevision);
         }
 

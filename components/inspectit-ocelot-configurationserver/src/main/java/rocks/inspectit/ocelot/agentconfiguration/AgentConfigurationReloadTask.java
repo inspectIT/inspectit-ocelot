@@ -16,6 +16,9 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
+import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
+
 /**
  * A task for asynchronously loading the configurations based on a given list of mappings.
  */
@@ -52,8 +55,11 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
     @Override
     public void run() {
         log.info("Starting configuration reloading...");
-        RevisionAccess fileAccess = fileManager.getWorkspaceRevision();
+        RevisionAccess fileAccess = mappingsSerializer.getRevisionAccess();
+
         if (!fileAccess.agentMappingsExist()) {
+            log.error("No agent mappings file was found on the current branch! Please add '{}' to the current branch.",
+                    AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             onTaskSuccess(Collections.emptyList());
             return;
         }
