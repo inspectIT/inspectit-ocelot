@@ -38,6 +38,9 @@ public class MetricsSettings {
      */
     private Duration frequency;
 
+    /**
+     * Settings for controlling the amount of unique tag values
+     */
     private TagGuardSettings tagGuard;
 
     @NotNull

@@ -29,11 +29,6 @@ public class AgentHealthChangedEvent extends ApplicationEvent {
     @Getter
     private String message;
 
-    /**
-     * Indicates if this event caused a health change.
-     */
-    private boolean changedState;
-
     public AgentHealthChangedEvent(Object source, @NonNull AgentHealth oldHealth, @NonNull AgentHealth newHealth, String message) {
         super(source);
         this.oldHealth = oldHealth;

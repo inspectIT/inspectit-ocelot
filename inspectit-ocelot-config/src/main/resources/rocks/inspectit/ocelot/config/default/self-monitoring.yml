@@ -15,6 +15,9 @@ inspectit:
       # health changes due to instrumentation errors are valid until the next re-instrumentation
       validity-period: 1h
 
+      # The amount of agent health incidents, which should be buffered
+      incident-buffer-size: 10
+
       # The minimum delay how often the AgentHealthManager checks for invalid agent health events to clear health status
       # By default the delay is calculated based on the last agent health event
       # Minimum value is 1m

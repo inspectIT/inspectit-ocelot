@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Service for continuously triggering the updated of a agent configuration via HTTP.
+ * Service for continuously triggering the updating of an agent configuration via HTTP.
  */
 @Service
 @Slf4j

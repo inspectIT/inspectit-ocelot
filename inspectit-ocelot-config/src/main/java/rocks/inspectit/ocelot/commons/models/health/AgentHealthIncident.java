@@ -9,17 +9,13 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgentHealthIncident implements Comparable{
+public class AgentHealthIncident implements Comparable<Object> {
 
     private String time;
     private AgentHealth health;
     private String source;
     private String message;
     private boolean changedHealth;
-
-    public static AgentHealthIncident getNoneIncident() {
-        return new AgentHealthIncident(LocalDateTime.now().toString(), AgentHealth.OK, "", "", false);
-    }
 
     @Override
     public int compareTo(Object o) {

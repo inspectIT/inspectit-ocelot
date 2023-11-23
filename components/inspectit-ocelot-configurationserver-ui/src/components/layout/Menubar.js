@@ -75,9 +75,6 @@ class Menubar extends React.Component {
               <label className="documentation-icon">
                 <i className="pi pi-info-circle" onClick={this.openDocumentation} title="Open Documentation"></i>
               </label>
-              <label className="documentation-icon">
-                <i className="pi pi-info-circle" onClick={this.openDocumentation} title="Open Documentation"></i>
-              </label>
               <div className="user-description">
                 Logged in as <b>{this.props.username}</b>
               </div>

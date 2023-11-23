@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagContextBuilder;
 import io.opencensus.tags.TagKey;
@@ -46,6 +47,8 @@ public class MeasureTagValueGuard {
 
     private static final String tagOverFlowMessageTemplate = "Overflow for tag %s";
 
+    private static final String tagOverFlowResolvedMessageTemplate = "Overflow resolved for tag %s";
+
     @Autowired
     private InspectitEnvironment env;
 
@@ -65,7 +68,10 @@ public class MeasureTagValueGuard {
 
     private volatile boolean isShuttingDown = false;
 
-    private final Map<String, Map<String, Boolean>> blockedTagKeysByMeasure = Maps.newHashMap();
+    /**
+     * Map of measure names and their related set of tag keys, which should be blocked.
+     */
+    private final Map<String, Set<String>> blockedTagKeysByMeasure = Maps.newHashMap();
 
     private Set<TagsHolder> latestTags = Collections.synchronizedSet(new HashSet<>());
 
@@ -100,6 +106,11 @@ public class MeasureTagValueGuard {
         blockTagValuesFuture.cancel(true);
     }
 
+    /**
+     * Task, which reads the persisted tag values to determine, which tags should be blocked, because of exceeding
+     * the specific tag value limit.
+     * If new tags values have been created, they will be persisted.
+     */
     Runnable blockTagValuesTask = () -> {
 
         if (!env.getCurrentConfig().getMetrics().getTagGuard().isEnabled()) {
@@ -111,20 +122,24 @@ public class MeasureTagValueGuard {
 
         Map<String, Map<String, Set<String>>> availableTagsByMeasure = fileReaderWriter.read();
 
-        copy.forEach(t -> {
-            String measureName = t.getMeasureName();
-            Map<String, String> newTags = t.getTags();
+        copy.forEach(tagsHolder -> {
+            String measureName = tagsHolder.getMeasureName();
+            Map<String, String> newTags = tagsHolder.getTags();
 
             int maxValuesPerTag = getMaxValuesPerTag(measureName, env.getCurrentConfig());
 
             Map<String, Set<String>> tagValuesByTagKey = availableTagsByMeasure.computeIfAbsent(measureName, k -> Maps.newHashMap());
             newTags.forEach((tagKey, tagValue) -> {
                 Set<String> tagValues = tagValuesByTagKey.computeIfAbsent(tagKey, (x) -> new HashSet<>());
-                if (tagValues.size() > maxValuesPerTag) {
-                    blockedTagKeysByMeasure.computeIfAbsent(tagKey, blocked -> Maps.newHashMap())
-                            .putIfAbsent(tagKey, true);
+                // if tag value is new AND max values per tag is already reached
+                if (!tagValues.contains(tagValue) && tagValues.size() >= maxValuesPerTag) {
+                    blockedTagKeysByMeasure.computeIfAbsent(measureName, blocked -> Sets.newHashSet())
+                            .add(tagKey);
                     agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(), String.format(tagOverFlowMessageTemplate, tagKey));
                 } else {
+                    Set<String> blockedTagKeys = blockedTagKeysByMeasure.computeIfAbsent(measureName, blocked -> Sets.newHashSet());
+                    if(blockedTagKeys.remove(tagKey))
+                        agentHealthManager.invalidateIncident(this.getClass(), String.format(tagOverFlowResolvedMessageTemplate, tagKey));
                     tagValues.add(tagValue);
                 }
             });
@@ -162,11 +177,17 @@ public class MeasureTagValueGuard {
                 .getMaxValuesPerTag());
     }
 
+    /**
+     *
+     * @param context
+     * @param metricAccessor
+     * @return
+     */
     public TagContext getTagContext(IHookAction.ExecutionContext context, MetricAccessor metricAccessor) {
         Map<String, String> tags = Maps.newHashMap();
         String measureName = metricAccessor.getName();
         InspectitContextImpl inspectitContext = context.getInspectitContext();
-        Map<String, Boolean> blockedTagKeys = blockedTagKeysByMeasure.getOrDefault(measureName, Maps.newHashMap());
+        Set<String> blockedTagKeys = blockedTagKeysByMeasure.getOrDefault(measureName, Sets.newHashSet());
         TagGuardSettings tagGuardSettings = env.getCurrentConfig().getMetrics().getTagGuard();
 
         // first common tags to allow to overwrite by constant or data tags
@@ -177,7 +198,7 @@ public class MeasureTagValueGuard {
 
         // then constant tags to allow to overwrite by data
         metricAccessor.getConstantTags().forEach((key, value) -> {
-            if (tagGuardSettings.isEnabled() && blockedTagKeys.containsKey(key)) {
+            if (tagGuardSettings.isEnabled() && blockedTagKeys.contains(key)) {
                 String overflowReplacement = env.getCurrentConfig().getMetrics().getTagGuard().getOverflowReplacement();
                 tags.put(key, TagUtils.createTagValueAsString(key, overflowReplacement));
             } else {
@@ -187,7 +208,7 @@ public class MeasureTagValueGuard {
 
         // go over data tags and match the value to the key from the contextTags (if available)
             metricAccessor.getDataTagAccessors().forEach((key, accessor) -> {
-                if (tagGuardSettings.isEnabled() && blockedTagKeys.containsKey(key)) {
+                if (tagGuardSettings.isEnabled() && blockedTagKeys.contains(key)) {
                     String overflowReplacement = env.getCurrentConfig().getMetrics().getTagGuard().getOverflowReplacement();
                     tags.put(key, TagUtils.createTagValueAsString(key, overflowReplacement));
                 } else {

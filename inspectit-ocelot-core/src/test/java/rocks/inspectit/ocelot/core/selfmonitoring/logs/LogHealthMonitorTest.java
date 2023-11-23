@@ -55,7 +55,7 @@ public class LogHealthMonitorTest {
 
             healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
 
-            verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getMessage());
+            verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getFormattedMessage());
         }
     }
 }
