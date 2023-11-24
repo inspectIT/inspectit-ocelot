@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.metrics.TagGuardSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
@@ -44,10 +45,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class MeasureTagValueGuard {
-
     private static final String tagOverFlowMessageTemplate = "Overflow for tag %s";
-
-    private static final String tagOverFlowResolvedMessageTemplate = "Overflow resolved for tag %s";
 
     @Autowired
     private InspectitEnvironment env;
@@ -62,14 +60,16 @@ public class MeasureTagValueGuard {
     private CommonTagsManager commonTagsManager;
 
     @Autowired
-    private ScheduledExecutorService executorService;
+    private ScheduledExecutorService executor;
 
     private PersistedTagsReaderWriter fileReaderWriter;
 
     private volatile boolean isShuttingDown = false;
 
+    private boolean hasTagValueOverflow = false;
+
     /**
-     * Map of measure names and their related set of tag keys, which should be blocked.
+     * Map of measure names and their related set of tag keys, which are currently blocked.
      */
     private final Map<String, Set<String>> blockedTagKeysByMeasure = Maps.newHashMap();
 
@@ -80,12 +80,9 @@ public class MeasureTagValueGuard {
     @PostConstruct
     protected void init() {
         TagGuardSettings tagGuardSettings = env.getCurrentConfig().getMetrics().getTagGuard();
-        if (!tagGuardSettings.isEnabled()) {
-            return;
-        }
+        if (!tagGuardSettings.isEnabled()) return;
 
         fileReaderWriter = new PersistedTagsReaderWriter(tagGuardSettings.getDatabaseFile(), new ObjectMapper());
-        blockTagValuesTask.run();
         scheduleTagGuardJob();
 
         log.info(String.format("TagValueGuard started with scheduleDelay %s and database file %s", tagGuardSettings.getScheduleDelay(), tagGuardSettings.getDatabaseFile()));
@@ -93,14 +90,12 @@ public class MeasureTagValueGuard {
 
     private void scheduleTagGuardJob() {
         Duration tagGuardScheduleDelay = env.getCurrentConfig().getMetrics().getTagGuard().getScheduleDelay();
-        blockTagValuesFuture = executorService.schedule(blockTagValuesTask, tagGuardScheduleDelay.toNanos(), TimeUnit.NANOSECONDS);
+        blockTagValuesFuture = executor.schedule(blockTagValuesTask, tagGuardScheduleDelay.toNanos(), TimeUnit.NANOSECONDS);
     }
 
     @PreDestroy
     protected void stop() {
-        if (!env.getCurrentConfig().getMetrics().getTagGuard().isEnabled()) {
-            return;
-        }
+        if (!env.getCurrentConfig().getMetrics().getTagGuard().isEnabled()) return;
 
         isShuttingDown = true;
         blockTagValuesFuture.cancel(true);
@@ -112,20 +107,18 @@ public class MeasureTagValueGuard {
      * If new tags values have been created, they will be persisted.
      */
     Runnable blockTagValuesTask = () -> {
+        if (!env.getCurrentConfig().getMetrics().getTagGuard().isEnabled()) return;
 
-        if (!env.getCurrentConfig().getMetrics().getTagGuard().isEnabled()) {
-            return;
-        }
+        // read current tag value database
+        Map<String, Map<String, Set<String>>> availableTagsByMeasure = fileReaderWriter.read();
 
         Set<TagsHolder> copy = latestTags;
         latestTags = Collections.synchronizedSet(new HashSet<>());
 
-        Map<String, Map<String, Set<String>>> availableTagsByMeasure = fileReaderWriter.read();
-
+        // process new tags
         copy.forEach(tagsHolder -> {
             String measureName = tagsHolder.getMeasureName();
             Map<String, String> newTags = tagsHolder.getTags();
-
             int maxValuesPerTag = getMaxValuesPerTag(measureName, env.getCurrentConfig());
 
             Map<String, Set<String>> tagValuesByTagKey = availableTagsByMeasure.computeIfAbsent(measureName, k -> Maps.newHashMap());
@@ -133,13 +126,10 @@ public class MeasureTagValueGuard {
                 Set<String> tagValues = tagValuesByTagKey.computeIfAbsent(tagKey, (x) -> new HashSet<>());
                 // if tag value is new AND max values per tag is already reached
                 if (!tagValues.contains(tagValue) && tagValues.size() >= maxValuesPerTag) {
-                    blockedTagKeysByMeasure.computeIfAbsent(measureName, blocked -> Sets.newHashSet())
-                            .add(tagKey);
+                    blockedTagKeysByMeasure.computeIfAbsent(measureName, measure ->  Sets.newHashSet()).add(tagKey);
                     agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(), String.format(tagOverFlowMessageTemplate, tagKey));
+                    hasTagValueOverflow = true;
                 } else {
-                    Set<String> blockedTagKeys = blockedTagKeysByMeasure.computeIfAbsent(measureName, blocked -> Sets.newHashSet());
-                    if(blockedTagKeys.remove(tagKey))
-                        agentHealthManager.invalidateIncident(this.getClass(), String.format(tagOverFlowResolvedMessageTemplate, tagKey));
                     tagValues.add(tagValue);
                 }
             });
@@ -148,26 +138,50 @@ public class MeasureTagValueGuard {
 
         fileReaderWriter.write(availableTagsByMeasure);
 
-        if (!isShuttingDown) {
-            scheduleTagGuardJob();
+        // remove all blocked tags, if no values are stored in the database file
+        if(availableTagsByMeasure.isEmpty()) blockedTagKeysByMeasure.clear();
+
+        // independent of processing new tags, check if tags should be blocked or unblocked due to their tag value limit
+        availableTagsByMeasure.forEach((measureName, tags) -> {
+            int maxValuesPerTag = getMaxValuesPerTag(measureName, env.getCurrentConfig());
+            tags.forEach((tagKey, tagValues) ->  {
+                if(tagValues.size() >= maxValuesPerTag) {
+                    boolean isNewBlockedTag = blockedTagKeysByMeasure.computeIfAbsent(measureName, measure -> Sets.newHashSet())
+                            .add(tagKey);
+                    if(isNewBlockedTag) {
+                        agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(), String.format(tagOverFlowMessageTemplate, tagKey));
+                        hasTagValueOverflow = true;
+                    }
+                } else {
+                    blockedTagKeysByMeasure.getOrDefault(measureName, Sets.newHashSet()).remove(tagKey);
+                }
+            });
+        });
+
+        // invalidate incident, if tag overflow was detected, but no more tags are blocked
+        boolean noBlockedTagKeys = blockedTagKeysByMeasure.values().stream().allMatch(Set::isEmpty);
+        if(hasTagValueOverflow && noBlockedTagKeys) {
+            agentHealthManager.invalidateIncident(this.getClass(), "Overflow for tags resolved");
+            hasTagValueOverflow = false;
         }
 
+        if (!isShuttingDown) scheduleTagGuardJob();
     };
 
     /**
-     * Gets the max value per tag for the given measure by hierarchically extracting {@link rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings#maxValuesPerTag} (prio 1), {@link TagGuardSettings#maxValuesPerTagByMeasure} (prio 2) and {@link TagGuardSettings#maxValuesPerTag} (default).
+     * Gets the max value amount per tag for the given measure by hierarchically extracting
+     * {@link MetricDefinitionSettings#maxValuesPerTag} (prio 1),
+     * {@link TagGuardSettings#maxValuesPerTagByMeasure} (prio 2) and
+     * {@link TagGuardSettings#maxValuesPerTag} (default).
      *
-     * @param measureName
-     *
-     * @return
+     * @param measureName the current measure
+     * @return The maximum amount of tag values for the given measure
      */
     @VisibleForTesting
     int getMaxValuesPerTag(String measureName, InspectitConfig config) {
         int maxValuesPerTag = config.getMetrics().getDefinitions().get(measureName).getMaxValuesPerTag();
 
-        if (maxValuesPerTag > 0) {
-            return maxValuesPerTag;
-        }
+        if (maxValuesPerTag > 0) return maxValuesPerTag;
 
         Map<String, Integer> maxValuesPerTagPerMeasuresMap = config.getMetrics()
                 .getTagGuard()
@@ -178,17 +192,20 @@ public class MeasureTagValueGuard {
     }
 
     /**
-     *
-     * @param context
-     * @param metricAccessor
-     * @return
+     * Creates the full tag context, including all specified tags, for the current measure
+     * @param context current context
+     * @param metricAccessor accessor for the measure as well as the particular tags
+     * @return TagContext including all tags for the current measure
      */
     public TagContext getTagContext(IHookAction.ExecutionContext context, MetricAccessor metricAccessor) {
         Map<String, String> tags = Maps.newHashMap();
         String measureName = metricAccessor.getName();
         InspectitContextImpl inspectitContext = context.getInspectitContext();
-        Set<String> blockedTagKeys = blockedTagKeysByMeasure.getOrDefault(measureName, Sets.newHashSet());
         TagGuardSettings tagGuardSettings = env.getCurrentConfig().getMetrics().getTagGuard();
+
+        Set<String> blockedTagKeys = blockedTagKeysByMeasure.getOrDefault(measureName, Sets.newHashSet());
+        log.debug("Currently blocked tag keys for measure {}, due to exceeding the configured tag value limit: {}",
+                measureName, blockedTagKeys);
 
         // first common tags to allow to overwrite by constant or data tags
         commonTagsManager.getCommonTagKeys().forEach(commonTagKey -> {
@@ -220,7 +237,7 @@ public class MeasureTagValueGuard {
         TagContextBuilder tagContextBuilder = Tags.getTagger().emptyBuilder();
         tags.forEach((key, value) -> tagContextBuilder.putLocal(TagKey.create(key), TagUtils.createTagValue(key, value)));
 
-        // Store the new tags for this measure as simple object and delay traversing trough tagKeys to async job
+        // store the new tags for this measure as simple object and delay traversing trough tagKeys to async job
         latestTags.add(new TagsHolder(measureName, tags));
 
         return tagContextBuilder.build();
@@ -256,10 +273,10 @@ public class MeasureTagValueGuard {
                         });
                         return tags;
                     } catch (Exception e) {
-                        log.error("Error loading tag value database from persistence file '{}'", fileName, e);
+                        log.error("Error loading tag-guard database from persistence file '{}'", fileName, e);
                     }
                 } else {
-                    log.info("No tag value database available. Assuming first Agent deployment.");
+                    log.info("Could not find tag-guard database file. File will be created during next write");
                 }
             }
             return Maps.newHashMap();
@@ -273,7 +290,7 @@ public class MeasureTagValueGuard {
                     String tagValuesString = mapper.writeValueAsString(tagValues);
                     Files.write(path, tagValuesString.getBytes(StandardCharsets.UTF_8));
                 } catch (IOException e) {
-                    log.error("Error writing tag value database to file '{}'", fileName, e);
+                    log.error("Error writing tag-guard database to file '{}'", fileName, e);
                 }
             }
         }

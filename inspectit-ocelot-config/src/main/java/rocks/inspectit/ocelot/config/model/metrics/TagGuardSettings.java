@@ -23,7 +23,7 @@ public class TagGuardSettings {
     private Duration scheduleDelay;
 
     /**
-     * File, which contains metrics with their particular recorded tags and their tag values
+     * File, which contains measures with their particular recorded tags and their tag values
      */
     private String databaseFile;
 
@@ -39,9 +39,10 @@ public class TagGuardSettings {
 
     /**
      * Map containing max values per tag by Measure, e.g., {{'method_duration': 1337}}
-     * <br> max-values-per-tag-by-measure:
-     *  - method_duration: 1337 <br>
-     *  - http_in_responestime: 2000
+     * <br>
+     * max-values-per-tag-by-measure: <br>
+     *  method_duration: 1337 <br>
+     *  http_in_responestime: 2000
      */
     @NotNull
     private Map<String, Integer> maxValuesPerTagByMeasure = Collections.emptyMap();

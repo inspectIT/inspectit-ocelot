@@ -1,16 +1,14 @@
 package rocks.inspectit.ocelot.core.utils;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealthIncident;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.selfmonitoring.event.models.AgentHealthIncidentAddedEvent;
 
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * Buffer with queued AgentHealthIncidents.
@@ -20,9 +18,12 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class AgentHealthIncidentBuffer {
-    private final ConcurrentLinkedQueue<AgentHealthIncident> buffer = new ConcurrentLinkedQueue<>();
+
+    private final ApplicationContext ctx;
 
     private final InspectitEnvironment env;
+
+    private final ConcurrentLinkedQueue<AgentHealthIncident> buffer = new ConcurrentLinkedQueue<>();
 
     /**
      * Add new incident to the buffer.
@@ -33,7 +34,9 @@ public class AgentHealthIncidentBuffer {
     public void put(AgentHealthIncident incident) {
         int bufferSize = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getIncidentBufferSize();
         while(buffer.size() >= bufferSize) buffer.poll();
+
         buffer.offer(incident);
+        ctx.publishEvent(new AgentHealthIncidentAddedEvent(this, asList()));
     }
 
     /**
