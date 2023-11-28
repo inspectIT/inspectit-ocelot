@@ -52,7 +52,9 @@ import static org.awaitility.Awaitility.await;
 import static org.testcontainers.Testcontainers.exposeHostPorts;
 
 /**
- * Base class for exporter integration tests. Verifies integration with the OpenTelemetry Collector. The Collector can be configured to accept the required data over gRPC or HTTP and exports the data over gRPC to a server running in process, allowing assertions to be made against the data.
+ * Base class for exporter integration tests. Verifies integration with the OpenTelemetry Collector.
+ * The Collector can be configured to accept the required data over gRPC or HTTP and exports the data over gRPC
+ * to a server running in process, allowing assertions to be made against the data.
  * This class is based on the {@link io.opentelemetry.integrationtest.OtlpExporterIntegrationTest}
  */
 @Testcontainers(disabledWithoutDocker = true)
@@ -154,7 +156,8 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
     }
 
     /**
-     * Gets the desired endpoint of the {@link #collector} constructed as 'http://{@link GenericContainer#getHost() collector.getHost()}:{@link GenericContainer#getMappedPort(int) collector.getMappedPort(port)}/path'
+     * Gets the desired endpoint of the {@link #collector} constructed as
+     * 'http://{@link GenericContainer#getHost() collector.getHost()}:{@link GenericContainer#getMappedPort(int) collector.getMappedPort(port)}/path'
      *
      * @param originalPort the port to get the actual mapped port for
      * @param path         the path
@@ -166,7 +169,8 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
     }
 
     /**
-     * Gets the desired endpoint of the {@link #collector} constructed as 'http://{@link GenericContainer#getHost() collector.getHost()}:{@link GenericContainer#getMappedPort(int) collector.getMappedPort(port)}'
+     * Gets the desired endpoint of the {@link #collector} constructed as
+     * 'http://{@link GenericContainer#getHost() collector.getHost()}:{@link GenericContainer#getMappedPort(int) collector.getMappedPort(port)}'
      *
      * @param originalPort the port to get the actual mapped port for
      *
@@ -204,23 +208,24 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
      * Records some dummy metrics and flushes them.
      */
     void recordMetricsAndFlush() {
-        recordMetricsAndFlush(1, "my-key", "my-val");
+        recordMetricsAndFlush("my-counter", 1, "my-key", "my-val");
     }
 
     /**
      * Records a counter with the given value and tag
      *
+     * @param measureName the name of the measure
      * @param value  the value to add to the counter
      * @param tagKey the key of the tag
      * @param tagVal the value of the tag
      */
-    protected void recordMetricsAndFlush(int value, String tagKey, String tagVal) {
+    protected void recordMetricsAndFlush(String measureName, int value, String tagKey, String tagVal) {
         // get the meter and create a counter
         Meter meter = GlobalOpenTelemetry.getMeterProvider()
                 .meterBuilder("rocks.inspectit.ocelot")
                 .setInstrumentationVersion("0.0.1")
                 .build();
-        LongCounter counter = meter.counterBuilder("my-counter").setDescription("My counter").setUnit("1").build();
+        LongCounter counter = meter.counterBuilder(measureName).setDescription("My counter").setUnit("1").build();
 
         // record counter
         counter.add(value, Attributes.of(AttributeKey.stringKey(tagKey), tagVal));
@@ -230,13 +235,15 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
     }
 
     /**
-     * Verifies that the metric with the given value and key/value attribute (tag) has been exported to and received by the {@link #grpcServer}
+     * Verifies that the metric with the given value and key/value attribute (tag) has been exported to and received
+     * by the {@link #grpcServer}
      *
-     * @param value
-     * @param tagKey
-     * @param tagVal
+     * @param measureName the name of the measure
+     * @param value  the value of the measure
+     * @param tagKey the key of the tag
+     * @param tagVal the value of the tag
      */
-    protected void awaitMetricsExported(int value, String tagKey, String tagVal) {
+    protected void awaitMetricsExported(String measureName, int value, String tagKey, String tagVal) {
         // create the attribute that we will use to verify that the metric has been written
         KeyValue attribute = KeyValue.newBuilder()
                 .setKey(tagKey)
@@ -247,12 +254,11 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
                 .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream()).anyMatch(mReq -> mReq.getResourceMetricsList()
                         .stream()
                         .anyMatch(rm ->
-                                // check for the "my-counter" metrics
-                                rm.getInstrumentationLibraryMetrics(0).getMetrics(0).getName().equals("my-counter")
+                                // check for the specified measure
+                                rm.getInstrumentationLibraryMetrics(0)
+                                        .getMetricsList().stream()
+                                        .filter(metric -> metric.getName().equals(measureName))
                                         // check for the specific attribute and value
-                                        && rm.getInstrumentationLibraryMetrics(0)
-                                        .getMetricsList()
-                                        .stream()
                                         .anyMatch(metric -> metric.getSum()
                                                 .getDataPointsList()
                                                 .stream()
@@ -261,7 +267,9 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
     }
 
     /**
-     * Waits for the spans to be exported to and received by the {@link #grpcServer}. This method asserts that Spans with the given names exist and that the child's {@link io.opentelemetry.proto.trace.v1.Span#getParentSpanId()} equals the parent's {@link io.opentelemetry.proto.trace.v1.Span#getSpanId()}
+     * Waits for the spans to be exported to and received by the {@link #grpcServer}. This method asserts that Spans
+     * with the given names exist and that the child's {@link io.opentelemetry.proto.trace.v1.Span#getParentSpanId()}
+     * equals the parent's {@link io.opentelemetry.proto.trace.v1.Span#getSpanId()}
      *
      * @param parentSpanName the name of the parent span
      * @param childSpanName  the name of the child span

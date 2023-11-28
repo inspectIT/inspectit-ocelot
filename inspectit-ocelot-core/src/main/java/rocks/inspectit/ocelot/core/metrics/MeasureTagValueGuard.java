@@ -106,6 +106,7 @@ public class MeasureTagValueGuard {
      * the specific tag value limit.
      * If new tags values have been created, they will be persisted.
      */
+    @VisibleForTesting
     Runnable blockTagValuesTask = () -> {
         if (!env.getCurrentConfig().getMetrics().getTagGuard().isEnabled()) return;
 
