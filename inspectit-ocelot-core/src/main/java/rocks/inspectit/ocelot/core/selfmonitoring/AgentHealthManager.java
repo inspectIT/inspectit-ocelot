@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
+import ch.qos.logback.classic.Level;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,18 +70,22 @@ public class AgentHealthManager {
             handleInvalidatableHealth(eventHealth, invalidator, message);
     }
 
-    public void handleInvalidatableHealth(AgentHealth eventHealth, Class<?> invalidator, String eventMessage) {
+    private void handleInvalidatableHealth(AgentHealth eventHealth, Class<?> invalidator, String eventMessage) {
         invalidatableHealth.merge(invalidator, eventHealth, AgentHealth::mostSevere);
-        triggerAgentHealthChangedEvent(invalidator.getTypeName(), eventMessage);
+
+        boolean shouldCreateIncident = eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING);
+        triggerAgentHealthChangedEvent(invalidator.getTypeName(), eventMessage, shouldCreateIncident);
     }
 
     private void handleTimeoutHealth(AgentHealth eventHealth, String loggerName, String eventMassage) {
         Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod();
+        boolean isNotInfo = eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING);
 
-        if (eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING)) {
+        if (isNotInfo) {
             generalHealthTimeouts.put(eventHealth, LocalDateTime.now().plus(validityPeriod));
         }
-        triggerAgentHealthChangedEvent(loggerName, eventMassage + ". This status is valid for " + validityPeriod);
+        String fullEventMessage = eventMassage + ". This status is valid for " + validityPeriod;
+        triggerAgentHealthChangedEvent(loggerName, fullEventMessage, isNotInfo);
     }
 
     public void invalidateIncident(Class<?> eventClass, String eventMessage) {
@@ -116,17 +121,23 @@ public class AgentHealthManager {
     }
 
     /**
-     * Creates a new AgentHealthIncident and also triggers an AgentHealthChangedEvent, if the agent health has changed
+     * Creates a new AgentHealthIncident, if specified, and also triggers an AgentHealthChangedEvent,
+     * if the agent health has changed
+     *
      * @param incidentSource class, which caused the incident
      * @param message message, describing the incident
+     * @param shouldCreateIncident whether to create a new AgentHealthIncident or not
      */
-    private void triggerAgentHealthChangedEvent(String incidentSource, String message) {
+    private void triggerAgentHealthChangedEvent(String incidentSource, String message, Boolean shouldCreateIncident) {
         synchronized (this) {
             boolean changedHealth = healthHasChanged();
             AgentHealth currentHealth = getCurrentHealth();
 
-            AgentHealthIncident incident = new AgentHealthIncident(LocalDateTime.now().toString(), currentHealth, incidentSource, message, changedHealth);
-            healthIncidentBuffer.put(incident);
+            if(shouldCreateIncident) {
+                AgentHealthIncident incident = new AgentHealthIncident(
+                        LocalDateTime.now().toString(), currentHealth, incidentSource, message, changedHealth);
+                healthIncidentBuffer.put(incident);
+            }
 
             if(changedHealth) {
                 AgentHealth lastHealth = lastNotifiedHealth;
@@ -135,6 +146,10 @@ public class AgentHealthManager {
                 ctx.publishEvent(event);
             }
         }
+    }
+
+    private void triggerAgentHealthChangedEvent(String incidentSource, String message) {
+        triggerAgentHealthChangedEvent(incidentSource, message, true);
     }
 
     /**
