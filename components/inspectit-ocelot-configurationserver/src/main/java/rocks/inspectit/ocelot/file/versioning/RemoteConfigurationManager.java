@@ -1,8 +1,5 @@
 package rocks.inspectit.ocelot.file.versioning;
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -10,12 +7,16 @@ import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.*;
+import org.eclipse.jgit.transport.sshd.SshdSessionFactoryBuilder;
 import org.eclipse.jgit.util.FS;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings.AuthenticationType;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +26,8 @@ import java.util.Optional;
 @Slf4j
 @AllArgsConstructor
 public class RemoteConfigurationManager {
+
+    private static final String SSH_DIR = ".ssh";
 
     /**
      * The current server settings.
@@ -214,6 +217,11 @@ public class RemoteConfigurationManager {
         String password = remoteRepository.getPassword();
         UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
         command.setCredentialsProvider(credentialsProvider);
+
+        command.setTransportConfigCallback(transport -> {
+            SshTransport sshTransport = (SshTransport) transport;
+            sshTransport.setSshSessionFactory(createSshSessionFactoryBuilder().build(null));
+        });
     }
 
     /**
@@ -223,28 +231,32 @@ public class RemoteConfigurationManager {
      * @param remoteRepository the settings for the repository
      */
     private void authenticatePpk(TransportCommand<?, ?> command, RemoteRepositorySettings remoteRepository) {
-        SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
-            @Override
-            protected JSch createDefaultJSch(FS fs) throws JSchException {
-                JSch defaultJSch = super.createDefaultJSch(fs);
+        SshdSessionFactoryBuilder sshSessionFactoryBuilder = createSshSessionFactoryBuilder();
 
-                String privateKeyFile = remoteRepository.getPrivateKeyFile();
-                if (StringUtils.isNotBlank(privateKeyFile)) {
-                    defaultJSch.addIdentity(privateKeyFile);
-                }
-
-                return defaultJSch;
-            }
-
-            @Override
-            protected void configure(OpenSshConfig.Host hc, Session session) {
-            }
-        };
+        String privateKeyFile = remoteRepository.getPrivateKeyFile();
+        if(StringUtils.isNotBlank(privateKeyFile)) {
+            // specify a specific private key, of configured -> no defaults from .ssh
+            sshSessionFactoryBuilder.setDefaultIdentities(file -> Collections.singletonList(Paths.get(privateKeyFile)));
+        }
 
         command.setTransportConfigCallback(transport -> {
             SshTransport sshTransport = (SshTransport) transport;
-            sshTransport.setSshSessionFactory(sshSessionFactory);
+            sshTransport.setSshSessionFactory(sshSessionFactoryBuilder.build(null));
         });
+    }
+
+    /**
+     * Creates a SshSessionFactoryBuilder with user home and ssh directory.
+     *
+     * @return The created builder
+     */
+    private SshdSessionFactoryBuilder createSshSessionFactoryBuilder() {
+        SshdSessionFactoryBuilder sshSessionFactoryBuilder = new SshdSessionFactoryBuilder();
+
+        sshSessionFactoryBuilder.setHomeDirectory(FS.DETECTED.userHome());
+        sshSessionFactoryBuilder.setSshDirectory(new File(FS.DETECTED.userHome(), "/" + SSH_DIR));
+
+        return sshSessionFactoryBuilder;
     }
 
     /**

@@ -45,7 +45,7 @@ public class PromotionController extends AbstractBaseController {
     }
 
     @Operation(summary = "Fetch promotion files", description = "Fetches all configuration files which are ready for promotion.")
-    @GetMapping(value = "promotions")
+    @GetMapping(value = {"promotions", "promotions/"})
     public WorkspaceDiff getPromotions(@Parameter(description = "Specifies whether the old and new content of each files should also be returned.") @RequestParam(defaultValue = "false", name = "include-content") boolean includeContent, Authentication authentication) throws IOException, GitAPIException {
         WorkspaceDiff workspaceDiff = fileManager.getWorkspaceDiff(includeContent);
         workspaceDiff.setCanPromoteOwnChanges(allowSelfPromotion(authentication));
@@ -54,7 +54,7 @@ public class PromotionController extends AbstractBaseController {
 
     @Secured(UserRoleConfiguration.PROMOTE_ACCESS_ROLE)
     @Operation(summary = "Promote files", description = "Promotes the specified files.")
-    @PostMapping(value = "promote")
+    @PostMapping(value = {"promote", "promote/"})
     public ResponseEntity<String> promote(@Parameter(description = "The definition that contains the information about which files to promote.") @RequestBody Promotion promotion, Authentication authentication) throws GitAPIException {
         boolean allowSelfPromotion = allowSelfPromotion(authentication);
         if (promotion.getCommitMessage() == null || promotion.getCommitMessage().isEmpty()) {

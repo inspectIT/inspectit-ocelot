@@ -43,12 +43,12 @@ public class FileManager {
     /**
      * The accessor used to access the working directory.
      */
-    private CachingWorkingDirectoryAccessor workingDirectoryAccessor;
+    private final CachingWorkingDirectoryAccessor workingDirectoryAccessor;
 
     /**
      * The manager used for Git interactions.
      */
-    private VersioningManager versioningManager;
+    private final VersioningManager versioningManager;
 
     /**
      * Caches the current live-revision to make sure the same instance is returned if no new changes were committed.

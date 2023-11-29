@@ -68,12 +68,12 @@ public class VersioningManager {
     /**
      * The server's settings.
      */
-    private InspectitServerSettings settings;
+    private final InspectitServerSettings settings;
 
     /**
      * Path of the current working directory.
      */
-    private Path workingDirectory;
+    private final Path workingDirectory;
 
     /**
      * Git repository of the working directory.
@@ -83,12 +83,12 @@ public class VersioningManager {
     /**
      * Supplier for accessing the currently logged in user.
      */
-    private Supplier<Authentication> authenticationSupplier;
+    private final Supplier<Authentication> authenticationSupplier;
 
     /**
      * Used for sending application events.
      */
-    private ApplicationEventPublisher eventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Timeout for amend commits. Consecutive commits of the same user within this time will be amended.
@@ -567,17 +567,15 @@ public class VersioningManager {
     List<String> getModifyingAuthors(SimpleDiffEntry entry, ObjectId baseCommitId, ObjectId newCommitId) {
         RevCommit baseCommit = getCommit(baseCommitId);
         RevCommit newCommit = getCommit(newCommitId);
-        switch (entry.getType()) {
-            case ADD:
-                return new ArrayList<>(findAuthorsSinceAddition(entry.getFile(), newCommit));
-            case MODIFY:
-                return new ArrayList<>(findModifyingAuthors(entry.getFile(), baseCommit, newCommit));
-            case DELETE:
-                return Collections.singletonList(findDeletingAuthor(entry.getFile(), baseCommit, newCommit));
-            default:
+        return switch (entry.getType()) {
+            case ADD -> new ArrayList<>(findAuthorsSinceAddition(entry.getFile(), newCommit));
+            case MODIFY -> new ArrayList<>(findModifyingAuthors(entry.getFile(), baseCommit, newCommit));
+            case DELETE -> Collections.singletonList(findDeletingAuthor(entry.getFile(), baseCommit, newCommit));
+            default -> {
                 log.warn("Unsupported change type for author lookup encountered: {}", entry.getType());
-                return Collections.emptyList();
-        }
+                yield Collections.emptyList();
+            }
+        };
     }
 
     /**

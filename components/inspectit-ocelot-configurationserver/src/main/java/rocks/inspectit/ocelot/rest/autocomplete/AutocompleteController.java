@@ -33,7 +33,7 @@ public class AutocompleteController extends AbstractBaseController {
         "    \"methods\",\n" +
         "    \"advanced\"]"))
     )
-    @PostMapping("/autocomplete")
+    @PostMapping({"/autocomplete", "/autocomplete/"})
     public List<String> getPossibleProperties(@RequestBody AutoCompleteRequest request) {
         return completers.stream()
                 .flatMap(autoCompleter -> autoCompleter.getSuggestions(PropertyPathHelper.parse(request.getPath()))
@@ -41,5 +41,3 @@ public class AutocompleteController extends AbstractBaseController {
                 .collect(Collectors.toList());
     }
 }
-
-

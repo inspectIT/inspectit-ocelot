@@ -28,7 +28,7 @@ public class EntityAuditLogger {
 
     private void logEvent(AuditDetail detail, String eventDescription) {
         String principal = getPrincipalUsername();
-        log.info("{}({}) {} by {}", detail.getEntityType(), detail.getEntityIdentifier(), eventDescription, principal);
+        log.info("{}({}) {} by {}", detail.entityType(), detail.entityIdentifier(), eventDescription, principal);
     }
 
     private String getPrincipalUsername() {

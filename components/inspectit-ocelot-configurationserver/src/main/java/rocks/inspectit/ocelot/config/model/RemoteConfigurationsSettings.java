@@ -1,11 +1,10 @@
 package rocks.inspectit.ocelot.config.model;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.validation.Valid;
 
 /**
  * Settings for connecting the configuration server to remote Git repositories.

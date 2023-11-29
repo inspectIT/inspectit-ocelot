@@ -31,5 +31,5 @@
 /nbdist/
 /.nb-gradle/
 
-/working_directory/
+*working_directory/
 /gradle/*.versions.updates.toml

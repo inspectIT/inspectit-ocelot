@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
 import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
-import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 @ExtendWith(MockitoExtension.class)
 public class AgentMappingSerializerTest {
@@ -92,10 +91,10 @@ public class AgentMappingSerializerTest {
 
             assertThat(result).hasSize(1);
             AgentMapping mapping = result.get(0);
-            assertThat(mapping.getName()).isEqualTo("mapping");
-            assertThat(mapping.getSources()).containsExactly("/any-source");
-            assertThat(mapping.getAttributes()).containsEntry("key", "val");
-            assertThat(mapping.getSourceBranch()).isEqualTo(LIVE);
+            assertThat(mapping.name()).isEqualTo("mapping");
+            assertThat(mapping.sources()).containsExactly("/any-source");
+            assertThat(mapping.attributes()).containsEntry("key", "val");
+            assertThat(mapping.sourceBranch()).isEqualTo(LIVE);
         }
     }
 

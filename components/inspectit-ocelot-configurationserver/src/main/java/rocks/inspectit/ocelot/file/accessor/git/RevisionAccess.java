@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.file.accessor.git;
 
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
@@ -33,12 +32,12 @@ public class RevisionAccess extends AbstractFileAccessor {
     /**
      * The repository to use.
      */
-    private Repository repository;
+    private final Repository repository;
 
     /**
      * The commit which will be used for the operations.
      */
-    private RevCommit revCommit;
+    private final RevCommit revCommit;
 
     /**
      * Constructor.
@@ -353,16 +352,5 @@ public class RevisionAccess extends AbstractFileAccessor {
         } while (hasNext);
 
         return false;
-    }
-
-    /**
-     * Container used for finding the commonAncestor
-     */
-    @Value
-    private static class Node {
-
-        boolean isReachableFromOwn;
-
-        RevisionAccess revAccess;
     }
 }

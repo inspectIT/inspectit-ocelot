@@ -24,7 +24,7 @@ public class KapacitorTemplateController extends KapacitorBaseController {
     }
 
     @Operation(description = "Provides a list with basic information about each kapacitor template")
-    @GetMapping("/alert/kapacitor/templates")
+    @GetMapping({"/alert/kapacitor/templates", "/alert/kapacitor/templates/"})
     public List<Template> getAllTemplates() {
         ObjectNode response = kapacitor().getForEntity("/kapacitor/v1/templates", ObjectNode.class).getBody();
 
@@ -38,7 +38,7 @@ public class KapacitorTemplateController extends KapacitorBaseController {
     }
 
     @Operation(description = "Provides detailed information about a given kapacitor template")
-    @GetMapping("/alert/kapacitor/templates/{templateId}")
+    @GetMapping({"/alert/kapacitor/templates/{templateId}", "/alert/kapacitor/templates/{templateId}/"})
     public Template getTemplate(@PathVariable @Parameter(description = "The id of the template to query") String templateId) {
         ObjectNode response = kapacitor().getForEntity("/kapacitor/v1/templates/{templateId}", ObjectNode.class, templateId)
                 .getBody();

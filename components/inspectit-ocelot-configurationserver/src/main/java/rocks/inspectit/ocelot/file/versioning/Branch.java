@@ -19,7 +19,7 @@ public enum Branch {
     /**
      * The actual branch name.
      */
-    private String branchName;
+    private final String branchName;
 
     Branch(String name) {
         this.branchName = name;

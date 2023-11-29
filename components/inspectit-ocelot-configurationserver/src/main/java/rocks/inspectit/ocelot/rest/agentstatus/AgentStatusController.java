@@ -26,14 +26,14 @@ public class AgentStatusController extends AbstractBaseController {
     private AgentStatusManager statusManager;
 
     @Operation(summary = "Fetch the List of Agent Statuses", description = "Gives a list of connected agents")
-    @GetMapping(value = "agentstatus")
+    @GetMapping(value = {"agentstatus", "agentstatus/"})
     public Collection<AgentStatus> getAgentStatuses(@RequestParam Map<String, String> attributes) {
         return statusManager.getAgentStatuses();
     }
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @Operation(summary = "Clear the List of Agent Statuses", description = "Clears the list of connected agents")
-    @DeleteMapping(value = "agentstatus")
+    @DeleteMapping(value = {"agentstatus", "agentstatus/"})
     public void clearAgentStatuses(@RequestParam Map<String, String> attributes) {
         statusManager.reset();
     }

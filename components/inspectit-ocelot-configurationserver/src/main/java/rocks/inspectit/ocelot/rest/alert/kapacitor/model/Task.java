@@ -111,7 +111,7 @@ public class Task {
         if (vars != null) {
             vars.forEach(var -> var.insertIntoKapacitorVars(mapper, varsNode));
         }
-        if (varsNode.size() > 0) {
+        if (!varsNode.isEmpty()) {
             result.set("vars", varsNode);
         }
         return result;

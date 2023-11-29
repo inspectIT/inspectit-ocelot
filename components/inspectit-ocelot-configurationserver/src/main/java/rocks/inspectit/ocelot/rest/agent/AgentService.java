@@ -32,9 +32,9 @@ public class AgentService {
     @VisibleForTesting
     final static String LOG_PRELOADING_DISABLED_MESSAGE = "Logs cannot be retrieved because log preloading (inspectit.log-preloading) is not enabled. To retrieve agent logs, please enable the log preloading.";
 
-    private AgentCommandDispatcher commandDispatcher;
+    private final AgentCommandDispatcher commandDispatcher;
 
-    private InspectitServerSettings configuration;
+    private final InspectitServerSettings configuration;
 
     private final ConfigParser configParser = new ConfigParser();
 
@@ -69,7 +69,7 @@ public class AgentService {
      */
     public DeferredResult<ResponseEntity<?>> buildSupportArchive(Map<String, String> attributes, AgentConfigurationManager configManager) throws ExecutionException {
         Long responseTimeout = configuration.getAgentCommand().getResponseTimeout().toMillis();
-        DeferredResult<ResponseEntity<?>> composedResult = new DeferredResult<ResponseEntity<?>>(responseTimeout) {{
+        DeferredResult<ResponseEntity<?>> composedResult = new DeferredResult<>(responseTimeout) {{
             onTimeout(() -> setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build()));
         }};
 

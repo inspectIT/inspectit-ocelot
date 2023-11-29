@@ -3,13 +3,13 @@ package rocks.inspectit.ocelot.rest.file;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collection;
 

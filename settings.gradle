@@ -10,3 +10,11 @@ include 'inspectit-ocelot-configdocsgenerator'
 project(':inspectit-ocelot-configurationserver').projectDir = new File('./components/inspectit-ocelot-configurationserver')
 project(':inspectit-ocelot-configurationserver-ui').projectDir = new File('./components/inspectit-ocelot-configurationserver-ui')
 project(':inspectit-ocelot-configdocsgenerator').projectDir = new File('./components/inspectit-ocelot-configdocsgenerator')
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        configServerLibs {
+            from(files("gradle/configserverlibs.versions.toml"))
+        }
+    }
+}

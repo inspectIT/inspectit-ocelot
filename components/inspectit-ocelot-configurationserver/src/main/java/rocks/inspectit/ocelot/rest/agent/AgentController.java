@@ -47,7 +47,7 @@ public class AgentController extends AbstractBaseController {
 
     @ExceptionHandler
     public void e(Exception e) {
-        e.printStackTrace();
+        log.warn("Error occurred calling AgentController: ", e);
     }
 
     /**
@@ -59,7 +59,7 @@ public class AgentController extends AbstractBaseController {
      * @return The configuration mapped on the given agent name
      */
     @Operation(summary = "Fetch the Agent Configuration", description = "Reads the configuration for the given agent and returns it as a yaml string")
-    @GetMapping(value = "agent/configuration", produces = "application/x-yaml")
+    @GetMapping(value = {"agent/configuration", "agent/configuration/"}, produces = "application/x-yaml")
     public ResponseEntity<String> fetchConfiguration(@Parameter(description = "The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes, @RequestHeader Map<String, String> headers) {
         log.debug("Fetching the agent configuration for agent ({})", attributes.toString());
         AgentConfiguration configuration = configManager.getConfiguration(attributes);
@@ -79,7 +79,7 @@ public class AgentController extends AbstractBaseController {
      *
      * @return Returns either a ResponseEntity with the next command as payload or an empty payload.
      */
-    @PostMapping(value = "agent/command", produces = "application/json")
+    @PostMapping(value = {"agent/command", "agent/command/"}, produces = "application/json")
     public ResponseEntity<Command> fetchCommand(@RequestHeader Map<String, String> headers, @RequestParam(required = false, name = "wait-for-command") boolean waitForCommand, @RequestBody(required = false) CommandResponse response) {
         String agentId = headers.get("x-ocelot-agent-id");
         if (agentId == null) {
@@ -111,7 +111,7 @@ public class AgentController extends AbstractBaseController {
      * @return The data used in the support archive.
      */
     @Operation(summary = "Fetch an Agents Data for Downloading a Support Archive", description = "Bundles useful information for debugging issues raised in support tickets.")
-    @GetMapping(value = "agent/supportArchive", produces = "application/json")
+    @GetMapping(value = {"agent/supportArchive", "agent/supportArchive/"}, produces = "application/json")
     public DeferredResult<ResponseEntity<?>> fetchSupportArchive(@Parameter(description = "The agent attributes used to retrieve the correct data") @RequestParam Map<String, String> attributes) throws ExecutionException {
         return agentService.buildSupportArchive(attributes, configManager);
     }

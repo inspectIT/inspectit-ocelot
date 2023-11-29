@@ -1,6 +1,10 @@
 package rocks.inspectit.ocelot.configschema;
 
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
@@ -8,10 +12,6 @@ import rocks.inspectit.ocelot.config.ui.UISettings;
 import rocks.inspectit.ocelot.config.utils.CaseUtils;
 import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
 
-import javax.annotation.PostConstruct;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -105,8 +105,7 @@ public class ConfigurationSchemaProvider {
     @VisibleForTesting
     ConfigurationPropertyDescription.ConfigurationPropertyDescriptionBuilder
     setTerminalType(Type type, ConfigurationPropertyDescription.ConfigurationPropertyDescriptionBuilder builder) {
-        if (type instanceof Class<?>) {
-            Class<?> clazz = (Class<?>) type;
+        if (type instanceof Class<?> clazz) {
             if (clazz.isEnum()) {
                 return builder
                         .type(ConfigurationPropertyType.ENUM)
