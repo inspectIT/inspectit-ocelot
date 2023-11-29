@@ -18,44 +18,84 @@ import rocks.inspectit.ocelot.core.selfmonitoring.AgentHealthManager;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-/**
- * Tests {@link AgentHealthManager}
- */
 @ExtendWith(MockitoExtension.class)
 public class LogHealthMonitorTest {
 
     @InjectMocks
     private LogHealthMonitor healthMonitor;
-
     @Mock
     private AgentHealthManager healthManager;
 
-    private ILoggingEvent createLoggingEvent(Class<?> loggedClass) {
-        return new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(loggedClass), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
+    private ILoggingEvent createLoggingEvent(Class<?> loggedClass, Level logLevel) {
+        return new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(loggedClass), logLevel, "Dummy Info", new Throwable(), new String[]{});
     }
-    //TODO testen mit allen Levels (WARN, ERROR, OK, INFO, DEBUG)
-    @Nested
-    class OnLoggingEvent {
 
-        @Test
-        void ignoreLogsFromAgentHealthManagerClass() {
-            ILoggingEvent loggingEvent = createLoggingEvent(AgentHealthManager.class);
+    @Test
+    void ignoreLogsFromAgentHealthManagerClass() {
+        ILoggingEvent loggingEvent = createLoggingEvent(AgentHealthManager.class, Level.INFO);
 
-            healthMonitor.onLoggingEvent(loggingEvent, null);
+        healthMonitor.onLoggingEvent(loggingEvent, null);
 
-            verifyNoMoreInteractions(healthManager);
-        }
+        verifyNoMoreInteractions(healthManager);
+    }
 
-        @Test
-        void triggerAgentHealthManagerNotifyAgentHealthEvent() {
-            Class<?> loggerClass = LogHealthMonitor.class;
-            ILoggingEvent loggingEvent = createLoggingEvent(loggerClass);
-            Class<?> invalidatorMock = PropertySourcesReloadEvent.class;
-            AgentHealth eventHealth = AgentHealth.fromLogLevel(loggingEvent.getLevel());
+    @Test
+    void verifyNotifyAgentHealthOnInfo() {
+        Class<?> loggerClass = LogHealthMonitor.class;
+        ILoggingEvent loggingEvent = createLoggingEvent(loggerClass, Level.INFO);
+        Class<?> invalidatorMock = PropertySourcesReloadEvent.class;
+        AgentHealth eventHealth = AgentHealth.OK;
 
-            healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
+        healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
 
-            verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getFormattedMessage());
-        }
+        verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getFormattedMessage());
+    }
+
+    @Test
+    void verifyNotifyAgentHealthOnWarn() {
+        Class<?> loggerClass = LogHealthMonitor.class;
+        ILoggingEvent loggingEvent = createLoggingEvent(loggerClass, Level.WARN);
+        Class<?> invalidatorMock = PropertySourcesReloadEvent.class;
+        AgentHealth eventHealth = AgentHealth.WARNING;
+
+        healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
+
+        verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getFormattedMessage());
+    }
+
+    @Test
+    void verifyNotifyAgentHealthOnError() {
+        Class<?> loggerClass = LogHealthMonitor.class;
+        ILoggingEvent loggingEvent = createLoggingEvent(loggerClass, Level.ERROR);
+        Class<?> invalidatorMock = PropertySourcesReloadEvent.class;
+        AgentHealth eventHealth = AgentHealth.ERROR;
+
+        healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
+
+        verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getFormattedMessage());
+    }
+
+    @Test
+    void verifyNotifyAgentHealthOnTrace() {
+        Class<?> loggerClass = LogHealthMonitor.class;
+        ILoggingEvent loggingEvent = createLoggingEvent(loggerClass, Level.TRACE);
+        Class<?> invalidatorMock = PropertySourcesReloadEvent.class;
+        AgentHealth eventHealth = AgentHealth.OK;
+
+        healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
+
+        verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getFormattedMessage());
+    }
+
+    @Test
+    void verifyNotifyAgentHealthOnDebug() {
+        Class<?> loggerClass = LogHealthMonitor.class;
+        ILoggingEvent loggingEvent = createLoggingEvent(loggerClass, Level.DEBUG);
+        Class<?> invalidatorMock = PropertySourcesReloadEvent.class;
+        AgentHealth eventHealth = AgentHealth.OK;
+
+        healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
+
+        verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getFormattedMessage());
     }
 }

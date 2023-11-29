@@ -1,6 +1,6 @@
-package rocks.inspectit.ocelot.core.utils;
+package rocks.inspectit.ocelot.core.selfmonitoring;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealthIncident;
@@ -16,12 +16,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * As soon as incidents are put into a full queue, old incidents will be removed to create space
  */
 @Component
-@RequiredArgsConstructor
 public class AgentHealthIncidentBuffer {
 
-    private final ApplicationContext ctx;
-
-    private final InspectitEnvironment env;
+    @Autowired
+    private ApplicationContext ctx;
+    @Autowired
+    private InspectitEnvironment env;
 
     private final ConcurrentLinkedQueue<AgentHealthIncident> buffer = new ConcurrentLinkedQueue<>();
 
@@ -48,5 +48,9 @@ public class AgentHealthIncidentBuffer {
         List<AgentHealthIncident> incidentList = new LinkedList<>(buffer);
         Collections.reverse(incidentList);
         return incidentList;
+    }
+
+    public void clear() {
+        buffer.clear();
     }
 }

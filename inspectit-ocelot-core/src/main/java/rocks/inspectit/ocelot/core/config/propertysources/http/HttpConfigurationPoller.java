@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
     /**
      * The state of the used HTTP property source configuration.
      */
+    @Getter
     private HttpPropertySourceState currentState;
 
     public HttpConfigurationPoller() {
@@ -86,5 +88,10 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
         if (currentState != null) {
             currentState.updateAgentHealthState(agentHealth);
         }
+    }
+
+    public AgentHealthState getCurrentAgentHealthState() {
+        if(currentState == null) return null;
+        return currentState.getAgentHealth();
     }
 }

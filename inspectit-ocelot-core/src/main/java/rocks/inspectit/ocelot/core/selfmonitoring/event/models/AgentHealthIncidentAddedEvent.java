@@ -3,7 +3,7 @@ package rocks.inspectit.ocelot.core.selfmonitoring.event.models;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealthIncident;
-import rocks.inspectit.ocelot.core.utils.AgentHealthIncidentBuffer;
+import rocks.inspectit.ocelot.core.selfmonitoring.AgentHealthIncidentBuffer;
 
 import java.util.List;
 

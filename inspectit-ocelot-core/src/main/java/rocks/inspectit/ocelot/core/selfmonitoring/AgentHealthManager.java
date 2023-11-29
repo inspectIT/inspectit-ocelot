@@ -1,16 +1,14 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
-import ch.qos.logback.classic.Level;
 import com.google.common.annotations.VisibleForTesting;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealthIncident;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.selfmonitoring.event.models.AgentHealthChangedEvent;
-import rocks.inspectit.ocelot.core.utils.AgentHealthIncidentBuffer;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
@@ -27,12 +25,16 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class AgentHealthManager {
 
-    private final ApplicationContext ctx;
-
-    private final ScheduledExecutorService executor;
+    @Autowired
+    private ApplicationContext ctx;
+    @Autowired
+    private ScheduledExecutorService executor;
+    @Autowired
+    private InspectitEnvironment env;
+    @Autowired
+    private AgentHealthIncidentBuffer healthIncidentBuffer;
 
     /**
      * Map of {@code eventClass -> agentHealth}, whereas the {@code agentHealth} is reset whenever an event of type
@@ -49,20 +51,25 @@ public class AgentHealthManager {
 
     private AgentHealth lastNotifiedHealth = AgentHealth.OK;
 
-    private final InspectitEnvironment env;
-
-    private final AgentHealthIncidentBuffer healthIncidentBuffer;
-
     @PostConstruct
     @VisibleForTesting
     void startHealthCheckScheduler() {
         checkHealthAndSchedule();
     }
 
-    public List<AgentHealthIncident> getHistory() {
+    public List<AgentHealthIncident> getIncidentHistory() {
         return healthIncidentBuffer.asList();
     }
 
+    /**
+     * Notifies the AgentHealthManager about an eventHealth.
+     * The manager determines, whether the event is invalidatable or times out.
+     *
+     * @param eventHealth health of event
+     * @param invalidator class, which created the invalidatable eventHealth
+     * @param loggerName name of the logger, who created the event
+     * @param message message of the event
+     */
     public void notifyAgentHealth(AgentHealth eventHealth, Class<?> invalidator, String loggerName, String message) {
         if (invalidator == null)
             handleTimeoutHealth(eventHealth, loggerName, message);
@@ -88,6 +95,11 @@ public class AgentHealthManager {
         triggerAgentHealthChangedEvent(loggerName, fullEventMessage, isNotInfo);
     }
 
+    /**
+     * Invalidates an invalidatable eventHealth and creates a new AgentHealthIncident
+     * @param eventClass class, which created the invalidatable eventHealth
+     * @param eventMessage message of the event
+     */
     public void invalidateIncident(Class<?> eventClass, String eventMessage) {
         invalidatableHealth.remove(eventClass);
         triggerAgentHealthChangedEvent(eventClass.getTypeName(), eventMessage);
@@ -101,7 +113,8 @@ public class AgentHealthManager {
      *     <li>exists -> run until that timeout is over</li>
      * </ul>
      */
-    private void checkHealthAndSchedule() {
+    @VisibleForTesting
+    void checkHealthAndSchedule() {
         triggerAgentHealthChangedEvent(AgentHealthManager.class.getCanonicalName(), "Checking timed out agent healths");
 
         Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod();
@@ -179,5 +192,21 @@ public class AgentHealthManager {
                 .reduce(AgentHealth::mostSevere)
                 .orElse(AgentHealth.OK);
         return AgentHealth.mostSevere(generalHealth, invHealth);
+    }
+
+    /**
+     * THIS METHOD SHOULD ONLY BE USED FOR TESTING.
+     * It allows to specify a custom validityPeriod, which by default has to be at least 60s.
+     * With customizing the period, you can reduce the amount of waiting time for tests.
+     */
+    @VisibleForTesting
+    void handleTimeoutHealthTesting(AgentHealth eventHealth, String loggerName, String eventMassage, Duration validityPeriod) {
+        boolean isNotInfo = eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING);
+
+        if (isNotInfo) {
+            generalHealthTimeouts.put(eventHealth, LocalDateTime.now().plus(validityPeriod));
+        }
+        String fullEventMessage = eventMassage + ". This status is valid for " + validityPeriod;
+        triggerAgentHealthChangedEvent(loggerName, fullEventMessage, isNotInfo);
     }
 }

@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.selfmonitoring.event.listener;
 
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,34 +24,25 @@ public class MetricWritingHealthEventListenerTest {
     @Mock
     private SelfMonitoringService selfMonitoringService;
 
-    @Nested
-    class SendInitialHealthMetric {
+    @Test
+    void sendInitialHealthMetric() {
+        HashMap<String, String> tags = new HashMap<>();
+        tags.put("message", INITIAL_METRIC_MESSAGE);
 
-        @Test
-        void successfulDelegationVerification() {
-            HashMap<String, String> tags = new HashMap<>();
-            tags.put("message", INITIAL_METRIC_MESSAGE);
+        metricWritingHealthEventListener.sendInitialHealthMetric();
 
-            metricWritingHealthEventListener.sendInitialHealthMetric();
-
-            verify(selfMonitoringService).recordMeasurement("health", AgentHealth.OK.ordinal(), tags);
-        }
+        verify(selfMonitoringService).recordMeasurement("health", AgentHealth.OK.ordinal(), tags);
     }
 
-    @Nested
-    class OnAgentHealthEvent {
+    @Test
+    void recordNewHealthMeasurement() {
+        AgentHealthChangedEvent event = new AgentHealthChangedEvent(this, AgentHealth.OK, AgentHealth.WARNING, "Mock Message");
+        HashMap<String, String> tags = new HashMap<>();
+        tags.put("message", event.getMessage());
+        tags.put("source", event.getSource().getClass().getName());
 
-        @Test
-        void recordNewHealthMeasurement() {
-            AgentHealthChangedEvent event = new AgentHealthChangedEvent(this, AgentHealth.OK, AgentHealth.WARNING, "Mock Message");
-            HashMap<String, String> tags = new HashMap<>();
-            tags.put("message", event.getMessage());
-            tags.put("source", event.getSource().getClass().getName());
+        metricWritingHealthEventListener.onAgentHealthEvent(event);
 
-            metricWritingHealthEventListener.onAgentHealthEvent(event);
-
-            verify(selfMonitoringService).recordMeasurement("health", event.getNewHealth().ordinal(), tags);
-        }
+        verify(selfMonitoringService).recordMeasurement("health", event.getNewHealth().ordinal(), tags);
     }
-
 }

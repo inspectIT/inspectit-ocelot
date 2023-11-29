@@ -104,6 +104,7 @@ public class HttpPropertySourceState {
     @Getter
     private boolean firstFileWriteAttemptSuccessful = true;
 
+    @Getter
     private AgentHealthState agentHealth = AgentHealthState.defaultState();
 
     /**

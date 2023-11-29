@@ -24,7 +24,7 @@ public class PollerWritingHealthEventListener implements HealthEventListener {
 
     @Override
     public void onAgentHealthEvent(AgentHealthChangedEvent event) {
-        List<AgentHealthIncident> incidentHistory = agentHealthManager.getHistory();
+        List<AgentHealthIncident> incidentHistory = agentHealthManager.getIncidentHistory();
 
         AgentHealthState state = new AgentHealthState(event.getNewHealth(), event.getSource().toString(), event.getMessage(), incidentHistory);
         httpConfigurationPoller.updateAgentHealthState(state);
