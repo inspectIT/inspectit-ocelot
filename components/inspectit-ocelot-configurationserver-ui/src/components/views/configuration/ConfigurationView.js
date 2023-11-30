@@ -361,10 +361,10 @@ const mapDispatchToProps = {
   showWarning: notificationActions.showWarningMessage,
   writeFile: configurationActions.writeFile,
   selectedFileContentsChanged: configurationActions.selectedFileContentsChanged,
-  selectVersion: configurationActions.selectVersion,
+  selectVersion: configurationActions.selectConfigurationVersion,
   toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView,
   selectFile: configurationActions.selectFile,
-  fetchVersions: configurationActions.fetchVersions,
+  fetchVersions: configurationActions.fetchConfigurationVersions,
   toggleShowHiddenFiles: configurationActions.toggleShowHiddenFiles,
 };
 

@@ -69,12 +69,20 @@ const notification = {
 };
 
 const mappings = {
-  /** Specifies how many requests are currently loading in the background */
+  /** Specifies how many requests are currently loading in the background. */
   pendingRequests: 0,
   /** The current agent mappings. */
   mappings: [],
   /** The date when the agent mappings have been fetched. */
   updateDate: null,
+  /** The existing versions. */
+  versions: [],
+  /** Specifies the selected git version. The latest version always has the number 0. */
+  selectedVersion: null,
+  /** The source branch for the agent mappings file itself. */
+  sourceBranch: '',
+  /** Defines which sidebar is currently shown */
+  currentSidebar: SidebarTypes.NONE,
 };
 
 const alerting = {

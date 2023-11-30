@@ -3,8 +3,8 @@ id: agent-mappings
 title: Agent Mappings
 ---
 
-Agent mappings are used to determine which agent receives which configuration. Here, individual files or specific
-folders can be defined, which serve as the basis for the resulting configuration.
+Agent mappings are used to determine which agent receives which configuration. Here, individual files or specific 
+folders can be defined, which serve as the basis for the resulting configuration. 
 Furthermore, you can specify which branch (`WORKSPACE` or `LIVE`) the mapping should use to obtain the configuration files.
 
 It's important to note that the first matching agent mapping will be used to determine which configuration is shipped to an agent.
@@ -37,15 +37,15 @@ This default agent mapping maps each agent to each configuration file of the `wo
 ## Git Staging
 
 :::tip
-You can find more detailed information about file staging and promotion [here](config-server/configuration-staging.md).
+You can find more detailed information about file staging and promotion [here](config-server/files-staging.md).
 :::
 
-Since the version `2.6.0` the configuration for the agent mappings itself will also be included into the git staging. For all agent mappings
+Since the version `2.5.7` the configuration for the agent mappings itself will also be included into the git staging. For all agent mappings 
 the configuration is stored in one file. After one or several agent mappings have been edited, the changes will also
 appear on the promotion page. The promotion of the agent mappings configuration works directly like the promotion of agent configuration files.
 
-Additionally, it is possible to select a source branch (`WORKSPACE` or `LIVE`) for the agent mappings configuration itself.
-This will determine, whether changes in the agent mappings should be applied directly or only after the promotion of the
+Additionally, it is possible to select a source branch (`WORKSPACE` or `LIVE`) for the agent mappings configuration itself. 
+This will determine, whether changes in the agent mappings should be applied directly or only after the promotion of the 
 agent mappings configuration.
 
 :::important

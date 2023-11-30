@@ -23,12 +23,12 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.RemoteConfigurationsSettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
 import rocks.inspectit.ocelot.error.exceptions.SelfPromotionNotAllowedException;
-import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
+import rocks.inspectit.ocelot.events.PromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.CachingRevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
-import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
+import rocks.inspectit.ocelot.file.versioning.model.Promotion;
 import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
@@ -142,7 +142,7 @@ public class VersioningManager {
                 setCurrentBranchToTarget();
             }
 
-            stageFiles(false); // the agent mapping file should not be committed to the live branch
+            stageFiles();
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", false);
 
             if (getCommitCount() <= 0) {
@@ -157,13 +157,10 @@ public class VersioningManager {
             // create the branches which will be used
             git.branchRename().setNewName(Branch.WORKSPACE.getBranchName()).call();
             git.branchCreate().setName(Branch.LIVE.getBranchName()).call();
-
-            stageFiles(true);
-            commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing agent mappings during startup", false);
         } else if (!isClean()) {
             log.info("Changes in the configuration or agent mapping files have been detected and will be committed to the repository.");
 
-            stageFiles(true);
+            stageFiles();
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
         }
 
@@ -265,7 +262,7 @@ public class VersioningManager {
         }
         log.info("Staging and committing of external changes to the configuration files or agent mappings");
 
-        stageFiles(true);
+        stageFiles();
         commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes", false);
     }
 
@@ -296,7 +293,7 @@ public class VersioningManager {
 
         PersonIdent author = getCurrentAuthor();
 
-        stageFiles(true);
+        stageFiles();
 
         if (commitAllFiles(author, message, author != GIT_SYSTEM_AUTHOR)) {
             eventPublisher.publishEvent(new WorkspaceChangedEvent(this, getWorkspaceRevision()));
@@ -344,17 +341,12 @@ public class VersioningManager {
 
     /**
      * Stage all modified/added/removed configuration files and, if specified, the agent mapping file.
-     *
-     * @param includeAgentMappings Flag indicating whether the agent mapping file should be staged as well
      */
-    private void stageFiles(boolean includeAgentMappings) throws GitAPIException {
-        log.debug("Staging all configuration files{}.", includeAgentMappings ? " and agent mappings" : "");
+    private void stageFiles() throws GitAPIException {
+        log.debug("Staging all configuration files and agent mappings.");
 
         AddCommand addCommand = git.add().addFilepattern(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
-
-        if (includeAgentMappings) {
-            addCommand.addFilepattern(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
-        }
+        addCommand.addFilepattern(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
 
         addCommand.call();
     }
@@ -542,7 +534,6 @@ public class VersioningManager {
         // the diff entries are converted into custom ones
         List<SimpleDiffEntry> simpleDiffEntries = diffEntries.stream()
                 .map(SimpleDiffEntry::of)
-                .filter(entry -> entry.getFile().startsWith(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER))
                 .map(SimpleDiffEntry::shortenName)
                 .collect(Collectors.toList());
 
@@ -604,8 +595,16 @@ public class VersioningManager {
         //move "baseRevision" to the last commit where this file was touched (potentially the root commit).
         baseRevision = findLastChangingRevision(file, baseRevision);
 
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
+            return findModifyingAuthorsForAgentMappings(file, newRevision, baseRevision);
+        else
+            return findModifyingAuthorsForConfiguration(file, newRevision, baseRevision);
+    }
+
+    private Collection<String> findModifyingAuthorsForConfiguration(String file, RevisionAccess newRevision, RevisionAccess baseRevision) {
         Set<String> authors = new HashSet<>();
         String baseContent = baseRevision.readConfigurationFile(file).get();
+
         //Find all persons who added or modified the file since the last promotion.
         RevisionAccess commonAncestor = newRevision.getCommonAncestor(baseRevision);
         while (!newRevision.getRevisionId().equals(commonAncestor.getRevisionId())) {
@@ -626,6 +625,30 @@ public class VersioningManager {
         return authors;
     }
 
+    private Collection<String> findModifyingAuthorsForAgentMappings(String file, RevisionAccess newRevision, RevisionAccess baseRevision) {
+        Set<String> authors = new HashSet<>();
+        String baseContent = baseRevision.readAgentMappings().get();
+
+        //Find all persons who added or modified the file since the last promotion.
+        RevisionAccess commonAncestor = newRevision.getCommonAncestor(baseRevision);
+        while (!newRevision.getRevisionId().equals(commonAncestor.getRevisionId())) {
+            if (newRevision.isAgentMappingsModified()) {
+                authors.add(newRevision.getAuthorName());
+            } else if (newRevision.isAgentMappingsAdded()) {
+                authors.add(newRevision.getAuthorName());
+                break; //THe file has been added, no need to take previous changes into account
+            }
+            newRevision = newRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
+            if (newRevision.agentMappingsExist() && newRevision.readAgentMappings()
+                    .get()
+                    .equals(baseContent)) {
+                break; // we have reached a revision where the content is in the original state, no need to look further
+            }
+        }
+        return authors;
+    }
+
     /**
      * Walks back in history to the point where the given file was added.
      * On the way, all authors which have modifies the file are remembered.
@@ -637,10 +660,32 @@ public class VersioningManager {
      */
     private Collection<String> findAuthorsSinceAddition(String file, RevCommit newCommit) {
         RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
+
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
+            return findAuthorsSinceAdditionForAgentMappings(newRevision);
+        else
+            return findAuthorsSinceAdditionForConfiguration(file, newRevision);
+    }
+
+    private Collection<String> findAuthorsSinceAdditionForConfiguration(String file, RevisionAccess newRevision) {
         Set<String> authors = new HashSet<>();
         //Find all persons who edited the file since it was added
         while (!newRevision.isConfigurationFileAdded(file)) {
             if (newRevision.isConfigurationFileModified(file)) {
+                authors.add(newRevision.getAuthorName());
+            }
+            newRevision = newRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
+        }
+        authors.add(newRevision.getAuthorName()); //Also add the name of the person who added the file
+        return authors;
+    }
+
+    private Collection<String> findAuthorsSinceAdditionForAgentMappings(RevisionAccess newRevision) {
+        Set<String> authors = new HashSet<>();
+        //Find all persons who edited the file since it was added
+        while (!newRevision.isAgentMappingsAdded()) {
+            if (newRevision.isAgentMappingsModified()) {
                 authors.add(newRevision.getAuthorName());
             }
             newRevision = newRevision.getPreviousRevision()
@@ -657,12 +702,15 @@ public class VersioningManager {
      * Returns the author of this revision.
      *
      * @param file       the file to check
-     * @param baseCommit the commit to comapre agains, usually the live branch
+     * @param baseCommit the commit to compare against, usually the live branch
      * @param newCommit  the commit in which the provided file does not exist anymore, usually on the workspace
      *
      * @return the author of the revision which is responsible for the deletion.
      */
     private String findDeletingAuthor(String file, RevCommit baseCommit, RevCommit newCommit) {
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
+            throw new IllegalStateException(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME + " must not be deleted!");
+
         RevisionAccess newRevision = new RevisionAccess(git.getRepository(), newCommit);
         RevisionAccess baseRevision = new RevisionAccess(git.getRepository(), baseCommit);
         //move "baseRevision" to the last commit where this file was touched (potentially the root commit).
@@ -694,7 +742,22 @@ public class VersioningManager {
      * @return a revision which either modifies or adds the given file.
      */
     private RevisionAccess findLastChangingRevision(String file, RevisionAccess baseRevision) {
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
+            return findLastChangingRevisionForAgentMappings(baseRevision);
+        else
+            return findLastChangingRevisionForConfiguration(file, baseRevision);
+    }
+
+    private RevisionAccess findLastChangingRevisionForConfiguration(String file, RevisionAccess baseRevision) {
         while (!baseRevision.isConfigurationFileAdded(file) && !baseRevision.isConfigurationFileModified(file)) {
+            baseRevision = baseRevision.getPreviousRevision()
+                    .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
+        }
+        return baseRevision;
+    }
+
+    private RevisionAccess findLastChangingRevisionForAgentMappings(RevisionAccess baseRevision) {
+        while (!baseRevision.isAgentMappingsAdded() && !baseRevision.isAgentMappingsModified()) {
             baseRevision = baseRevision.getPreviousRevision()
                     .orElseThrow(() -> new IllegalStateException(EXPECTED_PARENT_EXIST));
         }
@@ -710,6 +773,15 @@ public class VersioningManager {
      */
     private void fillFileContent(SimpleDiffEntry entry, RevisionAccess oldRevision, RevisionAccess newRevision) {
         String file = entry.getFile();
+
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
+            fillAgentMappingsFileContent(entry, oldRevision, newRevision);
+        else
+            fillConfigurationFileContent(entry, oldRevision, newRevision);
+    }
+
+    private void fillConfigurationFileContent(SimpleDiffEntry entry, RevisionAccess oldRevision, RevisionAccess newRevision) {
+        String file = entry.getFile();
         String oldContent = null;
         String newContent = null;
 
@@ -720,6 +792,23 @@ public class VersioningManager {
             newContent = newRevision.readConfigurationFile(file).orElse(null);
         } else if (entry.getType() == DiffEntry.ChangeType.DELETE) {
             oldContent = oldRevision.readConfigurationFile(file).orElse(null);
+        }
+
+        entry.setOldContent(oldContent);
+        entry.setNewContent(newContent);
+    }
+
+    private void fillAgentMappingsFileContent(SimpleDiffEntry entry, RevisionAccess oldRevision, RevisionAccess newRevision) {
+        String oldContent = null;
+        String newContent = null;
+
+        if (entry.getType() == DiffEntry.ChangeType.ADD) {
+            newContent = newRevision.readAgentMappings().orElse(null);
+        } else if (entry.getType() == DiffEntry.ChangeType.MODIFY) {
+            oldContent = oldRevision.readAgentMappings().orElse(null);
+            newContent = newRevision.readAgentMappings().orElse(null);
+        } else if (entry.getType() == DiffEntry.ChangeType.DELETE) {
+            oldContent = oldRevision.readAgentMappings().orElse(null);
         }
 
         entry.setOldContent(oldContent);
@@ -751,35 +840,35 @@ public class VersioningManager {
     }
 
     /**
-     * Promoting the configuration files according to the specified {@link ConfigurationPromotion} definition.
+     * Promoting the files according to the specified {@link Promotion} definition.
      *
      * @param promotion          the promotion definition
      * @param allowSelfPromotion whether users can promote their own files
      *
      * @return Additional information of the promotion in case the promotion was successful. This might contain additional
-     * information about warning or errors which did not affected the promotion itself.
+     * information about warning or errors which did not affect the promotion itself.
      *
-     * @throws SelfPromotionNotAllowedException in case the user tries to promote its own files but it is prohibited
-     * @throws ConcurrentModificationException  in case there was a commit on the live branch in the mean time
+     * @throws SelfPromotionNotAllowedException in case the user tries to promote its own files, but it is prohibited
+     * @throws ConcurrentModificationException  in case there was a commit on the live branch in the meantime
      * @throws PromotionFailedException         in case the promotion has been failed
      */
-    public PromotionResult promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion) throws GitAPIException {
-        return promoteConfiguration(promotion, allowSelfPromotion, getCurrentAuthor());
+    public PromotionResult promote(Promotion promotion, boolean allowSelfPromotion) throws GitAPIException {
+        return promote(promotion, allowSelfPromotion, getCurrentAuthor());
     }
 
     /**
-     * Promoting the configuration files according to the specified {@link ConfigurationPromotion} definition.
+     * Promoting the files according to the specified {@link Promotion} definition.
      *
      * @param promotion          the promotion definition
      * @param allowSelfPromotion whether users can promote their own files
      * @param author             the author used for the resulting promotion commit
      */
-    public synchronized PromotionResult promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion, PersonIdent author) throws GitAPIException {
+    public synchronized PromotionResult promote(Promotion promotion, boolean allowSelfPromotion, PersonIdent author) throws GitAPIException {
         if (promotion == null || CollectionUtils.isEmpty(promotion.getFiles())) {
-            throw new IllegalArgumentException("ConfigurationPromotion must not be null and has to promote at least one file!");
+            throw new IllegalArgumentException("Promotion must not be null and has to promote at least one file!");
         }
 
-        log.info("User '{}' promotes {} configuration files.", author.getName(), promotion.getFiles().size());
+        log.info("User '{}' promotes {} files.", author.getName(), promotion.getFiles().size());
 
         PromotionResult result = PromotionResult.OK;
         try {
@@ -840,20 +929,20 @@ public class VersioningManager {
                 }
             }
         } catch (IOException | GitAPIException ex) {
-            throw new PromotionFailedException("Configuration promotion has failed.", ex);
+            throw new PromotionFailedException("Promotion has failed.", ex);
         } finally {
-            log.info("Configuration promotion was successful.");
+            log.info("Promotion was successful.");
 
             // checkout workspace branch
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
 
-            eventPublisher.publishEvent(new ConfigurationPromotionEvent(this, getLiveRevision()));
+            eventPublisher.publishEvent(new PromotionEvent(this, getLiveRevision()));
         }
 
         return result;
     }
 
-    private boolean containsSelfPromotion(ConfigurationPromotion promotion, WorkspaceDiff diff) {
+    private boolean containsSelfPromotion(Promotion promotion, WorkspaceDiff diff) {
         PersonIdent currentAuthor = getCurrentAuthor();
         if (currentAuthor == GIT_SYSTEM_AUTHOR) {
             return false;
@@ -878,11 +967,12 @@ public class VersioningManager {
      * @return the file path including the files directory
      */
     private String prefixRelativeFile(String file) {
-        if (file.startsWith("/")) {
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME))
+            return file;
+        else if (file.startsWith("/"))
             return AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + file;
-        } else {
+        else
             return AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/" + file;
-        }
     }
 
     /**
@@ -1037,14 +1127,14 @@ public class VersioningManager {
                     .map(SimpleDiffEntry::getFile)
                     .collect(Collectors.toList());
 
-            ConfigurationPromotion promotion = ConfigurationPromotion.builder()
+            Promotion promotion = Promotion.builder()
                     .commitMessage("Auto-promotion due to workspace remote synchronization.")
                     .workspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName())
                     .liveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName())
                     .files(diffFiles)
                     .build();
 
-            promoteConfiguration(promotion, true, GIT_SYSTEM_AUTHOR);
+            promote(promotion, true, GIT_SYSTEM_AUTHOR);
         }
 
     }

@@ -73,7 +73,7 @@ const selectionTemplate = ({ file, type, authors, isApproved, canSelfApprove, cu
 };
 
 /**
- * Sidebar for showing existing configuration promotion files.
+ * Sidebar for showing existing promotion files.
  */
 const PromotionSidebar = ({ selection, onSelectionChange, promotionFiles, updateDate }) => {
   return (
@@ -117,7 +117,7 @@ const PromotionSidebar = ({ selection, onSelectionChange, promotionFiles, update
       </style>
 
       <div className="this">
-        <div className="title">Modified Configurations</div>
+        <div className="title">Modified Files</div>
         <ListBox
           value={selection}
           options={promotionFiles}

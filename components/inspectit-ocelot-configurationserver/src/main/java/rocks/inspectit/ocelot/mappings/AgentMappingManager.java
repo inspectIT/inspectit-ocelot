@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import javax.annotation.PostConstruct;
@@ -14,6 +15,8 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
+import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 /**
  * The manager class to handle and manage the agent mappings.
@@ -35,14 +38,19 @@ public class AgentMappingManager {
     /**
      * Object mapper utils.
      */
-    @Autowired
     private AgentMappingSerializer serializer;
 
     /**
      * Object mapper utils.
      */
-    @Autowired
     private FileManager fileManager;
+
+    @VisibleForTesting
+    @Autowired
+    AgentMappingManager(AgentMappingSerializer serializer, FileManager fileManager) {
+        this.serializer = serializer;
+        this.fileManager = fileManager;
+    }
 
     /**
      * Post construct. Initially reading the agent mappings if the mappings file exists.
@@ -50,19 +58,59 @@ public class AgentMappingManager {
     @PostConstruct
     public void postConstruct() throws IOException {
         if (!fileManager.getWorkspaceRevision().agentMappingsExist()) {
-            log.info("Generating default agent mappings");
+            log.info("Generating default agent mappings for workspace branch");
             List<AgentMapping> defaultMappings = Collections.singletonList(DEFAULT_MAPPING);
             serializer.writeAgentMappings(defaultMappings, fileManager.getWorkingDirectory());
         }
     }
 
     /**
-     * Returns a unmodifiable representation of the current agent mappings list.
+     * @return The current source branch for the agent mapping file itself.
+     */
+    public synchronized Branch getSourceBranch() {
+        return serializer.getSourceBranch();
+    }
+
+    /**
+     * Sets the source branch, from which the agent mapping file will be reade
+     * @param sourceBranch new source branch
+     * @return The set source branch
+     */
+    public synchronized Branch setSourceBranch(String sourceBranch) {
+        checkArgument(sourceBranch != null, "The set source branch cannot be null.");
+        sourceBranch = sourceBranch.toLowerCase();
+
+        switch (sourceBranch) {
+            case "live":
+                return serializer.setSourceBranch(LIVE);
+            case "workspace":
+                return serializer.setSourceBranch(WORKSPACE);
+            default:
+                throw new UnsupportedOperationException("Unhandled branch: " + sourceBranch);
+        }
+    }
+
+    /**
+     * Returns an unmodifiable representation of the agent mappings list.
+     *
+     * @param version The id of the version, which should be listed.
+     *                If it is empty, the latest workspace version is used.
+     *                Can be 'live' fir listing the latest live version.
      *
      * @return A list of {@link AgentMapping}
      */
+    public synchronized List<AgentMapping> getAgentMappings(String version) {
+        if (version == null) {
+            return serializer.readAgentMappings(fileManager.getWorkspaceRevision());
+        } else if (version.equals("live")) {
+            return serializer.readAgentMappings(fileManager.getLiveRevision());
+        } else {
+            return serializer.readAgentMappings(fileManager.getCommitWithId(version));
+        }
+    }
+
     public synchronized List<AgentMapping> getAgentMappings() {
-        return serializer.readAgentMappings(fileManager.getWorkspaceRevision());
+        return getAgentMappings(null);
     }
 
     /**

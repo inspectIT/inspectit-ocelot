@@ -1,25 +1,20 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import ConfigurationHistoryView from './history/ConfigurationHistoryView';
-import { configurationActions } from '../../../redux/ducks/configuration';
-import DocumentationView from './documentation/DocumentationView';
+import MappingsHistoryView from './history/MappingsHistoryView';
 import SidebarTypes from './SidebarTypes';
+import { mappingsActions } from '../../../redux/ducks/mappings';
 
 /**
  * The sidebar of the configuration view.
  */
-const ConfigurationSidebar = () => {
+const MappingSidebar = () => {
   const dispatch = useDispatch();
 
   // global state variables
-  const currentSidebar = useSelector((state) => state.configuration.currentSidebar);
+  const currentSidebar = useSelector((state) => state.mappings.currentSidebar);
 
   const toggleHistoryView = () => {
-    dispatch(configurationActions.toggleHistoryView());
-  };
-
-  const toggleDocumentationView = () => {
-    dispatch(configurationActions.toggleDocumentationView());
+    dispatch(mappingsActions.toggleHistoryView());
   };
 
   return (
@@ -27,12 +22,11 @@ const ConfigurationSidebar = () => {
       <style jsx>
         {`
           .sidebar {
+            display: flex;
             border: 0;
             border-radius: 0;
             background-color: #eee;
             border-left: 1px solid #ddd;
-            flex: 0;
-            display: flex;
             background-color: #eeeeee;
           }
           .vert-button {
@@ -52,11 +46,7 @@ const ConfigurationSidebar = () => {
       </style>
 
       <div className="sidebar">
-        <div className="content-container">
-          {currentSidebar == SidebarTypes.HISTORY && <ConfigurationHistoryView />}
-          {currentSidebar == SidebarTypes.CONFIGURATION_DOCS && <DocumentationView />}
-        </div>
-
+        <div className="content-container">{currentSidebar == SidebarTypes.HISTORY && <MappingsHistoryView />}</div>
         <div>
           <button
             className={'vert-button p-button p-togglebutton' + (currentSidebar == SidebarTypes.HISTORY ? 'p-highlight' : '')}
@@ -65,19 +55,12 @@ const ConfigurationSidebar = () => {
             <i className={'pi pi-chevron-' + (currentSidebar == SidebarTypes.HISTORY ? 'right' : 'left')} />
             <span>Versioning</span>
           </button>
-          <button
-            className={'vert-button p-button p-togglebutton' + (currentSidebar == SidebarTypes.CONFIGURATION_DOCS ? 'p-highlight' : '')}
-            onClick={toggleDocumentationView}
-          >
-            <i className={'pi pi-chevron-' + (currentSidebar == SidebarTypes.CONFIGURATION_DOCS ? 'right' : 'left')} />
-            <span>Configuration Docs</span>
-          </button>
         </div>
       </div>
     </>
   );
 };
 
-ConfigurationSidebar.propTypes = {};
+MappingSidebar.propTypes = {};
 
-export default ConfigurationSidebar;
+export default MappingSidebar;

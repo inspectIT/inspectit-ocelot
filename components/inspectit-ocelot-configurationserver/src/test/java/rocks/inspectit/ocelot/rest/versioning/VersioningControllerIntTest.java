@@ -23,9 +23,9 @@ class VersioningControllerIntTest extends IntegrationTestBase {
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             WorkspaceVersion[] resultBody = result.getBody();
-            assertThat(resultBody).hasSize(2)
+            assertThat(resultBody).hasSize(1)
                     .extracting(WorkspaceVersion::getAuthor, WorkspaceVersion::getMessage)
-                    .contains(tuple("System", "Initializing Git repository using existing working directory"), tuple("System", "Staging and committing agent mappings during startup"));
+                    .contains(tuple("System", "Initializing Git repository using existing working directory"));
             assertThat(resultBody).allMatch(version -> ObjectId.isId(version.getId()));
         }
 
@@ -38,9 +38,9 @@ class VersioningControllerIntTest extends IntegrationTestBase {
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             WorkspaceVersion[] resultBody = result.getBody();
-            assertThat(resultBody).hasSize(3)
+            assertThat(resultBody).hasSize(2)
                     .extracting(WorkspaceVersion::getAuthor, WorkspaceVersion::getMessage)
-                    .contains(tuple("admin", "Commit configuration file and agent mapping changes"), tuple("System", "Staging and committing agent mappings during startup"), tuple("System", "Initializing Git repository using existing working directory"));
+                    .contains(tuple("admin", "Commit configuration file and agent mapping changes"), tuple("System", "Initializing Git repository using existing working directory"));
             assertThat(resultBody).allMatch(version -> ObjectId.isId(version.getId()));
         }
 

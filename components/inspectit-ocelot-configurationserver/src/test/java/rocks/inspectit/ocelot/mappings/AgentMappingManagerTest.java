@@ -4,14 +4,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
+import rocks.inspectit.ocelot.events.AgentMappingsSourceBranchChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
+import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class AgentMappingManagerTest {
     @InjectMocks
     AgentMappingManager manager;
 
-    @Spy
+    @Mock
     AgentMappingSerializer serializer;
 
     @Mock
@@ -44,9 +45,17 @@ public class AgentMappingManagerTest {
     @Mock
     RevisionAccess readAccessor;
 
+    @Mock
+    ApplicationEventPublisher publisher;
+
     @BeforeEach
     public void init() {
+        InspectitServerSettings settings = InspectitServerSettings.builder().initialAgentMappingsSourceBranch("workspace").build();
+        serializer = Mockito.spy(new AgentMappingSerializer(settings, fileManager, publisher));
         serializer.postConstruct();
+
+        manager = new AgentMappingManager(serializer, fileManager);
+
         verify(serializer).postConstruct();
         lenient().doReturn(writeAccessor).when(fileManager).getWorkingDirectory();
         lenient().doReturn(readAccessor).when(fileManager).getWorkspaceRevision();
@@ -531,6 +540,30 @@ public class AgentMappingManagerTest {
 
             verify(serializer).readAgentMappings(any());
             verifyNoMoreInteractions(serializer);
+        }
+    }
+
+    @Nested
+    public class SetAgentMappingsSourceBranch {
+
+        @Test
+        public void verifySourceBranchHasChanged() {
+            when(fileManager.getLiveRevision()).thenReturn(readAccessor);
+            when(readAccessor.agentMappingsExist()).thenReturn(true);
+
+            Branch oldBranch = manager.getSourceBranch();
+            Branch newBranch = manager.setSourceBranch("LIVE");
+
+            verify(publisher, times(1)).publishEvent(any(AgentMappingsSourceBranchChangedEvent.class));
+            assertThat(oldBranch.equals(newBranch)).isFalse();
+        }
+
+        @Test
+        public void verifyThrowsExceptions()  {
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> manager.setSourceBranch(null))
+                    .withMessage("The set source branch cannot be null.");
+            assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> manager.setSourceBranch("unknown"))
+                    .withMessage("Unhandled branch: unknown");
         }
     }
 }

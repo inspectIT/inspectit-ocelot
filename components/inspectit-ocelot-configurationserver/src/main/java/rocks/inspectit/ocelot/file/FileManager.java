@@ -18,7 +18,7 @@ import rocks.inspectit.ocelot.file.accessor.workingdirectory.CachingWorkingDirec
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.versioning.PromotionResult;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
-import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
+import rocks.inspectit.ocelot.file.versioning.model.Promotion;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
 
@@ -148,18 +148,18 @@ public class FileManager {
     }
 
     /**
-     * Executes a file promotion according to the specified {@link ConfigurationPromotion} definition.
+     * Executes a promotion according to the specified {@link Promotion} definition.
      *
      * @param promotion          the definition what to promote
      * @param allowSelfPromotion if true, the current user will be allowed to promote his own changes.
      *
      * @return Additional information of the promotion in case the promotion was successful. This might contain additional
-     * information about warning or errors which did not affected the promotion itself.
+     * information about warning or errors which did not affect the promotion itself.
      */
-    public PromotionResult promoteConfiguration(ConfigurationPromotion promotion, boolean allowSelfPromotion) throws GitAPIException {
+    public PromotionResult promote(Promotion promotion, boolean allowSelfPromotion) throws GitAPIException {
         workingDirectoryLock.writeLock().lock();
         try {
-            return versioningManager.promoteConfiguration(promotion, allowSelfPromotion);
+            return versioningManager.promote(promotion, allowSelfPromotion);
         } finally {
             workingDirectoryLock.writeLock().unlock();
         }
@@ -169,7 +169,7 @@ public class FileManager {
      * Can be called to commit external changes to the working directory.
      * This will cause the workspace revision to be in sync with the file system.
      * <p>
-     * The changes will be commit as the currently logged in user.
+     * The changes will be committed as the currently logged-in user.
      */
     public void commitWorkingDirectory() throws GitAPIException {
         workingDirectoryLock.writeLock().lock();

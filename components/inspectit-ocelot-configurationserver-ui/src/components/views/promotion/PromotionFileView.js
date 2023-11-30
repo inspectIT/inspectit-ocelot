@@ -27,8 +27,8 @@ const PromotionFileViewer = ({ oldValue, newValue }) => {
 
       <div className="this">
         <ReactDiffViewer
-          leftTitle="Live Configuration"
-          rightTitle="Workspace Configuration"
+          leftTitle="LIVE"
+          rightTitle="WORKSPACE"
           oldValue={oldValue || ''}
           newValue={newValue || ''}
           splitView={isLargeScreen}
