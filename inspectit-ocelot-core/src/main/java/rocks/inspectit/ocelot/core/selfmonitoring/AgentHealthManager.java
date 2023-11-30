@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealthIncident;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.selfmonitoring.event.listener.LogWritingHealthEventListener;
 import rocks.inspectit.ocelot.core.selfmonitoring.event.models.AgentHealthChangedEvent;
 
 import javax.annotation.PostConstruct;
@@ -146,7 +147,10 @@ public class AgentHealthManager {
             boolean changedHealth = healthHasChanged();
             AgentHealth currentHealth = getCurrentHealth();
 
-            if(shouldCreateIncident) {
+            // Don't create incident for health event logs
+            boolean isLoggedHealthEvent = incidentSource.equals(LogWritingHealthEventListener.class.getName());
+
+            if(shouldCreateIncident && !isLoggedHealthEvent) {
                 AgentHealthIncident incident = new AgentHealthIncident(
                         LocalDateTime.now().toString(), currentHealth, incidentSource, message, changedHealth);
                 healthIncidentBuffer.put(incident);
@@ -192,21 +196,5 @@ public class AgentHealthManager {
                 .reduce(AgentHealth::mostSevere)
                 .orElse(AgentHealth.OK);
         return AgentHealth.mostSevere(generalHealth, invHealth);
-    }
-
-    /**
-     * THIS METHOD SHOULD ONLY BE USED FOR TESTING.
-     * It allows to specify a custom validityPeriod, which by default has to be at least 60s.
-     * With customizing the period, you can reduce the amount of waiting time for tests.
-     */
-    @VisibleForTesting
-    void handleTimeoutHealthTesting(AgentHealth eventHealth, String loggerName, String eventMassage, Duration validityPeriod) {
-        boolean isNotInfo = eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING);
-
-        if (isNotInfo) {
-            generalHealthTimeouts.put(eventHealth, LocalDateTime.now().plus(validityPeriod));
-        }
-        String fullEventMessage = eventMassage + ". This status is valid for " + validityPeriod;
-        triggerAgentHealthChangedEvent(loggerName, fullEventMessage, isNotInfo);
     }
 }

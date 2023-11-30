@@ -71,7 +71,7 @@ public class AgentHealthManagerTest {
     class TimeoutHealth {
 
         @BeforeEach
-        void setUp() {
+        void setUpValidityPeriod() {
             when(environment.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod())
                     .thenReturn(Duration.ofSeconds(5));
         }
@@ -103,7 +103,7 @@ public class AgentHealthManagerTest {
                     .thenReturn(Duration.ofSeconds(5));
 
             healthManager.notifyAgentHealth(AgentHealth.ERROR, null, this.getClass().getName(), "Mock message");
-            // Wait 6s for time out
+            // Wait 6s for time out (= 5s validityPeriod + 1s buffer)
             Thread.sleep(6000);
 
             assertEquals(healthManager.getCurrentHealth(), AgentHealth.OK);
@@ -115,7 +115,7 @@ public class AgentHealthManagerTest {
                     .thenReturn(Duration.ofSeconds(1));
 
             healthManager.notifyAgentHealth(AgentHealth.ERROR, null, this.getClass().getName(), "Mock message");
-            // Wait 6s for time out
+            // Wait 6s for time out (= 5s validityPeriod + 1s buffer)
             Thread.sleep(6000);
 
             healthManager.checkHealthAndSchedule();

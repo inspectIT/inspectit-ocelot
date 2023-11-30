@@ -1,79 +1,79 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.propertysources.http.HttpConfigurationPoller;
-
-import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Integration tests {@link AgentHealthManager}
  */
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@TestPropertySource(properties = "inspectit.self-monitoring.agent-health.validity-period:60s")
 public class AgentHealthManagerIntTest extends SpringTestBase {
 
     @Autowired
     private AgentHealthManager healthManager;
     @Autowired
     private HttpConfigurationPoller configurationPoller;
-    @Autowired
-    private AgentHealthIncidentBuffer incidentBuffer;
 
-    @BeforeEach
-    void clearBuffer() {
-        incidentBuffer.clear();
-    }
+    /**
+     * Period how long a TimeOut AgentHealth is valid (+1s buffer)
+     */
+    private final long validityPeriod = 61000;
 
     @Nested
     class InvalidatableHealth {
 
         @Test
         void verifyAgentHealthUpdating() {
+            AgentHealth currentManagerHealth = healthManager.getCurrentHealth();
             AgentHealth currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
-            int bufferSize = healthManager.getIncidentHistory().size();
+            assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.OK);
-            assertEquals(bufferSize, 0);
 
             healthManager.notifyAgentHealth(AgentHealth.WARNING, this.getClass(), this.getClass().getName(), "Mock message");
 
             currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
-            bufferSize = healthManager.getIncidentHistory().size();
+            currentManagerHealth = healthManager.getCurrentHealth();
+            assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.WARNING);
-            assertEquals(bufferSize, 1);
-
             healthManager.notifyAgentHealth(AgentHealth.ERROR, this.getClass(), this.getClass().getName(), "Mock message");
 
             currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
-            bufferSize = healthManager.getIncidentHistory().size();
+            currentManagerHealth = healthManager.getCurrentHealth();
+            assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.ERROR);
-            assertEquals(bufferSize, 2);
         }
 
         @Test
-        void verifyAgentHealthInvalidation() {
+        void verifyAgentHealthInvalidation() throws InterruptedException {
             AgentHealth currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
-            int bufferSize = healthManager.getIncidentHistory().size();
+            AgentHealth currentManagerHealth = healthManager.getCurrentHealth();
+            assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.OK);
-            assertEquals(bufferSize, 0);
 
             healthManager.notifyAgentHealth(AgentHealth.ERROR, this.getClass(), this.getClass().getName(), "Mock message");
 
             currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
-            bufferSize = healthManager.getIncidentHistory().size();
+            currentManagerHealth = healthManager.getCurrentHealth();
+            assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.ERROR);
-            assertEquals(bufferSize, 1);
 
             healthManager.invalidateIncident(this.getClass(), "Mock invalidation");
+            // simulate scheduler
+            Thread.sleep(validityPeriod);
+            healthManager.checkHealthAndSchedule();
 
             currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
-            bufferSize = healthManager.getIncidentHistory().size();
+            currentManagerHealth = healthManager.getCurrentHealth();
+            assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.OK);
-            assertEquals(bufferSize, 2);
         }
     }
 
@@ -83,27 +83,25 @@ public class AgentHealthManagerIntTest extends SpringTestBase {
         @Test
         void verifyAgentHealthUpdating() throws InterruptedException {
             AgentHealth currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
-            int bufferSize = healthManager.getIncidentHistory().size();
+            AgentHealth currentManagerHealth = healthManager.getCurrentHealth();
+            assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.OK);
-            assertEquals(bufferSize, 0);
 
-            // Use custom method for testing, to reduce the validityPeriod
-            // This method should not be used outside of tests!
-            healthManager.handleTimeoutHealthTesting(AgentHealth.WARNING, this.getClass().getName(),
-                    "Mock message", Duration.ofSeconds(10));
+            healthManager.notifyAgentHealth(AgentHealth.WARNING, null, this.getClass().getName(), "Mock message");
 
             currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
-            bufferSize = healthManager.getIncidentHistory().size();
+            currentManagerHealth = healthManager.getCurrentHealth();
+            assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.WARNING);
-            assertEquals(bufferSize, 1);
 
-            // wait 61s for time out (which has to be at least 60s)
-            Thread.sleep(61000);
+            // simulate scheduler
+            Thread.sleep(validityPeriod);
+            healthManager.checkHealthAndSchedule();
 
             currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
-            bufferSize = healthManager.getIncidentHistory().size();
+            currentManagerHealth = healthManager.getCurrentHealth();
+            assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.OK);
-            assertEquals(bufferSize, 3);
         }
     }
 }
