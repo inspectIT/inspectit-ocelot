@@ -3,11 +3,14 @@ id: agent-mappings
 title: Agent Mappings
 ---
 
-Agent mappings are used to determine which agent receives which configuration. Here, individual files or specific folders can be defined, which serve as the basis for the resulting configuration. Furthermore, you can specify which branch (`WORKSPACE` or `LIVE`) the mapping should use to obtain the configuration files.
+Agent mappings are used to determine which agent receives which configuration. Here, individual files or specific
+folders can be defined, which serve as the basis for the resulting configuration.
+Furthermore, you can specify which branch (`WORKSPACE` or `LIVE`) the mapping should use to obtain the configuration files.
 
 It's important to note that the first matching agent mapping will be used to determine which configuration is shipped to an agent.
 Additional agent mappings which may also match the attributes list sent by an agent will be ignored.
-See section [HTTP-based Configuration](configuration/external-configuration-sources.md#http-based-configuration) for information on how to specify which attributes will be sent by an agent.
+See section [HTTP-based Configuration](configuration/external-configuration-sources.md#http-based-configuration) for
+information on how to specify which attributes will be sent by an agent.
 
 An agent mapping consists of the following properties:
 
@@ -29,6 +32,35 @@ This default agent mapping maps each agent to each configuration file of the `wo
   attributes:
     service: ".*"
   sourceBranch: "WORKSPACE"
+```
+
+## Git Staging
+
+:::tip
+You can find more detailed information about file staging and promotion [here](config-server/configuration-staging.md).
+:::
+
+Since the version `2.6.0` the configuration for the agent mappings itself will also be included into the git staging. For all agent mappings
+the configuration is stored in one file. After one or several agent mappings have been edited, the changes will also
+appear on the promotion page. The promotion of the agent mappings configuration works directly like the promotion of agent configuration files.
+
+Additionally, it is possible to select a source branch (`WORKSPACE` or `LIVE`) for the agent mappings configuration itself.
+This will determine, whether changes in the agent mappings should be applied directly or only after the promotion of the
+agent mappings configuration.
+
+:::important
+The source branch for the agent mappings configuration will **not affect** the defined `sourceBranch` in each **individual agent mapping**!
+The `sourceBranch` property of an individual agent mapping determines, which branch should be used for the agent configuration files.
+:::
+
+![Different Source Branches on Agent Mappings Page](assets/agent_mappings_source_branch.png)
+
+You can define, which source branch should be used at start-up for the agent mappings
+in the application properties of the configuration server:
+
+```YAML
+inspectit-config-server:
+  initial-agent-mappings-source-branch: WORKSPACE
 ```
 
 ## Example Agent Mappings

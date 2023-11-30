@@ -20,7 +20,8 @@
       "metrics/metric-exporters",
       "metrics/common-tags",
       "metrics/custom-metrics",
-      "metrics/self-monitoring"
+      "metrics/self-monitoring",
+      "metrics/tag-guard"
     ],
     "Tracing": [
       "tracing/tracing",
