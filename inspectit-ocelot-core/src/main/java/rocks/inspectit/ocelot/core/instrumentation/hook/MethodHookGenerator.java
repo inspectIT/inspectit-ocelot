@@ -109,7 +109,7 @@ public class MethodHookGenerator {
         builder.exitActions(buildActionCalls(config.getPreExitActions(), methodInfo));
         builder.exitActions(buildActionCalls(config.getExitActions(), methodInfo));
         if (tracingSettings != null) {
-            List<IHookAction> actions = buildTracingExitActions(tracingSettings);
+            List<IHookAction> actions = buildTracingExitActions(config);
             if (isTracingInternalActions() && config.isTraceExitHook()) {
                 actions = wrapActionsWithTracing(actions);
             }
@@ -190,7 +190,8 @@ public class MethodHookGenerator {
     }
 
     @VisibleForTesting
-    List<IHookAction> buildTracingExitActions(RuleTracingSettings tracing) {
+    List<IHookAction> buildTracingExitActions(MethodHookConfiguration config) {
+        RuleTracingSettings tracing = config.getTracing();
         val result = new ArrayList<IHookAction>();
 
         boolean isSpanStartedOrContinued = tracing.getStartSpan() || StringUtils.isNotBlank(tracing.getContinueSpan());
@@ -201,7 +202,13 @@ public class MethodHookGenerator {
                 result.add(new SetSpanStatusAction(accessor));
             }
 
-            val attributes = tracing.getAttributes();
+            val tracingAttributes = tracing.getAttributes();
+
+            //TODO Make this configurable -> if(tracing.autoCopy.enabled)
+            Collection<MetricRecordingSettings> metrics = config.getMetrics();
+            Map<String, String> attributes = collectMetricTags(metrics);
+            attributes.putAll(tracingAttributes);
+
             if (!attributes.isEmpty()) {
                 Map<String, VariableAccessor> attributeAccessors = new HashMap<>();
                 attributes.forEach((attribute, variable) -> attributeAccessors.put(attribute, variableAccessorFactory.getVariableAccessor(variable)));
@@ -217,6 +224,16 @@ public class MethodHookGenerator {
         }
 
         return result;
+    }
+
+    private Map<String, String> collectMetricTags(Collection<MetricRecordingSettings> metrics) {
+        Map<String, String> tags = new HashMap<>();
+        metrics.forEach(metric -> {
+            //tags.putAll(metric.getConstantTags());
+            tags.putAll(metric.getDataTags());
+        });
+
+        return tags;
     }
 
     private Optional<IHookAction> buildMetricsRecorder(MethodHookConfiguration config) {

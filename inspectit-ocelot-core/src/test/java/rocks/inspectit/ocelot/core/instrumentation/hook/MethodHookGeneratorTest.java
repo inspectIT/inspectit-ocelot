@@ -190,7 +190,8 @@ public class MethodHookGeneratorTest {
                     .endSpan(true)
                     .build();
 
-            List<IHookAction> actions = generator.buildTracingExitActions(settings);
+            MethodHookConfiguration config = MethodHookConfiguration.builder().tracing(settings).build();
+            List<IHookAction> actions = generator.buildTracingExitActions(config);
 
             assertThat(actions).isEmpty();
         }
@@ -205,7 +206,8 @@ public class MethodHookGeneratorTest {
                     .endSpan(true)
                     .build();
 
-            List<IHookAction> actions = generator.buildTracingExitActions(settings);
+            MethodHookConfiguration config = MethodHookConfiguration.builder().tracing(settings).build();
+            List<IHookAction> actions = generator.buildTracingExitActions(config);
 
             assertThat(actions)
                     .hasSize(3)
@@ -224,7 +226,8 @@ public class MethodHookGeneratorTest {
                     .endSpan(true)
                     .build();
 
-            List<IHookAction> actions = generator.buildTracingExitActions(settings);
+            MethodHookConfiguration config = MethodHookConfiguration.builder().tracing(settings).build();
+            List<IHookAction> actions = generator.buildTracingExitActions(config);
 
             assertThat(actions)
                     .hasSize(3)
