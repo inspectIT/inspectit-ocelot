@@ -3,18 +3,23 @@ include 'inspectit-ocelot-bootstrap'
 include 'inspectit-ocelot-core'
 include "inspectit-ocelot-agent"
 include 'inspectit-ocelot-documentation'
-include 'inspectit-ocelot-configurationserver'
-include 'inspectit-ocelot-configurationserver-ui'
 include 'inspectit-ocelot-sdk'
 include 'inspectit-ocelot-configdocsgenerator'
-project(':inspectit-ocelot-configurationserver').projectDir = new File('./components/inspectit-ocelot-configurationserver')
-project(':inspectit-ocelot-configurationserver-ui').projectDir = new File('./components/inspectit-ocelot-configurationserver-ui')
 project(':inspectit-ocelot-configdocsgenerator').projectDir = new File('./components/inspectit-ocelot-configdocsgenerator')
 
-dependencyResolutionManagement {
-    versionCatalogs {
-        configServerLibs {
-            from(files("gradle/configserverlibs.versions.toml"))
+println("Current Java version: " + JavaVersion.current())
+if(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
+    include 'inspectit-ocelot-configurationserver'
+    include 'inspectit-ocelot-configurationserver-ui'
+    project(':inspectit-ocelot-configurationserver').projectDir = new File('./components/inspectit-ocelot-configurationserver')
+    project(':inspectit-ocelot-configurationserver-ui').projectDir = new File('./components/inspectit-ocelot-configurationserver-ui')
+
+    // seperate version catalog for configurationServer until everything is migrated to Java17
+    dependencyResolutionManagement {
+        versionCatalogs {
+            configServerLibs {
+                from(files("gradle/configserverlibs.versions.toml"))
+            }
         }
     }
 }

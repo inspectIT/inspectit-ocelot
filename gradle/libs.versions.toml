@@ -17,7 +17,7 @@ orgSpringframeworkBoot = "2.7.17"
 orgTestcontainers = "1.18.3"
 
 [libraries]
-chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.2.12"
+chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.2.13"
 comFasterxmlJacksonCoreJacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:2.13.5"
 # @pin Wiremock 3.* doesn't support java 8
 comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.1"
