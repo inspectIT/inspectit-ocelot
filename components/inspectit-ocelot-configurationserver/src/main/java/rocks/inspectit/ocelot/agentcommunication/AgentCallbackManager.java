@@ -5,6 +5,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,6 @@ import rocks.inspectit.ocelot.agentcommunication.handlers.CommandHandler;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;

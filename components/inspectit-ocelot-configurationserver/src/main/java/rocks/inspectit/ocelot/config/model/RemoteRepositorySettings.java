@@ -1,14 +1,13 @@
 package rocks.inspectit.ocelot.config.model;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.eclipse.jgit.transport.URIish;
 import rocks.inspectit.ocelot.config.validation.RemoteRepositorySettingsConstraint;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Data
 @Builder

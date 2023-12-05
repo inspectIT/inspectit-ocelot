@@ -2,9 +2,9 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     alias(libs.plugins.comPalantirDocker)
-    alias(libs.plugins.orgSpringframeworkBoot)
+    alias(configServerLibs.plugins.orgSpringframeworkBoot)
     alias(libs.plugins.orgCyclonedxBom)
-    alias(libs.plugins.ioSpringDependencyManagement)
+    alias(configServerLibs.plugins.ioSpringDependencyManagement)
 }
 
 apply plugin: 'idea'
@@ -31,6 +31,7 @@ tasks.register('bootJarWithFrontend', BootJar) {
         into('static/ui')
     }
 
+    getTargetJavaVersion().set(JavaVersion.current())
     mainClass = "${serverMainClass}"
 
     with bootJar
@@ -48,9 +49,12 @@ cyclonedxBom {
 repositories {
     mavenCentral()
 }
-//to guarantee that the Configuration Server is compatible with Java 8 runtime environments
-sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
-targetCompatibility = 1.8 // Java version to generate classes for.
+
+java {
+    sourceCompatibility = 17
+    targetCompatibility = 17
+}
+
 test {
     useJUnitPlatform()
 
@@ -58,6 +62,7 @@ test {
         exceptionFormat = 'full'
     }
 }
+
 
 dependencies {
     compileOnly libs.orgProjectlombokLombok
@@ -71,52 +76,43 @@ dependencies {
             // only use a compile-only (see details over there)
             libs.ioOpentelemetryOpentelemetrySdkMetrics,
             project(':inspectit-ocelot-configdocsgenerator'),
+            configServerLibs.orgSpringframeworkBootSpringBootStarterWeb,
+            configServerLibs.orgSpringframeworkBootSpringBootStarterDataJpa,
+            configServerLibs.orgSpringframeworkBootSpringBootStartervalidation,
+            configServerLibs.orgSpringframeworkSecuritySpringSecurityWeb,
+            configServerLibs.orgSpringframeworksecuritySpringSecurityConfig,
+            configServerLibs.orgSpringframeworkLdapSpringLdapCore,
+            configServerLibs.orgSpringframeworkSecuritySpringSecurityLdap,
+            configServerLibs.orgSpringframeworkBootSpringBootStarterActuator,
 
-            libs.orgSpringframeworkBootSpringBootStarterWeb,
-            libs.orgSpringframeworkBootSpringBootStarterDataJpa,
-            libs.orgSpringframeworkBootSpringBootStartervalidation,
-            libs.orgSpringframeworkSecuritySpringSecurityWeb,
-            libs.orgSpringframeworksecuritySpringSecurityConfig,
-            libs.orgSpringframeworkLdapSpringLdapCore,
-            libs.orgSpringframeworkSecuritySpringSecurityLdap,
-            libs.orgSpringframeworkBootSpringBootStarterActuator,
-
-            libs.orgYamlSnakeyaml,
+            configServerLibs.orgYamlSnakeyaml,
 
             libs.orgApacheHttpcomponentsHttpclient, //Required for PATCH-Requests
 
-            libs.orgXerialSqliteJdbc,
-            libs.comGithubGwennSqliteDialect,
-            libs.bundles.jsonwebtoken,
-            libs.commonsIo,
-            libs.orgApacheCommonsCommonsLang3,
-            libs.orgFlywaydbFlywayCore,
-            libs.bundles.jgit,
-            libs.comGoogleCodeGson,
+            configServerLibs.orgXerialSqliteJdbc,
+            configServerLibs.orgHibernateOrmHibernateCommunityDialects,
+            configServerLibs.bundles.jsonwebtoken,
+            configServerLibs.commonsIo,
+            configServerLibs.orgApacheCommonsCommonsLang3,
+            configServerLibs.orgFlywaydbFlywayCore,
+            configServerLibs.bundles.jgit,
+            configServerLibs.comGoogleCodeGson,
 
             // swagger
             libs.orgSpringdocSpringdocOpenapiUi,
 
-            libs.comGoogleGuavaConfigServer
+            configServerLibs.comGoogleGuava
     )
     testImplementation(
-            libs.orgSpringframeworkBootSpringBootStarterTest,
-            libs.orgSpringframeworkSecuritySpringSecurityTest,
+            configServerLibs.orgSpringframeworkBootSpringBootStarterTest,
+            configServerLibs.orgSpringframeworkSecuritySpringSecurityTest,
+            configServerLibs.orgMockitoMockitoJunitJupiter,
+            configServerLibs.comH2databaseH2,
+            libs.orgJunitJupiterJunitJupiter,
             libs.orgJunitJupiterJunitJupiterApi,
-            libs.orgMockitoMockitoJunitJupiter,
-            libs.comH2databaseH2,
             libs.orgAwaitility
     )
     testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
-
-    constraints {
-        implementation(libs.orgYamlSnakeyaml) {
-            because 'spring related'
-        }
-        testImplementation(libs.comH2databaseH2) {
-            because 'If we stick to the version provided by Spring Boot Bom database initialization scripts will fail'
-        }
-    }
 }
 
 tasks.register('copyServerJar', Copy) {

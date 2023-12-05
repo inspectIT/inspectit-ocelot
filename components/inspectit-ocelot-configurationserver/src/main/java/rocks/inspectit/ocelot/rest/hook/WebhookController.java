@@ -22,7 +22,7 @@ public class WebhookController extends AbstractBaseController {
 
     @Operation(summary = "Triggers a synchronization of the workspace branch with a configured remote configuration source.")
     @Parameter(name = "token", schema = @Schema(type = "string"), description = "Token for authenticating the request.")
-    @RequestMapping(path = "/hook/synchronize-workspace", method = {RequestMethod.PUT, RequestMethod.POST, RequestMethod.GET})
+    @RequestMapping(path = {"/hook/synchronize-workspace", "/hook/synchronize-workspace/"}, method = {RequestMethod.PUT, RequestMethod.POST, RequestMethod.GET})
     public ResponseEntity<?> synchronizeWorkspace() throws GitAPIException, IOException {
         fileManager.synchronizeWorkspace();
 

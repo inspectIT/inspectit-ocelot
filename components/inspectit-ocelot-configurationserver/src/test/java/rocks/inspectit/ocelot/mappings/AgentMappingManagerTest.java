@@ -103,7 +103,7 @@ public class AgentMappingManagerTest {
 
             assertThat(agentMappings).hasSize(1);
             assertThat(agentMappings.get(0))
-                    .extracting(AgentMapping::getName).isEqualTo("my-mapping");
+                    .extracting(AgentMapping::name).isEqualTo("my-mapping");
         }
 
         @Test
@@ -356,14 +356,14 @@ public class AgentMappingManagerTest {
 
             assertThat(manager.getAgentMappings()).containsExactly(mappingA);
             AgentMapping storedMapping = manager.getAgentMapping("mapping").get();
-            assertThat(storedMapping.getSources()).isEmpty();
+            assertThat(storedMapping.sources()).isEmpty();
 
             mappingA = AgentMapping.builder().name("mapping").source("/newSource").build();
             manager.addAgentMapping(mappingA);
 
             assertThat(manager.getAgentMappings()).containsExactly(mappingA);
             storedMapping = manager.getAgentMapping("mapping").get();
-            assertThat(storedMapping.getSources()).contains("/newSource");
+            assertThat(storedMapping.sources()).contains("/newSource");
         }
     }
 

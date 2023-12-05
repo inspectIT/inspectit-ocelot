@@ -3,15 +3,17 @@ package rocks.inspectit.ocelot.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import rocks.inspectit.ocelot.security.audit.AuditDetail;
 import rocks.inspectit.ocelot.security.audit.AuditEventListener;
 import rocks.inspectit.ocelot.security.audit.Auditable;
-
-import javax.persistence.*;
 
 /**
  * Data model for a user account, stored in the embedded database.
@@ -26,7 +28,14 @@ import javax.persistence.*;
 public class User implements Auditable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "sequence-generator")
+    @GenericGenerator(
+            name = "sequence-generator",
+            type = SequenceStyleGenerator.class,
+            parameters = {
+                    @Parameter(name ="sequence_name", value = "hibernate_sequence")
+            }
+    )
     private Long id;
 
     /**

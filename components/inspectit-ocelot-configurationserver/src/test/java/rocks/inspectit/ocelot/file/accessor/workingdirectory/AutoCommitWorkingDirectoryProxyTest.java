@@ -9,7 +9,6 @@ import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 
 import java.io.IOException;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
 
 import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.mockito.Mockito.*;

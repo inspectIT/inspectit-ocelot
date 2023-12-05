@@ -108,7 +108,7 @@ public abstract class AbstractFileAccessor {
             String fileContent = new String(rawFileContent, FILE_ENCODING);
             return Optional.of(fileContent);
         } catch (Exception ex) {
-            log.error("File '{}' could not been loaded.", ex);
+            log.error("File '" + targetPath + "' could not been loaded.", ex);
             return Optional.empty();
         }
     }
@@ -139,7 +139,7 @@ public abstract class AbstractFileAccessor {
             String fileContent = new String(rawFileContent, FILE_ENCODING);
             return Optional.of(fileContent);
         } catch (Exception ex) {
-            log.error("File '{}' could not been loaded.", ex);
+            log.error("File '" + AGENT_MAPPINGS_FILE_NAME + "' could not been loaded.", ex);
             return Optional.empty();
         }
     }

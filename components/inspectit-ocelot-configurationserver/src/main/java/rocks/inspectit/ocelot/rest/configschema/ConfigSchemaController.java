@@ -20,10 +20,8 @@ public class ConfigSchemaController extends AbstractBaseController {
 
     @Operation(summary = "Returns a schema describing all plain properties")
     @ApiResponse(responseCode = "200", description = "A JSON object describing the configuration schema for all plain properties")
-    @GetMapping("/schema/plain")
+    @GetMapping({"/schema/plain", "/schema/plain/"})
     public ConfigurationPropertyDescription getPlainSchema() {
         return provider.getSchema();
     }
 }
-
-

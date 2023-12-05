@@ -1,3 +1,8 @@
+logging:
+  level:
+    # TODO remove this with next spring boot version (currently 3.1.6)
+    org.springframework.web.servlet.handler.HandlerMappingIntrospector: error
+
 spring:
   datasource:
     url: jdbc:sqlite:${inspectit-config-server.working-directory}/users.db
@@ -6,9 +11,10 @@ spring:
     password: ""
 
   jpa:
+    open-in-view: false
     properties:
       hibernate:
-        dialect: org.sqlite.hibernate.dialect.SQLiteDialect
+        dialect: org.hibernate.community.dialect.SQLiteDialect
     hibernate:
       ddl-auto: validate
 
@@ -88,7 +94,7 @@ inspectit-config-server:
     #pull-repository:
       ## The name of the remote ref in the local Git repository.
       #remote-name: pull-remote-configuration
-      ## The URI to the remote Git repository. Examples: https://github.com/user/repo.git, git@github.com:user/repo.git
+      ## The URI to the remote Git repository. Examples: https://github.com/user/repo.git, ssh://git@github.com:user/repo.git
       #git-repository-uri:
       ## The branch name on the remote Git repository.
       #branch-name: remote-workspace
@@ -106,7 +112,7 @@ inspectit-config-server:
     #push-repository:
       ## The name of the remote ref in the local Git repository.
       #remote-name: push-remote-configuration
-      ## The URI to the remote Git repository. Examples: https://github.com/user/repo.git, git@github.com:user/repo.git
+      ## The URI to the remote Git repository. Examples: https://github.com/user/repo.git, ssh://git@github.com:user/repo.git
       #git-repository-uri:
       ## The branch name on the remote Git repository.
       #branch-name: remote-live

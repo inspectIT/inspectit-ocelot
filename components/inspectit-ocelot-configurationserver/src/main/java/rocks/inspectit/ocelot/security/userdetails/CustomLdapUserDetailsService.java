@@ -20,7 +20,7 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 @ConditionalOnLdap
 public class CustomLdapUserDetailsService extends LdapUserDetailsService {
 
-    private InspectitServerSettings settings;
+    private final InspectitServerSettings settings;
 
     @Autowired
     public CustomLdapUserDetailsService(LdapUserSearch ldapUserSearch, DefaultLdapAuthoritiesPopulator ldapAuthoritiesPopulator, InspectitServerSettings settings) {

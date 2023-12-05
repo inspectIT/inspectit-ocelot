@@ -1,9 +1,8 @@
 package rocks.inspectit.ocelot.rest.util;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerMapping;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class RequestUtil {
 

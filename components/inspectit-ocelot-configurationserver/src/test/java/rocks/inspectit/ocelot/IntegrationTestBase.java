@@ -35,7 +35,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = {"spring.datasource.url=jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1", "spring.datasource.driver-class-name=org.h2.Driver", "spring.datasource.username=sa", "spring.datasource.password=", "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect", "spring.jpa.hibernate.ddl-auto=create",})
+@TestPropertySource(properties = {"spring.datasource.url=jdbc:h2:mem:userdb;DB_CLOSE_DELAY=-1;NON_KEYWORDS=user", "spring.datasource.driver-class-name=org.h2.Driver", "spring.datasource.username=sa", "spring.datasource.password=", "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect", "spring.jpa.hibernate.ddl-auto=create",})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = IntegrationTestBase.Initializer.class)
 public class IntegrationTestBase {

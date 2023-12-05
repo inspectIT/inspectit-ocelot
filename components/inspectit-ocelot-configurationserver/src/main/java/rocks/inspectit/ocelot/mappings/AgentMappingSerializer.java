@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +20,12 @@ import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDire
 import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME;
-import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
-import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 /**
  * Utility for reading and writing the Agent Mappings.

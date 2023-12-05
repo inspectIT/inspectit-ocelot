@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.aspectj.weaver.IClassFileProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +18,6 @@ import rocks.inspectit.ocelot.search.FileContentSearchEngine;
 import rocks.inspectit.ocelot.search.SearchResult;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +43,7 @@ public class FileController extends FileBaseController {
         @RequestParam(defaultValue = "false")
         boolean raw,
         @Parameter(description = "The content to write, either raw or a json",
-            content = { 
+            content = {
                 @Content(mediaType = "text/plain", examples = @ExampleObject("This is the file content")),
                 @Content(mediaType = "application/json", examples = @ExampleObject("{ 'content' : 'This is the file content' }"))
             }
@@ -109,7 +108,7 @@ public class FileController extends FileBaseController {
 
     @Operation(summary = "Search the given query in all present files.", description = "Searches the given query in all present files. " + "Searches for as many matches as defined by the limit parameter. If the the limit is set " + "to -1, the query is searched for all occurrences in all files. All found matches are " + "returned in a list of SearchResult instances. Each of these instances contains the " + "following variables:" + "<p>" + "<b>file:</b> a String resembling the name of the file the match was found in." + "<p>" + "<b>firstLine:</b> the first line of the found match. Only retrieved if retrieveFirstLine is true " + "<p>" + "<b>startLine:</b> the number of the line in this file where the found match starts as " + "integer." + "<p>" + "<b>endLine:</b> the number of the line in this file where the found match ends as integer." + "<p>" + "<b>startColumn:</b> the number of the column where the found found match starts as " + "integer." + "<p>" + "<b>endColumn:</b> the number of the column where the found match ends as integer.")
     @Parameters({@Parameter(name = "query", description = "The query string that should be searched in the files."), @Parameter(name = "limit", description = "The limit for the returned values. Use '-1' for no limit."), @Parameter(name = "include-first-line", description = "If true, the first line of each match is added to the search results.")})
-    @GetMapping(value = "search")
+    @GetMapping(value = {"search", "search/"})
     public List<SearchResult> searchForContent(@RequestParam String query, @RequestParam(defaultValue = "100") int limit, @RequestParam(name = "include-first-line", defaultValue = "false") boolean includeFirstLine) {
         return fileContentSearchEngine.search(query, limit, includeFirstLine);
     }

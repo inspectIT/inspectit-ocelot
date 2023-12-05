@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.rest.file;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +12,6 @@ import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
