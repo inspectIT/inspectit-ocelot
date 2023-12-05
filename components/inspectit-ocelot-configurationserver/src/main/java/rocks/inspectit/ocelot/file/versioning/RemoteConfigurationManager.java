@@ -217,11 +217,6 @@ public class RemoteConfigurationManager {
         String password = remoteRepository.getPassword();
         UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
         command.setCredentialsProvider(credentialsProvider);
-
-        command.setTransportConfigCallback(transport -> {
-            SshTransport sshTransport = (SshTransport) transport;
-            sshTransport.setSshSessionFactory(createSshSessionFactoryBuilder().build(null));
-        });
     }
 
     /**
