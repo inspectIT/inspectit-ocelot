@@ -1,9 +1,7 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
 import org.awaitility.Awaitility;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +9,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.logging.logback.LogbackInitializer;
 
-import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,7 +24,7 @@ public class AgentHealthManagerDeadlockGh1597IntTest extends SpringTestBase {
     private AgentHealthManager cut;
 
     @Test
-    void testLogging() throws Exception {
+    void testLogging() {
         // This installs InternalProcessingAppender which together with AgentHealthManager caused a deadlock
         LogbackInitializer.initDefaultLogging();
 
@@ -53,7 +49,7 @@ public class AgentHealthManagerDeadlockGh1597IntTest extends SpringTestBase {
         Thread invalidationThread = new Thread(() -> {
             long start = System.currentTimeMillis();
             while (System.currentTimeMillis() - start < millisToRun) {
-                cut.onInvalidationEvent(cut.getClass());
+                cut.invalidateIncident(cut.getClass(), "Invalidation due to invalidator event");
             }
             isInvalidationThreadDone.getAndSet(true);
         });

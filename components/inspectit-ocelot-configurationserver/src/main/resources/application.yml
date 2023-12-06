@@ -28,6 +28,7 @@ spring:
 # server properties - see https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#server-properties
 server:
   port: 8090
+  max-http-header-size: 1MB
 
 inspectit-config-server:
   # the directory which is used as working directory
