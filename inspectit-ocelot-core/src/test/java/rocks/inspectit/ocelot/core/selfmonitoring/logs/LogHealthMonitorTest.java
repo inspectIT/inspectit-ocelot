@@ -48,7 +48,7 @@ public class LogHealthMonitorTest {
 
         healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
 
-        verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getFormattedMessage());
+        verify(healthManager).handleInvalidatableHealth(eventHealth, invalidatorMock, loggingEvent.getFormattedMessage());
     }
 
     @Test
@@ -60,7 +60,7 @@ public class LogHealthMonitorTest {
 
         healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
 
-        verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getFormattedMessage());
+        verify(healthManager).handleInvalidatableHealth(eventHealth, invalidatorMock, loggingEvent.getFormattedMessage());
     }
 
     @Test
@@ -72,7 +72,7 @@ public class LogHealthMonitorTest {
 
         healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
 
-        verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getFormattedMessage());
+        verify(healthManager).handleInvalidatableHealth(eventHealth, invalidatorMock, loggingEvent.getFormattedMessage());
     }
 
     @Test
@@ -84,7 +84,7 @@ public class LogHealthMonitorTest {
 
         healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
 
-        verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getFormattedMessage());
+        verify(healthManager).handleInvalidatableHealth(eventHealth, invalidatorMock, loggingEvent.getFormattedMessage());
     }
 
     @Test
@@ -96,6 +96,6 @@ public class LogHealthMonitorTest {
 
         healthMonitor.onLoggingEvent(loggingEvent, invalidatorMock);
 
-        verify(healthManager).notifyAgentHealth(eventHealth, invalidatorMock, loggerClass.getCanonicalName(), loggingEvent.getFormattedMessage());
+        verify(healthManager).handleInvalidatableHealth(eventHealth, invalidatorMock, loggingEvent.getFormattedMessage());
     }
 }

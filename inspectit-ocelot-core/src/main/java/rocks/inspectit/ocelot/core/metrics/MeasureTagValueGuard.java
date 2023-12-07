@@ -128,7 +128,7 @@ public class MeasureTagValueGuard {
                 // if tag value is new AND max values per tag is already reached
                 if (!tagValues.contains(tagValue) && tagValues.size() >= maxValuesPerTag) {
                     blockedTagKeysByMeasure.computeIfAbsent(measureName, measure ->  Sets.newHashSet()).add(tagKey);
-                    agentHealthManager.notifyAgentHealth(AgentHealth.ERROR, this.getClass(), this.getClass().getName(),
+                    agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(),
                             String.format(tagOverFlowMessageTemplate, tagKey));
                     hasTagValueOverflow = true;
                 } else {
@@ -151,7 +151,7 @@ public class MeasureTagValueGuard {
                     boolean isNewBlockedTag = blockedTagKeysByMeasure.computeIfAbsent(measureName, measure -> Sets.newHashSet())
                             .add(tagKey);
                     if(isNewBlockedTag) {
-                        agentHealthManager.notifyAgentHealth(AgentHealth.ERROR, this.getClass(), this.getClass().getName(),
+                        agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(),
                                 String.format(tagOverFlowMessageTemplate, tagKey));
                         hasTagValueOverflow = true;
                     }
@@ -227,15 +227,15 @@ public class MeasureTagValueGuard {
         });
 
         // go over data tags and match the value to the key from the contextTags (if available)
-            metricAccessor.getDataTagAccessors().forEach((key, accessor) -> {
-                if (tagGuardSettings.isEnabled() && blockedTagKeys.contains(key)) {
-                    String overflowReplacement = env.getCurrentConfig().getMetrics().getTagGuard().getOverflowReplacement();
-                    tags.put(key, TagUtils.createTagValueAsString(key, overflowReplacement));
-                } else {
-                    Optional.ofNullable(accessor.get(context))
-                            .ifPresent(tagValue -> tags.put(key, TagUtils.createTagValueAsString(key, tagValue.toString())));
-                }
-            });
+        metricAccessor.getDataTagAccessors().forEach((key, accessor) -> {
+            if (tagGuardSettings.isEnabled() && blockedTagKeys.contains(key)) {
+                String overflowReplacement = env.getCurrentConfig().getMetrics().getTagGuard().getOverflowReplacement();
+                tags.put(key, TagUtils.createTagValueAsString(key, overflowReplacement));
+            } else {
+                Optional.ofNullable(accessor.get(context))
+                        .ifPresent(tagValue -> tags.put(key, TagUtils.createTagValueAsString(key, tagValue.toString())));
+            }
+        });
 
         TagContextBuilder tagContextBuilder = Tags.getTagger().emptyBuilder();
         tags.forEach((key, value) -> tagContextBuilder.putLocal(TagKey.create(key), TagUtils.createTagValue(key, value)));

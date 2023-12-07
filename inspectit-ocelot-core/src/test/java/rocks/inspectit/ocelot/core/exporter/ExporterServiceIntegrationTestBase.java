@@ -327,10 +327,6 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
             logRequests.clear();
         }
 
-        public List<ExportMetricsServiceRequest> getMetricRequests() {
-            return metricRequests;
-        }
-
         @Override
         protected void configure(ServerBuilder sb) {
             sb.service("/opentelemetry.proto.collector.trace.v1.TraceService/Export", new AbstractUnaryGrpcService() {
@@ -369,9 +365,4 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
             sb.http(0);
         }
     }
-
-    public OtlpGrpcServer getGrpcServer() {
-        return grpcServer;
-    }
-
 }

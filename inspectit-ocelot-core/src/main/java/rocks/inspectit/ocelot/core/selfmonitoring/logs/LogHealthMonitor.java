@@ -28,7 +28,10 @@ public class LogHealthMonitor implements InternalProcessingAppender.LogEventCons
             return;
         }
         AgentHealth eventHealth = AgentHealth.fromLogLevel(event.getLevel());
-        agentHealthManager.notifyAgentHealth(eventHealth, invalidator, event.getLoggerName(), event.getFormattedMessage());
+        if(invalidator != null)
+            agentHealthManager.handleInvalidatableHealth(eventHealth, invalidator, event.getFormattedMessage());
+        else
+            agentHealthManager.handleTimeoutHealth(eventHealth, event.getLoggerName(), event.getFormattedMessage());
     }
 
     @Override

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 /**
- * Tests {@link AgentHealthManager}
+ * Tests for {@link AgentHealthManager}
  */
 @ExtendWith(MockitoExtension.class)
 public class AgentHealthManagerTest {
@@ -38,35 +38,36 @@ public class AgentHealthManagerTest {
     class InvalidatableHealth {
 
         @Test
-        void verifyAgentHealthChangedEvent() {
-            healthManager.notifyAgentHealth(AgentHealth.WARNING, this.getClass(), this.getClass().getName(), "Mock message");
+        void verifyAgentHealthChangedEventAfterInvalidatableHealth() {
+            healthManager.handleInvalidatableHealth(AgentHealth.WARNING, this.getClass(), "Mock message");
 
             verify(ctx).publishEvent(any(AgentHealthChangedEvent.class));
         }
 
         @Test
-        void verifyAgentHealthIncidentAddedEvent() {
-            healthManager.notifyAgentHealth(AgentHealth.WARNING, this.getClass(), this.getClass().getName(), "Mock message");
+        void verifyAgentHealthIncidentAddedEventAfterInvalidatableHealth() {
+            healthManager.handleInvalidatableHealth(AgentHealth.WARNING, this.getClass(), "Mock message");
 
             verify(incidentBuffer).put(any(AgentHealthIncident.class));
         }
 
         @Test
-        void verifyNoAgentHealthIncidentAddedEvent() {
-            healthManager.notifyAgentHealth(AgentHealth.OK, this.getClass(), this.getClass().getName(), "Mock message");
+        void verifyNoAgentHealthIncidentAddedEventAfterInvalidatableHealth() {
+            healthManager.handleInvalidatableHealth(AgentHealth.OK, this.getClass(), "Mock message");
 
             verifyNoInteractions(incidentBuffer);
         }
 
         @Test
-        void verifyInvalidateAgentHealthIncident() {
-            healthManager.notifyAgentHealth(AgentHealth.ERROR, this.getClass(), this.getClass().getName(), "Mock message");
+        void verifyAgentHealthIncidentInvalidation() {
+            healthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(), "Mock message");
             healthManager.invalidateIncident(this.getClass(), "Mock invalidation");
 
             verify(ctx, times(2)).publishEvent(any(AgentHealthChangedEvent.class));
             verify(incidentBuffer, times(2)).put(any(AgentHealthIncident.class));
         }
     }
+
     @Nested
     class TimeoutHealth {
 
@@ -77,22 +78,22 @@ public class AgentHealthManagerTest {
         }
 
         @Test
-        void verifyAgentHealthChangedEvent() {
-            healthManager.notifyAgentHealth(AgentHealth.WARNING, null, this.getClass().getName(), "Mock message");
+        void verifyAgentHealthChangedEventAfterTimeoutHealth() {
+            healthManager.handleTimeoutHealth(AgentHealth.WARNING, this.getClass().getName(), "Mock message");
 
             verify(ctx).publishEvent(any(AgentHealthChangedEvent.class));
         }
 
         @Test
-        void verifyAgentHealthIncidentAddedEvent() {
-            healthManager.notifyAgentHealth(AgentHealth.WARNING, null, this.getClass().getName(), "Mock message");
+        void verifyAgentHealthIncidentAddedEventAfterTimeoutHealth() {
+            healthManager.handleTimeoutHealth(AgentHealth.WARNING, this.getClass().getName(), "Mock message");
 
             verify(incidentBuffer).put(any(AgentHealthIncident.class));
         }
 
         @Test
-        void verifyNoAgentHealthIncidentAddedEvent() {
-            healthManager.notifyAgentHealth(AgentHealth.OK, null, this.getClass().getName(), "Mock message");
+        void verifyNoAgentHealthIncidentAddedEventAfterTimeoutHealth() {
+            healthManager.handleTimeoutHealth(AgentHealth.OK, this.getClass().getName(), "Mock message");;
 
             verifyNoInteractions(incidentBuffer);
         }
@@ -102,7 +103,8 @@ public class AgentHealthManagerTest {
             when(environment.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod())
                     .thenReturn(Duration.ofSeconds(5));
 
-            healthManager.notifyAgentHealth(AgentHealth.ERROR, null, this.getClass().getName(), "Mock message");
+            healthManager.handleTimeoutHealth(AgentHealth.OK, this.getClass().getName(), "Mock message");
+
             // Wait 6s for time out (= 5s validityPeriod + 1s buffer)
             Thread.sleep(6000);
 
@@ -114,10 +116,10 @@ public class AgentHealthManagerTest {
             when(environment.getCurrentConfig().getSelfMonitoring().getAgentHealth().getMinHealthCheckDelay())
                     .thenReturn(Duration.ofSeconds(1));
 
-            healthManager.notifyAgentHealth(AgentHealth.ERROR, null, this.getClass().getName(), "Mock message");
+            healthManager.handleTimeoutHealth(AgentHealth.ERROR, this.getClass().getName(), "Mock message");
+
             // Wait 6s for time out (= 5s validityPeriod + 1s buffer)
             Thread.sleep(6000);
-
             healthManager.checkHealthAndSchedule();
 
             verify(ctx, times(2)).publishEvent(any(AgentHealthChangedEvent.class));
@@ -129,7 +131,8 @@ public class AgentHealthManagerTest {
             when(environment.getCurrentConfig().getSelfMonitoring().getAgentHealth().getMinHealthCheckDelay())
                     .thenReturn(Duration.ofSeconds(1));
 
-            healthManager.notifyAgentHealth(AgentHealth.ERROR, null, this.getClass().getName(), "Mock message");
+            healthManager.handleTimeoutHealth(AgentHealth.ERROR, this.getClass().getName(), "Mock message");
+
             healthManager.checkHealthAndSchedule();
 
             verify(ctx, times(1)).publishEvent(any(AgentHealthChangedEvent.class));

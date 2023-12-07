@@ -41,7 +41,7 @@ public class AgentHealthIncidentBufferTest {
         incidentBuffer.put(incident);
         incidentBuffer.put(incident);
 
-        verify(ctx, times(3)).publishEvent(any(AgentHealthIncidentAddedEvent.class));
+        assertEquals(incidentBuffer.asList().size(), 2);
     }
 
     @Test

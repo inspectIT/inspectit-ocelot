@@ -63,36 +63,34 @@ public class AgentHealthManager {
     }
 
     /**
-     * Notifies the AgentHealthManager about an eventHealth.
-     * The manager determines, whether the event is invalidatable or times out.
+     * Notifies the AgentHealthManager about an invalidatable eventHealth.
      *
      * @param eventHealth health of event
      * @param invalidator class, which created the invalidatable eventHealth
-     * @param loggerName name of the logger, who created the event
-     * @param message message of the event
+     * @param eventMessage message of the event
      */
-    public void notifyAgentHealth(AgentHealth eventHealth, Class<?> invalidator, String loggerName, String message) {
-        if (invalidator == null)
-            handleTimeoutHealth(eventHealth, loggerName, message);
-         else
-            handleInvalidatableHealth(eventHealth, invalidator, message);
-    }
-
-    private void handleInvalidatableHealth(AgentHealth eventHealth, Class<?> invalidator, String eventMessage) {
+    public void handleInvalidatableHealth(AgentHealth eventHealth, Class<?> invalidator, String eventMessage) {
         invalidatableHealth.merge(invalidator, eventHealth, AgentHealth::mostSevere);
 
         boolean shouldCreateIncident = eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING);
         triggerAgentHealthChangedEvent(invalidator.getTypeName(), eventMessage, shouldCreateIncident);
     }
 
-    private void handleTimeoutHealth(AgentHealth eventHealth, String loggerName, String eventMassage) {
+    /**
+     * Notifies the AgentHealthManager about a timeout eventHealth.
+     *
+     * @param eventHealth health of event
+     * @param loggerName name of the logger, who created the event
+     * @param eventMessage message of the event
+     */
+    public void handleTimeoutHealth(AgentHealth eventHealth, String loggerName, String eventMessage) {
         Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod();
         boolean isNotInfo = eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING);
 
         if (isNotInfo) {
             generalHealthTimeouts.put(eventHealth, LocalDateTime.now().plus(validityPeriod));
         }
-        String fullEventMessage = eventMassage + ". This status is valid for " + validityPeriod;
+        String fullEventMessage = eventMessage + ". This status is valid for " + validityPeriod;
         triggerAgentHealthChangedEvent(loggerName, fullEventMessage, isNotInfo);
     }
 

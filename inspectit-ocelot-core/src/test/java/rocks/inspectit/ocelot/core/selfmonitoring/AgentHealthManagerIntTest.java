@@ -11,10 +11,10 @@ import rocks.inspectit.ocelot.core.config.propertysources.http.HttpConfiguration
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Integration tests {@link AgentHealthManager}
+ * Integration tests for {@link AgentHealthManager}
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-@TestPropertySource(properties = "inspectit.self-monitoring.agent-health.validity-period:60s")
+@TestPropertySource(properties = "inspectit.self-monitoring.agent-health.validity-period:5s")
 public class AgentHealthManagerIntTest extends SpringTestBase {
 
     @Autowired
@@ -25,7 +25,7 @@ public class AgentHealthManagerIntTest extends SpringTestBase {
     /**
      * Period how long a TimeOut AgentHealth is valid (+1s buffer)
      */
-    private final long validityPeriod = 61000;
+    private final long validityPeriod = 6000;
 
     @Nested
     class InvalidatableHealth {
@@ -37,13 +37,14 @@ public class AgentHealthManagerIntTest extends SpringTestBase {
             assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.OK);
 
-            healthManager.notifyAgentHealth(AgentHealth.WARNING, this.getClass(), this.getClass().getName(), "Mock message");
+            healthManager.handleInvalidatableHealth(AgentHealth.WARNING, this.getClass(), "Mock message");
 
             currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
             currentManagerHealth = healthManager.getCurrentHealth();
             assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.WARNING);
-            healthManager.notifyAgentHealth(AgentHealth.ERROR, this.getClass(), this.getClass().getName(), "Mock message");
+
+            healthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(), "Mock message");
 
             currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
             currentManagerHealth = healthManager.getCurrentHealth();
@@ -58,7 +59,7 @@ public class AgentHealthManagerIntTest extends SpringTestBase {
             assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.OK);
 
-            healthManager.notifyAgentHealth(AgentHealth.ERROR, this.getClass(), this.getClass().getName(), "Mock message");
+            healthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(), "Mock message");
 
             currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
             currentManagerHealth = healthManager.getCurrentHealth();
@@ -66,6 +67,7 @@ public class AgentHealthManagerIntTest extends SpringTestBase {
             assertEquals(currentHealth, AgentHealth.ERROR);
 
             healthManager.invalidateIncident(this.getClass(), "Mock invalidation");
+
             // simulate scheduler
             Thread.sleep(validityPeriod);
             healthManager.checkHealthAndSchedule();
@@ -81,13 +83,13 @@ public class AgentHealthManagerIntTest extends SpringTestBase {
     class TimeoutHealth {
 
         @Test
-        void verifyAgentHealthUpdating() throws InterruptedException {
+        void verifyAgentHealthTimedOut() throws InterruptedException {
             AgentHealth currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
             AgentHealth currentManagerHealth = healthManager.getCurrentHealth();
             assertEquals(currentHealth, currentManagerHealth);
             assertEquals(currentHealth, AgentHealth.OK);
 
-            healthManager.notifyAgentHealth(AgentHealth.WARNING, null, this.getClass().getName(), "Mock message");
+            healthManager.handleTimeoutHealth(AgentHealth.WARNING, this.getClass().getName(), "Mock message");
 
             currentHealth = configurationPoller.getCurrentAgentHealthState().getHealth();
             currentManagerHealth = healthManager.getCurrentHealth();
