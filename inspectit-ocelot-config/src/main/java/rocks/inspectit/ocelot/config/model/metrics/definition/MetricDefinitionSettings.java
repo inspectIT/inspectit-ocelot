@@ -35,9 +35,6 @@ public class MetricDefinitionSettings {
     @NotBlank
     private String unit;
 
-    @Builder.Default
-    private int maxValuesPerTag = -1;
-
     @NotNull
     @Builder.Default
     private MetricDefinitionSettings.MeasureType type = MeasureType.DOUBLE;

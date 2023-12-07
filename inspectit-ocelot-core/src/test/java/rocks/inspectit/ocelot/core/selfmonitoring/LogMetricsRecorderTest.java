@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.selfmonitoring.logs;
+package rocks.inspectit.ocelot.core.selfmonitoring;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
-import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;

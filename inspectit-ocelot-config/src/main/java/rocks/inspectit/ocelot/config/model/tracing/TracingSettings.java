@@ -55,12 +55,6 @@ public class TracingSettings {
     private AddCommonTags addCommonTags;
 
     /**
-     * If enabled, metric tags will be added as attributes to tracing within the same rule
-     */
-    @NotNull
-    private boolean addMetricTags;
-
-    /**
      * Settings for automatic tracing (stack trace sampling)
      */
     @Valid
@@ -85,7 +79,7 @@ public class TracingSettings {
     private long scheduleDelayMillis = 5000;
 
     /**
-     * If enabled, 64 Bit Trace Ids are used instead of the default 128 Bit.
+     * I enabled 64 Bit Trace Ids are used instead of the default 128 Bit.
      */
     private boolean use64BitTraceIds = false;
 }

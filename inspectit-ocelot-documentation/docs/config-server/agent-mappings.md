@@ -9,7 +9,7 @@ Furthermore, you can specify which branch (`WORKSPACE` or `LIVE`) the mapping sh
 
 It's important to note that the first matching agent mapping will be used to determine which configuration is shipped to an agent.
 Additional agent mappings which may also match the attributes list sent by an agent will be ignored.
-See section [HTTP-based Configuration](configuration/external-configuration-sources.md#http-based-configuration) for
+See section [HTTP-based Configuration](configuration/external-configuration-sources.md#http-based-configuration) for 
 information on how to specify which attributes will be sent by an agent.
 
 An agent mapping consists of the following properties:
@@ -55,7 +55,7 @@ The `sourceBranch` property of an individual agent mapping determines, which bra
 
 ![Different Source Branches on Agent Mappings Page](assets/agent_mappings_source_branch.png)
 
-You can define, which source branch should be used at start-up for the agent mappings
+You can define, which source branch should be used at start-up for the agent mappings 
 in the application properties of the configuration server:
 
 ```YAML
@@ -93,3 +93,4 @@ The following agent mapping will deliver all configuration files located in the 
     service: "customer-service"
   sourceBranch: "WORKSPACE"
 ```
+

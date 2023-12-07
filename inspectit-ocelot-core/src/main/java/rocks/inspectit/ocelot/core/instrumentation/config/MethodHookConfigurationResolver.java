@@ -155,7 +155,7 @@ public class MethodHookConfigurationResolver {
         builder.endSpan(endSpan);
         if (endSpan) {
             builder.endSpanConditions(Optional.ofNullable(getAndDetectConflicts(rulesDefiningEndSpan, r -> r.getTracing()
-                    .getEndSpanConditions(), ALWAYS_TRUE, "end span conditions"))
+                            .getEndSpanConditions(), ALWAYS_TRUE, "end span conditions"))
                     .orElse(new ConditionalActionSettings()));
         }
     }

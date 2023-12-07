@@ -53,19 +53,23 @@ class AgentMappingCell extends React.Component {
             display: flex;
             align-items: stretch;
           }
+
           .mapping-name {
             flex: 1;
             margin-right: 0.5rem;
           }
+
           .no-mapping {
             color: gray;
             font-style: italic;
           }
+
           .show-attributes {
             float: right;
             cursor: pointer;
             color: #007ad9;
           }
+
           .attributes {
             margin-top: 0.5rem;
             border-left: 0.25rem solid #ddd;
@@ -170,6 +174,7 @@ class StatusTable extends React.Component {
           .this {
             position: relative;
           }
+
           .this :global(.config-info-button) {
             width: 1.2rem;
             height: 1.2rem;
@@ -179,6 +184,7 @@ class StatusTable extends React.Component {
             background: #ddd;
             border-color: #ddd;
           }
+
           .this :global(.log-button) {
             width: 1.2rem;
             height: 1.2rem;
@@ -188,6 +194,7 @@ class StatusTable extends React.Component {
             background: #ddd;
             border-color: #ddd;
           }
+
           .this :global(.service-state-button) {
             width: 1.2rem;
             height: 1.2rem;
@@ -197,6 +204,7 @@ class StatusTable extends React.Component {
             background: #ddd;
             border-color: #ddd;
           }
+
           .this :global(.badge) {
             width: 1.2rem;
             height: 1.2rem;
@@ -209,6 +217,7 @@ class StatusTable extends React.Component {
             justify-content: center;
             color: white;
           }
+
           .this :global(.might-overflow) {
             max-width: 17.8rem;
             display: inline-block;
@@ -292,11 +301,8 @@ class StatusTable extends React.Component {
   };
 
   agentHealthTemplate = (rowData) => {
-    const { onShowHealthStateDialog } = this.props;
-    const { healthState, metaInformation } = rowData;
-    const { health } = healthState;
-    const { agentId } = metaInformation;
     const { onShowDownloadDialog } = this.props;
+    const { health, metaInformation } = rowData;
 
     let { agentCommandsEnabled, supportArchiveAvailable } = this.resolveServiceAvailability(metaInformation);
 
@@ -320,14 +326,12 @@ class StatusTable extends React.Component {
         iconColor = '#e8c413';
         break;
     }
-
     return (
       <>
         <style jsx>{`
           .state {
             align-items: center;
             display: flex;
-            cursor: pointer;
             position: relative;
           }
 
@@ -343,10 +347,8 @@ class StatusTable extends React.Component {
         `}</style>
         {health ? (
           <div className="state">
-            <div className="health-state" onClick={() => onShowHealthStateDialog(agentId, healthState)}>
-              <i className={classNames('pi pi-fw', iconClass)} style={{ color: iconColor }}></i>
-              <span>{healthInfo}</span>
-            </div>
+            <i className={classNames('pi pi-fw', iconClass)} style={{ color: iconColor }}></i>
+            <span>{healthInfo}</span>
             <Button
               className="archive-button"
               icon="pi pi-cloud-download"
@@ -414,12 +416,15 @@ class StatusTable extends React.Component {
             display: flex;
             align-items: center;
           }
+
           .pi {
             margin-right: 0.5rem;
           }
+
           .pi.live {
             color: #ef5350;
           }
+
           .pi.workspace {
             color: #616161;
           }

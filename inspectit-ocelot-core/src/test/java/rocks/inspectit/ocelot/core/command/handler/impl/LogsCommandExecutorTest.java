@@ -18,7 +18,7 @@ import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.selfmonitoring.logs.LogPreloader;
+import rocks.inspectit.ocelot.core.selfmonitoring.LogPreloader;
 
 import java.io.File;
 import java.io.IOException;

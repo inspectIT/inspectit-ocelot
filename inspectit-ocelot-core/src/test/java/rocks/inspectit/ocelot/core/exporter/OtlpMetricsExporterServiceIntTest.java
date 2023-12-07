@@ -39,10 +39,12 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
     @Autowired
     InspectitEnvironment environment;
 
-    String measure = "my-counter";
     String tagKeyGrpc = "otlp-grpc-metrics-test";
+
     String tagKeyHttp = "otlp-grpc-metrics-test";
+
     String tagVal = "random-val";
+
     int metricVal = 1337;
 
     @BeforeEach
@@ -64,9 +66,9 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
                 .pollInterval(500, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
-        recordMetricsAndFlush(measure, metricVal, tagKeyGrpc, tagVal);
+        recordMetricsAndFlush(metricVal, tagKeyGrpc, tagVal);
 
-        awaitMetricsExported(measure, metricVal, tagKeyGrpc, tagVal);
+        awaitMetricsExported(metricVal, tagKeyGrpc, tagVal);
     }
 
     @DirtiesContext
@@ -83,9 +85,9 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
                 .pollInterval(500, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
-        recordMetricsAndFlush(measure, metricVal, tagKeyHttp, tagVal);
+        recordMetricsAndFlush(metricVal, tagKeyHttp, tagVal);
 
-        awaitMetricsExported(measure, metricVal, tagKeyHttp, tagVal);
+        awaitMetricsExported(metricVal, tagKeyHttp, tagVal);
     }
 
 
@@ -137,8 +139,8 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
 
         assertThat(service.isEnabled()).isTrue();
 
-        recordMetricsAndFlush(measure, 1, "key", "val");
-        recordMetricsAndFlush(measure, 2, "key", "val");
+        recordMetricsAndFlush(1, "key", "val");
+        recordMetricsAndFlush(2, "key", "val");
 
         await().atMost(30, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream()).anyMatch(mReq -> mReq.getResourceMetricsList()
@@ -169,8 +171,8 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
 
         assertThat(service.isEnabled()).isTrue();
 
-        recordMetricsAndFlush(measure, 1, "key", "val");
-        recordMetricsAndFlush(measure, 2, "key", "val");
+        recordMetricsAndFlush(1, "key", "val");
+        recordMetricsAndFlush(2, "key", "val");
 
         await().atMost(30, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream()).anyMatch(mReq -> mReq.getResourceMetricsList()

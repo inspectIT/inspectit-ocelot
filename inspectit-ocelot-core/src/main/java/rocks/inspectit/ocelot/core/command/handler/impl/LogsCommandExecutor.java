@@ -10,7 +10,7 @@ import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
 import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
-import rocks.inspectit.ocelot.core.selfmonitoring.logs.LogPreloader;
+import rocks.inspectit.ocelot.core.selfmonitoring.LogPreloader;
 
 /**
  * Executor for executing {@link LogsCommand}s.

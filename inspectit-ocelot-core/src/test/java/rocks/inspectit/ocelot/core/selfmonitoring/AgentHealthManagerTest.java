@@ -1,20 +1,30 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.LoggingEvent;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
-import rocks.inspectit.ocelot.commons.models.health.AgentHealthIncident;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.selfmonitoring.AgentHealthSettings;
+import rocks.inspectit.ocelot.config.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.selfmonitoring.event.models.AgentHealthChangedEvent;
+import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
+import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentHealthChangedEvent;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.*;
 
 /**
@@ -23,117 +33,126 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class AgentHealthManagerTest {
 
-    @InjectMocks
-    private AgentHealthManager healthManager;
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private static final long VALIDITY_PERIOD_MILLIS = 500;
+
+    private static InspectitConfig config;
+
+    private ScheduledExecutorService executorService;
+
     private InspectitEnvironment environment;
-    @Mock
-    private ScheduledExecutorService executor;
-    @Mock
-    private ApplicationContext ctx;
-    @Mock
-    private AgentHealthIncidentBuffer incidentBuffer;
+
+    private ApplicationContext context;
+
+    private AgentHealthManager healthManager;
+
+    @BeforeAll
+    static void createInspectitConfig() {
+        config = new InspectitConfig();
+        AgentHealthSettings agentHealth = new AgentHealthSettings();
+        agentHealth.setValidityPeriod(Duration.ofMillis(VALIDITY_PERIOD_MILLIS));
+        SelfMonitoringSettings selfMonitoring = new SelfMonitoringSettings();
+        selfMonitoring.setAgentHealth(agentHealth);
+        config.setSelfMonitoring(selfMonitoring);
+    }
+
+    @BeforeEach
+    void setupStatusManager() {
+        executorService = new ScheduledThreadPoolExecutor(1);
+
+        environment = mock(InspectitEnvironment.class);
+        when(environment.getCurrentConfig()).thenReturn(config);
+
+        context = mock(ApplicationContext.class);
+
+        healthManager = new AgentHealthManager(context, executorService, environment, mock(SelfMonitoringService.class));
+        healthManager.startHealthCheckScheduler();
+    }
+
+    @AfterEach
+    void shutdownExecutorService() {
+        executorService.shutdown();
+    }
+
+    private ILoggingEvent createLoggingEvent(Level level) {
+        return new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(AgentHealthManagerTest.class), level, "Dummy Info", new Throwable(), new String[]{});
+    }
+
+    private void verifyExactlyOneEventWasPublished(AgentHealth status) {
+        ArgumentCaptor<AgentHealthChangedEvent> statusCaptor = ArgumentCaptor.forClass(AgentHealthChangedEvent.class);
+        verify(context).publishEvent(statusCaptor.capture());
+        assertThat(statusCaptor.getValue().getNewHealth()).isEqualTo(status);
+        verifyNoMoreInteractions(context);
+    }
 
     @Nested
-    class InvalidatableHealth {
+    class OnLogEvent {
 
         @Test
-        void verifyAgentHealthChangedEvent() {
-            healthManager.notifyAgentHealth(AgentHealth.WARNING, this.getClass(), this.getClass().getName(), "Mock message");
+        void logInstrumentationEvents() {
+            assertThat(healthManager.getCurrentHealth()).withFailMessage("Initial status shall be OK")
+                    .isEqualTo(AgentHealth.OK);
 
-            verify(ctx).publishEvent(any(AgentHealthChangedEvent.class));
+            healthManager.onLoggingEvent(createLoggingEvent(Level.INFO), InstrumentationConfigurationChangedEvent.class);
+            healthManager.onLoggingEvent(createLoggingEvent(Level.DEBUG), InstrumentationConfigurationChangedEvent.class);
+            assertThat(healthManager.getCurrentHealth()).withFailMessage("INFO and DEBUG messages shall not change the status")
+                    .isEqualTo(AgentHealth.OK);
+
+            verifyNoInteractions(context);
+
+            healthManager.onLoggingEvent(createLoggingEvent(Level.WARN), InstrumentationConfigurationChangedEvent.class);
+            assertThat(healthManager.getCurrentHealth()).withFailMessage("Status after WARN message shall be WARNING")
+                    .isEqualTo(AgentHealth.WARNING);
+            verifyExactlyOneEventWasPublished(AgentHealth.WARNING);
+
+            clearInvocations(context);
+
+            healthManager.onLoggingEvent(createLoggingEvent(Level.ERROR), InstrumentationConfigurationChangedEvent.class);
+            assertThat(healthManager.getCurrentHealth()).withFailMessage("Status after ERROR message shall be ERROR")
+                    .isEqualTo(AgentHealth.ERROR);
+            verifyExactlyOneEventWasPublished(AgentHealth.ERROR);
+
+            clearInvocations(context);
+
+            healthManager.onLoggingEvent(createLoggingEvent(Level.INFO), InstrumentationConfigurationChangedEvent.class);
+            assertThat(healthManager.getCurrentHealth()).withFailMessage("INFO messages shall not change the status")
+                    .isEqualTo(AgentHealth.ERROR);
+            verifyNoMoreInteractions(context);
+
+            clearInvocations(context);
+
+            healthManager.onInvalidationEvent(new InstrumentationConfigurationChangedEvent(this, null, null));
+            assertThat(healthManager.getCurrentHealth()).withFailMessage("When new instrumentation was triggered, status shall be OK")
+                    .isEqualTo(AgentHealth.OK);
+            verifyExactlyOneEventWasPublished(AgentHealth.OK);
         }
 
         @Test
-        void verifyAgentHealthIncidentAddedEvent() {
-            healthManager.notifyAgentHealth(AgentHealth.WARNING, this.getClass(), this.getClass().getName(), "Mock message");
+        void logGeneralEvents() {
+            assertThat(healthManager.getCurrentHealth()).withFailMessage("Initial status shall be OK")
+                    .isEqualTo(AgentHealth.OK);
 
-            verify(incidentBuffer).put(any(AgentHealthIncident.class));
+            healthManager.onLoggingEvent(createLoggingEvent(Level.INFO), null);
+            healthManager.onLoggingEvent(createLoggingEvent(Level.DEBUG), null);
+            assertThat(healthManager.getCurrentHealth()).withFailMessage("INFO and DEBUG messages shall not change the status")
+                    .isEqualTo(AgentHealth.OK);
+
+            verifyNoInteractions(context);
+
+            healthManager.onLoggingEvent(createLoggingEvent(Level.ERROR), null);
+            assertThat(healthManager.getCurrentHealth()).withFailMessage("Status after ERROR message shall be ERROR")
+                    .isEqualTo(AgentHealth.ERROR);
+            verifyExactlyOneEventWasPublished(AgentHealth.ERROR);
+
+            clearInvocations(context);
+
+            await().atMost(VALIDITY_PERIOD_MILLIS * 2, TimeUnit.MILLISECONDS)
+                    .untilAsserted(() -> assertThat(healthManager.getCurrentHealth()).withFailMessage("ERROR status should jump back to OK after timeout")
+                            .isEqualTo(AgentHealth.OK));
+
+            await().atMost(VALIDITY_PERIOD_MILLIS * 2, TimeUnit.MILLISECONDS)
+                    .untilAsserted(() -> verifyExactlyOneEventWasPublished(AgentHealth.OK));
         }
 
-        @Test
-        void verifyNoAgentHealthIncidentAddedEvent() {
-            healthManager.notifyAgentHealth(AgentHealth.OK, this.getClass(), this.getClass().getName(), "Mock message");
-
-            verifyNoInteractions(incidentBuffer);
-        }
-
-        @Test
-        void verifyInvalidateAgentHealthIncident() {
-            healthManager.notifyAgentHealth(AgentHealth.ERROR, this.getClass(), this.getClass().getName(), "Mock message");
-            healthManager.invalidateIncident(this.getClass(), "Mock invalidation");
-
-            verify(ctx, times(2)).publishEvent(any(AgentHealthChangedEvent.class));
-            verify(incidentBuffer, times(2)).put(any(AgentHealthIncident.class));
-        }
     }
-    @Nested
-    class TimeoutHealth {
 
-        @BeforeEach
-        void setUpValidityPeriod() {
-            when(environment.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod())
-                    .thenReturn(Duration.ofSeconds(5));
-        }
-
-        @Test
-        void verifyAgentHealthChangedEvent() {
-            healthManager.notifyAgentHealth(AgentHealth.WARNING, null, this.getClass().getName(), "Mock message");
-
-            verify(ctx).publishEvent(any(AgentHealthChangedEvent.class));
-        }
-
-        @Test
-        void verifyAgentHealthIncidentAddedEvent() {
-            healthManager.notifyAgentHealth(AgentHealth.WARNING, null, this.getClass().getName(), "Mock message");
-
-            verify(incidentBuffer).put(any(AgentHealthIncident.class));
-        }
-
-        @Test
-        void verifyNoAgentHealthIncidentAddedEvent() {
-            healthManager.notifyAgentHealth(AgentHealth.OK, null, this.getClass().getName(), "Mock message");
-
-            verifyNoInteractions(incidentBuffer);
-        }
-
-        @Test
-        void verifyAgentHealthTimeout() throws InterruptedException {
-            when(environment.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod())
-                    .thenReturn(Duration.ofSeconds(5));
-
-            healthManager.notifyAgentHealth(AgentHealth.ERROR, null, this.getClass().getName(), "Mock message");
-            // Wait 6s for time out (= 5s validityPeriod + 1s buffer)
-            Thread.sleep(6000);
-
-            assertEquals(healthManager.getCurrentHealth(), AgentHealth.OK);
-        }
-
-        @Test
-        void verifyCheckAgentHealth() throws InterruptedException {
-            when(environment.getCurrentConfig().getSelfMonitoring().getAgentHealth().getMinHealthCheckDelay())
-                    .thenReturn(Duration.ofSeconds(1));
-
-            healthManager.notifyAgentHealth(AgentHealth.ERROR, null, this.getClass().getName(), "Mock message");
-            // Wait 6s for time out (= 5s validityPeriod + 1s buffer)
-            Thread.sleep(6000);
-
-            healthManager.checkHealthAndSchedule();
-
-            verify(ctx, times(2)).publishEvent(any(AgentHealthChangedEvent.class));
-            verify(incidentBuffer, times(2)).put(any(AgentHealthIncident.class));
-        }
-
-        @Test
-        void verifyCheckAgentHealthTooEarly() {
-            when(environment.getCurrentConfig().getSelfMonitoring().getAgentHealth().getMinHealthCheckDelay())
-                    .thenReturn(Duration.ofSeconds(1));
-
-            healthManager.notifyAgentHealth(AgentHealth.ERROR, null, this.getClass().getName(), "Mock message");
-            healthManager.checkHealthAndSchedule();
-
-            verify(ctx, times(1)).publishEvent(any(AgentHealthChangedEvent.class));
-            verify(incidentBuffer, times(2)).put(any(AgentHealthIncident.class));
-        }
-    }
 }

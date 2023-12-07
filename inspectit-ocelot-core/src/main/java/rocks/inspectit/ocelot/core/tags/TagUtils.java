@@ -5,8 +5,6 @@ import io.opencensus.internal.StringUtils;
 import io.opencensus.tags.TagValue;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.function.Function;
-
 @Slf4j
 public final class TagUtils {
 
@@ -51,19 +49,11 @@ public final class TagUtils {
      * @return the created TagValue with 'v' or '&lt;invalid&gt;'
      */
     public static TagValue createTagValue(String tagKey, String value) {
-        return resolveTageValue(tagKey, value, TagValue::create);
-    }
-
-    public static String createTagValueAsString(String tagKey, String value) {
-        return resolveTageValue(tagKey, value, s -> s);
-    }
-
-    private static <T> T resolveTageValue(String tagKey, String value, Function<String, T> creator) {
         if (isTagValueValid(value)) {
-            return creator.apply(value);
+            return TagValue.create(value);
         }
         printWarning(tagKey, value);
-        return creator.apply("<invalid>");
+        return TagValue.create("<invalid>");
     }
 
     private static boolean isTagValueValid(String value) {
