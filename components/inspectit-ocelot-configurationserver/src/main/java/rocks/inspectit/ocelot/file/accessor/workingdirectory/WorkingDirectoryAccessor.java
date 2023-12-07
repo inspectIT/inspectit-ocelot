@@ -1,12 +1,12 @@
 package rocks.inspectit.ocelot.file.accessor.workingdirectory;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileInfoVisitor;
 
-import javax.annotation.PostConstruct;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
@@ -23,17 +23,17 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
     /**
      * Lock used when reading from the working directory.
      */
-    private Lock readLock;
+    private final Lock readLock;
 
     /**
      * Lock used when writing to the working directory.
      */
-    private Lock writeLock;
+    private final Lock writeLock;
 
     /**
      * The base path of the working directory.
      */
-    private Path workingDirectory;
+    private final Path workingDirectory;
 
     public WorkingDirectoryAccessor(Lock readLock, Lock writeLock, Path workingDirectory) {
         this.readLock = readLock;
@@ -54,7 +54,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
      * @return {@link Path} representing the given path string
      */
     private Path resolve(String path) {
-        if (StringUtils.isEmpty(path)) {
+        if (ObjectUtils.isEmpty(path)) {
             return workingDirectory;
         } else {
             return workingDirectory.resolve(path).normalize();

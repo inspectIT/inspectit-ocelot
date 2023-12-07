@@ -63,7 +63,7 @@ public class ConfigurationController extends AbstractBaseController {
      */
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @Operation(summary = "Reloads all configuration files.", description = "Reloads all configuration files present in the " + "servers working directory and adds them to the workspace revision.")
-    @GetMapping(value = "configuration/reload", produces = "application/x-yaml")
+    @GetMapping(value = {"configuration/reload", "configuration/reload/"}, produces = "application/x-yaml")
     public void reloadConfiguration() throws GitAPIException {
         fileManager.commitWorkingDirectory();
     }
@@ -78,7 +78,7 @@ public class ConfigurationController extends AbstractBaseController {
      * @return The configuration mapped on the given agent name
      */
     @Operation(summary = "Fetch the Agent Configuration without logging the access.", description = "Reads the configuration for the given agent and returns it as a yaml string." + "Does not log the access in the agent status.")
-    @GetMapping(value = "configuration/agent-configuration", produces = "application/x-yaml")
+    @GetMapping(value = {"configuration/agent-configuration", "configuration/agent-configuration/"}, produces = "application/x-yaml")
     public ResponseEntity<String> fetchConfiguration(@Parameter(description = "The agent attributes used to select the correct mapping") @RequestParam Map<String, String> attributes) {
         AgentConfiguration configuration = configManager.getConfiguration(attributes);
         if (configuration == null) {
@@ -96,7 +96,7 @@ public class ConfigurationController extends AbstractBaseController {
      * @return ConfigDocumentation for the configuration matching the given AgentMapping.
      */
     @Operation(summary = "Get the full configuration documentation of an AgentMappings config, based on the AgentMapping name.")
-    @GetMapping(value = "configuration/documentation", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = {"configuration/documentation", "configuration/documentation/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getConfigDocumentation(@Parameter(description = "The name of the AgentMapping the configuration documentation should be for.") @RequestParam(name = "agent-mapping") String mappingName, @Parameter(description = "Whether the shown documentation should include the merged in Default Config as well.") @RequestParam(name = "include-default") Boolean includeDefault) {
 
         ConfigDocumentation configDocumentation = null;

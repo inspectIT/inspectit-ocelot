@@ -75,7 +75,7 @@ inspectit:
     propagation-format: B3 # the format for propagating correlation headers
 ```
 
-Currently the following formats are supported for sending correlation information:
+Currently, the following formats are supported for sending correlation information:
 
 | Property | Format | Description
 |---|---|---|
@@ -86,6 +86,61 @@ Currently the following formats are supported for sending correlation informatio
 :::important
 It is important to note that this configuration refers to the format of the correlation information used to **send this data**. When processing correlation information that the agent receives, it automatically uses the correct format.
 :::
+
+### Adding Metric Tags
+
+It is possible to include all metrics tags of the current rule scope as tracing attributes.
+This way it isn't necessary to define key-value pairs twice for metrics as well as tracing.
+However, it is only possible to use metric tags as tracing attributes, but not vice versa!
+
+You can disable this feature in the tracing configuration:
+
+```YAML
+inspectit:
+  tracing:
+    add-metric-tags: true
+```
+
+In this example, both tags of the metric `my_counter` will be used as attributes for the tracing within this rule.
+
+```YAML
+rules:
+  'r_example':
+    include:
+      'r_myRule': true
+    entry:
+      'my_data':
+        action: 'a_getData'
+    metrics:
+      my_counter:
+        value: 1
+        data-tags:
+          'example': 'my_data'
+        constant-tags:
+          'scope': 'EXAMPLE'
+```
+
+Each tag key can only be used once within one trace. Thus, if a tag key has been assigned multiple values within one rule,
+the acquired tag value will be determined hierarchically. Tag keys defined in `metrics.data-tags` will overwrite tag keys
+defined in `metrics.constant-tags`. Tag keys defined in `tracing.attributes` will always overwrite tag keys defined in `metrics`. 
+In the example below, the tracing attributes will use 'trace' as value for 'myTag' and 'yourData' as value for 'yourTag'.
+
+
+```YAML
+rules:
+  'r_example':
+    tracing:
+      attributes:
+        'myTag': 'trace'
+    metrics:
+      my_counter:
+        data-tags:
+          'myTag': 'myData'
+          'yourTag': 'yourData'
+        constant-tags:
+          'yourTag': 'CONSTANT'
+```
+
 
 ### Using 64-Bit Trace IDs
 

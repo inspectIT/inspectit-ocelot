@@ -66,6 +66,12 @@ versionCatalogUpdate {
         // keep all plugins that aren't used in the project
         keepUnusedPlugins = true
     }
+
+    versionCatalogs {
+        configServerLibs {
+            catalogFile = file("gradle/configserverlibs.versions.toml")
+        }
+    }
 }
 
 tasks.withType(DependencyUpdatesTask).configureEach {

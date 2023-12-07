@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,6 @@ import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealthState;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
-import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -69,9 +69,9 @@ public class AgentStatusManager {
                 .metaInformation(metaInformation)
                 .attributes(agentAttributes)
                 .lastConfigFetch(new Date())
-                .mappingName(resultConfiguration == null ? null : resultConfiguration.getMapping().getName())
+                .mappingName(resultConfiguration == null ? null : resultConfiguration.getMapping().name())
                 .sourceBranch(resultConfiguration == null ? null : resultConfiguration.getMapping()
-                        .getSourceBranch()
+                        .sourceBranch()
                         .getBranchName())
                 .build();
 

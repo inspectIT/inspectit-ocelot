@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.rest.alert.kapacitor;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,7 @@ public class KapacitorTopicController extends KapacitorBaseController {
     }
 
     @Operation(summary = "Provides a list of all available topics")
-    @GetMapping("/alert/kapacitor/topics")
+    @GetMapping({"/alert/kapacitor/topics", "/alert/kapacitor/topics/"})
     public List<Topic> getTopics() {
         ObjectNode response = kapacitor()
                 .getForEntity("/kapacitor/v1/alerts/topics", ObjectNode.class)
@@ -42,7 +41,7 @@ public class KapacitorTopicController extends KapacitorBaseController {
     }
 
     @Operation(summary = "Provides a list of all available topics")
-    @GetMapping("/alert/kapacitor/topics/{topicId}/handlers")
+    @GetMapping({"/alert/kapacitor/topics/{topicId}/handlers", "/alert/kapacitor/topics/{topicId}/handlers/"})
     public List<Handler> getHandlers(@PathVariable @Parameter(description = "The id of the topic whose handlers will be queried") String topicId) {
         ObjectNode response = kapacitor()
                 .getForEntity("/kapacitor/v1/alerts/topics/{topicId}/handlers", ObjectNode.class, topicId)
@@ -59,7 +58,7 @@ public class KapacitorTopicController extends KapacitorBaseController {
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @Operation(summary = "Adds a new Handler to a topic")
-    @PostMapping("/alert/kapacitor/topics/{topicId}/handlers")
+    @PostMapping({"/alert/kapacitor/topics/{topicId}/handlers", "/alert/kapacitor/topics/{topicId}/handlers/"})
     public Handler addHandler(@PathVariable @Parameter(description = "The id of the topic to which the handler will be added") String topicId,
                               @RequestBody Handler handler) {
         ObjectNode response = kapacitor()
@@ -71,7 +70,7 @@ public class KapacitorTopicController extends KapacitorBaseController {
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @Operation(summary = "Replaced a handler of a given topic")
-    @PutMapping("/alert/kapacitor/topics/{topicId}/handlers/{handlerId}")
+    @PutMapping({"/alert/kapacitor/topics/{topicId}/handlers/{handlerId}", "/alert/kapacitor/topics/{topicId}/handlers/{handlerId}/"})
     public void replaceHandler(@PathVariable @Parameter(description = "The id of the topic which owns the handler") String topicId,
                                @PathVariable @Parameter(description = "The id of the handler to update") String handlerId,
                                @RequestBody Handler handler) {
@@ -84,7 +83,7 @@ public class KapacitorTopicController extends KapacitorBaseController {
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @Operation(summary = "Removes a handler from a topic")
-    @DeleteMapping("/alert/kapacitor/topics/{topicId}/handlers/{handlerId}")
+    @DeleteMapping({"/alert/kapacitor/topics/{topicId}/handlers/{handlerId}", "/alert/kapacitor/topics/{topicId}/handlers/{handlerId}/"})
     public void removeHandler(@PathVariable @Parameter(description = "The id of the topic which owns the handler") String topicId,
                               @PathVariable @Parameter(description = "The id of the handler") String handlerId) {
         kapacitorRestTemplate.delete("/kapacitor/v1/alerts/topics/{topicId}/handlers/{handlerId}", topicId, handlerId);

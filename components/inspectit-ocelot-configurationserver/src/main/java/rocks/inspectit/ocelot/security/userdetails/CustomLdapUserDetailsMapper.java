@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public class CustomLdapUserDetailsMapper extends InetOrgPersonContextMapper {
 
-    private LdapSettings settings;
+    private final LdapSettings settings;
 
     public CustomLdapUserDetailsMapper(LdapSettings settings) {
         this.settings = settings;

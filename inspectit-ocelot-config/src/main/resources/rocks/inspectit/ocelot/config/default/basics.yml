@@ -36,6 +36,8 @@ inspectit:
     # defines when to add common tags as attributes to spans
     # options are: NEVER, ON_GLOBAL_ROOT, ON_LOCAL_ROOT, ALWAYS
     add-common-tags: ON_LOCAL_ROOT
+    # if enabled, metric tags will be added as attributes to tracing within the same rule
+    add-metric-tags: true
     # settings regarding automatic tracing (stack-trace-sampling)
     auto-tracing:
       frequency: 50ms

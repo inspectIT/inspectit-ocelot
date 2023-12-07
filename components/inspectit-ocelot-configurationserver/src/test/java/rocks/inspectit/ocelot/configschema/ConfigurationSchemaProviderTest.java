@@ -1,13 +1,13 @@
 package rocks.inspectit.ocelot.configschema;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import rocks.inspectit.ocelot.config.ui.UISettings;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.beans.PropertyDescriptor;
 import java.net.URL;
 import java.time.Duration;

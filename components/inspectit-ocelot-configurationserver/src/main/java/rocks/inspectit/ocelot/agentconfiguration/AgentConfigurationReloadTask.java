@@ -78,7 +78,7 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
                         .build();
                 newConfigurations.add(agentConfiguration);
             } catch (Exception e) {
-                log.error("Could not load agent mapping '{}'.", mapping.getName(), e);
+                log.error("Could not load agent mapping '{}'.", mapping.name(), e);
             }
         }
         onTaskSuccess(newConfigurations);
@@ -97,7 +97,7 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         AbstractFileAccessor fileAccessor = getFileAccessorForMapping(mapping);
 
         LinkedHashSet<String> allYamlFiles = new LinkedHashSet<>();
-        for (String path : mapping.getSources()) {
+        for (String path : mapping.sources()) {
             if (isCanceled()) {
                 return null;
             }
@@ -115,18 +115,11 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
     }
 
     private AbstractFileAccessor getFileAccessorForMapping(AgentMapping mapping) {
-        AbstractFileAccessor fileAccessor;
-        switch (mapping.getSourceBranch()) {
-            case LIVE:
-                fileAccessor = fileManager.getLiveRevision();
-                break;
-            case WORKSPACE:
-                fileAccessor = fileManager.getWorkspaceRevision();
-                break;
-            default:
-                throw new UnsupportedOperationException("Unhandled branch: " + mapping.getSourceBranch());
-        }
-        return fileAccessor;
+        return switch (mapping.sourceBranch()) {
+            case LIVE -> fileManager.getLiveRevision();
+            case WORKSPACE -> fileManager.getWorkspaceRevision();
+            default -> throw new UnsupportedOperationException("Unhandled branch: " + mapping.sourceBranch());
+        };
     }
 
     /**

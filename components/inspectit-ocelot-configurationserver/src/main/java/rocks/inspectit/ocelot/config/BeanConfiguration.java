@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.config.model.SecuritySettings;
 import rocks.inspectit.ocelot.filters.WebhookAccessFilter;
 
 import java.util.Collections;
@@ -62,4 +61,5 @@ public class BeanConfiguration {
 
         return registrationBean;
     }
+
 }

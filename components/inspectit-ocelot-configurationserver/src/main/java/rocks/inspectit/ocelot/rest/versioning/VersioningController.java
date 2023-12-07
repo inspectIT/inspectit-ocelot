@@ -29,7 +29,7 @@ public class VersioningController extends AbstractBaseController {
 
     @Secured(UserRoleConfiguration.READ_ACCESS_ROLE)
     @Operation(summary = "List versions", description = "Lists all versions which are existing in the configuration server. By default, only versions in the workspace branch will be considered.")
-    @GetMapping(value = "versions")
+    @GetMapping(value = {"versions", "versions/"})
     public List<WorkspaceVersion> listVersions(@RequestParam(name = "limit", required = false) Integer limit) throws IOException, GitAPIException {
         if (limit == null || limit < 0) {
             return fileManager.listWorkspaceVersions();

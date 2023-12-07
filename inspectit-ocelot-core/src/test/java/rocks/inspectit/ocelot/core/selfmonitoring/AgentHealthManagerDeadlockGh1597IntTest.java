@@ -49,7 +49,7 @@ public class AgentHealthManagerDeadlockGh1597IntTest extends SpringTestBase {
         Thread invalidationThread = new Thread(() -> {
             long start = System.currentTimeMillis();
             while (System.currentTimeMillis() - start < millisToRun) {
-                cut.invalidateIncident(cut.getClass(), "Invalidation due to finished thread");
+                cut.invalidateIncident(cut.getClass(), "Invalidation during running thread");
             }
             isInvalidationThreadDone.getAndSet(true);
         });

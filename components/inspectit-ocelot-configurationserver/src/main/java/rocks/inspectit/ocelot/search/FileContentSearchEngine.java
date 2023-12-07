@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.search;
 
-import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -64,7 +63,7 @@ public class FileContentSearchEngine {
 
         AtomicInteger limitCounter = new AtomicInteger(limit);
 
-        List<SearchResult> result = files.stream()
+        return files.stream()
                 .map(fileInfo -> fileInfo.getAbsoluteFilePaths(""))
                 .reduce(Stream.empty(), Stream::concat)
                 .map(filename -> {
@@ -75,8 +74,6 @@ public class FileContentSearchEngine {
                 .map(Optional::get)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-
-        return result;
     }
 
     /**
@@ -109,23 +106,23 @@ public class FileContentSearchEngine {
             int start = matcher.start();
             int end = matcher.end();
 
-            while (start >= currentLine.getEndIndex()) {
+            while (start >= currentLine.endIndex()) {
                 currentLine = listIterator.next();
             }
-            searchResultBuilder.startLine(currentLine.getLineNumber());
-            searchResultBuilder.startColumn(start - currentLine.getStartIndex());
+            searchResultBuilder.startLine(currentLine.lineNumber());
+            searchResultBuilder.startColumn(start - currentLine.startIndex());
 
             if (retrieveFirstLine) {
-                String firstLine = content.substring(currentLine.getStartIndex(), currentLine.getEndIndex());
+                String firstLine = content.substring(currentLine.startIndex(), currentLine.endIndex());
                 firstLine = firstLine.replace("\n", "").replace("\r", "");
                 searchResultBuilder.firstLine(firstLine);
             }
 
-            while (end > currentLine.getEndIndex()) {
+            while (end > currentLine.endIndex()) {
                 currentLine = listIterator.next();
             }
-            searchResultBuilder.endLine(currentLine.getLineNumber());
-            searchResultBuilder.endColumn(end - currentLine.getStartIndex());
+            searchResultBuilder.endLine(currentLine.lineNumber());
+            searchResultBuilder.endColumn(end - currentLine.startIndex());
 
             results.add(searchResultBuilder.build());
         }
@@ -167,23 +164,12 @@ public class FileContentSearchEngine {
 
     /**
      * Class for representing a line in a string.
+     *
+     * @param lineNumber The line number.
+     * @param startIndex The absolute index where the line is starting.
+     * @param endIndex   The absolute end index where the line is ending.
      */
-    @Value
-    private class Line {
+        private record Line(int lineNumber, int startIndex, int endIndex) {
 
-        /**
-         * The line number.
-         */
-        int lineNumber;
-
-        /**
-         * The absolute index where the line is starting.
-         */
-        int startIndex;
-
-        /**
-         * The absolute end index where the line is ending.
-         */
-        int endIndex;
     }
 }

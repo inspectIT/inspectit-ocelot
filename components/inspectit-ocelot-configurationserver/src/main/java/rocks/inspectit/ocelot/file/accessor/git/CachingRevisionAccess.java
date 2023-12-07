@@ -16,12 +16,12 @@ public class CachingRevisionAccess extends RevisionAccess {
     /**
      * Maps file paths to their cached contents
      */
-    private ConcurrentHashMap<String, byte[]> fileContentsCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, byte[]> fileContentsCache = new ConcurrentHashMap<>();
 
     /**
      * Maps directory paths to their cached contents
      */
-    private ConcurrentHashMap<String, List<FileInfo>> directoriesCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, List<FileInfo>> directoriesCache = new ConcurrentHashMap<>();
 
     /**
      * Constructor.

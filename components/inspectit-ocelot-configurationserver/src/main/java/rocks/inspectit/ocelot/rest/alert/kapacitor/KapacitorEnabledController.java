@@ -22,7 +22,7 @@ public class KapacitorEnabledController extends KapacitorBaseController {
     }
 
     @Operation(summary = "Provides Information about the configured Kapacitor connection.")
-    @GetMapping("/alert/kapacitor")
+    @GetMapping({"/alert/kapacitor", "/alert/kapacitor/"})
     public KapacitorState getState() {
         boolean kapacitorEnabled = isKapacitorEnabled();
         boolean kapacitorReachable = false;

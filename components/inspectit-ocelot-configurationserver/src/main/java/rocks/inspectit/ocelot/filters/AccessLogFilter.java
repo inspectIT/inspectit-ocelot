@@ -1,20 +1,20 @@
 package rocks.inspectit.ocelot.filters;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.security.access.event.AuthorizationFailureEvent;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
+import org.springframework.security.authorization.event.AuthorizationDeniedEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Filter for printing messages on authentication failure and success.
@@ -33,7 +33,7 @@ public class AccessLogFilter {
      * Therefore, we remember the request identifier in a thread local variable,
      * which can then be accessed by the event listeners.
      */
-    private ThreadLocal<String> requestIdentifier = new ThreadLocal<>();
+    private final ThreadLocal<String> requestIdentifier = new ThreadLocal<>();
 
     @EventListener
     private void authSuccess(AuthenticationSuccessEvent event) {
@@ -46,11 +46,11 @@ public class AccessLogFilter {
     /**
      * This event is triggered if an authentication fails due to bad credentials.
      *
-     * @param event - the {@link AuthorizationFailureEvent}
+     * @param event - the {@link AuthorizationDeniedEvent}
      */
     @EventListener
-    private void authFailure(AuthorizationFailureEvent event) {
-        handleAuthFailure(event.getAuthentication(), event.getAccessDeniedException());
+    private void authFailure(AuthorizationDeniedEvent<?> event) {
+        handleAuthFailure(event.getAuthentication().get(), new AccessDeniedException(event.getAuthorizationDecision().toString()));
     }
 
     /**
@@ -82,8 +82,7 @@ public class AccessLogFilter {
     public Filter getFilter() {
         return (ServletRequest request, ServletResponse response, FilterChain chain) -> {
             try {
-                if (request instanceof HttpServletRequest) {
-                    HttpServletRequest httpRequest = (HttpServletRequest) request;
+                if (request instanceof HttpServletRequest httpRequest) {
                     requestIdentifier.set(httpRequest.getMethod() + " " + httpRequest.getServletPath());
                 }
                 chain.doFilter(request, response);
