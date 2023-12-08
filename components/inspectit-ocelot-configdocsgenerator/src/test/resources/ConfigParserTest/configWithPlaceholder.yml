@@ -8,5 +8,6 @@ inspectit:
       '[disk/free]':
         enabled: ${inspectit.metrics.disk.enabled.free}
         type: LONG
+        max-values-per-tag: 5
         unit: bytes
         description: free disk space
