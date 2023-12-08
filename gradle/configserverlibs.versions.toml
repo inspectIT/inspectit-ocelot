@@ -2,7 +2,7 @@
 ioJsonwebtoken = "0.12.3"
 orgEclipseJgit = "6.8.0.202311291450-r"
 orgMockito = "4.7.0"
-orgSpringframeworkBoot = { strictly = "3.1.6" }
+orgSpringframeworkBoot = { strictly = "3.2.0" }
 orgSpringframeworkSecurity = "6.1.5"
 
 [libraries]
