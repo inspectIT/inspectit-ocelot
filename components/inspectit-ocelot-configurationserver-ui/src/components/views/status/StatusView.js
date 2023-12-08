@@ -9,7 +9,8 @@ import { isEqual, map } from 'lodash';
 import DownloadDialogue from '../dialogs/DownloadDialogue';
 import ServiceStateDialog from '../dialogs/ServiceStateDialog';
 import { downloadArchiveFromJson } from '../../../functions/export-selection.function';
-import AgentHealthStateDialogue from './dialogs/AgentHealthStateDialogue';
+
+let controller = new AbortController(); // Controller to abort axios requests, when the dialog that triggered them have been aborted
 
 /**
  * The view presenting a list of connected agents, their mapping and when they last connected to the server.
@@ -25,20 +26,16 @@ class StatusView extends React.Component {
       useServiceMerge: true,
       error: false,
       agentsToShow: props.agents,
-      showDownloadDialog: false,
-      showHealthStateDialog: false,
       isServiceStateDialogShown: false,
       serviceStates: '{}',
+      isDownloadDialogShown: false,
       attributes: '',
       contentValue: '',
       contentType: '',
-      errorConfig: false,
+      errorConifg: false,
       isLoading: false,
-      isDownloadDialogFooterHidden: false,
     };
   }
-
-  axiosAbortController = new AbortController();
 
   componentDidUpdate(prevProps) {
     if (!isEqual(prevProps.agents, this.props.agents)) {
@@ -205,14 +202,12 @@ class StatusView extends React.Component {
       useServiceMerge,
       error,
       readOnly,
-      showDownloadDialog,
-      showHealthStateDialog,
+      isDownloadDialogShown,
       contentValue,
       contentType,
       contentLoadingFailed,
       isLoading,
       agentId,
-      isDownloadDialogFooterHidden: isDownloadDialogFooterHidden,
     } = this.state;
 
     return (
@@ -248,30 +243,18 @@ class StatusView extends React.Component {
               filter={filter}
               onShowDownloadDialog={this.showDownloadDialog}
               onShowServiceStateDialog={this.showServiceStateDialog}
-              onShowHealthStateDialog={this.showHealthStateDialog}
             />
           </div>
           <div>
             <StatusFooterToolbar fullData={agents} filteredData={agentsToShow} />
           </div>
           <DownloadDialogue
-            visible={showDownloadDialog}
-            onHide={() => this.setShowDownloadDialog(false)}
+            visible={isDownloadDialogShown}
+            onHide={() => this.setDownloadDialogShown(false)}
             error={contentLoadingFailed}
             loading={isLoading}
             contentValue={contentValue}
             contentType={contentType}
-            contextName={'Agent ' + agentId}
-            isDownloadDialogFooterHidden={isDownloadDialogFooterHidden}
-            onCancel={() => {
-              this.setShowDownloadDialog(false);
-              this.axiosAbortController.abort();
-            }}
-          />
-          <AgentHealthStateDialogue
-            visible={showHealthStateDialog}
-            onHide={() => this.setShowHealthStateDialog(false)}
-            contentValue={this.state.attributes}
             contextName={'Agent ' + agentId}
           />
           <ServiceStateDialog
@@ -319,20 +302,19 @@ class StatusView extends React.Component {
   /*
    * DOWNLOAD DIALOG
    */
-  setShowDownloadDialog = (showDialog) => {
-    this.setState({
-      showDownloadDialog: showDialog,
-    });
-  };
+  setDownloadDialogShown = (showDialog) => {
+    if (showDialog == false) {
+      controller.abort();
+      controller = new AbortController(); // A new instance has to be created in order for new requests to be accepted
+    }
 
-  setShowHealthStateDialog = (showDialog) => {
     this.setState({
-      showHealthStateDialog: showDialog,
+      isDownloadDialogShown: showDialog,
     });
   };
 
   showDownloadDialog = (agentId, attributes, contentType) => {
-    this.setShowDownloadDialog(true);
+    this.setDownloadDialogShown(true);
     this.setState(
       {
         agentId,
@@ -352,47 +334,36 @@ class StatusView extends React.Component {
             this.downloadSupportArchive(agentId, attributes);
             break;
           default:
-            this.setShowDownloadDialog(false);
+            this.setDownloadDialogShown(false);
             break;
         }
       }
     );
   };
 
-  showHealthStateDialog = (agentId, attributes) => {
-    this.setShowHealthStateDialog(true);
-    this.setState({
-      agentId,
-      attributes,
-    });
-  };
-
   downloadSupportArchive = (agentId, agentVersion) => {
     this.setState(
       {
         isLoading: true,
-        isDownloadDialogFooterHidden: true,
       },
       () => {
         axios
           .get('/agent/supportArchive', {
-            signal: this.axiosAbortController.signal,
             params: { 'agent-id': agentId },
+            signal: controller.signal,
           })
           .then((res) => {
-            downloadArchiveFromJson(res.data, agentId, agentVersion);
-            this.setShowDownloadDialog(false);
             this.setState({
               isLoading: false,
-              isDownloadDialogFooterHidden: false,
             });
+            downloadArchiveFromJson(res.data, agentId, agentVersion);
+            this.setDownloadDialogShown(false);
           })
           .catch(() => {
             this.setState({
-              contentValue: '',
+              contentValue: null,
               contentLoadingFailed: true,
               isLoading: false,
-              isDownloadDialogFooterHidden: false,
             });
           });
       }
@@ -411,8 +382,8 @@ class StatusView extends React.Component {
       () => {
         axios
           .get('/configuration/agent-configuration', {
-            signal: this.axiosAbortController.signal,
             params: { ...requestParams },
+            signal: controller.signal,
           })
           .then((res) => {
             this.setState({
@@ -440,8 +411,8 @@ class StatusView extends React.Component {
       () => {
         axios
           .get('/command/logs', {
-            signal: this.axiosAbortController.signal,
             params: { 'agent-id': agentId },
+            signal: controller.signal,
           })
           .then((res) => {
             this.setState({

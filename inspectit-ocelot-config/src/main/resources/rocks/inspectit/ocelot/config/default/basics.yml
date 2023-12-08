@@ -36,8 +36,6 @@ inspectit:
     # defines when to add common tags as attributes to spans
     # options are: NEVER, ON_GLOBAL_ROOT, ON_LOCAL_ROOT, ALWAYS
     add-common-tags: ON_LOCAL_ROOT
-    # if enabled, metric tags will be added as attributes to tracing within the same rule
-    add-metric-tags: true
     # settings regarding automatic tracing (stack-trace-sampling)
     auto-tracing:
       frequency: 50ms
@@ -79,13 +77,6 @@ inspectit:
     #  - no measurement values are collected via instrumentation, however the instrumentation is still performed
     #  - no views and measures are created
     enabled: true
-
-    tag-guard:
-      enabled: true
-      max-values-per-tag: 1000
-      schedule-delay: 30s
-      database-file : ${inspectit.env.agent-dir}/${inspectit.service-name}/tag-guard-database.json
-      overflow-replacement: "TAG_LIMIT_EXCEEDED"
 
   # logging settings
   logging:

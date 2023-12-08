@@ -18,7 +18,7 @@ const axiosBearer = axios.create(commonConfiguration);
 // Request Interceptors
 
 /**
- * Ensures requests are authenticated using the bearer token.
+ * Ensures requres are authenticated using the bearer token.
  */
 axiosBearer.interceptors.request.use(
   function (config) {

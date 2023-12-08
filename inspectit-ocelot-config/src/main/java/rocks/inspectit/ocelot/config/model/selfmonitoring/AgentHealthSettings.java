@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import javax.validation.constraints.AssertFalse;
-import javax.validation.constraints.AssertTrue;
 import java.time.Duration;
 
 /**
@@ -22,29 +21,7 @@ public class AgentHealthSettings {
     @NonNull
     private Duration validityPeriod;
 
-    /**
-     * The amount of AgentHealthIncidents, which should be buffered.
-     */
-    @NonNull
-    private Integer incidentBufferSize;
-
-    /**
-     * The minimum delay how often the AgentHealthManager checks for invalid agent health events to clear health status.
-     */
-    @NonNull
-    private Duration minHealthCheckDelay;
-
-    @AssertTrue(message = "validityPeriod must be greater than minHealthCheckDelay!")
-    public boolean validityPeriodIsGreaterThanMinDelay() {
-        return validityPeriod.compareTo(minHealthCheckDelay) > 0;
-    }
-
-    @AssertTrue(message = "minHealthCheckDelay must be at least 60 seconds!")
-    public boolean isMin60SecondsDelay() {
-        return minHealthCheckDelay.toMinutes() >= 1;
-    }
-
-    @AssertFalse(message = "The specified period must not be negative!")
+    @AssertFalse(message = "The specified period should not be negative!")
     public boolean isNegativeDuration() {
         return validityPeriod != null && validityPeriod.isNegative();
     }

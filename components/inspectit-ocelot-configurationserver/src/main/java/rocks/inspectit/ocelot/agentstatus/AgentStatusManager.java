@@ -1,8 +1,5 @@
 package rocks.inspectit.ocelot.agentstatus;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -12,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
-import rocks.inspectit.ocelot.commons.models.health.AgentHealthState;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.util.Collection;
@@ -83,28 +79,19 @@ public class AgentStatusManager {
         }
 
         if (headers.containsKey(HEADER_AGENT_HEALTH)) {
-            ObjectReader objectReader = new ObjectMapper().reader().forType(AgentHealthState.class);
-
-            AgentHealthState agentHealthState = null;
-            try {
-                agentHealthState = objectReader.readValue(headers.get(HEADER_AGENT_HEALTH));
-            } catch (JsonProcessingException e) { //If this exception occurs we assume the corresponding agent uses the legacy health indicator.
-                AgentHealth agentHealth = AgentHealth.valueOf(headers.get(HEADER_AGENT_HEALTH));
-                agentHealthState = AgentHealthState.defaultState();
-                agentHealthState.setHealth(agentHealth);
-            }
-            agentStatus.setHealthState(agentHealthState);
-            logHealthIfChanged(statusKey, agentHealthState);
+            AgentHealth agentHealth = AgentHealth.valueOf(headers.get(HEADER_AGENT_HEALTH));
+            agentStatus.setHealth(agentHealth);
+            logHealthIfChanged(statusKey, agentHealth);
         }
 
         attributesToAgentStatusCache.put(statusKey, agentStatus);
     }
 
-    private void logHealthIfChanged(Object statusKey, AgentHealthState agentHealthState) {
+    private void logHealthIfChanged(Object statusKey, AgentHealth agentHealth) {
         AgentStatus lastStatus = attributesToAgentStatusCache.getIfPresent(statusKey);
 
-        if (lastStatus == null || lastStatus.getHealthState().getHealth() != agentHealthState.getHealth()) {
-            log.info("Health of agent {} changed to {}.", statusKey, agentHealthState);
+        if (lastStatus == null || lastStatus.getHealth() != agentHealth) {
+            log.info("Health of agent {} changed to {}.", statusKey, agentHealth);
         }
     }
 

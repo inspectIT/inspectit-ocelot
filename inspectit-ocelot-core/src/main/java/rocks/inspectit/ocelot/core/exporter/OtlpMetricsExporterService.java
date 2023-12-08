@@ -34,7 +34,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
     /**
      * The {@link MetricExporter} for exporting metrics via OTLP
      */
-    MetricExporter metricExporter;
+            MetricExporter metricExporter;
 
     /**
      * The {@link PeriodicMetricReaderBuilder} for reading metrics to the log

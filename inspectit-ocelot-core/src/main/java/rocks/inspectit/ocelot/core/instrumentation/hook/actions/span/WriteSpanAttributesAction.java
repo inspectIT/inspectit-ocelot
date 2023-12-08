@@ -1,7 +1,10 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.span;
 
 import io.opentelemetry.api.trace.Span;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Singular;
+import lombok.val;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.IObfuscatory;
@@ -17,7 +20,6 @@ import java.util.function.Supplier;
 public class WriteSpanAttributesAction implements IHookAction {
 
     @Singular
-    @Getter
     private final Map<String, VariableAccessor> attributeAccessors;
 
     private final Supplier<IObfuscatory> obfuscatorySupplier;
