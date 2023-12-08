@@ -17,7 +17,6 @@ import java.util.function.Supplier;
 public class WriteSpanAttributesAction implements IHookAction {
 
     @Singular
-    @Getter
     private final Map<String, VariableAccessor> attributeAccessors;
 
     private final Supplier<IObfuscatory> obfuscatorySupplier;
