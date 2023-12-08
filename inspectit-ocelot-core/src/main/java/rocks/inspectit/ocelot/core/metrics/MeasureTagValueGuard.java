@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class MeasureTagValueGuard {
-    private static final String tagOverFlowMessageTemplate = "Overflow for tag %s";
+    private static final String tagOverFlowMessageTemplate = "Overflow in measure %s for tag key %s";
 
     @Autowired
     private InspectitEnvironment env;
@@ -129,7 +129,7 @@ public class MeasureTagValueGuard {
                 if (!tagValues.contains(tagValue) && tagValues.size() >= maxValuesPerTag) {
                     blockedTagKeysByMeasure.computeIfAbsent(measureName, measure ->  Sets.newHashSet()).add(tagKey);
                     agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(),
-                            String.format(tagOverFlowMessageTemplate, tagKey));
+                            String.format(tagOverFlowMessageTemplate, measureName, tagKey));
                     hasTagValueOverflow = true;
                 } else {
                     tagValues.add(tagValue);
@@ -152,7 +152,7 @@ public class MeasureTagValueGuard {
                             .add(tagKey);
                     if(isNewBlockedTag) {
                         agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(),
-                                String.format(tagOverFlowMessageTemplate, tagKey));
+                                String.format(tagOverFlowMessageTemplate, measureName, tagKey));
                         hasTagValueOverflow = true;
                     }
                 } else {
