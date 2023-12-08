@@ -56,7 +56,7 @@ class ConfigParserTest {
             when(metricDefinitionMock.isEnabled()).thenReturn(true);
             when(metricDefinitionMock.getType()).thenReturn(MetricDefinitionSettings.MeasureType.LONG);
             when(metricDefinitionMock.getUnit()).thenReturn("bytes");
-            when(metricDefinitionMock.getMaxValuesPerTag()).thenReturn(6);
+            when(metricDefinitionMock.getMaxValuesPerTag()).thenReturn(5);
             when(metricDefinitionMock.getDescription()).thenReturn("free disk space");
             when(metricDefinitionMock.getViews()).thenReturn(null);
 

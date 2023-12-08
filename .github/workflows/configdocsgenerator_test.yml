@@ -22,13 +22,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: test
-        run: ../../gradlew test -DtestLogging.showStandardStreams=true
+        run: ../../gradlew test
         working-directory: ${{env.working-directory}}
-      - name: Upload test results
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-results
-          path: build/test-results
 
   dependency-scan:
     name: Dependency Scan
