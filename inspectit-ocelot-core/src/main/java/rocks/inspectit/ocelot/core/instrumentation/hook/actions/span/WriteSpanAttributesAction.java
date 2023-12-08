@@ -1,10 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.span;
 
 import io.opentelemetry.api.trace.Span;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Singular;
-import lombok.val;
+import lombok.*;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.IObfuscatory;

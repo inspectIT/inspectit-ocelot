@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
+import rocks.inspectit.ocelot.commons.models.health.AgentHealthState;
 
 import java.util.Date;
 import java.util.Map;
@@ -47,5 +47,5 @@ public class AgentStatus {
     /**
      * The health status of the agent.
      */
-    private AgentHealth health;
+    private AgentHealthState healthState;
 }

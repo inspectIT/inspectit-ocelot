@@ -1,21 +1,21 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.common.annotations.VisibleForTesting;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
+import rocks.inspectit.ocelot.commons.models.health.AgentHealthIncident;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
-import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentHealthChangedEvent;
+import rocks.inspectit.ocelot.core.selfmonitoring.event.listener.LogWritingHealthEventListener;
+import rocks.inspectit.ocelot.core.selfmonitoring.event.models.AgentHealthChangedEvent;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -26,22 +26,20 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-@RequiredArgsConstructor
-public class AgentHealthManager implements InternalProcessingAppender.LogEventConsumer {
+public class AgentHealthManager {
 
-    private static final String LOG_CHANGE_STATUS = "The agent status changed from {} to {}.";
-
-    private final ApplicationContext ctx;
-
-    private final ScheduledExecutorService executor;
-
-    private final InspectitEnvironment env;
-
-    private final SelfMonitoringService selfMonitoringService;
+    @Autowired
+    private ApplicationContext ctx;
+    @Autowired
+    private ScheduledExecutorService executor;
+    @Autowired
+    private InspectitEnvironment env;
+    @Autowired
+    private AgentHealthIncidentBuffer healthIncidentBuffer;
 
     /**
      * Map of {@code eventClass -> agentHealth}, whereas the {@code agentHealth} is reset whenever an event of type
-     * {@code eventClass} occurs (see {@link #onInvalidationEvent(Object)}.
+     * {@code eventClass} occurs (see {@link #onInvalidationEvent(Object)}).
      * The resulting agent health is the most severe value in the map.
      */
     private final Map<Class<?>, AgentHealth> invalidatableHealth = new ConcurrentHashMap<>();
@@ -54,34 +52,128 @@ public class AgentHealthManager implements InternalProcessingAppender.LogEventCo
 
     private AgentHealth lastNotifiedHealth = AgentHealth.OK;
 
-    @Override
-    public void onLoggingEvent(ILoggingEvent event, Class<?> invalidator) {
-        if (AgentHealthManager.class.getCanonicalName().equals(event.getLoggerName())) {
-            // ignore own logs, which otherwise would tend to cause infinite loops
-            return;
-        }
-
-        AgentHealth eventHealth = AgentHealth.fromLogLevel(event.getLevel());
-
-        if (invalidator == null) {
-            handleTimeoutHealth(eventHealth);
-        } else {
-            handleInvalidatableHealth(eventHealth, invalidator);
-        }
-
-        triggerEventAndMetricIfHealthChanged();
+    @PostConstruct
+    @VisibleForTesting
+    void startHealthCheckScheduler() {
+        checkHealthAndSchedule();
     }
 
-    private void handleInvalidatableHealth(AgentHealth eventHealth, Class<?> invalidator) {
+    public List<AgentHealthIncident> getIncidentHistory() {
+        return healthIncidentBuffer.asList();
+    }
+
+    /**
+     * Notifies the AgentHealthManager about an invalidatable eventHealth.
+     *
+     * @param eventHealth health of event
+     * @param invalidator class, which created the invalidatable eventHealth
+     * @param eventMessage message of the event
+     */
+    public void handleInvalidatableHealth(AgentHealth eventHealth, Class<?> invalidator, String eventMessage) {
         invalidatableHealth.merge(invalidator, eventHealth, AgentHealth::mostSevere);
+
+        boolean shouldCreateIncident = eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING);
+        triggerAgentHealthChangedEvent(invalidator.getTypeName(), eventMessage, shouldCreateIncident);
     }
 
-    private void handleTimeoutHealth(AgentHealth eventHealth) {
+    /**
+     * Notifies the AgentHealthManager about a timeout eventHealth.
+     *
+     * @param eventHealth health of event
+     * @param loggerName name of the logger, who created the event
+     * @param eventMessage message of the event
+     */
+    public void handleTimeoutHealth(AgentHealth eventHealth, String loggerName, String eventMessage) {
         Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod();
+        boolean isNotInfo = eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING);
 
-        if (eventHealth.isMoreSevereOrEqualTo(AgentHealth.WARNING)) {
+        if (isNotInfo) {
             generalHealthTimeouts.put(eventHealth, LocalDateTime.now().plus(validityPeriod));
         }
+        String fullEventMessage = eventMessage + ". This status is valid for " + validityPeriod;
+        triggerAgentHealthChangedEvent(loggerName, fullEventMessage, isNotInfo);
+    }
+
+    /**
+     * Invalidates an invalidatable eventHealth and creates a new AgentHealthIncident
+     * @param eventClass class, which created the invalidatable eventHealth
+     * @param eventMessage message of the event
+     */
+    public void invalidateIncident(Class<?> eventClass, String eventMessage) {
+        invalidatableHealth.remove(eventClass);
+        triggerAgentHealthChangedEvent(eventClass.getTypeName(), eventMessage);
+    }
+
+    /**
+     * Checks whether the current health has changed since last check and schedules another check.
+     * The next check will run dependent on the earliest status timeout in the future:
+     * <ul>
+     *     <li>does not exist -> run again after validity period</li>
+     *     <li>exists -> run until that timeout is over</li>
+     * </ul>
+     */
+    @VisibleForTesting
+    void checkHealthAndSchedule() {
+        triggerAgentHealthChangedEvent(AgentHealthManager.class.getCanonicalName(), "Checking timed out agent healths");
+
+        Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod();
+        Duration minDelay = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getMinHealthCheckDelay();
+        Duration delay = generalHealthTimeouts.values()
+                .stream()
+                .filter(dateTime -> dateTime.isAfter(LocalDateTime.now()))
+                .max(Comparator.naturalOrder())
+                .map(dateTime -> {
+                    Duration dif = Duration.between(dateTime, LocalDateTime.now());
+                    if (minDelay.compareTo(dif) > 0) return minDelay;
+                    else return dif;
+                })
+                .orElse(validityPeriod);
+
+        executor.schedule(this::checkHealthAndSchedule, delay.toMillis(), TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Creates a new AgentHealthIncident, if specified, and also triggers an AgentHealthChangedEvent,
+     * if the agent health has changed
+     *
+     * @param incidentSource class, which caused the incident
+     * @param message message, describing the incident
+     * @param shouldCreateIncident whether to create a new AgentHealthIncident or not
+     */
+    private void triggerAgentHealthChangedEvent(String incidentSource, String message, Boolean shouldCreateIncident) {
+        synchronized (this) {
+            boolean changedHealth = healthHasChanged();
+            AgentHealth currentHealth = getCurrentHealth();
+
+            // Don't create incident for health event logs
+            boolean isLoggedHealthEvent = incidentSource.equals(LogWritingHealthEventListener.class.getName());
+
+            if(shouldCreateIncident && !isLoggedHealthEvent) {
+                AgentHealthIncident incident = new AgentHealthIncident(
+                        LocalDateTime.now().toString(), currentHealth, incidentSource, message, changedHealth);
+                healthIncidentBuffer.put(incident);
+            }
+
+            if(changedHealth) {
+                AgentHealth lastHealth = lastNotifiedHealth;
+                lastNotifiedHealth = currentHealth;
+                AgentHealthChangedEvent event = new AgentHealthChangedEvent(this, lastHealth, currentHealth, message);
+                ctx.publishEvent(event);
+            }
+        }
+    }
+
+    private void triggerAgentHealthChangedEvent(String incidentSource, String message) {
+        triggerAgentHealthChangedEvent(incidentSource, message, true);
+    }
+
+    /**
+     * Checks whether the current health has changed since last check.
+     *
+     * @return true if the health state changed
+     */
+    private boolean healthHasChanged() {
+        return getCurrentHealth() != lastNotifiedHealth;
     }
 
     /**
@@ -101,90 +193,6 @@ public class AgentHealthManager implements InternalProcessingAppender.LogEventCo
                 .stream()
                 .reduce(AgentHealth::mostSevere)
                 .orElse(AgentHealth.OK);
-
         return AgentHealth.mostSevere(generalHealth, invHealth);
-    }
-
-    @Override
-    public void onInvalidationEvent(Object invalidator) {
-        invalidatableHealth.remove(invalidator.getClass());
-        triggerEventAndMetricIfHealthChanged();
-    }
-
-    @PostConstruct
-    @VisibleForTesting
-    void registerAtAppender() {
-        InternalProcessingAppender.register(this);
-    }
-
-    @PostConstruct
-    @VisibleForTesting
-    void startHealthCheckScheduler() {
-        checkHealthAndSchedule();
-    }
-
-    @PostConstruct
-    @VisibleForTesting
-    void sendInitialHealthMetric() {
-        selfMonitoringService.recordMeasurement("health", AgentHealth.OK.ordinal());
-    }
-
-    @PreDestroy
-    @VisibleForTesting
-    void unregisterFromAppender() {
-        InternalProcessingAppender.unregister(this);
-    }
-
-    /**
-     * Checks whether the current health has changed since last check and schedules another check.
-     * The next check will run dependent on the earliest status timeout in the future:
-     * <ul>
-     *     <li>does not exist -> run again after validity period</li>
-     *     <li>exists -> run until that timeout is over</li>
-     * </ul>
-     */
-    private void checkHealthAndSchedule() {
-        triggerEventAndMetricIfHealthChanged();
-
-        Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod();
-        Duration delay = generalHealthTimeouts.values()
-                .stream()
-                .filter(d -> d.isAfter(LocalDateTime.now()))
-                .max(Comparator.naturalOrder())
-                .map(d -> Duration.between(d, LocalDateTime.now()))
-                .orElse(validityPeriod);
-
-        executor.schedule(this::checkHealthAndSchedule, delay.toMillis(), TimeUnit.MILLISECONDS);
-    }
-
-    private void triggerEventAndMetricIfHealthChanged() {
-        if (getCurrentHealth() != lastNotifiedHealth) {
-            AgentHealthChangedEvent event = null;
-            synchronized (this) {
-                AgentHealth currHealth = getCurrentHealth();
-                if (currHealth != lastNotifiedHealth) {
-                    AgentHealth lastHealth = lastNotifiedHealth;
-                    lastNotifiedHealth = currHealth;
-
-                    selfMonitoringService.recordMeasurement("health", currHealth.ordinal());
-
-                    event = new AgentHealthChangedEvent(this, lastHealth, currHealth);
-                    ctx.publishEvent(event);
-                }
-            }
-
-            // It is important that logging happens outside the synchronized block above.
-            // Otherwise, a deadlock may happen since _this_ is via Interface
-            // InternalProcessingAppender.LogEventConsumer indirectly a part of the logback infrastructure
-            if (event != null) {
-                AgentHealth newHealth = event.getNewHealth();
-                AgentHealth oldHealth = event.getOldHealth();
-                if(newHealth.isMoreSevereOrEqualTo(oldHealth)) {
-                    log.warn(LOG_CHANGE_STATUS, oldHealth, newHealth);
-                } else {
-                    log.info(LOG_CHANGE_STATUS, oldHealth, newHealth);
-                }
-            }
-        }
     }
 }

@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.selfmonitoring;
+package rocks.inspectit.ocelot.core.selfmonitoring.logs;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
+import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

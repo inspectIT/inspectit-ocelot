@@ -1,13 +1,13 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import rocks.inspectit.ocelot.commons.models.health.AgentHealthState;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.selfmonitoring.event.AgentHealthChangedEvent;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -15,7 +15,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Service for continuously triggering the updated of a agent configuration via HTTP.
+ * Service for continuously triggering the updating of an agent configuration via HTTP.
  */
 @Service
 @Slf4j
@@ -32,6 +32,7 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
     /**
      * The state of the used HTTP property source configuration.
      */
+    @Getter
     private HttpPropertySourceState currentState;
 
     public HttpConfigurationPoller() {
@@ -83,10 +84,14 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
         }
     }
 
-    @EventListener
-    void agentHealthChanged(AgentHealthChangedEvent event) {
+    public void updateAgentHealthState(AgentHealthState agentHealth) {
         if (currentState != null) {
-            currentState.updateAgentHealth(event.getNewHealth());
+            currentState.updateAgentHealthState(agentHealth);
         }
+    }
+
+    public AgentHealthState getCurrentAgentHealthState() {
+        if(currentState == null) return null;
+        return currentState.getAgentHealth();
     }
 }

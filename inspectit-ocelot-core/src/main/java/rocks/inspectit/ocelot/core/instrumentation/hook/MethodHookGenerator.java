@@ -23,6 +23,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.TracingHookActio
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
 import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
+import rocks.inspectit.ocelot.core.metrics.MeasureTagValueGuard;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.OcelotSamplerUtils;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
@@ -71,6 +72,9 @@ public class MethodHookGenerator {
 
     @Autowired
     private ActionScopeFactory actionScopeFactory;
+
+    @Autowired
+    private MeasureTagValueGuard tagValueGuard;
 
     /**
      * Builds an executable method hook based on the given configuration.
@@ -222,7 +226,7 @@ public class MethodHookGenerator {
                     .map(this::buildMetricAccessor)
                     .collect(Collectors.toList());
 
-            IHookAction recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager);
+            IHookAction recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager, tagValueGuard);
 
             if (isTracingInternalActions() && config.isTraceExitHook()) {
                 recorder = TracingHookAction.wrap(recorder, null, "INTERNAL");

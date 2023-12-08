@@ -43,7 +43,6 @@ dependencies {
             libs.orgApacheCommonsCommonsLang3,
             libs.commonsIo,
             libs.comFasterxmlJacksonCoreJacksonDatabind,
-
             // logging
             libs.chQosLogbackLogbackClassic,
     )

@@ -1,9 +1,10 @@
-package rocks.inspectit.ocelot.core.selfmonitoring;
+package rocks.inspectit.ocelot.core.selfmonitoring.logs;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.core.logging.logback.InternalProcessingAppender;
+import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

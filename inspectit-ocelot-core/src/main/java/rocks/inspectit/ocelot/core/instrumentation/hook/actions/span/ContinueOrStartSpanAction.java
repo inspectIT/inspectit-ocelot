@@ -138,8 +138,9 @@ public class ContinueOrStartSpanAction implements IHookAction {
                 hasLocalParent = !(currentSpan == Span.getInvalid() || !currentSpan.getSpanContext().isValid());
             }
 
-            // This is necessary, since the lambda expression needs a final value
+            // This is necessary, since the lambda expression needs an effectively final value
             SpanContext finalRemoteParent = remoteParent;
+
             Sampler sampler = getSampler(context);
             AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> stackTraceSampler.createAndEnterSpan(spanName, finalRemoteParent, sampler, spanKind, methodInfo, autoTrace));
             ctx.setSpanScope(spanCtx);
