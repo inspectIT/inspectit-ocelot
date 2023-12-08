@@ -51,7 +51,6 @@ application {
 test {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
-    testLogging { events("passed", "failed") }
 }
 
 //to guarantee that the Configuration Server is compatible with Java 8 runtime environments
