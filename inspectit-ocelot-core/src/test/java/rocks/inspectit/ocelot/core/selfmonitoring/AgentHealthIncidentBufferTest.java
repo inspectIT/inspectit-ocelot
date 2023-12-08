@@ -41,7 +41,8 @@ public class AgentHealthIncidentBufferTest {
         incidentBuffer.put(incident);
         incidentBuffer.put(incident);
 
-        assertEquals(incidentBuffer.asList().size(), 2);
+        // Check if the actual buffer size does not exceed the specified max buffer size
+        assertEquals(incidentBuffer.asList().size(), incidentBuffer.getMaxBufferSize());
     }
 
     @Test

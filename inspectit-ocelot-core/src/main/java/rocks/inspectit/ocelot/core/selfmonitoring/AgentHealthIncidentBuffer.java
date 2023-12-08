@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,8 @@ public class AgentHealthIncidentBuffer {
     private ApplicationContext ctx;
     @Autowired
     private InspectitEnvironment env;
-
+    @Getter
+    private int maxBufferSize;
     private final ConcurrentLinkedQueue<AgentHealthIncident> buffer = new ConcurrentLinkedQueue<>();
 
     /**
@@ -32,8 +34,8 @@ public class AgentHealthIncidentBuffer {
      * @param incident new incident
      */
     public void put(AgentHealthIncident incident) {
-        int bufferSize = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getIncidentBufferSize();
-        while(buffer.size() >= bufferSize) buffer.poll();
+        maxBufferSize = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getIncidentBufferSize();
+        while(buffer.size() >= maxBufferSize) buffer.poll();
 
         buffer.offer(incident);
         ctx.publishEvent(new AgentHealthIncidentAddedEvent(this, asList()));
@@ -42,7 +44,7 @@ public class AgentHealthIncidentBuffer {
     /**
      * Creates a list from the internal queue.
      * The list will be reversed, since the queue inserts new elements at the tail
-     * @return List of agent health incidents
+     * @return List of stored agent health incidents
      */
     public List<AgentHealthIncident> asList() {
         List<AgentHealthIncident> incidentList = new LinkedList<>(buffer);
