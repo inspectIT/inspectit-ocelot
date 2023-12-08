@@ -1,6 +1,6 @@
 [versions]
 ioJsonwebtoken = "0.12.3"
-orgEclipseJgit = "6.7.0.202309050840-r"
+orgEclipseJgit = "6.8.0.202311291450-r"
 orgMockito = "4.7.0"
 orgSpringframeworkBoot = { strictly = "3.1.6" }
 orgSpringframeworkSecurity = "6.1.5"
@@ -29,6 +29,8 @@ orgSpringframeworkSecuritySpringSecurityLdap = { module = "org.springframework.s
 orgSpringframeworkSecuritySpringSecurityTest = { module = "org.springframework.security:spring-security-test", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityWeb = { module = "org.springframework.security:spring-security-web", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworksecuritySpringSecurityConfig = { module = "org.springframework.security:spring-security-config", version.ref = "orgSpringframeworkSecurity" }
+chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.4.14"
+chQosLogbackLogbackCore = "ch.qos.logback:logback-core:1.4.14"
 orgXerialSqliteJdbc = "org.xerial:sqlite-jdbc:3.43.2.2"
 orgYamlSnakeyaml = "org.yaml:snakeyaml:2.2"
 
