@@ -23,7 +23,7 @@ function getStore() {
 
 export { getStore };
 
-export default (App) => {
+const AppWithRedux = (App) => {
   return class AppWithRedux extends React.Component {
     static async getInitialProps(appContext) {
       // Get or Create the store with `undefined` as initialState
@@ -54,3 +54,4 @@ export default (App) => {
     }
   };
 };
+export default AppWithRedux;

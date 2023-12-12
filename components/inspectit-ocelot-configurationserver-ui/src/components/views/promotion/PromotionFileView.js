@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer';
+import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued';
 
 /**
  * The view for showing the diff of the currently selected promotion file.

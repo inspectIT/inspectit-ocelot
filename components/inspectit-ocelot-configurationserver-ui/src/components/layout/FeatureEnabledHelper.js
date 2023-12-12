@@ -1,6 +1,6 @@
 import { alertingEnabled } from '../views/alerting/alerting-api';
 
-export default async (featureName, state) => {
+async function isFeatureEnabled(featureName, state) {
   switch (featureName) {
     case 'Alerting':
       return await alertingEnabled();
@@ -9,4 +9,5 @@ export default async (featureName, state) => {
     default:
       return true;
   }
-};
+}
+export default isFeatureEnabled;

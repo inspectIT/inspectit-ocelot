@@ -85,6 +85,9 @@ dependencies {
             configServerLibs.orgSpringframeworkSecuritySpringSecurityLdap,
             configServerLibs.orgSpringframeworkBootSpringBootStarterActuator,
 
+            configServerLibs.chQosLogbackLogbackClassic,
+            configServerLibs.chQosLogbackLogbackCore,
+
             configServerLibs.orgYamlSnakeyaml,
 
             libs.orgApacheHttpcomponentsHttpclient, //Required for PATCH-Requests

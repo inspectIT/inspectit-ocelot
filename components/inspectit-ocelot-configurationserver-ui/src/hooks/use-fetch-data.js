@@ -5,7 +5,7 @@ import axios from '../lib/axios-api';
  * Fetches data from the specified endpoint. The URL is relative to the API's base url.
  * See 'lib/axios-api' for more information.
  */
-export default (url, params, initialData = null) => {
+const useFetchData = (url, params, initialData = null) => {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [counter, setCounter] = useState(0);
   const [data, setData] = useState(initialData);
@@ -42,3 +42,4 @@ export default (url, params, initialData = null) => {
 
   return [{ data, isLoading, isError, lastUpdate, error }, refresh];
 };
+export default useFetchData;
