@@ -33,25 +33,25 @@ public class AgentCommandController extends AbstractBaseController {
      *
      * @return Returns OK if the Agent is reachable and Timeout if it is not.
      */
-    @GetMapping(value = "command/ping")
+    @GetMapping(value = {"command/ping", "command/ping/"})
     public DeferredResult<ResponseEntity<?>> ping(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
         PingCommand pingCommand = new PingCommand();
         return commandDispatcher.dispatchCommand(agentId, pingCommand);
     }
 
-    @GetMapping(value = "command/logs")
+    @GetMapping(value = {"command/logs", "command/logs/"})
     public DeferredResult<ResponseEntity<?>> logs(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
         LogsCommand logsCommand = new LogsCommand();
         return commandDispatcher.dispatchCommand(agentId, logsCommand);
     }
 
-    @GetMapping(value = "command/list/classes")
+    @GetMapping(value = {"command/list/classes", "command/list/classes/"})
     public DeferredResult<ResponseEntity<?>> listClasses(@RequestParam(value = "agent-id") String agentId, @RequestParam(value = "query") String query) throws ExecutionException {
         ListClassesCommand listClassesCommand = new ListClassesCommand(query);
         return commandDispatcher.dispatchCommand(agentId, listClassesCommand);
     }
 
-    @GetMapping(value = "command/environment")
+    @GetMapping(value = {"command/environment", "command/environment/"})
     public DeferredResult<ResponseEntity<?>> environment(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
         EnvironmentCommand environmentCommand = new EnvironmentCommand();
         return commandDispatcher.dispatchCommand(agentId, environmentCommand);

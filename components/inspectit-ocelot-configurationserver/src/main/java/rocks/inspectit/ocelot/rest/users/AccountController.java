@@ -4,7 +4,6 @@ package rocks.inspectit.ocelot.rest.users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,7 +58,7 @@ public class AccountController extends AbstractBaseController {
             "The token expires after the time specified by ${inspectit.token-lifespan}, which by default is 60 minutes." +
             "In case of a server restart, all previously issued tokens become invalid.")
     @ApiResponse(responseCode = "200", description = "The access token", content = @Content(mediaType = "text/plain", examples = @ExampleObject("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU2MTYyODE1NH0.KelDW1OXg9xlMjSiblwZqui7sya4Crq833b-98p8UZ4"))    )
-    @GetMapping("account/token")
+    @GetMapping({"account/token", "account/token/"})
     public String acquireNewAccessToken(Authentication auth) {
         Optional<User> userOptional = userService.getUserByName(auth.getName());
 
@@ -73,9 +72,9 @@ public class AccountController extends AbstractBaseController {
 
     @Operation(summary = "Change Password", description = "Changes the password of the logged in user." +
             " This endpoint does not work with token-based authentication, only HTTP basic auth is allowed.")
-    @PutMapping("account/password")
+    @PutMapping({"account/password", "account/password/"})
     public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest newPassword, Authentication auth) {
-        if (StringUtils.isEmpty(newPassword.getPassword())) {
+        if (ObjectUtils.isEmpty(newPassword.getPassword())) {
             return ResponseEntity.badRequest().body(NO_PASSWORD_ERROR);
         }
         User user = userService.getUserByName(auth.getName()).get();
@@ -93,7 +92,7 @@ public class AccountController extends AbstractBaseController {
 
     @Operation(summary = "Get the user's permissions", description = "Queries the permissions of the currently logged-in user.")
     @ApiResponse(responseCode = "200", description = "The permissions of the user")
-    @GetMapping("account/permissions")
+    @GetMapping({"account/permissions", "account/permissions/"})
     public UserPermissions getPermissions(Authentication auth) {
         Set<String> roles = auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)

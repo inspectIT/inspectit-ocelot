@@ -1,11 +1,11 @@
 package rocks.inspectit.ocelot.agentstatus;
 
 import com.google.common.base.Preconditions;
+import jakarta.validation.constraints.NotBlank;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.validation.constraints.NotBlank;
 import java.util.Map;
 
 /**

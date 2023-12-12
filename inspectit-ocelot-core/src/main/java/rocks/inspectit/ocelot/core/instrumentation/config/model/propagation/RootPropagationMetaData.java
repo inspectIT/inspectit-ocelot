@@ -41,6 +41,11 @@ class RootPropagationMetaData implements PropagationMetaData {
      */
     private Set<String> globalUpPropagatedKeys = new HashSet<>();
 
+    /**
+     * Contains all data keys which have an active browser-propagation
+     */
+    private Set<String> browserPropagatedKeys = new HashSet<>();
+
     private RootPropagationMetaData() {
     }
 
@@ -71,6 +76,11 @@ class RootPropagationMetaData implements PropagationMetaData {
     @Override
     public boolean isTag(String dataKey) {
         return tagKeys.contains(dataKey);
+    }
+
+    @Override
+    public boolean isPropagatedWithBrowser(String dataKey) {
+        return browserPropagatedKeys.contains(dataKey);
     }
 
     @Override
@@ -131,6 +141,13 @@ class RootPropagationMetaData implements PropagationMetaData {
                 default:
                     throw new IllegalArgumentException("Unhandled case: " + propagation);
             }
+            return this;
+        }
+
+        @Override
+        public Builder setBrowserPropagation(String dataKey, Boolean isActive) {
+            if(isActive) result.browserPropagatedKeys.add(dataKey);
+            else result.browserPropagatedKeys.remove(dataKey);
             return this;
         }
 

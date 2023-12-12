@@ -8,7 +8,7 @@ import { downloadSelection } from '../../../functions/export-selection.function'
 /**
  * Fetches all existing versions.
  */
-export const fetchVersions = () => {
+export const fetchConfigurationVersions = () => {
   return (dispatch) => {
     dispatch({ type: types.FETCH_VERSIONS_STARTED });
 
@@ -207,7 +207,7 @@ export const deleteSelection = (fetchFilesOnSuccess, selectedFile = null) => {
         dispatch({ type: types.DELETE_SELECTION_SUCCESS });
         if (fetchFilesOnSuccess) {
           dispatch(fetchFiles());
-          dispatch(fetchVersions());
+          dispatch(fetchConfigurationVersions());
         }
       })
       .catch(() => {
@@ -314,7 +314,7 @@ export const writeFile = (file, content, fetchFilesOnSuccess, selectFileOnSucces
 
         dispatch({ type: types.WRITE_FILE_SUCCESS, payload });
         dispatch(fetchFiles());
-        dispatch(fetchVersions());
+        dispatch(fetchConfigurationVersions());
 
         if (fetchFilesOnSuccess) {
           if (selectFileOnSuccess) {
@@ -385,7 +385,7 @@ export const move = (path, targetPath, fetchFilesOnSuccess) => {
         });
         if (fetchFilesOnSuccess) {
           dispatch(fetchFiles());
-          dispatch(fetchVersions());
+          dispatch(fetchConfigurationVersions());
         }
       })
       .catch(() => {
@@ -407,7 +407,7 @@ export const selectedFileContentsChanged = (content) => ({
 /**
  * Selects the version with the given id.
  */
-export const selectVersion = (version, reloadFiles = true) => {
+export const selectConfigurationVersion = (version, reloadFiles = true) => {
   return (dispatch) => {
     // changing the selected version
     dispatch({

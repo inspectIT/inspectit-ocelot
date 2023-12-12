@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import HistoryView from './history/HistoryView';
+import ConfigurationHistoryView from './history/ConfigurationHistoryView';
 import { configurationActions } from '../../../redux/ducks/configuration';
 import DocumentationView from './documentation/DocumentationView';
 import SidebarTypes from './SidebarTypes';
@@ -53,7 +53,7 @@ const ConfigurationSidebar = () => {
 
       <div className="sidebar">
         <div className="content-container">
-          {currentSidebar == SidebarTypes.HISTORY && <HistoryView />}
+          {currentSidebar == SidebarTypes.HISTORY && <ConfigurationHistoryView />}
           {currentSidebar == SidebarTypes.CONFIGURATION_DOCS && <DocumentationView />}
         </div>
 

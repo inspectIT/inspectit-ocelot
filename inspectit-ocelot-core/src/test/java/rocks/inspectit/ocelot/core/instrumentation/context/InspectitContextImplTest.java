@@ -71,6 +71,19 @@ public class InspectitContextImplTest extends SpringTestBase {
     }
 
     @Nested
+    public class CreateRemoteParentContext {
+        @Test
+        void verifyTraceContextFormat() {
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
+            String traceContext = ctx.createRemoteParentContext();
+            String w3cFormat = "00-([0-9a-f]{32})-([0-9a-f]{16})-01";
+
+            assertThat(traceContext.matches(w3cFormat)).isTrue();
+            ctx.close();
+        }
+    }
+
+    @Nested
     public class EnterSpan {
 
         @Spy

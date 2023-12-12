@@ -2,8 +2,8 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
     id 'maven-publish'
-    id 'org.springframework.boot' version "${springBootVersion}" apply false
-    id 'io.spring.dependency-management' version "${springDependencyManangementVersion}"
+    alias(libs.plugins.orgSpringframeworkBoot) apply false
+    alias(libs.plugins.ioSpringDependencyManagement)
 }
 
 dependencyManagement {
@@ -13,13 +13,13 @@ dependencyManagement {
 }
 
 dependencies {
-    compileOnly "org.projectlombok:lombok"
-    annotationProcessor "org.projectlombok:lombok"
+    compileOnly libs.orgProjectlombokLombok
+    annotationProcessor libs.orgProjectlombokLombok
     testImplementation (
-            "org.junit.jupiter:junit-jupiter-api",
-            "org.mockito:mockito-junit-jupiter"
+            libs.orgJunitJupiterJunitJupiterApi,
+            libs.orgMockitoMockitoJunitJupiter
     )
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 }
 
 test {
@@ -33,7 +33,7 @@ test {
 sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
 targetCompatibility = 1.8 // Java version to generate classes for.
 jar {
-    archiveName = "${project.name}.jar"
+    archiveFileName = "${project.name}.jar"
 
     //include all "implementation" dependencies in fat jar
     from {

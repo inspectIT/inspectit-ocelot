@@ -11,12 +11,12 @@ import java.util.Map;
 @RestController
 public class DefaultConfigController extends AbstractBaseController {
 
-    @GetMapping(value = "defaultconfig")
+    @GetMapping(value = {"defaultconfig", "defaultconfig/"})
     public Map<String, String> getDefaultConfigContent() throws IOException {
         return ConfigFileLoader.getDefaultConfigFiles();
     }
 
-    @GetMapping(value = "fallbackconfig")
+    @GetMapping(value = {"fallbackconfig", "fallbackconfig/"})
     public Map<String, String> getFallBackConfigContent() throws IOException {
         return ConfigFileLoader.getFallbackConfigFiles();
     }

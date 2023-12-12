@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       working-directory: ./components/inspectit-ocelot-configurationserver
-    container: openjdk:8-jdk
+    container: eclipse-temurin:17
     steps:
       - uses: actions/checkout@v2
       - name: Grant execute permission for gradlew
@@ -32,3 +32,17 @@ jobs:
       - name: test
         run: ../../gradlew test
         working-directory: ${{env.working-directory}}
+
+  dependency-scan:
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./components/inspectit-ocelot-configurationserver
+    container: eclipse-temurin:17
+    steps:
+      - uses: actions/checkout@v2
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Scan dependencies
+        working-directory: ${{env.working-directory}}
+        run: ../../gradlew :inspectit-ocelot-configurationserver:dependencyCheckAnalyze

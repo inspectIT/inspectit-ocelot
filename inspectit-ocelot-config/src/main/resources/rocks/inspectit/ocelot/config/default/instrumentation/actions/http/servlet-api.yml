@@ -109,3 +109,28 @@ inspectit:
               }
             }
           }
+
+      'a_servletapi_remoteParentContext':
+        docs:
+          since: '2.5.4'
+          description: "Writes a parent trace context to the given HttpServletResponse's Server-Timing header"
+          inputs:
+            'response': 'The HttpServletResponse to write to'
+        is-void: true
+        imports:
+          - 'javax.servlet'
+          - 'javax.servlet.http'
+        input:
+          'response': 'ServletResponse'
+          _context: 'InspectitContext'
+        value-body: |
+          if(response instanceof HttpServletResponse) {
+            HttpServletResponse res = (HttpServletResponse) response;
+            if(!res.isCommitted()) {
+            String traceContext = _context.createRemoteParentContext();
+              if(traceContext == null) return;
+              String key = "Server-Timing";
+              String value = "traceparent; desc=" + traceContext;
+              res.addHeader(key, value);
+            }
+          }

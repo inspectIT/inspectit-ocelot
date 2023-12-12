@@ -4,8 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.List;
 
@@ -42,7 +40,7 @@ public class JwtTokenManager {
      * We dynamically generate a secret to sign the tokens with at server start.
      * This means that tokens automatically become invalid as soon as the server restarts.
      */
-    private Key secret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final SecretKey secret = Jwts.SIG.HS256.key().build();
 
     /**
      * Creates a token containing the specified username.
@@ -60,8 +58,8 @@ public class JwtTokenManager {
         Date expiration = new Date(now.getTime() + config.getTokenLifespan().toMillis());
 
         return Jwts.builder()
-                .setSubject(username)
-                .setExpiration(expiration)
+                .subject(username)
+                .expiration(expiration)
                 .signWith(secret)
                 .compact();
     }
@@ -80,9 +78,9 @@ public class JwtTokenManager {
      * @throws UsernameNotFoundException thrown if the user does not exist
      */
     public Authentication authenticateWithToken(String token) throws JwtException, UsernameNotFoundException {
-        Claims jwtToken = Jwts.parser().setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody();
+        Claims jwtToken = Jwts.parser().verifyWith(secret)
+                .build().parseSignedClaims(token)
+                .getPayload();
 
         String username = jwtToken.getSubject();
         UserDetails userDetails = loadUser(username);

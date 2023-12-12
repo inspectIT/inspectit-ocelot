@@ -1,12 +1,12 @@
 package rocks.inspectit.ocelot.config.model;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertFalse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.Valid;
-import javax.validation.constraints.AssertFalse;
 import java.util.Collections;
 import java.util.List;
 

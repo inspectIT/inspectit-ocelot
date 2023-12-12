@@ -1,19 +1,22 @@
 package rocks.inspectit.ocelot.mappings;
 
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import rocks.inspectit.ocelot.file.FileManager;
+import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.IntStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
+import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 /**
  * The manager class to handle and manage the agent mappings.
@@ -35,14 +38,19 @@ public class AgentMappingManager {
     /**
      * Object mapper utils.
      */
-    @Autowired
     private AgentMappingSerializer serializer;
 
     /**
      * Object mapper utils.
      */
-    @Autowired
     private FileManager fileManager;
+
+    @VisibleForTesting
+    @Autowired
+    AgentMappingManager(AgentMappingSerializer serializer, FileManager fileManager) {
+        this.serializer = serializer;
+        this.fileManager = fileManager;
+    }
 
     /**
      * Post construct. Initially reading the agent mappings if the mappings file exists.
@@ -50,19 +58,59 @@ public class AgentMappingManager {
     @PostConstruct
     public void postConstruct() throws IOException {
         if (!fileManager.getWorkspaceRevision().agentMappingsExist()) {
-            log.info("Generating default agent mappings");
+            log.info("Generating default agent mappings for workspace branch");
             List<AgentMapping> defaultMappings = Collections.singletonList(DEFAULT_MAPPING);
             serializer.writeAgentMappings(defaultMappings, fileManager.getWorkingDirectory());
         }
     }
 
     /**
-     * Returns a unmodifiable representation of the current agent mappings list.
+     * @return The current source branch for the agent mapping file itself.
+     */
+    public synchronized Branch getSourceBranch() {
+        return serializer.getSourceBranch();
+    }
+
+    /**
+     * Sets the source branch, from which the agent mapping file will be reade
+     * @param sourceBranch new source branch
+     * @return The set source branch
+     */
+    public synchronized Branch setSourceBranch(String sourceBranch) {
+        checkArgument(sourceBranch != null, "The set source branch cannot be null.");
+        sourceBranch = sourceBranch.toLowerCase();
+
+        switch (sourceBranch) {
+            case "live":
+                return serializer.setSourceBranch(LIVE);
+            case "workspace":
+                return serializer.setSourceBranch(WORKSPACE);
+            default:
+                throw new UnsupportedOperationException("Unhandled branch: " + sourceBranch);
+        }
+    }
+
+    /**
+     * Returns an unmodifiable representation of the agent mappings list.
+     *
+     * @param version The id of the version, which should be listed.
+     *                If it is empty, the latest workspace version is used.
+     *                Can be 'live' fir listing the latest live version.
      *
      * @return A list of {@link AgentMapping}
      */
+    public synchronized List<AgentMapping> getAgentMappings(String version) {
+        if (version == null) {
+            return serializer.readAgentMappings(fileManager.getWorkspaceRevision());
+        } else if (version.equals("live")) {
+            return serializer.readAgentMappings(fileManager.getLiveRevision());
+        } else {
+            return serializer.readAgentMappings(fileManager.getCommitWithId(version));
+        }
+    }
+
     public synchronized List<AgentMapping> getAgentMappings() {
-        return serializer.readAgentMappings(fileManager.getWorkspaceRevision());
+        return getAgentMappings(null);
     }
 
     /**
@@ -73,10 +121,10 @@ public class AgentMappingManager {
      * @return The mapping with the given name or an empty {@link Optional} in case no mapping exists with the given name
      */
     public Optional<AgentMapping> getAgentMapping(String mappingName) {
-        checkArgument(!StringUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
+        checkArgument(!ObjectUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
 
         return getAgentMappings().stream()
-                .filter(mapping -> mapping.getName().equals(mappingName))
+                .filter(mapping -> mapping.name().equals(mappingName))
                 .findFirst();
     }
 
@@ -105,12 +153,12 @@ public class AgentMappingManager {
      * @throws IOException In case of an error while persisting it into a file
      */
     public synchronized boolean deleteAgentMapping(String mappingName) throws IOException {
-        checkArgument(!StringUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
+        checkArgument(!ObjectUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
 
         log.info("Deleting agent mapping '{}'.", mappingName);
 
         ArrayList<AgentMapping> newAgentMappings = new ArrayList<>(getAgentMappings());
-        boolean removed = newAgentMappings.removeIf(mapping -> mapping.getName().equals(mappingName));
+        boolean removed = newAgentMappings.removeIf(mapping -> mapping.name().equals(mappingName));
         if (removed) {
             setAgentMappings(newAgentMappings);
         }
@@ -128,9 +176,9 @@ public class AgentMappingManager {
      */
     public void addAgentMapping(AgentMapping agentMapping) throws IOException {
         checkArgument(agentMapping != null, "The agent mapping should not be null.");
-        checkArgument(!StringUtils.isEmpty(agentMapping.getName()), "The agent mapping's name should not be null or empty.");
+        checkArgument(!ObjectUtils.isEmpty(agentMapping.name()), "The agent mapping's name should not be null or empty.");
 
-        log.info("Adding new agent mapping '{}'.", agentMapping.getName());
+        log.info("Adding new agent mapping '{}'.", agentMapping.name());
 
         addAgentMapping(getAgentMappings(), agentMapping, 0);
     }
@@ -147,7 +195,7 @@ public class AgentMappingManager {
      * @throws RuntimeException If no mapping exists with the given name
      */
     public synchronized void addAgentMappingBefore(AgentMapping agentMapping, String mappingName) throws IOException {
-        log.info("Adding new agent mapping '{}' before existing mapping '{}'.", agentMapping.getName(), mappingName);
+        log.info("Adding new agent mapping '{}' before existing mapping '{}'.", agentMapping.name(), mappingName);
 
         List<AgentMapping> currentMappings = getAgentMappings();
         OptionalInt indexOpt = getMappingIndex(mappingName, currentMappings);
@@ -170,7 +218,7 @@ public class AgentMappingManager {
      * @throws RuntimeException If no mapping exists with the given name
      */
     public synchronized void addAgentMappingAfter(AgentMapping agentMapping, String mappingName) throws IOException {
-        log.info("Adding new agent mapping '{}' after existing mapping '{}'.", agentMapping.getName(), mappingName);
+        log.info("Adding new agent mapping '{}' after existing mapping '{}'.", agentMapping.name(), mappingName);
 
         List<AgentMapping> currentMappings = getAgentMappings();
         OptionalInt indexOpt = getMappingIndex(mappingName, currentMappings);
@@ -186,7 +234,7 @@ public class AgentMappingManager {
      */
     private OptionalInt getMappingIndex(String mappingName, List<AgentMapping> mappings) {
         return IntStream.range(0, mappings.size())
-                .filter(i -> mappingName.equals(mappings.get(i).getName()))
+                .filter(i -> mappingName.equals(mappings.get(i).name()))
                 .findFirst();
     }
 
@@ -196,7 +244,7 @@ public class AgentMappingManager {
     private void addAgentMapping(List<AgentMapping> currentMappings, AgentMapping agentMapping, int index) throws IOException {
         ArrayList<AgentMapping> newAgentMappings = new ArrayList<>(currentMappings);
 
-        OptionalInt currentIndexOpt = getMappingIndex(agentMapping.getName(), newAgentMappings);
+        OptionalInt currentIndexOpt = getMappingIndex(agentMapping.name(), newAgentMappings);
 
         if (currentIndexOpt.isPresent()) {
             int currentIndex = currentIndexOpt.getAsInt();

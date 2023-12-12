@@ -1,14 +1,14 @@
 package rocks.inspectit.ocelot.user;
 
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
-import javax.annotation.PostConstruct;
 import java.util.Optional;
 
 /**
@@ -92,7 +92,7 @@ public class UserService {
                 .toBuilder()
                 .username(user.getUsername().toLowerCase());
 
-        if (!StringUtils.isEmpty(user.getPassword())) {
+        if (!ObjectUtils.isEmpty(user.getPassword())) {
             String passwordHash = passwordEncoder.encode(user.getPassword());
             userBuilder.passwordHash(passwordHash);
         }

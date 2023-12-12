@@ -20,7 +20,7 @@ public class MoveController extends FileBaseController {
 
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
     @Operation(summary = "Move or rename a file or directory")
-    @PutMapping(value = "move")
+    @PutMapping(value = {"move", "move/"})
     public void moveFileOrDirectory(@RequestBody FileMoveDescription moveDescription) throws IOException {
         String source = removeLeadingSlash(moveDescription.getSource());
         String target = removeLeadingSlash(moveDescription.getTarget());

@@ -20,7 +20,8 @@
       "metrics/metric-exporters",
       "metrics/common-tags",
       "metrics/custom-metrics",
-      "metrics/self-monitoring"
+      "metrics/self-monitoring",
+      "metrics/tag-guard"
     ],
     "Tracing": [
       "tracing/tracing",
@@ -28,6 +29,9 @@
       "tracing/log-correlation",
       "tracing/privacy",
       "tracing/tracing-self-monitoring"
+    ],
+    "Tags": [
+      "tags/tags-exporters"
     ],
     "Instrumentation": [
       "instrumentation/instrumentation",
@@ -46,8 +50,8 @@
     "Configuration Server": [
       "config-server/overview",
       "config-server/cs-configuration",
-      "config-server/managing-configurations",
-      "config-server/configuration-files-staging",
+      "config-server/managing-files",
+      "config-server/files-staging",
       "config-server/agent-mappings",
       "config-server/scope-wizard",
       "config-server/class-browser",

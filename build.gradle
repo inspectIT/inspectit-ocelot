@@ -1,7 +1,11 @@
 import com.github.jk1.license.render.TextReportRenderer
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 plugins {
-    id "com.github.jk1.dependency-license-report" version "${licenseReportVersion}"
+    alias(libs.plugins.nlLittlerobotsVersionCatalogUpdate)
+    alias(libs.plugins.comGithubJk1DependencyLicenseReport)
+    alias(libs.plugins.orgOwaspDependencycheck) apply false
+    alias(libs.plugins.comGithubBenManesVersions)
 }
 
 licenseReport {
@@ -18,12 +22,104 @@ allprojects {
 
     apply plugin: 'java'
     apply plugin: 'jacoco'
+    apply plugin: 'org.owasp.dependencycheck'
 
     if (!project.hasProperty('buildVersion') || project.getProperty('buildVersion').empty) {
         ext.buildVersion = 'SNAPSHOT'
     }
 
     version = "$buildVersion"
+
+    dependencyCheck {
+        //failBuildOnCVSS = 6
+        scanProjects = [
+                ':inspectit-ocelot-agent',
+                ':inspectit-ocelot-core',
+                ':inspectit-ocelot-sdk',
+                ':inspectit-ocelot-bootstrap',
+                ':inspectit-ocelot-configurationserver',
+                ':inspectit-ocelot-configurationserver-ui'
+        ]
+        skipConfigurations = ["jmh", "jmhCompileClasspath", "systemTest", "systemTestCompileClasspath", "systemTestRuntimeClasspath"]
+        analyzers {
+            assemblyEnabled = false
+            ossIndex {
+                enabled = true
+            }
+            nodeAudit {
+                yarnEnabled = false
+            }
+        }
+    }
+
+
+}
+
+versionCatalogUpdate {
+    // sort the catalog by key (default is true)
+    sortByKey = true
+    keep {
+        // keep versions without any library or plugin reference
+        keepUnusedVersions = true
+        // keep all libraries that aren't used in the project
+        keepUnusedLibraries = true
+        // keep all plugins that aren't used in the project
+        keepUnusedPlugins = true
+    }
+
+    versionCatalogs {
+        configServerLibs {
+            catalogFile = file("gradle/configserverlibs.versions.toml")
+        }
+    }
+}
+
+tasks.withType(DependencyUpdatesTask).configureEach {
+    // default settings
+    revision = 'milestone'
+    gradleReleaseChannel = "current"
+    checkConstraints = true
+    checkBuildEnvironmentConstraints = true
+    outputFormatter = 'json,plain'
+}
+
+def isNonStable = { String candidate ->
+    def stableKeyword = ['RELEASE', 'FINAL', 'GA', 'JRE'].any { it -> candidate.toUpperCase().contains(it) }
+    def versionRegex = /^[0-9,.v-]+(-r)?$/
+    return !stableKeyword && !(candidate ==~ versionRegex)
+}
+
+def isNotSameMajorMinor = { String current, String candidate, boolean matchMinor ->
+    if(current.equals(candidate)) return false
+
+    def firstDot = current.indexOf('.')
+    def secondDot = current.indexOf('.', firstDot + 1)
+    def major = current.substring(0, firstDot)
+    def minor = current.substring(firstDot + 1, secondDot)
+    def majorRegex = /^$major\..*/
+    def minorRegex = /^$major\.${minor}\..*/
+    return !((candidate ==~ majorRegex) && (!matchMinor || (candidate ==~ minorRegex)))
+}
+
+tasks.named("dependencyUpdates").configure {
+    rejectVersionIf {
+        // only patch updates
+        isNonStable(it.candidate.version) || isNotSameMajorMinor(it.currentVersion, it.candidate.version, true)
+    }
+}
+
+tasks.register('dependencyUpdatesMinor', DependencyUpdatesTask) {
+    rejectVersionIf {
+        // only minor updates
+        isNonStable(it.candidate.version) || isNotSameMajorMinor(it.currentVersion, it.candidate.version, false)
+    }
+}
+
+tasks.register('dependencyUpdatesMajor', DependencyUpdatesTask) {
+    rejectVersionIf {
+        // all updates including major updates
+        isNonStable(it.candidate.version)
+    }
 }
 
 tasks.register('codeCoverageReport', JacocoReport) {

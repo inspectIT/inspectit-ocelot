@@ -47,7 +47,7 @@ const PromotionFileApproval = ({ currentUser, authors, canApprove, approved, onA
           (!preventApproval ? (
             <ToggleButton
               onLabel="Approved"
-              offLabel="Not Approved"
+              offLabel="Approve"
               onIcon="pi pi-check"
               offIcon="pi pi-times"
               checked={approved}

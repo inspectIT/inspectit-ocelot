@@ -14,8 +14,8 @@ import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
 import rocks.inspectit.ocelot.agentstatus.AgentStatusManager;
 import rocks.inspectit.ocelot.commons.models.command.Command;
-import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
+import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
 
 import java.util.Collections;
 import java.util.HashMap;

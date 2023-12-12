@@ -1,17 +1,16 @@
 package rocks.inspectit.ocelot.file.versioning;
 
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
+import rocks.inspectit.ocelot.events.PromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Monitors the workspace and the live branch for changes.
@@ -33,9 +32,9 @@ public class ExternalChangeDetector {
      */
     private String latestLiveId;
 
-    private FileManager fileManager;
+    private final FileManager fileManager;
 
-    private ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher publisher;
 
     @VisibleForTesting
     @Autowired
@@ -56,7 +55,7 @@ public class ExternalChangeDetector {
     synchronized void checkForUpdates() {
         RevisionAccess currentLiveRevision = fileManager.getLiveRevision();
         if (!currentLiveRevision.getRevisionId().equals(latestLiveId)) {
-            publisher.publishEvent(new ConfigurationPromotionEvent(this, currentLiveRevision));
+            publisher.publishEvent(new PromotionEvent(this, currentLiveRevision));
         }
 
         RevisionAccess currentWorkspaceRevision = fileManager.getWorkspaceRevision();
@@ -71,7 +70,7 @@ public class ExternalChangeDetector {
      * @param event
      */
     @EventListener
-    synchronized void configurationPromoted(ConfigurationPromotionEvent event) {
+    synchronized void configurationPromoted(PromotionEvent event) {
         latestLiveId = event.getLiveRevision().getRevisionId();
     }
 

@@ -60,17 +60,25 @@ This data is then used on method exit: using the action `a_timing_elapsedMillis`
 ## Data Propagation
 
 As illustrated by the previous example, we can collect any amount of data in both the entry and the exit section of an instrumented method. Each data is hereby identified by its name, the _data key_.
-Internally, inspectIT creates a dictionary like Object each time an instrumented method is executed. This object is basically a local variable for the method. Whenever data is written, inspectIT stores the value under the given data key in this dictionary. Similarly, whenever data is read, inspectIT looks it up based on the data key in the dictionary. This dictionary is called _inspectIT context_.
+Internally, inspectIT creates a dictionary like Object each time **an instrumented method is executed**. This object is basically a local variable for the method. **Whenever data is written**, inspectIT stores the value under the given data key in this dictionary. Similarly, whenever data is read, inspectIT looks it up based on the data key in the dictionary. This dictionary is called _inspectIT context_.
 
 If the inspectIT context was truly implemented as explained above, all data would be only visible in the method where it was collected. This however often is not the desired behaviour.
 Consider the following example: you instrument the entry method of your HTTP server and collect the request URL as data there. You now of course want this data to be visible as tag for metrics collected in methods called by your entry point. With the implementation above, the request URL would only be visible within the HTTP entry method.
 
-For this reason the inspectIT context implements _data propagation_. The propagation can happen in two directions:
+For this reason the inspectIT context implements _data propagation_.
 
 * **Down Propagation:** Data collected in your instrumented method will also be visible to all methods directly or indirectly called by your method. This behaviour already comes [with the OpenCensus Library for tags](https://opencensus.io/tag/#propagation).
 * **Up Propagation:** Data collected in your instrumented method will be visible to the methods which caused the invocation of your method. This means that all methods which lie on the call stack will have access to the data written by your method
+* **Browser Propagation:** An additional form of propagation. Data collected in your instrumented method will be stored inside a data storage. This storage can be exposed via a REST-API, if [_exporters.tags.http_](../tags/tags-exporters.md#http-exporter) is enabled. A browser can read this data via GET-requests. 
+
+Additionally, a browser can write data into the storage via PUT-requests. If browser- as well as down-propagation is enabled for a data key, the data written by the browser will be stored in the _inspectIT context_.
+Please note, before writing or reading browser propagation data, you need to provide a session-ID inside the request-header. 
+After that, all data belonging to the current session will be stored behind this session-ID.
+For more information, see [Tags-HTTP-Exporter](../tags/tags-exporters.md#http-exporter).
 
 Up- and down propagation can also be combined: in this case then the data is attached to the control flow, meaning that it will appear as if its value will be passed around with every method call and return.
+
+Also note, that you should only assign Java Objects into data keys and not native data types, like _boolean_.
 
 The second aspect of propagation to consider is the _level_. Does the propagation happen within each Thread separately or is it propagated across threads? Also, what about propagation across JVM borders, e.g. one micro service calling another one via HTTP? In inspectIT Ocelot we provide the following two settings for the propagation level.
 
@@ -96,16 +104,22 @@ inspectit:
       #this data will only be visible locally in the method where it is collected
       'http_method': {down-propagation: "NONE"}
       'http_status': {down-propagation: "NONE"}
+
+      #this data will be written to the inspectIT browser data storage
+      'database_tag': {browser-propagation: true}
+      #this data can be written by the browser
+      'transaction_id': {down-propagation: "JVM_LOCAL", browser-propagation: true}
 ```
 
 Under `inspectit.instrumentation.data`, the data keys are mapped to their desired behaviour.
 The configuration options are the following:
 
-|Config Property|Default| Description
-|---|---|---|
-| `down-propagation` | `JVM_LOCAL` if the data key is also a [common tag](metrics/common-tags.md), `NONE` otherwise | Configures if values for this data key propagate down and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place. | 
-| `up-propagation` |  `NONE` |  Configures if values for this data key propagate up and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no up propagation will take place. | 
-| `is-tag` | `true` if the data key is also a [common tag](metrics/common-tags.md) or is used as tag in any [metric definition](metrics/custom-metrics.md), `false` otherwise | If true, this data will act as a tag when metrics are recorded. This does not influence propagation. | 
+| Config Property       | Default                                                                                                                                                           | Description                                                                                                                                                                                             
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `down-propagation`    | `JVM_LOCAL` if the data key is also a [common tag](metrics/common-tags.md), `NONE` otherwise                                                                      | Configures if values for this data key propagate down and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place. | 
+| `up-propagation`      | `NONE`                                                                                                                                                            | Configures if values for this data key propagate up and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no up propagation will take place.     | 
+| `browser-propagation` | `false` | If true, this data will be written to the inspectIT browser data storage                                                                                                                                | 
+| `is-tag`              | `true` if the data key is also a [common tag](metrics/common-tags.md) or is used as tag in any [metric definition](metrics/custom-metrics.md), `false` otherwise  | If true, this data will act as a tag when metrics are recorded. This does not influence propagation.                                                                                                    | 
 
 Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. In this case simply all settings will have their default value.
 
@@ -370,27 +384,39 @@ If multiple conditions are given for the same action invocation, the invocation 
 
 #### Execution Order
 
-As we can use data values for input parameters and for conditions, action invocations can depend on another. This means that a defined order on action executions within each phase is required for rules to work as expected.
+As we can use data values for input parameters and for conditions, action invocations can depend on another. 
+This means that a defined order on action executions within each phase is required for rules to work as expected.
 
-As all invocations are specified under the `entry` or the `exit` config options which are YAML dictionaries, the order they are given in the config file does not matter. YAML dictionaries do not maintain or define an order of their entries.
+As all invocations are specified under the `entry` or the `exit` config options as well as the 
+`pre-entry`, `post-entry`, `pre-exit` and `post-exit` config options which are YAML dictionaries, 
+the order they are given in the config file does not matter. YAML dictionaries do not maintain or define an order 
+of their entries.
 
 However, inspectIT Ocelot _automatically_ orders the invocations for you correctly.
-For each instrumented method the agent first finds all rules which have scopes matching the given method. Afterwards, these rules get combined into one "super"-rule by simply merging the `entry`, `exit` and `metrics` phases.
+For each instrumented method the agent first finds all rules which have scopes matching the given method. 
+Afterward, these rules get combined into one "super"-rule by simply merging the 
+`entry`, `exit`, `pre-entry`, `post-entry`, `pre-exit` and `post-exit` and `metrics` phases.
 
-Within the `entry` and the `exit` phase, actions are now automatically ordered based on their dependencies. E.g. if the invocation writing `data_b` uses `data_a` as input, the invocation writing `data_a` is guaranteed to be executed first! Whenever you use a data value as value for a parameter or in a condition, this will be counted as a dependency.
+Within the `entry` and the `exit` phase, actions are now automatically ordered based on their dependencies.
+`pre-entry` and `pre-exit` actions will be executed before their particular phase.
+`post-entry` and `post-exit` actions will be executed after their particular phase.
 
-In some rare cases you might want to change this behaviour. E.g. in tracing context you want to store the [down propagated](#data-propagation) `span_id` in `parent_span`, before the current method assigns a new `span_id`. This can easily be realized using the `before` config option for action invocations:
+If for example, the invocation writing `data_b` uses `data_a` as input, the invocation writing `data_a` is guaranteed to 
+be executed first! Whenever you use a data value as value for a parameter or in a condition, this will be counted 
+as a dependency.
+
+In some rare cases you might want to change this behaviour. E.g. in tracing context you want to store 
+the [down propagated](#data-propagation) `span_id` in `parent_span`, before the current method assigns 
+a new `span_id`. This can easily be realized using the `pre-entry` phase for action invocations:
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
 'r_example_rule':
-  entry:
+  pre-entry:
     'parent_span':
       action: 'a_assign_value'
       data-input:
         'value': 'span_id'
-    'before':
-      'span_id': true
 ```
 
 ### Collecting Metrics
@@ -706,6 +732,90 @@ In this case, the rule will first attempt to continue the existing span. Only if
 
 Again, conditions for the span continuing and span ending can be specified just like for the span starting.
 The properties `continue-span-conditions` and `end-span-conditions` work just like `start-span-conditions`.
+
+#### Distributed Tracing with Remote Parent Context
+
+There are two ways to use a remote parent context in distributed tracing. If the remote parent context exists before the current context,
+you can use _readDownPropagationHeaders()_ inside your action. If the remote parent context will be created after your current context,
+you can use _createRemoteParentContext()_ inside your action.
+
+_readDownPropagationHeaders()_
+
+The method takes a _Map<String,String>_ as a parameter. This map should contain at least the trace context, which was sent by a Http request header.
+The remote parent trace context should be in either B3-format, W3C-format or datadog-format.
+The action, which uses this function, should be called in the pre-entry or entry phase.
+
+There is also a default-action in InspectIT, which uses the readDownPropagationHeaders()-function:
+
+```yaml
+  'a_servletapi_downPropagation':
+    docs:
+      since: '1.2.1'
+      description: 'Reads down-propagated data from the request HTTP headers.'
+    is-void: true
+    imports:
+     - 'java.util'
+     - 'javax.servlet'
+     - 'javax.servlet.http'
+    input:
+     _arg0: 'ServletRequest'
+     _context: 'InspectitContext'
+    value-body: |
+     if (_arg0 instanceof HttpServletRequest) {
+       HttpServletRequest req = (HttpServletRequest) _arg0;
+       Collection headerKeys = _context.getPropagationHeaderNames();
+       Map presentHeaders = new HashMap();
+       Iterator it = headerKeys.iterator();
+       while (it.hasNext()) {
+         String name = (String) it.next();
+         java.util.Enumeration values = req.getHeaders(name);
+         if (values != null && values.hasMoreElements()) {
+           presentHeaders.put(name, String.join(",", Collections.list(values)));
+         }
+       }
+       _context.readDownPropagationHeaders(presentHeaders);
+     }
+```
+
+_createRemoteParentContext()_
+
+The method takes no parameter. It can be used, if the remote context will be created after the current context, but should be used as a parent.
+The function creates a span context, which will be used as a parent for the current context. It returns a string, which contains
+the trace context of the remote parent in W3C-format. You can send the returned trace context to your remote service via http response header
+and use the information to create the remote parent context.
+
+Note that, if a remote parent context was down propagated via _readDownPropagationHeaders()_, InspectIT will use the down propagated context as a parent
+and ignore the context created with _createRemoteParentContext()_.
+
+The action, which uses this function, should be called in the pre-entry or entry phase.
+There is also a default-action in InspectIT, which uses the createRemoteParentContext()-function:
+
+```yaml
+  'a_servletapi_remoteParentContext':
+    docs:
+      since: '2.5.4'
+      description: "Writes a parent trace context to the given HttpServletResponse's Server-Timing header"
+      inputs:
+       'response': 'The HttpServletResponse to write to.'
+    is-void: true
+    imports:
+     - 'javax.servlet'
+     - 'javax.servlet.http'
+    input:
+     'response': 'ServletResponse'
+     _context: 'InspectitContext'
+    value-body: |
+     if(response instanceof HttpServletResponse) {
+       HttpServletResponse res = (HttpServletResponse) response;
+       if(!res.isCommitted()) {
+       String traceContext = _context.createRemoteParentContext();
+         if(traceContext == null) return;
+         String key = "Server-Timing";
+         String value = "traceparent; desc=" + traceContext;
+         res.addHeader(key, value);
+       }
+     }
+```
 
 ### Modularizing Rules
 

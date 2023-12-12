@@ -1,5 +1,10 @@
 package rocks.inspectit.ocelot.security.jwt;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -9,15 +14,10 @@ import org.springframework.security.authentication.event.AuthenticationSuccessEv
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.filter.GenericFilterBean;
 import rocks.inspectit.ocelot.security.config.SecurityConfiguration;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -80,7 +80,7 @@ public class JwtTokenFilter extends GenericFilterBean {
      */
     private String extractBearerToken(HttpServletRequest req) {
         String header = req.getHeader("Authorization");
-        if (!StringUtils.isEmpty(header) && header.toLowerCase().startsWith("bearer ")) {
+        if (!ObjectUtils.isEmpty(header) && header.toLowerCase().startsWith("bearer ")) {
             return header.substring("bearer ".length());
         }
         return null;

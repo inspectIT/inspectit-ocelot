@@ -10,7 +10,17 @@ import { ContentTypeMapper } from '../mappings/ContentTypeMapper';
 /**
  * Dialog that shows the given content, applying syntax highlighting if available, and offering a download option
  */
-const DownloadDialogue = ({ visible, onHide, error, loading, contentValue, contentType, contextName }) => {
+const DownloadDialogue = ({
+  visible,
+  onHide,
+  error,
+  loading,
+  contentValue,
+  contentType,
+  contextName,
+  isDownloadDialogFooterHidden,
+  onCancel,
+}) => {
   const dialogueSettings = ContentTypeMapper(contentType, contextName);
 
   const downloadFilename =
@@ -37,6 +47,11 @@ const DownloadDialogue = ({ visible, onHide, error, loading, contentValue, conte
 
   return (
     <>
+      <style jsx>{`
+        .downloadDialogFooter {
+          display: none;
+        }
+      `}</style>
       <Dialog
         style={{ width: '50vw', overflow: 'auto' }}
         header={dialogueSettings.header}
@@ -44,11 +59,11 @@ const DownloadDialogue = ({ visible, onHide, error, loading, contentValue, conte
         visible={visible}
         onHide={onHide}
         footer={
-          <div>
+          <div className={isDownloadDialogFooterHidden ? 'downloadDialogFooter' : null}>
             <a href={error || loading ? null : download()} download={downloadFilename}>
               <Button icon="pi pi-download" label="Download" className="p-button-primary" disabled={loading || error} />
             </a>
-            <Button label="Cancel" className="p-button-secondary" onClick={onHide} />
+            <Button label="Cancel" className="p-button-secondary" onClick={onCancel} />
           </div>
         }
       >
@@ -86,6 +101,10 @@ DownloadDialogue.propTypes = {
   contentType: PropTypes.string,
   /** The name of the data's context. E.g. the agent whose logs are being shown.*/
   contextName: PropTypes.string,
+  /** Whether the cancel Button is disabled */
+  disableDownloadCancelButton: PropTypes.bool,
+  /** Callback on dialog cancel */
+  onCancel: PropTypes.func,
 };
 
 DownloadDialogue.defaultProps = {

@@ -16,7 +16,6 @@ import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericAction
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.config.model.instrumentation.scope.AdvancedScopeSettings;
 
-
 import java.util.List;
 import java.util.Map;
 

@@ -30,6 +30,11 @@ class CompositePropagationMetaData implements PropagationMetaData {
     private Map<String, PropagationMode> upPropagationOverrides;
 
     /**
+     * Maps data keys to overrides for the browser-propagation settings.
+     */
+    private Map<String, Boolean> browserPropagationOverrides;
+
+    /**
      * Maps data keys to a boolean specifying whether the given data key is a tag or not.
      */
     private Map<String, Boolean> tagOverrides;
@@ -96,6 +101,12 @@ class CompositePropagationMetaData implements PropagationMetaData {
     }
 
     @Override
+    public boolean isPropagatedWithBrowser(String dataKey) {
+        Boolean isActive = browserPropagationOverrides.get(dataKey);
+        return isActive != null ? isActive : parent.isPropagatedWithBrowser(dataKey);
+    }
+
+    @Override
     public PropagationMetaData.Builder copy() {
         return new CompositePropagationMetaDataBuilder(this);
     }
@@ -111,11 +122,13 @@ class CompositePropagationMetaData implements PropagationMetaData {
                 result.parent = cParent.parent;
                 result.downPropagationOverrides = new HashMap<>(cParent.downPropagationOverrides);
                 result.upPropagationOverrides = new HashMap<>(cParent.upPropagationOverrides);
+                result.browserPropagationOverrides = new HashMap<>(cParent.browserPropagationOverrides);
                 result.tagOverrides = new HashMap<>(cParent.tagOverrides);
             } else {
                 result.parent = parent;
                 result.downPropagationOverrides = new HashMap<>();
                 result.upPropagationOverrides = new HashMap<>();
+                result.browserPropagationOverrides = new HashMap<>();
                 result.tagOverrides = new HashMap<>();
             }
         }
@@ -135,6 +148,12 @@ class CompositePropagationMetaData implements PropagationMetaData {
         @Override
         public Builder setUpPropagation(String dataKey, PropagationMode propagation) {
             result.upPropagationOverrides.put(dataKey, propagation);
+            return this;
+        }
+
+        @Override
+        public Builder setBrowserPropagation(String dataKey, Boolean isActive) {
+            result.browserPropagationOverrides.put(dataKey, isActive);
             return this;
         }
 

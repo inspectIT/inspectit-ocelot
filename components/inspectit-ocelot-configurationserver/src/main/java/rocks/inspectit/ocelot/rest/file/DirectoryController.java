@@ -3,13 +3,13 @@ package rocks.inspectit.ocelot.rest.file;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.rest.util.RequestUtil;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collection;
 
@@ -22,7 +22,7 @@ public class DirectoryController extends FileBaseController {
     @Operation(summary = "List directory contents", description = "Can be used to get a list of the contents of a given directory. In addition, the branch can be specified which will be used as basis for the listing.")
     @Parameter(name = "Path", description = "The part of the url after /directories/ define the path to the directory whose contents shall be read.")
     @GetMapping(value = "directories/**")
-    public Collection<FileInfo> listContents(@Parameter(description = "The id of the version which should be listed. If it is empty, the lastest workspace version is used. Can be 'live' fir listing the latest live version.") @RequestParam(value = "version", required = false) String commitId, HttpServletRequest request) {
+    public Collection<FileInfo> listContents(@Parameter(description = "The id of the version which should be listed. If it is empty, the latest workspace version is used. Can be 'live' for listing the latest live version.") @RequestParam(value = "version", required = false) String commitId, HttpServletRequest request) {
         String path = RequestUtil.getRequestSubPath(request);
 
         if (commitId == null) {

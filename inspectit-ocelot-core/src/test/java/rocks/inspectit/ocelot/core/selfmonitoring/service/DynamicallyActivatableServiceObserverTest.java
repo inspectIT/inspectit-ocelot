@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Nested;
 import rocks.inspectit.ocelot.core.command.AgentCommandService;
 import rocks.inspectit.ocelot.core.exporter.JaegerExporterService;
 import rocks.inspectit.ocelot.core.exporter.PrometheusExporterService;
-import rocks.inspectit.ocelot.core.selfmonitoring.LogPreloader;
+import rocks.inspectit.ocelot.core.selfmonitoring.logs.LogPreloader;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.util.ArrayList;
@@ -66,7 +66,7 @@ public class DynamicallyActivatableServiceObserverTest {
         @Test
         public void testAsJson() {
             setupTest();
-            String expectedJson = "{\"LoggingMetricExporterService\":false,\"MemoryMetricsRecorder\":true,\"HttpConfigurationPoller\":true,\"OtlpTraceExporterService\":false,\"DiskMetricsRecorder\":true,\"ActionMetricsRecorder\":false,\"PrometheusExporterService\":false,\"LoggingTraceExporterService\":false,\"GCMetricsRecorder\":true,\"InfluxExporterService\":false,\"OtlpMetricsExporterService\":false,\"JmxMetricsRecorder\":false,\"JaegerExporterService\":false,\"ProcessorMetricsRecorder\":true,\"ThreadMetricsRecorder\":true,\"AgentCommandService\":false,\"ConfigurationDirectoriesPoller\":false,\"LogPreloader\":false,\"ClassLoaderMetricsRecorder\":true,\"ZipkinExporterService\":false}";
+            String expectedJson = "{\"LoggingMetricExporterService\":false,\"MemoryMetricsRecorder\":true,\"HttpConfigurationPoller\":true,\"OtlpTraceExporterService\":false,\"DiskMetricsRecorder\":true,\"ActionMetricsRecorder\":false,\"PrometheusExporterService\":false,\"LoggingTraceExporterService\":false,\"GCMetricsRecorder\":true,\"InfluxExporterService\":false,\"OtlpMetricsExporterService\":false,\"JmxMetricsRecorder\":false,\"JaegerExporterService\":false,\"ProcessorMetricsRecorder\":true,\"ThreadMetricsRecorder\":true,\"AgentCommandService\":false,\"ConfigurationDirectoriesPoller\":false,\"BrowserPropagationHttpExporterService\":false,\"LogPreloader\":false,\"ClassLoaderMetricsRecorder\":true,\"ZipkinExporterService\":false}";
 
             assertThat(serviceObserver.asJson()).isEqualTo(expectedJson);
         }

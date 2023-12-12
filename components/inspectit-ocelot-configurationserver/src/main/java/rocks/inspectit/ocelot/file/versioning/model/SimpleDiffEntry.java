@@ -70,10 +70,13 @@ public class SimpleDiffEntry {
     /**
      * Shortens the filename of this instance based on {@link AbstractFileAccessor#CONFIGURATION_FILES_SUBFOLDER}.
      * The shortened name is the original name without the subfolder prefix.
+     * The name will not be shortened for the agent_mapping.yml
      *
      * @return the same {@link SimpleDiffEntry} object
      */
     public SimpleDiffEntry shortenName() {
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME)) return this;
+
         file = file.substring(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER.length());
         return this;
     }

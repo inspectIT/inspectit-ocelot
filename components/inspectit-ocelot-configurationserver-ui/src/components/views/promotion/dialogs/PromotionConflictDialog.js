@@ -3,7 +3,7 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 
 /**
- * Dialog for showing promotion conflicts. A conflict can occure if the
+ * Dialog for showing promotion conflicts. A conflict can occur if the
  * live branch has been modified and the user tries to promote new files.
  */
 const PromotionConflictDialog = ({ visible, onHide, onRefresh }) => {
@@ -21,7 +21,7 @@ const PromotionConflictDialog = ({ visible, onHide, onRefresh }) => {
 
   return (
     <Dialog
-      header="Concurrent Modification of Configurations"
+      header="Concurrent Modification of Files"
       visible={visible}
       style={{ width: '50vw' }}
       modal={true}

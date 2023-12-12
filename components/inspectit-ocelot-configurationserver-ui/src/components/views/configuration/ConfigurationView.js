@@ -165,7 +165,7 @@ class ConfigurationView extends React.Component {
    * If no version is specified, the latest version will be selected.
    */
   openFile = (filename, versionId = null) => {
-    if (this.props.selectedVersion != versionId) {
+    if (this.props.selectedVersion !== versionId) {
       this.props.selectVersion(versionId, false);
     }
     this.props.selectFile(filename);
@@ -191,7 +191,6 @@ class ConfigurationView extends React.Component {
       canWrite,
     } = this.props;
     const showEditor = (selection || selectedDefaultConfigFile) && !isDirectory;
-
     const { path, name } = this.parsePath(selection, selectedDefaultConfigFile);
     const icon = 'pi-' + (isDirectory ? 'folder' : 'file');
     const showHeader = !!name;
@@ -199,7 +198,6 @@ class ConfigurationView extends React.Component {
     const readOnly = !canWrite || !!selectedDefaultConfigFile || !isLatestVersion;
 
     const fileContentWithoutFirstLine = fileContent ? fileContent.split('\n').slice(1).join('\n') : '';
-
     return (
       <div className="this">
         <style jsx>{`
@@ -363,10 +361,10 @@ const mapDispatchToProps = {
   showWarning: notificationActions.showWarningMessage,
   writeFile: configurationActions.writeFile,
   selectedFileContentsChanged: configurationActions.selectedFileContentsChanged,
-  selectVersion: configurationActions.selectVersion,
+  selectVersion: configurationActions.selectConfigurationVersion,
   toggleVisualConfigurationView: configurationActions.toggleVisualConfigurationView,
   selectFile: configurationActions.selectFile,
-  fetchVersions: configurationActions.fetchVersions,
+  fetchVersions: configurationActions.fetchConfigurationVersions,
   toggleShowHiddenFiles: configurationActions.toggleShowHiddenFiles,
 };
 

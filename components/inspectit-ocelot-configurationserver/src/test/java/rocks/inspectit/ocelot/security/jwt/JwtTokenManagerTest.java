@@ -16,8 +16,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.test.util.ReflectionTestUtils;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
+import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,13 +50,13 @@ class JwtTokenManagerTest {
         public void validToken() {
             InspectitServerSettings settings = InspectitServerSettings.builder().tokenLifespan(Duration.ofMinutes(1)).build();
             manager.config = settings;
+            SecretKey secret = Jwts.SIG.HS256.key().build();
+            ReflectionTestUtils.setField(manager, "secret", secret);
 
             String result = manager.createToken("username");
 
             assertThat(result).isNotEmpty();
-            String[] splitToken = result.split("\\.");
-            String unsignedToken = splitToken[0] + "." + splitToken[1] + ".";
-            Claims jwt = (Claims) Jwts.parser().parse(unsignedToken).getBody();
+            Claims jwt = Jwts.parser().verifyWith(secret).build().parseSignedClaims(result).getPayload();
             assertThat(jwt.getSubject()).isEqualTo("username");
             assertThat(jwt.getExpiration()).isBefore(DateUtils.addSeconds(new Date(), 65));
             assertThat(jwt.getExpiration()).isAfter(DateUtils.addSeconds(new Date(), 55));
