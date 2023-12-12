@@ -25,6 +25,11 @@ public class DataSettings {
     private PropagationMode downPropagation;
 
     /**
+     * Defines, if data is allowed to be propagated to browser
+     */
+    private Boolean browserPropagation;
+
+    /**
      * Defines whether this data is visible as an OpenCensus Tag.
      */
     @Setter(AccessLevel.NONE)

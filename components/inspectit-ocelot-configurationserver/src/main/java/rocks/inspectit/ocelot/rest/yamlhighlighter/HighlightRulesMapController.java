@@ -9,14 +9,15 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -170,7 +171,7 @@ public class HighlightRulesMapController extends AbstractBaseController {
     }
 
     @Operation(summary = "Get JSON for Highlight Rules Generation", description = "")
-    @GetMapping(value = "highlight-rules", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = {"highlight-rules", "highlight-rules/"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> getHighlightRulesMap() {
         return generateMap(InspectitConfig.class);
     }

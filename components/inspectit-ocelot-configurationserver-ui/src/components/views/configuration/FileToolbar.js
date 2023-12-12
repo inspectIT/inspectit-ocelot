@@ -30,7 +30,7 @@ const FileToolbar = ({
   const showHiddenFiles = useSelector((state) => state.configuration.showHiddenFiles) || '';
 
   const reloadFiles = () => {
-    dispatch(configurationActions.selectVersion(null));
+    dispatch(configurationActions.selectConfigurationVersion(null));
   };
 
   return (
@@ -102,10 +102,24 @@ const FileToolbar = ({
               tooltipOptions={TOOLTIP_OPTIONS}
               onClick={() => showUploadDialog(selection)}
             />
+            <Button
+              disabled={readOnly || loading}
+              tooltip="Upload File or Directory"
+              icon="pi pi-upload"
+              tooltipOptions={TOOLTIP_OPTIONS}
+              onClick={() => showUploadDialog(selection)}
+            />
           </div>
         }
         right={
           <div className="p-toolbar-group-right">
+            <Button
+              disabled={loading}
+              onClick={toggleShowHiddenFiles}
+              tooltip={showHiddenFiles ? 'Hide Files' : 'Show Hidden Files'}
+              icon={showHiddenFiles ? 'pi pi-eye' : 'pi pi-eye-slash'}
+              tooltipOptions={TOOLTIP_OPTIONS}
+            />
             <Button
               disabled={loading}
               onClick={toggleShowHiddenFiles}

@@ -50,8 +50,7 @@ public class KapacitorBaseController extends AbstractBaseController {
     private ResponseEntity<ApiError> handleKapacitorError(ResourceAccessException exception) {
         Throwable cause = exception.getCause();
         ApiError apiError;
-        if (cause instanceof KapacitorServerException) {
-            KapacitorServerException kapacitorCause = (KapacitorServerException) cause;
+        if (cause instanceof KapacitorServerException kapacitorCause) {
             apiError = new ApiError(kapacitorCause.getStatus(), kapacitorCause.getMessage(), "");
         } else {
             apiError = new ApiError(HttpStatus.FAILED_DEPENDENCY,

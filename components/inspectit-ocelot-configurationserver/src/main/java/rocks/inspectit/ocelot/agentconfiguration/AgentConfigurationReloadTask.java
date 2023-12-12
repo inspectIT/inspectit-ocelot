@@ -16,6 +16,9 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
+import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
+
 /**
  * A task for asynchronously loading the configurations based on a given list of mappings.
  */
@@ -52,8 +55,11 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
     @Override
     public void run() {
         log.info("Starting configuration reloading...");
-        RevisionAccess fileAccess = fileManager.getWorkspaceRevision();
+        RevisionAccess fileAccess = mappingsSerializer.getRevisionAccess();
+
         if (!fileAccess.agentMappingsExist()) {
+            log.error("No agent mappings file was found on the current branch! Please add '{}' to the current branch.",
+                    AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             onTaskSuccess(Collections.emptyList());
             return;
         }
@@ -72,7 +78,7 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
                         .build();
                 newConfigurations.add(agentConfiguration);
             } catch (Exception e) {
-                log.error("Could not load agent mapping '{}'.", mapping.getName(), e);
+                log.error("Could not load agent mapping '{}'.", mapping.name(), e);
             }
         }
         onTaskSuccess(newConfigurations);
@@ -91,7 +97,7 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         AbstractFileAccessor fileAccessor = getFileAccessorForMapping(mapping);
 
         LinkedHashSet<String> allYamlFiles = new LinkedHashSet<>();
-        for (String path : mapping.getSources()) {
+        for (String path : mapping.sources()) {
             if (isCanceled()) {
                 return null;
             }
@@ -109,18 +115,11 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
     }
 
     private AbstractFileAccessor getFileAccessorForMapping(AgentMapping mapping) {
-        AbstractFileAccessor fileAccessor;
-        switch (mapping.getSourceBranch()) {
-            case LIVE:
-                fileAccessor = fileManager.getLiveRevision();
-                break;
-            case WORKSPACE:
-                fileAccessor = fileManager.getWorkspaceRevision();
-                break;
-            default:
-                throw new UnsupportedOperationException("Unhandled branch: " + mapping.getSourceBranch());
-        }
-        return fileAccessor;
+        return switch (mapping.sourceBranch()) {
+            case LIVE -> fileManager.getLiveRevision();
+            case WORKSPACE -> fileManager.getWorkspaceRevision();
+            default -> throw new UnsupportedOperationException("Unhandled branch: " + mapping.sourceBranch());
+        };
     }
 
     /**

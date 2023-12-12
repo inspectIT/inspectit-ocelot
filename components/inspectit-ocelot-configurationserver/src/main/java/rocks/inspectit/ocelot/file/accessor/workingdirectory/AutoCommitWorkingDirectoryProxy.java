@@ -18,17 +18,17 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
     /**
      * Lock which is used when writing to the working directory.
      */
-    private Lock writeLock;
+    private final Lock writeLock;
 
     /**
      * The accessor which actually does the working directory access.
      */
-    private WorkingDirectoryAccessor workingDirectoryAccessor;
+    private final WorkingDirectoryAccessor workingDirectoryAccessor;
 
     /**
      * The version manager to use.
      */
-    private VersioningManager versioningManager;
+    private final VersioningManager versioningManager;
 
     public AutoCommitWorkingDirectoryProxy(Lock writeLock, WorkingDirectoryAccessor workingDirectoryAccessor, VersioningManager versioningManager) {
         this.writeLock = writeLock;

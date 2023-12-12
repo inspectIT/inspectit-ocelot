@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.config.model;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +9,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.Valid;
 import java.time.Duration;
 
 /**
@@ -27,6 +27,11 @@ public class InspectitServerSettings {
      * The directory in which the server stores all its files.
      */
     private String workingDirectory;
+
+    /**
+     * Source branch for agent mappings, which should be used during start up
+     */
+    private String initialAgentMappingsSourceBranch;
 
     /**
      * The mail suffix used for internal users.

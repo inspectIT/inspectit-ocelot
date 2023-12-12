@@ -40,11 +40,11 @@ public class AgentMappingControllerTest {
         @Test
         public void successfullyGetAgentMappings() {
             List<AgentMapping> dummyList = new ArrayList<>();
-            when(mappingManager.getAgentMappings()).thenReturn(dummyList);
+            when(mappingManager.getAgentMappings(any())).thenReturn(dummyList);
 
-            List<AgentMapping> result = controller.getMappings();
+            List<AgentMapping> result = controller.getMappings(null);
 
-            verify(mappingManager).getAgentMappings();
+            verify(mappingManager).getAgentMappings(null);
             verifyNoMoreInteractions(mappingManager);
             assertThat(result).isSameAs(dummyList);
         }

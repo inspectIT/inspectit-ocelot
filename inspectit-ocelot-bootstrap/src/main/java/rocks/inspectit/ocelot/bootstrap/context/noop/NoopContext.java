@@ -28,6 +28,11 @@ public class NoopContext implements InternalInspectitContext {
     }
 
     @Override
+    public String createRemoteParentContext() {
+        return null;
+    }
+
+    @Override
     public void makeActive() {
     }
 

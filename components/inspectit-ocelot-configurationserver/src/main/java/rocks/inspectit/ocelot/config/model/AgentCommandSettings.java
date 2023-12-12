@@ -14,13 +14,15 @@ import java.time.Duration;
 public class AgentCommandSettings {
 
     /**
-     * Timeout for agent commands. After this duration, they will be removed if not fetched.
+     * Timeout for agent commands. After this duration, they will be removed if not
+     * fetched.
      */
     @Builder.Default
     private Duration commandTimeout = Duration.ofMinutes(2);
 
     /**
-     * Timeout how long a command will wait for a response from the agent before it will be removed.
+     * Timeout how long a command will wait for a response from the agent before it
+     * will be removed.
      */
     @Builder.Default
     private Duration responseTimeout = Duration.ofSeconds(30);
@@ -33,7 +35,9 @@ public class AgentCommandSettings {
 
     /**
      * The max. time an agent is allowed to wait for a new command.
+     * This value must be greater than the max response timeout from the config
+     * server.
      */
     @Builder.Default
-    private Duration agentPollingTimeout = Duration.ofSeconds(30);
+    private Duration agentPollingTimeout = Duration.ofSeconds(40);
 }

@@ -1,3 +1,8 @@
+logging:
+  level:
+    # TODO remove this with next spring boot version (currently 3.1.6)
+    org.springframework.web.servlet.handler.HandlerMappingIntrospector: error
+
 spring:
   datasource:
     url: jdbc:sqlite:${inspectit-config-server.working-directory}/users.db
@@ -6,9 +11,10 @@ spring:
     password: ""
 
   jpa:
+    open-in-view: false
     properties:
       hibernate:
-        dialect: org.sqlite.hibernate.dialect.SQLiteDialect
+        dialect: org.hibernate.community.dialect.SQLiteDialect
     hibernate:
       ddl-auto: validate
 
@@ -22,10 +28,13 @@ spring:
 # server properties - see https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html#server-properties
 server:
   port: 8090
+  max-http-header-size: 1MB
 
 inspectit-config-server:
   # the directory which is used as working directory
   working-directory: working_directory
+  # source branch for agent mappings, which should be used during start up
+  initial-agent-mappings-source-branch: WORKSPACE
   # the expiration duration of JWT tokens
   token-lifespan: 60m
   # the e-mail suffix used for internal users
@@ -86,7 +95,7 @@ inspectit-config-server:
     #pull-repository:
       ## The name of the remote ref in the local Git repository.
       #remote-name: pull-remote-configuration
-      ## The URI to the remote Git repository. Examples: https://github.com/user/repo.git, git@github.com:user/repo.git
+      ## The URI to the remote Git repository. Examples: https://github.com/user/repo.git, ssh://git@github.com:user/repo.git
       #git-repository-uri:
       ## The branch name on the remote Git repository.
       #branch-name: remote-workspace
@@ -104,7 +113,7 @@ inspectit-config-server:
     #push-repository:
       ## The name of the remote ref in the local Git repository.
       #remote-name: push-remote-configuration
-      ## The URI to the remote Git repository. Examples: https://github.com/user/repo.git, git@github.com:user/repo.git
+      ## The URI to the remote Git repository. Examples: https://github.com/user/repo.git, ssh://git@github.com:user/repo.git
       #git-repository-uri:
       ## The branch name on the remote Git repository.
       #branch-name: remote-live

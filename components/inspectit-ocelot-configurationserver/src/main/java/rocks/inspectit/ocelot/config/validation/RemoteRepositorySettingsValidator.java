@@ -1,19 +1,14 @@
 package rocks.inspectit.ocelot.config.validation;
 
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings;
 import rocks.inspectit.ocelot.config.model.RemoteRepositorySettings.AuthenticationType;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 
 /**
  * Validator for {@link RemoteRepositorySettings}.
  */
 public class RemoteRepositorySettingsValidator implements ConstraintValidator<RemoteRepositorySettingsConstraint, RemoteRepositorySettings> {
-
-    @Override
-    public void initialize(RemoteRepositorySettingsConstraint constraintAnnotation) {
-    }
 
     @Override
     public boolean isValid(RemoteRepositorySettings settings, ConstraintValidatorContext context) {

@@ -3,14 +3,13 @@ package rocks.inspectit.ocelot.mappings.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Singular;
-import lombok.Value;
 import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.security.audit.AuditDetail;
 import rocks.inspectit.ocelot.security.audit.Auditable;
 
-import javax.validation.constraints.NotBlank;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -19,32 +18,15 @@ import java.util.regex.Pattern;
 
 /**
  * The model of the agent mappings.
+ *
+ * @param name         The name of this mapping.
+ * @param sourceBranch The branch which is used by this mapping.
+ * @param sources      The sources which are applied to the matching agents.
+ * @param attributes   A set of key-value pairs which are used to specify which agent will get the specified sources.
  */
-@Value
 @Builder(toBuilder = true)
-public class AgentMapping implements Auditable {
-
-    /**
-     * The name of this mapping.
-     */
-    private String name;
-
-    /**
-     * The branch which is used by this mapping.
-     */
-    private Branch sourceBranch;
-
-    /**
-     * The sources which are applied to the matching agents.
-     */
-    @Singular
-    private List<@NotBlank String> sources;
-
-    /**
-     * A set of key-value pairs which are used to specify which agent will get the specified sources.
-     */
-    @Singular
-    private Map<@NotBlank String, @NotBlank String> attributes;
+public record AgentMapping(String name, Branch sourceBranch, @Singular List<@NotBlank String> sources,
+                           @Singular Map<@NotBlank String, @NotBlank String> attributes) implements Auditable {
 
     @JsonCreator
     public AgentMapping(
@@ -62,7 +44,6 @@ public class AgentMapping implements Auditable {
      * Checks if an Agent with a given map of attributes and their values fulfills the requirements of this mapping.
      *
      * @param agentAttributes the attributes to check
-     *
      * @return true, if this mapping matches
      */
     public boolean matchesAttributes(Map<String, String> agentAttributes) {

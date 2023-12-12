@@ -119,6 +119,13 @@ If you need additional or in-depth information on the actual implementation of i
   <img src="https://contributors-img.web.app/image?repo=inspectit/inspectit-ocelot" />
 </a>
 
+## How to Release
+
+Important tasks to check first are `dependencyUpdates` or `dependencyUpdates[Major|Minor]` for newer (patch, minor, major)
+versions, the `outdated` task for node modules and `dependencyCheckAnalyze` or `dependencyCheckAggregate` for security issues in the used dependencies (including node modules).
+All dependency versions are maintained in one [catalog](gradle/libs.version.toml) file. The task `versionCatalogUpdate[ConfigServerLibs] --interactive` creates a copy of the catalog file with all version
+updates. This file can also be edited manually and be applied with `versionCatalogApplyUpdates[ConfigServerLibs]`.
+
 ## FAQ
 
 #### Is it pronounced inspect-"IT" or "it"?

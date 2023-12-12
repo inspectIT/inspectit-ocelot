@@ -15,7 +15,7 @@ public abstract class CancellableTask<R> implements Runnable {
     /**
      * Callback which is invoked when this task has finished.
      */
-    private Consumer<R> onLoadCallback;
+    private final Consumer<R> onLoadCallback;
 
     protected CancellableTask(Consumer<R> onLoadCallback) {
         this.onLoadCallback = onLoadCallback;

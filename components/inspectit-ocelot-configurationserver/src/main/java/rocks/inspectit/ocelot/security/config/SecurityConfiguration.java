@@ -1,17 +1,21 @@
 package rocks.inspectit.ocelot.security.config;
 
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.ldap.core.support.LdapContextSource;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.config.model.LdapSettings;
@@ -21,15 +25,15 @@ import rocks.inspectit.ocelot.security.jwt.JwtTokenManager;
 import rocks.inspectit.ocelot.security.userdetails.CustomLdapUserDetailsMapper;
 import rocks.inspectit.ocelot.security.userdetails.LocalUserDetailsService;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 
 /**
  * Spring security configuration enabling authentication on all except excluded endpoints.
  */
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true)
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+@EnableMethodSecurity(securedEnabled = true)
+@Configuration
+public class SecurityConfiguration {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -53,54 +57,47 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @VisibleForTesting
     InspectitServerSettings serverSettings;
 
-    @Override
-    public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(
-                "/v2/**",
-                "/configuration/**",
-                "/csrf",
-                "/",
-                "/ui/**",
-                "/actuator/**",
-                // the following two patterns allow unauthenticated access to Swagger-UI
-                "/swagger*/**",
-                "/v3/api-docs/**",
-                "/webjars/**",
-                "/api/v1/agent/configuration",
-                "/api/v1/agent/command",
-                "/api/v1/hook/**");
-    }
+    @Bean
+    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
+                .sessionManagement(sc -> sc.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        http.authorizeHttpRequests(
+                authz -> authz
+                        .requestMatchers(
+                                "/v2/**",
+                                "/configuration/**",
+                                "/csrf",
+                                "/",
+                                "/ui/**",
+                                "/actuator/**",
+                                // the following two patterns allow unauthenticated access to Swagger-UI
+                                "/swagger*/**",
+                                "/v3/api-docs/**",
+                                "/webjars/**",
+                                "/api/v1/agent/configuration",
+                                "/api/v1/agent/command",
+                                "/api/v1/hook/**"
+                        ).permitAll()
+                        .anyRequest().hasRole(UserRoleConfiguration.READ_ACCESS)
+        );
 
-                .and()
-                .cors()
-
-                .and()
-                .authorizeRequests()
-                .anyRequest()
-                .hasRole(UserRoleConfiguration.READ_ACCESS)
-
-                .and()
-                // Custom authentication endpoint to prevent sending the "WWW-Authenticate" which causes Browsers to open the basic authentication dialog.
-                // See the following post: https://stackoverflow.com/a/50023070/2478009
-                .httpBasic()
+        http.httpBasic(hb -> hb
                 .authenticationEntryPoint((req, resp, authException) -> resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException
                         .getMessage()))
+        );
 
-                .and()
-                //TODO: The "correct" way of selectively enabling token based would be to have multiple spring security configs.
-                //However, previous attempts of doing so were unsuccessful, therefore we simply exclude them manually in the filter
-                .addFilterBefore(new JwtTokenFilter(tokenManager, eventPublisher, Collections.singletonList("/api/v1/account/password")), BasicAuthenticationFilter.class)
-                .addFilterBefore(accessLogFilter.getFilter(), JwtTokenFilter.class);
+        //TODO: The "correct" way of selectively enabling token based would be to have multiple spring security configs.
+        //However, previous attempts of doing so were unsuccessful, therefore we simply exclude them manually in the filter
+        http.addFilterBefore(new JwtTokenFilter(tokenManager, eventPublisher, Collections.singletonList("/api/v1/account/password")), BasicAuthenticationFilter.class);
+        http.addFilterBefore(accessLogFilter.getFilter(), JwtTokenFilter.class);
+
+        return http.build();
     }
 
-    @Override
+    @Autowired
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         if (serverSettings.getSecurity().isLdapAuthentication()) {
             configureLdapAuthentication(auth);
@@ -111,7 +108,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     /**
      * Configures the user authentication to use LDAP user management and authentication
      */
-    @SuppressWarnings("deprecation")
     private void configureLdapAuthentication(AuthenticationManagerBuilder auth) throws Exception {
         LdapSettings ldapSettings = serverSettings.getSecurity().getLdap();
 

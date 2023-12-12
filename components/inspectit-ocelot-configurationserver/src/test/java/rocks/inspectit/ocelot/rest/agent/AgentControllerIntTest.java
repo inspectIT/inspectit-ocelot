@@ -3,10 +3,7 @@ package rocks.inspectit.ocelot.rest.agent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import rocks.inspectit.ocelot.IntegrationTestBase;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
@@ -38,6 +35,7 @@ public class AgentControllerIntTest extends IntegrationTestBase {
     private ResponseEntity<Command> fetchCommand(String agentId, CommandResponse response, boolean wait) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("x-ocelot-agent-id", agentId);
+        httpHeaders.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         HttpEntity<CommandResponse> request = new HttpEntity<>(response, httpHeaders);
 
         String url = "/api/v1/agent/command";
@@ -49,7 +47,7 @@ public class AgentControllerIntTest extends IntegrationTestBase {
     }
 
     @Test
-    public void shouldFetchSupportArchive() throws InterruptedException {
+    public void shouldFetchSupportArchive() {
 
         String agentId = "testAgent";
         String testLog = "Logs cannot be retrieved because log preloading (inspectit.log-preloading) is not enabled. To retrieve agent logs, please enable the log preloading.";

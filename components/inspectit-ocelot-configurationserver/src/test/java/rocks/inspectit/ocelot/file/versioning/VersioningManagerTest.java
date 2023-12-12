@@ -25,7 +25,7 @@ import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileTestBase;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
-import rocks.inspectit.ocelot.file.versioning.model.ConfigurationPromotion;
+import rocks.inspectit.ocelot.file.versioning.model.Promotion;
 import rocks.inspectit.ocelot.file.versioning.model.SimpleDiffEntry;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceDiff;
 import rocks.inspectit.ocelot.file.versioning.model.WorkspaceVersion;
@@ -47,7 +47,7 @@ import static org.mockito.Mockito.*;
 class VersioningManagerTest extends FileTestBase {
 
     /**
-     * For convenience: if this field is not null, it will used as working directory during tests.
+     * For convenience: if this field is not null, it will be used as working directory during tests.
      * Note: the specified directory is CLEANED before each run, thus, if you have files there, they will be gone ;)
      */
     public static final String TEST_DIRECTORY = null;
@@ -110,7 +110,7 @@ class VersioningManagerTest extends FileTestBase {
             assertThat(clean).isTrue();
             assertThat(before).isFalse();
             assertThat(after).isTrue();
-            assertThat(count).isEqualTo(2); // Initializing Git repository + committing agent mappings
+            assertThat(count).isEqualTo(1); // Initializing Git repo + committing agent mappings happens in one commit
         }
 
         @Test
@@ -129,14 +129,14 @@ class VersioningManagerTest extends FileTestBase {
             int secondCount = versioningManager.getCommitCount();
             assertThat(initSecond).isTrue();
             assertThat(cleanFirst).isTrue();
-            assertThat(secondCount).isEqualTo(2); // Initializing Git repository + committing agent mappings
+            assertThat(secondCount).isEqualTo(1); // Initializing Git repo + committing agent mappings happens in one commit
 
             versioningManager.initialize();
 
             boolean cleanSecond = versioningManager.isClean();
             int thirdCount = versioningManager.getCommitCount();
             assertThat(cleanSecond).isTrue();
-            assertThat(thirdCount).isEqualTo(2);
+            assertThat(thirdCount).isEqualTo(1);
         }
 
         @Test
@@ -155,7 +155,7 @@ class VersioningManagerTest extends FileTestBase {
             int secondCount = versioningManager.getCommitCount();
             assertThat(initSecond).isTrue();
             assertThat(cleanFirst).isTrue();
-            assertThat(secondCount).isEqualTo(2); // Initializing Git repository + committing agent mappings
+            assertThat(secondCount).isEqualTo(1); // Initializing Git repo + committing agent mappings happens in one commit
 
             // edit file
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
@@ -165,7 +165,7 @@ class VersioningManagerTest extends FileTestBase {
             boolean cleanSecond = versioningManager.isClean();
             int thirdCount = versioningManager.getCommitCount();
             assertThat(cleanSecond).isTrue();
-            assertThat(thirdCount).isEqualTo(3);
+            assertThat(thirdCount).isEqualTo(2);
         }
     }
 
@@ -497,10 +497,11 @@ class VersioningManagerTest extends FileTestBase {
     }
 
     @Nested
-    class PromoteConfiguration {
+    class PromoteFile {
 
         @Test
         public void promoteEverything() throws GitAPIException, IOException {
+            createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
@@ -513,12 +514,14 @@ class VersioningManagerTest extends FileTestBase {
             String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
             String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
 
-            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            Promotion promotion = new Promotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
-            promotion.setFiles(Arrays.asList("/file_added.yml", "/file_modified.yml", "/file_removed.yml"));
+            promotion.setFiles(Arrays.asList(
+                    AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, "/file_added.yml", "/file_modified.yml", "/file_removed.yml")
+            );
 
-            versioningManager.promoteConfiguration(promotion, true);
+            versioningManager.promote(promotion, true);
 
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
 
@@ -539,12 +542,12 @@ class VersioningManagerTest extends FileTestBase {
             String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
             String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
 
-            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            Promotion promotion = new Promotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList("/file_modified.yml", "/file_removed.yml"));
 
-            versioningManager.promoteConfiguration(promotion, true);
+            versioningManager.promote(promotion, true);
 
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
 
@@ -569,13 +572,13 @@ class VersioningManagerTest extends FileTestBase {
             String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
             String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
 
-            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            Promotion promotion = new Promotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList("/file_modified.yml"));
 
             // first promotion
-            versioningManager.promoteConfiguration(promotion, true);
+            versioningManager.promote(promotion, true);
 
             // second
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=new_content");
@@ -584,13 +587,13 @@ class VersioningManagerTest extends FileTestBase {
             liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
             workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
 
-            promotion = new ConfigurationPromotion();
+            promotion = new Promotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList("/file_modified.yml"));
 
             // second promotion
-            versioningManager.promoteConfiguration(promotion, true);
+            versioningManager.promote(promotion, true);
 
             // diff
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
@@ -620,19 +623,19 @@ class VersioningManagerTest extends FileTestBase {
             String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
             String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
 
-            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            Promotion promotion = new Promotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList("/file_modified.yml"));
 
-            versioningManager.promoteConfiguration(promotion, true);
+            versioningManager.promote(promotion, true);
 
-            ConfigurationPromotion secondPromotion = new ConfigurationPromotion();
+            Promotion secondPromotion = new Promotion();
             secondPromotion.setLiveCommitId(liveId);
             secondPromotion.setWorkspaceCommitId(workspaceId);
             secondPromotion.setFiles(Arrays.asList("/file_added.yml"));
 
-            assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> versioningManager.promoteConfiguration(secondPromotion, true))
+            assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> versioningManager.promote(secondPromotion, true))
                     .withMessage("Live branch has been modified. The provided promotion definition is out of sync.");
         }
 
@@ -646,7 +649,7 @@ class VersioningManagerTest extends FileTestBase {
             String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
             String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
 
-            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            Promotion promotion = new Promotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList("/file_modified.yml"));
@@ -654,7 +657,7 @@ class VersioningManagerTest extends FileTestBase {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_B");
             versioningManager.commitAllChanges("commit");
 
-            versioningManager.promoteConfiguration(promotion, true);
+            versioningManager.promote(promotion, true);
 
             // diff live -> workspace
             WorkspaceDiff diff = versioningManager.getWorkspaceDiffWithoutContent();
@@ -680,7 +683,7 @@ class VersioningManagerTest extends FileTestBase {
             String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
             String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
 
-            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            Promotion promotion = new Promotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList("/file_modified.yml"));
@@ -689,7 +692,7 @@ class VersioningManagerTest extends FileTestBase {
             versioningManager.commitAllChanges("commit");
 
             doReturn("promoter").when(authentication).getName();
-            versioningManager.promoteConfiguration(promotion, false);
+            versioningManager.promote(promotion, false);
 
             assertThat(versioningManager.getLiveRevision()
                     .readConfigurationFile("file_modified.yml")).hasValue("content_A");
@@ -707,14 +710,14 @@ class VersioningManagerTest extends FileTestBase {
             String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
             String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
 
-            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            Promotion promotion = new Promotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList("/file_modified.yml"));
 
             RevisionAccess live = versioningManager.getLiveRevision();
 
-            assertThatThrownBy(() -> versioningManager.promoteConfiguration(promotion, false)).isInstanceOf(SelfPromotionNotAllowedException.class);
+            assertThatThrownBy(() -> versioningManager.promote(promotion, false)).isInstanceOf(SelfPromotionNotAllowedException.class);
 
             assertThat(versioningManager.getLiveRevision().getRevisionId()).isEqualTo(live.getRevisionId());
         }
@@ -784,11 +787,11 @@ class VersioningManagerTest extends FileTestBase {
             String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
             String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
 
-            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            Promotion promotion = new Promotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList(files));
-            versioningManager.promoteConfiguration(promotion, true);
+            versioningManager.promote(promotion, true);
         }
 
         private void buildDummyHistory() throws Exception {
@@ -818,6 +821,26 @@ class VersioningManagerTest extends FileTestBase {
 
             SimpleDiffEntry diff = SimpleDiffEntry.builder()
                     .file("new_file.yml")
+                    .type(DiffEntry.ChangeType.ADD)
+                    .build();
+
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+                    .get()
+                    .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
+
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("creating_user");
+        }
+
+        @Test
+        void agentMappingsAddedInMostRecentChange() throws Exception {
+            buildDummyHistory();
+
+            createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
+            doReturn("creating_user").when(authentication).getName();
+            versioningManager.commitAllChanges("new commit");
+
+            SimpleDiffEntry diff = SimpleDiffEntry.builder()
+                    .file(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME)
                     .type(DiffEntry.ChangeType.ADD)
                     .build();
 
@@ -900,6 +923,31 @@ class VersioningManagerTest extends FileTestBase {
                     .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
 
             assertThat(modifyingAuthors).containsExactlyInAnyOrder("creating_user", "second_editing_user");
+        }
+
+        @Test
+        void agentMappingsModified() throws Exception {
+            buildDummyHistory();
+
+            createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
+            doReturn("editing_user").when(authentication).getName();
+            versioningManager.commitAllChanges("com1");
+            promote(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
+
+            doReturn("editing_user").when(authentication).getName();
+            createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME + "=modified");
+            versioningManager.commitAllChanges("com2");
+
+            SimpleDiffEntry diff = SimpleDiffEntry.builder()
+                    .file(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME)
+                    .type(DiffEntry.ChangeType.MODIFY)
+                    .build();
+
+            List<String> modifyingAuthors = versioningManager.getModifyingAuthors(diff, versioningManager.getLatestCommit(Branch.LIVE)
+                    .get()
+                    .getId(), versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId());
+
+            assertThat(modifyingAuthors).containsExactlyInAnyOrder("editing_user");
         }
 
         @Test
@@ -1314,12 +1362,12 @@ class VersioningManagerTest extends FileTestBase {
             String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
             String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
 
-            ConfigurationPromotion promotion = new ConfigurationPromotion();
+            Promotion promotion = new Promotion();
             promotion.setLiveCommitId(liveId);
             promotion.setWorkspaceCommitId(workspaceId);
             promotion.setFiles(Arrays.asList("/foobar.yml"));
 
-            PromotionResult promotionResult = versioningManager.promoteConfiguration(promotion, true);
+            PromotionResult promotionResult = versioningManager.promote(promotion, true);
 
             assertThat(promotionResult).isEqualTo(PromotionResult.OK); // OK means no synchronization error
         }

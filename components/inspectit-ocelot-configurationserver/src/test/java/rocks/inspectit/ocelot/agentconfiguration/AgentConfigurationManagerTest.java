@@ -43,6 +43,7 @@ public class AgentConfigurationManagerTest {
     @BeforeEach
     public void beforeEach() {
         lenient().when(fileManager.getWorkspaceRevision()).thenReturn(fileAccessor);
+        lenient().when(serializer.getRevisionAccess()).thenReturn(fileAccessor);
     }
 
     void init() {

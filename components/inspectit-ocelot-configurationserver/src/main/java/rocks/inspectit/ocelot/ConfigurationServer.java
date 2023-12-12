@@ -2,7 +2,6 @@ package rocks.inspectit.ocelot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -16,9 +15,8 @@ import java.io.File;
 /**
  * The application class of the configuration server.
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {ErrorMvcAutoConfiguration.class})
 @Slf4j
-@EnableAutoConfiguration(exclude = {ErrorMvcAutoConfiguration.class})
 public class ConfigurationServer {
 
     /**

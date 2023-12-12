@@ -23,9 +23,9 @@ public class ModelAutoCompleter implements AutoCompleter {
 
     @Override
     public List<String> getSuggestions(List<String> path) {
-        if (CollectionUtils.isEmpty(path) || (path.size() == 1 && path.get(0).equals(""))) {
+        if (CollectionUtils.isEmpty(path) || (path.size() == 1 && path.get(0).isEmpty())) {
             return Collections.singletonList(INSPECTIT);
-        } else if (!path.isEmpty() && !path.get(0).equals(INSPECTIT)) {
+        } else if (!path.get(0).equals(INSPECTIT)) {
             return Collections.emptyList();
         }
         return collectProperties(path.subList(1, path.size()));

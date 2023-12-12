@@ -56,7 +56,7 @@ const EditorView = ({
   const configurationType = getConfigurationType(value);
 
   const selectlatestVersion = () => {
-    dispatch(configurationActions.selectVersion(null));
+    dispatch(configurationActions.selectConfigurationVersion(null));
   };
 
   let editorContent;

@@ -1,5 +1,6 @@
 .gradle
 *build/
+*bin/
 !gradle/wrapper/gradle-wrapper.jar
 *.log
 *.zip
@@ -30,4 +31,5 @@
 /nbdist/
 /.nb-gradle/
 
-/working_directory/
+*working_directory/
+/gradle/*.versions.updates.toml

@@ -23,6 +23,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.TracingHookActio
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
 import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
+import rocks.inspectit.ocelot.core.metrics.MeasureTagValueGuard;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.OcelotSamplerUtils;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
@@ -72,6 +73,9 @@ public class MethodHookGenerator {
     @Autowired
     private ActionScopeFactory actionScopeFactory;
 
+    @Autowired
+    private MeasureTagValueGuard tagValueGuard;
+
     /**
      * Builds an executable method hook based on the given configuration.
      *
@@ -105,7 +109,7 @@ public class MethodHookGenerator {
         builder.exitActions(buildActionCalls(config.getPreExitActions(), methodInfo));
         builder.exitActions(buildActionCalls(config.getExitActions(), methodInfo));
         if (tracingSettings != null) {
-            List<IHookAction> actions = buildTracingExitActions(tracingSettings);
+            List<IHookAction> actions = buildTracingExitActions(config);
             if (isTracingInternalActions() && config.isTraceExitHook()) {
                 actions = wrapActionsWithTracing(actions);
             }
@@ -186,7 +190,8 @@ public class MethodHookGenerator {
     }
 
     @VisibleForTesting
-    List<IHookAction> buildTracingExitActions(RuleTracingSettings tracing) {
+    List<IHookAction> buildTracingExitActions(MethodHookConfiguration config) {
+        RuleTracingSettings tracing = config.getTracing();
         val result = new ArrayList<IHookAction>();
 
         boolean isSpanStartedOrContinued = tracing.getStartSpan() || StringUtils.isNotBlank(tracing.getContinueSpan());
@@ -197,10 +202,24 @@ public class MethodHookGenerator {
                 result.add(new SetSpanStatusAction(accessor));
             }
 
-            val attributes = tracing.getAttributes();
-            if (!attributes.isEmpty()) {
+            Map<String, String> tracingAttributes = tracing.getAttributes();
+            Map<String, String> attributes = tracingAttributes;
+            Map<String, String> constantAttributes = new HashMap<>();
+
+            if(addMetricsToTracing()) {
+                Collection<MetricRecordingSettings> metrics = config.getMetrics();
+                constantAttributes = collectMetricConstantTags(metrics);
+                attributes = collectMetricDataTags(metrics);
+                // write tracing attributes after metric tags, to allow overwriting of metric tags
+                attributes.putAll(tracingAttributes);
+            }
+
+            if (!attributes.isEmpty() || !constantAttributes.isEmpty()) {
                 Map<String, VariableAccessor> attributeAccessors = new HashMap<>();
+                constantAttributes.forEach((attribute, constant) -> attributeAccessors.put(attribute, variableAccessorFactory.getConstantAccessor(constant)));
+                // if necessary, overwrite constant attributes
                 attributes.forEach((attribute, variable) -> attributeAccessors.put(attribute, variableAccessorFactory.getVariableAccessor(variable)));
+
                 IHookAction endTraceAction = new WriteSpanAttributesAction(attributeAccessors, obfuscationManager.obfuscatorySupplier());
                 IHookAction actionWithConditions = ConditionalHookAction.wrapWithConditionChecks(tracing.getAttributeConditions(), endTraceAction, variableAccessorFactory);
                 result.add(actionWithConditions);
@@ -215,14 +234,25 @@ public class MethodHookGenerator {
         return result;
     }
 
+    private Map<String, String> collectMetricDataTags(Collection<MetricRecordingSettings> metrics) {
+        Map<String, String> dataTags = new HashMap<>();
+        metrics.forEach(metric -> dataTags.putAll(metric.getDataTags()));
+        return dataTags;
+    }
+
+    private Map<String, String> collectMetricConstantTags(Collection<MetricRecordingSettings> metrics) {
+        Map<String, String> constantTags = new HashMap<>();
+        metrics.forEach(metric -> constantTags.putAll(metric.getConstantTags()));
+        return constantTags;
+    }
+
     private Optional<IHookAction> buildMetricsRecorder(MethodHookConfiguration config) {
         Collection<MetricRecordingSettings> metricRecordingSettings = config.getMetrics();
         if (!metricRecordingSettings.isEmpty()) {
             List<MetricAccessor> metricAccessors = metricRecordingSettings.stream()
                     .map(this::buildMetricAccessor)
                     .collect(Collectors.toList());
-
-            IHookAction recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager);
+            IHookAction recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager, tagValueGuard);
 
             if (isTracingInternalActions() && config.isTraceExitHook()) {
                 recorder = TracingHookAction.wrap(recorder, null, "INTERNAL");
@@ -232,6 +262,13 @@ public class MethodHookGenerator {
         } else {
             return Optional.empty();
         }
+    }
+
+    /**
+     * @return Returns whether metrics tags should be added to tracing as attributes
+     */
+    private boolean addMetricsToTracing() {
+        return environment.getCurrentConfig().getTracing().isAddMetricTags();
     }
 
     /**

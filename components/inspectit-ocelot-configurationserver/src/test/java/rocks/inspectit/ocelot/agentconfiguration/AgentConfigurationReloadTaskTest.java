@@ -27,6 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
+import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 @ExtendWith(MockitoExtension.class)
 public class AgentConfigurationReloadTaskTest {
@@ -50,6 +52,7 @@ public class AgentConfigurationReloadTaskTest {
     public void beforeEach() {
         lenient().when(fileManager.getWorkspaceRevision()).thenReturn(workspaceAccessor);
         lenient().when(fileManager.getLiveRevision()).thenReturn(liveAccessor);
+        lenient().when(serializer.getRevisionAccess()).thenReturn(workspaceAccessor);
     }
 
     @Nested
@@ -69,12 +72,12 @@ public class AgentConfigurationReloadTaskTest {
             AgentMapping mapping = AgentMapping.builder()
                     .name("test")
                     .source("/test")
-                    .sourceBranch(Branch.WORKSPACE)
+                    .sourceBranch(WORKSPACE)
                     .build();
             AgentMapping mapping2 = AgentMapping.builder()
                     .name("test2")
                     .source("/test2")
-                    .sourceBranch(Branch.WORKSPACE)
+                    .sourceBranch(WORKSPACE)
                     .build();
             doReturn(Arrays.asList(mapping, mapping2)).when(serializer).readAgentMappings(any());
 
@@ -106,12 +109,12 @@ public class AgentConfigurationReloadTaskTest {
             AgentMapping mapping = AgentMapping.builder()
                     .name("test")
                     .source("/test")
-                    .sourceBranch(Branch.WORKSPACE)
+                    .sourceBranch(WORKSPACE)
                     .build();
             AgentMapping mapping2 = AgentMapping.builder()
                     .name("test2")
                     .source("/test2")
-                    .sourceBranch(Branch.WORKSPACE)
+                    .sourceBranch(WORKSPACE)
                     .build();
             doReturn(Arrays.asList(mapping, mapping2)).when(serializer).readAgentMappings(any());
 
@@ -143,12 +146,12 @@ public class AgentConfigurationReloadTaskTest {
             AgentMapping mapping = AgentMapping.builder()
                     .name("test")
                     .source("/test")
-                    .sourceBranch(Branch.WORKSPACE)
+                    .sourceBranch(WORKSPACE)
                     .build();
             AgentMapping mapping2 = AgentMapping.builder()
                     .name("test2")
                     .source("/test2")
-                    .sourceBranch(Branch.WORKSPACE)
+                    .sourceBranch(WORKSPACE)
                     .build();
             doReturn(Arrays.asList(mapping, mapping2)).when(serializer).readAgentMappings(any());
 
@@ -164,6 +167,47 @@ public class AgentConfigurationReloadTaskTest {
             assertThat(configurationList).element(0)
                     .extracting(AgentConfiguration::getConfigYaml)
                     .isEqualTo("{key: valid}\n");
+        }
+
+        @Test
+        public void loadMappingFromWorkspace() {
+            when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
+
+            AgentMapping mapping = AgentMapping.builder()
+                    .name("test")
+                    .source("/test")
+                    .sourceBranch(WORKSPACE)
+                    .build();
+            doReturn(Collections.singletonList(mapping)).when(serializer).readAgentMappings(any());
+            MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
+            Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
+
+            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, consumer);
+            task.run();
+
+            verify(serializer, times(1)).readAgentMappings(workspaceAccessor);
+            verify(serializer, times(0)).readAgentMappings(liveAccessor);
+        }
+
+        @Test
+        public void loadMappingFromLive() {
+            lenient().when(serializer.getRevisionAccess()).thenReturn(liveAccessor);
+            when(liveAccessor.agentMappingsExist()).thenReturn(true);
+
+            AgentMapping mapping = AgentMapping.builder()
+                    .name("test")
+                    .source("/test")
+                    .sourceBranch(WORKSPACE)
+                    .build();
+            doReturn(Collections.singletonList(mapping)).when(serializer).readAgentMappings(any());
+            MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
+            Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
+
+            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, consumer);
+            task.run();
+
+            verify(serializer, times(0)).readAgentMappings(workspaceAccessor);
+            verify(serializer, times(1)).readAgentMappings(liveAccessor);
         }
     }
 
@@ -182,7 +226,7 @@ public class AgentConfigurationReloadTaskTest {
             AgentMapping mapping = AgentMapping.builder()
                     .name("test")
                     .source("/test")
-                    .sourceBranch(Branch.WORKSPACE)
+                    .sourceBranch(WORKSPACE)
                     .build();
             String string = reloadTask.loadConfigForMapping(mapping);
 
@@ -201,7 +245,7 @@ public class AgentConfigurationReloadTaskTest {
             AgentMapping mapping = AgentMapping.builder()
                     .name("test")
                     .source("/test")
-                    .sourceBranch(Branch.WORKSPACE)
+                    .sourceBranch(WORKSPACE)
                     .build();
 
             assertThatExceptionOfType(AgentConfigurationReloadTask.InvalidConfigurationFileException.class).isThrownBy(() -> reloadTask.loadConfigForMapping(mapping))
@@ -240,7 +284,7 @@ public class AgentConfigurationReloadTaskTest {
             String result = reloadTask.loadConfigForMapping(AgentMapping.builder()
                     .source("a.yml")
                     .source("/some/folder")
-                    .sourceBranch(Branch.WORKSPACE)
+                    .sourceBranch(WORKSPACE)
                     .build());
 
             assertThat(result).isEmpty();
@@ -257,7 +301,7 @@ public class AgentConfigurationReloadTaskTest {
                     .source("b.YmL")
                     .source("c.yaml")
                     .source("d.txt")
-                    .sourceBranch(Branch.WORKSPACE)
+                    .sourceBranch(WORKSPACE)
                     .build());
 
             assertThat(result).isEmpty();
@@ -276,7 +320,7 @@ public class AgentConfigurationReloadTaskTest {
 
             reloadTask.loadConfigForMapping(AgentMapping.builder()
                     .source("/a.yml")
-                    .sourceBranch(Branch.WORKSPACE)
+                    .sourceBranch(WORKSPACE)
                     .build());
 
             verify(workspaceAccessor).configurationFileExists(eq("a.yml"));
@@ -308,7 +352,7 @@ public class AgentConfigurationReloadTaskTest {
             String result = reloadTask.loadConfigForMapping(AgentMapping.builder()
                     .source("/z.yml")
                     .source("/folder")
-                    .sourceBranch(Branch.WORKSPACE)
+                    .sourceBranch(WORKSPACE)
                     .build());
 
             assertThat(result).isEqualTo("{val1: z, val2: a, val3: b}\n");

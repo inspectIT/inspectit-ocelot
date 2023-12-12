@@ -1,69 +1,14 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id 'com.github.node-gradle.node' version "${nodeGradleVersion}"
-    id 'com.palantir.docker' version "${palantirDockerVersion}"
-    id 'org.springframework.boot' version "${springBootVersion}"
-    id 'org.cyclonedx.bom' version "${cyclonedxBomVersion}"
-    id 'org.owasp.dependencycheck' version "${owaspDependencycheckVersion}"
-    id 'io.spring.dependency-management' version "${springDependencyManangementVersion}"
+    alias(libs.plugins.comPalantirDocker)
+    alias(configServerLibs.plugins.orgSpringframeworkBoot)
+    alias(libs.plugins.orgCyclonedxBom)
+    alias(configServerLibs.plugins.ioSpringDependencyManagement)
 }
 
 apply plugin: 'idea'
 apply plugin: 'java'
-
-node {
-    // Version of node to use.
-    version = '18.14.2'
-
-    // Version of npm to use.
-    npmVersion = '6.13.4'
-
-    // Version of Yarn to use.
-    yarnVersion = '1.22.0'
-
-    // If true, it will download node using above parameters.
-    // If false, it will try to use globally installed node.
-    download = true
-
-    // Set the work directory for unpacking node
-    workDir.set(project.layout.buildDirectory.dir("nodejs"))
-
-    // Set the work directory for NPM
-    npmWorkDir.set(project.layout.buildDirectory.dir("npm"))
-
-    // Set the work directory for Yarn
-    yarnWorkDir.set(project.layout.buildDirectory.dir("yarn"))
-
-    // Set the work directory where node_modules should be located
-    nodeProjectDir.set(project.layout.projectDirectory.dir("../inspectit-ocelot-configurationserver-ui"))
-}
-
-/**
- * Task for installing the frontend dependencies.
- */
-def installFrontend = tasks.register('installFrontend', YarnTask) {
-    args = ['install']
-}
-
-def lintFrontend = tasks.register('lintFrontend', YarnTask) {
-    dependsOn installFrontend
-    args = ['lint']
-}
-
-def checkCodeStyleFrontend = tasks.register('checkCodeStyleFrontend', YarnTask) {
-    dependsOn installFrontend
-    args = ['format']
-}
-
-/**
- * Task for building the frontend and copying it to the configuration-server project.
- */
-tasks.register('buildFrontend', YarnTask) {
-    dependsOn lintFrontend, checkCodeStyleFrontend
-    args = ['export']
-    environment = [NODE_OPTIONS: "--openssl-legacy-provider"]
-}
 
 def serverMainClass = 'rocks.inspectit.ocelot.ConfigurationServer'
 
@@ -86,11 +31,12 @@ tasks.register('bootJarWithFrontend', BootJar) {
         into('static/ui')
     }
 
+    getTargetJavaVersion().set(JavaVersion.current())
     mainClass = "${serverMainClass}"
 
     with bootJar
 }
-bootJarWithFrontend.dependsOn buildFrontend
+bootJarWithFrontend.dependsOn ':inspectit-ocelot-configurationserver-ui:buildFrontend'
 
 cyclonedxBom {
     includeConfigs = ["runtimeClasspath"]
@@ -103,9 +49,12 @@ cyclonedxBom {
 repositories {
     mavenCentral()
 }
-//to guarantee that the Configuration Server is compatible with Java 8 runtime environments
-sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
-targetCompatibility = 1.8 // Java version to generate classes for.
+
+java {
+    sourceCompatibility = 17
+    targetCompatibility = 17
+}
+
 test {
     useJUnitPlatform()
 
@@ -114,9 +63,10 @@ test {
     }
 }
 
+
 dependencies {
-    compileOnly "org.projectlombok:lombok"
-    annotationProcessor "org.projectlombok:lombok"
+    compileOnly libs.orgProjectlombokLombok
+    annotationProcessor libs.orgProjectlombokLombok
 }
 
 dependencies {
@@ -124,50 +74,48 @@ dependencies {
             project(':inspectit-ocelot-config'),
             // this is necessary as inspectit-ocelot-config needs it, but can
             // only use a compile-only (see details over there)
-            "io.opentelemetry:opentelemetry-sdk-metrics:${openTelemetryVersion}",
+            libs.ioOpentelemetryOpentelemetrySdkMetrics,
             project(':inspectit-ocelot-configdocsgenerator'),
+            configServerLibs.orgSpringframeworkBootSpringBootStarterWeb,
+            configServerLibs.orgSpringframeworkBootSpringBootStarterDataJpa,
+            configServerLibs.orgSpringframeworkBootSpringBootStartervalidation,
+            configServerLibs.orgSpringframeworkSecuritySpringSecurityWeb,
+            configServerLibs.orgSpringframeworksecuritySpringSecurityConfig,
+            configServerLibs.orgSpringframeworkLdapSpringLdapCore,
+            configServerLibs.orgSpringframeworkSecuritySpringSecurityLdap,
+            configServerLibs.orgSpringframeworkBootSpringBootStarterActuator,
 
-            "org.springframework.boot:spring-boot-starter-web",
-            "org.springframework.boot:spring-boot-starter-data-jpa",
-            "org.springframework.boot:spring-boot-starter-validation",
-            "org.springframework.security:spring-security-web",
-            "org.springframework.security:spring-security-config",
-            "org.springframework.ldap:spring-ldap-core",
-            "org.springframework.security:spring-security-ldap",
-            'org.springframework.boot:spring-boot-starter-actuator',
+            configServerLibs.chQosLogbackLogbackClassic,
+            configServerLibs.chQosLogbackLogbackCore,
 
-            // spring related
-            "org.yaml:snakeyaml:${snakeYamlVersion}",
+            configServerLibs.orgYamlSnakeyaml,
 
-            'org.apache.httpcomponents:httpclient', //Required for PATCH-Requests
+            libs.orgApacheHttpcomponentsHttpclient, //Required for PATCH-Requests
 
-            "org.xerial:sqlite-jdbc",
-            "com.github.gwenn:sqlite-dialect:${sqliteDialect}",
-            "io.jsonwebtoken:jjwt-api:${jsonWebTokenVersion}",
-            "io.jsonwebtoken:jjwt-impl:${jsonWebTokenVersion}",
-            "io.jsonwebtoken:jjwt-jackson:${jsonWebTokenVersion}",
-            "commons-io:commons-io:${commonsIoVersion}",
-            "org.apache.commons:commons-lang3",
-            "org.flywaydb:flyway-core",
-            "org.eclipse.jgit:org.eclipse.jgit:${eclipseJgitVersion}",
-            "org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:${eclipseJgitVersion}",
-            "com.google.code.gson:gson",
-            "com.google.guava:guava:${guavaVersion}",
+            configServerLibs.orgXerialSqliteJdbc,
+            configServerLibs.orgHibernateOrmHibernateCommunityDialects,
+            configServerLibs.bundles.jsonwebtoken,
+            configServerLibs.commonsIo,
+            configServerLibs.orgApacheCommonsCommonsLang3,
+            configServerLibs.orgFlywaydbFlywayCore,
+            configServerLibs.bundles.jgit,
+            configServerLibs.comGoogleCodeGson,
 
             // swagger
-            "org.springdoc:springdoc-openapi-ui:${springdocOopenapiUiVersion}",
+            libs.orgSpringdocSpringdocOpenapiUi,
+
+            configServerLibs.comGoogleGuava
     )
     testImplementation(
-            'org.springframework.boot:spring-boot-starter-test',
-            'org.springframework.security:spring-security-test',
-            'org.junit.jupiter:junit-jupiter-api',
-            'org.mockito:mockito-junit-jupiter',
-            // That version is important. If we stick to the version provided by Spring Boot Bom
-            // database initialization scripts will fail.
-            "com.h2database:h2:${h2Version}",
-            'org.awaitility:awaitility'
+            configServerLibs.orgSpringframeworkBootSpringBootStarterTest,
+            configServerLibs.orgSpringframeworkSecuritySpringSecurityTest,
+            configServerLibs.orgMockitoMockitoJunitJupiter,
+            configServerLibs.comH2databaseH2,
+            libs.orgJunitJupiterJunitJupiter,
+            libs.orgJunitJupiterJunitJupiterApi,
+            libs.orgAwaitility
     )
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 }
 
 tasks.register('copyServerJar', Copy) {

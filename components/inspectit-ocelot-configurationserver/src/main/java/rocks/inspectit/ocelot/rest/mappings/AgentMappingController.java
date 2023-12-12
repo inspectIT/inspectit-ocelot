@@ -1,11 +1,15 @@
 package rocks.inspectit.ocelot.rest.mappings;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
+import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
@@ -13,7 +17,6 @@ import rocks.inspectit.ocelot.security.audit.AuditDetail;
 import rocks.inspectit.ocelot.security.audit.EntityAuditLogger;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
-import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -39,9 +42,10 @@ public class AgentMappingController extends AbstractBaseController {
      *
      * @return List of {@link AgentMapping}s.
      */
-    @GetMapping(value = "mappings")
-    public List<AgentMapping> getMappings() {
-        return mappingManager.getAgentMappings();
+    @GetMapping(value = {"mappings", "mappings/"})
+    public List<AgentMapping> getMappings(@Parameter(description = "The id of the version which should be listed. If it is empty, the lastest workspace version is used. Can be 'live' for listing the latest live version.") @RequestParam(value = "version", required = false) String commitId) {
+        List<AgentMapping> agentMappings = mappingManager.getAgentMappings(commitId);
+        return agentMappings;
     }
 
     /**
@@ -52,11 +56,11 @@ public class AgentMappingController extends AbstractBaseController {
      * @throws IOException In case the new mappings cannot be written into a file.
      */
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @PutMapping(value = "mappings")
+    @PutMapping(value = {"mappings", "mappings/"})
     public void putMappings(@Valid @RequestBody List<AgentMapping> agentMappings) throws IOException {
         mappingManager.setAgentMappings(agentMappings);
         auditLogger.logEntityCreation(() -> {
-            String mappings = agentMappings.stream().map(AgentMapping::getName).collect(Collectors.joining(","));
+            String mappings = agentMappings.stream().map(AgentMapping::name).collect(Collectors.joining(","));
             return new AuditDetail("Agent Mappings", mappings);
         });
     }
@@ -67,7 +71,7 @@ public class AgentMappingController extends AbstractBaseController {
      * @param mappingName the name of the {@link AgentMapping}
      * @return The {@link AgentMapping} with the given name or a 404 if it does not exist
      */
-    @GetMapping(value = "mappings/{mappingName}")
+    @GetMapping(value = {"mappings/{mappingName}", "mappings/{mappingName}/"})
     public ResponseEntity<AgentMapping> getMappingByName(@PathVariable("mappingName") String mappingName) {
         Optional<AgentMapping> agentMapping = mappingManager.getAgentMapping(mappingName);
         return ResponseEntity.of(agentMapping);
@@ -81,8 +85,8 @@ public class AgentMappingController extends AbstractBaseController {
      * @throws IOException In case of an error during deletion
      */
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @DeleteMapping(value = "mappings/{mappingName}")
-    public ResponseEntity deleteMappingByName(@PathVariable("mappingName") String mappingName) throws IOException {
+    @DeleteMapping(value = {"mappings/{mappingName}", "mappings/{mappingName}/"})
+    public ResponseEntity<?> deleteMappingByName(@PathVariable("mappingName") String mappingName) throws IOException {
         boolean isDeleted = mappingManager.deleteAgentMapping(mappingName);
 
         if (isDeleted) {
@@ -109,12 +113,12 @@ public class AgentMappingController extends AbstractBaseController {
      * @throws IOException In case of an error
      */
     @Secured(UserRoleConfiguration.WRITE_ACCESS_ROLE)
-    @PutMapping(value = "mappings/{mappingName}")
-    public ResponseEntity putMapping(@PathVariable("mappingName") String mappingName, @Valid @RequestBody AgentMapping agentMapping, @RequestParam(required = false) String before, @RequestParam(required = false) String after) throws IOException {
-        checkArgument(!StringUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
+    @PutMapping(value = {"mappings/{mappingName}", "mappings/{mappingName}/"})
+    public ResponseEntity<?> putMapping(@PathVariable("mappingName") String mappingName, @Valid @RequestBody AgentMapping agentMapping, @RequestParam(required = false) String before, @RequestParam(required = false) String after) throws IOException {
+        checkArgument(!ObjectUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
         checkArgument(before == null || after == null, "The 'before' and 'after' parameters cannot be used together.");
 
-        if (!mappingName.equals(agentMapping.getName())) {
+        if (!mappingName.equals(agentMapping.name())) {
             agentMapping = agentMapping.toBuilder().name(mappingName).build();
         }
 
@@ -128,5 +132,36 @@ public class AgentMappingController extends AbstractBaseController {
 
         auditLogger.logEntityCreation(agentMapping);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Sets the source branch for the agent mappings file itself, which means that the actual agent mappings will be read from
+     * the agent mappings file, which is located in the specified branch.
+     * There exist only two possible branches, namely WORKSPACE and LIVE.
+     * <p>
+     * This does not affect the sourceBranch property, which is specified inside the agent mappings to configure the
+     * source branch for the agent configurations.
+     * <p>
+     * The configuration will automatically be reloaded, after the agent mappings have been changed
+     *
+     * @param branch the branch, which should be used as source branch for the agent mappings file
+     * @return 200 in case the operation was successful
+     */
+    @Secured(UserRoleConfiguration.ADMIN_ACCESS_ROLE)
+    @PutMapping (value = "mappings/source")
+    public ResponseEntity<Branch> setMappingSourceBranch(@RequestParam String branch) {
+        Branch setBranch = mappingManager.setSourceBranch(branch);
+        return new ResponseEntity<>(setBranch, HttpStatus.OK);
+    }
+
+    /**
+     * Returns the current set source branch for the agent mappings file itself.
+     *
+     * @return Current source branch for the agent mappings file
+     */
+    @GetMapping(value = "mappings/source")
+    public ResponseEntity<Branch> getMappingSourceBranch() {
+        Branch branch = mappingManager.getSourceBranch();
+        return new ResponseEntity<>(branch, HttpStatus.OK);
     }
 }

@@ -4,18 +4,19 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
-import rocks.inspectit.ocelot.events.ConfigurationPromotionEvent;
+import rocks.inspectit.ocelot.events.AgentMappingsSourceBranchChangedEvent;
+import rocks.inspectit.ocelot.events.PromotionEvent;
 import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
-import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +73,7 @@ public class AgentConfigurationManager {
         reloadConfigurationAsync();
     }
 
-    @EventListener({ConfigurationPromotionEvent.class, WorkspaceChangedEvent.class})
+    @EventListener({PromotionEvent.class, WorkspaceChangedEvent.class, AgentMappingsSourceBranchChangedEvent.class})
     private synchronized void reloadConfigurationAsync() {
         if (reloadTask != null) {
             reloadTask.cancel();

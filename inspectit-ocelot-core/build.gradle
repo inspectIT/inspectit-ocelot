@@ -1,11 +1,10 @@
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
-    id "me.champeau.jmh" version "${jmhVersion}"
-    id "org.cyclonedx.bom" version "${cyclonedxBomVersion}"
-    id "org.owasp.dependencycheck" version "${owaspDependencycheckVersion}"
-    id "org.springframework.boot" version "${springBootVersion}" apply false
-    id "io.spring.dependency-management" version "${springDependencyManangementVersion}"
+    alias(libs.plugins.meChampeauJmh)
+    alias(libs.plugins.orgCyclonedxBom)
+    alias(libs.plugins.orgSpringframeworkBoot) apply false
+    alias(libs.plugins.ioSpringDependencyManagement)
 }
 
 dependencyManagement {
@@ -40,134 +39,153 @@ targetCompatibility = 1.8 // Java version to generate classes for.
 dependencies {
     compileOnly(
             project(':inspectit-ocelot-bootstrap'),
-            "org.projectlombok:lombok",
+            libs.orgProjectlombokLombok,
 
             // OpenTelemetry
-            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
-            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
-            'io.opentelemetry:opentelemetry-api',
-            "io.opentelemetry:opentelemetry-sdk",
-            "io.opentelemetry:opentelemetry-sdk-metrics",
-            "io.opentelemetry:opentelemetry-semconv",
+            platform(libs.ioOpentelemetryOpentelemetryBom),
+            platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
+            libs.ioOpentelemetryOpentelemetryApi,
+            libs.ioOpentelemetryOpentelemetrySdk,
+            libs.ioOpentelemetryOpentelemetrySdkMetrics,
+            libs.ioOpentelemetryOpentelemetrySemconv,
             // OC-OTel bridge
-            "io.opentelemetry:opentelemetry-opencensus-shim",
+            libs.ioOpentelemetryOpentelemetryOpencensusShim,
 
 
     )
-    annotationProcessor "org.projectlombok:lombok"
+    annotationProcessor libs.orgProjectlombokLombok
 
     implementation(
             project(':inspectit-ocelot-config'),
             project(':inspectit-ocelot-sdk'),
 
             // spring related
-            "org.springframework.boot:spring-boot",
-            "org.yaml:snakeyaml:${snakeYamlVersion}",
-            "javax.annotation:javax.annotation-api", //Required for @PostConstruct and @PreDestroy to work in Java9+
+            libs.orgSpringframeworkBootSpringBoot,
+            libs.orgYamlSnakeyaml,
+            libs.javaxAnnotationJavaxAnnotationApi, //Required for @PostConstruct and @PreDestroy to work in Java9+
 
             // data validation
-            "org.apache.tomcat.embed:tomcat-embed-el",
-            "org.hibernate.validator:hibernate-validator",
+            libs.orgApacheTomcatEmbedTomcatEmbedEl,
+            libs.orgHibernateValidatorHibernateValidator,
 
             // logging
-            "ch.qos.logback:logback-classic",
+            libs.chQosLogbackLogbackClassic,
             // logstash support (JSON logging)
-            "net.logstash.logback:logstash-logback-encoder:${logstashLogBackEncoderVersion}",
+            libs.netLogstashLogbackLogstashLogbackEncoder,
+
+            // jetty HTTP server for REST-API
+            // we use jetty instead of Spring-Boot-Web since it's more lightweight and
+            // it 's easier to adapt changes from the config-server
+            libs.orgEclipseJettyJettyServer,
+            libs.orgeclipseJettyJettyServlet,
 
             // utils
-            "org.apache.commons:commons-lang3",
-            "org.apache.commons:commons-math3:${commonsMathVersion}",
-            "org.apache.httpcomponents:httpclient",
-            "commons-io:commons-io:${commonsIoVersion}",
-            "piccolo:piccolo:${piccoloVersion}",
-            "com.fasterxml.jackson.core:jackson-databind",
-            "io.github.resilience4j:resilience4j-retry:${resilience4jVersion}",
+            libs.orgApacheCommonsCommonsLang3,
+            libs.orgApacheCommonsCommonsMath3,
+            libs.orgApacheHttpcomponentsHttpclient,
+            libs.commonsIo,
+            libs.piccolo,
+            libs.comFasterxmlJacksonCoreJacksonDatabind,
+            libs.ioGithubResilience4jResilience4jRetry,
 
-            "org.javassist:javassist:${javassistVersion}",
+            libs.orgJavassist,
 
             // Metrics exporters
-            "io.prometheus:simpleclient_httpserver",
+            libs.ioPrometheusSimpleclientHttpserver,
 
             // this overwrites version of guava that opencensus-impl pulls in transitively, too.
-            "com.google.guava:guava:${guavaVersion}",
+            libs.comGoogleGuava,
             // we still need the OpenCensus SDK for the metric exporters to work, as the shim only includes opencensus-impl-core
-            "io.opencensus:opencensus-impl:${openCensusVersion}",
+            libs.ioOpencensusOpencensusImpl,
 
             // OpenTelemetry exporters
-            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
-            "io.opentelemetry:opentelemetry-exporter-logging",
-            "io.opentelemetry:opentelemetry-exporter-jaeger",
-            "io.opentelemetry:opentelemetry-exporter-jaeger-thrift",
-            "io.opentelemetry:opentelemetry-exporter-zipkin",
-            "io.opentelemetry:opentelemetry-exporter-otlp",
+            platform(libs.ioOpentelemetryOpentelemetryBom),
+            libs.ioOpentelemetryOpentelemetryExporterLogging,
+            libs.ioOpentelemetryOpentelemetryExporterJaeger,
+            libs.ioOpentelemetryOpentelemetryExporterJaegerThrift,
+            libs.ioOpentelemetryOpentelemetryExporterZipkin,
+            libs.ioOpentelemetryOpentelemetryExporterOtlp,
+            // Update okio, due to security concerns
+            libs.comSquareupOkio,
 
-            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
-            "io.opentelemetry:opentelemetry-exporter-prometheus",
+            platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
+            libs.ioOpentelemetryOpentelemetryExporterPrometheus,
 
             // The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
             // See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
-            "io.netty:netty-tcnative-boringssl-static:${tcnativeVersion}",
+            libs.ioNettyNettyTcnativeBoringsslStatic,
 
-            "rocks.inspectit:opencensus-influxdb-exporter:${opencensusInfluxdbExporter}",
+            libs.rocksInspectitOpencensusInfluxdbExporter,
 
             // bytecode manipulation
-            "net.bytebuddy:byte-buddy"
+            libs.netBytebuddyByteBuddy
     )
 
     testImplementation(
             project(':inspectit-ocelot-bootstrap'),
-            platform("io.opentelemetry:opentelemetry-bom:${openTelemetryVersion}"),
-            platform("io.opentelemetry:opentelemetry-bom-alpha:${openTelemetryAlphaVersion}"),
-            "io.opentelemetry:opentelemetry-sdk",
-            "io.opentelemetry:opentelemetry-sdk-metrics",
-            "io.opentelemetry:opentelemetry-opencensus-shim",
-            "io.opentelemetry:opentelemetry-semconv",
-            "io.opentelemetry:opentelemetry-sdk-testing",
-            "io.opentelemetry:opentelemetry-proto:${opentelemetryProtoVersion}",
+            platform(libs.ioOpentelemetryOpentelemetryBom),
+            platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
+            libs.ioOpentelemetryOpentelemetrySdk,
+            libs.ioOpentelemetryOpentelemetrySdkMetrics,
+            libs.ioOpentelemetryOpentelemetryOpencensusShim,
+            libs.ioOpentelemetryOpentelemetrySemconv,
+            libs.ioOpentelemetryOpentelemetrySdkTesting,
+            libs.ioOpentelemetryOpentelemetryProto,
 
-            'org.springframework:spring-test',
+            libs.orgSpringframeworkSpringTest,
 
-            "org.junit.jupiter:junit-jupiter-api",
-            "org.mockito:mockito-junit-jupiter",
+            libs.orgJunitJupiterJunitJupiterApi,
+            libs.orgMockitoMockitoJunitJupiter,
 
             // to make use of SpyBean
-            "org.springframework.boot:spring-boot-test",
+            libs.orgSpringframeworkBootSpringBootTest,
 
-            "org.mockito:mockito-core",
-            "org.assertj:assertj-core",
-            "org.assertj:assertj-guava:${assertjGuavaVersion}",
-            "org.awaitility:awaitility",
-            "com.github.tomakehurst:wiremock-jre8:${wiremockVersion}",
-            "io.grpc:grpc-netty-shaded:${grpcVersion}",
-            "io.grpc:grpc-stub:${grpcVersion}",
-            "org.influxdb:influxdb-java:${influxdbJavaVersion}",
-            "io.apisense.embed.influx:embed-influxDB:${embedInfluxdbVersion}",
+            libs.orgMockitoMockitoCore,
+            libs.orgAssertjAssertjCore,
+            libs.orgAssertjAssertjGuava,
+            libs.orgAwaitility,
+            libs.comGithubTomakehurstWiremockJre8,
+            libs.ioGrpcGrpcNettyShaded,
+            libs.ioGrpcGrpcStub,
+            libs.orgInfluxdbInfluxdbJava,
+            libs.ioApisenseEmbedInfluxEmbedInfluxDB,
 
             // for docker test containers
-            "org.testcontainers:testcontainers:${testContainersVersion}",
-            "org.testcontainers:junit-jupiter:${testContainersVersion}",
+            libs.orgTestcontainers,
+            libs.orgTestcontainersJunitJupiter,
 
             // ServerExtension
-            "com.linecorp.armeria:armeria-junit5:${armeriaVersion}",
-            "com.linecorp.armeria:armeria-grpc-protocol:${armeriaVersion}",
+            libs.comLinecorpArmeriaArmeriaJunit5,
+            libs.comLinecorpArmeriaArmeriaGrpcProtocol,
 
-            "com.google.protobuf:protobuf-java-util:${protobufJavaUtilVersion}",
+            libs.comGoogleProtobufProtobufJavaUtil,
 
             // LogCapturer
-            "io.github.netmikey.logunit:logunit-core:${logUnitVersion}",
+            libs.ioGithubNetmikeyLogunitLogunitCore,
             // jul-slf4j bridge needed to redirect OTEL logs using java.util.logging to logback
-            "org.slf4j:jul-to-slf4j",
+            libs.orgSlf4jJulToSlf4j,
     )
     testRuntimeOnly(
-            "org.junit.jupiter:junit-jupiter-engine",
+            libs.orgJunitJupiterJunitJupiterEngine,
             // LogCapturer
-            "io.github.netmikey.logunit:logunit-logback:${logUnitVersion}",
+            libs.ioGithubNetmikeyLogunitLogunitLogback,
     )
 
     jmh(
             project(':inspectit-ocelot-bootstrap')
     )
 
+    constraints {
+        implementation(libs.orgYamlSnakeyaml) {
+            because 'security issues'
+        }
+        implementation(libs.comGoogleGuava) {
+            because 'security issues'
+        }
+        implementation(libs.comSquareupOkio) {
+            because 'security issues'
+        }
+    }
 }
 
 apply plugin: 'java'
@@ -175,7 +193,7 @@ task compileJarCheck(type: JavaCompile){
     source = sourceSets.main.java.srcDirs
     include 'com/mindprod/jarcheck/JarCheck.java'
     classpath = sourceSets.main.compileClasspath
-    destinationDir =  new File("${buildDir}/classes/java/main")
+    destinationDirectory =  new File("${buildDir}/classes/java/main")
 }
 
 // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
@@ -205,8 +223,9 @@ task generateVersionFile {
     ext.versionFile = new File(buildDir, "ocelot-version.info")
     doLast {
         def currentDate = new Date().toString()
+        def openTelemetry = libs.versions.ioOpentelemetry.get()
         ext.versionFile.withWriter('UTF-8') { writer ->
-            writer << "$version\n$openTelemetryVersion\n$currentDate"
+            writer << "$version\n$openTelemetry\n$currentDate"
         }
     }
 }
@@ -223,7 +242,7 @@ jar.dependsOn generateVersionFile
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    archiveName = "${project.name}.jar"
+    archiveFileName = "${project.name}.jar"
 
     // include version file
     from generateVersionFile.versionFile
