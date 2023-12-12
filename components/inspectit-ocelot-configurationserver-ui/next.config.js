@@ -6,7 +6,7 @@ module.exports = {
   // Each page will be exported as a directory
   trailingSlash: true,
 
-  assetPrefix: isProduction ? '/ui' : '',
+  assetPrefix: isProduction ? '/ui' : '/',
 
   // Will only be available on the server side
   serverRuntimeConfig: {},
