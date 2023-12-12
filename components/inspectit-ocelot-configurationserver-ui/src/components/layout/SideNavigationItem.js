@@ -11,7 +11,7 @@ const SideNavigationItem = ({ href, icon, name, router, unfolded }) => {
 
   return (
     <Link className="this" href={href}>
-      <a className={classNames('anchor', { active: isActive, unfoldedSideNavItem: unfolded })} title={name}>
+      <div className={classNames('anchor', { active: isActive, unfoldedSideNavItem: unfolded })} title={name}>
         <style jsx>
           {`
             .pi {
@@ -30,7 +30,8 @@ const SideNavigationItem = ({ href, icon, name, router, unfolded }) => {
               padding: 0.75rem 0.25rem;
             }
             .anchor.active {
-              padding-left: 0;
+              padding-left: 10px;
+              padding-right: 10px;
               border-left: 0.25rem solid #e8a034;
             }
             .unfoldedSideNavItem {
@@ -49,7 +50,7 @@ const SideNavigationItem = ({ href, icon, name, router, unfolded }) => {
         </style>
         <i className={'pi ' + icon} />
         {unfolded && <div className="name-text">{name}</div>}
-      </a>
+      </div>
     </Link>
   );
 };
