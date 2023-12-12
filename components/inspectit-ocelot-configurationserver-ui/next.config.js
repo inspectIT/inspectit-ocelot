@@ -1,7 +1,6 @@
-const withCSS = require('@zeit/next-css');
 const isProduction = process.env.NODE_ENV === 'production';
 
-module.exports = withCSS({
+module.exports = {
   distDir: '../.next',
 
   // Each page will be exported as a directory
@@ -18,24 +17,8 @@ module.exports = withCSS({
     linkPrefix: isProduction ? '/ui' : '',
   },
 
-  // Required for successfully importing CSS files (e.g. from PrimeReact)
-  // See: https://github.com/zeit/next-plugins/issues/273#issuecomment-430597241
-  webpack: function (config) {
-    config.module.rules.push({
-      test: /\.(eot|woff|woff2|ttf|svg|png|jpg|gif)$/,
-      use: {
-        loader: 'url-loader',
-        options: {
-          limit: 100000,
-          name: '[name].[ext]',
-        },
-      },
-    });
-    return config;
-  },
-
   env: {
     VERSION: process.env.GITHUB_REF_NAME || 'SNAPSHOT',
     BUILD_DATE: new Date().toUTCString(),
   },
-});
+};
