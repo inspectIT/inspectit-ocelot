@@ -3,6 +3,7 @@ comLinecorpArmeria = "1.23.1"
 ioGithubNetmikeyLogunit = "1.1.3"
 ioGrpc = "1.43.3"
 # Ensure to adapt the netty version when changing the OpenCensus version
+# If you rename or move this variable to another file, adjust the release-workflow
 ioOpencensus = "0.31.1"
 ioOpentelemetry = "1.29.0"
 ioOpentelemetryAlpha = "1.29.0-alpha"
