@@ -197,6 +197,16 @@ const configurationReducer = createReducer(initialState)({
       showVisualConfigurationView: !state.showVisualConfigurationView,
     };
   },
+  [types.SELECT_CONFIG_DOCS_STARTED]: incrementPendingRequests,
+  [types.SELECT_CONFIG_DOCS_SUCCESS]: (state, action) => {
+    const redirectedSelection = action.payload.filePath;
+    console.info(redirectedSelection);
+    return {
+      ...decrementPendingRequests(state),
+      redirectedSelection,
+    };
+  },
+  [types.SELECT_CONFIG_DOCS_FAILURE]: decrementPendingRequests,
 
   [types.TOGGLE_HISTORY_VIEW]: (state) => {
     return {

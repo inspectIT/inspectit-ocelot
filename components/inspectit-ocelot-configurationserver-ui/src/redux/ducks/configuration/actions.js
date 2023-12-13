@@ -463,6 +463,29 @@ export const fetchConfigurationSchema = () => {
   };
 };
 
+export const selectConfigurationDocumentation = (mapping, element) => {
+  return (dispatch) => {
+    dispatch({ type: types.SELECT_CONFIG_DOCS_STARTED });
+
+    axios
+      .post(
+        `/configuration/documentation`,
+        {},
+        {
+          headers: { 'content-type': 'application/json' },
+          params: { 'agent-mapping': mapping, element: element },
+        }
+      )
+      .then((response) => {
+        const filePath = response.data;
+        dispatch({ type: types.SELECT_CONFIG_DOCS_SUCCESS, payload: { filePath } });
+      })
+      .catch(() => {
+        dispatch({ type: types.SELECT_CONFIG_DOCS_FAILURE });
+      });
+  };
+};
+
 /**
  * Shows or hides the split view for the configuration properties.
  */

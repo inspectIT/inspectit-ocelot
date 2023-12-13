@@ -147,16 +147,15 @@ public class ConfigurationController extends AbstractBaseController {
         }
     }
 
-    @Operation(summary = "Returns the contents of the file, which contains the documentation for the provided element.")
+    @Operation(summary = "Returns the file path, which contains the documentation for the provided element.")
     @PostMapping(value = {"configuration/documentation", "configuration/documentation/"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> openConfigDocumentation(
+    public ResponseEntity<String> openConfigDocumentation(
             @Parameter(description = "The name of the AgentMapping the configuration documentation should be for.")
             @RequestParam(name = "agent-mapping") String mappingName,
-            @Parameter(description = "The element whose Configuration Documentation has to be opened")
+            @Parameter(description = "The element whose configuration file has to be opened")
             @RequestParam(name = "element") String element) {
 
         Optional<AgentMapping> agentMapping = mappingManager.getAgentMapping(mappingName);
-        Optional<String> contentOptional = Optional.empty();
 
         if (agentMapping.isPresent()) {
             // TODO include default-Configurations
@@ -167,15 +166,10 @@ public class ConfigurationController extends AbstractBaseController {
                     .findFirst();   // TODO How to handle multiple found documentations?
 
             if (documentation.isPresent()) {
-                String filePath = documentation.get().getFilePath();
-
-                contentOptional = fileManager.getWorkingDirectory().readConfigurationFile(filePath);
+                String filePath = '/' + documentation.get().getFilePath();
+                return new ResponseEntity<>(filePath, HttpStatus.OK);
             }
         }
-
-        if (contentOptional.isPresent())
-            return new ResponseEntity<>(contentOptional.get(), HttpStatus.OK);
-         else
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

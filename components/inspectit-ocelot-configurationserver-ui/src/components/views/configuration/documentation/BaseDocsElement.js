@@ -2,8 +2,15 @@ import React from 'react';
 import DocsActionElement from './DocsActionElement';
 import DocsElementTypes from './DocsElementTypes';
 import DocsRuleElement from './DocsRuleElement';
+import { configurationActions } from '../../../../redux/ducks/configuration';
+import { useDispatch } from 'react-redux';
+//import { useRouter } from 'next/router';
 
-const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
+const BaseDocsElement = ({ data, type, registerRef, scrollTo, selectedAgentMapping }) => {
+  const dispatch = useDispatch();
+  //const router = useRouter();
+  //const redirect = useSelector((state) => state.configuration.redirectedSelection);
+
   // render specific content based on element type
   const renderSpecificContent = (element) => {
     switch (type) {
@@ -16,6 +23,11 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
       default:
         return null;
     }
+  };
+
+  const handleClick = (name) => {
+    dispatch(configurationActions.selectConfigurationDocumentation(selectedAgentMapping, name));
+    //Router.push(redirect);
   };
 
   return (
@@ -58,6 +70,7 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
           ref={(ref) => {
             registerRef(element.name, ref);
           }}
+          onClick={() => handleClick(element.name)}
         >
           <div className="title-row">
             <span className="title">{element.name}</span>
