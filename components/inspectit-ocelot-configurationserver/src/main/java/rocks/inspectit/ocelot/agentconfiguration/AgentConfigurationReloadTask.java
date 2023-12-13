@@ -1,8 +1,11 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
 import com.google.common.annotations.VisibleForTesting;
+import inspectit.ocelot.configdocsgenerator.parsing.ConfigParser;
 import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
+import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
@@ -15,9 +18,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
-import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 /**
  * A task for asynchronously loading the configurations based on a given list of mappings.
@@ -67,33 +67,26 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         List<AgentConfiguration> newConfigurations = new ArrayList<>();
         for (AgentMapping mapping : mappingsToLoad) {
             try {
-                String configYaml = loadConfigForMapping(mapping);
+                AgentConfiguration agentConfiguration = createAgentConfiguration(mapping);
                 if (isCanceled()) {
                     log.debug("Configuration reloading canceled");
                     return;
                 }
-                AgentConfiguration agentConfiguration = AgentConfiguration.builder()
-                        .mapping(mapping)
-                        .configYaml(configYaml)
-                        .build();
                 newConfigurations.add(agentConfiguration);
             } catch (Exception e) {
-                log.error("Could not load agent mapping '{}'.", mapping.name(), e);
+                log.error("Could not load agent configuration for agent mapping '{}'.", mapping.name(), e);
             }
         }
         onTaskSuccess(newConfigurations);
     }
 
     /**
-     * Loads the given mapping as yaml string.
-     *
+     * Creates the whole configuration for one agent with the provided agent mapping
      * @param mapping the mapping to load
-     *
-     * @return the merged yaml for the given mapping or an empty string if the mapping does not contain any existing files
-     * If this task has been canceled, null is returned.
+     * @return Configuration for the agent mapping
      */
     @VisibleForTesting
-    String loadConfigForMapping(AgentMapping mapping) {
+    AgentConfiguration createAgentConfiguration(AgentMapping mapping) {
         AbstractFileAccessor fileAccessor = getFileAccessorForMapping(mapping);
 
         LinkedHashSet<String> allYamlFiles = new LinkedHashSet<>();
@@ -104,6 +97,27 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
             allYamlFiles.addAll(getAllYamlFiles(fileAccessor, path));
         }
 
+        String configYaml = loadConfigYaml(fileAccessor, allYamlFiles);
+        List<AgentDocumentation> documentations = loadAgentDocumentations(fileAccessor, allYamlFiles);
+
+        AgentConfiguration agentConfiguration = AgentConfiguration.builder()
+                .mapping(mapping)
+                .documentations(documentations)
+                .configYaml(configYaml)
+                .build();
+
+        return agentConfiguration;
+    }
+
+    /**
+     * Loads the given mapping as yaml string.
+     *
+     * @param fileAccessor the accessor to use for reading the files
+     * @param allYamlFiles the list of yaml files, which should be merged
+     * @return the merged yaml for the given mapping or an empty string if the mapping does not contain any existing files
+     * If this task has been canceled, null is returned.
+     */
+    private String loadConfigYaml(AbstractFileAccessor fileAccessor, LinkedHashSet<String> allYamlFiles) {
         Object result = null;
         for (String path : allYamlFiles) {
             if (isCanceled()) {
@@ -112,6 +126,66 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
             result = loadAndMergeYaml(fileAccessor, result, path);
         }
         return result == null ? "" : new Yaml().dump(result);
+    }
+
+    /**
+     * Filters for all documented objects for each file for the current agent
+     *
+     * @param fileAccessor the accessor to use for reading the files
+     * @param allYamlFiles the list of yaml files, which should be merged
+     * @return A list with information for documented objects of the agent
+     */
+    private List<AgentDocumentation> loadAgentDocumentations(AbstractFileAccessor fileAccessor, LinkedHashSet<String> allYamlFiles) {
+        List<AgentDocumentation> documentations = new LinkedList<>();
+        Yaml yaml = new Yaml();
+        for (String path : allYamlFiles) {
+            String src = fileAccessor.readConfigurationFile(path).orElse("");
+            Object rawYaml = yaml.load(src);
+            List<String> documentedObjects = new LinkedList<>();
+
+            if(rawYaml != null) {
+                String cleanYaml = yaml.dump(rawYaml);
+                ConfigParser configParser = new ConfigParser();
+                try {
+                    InspectitConfig config = configParser.parseConfig(cleanYaml);
+                    InstrumentationSettings instrumentation = config.getInstrumentation();
+
+                    if(instrumentation != null) {
+                        instrumentation.getActions()
+                                .entrySet().stream()
+                                .filter(entry -> entry.getValue().getDocs() != null)
+                                .forEach(entry -> documentedObjects.add(entry.getKey()));
+
+                        instrumentation.getScopes()
+                                .entrySet().stream()
+                                .filter(entry -> entry.getValue().getDocs() != null)
+                                .forEach(entry -> documentedObjects.add(entry.getKey()));
+
+                        instrumentation.getRules()
+                                .entrySet().stream()
+                                .filter(entry -> entry.getValue().getDocs() != null)
+                                .forEach(entry -> documentedObjects.add(entry.getKey()));
+                    }
+
+                    config.getMetrics().getDefinitions()
+                            .entrySet().stream()
+                            .filter(entry -> entry.getValue().getDescription() != null)
+                            .forEach(entry -> documentedObjects.add(entry.getKey()));
+                    } catch (Exception e) {
+                        log.warn("Could not parse configuration: {}", path, e);
+                    }
+                }
+
+
+            AgentDocumentation agentDocumentation = AgentDocumentation.builder()
+                    .filePath(path)
+                    .documentedObjects(documentedObjects)
+                    .build();
+
+            documentations.add(agentDocumentation);
+        }
+
+        return documentations;
     }
 
     private AbstractFileAccessor getFileAccessorForMapping(AgentMapping mapping) {

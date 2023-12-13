@@ -12,11 +12,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.yaml.snakeyaml.Yaml;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
+import rocks.inspectit.ocelot.agentconfiguration.AgentDocumentation;
 import rocks.inspectit.ocelot.agentconfiguration.ObjectStructureMerger;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.file.FileManager;
@@ -27,6 +29,7 @@ import rocks.inspectit.ocelot.rest.file.DefaultConfigController;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -97,7 +100,11 @@ public class ConfigurationController extends AbstractBaseController {
      */
     @Operation(summary = "Get the full configuration documentation of an AgentMappings config, based on the AgentMapping name.")
     @GetMapping(value = {"configuration/documentation", "configuration/documentation/"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getConfigDocumentation(@Parameter(description = "The name of the AgentMapping the configuration documentation should be for.") @RequestParam(name = "agent-mapping") String mappingName, @Parameter(description = "Whether the shown documentation should include the merged in Default Config as well.") @RequestParam(name = "include-default") Boolean includeDefault) {
+    public ResponseEntity<Object> getConfigDocumentation(
+            @Parameter(description = "The name of the AgentMapping the configuration documentation should be for.")
+            @RequestParam(name = "agent-mapping") String mappingName,
+            @Parameter(description = "Whether the shown documentation should include the merged in Default Config as well.")
+            @RequestParam(name = "include-default") Boolean includeDefault) {
 
         ConfigDocumentation configDocumentation = null;
 
@@ -138,5 +145,37 @@ public class ConfigurationController extends AbstractBaseController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(String.format("No AgentMapping found with the name '%s'.", mappingName));
         }
+    }
+
+    @Operation(summary = "Returns the contents of the file, which contains the documentation for the provided element.")
+    @PostMapping(value = {"configuration/documentation", "configuration/documentation/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> openConfigDocumentation(
+            @Parameter(description = "The name of the AgentMapping the configuration documentation should be for.")
+            @RequestParam(name = "agent-mapping") String mappingName,
+            @Parameter(description = "The element whose Configuration Documentation has to be opened")
+            @RequestParam(name = "element") String element) {
+
+        Optional<AgentMapping> agentMapping = mappingManager.getAgentMapping(mappingName);
+        Optional<String> contentOptional = Optional.empty();
+
+        if (agentMapping.isPresent()) {
+            // TODO include default-Configurations
+            AgentConfiguration configuration = configManager.getConfigurationForMapping(agentMapping.get());
+            List<AgentDocumentation> documentations = configuration.getDocumentations();
+            Optional<AgentDocumentation> documentation = documentations.stream()
+                    .filter(doc -> doc.getDocumentedObjects().contains(element))
+                    .findFirst();   // TODO How to handle multiple found documentations?
+
+            if (documentation.isPresent()) {
+                String filePath = documentation.get().getFilePath();
+
+                contentOptional = fileManager.getWorkingDirectory().readConfigurationFile(filePath);
+            }
+        }
+
+        if (contentOptional.isPresent())
+            return new ResponseEntity<>(contentOptional.get(), HttpStatus.OK);
+         else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

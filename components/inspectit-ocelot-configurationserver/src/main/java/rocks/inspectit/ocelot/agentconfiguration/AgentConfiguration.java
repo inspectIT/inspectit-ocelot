@@ -6,10 +6,11 @@ import org.springframework.util.DigestUtils;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.nio.charset.Charset;
+import java.util.List;
 
 /**
  * An {@link AgentMapping} which has its configuration loaded in-memory.
- * In addition a cryptographic hash is computed to detect changes of configurations.
+ * In addition, a cryptographic hash is computed to detect changes of configurations.
  */
 @Value
 public class AgentConfiguration {
@@ -18,6 +19,11 @@ public class AgentConfiguration {
      * The agent mapping for which this instance represents the loaded configuration.
      */
     private AgentMapping mapping;
+
+    /**
+     * The list of documented objects in this configuration
+     */
+    private List<AgentDocumentation> documentations;
 
     /**
      * The merged YAML configuration for the given mapping.
@@ -30,8 +36,9 @@ public class AgentConfiguration {
     private String hash;
 
     @Builder
-    private AgentConfiguration(AgentMapping mapping, String configYaml) {
+    private AgentConfiguration(AgentMapping mapping, List<AgentDocumentation> documentations, String configYaml) {
         this.mapping = mapping;
+        this.documentations = documentations;
         this.configYaml = configYaml;
         hash = DigestUtils.md5DigestAsHex(configYaml.getBytes(Charset.defaultCharset()));
     }
