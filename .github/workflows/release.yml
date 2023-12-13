@@ -119,7 +119,7 @@ jobs:
         working-directory: ./inspectit-ocelot-documentation/docs
         run: |
           find . -type f -print0 | xargs -0 sed -i 's/{inspectit-ocelot-version}/'"${{ github.ref_name }}"'/g'
-          OPEN_CENSUS_VERSION=$(cat ../../gradle.properties | grep -oP '(?<=openCensusVersion=).*')
+          OPEN_CENSUS_VERSION=$(grep -oP 'ioOpencensus\s*=\s*"\K[^"]+' ../../gradle/libs.versions.toml)
           find . -type f -print0 | xargs -0 sed -i 's/{opencensus-version}/'"${OPEN_CENSUS_VERSION}"'/g'
       - name: Create new Documentation Version
         run: |
