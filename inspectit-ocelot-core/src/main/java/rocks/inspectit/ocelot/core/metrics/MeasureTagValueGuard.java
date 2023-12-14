@@ -127,10 +127,12 @@ public class MeasureTagValueGuard {
                 Set<String> tagValues = tagValuesByTagKey.computeIfAbsent(tagKey, (x) -> new HashSet<>());
                 // if tag value is new AND max values per tag is already reached
                 if (!tagValues.contains(tagValue) && tagValues.size() >= maxValuesPerTag) {
-                    blockedTagKeysByMeasure.computeIfAbsent(measureName, measure ->  Sets.newHashSet()).add(tagKey);
-                    agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(),
-                            String.format(tagOverFlowMessageTemplate, measureName, tagKey));
-                    hasTagValueOverflow = true;
+                    boolean isNewBlockedTag = blockedTagKeysByMeasure.computeIfAbsent(measureName, measure ->  Sets.newHashSet()).add(tagKey);
+                    if(isNewBlockedTag) {
+                        agentHealthManager.handleInvalidatableHealth(AgentHealth.ERROR, this.getClass(),
+                                String.format(tagOverFlowMessageTemplate, measureName, tagKey));
+                        hasTagValueOverflow = true;
+                    }
                 } else {
                     tagValues.add(tagValue);
                 }
