@@ -31,7 +31,7 @@ class ConfigDocsGeneratorTest {
 
     private static MetricDocs metricDoc;
 
-    private final ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator();
+    private final ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator(new HashMap<>());
 
     /**
      * Needed to create InspectitConfig Objects to use as input for DocObjectGenerator in tests.

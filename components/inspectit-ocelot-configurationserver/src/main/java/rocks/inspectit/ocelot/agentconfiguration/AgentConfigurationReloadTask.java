@@ -98,11 +98,11 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         }
 
         String configYaml = loadConfigYaml(fileAccessor, allYamlFiles);
-        List<AgentDocumentation> documentations = loadAgentDocumentations(fileAccessor, allYamlFiles);
+        Map<String, Set<String>> objectsByFile = loadObjectsByFile(fileAccessor, allYamlFiles);
 
         AgentConfiguration agentConfiguration = AgentConfiguration.builder()
                 .mapping(mapping)
-                .documentations(documentations)
+                .objectsByFile(objectsByFile)
                 .configYaml(configYaml)
                 .build();
 
@@ -129,19 +129,19 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
     }
 
     /**
-     * Filters for all documented objects for each file for the current agent
+     * Filters for all objects of each file for the current agent
      *
      * @param fileAccessor the accessor to use for reading the files
      * @param allYamlFiles the list of yaml files, which should be merged
      * @return A list with information for documented objects of the agent
      */
-    private List<AgentDocumentation> loadAgentDocumentations(AbstractFileAccessor fileAccessor, LinkedHashSet<String> allYamlFiles) {
-        List<AgentDocumentation> documentations = new LinkedList<>();
+    private Map<String, Set<String>> loadObjectsByFile(AbstractFileAccessor fileAccessor, LinkedHashSet<String> allYamlFiles) {
+        Map<String, Set<String>> objectsByFile = new HashMap<>();
         Yaml yaml = new Yaml();
         for (String path : allYamlFiles) {
             String src = fileAccessor.readConfigurationFile(path).orElse("");
             Object rawYaml = yaml.load(src);
-            List<String> documentedObjects = new LinkedList<>();
+            Set<String> objects = new HashSet<>();
 
             if(rawYaml != null) {
                 String cleanYaml = yaml.dump(rawYaml);
@@ -152,40 +152,34 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
 
                     if(instrumentation != null) {
                         instrumentation.getActions()
-                                .entrySet().stream()
-                                .filter(entry -> entry.getValue().getDocs() != null)
-                                .forEach(entry -> documentedObjects.add(entry.getKey()));
+                                //.entrySet().stream()
+                                //.filter(entry -> entry.getValue().getDocs() != null)
+                                .forEach((name, action) -> objects.add(name));
 
                         instrumentation.getScopes()
-                                .entrySet().stream()
-                                .filter(entry -> entry.getValue().getDocs() != null)
-                                .forEach(entry -> documentedObjects.add(entry.getKey()));
+                                //.entrySet().stream()
+                                //.filter(entry -> entry.getValue().getDocs() != null)
+                                .forEach((name, scope) -> objects.add(name));
 
                         instrumentation.getRules()
-                                .entrySet().stream()
-                                .filter(entry -> entry.getValue().getDocs() != null)
-                                .forEach(entry -> documentedObjects.add(entry.getKey()));
+                                //.entrySet().stream()
+                                //.filter(entry -> entry.getValue().getDocs() != null)
+                                .forEach((name, rule) -> objects.add(name));
                     }
 
                     config.getMetrics().getDefinitions()
-                            .entrySet().stream()
-                            .filter(entry -> entry.getValue().getDescription() != null)
-                            .forEach(entry -> documentedObjects.add(entry.getKey()));
+                            //.entrySet().stream()
+                            //.filter(entry -> entry.getValue().getDescription() != null)
+                            .forEach((name, metric) -> objects.add(name));
                     } catch (Exception e) {
                         log.warn("Could not parse configuration: {}", path, e);
                     }
                 }
 
-
-            AgentDocumentation agentDocumentation = AgentDocumentation.builder()
-                    .filePath(path)
-                    .documentedObjects(documentedObjects)
-                    .build();
-
-            documentations.add(agentDocumentation);
+            objectsByFile.put(path, objects);
         }
 
-        return documentations;
+        return objectsByFile;
     }
 
     private AbstractFileAccessor getFileAccessorForMapping(AgentMapping mapping) {

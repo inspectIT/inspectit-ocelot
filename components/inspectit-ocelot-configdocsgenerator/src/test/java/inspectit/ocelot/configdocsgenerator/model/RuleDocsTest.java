@@ -62,7 +62,7 @@ public class RuleDocsTest {
      * @return RuleDocs object with the given name and otherwise empty values.
      */
     private RuleDocs simpleRuleDoc(String name) {
-        return new RuleDocs(name, "", "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), null, Collections.emptyMap());
+        return new RuleDocs(name, "", "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), null, Collections.emptyMap(), Collections.emptySet());
     }
 
     /**
@@ -73,8 +73,8 @@ public class RuleDocsTest {
     private Map<String, RuleDocs> getTestRuleDocs() {
         Map<String, RuleDocs> allRuleDocs = new HashMap<>();
 
-        /* 
-        RuleDoc1: inherits from RuleDoc2 and 4. Overwrites ActionCall overwritten_by_1 and overwritten_by_1_and_2 
+        /*
+        RuleDoc1: inherits from RuleDoc2 and 4. Overwrites ActionCall overwritten_by_1 and overwritten_by_1_and_2
         which are both also in RuleDoc2.
          */
         allRuleDocs.put(RULE_1_NAME, simpleRuleDoc(RULE_1_NAME));
@@ -111,7 +111,7 @@ public class RuleDocsTest {
         actionCalls2.put(OVERWRITTEN_BY_2, actionCall23);
         actionCallsMap2.put(ENTRY_KEY, actionCalls2);
         allRuleDocs.get(RULE_2_NAME).setActionCallsMap(actionCallsMap2);
-        
+
         /*
         RuleDoc3: Creates ActionCalls overwritten_by_1_and_2, overwritten_by_2 and created_by_3.
         */

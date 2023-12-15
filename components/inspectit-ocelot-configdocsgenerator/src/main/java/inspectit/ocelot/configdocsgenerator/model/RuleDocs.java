@@ -7,6 +7,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.rules.Instrumentation
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Data container for documentation of a single Rule's {@link InstrumentationRuleSettings} in Config Documentation.
@@ -43,8 +44,10 @@ public class RuleDocs extends BaseDocs {
      */
     private Map<String, Map<String, ActionCallDocs>> actionCallsMap;
 
-    public RuleDocs(String name, String description, String since, List<String> include, List<String> scopes, List<RuleMetricsDocs> metricsDocs, RuleTracingDocs tracingDoc, Map<String, Map<String, ActionCallDocs>> actionCallsMap) {
-        super(name, description, since);
+    public RuleDocs(String name, String description, String since, List<String> include, List<String> scopes,
+                    List<RuleMetricsDocs> metricsDocs, RuleTracingDocs tracingDoc, Map<String, Map<String,
+                    ActionCallDocs>> actionCallsMap, Set<String> files) {
+        super(name, description, since, files);
         this.include = include;
         this.scopes = scopes;
         this.metricsDocs = metricsDocs;

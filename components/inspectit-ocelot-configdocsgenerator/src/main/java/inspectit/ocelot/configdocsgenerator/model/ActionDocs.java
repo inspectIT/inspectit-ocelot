@@ -4,6 +4,7 @@ import lombok.Getter;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Data container for documentation of a single Action's {@link GenericActionSettings} in Config Documentation.
@@ -26,8 +27,9 @@ public class ActionDocs extends BaseDocs {
      */
     private final Boolean isVoid;
 
-    public ActionDocs(String name, String description, String since, List<ActionInputDocs> inputs, String returnDescription, Boolean isVoid) {
-        super(name, description, since);
+    public ActionDocs(String name, String description, String since, List<ActionInputDocs> inputs, String returnDescription,
+                      Boolean isVoid, Set<String> files) {
+        super(name, description, since, files);
         this.inputs = inputs;
         this.returnDescription = returnDescription;
         this.isVoid = isVoid;

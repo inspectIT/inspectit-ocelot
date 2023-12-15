@@ -7,6 +7,8 @@ import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * An {@link AgentMapping} which has its configuration loaded in-memory.
@@ -21,9 +23,11 @@ public class AgentConfiguration {
     private AgentMapping mapping;
 
     /**
-     * The list of documented objects in this configuration
+     * The list of defined objects in this configuration for each file. <br>
+     * - Key: the file path <br>
+     * - Value: the set of objects, like actions, scopes, rules & metrics
      */
-    private List<AgentDocumentation> documentations;
+    private Map<String, Set<String>> objectsByFile;
 
     /**
      * The merged YAML configuration for the given mapping.
@@ -36,9 +40,9 @@ public class AgentConfiguration {
     private String hash;
 
     @Builder
-    private AgentConfiguration(AgentMapping mapping, List<AgentDocumentation> documentations, String configYaml) {
+    private AgentConfiguration(AgentMapping mapping, Map<String, Set<String>> objectsByFile, String configYaml) {
         this.mapping = mapping;
-        this.documentations = documentations;
+        this.objectsByFile = objectsByFile;
         this.configYaml = configYaml;
         hash = DigestUtils.md5DigestAsHex(configYaml.getBytes(Charset.defaultCharset()));
     }

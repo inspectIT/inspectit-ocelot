@@ -28,10 +28,7 @@ import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.file.DefaultConfigController;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Controller for endpoints related to configuration files.
@@ -56,7 +53,7 @@ public class ConfigurationController extends AbstractBaseController {
     private DefaultConfigController defaultConfigController;
 
     // Not final to make mocking in test possible
-    private ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator();
+    private ConfigDocsGenerator configDocsGenerator;
 
     // Not final to make mocking in test possible
     private Yaml yaml = new Yaml();
@@ -114,6 +111,9 @@ public class ConfigurationController extends AbstractBaseController {
 
             AgentConfiguration configuration = configManager.getConfigurationForMapping(agentMapping.get());
             String configYaml = configuration.getConfigYaml();
+            // TODO Include default configs
+            Map<String, Set<String>> objectsByFile = configuration.getObjectsByFile();
+            configDocsGenerator = new ConfigDocsGenerator(objectsByFile);
 
             try {
                 if (includeDefault) {
@@ -145,31 +145,5 @@ public class ConfigurationController extends AbstractBaseController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(String.format("No AgentMapping found with the name '%s'.", mappingName));
         }
-    }
-
-    @Operation(summary = "Returns the file path, which contains the documentation for the provided element.")
-    @PostMapping(value = {"configuration/documentation", "configuration/documentation/"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> openConfigDocumentation(
-            @Parameter(description = "The name of the AgentMapping the configuration documentation should be for.")
-            @RequestParam(name = "agent-mapping") String mappingName,
-            @Parameter(description = "The element whose configuration file has to be opened")
-            @RequestParam(name = "element") String element) {
-
-        Optional<AgentMapping> agentMapping = mappingManager.getAgentMapping(mappingName);
-
-        if (agentMapping.isPresent()) {
-            // TODO include default-Configurations
-            AgentConfiguration configuration = configManager.getConfigurationForMapping(agentMapping.get());
-            List<AgentDocumentation> documentations = configuration.getDocumentations();
-            Optional<AgentDocumentation> documentation = documentations.stream()
-                    .filter(doc -> doc.getDocumentedObjects().contains(element))
-                    .findFirst();   // TODO How to handle multiple found documentations?
-
-            if (documentation.isPresent()) {
-                String filePath = '/' + documentation.get().getFilePath();
-                return new ResponseEntity<>(filePath, HttpStatus.OK);
-            }
-        }
-         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }
