@@ -1,11 +1,8 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
 import com.google.common.annotations.VisibleForTesting;
-import inspectit.ocelot.configdocsgenerator.parsing.ConfigParser;
 import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
-import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
@@ -13,6 +10,7 @@ import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.utils.CancellableTask;
+import rocks.inspectit.ocelot.utils.DocsObjectsLoader;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -98,11 +96,11 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         }
 
         String configYaml = loadConfigYaml(fileAccessor, allYamlFiles);
-        Map<String, Set<String>> objectsByFile = loadObjectsByFile(fileAccessor, allYamlFiles);
+        Map<String, Set<String>> docsObjectsByFile = loadDocsObjectsByFile(fileAccessor, allYamlFiles);
 
         AgentConfiguration agentConfiguration = AgentConfiguration.builder()
                 .mapping(mapping)
-                .objectsByFile(objectsByFile)
+                .docsObjectsByFile(docsObjectsByFile)
                 .configYaml(configYaml)
                 .build();
 
@@ -129,57 +127,28 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
     }
 
     /**
-     * Filters for all objects of each file for the current agent
+     * Loads all documentable objects of each file for the current agent
      *
      * @param fileAccessor the accessor to use for reading the files
      * @param allYamlFiles the list of yaml files, which should be merged
-     * @return A list with information for documented objects of the agent
+     * @return A set of defined objects for each file
      */
-    private Map<String, Set<String>> loadObjectsByFile(AbstractFileAccessor fileAccessor, LinkedHashSet<String> allYamlFiles) {
-        Map<String, Set<String>> objectsByFile = new HashMap<>();
-        Yaml yaml = new Yaml();
+    private Map<String, Set<String>> loadDocsObjectsByFile(AbstractFileAccessor fileAccessor, LinkedHashSet<String> allYamlFiles) {
+        Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
         for (String path : allYamlFiles) {
             String src = fileAccessor.readConfigurationFile(path).orElse("");
-            Object rawYaml = yaml.load(src);
-            Set<String> objects = new HashSet<>();
+            Set<String> objects = Collections.emptySet();
 
-            if(rawYaml != null) {
-                String cleanYaml = yaml.dump(rawYaml);
-                ConfigParser configParser = new ConfigParser();
-                try {
-                    InspectitConfig config = configParser.parseConfig(cleanYaml);
-                    InstrumentationSettings instrumentation = config.getInstrumentation();
+            try {
+                objects = DocsObjectsLoader.loadObjects(src);
+            } catch (Exception e) {
+                log.warn("Could not parse configuration: {}", path, e);
+            }
 
-                    if(instrumentation != null) {
-                        instrumentation.getActions()
-                                //.entrySet().stream()
-                                //.filter(entry -> entry.getValue().getDocs() != null)
-                                .forEach((name, action) -> objects.add(name));
-
-                        instrumentation.getScopes()
-                                //.entrySet().stream()
-                                //.filter(entry -> entry.getValue().getDocs() != null)
-                                .forEach((name, scope) -> objects.add(name));
-
-                        instrumentation.getRules()
-                                //.entrySet().stream()
-                                //.filter(entry -> entry.getValue().getDocs() != null)
-                                .forEach((name, rule) -> objects.add(name));
-                    }
-
-                    config.getMetrics().getDefinitions()
-                            //.entrySet().stream()
-                            //.filter(entry -> entry.getValue().getDescription() != null)
-                            .forEach((name, metric) -> objects.add(name));
-                    } catch (Exception e) {
-                        log.warn("Could not parse configuration: {}", path, e);
-                    }
-                }
-
-            objectsByFile.put(path, objects);
+            docsObjectsByFile.put(path, objects);
         }
 
-        return objectsByFile;
+        return docsObjectsByFile;
     }
 
     private AbstractFileAccessor getFileAccessorForMapping(AgentMapping mapping) {

@@ -4,6 +4,7 @@ import DocsElementTypes from './DocsElementTypes';
 import DocsRuleElement from './DocsRuleElement';
 import { configurationActions } from '../../../../redux/ducks/configuration';
 import { useDispatch } from 'react-redux';
+import { DEFAULT_CONFIG_TREE_KEY } from '../../../../data/constants';
 
 const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
   const dispatch = useDispatch();
@@ -24,7 +25,7 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
   };
 
   const handleClick = (file) => {
-    dispatch(selectFile('/' + file));
+    dispatch(selectFile(file));
   };
 
   return (
@@ -99,7 +100,7 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
                 <div className="headline">Files</div>
                 {element.files.map((file, index) => (
                   <div key={index} className="file-item" onClick={() => handleClick(file)}>
-                    {file}
+                    {file.replace(DEFAULT_CONFIG_TREE_KEY, 'Ocelot Defaults')}
                   </div>
                 ))}
               </div>

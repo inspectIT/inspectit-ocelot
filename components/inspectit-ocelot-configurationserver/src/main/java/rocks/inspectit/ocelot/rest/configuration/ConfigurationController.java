@@ -12,13 +12,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.yaml.snakeyaml.Yaml;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
-import rocks.inspectit.ocelot.agentconfiguration.AgentDocumentation;
 import rocks.inspectit.ocelot.agentconfiguration.ObjectStructureMerger;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.file.FileManager;
@@ -27,6 +25,7 @@ import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.file.DefaultConfigController;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
+import rocks.inspectit.ocelot.utils.DocsObjectsLoader;
 
 import java.util.*;
 
@@ -111,9 +110,7 @@ public class ConfigurationController extends AbstractBaseController {
 
             AgentConfiguration configuration = configManager.getConfigurationForMapping(agentMapping.get());
             String configYaml = configuration.getConfigYaml();
-            // TODO Include default configs
-            Map<String, Set<String>> objectsByFile = configuration.getObjectsByFile();
-            configDocsGenerator.setObjectsByFile(objectsByFile);
+            Map<String, Set<String>> docsObjectsByFile = configuration.getDocsObjectsByFile();
 
             try {
                 if (includeDefault) {
@@ -128,8 +125,11 @@ public class ConfigurationController extends AbstractBaseController {
                         combined = ObjectStructureMerger.merge(combined, loadedYaml);
                     }
                     configYaml = yaml.dump(combined);
+                    Map<String, Set<String>> defaultObjectsByFile = DocsObjectsLoader.loadDefaultDocsObjectsByFile(defaultYamls);
+                    docsObjectsByFile.putAll(defaultObjectsByFile);
                 }
 
+                configDocsGenerator.setObjectsByFile(docsObjectsByFile);
                 configDocumentation = configDocsGenerator.generateConfigDocs(configYaml);
 
             } catch (Exception e) {

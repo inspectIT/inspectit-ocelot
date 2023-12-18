@@ -23,11 +23,11 @@ public class AgentConfiguration {
     private AgentMapping mapping;
 
     /**
-     * The list of defined objects in this configuration for each file. <br>
+     * The set of defined documentable objects in this configuration for each file. <br>
      * - Key: the file path <br>
      * - Value: the set of objects, like actions, scopes, rules & metrics
      */
-    private Map<String, Set<String>> objectsByFile;
+    private Map<String, Set<String>> docsObjectsByFile;
 
     /**
      * The merged YAML configuration for the given mapping.
@@ -40,9 +40,9 @@ public class AgentConfiguration {
     private String hash;
 
     @Builder
-    private AgentConfiguration(AgentMapping mapping, Map<String, Set<String>> objectsByFile, String configYaml) {
+    private AgentConfiguration(AgentMapping mapping, Map<String, Set<String>> docsObjectsByFile, String configYaml) {
         this.mapping = mapping;
-        this.objectsByFile = objectsByFile;
+        this.docsObjectsByFile = docsObjectsByFile;
         this.configYaml = configYaml;
         hash = DigestUtils.md5DigestAsHex(configYaml.getBytes(Charset.defaultCharset()));
     }
