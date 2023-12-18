@@ -161,7 +161,7 @@ const DocumentationView = () => {
 
         {selectedAgentMapping ? (
           configurationDocs && !isDocsError ? (
-            <ConfigDocumentation configurationDocs={configurationDocs} selectedAgentMapping={selectedAgentMapping} />
+            <ConfigDocumentation configurationDocs={configurationDocs} />
           ) : isLoadingDocs ? (
             <div className="note">Loading documentation...</div>
           ) : (

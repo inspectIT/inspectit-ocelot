@@ -4,12 +4,10 @@ import DocsElementTypes from './DocsElementTypes';
 import DocsRuleElement from './DocsRuleElement';
 import { configurationActions } from '../../../../redux/ducks/configuration';
 import { useDispatch } from 'react-redux';
-//import { useRouter } from 'next/router';
 
-const BaseDocsElement = ({ data, type, registerRef, scrollTo, selectedAgentMapping }) => {
+const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
   const dispatch = useDispatch();
-  //const router = useRouter();
-  //const redirect = useSelector((state) => state.configuration.redirectedSelection);
+  const selectFile = configurationActions.selectFile;
 
   // render specific content based on element type
   const renderSpecificContent = (element) => {
@@ -25,9 +23,8 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo, selectedAgentMappi
     }
   };
 
-  const handleClick = (name) => {
-    dispatch(configurationActions.selectConfigurationDocumentation(selectedAgentMapping, name));
-    //Router.push(redirect);
+  const handleClick = (file) => {
+    dispatch(selectFile('/' + file));
   };
 
   return (
@@ -62,6 +59,19 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo, selectedAgentMappi
           color: #333;
           white-space: pre-wrap;
         }
+        .headline {
+          margin-top: 0.5rem;
+          margin-bottom: 0.25rem;
+          font-weight: bold;
+          color: #4e4e4e;
+        }
+        .file-item {
+          cursor: pointer;
+          color: #0070f3;
+        }
+        .file-item:hover {
+          text-decoration: underline;
+        }
       `}</style>
       {data.map((element) => (
         <div
@@ -70,7 +80,6 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo, selectedAgentMappi
           ref={(ref) => {
             registerRef(element.name, ref);
           }}
-          onClick={() => handleClick(element.name)}
         >
           <div className="title-row">
             <span className="title">{element.name}</span>
@@ -83,6 +92,18 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo, selectedAgentMappi
           <div>
             {element.description && <div className="description">{element.description}</div>}
             {renderSpecificContent(element)}
+          </div>
+          <div>
+            {element.files && (
+              <div className="files">
+                <div className="headline">Files</div>
+                {element.files.map((file, index) => (
+                  <div key={index} className="file-item" onClick={() => handleClick(file)}>
+                    {file}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       ))}

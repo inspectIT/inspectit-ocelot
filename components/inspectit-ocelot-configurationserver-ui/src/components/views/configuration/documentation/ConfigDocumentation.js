@@ -4,7 +4,7 @@ import DocsElementTypes from './DocsElementTypes';
 import { Toast } from 'primereact/toast';
 import _ from 'lodash';
 
-const ConfigDocumentation = React.memo(({ configurationDocs, selectedAgentMapping }) => {
+const ConfigDocumentation = React.memo(({ configurationDocs }) => {
   // toast for showing notifications
   const toast = useRef(null);
 
@@ -71,12 +71,7 @@ const ConfigDocumentation = React.memo(({ configurationDocs, selectedAgentMappin
           {_.isEmpty(configurationDocs.scopes) ? (
             <div className="placeholder">No scopes defined.</div>
           ) : (
-            <BaseDocsElement
-              data={configurationDocs.scopes}
-              type={DocsElementTypes.SCOPE}
-              registerRef={registerRef}
-              selectedAgentMapping={selectedAgentMapping}
-            />
+            <BaseDocsElement data={configurationDocs.scopes} type={DocsElementTypes.SCOPE} registerRef={registerRef} />
           )}
         </div>
 
@@ -85,12 +80,7 @@ const ConfigDocumentation = React.memo(({ configurationDocs, selectedAgentMappin
           {_.isEmpty(configurationDocs.actions) ? (
             <div className="placeholder">No actions defined.</div>
           ) : (
-            <BaseDocsElement
-              data={configurationDocs.actions}
-              type={DocsElementTypes.ACTION}
-              registerRef={registerRef}
-              selectedAgentMapping={selectedAgentMapping}
-            />
+            <BaseDocsElement data={configurationDocs.actions} type={DocsElementTypes.ACTION} registerRef={registerRef} />
           )}
         </div>
 
@@ -99,13 +89,7 @@ const ConfigDocumentation = React.memo(({ configurationDocs, selectedAgentMappin
           {_.isEmpty(configurationDocs.rules) ? (
             <div className="placeholder">No rules defined.</div>
           ) : (
-            <BaseDocsElement
-              data={configurationDocs.rules}
-              type={DocsElementTypes.RULE}
-              registerRef={registerRef}
-              scrollTo={scrollTo}
-              selectedAgentMapping={selectedAgentMapping}
-            />
+            <BaseDocsElement data={configurationDocs.rules} type={DocsElementTypes.RULE} registerRef={registerRef} scrollTo={scrollTo} />
           )}
         </div>
 
@@ -114,12 +98,7 @@ const ConfigDocumentation = React.memo(({ configurationDocs, selectedAgentMappin
           {_.isEmpty(configurationDocs.metrics) ? (
             <div className="placeholder">No metrics defined.</div>
           ) : (
-            <BaseDocsElement
-              data={configurationDocs.metrics}
-              type={DocsElementTypes.METRIC}
-              registerRef={registerRef}
-              selectedAgentMapping={selectedAgentMapping}
-            />
+            <BaseDocsElement data={configurationDocs.metrics} type={DocsElementTypes.METRIC} registerRef={registerRef} />
           )}
         </div>
       </div>
