@@ -129,7 +129,7 @@ public class ConfigurationController extends AbstractBaseController {
                     docsObjectsByFile.putAll(defaultObjectsByFile);
                 }
 
-                configDocsGenerator.setObjectsByFile(docsObjectsByFile);
+                configDocsGenerator.setDocsObjectsByFile(docsObjectsByFile);
                 configDocumentation = configDocsGenerator.generateConfigDocs(configYaml);
 
             } catch (Exception e) {

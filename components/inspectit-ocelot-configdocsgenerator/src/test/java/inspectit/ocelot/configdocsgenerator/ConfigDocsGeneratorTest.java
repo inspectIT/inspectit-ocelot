@@ -57,7 +57,7 @@ class ConfigDocsGeneratorTest {
     @BeforeAll
     private static void createDocObjects() {
 
-        configDocsGenerator.setObjectsByFile(new HashMap<>());
+        configDocsGenerator.setDocsObjectsByFile(new HashMap<>());
 
         // Create a sample ActionDoc object where there was documentation values in the YAML, i.e. content behind the
         // doc-key

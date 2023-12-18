@@ -3,6 +3,7 @@ package inspectit.ocelot.configdocsgenerator;
 import inspectit.ocelot.configdocsgenerator.model.*;
 import inspectit.ocelot.configdocsgenerator.parsing.ConfigParser;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
  * Generator for generating ConfigDocumentation objects based on a YAML String describing an {@link InspectitConfig} or the
  * InspectitConfig itself.
  */
+@Slf4j
 public class ConfigDocsGenerator {
 
     /**
@@ -56,7 +58,7 @@ public class ConfigDocsGenerator {
      * Map of files, which contain a set of defined objects like actions, scopes, rules & metrics
      */
     @Setter
-    private Map<String, Set<String>> objectsByFile;
+    private Map<String, Set<String>> docsObjectsByFile;
 
     /**
      * Generates a ConfigDocumentation from a YAML String describing an {@link InspectitConfig}.
@@ -231,10 +233,13 @@ public class ConfigDocsGenerator {
      * @return a set of files, which contain the provided object
      */
     private Set<String> findFiles(String name) {
-        return objectsByFile.entrySet().stream()
+        Set<String> files = docsObjectsByFile.entrySet().stream()
                 .filter(entry -> entry.getValue().contains(name))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
+        if(files.isEmpty()) log.warn("No file found with definition of " + name);
+
+        return files;
     }
 
     /**

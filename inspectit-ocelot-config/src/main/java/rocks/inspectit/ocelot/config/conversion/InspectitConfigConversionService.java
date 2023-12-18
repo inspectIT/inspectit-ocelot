@@ -20,5 +20,6 @@ public class InspectitConfigConversionService extends ApplicationConversionServi
         addConverter(new BooleanToExporterEnabledStateConverter());
         addConverter(new StringToExporterEnabledStateConverter());
         addConverter(new StringToTransportProtocolConverter());
+        addConverter(new PlaceholderToDurationConverter());
     }
 }
