@@ -31,7 +31,7 @@ class ConfigDocsGeneratorTest {
 
     private static MetricDocs metricDoc;
 
-    private final ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator(new HashMap<>());
+    private final static ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator();
 
     /**
      * Needed to create InspectitConfig Objects to use as input for DocObjectGenerator in tests.
@@ -56,6 +56,8 @@ class ConfigDocsGeneratorTest {
      */
     @BeforeAll
     private static void createDocObjects() {
+
+        configDocsGenerator.setObjectsByFile(new HashMap<>());
 
         // Create a sample ActionDoc object where there was documentation values in the YAML, i.e. content behind the
         // doc-key

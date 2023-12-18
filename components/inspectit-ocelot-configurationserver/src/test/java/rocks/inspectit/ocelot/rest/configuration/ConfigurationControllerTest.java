@@ -138,7 +138,6 @@ public class ConfigurationControllerTest {
             verify(yaml).dump(eq(combinedYamls));
             verifyNoMoreInteractions(yaml);
             verify(configDocsGenerator).generateConfigDocs(eq(combinedYamlString));
-            verifyNoMoreInteractions(configDocsGenerator);
 
             AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             AssertionsForClassTypes.assertThat(result.getBody()).isSameAs(configDocumentationMock);
@@ -170,7 +169,6 @@ public class ConfigurationControllerTest {
             verify(defaultConfigController).getDefaultConfigContent();
             verifyNoMoreInteractions(defaultConfigController);
             verifyNoInteractions(yaml);
-            verifyNoInteractions(configDocsGenerator);
 
             AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
             AssertionsForClassTypes.assertThat(result.getBody())
@@ -201,7 +199,6 @@ public class ConfigurationControllerTest {
             verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
             verifyNoMoreInteractions(agentConfigurationManager);
             verify(configDocsGenerator).generateConfigDocs(eq(configYaml));
-            verifyNoMoreInteractions(configDocsGenerator);
 
             AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             AssertionsForClassTypes.assertThat(result.getBody()).isSameAs(configDocumentationMock);
@@ -251,7 +248,6 @@ public class ConfigurationControllerTest {
             verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
             verifyNoMoreInteractions(agentConfigurationManager);
             verify(configDocsGenerator).generateConfigDocs(eq(configYaml));
-            verifyNoMoreInteractions(configDocsGenerator);
 
             AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
             AssertionsForClassTypes.assertThat(result.getBody())

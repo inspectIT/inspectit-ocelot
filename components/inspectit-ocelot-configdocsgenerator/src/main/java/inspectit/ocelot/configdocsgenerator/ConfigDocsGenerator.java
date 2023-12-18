@@ -2,6 +2,7 @@ package inspectit.ocelot.configdocsgenerator;
 
 import inspectit.ocelot.configdocsgenerator.model.*;
 import inspectit.ocelot.configdocsgenerator.parsing.ConfigParser;
+import lombok.Setter;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
@@ -54,15 +55,8 @@ public class ConfigDocsGenerator {
     /**
      * Map of files, which contain a set of defined objects like actions, scopes, rules & metrics
      */
-    private final Map<String, Set<String>> objectsByFile;
-
-    public ConfigDocsGenerator(Map<String, Set<String>> objectsByFile) {
-        if(objectsByFile == null)
-            this.objectsByFile = new HashMap<>();
-        else
-            this.objectsByFile = objectsByFile;
-    }
-
+    @Setter
+    private Map<String, Set<String>> objectsByFile;
 
     /**
      * Generates a ConfigDocumentation from a YAML String describing an {@link InspectitConfig}.
@@ -237,13 +231,10 @@ public class ConfigDocsGenerator {
      * @return a set of files, which contain the provided object
      */
     private Set<String> findFiles(String name) {
-        Set<String> files = objectsByFile.entrySet().stream()
+        return objectsByFile.entrySet().stream()
                 .filter(entry -> entry.getValue().contains(name))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
-
-        if (files.isEmpty()) throw new IllegalStateException("There was no file found, containing the definition of '" + name + "'");
-        return files;
     }
 
     /**

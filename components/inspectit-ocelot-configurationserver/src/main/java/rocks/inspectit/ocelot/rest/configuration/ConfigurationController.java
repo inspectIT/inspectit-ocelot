@@ -53,7 +53,7 @@ public class ConfigurationController extends AbstractBaseController {
     private DefaultConfigController defaultConfigController;
 
     // Not final to make mocking in test possible
-    private ConfigDocsGenerator configDocsGenerator;
+    private ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator();
 
     // Not final to make mocking in test possible
     private Yaml yaml = new Yaml();
@@ -113,7 +113,7 @@ public class ConfigurationController extends AbstractBaseController {
             String configYaml = configuration.getConfigYaml();
             // TODO Include default configs
             Map<String, Set<String>> objectsByFile = configuration.getObjectsByFile();
-            configDocsGenerator = new ConfigDocsGenerator(objectsByFile);
+            configDocsGenerator.setObjectsByFile(objectsByFile);
 
             try {
                 if (includeDefault) {
