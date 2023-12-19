@@ -58,7 +58,7 @@ public class ConfigDocsGenerator {
      * Map of files, which contain a set of defined objects like actions, scopes, rules & metrics
      */
     @Setter
-    private Map<String, Set<String>> docsObjectsByFile;
+    private Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
 
     /**
      * Generates a ConfigDocumentation from a YAML String describing an {@link InspectitConfig}.

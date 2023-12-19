@@ -25,7 +25,7 @@ import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.file.DefaultConfigController;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
-import rocks.inspectit.ocelot.utils.DocsObjectsLoader;
+import rocks.inspectit.ocelot.agentconfiguration.DocsObjectsLoader;
 
 import java.util.*;
 

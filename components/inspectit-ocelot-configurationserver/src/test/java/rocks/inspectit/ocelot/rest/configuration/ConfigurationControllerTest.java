@@ -5,6 +5,8 @@ import inspectit.ocelot.configdocsgenerator.ConfigDocsGenerator;
 import inspectit.ocelot.configdocsgenerator.model.ConfigDocumentation;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,9 +25,7 @@ import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.file.DefaultConfigController;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -97,6 +97,14 @@ public class ConfigurationControllerTest {
     @Nested
     public class GetConfigDocumentationTest {
 
+        private final static Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
+
+        @BeforeAll
+        static void setUp() {
+          Set<String> objects = Collections.singleton("yaml");
+          docsObjectsByFile.put("test.yml", objects);
+        }
+
         @Test
         void withDefaultConfig() throws IOException {
 
@@ -106,7 +114,7 @@ public class ConfigurationControllerTest {
             final String configYaml = "yaml";
             AgentConfiguration agentConfiguration = AgentConfiguration.builder()
                     .configYaml(configYaml)
-                    .docsObjectsByFile(new HashMap<>())
+                    .docsObjectsByFile(docsObjectsByFile)
                     .build();
 
             Map<String, String> defaultYamls = new HashMap<>();
@@ -143,7 +151,9 @@ public class ConfigurationControllerTest {
             verify(yaml).load(eq(configYaml));
             verify(yaml).dump(eq(combinedYamls));
             verifyNoMoreInteractions(yaml);
+            verify(configDocsGenerator).setDocsObjectsByFile(eq(docsObjectsByFile));
             verify(configDocsGenerator).generateConfigDocs(eq(combinedYamlString));
+            verifyNoMoreInteractions(configDocsGenerator);
 
             AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             AssertionsForClassTypes.assertThat(result.getBody()).isSameAs(configDocumentationMock);
@@ -158,7 +168,7 @@ public class ConfigurationControllerTest {
             final String configYaml = "yaml";
             AgentConfiguration agentConfiguration = AgentConfiguration.builder()
                     .configYaml(configYaml)
-                    .docsObjectsByFile(new HashMap<>())
+                    .docsObjectsByFile(docsObjectsByFile)
                     .build();
 
             IOException exception = new IOException();
@@ -178,6 +188,7 @@ public class ConfigurationControllerTest {
             verify(defaultConfigController).getDefaultConfigContent();
             verifyNoMoreInteractions(defaultConfigController);
             verifyNoInteractions(yaml);
+            verifyNoMoreInteractions(configDocsGenerator);
 
             AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
             AssertionsForClassTypes.assertThat(result.getBody())
@@ -193,7 +204,7 @@ public class ConfigurationControllerTest {
             final String configYaml = "yaml";
             AgentConfiguration agentConfiguration = AgentConfiguration.builder()
                     .configYaml(configYaml)
-                    .docsObjectsByFile(new HashMap<>())
+                    .docsObjectsByFile(docsObjectsByFile)
                     .build();
 
             ConfigDocumentation configDocumentationMock = mock(ConfigDocumentation.class);
@@ -210,7 +221,9 @@ public class ConfigurationControllerTest {
             verifyNoMoreInteractions(mappingManager);
             verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
             verifyNoMoreInteractions(agentConfigurationManager);
+            verify(configDocsGenerator).setDocsObjectsByFile(eq(docsObjectsByFile));
             verify(configDocsGenerator).generateConfigDocs(eq(configYaml));
+            verifyNoMoreInteractions(configDocsGenerator);
 
             AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
             AssertionsForClassTypes.assertThat(result.getBody()).isSameAs(configDocumentationMock);
@@ -243,7 +256,7 @@ public class ConfigurationControllerTest {
             final String configYaml = "yaml";
             AgentConfiguration agentConfiguration = AgentConfiguration.builder()
                     .configYaml(configYaml)
-                    .docsObjectsByFile(new HashMap<>())
+                    .docsObjectsByFile(docsObjectsByFile)
                     .build();
 
             JsonProcessingException exception = mock(JsonProcessingException.class);
@@ -262,7 +275,10 @@ public class ConfigurationControllerTest {
             verifyNoMoreInteractions(mappingManager);
             verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
             verifyNoMoreInteractions(agentConfigurationManager);
+            verify(configDocsGenerator).setDocsObjectsByFile(eq(docsObjectsByFile));
             verify(configDocsGenerator).generateConfigDocs(eq(configYaml));
+            verifyNoMoreInteractions(configDocsGenerator);
+
 
             AssertionsForClassTypes.assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
             AssertionsForClassTypes.assertThat(result.getBody())

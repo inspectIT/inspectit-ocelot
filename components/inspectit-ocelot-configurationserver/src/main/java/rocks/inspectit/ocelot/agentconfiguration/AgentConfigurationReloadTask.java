@@ -10,7 +10,6 @@ import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.utils.CancellableTask;
-import rocks.inspectit.ocelot.utils.DocsObjectsLoader;
 
 import java.util.*;
 import java.util.function.Consumer;
