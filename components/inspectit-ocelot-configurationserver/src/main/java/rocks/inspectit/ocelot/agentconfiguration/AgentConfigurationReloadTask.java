@@ -79,8 +79,9 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
     }
 
     /**
-     * Creates the whole configuration for one agent with the provided agent mapping
+     * Creates the configuration for one agent with the provided agent mapping
      * @param mapping the mapping to load
+     *
      * @return Configuration for the agent mapping
      */
     @VisibleForTesting
@@ -89,66 +90,69 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
 
         LinkedHashSet<String> allYamlFiles = new LinkedHashSet<>();
         for (String path : mapping.sources()) {
-            if (isCanceled()) {
-                return null;
-            }
+            if (isCanceled()) return null;
             allYamlFiles.addAll(getAllYamlFiles(fileAccessor, path));
         }
 
-        String configYaml = loadConfigYaml(fileAccessor, allYamlFiles);
-        Map<String, Set<String>> docsObjectsByFile = loadDocsObjectsByFile(fileAccessor, allYamlFiles);
+        Object yamlResult = null;
+        Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
 
-        AgentConfiguration agentConfiguration = AgentConfiguration.builder()
+        for (String path : allYamlFiles) {
+            if (isCanceled()) return null;
+            String src = fileAccessor.readConfigurationFile(path).orElse("");
+
+            Set<String> loadedObjects = loadDocsObjects(src, path);
+            docsObjectsByFile.put(path, loadedObjects);
+            yamlResult = loadAndMergeYaml(yamlResult, src, path);
+        }
+        String configYaml = yamlResult == null ? "" : new Yaml().dump(yamlResult);
+
+        return AgentConfiguration.builder()
                 .mapping(mapping)
                 .docsObjectsByFile(docsObjectsByFile)
                 .configYaml(configYaml)
                 .build();
-
-        return agentConfiguration;
     }
 
     /**
-     * Loads the given mapping as yaml string.
+     * Loads all documentable objects of the yaml source string
      *
-     * @param fileAccessor the accessor to use for reading the files
-     * @param allYamlFiles the list of yaml files, which should be merged
-     * @return the merged yaml for the given mapping or an empty string if the mapping does not contain any existing files
-     * If this task has been canceled, null is returned.
+     * @param src the yaml string
+     * @param filePath the path to the yaml file
+     *
+     * @return the set of documentable objects
      */
-    private String loadConfigYaml(AbstractFileAccessor fileAccessor, LinkedHashSet<String> allYamlFiles) {
-        Object result = null;
-        for (String path : allYamlFiles) {
-            if (isCanceled()) {
-                return null;
-            }
-            result = loadAndMergeYaml(fileAccessor, result, path);
+    private Set<String> loadDocsObjects(String src, String filePath) {
+        Set<String> objects = Collections.emptySet();
+        try {
+            objects = DocsObjectsLoader.loadObjects(src);
+        } catch (Exception e) {
+            log.warn("Could not parse configuration: {}", filePath, e);
         }
-        return result == null ? "" : new Yaml().dump(result);
+        return objects;
     }
 
     /**
-     * Loads all documentable objects of each file for the current agent
+     * Loads a yaml file as a Map/List structure and merges it with an existing map/list structure
      *
-     * @param fileAccessor the accessor to use for reading the files
-     * @param allYamlFiles the list of yaml files, which should be merged
-     * @return A set of defined objects for each file
+     * @param toMerge the existing structure of nested maps / lists with which the loaded yaml will be merged.
+     * @param src the yaml string
+     * @param path the path of the yaml file to load
+     *
+     * @return the merged structure
      */
-    private Map<String, Set<String>> loadDocsObjectsByFile(AbstractFileAccessor fileAccessor, LinkedHashSet<String> allYamlFiles) {
-        Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
-        for (String path : allYamlFiles) {
-            String src = fileAccessor.readConfigurationFile(path).orElse("");
-            Set<String> objects = Collections.emptySet();
-
-            try {
-                objects = DocsObjectsLoader.loadObjects(src);
-            } catch (Exception e) {
-                log.warn("Could not parse configuration: {}", path, e);
+    private Object loadAndMergeYaml(Object toMerge, String src, String path) {
+        Yaml yaml = new Yaml();
+        try {
+            Map<String, Object> loadedYaml = yaml.load(src);
+            if (toMerge == null) {
+                return loadedYaml;
+            } else {
+                return ObjectStructureMerger.merge(toMerge, loadedYaml);
             }
-
-            docsObjectsByFile.put(path, objects);
+        } catch (Exception e) {
+            throw new InvalidConfigurationFileException(path, e);
         }
-
-        return docsObjectsByFile;
     }
 
     private AbstractFileAccessor getFileAccessorForMapping(AgentMapping mapping) {
@@ -190,30 +194,6 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
             }
         }
         return Collections.emptyList();
-    }
-
-    /**
-     * Loads a yaml file as a Map/List structure and merges it with an existing map/list structure
-     *
-     * @param toMerge the existing structure of nested maps / lists with which the loaded yaml will be merged.
-     * @param path    the path of the yaml file to load
-     *
-     * @return the merged structure
-     */
-    private Object loadAndMergeYaml(AbstractFileAccessor fileAccessor, Object toMerge, String path) {
-        Yaml yaml = new Yaml();
-        String src = fileAccessor.readConfigurationFile(path).orElse("");
-
-        try {
-            Map<String, Object> loadedYaml = yaml.load(src);
-            if (toMerge == null) {
-                return loadedYaml;
-            } else {
-                return ObjectStructureMerger.merge(toMerge, loadedYaml);
-            }
-        } catch (Exception e) {
-            throw new InvalidConfigurationFileException(path, e);
-        }
     }
 
     /**

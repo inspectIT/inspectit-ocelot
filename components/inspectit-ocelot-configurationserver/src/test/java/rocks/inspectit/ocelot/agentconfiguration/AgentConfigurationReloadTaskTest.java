@@ -310,11 +310,9 @@ public class AgentConfigurationReloadTaskTest {
             String yaml = config.getConfigYaml();
 
             assertThat(yaml).isEmpty();
-            // 2 calls = loadConfigYaml() + loadAgentDocumentations()
-            // TODO Optimize to only one call?
-            verify(workspaceAccessor, times(2)).readConfigurationFile("a.yml");
-            verify(workspaceAccessor, times(2)).readConfigurationFile("b.YmL");
-            verify(workspaceAccessor, times(2)).readConfigurationFile("c.yaml");
+            verify(workspaceAccessor).readConfigurationFile("a.yml");
+            verify(workspaceAccessor).readConfigurationFile("b.YmL");
+            verify(workspaceAccessor).readConfigurationFile("c.yaml");
 
             verify(workspaceAccessor, never()).readConfigurationFile("d.txt");
         }
