@@ -64,7 +64,7 @@ public class ConfigParser {
                 log.debug("Successfully deleted temp file '{}' used to generate ConfigDocs.", tempFile.getAbsolutePath());
             }
 
-            Binder binder = new Binder(configurationPropertySources, new PropertySourcesPlaceholdersResolver(propertySources), InspectitConfigConversionService.getInstance());
+            Binder binder = new Binder(configurationPropertySources, new PropertySourcesPlaceholdersResolver(propertySources), InspectitConfigConversionService.getParserInstance());
 
             // Create InspectitConfig from ConfigurationPropertySource
             return binder.bind("inspectit", InspectitConfig.class).get();
