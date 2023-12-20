@@ -11,7 +11,7 @@ class KeyValueEditor extends React.Component {
   editor = (columnProps) => {
     return (
       <InputText
-        value={columnProps.rowData[columnProps.field]}
+        defaultValue={columnProps.rowData[columnProps.field]}
         onChange={(e) => this.valueChanged(columnProps.rowIndex, columnProps.field, e.target.value)}
       />
     );
