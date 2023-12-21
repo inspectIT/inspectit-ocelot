@@ -17,30 +17,36 @@ public class InspectitConfigConversionService extends ApplicationConversionServi
 
     private static final InspectitConfigConversionService parserInstance = new InspectitConfigConversionService(new PlaceholderToDurationConverter());
 
+    /**
+     * @return the inspectIT default instance
+     */
     public static InspectitConfigConversionService getInstance() {
         return instance;
     }
 
+    /**
+     * @return the instance, which should only be used by the 'ConfigParser'
+     */
     public static InspectitConfigConversionService getParserInstance() {
         return parserInstance;
     }
 
     private InspectitConfigConversionService() {
         super();
-        addConverter(new StringToMetricRecordingSettingsConverter());
-        addConverter(new NumberToMetricRecordingSettingsConverter());
-        addConverter(new BooleanToExporterEnabledStateConverter());
-        addConverter(new StringToExporterEnabledStateConverter());
-        addConverter(new StringToTransportProtocolConverter());
+        addInspectItDefaultConverters();
     }
 
     private InspectitConfigConversionService(PlaceholderToDurationConverter placeHolderConverter) {
         super();
+        addInspectItDefaultConverters();
+        addConverter(placeHolderConverter);
+    }
+
+    private void addInspectItDefaultConverters() {
         addConverter(new StringToMetricRecordingSettingsConverter());
         addConverter(new NumberToMetricRecordingSettingsConverter());
         addConverter(new BooleanToExporterEnabledStateConverter());
         addConverter(new StringToExporterEnabledStateConverter());
         addConverter(new StringToTransportProtocolConverter());
-        addConverter(placeHolderConverter);
     }
 }

@@ -19,8 +19,12 @@ import java.util.regex.Pattern;
  */
 public class PlaceholderToDurationConverter implements Converter<String, Duration> {
 
+    /**
+     * the regex, to recognize placeholder, like ${inspectit.metrics.frequency}
+     */
     private final Pattern placeholderPattern = Pattern.compile("\\$\\{([^}]+)}");
-    private final Duration DUMMY_DURATION = Duration.ZERO;
+
+    private final Duration DUMMY_DURATION = Duration.ofHours(1);
 
     @Override
     public Duration convert(String source) {
