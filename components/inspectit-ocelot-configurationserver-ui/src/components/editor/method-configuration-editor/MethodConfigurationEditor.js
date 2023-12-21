@@ -74,17 +74,6 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
       };
     });
     setScopes(currentScopes);
-
-    // expand all rows by default
-    const initialExpandedRows = _.reduce(
-      currentScopes,
-      (result, { typeKey }) => {
-        result[typeKey] = true;
-        return result;
-      },
-      {}
-    );
-    setExpandedRows(initialExpandedRows);
   }, [configuration]);
 
   /**
@@ -337,7 +326,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
               dataKey="typeKey"
               sortField="typeKey"
               sortOrder={1}
-              groupField="typeKey"
+              groupRowsBy="typeKey"
               expandableRowGroups={true}
               expandedRows={expandedRows}
               onRowToggle={(e) => setExpandedRows(e.data)}
