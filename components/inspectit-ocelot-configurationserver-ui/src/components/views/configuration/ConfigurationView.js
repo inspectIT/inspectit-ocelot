@@ -292,6 +292,7 @@ class ConfigurationView extends React.Component {
         <DownloadDialogue
           visible={this.state.isConfigurationDialogShown}
           onHide={this.hideConfigurationDialog}
+          onCancel={this.hideConfigurationDialog}
           loading={this.props.loading}
           contentValue={fileContentWithoutFirstLine}
           contentType={'config'}

@@ -10,7 +10,7 @@ const ConvertDialog = ({ name, visible, onHide, text, onSuccess }) => {
   const proceedButton = React.createRef();
 
   useEffect(() => {
-    if (proceedButton && proceedButton.current) {
+    if (proceedButton?.current?.element) {
       proceedButton.current.element.focus();
     }
   });
