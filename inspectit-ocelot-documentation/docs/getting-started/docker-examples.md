@@ -52,6 +52,8 @@ sudo mount --bind /mnt/c /c
 
 For more information, check out the following blog post: [Setting Up Docker for Windows and WSL to Work Flawlessly](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly)
 
+If you have issues with Internet connectivity, check out the following post: [WSL2 - Fix Internet connectivity behind corporate proxy](https://gist.github.com/mandeepsmagh/f1d062fc59e4e6115385c2609b5f0448)
+
 ## Demo Scenarios
 
 > In all scenarios you can use `admin` as username and `demo` as password for accessing Grafana and the inspectIT Ocelot Configuration Server.
