@@ -2,6 +2,8 @@ package inspectit.ocelot.configdocsgenerator;
 
 import inspectit.ocelot.configdocsgenerator.model.*;
 import inspectit.ocelot.configdocsgenerator.parsing.ConfigParser;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
  * Generator for generating ConfigDocumentation objects based on a YAML String describing an {@link InspectitConfig} or the
  * InspectitConfig itself.
  */
+@Slf4j
 public class ConfigDocsGenerator {
 
     /**
@@ -50,6 +53,12 @@ public class ConfigDocsGenerator {
      * Map of descriptions for special input parameters that can have different names matching a regex.
      */
     Map<String, String> specialInputDescriptionsRegex = Collections.singletonMap("_arg\\d", "The _argN-th argument with which the instrumented method was called within which this action is getting executed.");
+
+    /**
+     * Map of files, which contain a set of defined objects like actions, scopes, rules & metrics
+     */
+    @Setter
+    private Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
 
     /**
      * Generates a ConfigDocumentation from a YAML String describing an {@link InspectitConfig}.
@@ -122,7 +131,9 @@ public class ConfigDocsGenerator {
                 description = doc.getDescription();
                 since = doc.getSince();
             }
-            scopeDocs.add(new BaseDocs(scopeName, description, since));
+            Set<String> files = findFiles(scopeName);
+
+            scopeDocs.add(new BaseDocs(scopeName, description, since, files));
         }
         return scopeDocs;
     }
@@ -146,8 +157,9 @@ public class ConfigDocsGenerator {
                 description = "";
             }
             String unit = metricDefinitionSettings.getUnit();
+            Set<String> files = findFiles(metricName);
 
-            metricDocs.add(new MetricDocs(metricName, description, unit));
+            metricDocs.add(new MetricDocs(metricName, description, unit, files));
 
         }
         return metricDocs;
@@ -180,6 +192,7 @@ public class ConfigDocsGenerator {
             }
 
             Boolean isVoid = actionSettings.getIsVoid();
+            Set<String> files = findFiles(actionName);
 
             List<ActionInputDocs> inputs = new ArrayList<>();
             Map<String, String> inputTypes = actionSettings.getInput();
@@ -209,9 +222,24 @@ public class ConfigDocsGenerator {
             }
             inputs.sort(Comparator.comparing(ActionInputDocs::getName));
 
-            actionDocs.add(new ActionDocs(actionName, description, since, inputs, returnDesc, isVoid));
+            actionDocs.add(new ActionDocs(actionName, description, since, inputs, returnDesc, isVoid, files));
         }
         return actionDocs;
+    }
+
+    /**
+     * Finds every file, which contains the definition of a specific object
+     * @param name the name of the object
+     * @return a set of files, which contain the provided object
+     */
+    private Set<String> findFiles(String name) {
+        Set<String> files = docsObjectsByFile.entrySet().stream()
+                .filter(entry -> entry.getValue().contains(name))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+        if(files.isEmpty()) log.warn("No file found with definition of " + name);
+
+        return files;
     }
 
     /**
@@ -261,7 +289,10 @@ public class ConfigDocsGenerator {
 
             Map<String, Map<String, ActionCallDocs>> actionCallsMap = generateActionCallDocs(ruleSettings);
 
-            ruleDocsMap.put(ruleName, new RuleDocs(ruleName, description, since, includeForDoc, scopesForDoc, ruleMetricsDocs, ruleTracingDocs, actionCallsMap));
+            Set<String> files = findFiles(ruleName);
+
+            ruleDocsMap.put(ruleName, new RuleDocs(ruleName, description, since, includeForDoc, scopesForDoc,
+                    ruleMetricsDocs, ruleTracingDocs, actionCallsMap, files));
         }
         return ruleDocsMap;
     }

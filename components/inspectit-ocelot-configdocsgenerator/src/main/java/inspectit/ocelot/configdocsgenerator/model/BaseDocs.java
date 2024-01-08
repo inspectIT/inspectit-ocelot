@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import rocks.inspectit.ocelot.config.model.instrumentation.documentation.BaseDocumentation;
 
+import java.util.Set;
+
 /**
  * Data container for documentation of a single object in Config Documentation, e.g. a scope or action.
  */
@@ -25,5 +27,10 @@ public class BaseDocs {
      * See {@link BaseDocumentation#getSince()}.
      */
     private final String since;
+
+    /**
+     * File paths, which contain definition for the current object
+     */
+    private final Set<String> files;
 
 }

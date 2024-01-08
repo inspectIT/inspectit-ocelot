@@ -3,7 +3,8 @@ id: config-docs
 title: Configuration Docs
 ---
 
-Since version 1.15.0 the inspectIT Ocelot configuration server provides the option to look at documentation for instrumentation objects, i.e. scopes, rules and actions, from the perspective of a selected agent mapping.
+Since version `1.15.0` the inspectIT Ocelot configuration server provides the option to look at documentation for 
+instrumentation objects, i.e. scopes, rules and actions, as well as metrics from the perspective of a selected agent mapping.
 
 ## Using existing Configuration Docs
 
@@ -25,6 +26,11 @@ It updates whenever you change either of the settings at the top, or save change
 To help with searching documentation for specific objects, you can filter the documentation using the filter text box above.
 
 ![Picture of documentation filtered for 'attach'](assets/config-docs-filter.png)
+
+Since version `2.6.2` the files, where a specific object is defined, are also tracked.
+If an object is only used or mentioned in a configuration file, the file will not be shown in the particular object documentation.
+
+If you click on a specific file path in an object documentation, the configuration file, which defines the object will be opened.
 
 
 ## Writing your own Configuration Docs

@@ -31,7 +31,7 @@ class ConfigDocsGeneratorTest {
 
     private static MetricDocs metricDoc;
 
-    private final ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator();
+    private final static ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator();
 
     /**
      * Needed to create InspectitConfig Objects to use as input for DocObjectGenerator in tests.
@@ -355,4 +355,52 @@ class ConfigDocsGeneratorTest {
         }
     }
 
+    @Nested
+    class FindFiles {
+
+        @Test
+        void verifyFindFiles() throws IOException {
+            String file = "all.yml";
+            String configYaml = getYaml(file);
+
+            Set<String> docsObjects = new HashSet<>();
+            docsObjects.add(actionWithDocInYaml.getName());
+            docsObjects.add(actionWithoutDocInYaml.getName());
+            docsObjects.add(scopeDoc.getName());
+            docsObjects.add(ruleDocChild.getName());
+            docsObjects.add(ruleDocParent.getName());
+            docsObjects.add(metricDoc.getName());
+
+            Map<String, Set<String>> docsObjectsByFile = Collections.singletonMap(file, docsObjects);
+            configDocsGenerator.setDocsObjectsByFile(docsObjectsByFile);
+            when(actionWithDocInYaml.getFiles()).thenReturn(Collections.singleton(file));
+            when(actionWithoutDocInYaml.getFiles()).thenReturn(Collections.singleton(file));
+            when(scopeDoc.getFiles()).thenReturn(Collections.singleton(file));
+            when(ruleDocChild.getFiles()).thenReturn(Collections.singleton(file));
+            when(ruleDocParent.getFiles()).thenReturn(Collections.singleton(file));
+            when(metricDoc.getFiles()).thenReturn(Collections.singleton(file));
+
+            InspectitConfig config = configParser.parseConfig(configYaml);
+            ConfigDocumentation result = configDocsGenerator.generateConfigDocs(config);
+
+            List<RuleDocs> rules = new ArrayList<>();
+            rules.add(ruleDocChild);
+            rules.add(ruleDocParent);
+            List<MetricDocs> metrics = new ArrayList<>();
+            metrics.add(metricDoc);
+            List<BaseDocs> scopes = new ArrayList<>();
+            scopes.add(scopeDoc);
+            List<ActionDocs> actions = new ArrayList<>();
+            actions.add(actionWithDocInYaml);
+            actions.add(actionWithoutDocInYaml);
+
+            ConfigDocumentation expected = Mockito.mock(ConfigDocumentation.class);
+            when(expected.getScopes()).thenReturn(scopes);
+            when(expected.getActions()).thenReturn(actions);
+            when(expected.getRules()).thenReturn(rules);
+            when(expected.getMetrics()).thenReturn(metrics);
+
+            assertThat(result).usingRecursiveComparison().isEqualTo(expected);
+        }
+    }
 }

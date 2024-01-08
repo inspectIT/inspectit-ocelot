@@ -25,10 +25,9 @@ import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.file.DefaultConfigController;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
+import rocks.inspectit.ocelot.agentconfiguration.DocsObjectsLoader;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Controller for endpoints related to configuration files.
@@ -97,7 +96,11 @@ public class ConfigurationController extends AbstractBaseController {
      */
     @Operation(summary = "Get the full configuration documentation of an AgentMappings config, based on the AgentMapping name.")
     @GetMapping(value = {"configuration/documentation", "configuration/documentation/"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getConfigDocumentation(@Parameter(description = "The name of the AgentMapping the configuration documentation should be for.") @RequestParam(name = "agent-mapping") String mappingName, @Parameter(description = "Whether the shown documentation should include the merged in Default Config as well.") @RequestParam(name = "include-default") Boolean includeDefault) {
+    public ResponseEntity<Object> getConfigDocumentation(
+            @Parameter(description = "The name of the AgentMapping the configuration documentation should be for.")
+            @RequestParam(name = "agent-mapping") String mappingName,
+            @Parameter(description = "Whether the shown documentation should include the merged in Default Config as well.")
+            @RequestParam(name = "include-default") Boolean includeDefault) {
 
         ConfigDocumentation configDocumentation = null;
 
@@ -107,6 +110,7 @@ public class ConfigurationController extends AbstractBaseController {
 
             AgentConfiguration configuration = configManager.getConfigurationForMapping(agentMapping.get());
             String configYaml = configuration.getConfigYaml();
+            Map<String, Set<String>> docsObjectsByFile = configuration.getDocsObjectsByFile();
 
             try {
                 if (includeDefault) {
@@ -121,8 +125,11 @@ public class ConfigurationController extends AbstractBaseController {
                         combined = ObjectStructureMerger.merge(combined, loadedYaml);
                     }
                     configYaml = yaml.dump(combined);
+                    Map<String, Set<String>> defaultObjectsByFile = DocsObjectsLoader.loadDefaultDocsObjectsByFile(defaultYamls);
+                    docsObjectsByFile.putAll(defaultObjectsByFile);
                 }
 
+                configDocsGenerator.setDocsObjectsByFile(docsObjectsByFile);
                 configDocumentation = configDocsGenerator.generateConfigDocs(configYaml);
 
             } catch (Exception e) {
