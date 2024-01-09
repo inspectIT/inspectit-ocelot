@@ -67,6 +67,7 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
           color: #4e4e4e;
         }
         .file-item {
+          padding-left: 0.25rem;
           cursor: pointer;
           color: #0070f3;
         }
