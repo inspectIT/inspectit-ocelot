@@ -12,6 +12,7 @@ import DeleteDialog from './dialogs/DeleteDialog';
 import ConfigurationDownload from './ConfigurationDownload';
 import { cloneDeep, find } from 'lodash';
 import classnames from 'classnames';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 /** Component including the menu button for each mapping */
 const ButtonCell = ({ readOnly, mapping, onEdit, onDelete, onDownload, onDuplicate, appendRef }) => {
@@ -205,7 +206,7 @@ class MappingsTable extends React.Component {
   hideDeleteMappingDialog = () => this.setState({ isDeleteDialogShown: false, selectedMappingName: null });
 
   render() {
-    const { readOnly, filterValue, maxHeight, mappings, putMappings, sidebar } = this.props;
+    const { readOnly, filterValue, maxHeight, mappings, putMappings, sidebar, isLoading } = this.props;
 
     const mappingValues = mappings.map((mapping) => {
       //build a dummy string to allow filtering
@@ -273,68 +274,91 @@ class MappingsTable extends React.Component {
           .buttons-col {
             width: 15rem;
           }
+          .selection-information {
+            display: flex;
+            flex-grow: 1;
+            flex-direction: column;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            color: #bbb;
+          }
+          .selection-information > span {
+            margin-bottom: 1rem;
+          }
         `}</style>
-        <div className="table-and-sidebar">
-          <div className="table" ref={(el) => (this.mappingsTable = el)}>
-            <DataTable
-              value={mappingValues}
-              reorderableRows={!readOnly}
-              scrollable={true}
-              scrollHeight={maxHeight ? maxHeight : '100%'}
-              onRowReorder={(e) => {
-                putMappings(e.value);
-              }}
-              globalFilter={filterValue}
-            >
-              {!readOnly && <Column className="drag-icon-col" rowReorder={!filterValue} />}
-              <Column className="mapping-name-col cell-text" columnKey="name" field="name" header="Mapping Name" />
-              <Column
-                className="source-branch-col cell-text"
-                columnKey="branch"
-                field="branch"
-                header="Source Branch"
-                body={(data) => <BranchCell branch={data.sourceBranch} />}
+
+        {isLoading && (
+          <>
+            <div className="selection-information">
+              <span>Loading agent mappings...</span>
+              <ProgressSpinner />
+            </div>
+          </>
+        )}
+        {mappings.length > 0 && (
+          <div className="table-and-sidebar">
+            <div className="table" ref={(el) => (this.mappingsTable = el)}>
+              <DataTable
+                value={mappingValues}
+                reorderableRows={!readOnly}
+                scrollable={true}
+                scrollHeight={maxHeight ? maxHeight : '100%'}
+                onRowReorder={(e) => {
+                  putMappings(e.value);
+                }}
+                globalFilter={filterValue}
+              >
+                {!readOnly && <Column className="drag-icon-col" rowReorder={!filterValue} />}
+                <Column className="mapping-name-col cell-text" columnKey="name" field="name" header="Mapping Name" />
+                <Column
+                  className="source-branch-col cell-text"
+                  columnKey="branch"
+                  field="branch"
+                  header="Source Branch"
+                  body={(data) => <BranchCell branch={data.sourceBranch} />}
+                />
+                <Column
+                  className="sources-col cell-text"
+                  columnKey="sources"
+                  field="sources"
+                  body={(data) => <SourceCell sources={data.sources} appendRef={this.mappingsTable} />}
+                  header="Sources"
+                />
+                <Column
+                  className="attributes-col cell-text"
+                  columnKey="attributes"
+                  field="attributesSearchString"
+                  body={(data) => <AttributesCell attributes={data.attributes} appendRef={this.mappingsTable} />}
+                  header="Attributes"
+                />
+                <Column
+                  className="buttons-col cell-text"
+                  columnKey="buttons"
+                  body={(data) => (
+                    <ButtonCell
+                      readOnly={readOnly}
+                      mapping={data}
+                      onEdit={this.props.onEditMapping}
+                      onDelete={this.showDeleteMappingDialog}
+                      onDownload={this.configDownload.download}
+                      onDuplicate={this.duplicateMapping}
+                      appendRef={this.mappingsTable}
+                    />
+                  )}
+                />
+              </DataTable>
+              <DeleteDialog
+                visible={this.state.isDeleteDialogShown}
+                onHide={this.hideDeleteMappingDialog}
+                mappingName={this.state.selectedMappingName}
               />
-              <Column
-                className="sources-col cell-text"
-                columnKey="sources"
-                field="sources"
-                body={(data) => <SourceCell sources={data.sources} appendRef={this.mappingsTable} />}
-                header="Sources"
-              />
-              <Column
-                className="attributes-col cell-text"
-                columnKey="attributes"
-                field="attributesSearchString"
-                body={(data) => <AttributesCell attributes={data.attributes} appendRef={this.mappingsTable} />}
-                header="Attributes"
-              />
-              <Column
-                className="buttons-col cell-text"
-                columnKey="buttons"
-                body={(data) => (
-                  <ButtonCell
-                    readOnly={readOnly}
-                    mapping={data}
-                    onEdit={this.props.onEditMapping}
-                    onDelete={this.showDeleteMappingDialog}
-                    onDownload={this.configDownload.download}
-                    onDuplicate={this.duplicateMapping}
-                    appendRef={this.mappingsTable}
-                  />
-                )}
-              />
-            </DataTable>
-            <DeleteDialog
-              visible={this.state.isDeleteDialogShown}
-              onHide={this.hideDeleteMappingDialog}
-              mappingName={this.state.selectedMappingName}
-            />
-            {/** reference is used for calling onDownload within ButtonCell component */}
-            <ConfigurationDownload onRef={(ref) => (this.configDownload = ref)} />
+              {/** reference is used for calling onDownload within ButtonCell component */}
+              <ConfigurationDownload onRef={(ref) => (this.configDownload = ref)} />
+            </div>
+            <div className="versioning-sidebar">{sidebar}</div>
           </div>
-          <div className="versioning-sidebar">{sidebar}</div>
-        </div>
+        )}
       </>
     );
   }
@@ -360,9 +384,10 @@ MappingsTable.propTypes = {
 };
 
 function mapStateToProps(state) {
-  const { mappings } = state.mappings;
+  const { mappings, isLoading } = state.mappings;
   return {
     mappings,
+    isLoading,
   };
 }
 
