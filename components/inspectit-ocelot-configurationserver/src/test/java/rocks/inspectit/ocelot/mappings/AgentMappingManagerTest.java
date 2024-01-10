@@ -49,7 +49,11 @@ public class AgentMappingManagerTest {
     ApplicationEventPublisher publisher;
 
     @BeforeEach
-    public void init() {
+    public void init() throws IOException {
+        lenient().doReturn(writeAccessor).when(fileManager).getWorkingDirectory();
+        lenient().doReturn(readAccessor).when(fileManager).getWorkspaceRevision();
+        when(readAccessor.agentMappingsExist()).thenReturn(true);
+
         InspectitServerSettings settings = InspectitServerSettings.builder().initialAgentMappingsSourceBranch("workspace").build();
         serializer = Mockito.spy(new AgentMappingSerializer(settings, fileManager, publisher));
         serializer.postConstruct();
@@ -57,34 +61,7 @@ public class AgentMappingManagerTest {
         manager = new AgentMappingManager(serializer, fileManager);
 
         verify(serializer).postConstruct();
-        lenient().doReturn(writeAccessor).when(fileManager).getWorkingDirectory();
-        lenient().doReturn(readAccessor).when(fileManager).getWorkspaceRevision();
-    }
-
-    @Nested
-    public class PostConstruct {
-
-        @Test
-        public void defaultMappingUsedForInitialization() throws IOException {
-            doReturn(false).when(readAccessor).agentMappingsExist();
-
-            manager.postConstruct();
-
-            ArgumentCaptor<String> writtenMapping = ArgumentCaptor.forClass(String.class);
-            verify(writeAccessor).writeAgentMappings(writtenMapping.capture());
-
-            doReturn(Optional.of(writtenMapping.getValue())).when(readAccessor).readAgentMappings();
-            assertThat(manager.getAgentMappings()).containsExactly(AgentMappingManager.DEFAULT_MAPPING);
-        }
-
-        @Test
-        public void noOverrideOfExistingMappings() throws IOException {
-            doReturn(true).when(readAccessor).agentMappingsExist();
-
-            manager.postConstruct();
-
-            verify(writeAccessor, never()).writeAgentMappings(anyString());
-        }
+        verify(serializer).readAgentMappings(readAccessor);
     }
 
     @Nested
@@ -99,6 +76,8 @@ public class AgentMappingManagerTest {
                     "    region: \"eu-west\"";
             doReturn(Optional.of(mappingYaml)).when(readAccessor).readAgentMappings();
 
+            // reset agentMappings, to trigger readAgentMappings() from readAccessor
+            serializer.writeAgentMappings(null);
             List<AgentMapping> agentMappings = manager.getAgentMappings();
 
             assertThat(agentMappings).hasSize(1);
@@ -107,10 +86,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void agentMappingsAreBroken() throws IOException {
-            String mappingYaml = "This is not a valid agent mapping!";
-            doReturn(Optional.of(mappingYaml)).when(readAccessor).readAgentMappings();
-
+        public void agentMappingsAreBroken() {
             List<AgentMapping> agentMappings = manager.getAgentMappings();
 
             assertThat(agentMappings).isEmpty();
@@ -134,15 +110,13 @@ public class AgentMappingManagerTest {
             ArgumentCaptor<String> writtenMapping = ArgumentCaptor.forClass(String.class);
             verify(writeAccessor).writeAgentMappings(writtenMapping.capture());
 
-            doReturn(Optional.of(writtenMapping.getValue())).when(readAccessor).readAgentMappings();
-
             assertThat(manager.getAgentMappings()).containsExactly(mapping);
         }
 
         @Test
         public void writingMappingsFileFails() throws IOException {
             AgentMapping mapping = AgentMapping.builder().name("mapping").build();
-            doThrow(IOException.class).when(serializer).writeAgentMappings(any(), any());
+            doThrow(IOException.class).when(serializer).writeAgentMappings(any());
 
             assertThatExceptionOfType(IOException.class)
                     .isThrownBy(() -> manager.setAgentMappings(Collections.singletonList(mapping)));
@@ -168,7 +142,7 @@ public class AgentMappingManagerTest {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
-            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readAgentMappings(same(readAccessor));
+            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readCachedAgentMappings();
 
             Optional<AgentMapping> result = manager.getAgentMapping("second");
 
@@ -178,10 +152,10 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void noMappingFound() throws IOException {
+        public void noMappingFound() {
             AgentMapping mapping = AgentMapping.builder().name("first").build();
 
-            doReturn(Arrays.asList(mapping)).when(serializer).readAgentMappings(same(readAccessor));
+            doReturn(Arrays.asList(mapping)).when(serializer).readCachedAgentMappings();
 
             Optional<AgentMapping> result = manager.getAgentMapping("not-existing");
 
@@ -217,16 +191,16 @@ public class AgentMappingManagerTest {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
-            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readAgentMappings(same(readAccessor));
+            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readCachedAgentMappings();
 
             boolean result = manager.deleteAgentMapping("first");
 
             ArgumentCaptor<List<AgentMapping>> writtenMapping = ArgumentCaptor.forClass(List.class);
-            verify(serializer).writeAgentMappings(writtenMapping.capture(), same(writeAccessor));
+            verify(serializer).writeAgentMappings(writtenMapping.capture());
 
             assertThat(result).isTrue();
             assertThat(writtenMapping.getValue()).containsExactly(mappingB);
-            verify(serializer).readAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
         }
 
@@ -234,28 +208,28 @@ public class AgentMappingManagerTest {
         public void mappingDoesNotExist() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
 
-            doReturn(Collections.singletonList(mappingA)).when(serializer).readAgentMappings(same(readAccessor));
+            doReturn(Collections.singletonList(mappingA)).when(serializer).readCachedAgentMappings();
 
             boolean result = manager.deleteAgentMapping("not-existing");
 
             assertThat(result).isFalse();
-            verify(serializer).readAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
         }
 
         @Test
         public void writingFileFails() throws IOException {
-            doThrow(IOException.class).when(serializer).writeAgentMappings(any(), any());
+            doThrow(IOException.class).when(serializer).writeAgentMappings(any());
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
-            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readAgentMappings(same(readAccessor));
+            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readCachedAgentMappings();
 
             assertThatExceptionOfType(IOException.class)
                     .isThrownBy(() -> manager.deleteAgentMapping("first"));
 
-            verify(serializer, times(1)).writeAgentMappings(any(), any());
-            verify(serializer).readAgentMappings(any());
+            verify(serializer, times(1)).writeAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
         }
 
         @Test
@@ -276,16 +250,16 @@ public class AgentMappingManagerTest {
         public void addingAgentMapping() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
 
-            doReturn(Collections.emptyList()).when(serializer).readAgentMappings(same(readAccessor));
+            doReturn(Collections.emptyList()).when(serializer).readCachedAgentMappings();
 
             manager.addAgentMapping(mappingA);
 
             ArgumentCaptor<List<AgentMapping>> writtenMapping = ArgumentCaptor.forClass(List.class);
-            verify(serializer).writeAgentMappings(writtenMapping.capture(), same(writeAccessor));
+            verify(serializer).writeAgentMappings(writtenMapping.capture());
 
             assertThat(writtenMapping.getValue()).containsExactly(mappingA);
-            verify(serializer).writeAgentMappings(any(), any());
-            verify(serializer).readAgentMappings(any());
+            verify(serializer).writeAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
         }
 
@@ -295,18 +269,18 @@ public class AgentMappingManagerTest {
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
             AtomicReference<List<AgentMapping>> mappingsHolder = new AtomicReference<>(Collections.emptyList());
-            doAnswer((rq) -> mappingsHolder.get()).when(serializer).readAgentMappings(same(readAccessor));
+            doAnswer((rq) -> mappingsHolder.get()).when(serializer).readCachedAgentMappings();
             doAnswer((rq) -> {
                 mappingsHolder.set(rq.getArgument(0));
                 return null;
-            }).when(serializer).writeAgentMappings(anyList(), same(writeAccessor));
+            }).when(serializer).writeAgentMappings(anyList());
 
             manager.addAgentMapping(mappingA);
             manager.addAgentMapping(mappingB);
 
             assertThat(mappingsHolder.get()).containsExactly(mappingB, mappingA);
-            verify(serializer, times(2)).writeAgentMappings(any(), any());
-            verify(serializer, times(2)).readAgentMappings(any());
+            verify(serializer, times(2)).writeAgentMappings(any());
+            verify(serializer, times(2)).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
         }
 
@@ -344,11 +318,11 @@ public class AgentMappingManagerTest {
         @Test
         public void updateMapping() throws IOException {
             AtomicReference<List<AgentMapping>> mappingsHolder = new AtomicReference<>(Collections.emptyList());
-            doAnswer((rq) -> mappingsHolder.get()).when(serializer).readAgentMappings(same(readAccessor));
+            doAnswer((rq) -> mappingsHolder.get()).when(serializer).readCachedAgentMappings();
             doAnswer((rq) -> {
                 mappingsHolder.set(rq.getArgument(0));
                 return null;
-            }).when(serializer).writeAgentMappings(anyList(), same(writeAccessor));
+            }).when(serializer).writeAgentMappings(anyList());
 
             AgentMapping mappingA = AgentMapping.builder().name("mapping").build();
 
@@ -377,15 +351,15 @@ public class AgentMappingManagerTest {
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
 
-            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readAgentMappings(same(readAccessor));
+            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readCachedAgentMappings();
 
             manager.addAgentMappingBefore(mappingC, "second");
 
             ArgumentCaptor<List<AgentMapping>> writtenMapping = ArgumentCaptor.forClass(List.class);
-            verify(serializer).writeAgentMappings(writtenMapping.capture(), same(writeAccessor));
+            verify(serializer).writeAgentMappings(writtenMapping.capture());
 
             assertThat(writtenMapping.getValue()).containsExactly(mappingA, mappingC, mappingB);
-            verify(serializer).readAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
         }
 
@@ -396,15 +370,15 @@ public class AgentMappingManagerTest {
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
 
-            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readAgentMappings(same(readAccessor));
+            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readCachedAgentMappings();
 
             manager.addAgentMappingBefore(mappingC, "first");
 
             ArgumentCaptor<List<AgentMapping>> writtenMapping = ArgumentCaptor.forClass(List.class);
-            verify(serializer).writeAgentMappings(writtenMapping.capture(), same(writeAccessor));
+            verify(serializer).writeAgentMappings(writtenMapping.capture());
             assertThat(writtenMapping.getValue()).containsExactly(mappingC, mappingA, mappingB);
 
-            verify(serializer).readAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
         }
 
@@ -416,15 +390,15 @@ public class AgentMappingManagerTest {
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
 
             doReturn(Arrays.asList(mappingA, mappingB, mappingC)).when(serializer)
-                    .readAgentMappings(same(readAccessor));
+                    .readCachedAgentMappings();
 
             manager.addAgentMappingBefore(mappingB, "second");
 
             ArgumentCaptor<List<AgentMapping>> writtenMapping = ArgumentCaptor.forClass(List.class);
-            verify(serializer).writeAgentMappings(writtenMapping.capture(), same(writeAccessor));
+            verify(serializer).writeAgentMappings(writtenMapping.capture());
             assertThat(writtenMapping.getValue()).containsExactly(mappingA, mappingB, mappingC);
 
-            verify(serializer).readAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
         }
 
@@ -436,31 +410,31 @@ public class AgentMappingManagerTest {
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
 
             doReturn(Arrays.asList(mappingA, mappingB, mappingC)).when(serializer)
-                    .readAgentMappings(same(readAccessor));
+                    .readCachedAgentMappings();
 
             manager.addAgentMappingBefore(mappingC, "first");
 
             ArgumentCaptor<List<AgentMapping>> writtenMapping = ArgumentCaptor.forClass(List.class);
-            verify(serializer).writeAgentMappings(writtenMapping.capture(), same(writeAccessor));
+            verify(serializer).writeAgentMappings(writtenMapping.capture());
             assertThat(writtenMapping.getValue()).containsExactly(mappingC, mappingA, mappingB);
 
-            verify(serializer).readAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
 
         }
 
         @Test
-        public void targetNotExists() throws IOException {
+        public void targetNotExists() {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
-            doReturn(Collections.singletonList(mappingA)).when(serializer).readAgentMappings(same(readAccessor));
+            doReturn(Collections.singletonList(mappingA)).when(serializer).readCachedAgentMappings();
 
             assertThatExceptionOfType(RuntimeException.class)
                     .isThrownBy(() -> manager.addAgentMappingBefore(mappingB, "not-existing"))
                     .withMessage("The agent mapping has not been added because the mapping 'not-existing' does not exists, thus, cannot be added before it.");
 
-            verify(serializer).readAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
         }
     }
@@ -475,15 +449,15 @@ public class AgentMappingManagerTest {
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
 
-            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readAgentMappings(same(readAccessor));
+            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readCachedAgentMappings();
 
             manager.addAgentMappingAfter(mappingC, "second");
 
             ArgumentCaptor<List<AgentMapping>> writtenMapping = ArgumentCaptor.forClass(List.class);
-            verify(serializer).writeAgentMappings(writtenMapping.capture(), same(writeAccessor));
+            verify(serializer).writeAgentMappings(writtenMapping.capture());
             assertThat(writtenMapping.getValue()).containsExactly(mappingA, mappingB, mappingC);
 
-            verify(serializer).readAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
         }
 
@@ -495,15 +469,15 @@ public class AgentMappingManagerTest {
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
 
             doReturn(Arrays.asList(mappingA, mappingB, mappingC)).when(serializer)
-                    .readAgentMappings(same(readAccessor));
+                    .readCachedAgentMappings();
 
             manager.addAgentMappingAfter(mappingB, "second");
 
             ArgumentCaptor<List<AgentMapping>> writtenMapping = ArgumentCaptor.forClass(List.class);
-            verify(serializer).writeAgentMappings(writtenMapping.capture(), same(writeAccessor));
+            verify(serializer).writeAgentMappings(writtenMapping.capture());
             assertThat(writtenMapping.getValue()).containsExactly(mappingA, mappingB, mappingC);
 
-            verify(serializer).readAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
         }
 
@@ -515,30 +489,30 @@ public class AgentMappingManagerTest {
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
 
             doReturn(Arrays.asList(mappingA, mappingB, mappingC)).when(serializer)
-                    .readAgentMappings(same(readAccessor));
+                    .readCachedAgentMappings();
 
             manager.addAgentMappingAfter(mappingC, "first");
 
             ArgumentCaptor<List<AgentMapping>> writtenMapping = ArgumentCaptor.forClass(List.class);
-            verify(serializer).writeAgentMappings(writtenMapping.capture(), same(writeAccessor));
+            verify(serializer).writeAgentMappings(writtenMapping.capture());
             assertThat(writtenMapping.getValue()).containsExactly(mappingA, mappingC, mappingB);
 
-            verify(serializer).readAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
         }
 
         @Test
-        public void targetNotExists() throws IOException {
+        public void targetNotExists() {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
-            doReturn(Arrays.asList(mappingA)).when(serializer).readAgentMappings(same(readAccessor));
+            doReturn(Arrays.asList(mappingA)).when(serializer).readCachedAgentMappings();
 
             assertThatExceptionOfType(RuntimeException.class)
                     .isThrownBy(() -> manager.addAgentMappingAfter(mappingB, "not-existing"))
                     .withMessage("The agent mapping has not been added because the mapping 'not-existing' does not exists, thus, cannot be added after it.");
 
-            verify(serializer).readAgentMappings(any());
+            verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
         }
     }

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME;
+import static rocks.inspectit.ocelot.mappings.AgentMappingManager.DEFAULT_MAPPING;
 
 /**
  * Utility for reading and writing the Agent Mappings.
@@ -39,6 +40,11 @@ public class AgentMappingSerializer {
     private CollectionType mappingsListType;
 
     private FileManager fileManager;
+
+    /**
+     * Current agent mappings, which are cached to avoid long page loading time
+     */
+    private List<AgentMapping> currentMappings;
 
     private ApplicationEventPublisher publisher;
 
@@ -59,13 +65,30 @@ public class AgentMappingSerializer {
 
     /**
      * Post construct for initializing the mapper objects.
+     * Additionally, initially reading the agent mappings if the mappings file exists.
      */
     @PostConstruct
-    public void postConstruct() {
+    public void postConstruct() throws IOException {
         ymlMapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         ymlMapper.findAndRegisterModules();
 
         mappingsListType = ymlMapper.getTypeFactory().constructCollectionType(List.class, AgentMapping.class);
+
+        if (!fileManager.getWorkspaceRevision().agentMappingsExist()) {
+            log.info("Generating default agent mappings for workspace branch");
+            List<AgentMapping> defaultMappings = Collections.singletonList(DEFAULT_MAPPING);
+            writeAgentMappings(defaultMappings);
+        }
+        else currentMappings = readAgentMappings(fileManager.getWorkspaceRevision());
+    }
+
+    /**
+     * Read cached agent mappings to avoid long ymlMapper-processing time
+     * @return List of current {@link AgentMapping}s representing the content of the given file
+     */
+    public List<AgentMapping> readCachedAgentMappings(){
+        if(currentMappings != null) return currentMappings;
+        else return readAgentMappings(fileManager.getWorkspaceRevision());
     }
 
     /**
@@ -91,11 +114,12 @@ public class AgentMappingSerializer {
      * Writing the given list of {@link AgentMapping}s as a Yaml representation into the specified file.
      *
      * @param agentMappings the {@link AgentMapping}s to write to file
-     * @param fileAccess    the accessor to which the mappings will be written
      *
      * @throws IOException if any error occurs, e.g. file cannot be written
      */
-    public void writeAgentMappings(List<AgentMapping> agentMappings, AbstractWorkingDirectoryAccessor fileAccess) throws IOException {
+    public void writeAgentMappings(List<AgentMapping> agentMappings) throws IOException {
+        currentMappings = agentMappings;
+        AbstractWorkingDirectoryAccessor fileAccess = fileManager.getWorkingDirectory();
         fileAccess.writeAgentMappings(ymlMapper.writeValueAsString(agentMappings));
     }
 

@@ -40,10 +40,37 @@ public class AgentMappingSerializerTest {
     RevisionAccess revisionAccess;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws IOException {
+        lenient().doReturn(workingDirectoryAccessor).when(fileManager).getWorkingDirectory();
+        lenient().doReturn(revisionAccess).when(fileManager).getWorkspaceRevision();
+        when(revisionAccess.agentMappingsExist()).thenReturn(true);
+
         InspectitServerSettings settings = InspectitServerSettings.builder().initialAgentMappingsSourceBranch("workspace").build();
         serializer = new AgentMappingSerializer(settings, fileManager, eventPublisher);
         serializer.postConstruct();
+    }
+
+    @Nested
+    public class PostConstruct {
+
+        @Test
+        public void defaultMappingUsedForInitialization() throws IOException {
+            doReturn(false).when(revisionAccess).agentMappingsExist();
+
+            InspectitServerSettings settings = InspectitServerSettings.builder().initialAgentMappingsSourceBranch("workspace").build();
+            serializer = new AgentMappingSerializer(settings, fileManager, eventPublisher);
+            serializer.postConstruct();
+
+            ArgumentCaptor<String> writtenMapping = ArgumentCaptor.forClass(String.class);
+            verify(workingDirectoryAccessor).writeAgentMappings(writtenMapping.capture());
+
+            assertThat(serializer.readCachedAgentMappings()).containsExactly(AgentMappingManager.DEFAULT_MAPPING);
+        }
+
+        @Test
+        public void noOverrideOfExistingMappings() throws IOException {
+            verify(workingDirectoryAccessor, never()).writeAgentMappings(anyString());
+        }
     }
 
     @Nested
@@ -58,7 +85,7 @@ public class AgentMappingSerializerTest {
                     .attribute("key", "val")
                     .build();
 
-            serializer.writeAgentMappings(Collections.singletonList(mapping), workingDirectoryAccessor);
+            serializer.writeAgentMappings(Collections.singletonList(mapping));
 
             ArgumentCaptor<String> writtenFile = ArgumentCaptor.forClass(String.class);
             verify(workingDirectoryAccessor).writeAgentMappings(writtenFile.capture());
