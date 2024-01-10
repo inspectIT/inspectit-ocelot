@@ -48,7 +48,7 @@ You can additionally define the following global properties (`inspectit.tracing`
 |`schedule-delay-millis`|5000| The delay interval between two consecutive exports in milliseconds.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 
 :::warning
-These properties take only effect once when the agent is starting. If you change these properties while the agent is running, they will not take effect until the agent retarted.
+These properties take only effect once when the agent is starting. If you change these properties while the agent is running, they will not take effect until the agent restarted.
 :::
 ### Common Tags as Attributes
 
