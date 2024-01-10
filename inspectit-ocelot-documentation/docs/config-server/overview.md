@@ -19,4 +19,4 @@ In addition, a Swagger UI is provided which contains a list including documentat
 
 Since version `1.4`, the configuration server uses Git and a local repository to manage the working directory. If a working directory already exists that was created by a configuration server in version `1.3` or lower, it is automatically migrated to a working directory managed using a local Git repository. No manual adjustments are necessary.
 
-Please see [Managing Files](config-server/managing-files.md) for more information on managing of the configuration files.
+Please see [Managing Files](managing-files.md) for more information on managing of the configuration files.
