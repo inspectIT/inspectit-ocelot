@@ -42,9 +42,9 @@ public class AgentMappingSerializer {
     private FileManager fileManager;
 
     /**
-     * Current agent mappings, which are cached to avoid long page loading time
+     * Current agent mappings from workspace, which are cached to avoid long processing time
      */
-    private List<AgentMapping> currentMappings;
+    private volatile List<AgentMapping> currentMappings;
 
     private ApplicationEventPublisher publisher;
 
