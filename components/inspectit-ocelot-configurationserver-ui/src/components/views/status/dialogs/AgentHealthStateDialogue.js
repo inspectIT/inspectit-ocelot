@@ -111,8 +111,6 @@ AgentHealthStateDialogue.propTypes = {
   visible: PropTypes.bool,
   /** Callback on dialog hide */
   onHide: PropTypes.func,
-  /** The string value being displayed. E.g. the logs.*/
-  contentValue: PropTypes.string,
   /** The type of content. E.g. config or log.*/
   contentType: PropTypes.string,
   /** The name of the data's context. E.g. the agent whose logs are being shown.*/
