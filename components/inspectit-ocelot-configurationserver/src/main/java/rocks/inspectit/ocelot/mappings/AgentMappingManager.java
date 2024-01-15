@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.mappings;
 
 import com.google.common.annotations.VisibleForTesting;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,18 +52,6 @@ public class AgentMappingManager {
     }
 
     /**
-     * Post construct. Initially reading the agent mappings if the mappings file exists.
-     */
-    @PostConstruct
-    public void postConstruct() throws IOException {
-        if (!fileManager.getWorkspaceRevision().agentMappingsExist()) {
-            log.info("Generating default agent mappings for workspace branch");
-            List<AgentMapping> defaultMappings = Collections.singletonList(DEFAULT_MAPPING);
-            serializer.writeAgentMappings(defaultMappings, fileManager.getWorkingDirectory());
-        }
-    }
-
-    /**
      * @return The current source branch for the agent mapping file itself.
      */
     public synchronized Branch getSourceBranch() {
@@ -101,7 +88,7 @@ public class AgentMappingManager {
      */
     public synchronized List<AgentMapping> getAgentMappings(String version) {
         if (version == null) {
-            return serializer.readAgentMappings(fileManager.getWorkspaceRevision());
+            return serializer.readCachedAgentMappings();
         } else if (version.equals("live")) {
             return serializer.readAgentMappings(fileManager.getLiveRevision());
         } else {
@@ -110,7 +97,7 @@ public class AgentMappingManager {
     }
 
     public synchronized List<AgentMapping> getAgentMappings() {
-        return getAgentMappings(null);
+        return serializer.readCachedAgentMappings();
     }
 
     /**
@@ -140,7 +127,7 @@ public class AgentMappingManager {
 
         log.info("Overriding current agent mappings with {} new mappings.", newAgentMappings.size());
 
-        serializer.writeAgentMappings(newAgentMappings, fileManager.getWorkingDirectory());
+        serializer.writeAgentMappings(newAgentMappings);
     }
 
     /**

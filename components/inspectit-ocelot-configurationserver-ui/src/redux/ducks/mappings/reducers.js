@@ -21,11 +21,13 @@ const mappingsReducer = createReducer(initialState)({
   [types.FETCH_MAPPINGS_STARTED]: (state) => {
     return {
       ...incrementPendingRequests(state),
+      isLoading: true,
     };
   },
   [types.FETCH_MAPPINGS_FAILURE]: (state) => {
     return {
       ...decrementPendingRequests(state),
+      isLoading: false,
     };
   },
   [types.FETCH_MAPPINGS_SUCCESS]: (state, action) => {
@@ -34,6 +36,7 @@ const mappingsReducer = createReducer(initialState)({
       ...decrementPendingRequests(state),
       mappings,
       updateDate: Date.now(),
+      isLoading: false,
     };
   },
   [types.PUT_MAPPINGS_STARTED]: (state) => {

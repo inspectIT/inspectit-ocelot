@@ -38,8 +38,6 @@ class StatusView extends React.Component {
     };
   }
 
-  axiosAbortController = new AbortController();
-
   componentDidUpdate(prevProps) {
     if (!isEqual(prevProps.agents, this.props.agents)) {
       this.filterAgents();
@@ -265,7 +263,6 @@ class StatusView extends React.Component {
             isDownloadDialogFooterHidden={isDownloadDialogFooterHidden}
             onCancel={() => {
               this.setShowDownloadDialog(false);
-              this.axiosAbortController.abort();
             }}
           />
           <AgentHealthStateDialogue
@@ -376,7 +373,6 @@ class StatusView extends React.Component {
       () => {
         axios
           .get('/agent/supportArchive', {
-            signal: this.axiosAbortController.signal,
             params: { 'agent-id': agentId },
           })
           .then((res) => {
@@ -411,7 +407,6 @@ class StatusView extends React.Component {
       () => {
         axios
           .get('/configuration/agent-configuration', {
-            signal: this.axiosAbortController.signal,
             params: { ...requestParams },
           })
           .then((res) => {
@@ -440,7 +435,6 @@ class StatusView extends React.Component {
       () => {
         axios
           .get('/command/logs', {
-            signal: this.axiosAbortController.signal,
             params: { 'agent-id': agentId },
           })
           .then((res) => {

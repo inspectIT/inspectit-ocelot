@@ -37,7 +37,7 @@ public class PropertyNamesValidator {
                     .map(ps -> (EnumerablePropertySource) ps)
                     .flatMap(ps -> Arrays.stream(ps.getPropertyNames()))
                     .filter(ps -> isInvalidPropertyName(ps))
-                    .forEach(ps -> log.warn("The specified property '{}' does not exist! ", ps));
+                    .forEach(ps -> log.warn("The specified property '{}' does not exist!", ps));
         });
     }
 
@@ -58,6 +58,7 @@ public class PropertyNamesValidator {
             return propertyName != null
                     && propertyName.startsWith("inspectit.")
                     && !propertyName.startsWith(PluginSettings.PLUGIN_CONFIG_PREFIX)
+                    && !propertyName.equals("inspectit.start.delay")
                     && isInvalidPath(parsedName);
         } catch (Exception e) {
             log.error("Error while checking property existence", e);

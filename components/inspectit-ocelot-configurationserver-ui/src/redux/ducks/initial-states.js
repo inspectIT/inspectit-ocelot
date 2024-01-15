@@ -83,6 +83,8 @@ const mappings = {
   sourceBranch: '',
   /** Defines which sidebar is currently shown */
   currentSidebar: SidebarTypes.NONE,
+  /** Whether the agent mappings are loading or not */
+  isLoading: true,
 };
 
 const alerting = {

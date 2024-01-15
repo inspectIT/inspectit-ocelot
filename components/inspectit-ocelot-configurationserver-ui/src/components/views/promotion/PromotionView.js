@@ -36,7 +36,7 @@ const PromotionView = () => {
   const currentUser = useSelector((state) => state.authentication.username);
 
   // fetching promotion data
-  const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/promotions', { 'include-content': 'true' });
+  const [{ data, isLoading, lastUpdate }, refreshData] = useFetchData('/configuration/promotions', { 'include-content': 'true' });
 
   // derived variables
   const canSelfApprove = _.get(data, 'canPromoteOwnChanges', false); // whether the user can approve self-made changes
@@ -90,7 +90,7 @@ const PromotionView = () => {
     setIsPromoting(true);
 
     try {
-      const { data } = await axios.post('/promote', payload);
+      const { data } = await axios.post('/configuration/promote', payload);
 
       if (data.result && data.result != 'OK') {
         setShowWarningDialog(true);

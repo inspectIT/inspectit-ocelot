@@ -78,7 +78,9 @@ class DownloadDialog extends React.Component {
     if (!prevProps.visible && this.props.visible) {
       /**Timeout is needed for .focus() to be triggered correctly. */
       setTimeout(() => {
-        this.downloadButton.current.focus();
+        if (this.downloadButton?.current) {
+          this.downloadButton.current.focus();
+        }
       }, 0);
     }
   }
