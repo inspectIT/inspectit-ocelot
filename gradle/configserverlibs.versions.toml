@@ -2,8 +2,8 @@
 ioJsonwebtoken = "0.12.3"
 orgEclipseJgit = "6.8.0.202311291450-r"
 orgMockito = "4.7.0"
-orgSpringframeworkBoot = { strictly = "3.1.6" }
-orgSpringframeworkSecurity = "6.1.5"
+orgSpringframeworkBoot = { strictly = "3.1.7" }
+orgSpringframeworkSecurity = "6.1.6"
 
 [libraries]
 comGoogleCodeGson = "com.google.code.gson:gson:2.10.1"
@@ -24,7 +24,7 @@ orgSpringframeworkBootSpringBootStarterDataJpa = { module = "org.springframework
 orgSpringframeworkBootSpringBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStartervalidation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "orgSpringframeworkBoot" }
-orgSpringframeworkLdapSpringLdapCore = "org.springframework.ldap:spring-ldap-core:3.2.0"
+orgSpringframeworkLdapSpringLdapCore = "org.springframework.ldap:spring-ldap-core:3.2.1"
 orgSpringframeworkSecuritySpringSecurityLdap = { module = "org.springframework.security:spring-security-ldap", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityTest = { module = "org.springframework.security:spring-security-test", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityWeb = { module = "org.springframework.security:spring-security-web", version.ref = "orgSpringframeworkSecurity" }
