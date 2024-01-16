@@ -9,7 +9,7 @@ This can be useful for controlling the amount of tag values, which will be writt
 which in turn might lead to performance or memory issues in your time series database.
 
 The recorded tag values for each measure of an agent will be stored inside a local JSON file. This file serves
-as a tag-guard-database and helps to check, if tag values exceeded their limit.
+as the tag-guard-database and helps to check, if tag values exceeded their limit.
 
 ### Configuring Tag-Guard
 
