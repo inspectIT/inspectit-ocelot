@@ -3,6 +3,31 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
+## Breaking changes in 2.6.0
+
+### Git-Staging of Agent Mappings
+
+In addition to all agent configurations, the agent mappings will be staged as well now.
+Thus, it is possible to keep a version history of the agent mappings. 
+There have been changed to the agent-mappings-page in the configuration server.
+
+Furthermore, the source branch of the entire agent mappings configuration is adjustable. 
+Now you can choose, whether the agent mappings configuration should be used from `WORKSPACE` (like previously) 
+or from `LIVE` (promoted changes).
+You can find more information [here](config-server/agent-mappings.md#Git-Staging).
+
+### Tag-Guard
+
+The Tag-Guard allows to limit the amount of tag values, which will be exported for a specific tag of a specific measure.
+This may help to prevent high cardinalities in your time series database.
+
+The recorded tag values for each tag per measure of an agent will be stored inside a local JSON file. This file serves
+as the tag-guard-database and helps to check, if tag values exceeded their limit.
+If a tag value has exceeded its limit, the agent health will change to `ERROR`. Therefore, the configured limit should be
+evaluated carefully.
+You can find more information [here](metrics/tag-guard.md).
+
+
 ## Breaking changes in 2.4.0
 
 ### Sampling adjusted

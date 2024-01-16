@@ -40,7 +40,7 @@ This default agent mapping maps each agent to each configuration file of the `wo
 You can find more detailed information about file staging and promotion [here](config-server/files-staging.md).
 :::
 
-Since the version `2.5.7` the configuration for the agent mappings itself will also be included into the git staging. For all agent mappings 
+Since the version `2.6.0` the configuration for the agent mappings itself will also be included into the git staging. For all agent mappings 
 the configuration is stored in one file. After one or several agent mappings have been edited, the changes will also
 appear on the promotion page. The promotion of the agent mappings configuration works directly like the promotion of agent configuration files.
 
