@@ -27,7 +27,7 @@ Either [download](https://github.com/inspectIT/inspectit-ocelot-demo/archive/ref
 Execute the following command to launch the desired demo scenario (replace [SCENARIO_POSTFIX] with the postfix of the scenario you would like to launch):
 
 ```bash
-$ docker compose -f docker-compose-[SCENARIO_POSTFIX].yml up
+$ docker-compose -f docker-compose-[SCENARIO_POSTFIX].yml up
 ```
 
 This will start all the Docker containers required for the corresponding demo scenario, including the PetClinic demo application.
