@@ -54,6 +54,9 @@
     <logger name="rocks.inspectit.ocelot.rest.agent" level="debug">
         <appender-ref ref="accessFile"/>
     </logger>
+    <logger name="rocks.inspectit.ocelot.agentstatus" level="debug">
+        <appender-ref ref="accessFile"/>
+    </logger>
 
     <!-- User access logger -->
     <logger name="rocks.inspectit.ocelot.filters.AccessLogFilter">
