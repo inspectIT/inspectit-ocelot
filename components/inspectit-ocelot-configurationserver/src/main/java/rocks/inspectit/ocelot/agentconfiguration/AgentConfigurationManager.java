@@ -91,6 +91,7 @@ public class AgentConfigurationManager {
      */
     public AgentConfiguration getConfiguration(Map<String, String> agentAttributes) {
         AgentConfiguration myConfig = attributesToConfigurationCache.getUnchecked(agentAttributes);
+        log.debug("Found agent configuration: {}", myConfig != NO_MATCHING_MAPPING);
         return myConfig == NO_MATCHING_MAPPING ? null : myConfig;
     }
 
