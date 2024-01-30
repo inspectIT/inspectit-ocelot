@@ -293,10 +293,19 @@ class StatusTable extends React.Component {
 
   agentHealthTemplate = (rowData) => {
     const { onShowHealthStateDialog } = this.props;
-    const { healthState, metaInformation } = rowData;
-    const { health } = healthState;
-    const { agentId } = metaInformation;
     const { onShowDownloadDialog } = this.props;
+    const { metaInformation } = rowData;
+    const { agentId } = metaInformation;
+    // TODO Remove console.error() after agent health issues are solved
+    let health;
+    let healthState;
+    try {
+      healthState = rowData['healthState'];
+      health = healthState['health'];
+    } catch (error) {
+      console.error(`Could not read agent health from ${agentId}`, error);
+      console.error(rowData);
+    }
 
     let { agentCommandsEnabled, supportArchiveAvailable } = this.resolveServiceAvailability(metaInformation);
 

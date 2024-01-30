@@ -97,6 +97,7 @@ public class AgentStatusManager {
             logHealthIfChanged(statusKey, agentHealthState);
         }
 
+        log.debug("Storing agent status of {}: ({})", statusKey, agentStatus);
         attributesToAgentStatusCache.put(statusKey, agentStatus);
     }
 
