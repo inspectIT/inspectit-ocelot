@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Using OpenTelemetry Library with inspectIT Ocelot · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&gt;&lt;mark&gt; TODO: finish the configuration documentation when the migration to OTEL (with the OTEL bridge) is finished, i.e., when all exporters (including OTLP exporters) are supported"/><meta name="docsearch:version" content="2.6.2"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Using OpenTelemetry Library with inspectIT Ocelot · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content="&gt;&lt;mark&gt; TODO: finish the configuration documentation when the migration to OTEL (with the OTEL bridge) is finished, i.e., when all exporters (including OTLP exporters) are supported"/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>2.6.2</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/configuration/open-telemetry-configuration.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Using OpenTelemetry Library with inspectIT Ocelot</h1></header><article><div><span><blockquote>
+<p><mark> TODO: finish the configuration documentation when the migration to OTEL (with the OTEL bridge) is finished, i.e., when all exporters (including OTLP exporters) are supported
+</mark>
+If you plan to use the OpenTelemetry library in an application which will be instrumented later on with inspectIT Ocelot, some special rules do apply.
+Following these rules will make sure that there are no run-time problems in your application.
+Furthermore, a correct configuration will make it possible to combine metrics and traces that you manually collect using the OpenTelemetry instrumentation library with the ones collected by the inspectIT Ocelot agent.</p>
+</blockquote>
+<ol>
+<li><p>Make sure you are using the same version of OpenTelemetry as inspectIT Ocelot.</p>
+<p>The inspectIT Ocelot agent in version 2.6.2 internally uses OpenTelemetry in version {opentelemetry-version}. Please adapt any OpenTelemetry dependency in your application to this version to avoid run-time conflicts.</p>
+<pre><code class="hljs css language-XML"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>io.opentelemetry<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>opentelemetry-api<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>{opentelemetry-version}<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+</code></pre></li>
+<li><p>Set the JVM property <code>inspectit.publishOpenTelemetryToBootstrap</code> to <code>true</code>.</p>
+<pre><code class="hljs"><span class="hljs-attr">-Dinspectit.publishOpenTelemetryToBootstrap</span>=<span class="hljs-literal">true</span>
+</code></pre>
+<p>Setting the above property to <code>true</code> tells inspectIT Ocelot that you plan to use the OpenTelemetry library in combination with the agent. Note that this property must be specified with this exact name. The flexibility offered for all other config options does not apply here. The inspectIT Ocelot agent will make sure that all OpenTelemetry classes are then loaded by the bootstrap class loader. This ensures that OpenTelemetry implementation is shared between your manual instrumentation and the agent instrumentation, making the combination of data possible.</p></li>
+<li><p>Add the agent to the start of a JVM</p>
+<p>In this scenario, it is required that you add the agent via <a href="/inspectit-ocelot/docs/2.6.2/getting-started/installation#adding-the-agent-to-a-jvm">the <code>javaagent</code> JVM argument</a>. If the agent is successfully added to the JVM, it will log that the OpenTelemetry classes pushed to the bootstrap classloader will be used.</p>
+<p>It is important to state that the agent will <em>not</em> publish the OpenTelemetry classes to the bootstrap classloader if it is attached during runtime – even if the previously mentioned JVM argument is set! In this case, metrics and traces of <em>manual OpenTelemetry instrumentations</em> will <em>not</em> be collected by the inspectIT Ocelot agent.</p></li>
+</ol>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 1/30/2024 by Eduard Schander</em></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2024 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'P7JV0ZK66K',
+                apiKey: 'd499024131bf8d92e6d469a6c14f4798',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:2.6.2"]}
+              });
+            </script></body></html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Custom Metrics · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="One of the main benefits of inspectIT Ocelot is that it gives you complete"/><meta name="docsearch:version" content="2.6.2"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Custom Metrics · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content="One of the main benefits of inspectIT Ocelot is that it gives you complete"/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>2.6.2</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Metrics</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Getting Started<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/doc1">Hello World</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/getting-started/quick-start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/getting-started/docker-examples">Demo Application</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/getting-started/installation">Installation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/configuration/configuration-sources">Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/configuration/external-configuration-sources">External Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/configuration/logging-configuration">Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/configuration/open-census-configuration">OpenCensus Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/configuration/plugin-configuration">Plugin Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/configuration/agent-command-configuration">Agent Command Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Metrics<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/metrics/metrics">Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/metrics/metric-recorders">Metrics Recorders</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/metrics/metric-exporters">Metrics Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/metrics/common-tags">Common Tags</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/metrics/custom-metrics">Custom Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/metrics/self-monitoring">Self-Monitoring</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/metrics/tag-guard">Tag-Guard</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tracing<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/tracing/tracing">Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/tracing/trace-exporters">Trace Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/tracing/log-correlation">Log Correlation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/tracing/privacy">Data Privacy</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/tracing/tracing-self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tags<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/tags/tags-exporters">Tags Exporters</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/instrumentation/instrumentation">Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/instrumentation/scopes">Scopes</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/instrumentation/rules">Rules &amp; Actions</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/instrumentation/code-style">Configuration Code Style</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/instrumentation/special-sensors">Special Sensors</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/instrumentation/process">Instrumentation Process</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">End User Monitoring<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/enduser-monitoring/enduser-monitoring-server">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/enduser-monitoring/eum-server-setup">Server Setup</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/enduser-monitoring/eum-server-configuration">Server, Metrics and Exporter Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/enduser-monitoring/install-eum-agent">Install EUM Agent</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration Server<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/config-server/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/config-server/cs-configuration">Server Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/config-server/managing-files">Managing Files</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/config-server/files-staging">File Staging</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/config-server/agent-mappings">Agent Mappings</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/config-server/scope-wizard">Scope Wizard</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/config-server/class-browser">Class Browser</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/config-server/user-authentication">User Authentication</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/config-server/config-docs">Configuration Docs</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/config-server/log-config">Server Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/config-server/syntax-highlighting">YAML Editor Syntax Highlighting</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/config-server/status-table-view">Agent Status Table View</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Breaking Changes<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.2/breaking-changes/Breaking Changes">Breaking Changes</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/metrics/custom-metrics.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Custom Metrics</h1></header><article><div><span><p>One of the main benefits of inspectIT Ocelot is that it gives you complete
+freedom in what data you want to capture and how you want to capture it.
+You can easily define custom performance and business metrics depending on your needs.</p>
+<p>In this section we explain how you can define custom OpenCensus <a href="https://opencensus.io/stats/">metrics</a>
+and <a href="https://opencensus.io/stats/view/">views</a>. We only show how to define the structure of both,
+not how the data is collected. For details on the data collection please see the <a href="/inspectit-ocelot/docs/2.6.2/instrumentation/rules#collecting-metrics">instrumentation section</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="configuration"></a><a href="#configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Configuration</h2>
+<p>All metrics are defined under the <code>inspectit.metrics.definitions</code> property.
+This is best explained by giving a simple example which comes from the default
+configuration of inspectIT Ocelot:</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">metrics:</span>
+    <span class="hljs-attr">definitions:</span>
+      <span class="hljs-string">'[method/duration]'</span><span class="hljs-string">:</span>
+        <span class="hljs-attr">unit:</span> <span class="hljs-string">ms</span>
+        <span class="hljs-attr">description:</span> <span class="hljs-string">'the duration from method entry to method exit'</span>
+        <span class="hljs-attr">views:</span>
+          <span class="hljs-string">'[method/duration/sum]'</span><span class="hljs-string">:</span>
+            <span class="hljs-attr">aggregation:</span> <span class="hljs-string">SUM</span>
+            <span class="hljs-attr">tags:</span>
+              <span class="hljs-string">'method_name'</span> <span class="hljs-string">:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-string">'[method/duration/count]'</span><span class="hljs-string">:</span>
+            <span class="hljs-attr">aggregation:</span> <span class="hljs-string">COUNT</span>
+            <span class="hljs-attr">tags:</span>
+              <span class="hljs-attr">'method_name':</span> <span class="hljs-literal">true</span>
+</code></pre>
+<p>This snippet defines a metric with the name <code>method/duration</code> and the two views <code>method/duration/sum</code>
+and <code>method/duration/count</code>. Note that the special quoting syntax <code>'[...]'</code> is required because of
+the slashes in the names. As the name suggests, the first view stores the total sum of all observed
+response times whereas the second one stores the number of observations. These two views therefore allow
+us to compute the average, for example for creating dashboards.</p>
+<p>The configuration options given above are only a subset of the available options. The full set of options for metrics is shown below:</p>
+<table>
+<thead>
+<tr><th>Config Property</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>enabled</code></td><td><code>true</code></td><td>When a metric is not enabled, it and all of it's views will <em>not</em> be registered at the OpenCensus library.</td></tr>
+<tr><td><code>unit</code></td><td>-</td><td><em>Required</em>. A textual representation of the unit of the data represented by the metric.</td></tr>
+<tr><td><code>description</code></td><td>Generated based on name and unit</td><td>A textual description of the purpose of the metric.</td></tr>
+<tr><td><code>type</code></td><td><code>DOUBLE</code></td><td>Specifies whether the metric data is given as integer (<code>LONG</code>) or floating point number (<code>DOUBLE</code>).</td></tr>
+</tbody>
+</table>
+<p>For a metric to be exposed it is necessary to define <a href="https://opencensus.io/stats/view/">views</a> in OpenCensus.
+This can be done through the <code>views</code> config property shown in the sample YAML above.</p>
+<p>If you do not explicitly define any view for a metric you defined, inspectIT Ocelot will automatically generate one:
+The view will have the same name as the metric and will simply expose the last recorded value.
+As soon as you specify at least one view for a metric yourself, inspectIT will not add the default view.</p>
+<p>All configuration options for customizing views are given below:</p>
+<table>
+<thead>
+<tr><th>Config Property</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>enabled</code></td><td><code>true</code></td><td>When set to <code>false</code>, the view will not be registered at the OpenCensus library.</td></tr>
+<tr><td><code>description</code></td><td>Generated based on name and aggregation</td><td>A textual description of the purpose of this view.</td></tr>
+<tr><td><code>aggregation</code></td><td><code>LAST_VALUE</code></td><td>Specifies how the measurement data is aggregated in this view. Possible values are <code>LAST_VALUE</code>, <code>COUNT</code>, <code>SUM</code>, <code>HISTOGRAM</code> and <code>QUANTILES</code>. Except for <code>QUANTILES</code>, these correspond to the <a href="https://opencensus.io/stats/view/#aggregations">OpenCensus Aggregations</a>.</td></tr>
+<tr><td><code>with-common-tags</code></td><td><code>true</code></td><td>If true, all <a href="/inspectit-ocelot/docs/2.6.2/metrics/common-tags">common tags</a> will be used for this view. Individual tags can still be disabled via the <code>tags</code> option.</td></tr>
+<tr><td><code>tags</code></td><td><code>{}</code></td><td>Specifies which tags should be used for this view. <code>tags</code> is a map containing tag names as key and either <code>true</code> or false as value. For example the value <code>{service: false, my_tag: true}</code> would remove the common tag <code>service</code> from the view and add the user tag <code>my_tag</code> to it.</td></tr>
+<tr><td><code>bucket-boundaries</code></td><td>-</td><td><em>Required if aggregation is <code>HISTOGRAM</code>.</em> A list of the boundaries of the histogram buckets. E.g. <code>[7.5,42]</code> defines three histogram buckets split at <code>7.5</code> and <code>42</code>.</td></tr>
+<tr><td><code>quantiles</code></td><td><code>[0, 0.5, 0.9, 0.95, 0.99, 1]</code></td><td><em>Required if aggregation is <code>QUANTILES</code>.</em> A list of quantiles to capture - see the section below for details.</td></tr>
+<tr><td><code>time-window</code></td><td><code>${inspectit.metrics.frequency}</code></td><td><em>Required if aggregation is <code>QUANTILES</code>.</em> The time window over which the quantiles are captured.</td></tr>
+<tr><td><code>max-buffered-points</code></td><td><code>16384</code></td><td><em>Required if aggregation is <code>QUANTILES</code>.</em> A safety limit defining the maximum number of points to be buffered.</td></tr>
+</tbody>
+</table>
+
+    <div class="admonition admonition-note">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"/></svg></div> note</h5>
+      </div>
+      <div class="admonition-content">
+    <p>Due to a limitation of the current OpenCensus library, it is <strong>not possible to remove or alter views and metrics</strong> once they have been registered.</p>
+<p>However, you can still add new views and metrics through dynamic configuration updates after the agent has already started.</p>
+</div></div><h2><a class="anchor" aria-hidden="true" id="quantile-views"></a><a href="#quantile-views" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Quantile Views</h2>
+<p>OpenCensus itself does not provide support for computing quantiles or the minimum and maximum value of a given metric.
+However, the average value alone is not always useful when analyzing response times.
+Hereby, the <code>HISTOGRAM</code> aggregation can help, however, it can be very difficult to define the boundaries of the histogram.
+For this reason, the inspectIT Ocelot agent contains a custom implemented aggregation type, providing the possibility to compute quantiles for any metric on top of OpenCensus.</p>
+<p>The calculation of quantiles is done by keeping <strong>all</strong> observed values for a given metric in memory over a fixed time window.
+This time window can be configured using the <code>time-window</code> option of the view, which defaults to <code>15s</code>.
+You can use this feature by settings the <code>aggregation</code> of your view to <code>QUANTILES</code>.</p>
+<p>The quantiles to export can be defined via the <code>quantiles</code> option of the view, where values from <code>0</code> to <code>1</code> can be specified.</p>
+<p>Whenever the recorded metrics are exported, inspectIT Ocelot computes the requested quantiles adhoc based on the buffered values of the given metric.
+For example, when using the default time window of 15 seconds, the inspectIT Ocelot agent will expose the quantiles of the metric values observed within the last 15 seconds at the point of time when doing the export.
+For this reason, <code>time-window</code> property should always be <strong>equal or greater</strong> than your metrics scrape or export interval.</p>
+
+    <div class="admonition admonition-important">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"/></svg></div> important</h5>
+      </div>
+      <div class="admonition-content">
+    <p>It is important to note that depending on the amount of gathered data the computations of percentiles can be a lot more expensive than just sums or histograms!
+To avoid that this feature causes a too high memory footprint, the <code>max-buffered-points</code> property exists, limiting the amount of data buffered for a view.
+The default value of <code>16384</code> was chosen so that the view can handle roughly 1000 data points per second with the default time window of <code>15s</code>.</p>
+<p>If this limit is exceeded, the quantiles will become meaningless due to data dropping and a warning will be printed in the logs.</p>
+</div></div><h3><a class="anchor" aria-hidden="true" id="collecting-min-and-max-values"></a><a href="#collecting-min-and-max-values" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Collecting Min and Max Values</h3>
+<p>The quantiles aggregation of a view also allows the capturing of minimum and maximum values of metrics.
+This can be done by using the special quantiles <code>0</code> and <code>1</code>, which enables the export of the minimum and maximum observed value respectively.</p>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 1/30/2024 by Eduard Schander</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/2.6.2/metrics/common-tags"><span class="arrow-prev">← </span><span>Common Tags</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/2.6.2/metrics/self-monitoring"><span>Self-Monitoring</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#configuration">Configuration</a></li><li><a href="#quantile-views">Quantile Views</a><ul class="toc-headings"><li><a href="#collecting-min-and-max-values">Collecting Min and Max Values</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2024 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'P7JV0ZK66K',
+                apiKey: 'd499024131bf8d92e6d469a6c14f4798',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:2.6.2"]}
+              });
+            </script></body></html>
