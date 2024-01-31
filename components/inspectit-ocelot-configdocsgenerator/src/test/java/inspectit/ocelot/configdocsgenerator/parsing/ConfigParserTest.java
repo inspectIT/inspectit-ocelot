@@ -47,7 +47,6 @@ class ConfigParserTest {
 
         @Test
         void withPlaceholder() throws IOException {
-
             String configYaml = getYaml("configWithPlaceholder.yml");
 
             InspectitConfig result = configParser.parseConfig(configYaml);
@@ -113,7 +112,6 @@ class ConfigParserTest {
 
         @Test
         void withDuration() throws IOException {
-
             String configYaml = getYaml("configWithDuration.yml");
 
             InspectitConfig result = configParser.parseConfig(configYaml);
@@ -126,7 +124,6 @@ class ConfigParserTest {
 
         @Test
         void withDocumentation() throws IOException {
-
             String configYaml = getYaml("configWithDocumentation.yml");
 
             InspectitConfig result = configParser.parseConfig(configYaml);
@@ -151,6 +148,15 @@ class ConfigParserTest {
 
             assertThat(result.getInstrumentation().getActions().get("a_debug_println")).usingRecursiveComparison()
                     .isEqualTo(actionSettingsMock);
+        }
+
+        @Test
+        void withoutFurtherProperties() throws IOException {
+            String configYaml = getYaml("configWithoutFurtherProperties.yml");
+
+            InspectitConfig result = configParser.parseConfig(configYaml);
+
+            assertThat(result).isEqualTo(new InspectitConfig());
         }
 
         @Test
