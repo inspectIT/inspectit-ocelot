@@ -48,6 +48,10 @@ public class ConfigParser {
             factory.setResources(new FileUrlResource(tempFile.getAbsolutePath()));
             Properties properties = factory.getObject();
 
+            // if the inspectit object does not contain further properties, like this "inspectit.config.http.url"
+            if(properties != null && properties.containsKey("inspectit"))
+                return new InspectitConfig();
+
             // Create ConfigurationPropertySource from Properties
             ConfigurationPropertySource propertySource = new MapConfigurationPropertySource(properties);
             // Add to list because Binder expects Iterable<ConfigurationPropertySource>
