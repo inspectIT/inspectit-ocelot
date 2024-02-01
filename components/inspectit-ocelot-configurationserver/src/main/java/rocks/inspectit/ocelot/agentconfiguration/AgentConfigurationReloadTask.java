@@ -85,8 +85,6 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         }
 
         onTaskSuccess(newConfigurations);
-        log.info("Finishing configuration reloading...");
-
         // add docsObjects afterward to provide agent configurations earlier
         runDocsObjectsTask(newConfigurations);
     }
@@ -122,7 +120,6 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
 
         String taskName = getClass().getSimpleName() + ".DocsObjectsTask";
         onTaskSuccess(newConfigurations, taskName);
-        log.info("Finishing configuration reloading with documented objects...");
     }
 
     /**
