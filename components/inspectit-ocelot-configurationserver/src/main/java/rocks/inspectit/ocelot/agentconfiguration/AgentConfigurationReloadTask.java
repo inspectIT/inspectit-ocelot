@@ -64,53 +64,55 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         List<AgentConfiguration> newConfigurations = new ArrayList<>();
         for (AgentMapping mapping : mappingsToLoad) {
             try {
-                AgentConfiguration agentConfiguration = createAgentConfiguration(mapping);
+                String configYaml = loadConfigForMapping(mapping);
                 if (isCanceled()) {
                     log.debug("Configuration reloading canceled");
                     return;
                 }
+                AgentConfiguration agentConfiguration = AgentConfiguration.builder()
+                        .mapping(mapping)
+                        .configYaml(configYaml)
+                        .docsObjectsByFile(new HashMap<>()) // leave docsObjectsByFile empty for now
+                        .build();
                 newConfigurations.add(agentConfiguration);
             } catch (Exception e) {
-                log.error("Could not load agent configuration for agent mapping '{}'.", mapping.name(), e);
+                log.error("Could not load agent mapping '{}'.", mapping.name(), e);
             }
         }
+
         onTaskSuccess(newConfigurations);
+        log.info("Finishing configuration reloading...");
+
+        // add docsObjects afterward to provide agent configurations earlier
+        addDocsObjectsTask(newConfigurations);
     }
 
-    /**
-     * Creates the configuration for one agent with the provided agent mapping
-     * @param mapping the mapping to load
-     *
-     * @return Configuration for the agent mapping
-     */
-    @VisibleForTesting
-    AgentConfiguration createAgentConfiguration(AgentMapping mapping) {
-        AbstractFileAccessor fileAccessor = getFileAccessorForMapping(mapping);
+    private void addDocsObjectsTask(List<AgentConfiguration> newConfigurations) {
+        log.info("Starting configuration reloading with documented objects...");
+        for (AgentConfiguration configuration : newConfigurations) {
+            AgentMapping mapping = configuration.getMapping();
+            try {
+                AbstractFileAccessor fileAccessor = getFileAccessorForMapping(mapping);
 
-        LinkedHashSet<String> allYamlFiles = new LinkedHashSet<>();
-        for (String path : mapping.sources()) {
-            if (isCanceled()) return null;
-            allYamlFiles.addAll(getAllYamlFiles(fileAccessor, path));
+                LinkedHashSet<String> allYamlFiles = loadAllYamlFilesForMapping(fileAccessor, mapping);
+
+                Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
+                for (String path : allYamlFiles) {
+                    if (isCanceled()) return;
+                    String src = fileAccessor.readConfigurationFile(path).orElse("");
+
+                    Set<String> loadedObjects = loadDocsObjects(src, path);
+                    docsObjectsByFile.put(path, loadedObjects);
+                }
+
+                configuration.setDocsObjectsByFile(docsObjectsByFile);
+            } catch (Exception e) {
+                log.error("Could not load documented objects for agent mapping '{}'.", mapping.name(), e);
+            }
         }
 
-        Object yamlResult = null;
-        Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
-
-        for (String path : allYamlFiles) {
-            if (isCanceled()) return null;
-            String src = fileAccessor.readConfigurationFile(path).orElse("");
-
-            Set<String> loadedObjects = loadDocsObjects(src, path);
-            docsObjectsByFile.put(path, loadedObjects);
-            yamlResult = loadAndMergeYaml(yamlResult, src, path);
-        }
-        String configYaml = yamlResult == null ? "" : new Yaml().dump(yamlResult);
-
-        return AgentConfiguration.builder()
-                .mapping(mapping)
-                .docsObjectsByFile(docsObjectsByFile)
-                .configYaml(configYaml)
-                .build();
+        onTaskSuccess(newConfigurations);
+        log.info("Finishing configuration reloading with documented objects...");
     }
 
     /**
@@ -132,16 +134,58 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
     }
 
     /**
+     * Loads the given mapping as yaml string.
+     *
+     * @param mapping the mapping to load
+     *
+     * @return the merged yaml for the given mapping or an empty string if the mapping does not contain any existing files
+     * If this task has been canceled, null is returned.
+     */
+    @VisibleForTesting
+    String loadConfigForMapping(AgentMapping mapping) {
+        AbstractFileAccessor fileAccessor = getFileAccessorForMapping(mapping);
+
+        LinkedHashSet<String> allYamlFiles = loadAllYamlFilesForMapping(fileAccessor, mapping);
+
+        Object result = null;
+        for (String path : allYamlFiles) {
+            if (isCanceled()) {
+                return null;
+            }
+            result = loadAndMergeYaml(fileAccessor, result, path);
+        }
+        return result == null ? "" : new Yaml().dump(result);
+    }
+
+    /**
+     *
+     * @param fileAccessor
+     * @param mapping
+     * @return
+     */
+    private LinkedHashSet<String> loadAllYamlFilesForMapping(AbstractFileAccessor fileAccessor, AgentMapping mapping) {
+        LinkedHashSet<String> allYamlFiles = new LinkedHashSet<>();
+        for (String path : mapping.sources()) {
+            if (isCanceled()) {
+                return null;
+            }
+            List<String> yamlFiles = getAllYamlFiles(fileAccessor, path);
+            allYamlFiles.addAll(yamlFiles);
+        }
+        return allYamlFiles;
+    }
+
+    /**
      * Loads a yaml file as a Map/List structure and merges it with an existing map/list structure
      *
      * @param toMerge the existing structure of nested maps / lists with which the loaded yaml will be merged.
-     * @param src the yaml string
-     * @param path the path of the yaml file to load
+     * @param path    the path of the yaml file to load
      *
      * @return the merged structure
      */
-    private Object loadAndMergeYaml(Object toMerge, String src, String path) {
+    private Object loadAndMergeYaml(AbstractFileAccessor fileAccessor, Object toMerge, String path) {
         Yaml yaml = new Yaml();
+        String src = fileAccessor.readConfigurationFile(path).orElse("");
         try {
             Map<String, Object> loadedYaml = yaml.load(src);
             if (toMerge == null) {
