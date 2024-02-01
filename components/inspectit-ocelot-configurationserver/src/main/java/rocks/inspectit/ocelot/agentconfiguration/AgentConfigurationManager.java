@@ -49,6 +49,9 @@ public class AgentConfigurationManager {
     @Autowired
     private FileManager fileManager;
 
+    @Autowired
+    private DocsObjectsLoader docsObjectsLoader;
+
     /**
      * List of current AgentConfigurations for retrieval of AgentConfiguration corresponding to AgentMapping in
      * {@link AgentConfigurationManager#getConfigurationForMapping(AgentMapping)}.
@@ -78,7 +81,7 @@ public class AgentConfigurationManager {
         if (reloadTask != null) {
             reloadTask.cancel();
         }
-        reloadTask = new AgentConfigurationReloadTask(mappingsSerializer, fileManager, this::replaceConfigurations);
+        reloadTask = new AgentConfigurationReloadTask(mappingsSerializer, fileManager, docsObjectsLoader, this::replaceConfigurations);
         executorService.submit(reloadTask);
     }
 

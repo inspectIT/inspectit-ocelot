@@ -51,6 +51,9 @@ public class ConfigurationController extends AbstractBaseController {
     @Autowired
     private DefaultConfigController defaultConfigController;
 
+    @Autowired
+    private DocsObjectsLoader docsObjectsLoader;
+
     // Not final to make mocking in test possible
     private ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator();
 
@@ -125,7 +128,7 @@ public class ConfigurationController extends AbstractBaseController {
                         combined = ObjectStructureMerger.merge(combined, loadedYaml);
                     }
                     configYaml = yaml.dump(combined);
-                    Map<String, Set<String>> defaultObjectsByFile = DocsObjectsLoader.loadDefaultDocsObjectsByFile(defaultYamls);
+                    Map<String, Set<String>> defaultObjectsByFile = docsObjectsLoader.loadDefaultDocsObjectsByFile(defaultYamls);
                     docsObjectsByFile.putAll(defaultObjectsByFile);
                 }
 

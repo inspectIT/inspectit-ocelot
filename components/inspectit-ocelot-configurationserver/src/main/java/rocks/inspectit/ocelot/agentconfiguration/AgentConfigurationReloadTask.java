@@ -32,6 +32,8 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
 
     private AgentMappingSerializer mappingsSerializer;
 
+    private DocsObjectsLoader docsObjectsLoader;
+
     /**
      * Creates a new reload task, but does NOT start it.
      * The loading process is done in {@link #run()}.
@@ -40,10 +42,12 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
      * @param fileManager        the FileManager used to read the configuration files
      * @param onLoadCallback     invoked when the loading has finished successfully. Will not be invoked if the loading failed or was canceled.
      */
-    public AgentConfigurationReloadTask(AgentMappingSerializer mappingsSerializer, FileManager fileManager, Consumer<List<AgentConfiguration>> onLoadCallback) {
+    public AgentConfigurationReloadTask(AgentMappingSerializer mappingsSerializer, FileManager fileManager,
+                                        DocsObjectsLoader docsObjectsLoader, Consumer<List<AgentConfiguration>> onLoadCallback) {
         super(onLoadCallback);
         this.mappingsSerializer = mappingsSerializer;
         this.fileManager = fileManager;
+        this.docsObjectsLoader = docsObjectsLoader;
     }
 
     /**
@@ -126,7 +130,7 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
     private Set<String> loadDocsObjects(String src, String filePath) {
         Set<String> objects = Collections.emptySet();
         try {
-            objects = DocsObjectsLoader.loadObjects(src);
+            objects = docsObjectsLoader.loadObjects(src);
         } catch (Exception e) {
             log.warn("Could not parse configuration: {}", filePath, e);
         }

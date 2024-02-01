@@ -16,10 +16,7 @@ import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -42,13 +39,16 @@ public class AgentConfigurationReloadTaskTest {
     FileManager fileManager;
 
     @Mock
+    DocsObjectsLoader docsObjectsLoader;
+
+    @Mock
     RevisionAccess liveAccessor;
 
     @Mock
     RevisionAccess workspaceAccessor;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         lenient().when(fileManager.getWorkspaceRevision()).thenReturn(workspaceAccessor);
         lenient().when(fileManager.getLiveRevision()).thenReturn(liveAccessor);
         lenient().when(serializer.getRevisionAccess()).thenReturn(workspaceAccessor);
@@ -58,7 +58,7 @@ public class AgentConfigurationReloadTaskTest {
     class Run {
 
         @Test
-        public void loadWithException() {
+        void loadWithException() {
             FileInfo fileInfo = mock(FileInfo.class);
             when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"), Stream.of("/test.yml"));
             when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
@@ -83,7 +83,7 @@ public class AgentConfigurationReloadTaskTest {
             MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
             Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
 
-            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, consumer);
+            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, docsObjectsLoader, consumer);
 
             task.run();
 
@@ -95,7 +95,7 @@ public class AgentConfigurationReloadTaskTest {
         }
 
         @Test
-        public void loadWithExceptionOnlyString() {
+        void loadWithExceptionOnlyString() {
             FileInfo fileInfo = mock(FileInfo.class);
             when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"), Stream.of("/test.yml"));
             when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
@@ -120,7 +120,7 @@ public class AgentConfigurationReloadTaskTest {
             MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
             Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
 
-            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, consumer);
+            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, docsObjectsLoader, consumer);
 
             task.run();
 
@@ -132,7 +132,7 @@ public class AgentConfigurationReloadTaskTest {
         }
 
         @Test
-        public void loadWithExceptionOnlyList() {
+        void loadWithExceptionOnlyList() {
             FileInfo fileInfo = mock(FileInfo.class);
             when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"), Stream.of("/test.yml"));
             when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
@@ -157,7 +157,7 @@ public class AgentConfigurationReloadTaskTest {
             MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
             Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
 
-            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, consumer);
+            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, docsObjectsLoader, consumer);
 
             task.run();
 
@@ -169,7 +169,7 @@ public class AgentConfigurationReloadTaskTest {
         }
 
         @Test
-        public void loadMappingFromWorkspace() {
+        void loadMappingFromWorkspace() {
             when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
 
             AgentMapping mapping = AgentMapping.builder()
@@ -181,7 +181,7 @@ public class AgentConfigurationReloadTaskTest {
             MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
             Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
 
-            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, consumer);
+            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, docsObjectsLoader, consumer);
             task.run();
 
             verify(serializer, times(1)).readAgentMappings(workspaceAccessor);
@@ -189,7 +189,7 @@ public class AgentConfigurationReloadTaskTest {
         }
 
         @Test
-        public void loadMappingFromLive() {
+        void loadMappingFromLive() {
             lenient().when(serializer.getRevisionAccess()).thenReturn(liveAccessor);
             when(liveAccessor.agentMappingsExist()).thenReturn(true);
 
@@ -202,7 +202,7 @@ public class AgentConfigurationReloadTaskTest {
             MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
             Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
 
-            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, consumer);
+            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, docsObjectsLoader, consumer);
             task.run();
 
             verify(serializer, times(0)).readAgentMappings(workspaceAccessor);
@@ -211,10 +211,48 @@ public class AgentConfigurationReloadTaskTest {
     }
 
     @Nested
+    class AddDocsObjectsTask {
+
+        @Test
+        void verifyDocsObjectsHaveBeenAdded() throws IOException {
+            FileInfo fileInfo = mock(FileInfo.class);
+            String fileName = "/test.yml";
+            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(fileName), Stream.of(fileName));
+            when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
+            when(workspaceAccessor.configurationFileExists(anyString())).thenReturn(true);
+            when(workspaceAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
+            when(workspaceAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
+
+            Set<String> docsObjects = Set.of("s_myScope", "r_myRule", "a_myAction", "myMetric");
+            when(docsObjectsLoader.loadObjects(any())).thenReturn(docsObjects);
+            Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
+            docsObjectsByFile.put(fileName, docsObjects);
+
+            AgentMapping mapping = AgentMapping.builder()
+                    .name("test")
+                    .source("/test")
+                    .sourceBranch(WORKSPACE)
+                    .build();
+            doReturn(Collections.singletonList(mapping)).when(serializer).readAgentMappings(any());
+            MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
+            Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
+
+            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, docsObjectsLoader, consumer);
+            task.run();
+
+            List<AgentConfiguration> configurationList = configurations.getValue();
+            assertThat(configurationList).hasSize(1);
+            assertThat(configurationList).element(0)
+                    .extracting(AgentConfiguration::getDocsObjectsByFile)
+                    .isEqualTo(docsObjectsByFile);
+        }
+    }
+
+    @Nested
     class LoadAndMergeYaml {
 
         @Test
-        public void loadYaml()  {
+        void loadYaml()  {
             FileInfo fileInfo = mock(FileInfo.class);
             when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"));
             when(workspaceAccessor.configurationFileExists("test")).thenReturn(true);
@@ -233,7 +271,7 @@ public class AgentConfigurationReloadTaskTest {
         }
 
         @Test
-        public void yamlWithTab() {
+        void yamlWithTab() {
             FileInfo fileInfo = mock(FileInfo.class);
             when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"));
             when(workspaceAccessor.configurationFileExists("test")).thenReturn(true);
