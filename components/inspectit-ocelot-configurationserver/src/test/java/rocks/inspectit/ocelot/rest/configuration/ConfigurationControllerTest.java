@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.yaml.snakeyaml.Yaml;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
+import rocks.inspectit.ocelot.agentconfiguration.DocsObjectsLoader;
 import rocks.inspectit.ocelot.agentconfiguration.ObjectStructureMerger;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
@@ -52,6 +53,9 @@ public class ConfigurationControllerTest {
 
     @Mock
     private DefaultConfigController defaultConfigController;
+
+    @Mock
+    private DocsObjectsLoader docsObjectsLoader;
 
     @Mock
     private Yaml yaml;

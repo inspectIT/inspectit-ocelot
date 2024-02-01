@@ -43,13 +43,24 @@ public abstract class CancellableTask<R> implements Runnable {
      * @param result the result of the task, which will be provided to the configured {@link #onLoadCallback}.
      */
     protected final void onTaskSuccess(R result) {
+        onTaskSuccess(result, getClass().getSimpleName());
+    }
+
+    /**
+     * Should be invoked by the {@link #run()} method when this task has finished.
+     * This guarantees that {@link #onLoadCallback} is only invoked if the task has not been canceled.
+     *
+     * @param result the result of the task, which will be provided to the configured {@link #onLoadCallback}.
+     * @param taskName the custom name of the task
+     */
+    protected final void onTaskSuccess(R result, String taskName) {
         synchronized (this) {
             if (cancelFlag) {
-                log.debug("{} canceled", getClass().getSimpleName());
+                log.debug("{} canceled", taskName);
                 return;
             }
             onLoadCallback.accept(result);
-            log.info("{} successfully finished", getClass().getSimpleName());
+            log.info("{} successfully finished", taskName);
         }
     }
 }

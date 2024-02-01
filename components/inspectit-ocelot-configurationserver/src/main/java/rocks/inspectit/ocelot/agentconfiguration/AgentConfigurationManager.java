@@ -123,7 +123,7 @@ public class AgentConfigurationManager {
         attributesToConfigurationCache = CacheBuilder.newBuilder()
                 .maximumSize(config.getMaxAgents())
                 .expireAfterAccess(config.getAgentEvictionDelay().toMillis(), TimeUnit.MILLISECONDS)
-                .build(new CacheLoader<Map<String, String>, AgentConfiguration>() {
+                .build(new CacheLoader<>() {
                     @Override
                     public AgentConfiguration load(Map<String, String> agentAttributes) {
                         return newConfigurations.stream()

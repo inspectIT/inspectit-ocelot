@@ -88,17 +88,22 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         log.info("Finishing configuration reloading...");
 
         // add docsObjects afterward to provide agent configurations earlier
-        addDocsObjectsTask(newConfigurations);
+        runDocsObjectsTask(newConfigurations);
     }
 
-    private void addDocsObjectsTask(List<AgentConfiguration> newConfigurations) {
+    /**
+     * After the loading of the agent configurations, these should be appended by their specific docsObjects.
+     *
+     * @param newConfigurations the list of agent configurations, which were loaded
+     */
+    private void runDocsObjectsTask(List<AgentConfiguration> newConfigurations) {
         log.info("Starting configuration reloading with documented objects...");
         for (AgentConfiguration configuration : newConfigurations) {
             AgentMapping mapping = configuration.getMapping();
             try {
                 AbstractFileAccessor fileAccessor = getFileAccessorForMapping(mapping);
 
-                LinkedHashSet<String> allYamlFiles = loadAllYamlFilesForMapping(fileAccessor, mapping);
+                LinkedHashSet<String> allYamlFiles = getAllYamlFilesForMapping(fileAccessor, mapping);
 
                 Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
                 for (String path : allYamlFiles) {
@@ -115,12 +120,13 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
             }
         }
 
-        onTaskSuccess(newConfigurations);
+        String taskName = getClass().getSimpleName() + ".DocsObjectsTask";
+        onTaskSuccess(newConfigurations, taskName);
         log.info("Finishing configuration reloading with documented objects...");
     }
 
     /**
-     * Loads all documentable objects of the yaml source string
+     * Loads all documentable objects of the yaml source string.
      *
      * @param src the yaml string
      * @param filePath the path to the yaml file
@@ -149,7 +155,7 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
     String loadConfigForMapping(AgentMapping mapping) {
         AbstractFileAccessor fileAccessor = getFileAccessorForMapping(mapping);
 
-        LinkedHashSet<String> allYamlFiles = loadAllYamlFilesForMapping(fileAccessor, mapping);
+        LinkedHashSet<String> allYamlFiles = getAllYamlFilesForMapping(fileAccessor, mapping);
 
         Object result = null;
         for (String path : allYamlFiles) {
@@ -162,12 +168,15 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
     }
 
     /**
+     * Returns the set of yaml files, which is defined in the agent mapping sources.
      *
-     * @param fileAccessor
-     * @param mapping
-     * @return
+     * @param fileAccessor the accessor to use for reading the file
+     * @param mapping the mapping, which contains a list of source file paths
+     *
+     * @return the set of yaml file paths for the provided mapping
+     * If this task has been canceled, null is returned.
      */
-    private LinkedHashSet<String> loadAllYamlFilesForMapping(AbstractFileAccessor fileAccessor, AgentMapping mapping) {
+    private LinkedHashSet<String> getAllYamlFilesForMapping(AbstractFileAccessor fileAccessor, AgentMapping mapping) {
         LinkedHashSet<String> allYamlFiles = new LinkedHashSet<>();
         for (String path : mapping.sources()) {
             if (isCanceled()) {
@@ -180,7 +189,7 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
     }
 
     /**
-     * Loads a yaml file as a Map/List structure and merges it with an existing map/list structure
+     * Loads a yaml file as a Map/List structure and merges it with an existing map/list structure.
      *
      * @param toMerge the existing structure of nested maps / lists with which the loaded yaml will be merged.
      * @param path    the path of the yaml file to load
@@ -202,11 +211,17 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         }
     }
 
+    /**
+     * Returns the file accessor with regard to the source branch of the agent mapping.
+     *
+     * @param mapping the agent mapping with source branch
+     *
+     * @return the file accessor for the mapping source branch
+     */
     private AbstractFileAccessor getFileAccessorForMapping(AgentMapping mapping) {
         return switch (mapping.sourceBranch()) {
             case LIVE -> fileManager.getLiveRevision();
             case WORKSPACE -> fileManager.getWorkspaceRevision();
-            default -> throw new UnsupportedOperationException("Unhandled branch: " + mapping.sourceBranch());
         };
     }
 
