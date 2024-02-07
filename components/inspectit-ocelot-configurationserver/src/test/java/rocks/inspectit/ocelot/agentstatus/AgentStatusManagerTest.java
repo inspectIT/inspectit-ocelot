@@ -13,10 +13,7 @@ import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,7 +41,7 @@ public class AgentStatusManagerTest {
         void testWithAgentIdHeader() {
             Branch testBranch = Branch.WORKSPACE;
             AgentMapping agentMapping = AgentMapping.builder().name("test-conf").sourceBranch(testBranch).build();
-            AgentConfiguration config = AgentConfiguration.create(agentMapping, new HashMap<>(), "");
+            AgentConfiguration config = AgentConfiguration.create(agentMapping, new HashSet<>(), "");
             Map<String, String> attributes = ImmutableMap.of("service", "test");
 
             manager.notifyAgentConfigurationFetched(attributes, Collections.singletonMap(HEADER_AGENT_ID, "aid"), config);
@@ -76,7 +73,7 @@ public class AgentStatusManagerTest {
         void testMappingFound() {
             Branch testBranch = Branch.WORKSPACE;
             AgentMapping agentMapping = AgentMapping.builder().name("test-conf").sourceBranch(testBranch).build();
-            AgentConfiguration config = AgentConfiguration.create(agentMapping, new HashMap<>(), "");;
+            AgentConfiguration config = AgentConfiguration.create(agentMapping, new HashSet<>(),"");;
             Map<String, String> attributes = ImmutableMap.of("service", "test");
 
             manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), config);
@@ -93,7 +90,7 @@ public class AgentStatusManagerTest {
         void testOverriding() throws Exception {
             Branch testBranch = Branch.WORKSPACE;
             AgentMapping agentMapping = AgentMapping.builder().name("test-conf").sourceBranch(testBranch).build();
-            AgentConfiguration config = AgentConfiguration.create(agentMapping, new HashMap<>(), "");
+            AgentConfiguration config = AgentConfiguration.create(agentMapping, new HashSet<>(),"");
             Map<String, String> attributes = ImmutableMap.of("service", "test");
 
             manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), null);

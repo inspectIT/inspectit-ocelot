@@ -18,6 +18,7 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -60,7 +61,7 @@ public class AgentServiceTest {
             String configYaml = String.format("inspectit.log-preloading: {enabled: %b}", logPreloadingEnabled);
 
             //set config
-            config = AgentConfiguration.create(null, new HashMap<>(), configYaml);
+            config = AgentConfiguration.create(null, new HashSet<>(), configYaml);
 
             //set attributes
             attributes = new HashMap<String, String>() {{

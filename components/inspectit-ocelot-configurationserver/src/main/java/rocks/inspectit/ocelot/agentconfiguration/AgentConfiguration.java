@@ -12,7 +12,6 @@ import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -26,7 +25,7 @@ public class AgentConfiguration {
     /**
      * Used as maker in {@link #attributesToConfigurationCache} to mark attribute-maps for which no mapping matches.
      */
-    public static final AgentConfiguration NO_MATCHING_MAPPING = createDefaultConfiguration();
+    public static AgentConfiguration NO_MATCHING_MAPPING = createDefault();
 
     /**
      * Predicate to check if a given file path ends with .yml or .yaml
@@ -40,17 +39,10 @@ public class AgentConfiguration {
     private AgentMapping mapping;
 
     /**
-     * The set of defined documentable objects in this configuration for each file. <br>
-     * The map might be initialized after constructing the AgentConfiguration. <br>
-     * - Key: the file path <br>
-     * - Value: the set of objects, like actions, scopes, rules & metrics
+     * The list of suppliers for documentable objects. <br>
+     * There is a setset of defined documentable objects in this configuration for each file.
      */
-    private Map<String, Set<String>> docsObjectsByFile;
-
-    /**
-     * The set of suppliers for the defined documentable objects in this configuration for each file
-     */
-    private static final Map<String, Supplier<Set<String>>> docsObjectsByFileSuppliers = new HashMap<>();
+    private static Set<AgentDocumentationSupplier> docsSuppliers = new HashSet<>();
 
     /**
      * The merged YAML configuration for the given mapping.
@@ -62,9 +54,15 @@ public class AgentConfiguration {
      */
     private String hash;
 
-    private AgentConfiguration(AgentMapping mapping, Map<String, Set<String>> docsObjectsByFile, String configYaml, String hash) {
+    private AgentConfiguration(AgentMapping mapping, String configYaml, String hash) {
         this.mapping = mapping;
-        this.docsObjectsByFile = docsObjectsByFile;
+        this.configYaml = configYaml;
+        this.hash = hash;
+    }
+
+    private AgentConfiguration(AgentMapping mapping, Set<AgentDocumentationSupplier> agentDocsSuppliers, String configYaml, String hash) {
+        this.mapping = mapping;
+        docsSuppliers = agentDocsSuppliers;
         this.configYaml = configYaml;
         this.hash = hash;
     }
@@ -79,7 +77,7 @@ public class AgentConfiguration {
     public static AgentConfiguration create(AgentMapping mapping, AbstractFileAccessor fileAccessor) {
         String configYaml = loadConfigForMapping(mapping, fileAccessor);
         String hash = DigestUtils.md5DigestAsHex(configYaml.getBytes(Charset.defaultCharset()));
-        return new AgentConfiguration(mapping, new HashMap<>(), configYaml, hash);
+        return new AgentConfiguration(mapping, configYaml, hash);
     }
 
     /**
@@ -87,22 +85,13 @@ public class AgentConfiguration {
      * Also creates a cryptographic hash.
      *
      * @param mapping The agent mapping for which this instance represents the loaded configuration
+     * @param docsSuppliers The set of
      * @param configYaml The yaml string, which contains the configuration
-     * @param docsObjectsByFile The set of defined documentable objects in this configuration for each file
      * @return Created AgentConfiguration
      */
-    public static AgentConfiguration create(AgentMapping mapping, Map<String, Set<String>> docsObjectsByFile, String configYaml) {
+    public static AgentConfiguration create(AgentMapping mapping, Set<AgentDocumentationSupplier> docsSuppliers, String configYaml) {
         String hash = DigestUtils.md5DigestAsHex(configYaml.getBytes(Charset.defaultCharset()));
-        return new AgentConfiguration(mapping, docsObjectsByFile, configYaml, hash);
-    }
-
-    /**
-     * Apply suppliers to get the documentable objects by file and store them
-     */
-    public void supplyDocsObjectsByFile() {
-        for (Map.Entry<String, Supplier<Set<String>>> entry : docsObjectsByFileSuppliers.entrySet()) {
-            this.docsObjectsByFile.put(entry.getKey(), entry.getValue().get());
-        }
+        return new AgentConfiguration(mapping, docsSuppliers, configYaml, hash);
     }
 
     /**
@@ -110,10 +99,22 @@ public class AgentConfiguration {
      *
      * @return Created default AgentConfiguration
      */
-    private static AgentConfiguration createDefaultConfiguration() {
+    public static AgentConfiguration createDefault() {
         String configYaml = "";
         String hash = DigestUtils.md5DigestAsHex(configYaml.getBytes(Charset.defaultCharset()));
-        return new AgentConfiguration(null, new HashMap<>(), configYaml, hash);
+        return new AgentConfiguration(null, new HashSet<>(), configYaml, hash);
+    }
+
+    /**
+     * Convert the set of agent documentation suppliers to a map
+     * @return the sets of documentable objects for each file
+     */
+    public Map<String, Set<String>> getDocsObjectsAsMap() {
+        return docsSuppliers.stream()
+                .collect(Collectors.toMap(
+                        docsSupplier -> docsSupplier.get().filePath(),
+                        docsSupplier -> docsSupplier.get().objects()
+                ));
     }
 
     /**
@@ -133,8 +134,8 @@ public class AgentConfiguration {
             String src = fileAccessor.readConfigurationFile(path).orElse("");
             result = ObjectStructureMerger.loadAndMergeYaml(src, result, path);
 
-            Supplier<Set<String>> docsObjectsSupplier = () -> loadDocsObjects(src, path);
-            docsObjectsByFileSuppliers.put(path, docsObjectsSupplier);
+            AgentDocumentationSupplier docsSupplier = new AgentDocumentationSupplier(() -> loadDocsObjects(src, path));
+            docsSuppliers.add(docsSupplier);
         }
         return result == null ? "" : new Yaml().dump(result);
     }
@@ -198,13 +199,13 @@ public class AgentConfiguration {
      *
      * @return the set of documentable objects
      */
-    private static Set<String> loadDocsObjects(String src, String filePath) {
+    private static AgentDocumentation loadDocsObjects(String src, String filePath) {
         Set<String> objects = Collections.emptySet();
         try {
             objects = DocsObjectsLoader.loadObjects(src);
         } catch (Exception e) {
             log.warn("Could not parse configuration: {}", filePath, e);
         }
-        return objects;
+        return new AgentDocumentation(filePath, objects);
     }
 }

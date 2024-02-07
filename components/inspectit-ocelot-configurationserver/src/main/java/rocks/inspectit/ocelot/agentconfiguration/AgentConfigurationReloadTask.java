@@ -68,9 +68,6 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         }
 
         onTaskSuccess(newConfigurations);
-
-        newConfigurations.forEach(AgentConfiguration::supplyDocsObjectsByFile);
-        log.info("Successfully supplied documented Objects for agent configurations");
     }
 
     /**

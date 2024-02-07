@@ -19,6 +19,7 @@ import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,7 +59,7 @@ public class AgentControllerTest {
 
         @Test
         public void mappingFound() {
-            AgentConfiguration config = AgentConfiguration.create(null, new HashMap<>(), "foo : bar");
+            AgentConfiguration config = AgentConfiguration.create(null, new HashSet<>(), "foo : bar");
             doReturn(config).when(configManager).getConfiguration(anyMap());
 
             HashMap<String, String> attributes = new HashMap<>();
@@ -71,7 +72,7 @@ public class AgentControllerTest {
 
         @Test
         public void etagPresent() {
-            AgentConfiguration config = AgentConfiguration.create(null, new HashMap<>(), "foo : bar");
+            AgentConfiguration config = AgentConfiguration.create(null, new HashSet<>(), "foo : bar");
             doReturn(config).when(configManager).getConfiguration(anyMap());
 
             ResponseEntity<String> firstResult = controller.fetchConfiguration(new HashMap<>(), Collections.emptyMap());

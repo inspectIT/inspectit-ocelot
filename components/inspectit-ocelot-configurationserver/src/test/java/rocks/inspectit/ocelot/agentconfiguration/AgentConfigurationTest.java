@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
-import org.apache.commons.lang3.mutable.MutableObject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,11 +8,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.file.FileInfo;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
-import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -136,7 +134,6 @@ public class AgentConfigurationTest {
 
         @Test
         void priorityRespected() {
-
             when(revisionAccess.configurationFileExists(any())).thenReturn(true);
 
             doReturn(true).when(revisionAccess).configurationFileIsDirectory("folder");
@@ -170,56 +167,32 @@ public class AgentConfigurationTest {
     }
 
     @Nested
-    class SupplyDocsObjects {
-
-        private final String srcYaml = """
-            inspectit:
-              instrumentation:
-                scopes:
-                  s_jdbc_statement_execute:
-                    docs:
-                      description: 'Scope for executed JDBC statements.'
-                    methods:
-                      - name: execute
-            """;
+    class getDocsObjects {
 
         @Test
-        void verifySuccessfulSupply() {
-            FileInfo fileInfo = mock(FileInfo.class);
-            String fileName = "/test.yml";
-            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(fileName), Stream.of(fileName));
-            when(revisionAccess.configurationFileExists(anyString())).thenReturn(true);
-            when(revisionAccess.configurationFileIsDirectory(anyString())).thenReturn(true);
-            when(revisionAccess.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
-            when(revisionAccess.readConfigurationFile(anyString())).thenReturn(Optional.of(srcYaml));
+        void verifyEmptyGetDocsObjectsAsMap() {
+            AgentConfiguration config = AgentConfiguration.NO_MATCHING_MAPPING;
+            Map<String, Set<String>> map = config.getDocsObjectsAsMap();
 
-            Set<String> docsObjects = Set.of("s_jdbc_statement_execute");
-            Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
-            docsObjectsByFile.put(fileName, docsObjects);
-
-            AgentMapping mapping = AgentMapping.builder()
-                    .name("test")
-                    .source("/test")
-                    .sourceBranch(WORKSPACE)
-                    .build();
-
-            AgentConfiguration config = AgentConfiguration.create(mapping, revisionAccess);
-            config.supplyDocsObjectsByFile();
-
-            assertThat(config.getDocsObjectsByFile()).isEqualTo(docsObjectsByFile);
+            assertThat(map).isEmpty();
         }
 
         @Test
-        void verifyNoSupply() {
-            AgentMapping mapping = AgentMapping.builder()
-                    .name("test")
-                    .source("/test")
-                    .sourceBranch(WORKSPACE)
-                    .build();
-            AgentConfiguration config = AgentConfiguration.create(mapping, new HashMap<>(), srcYaml);
-            config.supplyDocsObjectsByFile();
+        void verifyGetDocsObjectsAsMap() {
+            Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
+            Set<AgentDocumentationSupplier> docsSuppliers = new HashSet<>();
 
-            assertThat(config.getDocsObjectsByFile()).isEmpty();
+            String filePath = "test.yml";
+            Set<String> objects = Collections.singleton("yaml");
+            docsObjectsByFile.put(filePath, objects);
+
+            AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> new AgentDocumentation(filePath, objects));
+            docsSuppliers.add(supplier);
+
+            AgentConfiguration config = AgentConfiguration.create(null, docsSuppliers, "");
+            Map<String, Set<String>> map = config.getDocsObjectsAsMap();
+
+            assertThat(map).isEqualTo(docsObjectsByFile);
         }
     }
 }

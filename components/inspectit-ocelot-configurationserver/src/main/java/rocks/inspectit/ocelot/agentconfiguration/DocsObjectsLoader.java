@@ -2,7 +2,6 @@ package rocks.inspectit.ocelot.agentconfiguration;
 
 import inspectit.ocelot.configdocsgenerator.parsing.ConfigParser;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
@@ -19,7 +18,7 @@ public class DocsObjectsLoader {
     /**
      * Use the same constant as the ui in 'src/data/constants.js'
      */
-    final static String OCELOT_DEFAULT_CONFIG_PREFIX = "/$%$%$%$%Ocelot-default-key/";
+    public final static String OCELOT_DEFAULT_CONFIG_PREFIX = "/$%$%$%$%Ocelot-default-key/";
 
     /**
      * Loads all documentable objects, like actions, scopes, rules & metrics from the provided inspectIT yaml
