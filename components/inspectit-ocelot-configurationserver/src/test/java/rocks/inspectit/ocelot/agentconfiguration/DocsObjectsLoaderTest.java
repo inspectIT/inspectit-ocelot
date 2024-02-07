@@ -13,8 +13,6 @@ import static rocks.inspectit.ocelot.agentconfiguration.DocsObjectsLoader.OCELOT
 
 public class DocsObjectsLoaderTest {
 
-    private final DocsObjectsLoader docsObjectsLoader = new DocsObjectsLoader();
-
     private final String srcYaml = """
             inspectit:
               instrumentation:
@@ -36,21 +34,21 @@ public class DocsObjectsLoaderTest {
 
     @Test
     void verifyLoadObjectsSuccessful() throws IOException {
-        Set<String> objects = docsObjectsLoader.loadObjects(srcYaml);
+        Set<String> objects = DocsObjectsLoader.loadObjects(srcYaml);
 
         assertTrue(objects.contains("s_jdbc_statement_execute"));
     }
 
     @Test
     void verifyLoadObjectsEmpty() throws IOException {
-        Set<String> objects = docsObjectsLoader.loadObjects(srcYamlWithoutDocsObjects);
+        Set<String> objects = DocsObjectsLoader.loadObjects(srcYamlWithoutDocsObjects);
 
         assertTrue(objects.isEmpty());
     }
 
     @Test
     void verifyLoadThrowsException() {
-        assertThrows(NoSuchElementException.class, () -> docsObjectsLoader.loadObjects("invalid-config"));
+        assertThrows(NoSuchElementException.class, () -> DocsObjectsLoader.loadObjects("invalid-config"));
     }
 
     @Test
@@ -60,7 +58,7 @@ public class DocsObjectsLoaderTest {
         Map<String, String> configs = new HashMap<>();
         configs.put(file, srcYaml);
 
-        Map<String, Set<String>> docsObjectsByFile = docsObjectsLoader.loadDefaultDocsObjectsByFile(configs);
+        Map<String, Set<String>> docsObjectsByFile = DocsObjectsLoader.loadDefaultDocsObjectsByFile(configs);
         assertTrue(docsObjectsByFile.containsKey(fileWithPrefix));
         assertTrue(docsObjectsByFile.containsValue(Collections.singleton("s_jdbc_statement_execute")));
     }

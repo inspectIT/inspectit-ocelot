@@ -86,7 +86,7 @@ public class AgentMappingSerializer {
      * Read cached agent mappings to avoid long ymlMapper-processing time
      * @return List of current {@link AgentMapping}s representing the content of the given file
      */
-    public List<AgentMapping> readCachedAgentMappings(){
+    public List<AgentMapping> readCachedAgentMappings() {
         if(currentMappings == null) currentMappings = readAgentMappings(fileManager.getWorkspaceRevision());
         return currentMappings;
     }

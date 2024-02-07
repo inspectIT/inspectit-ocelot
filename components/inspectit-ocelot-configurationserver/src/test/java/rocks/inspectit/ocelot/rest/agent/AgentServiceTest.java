@@ -57,11 +57,10 @@ public class AgentServiceTest {
 
         public void setupTestData(boolean logPreloadingEnabled) {
             serviceSpy = Mockito.spy(cut);
+            String configYaml = String.format("inspectit.log-preloading: {enabled: %b}", logPreloadingEnabled);
 
             //set config
-            config = AgentConfiguration.builder()
-                    .configYaml(String.format("inspectit.log-preloading: {enabled: %b}", logPreloadingEnabled))
-                    .build();
+            config = AgentConfiguration.create(null, new HashMap<>(), configYaml);
 
             //set attributes
             attributes = new HashMap<String, String>() {{
@@ -111,7 +110,7 @@ public class AgentServiceTest {
 
             DeferredResult<ResponseEntity<?>> actualResult = serviceSpy.buildSupportArchive(attributes, configManager);
             ResponseEntity<?> unwrappedResult = (ResponseEntity<?>) actualResult.getResult();
-            
+
             assertThat(unwrappedResult.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(unwrappedResult.getBody()).isEqualTo(expectedResult);
         }

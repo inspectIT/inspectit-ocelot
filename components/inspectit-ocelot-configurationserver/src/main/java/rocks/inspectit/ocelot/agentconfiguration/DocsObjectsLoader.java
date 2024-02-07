@@ -14,7 +14,6 @@ import java.util.*;
  * Helper class to load documentable objects from a yaml string
  */
 @Slf4j
-@Component
 public class DocsObjectsLoader {
 
     /**
@@ -27,7 +26,7 @@ public class DocsObjectsLoader {
      * @param src the source yaml
      * @return a set of defined objects in this yaml
      */
-    public Set<String> loadObjects(String src) throws IOException {
+    public static Set<String> loadObjects(String src) throws IOException {
         Yaml yaml = new Yaml();
         Object rawYaml = yaml.load(src);
         Set<String> objects = new HashSet<>();
@@ -54,7 +53,7 @@ public class DocsObjectsLoader {
      * @param defaultYamls A map of the default file paths and their yaml content
      * @return A set of defined objects for each file
      */
-    public Map<String, Set<String>> loadDefaultDocsObjectsByFile(Map<String, String> defaultYamls) {
+    public static Map<String, Set<String>> loadDefaultDocsObjectsByFile(Map<String, String> defaultYamls) {
         Map<String, Set<String>> defaultDocsObjectsByFile = new HashMap<>();
         for(Map.Entry<String, String> entry : defaultYamls.entrySet()) {
             String path = OCELOT_DEFAULT_CONFIG_PREFIX + entry.getKey();

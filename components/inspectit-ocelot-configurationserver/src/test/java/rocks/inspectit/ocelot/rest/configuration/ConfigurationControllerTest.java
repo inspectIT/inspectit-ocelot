@@ -55,9 +55,6 @@ public class ConfigurationControllerTest {
     private DefaultConfigController defaultConfigController;
 
     @Mock
-    private DocsObjectsLoader docsObjectsLoader;
-
-    @Mock
     private Yaml yaml;
 
     @Nested
@@ -65,10 +62,7 @@ public class ConfigurationControllerTest {
 
         @Test
         public void returningConfiguration() {
-            AgentConfiguration configuration = AgentConfiguration.builder()
-                    .configYaml("yaml")
-                    .docsObjectsByFile(new HashMap<>())
-                    .build();
+            AgentConfiguration configuration = AgentConfiguration.create(null, new HashMap<>(), "yaml");
             when(agentConfigurationManager.getConfiguration(any())).thenReturn(configuration);
 
             ResponseEntity<String> output = configurationController.fetchConfiguration(null);
@@ -116,10 +110,7 @@ public class ConfigurationControllerTest {
             AgentMapping agentMapping = AgentMapping.builder().build();
 
             final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.builder()
-                    .configYaml(configYaml)
-                    .docsObjectsByFile(docsObjectsByFile)
-                    .build();
+            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, docsObjectsByFile, configYaml);
 
             Map<String, String> defaultYamls = new HashMap<>();
             final String defaultYamlContent = "defaultYaml";
@@ -170,10 +161,7 @@ public class ConfigurationControllerTest {
             AgentMapping agentMapping = AgentMapping.builder().build();
 
             final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.builder()
-                    .configYaml(configYaml)
-                    .docsObjectsByFile(docsObjectsByFile)
-                    .build();
+            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, docsObjectsByFile, configYaml);
 
             IOException exception = new IOException();
 
@@ -206,10 +194,7 @@ public class ConfigurationControllerTest {
             AgentMapping agentMapping = AgentMapping.builder().build();
 
             final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.builder()
-                    .configYaml(configYaml)
-                    .docsObjectsByFile(docsObjectsByFile)
-                    .build();
+            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, docsObjectsByFile, configYaml);
 
             ConfigDocumentation configDocumentationMock = mock(ConfigDocumentation.class);
 
@@ -258,10 +243,7 @@ public class ConfigurationControllerTest {
             AgentMapping agentMapping = AgentMapping.builder().build();
 
             final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.builder()
-                    .configYaml(configYaml)
-                    .docsObjectsByFile(docsObjectsByFile)
-                    .build();
+            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, docsObjectsByFile, configYaml);
 
             JsonProcessingException exception = mock(JsonProcessingException.class);
             final String errorMessage = "JsonProcessingException: Yaml could not be processed.";
