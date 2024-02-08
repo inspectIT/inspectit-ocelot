@@ -10,9 +10,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 import rocks.inspectit.ocelot.events.AgentMappingsSourceBranchChangedEvent;
+import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
@@ -83,12 +85,22 @@ public class AgentMappingSerializer {
     }
 
     /**
-     * Read cached agent mappings to avoid long ymlMapper-processing time
+     * Read cached agent mappings to avoid long ymlMapper-processing time.
+     *
      * @return List of current {@link AgentMapping}s representing the content of the given file
      */
     public List<AgentMapping> readCachedAgentMappings(){
         if(currentMappings != null) return currentMappings;
         else return readAgentMappings(fileManager.getWorkspaceRevision());
+    }
+
+    /**
+     * Reload cached agent mappings, if any external changes have been detected in the workspace.
+     */
+    @EventListener(WorkspaceChangedEvent.class)
+    public synchronized void reloadCachedAgentMappings() {
+        log.info("Reloading cached agent mappings");
+        currentMappings = readAgentMappings(fileManager.getWorkspaceRevision());
     }
 
     /**
@@ -125,7 +137,9 @@ public class AgentMappingSerializer {
 
     /**
      * Sets the source branch, from which the agent mappings file will be read
+     *
      * @param sourceBranch new source branch
+     *
      * @return the set source branch
      */
     public Branch setSourceBranch(Branch sourceBranch) {
