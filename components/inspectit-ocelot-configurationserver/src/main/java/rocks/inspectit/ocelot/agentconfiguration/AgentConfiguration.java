@@ -80,7 +80,7 @@ public class AgentConfiguration {
             String src = fileAccessor.readConfigurationFile(path).orElse("");
             yamlResult = ObjectStructureMerger.loadAndMergeYaml(src, yamlResult, path);
 
-            AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> loadDocsObjects(path, src));
+            AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> loadDocumentation(path, src));
             documentationSuppliers.add(supplier);
         }
 
@@ -181,14 +181,14 @@ public class AgentConfiguration {
     }
 
     /**
-     * Loads all documentable objects of the yaml source string.
+     * Loads all documentable objects of the yaml source string for the provided file.
      *
-     * @param src the yaml string
      * @param filePath the path to the yaml file
+     * @param src the yaml string
      *
-     * @return the set of documentable objects
+     * @return the set of documentable objects for the provided file
      */
-    private static AgentDocumentation loadDocsObjects(String filePath, String src) {
+    private static AgentDocumentation loadDocumentation(String filePath, String src) {
         Set<String> objects = Collections.emptySet();
         try {
             objects = DocsObjectsLoader.loadObjects(src);
