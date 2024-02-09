@@ -237,7 +237,7 @@ public class ConfigDocsGenerator {
                 .filter(entry -> entry.getValue().contains(name))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
-        if(files.isEmpty()) log.warn("No file found with definition of " + name);
+        if(files.isEmpty()) log.debug("No file found with definition of " + name);
 
         return files;
     }

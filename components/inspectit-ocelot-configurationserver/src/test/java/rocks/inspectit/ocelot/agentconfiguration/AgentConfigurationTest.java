@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -167,30 +166,30 @@ public class AgentConfigurationTest {
     }
 
     @Nested
-    class getDocsObjects {
+    class getDocumentations {
 
         @Test
         void verifyEmptyGetDocsObjectsAsMap() {
             AgentConfiguration config = AgentConfiguration.NO_MATCHING_MAPPING;
-            Map<String, Set<String>> map = config.getDocsObjectsAsMap();
+            Map<String, Set<String>> map = config.getDocumentationsAsMap();
 
             assertThat(map).isEmpty();
         }
 
         @Test
         void verifyGetDocsObjectsAsMap() {
-            Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
-            Set<AgentDocumentationSupplier> docsSuppliers = new HashSet<>();
-
             String filePath = "test.yml";
+            Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
+            Set<AgentDocumentation> documentations = new HashSet<>();
+
             Set<String> objects = Collections.singleton("yaml");
             docsObjectsByFile.put(filePath, objects);
 
-            AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> new AgentDocumentation(filePath, objects));
-            docsSuppliers.add(supplier);
+            AgentDocumentation documentation = new AgentDocumentation(filePath, objects);
+            documentations.add(documentation);
 
-            AgentConfiguration config = AgentConfiguration.create(null, docsSuppliers, "");
-            Map<String, Set<String>> map = config.getDocsObjectsAsMap();
+            AgentConfiguration config = AgentConfiguration.create(null, documentations, "");
+            Map<String, Set<String>> map = config.getDocumentationsAsMap();
 
             assertThat(map).isEqualTo(docsObjectsByFile);
         }

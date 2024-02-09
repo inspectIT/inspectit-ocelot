@@ -95,7 +95,7 @@ public class ConfigurationControllerTest {
 
         private Map<String, Set<String>> docsObjectsByFile;
 
-        private Set<AgentDocumentationSupplier> docsSuppliers;
+        private Set<AgentDocumentation> documentations;
 
         @BeforeEach
         void setUp() {
@@ -104,9 +104,9 @@ public class ConfigurationControllerTest {
           docsObjectsByFile = new HashMap<>();
           docsObjectsByFile.put(filePath, objects);
 
-          AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> new AgentDocumentation(filePath, objects));
-          docsSuppliers = new HashSet<>();
-          docsSuppliers.add(supplier);
+          AgentDocumentation documentation = new AgentDocumentation(filePath, objects);
+          documentations = new HashSet<>();
+          documentations.add(documentation);
         }
 
         @Test
@@ -116,7 +116,7 @@ public class ConfigurationControllerTest {
             AgentMapping agentMapping = AgentMapping.builder().build();
 
             final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, docsSuppliers, configYaml);
+            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, documentations, configYaml);
 
             Map<String, String> defaultYamls = new HashMap<>();
             final String defaultYamlContent = "defaultYaml";
@@ -168,7 +168,7 @@ public class ConfigurationControllerTest {
             AgentMapping agentMapping = AgentMapping.builder().build();
 
             final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, docsSuppliers, configYaml);
+            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, documentations, configYaml);
 
             IOException exception = new IOException();
 
@@ -201,7 +201,7 @@ public class ConfigurationControllerTest {
             AgentMapping agentMapping = AgentMapping.builder().build();
 
             final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, docsSuppliers, configYaml);
+            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, documentations, configYaml);
 
             ConfigDocumentation configDocumentationMock = mock(ConfigDocumentation.class);
 
@@ -250,7 +250,7 @@ public class ConfigurationControllerTest {
             AgentMapping agentMapping = AgentMapping.builder().build();
 
             final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, docsSuppliers, configYaml);
+            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, documentations, configYaml);
 
             JsonProcessingException exception = mock(JsonProcessingException.class);
             final String errorMessage = "JsonProcessingException: Yaml could not be processed.";

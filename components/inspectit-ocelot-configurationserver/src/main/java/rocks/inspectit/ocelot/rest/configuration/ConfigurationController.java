@@ -110,7 +110,7 @@ public class ConfigurationController extends AbstractBaseController {
 
             AgentConfiguration configuration = configManager.getConfigurationForMapping(agentMapping.get());
             String configYaml = configuration.getConfigYaml();
-            Map<String, Set<String>> docsObjectsByFile = configuration.getDocsObjectsAsMap();
+            Map<String, Set<String>> docsObjectsByFile = configuration.getDocumentationsAsMap();
 
             try {
                 if (includeDefault) {
