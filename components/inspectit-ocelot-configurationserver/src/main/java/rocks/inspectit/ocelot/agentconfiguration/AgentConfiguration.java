@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
-import com.google.common.annotations.VisibleForTesting;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.DigestUtils;
@@ -12,7 +11,6 @@ import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -24,7 +22,8 @@ import java.util.stream.Collectors;
 public class AgentConfiguration {
 
     /**
-     * Used as maker in {@link #attributesToConfigurationCache} to mark attribute-maps for which no mapping matches.
+     * Used as maker in {@link AgentConfigurationManager#attributesToConfigurationCache} to mark attribute-maps
+     * for which no mapping matches.
      */
     public static AgentConfiguration NO_MATCHING_MAPPING = createDefault();
 
@@ -40,15 +39,11 @@ public class AgentConfiguration {
     private AgentMapping mapping;
 
     /**
-     * The set of suppliers for documentable objects. <br>
+     * The set of suppliers for documentable objects.
+     * There is a set of defined documentable objects in this configuration for each file. <br>
+     * The documentable objects will be loaded lazy.
      */
-    private static final Set<Supplier<AgentDocumentation>> documentationSuppliers = Collections.synchronizedSet(new HashSet<>());
-
-    /**
-     * The set of documentable objects. <br>
-     * There is a set of defined documentable objects in this configuration for each file.
-     */
-    private Set<AgentDocumentation> documentations;
+    private Set<AgentDocumentationSupplier> documentationSuppliers;
 
     /**
      * The merged YAML configuration for the given mapping.
@@ -60,45 +55,52 @@ public class AgentConfiguration {
      */
     private String hash;
 
-    private AgentConfiguration(AgentMapping mapping, String configYaml, String hash) {
+    private AgentConfiguration(AgentMapping mapping, Set<AgentDocumentationSupplier> documentationSuppliers, String configYaml, String hash) {
         this.mapping = mapping;
-        this.documentations = new HashSet<>();
-        this.configYaml = configYaml;
-        this.hash = hash;
-    }
-
-    private AgentConfiguration(AgentMapping mapping, Set<AgentDocumentation> documentations, String configYaml, String hash) {
-        this.mapping = mapping;
-        this.documentations = documentations;
+        this.documentationSuppliers = documentationSuppliers;
         this.configYaml = configYaml;
         this.hash = hash;
     }
 
     /**
-     * Factory method to create AgentConfigurations.
-     * Also creates a cryptographic hash.
+     * Factory method to create AgentConfigurations. Also creates a cryptographic hash.
      *
      * @param mapping The agent mapping for which this instance represents the loaded configuration
+     * @param fileAccessor The accessor to use for reading the files
+     *
      * @return Created AgentConfiguration
      */
     public static AgentConfiguration create(AgentMapping mapping, AbstractFileAccessor fileAccessor) {
-        String configYaml = loadConfigForMapping(mapping, fileAccessor);
+        LinkedHashSet<String> allYamlFiles = getAllYamlFilesForMapping(fileAccessor, mapping);
+
+        Set<AgentDocumentationSupplier> documentationSuppliers = new HashSet<>();
+        Object yamlResult = null;
+
+        for (String path : allYamlFiles) {
+            String src = fileAccessor.readConfigurationFile(path).orElse("");
+            yamlResult = ObjectStructureMerger.loadAndMergeYaml(src, yamlResult, path);
+
+            AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> loadDocsObjects(path, src));
+            documentationSuppliers.add(supplier);
+        }
+
+        String configYaml = yamlResult == null ? "" : new Yaml().dump(yamlResult);
         String hash = DigestUtils.md5DigestAsHex(configYaml.getBytes(Charset.defaultCharset()));
-        return new AgentConfiguration(mapping, configYaml, hash);
+
+        return new AgentConfiguration(mapping, documentationSuppliers, configYaml, hash);
     }
 
     /**
-     * Factory method to create an AgentConfiguration.
-     * Also creates a cryptographic hash.
+     * Factory method to create an AgentConfiguration. Also creates a cryptographic hash.
      *
      * @param mapping The agent mapping for which this instance represents the loaded configuration
-     * @param docs The set of agent documentation objects
+     * @param documentationSuppliers The set of suppliers for agent documentations
      * @param configYaml The yaml string, which contains the configuration
      * @return Created AgentConfiguration
      */
-    public static AgentConfiguration create(AgentMapping mapping, Set<AgentDocumentation> docs, String configYaml) {
+    public static AgentConfiguration create(AgentMapping mapping, Set<AgentDocumentationSupplier> documentationSuppliers, String configYaml) {
         String hash = DigestUtils.md5DigestAsHex(configYaml.getBytes(Charset.defaultCharset()));
-        return new AgentConfiguration(mapping, docs, configYaml, hash);
+        return new AgentConfiguration(mapping, documentationSuppliers, configYaml, hash);
     }
 
     /**
@@ -106,57 +108,25 @@ public class AgentConfiguration {
      *
      * @return Created default AgentConfiguration
      */
-    public static AgentConfiguration createDefault() {
+    private static AgentConfiguration createDefault() {
         String configYaml = "";
         String hash = DigestUtils.md5DigestAsHex(configYaml.getBytes(Charset.defaultCharset()));
         return new AgentConfiguration(null, new HashSet<>(), configYaml, hash);
     }
 
     /**
-     * Use the suppliers to create the agent documentations for this configuration.
-     * The suppliers are cleared after they all have been used.
-     */
-    public synchronized void supplyDocumentations() {
-        documentationSuppliers.forEach(supplier -> documentations.add(supplier.get()));
-        documentationSuppliers.clear();
-    }
-
-    /**
-     * Get the current agent documentations as a map. <br>
+     * Get the current agent documentations as a map. The documentation will be loaded lazy.<br>
      * - Key: the file path <br>
      * - Value: the set of objects, like actions, scopes, rules & metrics
      *
      * @return The agent documentations as a map
      */
     public Map<String, Set<String>> getDocumentationsAsMap() {
-        return documentations.stream()
+        return documentationSuppliers.stream()
                 .collect(Collectors.toMap(
-                        AgentDocumentation::filePath,
-                        AgentDocumentation::objects
+                        supplier -> supplier.get().filePath(),
+                        supplier -> supplier.get().objects()
                 ));
-    }
-
-    /**
-     * Loads the given mapping as yaml string.
-     *
-     * @param mapping the mapping to load
-     *
-     * @return the merged yaml for the given mapping or an empty string if the mapping does not contain any existing files
-     * If this task has been canceled, null is returned.
-     */
-    @VisibleForTesting
-    static String loadConfigForMapping(AgentMapping mapping, AbstractFileAccessor fileAccessor) {
-        LinkedHashSet<String> allYamlFiles = getAllYamlFilesForMapping(fileAccessor, mapping);
-
-        Object result = null;
-        for (String path : allYamlFiles) {
-            String src = fileAccessor.readConfigurationFile(path).orElse("");
-            result = ObjectStructureMerger.loadAndMergeYaml(src, result, path);
-
-            Supplier<AgentDocumentation> documentationSupplier = () -> loadDocsObjects(path, src);
-            documentationSuppliers.add(documentationSupplier);
-        }
-        return result == null ? "" : new Yaml().dump(result);
     }
 
     /**

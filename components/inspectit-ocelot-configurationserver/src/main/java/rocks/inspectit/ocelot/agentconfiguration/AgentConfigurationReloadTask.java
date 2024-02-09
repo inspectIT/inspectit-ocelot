@@ -68,10 +68,6 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         }
 
         onTaskSuccess(newConfigurations);
-
-        // supply agent documentations after executing the callback to provide the agent configurations faster
-        newConfigurations.stream().takeWhile(config -> !isCanceled()).forEach(AgentConfiguration::supplyDocumentations);
-        log.info("Successfully supplied documented objects for agent configurations");
     }
 
     /**

@@ -10,6 +10,7 @@ import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -41,9 +42,10 @@ public class AgentConfigurationTest {
                     .source("/test")
                     .sourceBranch(WORKSPACE)
                     .build();
-            String string = AgentConfiguration.loadConfigForMapping(mapping, revisionAccess);
+            AgentConfiguration config = AgentConfiguration.create(mapping, revisionAccess);
+            String result = config.getConfigYaml();
 
-            assertThat(string).isEqualTo("{key: value}\n");
+            assertThat(result).isEqualTo("{key: value}\n");
         }
 
         @Test
@@ -62,7 +64,7 @@ public class AgentConfigurationTest {
                     .build();
 
             assertThatExceptionOfType(ObjectStructureMerger.InvalidConfigurationFileException.class).isThrownBy(
-                    () -> AgentConfiguration.loadConfigForMapping(mapping, revisionAccess)
+                    () -> AgentConfiguration.create(mapping, revisionAccess)
                     ).withMessage("The configuration file '/test.yml' is invalid and cannot be parsed.");
         }
     }
@@ -73,7 +75,8 @@ public class AgentConfigurationTest {
         @Test
         void noSourcesSpecified() {
             AgentMapping mapping = AgentMapping.builder().build();
-            String result = AgentConfiguration.loadConfigForMapping(mapping, revisionAccess);
+            AgentConfiguration config = AgentConfiguration.create(mapping, revisionAccess);
+            String result = config.getConfigYaml();
 
             assertThat(result).isEmpty();
         }
@@ -88,7 +91,8 @@ public class AgentConfigurationTest {
                     .source("/some/folder")
                     .sourceBranch(WORKSPACE)
                     .build();
-            String result = AgentConfiguration.loadConfigForMapping(mapping, revisionAccess);
+            AgentConfiguration config = AgentConfiguration.create(mapping, revisionAccess);
+            String result = config.getConfigYaml();
 
             assertThat(result).isEmpty();
         }
@@ -106,7 +110,8 @@ public class AgentConfigurationTest {
                     .source("d.txt")
                     .sourceBranch(WORKSPACE)
                     .build();
-            String result = AgentConfiguration.loadConfigForMapping(mapping, revisionAccess);
+            AgentConfiguration config = AgentConfiguration.create(mapping, revisionAccess);
+            String result = config.getConfigYaml();
 
             assertThat(result).isEmpty();
             verify(revisionAccess).readConfigurationFile("a.yml");
@@ -126,7 +131,7 @@ public class AgentConfigurationTest {
                     .source("/a.yml")
                     .sourceBranch(WORKSPACE)
                     .build();
-            AgentConfiguration.loadConfigForMapping(mapping, revisionAccess);
+            AgentConfiguration.create(mapping, revisionAccess);
 
             verify(revisionAccess).configurationFileExists(eq("a.yml"));
         }
@@ -158,7 +163,8 @@ public class AgentConfigurationTest {
                     .source("/folder")
                     .sourceBranch(WORKSPACE)
                     .build();
-            String result = AgentConfiguration.loadConfigForMapping(mapping, revisionAccess);
+            AgentConfiguration config = AgentConfiguration.create(mapping, revisionAccess);
+            String result = config.getConfigYaml();
 
             assertThat(result).isEqualTo("{val1: z, val2: a, val3: b}\n");
             verify(revisionAccess, never()).readConfigurationFile("folder/somethingelse");
@@ -169,7 +175,7 @@ public class AgentConfigurationTest {
     class getDocumentations {
 
         @Test
-        void verifyEmptyGetDocsObjectsAsMap() {
+        void verifyGetEmptyDocumentationsAsMap() {
             AgentConfiguration config = AgentConfiguration.NO_MATCHING_MAPPING;
             Map<String, Set<String>> map = config.getDocumentationsAsMap();
 
@@ -177,18 +183,18 @@ public class AgentConfigurationTest {
         }
 
         @Test
-        void verifyGetDocsObjectsAsMap() {
+        void verifyGetDocumentationsAsMap() {
             String filePath = "test.yml";
             Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
-            Set<AgentDocumentation> documentations = new HashSet<>();
+            Set<AgentDocumentationSupplier> suppliers = new HashSet<>();
 
             Set<String> objects = Collections.singleton("yaml");
             docsObjectsByFile.put(filePath, objects);
 
-            AgentDocumentation documentation = new AgentDocumentation(filePath, objects);
-            documentations.add(documentation);
+            AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> new AgentDocumentation(filePath, objects));
+            suppliers.add(supplier);
 
-            AgentConfiguration config = AgentConfiguration.create(null, documentations, "");
+            AgentConfiguration config = AgentConfiguration.create(null, suppliers, "");
             Map<String, Set<String>> map = config.getDocumentationsAsMap();
 
             assertThat(map).isEqualTo(docsObjectsByFile);

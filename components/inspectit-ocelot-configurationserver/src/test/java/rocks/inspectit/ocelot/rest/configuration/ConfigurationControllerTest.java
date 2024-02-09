@@ -24,6 +24,7 @@ import rocks.inspectit.ocelot.rest.file.DefaultConfigController;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -95,7 +96,7 @@ public class ConfigurationControllerTest {
 
         private Map<String, Set<String>> docsObjectsByFile;
 
-        private Set<AgentDocumentation> documentations;
+        private Set<AgentDocumentationSupplier> suppliers;
 
         @BeforeEach
         void setUp() {
@@ -104,9 +105,9 @@ public class ConfigurationControllerTest {
           docsObjectsByFile = new HashMap<>();
           docsObjectsByFile.put(filePath, objects);
 
-          AgentDocumentation documentation = new AgentDocumentation(filePath, objects);
-          documentations = new HashSet<>();
-          documentations.add(documentation);
+          AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> new AgentDocumentation(filePath, objects));
+          suppliers = new HashSet<>();
+          suppliers.add(supplier);
         }
 
         @Test
@@ -116,7 +117,7 @@ public class ConfigurationControllerTest {
             AgentMapping agentMapping = AgentMapping.builder().build();
 
             final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, documentations, configYaml);
+            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, suppliers, configYaml);
 
             Map<String, String> defaultYamls = new HashMap<>();
             final String defaultYamlContent = "defaultYaml";
@@ -168,7 +169,7 @@ public class ConfigurationControllerTest {
             AgentMapping agentMapping = AgentMapping.builder().build();
 
             final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, documentations, configYaml);
+            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, suppliers, configYaml);
 
             IOException exception = new IOException();
 
@@ -201,7 +202,7 @@ public class ConfigurationControllerTest {
             AgentMapping agentMapping = AgentMapping.builder().build();
 
             final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, documentations, configYaml);
+            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, suppliers, configYaml);
 
             ConfigDocumentation configDocumentationMock = mock(ConfigDocumentation.class);
 
@@ -250,7 +251,7 @@ public class ConfigurationControllerTest {
             AgentMapping agentMapping = AgentMapping.builder().build();
 
             final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, documentations, configYaml);
+            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, suppliers, configYaml);
 
             JsonProcessingException exception = mock(JsonProcessingException.class);
             final String errorMessage = "JsonProcessingException: Yaml could not be processed.";
