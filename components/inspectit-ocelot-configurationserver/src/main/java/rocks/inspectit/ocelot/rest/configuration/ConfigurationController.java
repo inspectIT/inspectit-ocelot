@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.rest.configuration;
 
 import inspectit.ocelot.configdocsgenerator.ConfigDocsGenerator;
+import inspectit.ocelot.configdocsgenerator.model.AgentDocumentation;
 import inspectit.ocelot.configdocsgenerator.model.ConfigDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,9 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.yaml.snakeyaml.Yaml;
-import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
-import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
-import rocks.inspectit.ocelot.agentconfiguration.ObjectStructureMerger;
+import rocks.inspectit.ocelot.agentconfiguration.*;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
@@ -25,9 +24,9 @@ import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 import rocks.inspectit.ocelot.rest.file.DefaultConfigController;
 import rocks.inspectit.ocelot.security.config.UserRoleConfiguration;
-import rocks.inspectit.ocelot.agentconfiguration.DocsObjectsLoader;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Controller for endpoints related to configuration files.
@@ -110,7 +109,7 @@ public class ConfigurationController extends AbstractBaseController {
 
             AgentConfiguration configuration = configManager.getConfigurationForMapping(agentMapping.get());
             String configYaml = configuration.getConfigYaml();
-            Map<String, Set<String>> docsObjectsByFile = configuration.getDocumentationsAsMap();
+            Set<AgentDocumentation> agentDocumentations = configuration.getDocumentations();
 
             try {
                 if (includeDefault) {
@@ -125,11 +124,11 @@ public class ConfigurationController extends AbstractBaseController {
                         combined = ObjectStructureMerger.merge(combined, loadedYaml);
                     }
                     configYaml = yaml.dump(combined);
-                    Map<String, Set<String>> defaultObjectsByFile = DocsObjectsLoader.loadDefaultDocsObjectsByFile(defaultYamls);
-                    docsObjectsByFile.putAll(defaultObjectsByFile);
+                    Set<AgentDocumentation> defaultAgentDocumentations = DocsObjectsLoader.loadDefaultAgentDocumentations(defaultYamls);
+                    agentDocumentations.addAll(defaultAgentDocumentations);
                 }
 
-                configDocsGenerator.setDocsObjectsByFile(docsObjectsByFile);
+                configDocsGenerator.setAgentDocumentations(agentDocumentations);
                 configDocumentation = configDocsGenerator.generateConfigDocs(configYaml);
 
             } catch (Exception e) {

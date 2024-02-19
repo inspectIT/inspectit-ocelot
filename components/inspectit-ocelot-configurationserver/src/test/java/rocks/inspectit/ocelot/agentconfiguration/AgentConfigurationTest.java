@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
+import inspectit.ocelot.configdocsgenerator.model.AgentDocumentation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +11,6 @@ import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -175,29 +175,30 @@ public class AgentConfigurationTest {
     class getDocumentations {
 
         @Test
-        void verifyGetEmptyDocumentationsAsMap() {
+        void verifyGetEmptyDocumentations() {
             AgentConfiguration config = AgentConfiguration.NO_MATCHING_MAPPING;
-            Map<String, Set<String>> map = config.getDocumentationsAsMap();
+            Set<AgentDocumentation> documentations = config.getDocumentations();
 
-            assertThat(map).isEmpty();
+            assertThat(documentations).isEmpty();
         }
 
         @Test
-        void verifyGetDocumentationsAsMap() {
+        void verifyGetDocumentations() {
             String filePath = "test.yml";
-            Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
+            Set<AgentDocumentation> agentDocumentations = new HashSet<>();
             Set<AgentDocumentationSupplier> suppliers = new HashSet<>();
 
             Set<String> objects = Collections.singleton("yaml");
-            docsObjectsByFile.put(filePath, objects);
+            AgentDocumentation documentation = new AgentDocumentation(filePath, objects);
+            agentDocumentations.add(documentation);
 
             AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> new AgentDocumentation(filePath, objects));
             suppliers.add(supplier);
 
             AgentConfiguration config = AgentConfiguration.create(null, suppliers, "");
-            Map<String, Set<String>> map = config.getDocumentationsAsMap();
+            Set<AgentDocumentation> documentations = config.getDocumentations();
 
-            assertThat(map).isEqualTo(docsObjectsByFile);
+            assertThat(documentations).isEqualTo(agentDocumentations);
         }
     }
 }

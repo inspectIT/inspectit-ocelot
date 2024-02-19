@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
+import inspectit.ocelot.configdocsgenerator.model.AgentDocumentation;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.DigestUtils;
@@ -115,18 +116,12 @@ public class AgentConfiguration {
     }
 
     /**
-     * Get the current agent documentations as a map. The documentation will be loaded lazy.<br>
-     * - Key: the file path <br>
-     * - Value: the set of objects, like actions, scopes, rules & metrics
+     * Get the current agent documentations. The documentations will be loaded lazy.
      *
-     * @return The agent documentations as a map
+     * @return The loaded agent documentations
      */
-    public Map<String, Set<String>> getDocumentationsAsMap() {
-        return documentationSuppliers.stream()
-                .collect(Collectors.toMap(
-                        supplier -> supplier.get().filePath(),
-                        supplier -> supplier.get().objects()
-                ));
+    public Set<AgentDocumentation> getDocumentations() {
+        return documentationSuppliers.stream().map(AgentDocumentationSupplier::get).collect(Collectors.toSet());
     }
 
     /**

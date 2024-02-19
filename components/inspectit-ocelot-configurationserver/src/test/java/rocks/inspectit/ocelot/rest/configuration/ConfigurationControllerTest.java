@@ -2,10 +2,10 @@ package rocks.inspectit.ocelot.rest.configuration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import inspectit.ocelot.configdocsgenerator.ConfigDocsGenerator;
+import inspectit.ocelot.configdocsgenerator.model.AgentDocumentation;
 import inspectit.ocelot.configdocsgenerator.model.ConfigDocumentation;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,6 @@ import rocks.inspectit.ocelot.rest.file.DefaultConfigController;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -94,7 +93,7 @@ public class ConfigurationControllerTest {
     @Nested
     public class GetConfigDocumentationTest {
 
-        private Map<String, Set<String>> docsObjectsByFile;
+        private Set<AgentDocumentation> agentDocumentations;
 
         private Set<AgentDocumentationSupplier> suppliers;
 
@@ -102,8 +101,9 @@ public class ConfigurationControllerTest {
         void setUp() {
           String filePath = "test.yml";
           Set<String> objects = Collections.singleton("yaml");
-          docsObjectsByFile = new HashMap<>();
-          docsObjectsByFile.put(filePath, objects);
+          agentDocumentations = new HashSet<>();
+          AgentDocumentation documentation = new AgentDocumentation(filePath, objects);
+          agentDocumentations.add(documentation);
 
           AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> new AgentDocumentation(filePath, objects));
           suppliers = new HashSet<>();
@@ -122,7 +122,8 @@ public class ConfigurationControllerTest {
             Map<String, String> defaultYamls = new HashMap<>();
             final String defaultYamlContent = "defaultYaml";
             defaultYamls.put("firstYaml", defaultYamlContent);
-            docsObjectsByFile.put(OCELOT_DEFAULT_CONFIG_PREFIX + "firstYaml", Collections.emptySet());
+            AgentDocumentation documentation = new AgentDocumentation(OCELOT_DEFAULT_CONFIG_PREFIX + "firstYaml", Collections.emptySet());
+            agentDocumentations.add(documentation);
 
             Map<String, String> configYamlMap = new HashMap<>();
             configYamlMap.put("entry", "value");
@@ -154,7 +155,7 @@ public class ConfigurationControllerTest {
             verify(yaml).load(eq(configYaml));
             verify(yaml).dump(eq(combinedYamls));
             verifyNoMoreInteractions(yaml);
-            verify(configDocsGenerator).setDocsObjectsByFile(eq(docsObjectsByFile));
+            verify(configDocsGenerator).setAgentDocumentations(eq(agentDocumentations));
             verify(configDocsGenerator).generateConfigDocs(eq(combinedYamlString));
             verifyNoMoreInteractions(configDocsGenerator);
 
@@ -218,7 +219,7 @@ public class ConfigurationControllerTest {
             verifyNoMoreInteractions(mappingManager);
             verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
             verifyNoMoreInteractions(agentConfigurationManager);
-            verify(configDocsGenerator).setDocsObjectsByFile(eq(docsObjectsByFile));
+            verify(configDocsGenerator).setAgentDocumentations(eq(agentDocumentations));
             verify(configDocsGenerator).generateConfigDocs(eq(configYaml));
             verifyNoMoreInteractions(configDocsGenerator);
 
@@ -269,7 +270,7 @@ public class ConfigurationControllerTest {
             verifyNoMoreInteractions(mappingManager);
             verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
             verifyNoMoreInteractions(agentConfigurationManager);
-            verify(configDocsGenerator).setDocsObjectsByFile(eq(docsObjectsByFile));
+            verify(configDocsGenerator).setAgentDocumentations(eq(agentDocumentations));
             verify(configDocsGenerator).generateConfigDocs(eq(configYaml));
             verifyNoMoreInteractions(configDocsGenerator);
 

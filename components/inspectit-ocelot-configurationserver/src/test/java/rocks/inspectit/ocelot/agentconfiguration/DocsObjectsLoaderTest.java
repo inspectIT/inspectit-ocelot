@@ -1,12 +1,11 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
+import inspectit.ocelot.configdocsgenerator.model.AgentDocumentation;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static rocks.inspectit.ocelot.agentconfiguration.DocsObjectsLoader.OCELOT_DEFAULT_CONFIG_PREFIX;
@@ -58,8 +57,8 @@ public class DocsObjectsLoaderTest {
         Map<String, String> configs = new HashMap<>();
         configs.put(file, srcYaml);
 
-        Map<String, Set<String>> docsObjectsByFile = DocsObjectsLoader.loadDefaultDocsObjectsByFile(configs);
-        assertTrue(docsObjectsByFile.containsKey(fileWithPrefix));
-        assertTrue(docsObjectsByFile.containsValue(Collections.singleton("s_jdbc_statement_execute")));
+        Set<AgentDocumentation> documentations = DocsObjectsLoader.loadDefaultAgentDocumentations(configs);
+        assertTrue(documentations.stream().anyMatch(doc -> doc.getFilePath().equals(fileWithPrefix)));
+        assertTrue(documentations.stream().anyMatch(doc -> doc.getObjects().equals(Collections.singleton("s_jdbc_statement_execute"))));
     }
 }

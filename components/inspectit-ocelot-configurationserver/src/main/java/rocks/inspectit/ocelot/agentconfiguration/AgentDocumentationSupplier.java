@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
+import inspectit.ocelot.configdocsgenerator.model.AgentDocumentation;
+
 import java.util.function.Supplier;
 
 /**

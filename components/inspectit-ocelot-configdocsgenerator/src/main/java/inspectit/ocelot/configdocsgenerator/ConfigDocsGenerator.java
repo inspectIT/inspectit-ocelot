@@ -55,10 +55,10 @@ public class ConfigDocsGenerator {
     Map<String, String> specialInputDescriptionsRegex = Collections.singletonMap("_arg\\d", "The _argN-th argument with which the instrumented method was called within which this action is getting executed.");
 
     /**
-     * Map of files, which contain a set of defined objects like actions, scopes, rules & metrics
+     * Set of documentations, which contain a set of documentable objects like actions, scopes, rules & metrics for every file
      */
     @Setter
-    private Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
+    private Set<AgentDocumentation> agentDocumentations = new HashSet<>();
 
     /**
      * Generates a ConfigDocumentation from a YAML String describing an {@link InspectitConfig}.
@@ -233,9 +233,9 @@ public class ConfigDocsGenerator {
      * @return a set of files, which contain the provided object
      */
     private Set<String> findFiles(String name) {
-        Set<String> files = docsObjectsByFile.entrySet().stream()
-                .filter(entry -> entry.getValue().contains(name))
-                .map(Map.Entry::getKey)
+        Set<String> files = agentDocumentations.stream()
+                .filter(documentation -> documentation.getObjects().contains(name))
+                .map(AgentDocumentation::getFilePath)
                 .collect(Collectors.toSet());
         if(files.isEmpty()) log.debug("No file found with definition of " + name);
 

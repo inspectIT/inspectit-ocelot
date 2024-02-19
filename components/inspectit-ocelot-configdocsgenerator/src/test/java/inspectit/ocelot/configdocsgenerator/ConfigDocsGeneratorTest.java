@@ -371,8 +371,10 @@ class ConfigDocsGeneratorTest {
             docsObjects.add(ruleDocParent.getName());
             docsObjects.add(metricDoc.getName());
 
-            Map<String, Set<String>> docsObjectsByFile = Collections.singletonMap(file, docsObjects);
-            configDocsGenerator.setDocsObjectsByFile(docsObjectsByFile);
+            AgentDocumentation documentation = new AgentDocumentation(file, docsObjects);
+            Set<AgentDocumentation> agentDocumentations = Collections.singleton(documentation);
+
+            configDocsGenerator.setAgentDocumentations(agentDocumentations);
             when(actionWithDocInYaml.getFiles()).thenReturn(Collections.singleton(file));
             when(actionWithoutDocInYaml.getFiles()).thenReturn(Collections.singleton(file));
             when(scopeDoc.getFiles()).thenReturn(Collections.singleton(file));
