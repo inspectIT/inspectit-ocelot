@@ -25,37 +25,74 @@ public class AgentConfigurationTest {
     @Mock
     RevisionAccess revisionAccess;
 
-    @Nested
-    class LoadAndMergeYaml {
+    final String file = "/test.yml";
 
+    @Nested
+    class Create {
         @Test
-        void loadYaml()  {
+        void verifyCreateHappyPath() {
             FileInfo fileInfo = mock(FileInfo.class);
-            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"));
+            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(file));
             when(revisionAccess.configurationFileExists("test")).thenReturn(true);
             when(revisionAccess.configurationFileIsDirectory("test")).thenReturn(true);
             when(revisionAccess.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
-            when(revisionAccess.readConfigurationFile("/test.yml")).thenReturn(Optional.of("key: value"));
+            when(revisionAccess.readConfigurationFile(file)).thenReturn(Optional.of("key: value"));
 
             AgentMapping mapping = AgentMapping.builder()
                     .name("test")
                     .source("/test")
                     .sourceBranch(WORKSPACE)
                     .build();
-            AgentConfiguration config = AgentConfiguration.create(mapping, revisionAccess);
-            String result = config.getConfigYaml();
 
-            assertThat(result).isEqualTo("{key: value}\n");
+            AgentDocumentation documentation = new AgentDocumentation(file, Collections.emptySet());
+
+            AgentConfiguration config = AgentConfiguration.create(mapping, revisionAccess);
+
+            assertThat(config.getMapping()).isEqualTo(mapping);
+            assertThat(config.getConfigYaml()).isEqualTo("{key: value}\n");
+            assertThat(config.getHash()).isNotBlank();
+            assertThat(config.getDocumentationSuppliers()).isNotEmpty();
+
+            AgentDocumentationSupplier createdSupplier = config.getDocumentationSuppliers().stream().findFirst().get();
+
+            assertThat(createdSupplier.get()).isEqualTo(documentation);
         }
+
+        @Test
+        void verifyCreateNoMapping() {
+            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
+                    () -> AgentConfiguration.create(null, revisionAccess)
+            ).withMessage("Cannot create AgentConfiguration for null mapping");
+        }
+
+        @Test
+        void verifyCreateNoFileAccessor() {
+            AgentMapping mapping = AgentMapping.builder()
+                    .name("test")
+                    .source("/test")
+                    .sourceBranch(WORKSPACE)
+                    .build();
+
+            AgentConfiguration config = AgentConfiguration.create(mapping, null);
+
+            assertThat(config.getMapping()).isEqualTo(mapping);
+            assertThat(config.getConfigYaml()).isBlank();
+            assertThat(config.getHash()).isNotBlank();
+            assertThat(config.getDocumentationSuppliers()).isEmpty();
+        }
+    }
+
+    @Nested
+    class LoadAndMergeYaml {
 
         @Test
         void yamlWithTab() {
             FileInfo fileInfo = mock(FileInfo.class);
-            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"));
+            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(file));
             when(revisionAccess.configurationFileExists("test")).thenReturn(true);
             when(revisionAccess.configurationFileIsDirectory("test")).thenReturn(true);
             when(revisionAccess.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
-            when(revisionAccess.readConfigurationFile("/test.yml")).thenReturn(Optional.of("key:\tvalue"));
+            when(revisionAccess.readConfigurationFile(file)).thenReturn(Optional.of("key:\tvalue"));
 
             AgentMapping mapping = AgentMapping.builder()
                     .name("test")
@@ -65,7 +102,7 @@ public class AgentConfigurationTest {
 
             assertThatExceptionOfType(ObjectStructureMerger.InvalidConfigurationFileException.class).isThrownBy(
                     () -> AgentConfiguration.create(mapping, revisionAccess)
-                    ).withMessage("The configuration file '/test.yml' is invalid and cannot be parsed.");
+                    ).withMessage("The configuration file '%s' is invalid and cannot be parsed.", file);
         }
     }
 
@@ -174,31 +211,53 @@ public class AgentConfigurationTest {
     @Nested
     class getDocumentations {
 
+        private final String srcYaml = """
+            inspectit:
+              instrumentation:
+                scopes:
+                  s_jdbc_statement_execute:
+                    docs:
+                      description: 'Scope for executed JDBC statements.'
+                    methods:
+                      - name: execute
+            """;
+
         @Test
         void verifyGetEmptyDocumentations() {
             AgentConfiguration config = AgentConfiguration.NO_MATCHING_MAPPING;
-            Set<AgentDocumentation> documentations = config.getDocumentations();
 
-            assertThat(documentations).isEmpty();
+            assertThat(config.getDocumentations()).isEmpty();
         }
 
         @Test
         void verifyGetDocumentations() {
-            String filePath = "test.yml";
-            Set<AgentDocumentation> agentDocumentations = new HashSet<>();
-            Set<AgentDocumentationSupplier> suppliers = new HashSet<>();
+            FileInfo fileInfo = mock(FileInfo.class);
+            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(file));
+            when(revisionAccess.configurationFileExists("test")).thenReturn(true);
+            when(revisionAccess.configurationFileIsDirectory("test")).thenReturn(true);
+            when(revisionAccess.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
+            when(revisionAccess.readConfigurationFile(file)).thenReturn(Optional.of(srcYaml));
 
-            Set<String> objects = Collections.singleton("yaml");
-            AgentDocumentation documentation = new AgentDocumentation(filePath, objects);
-            agentDocumentations.add(documentation);
+            AgentDocumentation documentation = new AgentDocumentation(file, Collections.singleton("s_jdbc_statement_execute"));
 
-            AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> new AgentDocumentation(filePath, objects));
-            suppliers.add(supplier);
+            AgentMapping mapping = AgentMapping.builder()
+                    .name("test-mapping")
+                    .source("/test")
+                    .sourceBranch(WORKSPACE)
+                    .build();
 
-            AgentConfiguration config = AgentConfiguration.create(null, suppliers, "");
-            Set<AgentDocumentation> documentations = config.getDocumentations();
+            AgentConfiguration config = AgentConfiguration.create(mapping, revisionAccess);
 
-            assertThat(documentations).isEqualTo(agentDocumentations);
+            assertThat(config.getDocumentations()).containsExactly(documentation);
+        }
+
+        @Test
+        void verifyGetDocumentationsWithoutFileAccessor() {
+            AgentMapping mapping = AgentMapping.builder().build();
+
+            AgentConfiguration config = AgentConfiguration.create(mapping, null);
+
+            assertThat(config.getDocumentations()).isEmpty();
         }
     }
 }

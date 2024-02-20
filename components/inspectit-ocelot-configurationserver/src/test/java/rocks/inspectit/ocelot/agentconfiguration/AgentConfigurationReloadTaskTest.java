@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
+import inspectit.ocelot.configdocsgenerator.model.AgentDocumentation;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -48,10 +49,52 @@ public class AgentConfigurationReloadTaskTest {
     @Nested
     class Run {
 
+        final String file = "/test.yml";
+
+        @Test
+        void verifyHappyPath() {
+            FileInfo fileInfo = mock(FileInfo.class);
+            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(file));
+            when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
+            when(workspaceAccessor.configurationFileExists(anyString())).thenReturn(true);
+            when(workspaceAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
+            when(workspaceAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
+            when(workspaceAccessor.readConfigurationFile(anyString())).thenReturn(Optional.of("key: valid"));
+
+            AgentMapping mapping = AgentMapping.builder()
+                    .name("test")
+                    .source("/test")
+                    .sourceBranch(WORKSPACE)
+                    .build();
+            doReturn(Collections.singletonList(mapping)).when(serializer).readAgentMappings(any());
+
+            AgentDocumentation documentation = new AgentDocumentation(file, Collections.emptySet());
+
+            MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
+            Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
+
+            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, consumer);
+
+            task.run();
+
+            List<AgentConfiguration> configurationList = configurations.getValue();
+            assertThat(configurationList).hasSize(1);
+
+            AgentConfiguration configuration = configurationList.get(0);
+
+            assertThat(configuration.getMapping()).isEqualTo(mapping);
+            assertThat(configuration.getConfigYaml()).isEqualTo("{key: valid}\n");
+            assertThat(configuration.getDocumentationSuppliers()).hasSize(1);
+
+            AgentDocumentationSupplier supplier = configuration.getDocumentationSuppliers().iterator().next();
+
+            assertThat(supplier.get()).isEqualTo(documentation);
+        }
+
         @Test
         void loadWithException() {
             FileInfo fileInfo = mock(FileInfo.class);
-            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"), Stream.of("/test.yml"));
+            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(file), Stream.of(file));
             when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
             when(workspaceAccessor.configurationFileExists(anyString())).thenReturn(true);
             when(workspaceAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
@@ -71,6 +114,8 @@ public class AgentConfigurationReloadTaskTest {
                     .build();
             doReturn(Arrays.asList(mapping, mapping2)).when(serializer).readAgentMappings(any());
 
+            AgentDocumentation documentation = new AgentDocumentation(file, Collections.emptySet());
+
             MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
             Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
 
@@ -80,15 +125,22 @@ public class AgentConfigurationReloadTaskTest {
 
             List<AgentConfiguration> configurationList = configurations.getValue();
             assertThat(configurationList).hasSize(1);
-            assertThat(configurationList).element(0)
-                    .extracting(AgentConfiguration::getConfigYaml)
-                    .isEqualTo("{key: valid}\n");
+
+            AgentConfiguration configuration = configurationList.get(0);
+
+            assertThat(configuration.getMapping()).isEqualTo(mapping2);
+            assertThat(configuration.getConfigYaml()).isEqualTo("{key: valid}\n");
+            assertThat(configuration.getDocumentationSuppliers()).hasSize(1);
+
+            AgentDocumentationSupplier supplier = configuration.getDocumentationSuppliers().iterator().next();
+
+            assertThat(supplier.get()).isEqualTo(documentation);
         }
 
         @Test
         void loadWithExceptionOnlyString() {
             FileInfo fileInfo = mock(FileInfo.class);
-            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"), Stream.of("/test.yml"));
+            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(file), Stream.of(file));
             when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
             when(workspaceAccessor.configurationFileExists(anyString())).thenReturn(true);
             when(workspaceAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
@@ -108,6 +160,8 @@ public class AgentConfigurationReloadTaskTest {
                     .build();
             doReturn(Arrays.asList(mapping, mapping2)).when(serializer).readAgentMappings(any());
 
+            AgentDocumentation documentation = new AgentDocumentation(file, Collections.emptySet());
+
             MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
             Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
 
@@ -117,15 +171,22 @@ public class AgentConfigurationReloadTaskTest {
 
             List<AgentConfiguration> configurationList = configurations.getValue();
             assertThat(configurationList).hasSize(1);
-            assertThat(configurationList).element(0)
-                    .extracting(AgentConfiguration::getConfigYaml)
-                    .isEqualTo("{key: valid}\n");
+
+            AgentConfiguration configuration = configurationList.get(0);
+
+            assertThat(configuration.getMapping()).isEqualTo(mapping2);
+            assertThat(configuration.getConfigYaml()).isEqualTo("{key: valid}\n");
+            assertThat(configuration.getDocumentationSuppliers()).hasSize(1);
+
+            AgentDocumentationSupplier supplier = configuration.getDocumentationSuppliers().iterator().next();
+
+            assertThat(supplier.get()).isEqualTo(documentation);
         }
 
         @Test
         void loadWithExceptionOnlyList() {
             FileInfo fileInfo = mock(FileInfo.class);
-            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of("/test.yml"), Stream.of("/test.yml"));
+            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(file), Stream.of(file));
             when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
             when(workspaceAccessor.configurationFileExists(anyString())).thenReturn(true);
             when(workspaceAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
@@ -145,6 +206,8 @@ public class AgentConfigurationReloadTaskTest {
                     .build();
             doReturn(Arrays.asList(mapping, mapping2)).when(serializer).readAgentMappings(any());
 
+            AgentDocumentation documentation = new AgentDocumentation(file, Collections.emptySet());
+
             MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
             Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
 
@@ -154,11 +217,21 @@ public class AgentConfigurationReloadTaskTest {
 
             List<AgentConfiguration> configurationList = configurations.getValue();
             assertThat(configurationList).hasSize(1);
-            assertThat(configurationList).element(0)
-                    .extracting(AgentConfiguration::getConfigYaml)
-                    .isEqualTo("{key: valid}\n");
-        }
 
+            AgentConfiguration configuration = configurationList.get(0);
+
+            assertThat(configuration.getMapping()).isEqualTo(mapping2);
+            assertThat(configuration.getConfigYaml()).isEqualTo("{key: valid}\n");
+            assertThat(configuration.getDocumentationSuppliers()).hasSize(1);
+
+            AgentDocumentationSupplier supplier = configuration.getDocumentationSuppliers().iterator().next();
+
+            assertThat(supplier.get()).isEqualTo(documentation);
+        }
+    }
+
+    @Nested
+    class MappingRevisionAccess {
         @Test
         void loadMappingFromWorkspace() {
             when(workspaceAccessor.agentMappingsExist()).thenReturn(true);

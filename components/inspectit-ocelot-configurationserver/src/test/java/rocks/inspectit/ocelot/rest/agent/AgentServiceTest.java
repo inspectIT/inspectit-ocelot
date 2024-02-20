@@ -39,14 +39,15 @@ public class AgentServiceTest {
     AgentConfigurationManager configManager;
 
     @Mock
+    AgentConfiguration config;
+
+    @Mock
     InspectitServerSettings configuration;
 
     @Nested
     public class BuildSupportArchive {
 
         AgentService serviceSpy;
-
-        AgentConfiguration config;
 
         Map<String, String> attributes;
 
@@ -61,7 +62,7 @@ public class AgentServiceTest {
             String configYaml = String.format("inspectit.log-preloading: {enabled: %b}", logPreloadingEnabled);
 
             //set config
-            config = AgentConfiguration.create(null, new HashSet<>(), configYaml);
+            when(config.getConfigYaml()).thenReturn(configYaml);
 
             //set attributes
             attributes = new HashMap<String, String>() {{

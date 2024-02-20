@@ -41,6 +41,9 @@ public class ConfigurationControllerTest {
     AgentConfigurationManager agentConfigurationManager;
 
     @Mock
+    AgentConfiguration agentConfiguration;
+
+    @Mock
     FileManager fileManager;
 
     @Mock
@@ -60,8 +63,8 @@ public class ConfigurationControllerTest {
 
         @Test
         public void returningConfiguration() {
-            AgentConfiguration configuration = AgentConfiguration.create(null, new HashSet<>(), "yaml");
-            when(agentConfigurationManager.getConfiguration(any())).thenReturn(configuration);
+            when(agentConfiguration.getConfigYaml()).thenReturn("yaml");
+            when(agentConfigurationManager.getConfiguration(any())).thenReturn(agentConfiguration);
 
             ResponseEntity<String> output = configurationController.fetchConfiguration(null);
 
@@ -93,9 +96,12 @@ public class ConfigurationControllerTest {
     @Nested
     public class GetConfigDocumentationTest {
 
+        private final String mappingName = "name";
+        private final AgentMapping agentMapping = AgentMapping.builder().build();
+        private final String configYaml = "yaml";
         private Set<AgentDocumentation> agentDocumentations;
 
-        private Set<AgentDocumentationSupplier> suppliers;
+
 
         @BeforeEach
         void setUp() {
@@ -105,20 +111,13 @@ public class ConfigurationControllerTest {
           AgentDocumentation documentation = new AgentDocumentation(filePath, objects);
           agentDocumentations.add(documentation);
 
-          AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> new AgentDocumentation(filePath, objects));
-          suppliers = new HashSet<>();
-          suppliers.add(supplier);
+          lenient().when(agentConfiguration.getMapping()).thenReturn(agentMapping);
+          lenient().when(agentConfiguration.getConfigYaml()).thenReturn(configYaml);
+          lenient().when(agentConfiguration.getDocumentations()).thenReturn(agentDocumentations);
         }
 
         @Test
         void withDefaultConfig() throws IOException {
-
-            final String mappingName = "name";
-            AgentMapping agentMapping = AgentMapping.builder().build();
-
-            final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, suppliers, configYaml);
-
             Map<String, String> defaultYamls = new HashMap<>();
             final String defaultYamlContent = "defaultYaml";
             defaultYamls.put("firstYaml", defaultYamlContent);
@@ -165,16 +164,7 @@ public class ConfigurationControllerTest {
 
         @Test
         void errorWhenGettingDefaultConfig() throws IOException {
-
-            final String mappingName = "name";
-            AgentMapping agentMapping = AgentMapping.builder().build();
-
-            final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, suppliers, configYaml);
-
             IOException exception = new IOException();
-
-            ConfigDocumentation configDocumentationMock = mock(ConfigDocumentation.class);
 
             when(mappingManager.getAgentMapping(mappingName)).thenReturn(Optional.of(agentMapping));
             when(agentConfigurationManager.getConfigurationForMapping(agentMapping)).thenReturn(agentConfiguration);
@@ -198,13 +188,6 @@ public class ConfigurationControllerTest {
 
         @Test
         void withoutDefaultConfig() throws IOException {
-
-            final String mappingName = "name";
-            AgentMapping agentMapping = AgentMapping.builder().build();
-
-            final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, suppliers, configYaml);
-
             ConfigDocumentation configDocumentationMock = mock(ConfigDocumentation.class);
 
             when(mappingManager.getAgentMapping(mappingName)).thenReturn(Optional.of(agentMapping));
@@ -229,9 +212,6 @@ public class ConfigurationControllerTest {
 
         @Test
         void agentMappingNotFound() {
-
-            final String mappingName = "name";
-
             when(mappingManager.getAgentMapping(mappingName)).thenReturn(Optional.empty());
 
             ResponseEntity<Object> result = configurationController.getConfigDocumentation(mappingName, false);
@@ -247,13 +227,6 @@ public class ConfigurationControllerTest {
 
         @Test
         void invalidYaml() throws IOException {
-
-            final String mappingName = "name";
-            AgentMapping agentMapping = AgentMapping.builder().build();
-
-            final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.create(agentMapping, suppliers, configYaml);
-
             JsonProcessingException exception = mock(JsonProcessingException.class);
             final String errorMessage = "JsonProcessingException: Yaml could not be processed.";
 

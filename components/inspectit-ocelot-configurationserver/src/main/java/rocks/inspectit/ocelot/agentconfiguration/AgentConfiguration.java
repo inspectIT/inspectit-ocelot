@@ -72,35 +72,28 @@ public class AgentConfiguration {
      * @return Created AgentConfiguration
      */
     public static AgentConfiguration create(AgentMapping mapping, AbstractFileAccessor fileAccessor) {
-        LinkedHashSet<String> allYamlFiles = getAllYamlFilesForMapping(fileAccessor, mapping);
+        if (mapping == null) throw new IllegalArgumentException("Cannot create AgentConfiguration for null mapping");
 
         Set<AgentDocumentationSupplier> documentationSuppliers = new HashSet<>();
         Object yamlResult = null;
 
-        for (String path : allYamlFiles) {
-            String src = fileAccessor.readConfigurationFile(path).orElse("");
-            yamlResult = ObjectStructureMerger.loadAndMergeYaml(src, yamlResult, path);
+        if(fileAccessor == null) {
+            log.warn("No file accessor provided for mapping {}. Cannot read files", mapping);
+        }
+        else {
+            LinkedHashSet<String> allYamlFiles = getAllYamlFilesForMapping(fileAccessor, mapping);
+            for (String path : allYamlFiles) {
+                String src = fileAccessor.readConfigurationFile(path).orElse("");
+                yamlResult = ObjectStructureMerger.loadAndMergeYaml(src, yamlResult, path);
 
-            AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> loadDocumentation(path, src));
-            documentationSuppliers.add(supplier);
+                AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> loadDocumentation(path, src));
+                documentationSuppliers.add(supplier);
+            }
         }
 
         String configYaml = yamlResult == null ? "" : new Yaml().dump(yamlResult);
         String hash = DigestUtils.md5DigestAsHex(configYaml.getBytes(Charset.defaultCharset()));
 
-        return new AgentConfiguration(mapping, documentationSuppliers, configYaml, hash);
-    }
-
-    /**
-     * Factory method to create an AgentConfiguration. Also creates a cryptographic hash.
-     *
-     * @param mapping The agent mapping for which this instance represents the loaded configuration
-     * @param documentationSuppliers The set of suppliers for agent documentations
-     * @param configYaml The yaml string, which contains the configuration
-     * @return Created AgentConfiguration
-     */
-    public static AgentConfiguration create(AgentMapping mapping, Set<AgentDocumentationSupplier> documentationSuppliers, String configYaml) {
-        String hash = DigestUtils.md5DigestAsHex(configYaml.getBytes(Charset.defaultCharset()));
         return new AgentConfiguration(mapping, documentationSuppliers, configYaml, hash);
     }
 
@@ -120,7 +113,8 @@ public class AgentConfiguration {
      *
      * @return The loaded agent documentations
      */
-    public Set<AgentDocumentation> getDocumentations() {
+    public synchronized Set<AgentDocumentation> getDocumentations() {
+        if (documentationSuppliers == null) return Collections.emptySet();
         return documentationSuppliers.stream().map(AgentDocumentationSupplier::get).collect(Collectors.toSet());
     }
 

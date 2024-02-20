@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
 import inspectit.ocelot.configdocsgenerator.model.AgentDocumentation;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -12,7 +13,7 @@ import static rocks.inspectit.ocelot.agentconfiguration.DocsObjectsLoader.OCELOT
 
 public class DocsObjectsLoaderTest {
 
-    private final String srcYaml = """
+    private final String srcYamlWithDocsObject = """
             inspectit:
               instrumentation:
                 scopes:
@@ -31,34 +32,77 @@ public class DocsObjectsLoaderTest {
                     free: true
             """;
 
-    @Test
-    void verifyLoadObjectsSuccessful() throws IOException {
-        Set<String> objects = DocsObjectsLoader.loadObjects(srcYaml);
 
-        assertTrue(objects.contains("s_jdbc_statement_execute"));
+    @Nested
+    class LoadObjects {
+        @Test
+        void verifyLoadObjectsSuccessful() throws IOException {
+            Set<String> objects = DocsObjectsLoader.loadObjects(srcYamlWithDocsObject);
+
+            assertTrue(objects.contains("s_jdbc_statement_execute"));
+        }
+
+        @Test
+        void verifyLoadObjectsEmptyDocs() throws IOException {
+            Set<String> objects = DocsObjectsLoader.loadObjects(srcYamlWithoutDocsObjects);
+
+            assertTrue(objects.isEmpty());
+        }
+
+        @Test
+        void verifyLoadObjectsEmptyString() throws IOException {
+            Set<String> objects = DocsObjectsLoader.loadObjects("");
+
+            assertTrue(objects.isEmpty());
+        }
+
+        @Test
+        void verifyLoadObjectsInvalidConfig() {
+            assertThrows(NoSuchElementException.class, () -> DocsObjectsLoader.loadObjects("invalid-config"));
+        }
+
+        @Test
+        void verifyLoadObjectsNull() {
+            assertThrows(IllegalArgumentException.class, () -> DocsObjectsLoader.loadObjects(null));
+        }
     }
 
-    @Test
-    void verifyLoadObjectsEmpty() throws IOException {
-        Set<String> objects = DocsObjectsLoader.loadObjects(srcYamlWithoutDocsObjects);
+    @Nested
+    class DefaultAgentDocumentation {
+        @Test
+        void verifyLoadDefaultAgentDocumentations() {
+            String file = "test.yml";
+            String fileWithPrefix = OCELOT_DEFAULT_CONFIG_PREFIX + file;
+            Map<String, String> configs = new HashMap<>();
+            configs.put(file, srcYamlWithDocsObject);
 
-        assertTrue(objects.isEmpty());
-    }
+            Set<AgentDocumentation> documentations = DocsObjectsLoader.loadDefaultAgentDocumentations(configs);
+            assertTrue(documentations.stream().anyMatch(doc -> doc.getFilePath().equals(fileWithPrefix)));
+            assertTrue(documentations.stream().anyMatch(doc -> doc.getObjects().equals(Collections.singleton("s_jdbc_statement_execute"))));
+        }
 
-    @Test
-    void verifyLoadThrowsException() {
-        assertThrows(NoSuchElementException.class, () -> DocsObjectsLoader.loadObjects("invalid-config"));
-    }
+        @Test
+        void verifyLoadDefaultAgentDocumentationsEmptyDocs() {
+            String file = "test.yml";
+            String fileWithPrefix = OCELOT_DEFAULT_CONFIG_PREFIX + file;
+            Map<String, String> configs = new HashMap<>();
+            configs.put(file, srcYamlWithoutDocsObjects);
 
-    @Test
-    void verifyLoadDefaultDocsObjectsByFile() {
-        String file = "test.yml";
-        String fileWithPrefix = OCELOT_DEFAULT_CONFIG_PREFIX + file;
-        Map<String, String> configs = new HashMap<>();
-        configs.put(file, srcYaml);
+            Set<AgentDocumentation> documentations = DocsObjectsLoader.loadDefaultAgentDocumentations(configs);
+            assertTrue(documentations.stream().anyMatch(doc -> doc.getFilePath().equals(fileWithPrefix)));
+            assertTrue(documentations.stream().anyMatch(doc -> doc.getObjects().equals(Collections.emptySet())));
+        }
 
-        Set<AgentDocumentation> documentations = DocsObjectsLoader.loadDefaultAgentDocumentations(configs);
-        assertTrue(documentations.stream().anyMatch(doc -> doc.getFilePath().equals(fileWithPrefix)));
-        assertTrue(documentations.stream().anyMatch(doc -> doc.getObjects().equals(Collections.singleton("s_jdbc_statement_execute"))));
+        @Test
+        void verifyLoadDefaultAgentDocumentationsEmptyMap() {
+            Set<AgentDocumentation> documentations = DocsObjectsLoader.loadDefaultAgentDocumentations(new HashMap<>());
+
+            assertTrue(documentations.isEmpty());
+        }
+
+        @Test
+        void verifyLoadDefaultAgentDocumentationsNull() {
+            assertThrows(IllegalArgumentException.class, () -> DocsObjectsLoader.loadObjects(null));
+        }
     }
 }
