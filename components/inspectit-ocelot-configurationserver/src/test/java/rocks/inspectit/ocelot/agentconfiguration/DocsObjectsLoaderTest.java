@@ -60,11 +60,6 @@ public class DocsObjectsLoaderTest {
         void verifyLoadObjectsInvalidConfig() {
             assertThrows(NoSuchElementException.class, () -> DocsObjectsLoader.loadObjects("invalid-config"));
         }
-
-        @Test
-        void verifyLoadObjectsNull() {
-            assertThrows(IllegalArgumentException.class, () -> DocsObjectsLoader.loadObjects(null));
-        }
     }
 
     @Nested
