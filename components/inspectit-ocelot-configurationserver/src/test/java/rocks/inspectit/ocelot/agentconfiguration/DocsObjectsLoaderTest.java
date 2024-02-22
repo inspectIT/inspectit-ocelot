@@ -99,10 +99,5 @@ public class DocsObjectsLoaderTest {
 
             assertTrue(documentations.isEmpty());
         }
-
-        @Test
-        void verifyLoadDefaultAgentDocumentationsNull() {
-            assertThrows(IllegalArgumentException.class, () -> DocsObjectsLoader.loadObjects(null));
-        }
     }
 }

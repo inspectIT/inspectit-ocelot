@@ -57,29 +57,6 @@ public class AgentConfigurationTest {
 
             assertThat(createdSupplier.get()).isEqualTo(documentation);
         }
-
-        @Test
-        void verifyCreateNoMapping() {
-            assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
-                    () -> AgentConfiguration.create(null, revisionAccess)
-            ).withMessage("Cannot create AgentConfiguration for null mapping");
-        }
-
-        @Test
-        void verifyCreateNoFileAccessor() {
-            AgentMapping mapping = AgentMapping.builder()
-                    .name("test")
-                    .source("/test")
-                    .sourceBranch(WORKSPACE)
-                    .build();
-
-            AgentConfiguration config = AgentConfiguration.create(mapping, null);
-
-            assertThat(config.getMapping()).isEqualTo(mapping);
-            assertThat(config.getConfigYaml()).isBlank();
-            assertThat(config.getHash()).isNotBlank();
-            assertThat(config.getDocumentationSuppliers()).isEmpty();
-        }
     }
 
     @Nested

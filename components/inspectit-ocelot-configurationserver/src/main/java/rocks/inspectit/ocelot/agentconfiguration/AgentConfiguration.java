@@ -72,23 +72,16 @@ public class AgentConfiguration {
      * @return Created AgentConfiguration
      */
     public static AgentConfiguration create(AgentMapping mapping, AbstractFileAccessor fileAccessor) {
-        if (mapping == null) throw new IllegalArgumentException("Cannot create AgentConfiguration for null mapping");
-
         Set<AgentDocumentationSupplier> documentationSuppliers = new HashSet<>();
         Object yamlResult = null;
 
-        if(fileAccessor == null) {
-            log.warn("No file accessor provided for mapping {}. Cannot read files", mapping);
-        }
-        else {
-            LinkedHashSet<String> allYamlFiles = getAllYamlFilesForMapping(fileAccessor, mapping);
-            for (String path : allYamlFiles) {
-                String src = fileAccessor.readConfigurationFile(path).orElse("");
-                yamlResult = ObjectStructureMerger.loadAndMergeYaml(src, yamlResult, path);
+        LinkedHashSet<String> allYamlFiles = getAllYamlFilesForMapping(fileAccessor, mapping);
+        for (String path : allYamlFiles) {
+            String src = fileAccessor.readConfigurationFile(path).orElse("");
+            yamlResult = ObjectStructureMerger.loadAndMergeYaml(src, yamlResult, path);
 
-                AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> loadDocumentation(path, src));
-                documentationSuppliers.add(supplier);
-            }
+            AgentDocumentationSupplier supplier = new AgentDocumentationSupplier(() -> loadDocumentation(path, src));
+            documentationSuppliers.add(supplier);
         }
 
         String configYaml = yamlResult == null ? "" : new Yaml().dump(yamlResult);

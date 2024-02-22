@@ -28,8 +28,6 @@ public class DocsObjectsLoader {
      * @return a set of defined objects in this yaml
      */
     public static Set<String> loadObjects(String src) throws IOException {
-        if(src == null) throw new IllegalArgumentException("Cannot load documentable objects from null");
-
         Yaml yaml = new Yaml();
         Object rawYaml = yaml.load(src);
         Set<String> objects = new HashSet<>();
@@ -58,8 +56,6 @@ public class DocsObjectsLoader {
      * @return A set of defined objects for each file
      */
     public static Set<AgentDocumentation> loadDefaultAgentDocumentations(Map<String, String> defaultYamls) {
-        if(defaultYamls == null) throw new IllegalArgumentException("Cannot load default documentable objects from null");
-
         Set<AgentDocumentation> defaultDocumentations = new HashSet<>();
         for(Map.Entry<String, String> entry : defaultYamls.entrySet()) {
             String path = OCELOT_DEFAULT_CONFIG_PREFIX + entry.getKey();

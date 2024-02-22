@@ -54,12 +54,22 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         List<AgentMapping> mappingsToLoad = mappingsSerializer.readAgentMappings(fileAccess);
         List<AgentConfiguration> newConfigurations = new ArrayList<>();
         for (AgentMapping mapping : mappingsToLoad) {
+            if(mapping == null) {
+                log.debug("Could not load null agent mapping");
+                continue;
+            }
             try {
                 if (isCanceled()) {
                     log.debug("Configuration reloading canceled");
                     return;
                 }
+
                 AbstractFileAccessor fileAccessor = getFileAccessorForMapping(mapping);
+                if(fileAccessor == null) {
+                    log.debug("No file accessor provided for mapping {}. Cannot read files", mapping);
+                    continue;
+                }
+
                 AgentConfiguration agentConfiguration = AgentConfiguration.create(mapping, fileAccessor);
                 newConfigurations.add(agentConfiguration);
             } catch (Exception e) {

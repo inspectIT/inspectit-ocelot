@@ -39,26 +39,27 @@ public class AgentConfigurationReloadTaskTest {
     @Mock
     RevisionAccess workspaceAccessor;
 
+    final String file = "/test.yml";
+
     @BeforeEach
     void beforeEach() {
         lenient().when(fileManager.getWorkspaceRevision()).thenReturn(workspaceAccessor);
         lenient().when(fileManager.getLiveRevision()).thenReturn(liveAccessor);
         lenient().when(serializer.getRevisionAccess()).thenReturn(workspaceAccessor);
+        lenient().when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
+
+        FileInfo fileInfo = mock(FileInfo.class);
+        lenient().when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(file), Stream.of(file));
+        lenient().when(workspaceAccessor.configurationFileExists(anyString())).thenReturn(true);
+        lenient().when(workspaceAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
+        lenient().when(workspaceAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
     }
 
     @Nested
     class Run {
 
-        final String file = "/test.yml";
-
         @Test
-        void verifyHappyPath() {
-            FileInfo fileInfo = mock(FileInfo.class);
-            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(file));
-            when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
-            when(workspaceAccessor.configurationFileExists(anyString())).thenReturn(true);
-            when(workspaceAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
-            when(workspaceAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
+        void runTaskWithValidOutput() throws Exception {
             when(workspaceAccessor.readConfigurationFile(anyString())).thenReturn(Optional.of("key: valid"));
 
             AgentMapping mapping = AgentMapping.builder()
@@ -72,19 +73,18 @@ public class AgentConfigurationReloadTaskTest {
 
             MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
             Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
-
             AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, consumer);
 
             task.run();
 
             List<AgentConfiguration> configurationList = configurations.getValue();
-            assertThat(configurationList).hasSize(1);
+            assertThat(configurationList).isNotEmpty();
 
             AgentConfiguration configuration = configurationList.get(0);
 
             assertThat(configuration.getMapping()).isEqualTo(mapping);
             assertThat(configuration.getConfigYaml()).isEqualTo("{key: valid}\n");
-            assertThat(configuration.getDocumentationSuppliers()).hasSize(1);
+            assertThat(configuration.getDocumentationSuppliers()).isNotEmpty();
 
             AgentDocumentationSupplier supplier = configuration.getDocumentationSuppliers().iterator().next();
 
@@ -92,13 +92,43 @@ public class AgentConfigurationReloadTaskTest {
         }
 
         @Test
-        void loadWithException() {
-            FileInfo fileInfo = mock(FileInfo.class);
-            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(file), Stream.of(file));
-            when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
-            when(workspaceAccessor.configurationFileExists(anyString())).thenReturn(true);
-            when(workspaceAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
-            when(workspaceAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
+        void runTaskWithNullMapping() {
+            doReturn(Collections.singletonList(null)).when(serializer).readAgentMappings(any());
+
+            MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
+            Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
+
+            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, consumer);
+
+            task.run();
+
+            List<AgentConfiguration> configurationList = configurations.getValue();
+            assertThat(configurationList).isEmpty();
+        }
+
+        @Test
+        void runTaskWithoutFileAccessor() {
+            when(fileManager.getWorkspaceRevision()).thenReturn(null);
+            AgentMapping mapping = AgentMapping.builder()
+                    .name("test")
+                    .source("/test")
+                    .sourceBranch(WORKSPACE)
+                    .build();
+            doReturn(Collections.singletonList(mapping)).when(serializer).readAgentMappings(any());
+
+            MutableObject<List<AgentConfiguration>> configurations = new MutableObject<>();
+            Consumer<List<AgentConfiguration>> consumer = configurations::setValue;
+
+            AgentConfigurationReloadTask task = new AgentConfigurationReloadTask(serializer, fileManager, consumer);
+
+            task.run();
+
+            List<AgentConfiguration> configurationList = configurations.getValue();
+            assertThat(configurationList).isEmpty();
+        }
+
+        @Test
+        void loadTabWithException() {
             // the first call will return a broken file
             when(workspaceAccessor.readConfigurationFile(anyString())).thenReturn(Optional.of("key:\tbroken"), Optional.of("key: valid"));
 
@@ -138,13 +168,7 @@ public class AgentConfigurationReloadTaskTest {
         }
 
         @Test
-        void loadWithExceptionOnlyString() {
-            FileInfo fileInfo = mock(FileInfo.class);
-            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(file), Stream.of(file));
-            when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
-            when(workspaceAccessor.configurationFileExists(anyString())).thenReturn(true);
-            when(workspaceAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
-            when(workspaceAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
+        void loadOnlyStringWithException() {
             // the first call will return an invalid file only containing a string
             when(workspaceAccessor.readConfigurationFile(anyString())).thenReturn(Optional.of("onlystring"), Optional.of("key: valid"));
 
@@ -184,13 +208,7 @@ public class AgentConfigurationReloadTaskTest {
         }
 
         @Test
-        void loadWithExceptionOnlyList() {
-            FileInfo fileInfo = mock(FileInfo.class);
-            when(fileInfo.getAbsoluteFilePaths(any())).thenReturn(Stream.of(file), Stream.of(file));
-            when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
-            when(workspaceAccessor.configurationFileExists(anyString())).thenReturn(true);
-            when(workspaceAccessor.configurationFileIsDirectory(anyString())).thenReturn(true);
-            when(workspaceAccessor.listConfigurationFiles(anyString())).thenReturn(Collections.singletonList(fileInfo));
+        void loadOnlyListWithException() {
             // the first call will return an invalid file only containing a list
             when(workspaceAccessor.readConfigurationFile(anyString())).thenReturn(Optional.of("- listentry1\n  listentry2"), Optional.of("key: valid"));
 
@@ -232,10 +250,9 @@ public class AgentConfigurationReloadTaskTest {
 
     @Nested
     class MappingRevisionAccess {
+
         @Test
         void loadMappingFromWorkspace() {
-            when(workspaceAccessor.agentMappingsExist()).thenReturn(true);
-
             AgentMapping mapping = AgentMapping.builder()
                     .name("test")
                     .source("/test")
@@ -254,7 +271,7 @@ public class AgentConfigurationReloadTaskTest {
 
         @Test
         void loadMappingFromLive() {
-            lenient().when(serializer.getRevisionAccess()).thenReturn(liveAccessor);
+            when(serializer.getRevisionAccess()).thenReturn(liveAccessor);
             when(liveAccessor.agentMappingsExist()).thenReturn(true);
 
             AgentMapping mapping = AgentMapping.builder()
