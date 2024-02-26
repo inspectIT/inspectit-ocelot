@@ -12,7 +12,7 @@ public class AgentDocumentationSupplier implements Supplier<AgentDocumentation> 
 
     private final Supplier<AgentDocumentation> supplier;
 
-    private AgentDocumentation documentation;
+    private volatile AgentDocumentation documentation;
 
     public AgentDocumentationSupplier(Supplier<AgentDocumentation> supplier) {
         this.supplier = supplier;
