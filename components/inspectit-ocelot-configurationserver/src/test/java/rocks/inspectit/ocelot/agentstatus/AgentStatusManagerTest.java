@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
@@ -13,11 +14,10 @@ import rocks.inspectit.ocelot.file.versioning.Branch;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class AgentStatusManagerTest {
@@ -26,6 +26,9 @@ public class AgentStatusManagerTest {
 
     @InjectMocks
     AgentStatusManager manager;
+
+    @Mock
+    AgentConfiguration agentConfiguration;
 
     @BeforeEach
     void init() {
@@ -43,10 +46,10 @@ public class AgentStatusManagerTest {
         void testWithAgentIdHeader() {
             Branch testBranch = Branch.WORKSPACE;
             AgentMapping agentMapping = AgentMapping.builder().name("test-conf").sourceBranch(testBranch).build();
-            AgentConfiguration config = AgentConfiguration.builder().mapping(agentMapping).configYaml("").build();
-            Map<String, String> attributes = ImmutableMap.of("service", "test");
+            when(agentConfiguration.getMapping()).thenReturn(agentMapping);
 
-            manager.notifyAgentConfigurationFetched(attributes, Collections.singletonMap(HEADER_AGENT_ID, "aid"), config);
+            Map<String, String> attributes = ImmutableMap.of("service", "test");
+            manager.notifyAgentConfigurationFetched(attributes, Collections.singletonMap(HEADER_AGENT_ID, "aid"), agentConfiguration);
 
             assertThat(manager.getAgentStatuses()).hasSize(1).anySatisfy(status -> {
                 assertThat(status.getAttributes()).isEqualTo(attributes);
@@ -75,10 +78,10 @@ public class AgentStatusManagerTest {
         void testMappingFound() {
             Branch testBranch = Branch.WORKSPACE;
             AgentMapping agentMapping = AgentMapping.builder().name("test-conf").sourceBranch(testBranch).build();
-            AgentConfiguration conf = AgentConfiguration.builder().mapping(agentMapping).configYaml("").build();
+            AgentConfiguration config = AgentConfiguration.create(agentMapping, null);
             Map<String, String> attributes = ImmutableMap.of("service", "test");
 
-            manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), conf);
+            manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), config);
 
             assertThat(manager.getAgentStatuses()).hasSize(1).anySatisfy(status -> {
                 assertThat(status.getAttributes()).isEqualTo(attributes);
@@ -92,7 +95,7 @@ public class AgentStatusManagerTest {
         void testOverriding() throws Exception {
             Branch testBranch = Branch.WORKSPACE;
             AgentMapping agentMapping = AgentMapping.builder().name("test-conf").sourceBranch(testBranch).build();
-            AgentConfiguration conf = AgentConfiguration.builder().mapping(agentMapping).configYaml("").build();
+            AgentConfiguration config = AgentConfiguration.create(agentMapping, null);
             Map<String, String> attributes = ImmutableMap.of("service", "test");
 
             manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), null);
@@ -107,7 +110,7 @@ public class AgentStatusManagerTest {
 
             Thread.sleep(1);
 
-            manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), conf);
+            manager.notifyAgentConfigurationFetched(attributes, Collections.emptyMap(), config);
 
             assertThat(manager.getAgentStatuses()).hasSize(1).anySatisfy(status -> {
                 assertThat(status.getAttributes()).isEqualTo(attributes);

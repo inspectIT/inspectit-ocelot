@@ -18,6 +18,7 @@ import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -38,14 +39,15 @@ public class AgentServiceTest {
     AgentConfigurationManager configManager;
 
     @Mock
+    AgentConfiguration config;
+
+    @Mock
     InspectitServerSettings configuration;
 
     @Nested
     public class BuildSupportArchive {
 
         AgentService serviceSpy;
-
-        AgentConfiguration config;
 
         Map<String, String> attributes;
 
@@ -57,11 +59,10 @@ public class AgentServiceTest {
 
         public void setupTestData(boolean logPreloadingEnabled) {
             serviceSpy = Mockito.spy(cut);
+            String configYaml = String.format("inspectit.log-preloading: {enabled: %b}", logPreloadingEnabled);
 
             //set config
-            config = AgentConfiguration.builder()
-                    .configYaml(String.format("inspectit.log-preloading: {enabled: %b}", logPreloadingEnabled))
-                    .build();
+            when(config.getConfigYaml()).thenReturn(configYaml);
 
             //set attributes
             attributes = new HashMap<String, String>() {{
@@ -111,7 +112,7 @@ public class AgentServiceTest {
 
             DeferredResult<ResponseEntity<?>> actualResult = serviceSpy.buildSupportArchive(attributes, configManager);
             ResponseEntity<?> unwrappedResult = (ResponseEntity<?>) actualResult.getResult();
-            
+
             assertThat(unwrappedResult.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(unwrappedResult.getBody()).isEqualTo(expectedResult);
         }

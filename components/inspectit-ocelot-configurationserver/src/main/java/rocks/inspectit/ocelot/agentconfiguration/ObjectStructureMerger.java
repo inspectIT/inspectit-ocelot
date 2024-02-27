@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
+import org.yaml.snakeyaml.Yaml;
+import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -9,6 +11,29 @@ import java.util.stream.Stream;
  * merge them as property sources.
  */
 public class ObjectStructureMerger {
+
+    /**
+     * Loads a yaml file as a Map/List structure and merges it with an existing map/list structure.
+     *
+     * @param src the source yaml, which should be merged
+     * @param toMerge the existing structure of nested maps / lists with which the loaded yaml will be merged.
+     * @param path    the path of the yaml file to load
+     *
+     * @return the merged structure
+     */
+    public static Object loadAndMergeYaml(String src, Object toMerge, String path) {
+        Yaml yaml = new Yaml();
+        try {
+            Map<String, Object> loadedYaml = yaml.load(src);
+            if (toMerge == null) {
+                return loadedYaml;
+            } else {
+                return ObjectStructureMerger.merge(toMerge, loadedYaml);
+            }
+        } catch (Exception e) {
+            throw new InvalidConfigurationFileException(path, e);
+        }
+    }
 
     /**
      * Tries to merge the given two Object structure, giving precedence to the first one.
@@ -82,4 +107,13 @@ public class ObjectStructureMerger {
         return result;
     }
 
+    /**
+     * This exception will be thrown if a configuration file cannot be parsed, e.g. it contains invalid characters.
+     */
+    static class InvalidConfigurationFileException extends RuntimeException {
+
+        public InvalidConfigurationFileException(String path, Exception e) {
+            super(String.format("The configuration file '%s' is invalid and cannot be parsed.", path), e);
+        }
+    }
 }

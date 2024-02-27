@@ -2,10 +2,10 @@ package rocks.inspectit.ocelot.rest.configuration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import inspectit.ocelot.configdocsgenerator.ConfigDocsGenerator;
+import inspectit.ocelot.configdocsgenerator.model.AgentDocumentation;
 import inspectit.ocelot.configdocsgenerator.model.ConfigDocumentation;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -16,9 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.yaml.snakeyaml.Yaml;
-import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
-import rocks.inspectit.ocelot.agentconfiguration.AgentConfigurationManager;
-import rocks.inspectit.ocelot.agentconfiguration.ObjectStructureMerger;
+import rocks.inspectit.ocelot.agentconfiguration.*;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
@@ -31,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static rocks.inspectit.ocelot.agentconfiguration.DocsObjectsLoader.OCELOT_DEFAULT_CONFIG_PREFIX;
 
 @ExtendWith(MockitoExtension.class)
 public class ConfigurationControllerTest {
@@ -40,6 +39,9 @@ public class ConfigurationControllerTest {
 
     @Mock
     AgentConfigurationManager agentConfigurationManager;
+
+    @Mock
+    AgentConfiguration agentConfiguration;
 
     @Mock
     FileManager fileManager;
@@ -61,11 +63,8 @@ public class ConfigurationControllerTest {
 
         @Test
         public void returningConfiguration() {
-            AgentConfiguration configuration = AgentConfiguration.builder()
-                    .configYaml("yaml")
-                    .docsObjectsByFile(new HashMap<>())
-                    .build();
-            when(agentConfigurationManager.getConfiguration(any())).thenReturn(configuration);
+            when(agentConfiguration.getConfigYaml()).thenReturn("yaml");
+            when(agentConfigurationManager.getConfiguration(any())).thenReturn(agentConfiguration);
 
             ResponseEntity<String> output = configurationController.fetchConfiguration(null);
 
@@ -97,29 +96,33 @@ public class ConfigurationControllerTest {
     @Nested
     public class GetConfigDocumentationTest {
 
-        private final static Map<String, Set<String>> docsObjectsByFile = new HashMap<>();
+        private final String mappingName = "name";
+        private final AgentMapping agentMapping = AgentMapping.builder().build();
+        private final String configYaml = "yaml";
+        private Set<AgentDocumentation> agentDocumentations;
 
-        @BeforeAll
-        static void setUp() {
+
+
+        @BeforeEach
+        void setUp() {
+          String filePath = "test.yml";
           Set<String> objects = Collections.singleton("yaml");
-          docsObjectsByFile.put("test.yml", objects);
+          agentDocumentations = new HashSet<>();
+          AgentDocumentation documentation = new AgentDocumentation(filePath, objects);
+          agentDocumentations.add(documentation);
+
+          lenient().when(agentConfiguration.getMapping()).thenReturn(agentMapping);
+          lenient().when(agentConfiguration.getConfigYaml()).thenReturn(configYaml);
+          lenient().when(agentConfiguration.getDocumentations()).thenReturn(agentDocumentations);
         }
 
         @Test
         void withDefaultConfig() throws IOException {
-
-            final String mappingName = "name";
-            AgentMapping agentMapping = AgentMapping.builder().build();
-
-            final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.builder()
-                    .configYaml(configYaml)
-                    .docsObjectsByFile(docsObjectsByFile)
-                    .build();
-
             Map<String, String> defaultYamls = new HashMap<>();
             final String defaultYamlContent = "defaultYaml";
             defaultYamls.put("firstYaml", defaultYamlContent);
+            AgentDocumentation documentation = new AgentDocumentation(OCELOT_DEFAULT_CONFIG_PREFIX + "firstYaml", Collections.emptySet());
+            agentDocumentations.add(documentation);
 
             Map<String, String> configYamlMap = new HashMap<>();
             configYamlMap.put("entry", "value");
@@ -151,7 +154,7 @@ public class ConfigurationControllerTest {
             verify(yaml).load(eq(configYaml));
             verify(yaml).dump(eq(combinedYamls));
             verifyNoMoreInteractions(yaml);
-            verify(configDocsGenerator).setDocsObjectsByFile(eq(docsObjectsByFile));
+            verify(configDocsGenerator).setAgentDocumentations(eq(agentDocumentations));
             verify(configDocsGenerator).generateConfigDocs(eq(combinedYamlString));
             verifyNoMoreInteractions(configDocsGenerator);
 
@@ -161,19 +164,7 @@ public class ConfigurationControllerTest {
 
         @Test
         void errorWhenGettingDefaultConfig() throws IOException {
-
-            final String mappingName = "name";
-            AgentMapping agentMapping = AgentMapping.builder().build();
-
-            final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.builder()
-                    .configYaml(configYaml)
-                    .docsObjectsByFile(docsObjectsByFile)
-                    .build();
-
             IOException exception = new IOException();
-
-            ConfigDocumentation configDocumentationMock = mock(ConfigDocumentation.class);
 
             when(mappingManager.getAgentMapping(mappingName)).thenReturn(Optional.of(agentMapping));
             when(agentConfigurationManager.getConfigurationForMapping(agentMapping)).thenReturn(agentConfiguration);
@@ -197,16 +188,6 @@ public class ConfigurationControllerTest {
 
         @Test
         void withoutDefaultConfig() throws IOException {
-
-            final String mappingName = "name";
-            AgentMapping agentMapping = AgentMapping.builder().build();
-
-            final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.builder()
-                    .configYaml(configYaml)
-                    .docsObjectsByFile(docsObjectsByFile)
-                    .build();
-
             ConfigDocumentation configDocumentationMock = mock(ConfigDocumentation.class);
 
             when(mappingManager.getAgentMapping(mappingName)).thenReturn(Optional.of(agentMapping));
@@ -221,7 +202,7 @@ public class ConfigurationControllerTest {
             verifyNoMoreInteractions(mappingManager);
             verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
             verifyNoMoreInteractions(agentConfigurationManager);
-            verify(configDocsGenerator).setDocsObjectsByFile(eq(docsObjectsByFile));
+            verify(configDocsGenerator).setAgentDocumentations(eq(agentDocumentations));
             verify(configDocsGenerator).generateConfigDocs(eq(configYaml));
             verifyNoMoreInteractions(configDocsGenerator);
 
@@ -231,9 +212,6 @@ public class ConfigurationControllerTest {
 
         @Test
         void agentMappingNotFound() {
-
-            final String mappingName = "name";
-
             when(mappingManager.getAgentMapping(mappingName)).thenReturn(Optional.empty());
 
             ResponseEntity<Object> result = configurationController.getConfigDocumentation(mappingName, false);
@@ -249,16 +227,6 @@ public class ConfigurationControllerTest {
 
         @Test
         void invalidYaml() throws IOException {
-
-            final String mappingName = "name";
-            AgentMapping agentMapping = AgentMapping.builder().build();
-
-            final String configYaml = "yaml";
-            AgentConfiguration agentConfiguration = AgentConfiguration.builder()
-                    .configYaml(configYaml)
-                    .docsObjectsByFile(docsObjectsByFile)
-                    .build();
-
             JsonProcessingException exception = mock(JsonProcessingException.class);
             final String errorMessage = "JsonProcessingException: Yaml could not be processed.";
 
@@ -275,7 +243,7 @@ public class ConfigurationControllerTest {
             verifyNoMoreInteractions(mappingManager);
             verify(agentConfigurationManager).getConfigurationForMapping(eq(agentMapping));
             verifyNoMoreInteractions(agentConfigurationManager);
-            verify(configDocsGenerator).setDocsObjectsByFile(eq(docsObjectsByFile));
+            verify(configDocsGenerator).setAgentDocumentations(eq(agentDocumentations));
             verify(configDocsGenerator).generateConfigDocs(eq(configYaml));
             verifyNoMoreInteractions(configDocsGenerator);
 

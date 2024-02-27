@@ -24,17 +24,14 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration.NO_MATCHING_MAPPING;
+
 /**
  * Manager responsible for serving the agent configuration based on the set of {@link AgentMapping}s.
  */
 @Component
 @Slf4j
 public class AgentConfigurationManager {
-
-    /**
-     * Used as maker in {@link #attributesToConfigurationCache} to mark attribute-maps for which no mapping matches.
-     */
-    private static final AgentConfiguration NO_MATCHING_MAPPING = AgentConfiguration.builder().configYaml("").build();
 
     @Autowired
     @VisibleForTesting
@@ -120,7 +117,7 @@ public class AgentConfigurationManager {
         attributesToConfigurationCache = CacheBuilder.newBuilder()
                 .maximumSize(config.getMaxAgents())
                 .expireAfterAccess(config.getAgentEvictionDelay().toMillis(), TimeUnit.MILLISECONDS)
-                .build(new CacheLoader<Map<String, String>, AgentConfiguration>() {
+                .build(new CacheLoader<>() {
                     @Override
                     public AgentConfiguration load(Map<String, String> agentAttributes) {
                         return newConfigurations.stream()

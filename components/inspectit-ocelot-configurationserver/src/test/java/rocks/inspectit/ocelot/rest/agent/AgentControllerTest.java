@@ -19,6 +19,7 @@ import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +35,9 @@ public class AgentControllerTest {
     AgentConfigurationManager configManager;
 
     @Mock
+    AgentConfiguration agentConfiguration;
+
+    @Mock
     AgentStatusManager statusManager;
 
     @Mock
@@ -44,6 +48,8 @@ public class AgentControllerTest {
 
     @Nested
     public class FetchConfiguration {
+
+        String srcYaml = "foo : bar";
 
         @Test
         public void noMappingFound() {
@@ -58,29 +64,31 @@ public class AgentControllerTest {
 
         @Test
         public void mappingFound() {
-            AgentConfiguration config = AgentConfiguration.builder().configYaml("foo : bar").build();
-            doReturn(config).when(configManager).getConfiguration(anyMap());
+            doReturn(agentConfiguration).when(configManager).getConfiguration(anyMap());
+            doReturn(srcYaml).when(agentConfiguration).getConfigYaml();
 
             HashMap<String, String> attributes = new HashMap<>();
             ResponseEntity<String> result = controller.fetchConfiguration(attributes, Collections.emptyMap());
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(result.getBody()).isEqualTo("foo : bar");
-            verify(statusManager).notifyAgentConfigurationFetched(same(attributes), eq(Collections.emptyMap()), same(config));
+            assertThat(result.getBody()).isEqualTo(srcYaml);
+            verify(statusManager).notifyAgentConfigurationFetched(same(attributes), eq(Collections.emptyMap()), same(agentConfiguration));
         }
 
         @Test
         public void etagPresent() {
-            AgentConfiguration config = AgentConfiguration.builder().configYaml("foo : bar").build();
-            doReturn(config).when(configManager).getConfiguration(anyMap());
+            String hash = "1234";
+            doReturn(agentConfiguration).when(configManager).getConfiguration(anyMap());
+            doReturn(srcYaml).when(agentConfiguration).getConfigYaml();
+            doReturn(hash).when(agentConfiguration).getHash();
 
             ResponseEntity<String> firstResult = controller.fetchConfiguration(new HashMap<>(), Collections.emptyMap());
             ResponseEntity<String> secondResult = controller.fetchConfiguration(new HashMap<>(), Collections.emptyMap());
 
             assertThat(firstResult.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(firstResult.getBody()).isEqualTo("foo : bar");
+            assertThat(firstResult.getBody()).isEqualTo(srcYaml);
             assertThat(secondResult.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(secondResult.getBody()).isEqualTo("foo : bar");
+            assertThat(secondResult.getBody()).isEqualTo(srcYaml);
             assertThat(firstResult.getHeaders().getFirst("ETag")).isNotBlank()
                     .isEqualTo(secondResult.getHeaders().getFirst("ETag"));
         }

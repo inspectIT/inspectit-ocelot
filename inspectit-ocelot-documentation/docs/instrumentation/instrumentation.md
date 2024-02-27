@@ -43,8 +43,11 @@ Therefore, to increase readability of your configuration files the following nam
 * Action names always start with `a_`, e.g. `a_my_action`.
 * Rule names always start with `r_`, e.g. `r_my_rule`.
 * Context variables names should start with `d_`, e.g. `d_transaction_name`.
-* Fields which are defined by the user should always be put in single quotations marks, e.g. `input: 'my_input'`. This rule also applies to keys which
-  can be entirely defined by the user, for example when defining the name of a custom action or attribute names.
+* Fields which are defined by the user should always be put in single quotations marks, e.g. `input: 'my_input'`. 
+* This rule also applies to keys which can be entirely defined by the user, for example when defining the name of a 
+  custom action or attribute names.
+* Field names should be written in **snake case**, e.g. `s_my_scope`. **Do not use** dots instead of underscores, since
+  this will create a _nested structure_ in yaml and might lead to configuration errors.
 
 This naming convention is used both in this documentation and the default configuration provided.
 

@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.agentconfiguration;
 
+import inspectit.ocelot.configdocsgenerator.model.AgentDocumentation;
 import inspectit.ocelot.configdocsgenerator.parsing.ConfigParser;
 import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
@@ -18,10 +19,11 @@ public class DocsObjectsLoader {
     /**
      * Use the same constant as the ui in 'src/data/constants.js'
      */
-    final static String OCELOT_DEFAULT_CONFIG_PREFIX = "/$%$%$%$%Ocelot-default-key/";
+    public final static String OCELOT_DEFAULT_CONFIG_PREFIX = "/$%$%$%$%Ocelot-default-key/";
 
     /**
      * Loads all documentable objects, like actions, scopes, rules & metrics from the provided inspectIT yaml
+     *
      * @param src the source yaml
      * @return a set of defined objects in this yaml
      */
@@ -49,11 +51,12 @@ public class DocsObjectsLoader {
 
     /**
      * Loads all documentable objects of each file for the current agent
+     *
      * @param defaultYamls A map of the default file paths and their yaml content
      * @return A set of defined objects for each file
      */
-    public static Map<String, Set<String>> loadDefaultDocsObjectsByFile(Map<String, String> defaultYamls) {
-        Map<String, Set<String>> defaultDocsObjectsByFile = new HashMap<>();
+    public static Set<AgentDocumentation> loadDefaultAgentDocumentations(Map<String, String> defaultYamls) {
+        Set<AgentDocumentation> defaultDocumentations = new HashSet<>();
         for(Map.Entry<String, String> entry : defaultYamls.entrySet()) {
             String path = OCELOT_DEFAULT_CONFIG_PREFIX + entry.getKey();
             String src = entry.getValue();
@@ -64,9 +67,10 @@ public class DocsObjectsLoader {
             } catch (Exception e) {
                 log.warn("Could not parse configuration: {}", path, e);
             }
-            defaultDocsObjectsByFile.put(path, objects);
+            AgentDocumentation documentation = new AgentDocumentation(path, objects);
+            defaultDocumentations.add(documentation);
         }
 
-        return defaultDocsObjectsByFile;
+        return defaultDocumentations;
     }
 }

@@ -89,9 +89,9 @@ public class AgentMappingSerializer {
      *
      * @return List of current {@link AgentMapping}s representing the content of the given file
      */
-    public List<AgentMapping> readCachedAgentMappings(){
-        if(currentMappings != null) return currentMappings;
-        else return readAgentMappings(fileManager.getWorkspaceRevision());
+    public List<AgentMapping> readCachedAgentMappings() {
+        if(currentMappings == null) currentMappings = readAgentMappings(fileManager.getWorkspaceRevision());
+        return currentMappings;
     }
 
     /**

@@ -54,10 +54,6 @@
     <logger name="rocks.inspectit.ocelot.rest.agent" level="debug">
         <appender-ref ref="accessFile"/>
     </logger>
-    <!-- Additional configuration fetch debugging -->
-    <logger name="rocks.inspectit.ocelot.agentstatus" level="debug">
-        <appender-ref ref="accessFile"/>
-    </logger>
     <logger name="rocks.inspectit.ocelot.agentconfiguration" level="debug">
         <appender-ref ref="accessFile"/>
     </logger>
