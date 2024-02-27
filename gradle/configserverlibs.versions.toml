@@ -22,6 +22,7 @@ orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:9.22.3"
 orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:6.3.2.Final"
 orgJunitJupiterJunitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "orgJunitJupiter" }
 orgJunitJupiterJunitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "orgJunitJupiter" }
+orgJunitJupiterJunitJupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "orgJunitJupiter" }
 orgMockitoMockitoJunitJupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "orgMockito" }
 orgSpringframeworkBootSpringBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterDataJpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "orgSpringframeworkBoot" }

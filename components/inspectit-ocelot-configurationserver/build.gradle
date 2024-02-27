@@ -115,7 +115,7 @@ dependencies {
             configServerLibs.orgJunitJupiterJunitJupiterApi,
             configServerLibs.orgAwaitility
     )
-    testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
+    testRuntimeOnly configServerLibs.orgJunitJupiterJunitJupiterEngine
 }
 
 tasks.register('copyServerJar', Copy) {
