@@ -18,7 +18,7 @@ orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.14.0"
 orgAwaitility = "org.awaitility:awaitility:4.2.0"
 orgEclipseJgitOrgEclipseJgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "orgEclipseJgit" }
 orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "orgEclipseJgit" }
-orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:9.22.3"
+orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:10.8.1"
 orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:6.3.2.Final"
 orgJunitJupiterJunitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "orgJunitJupiter" }
 orgJunitJupiterJunitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "orgJunitJupiter" }
