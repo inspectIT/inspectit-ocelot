@@ -1,5 +1,5 @@
 [versions]
-ioJsonwebtoken = "0.12.3"
+ioJsonwebtoken = "0.12.5"
 orgEclipseJgit = "6.8.0.202311291450-r"
 orgMockito = "5.10.0"
 orgJunitJupiter = "5.10.2"
@@ -8,13 +8,13 @@ orgSpringframeworkSecurity = "6.2.2"
 
 [libraries]
 comGoogleCodeGson = "com.google.code.gson:gson:2.10.1"
-comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "32.1.3-jre" } }
+comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.0.0-jre" } }
 comH2databaseH2 = "com.h2database:h2:2.2.224"
 commonsIo = "commons-io:commons-io:2.15.1"
 ioJsonwebtokenJjwtApi = { module = "io.jsonwebtoken:jjwt-api", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtImpl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtJackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "ioJsonwebtoken" }
-orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.13.0"
+orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.14.0"
 orgAwaitility = "org.awaitility:awaitility:4.2.0"
 orgEclipseJgitOrgEclipseJgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "orgEclipseJgit" }
 orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "orgEclipseJgit" }
@@ -29,7 +29,7 @@ orgSpringframeworkBootSpringBootStarterDataJpa = { module = "org.springframework
 orgSpringframeworkBootSpringBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStartervalidation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "orgSpringframeworkBoot" }
-orgSpringframeworkLdapSpringLdapCore = "org.springframework.ldap:spring-ldap-core:3.2.1"
+orgSpringframeworkLdapSpringLdapCore = "org.springframework.ldap:spring-ldap-core:3.2.2"
 orgSpringframeworkSecuritySpringSecurityLdap = { module = "org.springframework.security:spring-security-ldap", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityTest = { module = "org.springframework.security:spring-security-test", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityWeb = { module = "org.springframework.security:spring-security-web", version.ref = "orgSpringframeworkSecurity" }
