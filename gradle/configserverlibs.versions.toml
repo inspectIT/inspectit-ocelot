@@ -4,7 +4,7 @@ orgEclipseJgit = "6.8.0.202311291450-r"
 orgMockito = "5.10.0"
 orgJunitJupiter = "5.10.2"
 orgSpringframeworkBoot = { strictly = "3.2.3" }
-orgSpringframeworkSecurity = "6.1.6"
+orgSpringframeworkSecurity = "6.2.2"
 
 [libraries]
 comGoogleCodeGson = "com.google.code.gson:gson:2.10.1"
