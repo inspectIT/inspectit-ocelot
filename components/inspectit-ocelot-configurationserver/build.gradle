@@ -111,9 +111,9 @@ dependencies {
             configServerLibs.orgSpringframeworkSecuritySpringSecurityTest,
             configServerLibs.orgMockitoMockitoJunitJupiter,
             configServerLibs.comH2databaseH2,
-            libs.orgJunitJupiterJunitJupiter,
-            libs.orgJunitJupiterJunitJupiterApi,
-            libs.orgAwaitility
+            configServerLibs.orgJunitJupiterJunitJupiter,
+            configServerLibs.orgJunitJupiterJunitJupiterApi,
+            configServerLibs.orgAwaitility
     )
     testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 }

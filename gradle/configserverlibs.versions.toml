@@ -1,8 +1,9 @@
 [versions]
 ioJsonwebtoken = "0.12.3"
 orgEclipseJgit = "6.8.0.202311291450-r"
-orgMockito = "4.7.0"
-orgSpringframeworkBoot = { strictly = "3.1.7" }
+orgMockito = "5.10.0"
+orgJunitJupiter = "5.10.2"
+orgSpringframeworkBoot = { strictly = "3.2.3" }
 orgSpringframeworkSecurity = "6.1.6"
 
 [libraries]
@@ -14,10 +15,13 @@ ioJsonwebtokenJjwtApi = { module = "io.jsonwebtoken:jjwt-api", version.ref = "io
 ioJsonwebtokenJjwtImpl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtJackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "ioJsonwebtoken" }
 orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.13.0"
+orgAwaitility = "org.awaitility:awaitility:4.2.0"
 orgEclipseJgitOrgEclipseJgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "orgEclipseJgit" }
 orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "orgEclipseJgit" }
 orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:9.22.3"
 orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:6.3.2.Final"
+orgJunitJupiterJunitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "orgJunitJupiter" }
+orgJunitJupiterJunitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "orgJunitJupiter" }
 orgMockitoMockitoJunitJupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "orgMockito" }
 orgSpringframeworkBootSpringBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterDataJpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "orgSpringframeworkBoot" }

@@ -1,8 +1,3 @@
-logging:
-  level:
-    # TODO remove this with next spring boot version (currently 3.1.6)
-    org.springframework.web.servlet.handler.HandlerMappingIntrospector: error
-
 spring:
   datasource:
     url: jdbc:sqlite:${inspectit-config-server.working-directory}/users.db
