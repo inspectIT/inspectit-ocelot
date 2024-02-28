@@ -1,0 +1,133 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Self-Monitoring · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="inspectIT Ocelot is able to monitor itself and report the time spent in components responsible for recording metrics and creating traces."/><meta name="docsearch:version" content="2.6.3"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Self-Monitoring · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content="inspectIT Ocelot is able to monitor itself and report the time spent in components responsible for recording metrics and creating traces."/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>2.6.3</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Metrics</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Getting Started<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/doc1">Hello World</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/getting-started/quick-start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/getting-started/docker-examples">Demo Application</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/getting-started/installation">Installation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/configuration/configuration-sources">Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/configuration/external-configuration-sources">External Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/configuration/logging-configuration">Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/configuration/open-census-configuration">OpenCensus Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/configuration/plugin-configuration">Plugin Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/configuration/agent-command-configuration">Agent Command Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Metrics<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/metrics/metrics">Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/metrics/metric-recorders">Metrics Recorders</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/metrics/metric-exporters">Metrics Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/metrics/common-tags">Common Tags</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/metrics/custom-metrics">Custom Metrics</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/metrics/self-monitoring">Self-Monitoring</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/metrics/tag-guard">Tag-Guard</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tracing<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/tracing/tracing">Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/tracing/trace-exporters">Trace Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/tracing/log-correlation">Log Correlation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/tracing/privacy">Data Privacy</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/tracing/tracing-self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tags<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/tags/tags-exporters">Tags Exporters</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/instrumentation/instrumentation">Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/instrumentation/scopes">Scopes</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/instrumentation/rules">Rules &amp; Actions</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/instrumentation/code-style">Configuration Code Style</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/instrumentation/special-sensors">Special Sensors</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/instrumentation/process">Instrumentation Process</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">End User Monitoring<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/enduser-monitoring/enduser-monitoring-server">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/enduser-monitoring/eum-server-setup">Server Setup</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/enduser-monitoring/eum-server-configuration">Server, Metrics and Exporter Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/enduser-monitoring/install-eum-agent">Install EUM Agent</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration Server<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/config-server/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/config-server/cs-configuration">Server Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/config-server/managing-files">Managing Files</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/config-server/files-staging">File Staging</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/config-server/agent-mappings">Agent Mappings</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/config-server/scope-wizard">Scope Wizard</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/config-server/class-browser">Class Browser</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/config-server/user-authentication">User Authentication</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/config-server/config-docs">Configuration Docs</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/config-server/log-config">Server Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/config-server/syntax-highlighting">YAML Editor Syntax Highlighting</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/config-server/status-table-view">Agent Status Table View</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Breaking Changes<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.3/breaking-changes/Breaking Changes">Breaking Changes</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/metrics/self-monitoring.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Self-Monitoring</h1></header><article><div><span><p>inspectIT Ocelot is able to monitor itself and report the time spent in components responsible for recording metrics and creating traces.
+This way a user can have a clear view on what is the overhead introduced by running the inspectIT Ocelot agent.
+When self monitoring is enabled, the agent will expose several metrics regarding its internal state and processes.
+For example, the <code>inspectit/self/duration</code> metric gives the total execution time spent in the agent in microseconds.
+All metrics include the configured <a href="/inspectit-ocelot/docs/2.6.3/metrics/common-tags">common tags</a>.
+The metric is split by the tag containing the component name and also includes all common tags.</p>
+<table>
+<thead>
+<tr><th>Metric Name</th><th>Unit</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>inspectit/self/duration</code></td><td>us</td><td>The total time spent by inspectIT doing internal tasks, such as configuration loading, instrumenting, etc.The metric contains the tag <code>component_name</code>, specifying in which component the time was spent</td></tr>
+<tr><td><code>inspectit/self/instrumentation-queue-size</code></td><td><code>classes</code></td><td>InspectIT applies the configured instrumentation by working through a queue of classes it has to analyze and potentially instrument. This metric exposes the current size of this queue. By comparing it against the <a href="/inspectit-ocelot/docs/2.6.3/metrics/metric-recorders#class-loading-metrics">total number of loaded classes</a>, the instrumentation progress can be estimated.</td></tr>
+<tr><td><code>inspectit/self/instrumented-classes</code></td><td><code>classes</code></td><td>Exposes the total number of classes which are currently instrumented by inspectIT.</td></tr>
+<tr><td><code>inspectit/self/action/execution-time</code></td><td>us</td><td>The execution time of individual actions. The metric contains the tag <code>action_name</code>, specifying the name of the instrumented action.</td></tr>
+<tr><td><code>inspectit/self/action/count</code></td><td><code>action executions</code></td><td>The number of executions per action. The metric contains the tag <code>action_name</code>, specifying the name of the instrumented action.</td></tr>
+<tr><td><code>inspectit/self/health</code></td><td>health in <code>{0, 1, 2}</code></td><td>The current health status, which can be <code>OK</code> (= 0), <code>WARNING</code> (= 1), or <code>ERROR</code> (= 2)</td></tr>
+</tbody>
+</table>
+<p>Self monitoring is enabled by default (except action metrics) and can be disabled by setting the <code>inspectit.self-monitoring.enabled</code> property to <code>false</code>.</p>
+<blockquote>
+<p>Not all components responsible for internal management of inspectIT Ocelot are at the moment reporting the time used for internal tasks. Please take the provided numbers only for a basic reference on overhead and don't assume they are 100% correct. In addition the overhead introduced in application classes through instrumentation is currently also not captured.</p>
+</blockquote>
+<h3><a class="anchor" aria-hidden="true" id="action-execution-monitoring"></a><a href="#action-execution-monitoring" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Action Execution Monitoring</h3>
+<p>Since version <code>1.14.0</code>, the inspectIT Ocelot agent is able to record execution metrics of its actions.
+In order to reduce the overhead the agent is producing on the target system, the action execution metrics recording of actions is disabled by default.</p>
+<p>The recording of these metrics can be enabled using the following configuration:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">self-monitoring:</span>
+    <span class="hljs-attr">action-metrics:</span>
+      <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span>
+</code></pre>
+<p>Note: the action execution metrics are only recorded in case the self-monitoring metrics are enabled.</p>
+<h3><a class="anchor" aria-hidden="true" id="agent-health"></a><a href="#agent-health" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Agent Health</h3>
+<p>Since version 1.16.0, the agent determines its health by observing its own log messages.
+Whenever <code>WARN</code> messages occur, it changes the health to <code>WARNING</code>; when <code>ERROR</code> messages occur, to <code>ERROR</code>.</p>
+<p>It takes into account that some log messages become outdated, e.g., a <code>WARN</code> message about an invalid configuration
+becomes outdated when the configuration changes. Given there was one such <code>WARN</code> message, the health was <code>WARNING</code> and
+jumps back to <code>OK</code> when the new, correct configuration is received.</p>
+<p>Log messages that not become obsolete due to specific events time out after a defined period.
+This period is controlled via the following configuration:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">self-monitoring:</span>
+    <span class="hljs-attr">agent-health:</span>
+      <span class="hljs-attr">validity-period:</span> <span class="hljs-string">1h</span>
+</code></pre>
+<p>Note: the health metric is only recorded in case the self-monitoring metrics are enabled.</p>
+<blockquote>
+<p>Besides the metric, the agent also reports its health via the <code>X-OCELOT-HEALTH</code> header when fetching HTTP configurations.
+This information may be used by configuration providers, such as the configuration server, to display the agent health.</p>
+</blockquote>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2/27/2024 by Eduard Schander</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/2.6.3/metrics/custom-metrics"><span class="arrow-prev">← </span><span>Custom Metrics</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/2.6.3/metrics/tag-guard"><span>Tag-Guard</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2024 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'P7JV0ZK66K',
+                apiKey: 'd499024131bf8d92e6d469a6c14f4798',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:2.6.3"]}
+              });
+            </script></body></html>
