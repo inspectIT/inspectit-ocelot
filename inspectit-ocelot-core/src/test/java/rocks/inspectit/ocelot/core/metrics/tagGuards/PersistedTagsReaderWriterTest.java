@@ -26,9 +26,6 @@ class PersistedTagsReaderWriterTest {
         tagValues = createTagValues();
     }
 
-    @Test
-    void ofInvalidInput() {
-    }
 
     @Test
     void ofWillReturnAValidInstanceIfFilenameIsValid() {
