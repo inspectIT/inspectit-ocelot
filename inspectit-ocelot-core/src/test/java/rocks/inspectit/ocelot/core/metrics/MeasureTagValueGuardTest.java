@@ -24,6 +24,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction.ExecutionContext;
 
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
+import rocks.inspectit.ocelot.core.metrics.tagGuards.PersistedTagsReaderWriter;
 import rocks.inspectit.ocelot.core.selfmonitoring.AgentHealthManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
@@ -45,11 +46,11 @@ class MeasureTagValueGuardTest {
     @Mock
     private CommonTagsManager commonTagsManager;
     @Mock
+    PersistedTagsReaderWriter readerWriter;
+    @Mock
     private AgentHealthManager agentHealthManager;
     @Mock
     private ScheduledExecutorService executor;
-    @Mock
-    MeasureTagValueGuard.PersistedTagsReaderWriter readerWriter;
     @InjectMocks
     private MeasureTagValueGuard guard = new MeasureTagValueGuard();
 
@@ -114,7 +115,7 @@ class MeasureTagValueGuardTest {
         public void testReadWriteTagsFromDisk() {
             String tempFileName = generateTempFilePath();
 
-            MeasureTagValueGuard.PersistedTagsReaderWriter readerWriter = new MeasureTagValueGuard.PersistedTagsReaderWriter(tempFileName, new ObjectMapper());
+            PersistedTagsReaderWriter readerWriter = PersistedTagsReaderWriter.of(tempFileName);
             Map<String, Map<String, Set<String>>> tagValues = createTagValues();
             readerWriter.write(tagValues);
             Map<String, Map<String, Set<String>>> loaded = readerWriter.read();

@@ -63,22 +63,32 @@ public class MeasureTagValueGuard {
     protected void init() {
         TagGuardSettings tagGuardSettings = env.getCurrentConfig().getMetrics().getTagGuard();
         if (!tagGuardSettings.isEnabled()) return;
+        initTagReaderWriter(tagGuardSettings);
+        scheduleTagGuardJob();
+        log.info(String.format("TagValueGuard started with scheduleDelay %s and database file %s", tagGuardSettings.getScheduleDelay(), tagGuardSettings.getDatabaseFile()));
+    }
 
+    private void initTagReaderWriter(final TagGuardSettings tagGuardSettings) {
+        final String filename = getFilename(tagGuardSettings);
+        if (Objects.nonNull(filename)) {
+            fileReaderWriter = PersistedTagsReaderWriter.of(filename);
+        }
+    }
+
+    private String getFilename(final TagGuardSettings tagGuardSettings) {
         final String filename = tagGuardSettings.getDatabaseFile();
         if (StringUtils.isBlank(filename)) {
-
+            log.error("Filename is empty. Not able writign tags.");
+            return null;
         }
-        fileReaderWriter = PersistedTagsReaderWriter.of(filename);
-
-        scheduleTagGuardJob();
-
-        log.info(String.format("TagValueGuard started with scheduleDelay %s and database file %s", tagGuardSettings.getScheduleDelay(), tagGuardSettings.getDatabaseFile()));
+        return filename;
     }
 
     private void scheduleTagGuardJob() {
         Duration tagGuardScheduleDelay = env.getCurrentConfig().getMetrics().getTagGuard().getScheduleDelay();
         blockTagValuesFuture = executor.schedule(blockTagValuesTask, tagGuardScheduleDelay.toNanos(), TimeUnit.NANOSECONDS);
     }
+
 
     @PreDestroy
     protected void stop() {
@@ -163,6 +173,17 @@ public class MeasureTagValueGuard {
 
         return tagContextBuilder.build();
 
+    }
+
+    private boolean isMetrikSettingEnable() {
+        return env.getCurrentConfig().getMetrics().getTagGuard().isEnabled();
+    }
+
+    @Value
+    @EqualsAndHashCode
+    private static class TagsHolder {
+        String measureName;
+        Map<String, String> tags;
     }    /**
      * Task, which reads the persisted tag values to determine, which tags should be blocked, because of exceeding
      * the specific tag value limit.
@@ -170,7 +191,9 @@ public class MeasureTagValueGuard {
      */
     @VisibleForTesting
     Runnable blockTagValuesTask = () -> {
-        if (!env.getCurrentConfig().getMetrics().getTagGuard().isEnabled()) return;
+        if (!isMetrikSettingEnable()) {
+            return;
+        }
 
         // read current tag value database
         Map<String, Map<String, Set<String>>> availableTagsByMeasure = fileReaderWriter.read();
@@ -234,17 +257,6 @@ public class MeasureTagValueGuard {
 
         if (!isShuttingDown) scheduleTagGuardJob();
     };
-
-    @Value
-    @EqualsAndHashCode
-    private static class TagsHolder {
-
-        String measureName;
-
-        Map<String, String> tags;
-
-    }
-
 
 
 

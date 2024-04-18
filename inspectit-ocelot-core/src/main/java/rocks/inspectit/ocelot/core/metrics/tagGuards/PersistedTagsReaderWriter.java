@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,6 +23,7 @@ import java.util.Set;
 public class PersistedTagsReaderWriter {
 
     private final ObjectMapper mapper;
+
     @NotNull
     private final Path path;
 
@@ -34,16 +37,21 @@ public class PersistedTagsReaderWriter {
         return new PersistedTagsReaderWriter(new ObjectMapper(), path);
     }
 
+
     public Map<String, Map<String, Set<String>>> read() {
         if (!Files.exists(path)) {
             log.info("Could not find tag-guard database file. File will be created during next write");
             return new HashMap<>();
         }
+        return readTagsFromFile();
+    }
 
-        try {
-            byte[] content = Files.readAllBytes(path);
-            return mapper.readValue(content, new TypeReference<Map<String, Map<String, Set<String>>>>() {
+    @NotNull
+    private Map<String, Map<String, Set<String>>> readTagsFromFile() {
+        try (final BufferedReader content = Files.newBufferedReader(path)) {
+            final Map<String, Map<String, Set<String>>> result = mapper.readValue(content, new TypeReference<Map<String, Map<String, Set<String>>>>() {
             });
+            return Objects.nonNull(result) ? result : new HashMap<>();
         } catch (final Exception e) {
             log.error("Error loading tag-guard database from persistence file", e);
             return new HashMap<>();
@@ -51,16 +59,13 @@ public class PersistedTagsReaderWriter {
     }
 
     public void write(Map<String, Map<String, Set<String>>> tagValues) {
-        try {
-            final Path parent = path.getParent();
-            if (Objects.isNull(parent) || !Files.isWritable(parent) ) {
-                log.error("Cannot find write the file because of an invalid path.");
-                return;
-            }
+        if(!isWritable(path)){
+            return;
+        }
 
-            createFileDirectory(parent);
-            final String tagValuesString = mapper.writeValueAsString(tagValues);
-            Files.writeString(path, tagValuesString);
+        try (final Writer filesWriter = Files.newBufferedWriter(path)) {
+            createFileDirectory(path.getParent());
+            mapper.writeValue(filesWriter, tagValues);
         } catch (final IOException e) {
             log.error("Error writing tag-guard database to file", e);
         }
@@ -70,5 +75,9 @@ public class PersistedTagsReaderWriter {
         if (!Files.isDirectory(parent)) {
             Files.createDirectories(parent);
         }
+    }
+
+    private boolean isWritable(final Path path) {
+        return Files.exists(path) ? Files.isWritable(path) : Files.isWritable(path.getParent());
     }
 }

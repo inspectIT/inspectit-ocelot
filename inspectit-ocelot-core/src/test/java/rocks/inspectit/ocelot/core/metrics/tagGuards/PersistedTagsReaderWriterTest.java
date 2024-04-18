@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -97,15 +98,42 @@ class PersistedTagsReaderWriterTest {
     }
 
     @Test
-    void write() {
+    void writeWillReturnAnEmptyMapIfPathIsWrong() {
 
         //GIVEN
         PersistedTagsReaderWriter readerWriter = PersistedTagsReaderWriter.of(tempFileName);
 
         //WHEN
         readerWriter.write(tagValues);
-        PersistedTagsReaderWriter readerWriter1 = PersistedTagsReaderWriter.of("blubb");
-        final Map<String, Map<String, Set<String>>> result = readerWriter1.read();
+        PersistedTagsReaderWriter readerWriterWrongPath = PersistedTagsReaderWriter.of("blubb");
+        final Map<String, Map<String, Set<String>>> result = readerWriterWrongPath.read();
+
+        //THEN
+        Assertions.assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void wirteWillReturnAnEmptyMapIfTagMapIsNull() {
+
+        //GIVEN
+        PersistedTagsReaderWriter readerWriter = PersistedTagsReaderWriter.of(tempFileName);
+
+        //WHEN
+        readerWriter.write(null);
+        final Map<String, Map<String, Set<String>>> result = readerWriter.read();
+
+        //THEN
+        Assertions.assertTrue(result.isEmpty());
+    }
+    @Test
+    void writeWillReturnAnEmptyIf() {
+
+        //GIVEN
+        PersistedTagsReaderWriter readerWriter = PersistedTagsReaderWriter.of(tempFileName);
+
+        //WHEN
+        readerWriter.write(new HashMap<>());
+        final Map<String, Map<String, Set<String>>> result = readerWriter.read();
 
         //THEN
         Assertions.assertTrue(result.isEmpty());
@@ -114,8 +142,6 @@ class PersistedTagsReaderWriterTest {
 
     @Test
     public void testReadWriteTagsFromDisk() {
-
-
         PersistedTagsReaderWriter readerWriter = PersistedTagsReaderWriter.of(tempFileName);
         readerWriter.write(tagValues);
 
