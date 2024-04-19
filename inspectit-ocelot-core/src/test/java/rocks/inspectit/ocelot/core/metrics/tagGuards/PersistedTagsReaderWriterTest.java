@@ -5,10 +5,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,8 +16,9 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PersistedTagsReaderWriterTest {
+    @TempDir
+    File anotherTempDir;
     String tempFileName;
-
     Map<String, Map<String, Set<String>>> tagValues;
 
     @BeforeEach
@@ -125,6 +125,7 @@ class PersistedTagsReaderWriterTest {
         //THEN
         Assertions.assertTrue(result.isEmpty());
     }
+
     @Test
     void writeWillReturnAnEmptyIf() {
 
@@ -155,15 +156,8 @@ class PersistedTagsReaderWriterTest {
     }
 
     private String generateTempFilePath() {
-        try {
-            Path tempFile = Files.createTempFile("inspectit", "");
-            System.out.println(tempFile);
-            Files.delete(tempFile);
-            tempFile.toFile().deleteOnExit();
-            return tempFile.toString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        File inspectTempFile = new File(anotherTempDir, "inspectit.txt");
+        return inspectTempFile.getPath();
     }
 
     private Map<String, Map<String, Set<String>>> createTagValues() {
