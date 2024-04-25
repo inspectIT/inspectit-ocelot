@@ -61,27 +61,7 @@ public class MeasureTagValueGuard {
 
     @PostConstruct
     protected void init() {
-        TagGuardSettings tagGuardSettings = env.getCurrentConfig().getMetrics().getTagGuard();
-        if (!tagGuardSettings.isEnabled()) return;
-        initTagReaderWriter(tagGuardSettings);
         scheduleTagGuardJob();
-        log.info(String.format("TagValueGuard started with scheduleDelay %s and database file %s", tagGuardSettings.getScheduleDelay(), tagGuardSettings.getDatabaseFile()));
-    }
-
-    private void initTagReaderWriter(final TagGuardSettings tagGuardSettings) {
-        final String filename = getFilename(tagGuardSettings);
-        if (Objects.nonNull(filename)) {
-            fileReaderWriter = PersistedTagsReaderWriter.of(filename);
-        }
-    }
-
-    private String getFilename(final TagGuardSettings tagGuardSettings) {
-        final String filename = tagGuardSettings.getDatabaseFile();
-        if (StringUtils.isBlank(filename)) {
-            log.error("Filename is empty. Not able writign tags.");
-            return null;
-        }
-        return filename;
     }
 
     private void scheduleTagGuardJob() {
@@ -92,7 +72,9 @@ public class MeasureTagValueGuard {
 
     @PreDestroy
     protected void stop() {
-        if (!env.getCurrentConfig().getMetrics().getTagGuard().isEnabled()) return;
+        if (isTagGuardDisabled()) {
+            return;
+        }
 
         isShuttingDown = true;
         blockTagValuesFuture.cancel(true);
@@ -175,29 +157,70 @@ public class MeasureTagValueGuard {
 
     }
 
-    private boolean isMetrikSettingEnable() {
-        return env.getCurrentConfig().getMetrics().getTagGuard().isEnabled();
+    private boolean isTagGuardDisabled() {
+        return !env.getCurrentConfig().getMetrics().getTagGuard().isEnabled();
     }
 
-    @Value
-    @EqualsAndHashCode
-    private static class TagsHolder {
-        String measureName;
-        Map<String, String> tags;
-    }    /**
+    /**
      * Task, which reads the persisted tag values to determine, which tags should be blocked, because of exceeding
      * the specific tag value limit.
      * If new tags values have been created, they will be persisted.
      */
     @VisibleForTesting
     Runnable blockTagValuesTask = () -> {
-        if (!isMetrikSettingEnable()) {
+        if (isNotWritable()) {
             return;
         }
 
-        // read current tag value database
-        Map<String, Map<String, Set<String>>> availableTagsByMeasure = fileReaderWriter.read();
+        Map<String, Map<String, Set<String>>> storedTags = fileReaderWriter.read();
+        processNewTags(storedTags);
+        fileReaderWriter.write(storedTags);
+        removeBlockedTags(storedTags);
 
+        // invalidate incident, if tag overflow was detected, but no more tags are blocked
+        boolean noBlockedTagKeys = blockedTagKeysByMeasure.values().stream().allMatch(Set::isEmpty);
+        if (hasTagValueOverflow && noBlockedTagKeys) {
+            agentHealthManager.invalidateIncident(this.getClass(), "Overflow for tags resolved");
+            hasTagValueOverflow = false;
+        }
+
+        if (!isShuttingDown) scheduleTagGuardJob();
+    };
+
+    private boolean isNotWritable() {
+        if (isTagGuardDisabled()) {
+            return true;
+        }
+
+        initTagReaderWriter();
+        return Objects.isNull(fileReaderWriter);
+    }
+
+    private void initTagReaderWriter() {
+        final String filename = getFilename();
+        if (Objects.nonNull(filename)) {
+            fileReaderWriter = PersistedTagsReaderWriter.of(filename);
+        }
+    }
+
+    private String getFilename() {
+        TagGuardSettings tagGuardSettings = env.getCurrentConfig().getMetrics().getTagGuard();
+        if (!tagGuardSettings.isEnabled()) {
+            log.error("Filename is not set. Not able to be writing tags.");
+            return null;
+        }
+
+        final String filename = tagGuardSettings.getDatabaseFile();
+        if (StringUtils.isBlank(filename)) {
+            log.error("Filename is empty. Not able to be writing tags.");
+            return null;
+        }
+
+        log.info(String.format("TagValueGuard started with scheduleDelay %s and database file %s", tagGuardSettings.getScheduleDelay(), tagGuardSettings.getDatabaseFile()));
+        return filename;
+    }
+
+    private void processNewTags(Map<String, Map<String, Set<String>>> storedTags) {
         Set<TagsHolder> copy = latestTags;
         latestTags = Collections.synchronizedSet(new HashSet<>());
 
@@ -207,7 +230,7 @@ public class MeasureTagValueGuard {
             Map<String, String> newTags = tagsHolder.getTags();
             int maxValuesPerTag = getMaxValuesPerTag(measureName, env.getCurrentConfig());
 
-            Map<String, Set<String>> tagValuesByTagKey = availableTagsByMeasure.computeIfAbsent(measureName, k -> Maps.newHashMap());
+            Map<String, Set<String>> tagValuesByTagKey = storedTags.computeIfAbsent(measureName, k -> Maps.newHashMap());
             newTags.forEach((tagKey, tagValue) -> {
                 Set<String> tagValues = tagValuesByTagKey.computeIfAbsent(tagKey, (x) -> new HashSet<>());
                 // if tag value is new AND max values per tag is already reached
@@ -224,9 +247,9 @@ public class MeasureTagValueGuard {
             });
 
         });
+    }
 
-        fileReaderWriter.write(availableTagsByMeasure);
-
+    private void removeBlockedTags(Map<String, Map<String, Set<String>>> availableTagsByMeasure) {
         // remove all blocked tags, if no values are stored in the database file
         if (availableTagsByMeasure.isEmpty()) blockedTagKeysByMeasure.clear();
 
@@ -247,16 +270,15 @@ public class MeasureTagValueGuard {
                 }
             });
         });
+    }
 
-        // invalidate incident, if tag overflow was detected, but no more tags are blocked
-        boolean noBlockedTagKeys = blockedTagKeysByMeasure.values().stream().allMatch(Set::isEmpty);
-        if (hasTagValueOverflow && noBlockedTagKeys) {
-            agentHealthManager.invalidateIncident(this.getClass(), "Overflow for tags resolved");
-            hasTagValueOverflow = false;
-        }
+    @Value
+    @EqualsAndHashCode
+    private static class TagsHolder {
+        String measureName;
+        Map<String, String> tags;
+    }
 
-        if (!isShuttingDown) scheduleTagGuardJob();
-    };
 
 
 
