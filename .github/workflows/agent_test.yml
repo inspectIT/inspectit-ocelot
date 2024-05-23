@@ -46,6 +46,7 @@ jobs:
             echo "::set-output name=gradle_property::comPalantirDockerVersion=0.34.0"
           fi
       - name: Downgrade Wrapper to 7.6 for Java 8
+        shell: bash
         run: |
           if [[ "${{ matrix.dockerimage }}" == "eclipse-temurin:8" ]]; then
             ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} wrapper --gradle-version 7.6
