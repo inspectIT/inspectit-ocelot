@@ -45,11 +45,11 @@ jobs:
           else
             echo "::set-output name=gradle_property::comPalantirDockerVersion=0.34.0"
           fi
-      - name: Downgrade Wrapper to 7.6 for Java 8
+      - name: Upgrade Wrapper to 8.7 for Java 21
         shell: bash
         run: |
-          if [[ "${{ matrix.dockerimage }}" == "eclipse-temurin:8" ]]; then
-            sed -i 's/gradle-8.7-bin.zip/gradle-7.6-bin.zip/' gradle/wrapper/gradle-wrapper.properties
+          if [[ "${{ matrix.dockerimage }}" == "eclipse-temurin:21" ]]; then
+            sed -i 's/gradle-7.6-bin.zip/gradle-8.7-bin.zip/' gradle/wrapper/gradle-wrapper.properties
             cat gradle/wrapper/gradle-wrapper.properties
           fi
       - name: Clean Gradle cache
