@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.ioSpringDependencyManagement)
 }
 
+
+
 dependencyManagement {
     imports {
         mavenBom(SpringBootPlugin.BOM_COORDINATES)

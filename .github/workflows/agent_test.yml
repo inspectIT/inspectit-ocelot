@@ -46,13 +46,18 @@ jobs:
             echo "::set-output name=gradle_property::comPalantirDockerVersion=0.34.0"
           fi
       - name: Clean Gradle cache
-        run: ./gradlew -D${{ steps.determine-jdk.outputs.gradle_property }} clean
+        run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} clean
+      - name: Downgrade Wrapper to 7.6 for Java 8
+        run: |
+          if [[ "${{ matrix.dockerimage }}" == "eclipse-temurin:8" ]]; then
+            ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} wrapper --gradle-version 7.6
+          fi
       - name: assemble
-        run: ./gradlew -D${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-core:assemble
+        run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-core:assemble
       - name: test
-        run: ./gradlew -D${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-core:test --no-daemon
+        run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-core:test --no-daemon
       - name: systemTest
-        run: ./gradlew -D${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-agent:systemTest
+        run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-agent:systemTest
       - name: upload test results
         uses: actions/upload-artifact@v2
         if: ${{ failure() }}
