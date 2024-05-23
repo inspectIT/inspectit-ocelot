@@ -49,7 +49,8 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.dockerimage }}" == "eclipse-temurin:8" ]]; then
-            ./gradlew wrapper --gradle-version 7.6
+            sed -i 's/gradle-8.7-bin.zip/gradle-7.6-bin.zip/' gradle/wrapper/gradle-wrapper.properties
+            cat gradle/wrapper/gradle-wrapper.properties
           fi
       - name: Clean Gradle cache
         run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} clean
