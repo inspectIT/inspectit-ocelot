@@ -28,7 +28,8 @@ jobs:
     container: ${{ matrix.dockerimage }}
     steps:
       - uses: actions/checkout@v3
-      - uses: gradle/actions/setup-gradle@v3
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
       - name: Update Gradle Wrapper Version
         run: ./gradlew wrapper --gradle-version 8.7 --distribution-type all
       - name: assemble
@@ -55,9 +56,8 @@ jobs:
     needs: [ pr-check ]
     steps:
       - uses: actions/checkout@v3
-      - uses: gradle/actions/setup-gradle@v3
-      - name: Update Gradle Wrapper Version
-        run: ./gradlew wrapper --gradle-version 8.7 --distribution-type all
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
       - name: Run code coverage
         run: ./gradlew codeCoverageReport
       - name: Upload coverage to Codecov
