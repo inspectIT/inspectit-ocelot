@@ -277,7 +277,7 @@ public class InstrumentationConfigurationResolver {
             return true;
         }
 
-        if (config.getSource().isExcludeLambdas() && (type.getName().contains("$$Lambda$") || type.getName().contains("$$Lambda"))) {
+        if (config.getSource().isExcludeLambdas() && type.getName().contains("$$Lambda")) {
             return true;
         }
         return isClassFromIgnoredPackage(config.getSource(), type.getName(), loader);

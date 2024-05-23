@@ -28,6 +28,7 @@ jobs:
           - 'eclipse-temurin:8'
           - 'eclipse-temurin:11'
           - 'eclipse-temurin:17'
+          - 'eclipse-temurin:21'
     container: ${{ matrix.dockerimage }}
     steps:
       - uses: actions/checkout@v3
