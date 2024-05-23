@@ -40,11 +40,13 @@ jobs:
         run: |
           java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
           echo "Java version: $java_version"
-          if [[ "$java_version" == 1.8* ]]; then
-            echo "::set-output name=gradle_property::comPalantirDockerVersion=0.34.0"
-          else
+          if [[ "$java_version" == 21* ]]; then
             echo "::set-output name=gradle_property::comPalantirDockerVersion=0.36.0"
+          else
+            echo "::set-output name=gradle_property::comPalantirDockerVersion=0.34.0"
           fi
+      - name: Clean Gradle cache
+        run: ./gradlew clean
       - name: assemble
         run: ./gradlew -D${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-core:assemble
       - name: test
