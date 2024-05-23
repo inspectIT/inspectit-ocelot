@@ -46,7 +46,7 @@ jobs:
             echo "::set-output name=gradle_property::comPalantirDockerVersion=0.34.0"
           fi
       - name: Clean Gradle cache
-        run: ./gradlew clean
+        run: ./gradlew -D${{ steps.determine-jdk.outputs.gradle_property }} clean
       - name: assemble
         run: ./gradlew -D${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-core:assemble
       - name: test
