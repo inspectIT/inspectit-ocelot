@@ -24,15 +24,13 @@ jobs:
       fail-fast: false
       matrix:
         dockerimage:
-          - 'ibmcom/ibmjava:8-sdk'
-          - 'eclipse-temurin:8'
-          - 'eclipse-temurin:11'
-          - 'eclipse-temurin:17'
+          - 'eclipse-temurin:21'
     container: ${{ matrix.dockerimage }}
     steps:
       - uses: actions/checkout@v3
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Update Gradle Wrapper Version
+        run: ./gradlew wrapper --gradle-version 8.7 --distribution-type all
       - name: assemble
         run: ./gradlew :inspectit-ocelot-core:assemble
       - name: test
@@ -53,12 +51,13 @@ jobs:
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
-    container: eclipse-temurin:8-jdk
+    container: eclipse-temurin:21-jdk
     needs: [ pr-check ]
     steps:
       - uses: actions/checkout@v3
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Update Gradle Wrapper Version
+        run: ./gradlew wrapper --gradle-version 8.7 --distribution-type all
       - name: Run code coverage
         run: ./gradlew codeCoverageReport
       - name: Upload coverage to Codecov
