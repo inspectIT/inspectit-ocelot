@@ -117,7 +117,7 @@ comGithubBenManesVersions = "com.github.ben-manes.versions:0.48.0"
 comGithubJk1DependencyLicenseReport = "com.github.jk1.dependency-license-report:2.0"
 comGithubNodeGradleNode = "com.github.node-gradle.node:7.0.1"
 # @pin There is a newer Version 0.35.0, but it is not Java 8 compatible
-comPalantirDocker = "com.palantir.docker:0.34.0"
+comPalantirDocker = "com.palantir.docker:0.36.0"
 ioSpringDependencyManagement = "io.spring.dependency-management:1.1.4"
 meChampeauJmh = "me.champeau.jmh:0.7.2"
 nlLittlerobotsVersionCatalogUpdate = "nl.littlerobots.version-catalog-update:0.8.3"
