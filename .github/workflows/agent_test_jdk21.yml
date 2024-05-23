@@ -28,16 +28,16 @@ jobs:
     container: ${{ matrix.dockerimage }}
     steps:
       - uses: actions/checkout@v3
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Update Gradle Wrapper Version
-        run: ./gradlew wrapper --gradle-version 8.7 --distribution-type all
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.7
       - name: assemble
-        run: ./gradlew :inspectit-ocelot-core:assemble
+        run: gradle -DcomPalantirDockerVersion=0.36.0 :inspectit-ocelot-core:assemble
       - name: test
-        run: ./gradlew :inspectit-ocelot-core:test --no-daemon
+        run: gradle -DcomPalantirDockerVersion=0.36.0 :inspectit-ocelot-core:test --no-daemon
       - name: systemTest
-        run: ./gradlew :inspectit-ocelot-agent:systemTest
+        run: gradle -DcomPalantirDockerVersion=0.36.0 :inspectit-ocelot-agent:systemTest
       - name: upload test results
         uses: actions/upload-artifact@v2
         if: ${{ failure() }}
@@ -52,7 +52,7 @@ jobs:
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
-    container: eclipse-temurin:21-jdk
+    container: eclipse-temurin:8-jdk
     needs: [ pr-check ]
     steps:
       - uses: actions/checkout@v3

@@ -3,7 +3,7 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 plugins {
     alias(libs.plugins.meChampeauJmh)
     id 'maven-publish'
-    alias(libs.plugins.comPalantirDocker)
+    id("com.palantir.docker") version "${comPalantirDockerVersion}"
     alias(libs.plugins.orgSpringframeworkBoot) apply false
     alias(libs.plugins.ioSpringDependencyManagement)
 }
