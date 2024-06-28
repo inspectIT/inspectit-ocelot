@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         dockerimage:
-          - 'ibmcom/ibmjava:8-sdk'
+          - 'ibmjava:8-sdk'
           - 'eclipse-temurin:8'
           - 'eclipse-temurin:11'
           - 'eclipse-temurin:17'

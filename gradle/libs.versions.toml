@@ -76,7 +76,7 @@ orgApacheLoggingLog4jLog4jCore = { module = "org.apache.logging.log4j:log4j-core
 orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0.85"
 orgAssertjAssertjCore = "org.assertj:assertj-core:3.22.0"
 orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.24.2"
-orgAwaitility = "org.awaitility:awaitility:4.2.0"
+orgAwaitility = "org.awaitility:awaitility:4.2.1"
 orgEclipseJettyJettyServer = { module = "org.eclipse.jetty:jetty-server", version.ref = "orgEclipseJetty" }
 orgHibernateValidatorHibernateValidator = "org.hibernate.validator:hibernate-validator:6.2.5.Final"
 orgInfluxdbInfluxdbJava = "org.influxdb:influxdb-java:2.23"

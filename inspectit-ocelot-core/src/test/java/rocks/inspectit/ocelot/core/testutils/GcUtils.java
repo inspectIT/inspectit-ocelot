@@ -1,9 +1,9 @@
 package rocks.inspectit.ocelot.core.testutils;
 
 import java.lang.ref.WeakReference;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 
@@ -12,9 +12,9 @@ public class GcUtils {
     public static List<Object> blackhole;
 
     public static void waitUntilCleared(WeakReference<?> reference) {
-        await().atMost(10, TimeUnit.SECONDS).until(() -> {
+        await().atMost(Duration.ofSeconds(10)).until(() -> {
             System.gc();
-            System.runFinalization();
+            //System.runFinalization();
 
             // even more trash
             for (int x = 0; x < 1000000; x++) {
