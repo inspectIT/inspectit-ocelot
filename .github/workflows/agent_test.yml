@@ -36,6 +36,8 @@ jobs:
         run: chmod +x gradlew
       - name: Determine JDK version
         id: determine-jdk
+        # if Java 21 is used, update com.palantir.docker to 0.36.0, because 0.34.0 is not compatible with gradle 8
+        # Java 21 needs at least gradle 8
         shell: bash
         run: |
           java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
@@ -46,6 +48,7 @@ jobs:
             echo "::set-output name=gradle_property::comPalantirDockerVersion=0.34.0"
           fi
       - name: Upgrade Wrapper to 8.7 for Java 21
+        # Java 21 needs at least gradle 8
         shell: bash
         run: |
           if [[ "${{ matrix.dockerimage }}" == "eclipse-temurin:21" ]]; then
