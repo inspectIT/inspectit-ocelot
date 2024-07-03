@@ -19,7 +19,7 @@ public class SpringConfiguration {
 
     private ScheduledExecutorService activeExecutor = null;
 
-    @Bean
+    @Bean(destroyMethod = "shutdown")
     public ScheduledExecutorService getScheduledExecutorService(@Value("#{#inspectit.threadPoolSize}") int poolSize) {
         AtomicInteger threadCount = new AtomicInteger();
         activeExecutor = Executors.newScheduledThreadPool(poolSize, (runnable) -> {
