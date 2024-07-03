@@ -41,14 +41,14 @@ public class TraceTestBase extends InstrumentationSysTestBase {
             Map<String, List<io.opentelemetry.sdk.trace.data.SpanData>> traces = getExportedSpans().stream()
                     .collect(Collectors.groupingBy(s -> s.getSpanContext().getTraceId(), Collectors.toList()));
             // Print all traces for debugging
-/*            traces.forEach((traceId, spans) -> {
+            traces.forEach((traceId, spans) -> {
                 System.out.println("----------------- Trace Start ---------------");
                 System.out.println("Trace " + traceId);
                 spans.forEach(span -> System.out.println("  " + span.getName()));
                 spans.forEach(span -> System.out.println("  Span ID: " + span.getSpanId()));
                 spans.forEach(span -> System.out.println("Parent Span ID: " + span.getParentSpanId()));
                 System.out.println("----------------- Trace End -----------------");
-            });*/
+            });
             assertThat(traces.values()).anySatisfy(assertions);
             assertThat(traces.values()).filteredOnAssertions(assertions).hasSize(1);
         });

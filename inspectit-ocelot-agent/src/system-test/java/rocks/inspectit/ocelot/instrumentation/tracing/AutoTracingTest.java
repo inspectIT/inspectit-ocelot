@@ -34,8 +34,6 @@ public class AutoTracingTest extends TraceTestBase {
 
 
             io.opentelemetry.sdk.trace.data.SpanData root = getSpanWithName(spans, "AutoTracingTest.instrumentMe");
-            // In Java 21 the root span AutoTracingTest.instrumentMe is followed by a child-span *AutoTracingTest.instrumentMe
-            io.opentelemetry.sdk.trace.data.SpanData subRoot = getSpanWithName(spans, "*AutoTracingTest.instrumentMe");
             io.opentelemetry.sdk.trace.data.SpanData activeWait = getSpanWithName(spans, "*AutoTracingTest.activeWait");
             io.opentelemetry.sdk.trace.data.SpanData passiveWait;
 
@@ -43,7 +41,8 @@ public class AutoTracingTest extends TraceTestBase {
 
             // Thread.sleep method appears as Thread.sleep0 in Java 21
             if(System.getProperty("java.version").startsWith("21")) {
-                compareSpan = subRoot;
+                // In Java 21 the root span AutoTracingTest.instrumentMe is followed by a child-span *AutoTracingTest.instrumentMe
+                compareSpan = getSpanWithName(spans, "*AutoTracingTest.instrumentMe");
                 passiveWait = getSpanWithName(spans, "*Thread.sleep0");
 
             } else {
