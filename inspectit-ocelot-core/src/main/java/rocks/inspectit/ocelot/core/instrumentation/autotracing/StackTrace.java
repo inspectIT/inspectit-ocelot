@@ -104,7 +104,7 @@ public class StackTrace {
 
     private boolean isLambda(StackTraceElement element) {
         String className = element.getClassName();
-        return className.contains("$Lambda$");
+        return className.contains("$Lambda");
     }
 
     public StackTraceElement get(int indexFromRoot) {
