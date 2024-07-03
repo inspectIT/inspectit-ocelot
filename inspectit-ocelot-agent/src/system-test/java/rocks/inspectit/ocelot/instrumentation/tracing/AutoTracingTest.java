@@ -28,6 +28,7 @@ public class AutoTracingTest extends TraceTestBase {
 
     @Test
     void verifyStackTraceSampling() {
+        System.out.print("Java Vendor: " + System.getProperty("java.vendor"));
         instrumentMe();
 
         assertTraceExported((spans) -> {
@@ -45,7 +46,12 @@ public class AutoTracingTest extends TraceTestBase {
                 compareSpan = getSpanWithName(spans, "*AutoTracingTest.instrumentMe");
                 passiveWait = getSpanWithName(spans, "*Thread.sleep0");
 
-            } else {
+            }
+            else if(System.getProperty("java.vendor").startsWith("IBM")){
+                compareSpan = root;
+                passiveWait = getSpanWithName(spans, "*Thread.sleepImpl");
+            }
+            else {
                 compareSpan = root;
                 passiveWait = getSpanWithName(spans, "*Thread.sleep");
             }
