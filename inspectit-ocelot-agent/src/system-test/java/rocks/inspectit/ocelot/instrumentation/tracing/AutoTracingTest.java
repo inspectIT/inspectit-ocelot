@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.instrumentation.tracing;
 
+import io.opentelemetry.sdk.trace.data.SpanData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.utils.TestUtils;
@@ -31,11 +32,27 @@ public class AutoTracingTest extends TraceTestBase {
 
         assertTraceExported((spans) -> {
 
+
             io.opentelemetry.sdk.trace.data.SpanData root = getSpanWithName(spans, "AutoTracingTest.instrumentMe");
+            // In Java 21 the root span AutoTracingTest.instrumentMe is followed by a child-span *AutoTracingTest.instrumentMe
+            io.opentelemetry.sdk.trace.data.SpanData subRoot = getSpanWithName(spans, "*AutoTracingTest.instrumentMe");
             io.opentelemetry.sdk.trace.data.SpanData activeWait = getSpanWithName(spans, "*AutoTracingTest.activeWait");
-            io.opentelemetry.sdk.trace.data.SpanData passiveWait = getSpanWithName(spans, "*Thread.sleep");
-            assertThat(activeWait.getParentSpanId()).isEqualTo(root.getSpanId());
-            assertThat(passiveWait.getParentSpanId()).isEqualTo(root.getSpanId());
+            io.opentelemetry.sdk.trace.data.SpanData passiveWait;
+
+            io.opentelemetry.sdk.trace.data.SpanData compareSpan;
+
+            // Thread.sleep method appears as Thread.sleep0 in Java 21
+            if(System.getProperty("java.version").startsWith("21")) {
+                compareSpan = subRoot;
+                passiveWait = getSpanWithName(spans, "*Thread.sleep0");
+
+            } else {
+                compareSpan = root;
+                passiveWait = getSpanWithName(spans, "*Thread.sleep");
+            }
+
+            assertThat(activeWait.getParentSpanId()).isEqualTo(compareSpan.getSpanId());
+            assertThat(passiveWait.getParentSpanId()).isEqualTo(compareSpan.getSpanId());
 
             assertThat(activeWait.getEndEpochNanos()).isLessThan(passiveWait.getEndEpochNanos());
         });
