@@ -262,6 +262,10 @@ task systemTest {
                 includes = ["rocks/inspectit/*"]
             }
 
+            minHeapSize = "128m"
+            maxHeapSize = "2048m"
+
+
 
             // The JaCoCo agent must be specified first so that it can instrument our agent.
             // This is a work around for the issue that the JaCoCo agent is added last, cf.
@@ -291,6 +295,9 @@ task systemTest {
                 // that they are not garbage collected before being closed.
                 jvmArgs "-Dio.opentelemetry.context.enableStrictContext=true"
 
+                minHeapSize = "128m"
+                maxHeapSize = "2048m"
+
                 // enable reflection used in TestUtils#initializeOpenTelemetryForSystemTesting for JDK 11 and later
                 if(JavaVersion.current() >= JavaVersion.VERSION_11) {
                     // --add-opens has the following syntax: {A}/{package}={B}
@@ -311,6 +318,7 @@ task systemTest {
         systemTest.dependsOn perVersionSystemTest
     }
 }
+
 systemTest.mustRunAfter test
 check.dependsOn systemTest
 
