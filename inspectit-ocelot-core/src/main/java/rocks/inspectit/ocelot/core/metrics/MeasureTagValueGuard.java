@@ -205,10 +205,6 @@ public class MeasureTagValueGuard {
 
     private String getFilename() {
         TagGuardSettings tagGuardSettings = env.getCurrentConfig().getMetrics().getTagGuard();
-        if (!tagGuardSettings.isEnabled()) {
-            log.error("Filename is not set. Not able to be writing tags.");
-            return null;
-        }
 
         final String filename = tagGuardSettings.getDatabaseFile();
         if (StringUtils.isBlank(filename)) {
