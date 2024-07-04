@@ -52,7 +52,7 @@ public class ExecutorContextPropagationSensor implements SpecialSensor {
         @Advice.OnMethodEnter
         public static void enter(@Advice.Argument(value = 0, readOnly = false) Runnable runnable) {
             if (Instances.contextManager.enterCorrelation()) {
-                if (runnable.getClass().getName().contains("$$Lambda$")) {
+                if (runnable.getClass().getName().contains("$$Lambda")) {
                     // order is important because the log-correlator requires the restored context, thus, have to be
                     // called after the context wrapper (needs to be nested by it)
                     runnable = Instances.logTraceCorrelator.wrap(runnable);

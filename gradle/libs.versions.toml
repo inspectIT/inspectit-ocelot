@@ -65,7 +65,7 @@ ioOpentelemetryOpentelemetrySemconv = { module = "io.opentelemetry:opentelemetry
 ioPrometheusSimpleclientHttpserver = "io.prometheus:simpleclient_httpserver:0.15.0"
 javaxAnnotationJavaxAnnotationApi = "javax.annotation:javax.annotation-api:1.3.2"
 log4j = "log4j:log4j:1.2.17"
-netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.12.23"
+netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.14.15"
 netLogstashLogbackLogstashLogbackEncoder = "net.logstash.logback:logstash-logback-encoder:7.4"
 orgApacheCommonsCommonsCollections4 = "org.apache.commons:commons-collections4:4.4"
 orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.13.0"
@@ -76,7 +76,7 @@ orgApacheLoggingLog4jLog4jCore = { module = "org.apache.logging.log4j:log4j-core
 orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0.85"
 orgAssertjAssertjCore = "org.assertj:assertj-core:3.22.0"
 orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.24.2"
-orgAwaitility = "org.awaitility:awaitility:4.2.0"
+orgAwaitility = "org.awaitility:awaitility:4.2.1"
 orgEclipseJettyJettyServer = { module = "org.eclipse.jetty:jetty-server", version.ref = "orgEclipseJetty" }
 orgHibernateValidatorHibernateValidator = "org.hibernate.validator:hibernate-validator:6.2.5.Final"
 orgInfluxdbInfluxdbJava = "org.influxdb:influxdb-java:2.23"
@@ -117,6 +117,7 @@ comGithubBenManesVersions = "com.github.ben-manes.versions:0.48.0"
 comGithubJk1DependencyLicenseReport = "com.github.jk1.dependency-license-report:2.0"
 comGithubNodeGradleNode = "com.github.node-gradle.node:7.0.1"
 # @pin There is a newer Version 0.35.0, but it is not Java 8 compatible
+# For the Agent, this is currently provided via gradle.properties to make it dynamic.
 comPalantirDocker = "com.palantir.docker:0.34.0"
 ioSpringDependencyManagement = "io.spring.dependency-management:1.1.4"
 meChampeauJmh = "me.champeau.jmh:0.7.2"

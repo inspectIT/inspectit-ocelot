@@ -24,21 +24,45 @@ jobs:
       fail-fast: false
       matrix:
         dockerimage:
-          - 'ibmcom/ibmjava:8-sdk'
+          - 'ibmjava:8-sdk'
           - 'eclipse-temurin:8'
           - 'eclipse-temurin:11'
           - 'eclipse-temurin:17'
+          - 'eclipse-temurin:21'
     container: ${{ matrix.dockerimage }}
     steps:
       - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+      - name: Determine JDK version
+        id: determine-jdk
+        # if Java 21 is used, update com.palantir.docker to 0.36.0, because 0.34.0 is not compatible with gradle 8
+        # Java 21 needs at least gradle 8
+        shell: bash
+        run: |
+          java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+          echo "Java version: $java_version"
+          if [[ "$java_version" == 21* ]]; then
+            echo "::set-output name=gradle_property::comPalantirDockerVersion=0.36.0"
+          else
+            echo "::set-output name=gradle_property::comPalantirDockerVersion=0.34.0"
+          fi
+      - name: Upgrade Wrapper to 8.7 for Java 21
+        # Java 21 needs at least gradle 8
+        shell: bash
+        run: |
+          if [[ "${{ matrix.dockerimage }}" == "eclipse-temurin:21" ]]; then
+            sed -i 's/gradle-7.6-bin.zip/gradle-8.7-bin.zip/' gradle/wrapper/gradle-wrapper.properties
+            cat gradle/wrapper/gradle-wrapper.properties
+          fi
+      - name: Clean Gradle cache
+        run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} clean
       - name: assemble
-        run: ./gradlew :inspectit-ocelot-core:assemble
+        run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-core:assemble
       - name: test
-        run: ./gradlew :inspectit-ocelot-core:test --no-daemon
+        run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-core:test --no-daemon
       - name: systemTest
-        run: ./gradlew :inspectit-ocelot-agent:systemTest
+        run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-agent:systemTest
       - name: upload test results
         uses: actions/upload-artifact@v2
         if: ${{ failure() }}

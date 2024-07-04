@@ -1,7 +1,7 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    alias(libs.plugins.comPalantirDocker)
+    id("com.palantir.docker") version "${comPalantirDockerVersion}"
     alias(configServerLibs.plugins.orgSpringframeworkBoot)
     alias(libs.plugins.orgCyclonedxBom)
     alias(configServerLibs.plugins.ioSpringDependencyManagement)
