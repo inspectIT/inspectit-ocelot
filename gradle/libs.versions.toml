@@ -10,7 +10,8 @@ ioOpentelemetryAlpha = "1.29.0-alpha"
 orgApacheLoggingLog4j = "2.17.2"
 orgEclipseJetty = "9.4.53.v20231009"
 # @pin Starting with version 6.x requires Java 11
-orgJunitJupiter = "5.10.3"
+# 5.10.* is not running
+orgJunitJupiter = "5.9.3"
 orgMockito = "4.7.0"
 orgSlf4j = "2.0.13"
 orgSpringframework = "5.3.31"
