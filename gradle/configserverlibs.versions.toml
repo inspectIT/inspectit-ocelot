@@ -1,10 +1,10 @@
 [versions]
-ioJsonwebtoken = "0.12.5"
+ioJsonwebtoken = "0.12.6"
 orgEclipseJgit = "6.8.0.202311291450-r"
 orgMockito = "5.10.0"
-orgJunitJupiter = "5.10.2"
-orgSpringframeworkBoot = { strictly = "3.2.3" }
-orgSpringframeworkSecurity = "6.2.2"
+orgJunitJupiter = "5.10.3"
+orgSpringframeworkBoot = { strictly = "3.2.7" }
+orgSpringframeworkSecurity = "6.2.5"
 
 [libraries]
 comGoogleCodeGson = "com.google.code.gson:gson:2.10.1"
@@ -15,7 +15,7 @@ ioJsonwebtokenJjwtApi = { module = "io.jsonwebtoken:jjwt-api", version.ref = "io
 ioJsonwebtokenJjwtImpl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtJackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "ioJsonwebtoken" }
 orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.14.0"
-orgAwaitility = "org.awaitility:awaitility:4.2.0"
+orgAwaitility = "org.awaitility:awaitility:4.2.1"
 orgEclipseJgitOrgEclipseJgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "orgEclipseJgit" }
 orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "orgEclipseJgit" }
 orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:10.8.1"

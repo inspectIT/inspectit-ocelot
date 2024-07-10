@@ -10,9 +10,9 @@ ioOpentelemetryAlpha = "1.29.0-alpha"
 orgApacheLoggingLog4j = "2.17.2"
 orgEclipseJetty = "9.4.53.v20231009"
 # @pin Starting with version 6.x requires Java 11
-orgJunitJupiter = "5.8.2"
+orgJunitJupiter = "5.10.3"
 orgMockito = "4.7.0"
-orgSlf4j = "2.0.11"
+orgSlf4j = "2.0.13"
 orgSpringframework = "5.3.31"
 # @pin 2.7.18 is the latest release which runs on Java 8, this version marks the en of open source support for Sb 2.x
 orgSpringframeworkBoot = "2.7.18"
@@ -24,7 +24,7 @@ chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.2.13"
 # @pin 2.13.5 since this version is used by Spring Boot 2.7.18
 comFasterxmlJacksonCoreJacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:2.13.5"
 # @pin Wiremock 3.* doesn't support java 8
-comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.1"
+comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 # @pin ocelot-agent and ocelot-core cannot update guava, because of wiremock
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "31.1-jre" } }
 comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.22.5"
@@ -42,7 +42,7 @@ ioGrpcGrpcNettyShaded = { module = "io.grpc:grpc-netty-shaded", version.ref = "i
 ioGrpcGrpcStub = { module = "io.grpc:grpc-stub", version.ref = "ioGrpc" }
 # The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
 # See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
-ioNettyNettyTcnativeBoringsslStatic = "io.netty:netty-tcnative-boringssl-static:2.0.62.Final"
+ioNettyNettyTcnativeBoringsslStatic = "io.netty:netty-tcnative-boringssl-static:2.0.65.Final"
 # Ensure to adapt the netty version when changing the OpenCensus version
 ioOpencensusOpencensusApi = { module = "io.opencensus:opencensus-api", version.ref = "ioOpencensus" }
 ioOpencensusOpencensusImpl = { module = "io.opencensus:opencensus-impl", version.ref = "ioOpencensus" }
@@ -86,7 +86,7 @@ orgJunitJupiterJunitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api
 orgJunitJupiterJunitJupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "orgJunitJupiter" }
 orgMockitoMockitoCore = { module = "org.mockito:mockito-core", version.ref = "orgMockito" }
 orgMockitoMockitoJunitJupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "orgMockito" }
-orgProjectlombokLombok = "org.projectlombok:lombok:1.18.30"
+orgProjectlombokLombok = "org.projectlombok:lombok:1.18.34"
 orgSlf4jJulToSlf4j = { module = "org.slf4j:jul-to-slf4j", version.ref = "orgSlf4j" }
 orgSlf4jslf4jApi = { module = "org.slf4j:slf4j-api", version.ref = "orgSlf4j" }
 orgSpringdocSpringdocOpenapiUi = "org.springdoc:springdoc-openapi-ui:1.7.0"
@@ -115,13 +115,13 @@ opentelemetry = [
 comGithubBenManesVersions = "com.github.ben-manes.versions:0.48.0"
 # @pin There is a newer version 2.1, but it is not Java 8 compatible
 comGithubJk1DependencyLicenseReport = "com.github.jk1.dependency-license-report:2.0"
-comGithubNodeGradleNode = "com.github.node-gradle.node:7.0.1"
+comGithubNodeGradleNode = "com.github.node-gradle.node:7.0.2"
 # @pin There is a newer Version 0.35.0, but it is not Java 8 compatible
 # For the Agent, this is currently provided via gradle.properties to make it dynamic.
 comPalantirDocker = "com.palantir.docker:0.34.0"
 ioSpringDependencyManagement = "io.spring.dependency-management:1.1.4"
 meChampeauJmh = "me.champeau.jmh:0.7.2"
-nlLittlerobotsVersionCatalogUpdate = "nl.littlerobots.version-catalog-update:0.8.3"
+nlLittlerobotsVersionCatalogUpdate = "nl.littlerobots.version-catalog-update:0.8.4"
 orgCyclonedxBom = "org.cyclonedx.bom:1.7.4"
 # @pin Last version to be compatible with java 1.8
 orgOwaspDependencycheck = "org.owasp.dependencycheck:8.2.1"
