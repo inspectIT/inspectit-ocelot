@@ -1,7 +1,7 @@
 [versions]
-comLinecorpArmeria = "1.23.1"
-ioGithubNetmikeyLogunit = "1.1.3"
-ioGrpc = "1.43.3"
+comLinecorpArmeria = "1.29.2"
+ioGithubNetmikeyLogunit = "2.0.0"
+ioGrpc = "1.65.0"
 # Ensure to adapt the netty version when changing the OpenCensus version
 # If you rename or move this variable to another file, adjust the release-workflow
 ioOpencensus = "0.31.1"
@@ -30,16 +30,18 @@ comFasterxmlJacksonCoreJacksonDatabind = "com.fasterxml.jackson.core:jackson-dat
 comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 # @pin ocelot-agent and ocelot-core cannot update guava, because of wiremock
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "31.1-jre" } }
+# @pin protobuf 4.* is not running
 comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25.3"
 comH2databaseH2 = "com.h2database:h2:2.2.224"
 comLinecorpArmeriaArmeriaGrpcProtocol = { module = "com.linecorp.armeria:armeria-grpc-protocol", version.ref = "comLinecorpArmeria" }
 comLinecorpArmeriaArmeriaJunit5 = { module = "com.linecorp.armeria:armeria-junit5", version.ref = "comLinecorpArmeria" }
-comSquareupOkio = "com.squareup.okio:okio:3.5.0"
+comSquareupOkio = "com.squareup.okio:okio:3.9.0"
 commonsBeanutils = "commons-beanutils:commons-beanutils:1.9.4"
 commonsIo = "commons-io:commons-io:2.16.1"
-ioApisenseEmbedInfluxEmbedInfluxDB = "io.apisense.embed.influx:embed-influxDB:1.2.1"
+ioApisenseEmbedInfluxEmbedInfluxDB = "io.apisense.embed.influx:embed-influxDB:1.3.1"
 ioGithubNetmikeyLogunitLogunitCore = { module = "io.github.netmikey.logunit:logunit-core", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubNetmikeyLogunitLogunitLogback = { module = "io.github.netmikey.logunit:logunit-logback", version.ref = "ioGithubNetmikeyLogunit" }
+# @pin resilience4j 2.* uses Java 17 APIs
 ioGithubResilience4jResilience4jRetry = "io.github.resilience4j:resilience4j-retry:1.7.1"
 ioGrpcGrpcNettyShaded = { module = "io.grpc:grpc-netty-shaded", version.ref = "ioGrpc" }
 ioGrpcGrpcStub = { module = "io.grpc:grpc-stub", version.ref = "ioGrpc" }
