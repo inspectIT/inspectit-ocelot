@@ -16,6 +16,7 @@ orgJunitJupiter = "5.9.3"
 # @pin mockito 5 requires Java 11
 orgMockito = "4.11.0"
 orgSlf4j = "2.0.13"
+# @pin 5.3.* is the last version to support Java 8
 orgSpringframework = "5.3.37"
 # @pin 2.7.18 is the latest release which runs on Java 8, this version marks the en of open source support for Sb 2.x
 orgSpringframeworkBoot = "2.7.18"
@@ -76,15 +77,17 @@ orgApacheCommonsCommonsMath3 = "org.apache.commons:commons-math3:3.6.1"
 orgApacheHttpcomponentsHttpclient = "org.apache.httpcomponents:httpclient:4.5.14"
 orgApacheLoggingLog4jLog4jApi = { module = "org.apache.logging.log4j:log4j-api", version.ref = "orgApacheLoggingLog4j" }
 orgApacheLoggingLog4jLog4jCore = { module = "org.apache.logging.log4j:log4j-core", version.ref = "orgApacheLoggingLog4j" }
+# @pin Tomcat 9.0.* is the last version to support java 8
 orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0.91"
 orgAssertjAssertjCore = "org.assertj:assertj-core:3.26.3"
 orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.26.3"
 orgAwaitility = "org.awaitility:awaitility:4.2.1"
 # @pin Jetty 9.4.* is the last version to support java 8
 orgEclipseJettyJettyServer = { module = "org.eclipse.jetty:jetty-server", version.ref = "orgEclipseJetty" }
+# @pin HibernateValidator 6.* is the last version to support java 8
 orgHibernateValidatorHibernateValidator = "org.hibernate.validator:hibernate-validator:6.2.5.Final"
 orgInfluxdbInfluxdbJava = "org.influxdb:influxdb-java:2.24"
-orgJavassist = "org.javassist:javassist:3.29.2-GA"
+orgJavassist = "org.javassist:javassist:3.30.2-GA"
 orgJunitJupiterJunitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "orgJunitJupiter" }
 orgJunitJupiterJunitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "orgJunitJupiter" }
 orgJunitJupiterJunitJupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "orgJunitJupiter" }
