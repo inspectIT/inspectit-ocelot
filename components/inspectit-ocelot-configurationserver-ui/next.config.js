@@ -1,7 +1,8 @@
 const isProduction = process.env.NODE_ENV === 'production';
 
-module.exports = {
-  distDir: '../.next',
+const nextConfig = {
+  output: 'export',
+  distDir: '../out',
 
   // Each page will be exported as a directory
   trailingSlash: true,
@@ -22,3 +23,5 @@ module.exports = {
     BUILD_DATE: new Date().toUTCString(),
   },
 };
+
+module.exports = nextConfig;

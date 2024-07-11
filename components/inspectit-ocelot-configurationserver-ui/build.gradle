@@ -8,13 +8,13 @@ apply plugin: 'idea'
 
 node {
     // Version of node to use.
-    version = '18.14.2'
+    version = '20.15.1'
 
     // Version of npm to use.
-    npmVersion = '6.13.4'
+    npmVersion = '10.8.2'
 
     // Version of Yarn to use.
-    yarnVersion = '1.22.0'
+    yarnVersion = '1.22.22'
 
     // If true, it will download node using above parameters.
     // If false, it will try to use globally installed node.
@@ -74,7 +74,7 @@ tasks.register('buildFrontend', YarnTask) {
     outputs.dir('out')
 
     dependsOn lintFrontend, checkCodeStyleFrontend
-    args = ['export']
+    args = ['build']
     environment = [NODE_OPTIONS: "--openssl-legacy-provider"]
 }
 
