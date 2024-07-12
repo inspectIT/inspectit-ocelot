@@ -2,7 +2,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 const nextConfig = {
   output: 'export',
-  distDir: '../out',
+  distDir: './out',
 
   // Each page will be exported as a directory
   trailingSlash: true,
