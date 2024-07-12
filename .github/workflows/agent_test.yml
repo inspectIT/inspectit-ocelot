@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.dockerimage }}" == "eclipse-temurin:21" ]]; then
-            sed -i 's/gradle-7.6-bin.zip/gradle-8.7-bin.zip/' gradle/wrapper/gradle-wrapper.properties
+            sed -i 's/gradle-7.6.2-bin.zip/gradle-8.7-bin.zip/' gradle/wrapper/gradle-wrapper.properties
             cat gradle/wrapper/gradle-wrapper.properties
           fi
       - name: Clean Gradle cache

@@ -1,6 +1,16 @@
 import com.github.jk1.license.render.TextReportRenderer
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
+// There is a transitive dependency which causes the bootJar task to fail.
+// This fixes the issue by forcing the correct version of the dependency.
+buildscript {
+    configurations.configureEach {
+        resolutionStrategy {
+            force "org.apache.commons:commons-compress:1.26.2"
+        }
+    }
+}
+
 plugins {
     alias(libs.plugins.nlLittlerobotsVersionCatalogUpdate)
     alias(libs.plugins.comGithubJk1DependencyLicenseReport)
