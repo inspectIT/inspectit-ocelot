@@ -44,6 +44,8 @@ cyclonedxBom {
     schemaVersion = "1.4"
     // Specifies the type of project being built. Defaults to 'library'
     projectType = "application"
+    outputName = "bom"
+    outputFormat = "all"
 }
 
 repositories {
