@@ -62,6 +62,9 @@ public class MeasureTagValueGuard {
     @PostConstruct
     protected void init() {
         scheduleTagGuardJob();
+        TagGuardSettings settings = env.getCurrentConfig().getMetrics().getTagGuard();
+        log.info(String.format("TagValueGuard started with scheduleDelay %s and database file %s", settings.getScheduleDelay(), settings.getDatabaseFile()));
+
     }
 
     private void scheduleTagGuardJob() {
@@ -208,11 +211,10 @@ public class MeasureTagValueGuard {
 
         final String filename = tagGuardSettings.getDatabaseFile();
         if (StringUtils.isBlank(filename)) {
-            log.error("Filename is empty. Not able to be writing tags.");
+            log.error("TagGuard filename is empty. Not able to write tags");
             return null;
         }
 
-        log.info(String.format("TagValueGuard started with scheduleDelay %s and database file %s", tagGuardSettings.getScheduleDelay(), tagGuardSettings.getDatabaseFile()));
         return filename;
     }
 
