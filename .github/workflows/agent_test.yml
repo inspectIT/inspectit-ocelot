@@ -64,7 +64,7 @@ jobs:
       - name: systemTest
         run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-agent:systemTest
       - name: upload test results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: ${{ failure() }}
         with:
           name: 'test-results'
