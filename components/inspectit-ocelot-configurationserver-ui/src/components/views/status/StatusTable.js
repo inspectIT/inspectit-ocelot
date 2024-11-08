@@ -158,7 +158,7 @@ class StatusTable extends React.Component {
     let serviceStatesAvailable = false;
     let serviceStates = '{}';
     let name = '-';
-    let agentIdElement = <span></span>
+    let agentIdElement = <span></span>;
     let agentId = '';
 
     if (metaInformation && Object.entries(metaInformation).length > 0) {
