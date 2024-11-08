@@ -152,11 +152,18 @@ class StatusTable extends React.Component {
       attributes: { service },
     } = rowData;
 
-    let { logAvailable, agentCommandsEnabled, serviceStatesAvailable, serviceStates } = this.resolveServiceAvailability(metaInformation);
+    // Set default values
+    let logAvailable = false;
+    let agentCommandsEnabled = false;
+    let serviceStatesAvailable = false;
+    let serviceStates = '{}';
     let name = '-';
     let agentIdElement;
     let agentId = null;
-    if (metaInformation) {
+
+    if (metaInformation && Object.entries(metaInformation).length > 0) {
+      ({ logAvailable, agentCommandsEnabled, serviceStatesAvailable, serviceStates } = this.resolveServiceAvailability(metaInformation));
+
       if (service) {
         name = service;
       }
@@ -292,13 +299,17 @@ class StatusTable extends React.Component {
   };
 
   agentHealthTemplate = (rowData) => {
-    const { onShowHealthStateDialog } = this.props;
+    const { onShowHealthStateDialog, onShowDownloadDialog } = this.props;
     const { healthState, metaInformation } = rowData;
-    const { health } = healthState;
-    const { agentId } = metaInformation;
-    const { onShowDownloadDialog } = this.props;
+    const health = healthState?.health ?? null;
+    const agentId = metaInformation?.agentId ?? '';
 
-    let { agentCommandsEnabled, supportArchiveAvailable } = this.resolveServiceAvailability(metaInformation);
+    // Set default values
+    let agentCommandsEnabled = false;
+    let supportArchiveAvailable = false;
+    if (metaInformation && Object.entries(metaInformation).length > 0) {
+      ({ agentCommandsEnabled, supportArchiveAvailable } = this.resolveServiceAvailability(metaInformation));
+    }
 
     let healthInfo;
     let iconClass;
@@ -318,6 +329,11 @@ class StatusTable extends React.Component {
         healthInfo = 'Warning';
         iconClass = 'pi-minus-circle';
         iconColor = '#e8c413';
+        break;
+      default:
+        healthInfo = 'Unknown';
+        iconClass = 'pi-question-circle';
+        iconColor = 'gray';
         break;
     }
 
