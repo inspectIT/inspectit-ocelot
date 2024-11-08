@@ -158,8 +158,8 @@ class StatusTable extends React.Component {
     let serviceStatesAvailable = false;
     let serviceStates = '{}';
     let name = '-';
-    let agentIdElement;
-    let agentId = null;
+    let agentIdElement = <span></span>
+    let agentId = '';
 
     if (metaInformation && Object.entries(metaInformation).length > 0) {
       ({ logAvailable, agentCommandsEnabled, serviceStatesAvailable, serviceStates } = this.resolveServiceAvailability(metaInformation));
@@ -303,6 +303,7 @@ class StatusTable extends React.Component {
     const { healthState, metaInformation } = rowData;
     const health = healthState?.health ?? null;
     const agentId = metaInformation?.agentId ?? '';
+    const agentVersion = metaInformation?.agentVersion ?? '';
 
     // Set default values
     let agentCommandsEnabled = false;
@@ -366,7 +367,7 @@ class StatusTable extends React.Component {
             <Button
               className="archive-button"
               icon="pi pi-cloud-download"
-              onClick={() => onShowDownloadDialog(metaInformation.agentId, metaInformation.agentVersion, 'archive')}
+              onClick={() => onShowDownloadDialog(agentId, agentVersion, 'archive')}
               tooltip={
                 agentCommandsEnabled && supportArchiveAvailable
                   ? 'Download Support Archive'
