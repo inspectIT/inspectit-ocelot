@@ -1,13 +1,13 @@
 [versions]
-comLinecorpArmeria = "1.29.2"
+comLinecorpArmeria = "1.30.1"
 ioGithubNetmikeyLogunit = "2.0.0"
-ioGrpc = "1.65.0"
+ioGrpc = "1.68.1"
 # Ensure to adapt the netty version when changing the OpenCensus version
 # If you rename or move this variable to another file, adjust the release-workflow
 ioOpencensus = "0.31.1"
 ioOpentelemetry = "1.29.0"
 ioOpentelemetryAlpha = "1.29.0-alpha"
-orgApacheLoggingLog4j = "2.23.1"
+orgApacheLoggingLog4j = "2.24.1"
 # @pin last version to support Java 8
 orgEclipseJetty = "9.4.55.v20240627"
 # @pin Starting with version 6.x requires Java 11
@@ -15,12 +15,12 @@ orgEclipseJetty = "9.4.55.v20240627"
 orgJunitJupiter = "5.9.3"
 # @pin mockito 5 requires Java 11
 orgMockito = "4.11.0"
-orgSlf4j = "2.0.13"
+orgSlf4j = "2.0.16"
 # @pin 5.3.* is the last version to support Java 8
 orgSpringframework = "5.3.37"
 # @pin 2.7.18 is the latest release which runs on Java 8, this version marks the en of open source support for Sb 2.x
 orgSpringframeworkBoot = "2.7.18"
-orgTestcontainers = "1.19.8"
+orgTestcontainers = "1.20.3"
 
 [libraries]
 # @pin 1.3.* are the latest versions, which support java 8
@@ -33,12 +33,12 @@ comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "31.1-jre" } }
 # @pin protobuf 4.* is not running
 comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25.3"
-comH2databaseH2 = "com.h2database:h2:2.2.224"
+comH2databaseH2 = "com.h2database:h2:2.3.232"
 comLinecorpArmeriaArmeriaGrpcProtocol = { module = "com.linecorp.armeria:armeria-grpc-protocol", version.ref = "comLinecorpArmeria" }
 comLinecorpArmeriaArmeriaJunit5 = { module = "com.linecorp.armeria:armeria-junit5", version.ref = "comLinecorpArmeria" }
-comSquareupOkio = "com.squareup.okio:okio:3.9.0"
+comSquareupOkio = "com.squareup.okio:okio:3.9.1"
 commonsBeanutils = "commons-beanutils:commons-beanutils:1.9.4"
-commonsIo = "commons-io:commons-io:2.16.1"
+commonsIo = "commons-io:commons-io:2.17.0"
 ioApisenseEmbedInfluxEmbedInfluxDB = "io.apisense.embed.influx:embed-influxDB:1.3.1"
 ioGithubNetmikeyLogunitLogunitCore = { module = "io.github.netmikey.logunit:logunit-core", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubNetmikeyLogunitLogunitLogback = { module = "io.github.netmikey.logunit:logunit-logback", version.ref = "ioGithubNetmikeyLogunit" }
@@ -48,7 +48,7 @@ ioGrpcGrpcNettyShaded = { module = "io.grpc:grpc-netty-shaded", version.ref = "i
 ioGrpcGrpcStub = { module = "io.grpc:grpc-stub", version.ref = "ioGrpc" }
 # The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
 # See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
-ioNettyNettyTcnativeBoringsslStatic = "io.netty:netty-tcnative-boringssl-static:2.0.65.Final"
+ioNettyNettyTcnativeBoringsslStatic = "io.netty:netty-tcnative-boringssl-static:2.0.69.Final"
 # Ensure to adapt the netty version when changing the OpenCensus version
 ioOpencensusOpencensusApi = { module = "io.opencensus:opencensus-api", version.ref = "ioOpencensus" }
 ioOpencensusOpencensusImpl = { module = "io.opencensus:opencensus-impl", version.ref = "ioOpencensus" }
@@ -71,10 +71,11 @@ ioOpentelemetryOpentelemetrySemconv = { module = "io.opentelemetry:opentelemetry
 ioPrometheusSimpleclientHttpserver = "io.prometheus:simpleclient_httpserver:0.16.0"
 javaxAnnotationJavaxAnnotationApi = "javax.annotation:javax.annotation-api:1.3.2"
 log4j = "log4j:log4j:1.2.17"
-netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.14.18"
+netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.15.10"
+# @pin logback 7.* is the last version for Java 8
 netLogstashLogbackLogstashLogbackEncoder = "net.logstash.logback:logstash-logback-encoder:7.4"
 orgApacheCommonsCommonsCollections4 = "org.apache.commons:commons-collections4:4.4"
-orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.14.0"
+orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.17.0"
 orgApacheCommonsCommonsMath3 = "org.apache.commons:commons-math3:3.6.1"
 orgApacheHttpcomponentsHttpclient = "org.apache.httpcomponents:httpclient:4.5.14"
 orgApacheLoggingLog4jLog4jApi = { module = "org.apache.logging.log4j:log4j-api", version.ref = "orgApacheLoggingLog4j" }
@@ -83,7 +84,7 @@ orgApacheLoggingLog4jLog4jCore = { module = "org.apache.logging.log4j:log4j-core
 orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0.91"
 orgAssertjAssertjCore = "org.assertj:assertj-core:3.26.3"
 orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.26.3"
-orgAwaitility = "org.awaitility:awaitility:4.2.1"
+orgAwaitility = "org.awaitility:awaitility:4.2.2"
 # @pin Jetty 9.4.* is the last version to support java 8
 orgEclipseJettyJettyServer = { module = "org.eclipse.jetty:jetty-server", version.ref = "orgEclipseJetty" }
 # @pin HibernateValidator 6.* is the last version to support java 8
@@ -124,13 +125,13 @@ opentelemetry = [
 comGithubBenManesVersions = "com.github.ben-manes.versions:0.51.0"
 # @pin There is a newer version 2.1, but it is not Java 8 compatible
 comGithubJk1DependencyLicenseReport = "com.github.jk1.dependency-license-report:2.0"
-comGithubNodeGradleNode = "com.github.node-gradle.node:7.0.2"
+comGithubNodeGradleNode = "com.github.node-gradle.node:7.1.0"
 # @pin There is a newer Version 0.35.0, but it is not Java 8 compatible
 # For the Agent, this is currently provided via gradle.properties to make it dynamic.
 comPalantirDocker = "com.palantir.docker:0.34.0"
 ioSpringDependencyManagement = "io.spring.dependency-management:1.1.6"
 meChampeauJmh = "me.champeau.jmh:0.7.2"
-nlLittlerobotsVersionCatalogUpdate = "nl.littlerobots.version-catalog-update:0.8.4"
+nlLittlerobotsVersionCatalogUpdate = "nl.littlerobots.version-catalog-update:0.8.5"
 orgCyclonedxBom = "org.cyclonedx.bom:1.8.2"
 # @pin Last version to be compatible with java 1.8
 orgOwaspDependencycheck = "org.owasp.dependencycheck:8.2.1"
