@@ -1,8 +1,5 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-import de.flapdoodle.embed.process.runtime.Network;
-import io.apisense.embed.influx.InfluxServer;
-import io.apisense.embed.influx.configuration.InfluxConfigurationWriter;
 import io.github.netmikey.logunit.api.LogCapturer;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.*;
@@ -12,7 +9,6 @@ import io.opencensus.tags.Tags;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.InfluxDBIOException;
-import org.influxdb.dto.Pong;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.junit.jupiter.api.AfterEach;
@@ -20,18 +16,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.test.annotation.DirtiesContext;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+@Testcontainers
 public class InfluxExporterServiceIntTest extends SpringTestBase {
-
-    private InfluxServer influx;
 
     private String url;
 
@@ -40,21 +39,23 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
     @RegisterExtension
     LogCapturer warnLogs = LogCapturer.create().captureForType(InfluxExporterService.class, org.slf4j.event.Level.WARN);
 
+    @Container
+    private final GenericContainer influx = new GenericContainer(DockerImageName.parse("influxdb:1.8"))
+            .withExposedPorts(8086)
+            .withEnv("INFLUXDB_DB", DATABASE)
+            .withEnv("INFLUXDB_USER", "w00t")
+            .withEnv("INFLUXDB_USER_PASSWORD", "password");
+
     @BeforeEach
-    void startInfluxDB() throws Exception {
-        InfluxServer.Builder builder = new InfluxServer.Builder();
-        int freeHttpPort = Network.getFreeServerPort();
-        InfluxConfigurationWriter influxConfig = new InfluxConfigurationWriter.Builder().setHttp(freeHttpPort) // by default auth is disabled
-                .build();
-        builder.setInfluxConfiguration(influxConfig);
-        influx = builder.build();
-        influx.start();
-        url = "http://localhost:" + freeHttpPort;
+    void startInfluxDB()  {
+        String address = influx.getHost();
+        Integer port = influx.getFirstMappedPort();
+        this.url = "http://" + address + ":" + port;
     }
 
     @AfterEach
-    void shutdownInfluxDB() throws Exception {
-        influx.cleanup();
+    void shutdownInfluxDB() {
+       influx.stop();
     }
 
     private final String user = "w00t";
@@ -75,8 +76,7 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
 
         TagKey testTag = TagKey.create("my_tag");
         Measure.MeasureDouble testMeasure = Measure.MeasureDouble.create("my/test/measure", "foo", "bars");
-        View testView = View.create(View.Name.create("my/test/measure/cool%data"), "", testMeasure, Aggregation.Sum.create(), Arrays
-                .asList(testTag));
+        View testView = View.create(View.Name.create("my/test/measure/cool%data"), "", testMeasure, Aggregation.Sum.create(), Collections.singletonList(testTag));
         Stats.getViewManager().registerView(testView);
 
         try (Scope tc = Tags.getTagger().emptyBuilder().putLocal(testTag, TagValue.create("myval")).buildScoped()) {
