@@ -102,11 +102,10 @@ dependencies {
             configServerLibs.orgFlywaydbFlywayCore,
             configServerLibs.bundles.jgit,
             configServerLibs.comGoogleCodeGson,
+            configServerLibs.comGoogleGuava,
 
             // swagger
-            libs.orgSpringdocSpringdocOpenapiUi,
-
-            configServerLibs.comGoogleGuava
+            libs.orgSpringdocSpringdocOpenapiUi
     )
     testImplementation(
             configServerLibs.orgSpringframeworkBootSpringBootStarterTest,
