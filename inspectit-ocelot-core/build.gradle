@@ -148,7 +148,6 @@ dependencies {
             libs.ioGrpcGrpcNettyShaded,
             libs.ioGrpcGrpcStub,
             libs.orgInfluxdbInfluxdbJava,
-            libs.ioApisenseEmbedInfluxEmbedInfluxDB,
 
             // for docker test containers
             libs.orgTestcontainers,

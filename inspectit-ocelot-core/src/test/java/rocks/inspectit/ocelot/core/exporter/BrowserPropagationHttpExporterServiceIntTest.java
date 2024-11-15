@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-import de.flapdoodle.embed.process.runtime.Network;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -14,7 +13,7 @@ import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.util.SocketUtils;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
 
@@ -51,8 +50,8 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         sessionStorage.clearDataStorages();
     }
 
-    void startServer() throws IOException {
-        int port = Network.getFreeServerPort();
+    void startServer() {
+        int port = SocketUtils.findAvailableTcpPort();
         BrowserPropagationServlet servlet = new BrowserPropagationServlet(sessionIDHeader, Collections.singletonList(allowedOrigin));
         exporterService.startServer(host, port, path, servlet);
         url = "http://" + host + ":" + port + path;
