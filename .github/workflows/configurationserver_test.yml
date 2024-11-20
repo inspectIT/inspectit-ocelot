@@ -12,6 +12,9 @@ on:
       - '!components/inspectit-ocelot-configurationserver/README.md'
   workflow_call:
 
+env:
+  NVD_API_TOKEN: ${{ secrets.NVD_API_KEY }} # Token to access NVD API for dependency-check
+
 jobs:
   test:
     name: Assemble & Test

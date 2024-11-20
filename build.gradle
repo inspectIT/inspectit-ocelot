@@ -41,6 +41,10 @@ allprojects {
     version = "$buildVersion"
 
     dependencyCheck {
+        nvd {
+            apiKey = System.getenv("NVD_API_TOKEN")
+            delay = 10000
+        }
         //failBuildOnCVSS = 6
         scanProjects = [
                 ':inspectit-ocelot-agent',

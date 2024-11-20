@@ -160,6 +160,7 @@ dependencies {
 
             libs.orgAssertjAssertjCore,
             libs.orgAwaitility,
+            //libs.comGoogleGuavaTest,
             libs.comGithubTomakehurstWiremockJre8,
             libs.orgYamlSnakeyaml,
 

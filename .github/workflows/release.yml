@@ -5,6 +5,9 @@ on:
     tags:
       - "[0-9]*.[0-9]*.[0-9]**"
 
+env:
+  NVD_API_TOKEN: ${{ secrets.NVD_API_KEY }} # Token to access NVD API for dependency-check
+
 jobs:
   build_and_release:
     name: 'Build and Release'
