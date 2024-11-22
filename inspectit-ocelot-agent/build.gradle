@@ -47,7 +47,7 @@ dependencies {
         libs.ioOpentelemetryOpentelemetrySdk,
         libs.ioOpentelemetryOpentelemetryOpencensusShim,
         libs.ioOpencensusOpencensusImpl,
-        libs.comGoogleGuava
+        libs.comGoogleGuavaAgent
     )
     annotationProcessor libs.orgProjectlombokLombok
     testImplementation (
@@ -58,7 +58,7 @@ dependencies {
     testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 
     constraints {
-        opentelemetry(libs.comGoogleGuava) {
+        opentelemetry(libs.comGoogleGuavaAgent) {
             because 'security issues'
         }
     }
@@ -147,7 +147,7 @@ dependencies {
     systemTestImplementation(
             libs.ioOpencensusOpencensusTesting,
             libs.ioOpencensusOpencensusApi,
-            libs.comGoogleGuava,
+            libs.comGoogleGuavaAgent,
 
             // for InMemorySpanExporter
             platform(libs.ioOpentelemetryOpentelemetryBom),
