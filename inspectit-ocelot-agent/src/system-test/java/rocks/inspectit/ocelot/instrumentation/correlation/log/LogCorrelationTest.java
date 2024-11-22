@@ -62,7 +62,7 @@ public class LogCorrelationTest {
     }
 
     @BeforeAll
-    private static void beforeAll() throws Exception {
+    public static void beforeAll() throws Exception {
         Class<?> testMdcClass = new IsolatedMdcClassLoader().loadClass("org.slf4j.MDC");
         Method getMethod = testMdcClass.getMethod("get", String.class);
 

@@ -29,7 +29,6 @@ chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.2.13"
 comFasterxmlJacksonCoreJacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:2.13.5"
 comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 mockWebServer = "com.squareup.okhttp3:mockwebserver:4.12.0"
-comGoogleGuavaAgent = { module = "com.google.guava:guava", version = { strictly = "31.1-jre" } }
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.3.1-jre" } }
 # @pin protobuf 4.* is not running
 comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25.5"

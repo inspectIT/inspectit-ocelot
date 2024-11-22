@@ -47,7 +47,7 @@ dependencies {
         libs.ioOpentelemetryOpentelemetrySdk,
         libs.ioOpentelemetryOpentelemetryOpencensusShim,
         libs.ioOpencensusOpencensusImpl,
-        libs.comGoogleGuavaAgent
+        libs.comGoogleGuava
     )
     annotationProcessor libs.orgProjectlombokLombok
     testImplementation (
@@ -58,7 +58,7 @@ dependencies {
     testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 
     constraints {
-        opentelemetry(libs.comGoogleGuavaAgent) {
+        opentelemetry(libs.comGoogleGuava) {
             because 'security issues'
         }
     }
@@ -147,7 +147,6 @@ dependencies {
     systemTestImplementation(
             libs.ioOpencensusOpencensusTesting,
             libs.ioOpencensusOpencensusApi,
-            libs.comGoogleGuavaAgent,
 
             // for InMemorySpanExporter
             platform(libs.ioOpentelemetryOpentelemetryBom),
@@ -162,7 +161,7 @@ dependencies {
             libs.orgAssertjAssertjCore,
             libs.orgAwaitility,
             libs.commonsIo,
-            libs.mockWebServer,
+            libs.orgApacheCommonsCommonsLang3,
             libs.comGithubTomakehurstWiremockJre8,
             libs.orgYamlSnakeyaml,
 
@@ -193,12 +192,6 @@ dependencies {
             sourceSets.systemTest.output,
             project(':inspectit-ocelot-bootstrap')
     )
-
-    constraints {
-        systemTestImplementation(libs.comGoogleGuavaAgent) {
-            because 'security issues'
-        }
-    }
 }
 
 if (!project.hasProperty("systemTestJavaHomes")) {

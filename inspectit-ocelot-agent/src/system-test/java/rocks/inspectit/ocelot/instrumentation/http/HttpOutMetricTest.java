@@ -1,8 +1,7 @@
 package rocks.inspectit.ocelot.instrumentation.http;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import io.opencensus.stats.AggregationData;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -12,7 +11,6 @@ import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
@@ -20,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -35,24 +35,29 @@ public class HttpOutMetricTest {
 
     private static String WIREMOCK_URL;
 
-    private MockWebServer mockServer;
+    private static WireMockServer wireMockServer;
 
-    private final MockResponse successResponse = new MockResponse().setResponseCode(200);
+    @BeforeAll
+    public static void setupWiremock() {
+        wireMockServer = new WireMockServer(options().dynamicPort());
 
-    private final MockResponse errorResponse = new MockResponse().setResponseCode(500);
+        wireMockServer.start();
+        configureFor(wireMockServer.port());
 
-    @BeforeEach
-    public void setUp() throws IOException {
-        mockServer = new MockWebServer();
-        mockServer.start();
+        stubFor(get(urlPathEqualTo(PATH_500))
+                .willReturn(aResponse()
+                        .withStatus(500)));
+        stubFor(get(urlPathEqualTo(PATH_200))
+                .willReturn(aResponse()
+                        .withStatus(200)));
 
-        WIREMOCK_HOST_PORT = "localhost:" + mockServer.getPort();
+        WIREMOCK_HOST_PORT = "localhost:" + wireMockServer.port();
         WIREMOCK_URL = "http://" + WIREMOCK_HOST_PORT;
     }
 
-    @AfterEach
-    public  void shutdown() throws IOException {
-        mockServer.shutdown();
+    @AfterAll
+    public static void cleanup() {
+        wireMockServer.stop();
     }
 
     @Nested
@@ -68,8 +73,8 @@ public class HttpOutMetricTest {
             client = builder.build();
 
             TestUtils.waitForClassInstrumentations(Arrays.asList(
-                    CloseableHttpClient.class,
-                    Class.forName("org.apache.http.impl.client.InternalHttpClient")), true,
+                            CloseableHttpClient.class,
+                            Class.forName("org.apache.http.impl.client.InternalHttpClient")), true,
                     15, TimeUnit.SECONDS);
         }
 
@@ -80,7 +85,6 @@ public class HttpOutMetricTest {
 
         @Test
         void testSuccessStatus() throws Exception {
-            mockServer.enqueue(successResponse);
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("service", "apache_client_test");
             ctx.makeActive();
@@ -107,7 +111,6 @@ public class HttpOutMetricTest {
 
         @Test
         void testErrorStatus() throws Exception {
-            mockServer.enqueue(errorResponse);
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("service", "apache_client_test");
             ctx.makeActive();
@@ -176,7 +179,6 @@ public class HttpOutMetricTest {
 
         @Test
         void testSuccessStatus() throws Exception {
-            mockServer.enqueue(successResponse);
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("service", "urlconn_client_test");
             ctx.makeActive();
@@ -206,7 +208,6 @@ public class HttpOutMetricTest {
 
         @Test
         void testErrorStatus() throws Exception {
-            mockServer.enqueue(errorResponse);
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
             ctx.setData("service", "urlconn_client_test");
             ctx.makeActive();
