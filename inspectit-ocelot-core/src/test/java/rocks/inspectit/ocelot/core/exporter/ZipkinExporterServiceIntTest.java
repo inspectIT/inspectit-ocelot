@@ -1,16 +1,16 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import io.github.netmikey.logunit.api.LogCapturer;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okio.Buffer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
@@ -22,18 +22,20 @@ import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 @TestPropertySource(properties = {"inspectit.exporters.tracing.zipkin.endpoint=http://127.0.0.1:9411/api/v2/spans", "inspectit.tracing.max-export-batch-size=512", "inspectit.tracing.schedule-delay-millis=20000"})
 @DirtiesContext
 public class ZipkinExporterServiceIntTest extends SpringTestBase {
-
-    private static final Logger logger = LoggerFactory.getLogger(ZipkinExporterServiceIntTest.class);
 
     private static final int ZIPKIN_PORT = 9411;
 
@@ -42,20 +44,19 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
     @RegisterExtension
     LogCapturer warnLogs = LogCapturer.create().captureForType(ZipkinExporterService.class, org.slf4j.event.Level.WARN);
 
-    private WireMockServer wireMockServer;
+    private MockWebServer mockServer;
 
     @BeforeEach
-    void setupWiremock() {
-        wireMockServer = new WireMockServer(options().port(ZIPKIN_PORT));
-        wireMockServer.start();
-        configureFor(wireMockServer.port());
-
-        stubFor(post(urlPathEqualTo(ZIPKIN_PATH)).willReturn(aResponse().withStatus(200)));
+    void setupWiremock() throws IOException {
+        mockServer = new MockWebServer();
+        mockServer.start(ZIPKIN_PORT);
+        MockResponse mockResponse = new MockResponse().setResponseCode(200);
+        mockServer.enqueue(mockResponse);
     }
 
     @AfterEach
-    void cleanup() {
-        wireMockServer.stop();
+    void shutdown() throws IOException {
+        mockServer.shutdown();
     }
 
     @Test
@@ -68,7 +69,8 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
 
         await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
             Instances.openTelemetryController.flush();
-            verify(postRequestedFor(urlPathEqualTo(ZIPKIN_PATH)).withRequestBody(containing("zipkinspan")));
+            Buffer body = mockServer.takeRequest().getBody();
+            assertCompressedContent(body, "zipkinspan");
         });
     }
 
@@ -114,6 +116,30 @@ public class ZipkinExporterServiceIntTest extends SpringTestBase {
             assertThat(service.isEnabled()).isFalse();
             assertThat(zipkin.getEnabled()).isEqualTo(ExporterEnabledState.IF_CONFIGURED);
             assertThat(zipkin.getEndpoint()).isNullOrEmpty();
+        }
+    }
+
+    /**
+     * Asserts that the buffer contains the provided content. We need this helper method, since
+     * the body of the Zipkin exporter request is compressed.
+     * Fails if an exception was thrown.
+     *
+     * @param buffer the buffer with data
+     * @param content the content, which should be included
+     */
+    private void assertCompressedContent(Buffer buffer, String content) {
+        byte[] compressedBytes = buffer.readByteArray();
+        try (GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(compressedBytes));
+            InputStreamReader isr = new InputStreamReader(gis);
+            BufferedReader br = new BufferedReader(isr)) {
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+                assertThat(sb.toString()).contains(content);
+        } catch (IOException e) {
+            fail("Could not decompress data: " + e.getMessage());
         }
     }
 }

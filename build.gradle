@@ -51,8 +51,11 @@ allprojects {
                 ':inspectit-ocelot-core',
                 ':inspectit-ocelot-sdk',
                 ':inspectit-ocelot-bootstrap',
+                ':inspectit-ocelot-config',
+                'inspectit-ocelot-documentation',
                 ':inspectit-ocelot-configurationserver',
-                ':inspectit-ocelot-configurationserver-ui'
+                ':inspectit-ocelot-configurationserver-ui',
+                ":inspectit-ocelot-configdocsgenerator"
         ]
         skipConfigurations = ["jmh", "jmhCompileClasspath", "systemTest", "systemTestCompileClasspath", "systemTestRuntimeClasspath"]
         analyzers {

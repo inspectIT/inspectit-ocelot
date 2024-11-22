@@ -1,7 +1,8 @@
 package rocks.inspectit.ocelot.instrumentation.servicegraph;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import io.opencensus.stats.AggregationData;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIUtils;
@@ -24,8 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -41,27 +40,25 @@ public class HttpServiceOutMetricTest {
 
     public static final String SERVICE_NAME = "systemtest"; //configured in agent-overwrites.yml
 
-    private WireMockServer wireMockServer;
+    private MockWebServer mockServer;
 
     public static String targetName;
 
     @BeforeEach
     void setupWiremock() throws Exception {
-        wireMockServer = new WireMockServer(options().port(PORT));
-        wireMockServer.start();
-        configureFor(wireMockServer.port());
-
-        stubFor(get(urlEqualTo(TEST_PATH))
-                .willReturn(aResponse()
-                        .withBody("body")
-                        .withStatus(200)));
+        mockServer = new MockWebServer();
+        mockServer.start(PORT);
+        MockResponse mockResponse = new MockResponse()
+                .setBody("body")
+                .setResponseCode(200);
+        mockServer.enqueue(mockResponse);
 
         TestUtils.waitForClassInstrumentation(HttpServlet.class, true, 30, TimeUnit.SECONDS);
     }
 
     @AfterEach
-    void cleanup() throws Exception {
-        wireMockServer.stop();
+    void shutdown() throws Exception {
+        mockServer.shutdown();
     }
 
     @Nested

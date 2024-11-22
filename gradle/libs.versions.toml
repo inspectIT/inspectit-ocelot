@@ -27,11 +27,10 @@ orgTestcontainers = "1.20.3"
 chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.2.13"
 # @pin 2.13.5 since this version is used by Spring Boot 2.7.18
 comFasterxmlJacksonCoreJacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:2.13.5"
-# @pin Wiremock 3.* doesn't support java 8
 comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
-# @pin ocelot-agent and ocelot-core cannot update guava, because of wiremock
-comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "31.1-jre" } }
-#comGoogleGuavaTest = { module = "com.google.guava:guava", version = { strictly = "31.1-jre" } }
+mockWebServer = "com.squareup.okhttp3:mockwebserver:4.12.0"
+comGoogleGuavaAgent = { module = "com.google.guava:guava", version = { strictly = "31.1-jre" } }
+comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.3.1-jre" } }
 # @pin protobuf 4.* is not running
 comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25.5"
 # Note: Updating to 2.3.* will break jmh tests

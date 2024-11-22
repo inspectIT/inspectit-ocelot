@@ -1,17 +1,17 @@
 package rocks.inspectit.ocelot.core.exporter;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import io.github.netmikey.logunit.api.LogCapturer;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import okhttp3.HttpUrl;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -23,10 +23,9 @@ import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -41,8 +40,6 @@ public class JaegerExporterServiceIntTest {
 
     static final String JAEGER_GRPC_PATH = "/v1/traces";
 
-    private static final Logger logger = LoggerFactory.getLogger(JaegerExporterServiceIntTest.class);
-
     @RegisterExtension
     LogCapturer warnLogs = LogCapturer.create().captureForType(JaegerExporterService.class, org.slf4j.event.Level.WARN);
 
@@ -54,20 +51,19 @@ public class JaegerExporterServiceIntTest {
     @TestPropertySource(properties = {"inspectit.exporters.tracing.jaeger.endpoint=http://localhost:14268/api/traces", "inspectit.exporters.tracing.jaeger.protocol=http/thrift", "inspectit.exporters.tracing.jaeger.enabled=ENABLED", "inspectit.tracing.max-export-batch-size=1"})
     class JaegerThriftExporterServiceIntTest extends SpringTestBase {
 
-        private WireMockServer wireMockServer;
+        private MockWebServer mockServer;
 
         @BeforeEach
-        void setupWiremock() {
-            wireMockServer = new WireMockServer(options().port(JAEGER_THRIFT_PORT));
-            wireMockServer.start();
-            configureFor(wireMockServer.port());
-
-            stubFor(post(urlPathEqualTo(JAEGER_THRIFT_PATH)).willReturn(aResponse().withStatus(200)));
+        void setUpMockServer() throws IOException {
+            mockServer = new MockWebServer();
+            mockServer.start(JAEGER_THRIFT_PORT);
+            MockResponse mockResponse = new MockResponse().setResponseCode(200);
+            mockServer.enqueue(mockResponse);
         }
 
         @AfterEach
-        void cleanup() {
-            wireMockServer.stop();
+        void shutdownMockServer() throws IOException {
+            mockServer.shutdown();
         }
 
         @Test
@@ -81,7 +77,9 @@ public class JaegerExporterServiceIntTest {
 
             await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
                 Instances.openTelemetryController.flush();
-                verify(postRequestedFor(urlPathEqualTo(JAEGER_THRIFT_PATH)));
+                HttpUrl httpUrl = mockServer.takeRequest().getRequestUrl();
+                assertThat(httpUrl).isNotNull();
+                assertThat(httpUrl.url().getPath()).isEqualTo(JAEGER_THRIFT_PATH);
             });
         }
     }

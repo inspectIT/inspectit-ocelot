@@ -82,6 +82,7 @@ docker {
 
 task buildOpenTelemetryFatJar(type: Jar){
     archiveFileName = "opentelemetry-fat.jar"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     destinationDirectory = file("$buildDir/jarGen")
     from{
         configurations.opentelemetry.collect{it.isDirectory() ? it : zipTree(it) }
@@ -160,7 +161,8 @@ dependencies {
 
             libs.orgAssertjAssertjCore,
             libs.orgAwaitility,
-            //libs.comGoogleGuavaTest,
+            libs.commonsIo,
+            libs.mockWebServer,
             libs.comGithubTomakehurstWiremockJre8,
             libs.orgYamlSnakeyaml,
 
@@ -193,7 +195,7 @@ dependencies {
     )
 
     constraints {
-        systemTestImplementation(libs.comGoogleGuava) {
+        systemTestImplementation(libs.comGoogleGuavaAgent) {
             because 'security issues'
         }
     }
