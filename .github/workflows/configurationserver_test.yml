@@ -58,7 +58,7 @@ jobs:
             --nvdApiDelay 10000
       - name: Run DependencyCheck plugin ui
         uses: dependency-check/Dependency-Check_Action@main
-        id: depcheck
+        id: depcheck-ui
         continue-on-error: true
         with:
           project: inspectIT/inspectit-ocelot-configuration-server-ui
@@ -71,7 +71,7 @@ jobs:
             --nvdApiDelay 10000
       - name: Run DependencyCheck plugin configdocsgenerator
         uses: dependency-check/Dependency-Check_Action@main
-        id: depcheck
+        id: depcheck-docs
         continue-on-error: true
         with:
           project: inspectIT/inspectit-ocelot-configdocsgenerator
@@ -89,7 +89,7 @@ jobs:
           path: ${{ github.workspace }}/reports
       # if DependencyCheck failed, the job should also fail, but only after the results were uploaded
       - name: Validate DependencyCheck outcome
-        if: ${{ steps.depcheck.outcome == 'failure' }}
+        if: ${{ steps.depcheck.outcome == 'failure' }} #TODO
         run: |
           echo "DependencyCheck failed"
           exit 1
