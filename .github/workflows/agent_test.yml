@@ -94,24 +94,23 @@ jobs:
           verbose: true
 
   dependency-scan:
-    name: Dependency Scan
-    runs-on: ubuntu-latest
-    container: eclipse-temurin:8-jdk
-    needs: [ pr-check ]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Scan dependencies inspectit-ocelot-sdk
-        run: ./gradlew :inspectit-ocelot-sdk:dependencyCheckAnalyze
-      - name: Scan dependencies inspectit-ocelot-config
-        run: ./gradlew :inspectit-ocelot-config:dependencyCheckAnalyze
-      - name: Scan dependencies inspectit-ocelot-core
-        run: ./gradlew :inspectit-ocelot-core:dependencyCheckAnalyze
-      - name: Scan dependencies inspectit-ocelot-bootstrap
-        run: ./gradlew :inspectit-ocelot-bootstrap:dependencyCheckAnalyze
-      - name: Scan dependencies inspectit-ocelot-agent
-        run: ./gradlew :inspectit-ocelot-agent:dependencyCheckAnalyze
+    uses: ./.github/workflows/dependency_check.yml
+    secrets: inherit
+
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Grant execute permission for gradlew
+#        run: chmod +x gradlew
+#      - name: Scan dependencies inspectit-ocelot-sdk
+#        run: ./gradlew :inspectit-ocelot-sdk:dependencyCheckAnalyze
+#      - name: Scan dependencies inspectit-ocelot-config
+#        run: ./gradlew :inspectit-ocelot-config:dependencyCheckAnalyze
+#      - name: Scan dependencies inspectit-ocelot-core
+#        run: ./gradlew :inspectit-ocelot-core:dependencyCheckAnalyze
+#      - name: Scan dependencies inspectit-ocelot-bootstrap
+#        run: ./gradlew :inspectit-ocelot-bootstrap:dependencyCheckAnalyze
+#      - name: Scan dependencies inspectit-ocelot-agent
+#        run: ./gradlew :inspectit-ocelot-agent:dependencyCheckAnalyze
 
   jmh-compile:
     name: 'Compile JMH Tests'

@@ -1,0 +1,78 @@
+name: Dependency Check Agent
+
+# Don't forget to inherit secrets when calling this workflow
+on:
+  workflow_call:
+
+jobs:
+  dependency-scan:
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    container: eclipse-temurin:8-jdk
+    steps:
+      # the action has not been updated a while, but it always uses the latest plugin version
+      - name: DependencyCheck inspectit-ocelot-core
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: ${{ github.repository }}/inspectit-ocelot-core
+          path: inspectit-ocelot-core
+          format: 'HTML'
+          out: 'reports'
+          args: >
+            --disableAssembly
+            --disableNodeAudit
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --nvdApiDelay 10000
+      - name: DependencyCheck inspectit-ocelot-config
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: ${{ github.repository }}/inspectit-ocelot-config
+          path: inspectit-ocelot-config
+          format: 'HTML'
+          out: 'reports'
+          args: >
+            --disableAssembly
+            --disableNodeAudit
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --nvdApiDelay 10000
+      - name: DependencyCheck inspectit-ocelot-bootstrap
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: ${{ github.repository }}/inspectit-ocelot-bootstrap
+          path: inspectit-ocelot-bootstrap
+          format: 'HTML'
+          out: 'reports'
+          args: >
+            --disableAssembly
+            --disableNodeAudit
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --nvdApiDelay 10000
+      - name: DependencyCheck inspectit-ocelot-agent
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: ${{ github.repository }}/inspectit-ocelot-agent
+          path: inspectit-ocelot-core
+          format: 'HTML'
+          out: 'reports'
+          args: >
+            --disableAssembly
+            --disableNodeAudit
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --nvdApiDelay 10000
+      - name: DependencyCheck inspectit-ocelot-sdk
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: ${{ github.repository }}/inspectit-ocelot-sdk
+          path: inspectit-ocelot-core
+          format: 'HTML'
+          out: 'reports'
+          args: >
+            --disableAssembly
+            --disableNodeAudit
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --nvdApiDelay 10000
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report-ocelot-agent
+          path: ${{ github.workspace }}/reports
