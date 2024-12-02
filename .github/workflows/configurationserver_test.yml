@@ -57,8 +57,6 @@ jobs:
             --disableNodeAudit
             --nvdApiKey ${{ secrets.NVD_API_KEY }}
             --nvdApiDelay 10000
-#      - name: build UI
-#        run: ./gradlew :inspectit-ocelot-configurationserver-ui:buildFrontend
       - name: Run DependencyCheck plugin
         uses: dependency-check/Dependency-Check_Action@main
         id: depcheck-ui
@@ -96,7 +94,7 @@ jobs:
           path: ${{ github.workspace }}/reports
       # if DependencyCheck failed, the job should also fail, but only after the results were uploaded
       - name: Validate DependencyCheck outcome
-        if: ${{ steps.depcheck.outcome == 'failure' }} #TODO
+        if: ${{ steps.depcheck.outcome == 'failure' || steps.depcheck-ui.outcome == 'failure' || steps.depcheck-docs.outcome == 'failure' }}
         run: |
           echo "DependencyCheck failed"
           exit 1
