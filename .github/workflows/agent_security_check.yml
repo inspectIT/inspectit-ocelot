@@ -1,0 +1,45 @@
+name: Automatic Security Check Agent
+
+on:
+  schedule:
+    - cron: "0 8 1,15 * *" # At 08:00 on day-of-month 1 and 15
+
+jobs:
+  security-check:
+    name: Security Check Agent
+    runs-on: ubuntu-latest
+    container: eclipse-temurin:8-jdk
+    steps:
+      - uses: actions/checkout@v3
+      # the action has not been updated a while, but it always uses the latest plugin version
+      - name: Run DependencyCheck plugin
+        uses: dependency-check/Dependency-Check_Action@main
+        id: depcheck
+        continue-on-error: true
+        with:
+          project: inspectIT/inspectit-ocelot-agent
+          path: 'inspectit-ocelot-agent'
+          format: 'HTML'
+          args: >
+            --disableAssembly
+            --disableNodeAudit
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --nvdApiDelay 10000
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report-ocelot-agent
+          path: ${{ github.workspace }}/reports
+      - name: Send Notification
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*Ocelot-Agent Dependency-Check Report*: ${{ steps.depcheck.outcome }}\nPlease check the report here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      # if DependencyCheck failed, the job should also fail, but only after the results were uploaded
+      - name: Validate DependencyCheck outcome
+        if: ${{ steps.depcheck.outcome == 'failure' }}
+        run: |
+          echo "DependencyCheck failed"
+          exit 1
