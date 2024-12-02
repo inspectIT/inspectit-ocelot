@@ -104,7 +104,7 @@ jobs:
       - name: build
         run: ./gradlew :inspectit-ocelot-agent:assemble
       # the action has not been updated a while, but it always uses the latest plugin version
-      - name: DependencyCheck inspectit-ocelot-agent
+      - name: Run DependencyCheck plugin
         uses: dependency-check/Dependency-Check_Action@main
         with:
           project: inspectIT/inspectit-ocelot-agent
