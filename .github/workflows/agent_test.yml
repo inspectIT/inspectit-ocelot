@@ -99,7 +99,6 @@ jobs:
     container: eclipse-temurin:8-jdk
     steps:
       - uses: actions/checkout@v3
-      # the action has not been updated a while, but it always uses the latest plugin version
       - name: Run DependencyCheck plugin
         uses: dependency-check/Dependency-Check_Action@main
         id: depcheck
@@ -108,7 +107,6 @@ jobs:
           project: inspectIT/inspectit-ocelot-agent
           path: 'inspectit-ocelot-agent'
           format: 'HTML'
-          out: 'reports'
           args: >
             --disableAssembly
             --disableNodeAudit

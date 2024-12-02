@@ -36,7 +36,6 @@ jobs:
           project: inspectIT/inspectit-ocelot-configuration-server-ui
           path: 'components/inspectit-ocelot-configurationserver-ui'
           format: 'HTML'
-          out: 'reports'
           args: >
             --disableAssembly
             --disableNodeAudit
