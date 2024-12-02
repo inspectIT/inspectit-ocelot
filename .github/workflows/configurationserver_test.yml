@@ -49,7 +49,7 @@ jobs:
         continue-on-error: true
         with:
           project: inspectIT/inspectit-ocelot-configuration-server
-          path: 'components/inspectit-ocelot-configurationserver'
+          path: '$(find ./components/ -type f -name "inspectit-ocelot-config*.jar" | tr '\n' ' ')'
           format: 'HTML'
           args: >
             --disableAssembly
