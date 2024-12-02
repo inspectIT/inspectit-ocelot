@@ -6,6 +6,10 @@ plugins {
 }
 apply plugin: 'io.spring.dependency-management'
 
+configurations {
+    implementation.extendsFrom(api)
+}
+
 dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation(
