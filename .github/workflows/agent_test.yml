@@ -106,6 +106,8 @@ jobs:
       # the action has not been updated a while, but it always uses the latest plugin version
       - name: Run DependencyCheck plugin
         uses: dependency-check/Dependency-Check_Action@main
+        id: depcheck
+        continue-on-error: true
         with:
           project: inspectIT/inspectit-ocelot-agent
           path: 'inspectit-ocelot-agent'
@@ -121,6 +123,12 @@ jobs:
         with:
           name: dependency-check-report-ocelot-agent
           path: ${{ github.workspace }}/reports
+      # if DependencyCheck failed, the job should also fail, but only after the results were uploaded
+      - name: Validate DependencyCheck outcome
+        if: ${{ steps.depcheck.outcome == 'failure' }}
+        run: |
+          echo "DependencyCheck failed"
+          exit 1
 
   jmh-compile:
     name: 'Compile JMH Tests'

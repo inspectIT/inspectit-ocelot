@@ -41,12 +41,14 @@ jobs:
       - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Build Configuration-Server
-        run: ./gradlew :inspectit-ocelot-configurationserver:assemble
+      - name: build
+        run: ./gradlew :inspectit-ocelot-configurationserver:bootJarWithFrontend
       - name: Run DependencyCheck plugin
         uses: dependency-check/Dependency-Check_Action@main
+        id: depcheck
+        continue-on-error: true
         with:
-          project: inspectIT/inspectit-ocelot-configurationServer
+          project: inspectIT/inspectit-ocelot-configuration-server
           path: 'components/inspectit-ocelot-configurationserver'
           format: 'HTML'
           out: 'reports'
@@ -58,5 +60,11 @@ jobs:
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: dependency-check-report-ocelot-agent
+          name: dependency-check-report-ocelot-configurationserver
           path: ${{ github.workspace }}/reports
+      # if DependencyCheck failed, the job should also fail, but only after the results were uploaded
+      - name: Validate DependencyCheck outcome
+        if: ${{ steps.depcheck.outcome == 'failure' }}
+        run: |
+          echo "DependencyCheck failed"
+          exit 1
