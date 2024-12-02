@@ -39,10 +39,6 @@ jobs:
     container: eclipse-temurin:17
     steps:
       - uses: actions/checkout@v3
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: build
-        run: ./gradlew :inspectit-ocelot-configurationserver:bootJarWithFrontend
       - name: Run DependencyCheck plugin
         uses: dependency-check/Dependency-Check_Action@main
         id: depcheck
