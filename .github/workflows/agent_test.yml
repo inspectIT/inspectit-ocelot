@@ -94,7 +94,7 @@ jobs:
           verbose: true
 
   dependency-scan:
-    uses: ./.github/workflows/dependency_check.yml
+    uses: ./.github/workflows/dependency_check_agent.yml
     secrets: inherit
 
 #    steps:
