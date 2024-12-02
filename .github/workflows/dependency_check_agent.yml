@@ -14,8 +14,8 @@ jobs:
       - name: DependencyCheck inspectit-ocelot-core
         uses: dependency-check/Dependency-Check_Action@main
         with:
-          project: ${{ github.repository }}
-          path: inspectit-ocelot-core
+          project: inspectit-ocelot-core
+          path: ':inspectit-ocelot-core'
           format: 'HTML'
           out: 'reports'
           args: >
@@ -26,8 +26,8 @@ jobs:
       - name: DependencyCheck inspectit-ocelot-config
         uses: dependency-check/Dependency-Check_Action@main
         with:
-          project: ${{ github.repository }}
-          path: inspectit-ocelot-config
+          project:  inspectit-ocelot-config
+          path: ':inspectit-ocelot-config'
           format: 'HTML'
           out: 'reports'
           args: >
@@ -38,8 +38,8 @@ jobs:
       - name: DependencyCheck inspectit-ocelot-bootstrap
         uses: dependency-check/Dependency-Check_Action@main
         with:
-          project: ${{ github.repository }}
-          path: inspectit-ocelot-bootstrap
+          project: inspectit-ocelot-bootstrap
+          path: ':inspectit-ocelot-bootstrap'
           format: 'HTML'
           out: 'reports'
           args: >
@@ -50,8 +50,8 @@ jobs:
       - name: DependencyCheck inspectit-ocelot-agent
         uses: dependency-check/Dependency-Check_Action@main
         with:
-          project: ${{ github.repository }}
-          path: inspectit-ocelot-core
+          project: inspectit-ocelot-agent
+          path: ':inspectit-ocelot-agent'
           format: 'HTML'
           out: 'reports'
           args: >
@@ -62,8 +62,8 @@ jobs:
       - name: DependencyCheck inspectit-ocelot-sdk
         uses: dependency-check/Dependency-Check_Action@main
         with:
-          project: ${{ github.repository }}
-          path: inspectit-ocelot-core
+          project: inspectit-ocelot-core
+          path: ':inspectit-ocelot-core'
           format: 'HTML'
           out: 'reports'
           args: >
