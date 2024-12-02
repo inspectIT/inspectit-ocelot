@@ -49,7 +49,33 @@ jobs:
         continue-on-error: true
         with:
           project: inspectIT/inspectit-ocelot-configuration-server
-          path: 'components/inspectit-ocelot-config*/**/*.jar'
+          path: 'components/inspectit-ocelot-configurationserver'
+          format: 'HTML'
+          args: >
+            --disableAssembly
+            --disableNodeAudit
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --nvdApiDelay 10000
+      - name: Run DependencyCheck plugin ui
+        uses: dependency-check/Dependency-Check_Action@main
+        id: depcheck
+        continue-on-error: true
+        with:
+          project: inspectIT/inspectit-ocelot-configuration-server-ui
+          path: 'components/inspectit-ocelot-configurationserver-ui'
+          format: 'HTML'
+          args: >
+            --disableAssembly
+            --disableNodeAudit
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --nvdApiDelay 10000
+      - name: Run DependencyCheck plugin configdocsgenerator
+        uses: dependency-check/Dependency-Check_Action@main
+        id: depcheck
+        continue-on-error: true
+        with:
+          project: inspectIT/inspectit-ocelot-configdocsgenerator
+          path: 'components/inspectit-ocelot-configdocsgenerator'
           format: 'HTML'
           args: >
             --disableAssembly
