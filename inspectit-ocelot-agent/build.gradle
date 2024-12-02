@@ -83,6 +83,7 @@ docker {
 task buildOpenTelemetryFatJar(type: Jar){
     archiveFileName = "opentelemetry-fat.jar"
     destinationDirectory = file("$buildDir/jarGen")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from{
         configurations.opentelemetry.collect{it.isDirectory() ? it : zipTree(it) }
     }

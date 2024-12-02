@@ -134,6 +134,6 @@ ioSpringDependencyManagement = "io.spring.dependency-management:1.1.6"
 meChampeauJmh = "me.champeau.jmh:0.7.2"
 nlLittlerobotsVersionCatalogUpdate = "nl.littlerobots.version-catalog-update:0.8.5"
 orgCyclonedxBom = "org.cyclonedx.bom:1.8.2"
-# @pin Last version to be compatible with java 1.8
-orgOwaspDependencycheck = "org.owasp.dependencycheck:8.2.1"
+# @pin Dependency-Check 11.* requires Java 11, 10.0.4 does not work with Gradle 7
+orgOwaspDependencycheck = "org.owasp.dependencycheck:10.0.3"
 orgSpringframeworkBoot = { id = "org.springframework.boot", version.ref = "orgSpringframeworkBoot" }
