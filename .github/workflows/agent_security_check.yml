@@ -1,44 +1,27 @@
-name: Configuration UI Tests
+name: Automatic Security Check Agent
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    paths:
-      - 'components/inspectit-ocelot-configurationserver-ui/**'
-  workflow_call:
+  schedule:
+    - cron: "0 8 1,15 * *" # At 08:00 on day-of-month 1 and 15
 
 jobs:
-  test:
-    name: Test
+  security-check:
+    name: Security Check Agent
     runs-on: ubuntu-latest
-    container: eclipse-temurin:17
-    env:
-      working-directory: ./components/inspectit-ocelot-configurationserver-ui
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build frontend
-        working-directory: ${{env.working-directory}}
-        run: ../../gradlew buildFrontend
-
-  dependency-scan:
-    name: Dependency Scan
-    runs-on: ubuntu-latest
-    container: eclipse-temurin:17
+    container: eclipse-temurin:8-jdk
     steps:
       - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: build
-        run: ./gradlew :inspectit-ocelot-configurationserver-ui:buildFrontend
+        run: ./gradlew :inspectit-ocelot-agent:assemble
       - name: Run DependencyCheck plugin
         uses: dependency-check/Dependency-Check_Action@main
         id: depcheck
         continue-on-error: true
         with:
-          project: inspectIT/inspectit-ocelot-configuration-server-ui
-          path: 'components/inspectit-ocelot-configurationserver-ui'
+          project: inspectIT/inspectit-ocelot-agent
+          path: 'inspectit-ocelot-agent'
           format: 'HTML'
           args: >
             --disableAssembly
@@ -48,8 +31,15 @@ jobs:
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: dependency-check-report-ocelot-configurationserver-ui
+          name: dependency-check-report-ocelot-agent
           path: ${{ github.workspace }}/reports
+      - name: Send Notification
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*Ocelot-Agent Dependency-Check Report*: ${{ steps.depcheck.outcome }}\nPlease check the report here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
       # if DependencyCheck failed, the job should also fail, but only after the results were uploaded
       - name: Validate DependencyCheck outcome
         if: ${{ steps.depcheck.outcome == 'failure' }}

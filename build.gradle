@@ -42,13 +42,19 @@ allprojects {
 
     dependencyCheck {
         //failBuildOnCVSS = 6
+        nvd {
+            apiKey = System.getenv("NVD_API_TOKEN")
+            delay = 10000
+        }
         scanProjects = [
                 ':inspectit-ocelot-agent',
                 ':inspectit-ocelot-core',
                 ':inspectit-ocelot-sdk',
                 ':inspectit-ocelot-bootstrap',
+                ':inspectit-ocelot-config',
                 ':inspectit-ocelot-configurationserver',
-                ':inspectit-ocelot-configurationserver-ui'
+                ':inspectit-ocelot-configurationserver-ui',
+                ':inspectit-ocelot-configdocsgenerator'
         ]
         skipConfigurations = ["jmh", "jmhCompileClasspath", "systemTest", "systemTestCompileClasspath", "systemTestRuntimeClasspath"]
         analyzers {

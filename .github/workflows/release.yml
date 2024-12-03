@@ -20,8 +20,6 @@ jobs:
           distribution: temurin
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Scan dependencies
-        run: ./gradlew dependencyCheckAggregate
       - name: Build artifacts
         run: |
           ./gradlew assemble bootJarWithFrontend :inspectit-ocelot-core:cyclonedxBom :inspectit-ocelot-configurationserver:cyclonedxBom -PbuildVersion=${{ github.ref_name }}

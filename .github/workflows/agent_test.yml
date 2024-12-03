@@ -97,21 +97,36 @@ jobs:
     name: Dependency Scan
     runs-on: ubuntu-latest
     container: eclipse-temurin:8-jdk
-    needs: [ pr-check ]
     steps:
       - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Scan dependencies inspectit-ocelot-sdk
-        run: ./gradlew :inspectit-ocelot-sdk:dependencyCheckAnalyze
-      - name: Scan dependencies inspectit-ocelot-config
-        run: ./gradlew :inspectit-ocelot-config:dependencyCheckAnalyze
-      - name: Scan dependencies inspectit-ocelot-core
-        run: ./gradlew :inspectit-ocelot-core:dependencyCheckAnalyze
-      - name: Scan dependencies inspectit-ocelot-bootstrap
-        run: ./gradlew :inspectit-ocelot-bootstrap:dependencyCheckAnalyze
-      - name: Scan dependencies inspectit-ocelot-agent
-        run: ./gradlew :inspectit-ocelot-agent:dependencyCheckAnalyze
+      - name: build
+        run: ./gradlew :inspectit-ocelot-agent:assemble
+      - name: Run DependencyCheck plugin
+        uses: dependency-check/Dependency-Check_Action@main
+        id: depcheck
+        continue-on-error: true
+        with:
+          project: inspectIT/inspectit-ocelot-agent
+          path: 'inspectit-ocelot-agent'
+          format: 'HTML'
+          args: >
+            --disableAssembly
+            --disableNodeAudit
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --nvdApiDelay 10000
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report-ocelot-agent
+          path: ${{ github.workspace }}/reports
+      # if DependencyCheck failed, the job should also fail, but only after the results were uploaded
+      - name: Validate DependencyCheck outcome
+        if: ${{ steps.depcheck.outcome == 'failure' }}
+        run: |
+          echo "DependencyCheck failed"
+          exit 1
 
   jmh-compile:
     name: 'Compile JMH Tests'
