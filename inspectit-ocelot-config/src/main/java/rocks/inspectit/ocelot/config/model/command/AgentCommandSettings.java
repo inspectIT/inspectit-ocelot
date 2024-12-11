@@ -48,6 +48,11 @@ public class AgentCommandSettings {
     private Duration pollingInterval;
 
     /**
+     * The task timeout to use - the time to run one agent command task.
+     */
+    private Duration taskTimeout;
+
+    /**
      * How long the agent will stay in the live mode, before falling back to the normal mode.
      */
     private Duration liveModeDuration;

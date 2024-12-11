@@ -49,6 +49,11 @@ public class HttpConfigSettings {
     private Duration frequency;
 
     /**
+     * The task timeout to use - the time to run one HTTP polling task.
+     */
+    private Duration taskTimeout;
+
+    /**
      * The connection timeout to use - the time to establish the connection with the remote host.
      */
     private Duration connectionTimeout;
