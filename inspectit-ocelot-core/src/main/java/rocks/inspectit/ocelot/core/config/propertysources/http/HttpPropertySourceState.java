@@ -13,11 +13,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
@@ -63,6 +61,11 @@ public class HttpPropertySourceState {
      */
     @Getter
     private final String name;
+
+    /**
+     * The holder of the HTTP client.
+     */
+    private final HttpClientHolder clientHolder;
 
     /**
      * The currently used settings.
@@ -115,6 +118,7 @@ public class HttpPropertySourceState {
      */
     public HttpPropertySourceState(String name, HttpConfigSettings currentSettings) {
         this.name = name;
+        this.clientHolder = new HttpClientHolder();
         this.currentSettings = currentSettings;
         errorCounter = 0;
         //ensure that currentPropertySource is never null, even if the initial fetching fails
@@ -169,32 +173,6 @@ public class HttpPropertySourceState {
 
     }
 
-    /**
-     * Creates the {@link HttpClient} which is used for fetching the configuration.
-     *
-     * @return A new {@link HttpClient} instance.
-     */
-    private CloseableHttpClient createHttpClient() {
-        RequestConfig.Builder configBuilder = RequestConfig.custom();
-
-        if (currentSettings.getConnectionTimeout() != null) {
-            int connectionTimeout = (int) currentSettings.getConnectionTimeout().toMillis();
-            configBuilder = configBuilder.setConnectTimeout(connectionTimeout);
-        }
-        if (currentSettings.getConnectionRequestTimeout() != null) {
-            int connectionRequestTimeout = (int) currentSettings.getConnectionRequestTimeout().toMillis();
-            configBuilder = configBuilder.setConnectionRequestTimeout(connectionRequestTimeout);
-        }
-        if (currentSettings.getSocketTimeout() != null) {
-            int socketTimeout = (int) currentSettings.getSocketTimeout().toMillis();
-            configBuilder = configBuilder.setSocketTimeout(socketTimeout);
-        }
-
-        RequestConfig config = configBuilder.build();
-
-        return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-    }
-
     private String fetchConfiguration(boolean fallBackToFile) {
         HttpGet httpGet;
         try {
@@ -206,10 +184,9 @@ public class HttpPropertySourceState {
 
         String configuration = null;
         boolean isError = true;
-        // We create the httpClient outside the retry as it is a rather expensive object, but we create it for each call
-        // again, because the configuration may have changed. The "but" is currently pure speculation. Ideally we would
-        // recreate it only if configuration has changed.
-        try (CloseableHttpClient httpClient = createHttpClient()) {
+
+        try {
+            CloseableHttpClient httpClient = clientHolder.getHttpClient(currentSettings);
             Retry retry;
             if (fallBackToFile) {
                 // fallBackToFile == true means the agent started.
