@@ -136,6 +136,8 @@ inspectit:
     socket-timeout: 5s
     # the used interval for polling commands
     polling-interval: 15s
+    # the time to keep an HTTP connection alive
+    time-to-live: 4m
     # the maximum time to run one agent command polling task
     task-timeout: 32m
     # how long the agent will stay in the live mode, before falling back to the normal mode

@@ -8,6 +8,7 @@ import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Stores an instance of a {@link CloseableHttpClient} and it's relevant {@link HttpConfigSettings}.
@@ -24,6 +25,8 @@ public class HttpClientHolder {
 
     private Duration socketTimeout;
 
+    private Duration timeToLive;
+
     /**
      * Returns a {@link HttpClient}, which is used for fetching the configuration.
      * If the HTTP settings changed, a new client will be created and the old one will be closed.
@@ -32,31 +35,45 @@ public class HttpClientHolder {
      */
     public CloseableHttpClient getHttpClient(HttpConfigSettings httpSettings) throws IOException {
         if(isUpdated(httpSettings) || httpClient == null) {
-            RequestConfig.Builder configBuilder = RequestConfig.custom();
+            RequestConfig config = getRequestConfig(httpSettings);
+            HttpClientBuilder builder = HttpClientBuilder.create().setDefaultRequestConfig(config);
 
-            if (httpSettings.getConnectionTimeout() != null) {
-                int connectionTimeout = (int) httpSettings.getConnectionTimeout().toMillis();
-                configBuilder = configBuilder.setConnectTimeout(connectionTimeout);
+            if (httpSettings.getTimeToLive() != null) {
+                int timeToLive = (int) httpSettings.getTimeToLive().toMillis();
+                builder.setConnectionTimeToLive(timeToLive, TimeUnit.MILLISECONDS);
             }
-            if (httpSettings.getConnectionRequestTimeout() != null) {
-                int connectionRequestTimeout = (int) httpSettings.getConnectionRequestTimeout().toMillis();
-                configBuilder = configBuilder.setConnectionRequestTimeout(connectionRequestTimeout);
-            }
-            if (httpSettings.getSocketTimeout() != null) {
-                int socketTimeout = (int) httpSettings.getSocketTimeout().toMillis();
-                configBuilder = configBuilder.setSocketTimeout(socketTimeout);
-            }
-
-            RequestConfig config = configBuilder.build();
 
             if (httpClient != null) httpClient.close();
-            httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-
+            httpClient = builder.build();
             connectionTimeout = httpSettings.getConnectionTimeout();
             connectionRequestTimeout = httpSettings.getConnectionRequestTimeout();
             socketTimeout = httpSettings.getSocketTimeout();
+            timeToLive = httpSettings.getTimeToLive();
         }
         return httpClient;
+    }
+
+    /**
+     * @param httpSettings the current HTTP settings
+     * @return the derived request configuration
+     */
+    private static RequestConfig getRequestConfig(HttpConfigSettings httpSettings) {
+        RequestConfig.Builder configBuilder = RequestConfig.custom();
+
+        if (httpSettings.getConnectionTimeout() != null) {
+            int connectionTimeout = (int) httpSettings.getConnectionTimeout().toMillis();
+            configBuilder = configBuilder.setConnectTimeout(connectionTimeout);
+        }
+        if (httpSettings.getConnectionRequestTimeout() != null) {
+            int connectionRequestTimeout = (int) httpSettings.getConnectionRequestTimeout().toMillis();
+            configBuilder = configBuilder.setConnectionRequestTimeout(connectionRequestTimeout);
+        }
+        if (httpSettings.getSocketTimeout() != null) {
+            int socketTimeout = (int) httpSettings.getSocketTimeout().toMillis();
+            configBuilder = configBuilder.setSocketTimeout(socketTimeout);
+        }
+
+        return configBuilder.build();
     }
 
     /**
@@ -65,6 +82,7 @@ public class HttpClientHolder {
     private boolean isUpdated(HttpConfigSettings settings) {
         return settings.getConnectionTimeout() != connectionTimeout ||
                 settings.getConnectionRequestTimeout() != connectionRequestTimeout ||
-                settings.getSocketTimeout() != socketTimeout;
+                settings.getSocketTimeout() != socketTimeout ||
+                settings.getTimeToLive() != timeToLive;
     }
 }

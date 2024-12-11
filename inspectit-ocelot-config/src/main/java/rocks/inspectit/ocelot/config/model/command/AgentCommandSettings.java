@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.config.model.config.RetrySettings;
 
+import javax.validation.Valid;
+import javax.validation.constraints.AssertFalse;
 import java.net.URL;
 import java.time.Duration;
 
@@ -43,6 +45,11 @@ public class AgentCommandSettings {
     private Duration socketTimeout;
 
     /**
+     * The TTL - the time to keep an HTTP connection alive
+     */
+    private Duration timeToLive;
+
+    /**
      * The used interval for polling commands.
      */
     private Duration pollingInterval;
@@ -60,5 +67,14 @@ public class AgentCommandSettings {
     /**
      * Settings how retries are handled regarding fetching an agent command.
      */
+    @Valid
     private RetrySettings retry;
+
+    @AssertFalse(message = "The specified time values should not be negative!")
+    public boolean isNegativeTimeout() {
+        boolean negativeLiveReadTimeout = liveSocketTimeout != null && liveSocketTimeout.isNegative();
+        boolean negativeReadTimeout = socketTimeout != null && socketTimeout.isNegative();
+        boolean negativeTTL = timeToLive != null && timeToLive.isNegative();
+        return negativeLiveReadTimeout || negativeReadTimeout || negativeTTL;
+    }
 }

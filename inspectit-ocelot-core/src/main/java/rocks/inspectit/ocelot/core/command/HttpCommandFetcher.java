@@ -24,6 +24,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -78,13 +79,20 @@ public class HttpCommandFetcher {
         AgentCommandSettings settings = environment.getCurrentConfig().getAgentCommands();
         int timeout = (int) settings.getSocketTimeout().toMillis();
         int liveTimeout = (int) settings.getLiveSocketTimeout().toMillis();
+        int timeToLive = (int) settings.getTimeToLive().toMillis();
 
         RequestConfig normalConfig = RequestConfig.custom().setSocketTimeout(timeout).build();
 
         RequestConfig liveConfig = RequestConfig.custom().setSocketTimeout(liveTimeout).build();
 
-        normalHttpClient = HttpClientBuilder.create().setDefaultRequestConfig(normalConfig).build();
-        liveHttpClient = HttpClientBuilder.create().setDefaultRequestConfig(liveConfig).build();
+        normalHttpClient = HttpClientBuilder.create()
+                .setDefaultRequestConfig(normalConfig)
+                .setConnectionTimeToLive(timeToLive, TimeUnit.MILLISECONDS)
+                .build();
+        liveHttpClient = HttpClientBuilder.create()
+                .setDefaultRequestConfig(liveConfig)
+                .setConnectionTimeToLive(timeToLive, TimeUnit.MILLISECONDS)
+                .build();
     }
 
     /**
