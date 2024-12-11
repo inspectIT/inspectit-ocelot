@@ -116,7 +116,7 @@ inspectit:
       include-service-name: true
 
   # defines how many threads inspectIT may start for its internal tasks
-  thread-pool-size: 2
+  thread-pool-size: 4
 
   # settings for the agent commands and communication
   agent-commands:
