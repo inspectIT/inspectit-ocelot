@@ -54,6 +54,11 @@ public class HttpConfigSettings {
     private Duration connectionTimeout;
 
     /**
+     * The connection-request timeout to use - the time the client will wait to acquire a connection from the connection pool
+     */
+    private Duration connectionRequestTimeout;
+
+    /**
      * The socket timeout to use - the time waiting for data after establishing the connection; maximum time of inactivity between two data packets.
      */
     private Duration socketTimeout;

@@ -181,6 +181,10 @@ public class HttpPropertySourceState {
             int connectionTimeout = (int) currentSettings.getConnectionTimeout().toMillis();
             configBuilder = configBuilder.setConnectTimeout(connectionTimeout);
         }
+        if (currentSettings.getConnectionRequestTimeout() != null) {
+            int connectionRequestTimeout = (int) currentSettings.getConnectionRequestTimeout().toMillis();
+            configBuilder = configBuilder.setConnectionRequestTimeout(connectionRequestTimeout);
+        }
         if (currentSettings.getSocketTimeout() != null) {
             int socketTimeout = (int) currentSettings.getSocketTimeout().toMillis();
             configBuilder = configBuilder.setSocketTimeout(socketTimeout);
