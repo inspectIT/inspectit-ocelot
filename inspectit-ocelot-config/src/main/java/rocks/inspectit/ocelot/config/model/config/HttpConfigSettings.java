@@ -72,7 +72,8 @@ public class HttpConfigSettings {
     @AssertFalse(message = "The specified timeout values should not be negative!")
     public boolean isNegativeTimeout() {
         boolean negativeConnectionTimeout = connectionTimeout != null && connectionTimeout.isNegative();
+        boolean negativeConnectionRequestTimeout = connectionRequestTimeout != null && connectionRequestTimeout.isNegative();
         boolean negativeReadTimeout = socketTimeout != null && socketTimeout.isNegative();
-        return negativeConnectionTimeout || negativeReadTimeout;
+        return negativeConnectionTimeout || negativeConnectionRequestTimeout || negativeReadTimeout;
     }
 }
