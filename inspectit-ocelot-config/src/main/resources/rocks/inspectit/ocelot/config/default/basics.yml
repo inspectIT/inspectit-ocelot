@@ -138,7 +138,7 @@ inspectit:
     polling-interval: 15s
     # the time to keep an HTTP connection alive
     time-to-live: 4m
-    # the maximum time to run one agent command polling task
+    # the maximum time to run one agent command polling task - set to 0s to disable
     task-timeout: 32m
     # how long the agent will stay in the live mode, before falling back to the normal mode
     live-mode-duration: 2m

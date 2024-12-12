@@ -167,7 +167,22 @@ public class AgentCommandServiceTest {
         @Test
         void shouldNotCancelFutureWhenNoTimeout() throws MalformedURLException {
             Duration timeout = Duration.ofMillis(5000);
-            when(configuration.getAgentCommands().getPollingInterval()).thenReturn(Duration.ofSeconds(1));
+            when(configuration.getAgentCommands().getPollingInterval()).thenReturn(Duration.ofMillis(500));
+            when(configuration.getAgentCommands().getTaskTimeout()).thenReturn(timeout);
+            when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://example.org"));
+            ScheduledFuture future = mock(ScheduledFuture.class);
+            when(executor.scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(future);
+
+            service.doEnable(configuration);
+
+            verify(future, never()).cancel(true);
+            verify(executor, times(1)).scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class));
+        }
+
+        @Test
+        void shouldNotCancelFutureWhenTimeoutIsZero() throws MalformedURLException {
+            Duration timeout = Duration.ofMillis(0);
+            when(configuration.getAgentCommands().getPollingInterval()).thenReturn(Duration.ofMillis(500));
             when(configuration.getAgentCommands().getTaskTimeout()).thenReturn(timeout);
             when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://example.org"));
             ScheduledFuture future = mock(ScheduledFuture.class);

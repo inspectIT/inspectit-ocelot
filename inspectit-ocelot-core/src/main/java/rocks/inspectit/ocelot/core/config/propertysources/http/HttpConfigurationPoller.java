@@ -115,7 +115,8 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
         pollerFuture = executor.scheduleWithFixedDelay(this,
                 pollingInterval.toMillis(), pollingInterval.toMillis(), TimeUnit.MILLISECONDS);
         // Setup timeout for fetching the configuration
-        timeoutExecutor.scheduleCancelling(pollerFuture, "http.config", this::startScheduledPolling, pollingTimeout);
+        if (!pollingTimeout.isZero())
+            timeoutExecutor.scheduleCancelling(pollerFuture, "http.config", this::startScheduledPolling, pollingTimeout);
     }
 
     public void updateAgentHealthState(AgentHealthState agentHealth) {

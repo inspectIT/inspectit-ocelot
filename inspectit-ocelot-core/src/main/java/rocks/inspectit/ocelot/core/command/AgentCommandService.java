@@ -125,7 +125,8 @@ public class AgentCommandService extends DynamicallyActivatableService implement
         handlerFuture = executor.scheduleWithFixedDelay(this,
                 pollingInterval.toMillis(), pollingInterval.toMillis(), TimeUnit.MILLISECONDS);
         // Setup timeout for fetching a command
-        timeoutExecutor.scheduleCancelling(handlerFuture, "agentcommand", this::startScheduledHandler, pollingTimeout);
+        if (!pollingTimeout.isZero())
+            timeoutExecutor.scheduleCancelling(handlerFuture, "agentcommand", this::startScheduledHandler, pollingTimeout);
     }
 
     @VisibleForTesting
