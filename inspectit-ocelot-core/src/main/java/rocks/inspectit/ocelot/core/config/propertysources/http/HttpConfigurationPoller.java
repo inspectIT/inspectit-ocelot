@@ -10,6 +10,7 @@ import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
+import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +31,21 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
     private ScheduledFuture<?> pollerFuture;
 
     /**
+     * The interval for the scheduled task.
+     */
+    private Duration pollingInterval;
+
+    /**
+     * The executor to cancel the polling task by timeout. This should prevent the HTTP thread to deadlock.
+     */
+    private final TaskTimeoutExecutor timeoutExecutor;
+
+    /**
+     * The maximum time to run one polling task.
+     */
+    private Duration pollingTimeout;
+
+    /**
      * The state of the used HTTP property source configuration.
      */
     @Getter
@@ -37,6 +53,7 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
 
     public HttpConfigurationPoller() {
         super("config.http");
+        timeoutExecutor = new TaskTimeoutExecutor();
     }
 
     @Override
@@ -52,8 +69,9 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
 
         currentState = new HttpPropertySourceState(InspectitEnvironment.HTTP_BASED_CONFIGURATION, httpSettings);
 
-        long frequencyMs = httpSettings.getFrequency().toMillis();
-        pollerFuture = executor.scheduleWithFixedDelay(this, frequencyMs, frequencyMs, TimeUnit.MILLISECONDS);
+        pollingInterval = httpSettings.getFrequency();
+        pollingTimeout = httpSettings.getTaskTimeout();
+        startScheduledPolling();
 
         return true;
     }
@@ -61,6 +79,9 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
     @Override
     protected boolean doDisable() {
         log.info("Stopping HTTP configuration polling service.");
+        if (timeoutExecutor != null) {
+            timeoutExecutor.cancelTimeout();
+        }
         if (pollerFuture != null) {
             pollerFuture.cancel(true);
         }
@@ -74,7 +95,10 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
     @Override
     public void run() {
         log.debug("Updating HTTP property source.");
+        // Fetch configuration
         boolean wasUpdated = currentState.update(false);
+        // After the configuration was fetched, the task should no longer timeout
+        timeoutExecutor.cancelTimeout();
         if (wasUpdated) {
             env.updatePropertySources(propertySources -> {
                 if (propertySources.contains(InspectitEnvironment.HTTP_BASED_CONFIGURATION)) {
@@ -82,6 +106,16 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
                 }
             });
         }
+    }
+
+    /**
+     * Start the scheduled HTTP polling.
+     */
+    private void startScheduledPolling() {
+        pollerFuture = executor.scheduleWithFixedDelay(this,
+                pollingInterval.toMillis(), pollingInterval.toMillis(), TimeUnit.MILLISECONDS);
+        // Setup timeout for fetching the configuration
+        timeoutExecutor.scheduleCancelling(pollerFuture, "http.config", this::startScheduledPolling, pollingTimeout);
     }
 
     public void updateAgentHealthState(AgentHealthState agentHealth) {

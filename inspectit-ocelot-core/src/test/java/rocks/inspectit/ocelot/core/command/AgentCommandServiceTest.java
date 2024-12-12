@@ -144,4 +144,39 @@ public class AgentCommandServiceTest {
             assertThat(result.toString()).isEqualTo("http://example.org/api/command");
         }
     }
+
+    @Nested
+    public class TaskTimeout {
+
+        @Test
+        void shouldCancelFutureAndRestartWhenTimeoutExceeded() throws MalformedURLException {
+            Duration timeout = Duration.ofMillis(500);
+            when(configuration.getAgentCommands().getPollingInterval()).thenReturn(Duration.ofSeconds(5));
+            when(configuration.getAgentCommands().getTaskTimeout()).thenReturn(timeout);
+            when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://example.org"));
+            ScheduledFuture future = mock(ScheduledFuture.class);
+            when(future.isCancelled()).thenReturn(true);
+            when(executor.scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(future);
+
+            service.doEnable(configuration);
+
+            verify(future, timeout(timeout.toMillis() + 100)).cancel(true);
+            verify(executor, times(2)).scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class));
+        }
+
+        @Test
+        void shouldNotCancelFutureWhenNoTimeout() throws MalformedURLException {
+            Duration timeout = Duration.ofMillis(5000);
+            when(configuration.getAgentCommands().getPollingInterval()).thenReturn(Duration.ofSeconds(1));
+            when(configuration.getAgentCommands().getTaskTimeout()).thenReturn(timeout);
+            when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://example.org"));
+            ScheduledFuture future = mock(ScheduledFuture.class);
+            when(executor.scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(future);
+
+            service.doEnable(configuration);
+
+            verify(future, never()).cancel(true);
+            verify(executor, times(1)).scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class));
+        }
+    }
 }

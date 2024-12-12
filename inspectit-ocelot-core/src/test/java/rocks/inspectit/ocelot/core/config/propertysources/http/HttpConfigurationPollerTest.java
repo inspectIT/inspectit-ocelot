@@ -43,6 +43,7 @@ class HttpConfigurationPollerTest {
             configuration.setConfig(new ConfigSettings());
             configuration.getConfig().setHttp(new HttpConfigSettings());
             configuration.getConfig().getHttp().setFrequency(Duration.ofMillis(5000L));
+            configuration.getConfig().getHttp().setTaskTimeout(Duration.ofMillis(50000L));
             ScheduledFuture future = Mockito.mock(ScheduledFuture.class);
             when(executor.scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(future);
 
@@ -71,6 +72,7 @@ class HttpConfigurationPollerTest {
             configuration.setConfig(new ConfigSettings());
             configuration.getConfig().setHttp(new HttpConfigSettings());
             configuration.getConfig().getHttp().setFrequency(Duration.ofMillis(5000L));
+            configuration.getConfig().getHttp().setTaskTimeout(Duration.ofMillis(50000L));
             ScheduledFuture future = Mockito.mock(ScheduledFuture.class);
             when(executor.scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(future);
 
@@ -115,6 +117,45 @@ class HttpConfigurationPollerTest {
             verify(currentState).update(eq(false));
             verify(env).updatePropertySources(any());
             verifyNoMoreInteractions(currentState, env);
+        }
+    }
+
+    @Nested
+    public class TaskTimeout {
+
+        @Test
+        void shouldCancelFutureAndRestartWhenTimeoutExceeded() {
+            Duration timeout = Duration.ofMillis(500);
+            InspectitConfig configuration = new InspectitConfig();
+            configuration.setConfig(new ConfigSettings());
+            configuration.getConfig().setHttp(new HttpConfigSettings());
+            configuration.getConfig().getHttp().setFrequency(Duration.ofMillis(5000));
+            configuration.getConfig().getHttp().setTaskTimeout(timeout);
+            ScheduledFuture future = Mockito.mock(ScheduledFuture.class);
+            when(future.isCancelled()).thenReturn(true);
+            when(executor.scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(future);
+
+            poller.doEnable(configuration);
+
+            verify(future, timeout(timeout.toMillis() + 100)).cancel(true);
+            verify(executor, times(2)).scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class));
+        }
+
+        @Test
+        void shouldNotCancelFutureWhenNoTimeout() {
+            Duration timeout = Duration.ofMillis(5000);
+            InspectitConfig configuration = new InspectitConfig();
+            configuration.setConfig(new ConfigSettings());
+            configuration.getConfig().setHttp(new HttpConfigSettings());
+            configuration.getConfig().getHttp().setFrequency(Duration.ofMillis(500));
+            configuration.getConfig().getHttp().setTaskTimeout(timeout);
+            ScheduledFuture future = Mockito.mock(ScheduledFuture.class);
+            when(executor.scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(future);
+
+            poller.doEnable(configuration);
+
+            verify(future, never()).cancel(true);
+            verify(executor, times(1)).scheduleWithFixedDelay(any(Runnable.class), anyLong(), anyLong(), any(TimeUnit.class));
         }
     }
 }

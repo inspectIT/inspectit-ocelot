@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.command.AgentCommandSettings;
+import rocks.inspectit.ocelot.core.config.propertysources.http.TaskTimeoutExecutor;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -36,8 +38,24 @@ public class AgentCommandService extends DynamicallyActivatableService implement
      */
     private ScheduledFuture<?> handlerFuture;
 
+    /**
+     * The interval for the scheduled task.
+     */
+    private Duration pollingInterval;
+
+    /**
+     * The executor to cancel the polling task by timeout. This should prevent the HTTP thread to deadlock.
+     */
+    private final TaskTimeoutExecutor timeoutExecutor;
+
+    /**
+     * The maximum time to run one polling task.
+     */
+    private Duration pollingTimeout;
+
     public AgentCommandService() {
         super("agentCommands");
+        timeoutExecutor = new TaskTimeoutExecutor();
     }
 
     @Override
@@ -69,9 +87,9 @@ public class AgentCommandService extends DynamicallyActivatableService implement
         }
 
         AgentCommandSettings settings = configuration.getAgentCommands();
-        long pollingIntervalMs = settings.getPollingInterval().toMillis();
-
-        handlerFuture = executor.scheduleWithFixedDelay(this, pollingIntervalMs, pollingIntervalMs, TimeUnit.MILLISECONDS);
+        pollingInterval = settings.getPollingInterval();
+        pollingTimeout = settings.getTaskTimeout();
+        startScheduledHandler();
 
         return true;
     }
@@ -79,7 +97,9 @@ public class AgentCommandService extends DynamicallyActivatableService implement
     @Override
     protected boolean doDisable() {
         log.info("Stopping agent command polling service.");
-
+        if (timeoutExecutor != null) {
+            timeoutExecutor.cancelTimeout();
+        }
         if (handlerFuture != null) {
             handlerFuture.cancel(true);
         }
@@ -91,9 +111,21 @@ public class AgentCommandService extends DynamicallyActivatableService implement
         log.debug("Trying to fetch new agent commands.");
         try {
             commandHandler.nextCommand();
+            // After the command was fetched, the task should no longer timeout
+            timeoutExecutor.cancelTimeout();
         } catch (Exception exception) {
             log.error("Error while fetching agent command.", exception);
         }
+    }
+
+    /**
+     * Start the scheduled fetching of the next agent command.
+     */
+    private void startScheduledHandler() {
+        handlerFuture = executor.scheduleWithFixedDelay(this,
+                pollingInterval.toMillis(), pollingInterval.toMillis(), TimeUnit.MILLISECONDS);
+        // Setup timeout for fetching a command
+        timeoutExecutor.scheduleCancelling(handlerFuture, "agentcommand", this::startScheduledHandler, pollingTimeout);
     }
 
     @VisibleForTesting

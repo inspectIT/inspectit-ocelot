@@ -189,7 +189,7 @@ public class HttpPropertySourceState {
             CloseableHttpClient httpClient = clientHolder.getHttpClient(currentSettings);
             Retry retry;
             if (fallBackToFile) {
-                // fallBackToFile == true means the agent started.
+                // fallBackToFile == true means the agent has just started.
                 // If the configuration is not reachable, we want to fail fast and use the possibly existing backup file
                 // as soon as possible.
                 // If there is no backup standard polling mechanism will kick in and the agent will soon try again with
@@ -208,6 +208,9 @@ public class HttpPropertySourceState {
             logFetchError("HTTP protocol error occurred while fetching configuration.", e);
         } catch (IOException e) {
             logFetchError("A IO problem occurred while fetching configuration.", e);
+        } catch (InterruptedException e) {
+            logFetchError("Thread was interrupted while fetching configuration.", e);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             logFetchError("Exception occurred while fetching configuration.", e);
         }
