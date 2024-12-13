@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -122,6 +123,12 @@ class HttpConfigurationPollerTest {
 
     @Nested
     public class TaskTimeout {
+
+        @AfterEach
+        void disableTimeout() {
+            // Stop restarting the task after timeout
+            poller.doDisable();
+        }
 
         @Test
         void shouldCancelFutureAndRestartWhenTimeoutExceeded() {

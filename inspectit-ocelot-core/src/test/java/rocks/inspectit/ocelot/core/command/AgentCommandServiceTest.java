@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.command;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -147,6 +148,12 @@ public class AgentCommandServiceTest {
 
     @Nested
     public class TaskTimeout {
+
+        @AfterEach
+        void disableTimeout() {
+            // Stop restarting the task after timeout
+            service.doDisable();
+        }
 
         @Test
         void shouldCancelFutureAndRestartWhenTimeoutExceeded() throws MalformedURLException {
