@@ -27,8 +27,6 @@ inspectit:
       enabled: true
       # the frequency of polling the http endpoint to check for configuration changes
       frequency: 30s
-      # the maximum time to run one http polling task - set to 0s to disable timeout
-      task-timeout: 64m
       # the following attributes will be sent as http query parameters when fetching the configuration
       attributes:
         service: ${inspectit.service-name}
