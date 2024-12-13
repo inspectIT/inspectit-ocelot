@@ -34,10 +34,30 @@ public class AgentCommandSettings {
     private String agentCommandPath;
 
     /**
-     * The timeout duration used for requests  when the agent is in discovery mode. Defining how long the agent will wait for
+     * The timeout duration used to establish the connection with the remote host in discovery mode.
+     */
+    private Duration liveConnectionTimeout;
+
+    /**
+     * The timeout duration the client will wait to acquire a connection from the connection pool in discovery mode.
+     */
+    private Duration liveConnectionRequestTimeout;
+
+    /**
+     * The timeout duration used for requests when the agent is in discovery mode. Defining how long the agent will wait for
      * new commands.
      */
     private Duration liveSocketTimeout;
+
+    /**
+     * The timeout duration used to establish the connection with the remote host in normal mode.
+     */
+    private Duration connectionTimeout;
+
+    /**
+     * The timeout duration the client will wait to acquire a connection from the connection pool in normal mode.
+     */
+    private Duration connectionRequestTimeout;
 
     /**
      * The timeout duration used for requests when the agent is in normal mode.
@@ -72,9 +92,18 @@ public class AgentCommandSettings {
 
     @AssertFalse(message = "The specified time values should not be negative!")
     public boolean isNegativeTimeout() {
-        boolean negativeLiveReadTimeout = liveSocketTimeout != null && liveSocketTimeout.isNegative();
-        boolean negativeReadTimeout = socketTimeout != null && socketTimeout.isNegative();
+        boolean negativeTimeout = taskTimeout != null && taskTimeout.isNegative();
+        boolean negativeLiveConnectionTimeout = liveConnectionTimeout != null && liveConnectionTimeout.isNegative();
+        boolean negativeConnectionTimeout = connectionTimeout != null && connectionTimeout.isNegative();
+        boolean negativeLiveConnectionRequestTimeout = liveConnectionRequestTimeout != null && liveConnectionRequestTimeout.isNegative();
+        boolean negativeConnectionRequestTimeout = connectionRequestTimeout != null && connectionRequestTimeout.isNegative();
+        boolean negativeLiveSocketTimeout = liveSocketTimeout != null && liveSocketTimeout.isNegative();
+        boolean negativeSocketTimeout = socketTimeout != null && socketTimeout.isNegative();
         boolean negativeTTL = timeToLive != null && timeToLive.isNegative();
-        return negativeLiveReadTimeout || negativeReadTimeout || negativeTTL;
+        return negativeTimeout ||
+                negativeLiveConnectionTimeout || negativeConnectionTimeout ||
+                negativeLiveConnectionRequestTimeout || negativeConnectionRequestTimeout ||
+                negativeLiveSocketTimeout || negativeSocketTimeout
+                || negativeTTL;
     }
 }

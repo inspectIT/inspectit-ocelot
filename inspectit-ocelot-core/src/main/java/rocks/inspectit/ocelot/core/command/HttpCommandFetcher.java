@@ -77,22 +77,58 @@ public class HttpCommandFetcher {
      */
     private void updateHttpClients() {
         AgentCommandSettings settings = environment.getCurrentConfig().getAgentCommands();
-        int timeout = (int) settings.getSocketTimeout().toMillis();
-        int liveTimeout = (int) settings.getLiveSocketTimeout().toMillis();
-        int timeToLive = (int) settings.getTimeToLive().toMillis();
+        updateNormaleHttpClient(settings);
+        updateLiveHttpClient(settings);
+    }
 
-        RequestConfig normalConfig = RequestConfig.custom().setSocketTimeout(timeout).build();
+    private void updateNormaleHttpClient(AgentCommandSettings settings) {
+        RequestConfig.Builder configBuilder = RequestConfig.custom();
+        if (settings.getConnectionTimeout() != null) {
+            int connectionTimeout = (int) settings.getConnectionTimeout().toMillis();
+            configBuilder = configBuilder.setConnectTimeout(connectionTimeout);
+        }
+        if (settings.getConnectionRequestTimeout() != null) {
+            int connectionRequestTimeout = (int) settings.getConnectionRequestTimeout().toMillis();
+            configBuilder = configBuilder.setConnectionRequestTimeout(connectionRequestTimeout);
+        }
+        if (settings.getSocketTimeout() != null) {
+            int socketTimeout = (int) settings.getSocketTimeout().toMillis();
+            configBuilder = configBuilder.setSocketTimeout(socketTimeout);
+        }
 
-        RequestConfig liveConfig = RequestConfig.custom().setSocketTimeout(liveTimeout).build();
+        HttpClientBuilder clientBuilder = HttpClientBuilder.create()
+                .setDefaultRequestConfig(configBuilder.build());
+        if (settings.getTimeToLive() != null) {
+            int timeToLive = (int) settings.getTimeToLive().toMillis();
+            clientBuilder.setConnectionTimeToLive(timeToLive, TimeUnit.MILLISECONDS);
+        }
 
-        normalHttpClient = HttpClientBuilder.create()
-                .setDefaultRequestConfig(normalConfig)
-                .setConnectionTimeToLive(timeToLive, TimeUnit.MILLISECONDS)
-                .build();
-        liveHttpClient = HttpClientBuilder.create()
-                .setDefaultRequestConfig(liveConfig)
-                .setConnectionTimeToLive(timeToLive, TimeUnit.MILLISECONDS)
-                .build();
+        normalHttpClient = clientBuilder.build();
+    }
+
+    private void updateLiveHttpClient(AgentCommandSettings settings) {
+        RequestConfig.Builder configBuilder = RequestConfig.custom();
+        if (settings.getConnectionTimeout() != null) {
+            int connectionTimeout = (int) settings.getLiveConnectionTimeout().toMillis();
+            configBuilder = configBuilder.setConnectTimeout(connectionTimeout);
+        }
+        if (settings.getConnectionRequestTimeout() != null) {
+            int connectionRequestTimeout = (int) settings.getLiveConnectionRequestTimeout().toMillis();
+            configBuilder = configBuilder.setConnectionRequestTimeout(connectionRequestTimeout);
+        }
+        if (settings.getSocketTimeout() != null) {
+            int socketTimeout = (int) settings.getSocketTimeout().toMillis();
+            configBuilder = configBuilder.setSocketTimeout(socketTimeout);
+        }
+
+        HttpClientBuilder clientBuilder = HttpClientBuilder.create()
+                .setDefaultRequestConfig(configBuilder.build());
+        if (settings.getTimeToLive() != null) {
+            int timeToLive = (int) settings.getTimeToLive().toMillis();
+            clientBuilder.setConnectionTimeToLive(timeToLive, TimeUnit.MILLISECONDS);
+        }
+
+        liveHttpClient = clientBuilder.build();
     }
 
     /**

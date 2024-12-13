@@ -81,10 +81,13 @@ public class HttpConfigSettings {
 
     @AssertFalse(message = "The specified time values should not be negative!")
     public boolean isNegativeTimeout() {
+        boolean negativeTimeout = taskTimeout != null && taskTimeout.isNegative();
         boolean negativeConnectionTimeout = connectionTimeout != null && connectionTimeout.isNegative();
         boolean negativeConnectionRequestTimeout = connectionRequestTimeout != null && connectionRequestTimeout.isNegative();
         boolean negativeReadTimeout = socketTimeout != null && socketTimeout.isNegative();
         boolean negativeTTL = timeToLive != null && timeToLive.isNegative();
-        return negativeConnectionTimeout || negativeConnectionRequestTimeout || negativeReadTimeout || negativeTTL;
+        return negativeTimeout ||
+                negativeConnectionTimeout || negativeConnectionRequestTimeout || negativeReadTimeout ||
+                negativeTTL;
     }
 }
