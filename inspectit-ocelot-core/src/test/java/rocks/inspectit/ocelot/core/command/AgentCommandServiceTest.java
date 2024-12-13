@@ -150,9 +150,8 @@ public class AgentCommandServiceTest {
     public class TaskTimeout {
 
         @AfterEach
-        void disableTimeout() {
-            // Stop restarting the task after timeout
-            service.doDisable();
+        void cancelTimeout() {
+            service.cancelTimeout();
         }
 
         @Test

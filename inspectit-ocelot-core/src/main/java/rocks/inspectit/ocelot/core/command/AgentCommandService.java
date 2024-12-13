@@ -97,9 +97,7 @@ public class AgentCommandService extends DynamicallyActivatableService implement
     @Override
     protected boolean doDisable() {
         log.info("Stopping agent command polling service.");
-        if (timeoutExecutor != null) {
-            timeoutExecutor.cancelTimeout();
-        }
+        cancelTimeout();
         if (handlerFuture != null) {
             handlerFuture.cancel(true);
         }
@@ -112,7 +110,7 @@ public class AgentCommandService extends DynamicallyActivatableService implement
         try {
             commandHandler.nextCommand();
             // After the command was fetched, the task should no longer timeout
-            timeoutExecutor.cancelTimeout();
+            cancelTimeout();
         } catch (Exception exception) {
             log.error("Error while fetching agent command.", exception);
         }
@@ -149,6 +147,13 @@ public class AgentCommandService extends DynamicallyActivatableService implement
             return URI.create(urlBase + settings.getAgentCommandPath());
         } else {
             return settings.getUrl().toURI();
+        }
+    }
+
+    @VisibleForTesting
+    void cancelTimeout() {
+        if (timeoutExecutor != null) {
+            timeoutExecutor.cancelTimeout();
         }
     }
 }

@@ -125,9 +125,8 @@ class HttpConfigurationPollerTest {
     public class TaskTimeout {
 
         @AfterEach
-        void disableTimeout() {
-            // Stop restarting the task after timeout
-            poller.doDisable();
+        void cancelTimeout() {
+            poller.cancelTimeout();
         }
 
         @Test

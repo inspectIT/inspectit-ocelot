@@ -49,7 +49,7 @@ public class TaskTimeoutExecutor {
     }
 
     /**
-     * Cancel the timeout executor
+     * Cancel the timeout executor, if started
      */
     public void cancelTimeout() {
         if(timeoutExecutor != null) timeoutExecutor.cancel(true);

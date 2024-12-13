@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,9 +80,7 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
     @Override
     protected boolean doDisable() {
         log.info("Stopping HTTP configuration polling service.");
-        if (timeoutExecutor != null) {
-            timeoutExecutor.cancelTimeout();
-        }
+        cancelTimeout();
         if (pollerFuture != null) {
             pollerFuture.cancel(true);
         }
@@ -98,7 +97,7 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
         // Fetch configuration
         boolean wasUpdated = currentState.update(false);
         // After the configuration was fetched, the task should no longer timeout
-        timeoutExecutor.cancelTimeout();
+        cancelTimeout();
         if (wasUpdated) {
             env.updatePropertySources(propertySources -> {
                 if (propertySources.contains(InspectitEnvironment.HTTP_BASED_CONFIGURATION)) {
@@ -128,5 +127,12 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
     public AgentHealthState getCurrentAgentHealthState() {
         if(currentState == null) return null;
         return currentState.getAgentHealth();
+    }
+
+    @VisibleForTesting
+    void cancelTimeout() {
+        if (timeoutExecutor != null) {
+            timeoutExecutor.cancelTimeout();
+        }
     }
 }
