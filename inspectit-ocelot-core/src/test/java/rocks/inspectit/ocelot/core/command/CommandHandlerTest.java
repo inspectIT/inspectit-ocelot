@@ -69,7 +69,7 @@ public class CommandHandlerTest {
     public class NextCommand {
 
         @Test
-        public void noCommand() throws IOException {
+        public void noCommand() throws Exception {
             when(httpResponse.getStatusLine().getStatusCode()).thenReturn(HttpStatus.SC_NO_CONTENT);
             when(commandFetcher.fetchCommand(any(), anyBoolean())).thenReturn(httpResponse);
 
@@ -79,7 +79,7 @@ public class CommandHandlerTest {
         }
 
         @Test
-        public void pingCommandSend() throws IOException {
+        public void pingCommandSend() throws Exception {
             environment.getCurrentConfig().getAgentCommands().setLiveModeDuration(Duration.ZERO);
             PingCommand command = new PingCommand();
             PingCommand.Response pingResponse = new PingCommand.Response();
@@ -117,14 +117,14 @@ public class CommandHandlerTest {
         }
 
         @Test
-        void succeedsIfFirstCommandHandlerCallSucceeds() throws IOException {
+        void succeedsIfFirstCommandHandlerCallSucceeds() throws Exception {
             handler.nextCommand();
 
             verify(commandFetcher).fetchCommand(any(), anyBoolean());
         }
 
         @Test
-        void retriesOnCommandFetcherException() throws IOException {
+        void retriesOnCommandFetcherException() throws Exception {
             when(commandFetcher.fetchCommand(any(), anyBoolean()))
                     .thenThrow(IOException.class)
                     .thenReturn(successfulResponse);
@@ -135,7 +135,7 @@ public class CommandHandlerTest {
         }
 
         @Test
-        void retriesOnUnsuccessfulHttpResponse() throws IOException {
+        void retriesOnUnsuccessfulHttpResponse() throws Exception {
             when(commandFetcher.fetchCommand(any(), anyBoolean()))
                     .thenReturn(unsuccessfulResponse)
                     .thenReturn(successfulResponse);

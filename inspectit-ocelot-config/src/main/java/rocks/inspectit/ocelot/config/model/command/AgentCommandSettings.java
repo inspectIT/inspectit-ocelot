@@ -75,11 +75,6 @@ public class AgentCommandSettings {
     private Duration pollingInterval;
 
     /**
-     * The task timeout to use - the time to run one agent command task.
-     */
-    private Duration taskTimeout;
-
-    /**
      * How long the agent will stay in the live mode, before falling back to the normal mode.
      */
     private Duration liveModeDuration;
@@ -92,7 +87,6 @@ public class AgentCommandSettings {
 
     @AssertFalse(message = "The specified time values should not be negative!")
     public boolean isNegativeTimeout() {
-        boolean negativeTimeout = taskTimeout != null && taskTimeout.isNegative();
         boolean negativeLiveConnectionTimeout = liveConnectionTimeout != null && liveConnectionTimeout.isNegative();
         boolean negativeConnectionTimeout = connectionTimeout != null && connectionTimeout.isNegative();
         boolean negativeLiveConnectionRequestTimeout = liveConnectionRequestTimeout != null && liveConnectionRequestTimeout.isNegative();
@@ -100,8 +94,7 @@ public class AgentCommandSettings {
         boolean negativeLiveSocketTimeout = liveSocketTimeout != null && liveSocketTimeout.isNegative();
         boolean negativeSocketTimeout = socketTimeout != null && socketTimeout.isNegative();
         boolean negativeTTL = timeToLive != null && timeToLive.isNegative();
-        return negativeTimeout ||
-                negativeLiveConnectionTimeout || negativeConnectionTimeout ||
+        return negativeLiveConnectionTimeout || negativeConnectionTimeout ||
                 negativeLiveConnectionRequestTimeout || negativeConnectionRequestTimeout ||
                 negativeLiveSocketTimeout || negativeSocketTimeout
                 || negativeTTL;

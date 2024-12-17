@@ -3,11 +3,11 @@ package rocks.inspectit.ocelot.core.utils;
 import io.github.resilience4j.core.IntervalFunction;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
+import io.github.resilience4j.timelimiter.TimeLimiter;
+import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.config.model.config.RetrySettings;
-
-import java.time.temporal.ChronoUnit;
 
 public final class RetryUtils {
 
@@ -28,8 +28,21 @@ public final class RetryUtils {
                                     retrySettings.getRandomizationFactor().doubleValue()))
                     .build();
             Retry retry = Retry.of(retryName, retryConfig);
-            retry.getEventPublisher().onRetry( event -> LOGGER.info("Retrying for {} in {}.", retryName, event.getWaitInterval()));
+            retry.getEventPublisher().onRetry(event -> LOGGER.info("Retrying for {} in {}.", retryName, event.getWaitInterval()));
             return retry;
+        }
+        return null;
+    }
+
+    public static TimeLimiter buildTimeLimiter(RetrySettings retrySettings, String timeLimiterName) {
+        if(retrySettings != null && retrySettings.isEnabled()) {
+            TimeLimiterConfig timeLimiterConfig = TimeLimiterConfig.custom()
+                    .cancelRunningFuture(true)
+                    .timeoutDuration(retrySettings.getTimeLimit())
+                    .build();
+            TimeLimiter timeLimiter = TimeLimiter.of(timeLimiterName, timeLimiterConfig);
+            timeLimiter.getEventPublisher().onTimeout(event -> LOGGER.info("Time limit for {} was exceeded.", timeLimiterName));
+            return timeLimiter;
         }
         return null;
     }

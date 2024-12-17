@@ -49,11 +49,6 @@ public class HttpConfigSettings {
     private Duration frequency;
 
     /**
-     * The task timeout to use - the time to run one HTTP polling task.
-     */
-    private Duration taskTimeout;
-
-    /**
      * The connection timeout to use - the time to establish the connection with the remote host.
      */
     private Duration connectionTimeout;
@@ -81,13 +76,11 @@ public class HttpConfigSettings {
 
     @AssertFalse(message = "The specified time values should not be negative!")
     public boolean isNegativeTimeout() {
-        boolean negativeTimeout = taskTimeout != null && taskTimeout.isNegative();
         boolean negativeConnectionTimeout = connectionTimeout != null && connectionTimeout.isNegative();
         boolean negativeConnectionRequestTimeout = connectionRequestTimeout != null && connectionRequestTimeout.isNegative();
         boolean negativeReadTimeout = socketTimeout != null && socketTimeout.isNegative();
         boolean negativeTTL = timeToLive != null && timeToLive.isNegative();
-        return negativeTimeout ||
-                negativeConnectionTimeout || negativeConnectionRequestTimeout || negativeReadTimeout ||
+        return negativeConnectionTimeout || negativeConnectionRequestTimeout || negativeReadTimeout ||
                 negativeTTL;
     }
 }

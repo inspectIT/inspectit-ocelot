@@ -151,6 +151,8 @@ inspectit:
       multiplier: 2
       # This factor introduces randomness to what the actual wait interval will be. This prevents that a lot of agents will issue requests towards the configuration server at the same time.
       randomization-factor: 0.1
+      # The maximum duration one retry may take
+      time-limit: 32m
 
   log-preloading:
     enabled: false

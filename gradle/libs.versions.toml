@@ -21,6 +21,8 @@ orgSpringframework = "5.3.39"
 # @pin 2.7.18 is the latest release which runs on Java 8, this version marks the en of open source support for Sb 2.x
 orgSpringframeworkBoot = "2.7.18"
 orgTestcontainers = "1.20.3"
+# @pin resilience4j 2.* uses Java 17 APIs
+ioGithubResilience4j = "1.7.1"
 
 [libraries]
 # @pin 1.3.* are the latest versions, which support java 8
@@ -42,8 +44,8 @@ commonsBeanutils = "commons-beanutils:commons-beanutils:1.9.4"
 commonsIo = "commons-io:commons-io:2.17.0"
 ioGithubNetmikeyLogunitLogunitCore = { module = "io.github.netmikey.logunit:logunit-core", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubNetmikeyLogunitLogunitLogback = { module = "io.github.netmikey.logunit:logunit-logback", version.ref = "ioGithubNetmikeyLogunit" }
-# @pin resilience4j 2.* uses Java 17 APIs
-ioGithubResilience4jResilience4jRetry = "io.github.resilience4j:resilience4j-retry:1.7.1"
+ioGithubResilience4jResilience4jRetry = { module = "io.github.resilience4j:resilience4j-retry", version.ref = "ioGithubResilience4j" }
+ioGithubResilience4jResilience4jTimelimiter = { module = "io.github.resilience4j:resilience4j-timelimiter", version.ref = "ioGithubResilience4j" }
 ioGrpcGrpcNettyShaded = { module = "io.grpc:grpc-netty-shaded", version.ref = "ioGrpc" }
 ioGrpcGrpcStub = { module = "io.grpc:grpc-stub", version.ref = "ioGrpc" }
 # The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version

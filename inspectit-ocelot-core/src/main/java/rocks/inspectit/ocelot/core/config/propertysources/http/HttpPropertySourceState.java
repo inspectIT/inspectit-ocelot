@@ -4,6 +4,7 @@ import io.github.resilience4j.retry.Retry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import io.github.resilience4j.timelimiter.TimeLimiter;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.*;
 
 /**
  * Representing and managing the state of a HTTP-based agent configuration.
@@ -199,7 +201,18 @@ public class HttpPropertySourceState {
                 retry = buildRetry();
             }
             if (retry != null) {
-                configuration = retry.executeCallable(() -> fetchConfiguration(httpClient, httpGet));
+                Callable<String> fetchConfiguration;
+
+                TimeLimiter timeLimiter = buildTimeLimiter();
+                if(timeLimiter != null) {
+                    ExecutorService timeLimitExecutor = Executors.newSingleThreadExecutor();
+                    // Use time limiter for every function call
+                    fetchConfiguration = timeLimiter.decorateFutureSupplier(() -> timeLimitExecutor.submit(fetchConfigurationCall(httpClient, httpGet)));
+                }
+                else fetchConfiguration = fetchConfigurationCall(httpClient, httpGet);
+
+                // Execute function with retries
+                configuration = retry.executeCallable(fetchConfiguration);
             } else {
                 configuration = fetchConfiguration(httpClient, httpGet);
             }
@@ -208,9 +221,6 @@ public class HttpPropertySourceState {
             logFetchError("HTTP protocol error occurred while fetching configuration.", e);
         } catch (IOException e) {
             logFetchError("A IO problem occurred while fetching configuration.", e);
-        } catch (InterruptedException e) {
-            logFetchError("Thread was interrupted while fetching configuration.", e);
-            Thread.currentThread().interrupt();
         } catch (Exception e) {
             logFetchError("Exception occurred while fetching configuration.", e);
         }
@@ -230,6 +240,10 @@ public class HttpPropertySourceState {
         return RetryUtils.buildRetry(currentSettings.getRetry(), "http-property-source");
     }
 
+    private TimeLimiter buildTimeLimiter() {
+        return RetryUtils.buildTimeLimiter(currentSettings.getRetry(), "http-property-source");
+    }
+
     private HttpGet buildRequest() throws URISyntaxException {
         URI uri = getEffectiveRequestUri();
         log.debug("Updating configuration via HTTP from URL: {}", uri.toString());
@@ -241,21 +255,39 @@ public class HttpPropertySourceState {
         if (latestETag != null) {
             httpGet.setHeader("If-None-Match", latestETag);
         }
-
         setAgentMetaHeaders(httpGet);
 
         return httpGet;
     }
 
+    /**
+     * Wrapper for the method {@link #fetchConfiguration(HttpClient, HttpGet)}.
+     */
+    private Callable<String> fetchConfigurationCall(CloseableHttpClient httpClient, HttpGet httpGet) {
+       return () -> {
+           try {
+               return fetchConfiguration(httpClient, httpGet);
+           } catch (IOException e) {
+               throw new CouldNotFetchConfigurationException(e);
+           }
+       };
+    }
+
+    /**
+     * Execute HTTP request and read configuration
+     *
+     * @param client the client to execute the request
+     * @param request the request
+     * @return the fetched configuration string
+     */
     private String fetchConfiguration(HttpClient client, HttpGet request) throws IOException {
         HttpResponse response = client.execute(request);
-        // get the config from the response
+        // Get the config from the response
         String configuration = processHttpResponse(response);
         if (errorCounter != 0) {
             log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
             errorCounter = 0;
         }
-
         return configuration;
     }
 
@@ -405,4 +437,12 @@ public class HttpPropertySourceState {
         return null;
     }
 
+    /**
+     * Exception for {@link #fetchConfigurationCall(CloseableHttpClient, HttpGet)}
+     */
+    private static class CouldNotFetchConfigurationException extends RuntimeException {
+        CouldNotFetchConfigurationException(Exception e) {
+            super("Could not fetch HTTP configuration", e);
+        }
+    }
 }

@@ -42,4 +42,10 @@ public class RetrySettings {
     @NotNull
     // We use a BigDecimal as there is no support for double in hibernate validator
     private BigDecimal randomizationFactor;
+
+    /**
+     * The maximum amount of time one retry is allowed to take. May not be lower than 1
+     */
+    @DurationMin(millis = 0, inclusive = false)
+    private Duration timeLimit;
 }
