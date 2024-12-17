@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -15,6 +16,7 @@ import java.util.concurrent.TimeUnit;
  * Since the HTTP client is a rather expensive object, we create one instance and recreate it only
  * if the settings have changed.
  */
+@Slf4j
 public class HttpClientHolder {
 
     private CloseableHttpClient httpClient;
@@ -35,6 +37,7 @@ public class HttpClientHolder {
      */
     public CloseableHttpClient getHttpClient(HttpConfigSettings httpSettings) throws IOException {
         if(isUpdated(httpSettings) || httpClient == null) {
+            log.debug("Creating new HTTP client for HTTP configuration with settings {}", httpSettings);
             RequestConfig config = getRequestConfig(httpSettings);
             HttpClientBuilder builder = HttpClientBuilder.create().setDefaultRequestConfig(config);
 

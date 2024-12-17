@@ -6,16 +6,15 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.config.model.command.AgentCommandSettings;
+import rocks.inspectit.ocelot.core.command.http.CommandHttpClientHolder;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import java.io.IOException;
@@ -24,7 +23,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -44,92 +42,15 @@ public class HttpCommandFetcher {
     private static final String META_HEADER_PREFIX = "X-OCELOT-";
 
     /**
-     * Http client used in the normal mode.
+     * The holder of the HTTP clients for agent commands.
      */
-    private HttpClient normalHttpClient;
-
-    /**
-     * Http client used in the live mode (longer timeouts).
-     */
-    private HttpClient liveHttpClient;
+    private final CommandHttpClientHolder clientHolder = new CommandHttpClientHolder();
 
     /**
      * The URI for fetching commands.
      */
     @Setter
     private URI commandUri;
-
-    /**
-     * Returns the {@link HttpClient} which is used for fetching commands.
-     *
-     * @return A new {@link HttpClient} instance.
-     */
-    private HttpClient getHttpClient(boolean liveClient) {
-        if (normalHttpClient == null || liveHttpClient == null) {
-            updateHttpClients();
-        }
-
-        return liveClient ? liveHttpClient : normalHttpClient;
-    }
-
-    /**
-     * Updating the http clients.
-     */
-    private void updateHttpClients() {
-        AgentCommandSettings settings = environment.getCurrentConfig().getAgentCommands();
-        updateNormaleHttpClient(settings);
-        updateLiveHttpClient(settings);
-    }
-
-    private void updateNormaleHttpClient(AgentCommandSettings settings) {
-        RequestConfig.Builder configBuilder = RequestConfig.custom();
-        if (settings.getConnectionTimeout() != null) {
-            int connectionTimeout = (int) settings.getConnectionTimeout().toMillis();
-            configBuilder = configBuilder.setConnectTimeout(connectionTimeout);
-        }
-        if (settings.getConnectionRequestTimeout() != null) {
-            int connectionRequestTimeout = (int) settings.getConnectionRequestTimeout().toMillis();
-            configBuilder = configBuilder.setConnectionRequestTimeout(connectionRequestTimeout);
-        }
-        if (settings.getSocketTimeout() != null) {
-            int socketTimeout = (int) settings.getSocketTimeout().toMillis();
-            configBuilder = configBuilder.setSocketTimeout(socketTimeout);
-        }
-
-        HttpClientBuilder clientBuilder = HttpClientBuilder.create()
-                .setDefaultRequestConfig(configBuilder.build());
-        if (settings.getTimeToLive() != null) {
-            int timeToLive = (int) settings.getTimeToLive().toMillis();
-            clientBuilder.setConnectionTimeToLive(timeToLive, TimeUnit.MILLISECONDS);
-        }
-
-        normalHttpClient = clientBuilder.build();
-    }
-
-    private void updateLiveHttpClient(AgentCommandSettings settings) {
-        RequestConfig.Builder configBuilder = RequestConfig.custom();
-        if (settings.getConnectionTimeout() != null) {
-            int connectionTimeout = (int) settings.getLiveConnectionTimeout().toMillis();
-            configBuilder = configBuilder.setConnectTimeout(connectionTimeout);
-        }
-        if (settings.getConnectionRequestTimeout() != null) {
-            int connectionRequestTimeout = (int) settings.getLiveConnectionRequestTimeout().toMillis();
-            configBuilder = configBuilder.setConnectionRequestTimeout(connectionRequestTimeout);
-        }
-        if (settings.getSocketTimeout() != null) {
-            int socketTimeout = (int) settings.getSocketTimeout().toMillis();
-            configBuilder = configBuilder.setSocketTimeout(socketTimeout);
-        }
-
-        HttpClientBuilder clientBuilder = HttpClientBuilder.create()
-                .setDefaultRequestConfig(configBuilder.build());
-        if (settings.getTimeToLive() != null) {
-            int timeToLive = (int) settings.getTimeToLive().toMillis();
-            clientBuilder.setConnectionTimeToLive(timeToLive, TimeUnit.MILLISECONDS);
-        }
-
-        liveHttpClient = clientBuilder.build();
-    }
 
     /**
      * Fetches a {@link Command} by sending the given {@link CommandResponse} as payload and uses the given timeout-int as timeout.
@@ -191,5 +112,18 @@ public class HttpCommandFetcher {
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 
         httpPost.setHeader(META_HEADER_PREFIX + "AGENT-ID", runtime.getName());
+    }
+
+    /**
+     * Returns the {@link HttpClient} which is used for fetching commands.
+     *
+     * @param liveClient true, if live-mode is active
+     * @return A {@link HttpClient} instance.
+     */
+    private HttpClient getHttpClient(boolean liveClient) throws IOException {
+        AgentCommandSettings currentSettings = environment.getCurrentConfig().getAgentCommands();
+
+        if(liveClient) return clientHolder.getLiveHttpClient(currentSettings);
+        else return clientHolder.getDiscoveryHttpClient(currentSettings);
     }
 }

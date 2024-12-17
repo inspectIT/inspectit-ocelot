@@ -65,7 +65,7 @@ public class HttpPropertySourceState {
     private final String name;
 
     /**
-     * The holder of the HTTP client.
+     * The holder of the HTTP client for fetching configurations.
      */
     private final HttpClientHolder clientHolder;
 

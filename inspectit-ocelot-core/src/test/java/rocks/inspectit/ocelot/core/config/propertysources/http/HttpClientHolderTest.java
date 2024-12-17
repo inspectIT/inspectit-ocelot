@@ -64,4 +64,18 @@ public class HttpClientHolderTest {
 
         assertThat(updatedClient).isNotSameAs(client);
     }
+
+    @Test
+    void shouldCreateNewHttpClientWhenTTLChanges() throws IOException {
+        HttpClientHolder holder = new HttpClientHolder();
+        HttpConfigSettings settings = new HttpConfigSettings();
+
+        settings.setTimeToLive(Duration.ofSeconds(30));
+        CloseableHttpClient client = holder.getHttpClient(settings);
+
+        settings.setTimeToLive(Duration.ofSeconds(10));
+        CloseableHttpClient updatedClient = holder.getHttpClient(settings);
+
+        assertThat(updatedClient).isNotSameAs(client);
+    }
 }
