@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -113,6 +115,7 @@ public class CommandHandlerTest {
             retrySettings.setInitialInterval(Duration.ofMillis(5));
             retrySettings.setMultiplier(BigDecimal.ONE);
             retrySettings.setRandomizationFactor(BigDecimal.valueOf(0.1));
+            retrySettings.setTimeLimit(Duration.ofSeconds(1));
             environment.getCurrentConfig().getAgentCommands().setRetry(retrySettings);
         }
 
@@ -150,6 +153,18 @@ public class CommandHandlerTest {
             when(commandFetcher.fetchCommand(any(), anyBoolean())).thenReturn(unsuccessfulResponse);
 
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> handler.nextCommand());
+        }
+
+        @Test
+        void failsIfTimeLimitIsExceeded() throws Exception {
+            Answer<HttpResponse> delayedAnswer = invocation -> {
+                Thread.sleep(5000); // 5s delay
+                return unsuccessfulResponse;
+            };
+            when(commandFetcher.fetchCommand(any(), anyBoolean())).thenAnswer(delayedAnswer);
+
+            assertThatExceptionOfType(TimeoutException.class).isThrownBy(() -> handler.nextCommand());
+            verify(commandFetcher, times(2)).fetchCommand(any(), anyBoolean());
         }
     }
 

@@ -273,6 +273,9 @@ class HttpPropertySourceStateTest {
 
         private final ResponseDefinitionBuilder unsuccessfulResponse = aResponse().withStatus(500);
 
+        private final ResponseDefinitionBuilder slowResponse = aResponse().withStatus(500)
+                .withFixedDelay(5000);
+
         @BeforeEach
         public void setup() throws MalformedURLException {
             mockServer.start();
@@ -286,6 +289,7 @@ class HttpPropertySourceStateTest {
             retrySettings.setInitialInterval(Duration.ofMillis(5));
             retrySettings.setMultiplier(BigDecimal.ONE);
             retrySettings.setRandomizationFactor(BigDecimal.valueOf(0.1));
+            retrySettings.setTimeLimit(Duration.ofSeconds(1));
             httpSettings.setRetry(retrySettings);
 
             state = new HttpPropertySourceState("retry-test-state", httpSettings);
@@ -349,6 +353,18 @@ class HttpPropertySourceStateTest {
             state.update(true);
 
             mockServer.verify(1, anyRequestedFor(anyUrl()));
+        }
+
+        @Test
+        void failsIfTimeLimitIsExceeded() {
+            mockServer.stubFor(getHttpConfigurationMapping.willReturn(slowResponse));
+
+            boolean unsuccessfulUpdate = state.update(false);
+            int requests = mockServer.findRequestsMatching(anyRequestedFor(anyUrl()).build())
+                    .getRequests().size();
+
+            assertThat(unsuccessfulUpdate).isFalse();
+            assertThat(requests).isEqualTo(2);
         }
     }
 
