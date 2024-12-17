@@ -18,7 +18,7 @@ public final class RetryUtils {
     }
 
     public static Retry buildRetry(RetrySettings retrySettings, String retryName) {
-        if (retrySettings != null && retrySettings.isEnabled()) {
+        if (useRetry(retrySettings)) {
             RetryConfig retryConfig = RetryConfig.custom()
                     .maxAttempts(retrySettings.getMaxAttempts())
                     .intervalFunction(IntervalFunction
@@ -35,7 +35,7 @@ public final class RetryUtils {
     }
 
     public static TimeLimiter buildTimeLimiter(RetrySettings retrySettings, String timeLimiterName) {
-        if(retrySettings != null && retrySettings.isEnabled()) {
+        if(useTimeLimiter(retrySettings)) {
             TimeLimiterConfig timeLimiterConfig = TimeLimiterConfig.custom()
                     .cancelRunningFuture(true)
                     .timeoutDuration(retrySettings.getTimeLimit())
@@ -45,5 +45,13 @@ public final class RetryUtils {
             return timeLimiter;
         }
         return null;
+    }
+
+    private static boolean useRetry(RetrySettings retrySettings) {
+        return retrySettings != null && retrySettings.isEnabled();
+    }
+
+    private static boolean useTimeLimiter(RetrySettings retrySettings) {
+        return useRetry(retrySettings) && retrySettings.getTimeLimit() != null;
     }
 }
