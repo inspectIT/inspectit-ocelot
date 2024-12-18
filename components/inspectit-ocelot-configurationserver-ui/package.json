@@ -35,7 +35,7 @@
     "jszip": "^3.10.0",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
-    "next": "^14.2.10",
+    "next": "^14.2.15",
     "primeflex": "^3.2.1",
     "primeicons": "^5.0.0",
     "primereact": "^8.5.0",
