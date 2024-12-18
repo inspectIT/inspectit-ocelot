@@ -20,7 +20,7 @@ import java.util.Map;
 public class HttpConfigSettings {
 
     /**
-     * Whether a HTTP property source should be used.
+     * Whether an HTTP property source should be used.
      */
     private boolean enabled;
 
@@ -54,9 +54,19 @@ public class HttpConfigSettings {
     private Duration connectionTimeout;
 
     /**
+     * The connection-request timeout to use - the time the client will wait to acquire a connection from the connection pool
+     */
+    private Duration connectionRequestTimeout;
+
+    /**
      * The socket timeout to use - the time waiting for data after establishing the connection; maximum time of inactivity between two data packets.
      */
     private Duration socketTimeout;
+
+    /**
+     * The TTL - the time to keep an HTTP connection alive
+     */
+    private Duration timeToLive;
 
     /**
      * Settings how retries are handled regarding fetching an HTTP property source.
@@ -64,10 +74,13 @@ public class HttpConfigSettings {
     @Valid
     private RetrySettings retry;
 
-    @AssertFalse(message = "The specified timeout values should not be negative!")
+    @AssertFalse(message = "The specified time values should not be negative!")
     public boolean isNegativeTimeout() {
         boolean negativeConnectionTimeout = connectionTimeout != null && connectionTimeout.isNegative();
+        boolean negativeConnectionRequestTimeout = connectionRequestTimeout != null && connectionRequestTimeout.isNegative();
         boolean negativeReadTimeout = socketTimeout != null && socketTimeout.isNegative();
-        return negativeConnectionTimeout || negativeReadTimeout;
+        boolean negativeTTL = timeToLive != null && timeToLive.isNegative();
+        return negativeConnectionTimeout || negativeConnectionRequestTimeout || negativeReadTimeout ||
+                negativeTTL;
     }
 }

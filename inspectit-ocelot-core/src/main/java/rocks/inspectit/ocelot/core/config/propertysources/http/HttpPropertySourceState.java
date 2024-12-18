@@ -4,6 +4,7 @@ import io.github.resilience4j.retry.Retry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import io.github.resilience4j.timelimiter.TimeLimiter;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -13,11 +14,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
@@ -41,6 +40,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.*;
 
 /**
  * Representing and managing the state of a HTTP-based agent configuration.
@@ -63,6 +63,11 @@ public class HttpPropertySourceState {
      */
     @Getter
     private final String name;
+
+    /**
+     * The holder of the HTTP client for fetching configurations.
+     */
+    private final HttpClientHolder clientHolder;
 
     /**
      * The currently used settings.
@@ -108,6 +113,11 @@ public class HttpPropertySourceState {
     private AgentHealthState agentHealth = AgentHealthState.defaultState();
 
     /**
+     * Executor to cancel one configuration fetch after a time limit was exceeded.
+     */
+    private final ExecutorService timeLimitExecutor;
+
+    /**
      * Constructor.
      *
      * @param name            the name used for the property source
@@ -115,10 +125,12 @@ public class HttpPropertySourceState {
      */
     public HttpPropertySourceState(String name, HttpConfigSettings currentSettings) {
         this.name = name;
+        this.clientHolder = new HttpClientHolder();
         this.currentSettings = currentSettings;
-        errorCounter = 0;
+        this.errorCounter = 0;
         //ensure that currentPropertySource is never null, even if the initial fetching fails
-        currentPropertySource = new PropertiesPropertySource(name, new Properties());
+        this.currentPropertySource = new PropertiesPropertySource(name, new Properties());
+        this.timeLimitExecutor = Executors.newCachedThreadPool();
     }
 
     /**
@@ -169,28 +181,6 @@ public class HttpPropertySourceState {
 
     }
 
-    /**
-     * Creates the {@link HttpClient} which is used for fetching the configuration.
-     *
-     * @return A new {@link HttpClient} instance.
-     */
-    private CloseableHttpClient createHttpClient() {
-        RequestConfig.Builder configBuilder = RequestConfig.custom();
-
-        if (currentSettings.getConnectionTimeout() != null) {
-            int connectionTimeout = (int) currentSettings.getConnectionTimeout().toMillis();
-            configBuilder = configBuilder.setConnectTimeout(connectionTimeout);
-        }
-        if (currentSettings.getSocketTimeout() != null) {
-            int socketTimeout = (int) currentSettings.getSocketTimeout().toMillis();
-            configBuilder = configBuilder.setSocketTimeout(socketTimeout);
-        }
-
-        RequestConfig config = configBuilder.build();
-
-        return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-    }
-
     private String fetchConfiguration(boolean fallBackToFile) {
         HttpGet httpGet;
         try {
@@ -202,13 +192,12 @@ public class HttpPropertySourceState {
 
         String configuration = null;
         boolean isError = true;
-        // We create the httpClient outside the retry as it is a rather expensive object, but we create it for each call
-        // again, because the configuration may have changed. The "but" is currently pure speculation. Ideally we would
-        // recreate it only if configuration has changed.
-        try (CloseableHttpClient httpClient = createHttpClient()) {
+
+        try {
+            CloseableHttpClient httpClient = clientHolder.getHttpClient(currentSettings);
             Retry retry;
             if (fallBackToFile) {
-                // fallBackToFile == true means the agent started.
+                // fallBackToFile == true means the agent has just started.
                 // If the configuration is not reachable, we want to fail fast and use the possibly existing backup file
                 // as soon as possible.
                 // If there is no backup standard polling mechanism will kick in and the agent will soon try again with
@@ -218,7 +207,19 @@ public class HttpPropertySourceState {
                 retry = buildRetry();
             }
             if (retry != null) {
-                configuration = retry.executeCallable(() -> fetchConfiguration(httpClient, httpGet));
+                log.debug("Using Retries...");
+                Callable<String> fetchConfiguration;
+
+                TimeLimiter timeLimiter = buildTimeLimiter();
+                if(timeLimiter != null) {
+                    log.debug("Using TimeLimiter...");
+                    // Use time limiter for every single function call
+                    fetchConfiguration = timeLimiter.decorateFutureSupplier(() -> timeLimitExecutor.submit(fetchConfigurationCall(httpClient, httpGet)));
+                }
+                else fetchConfiguration = fetchConfigurationCall(httpClient, httpGet);
+
+                // Execute function with retries
+                configuration = retry.executeCallable(fetchConfiguration);
             } else {
                 configuration = fetchConfiguration(httpClient, httpGet);
             }
@@ -246,6 +247,10 @@ public class HttpPropertySourceState {
         return RetryUtils.buildRetry(currentSettings.getRetry(), "http-property-source");
     }
 
+    private TimeLimiter buildTimeLimiter() {
+        return RetryUtils.buildTimeLimiter(currentSettings.getRetry(), "http-property-source");
+    }
+
     private HttpGet buildRequest() throws URISyntaxException {
         URI uri = getEffectiveRequestUri();
         log.debug("Updating configuration via HTTP from URL: {}", uri.toString());
@@ -257,21 +262,40 @@ public class HttpPropertySourceState {
         if (latestETag != null) {
             httpGet.setHeader("If-None-Match", latestETag);
         }
-
         setAgentMetaHeaders(httpGet);
 
         return httpGet;
     }
 
+    /**
+     * Wrapper for the method {@link #fetchConfiguration(HttpClient, HttpGet)}.
+     */
+    private Callable<String> fetchConfigurationCall(CloseableHttpClient httpClient, HttpGet httpGet) {
+       return () -> {
+           try {
+               return fetchConfiguration(httpClient, httpGet);
+           } catch (IOException e) {
+               throw new CouldNotFetchConfigurationException(e);
+           }
+       };
+    }
+
+    /**
+     * Execute HTTP request and read configuration
+     *
+     * @param client the client to execute the request
+     * @param request the request
+     * @return the fetched configuration string
+     */
     private String fetchConfiguration(HttpClient client, HttpGet request) throws IOException {
+        log.debug("Executing HTTP request to fetch configuration...");
         HttpResponse response = client.execute(request);
-        // get the config from the response
+        // Get the config from the response
         String configuration = processHttpResponse(response);
         if (errorCounter != 0) {
             log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
             errorCounter = 0;
         }
-
         return configuration;
     }
 
@@ -421,4 +445,12 @@ public class HttpPropertySourceState {
         return null;
     }
 
+    /**
+     * Exception for {@link #fetchConfigurationCall(CloseableHttpClient, HttpGet)}
+     */
+    private static class CouldNotFetchConfigurationException extends RuntimeException {
+        CouldNotFetchConfigurationException(Exception e) {
+            super("Could not fetch HTTP configuration", e);
+        }
+    }
 }

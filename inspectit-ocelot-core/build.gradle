@@ -87,6 +87,7 @@ dependencies {
             libs.piccolo,
             libs.comFasterxmlJacksonCoreJacksonDatabind,
             libs.ioGithubResilience4jResilience4jRetry,
+            libs.ioGithubResilience4jResilience4jTimelimiter,
 
             libs.orgJavassist,
 

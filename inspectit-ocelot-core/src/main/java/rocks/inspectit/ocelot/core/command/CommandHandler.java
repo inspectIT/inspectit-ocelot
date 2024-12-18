@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.command;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.timelimiter.TimeLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -17,6 +18,9 @@ import rocks.inspectit.ocelot.core.utils.RetryUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Component which handles the fetching of new agent commands and execution of it.
@@ -54,9 +58,14 @@ public class CommandHandler {
     private boolean liveMode = false;
 
     /**
+     * Executor to cancel one command fetch after a time limit was exceeded.
+     */
+    private final ExecutorService timeLimitExecutor = Executors.newCachedThreadPool();
+
+    /**
      * Tries fetching and executing a new agent command from the server.
      */
-    public void nextCommand() {
+    public void nextCommand() throws Exception {
         nextCommand(null);
     }
 
@@ -67,7 +76,7 @@ public class CommandHandler {
      *
      * @param payload a {@link CommandResponse} to send with the next request
      */
-    private void nextCommand(CommandResponse payload) {
+    private void nextCommand(CommandResponse payload) throws Exception {
         CommandResponse commandResponse = payload;
 
         do {
@@ -101,10 +110,23 @@ public class CommandHandler {
         return System.currentTimeMillis() >= liveModeStart + settings.getLiveModeDuration().toMillis();
     }
 
-    private Command getCommandWithRetry(CommandResponse commandResponse) {
+    private Command getCommandWithRetry(CommandResponse commandResponse) throws Exception {
         Retry retry = buildRetry();
         if (retry != null) {
-            return retry.executeSupplier(() -> getCommand(commandResponse));
+            log.debug("Using Retries...");
+            Callable<Command> getCommand;
+
+            TimeLimiter timeLimiter = buildTimeLimiter();
+            if(timeLimiter != null) {
+                log.debug("Using TimeLimiter...");
+                // Use time limiter for every function call
+                getCommand = timeLimiter.decorateFutureSupplier(() -> timeLimitExecutor.submit(() -> getCommand(commandResponse)));
+            }
+            else getCommand = () -> getCommand(commandResponse);
+
+            Command command = retry.executeCallable(getCommand);
+            return command;
+
         } else {
             return getCommand(commandResponse);
         }
@@ -112,6 +134,12 @@ public class CommandHandler {
 
     private Retry buildRetry() {
         return RetryUtils.buildRetry(environment.getCurrentConfig()
+                .getAgentCommands()
+                .getRetry(), "agent-commands");
+    }
+
+    private TimeLimiter buildTimeLimiter() {
+        return RetryUtils.buildTimeLimiter(environment.getCurrentConfig()
                 .getAgentCommands()
                 .getRetry(), "agent-commands");
     }

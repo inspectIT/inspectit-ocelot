@@ -16,7 +16,7 @@ public class FallbackConfigTest extends SpringTestBase {
 
     @Test
     public void testFallbackConfigurationActive() {
-        Assertions.assertThat(env.getCurrentConfig().getThreadPoolSize()).isEqualTo(2);
+        Assertions.assertThat(env.getCurrentConfig().getThreadPoolSize()).isEqualTo(4);
         Assertions.assertThat(env.getCurrentConfig().getMetrics().isEnabled()).isFalse();
     }
 }

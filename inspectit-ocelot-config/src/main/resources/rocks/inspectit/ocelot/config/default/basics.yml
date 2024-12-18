@@ -116,7 +116,7 @@ inspectit:
       include-service-name: true
 
   # defines how many threads inspectIT may start for its internal tasks
-  thread-pool-size: 2
+  thread-pool-size: 4
 
   # settings for the agent commands and communication
   agent-commands:
@@ -136,7 +136,7 @@ inspectit:
     socket-timeout: 5s
     # the used interval for polling commands
     polling-interval: 15s
-    # how long the agent will staying in the live mode, before falling back to the normal mode
+    # how long the agent will stay in the live mode, before falling back to the normal mode
     live-mode-duration: 2m
     retry:
       # true if retries are enabled, false otherwise
@@ -149,6 +149,8 @@ inspectit:
       multiplier: 2
       # This factor introduces randomness to what the actual wait interval will be. This prevents that a lot of agents will issue requests towards the configuration server at the same time.
       randomization-factor: 0.1
+      # The maximum duration one retry may take
+      time-limit: 32m
 
   log-preloading:
     enabled: false
