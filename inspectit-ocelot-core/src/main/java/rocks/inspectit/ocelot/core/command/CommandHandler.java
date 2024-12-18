@@ -58,6 +58,11 @@ public class CommandHandler {
     private boolean liveMode = false;
 
     /**
+     * Executor to cancel one command fetch after a time limit was exceeded.
+     */
+    private final ExecutorService timeLimitExecutor = Executors.newCachedThreadPool();
+
+    /**
      * Tries fetching and executing a new agent command from the server.
      */
     public void nextCommand() throws Exception {
@@ -108,11 +113,12 @@ public class CommandHandler {
     private Command getCommandWithRetry(CommandResponse commandResponse) throws Exception {
         Retry retry = buildRetry();
         if (retry != null) {
+            log.debug("Configuring Retries...");
             Callable<Command> getCommand;
 
             TimeLimiter timeLimiter = buildTimeLimiter();
             if(timeLimiter != null) {
-                ExecutorService timeLimitExecutor = Executors.newSingleThreadExecutor();
+                log.debug("Configuring TimeLimiter...");
                 // Use time limiter for every function call
                 getCommand = timeLimiter.decorateFutureSupplier(() -> timeLimitExecutor.submit(() -> getCommand(commandResponse)));
             }

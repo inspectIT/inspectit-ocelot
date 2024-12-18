@@ -113,6 +113,11 @@ public class HttpPropertySourceState {
     private AgentHealthState agentHealth = AgentHealthState.defaultState();
 
     /**
+     * Executor to cancel one configuration fetch after a time limit was exceeded.
+     */
+    private final ExecutorService timeLimitExecutor;
+
+    /**
      * Constructor.
      *
      * @param name            the name used for the property source
@@ -122,9 +127,10 @@ public class HttpPropertySourceState {
         this.name = name;
         this.clientHolder = new HttpClientHolder();
         this.currentSettings = currentSettings;
-        errorCounter = 0;
+        this.errorCounter = 0;
         //ensure that currentPropertySource is never null, even if the initial fetching fails
-        currentPropertySource = new PropertiesPropertySource(name, new Properties());
+        this.currentPropertySource = new PropertiesPropertySource(name, new Properties());
+        this.timeLimitExecutor = Executors.newCachedThreadPool();
     }
 
     /**
@@ -201,12 +207,13 @@ public class HttpPropertySourceState {
                 retry = buildRetry();
             }
             if (retry != null) {
+                log.debug("Configuring Retries...");
                 Callable<String> fetchConfiguration;
 
                 TimeLimiter timeLimiter = buildTimeLimiter();
                 if(timeLimiter != null) {
-                    ExecutorService timeLimitExecutor = Executors.newSingleThreadExecutor();
-                    // Use time limiter for every function call
+                    log.debug("Configuring TimeLimiter...");
+                    // Use time limiter for every single function call
                     fetchConfiguration = timeLimiter.decorateFutureSupplier(() -> timeLimitExecutor.submit(fetchConfigurationCall(httpClient, httpGet)));
                 }
                 else fetchConfiguration = fetchConfigurationCall(httpClient, httpGet);
@@ -281,6 +288,7 @@ public class HttpPropertySourceState {
      * @return the fetched configuration string
      */
     private String fetchConfiguration(HttpClient client, HttpGet request) throws IOException {
+        log.debug("Executing HTTP request to fetch configuration...");
         HttpResponse response = client.execute(request);
         // Get the config from the response
         String configuration = processHttpResponse(response);
