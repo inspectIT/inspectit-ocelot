@@ -113,12 +113,12 @@ public class CommandHandler {
     private Command getCommandWithRetry(CommandResponse commandResponse) throws Exception {
         Retry retry = buildRetry();
         if (retry != null) {
-            log.debug("Configuring Retries...");
+            log.debug("Using Retries...");
             Callable<Command> getCommand;
 
             TimeLimiter timeLimiter = buildTimeLimiter();
             if(timeLimiter != null) {
-                log.debug("Configuring TimeLimiter...");
+                log.debug("Using TimeLimiter...");
                 // Use time limiter for every function call
                 getCommand = timeLimiter.decorateFutureSupplier(() -> timeLimitExecutor.submit(() -> getCommand(commandResponse)));
             }

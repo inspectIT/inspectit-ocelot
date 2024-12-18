@@ -12,7 +12,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Stores the instances of {@link CloseableHttpClient} and their relevant {@link AgentCommandSettings}.
+ * Stores the instances of {@link CloseableHttpClient}s and their relevant {@link AgentCommandSettings}.
  * Since HTTP clients are rather expensive objects, we create one instance and recreate it only
  * if the settings have changed. To fetch agent commands we use two different HTTP clients.
  */
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class CommandHttpClientHolder {
 
     /**
-     * Http client used in the normal mode.
+     * Http client used in the (normal) discovery mode.
      */
     private CloseableHttpClient discoveryHttpClient;
 

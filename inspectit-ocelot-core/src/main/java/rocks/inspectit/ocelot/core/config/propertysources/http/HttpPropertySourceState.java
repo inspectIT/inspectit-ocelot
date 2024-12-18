@@ -207,12 +207,12 @@ public class HttpPropertySourceState {
                 retry = buildRetry();
             }
             if (retry != null) {
-                log.debug("Configuring Retries...");
+                log.debug("Using Retries...");
                 Callable<String> fetchConfiguration;
 
                 TimeLimiter timeLimiter = buildTimeLimiter();
                 if(timeLimiter != null) {
-                    log.debug("Configuring TimeLimiter...");
+                    log.debug("Using TimeLimiter...");
                     // Use time limiter for every single function call
                     fetchConfiguration = timeLimiter.decorateFutureSupplier(() -> timeLimitExecutor.submit(fetchConfigurationCall(httpClient, httpGet)));
                 }
