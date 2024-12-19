@@ -41,6 +41,10 @@
       "instrumentation/special-sensors",
       "instrumentation/process"
     ],
+    "Default Instrumentation": [
+      "default-instrumentation/default-instrumentation",
+      "default-instrumentation/jakarta"
+    ],
     "End User Monitoring": [
       "enduser-monitoring/enduser-monitoring-server",
       "enduser-monitoring/eum-server-setup",
