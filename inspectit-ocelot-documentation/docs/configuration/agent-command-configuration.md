@@ -116,6 +116,7 @@ The agent command feature can be more precisely configured to the needs with the
 | `retry.initial-interval`           | `30s`         | The initial interval to wait after the first failed attempt. Durations must be greater or equal to 1 ms.                                                                                                                                                |
 | `retry.multiplier`                 | `2`           | For each retry the last interval to wait is multiplied with this number to calculate the next interval to wait. Decimals must be greater or equal to 1.0.                                                                                               |
 | `retry.randomization-factor`       | `0.1`         | This factor introduces randomness to what the actual wait interval will be. This prevents that a lot of agents will issue requests towards the configuration server at the same time. Decimals between 0.0 (exclusive) and 1.0 (inclusive) are allowed. |
+| `retry.time-limit`                 | `32m`         | The maximum amount of time one retry may take. After the limit is exceeded, the retry will be cancelled. Durations must be are greater or equal to 1 ms.                                                                                                |
 
 In case the specified HTTP endpoint is temporarily not available, inspectit applies by default a retry mechanism with
 exponential backoff in order to save resources. If Ocelot agent cannot reload the configuration successfully after the
