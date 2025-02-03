@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.opencensusshim.metrics.OpenCensusMetrics;
+import io.opentelemetry.opencensusshim.OpenCensusMetricProducer;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
@@ -14,7 +14,7 @@ import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.semconv.ResourceAttributes;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -431,11 +431,14 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
             Resource metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
                     .getServiceName()));
-            SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(metricServiceNameResource);
+            SdkMeterProviderBuilder builder = SdkMeterProvider.builder()
+                    // register OC metric producer, so the OTel SDK can use OC metrics
+                    .registerMetricProducer(OpenCensusMetricProducer.create())
+                    .setResource(metricServiceNameResource);
 
             // register metric reader for each service
             for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {
-                builder.registerMetricReader(OpenCensusMetrics.attachTo(metricsExportService.getNewMetricReader()));
+                builder.registerMetricReader(metricsExportService.getNewMetricReader());
             }
 
             return builder.build();

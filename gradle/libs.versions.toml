@@ -5,8 +5,10 @@ ioGrpc = "1.68.1"
 # Ensure to adapt the netty version when changing the OpenCensus version
 # If you rename or move this variable to another file, adjust the release-workflow
 ioOpencensus = "0.31.1"
-ioOpentelemetry = "1.29.0"
-ioOpentelemetryAlpha = "1.29.0-alpha"
+# Update to latest OTel in next release - Delay due to jaeger-exporter deprecation notice
+ioOpentelemetry = "1.34.1"
+ioOpentelemetryAlpha = "1.34.1-alpha"
+ioOpentelemetrySemconv = "1.29.0-alpha"
 orgApacheLoggingLog4j = "2.24.1"
 # @pin last version to support Java 8
 orgEclipseJetty = "9.4.56.v20240826"
@@ -31,8 +33,7 @@ chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.2.13"
 comFasterxmlJacksonCoreJacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:2.13.5"
 # @pin Wiremock 3.* doesn't support java 8
 comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
-# @pin ocelot-agent and ocelot-core cannot update guava, because of wiremock
-comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "31.1-jre" } }
+comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.0-jre" } }
 # @pin protobuf 4.* is not running
 comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25.5"
 # Note: Updating to 2.3.* will break jmh tests
@@ -69,7 +70,7 @@ ioOpentelemetryOpentelemetryProto = { module = "io.opentelemetry:opentelemetry-p
 ioOpentelemetryOpentelemetrySdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetrySdkMetrics = { module = "io.opentelemetry:opentelemetry-sdk-metrics", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetrySdkTesting = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "ioOpentelemetry" }
-ioOpentelemetryOpentelemetrySemconv = { module = "io.opentelemetry:opentelemetry-semconv", version.ref = "ioOpentelemetryAlpha" }
+ioOpentelemetryOpentelemetrySemconv = { module = "io.opentelemetry.semconv:opentelemetry-semconv", version.ref = "ioOpentelemetrySemconv" }
 ioPrometheusSimpleclientHttpserver = "io.prometheus:simpleclient_httpserver:0.16.0"
 javaxAnnotationJavaxAnnotationApi = "javax.annotation:javax.annotation-api:1.3.2"
 log4j = "log4j:log4j:1.2.17"
@@ -85,8 +86,8 @@ orgApacheLoggingLog4jLog4jApi = { module = "org.apache.logging.log4j:log4j-api",
 orgApacheLoggingLog4jLog4jCore = { module = "org.apache.logging.log4j:log4j-core", version.ref = "orgApacheLoggingLog4j" }
 # @pin Tomcat 9.0.* is the last version to support java 8
 orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0.97"
-orgAssertjAssertjCore = "org.assertj:assertj-core:3.26.3"
-orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.26.3"
+orgAssertjAssertjCore = "org.assertj:assertj-core:3.27.3"
+orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.27.3"
 orgAwaitility = "org.awaitility:awaitility:4.2.2"
 # @pin Jetty 9.4.* is the last version to support java 8
 orgEclipseJettyJettyServer = { module = "org.eclipse.jetty:jetty-server", version.ref = "orgEclipseJetty" }

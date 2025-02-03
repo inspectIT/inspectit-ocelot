@@ -8,7 +8,7 @@ orgSpringframeworkSecurity = "6.3.4"
 
 [libraries]
 comGoogleCodeGson = "com.google.code.gson:gson:2.11.0"
-comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.3.1-jre" } }
+comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.0-jre" } }
 comH2databaseH2 = "com.h2database:h2:2.3.232"
 commonsIo = "commons-io:commons-io:2.17.0"
 ioJsonwebtokenJjwtApi = { module = "io.jsonwebtoken:jjwt-api", version.ref = "ioJsonwebtoken" }
