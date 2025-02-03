@@ -1,7 +1,7 @@
 [versions]
-comLinecorpArmeria = "1.31.0"
+comLinecorpArmeria = "1.31.3"
 ioGithubNetmikeyLogunit = "2.0.0"
-ioGrpc = "1.68.1"
+ioGrpc = "1.70.0"
 # Ensure to adapt the netty version when changing the OpenCensus version
 # If you rename or move this variable to another file, adjust the release-workflow
 ioOpencensus = "0.31.1"
@@ -10,8 +10,8 @@ ioOpentelemetry = "1.34.1"
 ioOpentelemetryAlpha = "1.34.1-alpha"
 ioOpentelemetrySemconv = "1.29.0-alpha"
 orgApacheLoggingLog4j = "2.24.1"
-# @pin last version to support Java 8
-orgEclipseJetty = "9.4.56.v20240826"
+# @pin 10+ does not support Java 8 - Maintain latest 9 version
+orgEclipseJetty = "9.4.57.v20241219"
 # @pin Starting with version 6.x requires Java 11
 # 5.10.* is not running
 orgJunitJupiter = "5.9.3"
@@ -22,7 +22,7 @@ orgSlf4j = "2.0.16"
 orgSpringframework = "5.3.39"
 # @pin 2.7.18 is the latest release which runs on Java 8, this version marks the en of open source support for Sb 2.x
 orgSpringframeworkBoot = "2.7.18"
-orgTestcontainers = "1.20.3"
+orgTestcontainers = "1.20.4"
 # @pin resilience4j 2.* uses Java 17 APIs
 ioGithubResilience4j = "1.7.1"
 
@@ -40,9 +40,9 @@ comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25
 comH2databaseH2 = "com.h2database:h2:2.2.224"
 comLinecorpArmeriaArmeriaGrpcProtocol = { module = "com.linecorp.armeria:armeria-grpc-protocol", version.ref = "comLinecorpArmeria" }
 comLinecorpArmeriaArmeriaJunit5 = { module = "com.linecorp.armeria:armeria-junit5", version.ref = "comLinecorpArmeria" }
-comSquareupOkio = "com.squareup.okio:okio:3.9.1"
+comSquareupOkio = "com.squareup.okio:okio:3.10.2"
 commonsBeanutils = "commons-beanutils:commons-beanutils:1.9.4"
-commonsIo = "commons-io:commons-io:2.17.0"
+commonsIo = "commons-io:commons-io:2.18.0"
 ioGithubNetmikeyLogunitLogunitCore = { module = "io.github.netmikey.logunit:logunit-core", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubNetmikeyLogunitLogunitLogback = { module = "io.github.netmikey.logunit:logunit-logback", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubResilience4jResilience4jRetry = { module = "io.github.resilience4j:resilience4j-retry", version.ref = "ioGithubResilience4j" }
@@ -85,7 +85,7 @@ orgApacheHttpcomponentsHttpclient = "org.apache.httpcomponents:httpclient:4.5.14
 orgApacheLoggingLog4jLog4jApi = { module = "org.apache.logging.log4j:log4j-api", version.ref = "orgApacheLoggingLog4j" }
 orgApacheLoggingLog4jLog4jCore = { module = "org.apache.logging.log4j:log4j-core", version.ref = "orgApacheLoggingLog4j" }
 # @pin Tomcat 9.0.* is the last version to support java 8
-orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0.97"
+orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0.98"
 orgAssertjAssertjCore = "org.assertj:assertj-core:3.27.3"
 orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.27.3"
 orgAwaitility = "org.awaitility:awaitility:4.2.2"
@@ -133,7 +133,7 @@ comGithubNodeGradleNode = "com.github.node-gradle.node:7.1.0"
 # @pin There is a newer Version 0.35.0, but it is not Java 8 compatible
 # For the Agent, this is currently provided via gradle.properties to make it dynamic.
 comPalantirDocker = "com.palantir.docker:0.34.0"
-ioSpringDependencyManagement = "io.spring.dependency-management:1.1.6"
+ioSpringDependencyManagement = "io.spring.dependency-management:1.1.7"
 meChampeauJmh = "me.champeau.jmh:0.7.2"
 nlLittlerobotsVersionCatalogUpdate = "nl.littlerobots.version-catalog-update:0.8.5"
 orgCyclonedxBom = "org.cyclonedx.bom:1.8.2"
