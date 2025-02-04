@@ -11,6 +11,7 @@ dependencies {
 
             configServerLibs.orgMockitoMockitoJunitJupiter,
             configServerLibs.comGoogleGuava,
+            libs.ioOpentelemetryOpentelemetryApi,
             libs.orgAssertjAssertjCore,
     )
 
