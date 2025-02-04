@@ -6,8 +6,8 @@ ioGrpc = "1.70.0"
 # If you rename or move this variable to another file, adjust the release-workflow
 ioOpencensus = "0.31.1"
 # Update to latest OTel in next release - Delay due to jaeger-exporter deprecation notice
-ioOpentelemetry = "1.34.1"
-ioOpentelemetryAlpha = "1.34.1-alpha"
+ioOpentelemetry = "1.30.0"
+ioOpentelemetryAlpha = "1.30.0-alpha"
 ioOpentelemetrySemconv = "1.29.0-alpha"
 orgApacheLoggingLog4j = "2.24.1"
 # @pin 10+ does not support Java 8 - Maintain latest 9 version

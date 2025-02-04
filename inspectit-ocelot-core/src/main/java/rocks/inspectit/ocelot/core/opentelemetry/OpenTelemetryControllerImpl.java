@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.opencensusshim.OpenCensusMetricProducer;
+import io.opentelemetry.opencensusshim.metrics.OpenCensusMetrics;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
@@ -432,13 +432,13 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             Resource metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
                     .getServiceName()));
             SdkMeterProviderBuilder builder = SdkMeterProvider.builder()
-                    // register OC metric producer, so the OTel SDK can use OC metrics
-                    .registerMetricProducer(OpenCensusMetricProducer.create())
+                    // TODO Update OTel
+                    //.registerMetricProducer(OpenCensusMetricProducer.create())
                     .setResource(metricServiceNameResource);
 
             // register metric reader for each service
             for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {
-                builder.registerMetricReader(metricsExportService.getNewMetricReader());
+                builder.registerMetricReader(OpenCensusMetrics.attachTo(metricsExportService.getNewMetricReader()));
             }
 
             return builder.build();

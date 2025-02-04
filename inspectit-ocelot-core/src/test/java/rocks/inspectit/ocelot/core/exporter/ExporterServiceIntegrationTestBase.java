@@ -37,6 +37,8 @@ import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import java.io.UncheckedIOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +62,7 @@ import static org.testcontainers.Testcontainers.exposeHostPorts;
 @Testcontainers(disabledWithoutDocker = true)
 public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase {
 
-    static final String COLLECTOR_TAG = "0.58.0";
+    static final String COLLECTOR_TAG = "0.100.0";
 
     static final String COLLECTOR_IMAGE = "otel/opentelemetry-collector-contrib:" + COLLECTOR_TAG;
 
@@ -87,11 +89,6 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
     static final String INSTRUMENTATION_NAME = "rocks.inspectit.ocelot.instrumentation";
 
     static final String INSTRUMENTATION_VERSION = "0.0.1";
-
-    static final Resource RESOURCE = Resource.getDefault()
-            .toBuilder()
-            .put(ResourceAttributes.SERVICE_NAME, "OTEL integration test")
-            .build();
 
     private static final Logger LOGGER = Logger.getLogger(ExporterServiceIntegrationTestBase.class.getName());
 
@@ -129,7 +126,7 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
                 .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_JAEGER_THRIFT_HTTP_PORT, COLLECTOR_JAEGER_THRIFT_BINARY_PORT, COLLECTOR_JAEGER_THRIFT_COMPACT_PORT, COLLECTOR_JAEGER_GRPC_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_INFLUX_DB1_PORT, COLLECTOR_ZIPKIN_PORT)
                 .waitingFor(Wait.forHttp("/").forPort(COLLECTOR_HEALTH_CHECK_PORT));
 
-        // collector.withStartupTimeout(Duration.of(1, ChronoUnit.MINUTES));
+        //collector.withStartupTimeout(Duration.of(1, ChronoUnit.MINUTES));
         // note: in case you receive the 'Caused by: org.testcontainers.containers.ContainerLaunchException: Timed out waiting for container port to open' exception,
         // uncomment the above line. The exception is probably caused by Docker Desktop hiccups and should only appear locally.
         collector.start();

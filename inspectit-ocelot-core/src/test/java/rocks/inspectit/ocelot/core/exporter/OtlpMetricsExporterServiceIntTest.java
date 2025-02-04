@@ -15,7 +15,6 @@ import rocks.inspectit.ocelot.config.model.exporters.metrics.OtlpMetricsExporter
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -111,6 +110,7 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
         warnLogs.assertContains("'protocol'");
     }
 
+    @DirtiesContext
     @Test
     void defaultSettings() {
         AssertionsForClassTypes.assertThat(service.isEnabled()).isFalse();
@@ -140,20 +140,7 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
         recordMetricsAndFlush(measure, 1, "key", "val");
         recordMetricsAndFlush(measure, 2, "key", "val");
 
-        await().atMost(30, TimeUnit.SECONDS)
-                .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream()).anyMatch(mReq -> mReq.getResourceMetricsList()
-                        .stream()
-                        .anyMatch(rm ->
-                                // check for the "my-counter" metrics
-                                rm.getInstrumentationLibraryMetrics(0).getMetrics(0).getName().equals("my-counter")
-                                        // check for the specific attribute and value
-                                        && rm.getInstrumentationLibraryMetrics(0)
-                                        .getMetricsList()
-                                        .stream()
-                                        .anyMatch(metric -> metric.getSum()
-                                                .getDataPointsList()
-                                                .stream()
-                                                .anyMatch(d -> d.getAsInt() == 3)))));
+        awaitMetricsExported(measure, 3, "key", "val");
     }
 
     @DirtiesContext
@@ -172,21 +159,7 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
         recordMetricsAndFlush(measure, 1, "key", "val");
         recordMetricsAndFlush(measure, 2, "key", "val");
 
-        await().atMost(30, TimeUnit.SECONDS)
-                .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream()).anyMatch(mReq -> mReq.getResourceMetricsList()
-                        .stream()
-                        .anyMatch(rm ->
-                                // check for the "my-counter" metrics
-                                rm.getInstrumentationLibraryMetrics(0).getMetrics(0).getName().equals("my-counter")
-                                        // check for the specific attribute and value
-                                        && rm.getInstrumentationLibraryMetrics(0)
-                                        .getMetricsList()
-                                        .stream()
-                                        .anyMatch(metric -> metric.getSum()
-                                                .getDataPointsList()
-                                                .stream()
-                                                .anyMatch(d -> d.getAsInt() == 2)))));
-
+        awaitMetricsExported(measure, 2, "key", "val");
     }
 
     @DirtiesContext
