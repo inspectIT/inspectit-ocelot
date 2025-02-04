@@ -29,6 +29,9 @@ dependencies {
     annotationProcessor libs.orgProjectlombokLombok
 }
 
+// there is no main class here
+bootJar.enabled = false
+
 test {
     useJUnitPlatform()
 }
