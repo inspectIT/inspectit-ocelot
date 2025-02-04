@@ -14,7 +14,7 @@ import java.io.IOException;
 public class KapacitorErrorHandler extends DefaultResponseErrorHandler {
 
     @Override
-    protected void handleError(ClientHttpResponse response, HttpStatusCode statusCode) throws IOException {
+    public void handleError(ClientHttpResponse response) throws IOException {
         String message = "Unknown Kapacitor Error";
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -22,6 +22,6 @@ public class KapacitorErrorHandler extends DefaultResponseErrorHandler {
         } catch (Exception e) {
             log.debug("Failed to decode Kapacitor message", e);
         }
-        throw new KapacitorServerException(message, HttpStatus.valueOf(statusCode.value()));
+        throw new KapacitorServerException(message, HttpStatus.valueOf(response.getStatusCode().value()));
     }
 }

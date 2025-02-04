@@ -9,7 +9,7 @@ ioOpencensus = "0.31.1"
 ioOpentelemetry = "1.30.0"
 ioOpentelemetryAlpha = "1.30.0-alpha"
 ioOpentelemetrySemconv = "1.29.0-alpha"
-orgApacheLoggingLog4j = "2.24.1"
+orgApacheLoggingLog4j = "2.24.3"
 # @pin 10+ does not support Java 8 - Maintain latest 9 version
 orgEclipseJetty = "9.4.57.v20241219"
 # @pin Starting with version 6.x requires Java 11
@@ -20,7 +20,7 @@ orgMockito = "4.11.0"
 orgSlf4j = "2.0.16"
 # @pin 5.3.* is the last version to support Java 8
 orgSpringframework = "5.3.39"
-# @pin 2.7.18 is the latest release which runs on Java 8, this version marks the en of open source support for Sb 2.x
+# @pin 2.7.18 is the latest release which runs on Java 8, this version marks the end of open source support for SB 2.x
 orgSpringframeworkBoot = "2.7.18"
 orgTestcontainers = "1.20.4"
 # @pin resilience4j 2.* uses Java 17 APIs
@@ -35,13 +35,13 @@ comFasterxmlJacksonCoreJacksonDatabind = "com.fasterxml.jackson.core:jackson-dat
 comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.0-jre" } }
 # @pin protobuf 4.* is not running
-comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25.5"
+comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25.6"
 # Note: Updating to 2.3.* will break jmh tests
 comH2databaseH2 = "com.h2database:h2:2.2.224"
 comLinecorpArmeriaArmeriaGrpcProtocol = { module = "com.linecorp.armeria:armeria-grpc-protocol", version.ref = "comLinecorpArmeria" }
 comLinecorpArmeriaArmeriaJunit5 = { module = "com.linecorp.armeria:armeria-junit5", version.ref = "comLinecorpArmeria" }
 comSquareupOkio = "com.squareup.okio:okio:3.10.2"
-commonsBeanutils = "commons-beanutils:commons-beanutils:1.9.4"
+commonsBeanutils = "commons-beanutils:commons-beanutils:1.10.0"
 commonsIo = "commons-io:commons-io:2.18.0"
 ioGithubNetmikeyLogunitLogunitCore = { module = "io.github.netmikey.logunit:logunit-core", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubNetmikeyLogunitLogunitLogback = { module = "io.github.netmikey.logunit:logunit-logback", version.ref = "ioGithubNetmikeyLogunit" }
@@ -134,9 +134,9 @@ comGithubNodeGradleNode = "com.github.node-gradle.node:7.1.0"
 # For the Agent, this is currently provided via gradle.properties to make it dynamic.
 comPalantirDocker = "com.palantir.docker:0.34.0"
 ioSpringDependencyManagement = "io.spring.dependency-management:1.1.7"
-meChampeauJmh = "me.champeau.jmh:0.7.2"
+meChampeauJmh = "me.champeau.jmh:0.7.3"
 nlLittlerobotsVersionCatalogUpdate = "nl.littlerobots.version-catalog-update:0.8.5"
-orgCyclonedxBom = "org.cyclonedx.bom:1.8.2"
+orgCyclonedxBom = "org.cyclonedx.bom:2.0.0"
 # @pin Dependency-Check 11.* requires Java 11, 10.0.4 does not work with Gradle 7
 orgOwaspDependencycheck = "org.owasp.dependencycheck:10.0.3"
 orgSpringframeworkBoot = { id = "org.springframework.boot", version.ref = "orgSpringframeworkBoot" }

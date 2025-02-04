@@ -1,16 +1,16 @@
 [versions]
 ioJsonwebtoken = "0.12.6"
-orgEclipseJgit = "7.0.0.202409031743-r"
-orgMockito = "5.14.2"
-orgJunitJupiter = "5.10.5"
-orgSpringframeworkBoot = { strictly = "3.3.5" }
-orgSpringframeworkSecurity = "6.3.4"
+orgEclipseJgit = "7.1.0.202411261347-r"
+orgMockito = "5.15.2"
+orgJunitJupiter = "5.11.4"
+orgSpringframeworkBoot = { strictly = "3.4.2" }
+orgSpringframeworkSecurity = "6.4.2"
 
 [libraries]
-comGoogleCodeGson = "com.google.code.gson:gson:2.11.0"
+comGoogleCodeGson = "com.google.code.gson:gson:2.12.1"
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.0-jre" } }
 comH2databaseH2 = "com.h2database:h2:2.3.232"
-commonsIo = "commons-io:commons-io:2.17.0"
+commonsIo = "commons-io:commons-io:2.18.0"
 ioJsonwebtokenJjwtApi = { module = "io.jsonwebtoken:jjwt-api", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtImpl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtJackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "ioJsonwebtoken" }
@@ -18,8 +18,8 @@ orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.17.0"
 orgAwaitility = "org.awaitility:awaitility:4.2.2"
 orgEclipseJgitOrgEclipseJgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "orgEclipseJgit" }
 orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "orgEclipseJgit" }
-orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:10.21.0"
-orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:6.6.2.Final"
+orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:11.3.0"
+orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:6.6.6.Final"
 orgJunitJupiterJunitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "orgJunitJupiter" }
 orgJunitJupiterJunitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "orgJunitJupiter" }
 orgJunitJupiterJunitJupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "orgJunitJupiter" }
@@ -29,14 +29,14 @@ orgSpringframeworkBootSpringBootStarterDataJpa = { module = "org.springframework
 orgSpringframeworkBootSpringBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStartervalidation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "orgSpringframeworkBoot" }
-orgSpringframeworkLdapSpringLdapCore = "org.springframework.ldap:spring-ldap-core:3.2.8"
+orgSpringframeworkLdapSpringLdapCore = "org.springframework.ldap:spring-ldap-core:3.2.10"
 orgSpringframeworkSecuritySpringSecurityLdap = { module = "org.springframework.security:spring-security-ldap", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityTest = { module = "org.springframework.security:spring-security-test", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityWeb = { module = "org.springframework.security:spring-security-web", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworksecuritySpringSecurityConfig = { module = "org.springframework.security:spring-security-config", version.ref = "orgSpringframeworkSecurity" }
-chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.5.12"
-chQosLogbackLogbackCore = "ch.qos.logback:logback-core:1.5.12"
-orgXerialSqliteJdbc = "org.xerial:sqlite-jdbc:3.47.0.0"
+chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.5.16"
+chQosLogbackLogbackCore = "ch.qos.logback:logback-core:1.5.16"
+orgXerialSqliteJdbc = "org.xerial:sqlite-jdbc:3.48.0.0"
 orgYamlSnakeyaml = "org.yaml:snakeyaml:2.3"
 
 [bundles]
@@ -51,5 +51,5 @@ jsonwebtoken = [
 ]
 
 [plugins]
-ioSpringDependencyManagement = "io.spring.dependency-management:1.1.6"
+ioSpringDependencyManagement = "io.spring.dependency-management:1.1.7"
 orgSpringframeworkBoot = { id = "org.springframework.boot", version.ref = "orgSpringframeworkBoot" }
