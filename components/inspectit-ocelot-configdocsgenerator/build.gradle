@@ -1,58 +1,42 @@
 plugins {
-    // Apply the application plugin to add support for building a CLI application in Java.
-    id 'application'
-    // spring dependency manager
-    alias(libs.plugins.orgSpringframeworkBoot)
+    alias(configServerLibs.plugins.orgSpringframeworkBoot)
+    alias(configServerLibs.plugins.ioSpringDependencyManagement)
 }
-apply plugin: 'io.spring.dependency-management'
 
 dependencies {
-    // Use JUnit Jupiter for testing.
     testImplementation(
-            libs.orgJunitJupiterJunitJupiter,
-            libs.ioOpencensusOpencensusApi,
-            libs.ioOpentelemetryOpentelemetryApi,
+            configServerLibs.orgJunitJupiterJunitJupiter,
 
-            libs.orgMockitoMockitoJunitJupiter,
+            configServerLibs.orgMockitoMockitoJunitJupiter,
+            configServerLibs.comGoogleGuava,
+            libs.ioOpentelemetryOpentelemetryApi,
             libs.orgAssertjAssertjCore,
-            libs.comGoogleGuava
     )
 
-    // This dependency is used by the application.
     implementation(
             project(':inspectit-ocelot-config'),
-            libs.chQosLogbackLogbackClassic,
+            configServerLibs.chQosLogbackLogbackClassic,
             libs.orgApacheCommonsCommonsLang3,
             libs.commonsBeanutils,
             // Update dependency, due to Out-of-Support
             libs.orgApacheCommonsCommonsCollections4,
 
-            libs.orgSpringframeworkBootSpringBootStarterWeb,
-            libs.orgYamlSnakeyaml
+            configServerLibs.orgSpringframeworkBootSpringBootStarterWeb,
+            configServerLibs.orgYamlSnakeyaml
     )
 
-    constraints {
-        implementation(libs.orgYamlSnakeyaml) {
-            because 'vulnerabilities in v1.29 used by the SpringBoot version used in this module'
-        }
-        testImplementation(libs.comGoogleGuava) {
-            because 'security issues'
-        }
-    }
     compileOnly libs.orgProjectlombokLombok
     annotationProcessor libs.orgProjectlombokLombok
 }
 
-application {
-    // Define the main class for the application.
-    mainClass = 'inspectit.ocelot.configuration.docs.App'
-}
+// there is no main class here
+bootJar.enabled = false
 
 test {
-    // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
 
-//to guarantee that the Configuration Server is compatible with Java 8 runtime environments
-sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
-targetCompatibility = 1.8 // Java version to generate classes for.
+java {
+    sourceCompatibility = 17
+    targetCompatibility = 17
+}

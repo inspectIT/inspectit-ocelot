@@ -14,7 +14,7 @@ import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import io.opentelemetry.semconv.ResourceAttributes;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -431,7 +431,10 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
             Resource metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
                     .getServiceName()));
-            SdkMeterProviderBuilder builder = SdkMeterProvider.builder().setResource(metricServiceNameResource);
+            SdkMeterProviderBuilder builder = SdkMeterProvider.builder()
+                    // TODO Update OTel
+                    //.registerMetricProducer(OpenCensusMetricProducer.create())
+                    .setResource(metricServiceNameResource);
 
             // register metric reader for each service
             for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {

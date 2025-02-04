@@ -582,32 +582,7 @@ These settings apply to all trace exporters and can set below the `inspectit-eum
 |-----------------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `.service-name` | `${inspectit.service-name}` | The value of this property will be used to identify the service a trace came from. Please note that changes of this property only take effect after restarting the agent. |
 
-##### Jaeger
-InspectIT EUM Server supports thrift and gRPC Jaeger exporter.
-
-By default, the Jaeger exporter is enabled, but it is not active since the `endpoint` property is not set.
-
-The following configuration snippet makes the Jaeger exporter send traces to a Jaeger instance avialable under `localhost:14250`.
-
-```YAML
-inspectit-eum-server:
-  exporters:
-    tracing:
-      jaeger:
-      # If jaeger exporter for the OT received spans is enabled.
-      enabled: ENABLED
-
-      # Location of the jaeger gRPC API.
-      # Either a valid NameResolver-compliant URI, or an authority string.
-      # If this property is not set, the jaeger-exporter will not be started.
-      endpoint: localhost:14250
-      # the transport protocol, e.g., 'grpc' or 'http/protobuf'
-      protocol: grpc
-      # service name for all exported spans.
-      service-name: browser-js
-```
-
-##### OTLP (tracing)
+##### OTLP (Tracing)
 By default, the OTLP exporter is enabled, but is not active as the `endpoint`-property is not set.
 The property can be set via `inspectit-eum-server.exporters.tracing.otlp.endpoint`.
 
@@ -624,6 +599,12 @@ inspectit-eum-server:
         # the transport protocol, e.g., 'http/thrift' or 'grpc'
         protocol: grpc
 ```
+
+##### Jaeger (**Removed**)
+
+Since version 2.6.2 the EUM Server does no longer support the Jaeger exporter for traces.
+Please use the OTLP Exporter instead.
+
 #### Additional Span Attributes
 
 The EUM server is able to enrich a received span with additional attributes.

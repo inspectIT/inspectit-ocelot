@@ -20,9 +20,13 @@ import java.util.List;
 /**
  * Service for the {@link JaegerThriftSpanExporter}.
  * Can be dynamically started and stopped using the exporters.trace.jaeger.enabled configuration.
+ *
+ * @deprecated After we update OTel once more, the Jaeger exporter will no longer be supported.
+ *             Use {@link OtlpTraceExporterService} instead.
  */
 @Component
 @Slf4j
+@Deprecated
 public class JaegerExporterService extends DynamicallyActivatableService {
 
     private final List<TransportProtocol> SUPPORTED_PROTOCOLS = Arrays.asList(TransportProtocol.GRPC, TransportProtocol.HTTP_THRIFT);
@@ -93,6 +97,7 @@ public class JaegerExporterService extends DynamicallyActivatableService {
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
+        log.warn("Jaeger Exporter is deprecated and will be removed soon. Please use the OTLP Trace Exporter instead");
         try {
             JaegerExporterSettings settings = configuration.getExporters().getTracing().getJaeger();
 

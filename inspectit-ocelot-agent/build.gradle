@@ -47,6 +47,7 @@ dependencies {
         libs.ioOpentelemetryOpentelemetrySdk,
         libs.ioOpentelemetryOpentelemetryOpencensusShim,
         libs.ioOpencensusOpencensusImpl,
+        libs.ioOpentelemetryOpentelemetrySemconv,
         libs.comGoogleGuava
     )
     annotationProcessor libs.orgProjectlombokLombok
@@ -56,12 +57,6 @@ dependencies {
             libs.chQosLogbackLogbackClassic,
     )
     testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
-
-    constraints {
-        opentelemetry(libs.comGoogleGuava) {
-            because 'security issues'
-        }
-    }
 }
 
 task copyAgent(type: Copy) {
