@@ -1,9 +1,7 @@
 plugins {
-    // Apply the application plugin to add support for building a CLI application in Java.
-    id 'application'
     alias(configServerLibs.plugins.orgSpringframeworkBoot)
+    alias(configServerLibs.plugins.ioSpringDependencyManagement)
 }
-apply plugin: 'io.spring.dependency-management'
 
 dependencies {
     testImplementation(
@@ -31,13 +29,11 @@ dependencies {
     annotationProcessor libs.orgProjectlombokLombok
 }
 
-application {
-    mainClass = 'inspectit.ocelot.configuration.docs.App'
-}
-
 test {
     useJUnitPlatform()
 }
 
-sourceCompatibility = 17
-targetCompatibility = 17
+java {
+    sourceCompatibility = 17
+    targetCompatibility = 17
+}
