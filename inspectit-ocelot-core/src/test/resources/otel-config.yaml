@@ -2,14 +2,6 @@ extensions:
   health_check: {}
 receivers:
 
-  # accept Jaeger over all protocols
-  jaeger:
-    protocols:
-      grpc:
-      thrift_binary:
-      thrift_http:
-      thrift_compact:
-
   # accept OTLP over all protocols
   otlp:
     protocols:
@@ -38,16 +30,16 @@ exporters:
       insecure: true
     compression: none
   debug:
-    verbosity: detailed
+#    verbosity: detailed
 
 service:
   extensions: [health_check]
   pipelines:
     metrics:
-      receivers: [otlp, prometheus, influxdb]
+      receivers: [otlp] #, prometheus, influxdb]
       exporters: [debug, otlp]
     traces:
-      receivers: [otlp, jaeger, zipkin]
+      receivers: [otlp, zipkin]
       exporters: [debug, otlp]
     logs:
       receivers: [otlp]

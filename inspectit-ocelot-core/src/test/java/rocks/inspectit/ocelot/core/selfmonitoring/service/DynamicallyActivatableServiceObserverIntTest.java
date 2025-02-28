@@ -7,8 +7,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.core.SpringTestBase;
-import rocks.inspectit.ocelot.core.exporter.JaegerExporterService;
 import rocks.inspectit.ocelot.core.exporter.OtlpMetricsExporterService;
+import rocks.inspectit.ocelot.core.exporter.OtlpTraceExporterService;
 import rocks.inspectit.ocelot.core.exporter.PrometheusExporterService;
 
 import java.util.HashMap;
@@ -22,7 +22,7 @@ public class DynamicallyActivatableServiceObserverIntTest extends SpringTestBase
     private DynamicallyActivatableServiceObserver serviceObserver;
 
     @Autowired
-    private JaegerExporterService jaegerService;
+    private OtlpTraceExporterService otlpService;
 
     @Autowired
     private PrometheusExporterService prometheusExporterService;
@@ -37,13 +37,13 @@ public class DynamicallyActivatableServiceObserverIntTest extends SpringTestBase
         updateProperties(props -> {
             props.setProperty("inspectit.exporters.metrics.influx.enabled", true);
             props.setProperty("inspectit.exporters.metrics.prometheus.enabled", ExporterEnabledState.ENABLED);
-            props.setProperty("inspectit.exporters.tracing.jaeger.enabled", ExporterEnabledState.ENABLED);
-            props.setProperty("inspectit.exporters.tracing.jaeger.endpoint", "http://localhost:14250/api/traces");
-            props.setProperty("inspectit.exporters.tracing.jaeger.protocol", TransportProtocol.GRPC);
+            props.setProperty("inspectit.exporters.tracing.otlp.enabled", ExporterEnabledState.ENABLED);
+            props.setProperty("inspectit.exporters.tracing.otlp.endpoint", "http://localhost:4318/v1/metrics");
+            props.setProperty("inspectit.exporters.tracing.otlp.protocol", TransportProtocol.HTTP_PROTOBUF);
         });
 
         expectedServiceStates = new HashMap<String, Boolean>() {{
-            put(jaegerService.getName(), true);
+            put(otlpService.getName(), true);
             put(prometheusExporterService.getName(), true);
             put(otlpMetricsExporterService.getName(), false);
         }};
@@ -52,14 +52,14 @@ public class DynamicallyActivatableServiceObserverIntTest extends SpringTestBase
     @Test
     @DirtiesContext
     void verifyStatesHaveBeenObserved() {
-        assertThat(jaegerService.isEnabled()).isTrue();
+        assertThat(otlpService.isEnabled()).isTrue();
         assertExpectedServices();
 
         // update properties, check if the update gets observed
         updateProperties(props -> {
-            props.setProperty("inspectit.exporters.tracing.jaeger.enabled", ExporterEnabledState.DISABLED);
+            props.setProperty("inspectit.exporters.tracing.otlp.enabled", ExporterEnabledState.DISABLED);
         });
-        expectedServiceStates.put(jaegerService.getName(), false);
+        expectedServiceStates.put(otlpService.getName(), false);
         assertExpectedServices();
     }
 
@@ -70,28 +70,28 @@ public class DynamicallyActivatableServiceObserverIntTest extends SpringTestBase
 
         //Update Props 1
         updateProperties(props -> {
-            props.setProperty("inspectit.exporters.tracing.jaeger.enabled", ExporterEnabledState.DISABLED);
+            props.setProperty("inspectit.exporters.tracing.otlp.enabled", ExporterEnabledState.DISABLED);
         });
-        expectedServiceStates.put(jaegerService.getName(), false);
+        expectedServiceStates.put(otlpService.getName(), false);
         assertExpectedServices();
 
         //Update Props 2
         updateProperties(props -> {
-            props.setProperty("inspectit.exporters.tracing.jaeger.enabled", ExporterEnabledState.ENABLED);
+            props.setProperty("inspectit.exporters.tracing.otlp.enabled", ExporterEnabledState.ENABLED);
         });
-        expectedServiceStates.put(jaegerService.getName(), true);
+        expectedServiceStates.put(otlpService.getName(), true);
         assertExpectedServices();
 
         //Update Props 3 - Wrong input
         try {
             updateProperties(props -> {
-                props.setProperty("inspectit.exporters.tracing.jaeger.protocol", TransportProtocol.HTTP_PROTOBUF);
+                props.setProperty("inspectit.exporters.tracing.otlp.protocol", TransportProtocol.HTTP_THRIFT);
             });
         } catch (Exception e) {
             //ignore
         }
 
-        expectedServiceStates.put(jaegerService.getName(), false);
+        expectedServiceStates.put(otlpService.getName(), false);
         assertExpectedServices();
     }
 

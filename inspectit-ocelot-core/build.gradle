@@ -102,8 +102,6 @@ dependencies {
             // OpenTelemetry exporters
             platform(libs.ioOpentelemetryOpentelemetryBom),
             libs.ioOpentelemetryOpentelemetryExporterLogging,
-            libs.ioOpentelemetryOpentelemetryExporterJaeger,
-            libs.ioOpentelemetryOpentelemetryExporterJaegerThrift,
             libs.ioOpentelemetryOpentelemetryExporterZipkin,
             libs.ioOpentelemetryOpentelemetryExporterOtlp,
             // Update okio, due to security concerns

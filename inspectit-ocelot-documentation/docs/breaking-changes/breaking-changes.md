@@ -3,6 +3,14 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
+## Breaking changes in 2.6.8
+
+### Jaeger exporter replaced by OTLP exporter
+
+The Jaeger tracing exporter was fully removed, since OpenTelemetry has migrated away from it.
+You should use the OTLP exporter instead.
+Find more information about topic here: https://opentelemetry.io/blog/2023/jaeger-exporter-collector-migration/
+
 ## Breaking changes in 2.6.0
 
 ### Git-Staging of Agent Mappings

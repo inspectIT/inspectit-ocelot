@@ -6,5 +6,5 @@ inspectit:
       prometheus:
         enabled: ENABLED
     tracing:
-      jaeger:
+      otlp:
         enabled: false

@@ -10,10 +10,10 @@ inspectIT Ocelot currently supports the following trace exporters:
 * [Logging (Traces)](#logging-exporter-traces) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/blob/main/exporters/logging/src/main/java/io/opentelemetry/exporter/logging/LoggingSpanExporter.java)]
 * [OTLP (Traces)](#otlp-exporter-traces) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp/trace)]
 * [Zipkin](#zipkin-exporter) [[Homepage](https://zipkin.io/)]
-* [Jaeger](#jaeger-exporter) (**Deprecated**) [[Homepage](https://www.jaegertracing.io/)]
+* [Jaeger](#jaeger-exporter) (Removed, use OTLP instead) [[Homepage](https://www.jaegertracing.io/)]
 
 >**Important note**: Starting with version `2.0.0`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported and has been removed.  
-> Additionally, with OpenTelemetry, inspectIT Ocelot does not support the `service-name` property for individual exporter services anymore. Thus, we removed the `service-name` property from the Jaeger and Zipkin exporter. This property can now be set for all trace exporters in `inspectit.exporters.tracing.service-name`.
+> Additionally, with OpenTelemetry, inspectIT Ocelot does not support the `service-name` property for individual exporter services anymore. Thus, we removed the `service-name` property from the tracing exporters. This property can now be set for all trace exporters in `inspectit.exporters.tracing.service-name`.
 
 ## General Trace Exporter Settings
 
@@ -79,27 +79,8 @@ To make inspectIT Ocelot push the spans to a Zipkin server running on the same m
 -Dinspectit.exporters.tracing.zipkin.url=http://127.0.0.1:9411/api/v2/spans
 ```
 
-## Jaeger Exporter (Deprecated)
+## Jaeger Exporter (Removed)
 
-**This exporter is deprecated and will be removed soon. Please use the OTLP exporter instead.**
+**This exporter was removed. Please use the OTLP exporter instead.**
 
-The Jaeger exports works exactly the same way as the [Zipkin Exporter](#zipkin-exporter). InspectIT Ocelot supports thrift and gRPC Jaeger exporter.
-
-By default, the Jaeger exporters are enabled but the URL/gRPC endpoint needed for the exporter to actually start is set to `null`.
-
-### Jaeger Thrift Exporter 
-
-The following properties are nested properties below the `inspectit.exporters.tracing.jaeger` property:
-
-|Property | Default         | Description|
-|---|-----------------|---|
-|`.enabled`| `IF_CONFIGURED` |If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Jaeger exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.|
-|`.endpoint`| `null`          |URL endpoint under which the Jaeger server can be accessed (e.g. http://127.0.0.1:14268/api/traces).|
-|`.protocol`| `null`          |The transport protocol. Supported protocols are `grpc` and `http/thrift`.|
-
-To make inspectIT Ocelot push the spans to a Jaeger server running on the same machine as the agent, the following JVM property can be used:
-
-```
--Dinspectit.exporters.tracing.jaeger.endpoint=http://127.0.0.1:14268/api/traces
-```
 
