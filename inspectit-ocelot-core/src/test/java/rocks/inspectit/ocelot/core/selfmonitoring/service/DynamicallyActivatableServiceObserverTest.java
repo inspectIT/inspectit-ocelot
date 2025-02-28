@@ -44,15 +44,15 @@ public class DynamicallyActivatableServiceObserverTest {
             Map<String, Boolean> resultMap = serviceObserver.getServiceStateMap();
 
             //Check LogPreloader
-            assertThat(resultMap.containsKey(logPreloader.getName()));
+            assertThat(resultMap.containsKey(logPreloader.getName())).isTrue();
             assertThat(resultMap.get(logPreloader.getName())).isEqualTo(logPreloader.isEnabled());
 
             //Check PrometheusExporterService
-            assertThat(resultMap.containsKey(promExpoService.getName()));
+            assertThat(resultMap.containsKey(promExpoService.getName())).isTrue();
             assertThat(resultMap.get(promExpoService.getName())).isEqualTo(promExpoService.isEnabled());
 
             //Check AgentCommandService
-            assertThat(resultMap.containsKey(agentCommandService.getName()));
+            assertThat(resultMap.containsKey(agentCommandService.getName())).isTrue();
             assertThat(resultMap.get(agentCommandService.getName())).isEqualTo(agentCommandService.isEnabled());
         }
 

@@ -431,14 +431,15 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             Resource metricServiceNameResource = Resource.create(Attributes.of(ServiceAttributes.SERVICE_NAME, env.getCurrentConfig()
                     .getServiceName()));
             SdkMeterProviderBuilder builder = SdkMeterProvider.builder()
-                    .setResource(metricServiceNameResource)
-                    // register metric producer to handle OC metrics
-                    .registerMetricProducer(OpenCensusMetricProducer.create());
+                    .setResource(metricServiceNameResource);
 
             // register metric reader for each service
             for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {
                 builder.registerMetricReader(metricsExportService.getNewMetricReader());
             }
+
+            // register metric producer to handle OC metrics
+            builder.registerMetricProducer(OpenCensusMetricProducer.create());
 
             return builder.build();
 
