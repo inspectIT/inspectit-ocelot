@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.opencensusshim.metrics.OpenCensusMetrics;
+import io.opentelemetry.opencensusshim.OpenCensusMetricProducer;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
@@ -14,7 +14,8 @@ import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.ServiceAttributes;
+import io.opentelemetry.semconv.TelemetryAttributes;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -366,17 +367,15 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
     /**
      * Gets a {@link Resource} for the tracer provider attributes.
-     *
-     * @param configuration
-     *
-     * @return
      */
     private static Resource getTracerProviderAttributes(InspectitConfig configuration) {
-        // @formatter:off
-        Resource tracerProviderAttributes = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getExporters()
-                .getTracing()
-                .getServiceName(), AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion(), ResourceAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion(), ResourceAttributes.TELEMETRY_SDK_LANGUAGE, "java", ResourceAttributes.TELEMETRY_SDK_NAME, "opentelemetry"));
-        // @formatter:on
+        Resource tracerProviderAttributes = Resource.create(Attributes.of(
+                ServiceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName(),
+                AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion(),
+                TelemetryAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion(),
+                TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java",
+                TelemetryAttributes.TELEMETRY_SDK_NAME, "opentelemetry")
+        );
         return tracerProviderAttributes;
     }
 
@@ -386,7 +385,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      * @return A new {@link SdkMeterProvider} based on the {@link InspectitConfig}
      */
     private SdkMeterProvider buildMeterProvider(InspectitConfig configuration) {
-        Resource metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, configuration.getServiceName()));
+        Resource metricServiceNameResource = Resource.create(Attributes.of(ServiceAttributes.SERVICE_NAME, configuration.getServiceName()));
         return SdkMeterProvider.builder().setResource(metricServiceNameResource).build();
     }
 
@@ -429,17 +428,18 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                 OpenTelemetryUtils.stopMeterProvider(meterProvider, true);
             }
 
-            Resource metricServiceNameResource = Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, env.getCurrentConfig()
+            Resource metricServiceNameResource = Resource.create(Attributes.of(ServiceAttributes.SERVICE_NAME, env.getCurrentConfig()
                     .getServiceName()));
             SdkMeterProviderBuilder builder = SdkMeterProvider.builder()
-                    // TODO Update OTel
-                    //.registerMetricProducer(OpenCensusMetricProducer.create())
                     .setResource(metricServiceNameResource);
 
             // register metric reader for each service
             for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {
-                builder.registerMetricReader(OpenCensusMetrics.attachTo(metricsExportService.getNewMetricReader()));
+                builder.registerMetricReader(metricsExportService.getNewMetricReader());
             }
+
+            // register metric producer to handle OC metrics
+            builder.registerMetricProducer(OpenCensusMetricProducer.create());
 
             return builder.build();
 

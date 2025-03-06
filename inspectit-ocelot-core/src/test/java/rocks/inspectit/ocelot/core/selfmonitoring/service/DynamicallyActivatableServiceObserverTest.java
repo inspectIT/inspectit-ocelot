@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.core.selfmonitoring.service;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
 import rocks.inspectit.ocelot.core.command.AgentCommandService;
-import rocks.inspectit.ocelot.core.exporter.JaegerExporterService;
 import rocks.inspectit.ocelot.core.exporter.PrometheusExporterService;
 import rocks.inspectit.ocelot.core.selfmonitoring.logs.LogPreloader;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
@@ -25,13 +24,11 @@ public class DynamicallyActivatableServiceObserverTest {
         DynamicallyActivatableService logPreloader = new LogPreloader();
         DynamicallyActivatableService promExpoService = new PrometheusExporterService();
         DynamicallyActivatableService agentCommandService = new AgentCommandService();
-        DynamicallyActivatableService jaegerExpoService = new JaegerExporterService();
 
         List<DynamicallyActivatableService> expectedList = new ArrayList<DynamicallyActivatableService>() {{
             add(new LogPreloader());
             add(new PrometheusExporterService());
             add(new AgentCommandService());
-            add(new JaegerExporterService());
         }};
 
         void setupTest(){
@@ -47,26 +44,22 @@ public class DynamicallyActivatableServiceObserverTest {
             Map<String, Boolean> resultMap = serviceObserver.getServiceStateMap();
 
             //Check LogPreloader
-            assertThat(resultMap.containsKey(logPreloader.getName()));
+            assertThat(resultMap.containsKey(logPreloader.getName())).isTrue();
             assertThat(resultMap.get(logPreloader.getName())).isEqualTo(logPreloader.isEnabled());
 
             //Check PrometheusExporterService
-            assertThat(resultMap.containsKey(promExpoService.getName()));
+            assertThat(resultMap.containsKey(promExpoService.getName())).isTrue();
             assertThat(resultMap.get(promExpoService.getName())).isEqualTo(promExpoService.isEnabled());
 
             //Check AgentCommandService
-            assertThat(resultMap.containsKey(agentCommandService.getName()));
+            assertThat(resultMap.containsKey(agentCommandService.getName())).isTrue();
             assertThat(resultMap.get(agentCommandService.getName())).isEqualTo(agentCommandService.isEnabled());
-
-            //Check JaegerExporterService
-            assertThat(resultMap.containsKey(jaegerExpoService.getName()));
-            assertThat(resultMap.get(jaegerExpoService.getName())).isEqualTo(jaegerExpoService.isEnabled());
         }
 
         @Test
         public void testAsJson() {
             setupTest();
-            String expectedJson = "{\"LoggingMetricExporterService\":false,\"MemoryMetricsRecorder\":true,\"HttpConfigurationPoller\":true,\"OtlpTraceExporterService\":false,\"DiskMetricsRecorder\":true,\"ActionMetricsRecorder\":false,\"PrometheusExporterService\":false,\"LoggingTraceExporterService\":false,\"GCMetricsRecorder\":true,\"InfluxExporterService\":false,\"OtlpMetricsExporterService\":false,\"JmxMetricsRecorder\":false,\"JaegerExporterService\":false,\"ProcessorMetricsRecorder\":true,\"ThreadMetricsRecorder\":true,\"AgentCommandService\":false,\"ConfigurationDirectoriesPoller\":false,\"BrowserPropagationHttpExporterService\":false,\"LogPreloader\":false,\"ClassLoaderMetricsRecorder\":true,\"ZipkinExporterService\":false}";
+            String expectedJson = "{\"LoggingMetricExporterService\":false,\"MemoryMetricsRecorder\":true,\"HttpConfigurationPoller\":true,\"OtlpTraceExporterService\":false,\"DiskMetricsRecorder\":true,\"ActionMetricsRecorder\":false,\"PrometheusExporterService\":false,\"LoggingTraceExporterService\":false,\"GCMetricsRecorder\":true,\"InfluxExporterService\":false,\"OtlpMetricsExporterService\":false,\"JmxMetricsRecorder\":false,\"ProcessorMetricsRecorder\":true,\"ThreadMetricsRecorder\":true,\"AgentCommandService\":false,\"ConfigurationDirectoriesPoller\":false,\"BrowserPropagationHttpExporterService\":false,\"LogPreloader\":false,\"ClassLoaderMetricsRecorder\":true,\"ZipkinExporterService\":false}";
 
             assertThat(serviceObserver.asJson()).isEqualTo(expectedJson);
         }

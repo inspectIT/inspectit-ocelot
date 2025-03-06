@@ -5,9 +5,9 @@ ioGrpc = "1.70.0"
 # Ensure to adapt the netty version when changing the OpenCensus version
 # If you rename or move this variable to another file, adjust the release-workflow
 ioOpencensus = "0.31.1"
-# Update to latest OTel in next release - Delay due to jaeger-exporter deprecation notice
-ioOpentelemetry = "1.30.0"
-ioOpentelemetryAlpha = "1.30.0-alpha"
+ioOpentelemetry = "1.47.0"
+ioOpentelemetryAlpha = "1.47.0-alpha"
+ioOpentelemetryProto = "1.5.0-alpha"
 ioOpentelemetrySemconv = "1.29.0-alpha"
 orgApacheLoggingLog4j = "2.24.3"
 # @pin 10+ does not support Java 8 - Maintain latest 9 version
@@ -60,14 +60,12 @@ ioOpencensusOpencensusTesting = { module = "io.opencensus:opencensus-testing", v
 ioOpentelemetryOpentelemetryApi = { module = "io.opentelemetry:opentelemetry-api", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryBom = { module = "io.opentelemetry:opentelemetry-bom", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryBomAlpha = { module = "io.opentelemetry:opentelemetry-bom-alpha", version.ref = "ioOpentelemetryAlpha" }
-ioOpentelemetryOpentelemetryExporterJaeger = { module = "io.opentelemetry:opentelemetry-exporter-jaeger", version.ref = "ioOpentelemetry" }
-ioOpentelemetryOpentelemetryExporterJaegerThrift = { module = "io.opentelemetry:opentelemetry-exporter-jaeger-thrift", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryExporterLogging = { module = "io.opentelemetry:opentelemetry-exporter-logging", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryExporterOtlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryExporterPrometheus = { module = "io.opentelemetry:opentelemetry-exporter-prometheus", version.ref = "ioOpentelemetryAlpha" }
 ioOpentelemetryOpentelemetryExporterZipkin = { module = "io.opentelemetry:opentelemetry-exporter-zipkin", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryOpencensusShim = { module = "io.opentelemetry:opentelemetry-opencensus-shim", version.ref = "ioOpentelemetryAlpha" }
-ioOpentelemetryOpentelemetryProto = { module = "io.opentelemetry:opentelemetry-proto", version = { strictly = "1.7.1-alpha" } }
+ioOpentelemetryOpentelemetryProto = { module = "io.opentelemetry.proto:opentelemetry-proto", version.ref = "ioOpentelemetryProto" }
 ioOpentelemetryOpentelemetrySdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetrySdkMetrics = { module = "io.opentelemetry:opentelemetry-sdk-metrics", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetrySdkTesting = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "ioOpentelemetry" }

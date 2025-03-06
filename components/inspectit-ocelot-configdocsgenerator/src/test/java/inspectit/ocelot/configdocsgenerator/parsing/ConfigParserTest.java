@@ -92,7 +92,7 @@ class ConfigParserTest {
             // value 'false' in yaml to DISABLED in InspectitConfig
             assertThat(result.getExporters()
                     .getTracing()
-                    .getJaeger()
+                    .getOtlp()
                     .getEnabled()).isEqualTo(ExporterEnabledState.DISABLED);
             // example for new style, value 'ENABLED' in yaml to ENABLED in InspectitConfig
             assertThat(result.getExporters()

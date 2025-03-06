@@ -5,11 +5,9 @@ import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.ServiceRequestContext;
 import com.linecorp.armeria.server.grpc.protocol.AbstractUnaryGrpcService;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
+import io.opencensus.stats.*;
+import io.opencensus.tags.*;
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongCounter;
-import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
@@ -21,8 +19,6 @@ import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse;
 import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
-import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,11 +33,7 @@ import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import java.io.UncheckedIOException;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -71,18 +63,6 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
     static final Integer COLLECTOR_OTLP_HTTP_PORT = 4318;
 
     static final Integer COLLECTOR_HEALTH_CHECK_PORT = 13133;
-
-    static final Integer COLLECTOR_JAEGER_GRPC_PORT = 14250;
-
-    static final Integer COLLECTOR_JAEGER_THRIFT_HTTP_PORT = 14268;
-
-    static final Integer COLLECTOR_JAEGER_THRIFT_BINARY_PORT = 6832;
-
-    static final Integer COLLECTOR_JAEGER_THRIFT_COMPACT_PORT = 6831;
-
-    static final Integer COLLECTOR_PROMETHEUS_PORT = 8888;
-
-    static final Integer COLLECTOR_INFLUX_DB1_PORT = 8086;
 
     static final int COLLECTOR_ZIPKIN_PORT = 9411;
 
@@ -118,12 +98,11 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
 
         collector = new GenericContainer<>(DockerImageName.parse(COLLECTOR_IMAGE)).withEnv("LOGGING_EXPORTER_LOG_LEVEL", "INFO")
                 .withEnv("OTLP_EXPORTER_ENDPOINT", "host.testcontainers.internal:" + grpcServer.httpPort())
-                .withEnv("PROMETHEUS_SCRAPE_TARGET", String.format("host.testcontainers.internal:%s", COLLECTOR_PROMETHEUS_PORT))
                 .withClasspathResourceMapping("otel-config.yaml", "/otel-config.yaml", BindMode.READ_ONLY)
                 .withCommand("--config", "/otel-config.yaml")
-                .withLogConsumer(outputFrame -> LOGGER.log(Level.INFO, outputFrame.getUtf8String().replace("\n", "")))
+                .withLogConsumer(outputFrame -> LOGGER.log(Level.INFO, "COLLECTOR: " + outputFrame.getUtf8String().replace("\n", "")))
                 // expose all relevant ports
-                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_JAEGER_THRIFT_HTTP_PORT, COLLECTOR_JAEGER_THRIFT_BINARY_PORT, COLLECTOR_JAEGER_THRIFT_COMPACT_PORT, COLLECTOR_JAEGER_GRPC_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_INFLUX_DB1_PORT, COLLECTOR_ZIPKIN_PORT)
+                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_ZIPKIN_PORT)
                 .waitingFor(Wait.forHttp("/").forPort(COLLECTOR_HEALTH_CHECK_PORT));
 
         //collector.withStartupTimeout(Duration.of(1, ChronoUnit.MINUTES));
@@ -201,34 +180,35 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
         Instances.openTelemetryController.flush();
     }
 
-    /**
-     * Records some dummy metrics and flushes them.
-     */
-    void recordMetricsAndFlush() {
-        recordMetricsAndFlush("my-counter", 1, "my-key", "my-val");
+    protected Measure.MeasureLong createMeasure(String measureName, String tagKey) {
+        Measure.MeasureLong measure = Measure.MeasureLong.create(measureName, "desc", "1");
+
+        View view = View.create(View.Name.create(measureName), "desc", measure, Aggregation.Sum.create(),
+                Collections.singletonList(TagKey.create(tagKey)));
+        Stats.getViewManager().registerView(view);
+
+        return measure;
     }
 
     /**
-     * Records a counter with the given value and tag
+     * Records a sum with the given value and tag.
+     * Since we are still not using OTel to create metrics with the agent, we should stick to OC in tests.
      *
-     * @param measureName the name of the measure
-     * @param value  the value to add to the counter
+     * @param measure the measure to record
+     * @param value  the value to add to the measure
      * @param tagKey the key of the tag
      * @param tagVal the value of the tag
      */
-    protected void recordMetricsAndFlush(String measureName, int value, String tagKey, String tagVal) {
-        // get the meter and create a counter
-        Meter meter = GlobalOpenTelemetry.getMeterProvider()
-                .meterBuilder("rocks.inspectit.ocelot")
-                .setInstrumentationVersion("0.0.1")
+    protected void recordMeasureAndFlush(Measure.MeasureLong measure, int value, String tagKey, String tagVal) {
+        TagContext tagContext = Tags.getTagger().emptyBuilder()
+                .putLocal(TagKey.create(tagKey), TagValue.create(tagVal))
                 .build();
-        LongCounter counter = meter.counterBuilder(measureName).setDescription("My counter").setUnit("1").build();
 
-        // record counter
-        counter.add(value, Attributes.of(AttributeKey.stringKey(tagKey), tagVal));
+        Stats.getStatsRecorder().newMeasureMap()
+                .put(measure, value)
+                .record(tagContext);
 
         Instances.openTelemetryController.flush();
-
     }
 
     /**
@@ -248,19 +228,20 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
                 .build();
 
         await().atMost(30, TimeUnit.SECONDS)
-                .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream()).anyMatch(mReq -> mReq.getResourceMetricsList()
-                        .stream()
-                        .anyMatch(rm ->
-                                // check for the specified measure
-                                rm.getInstrumentationLibraryMetrics(0)
-                                        .getMetricsList().stream()
-                                        .filter(metric -> metric.getName().equals(measureName))
-                                        // check for the specific attribute and value
-                                        .anyMatch(metric -> metric.getSum()
-                                                .getDataPointsList()
-                                                .stream()
-                                                .anyMatch(d -> d.getAttributesList()
-                                                        .contains(attribute) && d.getAsInt() == value)))));
+                .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream())
+                        .anyMatch(mReq -> mReq.getResourceMetricsList().stream()
+                            .anyMatch(rm ->  rm.getScopeMetrics(0)
+                                .getMetricsList().stream()
+                                // check for the specific attribute and value
+                                .anyMatch(metric -> {
+                                    boolean validName = metric.getName().equals(measureName);
+                                    boolean validData = metric.getSum()
+                                            .getDataPointsList()
+                                            .stream()
+                                            .anyMatch(d -> d.getAttributesList()
+                                                    .contains(attribute) && d.getAsInt() == value);
+                                    return validName && validData;
+                                }))));
     }
 
     /**
@@ -279,7 +260,7 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
             Stream<List<io.opentelemetry.proto.trace.v1.Span>> spansLis = grpcServer.traceRequests.stream()
                     .flatMap(tr -> tr.getResourceSpansList()
                             .stream()
-                            .flatMap(rs -> rs.getInstrumentationLibrarySpansList()
+                            .flatMap(rs -> rs.getScopeSpansList()
                                     .stream()
                                     .map(ils -> ils.getSpansList())));
 
@@ -330,7 +311,8 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
                 @Override
                 protected CompletionStage<byte[]> handleMessage(ServiceRequestContext ctx, byte[] message) {
                     try {
-                        traceRequests.add(ExportTraceServiceRequest.parseFrom(message));
+                        ExportTraceServiceRequest request = ExportTraceServiceRequest.parseFrom(message);
+                        traceRequests.add(request);
                     } catch (InvalidProtocolBufferException e) {
                         throw new UncheckedIOException(e);
                     }
@@ -341,7 +323,8 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
                 @Override
                 protected CompletionStage<byte[]> handleMessage(ServiceRequestContext ctx, byte[] message) {
                     try {
-                        metricRequests.add(ExportMetricsServiceRequest.parseFrom(message));
+                        ExportMetricsServiceRequest request = ExportMetricsServiceRequest.parseFrom(message);
+                        metricRequests.add(request);
                     } catch (InvalidProtocolBufferException e) {
                         throw new UncheckedIOException(e);
                     }
@@ -352,7 +335,8 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
                 @Override
                 protected CompletionStage<byte[]> handleMessage(ServiceRequestContext ctx, byte[] message) {
                     try {
-                        logRequests.add(ExportLogsServiceRequest.parseFrom(message));
+                        ExportLogsServiceRequest request = ExportLogsServiceRequest.parseFrom(message);
+                        logRequests.add(request);
                     } catch (InvalidProtocolBufferException e) {
                         throw new UncheckedIOException(e);
                     }

@@ -41,8 +41,9 @@ public class OtlpMetricsExporterSettings {
     /**
      * The time period over which metrics should be aggregated.
      * Valid values are CUMULATIVE and DELTA
+     * NOTE: Removed, since the temporality will not be applied to OpenCensus metrics
      */
-    private AggregationTemporality preferredTemporality;
+    //private AggregationTemporality preferredTemporality;
 
     /**
      * Key-value pairs to be used as headers associated with gRPC or HTTP requests.

@@ -15,9 +15,6 @@ public class TraceExportersSettings {
     private String serviceName;
 
     @Valid
-    private JaegerExporterSettings jaeger;
-
-    @Valid
     private ZipkinExporterSettings zipkin;
 
     @Valid
@@ -25,5 +22,4 @@ public class TraceExportersSettings {
 
     @Valid
     private OtlpTraceExporterSettings otlp;
-
 }
