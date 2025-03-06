@@ -2,8 +2,21 @@ name: Test Documentation Deployment
 
 on:
   pull_request:
+    paths-ignore:
+      - 'components/**'
+      - 'resources/**'
+      - 'codequality/**'
+      - '**.txt'
+      - '.github/**'
+  push:
     branches:
       - master
+    paths-ignore:
+      - 'components/**'
+      - 'resources/**'
+      - 'codequality/**'
+      - '**.txt'
+      - '.github/**'
 
 jobs:
   test-deploy:
