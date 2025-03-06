@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.github.netmikey.logunit.api.LogCapturer;
+import io.opencensus.stats.Measure;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
     @Autowired
     InspectitEnvironment environment;
 
-    String measure = "my-counter";
+    String measureNamePrefix = "my-counter";
     String tagKeyGrpc = "otlp-grpc-metrics-test";
     String tagKeyHttp = "otlp-http-metrics-test";
     String tagVal = "random-val";
@@ -64,8 +65,9 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
                 .pollInterval(500, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
-        String measureName = measure + "-grpc";
-        recordMetricsAndFlush(measureName, metricVal, tagKeyGrpc, tagVal);
+        String measureName = measureNamePrefix + "-grpc";
+        Measure.MeasureLong measure = createMeasure(measureName, tagKeyGrpc);
+        recordMeasureAndFlush(measure, metricVal, tagKeyGrpc, tagVal);
 
         awaitMetricsExported(measureName, metricVal, tagKeyGrpc, tagVal);
     }
@@ -84,8 +86,9 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
                 .pollInterval(500, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
 
-        String measureName = measure + "-http";
-        recordMetricsAndFlush(measureName, metricVal, tagKeyHttp, tagVal);
+        String measureName = measureNamePrefix + "-http";
+        Measure.MeasureLong measure = createMeasure(measureName, tagKeyHttp);
+        recordMeasureAndFlush(measure, metricVal, tagKeyHttp, tagVal);
 
         awaitMetricsExported(measureName, metricVal, tagKeyHttp, tagVal);
     }
@@ -138,17 +141,24 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
 
         assertThat(service.isEnabled()).isTrue();
 
-        String measureName = measure + "-cumulative";
-        recordMetricsAndFlush(measureName, 1, "key", "val");
-        recordMetricsAndFlush(measureName, 2, "key", "val");
+        String measureName = measureNamePrefix + "-cumulative";
+        Measure.MeasureLong measure = createMeasure(measureName, "key");
+        recordMeasureAndFlush(measure, 1, "key", "val");
+        recordMeasureAndFlush(measure, 2, "key", "val");
 
         awaitMetricsExported(measureName, 3, "key", "val");
     }
 
     /**
-     * As it seems, the aggregation temporality of the OTel MetricExporter does no longer affect the OC
-     * aggregation temporality.
-     * TODO We have to check for a workaround. Until then the test is disabled
+     * Previously, we have recorded metrics via OpenTelemetry within this test.
+     * <br>
+     * However, since we still use OpenCensus to record metrics in the agent, we should also use it within tests.
+     * After switching to OpenCensus, we realized, that the AggregationTemporality of the OTel MetricExporter does not
+     * get applied to OpenCensus metrics at all.
+     * For example, compare {@link io.opentelemetry.opencensusshim.MetricAdapter#convertLongPoints} with
+     * {@link io.opentelemetry.sdk.metrics.internal.state.AsynchronousMetricStorage#collect}
+     * <br>
+     * Thus, this test stays disabled.
      */
     @DirtiesContext
     @Test
@@ -164,10 +174,12 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
 
         assertThat(service.isEnabled()).isTrue();
 
-        String measureName = measure + "-delta";
-        recordMetricsAndFlush(measureName, 1, "key", "val");
-        recordMetricsAndFlush(measureName, 2, "key", "val");
+        String measureName = measureNamePrefix + "-delta";
+        Measure.MeasureLong measure = createMeasure(measureName, "key");
+        recordMeasureAndFlush(measure, 1, "key", "val");
+        recordMeasureAndFlush(measure, 2, "key", "val");
 
+        // Since the AggregationTemporality is not applied to OpenCensus metrics, the measure value will be 3
         awaitMetricsExported(measureName, 2, "key", "val");
     }
 

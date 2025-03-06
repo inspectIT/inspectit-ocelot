@@ -64,10 +64,6 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
 
     static final Integer COLLECTOR_HEALTH_CHECK_PORT = 13133;
 
-    static final Integer COLLECTOR_PROMETHEUS_PORT = 8888;
-
-    static final Integer COLLECTOR_INFLUX_DB1_PORT = 8086;
-
     static final int COLLECTOR_ZIPKIN_PORT = 9411;
 
     static final String INSTRUMENTATION_NAME = "rocks.inspectit.ocelot.instrumentation";
@@ -102,12 +98,11 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
 
         collector = new GenericContainer<>(DockerImageName.parse(COLLECTOR_IMAGE)).withEnv("LOGGING_EXPORTER_LOG_LEVEL", "INFO")
                 .withEnv("OTLP_EXPORTER_ENDPOINT", "host.testcontainers.internal:" + grpcServer.httpPort())
-                .withEnv("PROMETHEUS_SCRAPE_TARGET", String.format("host.testcontainers.internal:%s", COLLECTOR_PROMETHEUS_PORT))
                 .withClasspathResourceMapping("otel-config.yaml", "/otel-config.yaml", BindMode.READ_ONLY)
                 .withCommand("--config", "/otel-config.yaml")
                 .withLogConsumer(outputFrame -> LOGGER.log(Level.INFO, "COLLECTOR: " + outputFrame.getUtf8String().replace("\n", "")))
                 // expose all relevant ports
-                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_PROMETHEUS_PORT, COLLECTOR_INFLUX_DB1_PORT, COLLECTOR_ZIPKIN_PORT)
+                .withExposedPorts(COLLECTOR_OTLP_GRPC_PORT, COLLECTOR_OTLP_HTTP_PORT, COLLECTOR_HEALTH_CHECK_PORT, COLLECTOR_ZIPKIN_PORT)
                 .waitingFor(Wait.forHttp("/").forPort(COLLECTOR_HEALTH_CHECK_PORT));
 
         //collector.withStartupTimeout(Duration.of(1, ChronoUnit.MINUTES));
@@ -185,37 +180,33 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
         Instances.openTelemetryController.flush();
     }
 
-    /**
-     * Records some dummy metrics and flushes them.
-     */
-    void recordMetricsAndFlush() {
-        recordMetricsAndFlush("my-counter", 1, "my-key", "my-val");
+    protected Measure.MeasureLong createMeasure(String measureName, String tagKey) {
+        Measure.MeasureLong measure = Measure.MeasureLong.create(measureName, "desc", "1");
+
+        View view = View.create(View.Name.create(measureName), "desc", measure, Aggregation.Sum.create(),
+                Collections.singletonList(TagKey.create(tagKey)));
+        Stats.getViewManager().registerView(view);
+
+        return measure;
     }
 
     /**
      * Records a sum with the given value and tag.
      * Since we are still not using OTel to create metrics with the agent, we should stick to OC in tests.
      *
-     * @param measureName the measure
+     * @param measure the measure to record
      * @param value  the value to add to the measure
      * @param tagKey the key of the tag
      * @param tagVal the value of the tag
      */
-    protected void recordMetricsAndFlush(String measureName, int value, String tagKey, String tagVal) {
-        Measure.MeasureLong measure = Measure.MeasureLong.create(measureName, "desc", "1");
-
-        View.Name viewName = View.Name.create(measureName);
-        // Views can be registered only once
-        if(Stats.getViewManager().getView(viewName) == null) {
-            View view = View.create(View.Name.create(measureName), "desc", measure, Aggregation.Sum.create(), Collections.singletonList(TagKey.create(tagKey)));
-            Stats.getViewManager().registerView(view);
-        }
-
+    protected void recordMeasureAndFlush(Measure.MeasureLong measure, int value, String tagKey, String tagVal) {
         TagContext tagContext = Tags.getTagger().emptyBuilder()
                 .putLocal(TagKey.create(tagKey), TagValue.create(tagVal))
                 .build();
 
-        Stats.getStatsRecorder().newMeasureMap().put(measure, value).record(tagContext);
+        Stats.getStatsRecorder().newMeasureMap()
+                .put(measure, value)
+                .record(tagContext);
 
         Instances.openTelemetryController.flush();
     }
@@ -241,13 +232,16 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
                         .anyMatch(mReq -> mReq.getResourceMetricsList().stream()
                             .anyMatch(rm ->  rm.getScopeMetrics(0)
                                 .getMetricsList().stream()
-                                .filter(metric -> metric.getName().equals(measureName))
                                 // check for the specific attribute and value
-                                .anyMatch(metric -> metric.getSum()
-                                        .getDataPointsList()
-                                        .stream()
-                                        .anyMatch(d -> d.getAttributesList()
-                                                .contains(attribute) && d.getAsInt() == value)))));
+                                .anyMatch(metric -> {
+                                    boolean validName = metric.getName().equals(measureName);
+                                    boolean validData = metric.getSum()
+                                            .getDataPointsList()
+                                            .stream()
+                                            .anyMatch(d -> d.getAttributesList()
+                                                    .contains(attribute) && d.getAsInt() == value);
+                                    return validName && validData;
+                                }))));
     }
 
     /**
