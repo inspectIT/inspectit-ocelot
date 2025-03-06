@@ -122,7 +122,6 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
         assertThat(otlp.getEnabled()).isEqualTo(ExporterEnabledState.IF_CONFIGURED);
         assertThat(otlp.getEndpoint()).isNullOrEmpty();
         assertThat(otlp.getProtocol()).isNull();
-        assertThat(otlp.getPreferredTemporality()).isEqualTo(AggregationTemporality.CUMULATIVE);
         assertThat(otlp.getHeaders()).isNullOrEmpty();
         assertThat(otlp.getCompression()).isEqualTo(CompressionMethod.NONE);
         assertThat(otlp.getTimeout()).isEqualTo(Duration.ofSeconds(10));
@@ -136,7 +135,7 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
             mps.setProperty("inspectit.exporters.metrics.otlp.export-interval", "500ms");
             mps.setProperty("inspectit.exporters.metrics.otlp.enabled", ExporterEnabledState.ENABLED);
             mps.setProperty("inspectit.exporters.metrics.otlp.protocol", TransportProtocol.GRPC);
-            mps.setProperty("inspectit.exporters.metrics.otlp.preferredTemporality", AggregationTemporality.CUMULATIVE);
+            //mps.setProperty("inspectit.exporters.metrics.otlp.preferredTemporality", AggregationTemporality.CUMULATIVE);
         });
 
         assertThat(service.isEnabled()).isTrue();
@@ -169,7 +168,7 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
             mps.setProperty("inspectit.exporters.metrics.otlp.export-interval", "500ms");
             mps.setProperty("inspectit.exporters.metrics.otlp.enabled", ExporterEnabledState.ENABLED);
             mps.setProperty("inspectit.exporters.metrics.otlp.protocol", TransportProtocol.GRPC);
-            mps.setProperty("inspectit.exporters.metrics.otlp.preferredTemporality", AggregationTemporality.DELTA);
+            //mps.setProperty("inspectit.exporters.metrics.otlp.preferredTemporality", AggregationTemporality.DELTA);
         });
 
         assertThat(service.isEnabled()).isTrue();

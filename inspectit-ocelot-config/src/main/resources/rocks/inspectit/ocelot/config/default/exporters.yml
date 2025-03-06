@@ -55,8 +55,6 @@ inspectit:
         protocol:
         # headers
         headers: {}
-        # the aggregation temporality, e.g., CUMULATIVE or DELTA
-        preferredTemporality: CUMULATIVE
         # compression method
         compression: NONE
         # timeout, i.e., maximum time the OTLP exporter will wait for each batch export

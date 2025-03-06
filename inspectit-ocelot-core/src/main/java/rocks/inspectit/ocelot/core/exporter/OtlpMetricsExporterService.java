@@ -77,12 +77,11 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
     protected boolean doEnable(InspectitConfig configuration) {
         try {
             OtlpMetricsExporterSettings otlp = configuration.getExporters().getMetrics().getOtlp();
-            AggregationTemporalitySelector aggregationTemporalitySelector = otlp.getPreferredTemporality() == AggregationTemporality.DELTA ? AggregationTemporalitySelector.deltaPreferred() : AggregationTemporalitySelector.alwaysCumulative();
 
             switch (otlp.getProtocol()) {
                 case GRPC: {
                     OtlpGrpcMetricExporterBuilder metricExporterBuilder = OtlpGrpcMetricExporter.builder()
-                            .setAggregationTemporalitySelector(aggregationTemporalitySelector)
+                            //.setAggregationTemporalitySelector(aggregationTemporalitySelector)
                             .setEndpoint(otlp.getEndpoint())
                             .setCompression(otlp.getCompression().toString())
                             .setTimeout(otlp.getTimeout());
@@ -96,7 +95,6 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
                 }
                 case HTTP_PROTOBUF: {
                     OtlpHttpMetricExporterBuilder metricExporterBuilder = OtlpHttpMetricExporter.builder()
-                            .setAggregationTemporalitySelector(aggregationTemporalitySelector)
                             .setEndpoint(otlp.getEndpoint())
                             .setCompression(otlp.getCompression().toString())
                             .setTimeout(otlp.getTimeout());
