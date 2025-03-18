@@ -61,43 +61,43 @@ If you have issues with Internet connectivity, check out the following post: [WS
 ### Demo #1 - Prometheus, Grafana and Jaeger
 
 Uses Prometheus Server for metrics gathering and storage, Grafana for Dashboards.
-Traces are exported to Jaeger.
+Traces are exported to Jaeger via OpenTelemetry collector.
 
 * File: `docker-compose-prometheus-jaeger.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=jaeger-collector,inspectit-oce-eum-server,prometheus-server&dashboarding=grafana&visualization=jaeger-query&usedges=jaeger-query:grafana&showCommercial=true&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=opentelemetry-collector,inspectit-oce-eum-server,jaeger-collector,prometheus-server&visualization=jaeger-query&dashboarding=grafana&usedges=jaeger-query:grafana,inspectit-oce-eum-server:jaeger-collector,inspectit-ocelot-agent:jaeger-collector,opentelemetry-collector:prometheus-server&showCommercial=true&showFormats=false)
+
 
 ![Demo scenario using Prometheus and Jaeger](assets/demo-landscape-prometheus-jaeger.png)
 
 In this scenario the following components are preconfigured and used for monitoring:
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
 - *inspectIT Ocelot EUM server:* Records the user's behaviour or actions while using the demo application.
-- *Prometheus Server:* Gathers metrics exposed by the agent.
-- *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent.
+- *Prometheus Server:* Gathers metrics exposed by the agent & EUM server.
+- *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent & EUM server.
+- *OpenTelemetry collector:* Receives traces by the agent & EUM server and forwards them to Jaeger.
 - *Jaeger:* Jaeger is used to store and query all recorded traces.
 
 You can access Grafana through http://localhost:3000 and the configuration server via http://localhost:8090.  
 The traces can be viewed in Jaeger on http://localhost:16686.  
 Prometheus can be accessed through http://localhost:9090.
 
-:::note
-Currently the EUM-Server dashboards are only supported for the InfluxDB demos. You may use the `Explore` view in Grafana to view the EUM server metrics.
-:::
-
 ### Demo #2 - InfluxDB and Jaeger
 
 Uses InfluxDB for metrics storage and Grafana for Dashboards.
-Traces are exported to Jaeger.
+Traces are exported to Jaeger via OpenTelemetry Collector.
 
 * File: `docker-compose-influxdb-jaeger.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=jaeger-collector,inspectit-oce-eum-server&storage=influx-db&visualization=jaeger-query&dashboarding=grafana&alerting=grafana&usedges=jaeger-query:grafana&showCommercial=false&showFormats=false)
-* 
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=opentelemetry-collector,inspectit-oce-eum-server,jaeger-collector&storage=influxdata-influxdb&visualization=jaeger-query&dashboarding=grafana&usedges=jaeger-query:grafana,inspectit-oce-eum-server:jaeger-collector,inspectit-ocelot-agent:jaeger-collector&showCommercial=true&showFormats=false)
+
+
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-jaeger.png)
 
 In this scenario the following components are preconfigured and used for monitoring:
 - *inspectIT Ocelot agent:* Instruments all the target demo application components.
 - *inspectIT Ocelot EUM server:* Records the user's behaviour or actions while using the demo application.
 - *InfluxDB:* Stores metric data exported by OpenCensus as time series.
-- *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [InfluxQL](https://docs.influxdata.com/influxdb/v1.8/query_language/) is used to query the data from InfluxDB.
+- *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent & EUM server. The query language [InfluxQL](https://docs.influxdata.com/influxdb/v1.8/query_language/) is used to query the data from InfluxDB.
+- *OpenTelemetry collector:* Receives traces by the agent & EUM server and forwards them to Jaeger.
 - *Jaeger:* Jaeger is used to store and query all recorded traces.
 
 You can access Grafana through http://localhost:3000 and the configuration server via http://localhost:8090.
@@ -106,10 +106,10 @@ The traces can be viewed in Jaeger on http://localhost:16686.
 ### Demo #3 - InfluxDB and Zipkin
 
 Uses InfluxDB for metrics storage and Grafana for Dashboards.
-Traces are exported to Zipkin.
+Traces are exported to Zipkin directly or via OpenTelemetry collector.
 
 * File: `docker-compose-influxdb-zipkin.yml`
-* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=zipkin-server,inspectit-oce-eum-server&storage=influx-db&visualization=zipkin-server&dashboarding=grafana&alerting=grafana&showCommercial=false&showFormats=false)
+* [OpenAPM Landscape](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=inspectit-oce-eum-server,opentelemetry-collector&dashboarding=grafana&storage=influxdata-influxdb&visualization=zipkin-server&usedges=opentelemetry-collector:prometheus-server,jaeger-query:grafana,inspectit-ocelot-agent:jaeger-collector,inspectit-oce-eum-server:jaeger-collector,inspectit-oce-eum-server:zipkin-server,inspectit-ocelot-agent:opentelemetry-collector&showCommercial=true&showFormats=false)
 
 ![Demo scenario using InfluxDB and Zipkin](assets/demo-landscape-influxdb-zipkin.png)
 
@@ -118,14 +118,11 @@ In this scenario the following components are preconfigured and used for monitor
 - *inspectIT Ocelot EUM server:* Records the user's behaviour or actions while using the demo application.
 - *InfluxDB:* Stores metric data exported by OpenCensus as time series.
 - *Grafana:* Provides predefined example Dashboards visualizing the metrics collected by the inspectIT Ocelot agent. The query language [InfluxQL](https://docs.influxdata.com/influxdb/v1.8/query_language/) is used to query the data from InfluxDB.
+- *OpenTelemetry collector:* Receives traces by the EUM server and forwards them to Zipkin.
 - *Zipkin:* Zipkin is used to store and query all recorded traces.
 
 You can access Grafana through http://localhost:3000 and the configuration server via http://localhost:8090.
 The traces can be viewed in Zipkin on http://localhost:9411.
-
-:::note
-Currently, of the EUM dashboards only the Beacons one is working for this scenario.
-:::
 
 ## Demo Grafana Dashboards
 The InfluxDB and Prometheus demo scenarios include the following predefined Grafana Dashboards:
@@ -159,12 +156,14 @@ The demo starts the following services, of which each is instrumented with an in
 - *visits-service*
 - *vets-service*
 - *api-gateway*
-
+- *genai-service*
+- *eum-server*
 
 ## Load Test
 
-All demo scenarios launch with a load test written in [artillery](https://artillery.io/) that simulates user behavior. 
-For 10 minutes approximately every 3 seconds a new virtual user is created which either looks up a random owner from the database or edits the pet type of an existing animal. 
+All demo scenarios launch with a load test written in [Locust](https://locust.io/) that simulates user behavior. 
+You can access the UI via http://localhost:8089 to view statistics.
+There are 10 virtual users who look up a random owner from the database, edit the pet type of existing animals or creates new pets. 
 Therefore, no real user interaction with the PetClinic is needed to generate data.
 
 ## Further Scenarios
