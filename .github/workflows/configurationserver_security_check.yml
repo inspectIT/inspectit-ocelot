@@ -1,6 +1,7 @@
 name: Automatic Security Check Configuration-Server
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 8 1,15 * *" # At 08:00 on day-of-month 1 and 15
 
