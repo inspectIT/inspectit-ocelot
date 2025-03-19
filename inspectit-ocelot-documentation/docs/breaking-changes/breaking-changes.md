@@ -8,8 +8,10 @@ title: Breaking Changes
 ### Jaeger exporter replaced by OTLP exporter
 
 The Jaeger tracing exporter was fully removed, since OpenTelemetry has migrated away from it.
-You should use the OTLP exporter instead.
-Find more information about topic here: https://opentelemetry.io/blog/2023/jaeger-exporter-collector-migration/
+You should use the OTLP tracing exporter instead.
+Since version 2.6.2 the EUM Server does also no longer support the Jaeger exporter for traces.
+
+Find more information about this topic [here](https://opentelemetry.io/blog/2023/jaeger-exporter-collector-migration/). 
 
 ## Breaking changes in 2.6.0
 
