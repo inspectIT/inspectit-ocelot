@@ -35,7 +35,7 @@ If a user wants to make a change to a configuration file, but the version of the
 the user must do the following:
 
 * First, the user must perform the change, which allows the change to be tracked on the workspace branch.
-* Afterwards the change must be approved and promoted by a user who has promotion rights. Only through promotion the changes to a file will be transferred to the `LIVE` branch.
+* Afterward the change must be approved and promoted by a user who has promotion rights. Only through promotion the changes to a file will be transferred to the `LIVE` branch.
 
 :::note
 It is important to note that only whole files and not individual changes can be promoted. This means that if two different users have edited a single file it is only possible to promote the whole file and not just the changes of a specific user.
@@ -82,6 +82,17 @@ You can provide a custom mail suffix in the following settings:
 inspectit-config-server:
   mail-suffix: @my_mail.com
 ```
+
+## History View
+
+The configuration server versions every file for each promotion. 
+You can view the history of file changes in the _Versioning_ sidebar of the configuration or agent mappings page.
+The history displays for each promotion the ID, date and user who applied the promotion.
+When selecting a specific version, the configurations will be reverted to the state of this exact version.
+You can only edit configurations when selecting the latest version in WORKSPACE.
+Furthermore, you can also examine the current state of the LIVE branch, which resembles the last applied promotion.
+
+![Configuration Server's history view](assets/history-view.png)
 
 ## External Changes
 
