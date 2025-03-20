@@ -13,9 +13,14 @@ on:
       - '.github/**'
       - '.circleci/**'
   pull_request:
-    paths:
-      - '.github/workflows/configdocsgenerator_test.yml'
-      - 'components/inspectit-ocelot-configdocsgenerator/**'
+    paths-ignore:
+      - 'inspectit-ocelot-documentation/**'
+      - 'resources/**'
+      - 'codequality/**'
+      - '**.md'
+      - '**.txt'
+      - '.github/**'
+      - '.circleci/**'
   workflow_call:
 
 jobs:
