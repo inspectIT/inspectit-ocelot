@@ -13,11 +13,14 @@ on:
       - '.github/**'
       - '.circleci/**'
   pull_request:
-    paths:
-      - '.github/workflows/configurationserver_test.yml'
-      - 'components/inspectit-ocelot-configurationserver/**'
-      - 'gradle.properties'
-      - '!components/inspectit-ocelot-configurationserver/README.md'
+    paths-ignore:
+      - 'inspectit-ocelot-documentation/**'
+      - 'resources/**'
+      - 'codequality/**'
+      - '**.md'
+      - '**.txt'
+      - '.github/**'
+      - '.circleci/**'
   workflow_call:
 
 jobs:
