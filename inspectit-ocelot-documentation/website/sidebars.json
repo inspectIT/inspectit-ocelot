@@ -63,7 +63,8 @@
       "config-server/config-docs",
       "config-server/log-config",
       "config-server/yaml-editor",
-      "config-server/status-table-view"
+      "config-server/status-table-view",
+      "config-server/alerting"
     ],
     "Breaking Changes": ["breaking-changes/Breaking Changes"]
   }
