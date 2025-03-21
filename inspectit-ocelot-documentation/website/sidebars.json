@@ -37,6 +37,7 @@
       "instrumentation/instrumentation",
       "instrumentation/scopes",
       "instrumentation/rules",
+      "instrumentation/business-transactions",
       "instrumentation/code-style",
       "instrumentation/special-sensors",
       "instrumentation/process"
