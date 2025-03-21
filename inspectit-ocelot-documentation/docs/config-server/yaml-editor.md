@@ -1,9 +1,23 @@
 ---
-id: syntax-highlighting
-title: YAML Editor Syntax Highlighting
+id: yaml-editor
+title: YAML Editor
 ---
 
-The *inspectIT Configuration Server* uses a custom Mode for [Syntax Highlighting in its Ace Editor](https://ace.c9.io/#nav=higlighter) based on the editor's default YAML Highlighting to help with writing your configurations.
+The *inspectIT Configuration Server* provides a YAML editor to write agent configuration all by yourself.
+It uses a custom Mode for [Syntax Highlighting in its Ace Editor](https://ace.c9.io/#nav=higlighter) based on the editor's default YAML Highlighting to help with writing your configurations.
+
+## Auto-completion
+
+To simplify writing configurations, the editor provides auto-completion for properties.
+You can use the completion by pressing CTRL + SPACE (or CMD + SPACE). 
+
+The editor will provide you multiple options to complete a property. Note that the suggestions will depend on your 
+current indentation. Properties labeled with _Ocelot_ resemble properties of the inspectIT configuration model and are
+most likely what you are looking for.
+Properties labeled with _local_ resemble properties used earlier in the editor.
+
+
+![Example for autocompletion](assets/autocompletion-example.png)
 
 ## Additions to the standard YAML Highlighting
 

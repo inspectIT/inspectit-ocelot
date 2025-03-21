@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - 'inspectit-ocelot-documentation/**'
+      - 'resources/**'
+      - 'codequality/**'
+      - '**.md'
+      - '**.txt'
+      - '.github/**'
+      - '.circleci/**'
   pull_request:
     paths:
       - 'components/inspectit-ocelot-configurationserver-ui/**'

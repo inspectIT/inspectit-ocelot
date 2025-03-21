@@ -7,19 +7,19 @@ Agent mappings are used to determine which agent receives which configuration. H
 folders can be defined, which serve as the basis for the resulting configuration. 
 Furthermore, you can specify which branch (`WORKSPACE` or `LIVE`) the mapping should use to obtain the configuration files.
 
-It's important to note that the first matching agent mapping will be used to determine which configuration is shipped to an agent.
+It's important to note that the **first matching** agent mapping will be used to determine which configuration is shipped to an agent.
 Additional agent mappings which may also match the attributes list sent by an agent will be ignored.
-See section [HTTP-based Configuration](configuration/external-configuration-sources.md#http-based-configuration) for
-information on how to specify which attributes will be sent by an agent.
+Thus, mappings at the top of the list are higher prioritized.
+See section [HTTP-based Configuration](configuration/external-configuration-sources.md#http-based-configuration) for information on how to specify which attributes will be sent by an agent.
 
 An agent mapping consists of the following properties:
 
-| Property | Default | Note |
-| --- | --- | --- |
-| `name` | - | The name of the agent mapping. |
-| `sources` | `[]` | A list of paths. All configuration files matching this list (Directories are resolved recursively) will be merged together and returned to matching agents. |
-| `attributes` | `{}` | A map of attributes. This map is used to determine whether an agent will match this agent mapping, thus, get its configuration. |
-| `sourceBranch` | `WORKSPACE` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE` |
+| Property       | Default     | Note                                                                                                                                                                                                                                 |
+|----------------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`         | -           | The name of the agent mapping.                                                                                                                                                                                                       |
+| `sources`      | `[]`        | A list of paths. Sources from the top of the list are higher prioritized than lower ones. All configuration files matching this list (Directories are resolved recursively) will be merged together and returned to matching agents. |
+| `attributes`   | `{}`        | A map of attributes. This map is used to determine whether an agent will match this agent mapping, thus, get its configuration.                                                                                                      |
+| `sourceBranch` | `WORKSPACE` | Defines which branch is used as source for the configuration files. Supported values are: `WORKSPACE`, `LIVE`                                                                                                                        |
 
 
 The configuration server is shipped with a default agent mapping.
@@ -41,8 +41,8 @@ You can find more detailed information about file staging and promotion [here](c
 :::
 
 Since the version `2.6.0` the configuration for the agent mappings itself will also be included into the git staging. For all agent mappings 
-the configuration is stored in one file. After one or several agent mappings have been edited, the changes will also
-appear on the promotion page. The promotion of the agent mappings configuration works directly like the promotion of agent configuration files.
+the configuration is stored in one YAML file. After one or several agent mappings have been edited, the changes will also
+appear on the promotion page. The promotion of the agent mappings configuration works the same as the promotion of agent configuration files.
 
 Additionally, it is possible to select a source branch (`WORKSPACE` or `LIVE`) for the agent mappings configuration itself. 
 This will determine, whether changes in the agent mappings should be applied directly or only after the promotion of the 

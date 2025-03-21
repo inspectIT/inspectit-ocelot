@@ -6,7 +6,7 @@ title: Configuration Code Style
 Below you can see a pseudo example configuration file with comments regarding style conventions that inspectIT Ocelot's default configuration follows.
 They might help you with making your configurations easy to read and understand.
 
-If you are using the inspectIT Ocelot configuration server to write and/or manage your configurations, also consider the guidelines for its [Syntax Highlighter](config-server/syntax-highlighting.md#guidelines).  
+If you are using the inspectIT Ocelot configuration server to write and/or manage your configurations, also consider the guidelines for its [Syntax Highlighter](config-server/yaml-editor.md#guidelines).  
 
 Similarly, for writing documentation into your configurations see the section [Configuration Docs](../config-server/config-docs.md).
 
