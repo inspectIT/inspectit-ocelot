@@ -314,7 +314,8 @@ We distinguish between to different types of tags:
 | `beacon` | Beacon tags define tags, whose value is resolved by an incoming beacon entry. |
 
 For example, the following configuration specifies the two tags `APP` and `URL`.
-The tag `APP` will always be resolved to the value `my-application`, where the tag `URL` will be resolved to the value of the field `u` of a received beacon.
+The tag `APP` will always be resolved to the value `my-application`, where the tag `URL` will be resolved to the value 
+of the field `u` of a received beacon. Additionally, if the field `u` is null, an empty string will be used instead.
 
 ```YAML
 inspectit-eum-server:
@@ -324,6 +325,7 @@ inspectit-eum-server:
     beacon:
       URL: 
         input: u
+        null-as-empty: true
 ```
 
 Tags configured via `beacon` offer some additional flexibility: In addition to simply copying the input value, 
