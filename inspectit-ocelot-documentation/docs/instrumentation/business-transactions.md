@@ -12,7 +12,7 @@ inspectIT Ocelot allows you to link such business transactions with the correspo
 This chapter assumes you are already familiar with instrumentation. Please make sure to read the previous chapters about [scopes](instrumentation/scopes.md), [rules & actions](instrumentation/rules.md).
 :::
 
-## Detect Business Transactions
+## Detecting Business Transactions
 
 First of all, it is necessary to detect which business transaction currently occurs. 
 There are **no strict rules** on how to detect transactions. Most likely it will depend on your specific case.
@@ -25,7 +25,7 @@ Below there are some examples on how to detect business transactions in the cont
 The detected business transaction will be written into the variable `business_transaction`, which later may be used
 in metrics or traces.
 
-### Detect Business Transactions via HTTP path
+### Detecting Business Transactions via HTTP path
 
 This example uses the HTTP paths of incoming requests to our service to derive the business transaction from it.
 Let's assume our service uses the Javax HTTP Servlet.
@@ -57,13 +57,13 @@ inspectit:
       # use the template in other rules
       r_other_rule:
         include:
-          r_detect_business_transaction_http: true
+          r_detect_business_transaction_via_http: true
 ```
 
-### Detect Business Transactions via Java code
+### Detecting Business Transactions via Java code
 
 This example uses specific Java objects to detect the business transaction.
-In this case, we examine an `Order` object to get the type of order via action 
+In this case, we examine an `Order` object to get the type of order via action.
 The order type will be used as business transaction. The rule acts as a template and can be included in other rules.
 
 ```yaml
@@ -92,11 +92,11 @@ inspectit:
 ```
 
 
-### Detect Business Transactions via Scope
+### Detecting Business Transactions via Scope
 
 This example uses the methods of a Java class to determine the business transaction.
 The class supports three types of orders: discount, regular and business.
-Since the business transaction depends on a specific class, we cannot create a template rule.
+Since the business transaction depends on a specific class, we probably cannot use the rule as a template.
 
 ```yaml
 inspectit:
@@ -136,9 +136,10 @@ For instance, we would like to reuse the previously mentioned tag `business_tran
 
 In short, **down propagation** will allow you to use the tag in every rule after the rule, which detected the business transaction.
 **Up propagation** will make the tag available in previous rules as well. 
-This will be useful, if you cannot detect the business transaction at the entrypoint of your service where the root span is created.
+This will be useful, if you cannot detect the business transaction at the entrypoint of your service where for instance
+the root span is created.
 If the business transaction was detected later, because of up propagation you will be able to use it as an attribute 
-in the span of the entrypoint.
+in the span of the entrypoint, even tough the data was only available after that.
 
 For more detailed information, view the section [Data propagation](instrumentation/rules.md#data-propagation).
 
@@ -169,7 +170,7 @@ inspectit:
           '[method/duration/sum]':
             aggregation: SUM
             tags:
-              'method_name' : true
+              'method_name': true
               'business_transaction': true # business tag
           '[method/duration/count]':
             aggregation: COUNT
@@ -197,7 +198,7 @@ inspectit:
       # use the template in other rules
       r_other_rule:
         include:
-          r_record_business_transaction: true
+          r_metrics_business_transaction: true
 ```
 
 ## Extending Traces
@@ -222,5 +223,5 @@ inspectit:
       # use the template in other rules
       r_other_rule:
         include:
-          r_record_business_transaction: true
+          r_tracing_business_transaction: true
 ```
