@@ -17,10 +17,11 @@ parts of the instrumentation by disabling the particular rules.
 - Furthermore, you can view the complete default configuration in [GitHub](https://github.com/inspectIT/inspectit-ocelot/tree/master/inspectit-ocelot-config/src/main/resources/rocks/inspectit/ocelot/config/default) 
 or in the [Configuration Server](config-server/overview.md)
 
-> **Note that the default instrumentation does not always apply for more modern technologies**, like Spring Boot 3 or Tomcat 10.
+> **Note, the default instrumentation does not always apply for more modern technologies**, like Spring Boot 3 or Tomcat 10.
 > As the agent was originally developed to support mainly Java 8 applications, 
-> you have to overwrite the default instrumentation so that it works again. 
+> you have to overwrite the default instrumentation to work again. 
 > - View [Upgrade to Jakarta Namespace](default-instrumentation/jakarta.md) to enable instrumentation for the Jakarta HTTP Servlet.
+> - View [Upgrade to Apache Client 5](default-instrumentation/apache-client5.md) to enable instrumentation for the Apache Client 5.
 
 ---
 The default configuration in the Configuration Server:

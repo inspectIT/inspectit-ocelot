@@ -37,13 +37,15 @@
       "instrumentation/instrumentation",
       "instrumentation/scopes",
       "instrumentation/rules",
+      "instrumentation/business-transactions",
       "instrumentation/code-style",
       "instrumentation/special-sensors",
       "instrumentation/process"
     ],
     "Default Instrumentation": [
       "default-instrumentation/default-instrumentation",
-      "default-instrumentation/jakarta"
+      "default-instrumentation/jakarta",
+      "default-instrumentation/apache-client5"
     ],
     "End User Monitoring": [
       "enduser-monitoring/enduser-monitoring-server",
@@ -62,8 +64,9 @@
       "config-server/user-authentication",
       "config-server/config-docs",
       "config-server/log-config",
-      "config-server/syntax-highlighting",
-      "config-server/status-table-view"
+      "config-server/yaml-editor",
+      "config-server/status-table-view",
+      "config-server/alerting"
     ],
     "Breaking Changes": ["breaking-changes/Breaking Changes"]
   }
