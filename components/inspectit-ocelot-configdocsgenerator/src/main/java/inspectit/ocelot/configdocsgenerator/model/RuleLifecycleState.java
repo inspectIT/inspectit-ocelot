@@ -5,12 +5,20 @@ import lombok.RequiredArgsConstructor;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
 
 /**
- * Enum with possible field names in {@link InstrumentationRuleSettings} for entry, exit, etc. ActionCall settings.
+ * Enum with possible method names in {@link InstrumentationRuleSettings} for entry, exit, etc. ActionCall settings.
  */
 @Getter
 @RequiredArgsConstructor
 public enum RuleLifecycleState {
-    PRE_ENTRY("preEntry"), ENTRY("entry"), POST_ENTRY("postEntry"), PRE_EXIT("preExit"), EXIT("exit"), POST_EXIT("postExit");
 
-    private final String key;
+    PRE_ENTRY("getPreEntry", "preEntry"),
+    ENTRY("getEntry", "entry"),
+    POST_ENTRY("getPostEntry", "postEntry"),
+    PRE_EXIT("getPreExit", "preExit"),
+    EXIT("getExit", "exit"),
+    POST_EXIT("getPostExit", "postExit"),;
+
+    private final String methodName;
+
+    private final String propertyName;
 }

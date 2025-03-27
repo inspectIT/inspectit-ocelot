@@ -16,7 +16,6 @@ ioJsonwebtokenJjwtApi = { module = "io.jsonwebtoken:jjwt-api", version.ref = "io
 ioJsonwebtokenJjwtImpl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtJackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "ioJsonwebtoken" }
 orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.17.0"
-commonsBeanutils = "commons-beanutils:commons-beanutils:1.10.1"
 orgAwaitility = "org.awaitility:awaitility:4.3.0"
 orgEclipseJgitOrgEclipseJgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "orgEclipseJgit" }
 orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "orgEclipseJgit" }

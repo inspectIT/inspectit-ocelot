@@ -49,7 +49,7 @@ public class RuleDocsTest {
     public static Map<String, Map<String, ActionCallDocs>> getEmptyActionCallsMap() {
         Map<String, Map<String, ActionCallDocs>> actionCallsMap = new HashMap<>();
         for (RuleLifecycleState ruleLifecycleState : RuleLifecycleState.values()) {
-            actionCallsMap.put(ruleLifecycleState.getKey(), new TreeMap<>());
+            actionCallsMap.put(ruleLifecycleState.getPropertyName(), new TreeMap<>());
         }
         return actionCallsMap;
     }

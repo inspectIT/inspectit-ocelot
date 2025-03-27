@@ -42,7 +42,6 @@ comH2databaseH2 = "com.h2database:h2:2.2.224"
 comLinecorpArmeriaArmeriaGrpcProtocol = { module = "com.linecorp.armeria:armeria-grpc-protocol", version.ref = "comLinecorpArmeria" }
 comLinecorpArmeriaArmeriaJunit5 = { module = "com.linecorp.armeria:armeria-junit5", version.ref = "comLinecorpArmeria" }
 comSquareupOkio = "com.squareup.okio:okio:3.10.2"
-commonsBeanutils = "commons-beanutils:commons-beanutils:1.10.0"
 commonsIo = "commons-io:commons-io:2.18.0"
 ioGithubNetmikeyLogunitLogunitCore = { module = "io.github.netmikey.logunit:logunit-core", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubNetmikeyLogunitLogunitLogback = { module = "io.github.netmikey.logunit:logunit-logback", version.ref = "ioGithubNetmikeyLogunit" }
@@ -77,7 +76,6 @@ log4j = "log4j:log4j:1.2.17"
 netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.14.19"
 # @pin logback 7.* is the last version for Java 8
 netLogstashLogbackLogstashLogbackEncoder = "net.logstash.logback:logstash-logback-encoder:7.4"
-orgApacheCommonsCommonsCollections4 = "org.apache.commons:commons-collections4:4.4"
 orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.17.0"
 orgApacheCommonsCommonsMath3 = "org.apache.commons:commons-math3:3.6.1"
 orgApacheHttpcomponentsHttpclient = "org.apache.httpcomponents:httpclient:4.5.14"
