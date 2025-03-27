@@ -2,9 +2,9 @@
 ioJsonwebtoken = "0.12.6"
 orgEclipseJgit = "7.1.0.202411261347-r"
 orgMockito = "5.15.2"
-orgJunitJupiter = "5.11.4"
-orgSpringframeworkBoot = { strictly = "3.4.2" }
-orgSpringframeworkSecurity = "6.4.2"
+orgJunitJupiter = "5.12.1"
+orgSpringframeworkBoot = { strictly = "3.4.4" }
+orgSpringframeworkSecurity = "6.4.4"
 
 [libraries]
 comGoogleCodeGson = "com.google.code.gson:gson:2.12.1"
@@ -37,7 +37,7 @@ orgSpringframeworksecuritySpringSecurityConfig = { module = "org.springframework
 chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.5.16"
 chQosLogbackLogbackCore = "ch.qos.logback:logback-core:1.5.16"
 orgXerialSqliteJdbc = "org.xerial:sqlite-jdbc:3.48.0.0"
-orgYamlSnakeyaml = "org.yaml:snakeyaml:2.3"
+orgYamlSnakeyaml = "org.yaml:snakeyaml:2.4"
 
 [bundles]
 jgit = [
