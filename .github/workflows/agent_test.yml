@@ -13,6 +13,7 @@ on:
       - '**.txt'
       - '.github/**'
       - '.circleci/**'
+      - 'gradle/configserverlibs.versions.toml'
   pull_request:
     paths-ignore:
       - 'components/**'
@@ -23,6 +24,7 @@ on:
       - '**.txt'
       - '.github/**'
       - '.circleci/**'
+      - 'gradle/configserverlibs.versions.toml'
   workflow_call:
 
 jobs:
