@@ -1,14 +1,15 @@
 [versions]
 ioJsonwebtoken = "0.12.6"
-orgEclipseJgit = "7.1.0.202411261347-r"
-orgMockito = "5.15.2"
-orgJunitJupiter = "5.12.1"
+orgEclipseJgit = "7.2.0.202503040940-r"
+orgMockito = "5.16.1"
+# Take a look at spring version
+orgJunitJupiter = "5.11.4"
 orgSpringframeworkBoot = { strictly = "3.4.4" }
 orgSpringframeworkSecurity = "6.4.4"
 
 [libraries]
 comGoogleCodeGson = "com.google.code.gson:gson:2.12.1"
-comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.0-jre" } }
+comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.6-jre" } }
 comH2databaseH2 = "com.h2database:h2:2.3.232"
 commonsIo = "commons-io:commons-io:2.18.0"
 ioJsonwebtokenJjwtApi = { module = "io.jsonwebtoken:jjwt-api", version.ref = "ioJsonwebtoken" }
@@ -18,7 +19,7 @@ orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.17.0"
 orgAwaitility = "org.awaitility:awaitility:4.2.2"
 orgEclipseJgitOrgEclipseJgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "orgEclipseJgit" }
 orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "orgEclipseJgit" }
-orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:11.3.0"
+orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:11.5.0"
 orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:6.6.6.Final"
 orgJunitJupiterJunitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "orgJunitJupiter" }
 orgJunitJupiterJunitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "orgJunitJupiter" }
@@ -29,14 +30,14 @@ orgSpringframeworkBootSpringBootStarterDataJpa = { module = "org.springframework
 orgSpringframeworkBootSpringBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStartervalidation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "orgSpringframeworkBoot" }
-orgSpringframeworkLdapSpringLdapCore = "org.springframework.ldap:spring-ldap-core:3.2.10"
+orgSpringframeworkLdapSpringLdapCore = "org.springframework.ldap:spring-ldap-core:3.2.11"
 orgSpringframeworkSecuritySpringSecurityLdap = { module = "org.springframework.security:spring-security-ldap", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityTest = { module = "org.springframework.security:spring-security-test", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityWeb = { module = "org.springframework.security:spring-security-web", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworksecuritySpringSecurityConfig = { module = "org.springframework.security:spring-security-config", version.ref = "orgSpringframeworkSecurity" }
-chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.5.16"
-chQosLogbackLogbackCore = "ch.qos.logback:logback-core:1.5.16"
-orgXerialSqliteJdbc = "org.xerial:sqlite-jdbc:3.48.0.0"
+chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.5.18"
+chQosLogbackLogbackCore = "ch.qos.logback:logback-core:1.5.18"
+orgXerialSqliteJdbc = "org.xerial:sqlite-jdbc:3.49.1.0"
 orgYamlSnakeyaml = "org.yaml:snakeyaml:2.4"
 
 [bundles]
