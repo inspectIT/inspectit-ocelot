@@ -8,6 +8,7 @@ on:
       - 'codequality/**'
       - '**.txt'
       - '.github/**'
+      - 'gradle/**'
   push:
     branches:
       - master
@@ -17,6 +18,7 @@ on:
       - 'codequality/**'
       - '**.txt'
       - '.github/**'
+      - 'gradle/**'
 
 jobs:
   test-deploy:
