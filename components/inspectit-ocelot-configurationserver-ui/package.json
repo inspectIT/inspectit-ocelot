@@ -85,5 +85,9 @@
     "file-loader": "^6.2.0",
     "prettier": "^3.1.1",
     "url-loader": "^4.1.1"
+  },
+  "resolutions": {
+    "@babel/helpers": "^7.26.10",
+    "prismjs": "^1.30.0"
   }
 }
