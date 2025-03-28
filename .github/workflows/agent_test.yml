@@ -14,8 +14,8 @@ on:
       - '.github/**'
       - '.circleci/**'
       - 'gradle/configserverlibs.versions.toml'
-      - '**/package.json'
-      - '**/yarn.lock'
+      - 'components/inspectit-ocelot-configurationserver-ui/package.json'
+      - 'components/inspectit-ocelot-configurationserver-ui/yarn.lock'
   pull_request:
     paths-ignore:
       - 'components/**'
@@ -27,8 +27,8 @@ on:
       - '.github/**'
       - '.circleci/**'
       - 'gradle/configserverlibs.versions.toml'
-      - '**/package.json'
-      - '**/yarn.lock'
+      - 'components/inspectit-ocelot-configurationserver-ui/package.json'
+      - 'components/inspectit-ocelot-configurationserver-ui/yarn.lock'
   workflow_call:
 
 jobs:
