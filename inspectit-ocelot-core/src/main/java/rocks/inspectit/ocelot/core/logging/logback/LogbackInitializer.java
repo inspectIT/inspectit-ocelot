@@ -87,7 +87,7 @@ public class LogbackInitializer {
             configurator.setContext(context);
             context.reset();
             recorder.recordEvents(getConfigFileInputStream(config));
-            configurator.doConfigure(recorder.getSaxEventList());
+            configurator.doConfigure(getConfigFileInputStream(config));
         } catch (JoranException je) {
             // StatusPrinter will handle this
         }
