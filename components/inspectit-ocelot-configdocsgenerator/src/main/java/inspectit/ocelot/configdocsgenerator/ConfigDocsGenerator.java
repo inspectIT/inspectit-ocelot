@@ -4,8 +4,7 @@ import inspectit.ocelot.configdocsgenerator.model.*;
 import inspectit.ocelot.configdocsgenerator.parsing.ConfigParser;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
@@ -22,6 +21,8 @@ import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSe
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,7 +38,7 @@ public class ConfigDocsGenerator {
     /**
      * Map of descriptions for special input parameters.
      */
-    Map<String, String> specialInputDescriptions = new HashMap<String, String>() {{
+    Map<String, String> specialInputDescriptions = new HashMap<>() {{
         put("_methodName", "The name of the instrumented method within which this action is getting executed.");
         put("_class", "The class declaring the instrumented method within which this action is getting executed.");
         put("_parameterTypes", "The types of the parameters which the instrumented method declares for which the action is executed.");
@@ -345,9 +346,10 @@ public class ConfigDocsGenerator {
                 if (!field.isSynthetic()) {
                     String fieldName = field.getName();
                     try {
-                        String fieldValue = BeanUtils.getProperty(conditionalActionSettings, fieldName);
+                        Object fieldValue = FieldUtils.readField(conditionalActionSettings, fieldName, true);
+
                         if (fieldValue != null) {
-                            startSpanConditions.put(fieldName, fieldValue);
+                            startSpanConditions.put(fieldName, fieldValue.toString());
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -374,13 +376,14 @@ public class ConfigDocsGenerator {
         Map<String, Map<String, ActionCallDocs>> actionCallsMap = new HashMap<>();
         for (RuleLifecycleState ruleLifecycleState : RuleLifecycleState.values()) {
             try {
-                Map<String, ActionCallSettings> singleStateActionCallMap = (Map<String, ActionCallSettings>) PropertyUtils.getProperty(ruleSettings, ruleLifecycleState.getKey());
+                Map<String, ActionCallSettings> singleStateActionCallMap = getActionsCallMap(ruleSettings, ruleLifecycleState.getMethodName());
+
                 Map<String, ActionCallDocs> actionCallDocs = new TreeMap<>();
                 for (String actionCallKey : singleStateActionCallMap.keySet()) {
                     actionCallDocs.put(actionCallKey, new ActionCallDocs(actionCallKey, singleStateActionCallMap.get(actionCallKey)
                             .getAction()));
                 }
-                actionCallsMap.put(ruleLifecycleState.getKey(), actionCallDocs);
+                actionCallsMap.put(ruleLifecycleState.getPropertyName(), actionCallDocs);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -388,4 +391,27 @@ public class ConfigDocsGenerator {
         return actionCallsMap;
     }
 
+    /**
+     * Calls a specific method on the instrumentation rule to access specific actions.
+     * Basically, we want to call getter-methods to get specific actions, like getEntry(), getExit() etc.
+     *
+     * @param settings the instrumentation rule
+     * @param methodName the method to call
+     * @return the result of the called method
+     */
+    private Map<String, ActionCallSettings> getActionsCallMap(InstrumentationRuleSettings settings, String methodName) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Class<?> ruleClass = settings.getClass();
+        Method getActionsMethod = null;
+
+        for(Method method : ruleClass.getMethods()) {
+            if(methodName.equals(method.getName())) {
+                getActionsMethod = method;
+                break;
+            }
+        }
+        if(getActionsMethod == null) throw new NoSuchMethodException("Method could not be found: " + methodName);
+
+        Map<String, ActionCallSettings> actionsCallMap = (Map<String, ActionCallSettings>) getActionsMethod.invoke(settings);
+        return actionsCallMap;
+    }
 }

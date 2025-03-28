@@ -16,10 +16,7 @@ dependencies {
     implementation(
             project(':inspectit-ocelot-config'),
             configServerLibs.chQosLogbackLogbackClassic,
-            libs.orgApacheCommonsCommonsLang3,
-            libs.commonsBeanutils,
-            // Update dependency, due to Out-of-Support
-            libs.orgApacheCommonsCommonsCollections4,
+            configServerLibs.orgApacheCommonsCommonsLang3,
 
             configServerLibs.orgSpringframeworkBootSpringBootStarterWeb,
             configServerLibs.orgYamlSnakeyaml

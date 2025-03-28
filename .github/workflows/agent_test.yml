@@ -13,6 +13,9 @@ on:
       - '**.txt'
       - '.github/**'
       - '.circleci/**'
+      - 'gradle/configserverlibs.versions.toml'
+      - '**/package.json'
+      - '**/yarn.lock'
   pull_request:
     paths-ignore:
       - 'components/**'
@@ -23,6 +26,9 @@ on:
       - '**.txt'
       - '.github/**'
       - '.circleci/**'
+      - 'gradle/configserverlibs.versions.toml'
+      - '**/package.json'
+      - '**/yarn.lock'
   workflow_call:
 
 jobs:
