@@ -1,14 +1,14 @@
 [versions]
-comLinecorpArmeria = "1.31.3"
+comLinecorpArmeria = "1.32.3"
 ioGithubNetmikeyLogunit = "2.0.0"
-ioGrpc = "1.70.0"
+ioGrpc = "1.71.0"
 # Ensure to adapt the netty version when changing the OpenCensus version
 # If you rename or move this variable to another file, adjust the release-workflow
 ioOpencensus = "0.31.1"
-ioOpentelemetry = "1.47.0"
-ioOpentelemetryAlpha = "1.47.0-alpha"
+ioOpentelemetry = "1.48.0"
+ioOpentelemetryAlpha = "1.48.0-alpha"
 ioOpentelemetryProto = "1.5.0-alpha"
-ioOpentelemetrySemconv = "1.29.0-alpha"
+ioOpentelemetrySemconv = "1.30.0"
 orgApacheLoggingLog4j = "2.24.3"
 # @pin 10+ does not support Java 8 - Maintain latest 9 version
 orgEclipseJetty = "9.4.57.v20241219"
@@ -17,12 +17,12 @@ orgEclipseJetty = "9.4.57.v20241219"
 orgJunitJupiter = "5.9.3"
 # @pin mockito 5 requires Java 11
 orgMockito = "4.11.0"
-orgSlf4j = "2.0.16"
+orgSlf4j = "2.0.17"
 # @pin 5.3.* is the last version to support Java 8
 orgSpringframework = "5.3.39"
 # @pin 2.7.18 is the latest release which runs on Java 8, this version marks the end of open source support for SB 2.x
 orgSpringframeworkBoot = "2.7.18"
-orgTestcontainers = "1.20.4"
+orgTestcontainers = "1.20.6"
 # @pin resilience4j 2.* uses Java 17 APIs
 ioGithubResilience4j = "1.7.1"
 
@@ -51,7 +51,7 @@ ioGrpcGrpcNettyShaded = { module = "io.grpc:grpc-netty-shaded", version.ref = "i
 ioGrpcGrpcStub = { module = "io.grpc:grpc-stub", version.ref = "ioGrpc" }
 # The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
 # See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
-ioNettyNettyTcnativeBoringsslStatic = "io.netty:netty-tcnative-boringssl-static:2.0.69.Final"
+ioNettyNettyTcnativeBoringsslStatic = "io.netty:netty-tcnative-boringssl-static:2.0.70.Final"
 # Ensure to adapt the netty version when changing the OpenCensus version
 ioOpencensusOpencensusApi = { module = "io.opencensus:opencensus-api", version.ref = "ioOpencensus" }
 ioOpencensusOpencensusImpl = { module = "io.opencensus:opencensus-impl", version.ref = "ioOpencensus" }
@@ -85,14 +85,13 @@ orgApacheLoggingLog4jLog4jCore = { module = "org.apache.logging.log4j:log4j-core
 orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0.98"
 orgAssertjAssertjCore = "org.assertj:assertj-core:3.27.3"
 orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.27.3"
-orgAwaitility = "org.awaitility:awaitility:4.2.2"
+orgAwaitility = "org.awaitility:awaitility:4.3.0"
 # @pin Jetty 9.4.* is the last version to support java 8
 orgEclipseJettyJettyServer = { module = "org.eclipse.jetty:jetty-server", version.ref = "orgEclipseJetty" }
 # @pin HibernateValidator 6.* is the last version to support java 8
 orgHibernateValidatorHibernateValidator = "org.hibernate.validator:hibernate-validator:6.2.5.Final"
-orgInfluxdbInfluxdbJava = "org.influxdb:influxdb-java:2.24"
+orgInfluxdbInfluxdbJava = "org.influxdb:influxdb-java:2.25"
 orgJavassist = "org.javassist:javassist:3.30.2-GA"
-orgJunitJupiterJunitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "orgJunitJupiter" }
 orgJunitJupiterJunitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "orgJunitJupiter" }
 orgJunitJupiterJunitJupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "orgJunitJupiter" }
 orgMockitoMockitoCore = { module = "org.mockito:mockito-core", version.ref = "orgMockito" }
@@ -102,7 +101,6 @@ orgSlf4jJulToSlf4j = { module = "org.slf4j:jul-to-slf4j", version.ref = "orgSlf4
 orgSlf4jslf4jApi = { module = "org.slf4j:slf4j-api", version.ref = "orgSlf4j" }
 orgSpringdocSpringdocOpenapiUi = "org.springdoc:springdoc-openapi-ui:1.8.0"
 orgSpringframeworkBootSpringBoot = { module = "org.springframework.boot:spring-boot", version.ref = "orgSpringframeworkBoot" }
-orgSpringframeworkBootSpringBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootTest = { module = "org.springframework.boot:spring-boot-test", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkSpringJcl = { module = "org.springframework:spring-jcl", version.ref = "orgSpringframework" }
 orgSpringframeworkSpringTest = { module = "org.springframework:spring-test", version.ref = "orgSpringframework" }
@@ -123,7 +121,7 @@ opentelemetry = [
 ]
 
 [plugins]
-comGithubBenManesVersions = "com.github.ben-manes.versions:0.51.0"
+comGithubBenManesVersions = "com.github.ben-manes.versions:0.52.0"
 # @pin There is a newer version 2.1, but it is not Java 8 compatible
 comGithubJk1DependencyLicenseReport = "com.github.jk1.dependency-license-report:2.0"
 comGithubNodeGradleNode = "com.github.node-gradle.node:7.1.0"
@@ -133,6 +131,7 @@ comPalantirDocker = "com.palantir.docker:0.34.0"
 ioSpringDependencyManagement = "io.spring.dependency-management:1.1.7"
 meChampeauJmh = "me.champeau.jmh:0.7.3"
 nlLittlerobotsVersionCatalogUpdate = "nl.littlerobots.version-catalog-update:0.8.5"
+# version > 2.0 breaks gradle setup
 orgCyclonedxBom = "org.cyclonedx.bom:2.0.0"
 # @pin Dependency-Check 11.* requires Java 11, 10.0.4 does not work with Gradle 7
 orgOwaspDependencycheck = "org.owasp.dependencycheck:10.0.3"
