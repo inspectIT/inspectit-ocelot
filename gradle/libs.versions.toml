@@ -1,5 +1,6 @@
 [versions]
-comLinecorpArmeria = "1.32.3"
+# versions 1.32.* break tests
+comLinecorpArmeria = "1.31.3"
 ioGithubNetmikeyLogunit = "2.0.0"
 ioGrpc = "1.71.0"
 # Ensure to adapt the netty version when changing the OpenCensus version
