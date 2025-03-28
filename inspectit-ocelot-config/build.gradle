@@ -45,6 +45,7 @@ dependencies {
             libs.comFasterxmlJacksonCoreJacksonDatabind,
             // logging
             libs.chQosLogbackLogbackClassic,
+            libs.chQosLogbackLogbackCore
     )
 
     // the api is included as compile only because the open census api has to be decoupled

@@ -55,6 +55,7 @@ dependencies {
             libs.orgJunitJupiterJunitJupiterApi,
             libs.orgMockitoMockitoJunitJupiter,
             libs.chQosLogbackLogbackClassic,
+            libs.chQosLogbackLogbackCore
     )
     testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 }
@@ -132,6 +133,7 @@ dependencies {
     systemTestCompileOnly(
             platform(libs.ioOpentelemetryOpentelemetryBom),
             platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
+            libs.ioOpentelemetryOpentelemetryApi,
             libs.ioOpentelemetryOpentelemetrySdk,
             libs.ioOpentelemetryOpentelemetryOpencensusShim,
             libs.ioOpencensusOpencensusImpl,
@@ -178,8 +180,8 @@ dependencies {
             libs.orgApacheLoggingLog4jLog4jApi,
             libs.orgApacheLoggingLog4jLog4jCore,
             libs.log4j,
-            libs.chQosLogbackLogbackClassic // Used for SLF4J Correlation
-
+            libs.chQosLogbackLogbackClassic, // Used for SLF4J Correlation
+            libs.chQosLogbackLogbackCore
     )
 
     jmh(

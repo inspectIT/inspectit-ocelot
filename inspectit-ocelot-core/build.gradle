@@ -70,6 +70,8 @@ dependencies {
 
             // logging
             libs.chQosLogbackLogbackClassic,
+            libs.chQosLogbackLogbackCore,
+            libs.orgSlf4jslf4jApi,
             // logstash support (JSON logging)
             libs.netLogstashLogbackLogstashLogbackEncoder,
 
@@ -161,7 +163,7 @@ dependencies {
             // LogCapturer
             libs.ioGithubNetmikeyLogunitLogunitCore,
             // jul-slf4j bridge needed to redirect OTEL logs using java.util.logging to logback
-            libs.orgSlf4jJulToSlf4j,
+            libs.orgSlf4jJulToSlf4j
     )
     testRuntimeOnly(
             libs.orgJunitJupiterJunitJupiterEngine,
