@@ -4,7 +4,6 @@ import io.opentelemetry.api.trace.Span;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.*;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestCallable;
 import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestRunnable;
@@ -12,7 +11,6 @@ import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.Deque;
 import java.util.concurrent.*;
@@ -43,12 +41,17 @@ public class LogCorrelationTest {
                 throw new ClassNotFoundException();
             }
 
-            // only this class should be loaded, otherwise we delegate the loading to the parent
+            // only these classes should be loaded, otherwise we delegate the loading to the parent
+            /*
+             * The MDC class needs the LoggerFactory for initialization.
+             * The LoggerFactory should be available within the same Java module as the MDC to be accessible.
+             * Thus, this isolated ClassLoader should be able to load it.
+             */
             if (!name.equals("org.slf4j.MDC") && !name.equals("org.slf4j.LoggerFactory")) {
                 return super.loadClass(name, false);
             }
 
-            System.out.println("Load " + name);
+            System.out.println("Loading: " + name);
 
             try {
                 String replace = name.replace(".", "/");
@@ -67,14 +70,7 @@ public class LogCorrelationTest {
     static void beforeAll() throws Exception {
         IsolatedMdcClassLoader cl = new IsolatedMdcClassLoader();
         Class<?> testMdcClass = cl.loadClass("org.slf4j.MDC");
-        Class<?> testlfClass = cl.loadClass("org.slf4j.LoggerFactory");
         Method getMethod = testMdcClass.getMethod("get", String.class);
-
-        Class<?> lf = Class.forName("org.slf4j.LoggerFactory", true, cl);
-        Method[] ms = testlfClass.getDeclaredMethods();
-        Method getProvider = lf.getDeclaredMethod("getProvider");
-        getProvider.setAccessible(true);
-        Class<?> mdc = Class.forName("org.slf4j.MDC", true, cl);
 
         getTestMdc = (key) -> {
             try {
@@ -145,9 +141,7 @@ public class LogCorrelationTest {
     }
 
     /**
-     * Gets the {@link Span#current() current Span's} trace id
-     *
-     * @return
+     * @return the {@link Span#current() current Span's} trace id
      */
     private static String currentTraceId() {
         return Span.current().getSpanContext().getTraceId();
