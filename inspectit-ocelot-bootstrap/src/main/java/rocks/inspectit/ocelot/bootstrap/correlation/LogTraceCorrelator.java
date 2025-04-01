@@ -4,9 +4,10 @@ import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 /**
- * Implementations of this interface are responsible for putting the active TraceID into the MDCs of all used logging library to enable log correlation.
- * Note that log-correlation is always active, it however gets disabled by using the {@link rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator}
- * implementation.
+ * Implementations of this interface are responsible for putting the active TraceID into the MDCs of all used logging
+ * library to enable log correlation.
+ * Note that log-correlation is always active, it however gets disabled by using the
+ * {@link rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator} implementation.
  */
 public interface LogTraceCorrelator {
 
@@ -14,12 +15,13 @@ public interface LogTraceCorrelator {
      * Executes a given function which starts a scoped span.
      * The scoped span puts the current span onto the context as active and removes it when closed.
      * <p>
-     * This method observers, if the current trace on the context has changed after executing the supplied function.
+     * This method observes, if the current trace on the context has changed after executing the supplied function.
      * If the trace has changed, the MDC of all logging libraries is updated to the new traceID.
-     * In addition the span scoped is wrapped with a closeable which also undos these correlation changes.
+     * In addition, the span scoped is wrapped with a closeable which also undos these correlation changes.
      *
      * @param spanScopeStarter a function which starts (and returns) a scoped span
-     * @return the return value of spanScopeStarter if no MDC update was required. Otherwise a wreapping closeable which closes the span and undos the log correlation.
+     * @return the return value of spanScopeStarter if no MDC update was required. Otherwise, a wrapped closeable
+     * which closes the span and undos the log correlation.
      */
     AutoCloseable startCorrelatedSpanScope(Supplier<? extends AutoCloseable> spanScopeStarter);
 

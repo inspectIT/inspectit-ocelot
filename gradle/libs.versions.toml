@@ -113,6 +113,7 @@ orgTestcontainersJunitJupiter = { module = "org.testcontainers:junit-jupiter", v
 # @pin Version 2.* is not working with the current jackson-dependency of spring 2
 orgYamlSnakeyaml = "org.yaml:snakeyaml:1.33"
 orgeclipseJettyJettyServlet = { module = "org.eclipse.jetty:jetty-servlet", version.ref = "orgEclipseJetty" }
+# No updates available, necessary for our custom logging PiccoloSaxEventRecorder in inspectit-ocelot-core
 piccolo = "piccolo:piccolo:1.0.3"
 rocksInspectitOpencensusInfluxdbExporter = "rocks.inspectit:opencensus-influxdb-exporter:1.2"
 

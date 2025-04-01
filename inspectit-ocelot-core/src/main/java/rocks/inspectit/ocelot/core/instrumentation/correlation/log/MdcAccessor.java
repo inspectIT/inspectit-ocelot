@@ -12,8 +12,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Abstract accessor for logging MDCs. Implementations of this class will be used to interact with a specific MDC, e.g.
- * for injecting values into it.
+ * Abstract accessor for logging MDCs. Implementations of this class will be used to interact with a specific MDC,
+ * e.g. for injecting values into it.
  */
 @Slf4j
 @AllArgsConstructor

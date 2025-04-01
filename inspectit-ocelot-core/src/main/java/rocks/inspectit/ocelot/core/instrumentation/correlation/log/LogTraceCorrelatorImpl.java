@@ -34,7 +34,7 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
     public AutoCloseable startCorrelatedSpanScope(Supplier<? extends AutoCloseable> spanScopeStarter) {
         String oldId = Span.current().getSpanContext().getTraceId();
         AutoCloseable spanScope = spanScopeStarter.get();
-        io.opentelemetry.api.trace.SpanContext newContext = Span.current().getSpanContext();
+        SpanContext newContext = Span.current().getSpanContext();
         String newId = newContext.getTraceId();
         if (oldId.equals(newId) || !newContext.isValid() || !newContext.getTraceFlags().isSampled()) {
             return spanScope;
