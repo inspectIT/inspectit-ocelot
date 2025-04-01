@@ -55,7 +55,9 @@ dependencies {
             libs.orgJunitJupiterJunitJupiterApi,
             libs.orgMockitoMockitoJunitJupiter,
             libs.chQosLogbackLogbackClassic,
-            libs.chQosLogbackLogbackCore
+            libs.chQosLogbackLogbackCore,
+            libs.orgSlf4jJulToSlf4j,
+            libs.orgSlf4jslf4jApi
     )
     testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 }
@@ -181,7 +183,9 @@ dependencies {
             libs.orgApacheLoggingLog4jLog4jCore,
             libs.log4j,
             libs.chQosLogbackLogbackClassic, // Used for SLF4J Correlation
-            libs.chQosLogbackLogbackCore
+            libs.chQosLogbackLogbackCore,
+            libs.orgSlf4jslf4jApi,
+            libs.orgSlf4jJulToSlf4j
     )
 
     jmh(
@@ -281,6 +285,9 @@ task systemTest {
                     //Turns the jigsaw warnings into errors, making the system tests fail in case of illegal accesses
                     jvmArgs "--illegal-access=deny"
                 }
+
+                // uncomment to check sources for classloading
+                //jvmArgs "-verbose:class"
 
                 jvmArgs "-Dinspectit.config.file-based.path=$projectDir/src/system-test/resources/config"
                 // make inspectIT scan the workdir for configs
