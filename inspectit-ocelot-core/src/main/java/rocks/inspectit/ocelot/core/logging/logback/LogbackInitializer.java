@@ -19,7 +19,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * Main logback initializer. Method {@link #initLogging(InspectitConfig)} can be called whenever inspectIT configuration is changed in order to update the logging settings.
+ * Main logback initializer. Method {@link #initLogging(InspectitConfig)} can be called
+ * whenever inspectIT configuration is changed in order to update the logging settings.
  *
  * @author Ivan Senic
  */
@@ -87,7 +88,7 @@ public class LogbackInitializer {
             configurator.setContext(context);
             context.reset();
             recorder.recordEvents(getConfigFileInputStream(config));
-            configurator.doConfigure(recorder.getSaxEventList());
+            configurator.doConfigure(getConfigFileInputStream(config));
         } catch (JoranException je) {
             // StatusPrinter will handle this
         }

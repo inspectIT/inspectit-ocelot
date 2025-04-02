@@ -40,6 +40,7 @@ jobs:
           format: 'HTML'
           out: 'reports/configuration-server-ui'
           args: >
+            --suppression components/inspectit-ocelot-configurationserver-ui/dependencyCheckSuppression.xml
             --disableAssembly
             --disableNodeAudit
             --nvdApiKey ${{ secrets.NVD_API_KEY }}

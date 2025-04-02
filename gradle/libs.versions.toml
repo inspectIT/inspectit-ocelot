@@ -1,6 +1,8 @@
 [versions]
 # versions 1.32.* break tests
 comLinecorpArmeria = "1.31.3"
+# @pin 1.3.* are the latest versions, which support java 8
+chQosLogback= "1.3.15"
 ioGithubNetmikeyLogunit = "2.0.0"
 ioGrpc = "1.71.0"
 # Ensure to adapt the netty version when changing the OpenCensus version
@@ -18,7 +20,8 @@ orgEclipseJetty = "9.4.57.v20241219"
 orgJunitJupiter = "5.9.3"
 # @pin mockito 5 requires Java 11
 orgMockito = "4.11.0"
-orgSlf4j = "2.0.17"
+# use version, which logback is using
+orgSlf4j = "2.0.7"
 # @pin 5.3.* is the last version to support Java 8
 orgSpringframework = "5.3.39"
 # @pin 2.7.18 is the latest release which runs on Java 8, this version marks the end of open source support for SB 2.x
@@ -28,8 +31,8 @@ orgTestcontainers = "1.20.6"
 ioGithubResilience4j = "1.7.1"
 
 [libraries]
-# @pin 1.3.* are the latest versions, which support java 8
-chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.2.13"
+chQosLogbackLogbackClassic = { module = "ch.qos.logback:logback-classic", version.ref = "chQosLogback" }
+chQosLogbackLogbackCore = { module = "ch.qos.logback:logback-core", version.ref = "chQosLogback" }
 # @pin 2.13.5 since this version is used by Spring Boot 2.7.18
 comFasterxmlJacksonCoreJacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:2.13.5"
 # @pin Wiremock 3.* doesn't support java 8
@@ -110,6 +113,7 @@ orgTestcontainersJunitJupiter = { module = "org.testcontainers:junit-jupiter", v
 # @pin Version 2.* is not working with the current jackson-dependency of spring 2
 orgYamlSnakeyaml = "org.yaml:snakeyaml:1.33"
 orgeclipseJettyJettyServlet = { module = "org.eclipse.jetty:jetty-servlet", version.ref = "orgEclipseJetty" }
+# No updates available, necessary for our custom logging PiccoloSaxEventRecorder in inspectit-ocelot-core
 piccolo = "piccolo:piccolo:1.0.3"
 rocksInspectitOpencensusInfluxdbExporter = "rocks.inspectit:opencensus-influxdb-exporter:1.2"
 

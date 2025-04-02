@@ -18,7 +18,6 @@ import javax.annotation.PreDestroy;
 @RequiredArgsConstructor
 public class LogHealthMonitor implements InternalProcessingAppender.LogEventConsumer {
 
-    @Autowired
     final AgentHealthManager agentHealthManager;
 
     @Override
@@ -40,14 +39,12 @@ public class LogHealthMonitor implements InternalProcessingAppender.LogEventCons
     }
 
     @PostConstruct
-    @VisibleForTesting
-    void registerAtAppender() {
+    private void subscribe() {
         InternalProcessingAppender.register(this);
     }
 
     @PreDestroy
-    @VisibleForTesting
-    void unregisterFromAppender() {
+    private void unsubscribe() {
         InternalProcessingAppender.unregister(this);
     }
 

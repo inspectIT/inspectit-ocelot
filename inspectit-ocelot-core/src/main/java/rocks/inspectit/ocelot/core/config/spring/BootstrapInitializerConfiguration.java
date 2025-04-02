@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.config.spring;
 
-import org.hibernate.validator.internal.constraintvalidators.hv.LengthValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import rocks.inspectit.ocelot.bootstrap.Instances;

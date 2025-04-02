@@ -41,17 +41,22 @@ public class LogCorrelationTest {
                 throw new ClassNotFoundException();
             }
 
-            // only this class should be loaded, otherwise we delegate the loading to the parent
-            if (!name.startsWith("org.slf4j.MDC")) {
-                return super.loadClass(name);
+            // only these classes should be loaded, otherwise we delegate the loading to the parent
+            /*
+             * The MDC class needs the LoggerFactory for initialization.
+             * The LoggerFactory should be available within the same Java module as the MDC to be accessible.
+             * Thus, this isolated ClassLoader should be able to load it.
+             */
+            if (!name.equals("org.slf4j.MDC") && !name.equals("org.slf4j.LoggerFactory")) {
+                return super.loadClass(name, false);
             }
 
-            System.out.println("Load " + name);
+            System.out.println("Loading: " + name);
 
             try {
                 String replace = name.replace(".", "/");
                 InputStream in = ClassLoader.getSystemResourceAsStream(replace + ".class");
-                byte[] a = new byte[10000];
+                byte[] a = new byte[100000];
                 int len = in.read(a);
                 in.close();
                 return defineClass(name, a, 0, len);
@@ -62,8 +67,9 @@ public class LogCorrelationTest {
     }
 
     @BeforeAll
-    private static void beforeAll() throws Exception {
-        Class<?> testMdcClass = new IsolatedMdcClassLoader().loadClass("org.slf4j.MDC");
+    static void beforeAll() throws Exception {
+        IsolatedMdcClassLoader cl = new IsolatedMdcClassLoader();
+        Class<?> testMdcClass = cl.loadClass("org.slf4j.MDC");
         Method getMethod = testMdcClass.getMethod("get", String.class);
 
         getTestMdc = (key) -> {
@@ -135,9 +141,7 @@ public class LogCorrelationTest {
     }
 
     /**
-     * Gets the {@link Span#current() current Span's} trace id
-     *
-     * @return
+     * @return the {@link Span#current() current Span's} trace id
      */
     private static String currentTraceId() {
         return Span.current().getSpanContext().getTraceId();

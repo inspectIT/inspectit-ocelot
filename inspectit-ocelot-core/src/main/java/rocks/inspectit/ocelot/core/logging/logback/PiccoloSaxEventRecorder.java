@@ -1,16 +1,15 @@
 package rocks.inspectit.ocelot.core.logging.logback;
 
 import ch.qos.logback.core.Context;
-import ch.qos.logback.core.joran.event.SaxEvent;
 import ch.qos.logback.core.joran.event.SaxEventRecorder;
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.bluecast.xml.JAXPSAXParserFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Extension of the {@link SaxEventRecorder} that uses {@link com.bluecast.xml.JAXPSAXParserFactory}
@@ -39,11 +38,11 @@ public class PiccoloSaxEventRecorder extends SaxEventRecorder {
      * {@link #getSaxParser()} method for creating the parser.
      */
     @Override
-    public List<SaxEvent> recordEvents(InputSource inputSource) throws JoranException {
+    public void recordEvents(InputSource inputSource) throws JoranException {
         SAXParser saxParser = getSaxParser();
         try {
             saxParser.parse(inputSource, this);
-            return saxEventList;
+            return;
         } catch (IOException ie) {
             handleError("I/O error occurred while parsing xml file", ie);
         } catch (SAXException se) {
@@ -78,15 +77,23 @@ public class PiccoloSaxEventRecorder extends SaxEventRecorder {
      */
     private SAXParser getSaxParser() throws JoranException {
         try {
-            JAXPSAXParserFactory jaxpsaxParserFactory = new JAXPSAXParserFactory();
-            jaxpsaxParserFactory.setValidating(false);
-            jaxpsaxParserFactory.setNamespaceAware(true);
-            return jaxpsaxParserFactory.newSAXParser();
-        } catch (Exception pce) {
-            String errMsg = "Parser configuration error occurred";
+            JAXPSAXParserFactory spf = new JAXPSAXParserFactory();
+            spf.setValidating(false);
+            //spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            // See LOGBACK-1465
+            spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            spf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            spf.setNamespaceAware(true);
+            return spf.newSAXParser();
+        } catch (
+        ParserConfigurationException pce) {
+            String errMsg = "Error during SAX paser configuration. See https://logback.qos.ch/codes.html#saxParserConfiguration";
+            addError(errMsg, pce);
+            throw new JoranException(errMsg, pce);
+        } catch (SAXException pce) {
+            String errMsg = "Error during parser creation or parser configuration";
             addError(errMsg, pce);
             throw new JoranException(errMsg, pce);
         }
     }
-
 }
