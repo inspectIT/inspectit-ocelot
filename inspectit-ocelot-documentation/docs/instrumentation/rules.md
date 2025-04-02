@@ -489,13 +489,13 @@ Due to the way configuration loading works, the short notation will always take 
 
 ### Collecting Traces
 
-The inspectIT Ocelot agent allows you to record method invocations as [OpenCensus spans](https://opencensus.io/tracing/span/).
+The inspectIT Ocelot agent allows you to record method invocations as [OpenTelemetry spans](https://opentelemetry.io/docs/concepts/signals/traces/#spans).
 
 #### Tracing Methods
 
 In order to make your collected spans visible, you must first set up a [trace exporter](tracing/trace-exporters.md).
 
-Afterwards you can define that all methods matching a certain rule will be traced:
+Afterward you can define that all methods matching a certain rule will be traced:
 
 ```yaml
 inspectit:
@@ -513,7 +513,7 @@ Its appearance can be customized using the following properties which can be set
 |---|---|---|
 |`start-span`|`false`|If true, all method invocations of methods matching any scope of this rule will be collected as spans.
 |`name`|`null`|Defines a data key whose value will be used as name for the span. If it is `null` or the value for the data key is `null`, the fully qualified name of the method will be used. Note that the value for the data key must be written in the entry section of the rule at latest!
-|`kind`|`null`|Can be `null`, `CLIENT` or `SERVER` corresponding to the [OpenCensus values](https://opencensus.io/tracing/span/kind/).
+|`kind`|`null`|Can be `null`, `CLIENT` or `SERVER` corresponding to the [OpenTelemetry values](https://opentelemetry.io/docs/concepts/signals/traces/#span-kind).
 |`attributes`|`{}` (empty dictionary) |Maps names of attributes to data keys whose values will be used on exit to populate the given attributes.
 
 Commonly, you do not want to have the fully qualified name of the instrumented method as span name. For example, for HTTP requests you typically want the HTTP path as span name. This behaviour can be customized using the `name` property:
@@ -745,7 +745,7 @@ The method takes a _Map<String,String>_ as a parameter. This map should contain 
 The remote parent trace context should be in either B3-format, W3C-format or datadog-format.
 The action, which uses this function, should be called in the pre-entry or entry phase.
 
-There is also a default-action in InspectIT, which uses the readDownPropagationHeaders()-function:
+InspectIT Ocelot offers a default action to read down propagated headers in javax HTTP Servlets:
 
 ```yaml
   'a_servletapi_downPropagation':
@@ -773,6 +773,7 @@ There is also a default-action in InspectIT, which uses the readDownPropagationH
            presentHeaders.put(name, String.join(",", Collections.list(values)));
          }
        }
+       // read request headers
        _context.readDownPropagationHeaders(presentHeaders);
      }
 ```
@@ -781,14 +782,14 @@ _createRemoteParentContext()_
 
 The method takes no parameter. It can be used, if the remote context will be created after the current context, but should be used as a parent.
 The function creates a span context, which will be used as a parent for the current context. It returns a string, which contains
-the trace context of the remote parent in W3C-format. You can send the returned trace context to your remote service via http response header
+the trace context of the remote parent in W3C-format. You can send the returned trace context to your remote service via HTTP response header
 and use the information to create the remote parent context.
 
 Note that, if a remote parent context was down propagated via _readDownPropagationHeaders()_, InspectIT will use the down propagated context as a parent
 and ignore the context created with _createRemoteParentContext()_.
 
 The action, which uses this function, should be called in the pre-entry or entry phase.
-There is also a default-action in InspectIT, which uses the createRemoteParentContext()-function:
+InspectIT Ocelot offers a default action to create a remote parent context when using javax HTTP Servlets:
 
 ```yaml
   'a_servletapi_remoteParentContext':
@@ -808,6 +809,7 @@ There is also a default-action in InspectIT, which uses the createRemoteParentCo
      if(response instanceof HttpServletResponse) {
        HttpServletResponse res = (HttpServletResponse) response;
        if(!res.isCommitted()) {
+       // create context, which will be used as parent now
        String traceContext = _context.createRemoteParentContext();
          if(traceContext == null) return;
          String key = "Server-Timing";
