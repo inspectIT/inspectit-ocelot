@@ -114,16 +114,19 @@ public class ConfigurationDirectoriesPoller extends DynamicallyActivatableServic
             observer.addListener(new FileAlterationListenerAdaptor() {
                 @Override
                 public void onFileCreate(File file) {
+                    log.debug("File was created: {}", file.getAbsolutePath());
                     anyFileChanged = true;
                 }
 
                 @Override
                 public void onFileChange(File file) {
+                    log.debug("File has been changed: {}", file.getAbsolutePath());
                     anyFileChanged = true;
                 }
 
                 @Override
                 public void onFileDelete(File file) {
+                    log.debug("File was deleted: {}", file.getAbsolutePath());
                     anyFileChanged = true;
                 }
             });
