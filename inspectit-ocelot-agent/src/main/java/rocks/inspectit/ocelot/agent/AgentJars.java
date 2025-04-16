@@ -102,6 +102,7 @@ public class AgentJars {
     private static Path copyResourceToTempJarFile(String resourcePath, String prefix) throws IOException {
         try (InputStream is = AgentMain.class.getResourceAsStream(resourcePath)) {
             Path tempDir = getTempDirectory();
+            Files.createDirectories(tempDir);
             Path targetFile = Files.createTempFile(tempDir, prefix, ".jar");
 
             Files.copy(is, targetFile, StandardCopyOption.REPLACE_EXISTING);
@@ -117,7 +118,7 @@ public class AgentJars {
         String temporaryDirectoryValue = null != System.getProperty(INSPECTIT_TEMP_DIR_PROPERTY) ? System.getProperty(INSPECTIT_TEMP_DIR_PROPERTY) : System.getenv(INSPECTIT_TEMP_DIR_ENV_PROPERTY);
 
         if(temporaryDirectoryValue != null)
-            return Paths.get(temporaryDirectoryValue);
+            return Paths.get(temporaryDirectoryValue, "/inspectit-ocelot");
 
         String defaultTempDir = System.getProperty("java.io.tmpdir") + "/inspectit-ocelot";
         return Paths.get(defaultTempDir);
