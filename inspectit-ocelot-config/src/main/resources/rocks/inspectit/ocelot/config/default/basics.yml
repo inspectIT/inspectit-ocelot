@@ -3,7 +3,7 @@ inspectit:
   # the name of the service which is being instrumented
   service-name: "InspectIT Agent"
 
-  # defines common tags to be be set on the metrics
+  # defines common tags to be set on the metrics
   tags:
     # different tag providers that can be configured
     providers:
@@ -26,11 +26,11 @@ inspectit:
     #  - tracing is disabled for all instrumentation rules
     enabled: true
     # global sample probability used to decide if a trace shall be sampled or not
-    # this value can be overridden by the tracing settings of individual instrumentation rules.
+    # this value can be overridden by the tracing settings of individual instrumentation rules
     sample-probability: 1.0
     # global default sample mode used to decide if a trace shall be sampled or not. Can either be 'PARENT_BASED', 'TRACE_ID_RATIO_BASED' or 'HYBRID_PARENT_TRACE_ID_RATIO_BASED'
     sample-mode: PARENT_BASED
-    # the format for propagating correlation headers.
+    # the format for propagating correlation headers
     # options are: B3, TRACE_CONTEXT, DATADOG
     propagation-format: B3
     # defines when to add common tags as attributes to spans
@@ -60,7 +60,7 @@ inspectit:
         # Opt-out option for JBoss Logmanager
         jboss-logmanager-enabled: true
       trace-id-auto-injection:
-        # whether the trace id should automatically injected into log statements
+        # whether the trace id should automatically be injected into log statements
         enabled: false
         # the prefix to use when injecting a trace id
         prefix: "[TraceID: "
@@ -84,7 +84,7 @@ inspectit:
       enabled: true
       max-values-per-tag: 1000
       schedule-delay: 30s
-      database-file : ${inspectit.env.agent-dir}/${inspectit.service-name}/tag-guard-database.json
+      database-file: ${inspectit.env.agent-dir}/${inspectit.service-name}/tag-guard-database.json
       overflow-replacement: "TAG_LIMIT_EXCEEDED"
 
   # logging settings
@@ -109,7 +109,7 @@ inspectit:
       enabled: true
       # defines a custom pattern to output to the console
       pattern:
-      # defines a custom path where log files should be placed (defaults to /tmp/inspectit-oce)
+      # defines a custom path where log files should be placed (defaults to /tmp/inspectit-ocelot)
       path:
       # if the default pattern should include the service name (specified with inspectit.service-name)
       # helpful when you run more than one service on the same host
@@ -128,9 +128,9 @@ inspectit:
     derive-from-http-config-url: false
     # path which is used for the agent command URL in case it is derived from the HTTP configuration URL
     agent-command-path: "/api/v1/agent/command"
-    # the timeout duration used when the agent is in discovery mode. Defining how long the agent
-    # will wait for new commands.
-    # This value must be greater than the max response timeout from the config server.
+    # the timeout duration used when the agent is in discovery mode.
+    # Defining how long the agent will wait for new commands.
+    # This value must be greater than the max response timeout from the config server
     live-socket-timeout: 40s
     # the timeout duration used for requests when the agent is in normal mode
     socket-timeout: 5s

@@ -15,7 +15,6 @@ inspectit:
         # the port on which the /metrics endpoint of prometheus will be started
         port: 8888
 
-
       influx:
         # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
         enabled: IF_CONFIGURED
