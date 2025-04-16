@@ -4,43 +4,22 @@ import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.util.jar.JarFile;
 
 /**
- * Entry point of the agent.
+ * Entrypoint of the agent.
  *
  * @author Jonas Kunz
  */
 public class AgentMain {
-
-    private static final String INSPECTIT_BOOTSTRAP_JAR_PATH = "/inspectit-ocelot-bootstrap.jar";
-
-    private static final String INSPECTIT_BOOTSTRAP_JAR_TEMP_PREFIX = "ocelot-bootstrap-";
-
-    private static final String INSPECTIT_CORE_JAR_PATH = "/inspectit-ocelot-core.jar";
-
-    private static final String INSPECTIT_CORE_JAR_TEMP_PREFIX = "ocelot-core-";
-
-    /**
-     * Deprecated as of version 2.X. Use {@link #PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY} instead.
-     */
-    @Deprecated
-    private static final String PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY = "inspectit.publishOpenCensusToBootstrap";
-
-    private static final String OPEN_TELEMETRY_FAT_JAR_PATH = "/opentelemetry-fat.jar";
-
-    private static final String OPEN_TELEMETRY_FAT_JAR_TEMP_PREFIX = "ocelot-opentelemetry-fat-";
 
     private static final String PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY = "inspectit.publishOpenTelemetryToBootstrap";
 
@@ -80,16 +59,12 @@ public class AgentMain {
 
     // invoked if agent is started before the instrumented application
     public static void premain(String agentArgs, Instrumentation inst) {
-        boolean loadOpenTelemetryJarToBootstrap = null != System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY) ? "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY)) : "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY));
-        // check for deprecated JVM property
-        if (null != System.getProperty(PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY)) {
-            System.err.println("You are using the deprecated JVM property '" + PUBLISH_OPEN_CENSUS_TO_BOOTSTRAP_PROPERTY + "'. Please use the new JVM property '" + PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY + "'. inspectIT Ocelot has moved from OpenCensus to OpenTelemetry. However, applications using the OpenCensusAPI are still supported through the opentelemetry-opencensus-shim ");
-        }
+        boolean loadOpenTelemetryJarToBootstrap = "true".equalsIgnoreCase(System.getProperty(PUBLISH_OPEN_TELEMETRY_TO_BOOTSTRAP_PROPERTY));
 
         try {
             if (loadOpenTelemetryJarToBootstrap) {
-                Path otelJarFile = copyResourceToTempJarFile(OPEN_TELEMETRY_FAT_JAR_PATH, OPEN_TELEMETRY_FAT_JAR_TEMP_PREFIX);
-                inst.appendToBootstrapClassLoaderSearch(new JarFile(otelJarFile.toFile()));
+                Path otelJar = AgentJars.getOpenTelemetryJar();
+                inst.appendToBootstrapClassLoaderSearch(new JarFile(otelJar.toFile()));
             }
 
             if (isAsyncInstrumentationEnabled()) {
@@ -108,11 +83,11 @@ public class AgentMain {
         }
     }
 
-    private static void startAgent(String agentArgs, Instrumentation inst, boolean includeOpencensusInInspectitLoader) {
+    private static void startAgent(String agentArgs, Instrumentation inst, boolean includeOpenTelemetryInInspectitLoader) {
         delayAgentStart();
 
         try {
-            InspectITClassLoader icl = initializeInspectitLoader(inst, includeOpencensusInInspectitLoader);
+            InspectITClassLoader icl = initializeInspectitLoader(inst, includeOpenTelemetryInInspectitLoader);
             AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
         } catch (Exception e) {
             System.err.println("Error starting inspectIT Agent!");
@@ -152,48 +127,27 @@ public class AgentMain {
     }
 
     /**
-     * Loads {@link #INSPECTIT_BOOTSTRAP_JAR_PATH} with the bootstrap classloader and @link {@link #INSPECTIT_CORE_JAR_PATH} with a new inspectIT loader.
+     * Loads inspectit-ocelot-bootstrap with the bootstrap classloader and inspectit-ocelot-core with a new inspectIT loader.
      *
      * @return the created inspectIT classloader
-     *
-     * @throws IOException
      */
     private static InspectITClassLoader initializeInspectitLoader(Instrumentation inst, boolean includeOpenTelemetry) throws IOException {
-        Path bootstrapJar = copyResourceToTempJarFile(INSPECTIT_BOOTSTRAP_JAR_PATH, INSPECTIT_BOOTSTRAP_JAR_TEMP_PREFIX);
+        Path bootstrapJar = AgentJars.getOcelotBootstrapJar();
         inst.appendToBootstrapClassLoaderSearch(new JarFile(bootstrapJar.toFile()));
 
         Instances.BOOTSTRAP_JAR_URL = bootstrapJar.toUri().toURL();
 
         Instances.AGENT_JAR_URL = AgentMain.class.getProtectionDomain().getCodeSource().getLocation();
 
-        Path coreJar = copyResourceToTempJarFile(INSPECTIT_CORE_JAR_PATH, INSPECTIT_CORE_JAR_TEMP_PREFIX);
+        Path coreJar = AgentJars.getOcelotCoreJar();
         InspectITClassLoader icl = new InspectITClassLoader(new URL[]{coreJar.toUri().toURL()});
 
         if (includeOpenTelemetry) {
-            Path otJarFile = copyResourceToTempJarFile(OPEN_TELEMETRY_FAT_JAR_PATH, OPEN_TELEMETRY_FAT_JAR_TEMP_PREFIX);
-            icl.addURL(otJarFile.toUri().toURL());
+            Path otelJar = AgentJars.getOpenTelemetryJar();
+            icl.addURL(otelJar.toUri().toURL());
         }
 
         return icl;
-    }
-
-    /**
-     * Copies the given resource to a new temporary file with the ending ".jar"
-     *
-     * @param resourcePath the path to the resource
-     * @param prefix       the name of the new temporary file
-     *
-     * @return the path to the generated jar file
-     *
-     * @throws IOException
-     */
-    private static Path copyResourceToTempJarFile(String resourcePath, String prefix) throws IOException {
-        try (InputStream is = AgentMain.class.getResourceAsStream(resourcePath)) {
-            Path targetFile = Files.createTempFile(prefix, ".jar");
-            Files.copy(is, targetFile, StandardCopyOption.REPLACE_EXISTING);
-            targetFile.toFile().deleteOnExit();
-            return targetFile;
-        }
     }
 
     /**
