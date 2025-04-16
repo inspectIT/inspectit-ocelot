@@ -73,7 +73,7 @@
     "@next/eslint-plugin-next": "^14.2.26",
     "@storybook/addon-actions": "^7.6.19",
     "@storybook/addon-essentials": "^7.6.19",
-    "@storybook/addon-links": "^7.6.19",
+    "@storybook/addon-links": "^8.1.11",
     "@storybook/react": "^7.6.19",
     "babel-loader": "^9.2.1",
     "eslint": "8.55.0",
