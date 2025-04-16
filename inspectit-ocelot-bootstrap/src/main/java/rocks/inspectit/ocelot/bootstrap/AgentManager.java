@@ -3,7 +3,7 @@ package rocks.inspectit.ocelot.bootstrap;
 import java.lang.instrument.Instrumentation;
 
 /**
- * Manages the running Agent. This class is responsible for starting and stopping the active {@link IAgent} implementation.
+ * Manages the running agent. This class is responsible for starting and stopping the active {@link IAgent} implementation.
  *
  * @author Jonas Kunz
  */
@@ -20,12 +20,12 @@ public class AgentManager {
     private static volatile boolean initialized = false;
 
     /**
-     * If an Agent is already running, invoking this method first stops it.
-     * Afterwards it tries to start a new Agent from the given Classpath.
+     * If an agent is already running, invoking this method first stops it.
+     * Afterward it tries to start a new agent from the given classpath.
      *
-     * @param inspectITClassLoader the classloader of inspectit-core
-     * @param agentCmdArgs         the command line arguments to pass to the Agent
-     * @param instrumentation      the {@link Instrumentation} to pass to the Agent
+     * @param inspectITClassLoader the classloader of inspectit-ocelot-core
+     * @param agentCmdArgs         the command line arguments to pass to the agent
+     * @param instrumentation      the {@link Instrumentation} to pass to the agent
      */
     public static synchronized void startOrReplaceInspectitCore(ClassLoader inspectITClassLoader, String agentCmdArgs, Instrumentation instrumentation) {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -51,17 +51,13 @@ public class AgentManager {
     }
 
     /**
-     * Returns whether an agent is initialized or not.
-     *
-     * @return Returns true if an agent has been initialized.
+     * @return true if an agent has been initialized.
      */
     public static boolean isInitialized() {
         return initialized;
     }
 
     /**
-     * Returns the agent which is currently active.
-     *
      * @return the active {@link IAgent} implementation instance
      */
     public static IAgent getAgent() {
@@ -69,8 +65,6 @@ public class AgentManager {
     }
 
     /**
-     * Returns the version of the current agent.
-     *
      * @return the current agent version
      */
     public static String getAgentVersion() {
@@ -82,9 +76,7 @@ public class AgentManager {
     }
 
     /**
-     * Returns the Open Telemetry version the current agent was build with.
-     *
-     * @return the current OTEL version
+     * @return the current OTel version the agent was build with
      */
     public static String getOpenTelemetryVersion() {
         if (agentInstance == null) {
