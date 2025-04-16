@@ -10,7 +10,7 @@
       "configuration/configuration-sources",
       "configuration/external-configuration-sources",
       "configuration/logging-configuration",
-      "configuration/open-census-configuration",
+      "configuration/opentelemetry-configuration",
       "configuration/plugin-configuration",
       "configuration/agent-command-configuration"
     ],
