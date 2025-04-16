@@ -1,7 +1,9 @@
 package rocks.inspectit.ocelot.agent;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,6 +35,11 @@ public class AgentJars {
     private static final String OPEN_TELEMETRY_FAT_JAR_PATH = "/opentelemetry-fat.jar";
 
     private static final String OPEN_TELEMETRY_FAT_JAR_TEMP_PREFIX = "ocelot-opentelemetry-fat-";
+
+    /** The file used to load the agent's version */
+    private static final String AGENT_VERSION_INFORMATION_FILE = "/ocelot-version.info";
+
+    private static String agentVersion;
 
     /**
      * @return the absolute path used for the inspectit-ocelot-bootstrap.jar
@@ -136,7 +143,7 @@ public class AgentJars {
     }
 
     /**
-     * If the recycling of jars if enabled, we will search for existing jar files.
+     * If the recycling of jars is enabled, we will search for existing jar files.
      * If no files could be found, we will create new ones. Otherwise, the existing files will be used.
      *
      * @return true, if jars should be recycled
@@ -150,7 +157,15 @@ public class AgentJars {
      * @return the current agent version
      */
     private static String getAgentVersion() {
-        // TODO retrieve current agent version (like in ocelot-core?)
-        return "2.6.9";
+        if(agentVersion == null) {
+            try (InputStream is = AgentJars.class.getResourceAsStream(AGENT_VERSION_INFORMATION_FILE)) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                agentVersion = reader.readLine();
+            } catch (Exception e) {
+                System.err.println("Could not read agent version information file");
+                agentVersion = "UNKNOWN";
+            }
+        }
+        return agentVersion;
     }
 }
