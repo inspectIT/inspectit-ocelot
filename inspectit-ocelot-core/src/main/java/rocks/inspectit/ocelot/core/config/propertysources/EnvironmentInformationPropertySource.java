@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
+import rocks.inspectit.ocelot.bootstrap.AgentProperties;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 
 import java.io.File;
@@ -17,10 +18,6 @@ import java.util.Properties;
  */
 @Slf4j
 public class EnvironmentInformationPropertySource extends PropertiesPropertySource {
-
-    private static final String INSPECTIT_TEMP_DIR_PROPERTY = "inspectit.temp-dir";
-
-    private static final String INSPECTIT_TEMP_DIR_ENV_PROPERTY = "INSPECTIT_TEMP_DIR";
 
     public EnvironmentInformationPropertySource(String name) {
         super(name, getEnvironmentProperties());
@@ -63,7 +60,8 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
      * @return path of the used temp directory
      */
     private static String getTempDir() {
-        String configuredTempDir = null != System.getProperty(INSPECTIT_TEMP_DIR_PROPERTY) ? System.getProperty(INSPECTIT_TEMP_DIR_PROPERTY) : System.getenv(INSPECTIT_TEMP_DIR_ENV_PROPERTY);
+        String configuredTempDir = null != System.getProperty(AgentProperties.INSPECTIT_TEMP_DIR_PROPERTY) ?
+                System.getProperty(AgentProperties.INSPECTIT_TEMP_DIR_PROPERTY) : System.getenv(AgentProperties.INSPECTIT_TEMP_DIR_ENV_PROPERTY);
         if(configuredTempDir != null) {
             return configuredTempDir;
         }
