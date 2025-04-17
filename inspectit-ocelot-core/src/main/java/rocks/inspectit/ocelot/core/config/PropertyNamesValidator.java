@@ -44,7 +44,7 @@ public class PropertyNamesValidator {
     /**
      * Checks if a given property should be handled as an invalid property. Invalid properties are properties which
      * apparently are meant to be found in the inspectit environment but are not. This applies for all properties
-     * starting with "inspectit.". Further it is checked whether or not a given property exists in the model and ends
+     * starting with "inspectit.". Further it is checked whether a given property exists in the model and ends
      * in a terminal-type. Terminal types are all enums, primitive types and their corresponding wrapper classes as well
      * as Duration.class, Path.class, URL.class and FileSystemResource.class
      *
@@ -55,11 +55,14 @@ public class PropertyNamesValidator {
     boolean isInvalidPropertyName(String propertyName) {
         ArrayList<String> parsedName = (ArrayList<String>) PropertyPathHelper.parse(propertyName);
         try {
-            return propertyName != null
+            boolean isInvalid = propertyName != null
                     && propertyName.startsWith("inspectit.")
                     && !propertyName.startsWith(PluginSettings.PLUGIN_CONFIG_PREFIX)
                     && !propertyName.equals("inspectit.start.delay")
+                    && !propertyName.equals("inspectit.recycle-jars")
+                    && !propertyName.equals("inspectit.temp-dir")
                     && isInvalidPath(parsedName);
+            return isInvalid;
         } catch (Exception e) {
             log.error("Error while checking property existence", e);
             return false;
