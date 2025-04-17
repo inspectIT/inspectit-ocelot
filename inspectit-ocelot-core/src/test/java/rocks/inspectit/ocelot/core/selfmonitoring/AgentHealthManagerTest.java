@@ -141,7 +141,7 @@ public class AgentHealthManagerTest {
             healthManager.checkHealthAndSchedule();
 
             verify(ctx, times(1)).publishEvent(any(AgentHealthChangedEvent.class));
-            verify(incidentBuffer, times(2)).put(any(AgentHealthIncident.class));
+            verify(incidentBuffer, times(1)).put(any(AgentHealthIncident.class));
         }
     }
 
