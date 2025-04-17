@@ -33,7 +33,7 @@ You can access the preview version of the documentation at
 [http://localhost:3000/inspectit-ocelot/docs/next/doc1](http://localhost:3000/inspectit-ocelot/docs/next/doc1)
 (note the **/next/** sub-path). 
 
-This is the default for local deveopment.
+This is the default for local development.
 
 ## Directory Structure
 
