@@ -6,16 +6,6 @@ title: Start Configuration
 There are some properties to configure the start procedure of the agent. These properties can only be
 defined via [Java System Properties](#java-system-properties) or [Environment Variables](#os-environment-variables).
 
-## Delaying agent start
-
-It is possible to delay the start of the agent. This will block the main-thread of the agent for the duration of the delay.
-The delay has to be specified in milliseconds. 
-For instance, this configuration would delay the start of the agent for 5 seconds:
-
-```
--Dinspectit.start.delay=5000
-```
-
 ## Changing temporary directory
 
 By default, the agent will use ``java.io.tmpdir`` (Java default) to create temporary files, such as logs or
