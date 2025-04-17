@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.agent;
 
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
+import rocks.inspectit.ocelot.bootstrap.AgentProperties;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 
 import java.io.IOException;
@@ -26,10 +27,6 @@ public class AgentMain {
     private static final String ASYNC_INSTRUMENTATION_PROPERTY = "inspectit.instrumentation.internal.async";
 
     private static final String ASYNC_INSTRUMENTATION_ENV_PROPERTY = "INSPECTIT_INSTRUMENTATION_INTERNAL_ASYNC";
-
-    private static final String START_DELAY_PROPERTY = "inspectit.start.delay";
-
-    private static final String START_DELAY_ENV_PROPERTY = "INSPECTIT_START_DELAY";
 
     /**
      * Main method for attaching the agent itself to a running JVM.
@@ -96,12 +93,12 @@ public class AgentMain {
     }
 
     private static void delayAgentStart() {
-        String startDelayViaSystemProperty = System.getProperty(START_DELAY_PROPERTY);
-        String startDelayViaEnvironmentVariable = System.getenv(START_DELAY_ENV_PROPERTY);
+        String startDelayViaSystemProperty = System.getProperty(AgentProperties.START_DELAY_PROPERTY);
+        String startDelayViaEnvironmentVariable = System.getenv(AgentProperties.START_DELAY_ENV_PROPERTY);
         if (startDelayViaSystemProperty != null) {
-            delayAgentStart(startDelayViaSystemProperty, "Value '%s' of system property " + START_DELAY_PROPERTY + " does not contain a positive integer value. Continuing without delay.");
+            delayAgentStart(startDelayViaSystemProperty, "Value '%s' of system property " + AgentProperties.START_DELAY_PROPERTY + " does not contain a positive integer value. Continuing without delay.");
         } else if (startDelayViaEnvironmentVariable != null) {
-            delayAgentStart(startDelayViaEnvironmentVariable, "Value '%s' of environment variable " + START_DELAY_ENV_PROPERTY + " does not contain a positive integer value. Continuing without delay.");
+            delayAgentStart(startDelayViaEnvironmentVariable, "Value '%s' of environment variable " + AgentProperties.START_DELAY_ENV_PROPERTY + " does not contain a positive integer value. Continuing without delay.");
         }
     }
 

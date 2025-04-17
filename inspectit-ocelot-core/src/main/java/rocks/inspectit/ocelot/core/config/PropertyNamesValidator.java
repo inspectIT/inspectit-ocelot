@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.bootstrap.AgentProperties;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.plugins.PluginSettings;
 import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
@@ -14,6 +15,7 @@ import javax.annotation.PostConstruct;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * On startup and whenever the configured property sources change,
@@ -58,9 +60,7 @@ public class PropertyNamesValidator {
             boolean isInvalid = propertyName != null
                     && propertyName.startsWith("inspectit.")
                     && !propertyName.startsWith(PluginSettings.PLUGIN_CONFIG_PREFIX)
-                    && !propertyName.equals("inspectit.start.delay")
-                    && !propertyName.equals("inspectit.recycle-jars")
-                    && !propertyName.equals("inspectit.temp-dir")
+                    && !isAgentProperty(propertyName)
                     && isInvalidPath(parsedName);
             return isInvalid;
         } catch (Exception e) {
@@ -84,4 +84,11 @@ public class PropertyNamesValidator {
         return !PropertyPathHelper.isTerminal(t) && !PropertyPathHelper.isListOfTerminalTypes(t);
     }
 
+    /**
+     * @return true, if the property is part of {@link AgentProperties}
+     */
+    private boolean isAgentProperty(String propertyName) {
+        List<String> agentProperties = AgentProperties.getAllProperties();
+        return agentProperties.contains(propertyName);
+    }
 }

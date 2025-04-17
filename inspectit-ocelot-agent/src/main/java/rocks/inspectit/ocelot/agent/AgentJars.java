@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.agent;
 
+import rocks.inspectit.ocelot.bootstrap.AgentProperties;
+
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -17,16 +19,6 @@ import java.nio.file.StandardCopyOption;
  */
 public class AgentJars {
 
-    // system and environment properties
-    private static final String RECYCLE_JARS_PROPERTY = "inspectit.recycle-jars";
-
-    private static final String RECYCLE_JARS_ENV_PROPERTY = "INSPECTIT_RECYCLE_JARS";
-
-    private static final String INSPECTIT_TEMP_DIR_PROPERTY = "inspectit.temp-dir";
-
-    private static final String INSPECTIT_TEMP_DIR_ENV_PROPERTY = "INSPECTIT_TEMP_DIR";
-
-    // file names
     private static final String INSPECTIT_BOOTSTRAP_JAR_PATH = "/inspectit-ocelot-bootstrap.jar";
 
     private static final String INSPECTIT_BOOTSTRAP_JAR_TEMP_PREFIX = "ocelot-bootstrap-";
@@ -186,7 +178,8 @@ public class AgentJars {
      * @return the directory to use for temporary files of inspectIT
      */
     private static Path getTempDirectory() {
-        String temporaryDirectoryValue = null != System.getProperty(INSPECTIT_TEMP_DIR_PROPERTY) ? System.getProperty(INSPECTIT_TEMP_DIR_PROPERTY) : System.getenv(INSPECTIT_TEMP_DIR_ENV_PROPERTY);
+        String temporaryDirectoryValue = null != System.getProperty(AgentProperties.INSPECTIT_TEMP_DIR_PROPERTY) ?
+                System.getProperty(AgentProperties.INSPECTIT_TEMP_DIR_PROPERTY) : System.getenv(AgentProperties.INSPECTIT_TEMP_DIR_ENV_PROPERTY);
 
         if(temporaryDirectoryValue != null)
             return Paths.get(temporaryDirectoryValue, "/inspectit-ocelot");
@@ -213,7 +206,8 @@ public class AgentJars {
      * @return true, if jars should be recycled
      */
     private static boolean isRecyclingEnabled() {
-        String isRecyclingEnabledValue = null != System.getProperty(RECYCLE_JARS_PROPERTY) ? System.getProperty(RECYCLE_JARS_PROPERTY) : System.getenv(RECYCLE_JARS_ENV_PROPERTY);
+        String isRecyclingEnabledValue = null != System.getProperty(AgentProperties.RECYCLE_JARS_PROPERTY) ?
+                System.getProperty(AgentProperties.RECYCLE_JARS_PROPERTY) : System.getenv(AgentProperties.RECYCLE_JARS_ENV_PROPERTY);
         return "true".equalsIgnoreCase(isRecyclingEnabledValue);
     }
 
