@@ -29,6 +29,8 @@ public class AgentHealthManager {
 
     private static final String LOG_CHANGE_STATUS = "The agent status changed from {} to {}. Reason: {}";
 
+    private static final String CHECK_HEALTH_MESSAGE = "Checking timed out agent healths";
+
     @Autowired
     private ApplicationContext ctx;
 
@@ -118,7 +120,7 @@ public class AgentHealthManager {
      */
     @VisibleForTesting
     void checkHealthAndSchedule() {
-        triggerAgentHealthChangedEvent(AgentHealthManager.class.getCanonicalName(), "Checking timed out agent healths");
+        triggerAgentHealthChangedEvent(AgentHealthManager.class.getCanonicalName(), CHECK_HEALTH_MESSAGE);
 
         Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod();
         Duration minDelay = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getMinHealthCheckDelay();
@@ -150,6 +152,10 @@ public class AgentHealthManager {
             boolean changedHealth = healthHasChanged();
             AgentHealth currentHealth = getCurrentHealth();
 
+            // Don't create incident for health check without health change
+            if(message.equals(CHECK_HEALTH_MESSAGE) && !changedHealth)
+                shouldCreateIncident = false;
+
             if(shouldCreateIncident) {
                 AgentHealthIncident incident = new AgentHealthIncident(
                         LocalDateTime.now().toString(), currentHealth, incidentSource, message, changedHealth);
@@ -169,7 +175,7 @@ public class AgentHealthManager {
             AgentHealth oldHealth = event.getOldHealth();
 
             // It is important that logging happens outside the synchronized block above.
-            // Otherwise, a deadlock may happen
+            // Otherwise, a deadlock may happen.
             if (newHealth.isMoreSevereOrEqualTo(oldHealth)) {
                 log.warn(LOG_CHANGE_STATUS, oldHealth, newHealth, event.getMessage());
             } else {
