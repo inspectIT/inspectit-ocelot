@@ -25,7 +25,7 @@ public class InspectitConfigConversionService extends ApplicationConversionServi
     }
 
     /**
-     * @return the instance, which should only be used by the 'ConfigParser'
+     * @return the instance, which should only be used by the {@code ConfigParser}
      */
     public static InspectitConfigConversionService getParserInstance() {
         return parserInstance;
@@ -43,10 +43,6 @@ public class InspectitConfigConversionService extends ApplicationConversionServi
     }
 
     private void addInspectItDefaultConverters() {
-        addConverter(new StringToMetricRecordingSettingsConverter());
-        addConverter(new NumberToMetricRecordingSettingsConverter());
-        addConverter(new BooleanToExporterEnabledStateConverter());
-        addConverter(new StringToExporterEnabledStateConverter());
         addConverter(new StringToTransportProtocolConverter());
     }
 }
