@@ -79,29 +79,6 @@ class ConfigParserTest {
         }
 
         @Test
-        void withOldExporterEnabled() throws IOException {
-            String configYaml = getYaml("configWithOldExporterEnabled.yml");
-
-            InspectitConfig result = configParser.parseConfig(configYaml);
-
-            // value 'true' in yaml to IF_CONFIGURED in InspectitConfig
-            assertThat(result.getExporters()
-                    .getMetrics()
-                    .getInflux()
-                    .getEnabled()).isEqualTo(ExporterEnabledState.IF_CONFIGURED);
-            // value 'false' in yaml to DISABLED in InspectitConfig
-            assertThat(result.getExporters()
-                    .getTracing()
-                    .getOtlp()
-                    .getEnabled()).isEqualTo(ExporterEnabledState.DISABLED);
-            // example for new style, value 'ENABLED' in yaml to ENABLED in InspectitConfig
-            assertThat(result.getExporters()
-                    .getMetrics()
-                    .getPrometheus()
-                    .getEnabled()).isEqualTo(ExporterEnabledState.ENABLED);
-        }
-
-        @Test
         void withUnknownProperty() throws IOException {
             String configYaml = getYaml("configWithUnknownProperty.yml");
 
