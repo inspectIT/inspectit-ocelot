@@ -11,7 +11,7 @@ orgSpringframeworkSecurity = "6.4.4"
 comGoogleCodeGson = "com.google.code.gson:gson:2.12.1"
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.6-jre" } }
 comH2databaseH2 = "com.h2database:h2:2.3.232"
-commonsIo = "commons-io:commons-io:2.18.0"
+commonsIo = "commons-io:commons-io:2.19.0"
 ioJsonwebtokenJjwtApi = { module = "io.jsonwebtoken:jjwt-api", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtImpl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtJackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "ioJsonwebtoken" }
