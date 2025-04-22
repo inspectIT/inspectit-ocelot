@@ -466,27 +466,6 @@ Note that `data-tags` have higher priority than the `constant-tags`, thus if bot
 All [common tags](metrics/common-tags.md) are always included in the metric recording and do not need explicit specification.
 :::
 
-:::warning Short notation is deprecated
-The default way to specify metric collection in Ocelot versions up to and including v1.0 was a so called short notation, which is now deprecated and will be invalid in future Ocelot releases:
-
-```yaml
-#inspectit.instrumentation.rules is omitted here
-'r_example_rule':
-  #...
-  exit:
-    'method_duration':
-      #action invocation here....
-
-  metrics:
-    '[method/duration]' : 'method_duration'
-    '[some/other/metric]' : '42'
-```
-
-As short notation does not allow specification of tags to be recorded, using the short notation means that only common tags will be collected.
-We advise to migrate to the new configuration style immediately.
-Due to the way configuration loading works, the short notation will always take precedence over the explicit notation. This means that you cannot override settings made with the short-notation by using the explicit notation.
-:::
-
 ### Collecting Traces
 
 The inspectIT Ocelot agent allows you to record method invocations as [OpenTelemetry spans](https://opentelemetry.io/docs/concepts/signals/traces/#spans).
