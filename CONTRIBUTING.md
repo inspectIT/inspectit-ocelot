@@ -25,7 +25,9 @@ The first step in order to contribute is to fork this repository into your accou
 You can develop your changes on a separate branch there and open a [pull request](https://github.com/inspectIT/inspectit-ocelot/pulls)
 in the main repository as soon as you are done.
 
-> **Important**: please update and commit the third party licenses (`THIRD-PARTY-LICENSES.txt`) if you changed any of the `build.gradle` files by executing the gradle task `gradlew generateLicenseReport` before you open your pull request.
+If your pull request has changed any dependencies, the `THIRD-PARTY-LICENSES.txt` file must be updated.
+Normally, an automatic workflow will run when opening a new pull request.
+Otherwise, please run `gradlew generateLicenseReport` to update the file.
 
 Usually, a pull request should correspond to an open [issue](https://github.com/inspectIT/inspectit-ocelot/issues) in this repository.
 Therefore, make sure that an issue exists which your pull request attempts to resolve. If none exists, you should create one.
