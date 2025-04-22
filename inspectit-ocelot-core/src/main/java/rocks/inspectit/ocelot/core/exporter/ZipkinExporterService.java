@@ -33,9 +33,6 @@ public class ZipkinExporterService extends DynamicallyActivatableService {
         if (conf.getTracing().isEnabled() && !zipkin.getEnabled().isDisabled()) {
             if (StringUtils.hasText(zipkin.getEndpoint())) {
                 return true;
-            } else if (StringUtils.hasText(zipkin.getUrl())) {
-                log.warn("You are using the deprecated property 'url'. This property will be invalid in future releases of InspectIT Ocelot, please use 'endpoint' instead.");
-                return true;
             } else if (zipkin.getEnabled().equals(ExporterEnabledState.ENABLED)) {
                 log.warn("Zipkin Exporter is enabled but 'endpoint' is not set.");
             }
@@ -47,7 +44,7 @@ public class ZipkinExporterService extends DynamicallyActivatableService {
     protected boolean doEnable(InspectitConfig configuration) {
         try {
             ZipkinExporterSettings settings = configuration.getExporters().getTracing().getZipkin();
-            String endpoint = StringUtils.hasText(settings.getEndpoint()) ? settings.getEndpoint() : settings.getUrl();
+            String endpoint = settings.getEndpoint();
 
             spanExporter = ZipkinSpanExporter.builder().setEndpoint(endpoint).build();
 

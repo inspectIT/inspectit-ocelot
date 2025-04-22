@@ -32,7 +32,7 @@ public class HttpExporterSettings {
     private String path;
 
     /**
-     * List of allowed Orgins, which are able to access the HTTP-server
+     * List of allowed Origins, which are able to access the HTTP-server
      */
     private List<String> allowedOrigins;
 

@@ -61,9 +61,6 @@ public class InfluxExporterService extends DynamicallyActivatableService {
         if (conf.getMetrics().isEnabled() && !influx.getEnabled().isDisabled()) {
             if (StringUtils.hasText(influx.getEndpoint())) {
                 return true;
-            } else if (StringUtils.hasText(influx.getUrl())) {
-                log.warn("You are using the deprecated property 'url'. This property will be invalid in future releases of InspectIT Ocelot, please use 'endpoint' instead.");
-                return true;
             } else if (influx.getEnabled().equals(ExporterEnabledState.ENABLED)) {
                 log.warn("InfluxDB Exporter is enabled but 'endpoint' is not set.");
             }
@@ -76,8 +73,8 @@ public class InfluxExporterService extends DynamicallyActivatableService {
         InfluxExporterSettings influx = configuration.getExporters().getMetrics().getInflux();
         String user = influx.getUser();
         String password = influx.getPassword();
+        String endpoint = influx.getEndpoint();
 
-        String endpoint = StringUtils.hasText(influx.getEndpoint()) ? influx.getEndpoint() : influx.getUrl();
         // check user and password, which are not allowed to be null as of v1.15.0
         if (null == user) {
             user = DUMMY_USER;

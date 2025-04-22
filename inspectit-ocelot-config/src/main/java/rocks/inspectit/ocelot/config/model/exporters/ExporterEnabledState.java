@@ -21,7 +21,6 @@ public enum ExporterEnabledState {
     IF_CONFIGURED;
 
     /**
-     * Returns whether the {@link ExporterEnabledState} results in that the related exporter is disabled.
      * @return Whether the {@link ExporterEnabledState} results in that the related exporter is disabled.
      */
     public boolean isDisabled(){
