@@ -31,6 +31,7 @@ jobs:
           
           if git status --porcelain | grep 'THIRD-PARTY-LICENSES.txt'; then
             echo "THIRD-PARTY-LICENSES.txt updated, pushing changes..."
+            sed -i 's/SNAPSHOT/LATEST/g' THIRD-PARTY-LICENSES.txt
             git add THIRD-PARTY-LICENSES.txt
             git commit -m "update THIRD-PARTY-LICENSES.txt"
             git push origin HEAD:${{ github.head_ref }}

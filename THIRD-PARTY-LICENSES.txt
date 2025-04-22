@@ -1,5 +1,5 @@
 
-Dependency License Report for inspectit-ocelot SNAPSHOT
+Dependency License Report for inspectit-ocelot LATEST
 
 1. Group: ch.qos.logback  Name: logback-classic  Version: 1.2.12
 
