@@ -1,0 +1,40 @@
+name: Update THIRD-PARTY-LICENSES.txt
+
+on:
+  pull_request:
+      paths:
+        - '**/configserverlibs.version.toml'
+        - '**/libs.versions.toml'
+
+jobs:
+  update-licenses:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Run generateLicenseReport
+        run: ./gradlew generateLicenseReport
+      - name: Check for license changes and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          if git status --porcelain | grep 'THIRD-PARTY-LICENSES.txt'; then
+            echo "THIRD-PARTY-LICENSES.txt updated, pushing changes..."
+            sed -i 's/SNAPSHOT/LATEST/g' THIRD-PARTY-LICENSES.txt
+            git add THIRD-PARTY-LICENSES.txt
+            git commit -m "update THIRD-PARTY-LICENSES.txt"
+            git push origin HEAD:${{ github.head_ref }}
+          else
+            echo "No changes to THIRD-PARTY-LICENSES.txt"
+          fi
