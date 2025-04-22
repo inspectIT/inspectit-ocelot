@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealthIncident;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.selfmonitoring.event.listener.LogWritingHealthEventListener;
 import rocks.inspectit.ocelot.core.selfmonitoring.event.models.AgentHealthChangedEvent;
 
 import javax.annotation.PostConstruct;
@@ -28,12 +27,19 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class AgentHealthManager {
 
+    private static final String LOG_CHANGE_STATUS = "The agent status changed from {} to {}. Reason: {}";
+
+    private static final String CHECK_HEALTH_MESSAGE = "Checking timed out agent healths";
+
     @Autowired
     private ApplicationContext ctx;
+
     @Autowired
     private ScheduledExecutorService executor;
+
     @Autowired
     private InspectitEnvironment env;
+
     @Autowired
     private AgentHealthIncidentBuffer healthIncidentBuffer;
 
@@ -114,7 +120,7 @@ public class AgentHealthManager {
      */
     @VisibleForTesting
     void checkHealthAndSchedule() {
-        triggerAgentHealthChangedEvent(AgentHealthManager.class.getCanonicalName(), "Checking timed out agent healths");
+        triggerAgentHealthChangedEvent(AgentHealthManager.class.getCanonicalName(), CHECK_HEALTH_MESSAGE);
 
         Duration validityPeriod = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getValidityPeriod();
         Duration minDelay = env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getMinHealthCheckDelay();
@@ -141,14 +147,16 @@ public class AgentHealthManager {
      * @param shouldCreateIncident whether to create a new AgentHealthIncident or not
      */
     private void triggerAgentHealthChangedEvent(String incidentSource, String message, Boolean shouldCreateIncident) {
+        AgentHealthChangedEvent event = null;
         synchronized (this) {
             boolean changedHealth = healthHasChanged();
             AgentHealth currentHealth = getCurrentHealth();
 
-            // Don't create incident for health event logs
-            boolean isLoggedHealthEvent = incidentSource.equals(LogWritingHealthEventListener.class.getName());
+            // Don't create incident for health check without health change
+            if(message.equals(CHECK_HEALTH_MESSAGE) && !changedHealth)
+                shouldCreateIncident = false;
 
-            if(shouldCreateIncident && !isLoggedHealthEvent) {
+            if(shouldCreateIncident) {
                 AgentHealthIncident incident = new AgentHealthIncident(
                         LocalDateTime.now().toString(), currentHealth, incidentSource, message, changedHealth);
                 healthIncidentBuffer.put(incident);
@@ -157,8 +165,21 @@ public class AgentHealthManager {
             if(changedHealth) {
                 AgentHealth lastHealth = lastNotifiedHealth;
                 lastNotifiedHealth = currentHealth;
-                AgentHealthChangedEvent event = new AgentHealthChangedEvent(this, lastHealth, currentHealth, message);
+                event = new AgentHealthChangedEvent(this, lastHealth, currentHealth, message);
                 ctx.publishEvent(event);
+            }
+        }
+
+        if(event != null) {
+            AgentHealth newHealth = event.getNewHealth();
+            AgentHealth oldHealth = event.getOldHealth();
+
+            // It is important that logging happens outside the synchronized block above.
+            // Otherwise, a deadlock may happen.
+            if (newHealth.isMoreSevereOrEqualTo(oldHealth)) {
+                log.warn(LOG_CHANGE_STATUS, oldHealth, newHealth, event.getMessage());
+            } else {
+                log.info(LOG_CHANGE_STATUS, oldHealth, newHealth, event.getMessage());
             }
         }
     }

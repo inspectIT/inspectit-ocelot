@@ -8,8 +8,6 @@ plugins {
     alias(libs.plugins.ioSpringDependencyManagement)
 }
 
-
-
 dependencyManagement {
     imports {
         mavenBom(SpringBootPlugin.BOM_COORDINATES)
@@ -31,7 +29,6 @@ group = 'rocks.inspectit.ocelot'
 
 sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
 targetCompatibility = 1.8 // Java version to generate classes for.
-
 
 configurations {
     opentelemetry
@@ -91,6 +88,15 @@ processJmhResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+task generateVersionFile {
+    ext.versionFile = new File(buildDir, "ocelot-version.info")
+    doLast {
+        ext.versionFile.withWriter('UTF-8') { writer ->
+            writer << "$version"
+        }
+    }
+}
+
 jar {
     destinationDirectory = buildDir
     archivesBaseName = "${project.name}"
@@ -98,6 +104,9 @@ jar {
     manifest {
         from file("src/main/resources/META-INF/MANIFEST.MF")
     }
+
+    dependsOn generateVersionFile
+    from generateVersionFile.versionFile
 
     // include the open-telemetry dependencies as a fat jar
     dependsOn buildOpenTelemetryFatJar

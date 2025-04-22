@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.bootstrap.AgentProperties;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.plugins.PluginSettings;
 import rocks.inspectit.ocelot.config.validation.PropertyPathHelper;
@@ -14,6 +15,7 @@ import javax.annotation.PostConstruct;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * On startup and whenever the configured property sources change,
@@ -44,7 +46,7 @@ public class PropertyNamesValidator {
     /**
      * Checks if a given property should be handled as an invalid property. Invalid properties are properties which
      * apparently are meant to be found in the inspectit environment but are not. This applies for all properties
-     * starting with "inspectit.". Further it is checked whether or not a given property exists in the model and ends
+     * starting with "inspectit.". Further it is checked whether a given property exists in the model and ends
      * in a terminal-type. Terminal types are all enums, primitive types and their corresponding wrapper classes as well
      * as Duration.class, Path.class, URL.class and FileSystemResource.class
      *
@@ -55,11 +57,12 @@ public class PropertyNamesValidator {
     boolean isInvalidPropertyName(String propertyName) {
         ArrayList<String> parsedName = (ArrayList<String>) PropertyPathHelper.parse(propertyName);
         try {
-            return propertyName != null
+            boolean isInvalid = propertyName != null
                     && propertyName.startsWith("inspectit.")
                     && !propertyName.startsWith(PluginSettings.PLUGIN_CONFIG_PREFIX)
-                    && !propertyName.equals("inspectit.start.delay")
+                    && !isAgentProperty(propertyName)
                     && isInvalidPath(parsedName);
+            return isInvalid;
         } catch (Exception e) {
             log.error("Error while checking property existence", e);
             return false;
@@ -81,4 +84,11 @@ public class PropertyNamesValidator {
         return !PropertyPathHelper.isTerminal(t) && !PropertyPathHelper.isListOfTerminalTypes(t);
     }
 
+    /**
+     * @return true, if the property is part of {@link AgentProperties}
+     */
+    private boolean isAgentProperty(String propertyName) {
+        List<String> agentProperties = AgentProperties.getAllProperties();
+        return agentProperties.contains(propertyName);
+    }
 }

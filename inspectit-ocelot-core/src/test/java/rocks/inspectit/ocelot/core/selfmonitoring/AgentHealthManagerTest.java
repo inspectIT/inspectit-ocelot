@@ -1,11 +1,15 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealthIncident;
@@ -15,6 +19,7 @@ import rocks.inspectit.ocelot.core.selfmonitoring.event.models.AgentHealthChange
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 /**
@@ -136,7 +141,32 @@ public class AgentHealthManagerTest {
             healthManager.checkHealthAndSchedule();
 
             verify(ctx, times(1)).publishEvent(any(AgentHealthChangedEvent.class));
-            verify(incidentBuffer, times(2)).put(any(AgentHealthIncident.class));
+            verify(incidentBuffer, times(1)).put(any(AgentHealthIncident.class));
+        }
+    }
+
+    @Nested
+    class AgentHealthLog {
+        private ListAppender<ILoggingEvent> listAppender;
+
+        @BeforeEach
+        void setUp() {
+            listAppender = new ListAppender<>();
+            listAppender.start();
+
+            Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+            logger.addAppender(listAppender);
+        }
+
+        @Test
+        void verifyAgentHealthLogging() {
+            String eventMessage = "Mock message";
+            String expectedFullMessage = String.format("The agent status changed from %s to %s. Reason: %s",
+                    AgentHealth.OK, AgentHealth.WARNING, eventMessage);
+
+            healthManager.handleInvalidatableHealth(AgentHealth.WARNING, this.getClass(), eventMessage);
+
+            assertTrue(listAppender.list.stream().anyMatch(logEvent -> logEvent.getFormattedMessage().contains(expectedFullMessage)));
         }
     }
 }
