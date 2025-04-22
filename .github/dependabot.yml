@@ -13,7 +13,6 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 5
     labels:
-      - "gradle"
       - "dependencies"
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/components/inspectit-ocelot-configurationserver-ui" # Location of package manifests
@@ -21,5 +20,4 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 5
     labels:
-      - "npm"
       - "dependencies"
