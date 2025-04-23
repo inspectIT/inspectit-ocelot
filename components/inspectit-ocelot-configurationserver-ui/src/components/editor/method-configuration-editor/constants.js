@@ -2,6 +2,8 @@
 export const MATCHER_MODE_DESCRIPTION = {
   EQUALS_FULLY: 'equal',
   EQUALS_FULLY_IGNORE_CASE: 'equal (case-insensitive)',
+  NOT_EQUALS_FULLY: 'not equal',
+  NOT_EQUALS_FULLY_IGNORE_CASE: 'not equal (case-insensitive)',
   STARTS_WITH: 'start with',
   STARTS_WITH_IGNORE_CASE: 'start with (case-insensitive)',
   ENDS_WITH: 'end with',
@@ -15,6 +17,8 @@ export const MATCHER_MODE_DESCRIPTION = {
 export const MATCHER_MODE_DESCRIPTION_S = {
   EQUALS_FULLY: 'equals',
   EQUALS_FULLY_IGNORE_CASE: 'equals (case-insensitive)',
+  NOT_EQUALS_FULLY: 'not equals',
+  NOT_EQUALS_FULLY_IGNORE_CASE: 'not equals (case-insensitive)',
   STARTS_WITH: 'starts with',
   STARTS_WITH_IGNORE_CASE: 'starts with (case-insensitive)',
   ENDS_WITH: 'ends with',
