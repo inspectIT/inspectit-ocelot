@@ -3,6 +3,33 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
+## Breaking changes in 2.6.9
+
+### Fully removed deprecated notations
+
+It is no longer possible to use the short notation to record metrics.
+Thus, metrics have to be recorded within rules like this:
+
+```
+#inspectit.instrumentation.rules is omitted here
+'r_example_rule':
+  #...
+  exit:
+    'method_duration':
+      #action invocation here....
+
+  metrics:
+    '[method/duration]' : 
+        value: 'method_duration'
+    '[some/other/metric]' : 
+        value: '42'
+```
+
+Furthermore, no exporter will support the `url` property anymore. Please use the `endpoint` property instead.
+Additionally, it is no longer possible to use boolean values to set the `enabled` property of exporters.
+Please use the following constants instead: `DISABLED`, `IF_CONFIGURED`, `ENABLED`.
+
+
 ## Breaking changes in 2.6.8
 
 ### Jaeger exporter replaced by OTLP exporter

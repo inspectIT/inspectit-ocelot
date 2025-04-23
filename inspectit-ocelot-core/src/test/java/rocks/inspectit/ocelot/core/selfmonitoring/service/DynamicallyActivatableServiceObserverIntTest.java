@@ -35,7 +35,7 @@ public class DynamicallyActivatableServiceObserverIntTest extends SpringTestBase
     @BeforeEach
     void Setup() {
         updateProperties(props -> {
-            props.setProperty("inspectit.exporters.metrics.influx.enabled", true);
+            props.setProperty("inspectit.exporters.metrics.influx.enabled", ExporterEnabledState.ENABLED);
             props.setProperty("inspectit.exporters.metrics.prometheus.enabled", ExporterEnabledState.ENABLED);
             props.setProperty("inspectit.exporters.tracing.otlp.enabled", ExporterEnabledState.ENABLED);
             props.setProperty("inspectit.exporters.tracing.otlp.endpoint", "http://localhost:4318/v1/metrics");

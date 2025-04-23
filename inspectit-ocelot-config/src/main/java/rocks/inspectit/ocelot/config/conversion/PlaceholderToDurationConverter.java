@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public class PlaceholderToDurationConverter implements Converter<String, Duration> {
 
     /**
-     * the regex, to recognize placeholder, like ${inspectit.metrics.frequency}
+     * the regex to recognize placeholder like ${inspectit.metrics.frequency}
      */
     private final Pattern placeholderPattern = Pattern.compile("\\$\\{([^}]+)}");
 
@@ -30,7 +30,7 @@ public class PlaceholderToDurationConverter implements Converter<String, Duratio
     public Duration convert(String source) {
         Matcher matcher = placeholderPattern.matcher(source);
 
-        if (matcher.find()) return DUMMY_DURATION;
+        if (matcher.find() || source.isEmpty()) return DUMMY_DURATION;
         else return DurationStyle.detectAndParse(source);
     }
 }
