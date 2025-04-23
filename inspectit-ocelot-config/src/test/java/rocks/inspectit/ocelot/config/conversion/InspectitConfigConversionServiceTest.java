@@ -3,66 +3,64 @@ package rocks.inspectit.ocelot.config.conversion;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.convert.TypeDescriptor;
-import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
-import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
+import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
+
+import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InspectitConfigConversionServiceTest {
 
-    InspectitConfigConversionService converter = InspectitConfigConversionService.getInstance();
+    private final InspectitConfigConversionService converter = InspectitConfigConversionService.getInstance();
 
     @Nested
-    class MetricsRecordingSettings {
+    class TransportProtocolConverter {
 
-        private final TypeDescriptor TARGET = TypeDescriptor.valueOf(MetricRecordingSettings.class);
-
-        @Test
-        void fromDouble() {
-            MetricRecordingSettings result = (MetricRecordingSettings) converter.convert(42.42, TARGET);
-
-            assertThat(result.getValue()).isEqualTo("42.42");
-        }
-
-        @Test
-        void fromInteger() {
-            MetricRecordingSettings result = (MetricRecordingSettings) converter.convert(42, TARGET);
-
-            assertThat(result.getValue()).isEqualTo("42");
-        }
+        private final TypeDescriptor TARGET = TypeDescriptor.valueOf(TransportProtocol.class);
 
         @Test
         void fromString() {
-            MetricRecordingSettings result = (MetricRecordingSettings) converter.convert("data_key", TARGET);
+            TransportProtocol result = (TransportProtocol) converter.convert("grpc", TARGET);
 
-            assertThat(result.getValue()).isEqualTo("data_key");
+            assertThat(result).isEqualTo(TransportProtocol.GRPC);
         }
 
         @Test
         void fromEmptyString() {
-            MetricRecordingSettings result = (MetricRecordingSettings) converter.convert("", TARGET);
+            TransportProtocol result = (TransportProtocol) converter.convert("", TARGET);
 
-            assertThat(result.getValue()).isEqualTo("");
+            assertThat(result).isEqualTo(null);
         }
     }
 
     @Nested
-    class ExporterEnabledStateConverter {
+    class DurationConverter {
 
-        private final TypeDescriptor TARGET = TypeDescriptor.valueOf(ExporterEnabledState.class);
+        private final InspectitConfigConversionService converter = InspectitConfigConversionService.getParserInstance();
+
+        private final TypeDescriptor TARGET = TypeDescriptor.valueOf(Duration.class);
+
+        private final Duration DUMMY_DURATION = Duration.ofHours(1);
 
         @Test
-        void fromTrue() {
-            ExporterEnabledState result = (ExporterEnabledState) converter.convert(true, TARGET);
+        void fromPlaceholder() {
+            Duration result = (Duration) converter.convert("${placeholder}", TARGET);
 
-            assertThat(result).isEqualTo(ExporterEnabledState.IF_CONFIGURED);
+            assertThat(result).isEqualTo(DUMMY_DURATION);
         }
 
         @Test
-        void fromFalse() {
-            ExporterEnabledState result = (ExporterEnabledState) converter.convert(false, TARGET);
+        void fromString() {
+            Duration result = (Duration) converter.convert("60s", TARGET);
 
-            assertThat(result).isEqualTo(ExporterEnabledState.DISABLED);
+            assertThat(result).isEqualTo(Duration.ofSeconds(60));
+        }
+
+        @Test
+        void fromEmptyString() {
+            Duration result = (Duration) converter.convert("", TARGET);
+
+            assertThat(result).isEqualTo(DUMMY_DURATION);
         }
     }
 }
