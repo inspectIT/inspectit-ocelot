@@ -25,6 +25,7 @@ import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.CachingWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 import rocks.inspectit.ocelot.mappings.AgentMappingManager;
+import rocks.inspectit.ocelot.mappings.AgentMappingSerializer;
 import rocks.inspectit.ocelot.mappings.model.AgentMapping;
 
 import java.io.File;
@@ -81,7 +82,7 @@ public class IntegrationTestBase {
         // it is not a git repository anymore
 
         // recreate the default agent mappings - the AgentMappingSerializer is not used because its depending on the version manager
-        AgentMapping defaultMapping = (AgentMapping) ReflectionTestUtils.getField(AgentMappingManager.class, "DEFAULT_MAPPING");
+        AgentMapping defaultMapping = (AgentMapping) ReflectionTestUtils.getField(AgentMappingSerializer.class, "DEFAULT_MAPPING");
         ObjectMapper ymlMapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         ymlMapper.findAndRegisterModules();
         Path agentMappingsFile = Paths.get(settings.getWorkingDirectory(), AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
