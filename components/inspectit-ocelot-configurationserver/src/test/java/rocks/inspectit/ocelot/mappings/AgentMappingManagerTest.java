@@ -207,10 +207,24 @@ public class AgentMappingManagerTest {
         @Test
         public void mappingDoesNotExist() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
+            AgentMapping mappingB = AgentMapping.builder().name("second").build();
+
+            doReturn(Arrays.asList(mappingA, mappingB)).when(serializer).readCachedAgentMappings();
+
+            boolean result = manager.deleteAgentMapping("not-existing");
+
+            assertThat(result).isFalse();
+            verify(serializer).readCachedAgentMappings();
+            verifyNoMoreInteractions(serializer);
+        }
+
+        @Test
+        public void lastMappingCannotBeDeleted() throws IOException {
+            AgentMapping mappingA = AgentMapping.builder().name("last").build();
 
             doReturn(Collections.singletonList(mappingA)).when(serializer).readCachedAgentMappings();
 
-            boolean result = manager.deleteAgentMapping("not-existing");
+            boolean result = manager.deleteAgentMapping("last");
 
             assertThat(result).isFalse();
             verify(serializer).readCachedAgentMappings();
