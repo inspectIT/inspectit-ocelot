@@ -25,16 +25,6 @@ import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 public class AgentMappingManager {
 
     /**
-     * The mapping which is used when no mappings file exists.
-     */
-    @VisibleForTesting
-    static final AgentMapping DEFAULT_MAPPING = AgentMapping.builder()
-            .name("Default Mapping")
-            .source("/")
-            .attribute("service", ".*")
-            .build();
-
-    /**
      * Object mapper utils.
      */
     private AgentMappingSerializer serializer;
@@ -144,7 +134,12 @@ public class AgentMappingManager {
 
         log.info("Deleting agent mapping '{}'.", mappingName);
 
-        ArrayList<AgentMapping> newAgentMappings = new ArrayList<>(getAgentMappings());
+        List<AgentMapping> currentAgentMappings = getAgentMappings();
+        if(currentAgentMappings.size() <= 1) {
+            log.warn("Cannot delete agent mapping. There has to be at least one agent mapping.");
+            return false;
+        }
+        ArrayList<AgentMapping> newAgentMappings = new ArrayList<>(currentAgentMappings);
         boolean removed = newAgentMappings.removeIf(mapping -> mapping.name().equals(mappingName));
         if (removed) {
             setAgentMappings(newAgentMappings);
@@ -226,7 +221,7 @@ public class AgentMappingManager {
     }
 
     /**
-     * Adds a agent mapping at the specified index. An existing mapping will be removed if it has the same name as the given one.
+     * Adds an agent mapping at the specified index. An existing mapping will be removed if it has the same name as the given one.
      */
     private void addAgentMapping(List<AgentMapping> currentMappings, AgentMapping agentMapping, int index) throws IOException {
         ArrayList<AgentMapping> newAgentMappings = new ArrayList<>(currentMappings);

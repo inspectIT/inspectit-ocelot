@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME;
-import static rocks.inspectit.ocelot.mappings.AgentMappingManager.DEFAULT_MAPPING;
 
 /**
  * Utility for reading and writing the Agent Mappings.
@@ -36,6 +35,16 @@ import static rocks.inspectit.ocelot.mappings.AgentMappingManager.DEFAULT_MAPPIN
 @Component
 @Slf4j
 public class AgentMappingSerializer {
+
+    /**
+     * The mapping which is used when no mappings file exists.
+     */
+    @VisibleForTesting
+    static final AgentMapping DEFAULT_MAPPING = AgentMapping.builder()
+            .name("Default Mapping")
+            .source("/")
+            .attribute("service", ".*")
+            .build();
 
     private ObjectMapper ymlMapper;
 

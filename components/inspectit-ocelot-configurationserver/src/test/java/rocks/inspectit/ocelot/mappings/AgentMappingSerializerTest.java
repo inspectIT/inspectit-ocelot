@@ -64,7 +64,7 @@ public class AgentMappingSerializerTest {
             ArgumentCaptor<String> writtenMapping = ArgumentCaptor.forClass(String.class);
             verify(workingDirectoryAccessor).writeAgentMappings(writtenMapping.capture());
 
-            assertThat(serializer.readCachedAgentMappings()).containsExactly(AgentMappingManager.DEFAULT_MAPPING);
+            assertThat(serializer.readCachedAgentMappings()).containsExactly(AgentMappingSerializer.DEFAULT_MAPPING);
         }
 
         @Test
