@@ -118,8 +118,14 @@ public class AgentMain {
         }
     }
 
+    /**
+     * By default, asynchronous instrumentation is enabled.
+     *
+     * @return true, if the asynchronous instrumentation property is {@code true} or not defined.
+     */
     private static boolean isAsyncInstrumentationEnabled() {
-        String isAsyncInstrumentationPropertyValue = null != System.getProperty(ASYNC_INSTRUMENTATION_PROPERTY) ? System.getProperty(ASYNC_INSTRUMENTATION_PROPERTY) : System.getenv(ASYNC_INSTRUMENTATION_ENV_PROPERTY);
+        String isAsyncInstrumentationPropertyValue = null != System.getProperty(ASYNC_INSTRUMENTATION_PROPERTY) ?
+                System.getProperty(ASYNC_INSTRUMENTATION_PROPERTY) : System.getenv(ASYNC_INSTRUMENTATION_ENV_PROPERTY);
         return null == isAsyncInstrumentationPropertyValue || "true".equalsIgnoreCase(isAsyncInstrumentationPropertyValue);
     }
 
@@ -161,7 +167,7 @@ public class AgentMain {
         }
 
         /**
-         * Visibility changed to public.
+         * Visibility changed to public
          */
         @Override
         public void addURL(URL url) {
@@ -181,7 +187,7 @@ public class AgentMain {
         }
 
         /**
-         * @return Returns the platform class loader if we are on Java 9 as this one can load needed
+         * @return the platform class loader if we are on Java 9 as this one can load needed
          * Java classes for us.
          */
         private static ClassLoader findParentClassLoader() {
