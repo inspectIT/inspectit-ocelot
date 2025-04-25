@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.core;
 
-import io.opencensus.tags.Tags;
+import io.opentelemetry.api.OpenTelemetry;
 import net.bytebuddy.pool.TypePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +111,8 @@ public class AgentImpl implements IAgent {
     }
 
     private void logOpenTelemetryClassLoader() {
-        if (Tags.class.getClassLoader() == AgentImpl.class.getClassLoader()) {
+        // check the classloader of any OTel class
+        if (OpenTelemetry.class.getClassLoader() == AgentImpl.class.getClassLoader()) {
             LOGGER.info("OpenTelemetry was loaded in inspectIT classloader");
         } else {
             LOGGER.info("OpenTelemetry was loaded in bootstrap classloader");
