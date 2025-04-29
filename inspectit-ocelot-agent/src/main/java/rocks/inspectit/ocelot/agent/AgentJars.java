@@ -37,6 +37,8 @@ public class AgentJars {
     private static String agentVersion;
 
     /**
+     * Get the path to the inspectit-ocelot-bootstrap.jar, which contains all classes from inspectit-ocelot-bootstrap.
+     *
      * @return the absolute path used for the inspectit-ocelot-bootstrap.jar in the file system
      */
     public static Path getOcelotBootstrapJar() throws IOException {
@@ -44,6 +46,9 @@ public class AgentJars {
     }
 
     /**
+     * Get the path to the inspectit-ocelot-core.jar, which contains all classes from inspectit-ocelot-core,
+     * inspectit-ocelot-config and inspectit-ocelot-sdk.
+     *
      * @return the absolute path used for the inspectit-ocelot-core.jar in the file system
      */
     public static Path getOcelotCoreJar() throws IOException {
@@ -51,6 +56,8 @@ public class AgentJars {
     }
 
     /**
+     * Get the path to the opentelemetry-fat.jar, which contains classes for OpenTelemetry as well as OpenCensus.
+     *
      * @return the absolute path used for the opentelemetry-fat.jar in the file system
      */
     public static Path getOpenTelemetryJar() throws IOException {
@@ -126,7 +133,7 @@ public class AgentJars {
      *
      * @param resourcePath the path to the resource, used if no jar has been found
      * @param jarPath the path of the jar file
-     * @return the path to the generated jar file
+     * @return the path to the used jar file
      */
     private static Path recycleJarFileWithLock(String resourcePath, Path jarPath) throws IOException {
         Files.createDirectories(jarPath.getParent());
