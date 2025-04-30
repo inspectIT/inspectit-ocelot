@@ -64,6 +64,7 @@ public class LogbackInitializer {
             JoranConfigurator configurator = new JoranConfigurator();
             configurator.setContext(context);
             context.reset();
+            // one input stream cannot be read twice
             recorder.recordEvents(getConfigFileInputStream(config));
             configurator.doConfigure(getConfigFileInputStream(config));
         } catch (JoranException je) {
@@ -87,6 +88,7 @@ public class LogbackInitializer {
      *
      * @param systemProperty the name of the system property
      * @param envVariable the name of the environment variable
+     *
      * @return true, if the property/variable is enabled at start up
      */
     private static boolean isInitiallyEnabled(String systemProperty, String envVariable) {
@@ -105,7 +107,7 @@ public class LogbackInitializer {
     /**
      * @return the initial configuration file for logging, if configured or {@code null}
      */
-    static File getInitialConfigFile() {
+    private static File getInitialConfigFile() {
         String configFileValue = null != System.getProperty(INSPECTIT_LOGGING_CONFIG_FILE_SYSTEM) ?
                 System.getProperty(INSPECTIT_LOGGING_CONFIG_FILE_SYSTEM) : System.getenv(INSPECTIT_LOGGING_CONFIG_FILE);
 
@@ -133,7 +135,8 @@ public class LogbackInitializer {
 
     /**
      * @param config the current inspectIT configuration
-     * @return the input stream of the currently configured logging config file
+     *
+     * @return the input stream of the currently referenced logging config file
      */
     private static Optional<InputStream> getCurrentConfigFileInputStream(InspectitConfig config) {
         return Optional.ofNullable(config)
@@ -249,6 +252,9 @@ public class LogbackInitializer {
         return false;
     }
 
+    /**
+     * Custom Filter used in {@code inspectit-logback.xml}
+     */
     public static class ConsoleFilter extends Filter {
 
         @Override
@@ -261,6 +267,9 @@ public class LogbackInitializer {
         }
     }
 
+    /**
+     * Custom Filter used in {@code inspectit-logback.xml}
+     */
     public static class FileFilter extends Filter {
 
         @Override
@@ -272,5 +281,4 @@ public class LogbackInitializer {
             }
         }
     }
-
 }
