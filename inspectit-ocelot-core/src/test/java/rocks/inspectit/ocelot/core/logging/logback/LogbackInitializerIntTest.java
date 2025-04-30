@@ -49,12 +49,12 @@ class LogbackInitializerIntTest {
         void propertiesSet() {
             LogbackInitializer.initLogging(environment.getCurrentConfig());
 
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_LEVEL)).isNull();
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_PATH)).isNull();
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_SERVICE_NAME)).isEqualTo("[" + environment.getCurrentConfig()
+            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_LEVEL)).isNull();
+            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_PATH)).isNull();
+            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_SERVICE_NAME)).isEqualTo("[" + environment.getCurrentConfig()
                     .getServiceName() + "]");
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_CONSOLE_PATTERN)).isNull();
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_FILE_PATTERN)).isNull();
+            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_CONSOLE_PATTERN)).isNull();
+            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_FILE_PATTERN)).isNull();
 
             assertThat(LogbackInitializer.consoleEnabled).isTrue();
             assertThat(LogbackInitializer.fileEnabled).isTrue();
@@ -195,12 +195,12 @@ class LogbackInitializerIntTest {
         void propertiesSet() {
             LogbackInitializer.initLogging(environment.getCurrentConfig());
 
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_LEVEL)).isEqualTo("TRACE");
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_PATH)).isEqualTo(tempDirectory.toAbsolutePath()
+            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_LEVEL)).isEqualTo("TRACE");
+            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_PATH)).isEqualTo(tempDirectory.toAbsolutePath()
                     .toString());
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_SERVICE_NAME)).isEmpty();
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_CONSOLE_PATTERN)).isEqualTo("my-console-pattern");
-            assertThat(System.getProperty(LogbackInitializer.INSPECTIT_LOG_FILE_PATTERN)).isEqualTo("my-file-pattern");
+            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_SERVICE_NAME)).isEmpty();
+            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_CONSOLE_PATTERN)).isEqualTo("my-console-pattern");
+            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_FILE_PATTERN)).isEqualTo("my-file-pattern");
 
             assertThat(LogbackInitializer.consoleEnabled).isFalse();
             assertThat(LogbackInitializer.fileEnabled).isFalse();

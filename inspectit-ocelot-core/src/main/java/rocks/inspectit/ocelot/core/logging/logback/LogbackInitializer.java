@@ -13,10 +13,14 @@ import org.springframework.core.io.Resource;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.logging.LoggingSettings;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Optional;
 import java.util.function.Function;
+
+import static rocks.inspectit.ocelot.core.logging.logback.LoggingProperties.*;
 
 /**
  * Main logback initializer. Method {@link #initLogging(InspectitConfig)} can be called
@@ -27,36 +31,6 @@ import java.util.function.Function;
 public class LogbackInitializer {
 
     /**
-     * The name of the System property that contains the log path.
-     */
-    static final String INSPECTIT_LOG_LEVEL = "INSPECTIT_LOG_LEVEL";
-
-    /**
-     * The name of the System property that contains the log path.
-     */
-    static final String INSPECTIT_LOG_PATH = "INSPECTIT_LOG_PATH";
-
-    /**
-     * The name of the System property that contains this service name.
-     */
-    static final String INSPECTIT_LOG_SERVICE_NAME = "INSPECTIT_LOG_SERVICE_NAME";
-
-    /**
-     * The name of the System property that contains this console pattern.
-     */
-    static final String INSPECTIT_LOG_CONSOLE_PATTERN = "INSPECTIT_LOG_CONSOLE_PATTERN";
-
-    /**
-     * The name of the System property that contains this console pattern.
-     */
-    static final String INSPECTIT_LOG_FILE_PATTERN = "INSPECTIT_LOG_FILE_PATTERN";
-
-    /**
-     * Allow disabling the console log before the log system is initialized.
-     */
-    static final String INSPECTIT_LOGGING_CONSOLE_ENABLED = "INSPECTIT_LOGGING_CONSOLE_ENABLED";
-
-    /**
      * {@link #consoleEnabled} is depending on this function, thus, the field order is important.
      */
     @VisibleForTesting
@@ -65,8 +39,11 @@ public class LogbackInitializer {
     // flags for the filters
     static boolean consoleEnabled = isConsoleInitiallyEnabled();
 
-    static boolean fileEnabled = true;
+    static boolean fileEnabled = isFileInitiallyEnabled();
 
+    /**
+     * Initialize logging before reading the {@link InspectitConfig}
+     */
     public static void initDefaultLogging() {
         initLogging(null);
     }
@@ -97,9 +74,25 @@ public class LogbackInitializer {
 
     @VisibleForTesting
     static boolean isConsoleInitiallyEnabled() {
-        String enabledFlag = System.getProperty(INSPECTIT_LOGGING_CONSOLE_ENABLED);
+        return isInitiallyEnabled(INSPECTIT_LOGGING_CONSOLE_ENABLED_SYSTEM, INSPECTIT_LOGGING_CONSOLE_ENABLED);
+    }
+
+    @VisibleForTesting
+    static boolean isFileInitiallyEnabled() {
+        return isInitiallyEnabled(INSPECTIT_LOGGING_FILE_ENABLED_SYSTEM, INSPECTIT_LOGGING_FILE_ENABLED);
+    }
+
+    /**
+     * Checks, if a feature is enabled at start up. System properties are higher prioritized than environment variables.
+     *
+     * @param systemProperty the name of the system property
+     * @param envVariable the name of the environment variable
+     * @return true, if the property/variable is enabled at start up
+     */
+    private static boolean isInitiallyEnabled(String systemProperty, String envVariable) {
+        String enabledFlag = System.getProperty(systemProperty);
         if (enabledFlag == null) {
-            enabledFlag = getEnvironment.apply(INSPECTIT_LOGGING_CONSOLE_ENABLED);
+            enabledFlag = getEnvironment.apply(envVariable);
         }
 
         if (enabledFlag == null) {
@@ -109,7 +102,40 @@ public class LogbackInitializer {
         }
     }
 
+    /**
+     * @return the initial configuration file for logging, if configured or {@code null}
+     */
+    static File getInitialConfigFile() {
+        String configFileValue = null != System.getProperty(INSPECTIT_LOGGING_CONFIG_FILE_SYSTEM) ?
+                System.getProperty(INSPECTIT_LOGGING_CONFIG_FILE_SYSTEM) : System.getenv(INSPECTIT_LOGGING_CONFIG_FILE);
+
+        if (configFileValue != null) return new File(configFileValue);
+        return null;
+    }
+
+    /**
+     * Get the input stream of the used logging configuration file. <br>
+     * First, we check the file, specified by the current {@link InspectitConfig}.<br>
+     * Then, we try to read the initially set file. <br>
+     * At the end, we fall back to inspectit default logging config.
+     *
+     * @param config the current inspectIT config
+     *
+     * @return the input stream of the used logging configuration file
+     */
     private static InputStream getConfigFileInputStream(InspectitConfig config) {
+        Optional<InputStream> inputStream = getCurrentConfigFileInputStream(config);
+        if (inputStream.isPresent()) return inputStream.get();
+
+        return getInitialConfigFileInputStream()
+                .orElse(LogbackInitializer.class.getResourceAsStream("/inspectit-logback.xml"));
+    }
+
+    /**
+     * @param config the current inspectIT configuration
+     * @return the input stream of the currently configured logging config file
+     */
+    private static Optional<InputStream> getCurrentConfigFileInputStream(InspectitConfig config) {
         return Optional.ofNullable(config)
                 .map(InspectitConfig::getLogging)
                 .map(LoggingSettings::getConfigFile)
@@ -122,10 +148,33 @@ public class LogbackInitializer {
                     } catch (IOException e) {
                         return Optional.empty();
                     }
-                })
-                .orElse(LogbackInitializer.class.getResourceAsStream("/inspectit-logback.xml"));
+                });
     }
 
+    /**
+     * @return the input stream of the initially configured logging config file
+     */
+    private static Optional<InputStream> getInitialConfigFileInputStream() {
+        File initialConfigFile = getInitialConfigFile();
+        if (initialConfigFile == null) return Optional.empty();
+
+        if(!initialConfigFile.exists() || !initialConfigFile.canRead()) {
+            System.err.println("Could not read initial logging configuration file: " + initialConfigFile);
+            return Optional.empty();
+        }
+
+        try {
+            return Optional.of(Files.newInputStream(initialConfigFile.toPath()));
+        } catch (IOException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Overwrites the properties with the values from {@link InspectitConfig}.
+     *
+     * @param config the current inspectit config
+     */
     private static void setPropertiesFromConfig(InspectitConfig config) {
         consoleEnabled = config.getLogging().getConsole().isEnabled();
         fileEnabled = config.getLogging().getFile().isEnabled();
