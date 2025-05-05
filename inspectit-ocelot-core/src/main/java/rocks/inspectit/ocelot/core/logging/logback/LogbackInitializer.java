@@ -107,9 +107,10 @@ public class LogbackInitializer {
     /**
      * @return the initial configuration file for logging, if configured or {@code null}
      */
-    private static File getInitialConfigFile() {
+    @VisibleForTesting
+    static File getInitialConfigFile() {
         String configFileValue = null != System.getProperty(INSPECTIT_LOGGING_CONFIG_FILE_SYSTEM) ?
-                System.getProperty(INSPECTIT_LOGGING_CONFIG_FILE_SYSTEM) : System.getenv(INSPECTIT_LOGGING_CONFIG_FILE);
+                System.getProperty(INSPECTIT_LOGGING_CONFIG_FILE_SYSTEM) : getEnvironment.apply(INSPECTIT_LOGGING_CONFIG_FILE);
 
         if (configFileValue != null) return new File(configFileValue);
         return null;

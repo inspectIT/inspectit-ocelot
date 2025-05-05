@@ -15,6 +15,7 @@ import org.springframework.test.context.TestPropertySource;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static rocks.inspectit.ocelot.core.logging.logback.LoggingProperties.*;
 
 class LogbackInitializerIntTest {
 
@@ -49,12 +51,12 @@ class LogbackInitializerIntTest {
         void propertiesSet() {
             LogbackInitializer.initLogging(environment.getCurrentConfig());
 
-            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_LEVEL)).isNull();
-            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_PATH)).isNull();
-            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_SERVICE_NAME)).isEqualTo("[" + environment.getCurrentConfig()
+            assertThat(System.getProperty(INSPECTIT_LOG_LEVEL)).isNull();
+            assertThat(System.getProperty(INSPECTIT_LOG_PATH)).isNull();
+            assertThat(System.getProperty(INSPECTIT_LOG_SERVICE_NAME)).isEqualTo("[" + environment.getCurrentConfig()
                     .getServiceName() + "]");
-            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_CONSOLE_PATTERN)).isNull();
-            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_FILE_PATTERN)).isNull();
+            assertThat(System.getProperty(INSPECTIT_LOG_CONSOLE_PATTERN)).isNull();
+            assertThat(System.getProperty(INSPECTIT_LOG_FILE_PATTERN)).isNull();
 
             assertThat(LogbackInitializer.consoleEnabled).isTrue();
             assertThat(LogbackInitializer.fileEnabled).isTrue();
@@ -176,8 +178,8 @@ class LogbackInitializerIntTest {
     }
 
     @Nested
-    @TestPropertySource(properties = {"inspectit.logging.trace=true", "inspectit.logging.debug=true", "inspectit.logging.console.enabled=false", "inspectit.logging.console.pattern=my-console-pattern", "inspectit.logging.file.enabled=false", "inspectit.logging.file.pattern=my-file-pattern", "inspectit.logging.file.include-service-name=false",})
     @DirtiesContext
+    @TestPropertySource(properties = {"inspectit.logging.trace=true", "inspectit.logging.debug=true", "inspectit.logging.console.enabled=false", "inspectit.logging.console.pattern=my-console-pattern", "inspectit.logging.file.enabled=false", "inspectit.logging.file.pattern=my-file-pattern", "inspectit.logging.file.include-service-name=false",})
     class OverwrittenDefaults extends SpringTestBase {
 
         Path tempDirectory;
@@ -195,12 +197,12 @@ class LogbackInitializerIntTest {
         void propertiesSet() {
             LogbackInitializer.initLogging(environment.getCurrentConfig());
 
-            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_LEVEL)).isEqualTo("TRACE");
-            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_PATH)).isEqualTo(tempDirectory.toAbsolutePath()
+            assertThat(System.getProperty(INSPECTIT_LOG_LEVEL)).isEqualTo("TRACE");
+            assertThat(System.getProperty(INSPECTIT_LOG_PATH)).isEqualTo(tempDirectory.toAbsolutePath()
                     .toString());
-            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_SERVICE_NAME)).isEmpty();
-            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_CONSOLE_PATTERN)).isEqualTo("my-console-pattern");
-            assertThat(System.getProperty(LoggingProperties.INSPECTIT_LOG_FILE_PATTERN)).isEqualTo("my-file-pattern");
+            assertThat(System.getProperty(INSPECTIT_LOG_SERVICE_NAME)).isEmpty();
+            assertThat(System.getProperty(INSPECTIT_LOG_CONSOLE_PATTERN)).isEqualTo("my-console-pattern");
+            assertThat(System.getProperty(INSPECTIT_LOG_FILE_PATTERN)).isEqualTo("my-file-pattern");
 
             assertThat(LogbackInitializer.consoleEnabled).isFalse();
             assertThat(LogbackInitializer.fileEnabled).isFalse();
@@ -238,6 +240,102 @@ class LogbackInitializerIntTest {
             }
 
             FileUtils.deleteDirectory(tempDirectory.toFile());
+        }
+    }
+
+    @Nested
+    class InitialOverwrittenDefaults {
+
+        Path tempDirectory;
+
+        String expectedPath;
+
+        @BeforeEach
+        void beforeTest() throws IOException {
+            tempDirectory = Files.createTempDirectory("ocelot-logback");
+
+            String configFilePath = "src/test/resources/test-logback.xml";
+            expectedPath = Paths.get(tempDirectory.toString(), configFilePath).toString();
+        }
+
+        @AfterEach
+        void clean() throws Exception {
+            ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
+            // Check for logback implementation of slf4j
+            if (loggerFactory instanceof LoggerContext) {
+                LoggerContext context = (LoggerContext) loggerFactory;
+                context.reset();
+                context.stop();
+            }
+
+            FileUtils.deleteDirectory(tempDirectory.toFile());
+
+            LogbackInitializer.getEnvironment = System::getenv;
+            System.clearProperty(INSPECTIT_LOGGING_CONSOLE_ENABLED_SYSTEM);
+            System.clearProperty(INSPECTIT_LOGGING_FILE_ENABLED_SYSTEM);
+            System.clearProperty(INSPECTIT_LOGGING_CONFIG_FILE_SYSTEM);
+        }
+
+        @Test
+        void defaultLoggingUsesInitialSystemProperties() {
+            System.setProperty(INSPECTIT_LOGGING_CONSOLE_ENABLED_SYSTEM, "false");
+            System.setProperty(INSPECTIT_LOGGING_FILE_ENABLED_SYSTEM, "false");
+            System.setProperty(INSPECTIT_LOGGING_CONFIG_FILE_SYSTEM, expectedPath);
+
+            LogbackInitializer.initDefaultLogging();
+
+            boolean consoleEnabled = LogbackInitializer.isConsoleInitiallyEnabled();
+            boolean fileEnabled = LogbackInitializer.isFileInitiallyEnabled();
+            File configFile = LogbackInitializer.getInitialConfigFile();
+
+            assertThat(consoleEnabled).isFalse();
+            assertThat(fileEnabled).isFalse();
+            assertThat(configFile).isNotNull();
+            assertThat(configFile.getAbsolutePath()).isEqualTo(expectedPath);
+        }
+
+        @Test
+        void defaultLoggingUsesInitialEnvVariables() {
+            LogbackInitializer.getEnvironment = envKey -> {
+              if(envKey.equals(INSPECTIT_LOGGING_CONSOLE_ENABLED)) return "false";
+              else if(envKey.equals(INSPECTIT_LOGGING_FILE_ENABLED)) return "false";
+              else return expectedPath;
+            };
+
+            LogbackInitializer.initDefaultLogging();
+
+            boolean consoleEnabled = LogbackInitializer.isConsoleInitiallyEnabled();
+            boolean fileEnabled = LogbackInitializer.isFileInitiallyEnabled();
+            File configFile = LogbackInitializer.getInitialConfigFile();
+
+            assertThat(consoleEnabled).isFalse();
+            assertThat(fileEnabled).isFalse();
+            assertThat(configFile).isNotNull();
+            assertThat(configFile.getAbsolutePath()).isEqualTo(expectedPath);
+        }
+
+        @Test
+        void defaultLoggingUsesSystemPropertyPrioritized() {
+            System.setProperty(INSPECTIT_LOGGING_CONSOLE_ENABLED_SYSTEM, "false");
+            System.setProperty(INSPECTIT_LOGGING_FILE_ENABLED_SYSTEM, "true");
+            System.setProperty(INSPECTIT_LOGGING_CONFIG_FILE_SYSTEM, expectedPath);
+
+            LogbackInitializer.getEnvironment = envKey -> {
+                if(envKey.equals(INSPECTIT_LOGGING_CONSOLE_ENABLED)) return "true";
+                else if(envKey.equals(INSPECTIT_LOGGING_FILE_ENABLED)) return "false";
+                else return null;
+            };
+
+            LogbackInitializer.initDefaultLogging();
+
+            boolean consoleEnabled = LogbackInitializer.isConsoleInitiallyEnabled();
+            boolean fileEnabled = LogbackInitializer.isFileInitiallyEnabled();
+            File configFile = LogbackInitializer.getInitialConfigFile();
+
+            assertThat(consoleEnabled).isFalse();
+            assertThat(fileEnabled).isTrue();
+            assertThat(configFile).isNotNull();
+            assertThat(configFile.getAbsolutePath()).isEqualTo(expectedPath);
         }
     }
 
