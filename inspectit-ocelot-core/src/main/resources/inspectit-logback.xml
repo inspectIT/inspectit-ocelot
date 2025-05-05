@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- Configure logDir with multiple fallback paths
-        1. INSPECTIT_LOG_PATH (env variable)
-        2. inspectit.temp.dir (system property)
-        3. INSPECTIT_TEMP_DIR (env variable)
-        4. LOG_TEMP (env variable)
+    <!--
+    NOTE:
+        Even though we use the ENV variable naming convention, the inspectIT variables below (e.g. INSPECTIT_LOG_PATH)
+        are used as system properties by the inspectit-ocelot-core (see LogbackInitializer)
+    NOTE AGAIN:
+        Those variables can also be set from outside either via ENV variables or system properties (via start arguments):
+        - e.g. 'export INSPECTIT_LOG_PATH=...' or '-DINSPECTIT_LOG_PATH=...'
+        - It's NOT RECOMMENDED to set those variables from outside AND try to change them via external configuration
+          sources (e.g. configuration-server), because:
+        - When setting them via ENV variables, those variables cannot be overwritten, but overruled by system properties,
+          which are set by the inspectit-ocelot-core (see LogbackInitializer)
+        - When setting them via system properties, those variables will be overwritten or cleared
+          by the inspectit-ocelot-core (see LogbackInitializer)
+    -->
+
+    <!--
+    Configure logDir with multiple fallback paths
+        1. INSPECTIT_LOG_PATH
+        2. inspectit.temp-dir
+        3. INSPECTIT_TEMP_DIR
+        4. LOG_TEMP
         5. java.io.tmpdir (system property set by java)
         6. /tmp (absolute path)
     -->
