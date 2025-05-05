@@ -16,7 +16,6 @@ import rocks.inspectit.ocelot.core.instrumentation.context.propagation.BrowserPr
 import rocks.inspectit.ocelot.core.instrumentation.context.propagation.DatadogFormat;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 
-import javax.annotation.Nullable;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
@@ -70,7 +69,7 @@ public class ContextPropagationUtil {
 
     public static final TextMapSetter<Map<String, String>> MAP_INJECTOR = new TextMapSetter<Map<String, String>>() {
         @Override
-        public void set(@Nullable Map<String, String> carrier, String key, String value) {
+        public void set( Map<String, String> carrier, String key, String value) {
             carrier.put(key, value);
         }
     };

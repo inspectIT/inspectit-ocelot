@@ -4,14 +4,14 @@ comLinecorpArmeria = "1.31.3"
 # @pin 1.3.* are the latest versions, which support java 8
 chQosLogback= "1.3.15"
 ioGithubNetmikeyLogunit = "2.0.0"
-ioGrpc = "1.71.0"
+ioGrpc = "1.72.0"
 # Ensure to adapt the netty version when changing the OpenCensus version
 # If you rename or move this variable to another file, adjust the release-workflow
 ioOpencensus = "0.31.1"
-ioOpentelemetry = "1.48.0"
-ioOpentelemetryAlpha = "1.48.0-alpha"
+ioOpentelemetry = "1.49.0"
+ioOpentelemetryAlpha = "1.49.0-alpha"
 ioOpentelemetryProto = "1.5.0-alpha"
-ioOpentelemetrySemconv = "1.30.0"
+ioOpentelemetrySemconv = "1.32.0"
 orgApacheLoggingLog4j = "2.24.3"
 # @pin 10+ does not support Java 8 - Maintain latest 9 version
 orgEclipseJetty = "9.4.57.v20241219"
@@ -26,7 +26,7 @@ orgSlf4j = "2.0.7"
 orgSpringframework = "5.3.39"
 # @pin 2.7.18 is the latest release which runs on Java 8, this version marks the end of open source support for SB 2.x
 orgSpringframeworkBoot = "2.7.18"
-orgTestcontainers = "1.20.6"
+orgTestcontainers = "1.21.0"
 # @pin resilience4j 2.* uses Java 17 APIs
 ioGithubResilience4j = "1.7.1"
 
@@ -37,7 +37,7 @@ chQosLogbackLogbackCore = { module = "ch.qos.logback:logback-core", version.ref 
 comFasterxmlJacksonCoreJacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:2.13.5"
 # @pin Wiremock 3.* doesn't support java 8
 comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
-comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.0-jre" } }
+comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.8-jre" } }
 # @pin protobuf 4.* is not running
 # Note: 3.25.6 breaks tests
 comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25.5"
@@ -45,8 +45,8 @@ comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25
 comH2databaseH2 = "com.h2database:h2:2.2.224"
 comLinecorpArmeriaArmeriaGrpcProtocol = { module = "com.linecorp.armeria:armeria-grpc-protocol", version.ref = "comLinecorpArmeria" }
 comLinecorpArmeriaArmeriaJunit5 = { module = "com.linecorp.armeria:armeria-junit5", version.ref = "comLinecorpArmeria" }
-comSquareupOkio = "com.squareup.okio:okio:3.10.2"
-commonsIo = "commons-io:commons-io:2.18.0"
+comSquareupOkio = "com.squareup.okio:okio:3.11.0"
+commonsIo = "commons-io:commons-io:2.19.0"
 ioGithubNetmikeyLogunitLogunitCore = { module = "io.github.netmikey.logunit:logunit-core", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubNetmikeyLogunitLogunitLogback = { module = "io.github.netmikey.logunit:logunit-logback", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubResilience4jResilience4jRetry = { module = "io.github.resilience4j:resilience4j-retry", version.ref = "ioGithubResilience4j" }
@@ -55,7 +55,7 @@ ioGrpcGrpcNettyShaded = { module = "io.grpc:grpc-netty-shaded", version.ref = "i
 ioGrpcGrpcStub = { module = "io.grpc:grpc-stub", version.ref = "ioGrpc" }
 # The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
 # See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
-ioNettyNettyTcnativeBoringsslStatic = "io.netty:netty-tcnative-boringssl-static:2.0.70.Final"
+ioNettyNettyTcnativeBoringsslStatic = "io.netty:netty-tcnative-boringssl-static:2.0.71.Final"
 # Ensure to adapt the netty version when changing the OpenCensus version
 ioOpencensusOpencensusApi = { module = "io.opencensus:opencensus-api", version.ref = "ioOpencensus" }
 ioOpencensusOpencensusImpl = { module = "io.opencensus:opencensus-impl", version.ref = "ioOpencensus" }
@@ -100,7 +100,7 @@ orgJunitJupiterJunitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api
 orgJunitJupiterJunitJupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "orgJunitJupiter" }
 orgMockitoMockitoCore = { module = "org.mockito:mockito-core", version.ref = "orgMockito" }
 orgMockitoMockitoJunitJupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "orgMockito" }
-orgProjectlombokLombok = "org.projectlombok:lombok:1.18.36"
+orgProjectlombokLombok = "org.projectlombok:lombok:1.18.38"
 orgSlf4jJulToSlf4j = { module = "org.slf4j:jul-to-slf4j", version.ref = "orgSlf4j" }
 orgSlf4jslf4jApi = { module = "org.slf4j:slf4j-api", version.ref = "orgSlf4j" }
 orgSpringdocSpringdocOpenapiUi = "org.springdoc:springdoc-openapi-ui:1.8.0"
