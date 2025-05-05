@@ -1,15 +1,15 @@
 [versions]
 ioJsonwebtoken = "0.12.6"
 orgEclipseJgit = "7.2.0.202503040940-r"
-orgMockito = "5.16.1"
+orgMockito = "5.17.0"
 # Take a look at spring version
 orgJunitJupiter = "5.11.4"
-orgSpringframeworkBoot = { strictly = "3.4.4" }
-orgSpringframeworkSecurity = "6.4.4"
+orgSpringframeworkBoot = { strictly = "3.4.5" }
+orgSpringframeworkSecurity = "6.4.5"
 
 [libraries]
-comGoogleCodeGson = "com.google.code.gson:gson:2.12.1"
-comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.6-jre" } }
+comGoogleCodeGson = "com.google.code.gson:gson:2.13.1"
+comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.8-jre" } }
 comH2databaseH2 = "com.h2database:h2:2.3.232"
 commonsIo = "commons-io:commons-io:2.19.0"
 ioJsonwebtokenJjwtApi = { module = "io.jsonwebtoken:jjwt-api", version.ref = "ioJsonwebtoken" }
@@ -19,8 +19,8 @@ orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.17.0"
 orgAwaitility = "org.awaitility:awaitility:4.3.0"
 orgEclipseJgitOrgEclipseJgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "orgEclipseJgit" }
 orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "orgEclipseJgit" }
-orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:11.5.0"
-orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:6.6.11.Final"
+orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:11.8.0"
+orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:6.6.13.Final"
 orgJunitJupiterJunitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "orgJunitJupiter" }
 orgJunitJupiterJunitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "orgJunitJupiter" }
 orgJunitJupiterJunitJupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "orgJunitJupiter" }
@@ -30,7 +30,7 @@ orgSpringframeworkBootSpringBootStarterDataJpa = { module = "org.springframework
 orgSpringframeworkBootSpringBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStartervalidation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "orgSpringframeworkBoot" }
-orgSpringframeworkLdapSpringLdapCore = "org.springframework.ldap:spring-ldap-core:3.2.11"
+orgSpringframeworkLdapSpringLdapCore = "org.springframework.ldap:spring-ldap-core:3.2.12"
 orgSpringframeworkSecuritySpringSecurityLdap = { module = "org.springframework.security:spring-security-ldap", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityTest = { module = "org.springframework.security:spring-security-test", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityWeb = { module = "org.springframework.security:spring-security-web", version.ref = "orgSpringframeworkSecurity" }
