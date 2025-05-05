@@ -1,0 +1,76 @@
+{
+  "version-2.6.9-docs": {
+    "Getting Started": [
+      "version-2.6.9-doc1",
+      "version-2.6.9-getting-started/quick-start",
+      "version-2.6.9-getting-started/docker-examples",
+      "version-2.6.9-getting-started/installation"
+    ],
+    "Configuration": [
+      "version-2.6.9-configuration/configuration-sources",
+      "version-2.6.9-configuration/external-configuration-sources",
+      "version-2.6.9-configuration/logging-configuration",
+      "version-2.6.9-configuration/start-configuration",
+      "version-2.6.9-configuration/opentelemetry-configuration",
+      "version-2.6.9-configuration/plugin-configuration",
+      "version-2.6.9-configuration/agent-command-configuration"
+    ],
+    "Metrics": [
+      "version-2.6.9-metrics/metrics",
+      "version-2.6.9-metrics/metric-recorders",
+      "version-2.6.9-metrics/metric-exporters",
+      "version-2.6.9-metrics/common-tags",
+      "version-2.6.9-metrics/custom-metrics",
+      "version-2.6.9-metrics/self-monitoring",
+      "version-2.6.9-metrics/tag-guard"
+    ],
+    "Tracing": [
+      "version-2.6.9-tracing/tracing",
+      "version-2.6.9-tracing/trace-exporters",
+      "version-2.6.9-tracing/log-correlation",
+      "version-2.6.9-tracing/privacy",
+      "version-2.6.9-tracing/tracing-self-monitoring"
+    ],
+    "Tags": [
+      "version-2.6.9-tags/tags-exporters"
+    ],
+    "Instrumentation": [
+      "version-2.6.9-instrumentation/instrumentation",
+      "version-2.6.9-instrumentation/scopes",
+      "version-2.6.9-instrumentation/rules",
+      "version-2.6.9-instrumentation/business-transactions",
+      "version-2.6.9-instrumentation/code-style",
+      "version-2.6.9-instrumentation/special-sensors",
+      "version-2.6.9-instrumentation/process"
+    ],
+    "Default Instrumentation": [
+      "version-2.6.9-default-instrumentation/default-instrumentation",
+      "version-2.6.9-default-instrumentation/jakarta",
+      "version-2.6.9-default-instrumentation/apache-client5"
+    ],
+    "End User Monitoring": [
+      "version-2.6.9-enduser-monitoring/enduser-monitoring-server",
+      "version-2.6.9-enduser-monitoring/eum-server-setup",
+      "version-2.6.9-enduser-monitoring/eum-server-configuration",
+      "version-2.6.9-enduser-monitoring/install-eum-agent"
+    ],
+    "Configuration Server": [
+      "version-2.6.9-config-server/overview",
+      "version-2.6.9-config-server/cs-configuration",
+      "version-2.6.9-config-server/managing-files",
+      "version-2.6.9-config-server/files-staging",
+      "version-2.6.9-config-server/agent-mappings",
+      "version-2.6.9-config-server/scope-wizard",
+      "version-2.6.9-config-server/class-browser",
+      "version-2.6.9-config-server/user-authentication",
+      "version-2.6.9-config-server/config-docs",
+      "version-2.6.9-config-server/log-config",
+      "version-2.6.9-config-server/yaml-editor",
+      "version-2.6.9-config-server/status-table-view",
+      "version-2.6.9-config-server/alerting"
+    ],
+    "Breaking Changes": [
+      "version-2.6.9-breaking-changes/Breaking Changes"
+    ]
+  }
+}
