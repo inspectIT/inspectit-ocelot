@@ -11,6 +11,7 @@ import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.pool.TypePool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
@@ -130,11 +131,16 @@ public abstract class AbstractClassTransformer implements ClassTransformer {
             }
 
             // Make a ByteBuddy builder based on the input bytecode
+            ClassFileLocator classLoaderClassFileLocator = ClassFileLocator.ForClassLoader.of(typeWithLoader.getLoader());
             ClassFileLocator bytecodeClassFileLocator = ClassFileLocator.Simple.of(typeWithLoader.getName(), bytecode);
+            ClassFileLocator compoundClassFileLocator = new ClassFileLocator.Compound(classLoaderClassFileLocator, bytecodeClassFileLocator);
+            TypePool typePool = TypePool.Default.of(compoundClassFileLocator);
+
             // See https://github.com/raphw/byte-buddy/issues/1095 and https://github.com/raphw/byte-buddy/issues/1040
             // why we are using the different method graph and decorate function here
-            DynamicType.Builder<?> builder = new ByteBuddy().with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE)
-                    .decorate(typeWithLoader.getType(), bytecodeClassFileLocator);
+            DynamicType.Builder<?> builder = new ByteBuddy()
+                    .with(MethodGraph.Compiler.ForDeclaredMethods.INSTANCE)
+                    .decorate(typePool.describe(typeWithLoader.getName()).resolve(), compoundClassFileLocator);
 
             // Apply the actual instrumentation onto the builders
             for (SpecialSensor specialSensor : classConf.getActiveSpecialSensors()) {
