@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.instrument.Instrumentation;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 /**
@@ -124,7 +125,7 @@ public class AgentImpl implements IAgent {
      */
     private void readVersionInformation() {
         try (InputStream inputStream = AgentImpl.class.getResourceAsStream(AGENT_VERSION_INFORMATION_FILE)) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             agentVersion = reader.readLine();
             openTelemetryVersion = reader.readLine();
             agentBuildDate = reader.readLine();

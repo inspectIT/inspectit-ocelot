@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -226,7 +227,7 @@ public class AgentJars {
     private static String getAgentVersion() {
         if(agentVersion == null) {
             try (InputStream is = AgentJars.class.getResourceAsStream(AGENT_VERSION_INFORMATION_FILE)) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
                 agentVersion = reader.readLine();
             } catch (Exception e) {
                 System.err.println("Could not read agent version information file");
