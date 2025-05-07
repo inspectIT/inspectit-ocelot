@@ -1,0 +1,33 @@
+dependencies {
+    testImplementation(
+            configServerLibs.orgJunitJupiterJunitJupiter
+    )
+
+    implementation(
+            project(':inspectit-ocelot-config'),
+            libs.ioOpentelemetryOpentelemetryApi,
+            // TODO move to version catalog
+            'com.fasterxml.jackson.module:jackson-module-jsonSchema:2.19.0',
+            'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.19.0'
+    )
+
+    compileOnly libs.orgProjectlombokLombok
+    annotationProcessor libs.orgProjectlombokLombok
+}
+
+task generateConfigSchema(type: JavaExec) {
+    def outputPath = "$buildDir/inspectit-ocelot-configuration-schema-${version}.yml"
+
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass.set("inspectit.ocelot.configschemagenerator.SchemaGenerator")
+    args outputPath
+}
+
+test {
+    useJUnitPlatform()
+}
+
+java {
+    sourceCompatibility = 17
+    targetCompatibility = 17
+}
