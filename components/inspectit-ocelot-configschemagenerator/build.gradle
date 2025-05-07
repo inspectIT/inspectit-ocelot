@@ -6,9 +6,11 @@ dependencies {
     implementation(
             project(':inspectit-ocelot-config'),
             libs.ioOpentelemetryOpentelemetryApi,
-            // TODO move to version catalog
-            'com.fasterxml.jackson.module:jackson-module-jsonSchema:2.19.0',
-            'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.19.0'
+
+            // We chose this generator, because it has a great feature-set and is actively maintained
+            configServerLibs.comGithubVictoolsJsonschemaGenerator,
+            configServerLibs.comGithubVictoolsJsonschemaModuleJackson,
+            configServerLibs.comGithubVictoolsJsonschemaModuleJavaxValidation,
     )
 
     compileOnly libs.orgProjectlombokLombok
@@ -16,10 +18,10 @@ dependencies {
 }
 
 task generateConfigSchema(type: JavaExec) {
-    def outputPath = "$buildDir/inspectit-ocelot-configuration-schema-${version}.yml"
+    def outputPath = "$buildDir/inspectit-ocelot-configuration-schema-${version}.json"
 
     classpath = sourceSets.main.runtimeClasspath
-    mainClass.set("inspectit.ocelot.configschemagenerator.SchemaGenerator")
+    mainClass.set("inspectit.ocelot.configschemagenerator.InspectitSchemaGenerator")
     args outputPath
 }
 
