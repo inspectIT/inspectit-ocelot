@@ -1,4 +1,4 @@
-package inspectit.ocelot.configschemagenerator;
+package rocks.inspectit.ocelot.configschemagenerator;
 
 import lombok.Data;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;

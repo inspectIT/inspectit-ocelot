@@ -21,8 +21,19 @@ task generateConfigSchema(type: JavaExec) {
     def outputPath = "$buildDir/inspectit-ocelot-configuration-schema-${version}.json"
 
     classpath = sourceSets.main.runtimeClasspath
-    mainClass.set("inspectit.ocelot.configschemagenerator.InspectitSchemaGenerator")
+    mainClass.set("rocks.inspectit.ocelot.configschemagenerator.InspectitSchemaGenerator")
     args outputPath
+}
+
+// build fatJar with dependencies included
+jar {
+    manifest {
+        attributes('Main-Class': 'rocks.inspectit.ocelot.configschemagenerator.InspectitSchemaGenerator')
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 test {

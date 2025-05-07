@@ -1,4 +1,4 @@
-package inspectit.ocelot.configschemagenerator;
+package rocks.inspectit.ocelot.configschemagenerator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;

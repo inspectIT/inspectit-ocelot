@@ -1,4 +1,4 @@
-package inspectit.ocelot.configschemagenerator;
+package rocks.inspectit.ocelot.configschemagenerator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
