@@ -61,6 +61,22 @@ jobs:
             --disableNodeAudit
             --nvdApiKey ${{ secrets.NVD_API_KEY }}
             --nvdApiDelay 10000
+      - name: build ConfigSchemaGenerator
+        run: ./gradlew :inspectit-ocelot-configschemagenerator:assemble
+      - name: Run DependencyCheck ConfigSchemaGenerator
+        uses: dependency-check/Dependency-Check_Action@main
+        id: depcheck-schema
+        continue-on-error: true
+        with:
+          project: inspectIT/inspectit-ocelot-configschemagenerator
+          path: 'components/inspectit-ocelot-configschemagenerator'
+          format: 'HTML'
+          out: 'reports/configschemagenerator'
+          args: >
+            --disableAssembly
+            --disableNodeAudit
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --nvdApiDelay 10000
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
@@ -68,7 +84,7 @@ jobs:
           path: ${{ github.workspace }}/reports
       - name: Set DependencyCheck status
         run: |
-          if [ ${{ steps.depcheck.outcome == 'failure' || steps.depcheck-ui.outcome == 'failure' || steps.depcheck-docs.outcome == 'failure' }} == "true" ]; then
+          if [ ${{ steps.depcheck.outcome == 'failure' || steps.depcheck-ui.outcome == 'failure' || steps.depcheck-docs.outcome == 'failure' || steps.depcheck-schema.outcome == 'failure' }} == "true" ]; then
             echo "DEP_CHECK_STATUS=failure" >> $GITHUB_ENV
           else
             echo "DEP_CHECK_STATUS=success" >> $GITHUB_ENV

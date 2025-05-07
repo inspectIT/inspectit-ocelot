@@ -6,8 +6,12 @@ orgMockito = "5.17.0"
 orgJunitJupiter = "5.11.4"
 orgSpringframeworkBoot = { strictly = "3.4.5" }
 orgSpringframeworkSecurity = "6.4.5"
+jsonSchemaGenerator = "4.38.0"
 
 [libraries]
+comGithubVictoolsJsonschemaGenerator = { module = "com.github.victools:jsonschema-generator", version.ref = "jsonSchemaGenerator" }
+comGithubVictoolsJsonschemaModuleJackson = { module = "com.github.victools:jsonschema-module-jackson", version.ref = "jsonSchemaGenerator" }
+comGithubVictoolsJsonschemaModuleJavaxValidation = { module = "com.github.victools:jsonschema-module-javax-validation", version.ref = "jsonSchemaGenerator" }
 comGoogleCodeGson = "com.google.code.gson:gson:2.13.1"
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.8-jre" } }
 comH2databaseH2 = "com.h2database:h2:2.3.232"
