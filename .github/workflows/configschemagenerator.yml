@@ -1,0 +1,69 @@
+name: Generate Configuration Schema
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'components/inspectit-ocelot-configschemagenerator/**'
+      - 'inspectit-ocelot-config/**'
+  pull_request:
+    paths:
+      - 'components/inspectit-ocelot-configschemagenerator/**'
+      - 'inspectit-ocelot-config/**'
+  workflow_call:
+
+jobs:
+  generate-schema:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./components/inspectit-ocelot-configschemagenerator
+    container: eclipse-temurin:17
+    steps:
+      - uses: actions/checkout@v3
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Run test
+        run: ./gradlew :inspectit-ocelot-configschemagenerator:test
+      - name: Generate schema file
+        run: ./gradlew :inspectit-ocelot-configschemagenerator:generateConfigSchema
+      - name: Upload schema file
+        uses: actions/upload-artifact@v4
+        with:
+          name: configuration-schema
+          path: components/inspectit-ocelot-configschemagenerator/build/
+
+  dependency-scan:
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    container: eclipse-temurin:17
+    steps:
+      - uses: actions/checkout@v3
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: build
+        run: ./gradlew :inspectit-ocelot-configschemagenerator:assemble
+      - name: Run DependencyCheck plugin
+        uses: dependency-check/Dependency-Check_Action@main
+        id: depcheck
+        continue-on-error: true
+        with:
+          project: inspectIT/inspectit-ocelot-configschemagenerator
+          path: 'components/inspectit-ocelot-configschemagenerator'
+          format: 'HTML'
+          args: >
+            --disableAssembly
+            --disableNodeAudit
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --nvdApiDelay 10000
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report-ocelot-configschemagenerator
+          path: ${{ github.workspace }}/reports
+      # if DependencyCheck failed, the job should also fail, but only after the results were uploaded
+      - name: Validate DependencyCheck outcome
+        if: ${{ steps.depcheck.outcome == 'failure' }}
+        run: |
+          echo "DependencyCheck failed"
+          exit 1
