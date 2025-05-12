@@ -87,13 +87,18 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
     const type = typeMatcher.type;
     const classMatcherType = typeMatcher.matcherType;
     const className = typeMatcher.name;
+    const advancedScopeSettings = { advanced: { 'disable-safety-mechanisms': true } };
 
     if (_.isEmpty(type) || _.isEmpty(classMatcherType) || _.isEmpty(className)) {
       throw new Error('Type matcher must be fully specified!');
     }
 
     const typeMatcherBody = { name: className, 'matcher-mode': classMatcherType };
-    const classMatcherScope = { [type]: type === 'interfaces' ? [typeMatcherBody] : typeMatcherBody };
+    const classMatcherScope = {
+      [type]: type === 'interfaces' ? [typeMatcherBody] : typeMatcherBody,
+      // we need to add advanced settings, for these two type matchers to work
+      ...(classMatcherType === 'NOT_EQUALS_FULLY' || classMatcherType === 'NOT_EQUALS_FULLY_IGNORE_CASE' ? advancedScopeSettings : {}),
+    };
 
     // Prepare method matcher
     const visibilities = methodMatcher.visibilities;
