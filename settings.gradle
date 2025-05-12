@@ -10,9 +10,11 @@ if(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
     include 'inspectit-ocelot-configurationserver'
     include 'inspectit-ocelot-configurationserver-ui'
     include 'inspectit-ocelot-configdocsgenerator'
+    include 'inspectit-ocelot-configschemagenerator'
     project(':inspectit-ocelot-configurationserver').projectDir = new File('./components/inspectit-ocelot-configurationserver')
     project(':inspectit-ocelot-configurationserver-ui').projectDir = new File('./components/inspectit-ocelot-configurationserver-ui')
     project(':inspectit-ocelot-configdocsgenerator').projectDir = new File('./components/inspectit-ocelot-configdocsgenerator')
+    project(':inspectit-ocelot-configschemagenerator').projectDir = new File('./components/inspectit-ocelot-configschemagenerator')
 
     // separate version catalog for configuration server until everything is migrated to Java 17
     dependencyResolutionManagement {

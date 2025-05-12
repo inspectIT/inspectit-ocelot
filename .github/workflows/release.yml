@@ -22,10 +22,11 @@ jobs:
         run: chmod +x gradlew
       - name: Build artifacts
         run: |
-          ./gradlew assemble bootJarWithFrontend :inspectit-ocelot-core:cyclonedxBom :inspectit-ocelot-configurationserver:cyclonedxBom -PbuildVersion=${{ github.ref_name }}
+          ./gradlew assemble bootJarWithFrontend :inspectit-ocelot-core:cyclonedxBom :inspectit-ocelot-configurationserver:cyclonedxBom :inspectit-ocelot-configschemegenerator:generateConfigSchema -PbuildVersion=${{ github.ref_name }}
           mkdir artifacts
           cp ./inspectit-ocelot-agent/build/inspectit-ocelot-agent-${{ github.ref_name }}.jar ./artifacts
           cp ./components/inspectit-ocelot-configurationserver/build/libs/inspectit-ocelot-configurationserver-${{ github.ref_name }}.jar ./artifacts
+          cp ./components/inspectit-ocelot-configschemagenerator/build/inspectit-ocelot-configuration-schema-${{github.ref_name}}.json ./artifacts
           mkdir boms
           cp ./inspectit-ocelot-core/build/reports/bom.json ./boms/inspectit-ocelot-agent-bom.json
           cp ./inspectit-ocelot-core/build/reports/bom.xml ./boms/inspectit-ocelot-agent-bom.xml
