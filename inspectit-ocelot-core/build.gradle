@@ -1,10 +1,19 @@
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
+    id 'maven-publish'
     alias(libs.plugins.meChampeauJmh)
     alias(libs.plugins.orgCyclonedxBom)
     alias(libs.plugins.orgSpringframeworkBoot) apply false
     alias(libs.plugins.ioSpringDependencyManagement)
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
 
 dependencyManagement {
@@ -31,7 +40,7 @@ test {
     }
 }
 
-
+group = 'rocks.inspectit.ocelot'
 sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
 targetCompatibility = 1.8 // Java version to generate classes for.
 
@@ -195,7 +204,6 @@ dependencies {
     }
 }
 
-apply plugin: 'java'
 task compileJarCheck(type: JavaCompile){
     source = sourceSets.main.java.srcDirs
     include 'com/mindprod/jarcheck/JarCheck.java'

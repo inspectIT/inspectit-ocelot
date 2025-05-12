@@ -6,6 +6,14 @@ plugins {
     alias(libs.plugins.ioSpringDependencyManagement)
 }
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
 dependencyManagement {
     imports {
         mavenBom(SpringBootPlugin.BOM_COORDINATES)
@@ -30,6 +38,7 @@ test {
     }
 }
 
+group = 'rocks.inspectit.ocelot'
 sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
 targetCompatibility = 1.8 // Java version to generate classes for.
 jar {
