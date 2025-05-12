@@ -70,7 +70,7 @@
     "@babel/helper-regex": "^7.10.5",
     "@babel/helper-string-parser": "^7.25.9",
     "@babel/preset-react": "^7.26.3",
-    "@next/eslint-plugin-next": "^14.2.26",
+    "@next/eslint-plugin-next": "^15.3.2",
     "@storybook/addon-actions": "^7.6.19",
     "@storybook/addon-essentials": "^7.6.19",
     "@storybook/addon-links": "^8.1.11",
