@@ -1,6 +1,15 @@
 plugins {
+    id 'maven-publish'
     alias(configServerLibs.plugins.orgSpringframeworkBoot)
     alias(configServerLibs.plugins.ioSpringDependencyManagement)
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
 
 dependencies {
@@ -32,6 +41,8 @@ bootJar.enabled = false
 test {
     useJUnitPlatform()
 }
+
+group = 'rocks.inspectit.ocelot'
 
 java {
     sourceCompatibility = 17

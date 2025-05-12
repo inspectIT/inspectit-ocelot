@@ -1,6 +1,7 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
+    id 'maven-publish'
     id("com.palantir.docker") version "${comPalantirDockerVersion}"
     alias(configServerLibs.plugins.orgSpringframeworkBoot)
     alias(libs.plugins.orgCyclonedxBom)
@@ -9,6 +10,14 @@ plugins {
 
 apply plugin: 'idea'
 apply plugin: 'java'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
 
 def serverMainClass = 'rocks.inspectit.ocelot.ConfigurationServer'
 
@@ -51,6 +60,8 @@ cyclonedxBom {
 repositories {
     mavenCentral()
 }
+
+group = 'rocks.inspectit.ocelot'
 
 java {
     sourceCompatibility = 17

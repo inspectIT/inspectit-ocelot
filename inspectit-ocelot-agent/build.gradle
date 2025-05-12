@@ -8,6 +8,14 @@ plugins {
     alias(libs.plugins.ioSpringDependencyManagement)
 }
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
 dependencyManagement {
     imports {
         mavenBom(SpringBootPlugin.BOM_COORDINATES)
