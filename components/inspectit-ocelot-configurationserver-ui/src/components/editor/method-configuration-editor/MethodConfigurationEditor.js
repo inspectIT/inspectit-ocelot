@@ -97,8 +97,7 @@ const MethodConfigurationEditor = ({ yamlConfiguration }) => {
     const classMatcherScope = {
       [type]: type === 'interfaces' ? [typeMatcherBody] : typeMatcherBody,
       // we need to add advanced settings, for these two type matchers to work
-      ...(classMatcherType === 'NOT_EQUALS_FULLY' ||
-          classMatcherType === 'NOT_EQUALS_FULLY_IGNORE_CASE' ? advancedScopeSettings : {})
+      ...(classMatcherType === 'NOT_EQUALS_FULLY' || classMatcherType === 'NOT_EQUALS_FULLY_IGNORE_CASE' ? advancedScopeSettings : {}),
     };
 
     // Prepare method matcher
