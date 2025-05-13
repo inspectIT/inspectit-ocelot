@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Data Propagation · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="We can collect any amount of data in both the entry and the exit section of an instrumented method. "/><meta name="docsearch:version" content="next"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Data Propagation · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content="We can collect any amount of data in both the entry and the exit section of an instrumented method. "/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>next</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Instrumentation</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Getting Started<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/doc1">Hello World</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/getting-started/quick-start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/getting-started/docker-examples">Demo Application</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/getting-started/installation">Installation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/configuration/configuration-sources">Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/configuration/external-configuration-sources">External Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/configuration/logging-configuration">Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/configuration/start-configuration">Start Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/configuration/opentelemetry-configuration">OpenTelemetry Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/configuration/plugin-configuration">Plugin Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/configuration/agent-command-configuration">Agent Command Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Metrics<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/metrics/metrics">Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/metrics/metric-recorders">Metrics Recorders</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/metrics/metric-exporters">Metrics Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/metrics/common-tags">Common Tags</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/metrics/custom-metrics">Custom Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/metrics/self-monitoring">Self-Monitoring</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/metrics/tag-guard">Tag-Guard</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tracing<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/tracing/tracing">Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/tracing/trace-exporters">Trace Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/tracing/log-correlation">Log Correlation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/tracing/privacy">Data Privacy</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/tracing/tracing-self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tags<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/tags/tags-exporters">Tags Exporters</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/instrumentation/instrumentation">Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/instrumentation/scopes">Scopes</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/instrumentation/actions">Actions</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/instrumentation/rules">Rules</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/inspectit-ocelot/docs/next/instrumentation/data-propagation">Data Propagation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/instrumentation/metrics">Collecting Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/instrumentation/tracing">Collecting Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/instrumentation/business-transactions">Business Transactions</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/instrumentation/code-style">Configuration Code Style</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/instrumentation/special-sensors">Special Sensors</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/instrumentation/process">Instrumentation Process</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Default Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/default-instrumentation/default-instrumentation">Default Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/default-instrumentation/jakarta">Upgrade to Jakarta Namespace</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/default-instrumentation/apache-client5">Upgrade to Apache Client 5</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">End User Monitoring<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/enduser-monitoring/enduser-monitoring-server">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/enduser-monitoring/eum-server-setup">Server Setup</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/enduser-monitoring/eum-server-configuration">Server, Metrics and Exporter Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/enduser-monitoring/install-eum-agent">Install EUM Agent</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration Server<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/cs-configuration">Server Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/managing-files">Managing Files</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/files-staging">File Staging</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/agent-mappings">Agent Mappings</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/scope-wizard">Scope Wizard</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/class-browser">Class Browser</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/user-authentication">User Authentication</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/config-docs">Configuration Docs</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/log-config">Server Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/yaml-editor">YAML Editor</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/status-table-view">Agent Status Table View</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/config-server/alerting">Alerting</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Breaking Changes<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/next/breaking-changes/Breaking Changes">Breaking Changes</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/instrumentation/data-propagation.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Data Propagation</h1></header><article><div><span><p>We can collect any amount of data in both the entry and the exit section of an instrumented method.
+Each data is hereby identified by its name, the <em>data key</em>.
+Internally, inspectIT creates a dictionary like object each time <strong>an instrumented method is executed</strong>.
+This object is basically a local variable for the method. <strong>Whenever data is written</strong>, inspectIT stores the value
+under the given data key in this dictionary. Similarly, whenever data is read, inspectIT looks it up based on the
+data key in the dictionary.</p>
+<p>This dictionary is called <strong>inspectIT context</strong>.</p>
+<p>If the inspectIT context was truly implemented as explained above, all data would be only visible in the method where it was collected.
+This however often is not the desired behaviour.
+Consider the following example: you instrument the entry method of your HTTP server and collect the request URL as data there.
+You now of course want this data to be visible as tag for metrics collected in methods called by your entry point.
+With the implementation above, the request URL would only be visible within the HTTP entry method.</p>
+<p>For this reason the inspectIT context implements <em>data propagation</em>.</p>
+<ul>
+<li><strong>Down Propagation:</strong> Data collected in your instrumented method will also be visible to all methods directly
+or indirectly called by your method. This behaviour already comes <a href="https://opencensus.io/tag/#propagation">with the OpenCensus Library for tags</a>.</li>
+<li><strong>Up Propagation:</strong> Data collected in your instrumented method will be visible to the methods which caused the
+invocation of your method. This means that all methods which lie on the call stack will have access to the data written by your method</li>
+<li><strong>Browser Propagation:</strong> An additional form of propagation. Data collected in your instrumented method will be
+stored inside a data storage, which is accessible to the outside.</li>
+</ul>
+<p>Up- and down propagation can also be combined. In this case then the data is attached to the control flow,
+meaning that it will appear as if its value will be passed around with every method call and return.</p>
+<p>Also note, that you should only assign Java Objects into data keys and not native data types, like <em>boolean</em>.</p>
+<p>The second aspect of propagation to consider is the <em>level</em>. Does the propagation happen within each thread separately
+or is it propagated across threads? Also, what about propagation across JVM borders, e.g. one micro-service
+calling another one via HTTP? In inspectIT Ocelot we provide the following two settings for the propagation level.</p>
+<ul>
+<li><strong>JVM local:</strong> The data is propagated within the JVM, even across thread borders. The behaviour when data moves from one thread to another is defined through <a href="/inspectit-ocelot/docs/next/instrumentation/special-sensors">Special Sensors</a>.</li>
+<li><strong>Global:</strong> Data is propagated within the JVM and even across JVM borders. For example, when an application issues an HTTP request, the globally down propagated data is added to the headers of the request. When the response arrives, up propagated data is collected from the response headers. This protocol specific behaviour is realized through default instrumentation rules provided with the agent, but can be extended as needed.</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="defining-the-behaviour"></a><a href="#defining-the-behaviour" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining the Behaviour</h2>
+<p>The propagation behaviour is not defined on rule level but instead globally based on the data keys under the configuration
+property <code>inspectit.instrumentation.data</code>. Here are some examples extracted from the default configurations of inspectIT:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">data:</span>
+      <span class="hljs-comment"># for correlating calls across JVM borders</span>
+      <span class="hljs-attr">'prop_origin_service':</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">"GLOBAL"</span><span class="hljs-string">,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-string">"false"</span><span class="hljs-string">}</span>
+      <span class="hljs-attr">'prop_target_service':</span> <span class="hljs-string">{up-propagation:</span> <span class="hljs-string">"GLOBAL"</span><span class="hljs-string">,</span> <span class="hljs-attr">down-propagation:</span> <span class="hljs-string">"JVM_LOCAL"</span><span class="hljs-string">,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-string">"false"</span><span class="hljs-string">}</span>
+
+      <span class="hljs-comment">#we allow the application to be defined at the beginning and to be down propagated from there</span>
+      <span class="hljs-attr">'application':</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">"GLOBAL"</span><span class="hljs-string">,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-string">"true"</span><span class="hljs-string">}</span>
+
+      <span class="hljs-comment">#this data will only be visible locally in the method where it is collected</span>
+      <span class="hljs-attr">'http_method':</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">"NONE"</span><span class="hljs-string">}</span>
+      <span class="hljs-attr">'http_status':</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">"NONE"</span><span class="hljs-string">}</span>
+
+      <span class="hljs-comment">#this data will be written to the inspectIT browser data storage</span>
+      <span class="hljs-attr">'database_tag':</span> <span class="hljs-string">{browser-propagation:</span> <span class="hljs-literal">true</span><span class="hljs-string">}</span>
+      <span class="hljs-comment">#this data can be written by the browser</span>
+      <span class="hljs-attr">'transaction_id':</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">"JVM_LOCAL"</span><span class="hljs-string">,</span> <span class="hljs-attr">browser-propagation:</span> <span class="hljs-literal">true</span><span class="hljs-string">}</span>
+</code></pre>
+<p>Under <code>inspectit.instrumentation.data</code>, the data keys are mapped to their desired behaviour.
+The configuration options are the following:</p>
+<table>
+<thead>
+<tr><th>Config Property</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>down-propagation</code></td><td><code>JVM_LOCAL</code> if the data key is also a <a href="/inspectit-ocelot/docs/next/metrics/common-tags">common tag</a>, <code>NONE</code> otherwise</td><td>Configures if values for this data key propagate down and the level of propagation. Possible values are <code>NONE</code>, <code>JVM_LOCAL</code> and <code>GLOBAL</code>. If <code>NONE</code> is configured, no down propagation will take place.</td></tr>
+<tr><td><code>up-propagation</code></td><td><code>NONE</code></td><td>Configures if values for this data key propagate up and the level of propagation. Possible values are <code>NONE</code>, <code>JVM_LOCAL</code> and <code>GLOBAL</code>. If <code>NONE</code> is configured, no up propagation will take place.</td></tr>
+<tr><td><code>browser-propagation</code></td><td><code>false</code></td><td>If true, this data will be written to the inspectIT browser data storage</td></tr>
+<tr><td><code>is-tag</code></td><td><code>true</code> if the data key is also a <a href="/inspectit-ocelot/docs/next/metrics/common-tags">common tag</a> or is used as tag in any <a href="/inspectit-ocelot/docs/next/metrics/custom-metrics">metric definition</a>, <code>false</code> otherwise</td><td>If true, this data will act as a tag when metrics are recorded. This does not influence propagation.</td></tr>
+</tbody>
+</table>
+<p>Note that you are free to use data keys without explicitly defining them in the <code>inspectit.instrumentation.data</code> section. In this case simply all settings will have their default value.</p>
+<h2><a class="anchor" aria-hidden="true" id="interaction-with-opencensus-tags"></a><a href="#interaction-with-opencensus-tags" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Interaction with OpenCensus Tags</h2>
+<p>As explained previously, our inspectIT context can be seen as a more flexible variation of OpenCensus tags. In fact, we designed the inspectIT context so that it acts as a superset of the OpenCensus TagContext.</p>
+<p>Firstly, when an instrumented method is entered, a new inspectIT context is created.
+At this point, it imports any tag values published by OpenCensus directly as data.
+This also includes the <a href="/inspectit-ocelot/docs/next/metrics/common-tags">common tags</a> created by inspectIT. This means, that you can simply read (and override)
+values for common tags such as <code>service</code> or <code>host_address</code> at any rule.</p>
+<p>The integration is even deeper if you configured the agent to also extract the metrics from manual instrumentation
+in your application via OpenCensus.
+Firstly, if a method instrumented by inspectIT Ocelot is executed within a TagContext opened by your application,
+these application tags will also be visible in the inspectIT context. Secondly, after the execution of the entry phase
+of each rule, a new TagContext is opened making the tags written there accessible to metrics collected by your application.
+Hereby, only data for which down propagation was configured to be <code>JVM_LOCAL</code> or greater and for which <code>is-tag</code> is true
+will be visible as tags.</p>
+<!-- 
+Please rework browser propagation, so it is no longer possible to speak with the agent from outside
+See: https://github.com/inspectIT/inspectit-ocelot/issues/1703
+-->
+<h2><a class="anchor" aria-hidden="true" id="browser-propagation"></a><a href="#browser-propagation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Browser Propagation</h2>
+<p>Data enabled for browser propagation will be stored inside a special dictionary.
+This dictionary can be exposed via REST-API, if <a href="/inspectit-ocelot/docs/next/tags/tags-exporters#http-exporter">inspectit.exporters.tags.http</a> is enabled.
+A browser can read this data via GET-requests.</p>
+<p>Additionally, a browser can write data into the storage via PUT-requests, if browser- as well as down-propagation is enabled for a data key, the data written by the browser will be stored in the <em>inspectIT context</em>.
+Please note, before writing or reading browser propagation data, you need to provide a session-ID inside the request-header.
+After that, all data belonging to the current session will be stored behind this session-ID.
+For more information, see <a href="/inspectit-ocelot/docs/next/tags/tags-exporters#http-exporter">Tags-HTTP-Exporter</a>.</p>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 5/13/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/rules"><span class="arrow-prev">← </span><span>Rules</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/metrics"><span>Collecting Metrics</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li><li><a href="#browser-propagation">Browser Propagation</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'P7JV0ZK66K',
+                apiKey: 'd499024131bf8d92e6d469a6c14f4798',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:next"]}
+              });
+            </script></body></html>
