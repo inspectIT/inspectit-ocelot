@@ -3,6 +3,15 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
+## Breaking changes in 2.6.10
+
+### Restructured instrumentation documentation
+
+The documentation for instrumentation has been restructured. 
+Thus, some of your references to the documentation might be broken.
+We have updated every link within the documentation itself.
+The previous section _Rules & Actions_ has been split into multiple sections with additional information for the specific topic.
+
 ## Breaking changes in 2.6.9
 
 ### Fully removed deprecated notations
