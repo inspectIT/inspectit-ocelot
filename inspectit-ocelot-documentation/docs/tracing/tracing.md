@@ -16,7 +16,7 @@ If used, the switch makes sure that the inspectIT Ocelot agent:
 
 ### Global Sampling Rate
 
-It is possible to globally regulate the number of traces generated through [sampling](https://opencensus.io/tracing/sampling/).
+It is possible to globally regulate the number of traces generated through [sampling](https://opentelemetry.io/docs/concepts/sampling/).
 You can configure the probability with which a trace ends up being collected via `inspectit.tracing.sampleProbability`.
 E.g. setting the value to `0.1` will record only 10% of all traces.
 

@@ -11,7 +11,7 @@ which in turn might lead to performance or memory issues in your time series dat
 The recorded tag values for each measure of an agent will be stored inside a local JSON file. This file serves
 as the tag-guard-database and helps to check, if tag values exceeded their limit.
 
-### Configuring Tag-Guard
+## Configuration
 
 You can set the Tag-Guard configuration in `inspectit.metrics.tag-guard`.
 
@@ -64,7 +64,7 @@ resulting in a tag value limit of 100. Every other measure still uses the global
 limit of 1000.
 
 
-### Agent Health Monitoring
+## Agent Health Monitoring
 
 If the tag value for a specific agent is exceeded, the Tag-Guard scheduler will detect an overflow and change
 the agent health to `ERROR`.
