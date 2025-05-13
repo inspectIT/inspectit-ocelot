@@ -23,7 +23,7 @@ inspectit:
 
 In the background, every scope resembles a combination of [ByteBuddy](https://bytebuddy.net) matchers.
 
-## Scope Definition
+## Defining Scopes
 
 The definition of a scope contains the following five attributes:
 

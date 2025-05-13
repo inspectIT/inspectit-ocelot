@@ -8,7 +8,7 @@ They are effectively lambda-like functions you can invoke from the entry and the
 They are defined by (A) specifying their input parameter and (B) giving a Java code snippet which defines 
 how the result value is computed from these.
 
-## Defining actions
+## Defining Actions
 
 Again, this is best explained by giving some simple examples extracted from the inspectIT Ocelot default configuration:
 
@@ -98,11 +98,12 @@ input parameter is given below:
 | `_context`              | [InspectitContext](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitContext.java)   | Gives direct read and write access to the current [context](instrumentation/data-propagation.md). Can be used as data dictionary or to implement custom data propagation.                          |
 | `_attachments`          | [ObjectAttachments](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/ObjectAttachments.java) | Allows you to attach values to Java objects instead of to the control flow, as done via `_context`. This enables sharing data across multiple threads.                                             |
 
-### Multiple Statements and Imports
+## Multiple Statements and Imports
 
 Actions can easily become more complex, so that a single expression is not sufficient for expressing the functionality.
 For this purpose we introduced the `value-body` configuration property for actions as an alternative to `value`.
-`value-body` allows you to specify a Java method body which returns the result of the action. The body is given without surrounding curly braces. One example action from the default configuration making use of this is given below:
+`value-body` allows you to specify a Java method body which returns the result of the action. 
+The body is given without surrounding curly braces. One example action from the default configuration making use of this is given below:
 
 ```yaml
 inspectit:
@@ -132,10 +133,13 @@ In this example this allows us to refer to `ServletRequest` and `HttpServletRequ
 
 ## Default Actions
 
-inspectIT Ocelot provides a large set of default actions, which can be used within any configuration.
+InspectIT Ocelot provides a large set of default actions, which can be used within any configuration.
 Such actions allow you for example to assign values to data keys, print debug information or replace strings via regex.
 You can find the full set of default actions [here](https://github.com/inspectIT/inspectit-ocelot/tree/master/inspectit-ocelot-config/src/main/resources/rocks/inspectit/ocelot/config/default/instrumentation/actions/_shared).
+
 Below, some important actions are explained in more detail.
+The examples show how to apply the actions within [rules](instrumentation/rules.md). 
+In the upcoming section you will find more detailed information about [Invoking Actions](instrumentation/rules.md#invoking-actions).
 
 ### Assigning values
 
