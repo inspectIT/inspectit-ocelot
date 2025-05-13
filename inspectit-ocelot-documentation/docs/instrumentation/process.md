@@ -3,6 +3,8 @@ id: process
 title: Instrumentation Process
 ---
 
+## Asynchronous instrumentation (default)
+
 The approach inspectIT Ocelot takes for instrumenting is fundamentally different from the approach of most other 
 JVM instrumentation agents.
 InspectIT Ocelot does *not* instrument classes when they are loaded, the instrumentation is performed purely 
@@ -59,7 +61,7 @@ inspectit:
 ## Synchronous instrumentation (BETA!)
 :::caution
 Enabling synchronous instrumentation in Java 8 environments will result in significant boot time performance degradation!
-See See: <a href="https://bugs.openjdk.java.net/browse/JDK-7018422">JDK-7018422</a>
+See: <a href="https://bugs.openjdk.java.net/browse/JDK-7018422">JDK-7018422</a>
 :::
 
 By default, all instrumentation is performed purely asynchronously in the background. There may be situations where this is not appropriate and a class must be instrumented directly at the first load, 
@@ -71,37 +73,4 @@ inspectit:
   instrumentation:
     internal:
       async: false
-```
-
-## Delayed instrumentation
-Despite instrumenting asynchronously or synchronously, inspectIT always starts the instrumentation process as soon as
-the agent is attached to a JVM. There are cases in which it is desirable to postpone the start of the instrumentation 
-process. Although this is rarely necessary inspectIT provides the possibility to do so via system property
-`inspectit.start.delay` or OS environment variable `INSPECTIT_START_DELAY`. 
-
-You provide a value interpreted as milliseconds the agent shall wait before the instrumentation process starts. If you 
-do not provide a value the instrumentation process will start immediately.
-
-The Agent expects positive integers excluding zero. For all other values the agent will print an error message on stderr
-and continue as if there was no value supplied.
-
-If you specify both system property and OS environment variable, the system property will take precedence.
-
-Since this option has an impact before the agent fetches any configuration from the
-[Configuration Server](config-server/overview.md) you cannot specify that value like any other inspectIT configuration
-property. It is only available as system property or OS environment variable.
-
-Example using system property:
-```bash
-# this will delay the instrumentation process by 10 minutes
-$ java -javaagent:"/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar" \
-   -Dinspectit.start.delay=600000 \
-   -jar my-java-program.jar
-```
-
-Example using OS environment variable (using bash):
-```bash
-# this will delay the instrumentation process by 5 minutes
-$ export INSPECTIT_START_DELAY=300000
-$ java -javaagent:"/path/to/inspectit-ocelot-agent-{inspectit-ocelot-version}.jar" -jar my-java-program.jar
 ```

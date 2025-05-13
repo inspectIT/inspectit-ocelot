@@ -7,20 +7,26 @@ This section describes how the inspectIT Ocelot Java agent can be used to inject
 InspectIT Ocelot gives you a very large degree of freedom when it comes to defining instrumentation.
 The first step is usually defining your [scopes](instrumentation/scopes.md). A scope acts as a selector for finding the methods you want to instrument.
 
-Scopes are then used by [rules](instrumentation/rules.md). While scopes define which methods you instrument, rules define the actual monitoring actions which will be performed. Examples for such actions would be recording the response time or extracting the HTTP url for further processing.
+Then, you define [actions](instrumentation/actions.md), which contain the logic of your instrumentation.
+In short: Actions allow you to specify _Java snippets in your configuration_ which will be executed to extract
+any data you want. This can be performance data such as the response time or any kind of business data,
+e.g. the shopping cart size.
 
-For the definition of rules, [actions](instrumentation/rules.md#actions) are a key concept.
-Long story short: actions allow you to specify _Java snippets in your configuration_ which will be executed to extract any data you want. This can be performance data such as the response time or any kind of business data, e.g. the shopping cart size.
+Scopes and actions are then combined within [rules](instrumentation/rules.md). 
+While scopes define which methods you instrument, rules define the actual monitoring actions which will be performed
+to utilize collected data.
+Examples for such actions would be recording the response time in metrics or extracting the HTTP url for further processing.
 
 :::tip
 All instrumentation settings can be changed without restarting the application!
-They can even be changed while a previous instrumentation is **still in progress**. In this case the inspectIT Ocelot agent will automatically switch to the new instrumentation as soon as the configuration is loaded.
+They can even be changed while a previous instrumentation is **still in progress**. 
+In this case the inspectIT Ocelot agent will automatically switch to the new instrumentation as soon as the configuration is loaded.
 :::
 
 ## Disabling the Instrumentation
 
 Since version `1.12.2`, the agent provides the option to disable its instrumentation process.
-When disabled, the agent will **revert** any instrumentations done and restore the original state of all instrumented classes.
+When disabled, the agent will **revert** any instrumentation done and restore the original state of all instrumented classes.
 This would be like having no single rule (also none in the agent's default configuration) defined.
 This results in no more runtime data (traces and metrics) being recorded from executed methods.
 

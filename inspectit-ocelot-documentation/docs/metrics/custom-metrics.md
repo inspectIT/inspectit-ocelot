@@ -9,7 +9,7 @@ You can easily define custom performance and business metrics depending on your 
 
 In this section we explain how you can define custom OpenCensus [metrics](https://opencensus.io/stats/)
 and [views](https://opencensus.io/stats/view/). We only show how to define the structure of both,
-not how the data is collected. For details on the data collection please see the [instrumentation section](instrumentation/rules.md#collecting-metrics).
+not how the data is collected. For details on the data collection please see the [instrumentation section](instrumentation/metrics.md).
 
 ## Configuration
 

@@ -6,6 +6,8 @@ title: Scopes
 A Scope is one of the basic instrumentation configuration components.
 It is important to get familiar with it in order to understand which methods are targeted by which instrumentation rule.
 A single scope can be considered as a set of methods and is used by rules to determine which instrumentation should apply to which method.
+Thus, scopes will only be instrumented, if they are part of an active [rule](instrumentation/rules.md) containing 
+at least one [action](instrumentation/actions.md).
 
 Scopes are defined under the configuration key `inspectit.instrumentation.scopes` and will be defined as a map of key-value pairs:
 
@@ -19,18 +21,20 @@ inspectit:
         # SCOPE_DEFINITION
 ```
 
-## Scope Definition
+In the background, every scope resembles a combination of [ByteBuddy](https://bytebuddy.net) matchers.
+
+## Defining Scopes
 
 The definition of a scope contains the following five attributes:
 
-|Attribute|Description
-|---|---
-|`interfaces`| A list of matcher which defines the required interfaces of the target method's class.
-|`superclass`| A matcher which defines the required superclass of the target method's class.
-|`type`| A matcher which defines the required type of the target method's class.
-|`methods`| A list of matchers which defines the target methods itself.
-|`advanced`| Advanced settings.
-|`exclude`| A map of scopes. This map is used to exclude the specified scopes methods.
+| Attribute    | Description                                                                            |
+|--------------|----------------------------------------------------------------------------------------|
+| `interfaces` | A list of matchers which defines the required interfaces of the target method's class. |
+| `superclass` | A matcher which defines the required superclass of the target method's class.          |
+| `type`       | A matcher which defines the required type of the target method's class.                |
+| `methods`    | A list of matchers which defines the target methods itself.                            |
+| `advanced`   | Advanced settings.                                                                     |
+| `exclude`    | A map of scopes. This map is used to exclude the specified scopes methods.             |
 
 In order to determine which methods should be instrumented all classes are checked against the defined `interface`, `superclass` and `type` matchers.
 If and only if a class matches on *all* matchers, each of their methods is checked against the defined method matchers in order to determine the target methods.
@@ -43,7 +47,7 @@ Thus, the process of determine whether the methods of a class `X` should be inst
 4. For each method: check if the method is matching *any* of the defined method matchers (if defined)
 5. For each excluded scope: exclude the corresponding methods from the method matcher (if defined)
 
-> Keep in mind that all of the type matchers have to match whereas only one of the method matchers have to match!
+> Keep in mind that **all** the type matchers have to match whereas **only one** of the method matchers have to match!
 
 Based on the previous description a scope definition looks like the following code-snippet:
 

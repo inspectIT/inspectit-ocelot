@@ -37,7 +37,11 @@
     "Instrumentation": [
       "instrumentation/instrumentation",
       "instrumentation/scopes",
+      "instrumentation/actions",
       "instrumentation/rules",
+      "instrumentation/data-propagation",
+      "instrumentation/metrics",
+      "instrumentation/tracing",
       "instrumentation/business-transactions",
       "instrumentation/code-style",
       "instrumentation/special-sensors",
