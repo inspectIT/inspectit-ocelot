@@ -9,7 +9,8 @@ a specific selling order.
 inspectIT Ocelot allows you to link such business transactions with the corresponding data. 
 
 :::note
-This chapter assumes you are already familiar with instrumentation. Please make sure to read the previous chapters about [scopes](instrumentation/scopes.md), [rules & actions](instrumentation/rules.md).
+This chapter assumes you are already familiar with instrumentation. 
+Please make sure to read the previous chapters about [scopes](instrumentation/scopes.md), [rules](instrumentation/rules.md) & [actions](instrumentation/actions.md).
 :::
 
 ## Detecting Business Transactions
@@ -25,7 +26,7 @@ Below there are some examples on how to detect business transactions in the cont
 The detected business transaction will be written into the variable `business_transaction`, which later may be used
 in metrics or traces.
 
-### Detecting Business Transactions via HTTP path
+### Detecting Business Transactions via HTTP Path
 
 This example uses the HTTP paths of incoming requests to our service to derive the business transaction from it.
 Let's assume our service uses the Javax HTTP Servlet.
@@ -60,7 +61,7 @@ inspectit:
           r_detect_business_transaction_via_http: true
 ```
 
-### Detecting Business Transactions via Java code
+### Detecting Business Transactions via Actions
 
 This example uses specific Java objects to detect the business transaction.
 In this case, we examine an `Order` object to get the type of order via action.
@@ -92,7 +93,7 @@ inspectit:
 ```
 
 
-### Detecting Business Transactions via Scope
+### Detecting Business Transactions via Scopes
 
 This example uses the methods of a Java class to determine the business transaction.
 The class supports three types of orders: discount, regular and business.

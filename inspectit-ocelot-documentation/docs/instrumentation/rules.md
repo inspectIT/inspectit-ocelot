@@ -41,7 +41,6 @@ inspectit:
             data-tags:
               'class': 'class_name'
               'method': 'method_name_with_params'
-             
 ```
 
 This example rule named `r_record_method_duration` measures the duration of the instrumented method and outputs the value using
@@ -115,7 +114,7 @@ In the _metrics phase_ you only can collect metrics, this is explained in the [C
 In this section you will find out how to collect data in the entry and exit phase of rules by invoking [actions](instrumentation/actions.md) 
 and storing the results in the [inspectIT context](instrumentation/data-propagation.md).
 
-Let's take a look again at the entry phase definitions of the ``record_method_duration`` rule:
+Let's take a look again at the entry phase definitions of the `record_method_duration` rule:
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
@@ -193,7 +192,7 @@ You can also mix which parameters you assign from data and which from constants:
         'replacement': 'Bye'
 ```
 
-As expected given the [definition](/instrumentation/actions.md) of the `string_replace_all` action, 
+As expected given the [definition](instrumentation/actions.md) of the `string_replace_all` action, 
 the value of `bye_world_text` will be `"Bye World!"`
 
 ### Adding Conditions

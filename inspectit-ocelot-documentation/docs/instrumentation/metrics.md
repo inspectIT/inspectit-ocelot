@@ -1,9 +1,10 @@
 ---
 id: metrics
-title: Metrics
+title: Collecting Metrics
 ---
 
-Metrics collection is done in the metrics phase of a rule, which can be configured using the `metrics` option:
+Metrics collection is done in the metrics phase of a [rule](instrumentation/rules.md), 
+which can be configured using the `metrics` option:
 
 ```yaml
 #inspectit.instrumentation.rules is omitted here
@@ -38,7 +39,8 @@ Here, the `value` for the data key `method_duration` is taken, which we previous
 Alternatively you can just specify a constant which will be used, like shown for `some/other/metric`.
 
 In addition, you should define tags that are be recorded alongside the metric value.
-The prerequisite for this is that tags have been declared in the [metric definition](metrics/custom-metrics.md) and [configured to be used as tags](#defining-the-behaviour).
+The prerequisite for this is that tags have been declared in the [metric definition](metrics/custom-metrics.md) 
+and [configured to be used as tags](instrumentation/data-propagation.md#defining-the-behaviour).
 Constant tags always have same values as defined in the configuration.
 The data tags try to resolve value from the data key, which is previously wrote in the exit phase.
 If data key for the data tag can not be found, then corresponding tag is omitted.

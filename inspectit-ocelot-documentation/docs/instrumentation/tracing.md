@@ -1,14 +1,13 @@
 ---
 id: tracing
-title: Tracing
+title: Collecting Tracing
 ---
 
-The inspectIT Ocelot agent allows you to record method invocations as [OpenTelemetry spans](https://opentelemetry.io/docs/concepts/signals/traces/#spans).
+The inspectIT Ocelot agent allows you to record method invocations as [OpenTelemetry spans](https://opentelemetry.io/docs/concepts/signals/traces/#spans) with the help
+of [rules](instrumentation/rules.md).
 
-#### Tracing Methods
 
 In order to make your collected spans visible, you must first set up a [trace exporter](tracing/trace-exporters.md).
-
 Afterward you can define that all methods matching a certain rule will be traced:
 
 ```yaml
@@ -20,17 +19,20 @@ inspectit:
           start-span: true
 ```
 
-For example, using the previous configuration snippet, each method that matches the scope definition of the `example_rule` rule will appear within a trace.
+For example, using the previous configuration snippet, each method that matches the scope definition of the `example_rule` 
+rule will appear within a trace.
 Its appearance can be customized using the following properties which can be set in the rule's `tracing` section.
 
-|Property |Default| Description
-|---|---|---|
-|`start-span`|`false`|If true, all method invocations of methods matching any scope of this rule will be collected as spans.
-|`name`|`null`|Defines a data key whose value will be used as name for the span. If it is `null` or the value for the data key is `null`, the fully qualified name of the method will be used. Note that the value for the data key must be written in the entry section of the rule at latest!
-|`kind`|`null`|Can be `null`, `CLIENT` or `SERVER` corresponding to the [OpenTelemetry values](https://opentelemetry.io/docs/concepts/signals/traces/#span-kind).
-|`attributes`|`{}` (empty dictionary) |Maps names of attributes to data keys whose values will be used on exit to populate the given attributes.
+| Property     | Default                 | Description                                                                                                                                                                                                                                                                      |
+|--------------|-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `start-span` | `false`                 | If true, all method invocations of methods matching any scope of this rule will be collected as spans.                                                                                                                                                                           |
+| `name`       | `null`                  | Defines a data key whose value will be used as name for the span. If it is `null` or the value for the data key is `null`, the fully qualified name of the method will be used. Note that the value for the data key must be written in the entry section of the rule at latest! |
+| `kind`       | `null`                  | Can be `null`, `CLIENT` or `SERVER` corresponding to the [OpenTelemetry values](https://opentelemetry.io/docs/concepts/signals/traces/#span-kind).                                                                                                                               |
+| `attributes` | `{}` (empty dictionary) | Maps names of attributes to data keys whose values will be used on exit to populate the given attributes.                                                                                                                                                                        |
 
-Commonly, you do not want to have the fully qualified name of the instrumented method as span name. For example, for HTTP requests you typically want the HTTP path as span name. This behaviour can be customized using the `name` property:
+Commonly, you do not want to have the fully qualified name of the instrumented method as span name. 
+For example, for HTTP requests you typically want the HTTP path as span name. 
+This behaviour can be customized using the `name` property:
 
 ```yaml
 inspectit:
@@ -49,9 +51,10 @@ inspectit:
 The name must exist at the end of the entry section and cannot be set in the exit section.
 :::
 
-#### Trace Sampling
+## Trace Sampling
 
-It is often desirable to not capture every trace, but instead [sample](https://opencensus.io/tracing/sampling/) only a subset.
+It is often desirable to not capture every trace, but instead [sample](https://opentelemetry.io/docs/concepts/sampling/) 
+only a subset.
 This can be configured using the `sample-probability` and `sample-mode` setting under the `tracing` section:
 
 ```yaml
@@ -70,13 +73,15 @@ Instead of specifying a fixed value, you can also specify a data key here, just 
 In this case, the value from the given data key is read and used as sampling probability.
 This allows you for example to vary the sample probability based on the HTTP url.
 
-The `sample-mode` is explained at [tracing](tracing/tracing.md) and can either be `PARENT_BASED`, `TRACE_ID_RATIO_BASED`, or `HYBRID_PARENT_TRACE_ID_RATIO_BASED`.
+The `sample-mode` is explained at [tracing](tracing/tracing.md) and can either be `PARENT_BASED`, `TRACE_ID_RATIO_BASED`, 
+or `HYBRID_PARENT_TRACE_ID_RATIO_BASED`.
 
-By default, `HYBRID_PARENT_TRACE_ID_RATIO_BASED` sampler is used if `sample-mode` is unset and the `sample-probability` has been specified.
+By default, `HYBRID_PARENT_TRACE_ID_RATIO_BASED` sampler is used if `sample-mode` is unset and the `sample-probability` 
+has been specified.
 
 If no sample probability is defined for a rule, the [default probability](tracing/tracing.md) is used.
 
-#### Adding Attributes
+## Adding Attributes
 
 Another useful property of spans is that you can attach any additional information in form of attributes.
 In most tracing backends such as Zipkin and Jaeger, you can search your traces based on attributes.
@@ -104,7 +109,7 @@ Note that if a rule does not start or continue a span, no attributes will be wri
 The [common tags](metrics/common-tags.md) are added as attributes in all local span roots by default.
 This behavior can be configured in the global [tracing settings](tracing/tracing.md#common-tags-as-attributes).
 
-#### Visualizing Span Errors
+## Visualizing Span Errors
 
 Most tracing backends support highlighting of spans which are marked as errors.
 InspectIT Ocelot allows you to configure exactly under which circumstances your spans are interpreted
@@ -121,15 +126,15 @@ inspectit:
           error-status: _thrown
 ```
 
-The value of the `error-status` property can be any value from the context or any [special variable](#input-parameters).
+The value of the `error-status` property can be any value from the context or any [special variable](instrumentation/actions.md#input-parameter).
 
-When the instrumented method finishes, Ocelot will read the value of the given variable.
+When the instrumented method finishes, inspectIT Ocelot will read the value of the given variable.
 If the value is neither `null` nor `false`, the span will be marked as an error.
 
 In the example above, the special variable `_thrown` is used to define the error status.
 This means if `_thrown` is not null (which means the method threw an exception), the span will be marked as error.
 
-#### Adding Span Conditions
+## Adding Span Conditions
 
 It is possible to conditionalize the span starting as well as the attribute writing:
 
@@ -154,9 +159,9 @@ inspectit:
 
 If any `start-span-conditions` are defined, a span will only be created when all conditions are met.
 Analogous to this, attributes will only be written if each condition defined in `attribute-conditions` is fulfilled.
-The conditions that can be defined are equal to the ones of actions, thus, please see the [action conditions description](#adding-conditions) for detailed information.
+The conditions that can be defined are equal to the ones of actions, thus, please see the [action conditions description](instrumentation/rules.md#adding-conditions) for detailed information.
 
-#### Auto-Tracing
+## Auto-Tracing
 
 :::warning Experimental Feature
 Please note that this is an experimental feature.
@@ -168,8 +173,8 @@ Often however, one observes certain methods taking a long time without knowing w
 The "auto-tracing" feature can be used to solve this problem.
 
 When auto-tracing is enabled, inspectIT Ocelot uses a profiler-like approach for recording traces.
-With auto-tracing, stack traces of threads are collected periodically. Based on these samples, inspectIT Ocelot will reconstruct
-an approximate trace showing where the time was spent.
+With auto-tracing, stack traces of threads are collected periodically. 
+Based on these samples, inspectIT Ocelot will reconstruct an approximate trace showing where the time was spent.
 
 Auto-tracing can be enabled on methods which are traced using either the `start-span` or `continue-span` options.
 To enable it you can simply add the `auto-tracing` setting:
@@ -202,7 +207,7 @@ This setting specifies that each thread for which auto-tracing is enabled will b
 It also implicitly defines the granularity of your traces: Only methods with at least this duration will appear in your traces.
 
 
-#### Tracing Asynchronous Invocations
+## Tracing Asynchronous Invocations
 
 With the previous shown settings, it is possible to add an instrumentation which creates exactly one span per invocation of an instrumented method.
 Especially in asynchronous scenarios, this might not be the desired behaviour:
@@ -213,7 +218,8 @@ The resulting span then has the following properties:
 * all attributes written by each method are combined into the single span
 * all invocations made from the methods which compose the single span will appear as children of this span
 
-This can be configured by defining for rules that they (a) can continue existing spans and (b) can optionally end the span they started or continued.
+This can be configured by defining for rules that they (A) can continue existing spans and (B)
+can optionally end the span they started or continued.
 
 Firstly, it is possible to "remember" the span created or continued using the `store-span` option:
 
@@ -226,7 +232,8 @@ Firstly, it is possible to "remember" the span created or continued using the `s
           end-span: false
 ```
 
-With this option, the span created at the end of the entry phase will be stored in the context with the data key `my_span_data`. Usually this span reference is then extracted from the context and attached to an object via the [_attachments](#input-parameters).
+With this option, the span created at the end of the entry phase will be stored in the context with the data key `my_span_data`. 
+Usually this span reference is then extracted from the context and attached to an object via the [Object Attachments](instrumentation/actions.md#attaching-values).
 
 Without the `end-span: false` definition above, the span would be ended as soon as the instrumented method returns.
 By setting `end-span` to false, the span is kept open instead. It can then be continued when another method is executed as follows:
@@ -239,96 +246,47 @@ By setting `end-span` to false, the span is kept open instead. It can then be co
           end-span: true # actually not necessary as it is the default value
 ```
 
-Methods instrumented with this rule will not create a new span. Instead at the end of the entry phase the data for the key `my_span_data` is read from the context. If it contains a valid span written via `store-span`, this span is continued in this method. This implies that all spans started by callees of this method will appear as children of the span stored in `my_span_data`. In addition, this rule also then causes the continued span to end with the execution of the method due to the `end-span` option. This is not required to happen: a span can be continued by any number of rules before it is finally ended.
+Methods instrumented with this rule will not create a new span. 
+Instead, at the end of the entry phase the data for the key `my_span_data` is read from the context. 
+If it contains a valid span written via `store-span`, this span is continued in this method. 
+This implies that all spans started by callees of this method will appear as children of the span stored in `my_span_data`. 
++In addition, this rule also then causes the continued span to end with the execution of the method due to the `end-span` option. 
+This is not required to happen: a span can be continued by any number of rules before it is finally ended.
 
 It also is possible to define rules for which both `start-span` and `continue-span` is configured.
-In this case, the rule will first attempt to continue the existing span. Only if this fails (e.g. because the specified span does not exist yet or the conditions are not met) a new span is started.
+In this case, the rule will first attempt to continue the existing span. Only if this fails 
+(e.g. because the specified span does not exist yet or the conditions are not met) a new span is started.
 
 Again, conditions for the span continuing and span ending can be specified just like for the span starting.
 The properties `continue-span-conditions` and `end-span-conditions` work just like `start-span-conditions`.
 
-#### Distributed Tracing with Remote Parent Context
+## Distributed Tracing with Remote Parent Context
 
-There are two ways to use a remote parent context in distributed tracing. If the remote parent context exists before the current context,
-you can use _readDownPropagationHeaders()_ inside your action. If the remote parent context will be created after your current context,
-you can use _createRemoteParentContext()_ inside your action.
+The inspectIT default configuration provides two options to use a remote parent context for distributed tracing. 
+Of course, you may write another action by yourself.
+If the remote parent context exists before your service gets called, you can use _readDownPropagationHeaders()_ 
+inside your propagation action. If the remote parent context will be created after calling your service,
+you can use _createRemoteParentContext()_ inside your action and pass the context information to the client.
 
-_readDownPropagationHeaders()_
+#### readDownPropagationHeaders()
 
 The method takes a _Map<String,String>_ as a parameter. This map should contain at least the trace context, which was sent by a Http request header.
 The remote parent trace context should be in either B3-format, W3C-format or datadog-format.
-The action, which uses this function, should be called in the pre-entry or entry phase.
+The action, which uses this function, should be called in the `pre-entry` or `entry` phase.
 
-InspectIT Ocelot offers a default action to read down propagated headers in javax HTTP Servlets:
+InspectIT Ocelot offers a default action to read down propagated headers in javax HTTP Servlets: `a_servletapi_downPropagation`
 
-```yaml
-  'a_servletapi_downPropagation':
-    docs:
-      since: '1.2.1'
-      description: 'Reads down-propagated data from the request HTTP headers.'
-    is-void: true
-    imports:
-     - 'java.util'
-     - 'javax.servlet'
-     - 'javax.servlet.http'
-    input:
-     _arg0: 'ServletRequest'
-     _context: 'InspectitContext'
-    value-body: |
-     if (_arg0 instanceof HttpServletRequest) {
-       HttpServletRequest req = (HttpServletRequest) _arg0;
-       Collection headerKeys = _context.getPropagationHeaderNames();
-       Map presentHeaders = new HashMap();
-       Iterator it = headerKeys.iterator();
-       while (it.hasNext()) {
-         String name = (String) it.next();
-         java.util.Enumeration values = req.getHeaders(name);
-         if (values != null && values.hasMoreElements()) {
-           presentHeaders.put(name, String.join(",", Collections.list(values)));
-         }
-       }
-       // read request headers
-       _context.readDownPropagationHeaders(presentHeaders);
-     }
-```
+#### createRemoteParentContext()
 
-_createRemoteParentContext()_
-
-The method takes no parameter. It can be used, if the remote context will be created after the current context, but should be used as a parent.
+The method takes no parameter. It can be used, if the remote context will be created after calling your service, 
+but still should be used as a parent.
 The function creates a span context, which will be used as a parent for the current context. It returns a string, which contains
-the trace context of the remote parent in W3C-format. You can send the returned trace context to your remote service via HTTP response header
-and use the information to create the remote parent context.
+the trace context of the remote parent in W3C-format. You can pass the returned trace context to your remote client 
+via HTTP response header and use the information to create the remote parent context there.
 
-Note that, if a remote parent context was down propagated via _readDownPropagationHeaders()_, InspectIT will use the down propagated context as a parent
-and ignore the context created with _createRemoteParentContext()_.
+Note that, if a remote parent context was down propagated via _readDownPropagationHeaders()_, inspectIT Ocelot will 
+use the down propagated context as a parent and ignore the context created with _createRemoteParentContext()_.
 
-The action, which uses this function, should be called in the pre-entry or entry phase.
-InspectIT Ocelot offers a default action to create a remote parent context when using javax HTTP Servlets:
+The action, which uses this function, should be called in the `pre-entry` or `entry` phase.
 
-```yaml
-  'a_servletapi_remoteParentContext':
-    docs:
-      since: '2.5.4'
-      description: "Writes a parent trace context to the given HttpServletResponse's Server-Timing header"
-      inputs:
-       'response': 'The HttpServletResponse to write to.'
-    is-void: true
-    imports:
-     - 'javax.servlet'
-     - 'javax.servlet.http'
-    input:
-     'response': 'ServletResponse'
-     _context: 'InspectitContext'
-    value-body: |
-     if(response instanceof HttpServletResponse) {
-       HttpServletResponse res = (HttpServletResponse) response;
-       if(!res.isCommitted()) {
-       // create context, which will be used as parent now
-       String traceContext = _context.createRemoteParentContext();
-         if(traceContext == null) return;
-         String key = "Server-Timing";
-         String value = "traceparent; desc=" + traceContext;
-         res.addHeader(key, value);
-       }
-     }
-```
+InspectIT Ocelot offers a default action to create a remote parent context when using javax HTTP Servlets: `a_servletapi_remoteParentContext`
