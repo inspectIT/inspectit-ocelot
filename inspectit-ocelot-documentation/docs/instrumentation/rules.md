@@ -76,7 +76,6 @@ Therefore, this rule is defined without scopes, but you can easily add some in y
 inspectit:
   instrumentation:
     rules:
-
       'r_record_method_duration':
         scopes:
           's_my_first_scope': true
@@ -342,7 +341,7 @@ rules:
 
 ### Collecting Traces
 
-Include the rule `r_method_metric` to record the current method as part of a trace.
+Include the rule `r_trace_method` to record the current method as part of a trace.
 In addition, some attributes are added to the trace, like method name or error status.
 In the upcoming section you will learn more about [Collecting Traces](instrumentation/tracing.md).
 

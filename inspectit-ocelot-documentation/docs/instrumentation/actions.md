@@ -141,7 +141,7 @@ Below, some important actions are explained in more detail.
 The examples show how to apply the actions within [rules](instrumentation/rules.md). 
 In the upcoming section you will find more detailed information about [Invoking Actions](instrumentation/rules.md#invoking-actions).
 
-### Assigning values
+### Assigning Values
 
 Data keys can only be used withing rules (e.g. for metric tags or tracing attributes), if they have an assigned value.
 You can assign values via any action. If you would like to assign a constant value or copy another value to a data key,
@@ -165,7 +165,7 @@ rules:
         action: a_assign_true
 ```
 
-### Attaching values
+### Attaching Values
 
 Object attachments allow you to store and access data outside the current control flow.
 The inspectIT agent provides one global dictionary, where any Java object can serve as a key, 
@@ -233,7 +233,7 @@ rules:
           b: another_value
 ```
 
-### Logical operators
+### Logical Operators
 
 We also provide some logical operators for checking specific conditions of data values:
 `a_logic_isNull`, `a_logic_isNotNull`, `a_logic_and`, `a_logic_or` and `a_logic_isTrueOrNotNull`.
@@ -259,7 +259,7 @@ rules:
           b: isTrue
 ```
 
-### Replacing strings via regex
+### Replacing Strings via Regex
 
 If you would like to sanitize some strings, for instance to remove sensitive data, you can use the following default
 actions: `a_regex_replaceAll`, `a_regex_replaceAll_multi`, `a_regex_replaceMatch`, `a_regex_replaceMatch_multi`, 
