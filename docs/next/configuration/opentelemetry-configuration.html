@@ -67,12 +67,12 @@ Furthermore, a correct configuration will make it possible to combine metrics an
 using the OpenTelemetry instrumentation library with the ones collected by the inspectIT Ocelot agent.</p>
 <ol>
 <li><p>Make sure you are using the same version of OpenTelemetry as inspectIT Ocelot.</p>
-<p>The inspectIT Ocelot agent in version {inspectit-ocelot-version} internally uses OpenTelemetry in version
-{opentelemetry-version}. Please adapt any OpenTelemetry dependency in your application to this version to avoid runtime conflicts.</p>
+<p>The inspectIT Ocelot agent in version 2.6.10 internally uses OpenTelemetry in version
+1.50.0. Please adapt any OpenTelemetry dependency in your application to this version to avoid runtime conflicts.</p>
 <pre><code class="hljs css language-XML"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>io.opentelemetry<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>opentelemetry-api<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>{opentelemetry-version}<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.50.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
 </code></pre></li>
 <li><p>Set the JVM property <code>inspectit.publishOpenTelemetryToBootstrap</code> to <code>true</code>.</p>
@@ -91,7 +91,7 @@ classloader will be used.</p>
 if it is attached during runtime – even if the previously mentioned JVM argument is set!
 In this case, metrics and traces of <em>manual OpenTelemetry instrumentations</em> will <em>not</em> be collected by the inspectIT Ocelot agent.</p></li>
 </ol>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 5/13/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/configuration/start-configuration"><span class="arrow-prev">← </span><span>Start Configuration</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/configuration/plugin-configuration"><span>Plugin Configuration</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 5/14/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/configuration/start-configuration"><span class="arrow-prev">← </span><span>Start Configuration</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/configuration/plugin-configuration"><span>Plugin Configuration</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
