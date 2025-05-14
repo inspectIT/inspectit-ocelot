@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.metrics.tagGuards;
+package rocks.inspectit.ocelot.core.metrics.tagGuard;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
@@ -16,9 +16,12 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PersistedTagsReaderWriterTest {
+
     @TempDir
     File anotherTempDir;
+
     String tempFileName;
+
     Map<String, Map<String, Set<String>>> tagValues;
 
     @BeforeEach

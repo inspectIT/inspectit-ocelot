@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.metrics;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagKey;
@@ -24,7 +23,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction.ExecutionContext;
 
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
-import rocks.inspectit.ocelot.core.metrics.tagGuards.PersistedTagsReaderWriter;
+import rocks.inspectit.ocelot.core.metrics.tagGuard.PersistedTagsReaderWriter;
 import rocks.inspectit.ocelot.core.selfmonitoring.AgentHealthManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 

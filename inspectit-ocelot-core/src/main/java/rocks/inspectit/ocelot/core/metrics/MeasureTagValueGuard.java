@@ -21,7 +21,7 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
-import rocks.inspectit.ocelot.core.metrics.tagGuards.PersistedTagsReaderWriter;
+import rocks.inspectit.ocelot.core.metrics.tagGuard.PersistedTagsReaderWriter;
 import rocks.inspectit.ocelot.core.selfmonitoring.AgentHealthManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 import rocks.inspectit.ocelot.core.tags.TagUtils;

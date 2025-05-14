@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.metrics.tagGuards;
+package rocks.inspectit.ocelot.core.metrics.tagGuard;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,7 +40,7 @@ public class PersistedTagsReaderWriter {
 
     public Map<String, Map<String, Set<String>>> read() {
         if (!Files.exists(path)) {
-            log.info("Could not find tag-guard database file. File will be created during next write");
+            log.debug("Could not find tag-guard database file. File will be created during next write");
             return new HashMap<>();
         }
         return readTagsFromFile();
