@@ -2,8 +2,10 @@ package rocks.inspectit.ocelot.core.exporter;
 
 import io.github.netmikey.logunit.api.LogCapturer;
 import io.opencensus.stats.Measure;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import org.assertj.core.api.AssertionsForClassTypes;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -24,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 /**
- * Test class for {@link OtlpMetricsExporterService}
+ * Test class for {@link OtlpMetricsExporterService}.
  */
 public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegrationTestBase {
 
@@ -49,6 +51,12 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
     @BeforeEach
     void clearRequests() {
         grpcServer.metricRequests.clear();
+        GlobalOpenTelemetry.resetForTest();
+    }
+
+    @AfterEach
+    void cleanUp() {
+        GlobalOpenTelemetry.resetForTest();
     }
 
     @DirtiesContext

@@ -8,10 +8,8 @@ ioGrpc = "1.72.0"
 # Ensure to adapt the netty version when changing the OpenCensus version
 # If you rename or move this variable to another file, adjust the release-workflow
 ioOpencensus = "0.31.1"
-# Updating OTel >1.49.0 leads to veeeeery flaky tests in OtlpMetricsExporterServiceIntTest
-# We have to clearify how to deal with this
-ioOpentelemetry = "1.49.0"
-ioOpentelemetryAlpha = "1.49.0-alpha"
+ioOpentelemetry = "1.50.0"
+ioOpentelemetryAlpha = "1.50.0-alpha"
 ioOpentelemetryProto = "1.5.0-alpha"
 ioOpentelemetrySemconv = "1.32.0"
 orgApacheLoggingLog4j = "2.24.3"
