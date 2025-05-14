@@ -5122,7 +5122,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-67. Group: io.opentelemetry  Name: opentelemetry-api  Version: 1.50.0
+67. Group: io.opentelemetry  Name: opentelemetry-api  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5130,11 +5130,11 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-68. Group: io.opentelemetry  Name: opentelemetry-bom  Version: 1.50.0
+68. Group: io.opentelemetry  Name: opentelemetry-bom  Version: 1.49.0
 
 No license information found
 
-69. Group: io.opentelemetry  Name: opentelemetry-bom-alpha  Version: 1.50.0-alpha
+69. Group: io.opentelemetry  Name: opentelemetry-bom-alpha  Version: 1.49.0-alpha
 
 No license information found
 
@@ -5146,7 +5146,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-71. Group: io.opentelemetry  Name: opentelemetry-context  Version: 1.50.0
+71. Group: io.opentelemetry  Name: opentelemetry-context  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5154,7 +5154,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-72. Group: io.opentelemetry  Name: opentelemetry-exporter-common  Version: 1.50.0
+72. Group: io.opentelemetry  Name: opentelemetry-exporter-common  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5162,7 +5162,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-73. Group: io.opentelemetry  Name: opentelemetry-exporter-logging  Version: 1.50.0
+73. Group: io.opentelemetry  Name: opentelemetry-exporter-logging  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5170,7 +5170,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-74. Group: io.opentelemetry  Name: opentelemetry-exporter-otlp  Version: 1.50.0
+74. Group: io.opentelemetry  Name: opentelemetry-exporter-otlp  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5178,7 +5178,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-75. Group: io.opentelemetry  Name: opentelemetry-exporter-otlp-common  Version: 1.50.0
+75. Group: io.opentelemetry  Name: opentelemetry-exporter-otlp-common  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5186,7 +5186,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-76. Group: io.opentelemetry  Name: opentelemetry-exporter-prometheus  Version: 1.50.0-alpha
+76. Group: io.opentelemetry  Name: opentelemetry-exporter-prometheus  Version: 1.49.0-alpha
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5194,7 +5194,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-77. Group: io.opentelemetry  Name: opentelemetry-exporter-sender-okhttp  Version: 1.50.0
+77. Group: io.opentelemetry  Name: opentelemetry-exporter-sender-okhttp  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5202,7 +5202,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-78. Group: io.opentelemetry  Name: opentelemetry-exporter-zipkin  Version: 1.50.0
+78. Group: io.opentelemetry  Name: opentelemetry-exporter-zipkin  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5210,7 +5210,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-79. Group: io.opentelemetry  Name: opentelemetry-sdk  Version: 1.50.0
+79. Group: io.opentelemetry  Name: opentelemetry-sdk  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5226,7 +5226,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-81. Group: io.opentelemetry  Name: opentelemetry-sdk-common  Version: 1.50.0
+81. Group: io.opentelemetry  Name: opentelemetry-sdk-common  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5234,7 +5234,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-82. Group: io.opentelemetry  Name: opentelemetry-sdk-extension-autoconfigure-spi  Version: 1.50.0
+82. Group: io.opentelemetry  Name: opentelemetry-sdk-extension-autoconfigure-spi  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5242,7 +5242,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-83. Group: io.opentelemetry  Name: opentelemetry-sdk-logs  Version: 1.50.0
+83. Group: io.opentelemetry  Name: opentelemetry-sdk-logs  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5250,7 +5250,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-84. Group: io.opentelemetry  Name: opentelemetry-sdk-metrics  Version: 1.50.0
+84. Group: io.opentelemetry  Name: opentelemetry-sdk-metrics  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -5258,7 +5258,7 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 
 --------------------------------------------------------------------------------
 
-85. Group: io.opentelemetry  Name: opentelemetry-sdk-trace  Version: 1.50.0
+85. Group: io.opentelemetry  Name: opentelemetry-sdk-trace  Version: 1.49.0
 
 POM Project URL: https://github.com/open-telemetry/opentelemetry-java
 
@@ -29925,5 +29925,5 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 --------------------------------------------------------------------------------
 
 
-This report was generated at Wed May 14 10:58:49 UTC 2025.
+This report was generated at Wed May 14 11:55:13 UTC 2025.
 
