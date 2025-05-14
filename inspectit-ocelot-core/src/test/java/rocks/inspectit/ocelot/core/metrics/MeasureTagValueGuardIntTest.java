@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.core.metrics;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +63,7 @@ public class MeasureTagValueGuardIntTest extends ExporterServiceIntegrationTestB
      */
     @BeforeEach
     void updateProperties() {
+        GlobalOpenTelemetry.resetForTest();
         ViewDefinitionSettings viewDefinition = new ViewDefinitionSettings();
         viewDefinition.setAggregation(Aggregation.SUM);
         viewDefinition.setTags(Collections.singletonMap(TAG_KEY, true));
@@ -86,6 +89,12 @@ public class MeasureTagValueGuardIntTest extends ExporterServiceIntegrationTestB
             mps.setProperty("inspectit.metrics.definitions." + MEASURE_NAME, metricDefinition);
         });
     }
+
+    @AfterEach
+    void cleanUp() {
+        GlobalOpenTelemetry.resetForTest();
+    }
+
 
     @Test
     void verifyTagValueOverflowReplacement() {
