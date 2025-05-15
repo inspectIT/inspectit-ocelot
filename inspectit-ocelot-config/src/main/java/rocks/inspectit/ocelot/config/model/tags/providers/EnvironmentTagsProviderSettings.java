@@ -18,11 +18,6 @@ public class EnvironmentTagsProviderSettings {
     private boolean resolveHostName;
 
     /**
-     * If true tries to resolve the host arch using {@code System.getProperty("os.arch")}.
-     */
-    private boolean resolveHostArch;
-
-    /**
      * If true tries to resolve the host ip using {@link java.net.InetAddress}.
      */
     private boolean resolveHostIp;

@@ -30,10 +30,9 @@ class EnvironmentTagsProviderIntTest {
         @Test
         public void happyPath() {
             assertThat(provider.getTags(env.getCurrentConfig()))
-                    .hasSize(4)
+                    .hasSize(3)
                     .containsEntry("service", SERVICE_NAME)
                     .containsKey("host.name")
-                    .containsKey("host.arch")
                     .containsKey("host.ip");
         }
     }
@@ -42,7 +41,6 @@ class EnvironmentTagsProviderIntTest {
     @DirtiesContext
     @TestPropertySource(properties = {
             "inspectit.tags.providers.environment.resolve-host-name=false",
-            "inspectit.tags.providers.environment.resolve-host-arch=false",
             "inspectit.tags.providers.environment.resolve-host-ip=false",
     })
     class Overwritten extends SpringTestBase {
@@ -97,7 +95,7 @@ class EnvironmentTagsProviderIntTest {
         public void enable() {
             updateProperties(properties -> properties.withProperty("inspectit.tags.providers.environment.enabled", Boolean.TRUE));
 
-            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(4);
+            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(3);
         }
     }
 
@@ -118,7 +116,7 @@ class EnvironmentTagsProviderIntTest {
                             .withProperty("inspectit.service-name", "updatedName")
             );
 
-            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(4)
+            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(3)
                     .containsEntry("service", "updatedName");
         }
     }

@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * {@link ICommonTagsProvider} that provides the environment based tags like service name, host, etc.
  * <p>
- * SIDE NOTE: Normally, {@code host.name}, {@code host.ip} & {@code host.arch} would be attributes of our {@link Resource},
+ * SIDE NOTE: Normally, {@code host.name} and {@code host.ip} would be attributes of our {@link Resource},
  * but since we also would like to allow filtering metrics with them, we use them as environment tags.
  */
 @Component
@@ -43,10 +43,6 @@ public class EnvironmentTagsProvider implements ICommonTagsProvider {
                 }
             }
 
-            if(conf.isResolveHostArch()) {
-                envTags.put("host.arch", resolveHostArch());
-            }
-
             if (conf.isResolveHostIp()) {
                 try {
                     envTags.put("host.ip", resolveHostAddress());
@@ -64,13 +60,6 @@ public class EnvironmentTagsProvider implements ICommonTagsProvider {
 
     private static String resolveHostName() throws UnknownHostException {
         return InetAddress.getLocalHost().getHostName();
-    }
-
-    /**
-     * We use the OpenTelemetry {@code HostResource} to determine the {@code host.arch}.
-     */
-    private static String resolveHostArch() {
-        return HostResource.get().getAttribute(AttributeKey.stringKey("host.arch"));
     }
 
     private static String resolveHostAddress() throws UnknownHostException {

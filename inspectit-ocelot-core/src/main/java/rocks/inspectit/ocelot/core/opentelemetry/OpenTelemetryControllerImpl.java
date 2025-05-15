@@ -4,6 +4,8 @@ import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.instrumentation.resources.*;
 import io.opentelemetry.opencensusshim.OpenCensusMetricProducer;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
@@ -182,7 +184,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      * For metrics, the {@link SdkMeterProvider} is reconfigured and updated in the {@link GlobalOpenTelemetry}.     *
      * Using the {@link Order} annotation, we make sure this method called after the individual services have (un)-registered.
      *
-     * @return
+     * @return true, if OpenTelemetry was successfully configured
      */
     @EventListener(InspectitConfigChangedEvent.class)
     @Order()
@@ -212,7 +214,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             // configure meter provider (metrics) if not configured or when metrics settings changed
             SdkMeterProvider sdkMeterProvider = !(metricSettingsChanged || !active) ? meterProvider : configureMeterProvider();
 
-            // only if metrics settings changed or OTEL has not been configured and is running, we need to rebuild the OpenTelemetrySdk
+            // only if metrics settings changed or OTel has not been configured and is running, we need to rebuild the OpenTelemetrySdk
             if (metricSettingsChanged || !active) {
 
                 OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
@@ -229,7 +231,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         if (success) {
             log.info("Successfully configured OpenTelemetry with tracing and metrics");
         } else {
-            log.error("Failed to configure OpenTelemetry. Please scan the logs for detailed failure messages.");
+            log.error("Failed to configure OpenTelemetry. Please scan the logs for detailed failure messages");
         }
 
         isConfiguring.set(false);
@@ -240,7 +242,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
     @Override
     synchronized public boolean start() {
-        // if OTEL is not already up and running, configure and start it
+        // if OTel is not already up and running, configure and start it
         if (active) {
             throw new IllegalStateException("The OpenTelemetry controller is already running and cannot be started again.");
         } else {
@@ -254,7 +256,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      */
     @Override
     public void flush() {
-        log.info("Flush pending OTEL data.");
+        log.info("Flush pending OTel data.");
         long start = System.nanoTime();
         openTelemetry.flush();
         log.info("Flushing process took {} ms", (System.nanoTime() - start) / 1000000);
@@ -277,7 +279,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         }
         long start = System.nanoTime();
 
-        // close OTEL
+        // close OTel
         if (null != openTelemetry) {
             // note: close calls SdkTracerProvider#shutdown, which calls SpanProcessor#shutdown, which calls SpanExporter#shutdown.
             // thus, the spanProcessor and spanExporter are shut down in this process and cannot be used later
@@ -290,7 +292,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         shutdown = true;
         isShuttingDown.set(false);
 
-        // set all OTEL related fields to null
+        // set all OTel related fields to null
         openTelemetry = null;
         meterProvider = null;
         sampler = null;
@@ -311,9 +313,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     }
 
     /**
-     * Initializes tracer and meter provider components, i.e., {@link #openTelemetry}, {@link #multiSpanExporter}, {@link #spanProcessor}, {@link #sampler}, {@link SdkTracerProvider}, and {@link SdkMeterProvider}
-     *
-     * @param configuration
+     * Initializes tracer and meter provider components,
+     * e.g. {@link #openTelemetry}, {@link #multiSpanExporter}, {@link #spanProcessor}, {@link #sampler},
+     * {@link SdkTracerProvider} and {@link SdkMeterProvider}
      */
     @VisibleForTesting
     void initOtel(InspectitConfig configuration) {
@@ -369,14 +371,26 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      * Gets a {@link Resource} for the tracer provider attributes.
      */
     private static Resource getTracerProviderAttributes(InspectitConfig configuration) {
-        Resource tracerProviderAttributes = Resource.create(Attributes.of(
-                ServiceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName(),
-                AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion(),
-                TelemetryAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion(),
-                TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java",
-                TelemetryAttributes.TELEMETRY_SDK_NAME, "opentelemetry")
-        );
-        return tracerProviderAttributes;
+        AttributesBuilder builder = Attributes.builder();
+
+        // add inspectIT resource attributes
+        builder.put(ServiceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName());
+        builder.put(AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion());
+        builder.put(TelemetryAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion());
+        builder.put(TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java");
+        builder.put(TelemetryAttributes.TELEMETRY_SDK_NAME, "opentelemetry");
+
+        // add additional resources from OTel ResourceProviders
+        // we already use host.name as environment tag, see EnvironmentTagsProvider
+        AttributeKey<String> hostArchKey = AttributeKey.stringKey("host.arch");
+        builder.put(hostArchKey, HostResource.get().getAttribute(hostArchKey));
+        builder.putAll(HostIdResource.get().getAttributes());
+        builder.putAll(OsResource.get().getAttributes());
+        builder.putAll(ProcessResource.get().getAttributes());
+        builder.putAll(ProcessRuntimeResource.get().getAttributes());
+        builder.putAll(ContainerResource.get().getAttributes());
+
+        return Resource.create(builder.build());
     }
 
     /**
@@ -385,7 +399,10 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      * @return A new {@link SdkMeterProvider} based on the {@link InspectitConfig}
      */
     private SdkMeterProvider buildMeterProvider(InspectitConfig configuration) {
-        Resource metricServiceNameResource = Resource.create(Attributes.of(ServiceAttributes.SERVICE_NAME, configuration.getServiceName()));
+        // DO NOT USE ANY HIGHLY VARIANT VARIABLES AS METRIC TAGS
+        Resource metricServiceNameResource = Resource.create(Attributes.of(
+                ServiceAttributes.SERVICE_NAME, configuration.getServiceName()
+        ));
         return SdkMeterProvider.builder().setResource(metricServiceNameResource).build();
     }
 
