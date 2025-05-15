@@ -53,6 +53,7 @@ dependencies {
         libs.ioOpentelemetryOpentelemetryOpencensusShim,
         libs.ioOpencensusOpencensusImpl,
         libs.ioOpentelemetryOpentelemetrySemconv,
+        libs.ioOpentelemetryInstrumentationOpentelemetryResources,
         libs.comGoogleGuava
     )
     annotationProcessor libs.orgProjectlombokLombok
@@ -154,6 +155,7 @@ dependencies {
             platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
             libs.ioOpentelemetryOpentelemetryApi,
             libs.ioOpentelemetryOpentelemetrySdk,
+            libs.ioOpentelemetryInstrumentationOpentelemetryResources,
             libs.ioOpentelemetryOpentelemetryOpencensusShim,
             libs.ioOpencensusOpencensusImpl,
 
@@ -171,6 +173,7 @@ dependencies {
             libs.ioOpentelemetryOpentelemetryExporterLogging,
             platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
             libs.ioOpentelemetryOpentelemetrySemconv,
+            libs.ioOpentelemetryInstrumentationOpentelemetryResources,
 
             libs.orgJunitJupiterJunitJupiterEngine,
             libs.orgJunitJupiterJunitJupiterApi,

@@ -10,6 +10,7 @@ ioOpencensus = "0.31.1"
 # If you rename this OTel variable or move it to another file, adjust the release-workflow
 ioOpentelemetry = "1.50.0"
 ioOpentelemetryAlpha = "1.50.0-alpha"
+ioOpentelemetryInstrumentation = "2.15.0-alpha"
 ioOpentelemetryProto = "1.5.0-alpha"
 ioOpentelemetrySemconv = "1.32.0"
 orgApacheLoggingLog4j = "2.24.3"
@@ -53,13 +54,11 @@ ioGithubResilience4jResilience4jRetry = { module = "io.github.resilience4j:resil
 ioGithubResilience4jResilience4jTimelimiter = { module = "io.github.resilience4j:resilience4j-timelimiter", version.ref = "ioGithubResilience4j" }
 ioGrpcGrpcNettyShaded = { module = "io.grpc:grpc-netty-shaded", version.ref = "ioGrpc" }
 ioGrpcGrpcStub = { module = "io.grpc:grpc-stub", version.ref = "ioGrpc" }
-# The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
-# See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
-ioNettyNettyTcnativeBoringsslStatic = "io.netty:netty-tcnative-boringssl-static:2.0.71.Final"
 # Ensure to adapt the netty version when changing the OpenCensus version
 ioOpencensusOpencensusApi = { module = "io.opencensus:opencensus-api", version.ref = "ioOpencensus" }
 ioOpencensusOpencensusImpl = { module = "io.opencensus:opencensus-impl", version.ref = "ioOpencensus" }
 ioOpencensusOpencensusTesting = { module = "io.opencensus:opencensus-testing", version.ref = "ioOpencensus" }
+ioOpentelemetryInstrumentationOpentelemetryResources = { module = "io.opentelemetry.instrumentation:opentelemetry-resources" , version.ref = "ioOpentelemetryInstrumentation"}
 ioOpentelemetryOpentelemetryApi = { module = "io.opentelemetry:opentelemetry-api", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryBom = { module = "io.opentelemetry:opentelemetry-bom", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryBomAlpha = { module = "io.opentelemetry:opentelemetry-bom-alpha", version.ref = "ioOpentelemetryAlpha" }
