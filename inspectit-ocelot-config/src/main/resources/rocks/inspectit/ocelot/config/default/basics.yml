@@ -7,14 +7,16 @@ inspectit:
   tags:
     # different tag providers that can be configured
     providers:
-      # environment provider adds 'service-name', 'host' and 'host-address' tags
+      # environment provider adds 'service', 'host.name', 'host.arch' and 'host-ip' tags
       environment:
         # if environment provider is enabled
         enabled: true
-        # should the host name be resolved using InetAddress.getLocalHost(), if false 'host' tag is not added by env provider
+        # should the host name be resolved using InetAddress.getLocalHost(), if false 'host.name' tag is not added by env provider
         resolve-host-name: true
-        # should the host address be resolved using InetAddress.getLocalHost(), if false 'host-address' tag is not added by env provider
-        resolve-host-address: true
+        # should the host arch be resolved using System.getProperty("os.arch"), if false 'host.arch' tag is not added by env provider
+        resolve-host-arch: true
+        # should the host ip be resolved using InetAddress.getLocalHost(), if false 'host.ip' tag is not added by env provider
+        resolve-host-ip: true
     # specifies user defined tag keys and values as a map
     # these tag values would overwrite any value added by the providers, thus you can easily overwrite tags values by your own
     extra: { }
