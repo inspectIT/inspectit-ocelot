@@ -6,8 +6,8 @@ chQosLogback= "1.3.15"
 ioGithubNetmikeyLogunit = "2.0.0"
 ioGrpc = "1.72.0"
 # Ensure to adapt the netty version when changing the OpenCensus version
-# If you rename or move this variable to another file, adjust the release-workflow
 ioOpencensus = "0.31.1"
+# If you rename this OTel variable or move it to another file, adjust the release-workflow
 ioOpentelemetry = "1.50.0"
 ioOpentelemetryAlpha = "1.50.0-alpha"
 ioOpentelemetryProto = "1.5.0-alpha"
@@ -76,9 +76,7 @@ ioOpentelemetryOpentelemetrySemconv = { module = "io.opentelemetry.semconv:opent
 ioPrometheusSimpleclientHttpserver = "io.prometheus:simpleclient_httpserver:0.16.0"
 javaxAnnotationJavaxAnnotationApi = "javax.annotation:javax.annotation-api:1.3.2"
 log4j = "log4j:log4j:1.2.17"
-# @pin Newer versions have changed the behaviour of the equals() method of ElementMatchers
-# We need a solution to be properly able to compare InstrumentationScope objects
-netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.15.4"
+netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.17.5"
 # @pin logback 7.* is the last version for Java 8
 netLogstashLogbackLogstashLogbackEncoder = "net.logstash.logback:logstash-logback-encoder:7.4"
 orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.17.0"

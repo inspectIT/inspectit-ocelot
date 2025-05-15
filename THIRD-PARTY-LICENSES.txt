@@ -9801,7 +9801,7 @@ limitations under the License.
 
 --------------------------------------------------------------------------------
 
-118. Group: net.bytebuddy  Name: byte-buddy  Version: 1.15.4
+118. Group: net.bytebuddy  Name: byte-buddy  Version: 1.17.5
 
 POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0.txt
 
@@ -9809,7 +9809,7 @@ Embedded license:
 
                     ****************************************                    
 
-This product bundles ASM 9.7.1, which is available under a "3-clause BSD"
+This product bundles ASM 9.8, which is available under a "3-clause BSD"
 license. For details, see licenses/ASM. For more information visit ${asm.url}.
 
 Apache License
@@ -29925,5 +29925,5 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 --------------------------------------------------------------------------------
 
 
-This report was generated at Wed May 14 13:49:43 UTC 2025.
+This report was generated at Thu May 15 09:03:18 UTC 2025.
 
