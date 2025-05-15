@@ -7,7 +7,7 @@ inspectit:
   tags:
     # different tag providers that can be configured
     providers:
-      # environment provider adds 'service', 'host.name', 'host.arch' and 'host-ip' tags
+      # environment provider adds 'service', 'host.name' and 'host-ip' tags
       environment:
         # if environment provider is enabled
         enabled: true

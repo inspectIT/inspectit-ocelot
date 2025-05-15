@@ -2,10 +2,8 @@ package rocks.inspectit.ocelot.core.opentelemetry;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
-import io.opentelemetry.instrumentation.resources.*;
 import io.opentelemetry.opencensusshim.OpenCensusMetricProducer;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
@@ -17,7 +15,6 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.semconv.ServiceAttributes;
-import io.opentelemetry.semconv.TelemetryAttributes;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,13 +25,13 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.IOpenTelemetryController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
+import rocks.inspectit.ocelot.core.opentelemetry.resource.ResourceAttributesProvider;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.DynamicSampler;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
@@ -153,10 +150,10 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     private DynamicMultiSpanExporter multiSpanExporter;
 
     /**
-     * {@link Resource} containing  tracer provider attributes.
+     * {@link Resource} containing tracer provider attributes
      */
     @Getter(AccessLevel.PACKAGE)
-    private Resource tracerProviderAttributes;
+    private Resource tracerProviderResource;
 
     @PostConstruct
     @VisibleForTesting
@@ -352,7 +349,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         sampler = new DynamicSampler(configuration.getTracing().getSampleMode(), configuration.getTracing()
                 .getSampleProbability());
         multiSpanExporter = DynamicMultiSpanExporter.create();
-        tracerProviderAttributes = getTracerProviderAttributes(configuration);
+        tracerProviderResource = getTracerProviderResource(configuration);
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)
                 .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
                 .setScheduleDelay(configuration.getTracing().getScheduleDelayMillis(), TimeUnit.MILLISECONDS)
@@ -360,7 +357,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
         SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
                 .setSampler(sampler)
-                .setResource(tracerProviderAttributes)
+                .setResource(tracerProviderResource)
                 .addSpanProcessor(spanProcessor)
                 .setIdGenerator(idGenerator);
 
@@ -370,25 +367,11 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     /**
      * Gets a {@link Resource} for the tracer provider attributes.
      */
-    private static Resource getTracerProviderAttributes(InspectitConfig configuration) {
+    private static Resource getTracerProviderResource(InspectitConfig configuration) {
         AttributesBuilder builder = Attributes.builder();
 
-        // add inspectIT resource attributes
         builder.put(ServiceAttributes.SERVICE_NAME, configuration.getExporters().getTracing().getServiceName());
-        builder.put(AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion());
-        builder.put(TelemetryAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion());
-        builder.put(TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java");
-        builder.put(TelemetryAttributes.TELEMETRY_SDK_NAME, "opentelemetry");
-
-        // add additional resources from OTel ResourceProviders
-        // we already use host.name as environment tag, see EnvironmentTagsProvider
-        AttributeKey<String> hostArchKey = AttributeKey.stringKey("host.arch");
-        builder.put(hostArchKey, HostResource.get().getAttribute(hostArchKey));
-        builder.putAll(HostIdResource.get().getAttributes());
-        builder.putAll(OsResource.get().getAttributes());
-        builder.putAll(ProcessResource.get().getAttributes());
-        builder.putAll(ProcessRuntimeResource.get().getAttributes());
-        builder.putAll(ContainerResource.get().getAttributes());
+        builder.putAll(ResourceAttributesProvider.getTracerProviderResourceAttributes());
 
         return Resource.create(builder.build());
     }
@@ -399,11 +382,11 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      * @return A new {@link SdkMeterProvider} based on the {@link InspectitConfig}
      */
     private SdkMeterProvider buildMeterProvider(InspectitConfig configuration) {
-        // DO NOT USE ANY HIGHLY VARIANT VARIABLES AS METRIC TAGS
-        Resource metricServiceNameResource = Resource.create(Attributes.of(
+        // DO NOT USE ANY HIGHLY VARIANT VARIABLES FOR METRIC TAGS
+        Resource metricResource = Resource.create(Attributes.of(
                 ServiceAttributes.SERVICE_NAME, configuration.getServiceName()
         ));
-        return SdkMeterProvider.builder().setResource(metricServiceNameResource).build();
+        return SdkMeterProvider.builder().setResource(metricResource).build();
     }
 
     /**
