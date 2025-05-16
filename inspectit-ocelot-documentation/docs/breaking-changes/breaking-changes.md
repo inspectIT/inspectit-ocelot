@@ -3,6 +3,19 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
+## Breaking changes in 2.6.11
+
+### Renamed environment tag keys
+
+To comply with the [Semantic Conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/) of OpenTelemetry,
+the host environment tags have been renamed.
+
+The tag `host` was renamed to `host.name`. The tag `host_address` has been renamed to `host.ip`.
+Furthermore, the configuration option
+`inspectit.tags.providers.environment.resolve-host-address`
+has been changed to 
+`inspectit.tags.providers.environment.resolve-host-ip`.
+
 ## Breaking changes in 2.6.10
 
 ### Restructured instrumentation documentation

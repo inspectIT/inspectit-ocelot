@@ -10,7 +10,9 @@ import lombok.Getter;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 
 /**
- * Provides static resource attributes, which will not change during runtime.
+ * Provides static resource attributes, which will not change during runtime. <br>
+ * There should be a list of all available OpenTelemetry Resource Providers here:
+ * <a href="https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/resources/library">
  */
 public class ResourceAttributesProvider {
 
