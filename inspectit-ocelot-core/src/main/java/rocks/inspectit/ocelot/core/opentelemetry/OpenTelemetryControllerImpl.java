@@ -206,7 +206,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         if (!active || metricSettingsChanged || tracingSettingsChanged) {
 
             // configure tracing if not configured or when tracing settings changed
-            SdkTracerProvider sdkTracerProvider = !(tracingSettingsChanged || !active) ? tracerProvider : configureTracing(configuration);
+            SdkTracerProvider sdkTracerProvider = !(tracingSettingsChanged || !active) ? tracerProvider : configureTracerProvider(configuration);
 
             // configure meter provider (metrics) if not configured or when metrics settings changed
             SdkMeterProvider sdkMeterProvider = !(metricSettingsChanged || !active) ? meterProvider : configureMeterProvider();
@@ -316,8 +316,8 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      */
     @VisibleForTesting
     void initOtel(InspectitConfig configuration) {
-        meterProvider = buildMeterProvider(configuration);
-        tracerProvider = buildTracerProvider(configuration);
+        meterProvider = getMeterProviderBuilder(configuration).build();
+        tracerProvider = getTracerProviderBuilder(configuration).build();
 
         OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                 .setTracerProvider(tracerProvider)
@@ -341,27 +341,23 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     }
 
     /**
-     * Builds a new {@link SdkTracerProvider} based on the given {@link InspectitConfig}
-     *
-     * @return A new {@link SdkTracerProvider} based on the {@link InspectitConfig}
+     * @return A new {@link SdkTracerProviderBuilder} based on the {@link InspectitConfig}
      */
-    private SdkTracerProvider buildTracerProvider(InspectitConfig configuration) {
+    private SdkTracerProviderBuilder getTracerProviderBuilder(InspectitConfig configuration) {
         sampler = new DynamicSampler(configuration.getTracing().getSampleMode(), configuration.getTracing()
                 .getSampleProbability());
-        multiSpanExporter = DynamicMultiSpanExporter.create();
         tracerProviderResource = getTracerProviderResource(configuration);
+        multiSpanExporter = DynamicMultiSpanExporter.create();
         spanProcessor = BatchSpanProcessor.builder(multiSpanExporter)
                 .setMaxExportBatchSize(configuration.getTracing().getMaxExportBatchSize())
                 .setScheduleDelay(configuration.getTracing().getScheduleDelayMillis(), TimeUnit.MILLISECONDS)
                 .build();
 
-        SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
+        return SdkTracerProvider.builder()
                 .setSampler(sampler)
                 .setResource(tracerProviderResource)
                 .addSpanProcessor(spanProcessor)
                 .setIdGenerator(idGenerator);
-
-        return builder.build();
     }
 
     /**
@@ -377,35 +373,32 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     }
 
     /**
-     * Builds a new {@link SdkMeterProvider} based on the given {@link InspectitConfig}
-     *
-     * @return A new {@link SdkMeterProvider} based on the {@link InspectitConfig}
+     * @return A new {@link SdkMeterProviderBuilder} based on the {@link InspectitConfig}
      */
-    private SdkMeterProvider buildMeterProvider(InspectitConfig configuration) {
+    private SdkMeterProviderBuilder getMeterProviderBuilder(InspectitConfig configuration) {
         // DO NOT USE ANY HIGHLY VARIANT VARIABLES FOR METRIC TAGS
         Resource metricResource = Resource.create(Attributes.of(
                 ServiceAttributes.SERVICE_NAME, configuration.getServiceName()
         ));
-        return SdkMeterProvider.builder().setResource(metricResource).build();
+        return SdkMeterProvider.builder().setResource(metricResource);
     }
 
     /**
-     * Configures the tracing, i.e. {@link #openTelemetry} and the related {@link SdkTracerProvider}. A new {@link SdkTracerProvider} is only built once or after {@link #shutdown()} was called.
+     * (Re-) Configures the tracing. Currently, only the sampleProbability has to be updatable at runtime.
      *
-     * @param configuration The {@link InspectitConfig} used to build the {@link SdkTracerProvider}
+     * @param configuration The current {@link InspectitConfig}
      *
      * @return The updated {@link SdkTracerProvider} or null if the configuration failed.
      */
     @VisibleForTesting
-    synchronized SdkTracerProvider configureTracing(InspectitConfig configuration) {
+    synchronized SdkTracerProvider configureTracerProvider(InspectitConfig configuration) {
         if (shutdown) {
             return null;
         }
         try {
-            sampler.setSampler(configuration.getTracing().getSampleMode(), configuration.getTracing()
-                    .getSampleProbability());
+            sampler.setSampler(configuration.getTracing().getSampleMode(),
+                    configuration.getTracing().getSampleProbability());
             return tracerProvider;
-
         } catch (Exception e) {
             log.error("Failed to configure OpenTelemetry Tracing", e);
             return null;
@@ -428,10 +421,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                 OpenTelemetryUtils.stopMeterProvider(meterProvider, true);
             }
 
-            Resource metricServiceNameResource = Resource.create(Attributes.of(ServiceAttributes.SERVICE_NAME, env.getCurrentConfig()
-                    .getServiceName()));
-            SdkMeterProviderBuilder builder = SdkMeterProvider.builder()
-                    .setResource(metricServiceNameResource);
+            SdkMeterProviderBuilder builder = getMeterProviderBuilder(env.getCurrentConfig());
 
             // register metric reader for each service
             for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {
