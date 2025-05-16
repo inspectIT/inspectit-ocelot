@@ -32,17 +32,16 @@ class EnvironmentTagsProviderIntTest {
             assertThat(provider.getTags(env.getCurrentConfig()))
                     .hasSize(3)
                     .containsEntry("service", SERVICE_NAME)
-                    .containsKey("host")
-                    .containsKey("host_address");
+                    .containsKey("host.name")
+                    .containsKey("host.ip");
         }
-
     }
 
     @Nested
     @DirtiesContext
     @TestPropertySource(properties = {
             "inspectit.tags.providers.environment.resolve-host-name=false",
-            "inspectit.tags.providers.environment.resolve-host-address=false",
+            "inspectit.tags.providers.environment.resolve-host-ip=false",
     })
     class Overwritten extends SpringTestBase {
 
@@ -58,7 +57,6 @@ class EnvironmentTagsProviderIntTest {
                     .hasSize(1)
                     .containsKeys("service");
         }
-
     }
 
     @Nested
@@ -78,7 +76,6 @@ class EnvironmentTagsProviderIntTest {
         public void happyPath() {
             assertThat(provider.getTags(env.getCurrentConfig())).isEmpty();
         }
-
     }
 
     @Nested
@@ -100,7 +97,6 @@ class EnvironmentTagsProviderIntTest {
 
             assertThat(provider.getTags(env.getCurrentConfig())).hasSize(3);
         }
-
     }
 
     @Nested
@@ -123,7 +119,5 @@ class EnvironmentTagsProviderIntTest {
             assertThat(provider.getTags(env.getCurrentConfig())).hasSize(3)
                     .containsEntry("service", "updatedName");
         }
-
     }
-
 }

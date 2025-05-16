@@ -70,6 +70,7 @@ public class AgentJars {
      *
      * @param resourcePath the path to the resource
      * @param prefix       the name of the file
+     *
      * @return the absolute path used for the specified jar file in the file system
      */
     private static Path getJar(String resourcePath, String prefix) throws IOException {
@@ -83,6 +84,7 @@ public class AgentJars {
      *
      * @param resourcePath the path to the resource
      * @param prefix       the name of the file
+     *
      * @return the path to the used jar file
      */
     private static Path recycleJarFile(String resourcePath, String prefix) throws IOException {
@@ -134,6 +136,7 @@ public class AgentJars {
      *
      * @param resourcePath the path to the resource, used if no jar has been found
      * @param jarPath the path of the jar file
+     *
      * @return the path to the used jar file
      */
     private static Path recycleJarFileWithLock(String resourcePath, Path jarPath) throws IOException {
@@ -158,19 +161,15 @@ public class AgentJars {
      * @param lockChannel the channel of the lock file
      * @param timeout the maximum time to wait in ms
      * @param retryDelay the delay for every retry in ms
+     *
      * @return the acquired lock or {@code null} if timed out
      */
     private static FileLock acquireLock(FileChannel lockChannel, long timeout, long retryDelay) throws IOException {
         long end = System.currentTimeMillis() + timeout;
 
         while (System.currentTimeMillis() < end) {
-            try {
-                FileLock lock = lockChannel.tryLock();
-                if (lock != null) return lock;
-            } catch (OverlappingFileLockException e) {
-                // already locked in this JVM – shouldn't happen
-                throw new IOException(e);
-            }
+            FileLock lock = lockChannel.tryLock();
+            if (lock != null) return lock;
 
             try {
                 Thread.sleep(retryDelay);
@@ -198,6 +197,7 @@ public class AgentJars {
 
     /**
      * @param prefix the name of the new jar file
+     *
      * @return the absolute path to the jar file
      */
     private static Path getAbsoluteJarPath(String prefix) {

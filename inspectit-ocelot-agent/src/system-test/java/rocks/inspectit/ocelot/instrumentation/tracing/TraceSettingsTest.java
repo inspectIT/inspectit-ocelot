@@ -36,7 +36,7 @@ public class TraceSettingsTest extends TraceTestBase {
                             .containsEntry(AttributeKey.stringKey("anything"), "***")
                             // plus include all common tags (service + key validation only)
                             .containsEntry(AttributeKey.stringKey("service"), "systemtest")
-                            .containsKeys(AttributeKey.stringKey("host"), AttributeKey.stringKey("host_address"));
+                            .containsKeys(AttributeKey.stringKey("host.name"), AttributeKey.stringKey("host.ip"));
                 })
 
         );
@@ -57,7 +57,7 @@ public class TraceSettingsTest extends TraceTestBase {
         assertTraceExported((spans) -> assertThat(spans).hasSize(1).anySatisfy((sp) -> {
                     assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetterWithConditions");
                     assertThat(sp.getAttributes().asMap()).hasSize(3)
-                            .containsKeys(AttributeKey.stringKey("service"), AttributeKey.stringKey("host"), AttributeKey.stringKey("host_address"));
+                            .containsKeys(AttributeKey.stringKey("service"), AttributeKey.stringKey("host.name"), AttributeKey.stringKey("host.ip"));
                 })
 
         );
@@ -67,7 +67,7 @@ public class TraceSettingsTest extends TraceTestBase {
                     assertThat(sp.getAttributes().asMap()).hasSize(5)
                             .containsEntry(AttributeKey.stringKey("entry"), "const")
                             .containsEntry(AttributeKey.stringKey("exit"), "Hello B!")
-                            .containsKeys(AttributeKey.stringKey("service"), AttributeKey.stringKey("host"), AttributeKey.stringKey("host_address"));
+                            .containsKeys(AttributeKey.stringKey("service"), AttributeKey.stringKey("host.name"), AttributeKey.stringKey("host.ip"));
                 })
 
         );
@@ -194,12 +194,12 @@ public class TraceSettingsTest extends TraceTestBase {
             assertThat(firstSpan.getAttributes().asMap()).hasSize(5)
                     .containsEntry(AttributeKey.stringKey("1"), "a1")
                     .containsEntry(AttributeKey.stringKey("2"), "a2")
-                    .containsKeys(AttributeKey.stringKey("service"), AttributeKey.stringKey("host"), AttributeKey.stringKey("host_address"));
+                    .containsKeys(AttributeKey.stringKey("service"), AttributeKey.stringKey("host.name"), AttributeKey.stringKey("host.ip"));
             assertThat(secondSpan.getAttributes().asMap()).hasSize(6)
                     .containsEntry(AttributeKey.stringKey("1"), "b1")
                     .containsEntry(AttributeKey.stringKey("2"), "b2")
                     .containsEntry(AttributeKey.stringKey("3"), "b3")
-                    .containsKeys(AttributeKey.stringKey("service"), AttributeKey.stringKey("host"), AttributeKey.stringKey("host_address"));
+                    .containsKeys(AttributeKey.stringKey("service"), AttributeKey.stringKey("host.name"), AttributeKey.stringKey("host.ip"));
 
             //ensure that the timings are valid
             assertThat(firstSpan.getEndEpochNanos()).isLessThan(secondSpan.getEndEpochNanos());

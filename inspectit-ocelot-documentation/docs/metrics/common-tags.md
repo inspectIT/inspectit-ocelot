@@ -17,10 +17,10 @@ Each provider specifies a priority and if the same tag keys are supplied by two 
 
 inspectIT Ocelot currently supports the following tag providers:
 
-|Provider |Tags provided |Supports run-time updates |Enabled by default |Priority
-|---|---|---|---|---|
-|[User Defined Tags](#user-defined-tags)|-|Yes|No|HIGH
-|[Environment Tags](#environment-tags)|`service`, `host`, `host_address`|Yes|Yes|LOW
+| Provider                                | Tags provided                     | Supports run-time updates | Enabled by default | Priority |
+|-----------------------------------------|-----------------------------------|---------------------------|--------------------|----------|
+| [User Defined Tags](#user-defined-tags) | -                                 | Yes                       | No                 | HIGH     |
+| [Environment Tags](#environment-tags)   | `service`, `host.name`, `host.ip` | Yes                       | Yes                | LOW      |
 
 > Run-time updates currently only support changing of a tag value, but not adding or removing tags.
 
@@ -50,8 +50,8 @@ The service is resolved from the `inspectit.service-name` property, while the ho
 
 > On machines that have multiple network interfaces the `InetAddress.getLocalHost()` method might not provide desired values for host related tags.
 
-|Property |Default| Description
-|---|---|---|
-|`inspectit.tags.providers.environment.enabled`|`true`|Enables or disables the provider.
-|`inspectit.tags.providers.environment.resolve-host-name`|`true`|If `false`, the tag `host` containing the resolved host name will not be provided.
-|`inspectit.tags.providers.environment.resolve-host-address`|`true`|If `false`, the tag `host_address` containing the resolved host IP address will not be provided.
+| Property                                                 | Default | Description                                                                                 |
+|----------------------------------------------------------|---------|---------------------------------------------------------------------------------------------|
+| `inspectit.tags.providers.environment.enabled`           | `true`  | Enables or disables the provider.                                                           |
+| `inspectit.tags.providers.environment.resolve-host-name` | `true`  | If `false`, the tag `host.name` containing the resolved host name will not be provided.     |
+| `inspectit.tags.providers.environment.resolve-host-ip`   | `true`  | If `false`, the tag `host.ip` containing the resolved host IP address will not be provided. |

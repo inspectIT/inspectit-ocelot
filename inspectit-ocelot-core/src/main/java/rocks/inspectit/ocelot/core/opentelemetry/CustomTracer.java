@@ -36,7 +36,7 @@ public class CustomTracer implements Tracer {
         tracerProvider = tracerProviderCache.computeIfAbsent(sampler, samp -> SdkTracerProvider.builder()
                 .setIdGenerator(openTelemetryController.getIdGenerator())
                 .addSpanProcessor(openTelemetryController.getSpanProcessor())
-                .setResource(openTelemetryController.getTracerProviderAttributes())
+                .setResource(openTelemetryController.getTracerProviderResource())
                 .setSampler(sampler)
                 .build());
     }
