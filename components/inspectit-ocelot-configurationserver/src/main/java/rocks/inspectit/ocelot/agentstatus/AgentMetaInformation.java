@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Map;
 
 /**
- * Container class for storing meta information about an agent that fetched a HTTP configuration.
+ * Container class for storing meta information about an agent that fetched an HTTP configuration.
  */
 @Value
 @EqualsAndHashCode
@@ -39,16 +39,6 @@ public class AgentMetaInformation {
      * Name of the start time header.
      */
     private static final String HEADER_START_TIME = HEADER_PREFIX + "start-time";
-
-    /**
-     * Name of the VM name header.
-     */
-    private static final String HEADER_VM_NAME = HEADER_PREFIX + "vm-name";
-
-    /**
-     * Name of the VM vendor header.
-     */
-    private static final String HEADER_VM_VENDOR = HEADER_PREFIX + "vm-vendor";
 
     /**
      *  Name of the service states header.
@@ -94,16 +84,6 @@ public class AgentMetaInformation {
     private String startTime;
 
     /**
-     * The name of the JVM.
-     */
-    private String vmName;
-
-    /**
-     * The name of the JVM vendor.
-     */
-    private String vmVendor;
-
-    /**
      * The current setting states in a json string
      */
     private String serviceStates;
@@ -115,8 +95,6 @@ public class AgentMetaInformation {
         agentVersion = headers.get(HEADER_AGENT_VERSION);
         javaVersion = headers.get(HEADER_JAVA_VERSION);
         startTime = headers.get(HEADER_START_TIME);
-        vmName = headers.get(HEADER_VM_NAME);
-        vmVendor = headers.get(HEADER_VM_VENDOR);
         serviceStates = headers.get(HEADER_SERVICE_STATES);
     }
 }
