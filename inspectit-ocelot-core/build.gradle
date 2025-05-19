@@ -57,6 +57,7 @@ dependencies {
             libs.ioOpentelemetryOpentelemetrySdk,
             libs.ioOpentelemetryOpentelemetrySdkMetrics,
             libs.ioOpentelemetryOpentelemetrySemconv,
+            libs.ioOpentelemetryInstrumentationOpentelemetryResources,
             // OC-OTel bridge
             libs.ioOpentelemetryOpentelemetryOpencensusShim,
 
@@ -122,10 +123,6 @@ dependencies {
             platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
             libs.ioOpentelemetryOpentelemetryExporterPrometheus,
 
-            // The following dependency is required for the OC-exporter to work correctly and must be matched against the grpc version
-            // See https://github.com/census-instrumentation/opencensus-java/blob/master/exporters/trace/ocagent/README.md
-            libs.ioNettyNettyTcnativeBoringsslStatic,
-
             libs.rocksInspectitOpencensusInfluxdbExporter,
 
             // bytecode manipulation
@@ -142,6 +139,7 @@ dependencies {
             libs.ioOpentelemetryOpentelemetrySemconv,
             libs.ioOpentelemetryOpentelemetrySdkTesting,
             libs.ioOpentelemetryOpentelemetryProto,
+            libs.ioOpentelemetryInstrumentationOpentelemetryResources,
 
             libs.orgSpringframeworkSpringTest,
 

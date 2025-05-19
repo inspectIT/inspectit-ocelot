@@ -57,9 +57,10 @@ public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBa
         TestUtils.waitForOpenCensusQueueToBeProcessed();
 
         HashMap<String, String> tags = new HashMap<>();
-        tags.put("host", ".*");
-        tags.put("host_address", ".*");
+        tags.put("host.name", ".*");
+        tags.put("host.ip", ".*");
         tags.put("service", ".*");
+        tags.put("service.name", ".*");
         tags.put("method", "responseTimeMeasuring\\(\\)");
         tags.put("class", UserInstrumentationWithMetricsTest.class.getName());
 

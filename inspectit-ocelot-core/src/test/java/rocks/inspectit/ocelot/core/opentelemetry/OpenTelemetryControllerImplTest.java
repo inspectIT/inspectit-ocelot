@@ -149,7 +149,7 @@ class OpenTelemetryControllerImplTest {
             // configure OTEL
             assertThat(openTelemetryController.configureOpenTelemetry()).isTrue();
             // tracing should have changed but metrics not
-            verify(openTelemetryController, times(1)).configureTracing(any(InspectitConfig.class));
+            verify(openTelemetryController, times(1)).configureTracerProvider(any(InspectitConfig.class));
             verify(openTelemetryController, times(0)).configureMeterProvider();
 
             // verify that the tracer provider does not change after tracing has been (re-)configured
@@ -272,7 +272,7 @@ class OpenTelemetryControllerImplTest {
 
             // verify that meter provider was configured but not tracing
             verify(openTelemetryController, times(1)).configureMeterProvider();
-            verify(openTelemetryController, times(0)).configureTracing(any(InspectitConfig.class));
+            verify(openTelemetryController, times(0)).configureTracerProvider(any(InspectitConfig.class));
 
             // the meter provider should have changed, but the tracer provider not
             assertThat(openTelemetryController.getMeterProvider()).isNotSameAs(meterProvider);

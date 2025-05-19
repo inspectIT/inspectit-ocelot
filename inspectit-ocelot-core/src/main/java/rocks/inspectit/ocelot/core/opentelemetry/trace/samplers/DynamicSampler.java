@@ -39,7 +39,7 @@ public class DynamicSampler implements Sampler {
     private double sampleProbability = -1;
 
     /**
-     * Creates a new {@link DynamicSampler} with the given sample probability and the {@link SampleMode#PARENT_BASED] as the default sample mode.
+     * Creates a new {@link DynamicSampler} with the given sample probability and the {@link SampleMode#PARENT_BASED} as the default sample mode.
      *
      * @param sampleProbability The sample probability, see {@link rocks.inspectit.ocelot.config.model.tracing.TracingSettings}
      *                          and {@link Sampler#traceIdRatioBased(double)}
