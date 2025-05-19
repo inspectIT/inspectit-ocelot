@@ -30,8 +30,9 @@ class EnvironmentTagsProviderIntTest {
         @Test
         public void happyPath() {
             assertThat(provider.getTags(env.getCurrentConfig()))
-                    .hasSize(3)
+                    .hasSize(4)
                     .containsEntry("service", SERVICE_NAME)
+                    .containsEntry("service.name", SERVICE_NAME)
                     .containsKey("host.name")
                     .containsKey("host.ip");
         }
@@ -54,8 +55,8 @@ class EnvironmentTagsProviderIntTest {
         @Test
         public void happyPath() {
             assertThat(provider.getTags(env.getCurrentConfig()))
-                    .hasSize(1)
-                    .containsKeys("service");
+                    .hasSize(2)
+                    .containsKeys("service.name");
         }
     }
 
@@ -95,7 +96,7 @@ class EnvironmentTagsProviderIntTest {
         public void enable() {
             updateProperties(properties -> properties.withProperty("inspectit.tags.providers.environment.enabled", Boolean.TRUE));
 
-            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(3);
+            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(4);
         }
     }
 
@@ -116,8 +117,8 @@ class EnvironmentTagsProviderIntTest {
                             .withProperty("inspectit.service-name", "updatedName")
             );
 
-            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(3)
-                    .containsEntry("service", "updatedName");
+            assertThat(provider.getTags(env.getCurrentConfig())).hasSize(4)
+                    .containsEntry("service.name", "updatedName");
         }
     }
 }
