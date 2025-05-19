@@ -376,7 +376,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      * @return A new {@link SdkMeterProviderBuilder} based on the {@link InspectitConfig}
      */
     private SdkMeterProviderBuilder getMeterProviderBuilder(InspectitConfig configuration) {
-        // DO NOT USE ANY HIGHLY VARIANT VARIABLES FOR METRIC TAGS
         Resource metricResource = Resource.create(Attributes.of(
                 ServiceAttributes.SERVICE_NAME, configuration.getServiceName()
         ));

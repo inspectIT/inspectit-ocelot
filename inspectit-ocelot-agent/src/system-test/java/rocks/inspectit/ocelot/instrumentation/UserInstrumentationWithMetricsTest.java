@@ -60,6 +60,7 @@ public class UserInstrumentationWithMetricsTest extends InstrumentationSysTestBa
         tags.put("host.name", ".*");
         tags.put("host.ip", ".*");
         tags.put("service", ".*");
+        tags.put("service.name", ".*");
         tags.put("method", "responseTimeMeasuring\\(\\)");
         tags.put("class", UserInstrumentationWithMetricsTest.class.getName());
 
