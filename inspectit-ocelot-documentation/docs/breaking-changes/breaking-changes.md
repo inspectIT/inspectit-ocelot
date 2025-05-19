@@ -8,13 +8,17 @@ title: Breaking Changes
 ### Renamed environment tag keys
 
 To comply with the [Semantic Conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/) of OpenTelemetry,
-the host environment tags have been renamed.
+the environment tags have been renamed.
 
 The tag `host` was renamed to `host.name`. The tag `host_address` has been renamed to `host.ip`.
 Furthermore, the configuration option
 `inspectit.tags.providers.environment.resolve-host-address`
 has been changed to 
 `inspectit.tags.providers.environment.resolve-host-ip`.
+
+In addition, there is a new tag `service.name` which contains the same value as `service`.
+The tag `service` is marked as **deprecated** and will be removed in future versions.
+Please use the tag `service.name` instead.
 
 ## Breaking changes in 2.6.10
 

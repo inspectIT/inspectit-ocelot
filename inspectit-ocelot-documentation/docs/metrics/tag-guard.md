@@ -17,7 +17,7 @@ You can set the Tag-Guard configuration in `inspectit.metrics.tag-guard`.
 
 | Property                         | Default                                                                        | Description                                                                                                            |
 |----------------------------------|--------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
-| `.enabled`                       | `true`                                                                         | Only when the tag-guard is enabled, the tag value limits will be checked.                                              
+| `.enabled`                       | `true`                                                                         | Only when the tag-guard is enabled, the tag value limits will be checked.                                              |
 | `.database-file`                 | `${inspectit.env.agent-dir}/${inspectit.service-name}/tag-guard-database.json` | The location of the JSON file with all recorded tag values.                                                            |
 | `.schedule-delay`                | `30s`                                                                          | The delay for the scheduler, which will regularly compare the tag-guard-database with the configured tag value limits. |
 | `.overflow-replacement`          | `TAG_LIMIT_EXCEEDED`                                                           | After exceeding it's configured tag value limit, every tag will use this overflow replacement as value.                |
