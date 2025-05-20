@@ -611,7 +611,13 @@ class StatusTable extends React.Component {
             sortable
             style={{ width: '175px' }}
           />
-          <Column header="System Information" field="systemInformation" body={this.systemInfoTemplate} sortable style={{ width: '175px' }} />
+          <Column
+            header="System Information"
+            field="systemInformation"
+            body={this.systemInfoTemplate}
+            sortable
+            style={{ width: '175px' }}
+          />
           <Column header="Source Branch" field="sourceBranch" body={this.sourceBranchTemplate} style={{ width: '150px' }} sortable />
           <Column header="Agent Mapping" field="mappingFilter" body={this.agentMappingTemplate} sortable />
           <Column header="Last Fetch" field="lastConfigFetch" body={this.lastFetchTemplate} sortable style={{ width: '200px' }} />
