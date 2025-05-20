@@ -36,6 +36,7 @@ chQosLogbackLogbackClassic = { module = "ch.qos.logback:logback-classic", versio
 chQosLogbackLogbackCore = { module = "ch.qos.logback:logback-core", version.ref = "chQosLogback" }
 # @pin 2.13.5 since this version is used by Spring Boot 2.7.18
 comFasterxmlJacksonCoreJacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:2.13.5"
+comGithubOshiOshiCore = "com.github.oshi:oshi-core:6.8.1"
 # @pin Wiremock 3.* doesn't support java 8
 comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.8-jre" } }

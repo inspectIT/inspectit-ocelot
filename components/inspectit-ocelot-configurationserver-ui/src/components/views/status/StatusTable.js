@@ -93,6 +93,77 @@ class AgentMappingCell extends React.Component {
 }
 
 /**
+ * Component for rendering the system information cell of the data table.
+ */
+class SystemInfoCell extends React.Component {
+  state = {
+    showInfos: false,
+  };
+
+  toggleShowAll = () => {
+    this.setState({
+      showInfos: !this.state.showInfos,
+    });
+  };
+
+  render() {
+    const { data } = this.props;
+    const { showInfos } = this.state;
+
+    let startTime;
+    if (data.osStartTime) {
+      const startDate = new Date(data.osStartTime);
+      startTime = dateformat(startDate, 'dd/mm/yy HH:MM:ss');
+    }
+
+    const systemInfoMap = {
+      'OS Name': data.osName,
+      'OS Arch': data.osArch,
+      'OS Start Time': startTime,
+      'JVM Name': data.vmName,
+      'JVM Vendor': data.vmVendor,
+      'System Model': data.csModel,
+      'Processor Name': data.processorName,
+      'Processor ID': data.processorIdentifier,
+    };
+
+    return (
+      <div className="this">
+        <style jsx>{`
+          .show-all-systemInfos {
+            cursor: pointer;
+            color: #007ad9;
+          }
+          .systemInfos {
+            margin-top: 0.5rem;
+            margin-left: 0.5rem;
+            border-left: 0.25rem solid #ddd;
+            padding-left: 0.25rem;
+          }
+        `}</style>
+        <div className="systemInfo">
+          <a onClick={() => this.toggleShowAll()} className="show-all-systemInfos">
+            {showInfos ? 'Hide' : 'Show'} Information
+          </a>
+        </div>
+        {showInfos && (
+          <div className="systemInfos">
+            {map(systemInfoMap, (value, key) => (
+              <div key={key} className="systemInfo-entry">
+                <div className="systemInfo-key">
+                  <b>{key}</b>
+                </div>
+                <div className="systemInfo-value">{value ? value : 'N/A'}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+}
+
+/**
  * The table listing all agent statuses
  */
 class StatusTable extends React.Component {
@@ -407,6 +478,15 @@ class StatusTable extends React.Component {
     return <span>{date}</span>;
   };
 
+  systemInfoTemplate = (rowData) => {
+    const { systemInformation } = rowData;
+    if (systemInformation) {
+      return <SystemInfoCell data={systemInformation} />;
+    } else {
+      return <span>N/A</span>;
+    }
+  };
+
   agentMappingTemplate = (rowData) => {
     return <AgentMappingCell data={rowData} />;
   };
@@ -528,6 +608,13 @@ class StatusTable extends React.Component {
             header="Last JVM Restart"
             field="metaInformation.startTime"
             body={this.jvmRestartTemplate}
+            sortable
+            style={{ width: '175px' }}
+          />
+          <Column
+            header="System Information"
+            field="systemInformation"
+            body={this.systemInfoTemplate}
             sortable
             style={{ width: '175px' }}
           />

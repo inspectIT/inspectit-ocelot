@@ -101,6 +101,7 @@ dependencies {
             libs.comFasterxmlJacksonCoreJacksonDatabind,
             libs.ioGithubResilience4jResilience4jRetry,
             libs.ioGithubResilience4jResilience4jTimelimiter,
+            libs.comGithubOshiOshiCore,
 
             libs.orgJavassist,
 

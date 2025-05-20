@@ -5,12 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealthState;
+import rocks.inspectit.ocelot.commons.models.info.AgentSystemInformation;
 
 import java.util.Date;
 import java.util.Map;
 
 /**
- * Status information for an agent identified by his set of attributes.
+ * Status information for an agent identified by his set of attributes
  */
 @Data
 @Builder
@@ -19,9 +20,15 @@ import java.util.Map;
 public class AgentStatus {
 
     /**
-     * Meta information about the agent, in case the configuration was fetched by an agent.
+     * Meta information about the agent, in case the configuration was fetched by an agent
      */
     private AgentMetaInformation metaInformation;
+
+
+    /**
+     * The system information, where the agent is running
+     */
+    private AgentSystemInformation systemInformation;
 
     /**
      * The attributes with which the corresponding agent connected

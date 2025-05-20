@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.agentconfiguration.AgentConfiguration;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealth;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealthState;
+import rocks.inspectit.ocelot.commons.models.info.AgentSystemInformation;
 import rocks.inspectit.ocelot.config.model.InspectitServerSettings;
 
 import java.util.Collection;
@@ -32,6 +33,8 @@ public class AgentStatusManager {
      * Name of the agent health header.
      */
     private static final String HEADER_AGENT_HEALTH = "x-ocelot-health";
+
+    private static final String HEADER_AGENT_SYSTEM_INFO = "x-ocelot-system-info";
 
     @Autowired
     @VisibleForTesting
@@ -75,6 +78,8 @@ public class AgentStatusManager {
                         .getBranchName())
                 .build();
 
+        setSystemInformation(agentStatus, headers);
+
         Object statusKey;
         if (metaInformation != null) {
             statusKey = metaInformation.getAgentId();
@@ -83,21 +88,40 @@ public class AgentStatusManager {
         }
 
         if (headers.containsKey(HEADER_AGENT_HEALTH)) {
-            ObjectReader objectReader = new ObjectMapper().reader().forType(AgentHealthState.class);
-
-            AgentHealthState agentHealthState = null;
-            try {
-                agentHealthState = objectReader.readValue(headers.get(HEADER_AGENT_HEALTH));
-            } catch (JsonProcessingException e) { //If this exception occurs we assume the corresponding agent uses the legacy health indicator.
-                AgentHealth agentHealth = AgentHealth.valueOf(headers.get(HEADER_AGENT_HEALTH));
-                agentHealthState = AgentHealthState.defaultState();
-                agentHealthState.setHealth(agentHealth);
-            }
-            agentStatus.setHealthState(agentHealthState);
-            logHealthIfChanged(statusKey, agentHealthState);
+            setHealthState(agentStatus, headers, statusKey);
         }
 
         attributesToAgentStatusCache.put(statusKey, agentStatus);
+    }
+
+    private void setSystemInformation(AgentStatus agentStatus, Map<String, String> headers) {
+        ObjectReader objectReader = new ObjectMapper().reader().forType(AgentSystemInformation.class);
+
+        if(headers.containsKey(HEADER_AGENT_SYSTEM_INFO)) {
+            try {
+                AgentSystemInformation systemInfo = objectReader.readValue(headers.get(HEADER_AGENT_SYSTEM_INFO));
+                agentStatus.setSystemInformation(systemInfo);
+            } catch (JsonProcessingException e) {
+                log.info("Could not read system information", e);
+            }
+        }
+    }
+
+    private void setHealthState(AgentStatus agentStatus, Map<String, String> headers, Object statusKey) {
+        ObjectReader objectReader = new ObjectMapper().reader().forType(AgentHealthState.class);
+
+        AgentHealthState agentHealthState = null;
+        try {
+            agentHealthState = objectReader.readValue(headers.get(HEADER_AGENT_HEALTH));
+        } catch (
+                JsonProcessingException e) { //If this exception occurs we assume the corresponding agent uses the legacy health indicator.
+            log.debug("Could not read health state", e);
+            AgentHealth agentHealth = AgentHealth.valueOf(headers.get(HEADER_AGENT_HEALTH));
+            agentHealthState = AgentHealthState.defaultState();
+            agentHealthState.setHealth(agentHealth);
+        }
+        agentStatus.setHealthState(agentHealthState);
+        logHealthIfChanged(statusKey, agentHealthState);
     }
 
     private void logHealthIfChanged(Object statusKey, AgentHealthState agentHealthState) {
