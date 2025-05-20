@@ -48,21 +48,6 @@ public class AgentSystemInformation {
     private String csModel;
 
     /**
-     * The serial number of the computer system
-     */
-    private String csSerialNumber;
-
-    /**
-     * The amount of logical processors
-     */
-    private int logicalProcessors;
-
-    /**
-     * The amount of physical processors
-     */
-    private int physicalProcessors;
-
-    /**
      * The name of the processor
      */
     private String processorName;

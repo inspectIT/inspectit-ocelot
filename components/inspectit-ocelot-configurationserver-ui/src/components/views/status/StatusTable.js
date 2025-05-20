@@ -121,14 +121,11 @@ class SystemInfoCell extends React.Component {
       'OS Arch': data.osArch,
       'OS Host': data.osHost,
       'OS Start Time': startTime,
-      'VM Name': data.vmName,
-      'VM Vendor': data.vmVendor,
+      'JVM Name': data.vmName,
+      'JVM Vendor': data.vmVendor,
       'System Model': data.csModel,
-      'System Serial Nr.': data.csSerialNumber,
       'Processor Name': data.processorName,
-      'Processor ID': data.processorIdentifier,
-      'Logical Cores': data.logicalProcessors,
-      'Physical Cores': data.physicalProcessors,
+      'Processor ID': data.processorIdentifier
     };
 
     return (

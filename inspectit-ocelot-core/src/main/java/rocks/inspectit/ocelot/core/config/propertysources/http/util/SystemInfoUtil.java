@@ -62,15 +62,10 @@ public class SystemInfoUtil {
         ComputerSystem computerSystem = systemInfo.getHardware().getComputerSystem();
         String csModel = computerSystem.getManufacturer() + " " + computerSystem.getModel();
         agentSystemInfo.setCsModel(csModel);
-        agentSystemInfo.setCsSerialNumber(computerSystem.getSerialNumber());
 
-        CentralProcessor processor = systemInfo.getHardware().getProcessor();
-        agentSystemInfo.setLogicalProcessors(processor.getLogicalProcessorCount());
-        agentSystemInfo.setPhysicalProcessors(processor.getPhysicalProcessorCount());
-
-        CentralProcessor.ProcessorIdentifier processorIdentifier = processor.getProcessorIdentifier();
-        agentSystemInfo.setProcessorName(processorIdentifier.getName());
-        agentSystemInfo.setProcessorIdentifier(processorIdentifier.getIdentifier());
+        CentralProcessor.ProcessorIdentifier processorId = systemInfo.getHardware().getProcessor().getProcessorIdentifier();
+        agentSystemInfo.setProcessorName(processorId.getName());
+        agentSystemInfo.setProcessorIdentifier(processorId.getIdentifier());
 
         systemInformation = agentSystemInfo;
     }
