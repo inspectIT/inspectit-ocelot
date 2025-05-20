@@ -125,7 +125,7 @@ class SystemInfoCell extends React.Component {
       'JVM Vendor': data.vmVendor,
       'System Model': data.csModel,
       'Processor Name': data.processorName,
-      'Processor ID': data.processorIdentifier
+      'Processor ID': data.processorIdentifier,
     };
 
     return (
