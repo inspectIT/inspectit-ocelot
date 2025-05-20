@@ -48,7 +48,7 @@
     "react-redux": "^9.2.0",
     "react-syntax-highlighter": "^15.5.0",
     "react-timeago": "^8.2.0",
-    "react-tooltip": "^4.5.1",
+    "react-tooltip": "^5.28.1",
     "react-transition-group": "^4.4.2",
     "redux": "^4.2.1",
     "redux-devtools-extension": "^2.13.2",
