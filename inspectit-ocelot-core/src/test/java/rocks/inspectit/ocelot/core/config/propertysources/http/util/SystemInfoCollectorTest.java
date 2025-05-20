@@ -8,11 +8,11 @@ import rocks.inspectit.ocelot.commons.models.info.AgentSystemInformation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SystemInfoUtilTest {
+public class SystemInfoCollectorTest {
 
     @Test
     void shouldBeSerializable() {
-        String systemInfo = SystemInfoUtil.collect();
+        String systemInfo = SystemInfoCollector.get().collect();
 
         assertThat(systemInfo).isNotEmpty();
     }
@@ -21,7 +21,7 @@ public class SystemInfoUtilTest {
     void shouldBeDeserializable() throws JsonProcessingException {
         ObjectReader objectReader = new ObjectMapper().reader().forType(AgentSystemInformation.class);
 
-        String string = SystemInfoUtil.collect();
+        String string = SystemInfoCollector.get().collect();
         AgentSystemInformation systemInfo = objectReader.readValue(string);
 
         assertThat(systemInfo).isNotNull();

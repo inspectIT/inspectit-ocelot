@@ -119,7 +119,6 @@ class SystemInfoCell extends React.Component {
     const systemInfoMap = {
       'OS Name': data.osName,
       'OS Arch': data.osArch,
-      'OS Host': data.osHost,
       'OS Start Time': startTime,
       'JVM Name': data.vmName,
       'JVM Vendor': data.vmVendor,
@@ -612,7 +611,7 @@ class StatusTable extends React.Component {
             sortable
             style={{ width: '175px' }}
           />
-          <Column header="System Info" field="systemInformation" body={this.systemInfoTemplate} sortable style={{ width: '175px' }} />
+          <Column header="System Information" field="systemInformation" body={this.systemInfoTemplate} sortable style={{ width: '175px' }} />
           <Column header="Source Branch" field="sourceBranch" body={this.sourceBranchTemplate} style={{ width: '150px' }} sortable />
           <Column header="Agent Mapping" field="mappingFilter" body={this.agentMappingTemplate} sortable />
           <Column header="Last Fetch" field="lastConfigFetch" body={this.lastFetchTemplate} sortable style={{ width: '200px' }} />

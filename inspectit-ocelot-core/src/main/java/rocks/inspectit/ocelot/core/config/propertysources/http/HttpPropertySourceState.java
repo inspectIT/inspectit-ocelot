@@ -23,7 +23,7 @@ import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.commons.models.health.AgentHealthState;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
-import rocks.inspectit.ocelot.core.config.propertysources.http.util.SystemInfoUtil;
+import rocks.inspectit.ocelot.core.config.propertysources.http.util.SystemInfoCollector;
 import rocks.inspectit.ocelot.core.config.util.InvalidPropertiesException;
 import rocks.inspectit.ocelot.core.config.util.PropertyUtils;
 import rocks.inspectit.ocelot.core.selfmonitoring.service.DynamicallyActivatableServiceObserver;
@@ -320,7 +320,7 @@ public class HttpPropertySourceState {
         httpGet.setHeader(META_HEADER_PREFIX + "AGENT-ID", runtime.getName());
         httpGet.setHeader(META_HEADER_PREFIX + "AGENT-VERSION", AgentManager.getAgentVersion());
         httpGet.setHeader(META_HEADER_PREFIX + "JAVA-VERSION", System.getProperty("java.version"));
-        httpGet.setHeader(META_HEADER_PREFIX + "SYSTEM-INFO", SystemInfoUtil.collect());
+        httpGet.setHeader(META_HEADER_PREFIX + "SYSTEM-INFO", SystemInfoCollector.get().collect());
         httpGet.setHeader(META_HEADER_PREFIX + "START-TIME", String.valueOf(runtime.getStartTime()));
         httpGet.setHeader(META_HEADER_PREFIX + "HEALTH", agentHealthJson);
         httpGet.setHeader(META_HEADER_PREFIX + "SERVICE-STATES-MAP", DynamicallyActivatableServiceObserver.asJson());

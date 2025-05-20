@@ -38,11 +38,6 @@ public class AgentSystemInformation {
     private long osStartTime;
 
     /**
-     * The host name
-     */
-    private String osHost;
-
-    /**
      * The model of the computer system
      */
     private String csModel;

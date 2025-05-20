@@ -1,37 +1,46 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.ComputerSystem;
-import oshi.hardware.HardwareAbstractionLayer;
 import oshi.software.os.OperatingSystem;
 import rocks.inspectit.ocelot.commons.models.info.AgentSystemInformation;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Helper class to collect relevant system information about OS, processor etc.
  */
 @Slf4j
-public class SystemInfoUtil {
+public class SystemInfoCollector {
 
-    private static AgentSystemInformation systemInformation;
+    private static SystemInfoCollector instance;
+
+    private final AgentSystemInformation systemInformation;
+
+    private SystemInfoCollector() {
+        this.systemInformation = collectSystemInfo();
+    }
 
     /**
-     * @return the system information as JSON string
+     * @return the singleton instance of the collector
      */
-    public static String collect() {
+    public static SystemInfoCollector get() {
+        if (instance == null) instance = new SystemInfoCollector();
+
+        return instance;
+    }
+
+    /**
+     * @return the agent system information as JSON string
+     */
+    public String collect() {
         ObjectMapper objectMapper = new ObjectMapper();
         String json = "{}";
-
-        // only collect infos if requested
-        if(systemInformation == null) collectSystemInfo();
 
         try {
             json = objectMapper.writeValueAsString(systemInformation);
@@ -44,8 +53,10 @@ public class SystemInfoUtil {
 
     /**
      * Collects and stores system information
+     *
+     * @return the agent system information
      */
-    private static void collectSystemInfo() {
+    private AgentSystemInformation collectSystemInfo() {
         AgentSystemInformation agentSystemInfo = new AgentSystemInformation();
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
         agentSystemInfo.setVmName(runtime.getVmName());
@@ -57,7 +68,6 @@ public class SystemInfoUtil {
         agentSystemInfo.setOsName(osName);
         agentSystemInfo.setOsArch(System.getProperty("os.arch"));
         agentSystemInfo.setOsStartTime(convertToStartTime(os.getSystemUptime()));
-        agentSystemInfo.setOsHost(os.getNetworkParams().getHostName());
 
         ComputerSystem computerSystem = systemInfo.getHardware().getComputerSystem();
         String csModel = computerSystem.getManufacturer() + " " + computerSystem.getModel();
@@ -67,13 +77,13 @@ public class SystemInfoUtil {
         agentSystemInfo.setProcessorName(processorId.getName());
         agentSystemInfo.setProcessorIdentifier(processorId.getIdentifier());
 
-        systemInformation = agentSystemInfo;
+        return agentSystemInfo;
     }
 
     /**
-     * Converts the up-time to the start-time.
+     * Converts the up-time to the start-time
      */
-    private static long convertToStartTime(long upTime) {
+    private long convertToStartTime(long upTime) {
         long now = System.currentTimeMillis();
         return now - (upTime * 1000);
     }
