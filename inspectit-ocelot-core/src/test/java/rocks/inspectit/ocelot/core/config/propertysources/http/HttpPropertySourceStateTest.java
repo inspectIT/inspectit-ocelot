@@ -95,7 +95,15 @@ class HttpPropertySourceStateTest {
                     .filter(key -> key.startsWith("X-OCELOT-"))
                     .collect(Collectors.toList());
 
-            assertThat(headerKeys).containsOnly("X-OCELOT-AGENT-ID", "X-OCELOT-AGENT-VERSION", "X-OCELOT-JAVA-VERSION", "X-OCELOT-VM-NAME", "X-OCELOT-VM-VENDOR", "X-OCELOT-START-TIME", "X-OCELOT-HEALTH", "X-OCELOT-SERVICE-STATES-MAP");
+            assertThat(headerKeys).containsOnly(
+                    "X-OCELOT-AGENT-ID",
+                    "X-OCELOT-AGENT-VERSION",
+                    "X-OCELOT-JAVA-VERSION",
+                    "X-OCELOT-SYSTEM-INFO",
+                    "X-OCELOT-START-TIME",
+                    "X-OCELOT-HEALTH",
+                    "X-OCELOT-SERVICE-STATES-MAP"
+            );
         }
 
         @Test
@@ -216,7 +224,7 @@ class HttpPropertySourceStateTest {
         }
 
         @Test
-        public void serverReturnsErrorWithoutFallbackFile() throws IOException {
+        public void serverReturnsErrorWithoutFallbackFile() {
             mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(500)));
 
             boolean updateResult = state.update(false);
