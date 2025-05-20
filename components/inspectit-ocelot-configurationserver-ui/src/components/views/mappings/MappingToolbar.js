@@ -6,7 +6,7 @@ import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import PropTypes from 'prop-types';
-import ReactTooltip from 'react-tooltip';
+import { Tooltip } from 'react-tooltip';
 import ChangeSourceBranchDialog from './dialogs/ChangeSourceBranchDialog';
 
 const searchFieldTooltipText =
@@ -87,14 +87,16 @@ class MappingToolbar extends React.Component {
                   <Dropdown value={sourceBranch} disabled={!isAdmin} onChange={(e) => this.onChange(e)} options={['WORKSPACE', 'LIVE']} />
                 </div>
                 <span
-                  data-tip="Specify the branch, which should be used as source for the agent mappings configuration itself.<br>
+                  data-tooltip-html="Specify the branch, which should be used as source for the agent mappings configuration itself.<br>
                   This <u><b>does not affect</b></u> the source branch in each individual agent mapping.<br>
                   All specified agent mappings are stored in one single file, which can use either the WORKSPACE or LIVE branch as its source.<br>"
+                  data-tooltip-id="tooltip"
+                  data-tooltip-variant="info"
                   className="hint-badge"
                 >
                   ?
                 </span>
-                <ReactTooltip place="bottom" effect="solid" type="info" html={true} />
+                <Tooltip id="tooltip" place="right" />
               </div>
             </>
           }
