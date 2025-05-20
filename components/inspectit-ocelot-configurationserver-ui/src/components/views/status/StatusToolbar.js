@@ -6,7 +6,7 @@ import ClearDialog from './dialogs/ClearDialog';
 import { connect } from 'react-redux';
 import { agentStatusActions } from '../../../redux/ducks/agent-status';
 import { Checkbox } from 'primereact/checkbox';
-import ReactTooltip from 'react-tooltip';
+import { Tooltip } from 'react-tooltip';
 
 /**
  * Toolbar in the status view. Allows filtering of statuses, refreshing and clearing all statuses.
@@ -87,6 +87,7 @@ class StatusToolbar extends React.Component {
             justify-content: center;
             color: white;
           }
+
           &.__react_component_tooltip.show :global(*) {
             opacity: 1 !important;
           }
@@ -116,14 +117,16 @@ class StatusToolbar extends React.Component {
                 <label style={{ width: 'max-content' }}>Combine duplicate services</label>
                 <Checkbox onChange={onServiceMergeChange} checked={useServiceMerge} />
                 <span
-                  data-tip="Combine agents with the same name into a single entry.<br>
+                  data-tooltip-html="Combine agents with the same name into a single entry.<br>
                 Only the most recently started agent will be displayed.<br>
                 A badge behind the agents name will indicate the number of combined agents."
+                  data-tooltip-id="tooltip"
+                  data-tooltip-variant="info"
                   className="hint-badge"
                 >
                   ?
                 </span>
-                <ReactTooltip place="bottom" effect="solid" type="info" html={true} />
+                <Tooltip id="tooltip" place="right" />
               </div>
             </div>
           }
