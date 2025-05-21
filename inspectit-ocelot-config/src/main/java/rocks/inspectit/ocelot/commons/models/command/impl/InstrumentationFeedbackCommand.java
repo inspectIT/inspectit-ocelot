@@ -10,8 +10,11 @@ import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Command for requesting the currently applied instrumentation.
+ * The command response contains a set of classes, theirs methods and the active rules for these methods.
+ */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class InstrumentationFeedbackCommand extends Command {

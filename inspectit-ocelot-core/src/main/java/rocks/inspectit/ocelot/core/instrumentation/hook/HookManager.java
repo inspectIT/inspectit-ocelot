@@ -184,7 +184,7 @@ public class HookManager {
      * @return the currently active hooks
      */
     public Map<Class<?>, Map<String, MethodHook>> getHooks() {
-        return Collections.unmodifiableMap(new HashMap<>(hooks));
+        return Collections.unmodifiableMap(hooks);
     }
 
     /**

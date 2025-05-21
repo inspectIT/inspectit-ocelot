@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import rocks.inspectit.ocelot.agentcommunication.AgentCommandDispatcher;
-import rocks.inspectit.ocelot.commons.models.command.impl.EnvironmentCommand;
-import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
-import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
-import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
+import rocks.inspectit.ocelot.commons.models.command.impl.*;
 import rocks.inspectit.ocelot.rest.AbstractBaseController;
 
 import java.util.concurrent.ExecutionException;
@@ -55,5 +52,11 @@ public class AgentCommandController extends AbstractBaseController {
     public DeferredResult<ResponseEntity<?>> environment(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
         EnvironmentCommand environmentCommand = new EnvironmentCommand();
         return commandDispatcher.dispatchCommand(agentId, environmentCommand);
+    }
+
+    @GetMapping(value = {"command/instrumentation-feedback", "command/instrumentation-feedback/"})
+    public DeferredResult<ResponseEntity<?>> instrumentationFeedback(@RequestParam(value = "agent-id") String agentId) throws ExecutionException {
+        InstrumentationFeedbackCommand instrumentationFeedbackCommand = new InstrumentationFeedbackCommand();
+        return commandDispatcher.dispatchCommand(agentId, instrumentationFeedbackCommand);
     }
 }

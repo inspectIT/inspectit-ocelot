@@ -51,6 +51,8 @@ public class InstrumentationFeedbackCommandExecutor implements CommandExecutor {
             throw new IllegalArgumentException(exceptionMessage);
         }
 
+        log.debug("Executing InstrumentationFeedbackCommand {}", command.getCommandId().toString());
+
         Map<Class<?>, Map<String, MethodHook>> activeHooks = hookManager.getHooks();
         InstrumentationFeedbackCommand.Response response = new InstrumentationFeedbackCommand.Response();
         response.setCommandId(command.getCommandId());

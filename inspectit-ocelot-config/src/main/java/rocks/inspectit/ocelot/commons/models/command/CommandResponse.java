@@ -5,15 +5,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import rocks.inspectit.ocelot.commons.models.command.impl.EnvironmentCommand;
-import rocks.inspectit.ocelot.commons.models.command.impl.ListClassesCommand;
-import rocks.inspectit.ocelot.commons.models.command.impl.LogsCommand;
-import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
+import rocks.inspectit.ocelot.commons.models.command.impl.*;
 
 import java.util.UUID;
 
 /**
- * Represents a response to be send by an inspectIT agent.
+ * Represents a response to be sent by an inspectIT agent.
  */
 @Data
 @AllArgsConstructor
@@ -24,6 +21,7 @@ import java.util.UUID;
         @JsonSubTypes.Type(name = ListClassesCommand.TYPE_IDENTIFIER, value = ListClassesCommand.Response.class),
         @JsonSubTypes.Type(name = LogsCommand.TYPE_IDENTIFIER, value = LogsCommand.Response.class),
         @JsonSubTypes.Type(name = EnvironmentCommand.TYPE_IDENTIFIER, value = EnvironmentCommand.Response.class),
+        @JsonSubTypes.Type(name = InstrumentationFeedbackCommand.TYPE_IDENTIFIER, value = InstrumentationFeedbackCommand.Response.class),
 })
 public abstract class CommandResponse {
 

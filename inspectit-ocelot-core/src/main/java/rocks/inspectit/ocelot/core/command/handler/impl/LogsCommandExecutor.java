@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.command.handler.impl;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import rocks.inspectit.ocelot.core.selfmonitoring.logs.LogPreloader;
 /**
  * Executor for executing {@link LogsCommand}s.
  */
+@Slf4j
 @Component
 public class LogsCommandExecutor implements CommandExecutor {
 
@@ -47,6 +49,8 @@ public class LogsCommandExecutor implements CommandExecutor {
             String exceptionMessage = "Invalid command type. Executor does not support commands of type " + command.getClass();
             throw new IllegalArgumentException(exceptionMessage);
         }
+
+        log.debug("Executing LogsCommand {}", command.getCommandId().toString());
 
         LogsCommand logsCommand = (LogsCommand) command;
         PatternLayout layout = new PatternLayout();
