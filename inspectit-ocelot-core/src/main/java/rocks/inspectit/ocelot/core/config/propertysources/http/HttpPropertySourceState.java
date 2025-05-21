@@ -9,15 +9,16 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.apache.hc.core5.net.URIBuilder;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
@@ -183,7 +184,7 @@ public class HttpPropertySourceState {
     }
 
     private String fetchConfiguration(boolean fallBackToFile) {
-        HttpGet httpGet;
+        ClassicHttpRequest httpGet;
         try {
             httpGet = buildRequest();
         } catch (URISyntaxException ex) {
@@ -252,10 +253,10 @@ public class HttpPropertySourceState {
         return RetryUtils.buildTimeLimiter(currentSettings.getRetry(), "http-property-source");
     }
 
-    private HttpGet buildRequest() throws URISyntaxException {
+    private ClassicHttpRequest buildRequest() throws URISyntaxException {
         URI uri = getEffectiveRequestUri();
         log.debug("Updating configuration via HTTP from URL: {}", uri.toString());
-        HttpGet httpGet = new HttpGet(uri);
+        ClassicHttpRequest httpGet = ClassicRequestBuilder.get().setUri(uri).build();
 
         if (latestLastModified != null) {
             httpGet.setHeader("If-Modified-Since", latestLastModified);
@@ -269,13 +270,13 @@ public class HttpPropertySourceState {
     }
 
     /**
-     * Wrapper for the method {@link #fetchConfiguration(HttpClient, HttpGet)}.
+     * Wrapper for the method {@link #fetchConfiguration(CloseableHttpClient, ClassicHttpRequest)}.
      */
-    private Callable<String> fetchConfigurationCall(CloseableHttpClient httpClient, HttpGet httpGet) {
+    private Callable<String> fetchConfigurationCall(CloseableHttpClient httpClient, ClassicHttpRequest httpGet) {
        return () -> {
            try {
                return fetchConfiguration(httpClient, httpGet);
-           } catch (IOException e) {
+           } catch (Exception e) {
                throw new CouldNotFetchConfigurationException(e);
            }
        };
@@ -286,18 +287,22 @@ public class HttpPropertySourceState {
      *
      * @param client the client to execute the request
      * @param request the request
+     *
      * @return the fetched configuration string
      */
-    private String fetchConfiguration(HttpClient client, HttpGet request) throws IOException {
+    private String fetchConfiguration(CloseableHttpClient client, ClassicHttpRequest request) throws IOException, ParseException {
         log.debug("Executing HTTP request to fetch configuration...");
-        HttpResponse response = client.execute(request);
-        // Get the config from the response
-        String configuration = processHttpResponse(response);
-        if (errorCounter != 0) {
-            log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
-            errorCounter = 0;
+
+        // we could try to use a ResponseHandler here
+        try (CloseableHttpResponse response = client.execute(request)) {
+            // Get the config from the response
+            String configuration = processHttpResponse(response);
+            if (errorCounter != 0) {
+                log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
+                errorCounter = 0;
+            }
+            return configuration;
         }
-        return configuration;
     }
 
     /**
@@ -306,7 +311,7 @@ public class HttpPropertySourceState {
      *
      * @param httpGet the request to inject the meat information headers
      */
-    private void setAgentMetaHeaders(HttpGet httpGet) {
+    private void setAgentMetaHeaders(ClassicHttpRequest httpGet) {
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -364,8 +369,8 @@ public class HttpPropertySourceState {
      *
      * @throws IOException if an error occurs reading the input stream or if the server returned an unexpected status code
      */
-    private String processHttpResponse(HttpResponse response) throws IOException {
-        int statusCode = response.getStatusLine().getStatusCode();
+    private String processHttpResponse(CloseableHttpResponse response) throws IOException, ParseException {
+        int statusCode = response.getCode();
 
         if (statusCode == HttpStatus.SC_OK) {
             String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
@@ -446,7 +451,7 @@ public class HttpPropertySourceState {
     }
 
     /**
-     * Exception for {@link #fetchConfigurationCall(CloseableHttpClient, HttpGet)}
+     * Exception for {@link #fetchConfigurationCall(CloseableHttpClient, ClassicHttpRequest)}
      */
     private static class CouldNotFetchConfigurationException extends RuntimeException {
         CouldNotFetchConfigurationException(Exception e) {
