@@ -41,7 +41,7 @@ and tagged with relevant information such as the response code or the HTTP metho
 
 Ocelot also collects response times and invocation counts for remote calls between your services.
 Hereby, it is automatically detected whether the call was made to an internal or external service.
-The resulting metric can then then be visualized for example
+The resulting metric can then be visualized for example
 using the [Grafana Service Graph Panel](https://github.com/NovatecConsulting/novatec-service-dependency-graph-panel):
 
 ![Service Graph](https://inspectit.github.io/inspectit-ocelot/images/service-graph.PNG)
@@ -62,9 +62,9 @@ The demo consists of two different scenarios, whereby we would like to emphasize
 
 All you have to do is to download the [demo archive](https://github.com/inspectIT/inspectit-ocelot/releases/latest) and start it with docker-compose:
 
-* `$ docker-compose -f docker-compose-prometheus-jaeger.yml up`
-* `$ docker-compose -f docker-compose-influxdb-jaeger.yml up`
-* `$ docker-compose -f docker-compose-influxdb-zipkin.yml up`
+* `$ docker compose -f docker-compose-prometheus-jaeger.yml up`
+* `$ docker compose -f docker-compose-influxdb-jaeger.yml up`
+* `$ docker compose -f docker-compose-influxdb-zipkin.yml up`
 
 Check out the [documentation's demo section](https://inspectit.github.io/inspectit-ocelot/docs/getting-started/docker-examples) for detailed information on each scenario.
 
@@ -140,18 +140,18 @@ No. The Java agent is developed against Java 8, thus, the application which you 
 
 No. The agent is compatible to and can be used with any kind of JVM (Oracle JVM, an OpenJDK, an IBM JVM, ...), as long as it supports the `javaagent` argument and provides Java 8 or higher.
 
-#### My application is already using OpenCensus. Can I use the agent anyway?
+#### My application is already using OpenTelemetry. Can I use the agent anyway?
 
-Yes, you can use the inspectIT Ocelot Java agent if you already use the OpenCensus library.
+Yes, you can use the inspectIT Ocelot Java agent if you already use the OpenTelemetry library.
 However, there are a few points that need to be considered to ensure a smooth operation.
-Please read the [corresponding section in the documentation](https://inspectit.github.io/inspectit-ocelot/docs/next/configuration/open-census-configuration).
+Please read the [corresponding section in the documentation](https://inspectit.github.io/inspectit-ocelot/docs/next/configuration/opentelemetry-configuration).
 
 #### How can I start my application with the inspectIT Ocelot Java agent?
 
 We have a [detailed section in the documentation](https://inspectit.github.io/inspectit-ocelot/docs/next/getting-started/installation) about this topic.
 The easiest way is to add the `javaagent` argument to your Java command like [described above](#installation).
 
-#### My Java application does not start or it exits immediately when I use the agent.
+#### My Java application does not start, or it exits immediately when I use the agent.
 
 In this case, check your Java command and ensure that you have not accidentally removed your application.
 You'll most likely have a command like `java -javaagent:inspectit-ocelot-agent.jar` or `java -javaagent:inspectit-ocelot-agent.jar -version`. 
