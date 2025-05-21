@@ -56,9 +56,9 @@ public class CustomIdGenerator implements IdGenerator {
         using64Bit = is64Bit;
 
         if (using64Bit) {
-            log.info("Use of trace IDs with a length of 64 bits.");
+            log.info("Use of trace IDs with a length of 64 bits");
         } else {
-            log.info("Use of trace IDs with the default length (128 bits).");
+            log.info("Use of trace IDs with the default length (128 bits)");
         }
     }
 

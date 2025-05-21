@@ -88,16 +88,16 @@ public class CommandHandler {
             if (commandResponse != null) {
                 // start / continue live mode
                 if (liveMode) {
-                    log.debug("Extending command live mode timeout.");
+                    log.debug("Extending command live mode timeout");
                 } else {
-                    log.debug("Switching to command live mode.");
+                    log.debug("Switching to command live mode");
                     liveMode = true;
                 }
                 liveModeStart = System.currentTimeMillis();
             }
 
             if (liveMode && isLiveModeExpired()) {
-                log.debug("Leaving command live mode.");
+                log.debug("Leaving command live mode");
                 liveMode = false;
             }
         } while (liveMode || commandResponse != null);
@@ -172,7 +172,7 @@ public class CommandHandler {
                     InputStream content = responseEntity.getContent();
                     return objectMapper.readValue(content, Command.class);
                 } catch (Exception exception) {
-                    log.error("Exception during agent command deserialization.", exception);
+                    log.error("Exception during agent command deserialization", exception);
                     return null;
                 }
             } else {
@@ -195,7 +195,7 @@ public class CommandHandler {
             try {
                 return commandDelegator.delegate(command);
             } catch (Exception exception) {
-                log.error("Exception during agent command execution.", exception);
+                log.error("Exception during agent command execution", exception);
             }
         }
         return null;

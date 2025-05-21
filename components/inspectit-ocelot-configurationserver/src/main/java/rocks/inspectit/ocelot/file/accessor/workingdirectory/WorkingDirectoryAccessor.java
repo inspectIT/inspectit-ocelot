@@ -68,11 +68,11 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
             Path targetPath = resolve(path);
 
             if (!Files.exists(targetPath)) {
-                throw new FileNotFoundException("File '" + path + "' does not exist.");
+                throw new FileNotFoundException("File '" + path + "' does not exist");
             }
 
             if (Files.isDirectory(targetPath)) {
-                throw new IllegalArgumentException("The specified '" + path + "' is not a file but directory.");
+                throw new IllegalArgumentException("The specified '" + path + "' is not a file but directory");
             }
 
             return Files.readAllBytes(targetPath);
@@ -96,7 +96,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
 
             return fileInfoVisitor.getFileInfos();
         } catch (IOException e) {
-            log.error("Exception while listing files in path '{}'.", path, e);
+            log.error("Exception while listing files in path '{}'", path, e);
             return Collections.emptyList();
         } finally {
             readLock.unlock();
@@ -168,7 +168,7 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
             } else if (Files.isRegularFile(targetPath)) {
                 Files.delete(targetPath);
             } else {
-                throw new AccessDeniedException("'" + targetPath + "' could not be deleted.");
+                throw new AccessDeniedException("'" + targetPath + "' could not be deleted");
             }
         } finally {
             writeLock.unlock();

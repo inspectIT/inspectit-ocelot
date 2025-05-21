@@ -9,7 +9,7 @@ import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 /**
- * Base class for dynamically enableable metrics recorders.
+ * Base class for dynamically enabled metrics recorders.
  */
 @Slf4j
 public abstract class AbstractMetricsRecorder extends DynamicallyActivatableService {

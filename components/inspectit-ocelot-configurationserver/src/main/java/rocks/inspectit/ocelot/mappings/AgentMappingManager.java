@@ -54,7 +54,7 @@ public class AgentMappingManager {
      * @return The set source branch
      */
     public synchronized Branch setSourceBranch(String sourceBranch) {
-        checkArgument(sourceBranch != null, "The set source branch cannot be null.");
+        checkArgument(sourceBranch != null, "The set source branch cannot be null");
         sourceBranch = sourceBranch.toLowerCase();
 
         switch (sourceBranch) {
@@ -98,7 +98,7 @@ public class AgentMappingManager {
      * @return The mapping with the given name or an empty {@link Optional} in case no mapping exists with the given name
      */
     public Optional<AgentMapping> getAgentMapping(String mappingName) {
-        checkArgument(!ObjectUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
+        checkArgument(!ObjectUtils.isEmpty(mappingName), "The mapping name should not be empty or null");
 
         return getAgentMappings().stream()
                 .filter(mapping -> mapping.name().equals(mappingName))
@@ -113,9 +113,9 @@ public class AgentMappingManager {
      * @throws IOException In case of an error while persisting it into a file
      */
     public synchronized void setAgentMappings(List<AgentMapping> newAgentMappings) throws IOException {
-        checkArgument(newAgentMappings != null, "The agent mappings should not be null.");
+        checkArgument(newAgentMappings != null, "The agent mappings should not be null");
 
-        log.info("Overriding current agent mappings with {} new mappings.", newAgentMappings.size());
+        log.info("Overriding current agent mappings with {} new mappings", newAgentMappings.size());
 
         serializer.writeAgentMappings(newAgentMappings);
     }
@@ -130,13 +130,13 @@ public class AgentMappingManager {
      * @throws IOException In case of an error while persisting it into a file
      */
     public synchronized boolean deleteAgentMapping(String mappingName) throws IOException {
-        checkArgument(!ObjectUtils.isEmpty(mappingName), "The mapping name should not be empty or null.");
+        checkArgument(!ObjectUtils.isEmpty(mappingName), "The mapping name should not be empty or null");
 
-        log.info("Deleting agent mapping '{}'.", mappingName);
+        log.info("Deleting agent mapping '{}'", mappingName);
 
         List<AgentMapping> currentAgentMappings = getAgentMappings();
         if(currentAgentMappings.size() <= 1) {
-            log.warn("Cannot delete agent mapping. There has to be at least one agent mapping.");
+            log.warn("Cannot delete agent mapping. There has to be at least one agent mapping");
             return false;
         }
         ArrayList<AgentMapping> newAgentMappings = new ArrayList<>(currentAgentMappings);
@@ -157,10 +157,10 @@ public class AgentMappingManager {
      * @throws IOException In case of an error while persisting it into a file
      */
     public void addAgentMapping(AgentMapping agentMapping) throws IOException {
-        checkArgument(agentMapping != null, "The agent mapping should not be null.");
-        checkArgument(!ObjectUtils.isEmpty(agentMapping.name()), "The agent mapping's name should not be null or empty.");
+        checkArgument(agentMapping != null, "The agent mapping should not be null");
+        checkArgument(!ObjectUtils.isEmpty(agentMapping.name()), "The agent mapping's name should not be null or empty");
 
-        log.info("Adding new agent mapping '{}'.", agentMapping.name());
+        log.info("Adding new agent mapping '{}'", agentMapping.name());
 
         addAgentMapping(getAgentMappings(), agentMapping, 0);
     }
@@ -177,14 +177,14 @@ public class AgentMappingManager {
      * @throws RuntimeException If no mapping exists with the given name
      */
     public synchronized void addAgentMappingBefore(AgentMapping agentMapping, String mappingName) throws IOException {
-        log.info("Adding new agent mapping '{}' before existing mapping '{}'.", agentMapping.name(), mappingName);
+        log.info("Adding new agent mapping '{}' before existing mapping '{}'", agentMapping.name(), mappingName);
 
         List<AgentMapping> currentMappings = getAgentMappings();
         OptionalInt indexOpt = getMappingIndex(mappingName, currentMappings);
         if (indexOpt.isPresent()) {
             addAgentMapping(currentMappings, agentMapping, indexOpt.getAsInt());
         } else {
-            throw new IllegalArgumentException("The agent mapping has not been added because the mapping '" + mappingName + "' does not exists, thus, cannot be added before it.");
+            throw new IllegalArgumentException("The agent mapping has not been added because the mapping '" + mappingName + "' does not exists, thus, cannot be added before it");
         }
     }
 
@@ -200,14 +200,14 @@ public class AgentMappingManager {
      * @throws RuntimeException If no mapping exists with the given name
      */
     public synchronized void addAgentMappingAfter(AgentMapping agentMapping, String mappingName) throws IOException {
-        log.info("Adding new agent mapping '{}' after existing mapping '{}'.", agentMapping.name(), mappingName);
+        log.info("Adding new agent mapping '{}' after existing mapping '{}'", agentMapping.name(), mappingName);
 
         List<AgentMapping> currentMappings = getAgentMappings();
         OptionalInt indexOpt = getMappingIndex(mappingName, currentMappings);
         if (indexOpt.isPresent()) {
             addAgentMapping(currentMappings, agentMapping, indexOpt.getAsInt() + 1);
         } else {
-            throw new IllegalArgumentException("The agent mapping has not been added because the mapping '" + mappingName + "' does not exists, thus, cannot be added after it.");
+            throw new IllegalArgumentException("The agent mapping has not been added because the mapping '" + mappingName + "' does not exists, thus, cannot be added after it");
         }
     }
 

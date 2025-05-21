@@ -40,8 +40,8 @@ public class LocalUserDetailsService implements UserDetailsService {
         User user = userOptional.get();
 
         if (user.isLdapUser()) {
-            log.debug("User is LDAP user, thus, not returned by this user details service.");
-            throw new UsernameNotFoundException("User with username '" + username + "' has not been found because it is a LDAP user.");
+            log.debug("User is LDAP user, thus, not returned by this user details service");
+            throw new UsernameNotFoundException("User with username '" + username + "' has not been found because it is a LDAP user");
         }
 
         return toUserDetails(user);

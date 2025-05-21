@@ -80,9 +80,9 @@ public class SelfMonitoringService {
         SelfMonitoringSettings newS = ev.getNewConfig().getSelfMonitoring();
         SelfMonitoringSettings oldS = ev.getOldConfig().getSelfMonitoring();
         if (newS.isEnabled() && !oldS.isEnabled()) {
-            log.info("Enabling self monitoring.");
+            log.info("Enabling self monitoring");
         } else if (!newS.isEnabled() && oldS.isEnabled()) {
-            log.info("Disabling self monitoring.");
+            log.info("Disabling self monitoring");
         }
     }
 

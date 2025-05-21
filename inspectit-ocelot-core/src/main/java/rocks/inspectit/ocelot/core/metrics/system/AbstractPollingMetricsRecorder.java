@@ -49,7 +49,7 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        log.info("Enabling {}.", getClass().getSimpleName());
+        log.info("Enabling {}", getClass().getSimpleName());
         val conf = configuration.getMetrics();
         pollingTask = executor.scheduleWithFixedDelay(() -> {
             try (val scope = selfMonitoringService.withDurationSelfMonitoring(getClass().getSimpleName())) {
@@ -65,7 +65,7 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
 
     @Override
     protected boolean doDisable() {
-        log.info("Disabling {}.", getClass().getSimpleName());
+        log.info("Disabling {}", getClass().getSimpleName());
         pollingTask.cancel(true);
         return true;
     }

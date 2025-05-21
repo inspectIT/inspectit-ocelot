@@ -63,9 +63,9 @@ public class ConfigParser {
 
             boolean success = tempFile.delete();
             if (!success) {
-                log.warn("Could not delete temp file '{}' used to generate ConfigDocs.", tempFile.getAbsolutePath());
+                log.warn("Could not delete temp file '{}' used to generate ConfigDocs", tempFile.getAbsolutePath());
             } else {
-                log.debug("Successfully deleted temp file '{}' used to generate ConfigDocs.", tempFile.getAbsolutePath());
+                log.debug("Successfully deleted temp file '{}' used to generate ConfigDocs", tempFile.getAbsolutePath());
             }
 
             Binder binder = new Binder(configurationPropertySources, new PropertySourcesPlaceholdersResolver(propertySources), InspectitConfigConversionService.getParserInstance());

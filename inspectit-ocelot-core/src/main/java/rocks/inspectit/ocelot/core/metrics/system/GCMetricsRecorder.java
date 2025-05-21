@@ -82,7 +82,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     public GCMetricsRecorder() {
         super("metrics.gc");
         if (!MANAGEMENT_EXTENSIONS_PRESENT) {
-            log.info("com.sun.management.GarbageCollectionNotificationInfo is not available on this system, gc metrics are unavailable.");
+            log.info("com.sun.management.GarbageCollectionNotificationInfo is not available on this system, gc metrics are unavailable");
         }
     }
 

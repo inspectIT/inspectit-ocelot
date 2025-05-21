@@ -41,7 +41,7 @@ public class LoggingConfigurationChangeListener {
         // simply call initLogging again with new config
         LogbackInitializer.initLogging(newConfig);
         if (log.isDebugEnabled()) {
-            log.debug("Logback configuration updated.");
+            log.debug("Logback configuration updated");
         }
     }
 

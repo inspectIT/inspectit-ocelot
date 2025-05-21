@@ -51,7 +51,7 @@ public class OtlpTraceExporterService extends DynamicallyActivatableService {
                             .toArray()));
                 }
                 if (!StringUtils.hasText(otlp.getEndpoint())) {
-                    log.warn("OTLP Trace Exporter is enabled but 'endpoint' is not set.");
+                    log.warn("OTLP Trace Exporter is enabled but 'endpoint' is not set");
                 }
             }
         }

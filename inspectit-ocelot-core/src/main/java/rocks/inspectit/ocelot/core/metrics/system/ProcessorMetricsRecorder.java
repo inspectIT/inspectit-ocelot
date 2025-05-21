@@ -32,7 +32,7 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     private static final String PROCESS_USAGE_METRIC_FULL_NAME = "process/cpu/usage";
 
-    private static final String METRIC_UNAVAILABLE = "Metric '{}' will not be recorded because '{}' is unavailable.";
+    private static final String METRIC_UNAVAILABLE = "Metric '{}' will not be recorded because '{}' is unavailable";
 
     private static final List<String> OPERATING_SYSTEM_BEAN_CLASS_NAMES = Arrays.asList(
             "com.sun.management.OperatingSystemMXBean", // HotSpot

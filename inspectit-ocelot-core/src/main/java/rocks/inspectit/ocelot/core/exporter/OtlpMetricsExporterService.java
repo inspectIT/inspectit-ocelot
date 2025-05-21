@@ -51,12 +51,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
         if (configuration.getMetrics().isEnabled() && !otlp.getEnabled().isDisabled()) {
             if (SUPPORTED_PROTOCOLS.contains(otlp.getProtocol())) {
 
-                if (StringUtils.hasText(otlp.getEndpoint())) {
-                    return true;
-                } else if (StringUtils.hasText(otlp.getEndpoint())) {
-                    log.warn("You are using the deprecated property 'url'. This property will be invalid in future releases of InspectIT Ocelot, please use 'endpoint' instead.");
-                    return true;
-                }
+                if (StringUtils.hasText(otlp.getEndpoint())) return true;
             }
             if (otlp.getEnabled().equals(ExporterEnabledState.ENABLED)) {
                 if (!SUPPORTED_PROTOCOLS.contains(otlp.getProtocol())) {
@@ -65,7 +60,7 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
                             .toArray()));
                 }
                 if (!StringUtils.hasText(otlp.getEndpoint()) && !StringUtils.hasText(otlp.getEndpoint())) {
-                    log.warn("OTLP Metric Exporter is enabled but 'endpoint' is not set.");
+                    log.warn("OTLP Metric Exporter is enabled but 'endpoint' is not set");
                 }
             }
         }

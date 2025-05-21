@@ -46,7 +46,7 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        log.info("Starting HTTP configuration polling service.");
+        log.info("Starting HTTP configuration polling service");
 
         HttpConfigSettings httpSettings = configuration.getConfig().getHttp();
 
@@ -60,7 +60,7 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
 
     @Override
     protected boolean doDisable() {
-        log.info("Stopping HTTP configuration polling service.");
+        log.info("Stopping HTTP configuration polling service");
         if (pollerFuture != null) {
             pollerFuture.cancel(true);
         }
@@ -73,7 +73,7 @@ public class HttpConfigurationPoller extends DynamicallyActivatableService imple
      */
     @Override
     public void run() {
-        log.debug("Updating HTTP property source.");
+        log.debug("Updating HTTP property source");
         boolean wasUpdated = currentState.update(false);
         if (wasUpdated) {
             env.updatePropertySources(propertySources -> {

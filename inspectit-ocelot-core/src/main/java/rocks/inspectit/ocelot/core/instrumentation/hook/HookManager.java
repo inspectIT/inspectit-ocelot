@@ -152,10 +152,10 @@ public class HookManager {
                         MethodHook methodHook = hookGenerator.buildHook(clazz, method, config);
                         lazyHooks.put(signature, methodHook);
                         if (log.isDebugEnabled()) {
-                            log.debug("Lazy loading hooks for {} of {}.", signature, clazz.getName());
+                            log.debug("Lazy loading hooks for {} of {}", signature, clazz.getName());
                         }
                     } catch (Throwable throwable) {
-                        log.error("Error generating hook for {} of {}. Method will not be hooked.", signature, clazz.getName(), throwable);
+                        log.error("Error generating hook for {} of {}. Method will not be hooked", signature, clazz.getName(), throwable);
                     }
                 });
 
@@ -248,7 +248,7 @@ public class HookManager {
         }
 
         /**
-         * Activates all changes made via {@link #updateHooksForClass(Class)} and reenables all disables actions of all hooks
+         * Activates all changes made via {@link #updateHooksForClass(Class)} and re-enables all disables actions of all hooks
          * on the {@link HookManager}.
          * After this method is called, {@link #getHook(Class, String)} will return the updated hooks.
          */
@@ -315,7 +315,7 @@ public class HookManager {
                     try {
                         setHook(clazz, signature, hookGenerator.buildHook(clazz, method, newConfig));
                     } catch (Throwable t) {
-                        log.error("Error generating hook for {} of {}. Method will not be hooked.", signature, clazz.getName(), t);
+                        log.error("Error generating hook for {} of {}. Method will not be hooked", signature, clazz.getName(), t);
                         removeHook(clazz, signature);
                     }
                 }

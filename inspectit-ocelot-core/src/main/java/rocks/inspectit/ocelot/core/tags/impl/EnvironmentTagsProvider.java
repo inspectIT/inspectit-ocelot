@@ -43,7 +43,7 @@ public class EnvironmentTagsProvider implements ICommonTagsProvider {
                     envTags.put("host.name", resolveHostName());
                 } catch (UnknownHostException e) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Failed to resolve host name.", e);
+                        log.debug("Failed to resolve host name", e);
                     }
                 }
             }
@@ -53,7 +53,7 @@ public class EnvironmentTagsProvider implements ICommonTagsProvider {
                     envTags.put("host.ip", resolveHostAddress());
                 } catch (UnknownHostException e) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Failed to resolve host address.", e);
+                        log.debug("Failed to resolve host address", e);
                     }
                 }
             }

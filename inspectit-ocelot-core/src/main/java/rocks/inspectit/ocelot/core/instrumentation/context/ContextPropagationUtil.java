@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 /**
  * Implements the logic for generating and reading the http headers related to context propagation.
- * Currently the propagation happens only via the Correlation-Context headers:
+ * Currently, the propagation happens only via the Correlation-Context headers:
  * https://github.com/w3c/correlation-context/blob/master/correlation_context/HTTP_HEADER_FORMAT.md
  * When tracing is added, additional header formats, such as B3 will be used.
  */
@@ -234,7 +234,7 @@ public class ContextPropagationUtil {
             try {
                 return extractPropagatedSpanContext(W3CTraceContextPropagator.getInstance(), propagationMap);
             } catch (Throwable t) {
-                log.error("Error reading trace correlation data from the trace context headers.", t);
+                log.error("Error reading trace correlation data from the trace context headers", t);
             }
         }
 
@@ -243,7 +243,7 @@ public class ContextPropagationUtil {
             try {
                 return extractPropagatedSpanContext(DatadogFormat.INSTANCE, propagationMap);
             } catch (Throwable t) {
-                log.error("Error reading trace correlation data from the Datadog headers.", t);
+                log.error("Error reading trace correlation data from the Datadog headers", t);
             }
         }
 
@@ -329,7 +329,7 @@ public class ContextPropagationUtil {
     /**
      * Scans the given properties for a type=... definition.
      * If a correct definition is found, the given string value is parsed ot the given type and returned.
-     * Otherwise the string value is returned unchanged.
+     * Otherwise, the string value is returned unchanged.
      *
      * @param stringValue the value to parse
      * @param properties  the collection of property definition in the format "propertyname=value"
@@ -361,19 +361,19 @@ public class ContextPropagationUtil {
     public static void setPropagationFormat(PropagationFormat format) {
         switch (format) {
             case B3:
-                log.info("Using B3 format for context propagation.");
+                log.info("Using B3 format for context propagation");
                 propagationFormat = B3Propagator.injectingMultiHeaders();
                 break;
             case TRACE_CONTEXT:
-                log.info("Using TraceContext format for context propagation.");
+                log.info("Using TraceContext format for context propagation");
                 propagationFormat = W3CTraceContextPropagator.getInstance();
                 break;
             case DATADOG:
-                log.info("Using Datadog format for context propagation.");
+                log.info("Using Datadog format for context propagation");
                 propagationFormat = DatadogFormat.INSTANCE;
                 break;
             default:
-                log.warn("The specified propagation format {} is not supported. Falling back to B3 format.", format);
+                log.warn("The specified propagation format {} is not supported. Falling back to B3 format", format);
                 propagationFormat = B3Propagator.injectingMultiHeaders();
         }
     }

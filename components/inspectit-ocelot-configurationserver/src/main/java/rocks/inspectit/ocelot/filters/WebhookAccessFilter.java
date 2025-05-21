@@ -38,7 +38,7 @@ public class WebhookAccessFilter implements Filter {
             chain.doFilter(request, response);
         } else {
             String requestUrl = ((HttpServletRequest) request).getRequestURL().toString();
-            log.warn("Access has been denied for '{}' because of an invalid or missing token.", requestUrl);
+            log.warn("Access has been denied for '{}' because of an invalid or missing token", requestUrl);
             ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }

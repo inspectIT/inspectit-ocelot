@@ -55,7 +55,7 @@ public class AutoCommitWorkingDirectoryProxy extends AbstractWorkingDirectoryAcc
         try {
             versioningManager.commitAsExternalChange();
         } catch (GitAPIException e) {
-            log.error("Could not clean the working directory.");
+            log.error("Could not clean the working directory");
             throw new RuntimeException(e);
         }
     }

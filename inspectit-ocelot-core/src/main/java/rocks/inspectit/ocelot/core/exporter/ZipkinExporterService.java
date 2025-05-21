@@ -34,7 +34,7 @@ public class ZipkinExporterService extends DynamicallyActivatableService {
             if (StringUtils.hasText(zipkin.getEndpoint())) {
                 return true;
             } else if (zipkin.getEnabled().equals(ExporterEnabledState.ENABLED)) {
-                log.warn("Zipkin Exporter is enabled but 'endpoint' is not set.");
+                log.warn("Zipkin Exporter is enabled but 'endpoint' is not set");
             }
         }
         return false;

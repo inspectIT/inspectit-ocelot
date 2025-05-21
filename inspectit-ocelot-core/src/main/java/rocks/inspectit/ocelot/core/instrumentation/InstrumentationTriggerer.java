@@ -154,7 +154,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
                     instrumentation.retransformClasses(classesToRetransform.toArray(new Class<?>[]{}));
                     log.debug("Retransformed {} classes in {} ms", classesToRetransform.size(), watch.elapsed(TimeUnit.MILLISECONDS));
                 } catch (Throwable e) {
-                    log.warn("Error retransforming batch of classes, retrying classes one by one.");
+                    log.warn("Error retransforming batch of classes, retrying classes one by one");
                     boolean singleBatch = classesToRetransform.size() == 1;
 
                     classesToRetransform.removeIf(clazz -> {
@@ -166,7 +166,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
                             if (throwable instanceof NoClassDefFoundError) {
                                 // this can happen, when classes are lazy loaded which dependencies are not existing.
                                 // see ticket https://github.com/inspectIT/inspectit-ocelot/issues/512
-                                log.warn("Class {} will not be instrumented because it cannot be loaded. This can happen if dependencies are not existing.", clazz.getName());
+                                log.warn("Class {} will not be instrumented because it cannot be loaded. This can happen if dependencies are not existing", clazz.getName());
                                 return true;
                             } else {
                                 // we'll try the instrumentation once more

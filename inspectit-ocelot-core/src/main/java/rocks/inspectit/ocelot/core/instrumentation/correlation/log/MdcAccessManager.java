@@ -121,9 +121,9 @@ public class MdcAccessManager implements IClassDiscoveryListener {
                         updateActiveMdcAccessors();
                     } catch (Throwable t) {
                         if (log.isDebugEnabled()) {
-                            log.error("Error creating log-correlation MDC adapter for class '{}', thus trace-id will not be available in the logger.", clazz.getName());
+                            log.error("Error creating log-correlation MDC adapter for class '{}', thus trace-id will not be available in the logger", clazz.getName());
                         } else {
-                            log.error("Error creating log-correlation MDC adapter for class '{}', thus trace-id will not be available in the logger.", clazz.getName(), t);
+                            log.error("Error creating log-correlation MDC adapter for class '{}', thus trace-id will not be available in the logger", clazz.getName(), t);
                         }
                     }
                 });
@@ -209,10 +209,10 @@ public class MdcAccessManager implements IClassDiscoveryListener {
 
         activeAccessors.stream()
                 .filter(accessor -> !previousAccessors.contains(accessor))
-                .forEach(accessor -> log.info("Activated trace-log correlation for MDC '{}'.", accessor));
+                .forEach(accessor -> log.info("Activated trace-log correlation for MDC '{}'", accessor));
         previousAccessors.stream()
                 .filter(accessor -> !activeAccessors.contains(accessor))
-                .forEach(accessor -> log.info("Deactivated trace-log correlation for MDC '{}'.", accessor));
+                .forEach(accessor -> log.info("Deactivated trace-log correlation for MDC '{}'", accessor));
     }
 
     /**

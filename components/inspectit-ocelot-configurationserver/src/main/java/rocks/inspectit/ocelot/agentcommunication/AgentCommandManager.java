@@ -93,7 +93,7 @@ public class AgentCommandManager {
             }
             return command;
         } catch (ExecutionException | InterruptedException e) {
-            log.error("Exception while getting an agent command.", e);
+            log.error("Exception while getting an agent command", e);
             return null;
         }
     }

@@ -182,7 +182,7 @@ public class InspectitEnvironment extends StandardEnvironment {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (InvalidPropertiesException e) {
-            throw new RuntimeException("Could not load default configuration.", e);
+            throw new RuntimeException("Could not load default configuration", e);
         }
         propsList.addLast(defaultSettings);
         propsList.addLast(new EnvironmentInformationPropertySource(INSPECTIT_ENV_PROPERTYSOURCE_NAME));
@@ -215,7 +215,7 @@ public class InspectitEnvironment extends StandardEnvironment {
             if (fallbackConfig.isPresent()) {
                 currentConfig = fallbackConfig.get();
             } else {
-                throw new RuntimeException("The fallback configuration could not be parsed, probably due to a validation error. See logs for further information.");
+                throw new RuntimeException("The fallback configuration could not be parsed, probably due to a validation error. See logs for further information");
             }
 
             fallbackSources.forEach(ps -> propsList.remove(ps.getName()));
@@ -253,7 +253,7 @@ public class InspectitEnvironment extends StandardEnvironment {
                     .getInstance());
             newConfig = binder.bind(prefix, configClazz).get();
         } catch (Exception e) {
-            log.error("Error loading the configuration '{}'.", prefix, e);
+            log.error("Error loading the configuration '{}'", prefix, e);
             return Optional.empty();
         }
         Validator myValidator = getValidator();
@@ -261,7 +261,7 @@ public class InspectitEnvironment extends StandardEnvironment {
         if (violations.isEmpty()) {
             return Optional.of(newConfig);
         } else {
-            log.error("Error loading the configuration '{}'.", prefix);
+            log.error("Error loading the configuration '{}'", prefix);
             for (ConstraintViolation<T> vio : violations) {
                 String property = CaseUtils.camelCaseToKebabCase(vio.getPropertyPath().toString());
                 if (vio.getInvalidValue() instanceof CharSequence || vio.getInvalidValue() instanceof Number || vio.getInvalidValue() instanceof Duration) {

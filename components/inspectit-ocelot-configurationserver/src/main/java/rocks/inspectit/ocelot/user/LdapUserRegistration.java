@@ -40,7 +40,7 @@ public class LdapUserRegistration {
                         .passwordHash("<EMPTY>")
                         .isLdapUser(true)
                         .build());
-                log.info("User `{}` was authenticated using LDAP and added to the database.", name);
+                log.info("User `{}` was authenticated using LDAP and added to the database", name);
             }
         } catch (DataAccessException dae) {
             log.debug("User already exists", dae);

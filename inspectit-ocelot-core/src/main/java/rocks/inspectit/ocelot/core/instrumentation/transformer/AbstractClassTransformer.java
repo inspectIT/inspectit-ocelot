@@ -156,7 +156,7 @@ public abstract class AbstractClassTransformer implements ClassTransformer {
 
             return instrumentedClass.getBytes();
         } catch (Throwable throwable) {
-            log.warn("Could not instrument class '{}' due to an error during bytecode generation.", typeWithLoader.getName(), throwable);
+            log.warn("Could not instrument class '{}' due to an error during bytecode generation", typeWithLoader.getName(), throwable);
             return bytecode;
         }
     }
@@ -232,7 +232,7 @@ public abstract class AbstractClassTransformer implements ClassTransformer {
 
         for (InstrumentationRule rule : classConfig.getActiveRules()) {
             if (log.isDebugEnabled()) {
-                log.debug("Added hook to {} due to rule '{}'.", type.getName(), rule.getName());
+                log.debug("Added hook to {} due to rule '{}'", type.getName(), rule.getName());
             }
             for (InstrumentationScope scope : rule.getScopes()) {
                 if (log.isTraceEnabled()) {

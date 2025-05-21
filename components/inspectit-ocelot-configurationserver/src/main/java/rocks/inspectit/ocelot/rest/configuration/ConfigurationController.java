@@ -132,7 +132,7 @@ public class ConfigurationController extends AbstractBaseController {
                 configDocumentation = configDocsGenerator.generateConfigDocs(configYaml);
 
             } catch (Exception e) {
-                log.error("Config Documentation could not be generated due to Exception.", e);
+                log.error("Config Documentation could not be generated due to Exception", e);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(String.format("Config Documentation for given AgentMapping '%s' could not be generated due to the following error: %s.", mappingName, e.getMessage()));
             }

@@ -95,7 +95,7 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
             });
             return fileSources;
         } catch (Exception e) {
-            logger.error("Unable to access config directory.", e);
+            logger.error("Unable to access config directory", e);
             return Collections.emptyList();
         }
     }
@@ -105,7 +105,7 @@ public class DirectoryPropertySource extends EnumerablePropertySource<Void> {
             String name = getCombinedName(file);
             return Optional.of(new ChildFilePropertySource(name, loader.load(new FileSystemResource(file))));
         } catch (Exception e) {
-            logger.error("Unable to load config file " + getRelativePath(file) + "!", e);
+            logger.error("Unable to load config file " + getRelativePath(file), e);
             return Optional.empty();
         }
     }

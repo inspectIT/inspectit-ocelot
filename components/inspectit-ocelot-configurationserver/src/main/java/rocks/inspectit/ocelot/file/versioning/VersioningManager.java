@@ -134,7 +134,7 @@ public class VersioningManager {
         }
 
         if (!hasGit) {
-            log.info("Working directory is not managed by Git. Initializing Git repository and staging and committing all existing file.");
+            log.info("Working directory is not managed by Git. Initializing Git repository and staging and committing all existing file");
 
             if (usingRemoteConfiguration && remoteSettings.getPushRepository() != null && remoteConfigurationManager.sourceBranchExistsOnRemote(remoteSettings
                     .getPushRepository())) {
@@ -158,7 +158,7 @@ public class VersioningManager {
             git.branchRename().setNewName(Branch.WORKSPACE.getBranchName()).call();
             git.branchCreate().setName(Branch.LIVE.getBranchName()).call();
         } else if (!isClean()) {
-            log.info("Changes in the configuration or agent mapping files have been detected and will be committed to the repository.");
+            log.info("Changes in the configuration or agent mapping files have been detected and will be committed to the repository");
 
             stageFiles();
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Staging and committing of external changes during startup", false);
@@ -204,7 +204,7 @@ public class VersioningManager {
      * Expects the target branch to be present (in configuration and remote push repository).
      */
     private void setCurrentBranchToTarget() throws GitAPIException, IOException {
-        log.info("Synchronizing local live branch with target branch of remote push repository.");
+        log.info("Synchronizing local live branch with target branch of remote push repository");
 
         RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
         RemoteRepositorySettings sourceRepository = settings.getRemoteConfigurations().getPullRepository();
@@ -222,13 +222,13 @@ public class VersioningManager {
         // otherwise, we need to properly merge files from two remotes
         boolean hardReset = remoteSettings.isInitialConfigurationSync() && remoteSettings.isAutoPromotion() && areRemotesEqual(sourceRepository, targetRepository);
 
-        log.info("{}-resetting current branch to '{}'.", (hardReset ? "Hard" : "Soft"), targetRepository.getBranchName());
+        log.info("{}-resetting current branch to '{}'", (hardReset ? "Hard" : "Soft"), targetRepository.getBranchName());
         git.reset()
                 .setRef("refs/heads/" + targetRepository.getBranchName())
                 .setMode(hardReset ? ResetCommand.ResetType.HARD : ResetCommand.ResetType.SOFT)
                 .call();
 
-        log.info("Local changes can now be pushed to the remote target branch without force.");
+        log.info("Local changes can now be pushed to the remote target branch without force");
     }
 
     private boolean areRemotesEqual(RemoteRepositorySettings sourceRepository, RemoteRepositorySettings targetRepository) throws IOException {
@@ -272,7 +272,7 @@ public class VersioningManager {
             String workspaceRef = "refs/heads/" + Branch.WORKSPACE.getBranchName();
             return workspaceRef.equals(fullBranch);
         } catch (IOException e) {
-            throw new RuntimeException("Exception while accessing Git workspace repository.", e);
+            throw new RuntimeException("Exception while accessing Git workspace repository", e);
         }
     }
 
@@ -312,10 +312,10 @@ public class VersioningManager {
      */
     private boolean commitAllFiles(PersonIdent author, String message, boolean allowAmend) throws GitAPIException {
         if (isClean()) {
-            log.debug("Repository is in clean state, thus, committing will be skipped.");
+            log.debug("Repository is in clean state, thus, committing will be skipped");
             return false;
         } else {
-            log.debug("Committing staged changes.");
+            log.debug("Committing staged changes");
         }
 
         CommitCommand commitCommand = git.commit().setAll(true) // in order to remove deleted files from index
@@ -330,7 +330,7 @@ public class VersioningManager {
             boolean expired = latestCommitTime + amendTimeout < System.currentTimeMillis();
 
             if (sameAuthor && !expired) {
-                log.debug("|-Executing an amend commit.");
+                log.debug("|-Executing an amend commit");
                 commitCommand.setAmend(true);
             }
         }
@@ -343,7 +343,7 @@ public class VersioningManager {
      * Stage all modified/added/removed configuration files and, if specified, the agent mapping file.
      */
     private void stageFiles() throws GitAPIException {
-        log.debug("Staging all configuration files and agent mappings.");
+        log.debug("Staging all configuration files and agent mappings");
 
         AddCommand addCommand = git.add().addFilepattern(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
         addCommand.addFilepattern(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
@@ -417,7 +417,7 @@ public class VersioningManager {
             RevCommit commit = getCommit(commitId);
             return Optional.ofNullable(commit);
         } catch (IOException e) {
-            log.error("An exception occurred while trying to load the latest commit.", e);
+            log.error("An exception occurred while trying to load the latest commit", e);
             return Optional.empty();
         }
     }
@@ -441,7 +441,7 @@ public class VersioningManager {
                 return revWalk.parseCommit(commitId);
             }
         } catch (IOException e) {
-            log.error("An exception occurred while trying to load the latest commit.", e);
+            log.error("An exception occurred while trying to load the latest commit", e);
             return null;
         }
     }
@@ -866,7 +866,7 @@ public class VersioningManager {
             throw new IllegalArgumentException("Promotion must not be null and has to promote at least one file!");
         }
 
-        log.info("User '{}' promotes {} files.", author.getName(), promotion.getFiles().size());
+        log.info("User '{}' promotes {} files", author.getName(), promotion.getFiles().size());
 
         PromotionResult result = PromotionResult.OK;
         try {
@@ -878,7 +878,7 @@ public class VersioningManager {
                     .getObjectId();
 
             if (!liveCommitId.equals(currentLiveBranchId)) {
-                throw new ConcurrentModificationException("Live branch has been modified. The provided promotion definition is out of sync.");
+                throw new ConcurrentModificationException("Live branch has been modified. The provided promotion definition is out of sync");
             }
 
             // get modified files between the specified diff - we only consider files which exists in the diff
@@ -927,9 +927,9 @@ public class VersioningManager {
                 }
             }
         } catch (IOException | GitAPIException ex) {
-            throw new PromotionFailedException("Promotion has failed.", ex);
+            throw new PromotionFailedException("Promotion has failed", ex);
         } finally {
-            log.info("Promotion was successful.");
+            log.info("Promotion was successful");
 
             // checkout workspace branch
             git.checkout().setName(Branch.WORKSPACE.getBranchName()).call();
@@ -1011,7 +1011,7 @@ public class VersioningManager {
         RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
 
         if (remoteSettings == null || !remoteSettings.isEnabled() || remoteSettings.getPullRepository() == null) {
-            log.info("Remote configuration source will not be pulled because it is not specified or disabled.");
+            log.info("Remote configuration source will not be pulled because it is not specified or disabled");
             return false;
         }
 
@@ -1027,15 +1027,15 @@ public class VersioningManager {
      */
     @VisibleForTesting
     synchronized void mergeSourceBranch() throws GitAPIException, IOException {
-        log.info("Merging remote configurations into the workspace.");
+        log.info("Merging remote configurations into the workspace");
 
         RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
         if (remoteSettings == null) {
-            throw new IllegalStateException("The remote configuration settings must not be null.");
+            throw new IllegalStateException("The remote configuration settings must not be null");
         }
         RemoteRepositorySettings sourceRepository = remoteSettings.getPullRepository();
         if (sourceRepository == null) {
-            throw new IllegalStateException("Source repository settings must not be null.");
+            throw new IllegalStateException("Source repository settings must not be null");
         }
 
         // get ref of synchronization tag
@@ -1055,16 +1055,16 @@ public class VersioningManager {
         } else if (remoteSettings.isInitialConfigurationSync()) {
             // in case this options is set, we merge the diff between the workspace and the source branch head.
             // we don't remove files in this case!
-            log.info("Synchronization marker has not been found. Executing an initial configuration synchronization.");
+            log.info("Synchronization marker has not been found. Executing an initial configuration synchronization");
             Optional<RevCommit> workspaceCommit = getLatestCommit(Branch.WORKSPACE);
             if (workspaceCommit.isPresent()) {
                 mergeBranch(workspaceCommit.get(), diffTarget, false, "Initial configuration synchronization");
             } else {
-                log.error("Cannot merge configuration source into local workspace because the workspace branch has no commits.");
+                log.error("Cannot merge configuration source into local workspace because the workspace branch has no commits");
             }
         } else {
             // otherwise, nothing will be merged
-            log.info("Synchronization marker has not been found, thus adding it to the latest commit on the configuration remote.");
+            log.info("Synchronization marker has not been found, thus adding it to the latest commit on the configuration remote");
         }
 
         // updating synchronization tag and setting it
@@ -1110,7 +1110,7 @@ public class VersioningManager {
                 .collect(Collectors.toList());
 
         if (fileToRemove.isEmpty() && checkoutFiles.isEmpty()) {
-            log.info("There is nothing to merge from the source configuration branch into the current workspace branch.");
+            log.info("There is nothing to merge from the source configuration branch into the current workspace branch");
             return;
         }
 
@@ -1119,14 +1119,14 @@ public class VersioningManager {
 
         // promote if enabled
         if (settings.getRemoteConfigurations().isAutoPromotion()) {
-            log.info("Auto-promotion of synchronized configuration files.");
+            log.info("Auto-promotion of synchronized configuration files");
             List<String> diffFiles = diff.getEntries()
                     .stream()
                     .map(SimpleDiffEntry::getFile)
                     .collect(Collectors.toList());
 
             Promotion promotion = Promotion.builder()
-                    .commitMessage("Auto-promotion due to workspace remote synchronization.")
+                    .commitMessage("Auto-promotion due to workspace remote synchronization")
                     .workspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName())
                     .liveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName())
                     .files(diffFiles)
@@ -1187,7 +1187,7 @@ public class VersioningManager {
         if (commit == null) {
             throw new IllegalArgumentException("Target commit must not be null");
         }
-        log.debug("Adding synchronization tag to commit {}.", commit.getName());
+        log.debug("Adding synchronization tag to commit {}", commit.getName());
         git.tag().setName(SOURCE_SYNC_TAG_NAME).setObjectId(commit).setForceUpdate(true).call();
     }
 }

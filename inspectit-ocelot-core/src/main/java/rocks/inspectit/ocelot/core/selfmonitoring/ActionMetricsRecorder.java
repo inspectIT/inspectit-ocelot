@@ -75,13 +75,13 @@ public class ActionMetricsRecorder extends DynamicallyActivatableService {
 
     @Override
     protected boolean doEnable(InspectitConfig configuration) {
-        log.info("Enabling ActionMetricsRecorder.");
+        log.info("Enabling ActionMetricsRecorder");
         return true;
     }
 
     @Override
     protected boolean doDisable() {
-        log.info("Disabling ActionMetricsRecorder.");
+        log.info("Disabling ActionMetricsRecorder");
         return true;
     }
 }

@@ -128,7 +128,7 @@ public class AgentStatusManager {
         AgentStatus lastStatus = attributesToAgentStatusCache.getIfPresent(statusKey);
 
         if (lastStatus == null || lastStatus.getHealthState().getHealth() != agentHealthState.getHealth()) {
-            log.info("Health of agent {} changed to {}.", statusKey, agentHealthState);
+            log.info("Health of agent {} changed to {}", statusKey, agentHealthState);
         }
     }
 
