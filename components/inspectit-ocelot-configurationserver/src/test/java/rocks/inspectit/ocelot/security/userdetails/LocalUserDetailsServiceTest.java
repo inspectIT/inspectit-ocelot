@@ -50,7 +50,7 @@ public class LocalUserDetailsServiceTest {
 
             assertThatExceptionOfType(UsernameNotFoundException.class)
                     .isThrownBy(() -> detailsService.loadUserByUsername("username"))
-                    .withMessage("User with username 'username' has not been found.");
+                    .withMessage("User with username 'username' has not been found");
 
             verify(userService).getUserByName(anyString());
             verifyNoMoreInteractions(userService);
@@ -63,7 +63,7 @@ public class LocalUserDetailsServiceTest {
 
             assertThatExceptionOfType(UsernameNotFoundException.class)
                     .isThrownBy(() -> detailsService.loadUserByUsername("username"))
-                    .withMessage("User with username 'username' has not been found because it is a LDAP user.");
+                    .withMessage("User with username 'username' has not been found because it is a LDAP user");
 
             verify(userService).getUserByName(anyString());
             verifyNoMoreInteractions(userService);

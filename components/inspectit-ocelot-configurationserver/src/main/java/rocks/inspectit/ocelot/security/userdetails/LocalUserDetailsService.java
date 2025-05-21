@@ -34,7 +34,7 @@ public class LocalUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOptional = userService.getUserByName(username);
         if (!userOptional.isPresent()) {
-            throw new UsernameNotFoundException("User with username '" + username + "' has not been found.");
+            throw new UsernameNotFoundException("User with username '" + username + "' has not been found");
         }
 
         User user = userOptional.get();

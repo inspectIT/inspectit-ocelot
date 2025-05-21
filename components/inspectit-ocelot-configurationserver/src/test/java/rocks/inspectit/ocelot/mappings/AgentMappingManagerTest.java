@@ -128,7 +128,7 @@ public class AgentMappingManagerTest {
         public void setNull() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.setAgentMappings(null))
-                    .withMessage("The agent mappings should not be null.");
+                    .withMessage("The agent mappings should not be null");
 
             verifyNoMoreInteractions(serializer);
         }
@@ -167,7 +167,7 @@ public class AgentMappingManagerTest {
         public void getNullName() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.getAgentMapping(null))
-                    .withMessage("The mapping name should not be empty or null.");
+                    .withMessage("The mapping name should not be empty or null");
 
             verifyNoMoreInteractions(serializer, writeAccessor);
         }
@@ -176,7 +176,7 @@ public class AgentMappingManagerTest {
         public void getEmptyName() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.getAgentMapping(""))
-                    .withMessage("The mapping name should not be empty or null.");
+                    .withMessage("The mapping name should not be empty or null");
 
             verifyNoMoreInteractions(serializer, writeAccessor);
         }
@@ -250,7 +250,7 @@ public class AgentMappingManagerTest {
         public void deleteNullMapping() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.deleteAgentMapping(null))
-                    .withMessage("The mapping name should not be empty or null.");
+                    .withMessage("The mapping name should not be empty or null");
 
             verifyNoMoreInteractions(serializer);
         }
@@ -302,7 +302,7 @@ public class AgentMappingManagerTest {
         public void addNullMapping() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.addAgentMapping(null))
-                    .withMessage("The agent mapping should not be null.");
+                    .withMessage("The agent mapping should not be null");
 
             verifyNoMoreInteractions(serializer);
         }
@@ -313,7 +313,7 @@ public class AgentMappingManagerTest {
 
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.addAgentMapping(mappingA))
-                    .withMessage("The agent mapping's name should not be null or empty.");
+                    .withMessage("The agent mapping's name should not be null or empty");
 
             verifyNoMoreInteractions(serializer);
         }
@@ -324,7 +324,7 @@ public class AgentMappingManagerTest {
 
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.addAgentMapping(mappingA))
-                    .withMessage("The agent mapping's name should not be null or empty.");
+                    .withMessage("The agent mapping's name should not be null or empty");
 
             verifyNoMoreInteractions(serializer);
         }
@@ -446,7 +446,7 @@ public class AgentMappingManagerTest {
 
             assertThatExceptionOfType(RuntimeException.class)
                     .isThrownBy(() -> manager.addAgentMappingBefore(mappingB, "not-existing"))
-                    .withMessage("The agent mapping has not been added because the mapping 'not-existing' does not exists, thus, cannot be added before it.");
+                    .withMessage("The agent mapping has not been added because the mapping 'not-existing' does not exists, thus, cannot be added before it");
 
             verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
@@ -524,7 +524,7 @@ public class AgentMappingManagerTest {
 
             assertThatExceptionOfType(RuntimeException.class)
                     .isThrownBy(() -> manager.addAgentMappingAfter(mappingB, "not-existing"))
-                    .withMessage("The agent mapping has not been added because the mapping 'not-existing' does not exists, thus, cannot be added after it.");
+                    .withMessage("The agent mapping has not been added because the mapping 'not-existing' does not exists, thus, cannot be added after it");
 
             verify(serializer).readCachedAgentMappings();
             verifyNoMoreInteractions(serializer);
@@ -549,7 +549,7 @@ public class AgentMappingManagerTest {
         @Test
         public void verifyThrowsExceptions()  {
             assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> manager.setSourceBranch(null))
-                    .withMessage("The set source branch cannot be null.");
+                    .withMessage("The set source branch cannot be null");
             assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> manager.setSourceBranch("unknown"))
                     .withMessage("Unhandled branch: unknown");
         }

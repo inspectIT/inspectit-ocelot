@@ -636,7 +636,7 @@ class VersioningManagerTest extends FileTestBase {
             secondPromotion.setFiles(Arrays.asList("/file_added.yml"));
 
             assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> versioningManager.promote(secondPromotion, true))
-                    .withMessage("Live branch has been modified. The provided promotion definition is out of sync.");
+                    .withMessage("Live branch has been modified. The provided promotion definition is out of sync");
         }
 
         @Test
@@ -1112,7 +1112,7 @@ class VersioningManagerTest extends FileTestBase {
         @Test
         public void missingRemoteConfiguration() {
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> versioningManager.mergeSourceBranch())
-                    .withMessage("The remote configuration settings must not be null.");
+                    .withMessage("The remote configuration settings must not be null");
         }
 
         @Test
@@ -1120,7 +1120,7 @@ class VersioningManagerTest extends FileTestBase {
             when(settings.getRemoteConfigurations()).thenReturn(mock(RemoteConfigurationsSettings.class));
 
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> versioningManager.mergeSourceBranch())
-                    .withMessage("Source repository settings must not be null.");
+                    .withMessage("Source repository settings must not be null");
         }
 
         @Test
