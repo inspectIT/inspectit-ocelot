@@ -4,11 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.apache.hc.core5.http.protocol.BasicHttpContext;
+import org.apache.hc.core5.net.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.command.Command;
@@ -62,8 +65,8 @@ public class HttpCommandFetcher {
      *
      * @throws IOException if communication with the server was not successful.
      */
-    public HttpResponse fetchCommand(CommandResponse commandResponse, boolean waitForCommand) throws IOException {
-        HttpPost httpPost;
+    public ClassicHttpResponse fetchCommand(CommandResponse commandResponse, boolean waitForCommand) throws IOException {
+        ClassicHttpRequest httpPost;
         try {
             URIBuilder uriBuilder = new URIBuilder(commandUri);
             if (waitForCommand) {
@@ -72,7 +75,7 @@ public class HttpCommandFetcher {
             URI uri = uriBuilder.build();
 
             log.debug("Fetching command via HTTP from URL: {}", uri.toString());
-            httpPost = new HttpPost(uri);
+            httpPost = ClassicRequestBuilder.post().setUri(uri).build();
         } catch (URISyntaxException e) {
             log.error("Error building HTTP URI for fetching command!", e);
             return null;
@@ -83,7 +86,7 @@ public class HttpCommandFetcher {
             try {
                 StringEntity payloadEntity = new StringEntity(objectMapper.writeValueAsString(commandResponse));
                 httpPost.setEntity(payloadEntity);
-            } catch (JsonProcessingException | UnsupportedEncodingException e) {
+            } catch (JsonProcessingException e) {
                 log.error("Error serializing the command response!", e);
                 return null;
             }
@@ -93,13 +96,10 @@ public class HttpCommandFetcher {
         setAgentMetaHeaders(httpPost);
         httpPost.setHeader("Content-Type", "application/json");
 
-        HttpClient httpClient = getHttpClient(waitForCommand);
+        CloseableHttpClient httpClient = getHttpClient(waitForCommand);
 
-        try {
-            return httpClient.execute(httpPost);
-        } finally {
-            httpPost.releaseConnection();
-        }
+        // we could try to use a ResponseHandler here
+        return httpClient.execute(httpPost);
     }
 
     /**
@@ -108,19 +108,19 @@ public class HttpCommandFetcher {
      *
      * @param httpPost the request to inject the meta information headers
      */
-    private void setAgentMetaHeaders(HttpPost httpPost) {
+    private void setAgentMetaHeaders(ClassicHttpRequest httpPost) {
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 
         httpPost.setHeader(META_HEADER_PREFIX + "AGENT-ID", runtime.getName());
     }
 
     /**
-     * Returns the {@link HttpClient} which is used for fetching commands.
+     * Returns the {@link CloseableHttpClient} which is used for fetching commands.
      *
      * @param liveClient true, if live-mode is active
-     * @return A {@link HttpClient} instance.
+     * @return A {@link CloseableHttpClient} instance.
      */
-    private HttpClient getHttpClient(boolean liveClient) throws IOException {
+    private CloseableHttpClient getHttpClient(boolean liveClient) throws IOException {
         AgentCommandSettings currentSettings = environment.getCurrentConfig().getAgentCommands();
 
         if(liveClient) return clientHolder.getLiveHttpClient(currentSettings);

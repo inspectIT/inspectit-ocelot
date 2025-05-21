@@ -183,7 +183,9 @@ dependencies {
             libs.comGithubTomakehurstWiremockJre8,
             libs.orgYamlSnakeyaml,
 
+            // we still use the v4 client in system tests, since the default instrumentation does not work for v5
             libs.orgApacheHttpcomponentsHttpclient,
+
             // Switching to spring-boot dependency management excludes somehow magically the transitive
             // dependency commons-logging:commons-logging of org.apache.httpcomponents:httpclient.
             // Spring-Boot applications include org.springframework:spring-jcl, which provides a better

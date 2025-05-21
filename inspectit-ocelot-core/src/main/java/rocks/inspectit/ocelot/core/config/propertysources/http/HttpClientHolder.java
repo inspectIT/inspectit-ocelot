@@ -1,10 +1,14 @@
 package rocks.inspectit.ocelot.core.config.propertysources.http;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.core5.util.Timeout;
 import rocks.inspectit.ocelot.config.model.config.HttpConfigSettings;
 
 import java.io.IOException;
@@ -36,17 +40,19 @@ public class HttpClientHolder {
      * @return a {@link HttpClient} instance.
      */
     public CloseableHttpClient getHttpClient(HttpConfigSettings httpSettings) throws IOException {
-        if(isUpdated(httpSettings) || httpClient == null) {
+        if(httpClient == null || isUpdated(httpSettings)) {
             log.debug("Creating new HTTP client for HTTP configuration with settings {}", httpSettings);
             RequestConfig config = getRequestConfig(httpSettings);
-            HttpClientBuilder builder = HttpClientBuilder.create().setDefaultRequestConfig(config);
+            HttpClientBuilder builder = HttpClientBuilder.create()
+                    .setDefaultRequestConfig(config);
 
-            if (httpSettings.getTimeToLive() != null) {
-                int timeToLive = (int) httpSettings.getTimeToLive().toMillis();
-                builder.setConnectionTimeToLive(timeToLive, TimeUnit.MILLISECONDS);
+            if (httpSettings.getTimeToLive() != null || httpSettings.getConnectionTimeout() != null) {
+                HttpClientConnectionManager connectionManager = getConnectionManager(httpSettings);
+                builder.setConnectionManager(connectionManager);
             }
 
             if (httpClient != null) httpClient.close();
+
             httpClient = builder.build();
             connectionTimeout = httpSettings.getConnectionTimeout();
             connectionRequestTimeout = httpSettings.getConnectionRequestTimeout();
@@ -63,20 +69,41 @@ public class HttpClientHolder {
     private static RequestConfig getRequestConfig(HttpConfigSettings httpSettings) {
         RequestConfig.Builder configBuilder = RequestConfig.custom();
 
-        if (httpSettings.getConnectionTimeout() != null) {
-            int connectionTimeout = (int) httpSettings.getConnectionTimeout().toMillis();
-            configBuilder = configBuilder.setConnectTimeout(connectionTimeout);
-        }
         if (httpSettings.getConnectionRequestTimeout() != null) {
-            int connectionRequestTimeout = (int) httpSettings.getConnectionRequestTimeout().toMillis();
+            Timeout connectionRequestTimeout = convertToTimeout(httpSettings.getConnectionRequestTimeout());
             configBuilder = configBuilder.setConnectionRequestTimeout(connectionRequestTimeout);
         }
         if (httpSettings.getSocketTimeout() != null) {
-            int socketTimeout = (int) httpSettings.getSocketTimeout().toMillis();
-            configBuilder = configBuilder.setSocketTimeout(socketTimeout);
+            Timeout socketTimeout =  convertToTimeout(httpSettings.getSocketTimeout());
+            configBuilder = configBuilder.setResponseTimeout(socketTimeout);
         }
 
         return configBuilder.build();
+    }
+
+    /**
+     * @param httpSettings the current HTTP settings
+     * @return the derived connection manager
+     */
+    private static HttpClientConnectionManager getConnectionManager(HttpConfigSettings httpSettings) {
+        ConnectionConfig.Builder connectionBuilder = ConnectionConfig.custom();
+
+        if(httpSettings.getConnectionTimeout() != null) {
+            Timeout connectTimeout = convertToTimeout(httpSettings.getConnectionTimeout());
+            connectionBuilder.setConnectTimeout(connectTimeout);
+        }
+
+        if(httpSettings.getTimeToLive() != null) {
+            connectionBuilder.setTimeToLive(httpSettings.getTimeToLive().toMillis(), TimeUnit.MILLISECONDS);
+        }
+
+        return PoolingHttpClientConnectionManagerBuilder.create()
+                .setDefaultConnectionConfig(connectionBuilder.build())
+                .build();
+    }
+
+    private static Timeout convertToTimeout(Duration duration) {
+        return Timeout.of(duration.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     /**

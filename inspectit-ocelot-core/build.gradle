@@ -95,7 +95,8 @@ dependencies {
             // utils
             libs.orgApacheCommonsCommonsLang3,
             libs.orgApacheCommonsCommonsMath3,
-            libs.orgApacheHttpcomponentsHttpclient,
+            libs.orgApacheHttpcomponentsClient5Httpclient5,
+            libs.orgApacheHttpcomponentsCore5Httpcore5,
             libs.commonsIo,
             libs.piccolo,
             libs.comFasterxmlJacksonCoreJacksonDatabind,

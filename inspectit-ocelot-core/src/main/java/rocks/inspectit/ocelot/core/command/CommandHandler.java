@@ -5,9 +5,10 @@ import com.google.common.annotations.VisibleForTesting;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.timelimiter.TimeLimiter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.command.Command;
@@ -36,7 +37,7 @@ public class CommandHandler {
     private HttpCommandFetcher commandFetcher;
 
     /**
-     * Used to delegate recieved {@link Command} objects to their respective implementation of {@link rocks.inspectit.ocelot.core.command.handler.CommandExecutor}.
+     * Used to delegate received {@link Command} objects to their respective implementation of {@link rocks.inspectit.ocelot.core.command.handler.CommandExecutor}.
      */
     @Autowired
     private CommandDelegator commandDelegator;
@@ -154,34 +155,31 @@ public class CommandHandler {
      * @throws IllegalStateException If communication was not successful.
      */
     private Command getCommand(CommandResponse commandResponse) {
-        HttpResponse response;
-        try {
-            response = commandFetcher.fetchCommand(commandResponse, liveMode);
-        } catch (IOException ioe) {
-            throw new IllegalStateException("IOException while fetching command", ioe);
-        }
-        // response is null if some configurations are not correct. commandFetcher will log an error in this case.
-        if (response == null) {
-            return null;
-        }
-
-        int statusCode = response.getStatusLine().getStatusCode();
-
-        if (statusCode == HttpStatus.SC_NO_CONTENT) {
-            // we do nothing
-            return null;
-        } else if (statusCode == HttpStatus.SC_OK) {
-            try {
-                HttpEntity responseEntity = response.getEntity();
-                InputStream content = responseEntity.getContent();
-                return objectMapper.readValue(content, Command.class);
-            } catch (Exception exception) {
-                log.error("Exception during agent command deserialization.", exception);
+        try (ClassicHttpResponse response = commandFetcher.fetchCommand(commandResponse, liveMode)) {
+            // response is null if some configurations are not correct. commandFetcher will log an error in this case.
+            if (response == null) {
                 return null;
             }
-        } else {
-            throw new IllegalStateException("Couldn't successfully fetch an agent command. Server returned " + response.getStatusLine()
-                    .getStatusCode());
+
+            int statusCode = response.getCode();
+
+            if (statusCode == HttpStatus.SC_NO_CONTENT) {
+                // we do nothing
+                return null;
+            } else if (statusCode == HttpStatus.SC_OK) {
+                try {
+                    HttpEntity responseEntity = response.getEntity();
+                    InputStream content = responseEntity.getContent();
+                    return objectMapper.readValue(content, Command.class);
+                } catch (Exception exception) {
+                    log.error("Exception during agent command deserialization.", exception);
+                    return null;
+                }
+            } else {
+                throw new IllegalStateException("Couldn't successfully fetch an agent command. Server returned " + response.getCode());
+            }
+        } catch (IOException ioe) {
+            throw new IllegalStateException("IOException while fetching command", ioe);
         }
     }
 

@@ -103,7 +103,8 @@ dependencies {
 
             configServerLibs.orgYamlSnakeyaml,
 
-            libs.orgApacheHttpcomponentsHttpclient, //Required for PATCH-Requests
+            libs.orgApacheHttpcomponentsClient5Httpclient5, // Required for PATCH-Requests (?)
+            libs.orgApacheHttpcomponentsCore5Httpcore5,
 
             configServerLibs.orgXerialSqliteJdbc,
             configServerLibs.orgHibernateOrmHibernateCommunityDialects,
