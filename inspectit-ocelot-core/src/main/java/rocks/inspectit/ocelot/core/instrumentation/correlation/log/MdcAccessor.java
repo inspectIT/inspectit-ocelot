@@ -104,11 +104,11 @@ public abstract class MdcAccessor {
                         remove(key);
                     }
                 } catch (Throwable e) {
-                    log.error("Could not restore previous MDC value.", e);
+                    log.error("Could not restore previous MDC value", e);
                 }
             };
         } catch (Throwable e) {
-            log.error("Could not write to MDC.", e);
+            log.error("Could not write to MDC", e);
             return InjectionScope.NOOP;
         }
     }

@@ -253,7 +253,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
      */
     @Override
     public void flush() {
-        log.info("Flush pending OTel data.");
+        log.info("Flush pending OTel data");
         long start = System.nanoTime();
         openTelemetry.flush();
         log.info("Flushing process took {} ms", (System.nanoTime() - start) / 1000000);
@@ -460,7 +460,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             // try to register the span exporter of the service
             if (null != multiSpanExporter) {
                 if (multiSpanExporter.registerSpanExporter(serviceName, spanExporter)) {
-                    log.info("The spanExporter {} for the service {} was successfully registered.", spanExporter.getClass()
+                    log.info("The spanExporter {} for the service {} was successfully registered", spanExporter.getClass()
                             .getName(), serviceName);
                 } else {
                     log.error("The spanExporter {} for the service {} was already registered", spanExporter.getClass()
@@ -470,7 +470,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             // try to add the service if it has not already been registered
             if (null == registeredTraceExportServices.put(serviceName, spanExporter)) {
                 notifyTracingSettingsChanged();
-                log.info("The service {} was successfully registered.", serviceName);
+                log.info("The service {} was successfully registered", serviceName);
                 return true;
             } else {
                 log.warn("The service {} was already registered", serviceName);
@@ -496,7 +496,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             notifyTracingSettingsChanged();
             return true;
         } else {
-            log.warn("Failed to unregister {}. The service has not been registered.", serviceName);
+            log.warn("Failed to unregister {}. The service has not been registered", serviceName);
             return false;
         }
     }
@@ -512,7 +512,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         try {
             if (null == registeredMetricExporterServices.put(service.getName(), service)) {
                 notifyMetricsSettingsChanged();
-                log.info("The service {} was successfully registered.", service.getName());
+                log.info("The service {} was successfully registered", service.getName());
                 return true;
             } else {
                 log.warn("The service {} was already registered!", service.getName());
@@ -536,7 +536,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             notifyMetricsSettingsChanged();
             return true;
         } else {
-            log.warn("Failed to unregister {}. The service has not been registered.", serviceName);
+            log.warn("Failed to unregister {}. The service has not been registered", serviceName);
             return false;
         }
     }

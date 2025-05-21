@@ -56,7 +56,7 @@ public class LogTraceCorrelatorImpl implements LogTraceCorrelator {
      */
     private InjectionScope injectTraceContextInMdc(SpanContext context) {
         if (context.isValid() && context.getTraceFlags().isSampled()) {
-            log.trace("Adding trace correlation information to MDC.");
+            log.trace("Adding trace correlation information to MDC");
             return mdcAccess.injectValue(traceIdKey, context.getTraceId());
         } else {
             return mdcAccess.injectValue(traceIdKey, null);

@@ -37,34 +37,45 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class MeasureTagValueGuard {
+
     private static final String tagOverFlowMessageTemplate = "Overflow in measure %s for tag key %s";
-    /**
-     * Map of measure names and their related set of tag keys, which are currently blocked.
-     */
-    private final Map<String, Set<String>> blockedTagKeysByMeasure = Maps.newHashMap();
-    PersistedTagsReaderWriter fileReaderWriter;
+
     @Autowired
     private InspectitEnvironment env;
+
     @Autowired
     private AgentHealthManager agentHealthManager;
+
     /**
      * Common tags manager needed for gathering common tags when recording metrics.
      */
     @Autowired
     private CommonTagsManager commonTagsManager;
+
     @Autowired
     private ScheduledExecutorService executor;
-    private volatile boolean isShuttingDown = false;
-    private boolean hasTagValueOverflow = false;
+
+    private PersistedTagsReaderWriter fileReaderWriter;
+
+    /**
+     * Map of measure names and their related set of tag keys, which are currently blocked.
+     */
+    private final Map<String, Set<String>> blockedTagKeysByMeasure = Maps.newHashMap();
+
     private Set<TagsHolder> latestTags = Collections.synchronizedSet(new HashSet<>());
+
+    private volatile boolean isShuttingDown = false;
+
+    private boolean hasTagValueOverflow = false;
+
+
     private Future<?> blockTagValuesFuture;
 
     @PostConstruct
     protected void init() {
         scheduleTagGuardJob();
         TagGuardSettings settings = env.getCurrentConfig().getMetrics().getTagGuard();
-        log.info(String.format("TagValueGuard started with scheduleDelay %s and database file %s", settings.getScheduleDelay(), settings.getDatabaseFile()));
-
+        log.info("TagValueGuard started with scheduleDelay {} and database file {}", settings.getScheduleDelay(), settings.getDatabaseFile());
     }
 
     private void scheduleTagGuardJob() {
@@ -276,10 +287,4 @@ public class MeasureTagValueGuard {
         String measureName;
         Map<String, String> tags;
     }
-
-
-
-
 }
-
-

@@ -82,7 +82,7 @@ public class ObfuscationManager {
                                 .build();
                         return Stream.of(patternEntry);
                     } catch (Exception e) {
-                        log.warn("Failed to compile pattern {} for the data obfuscation. Skipping..", p.getPattern(), e);
+                        log.warn("Failed to compile pattern {} for the data obfuscation. Skipping...", p.getPattern(), e);
                         return Stream.empty();
                     }
                 })

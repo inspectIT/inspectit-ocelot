@@ -60,7 +60,7 @@ public class LogsCommandHandler implements CommandHandler {
     @Override
     public DeferredResult<ResponseEntity<?>> prepareResponse(String agentId, Command command) {
         if (!canHandle(command)) {
-            throw new IllegalArgumentException("LogsCommandHandler can only handle commands of type LogsCommand.");
+            throw new IllegalArgumentException("LogsCommandHandler can only handle commands of type LogsCommand");
         }
 
         Duration responseTimeout = configuration.getAgentCommand().getResponseTimeout();

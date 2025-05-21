@@ -40,7 +40,7 @@ public class PersistedTagsReaderWriter {
 
     public Map<String, Map<String, Set<String>>> read() {
         if (!Files.exists(path)) {
-            log.debug("Could not find tag-guard database file. File will be created during next write");
+            log.debug("Could not find tag-guard database file {}. File will be created during next write", path);
             return new HashMap<>();
         }
         return readTagsFromFile();

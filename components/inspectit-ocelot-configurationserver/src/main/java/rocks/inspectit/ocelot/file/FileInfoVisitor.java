@@ -143,7 +143,7 @@ public class FileInfoVisitor implements FileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFileFailed(Path file, IOException exc) {
-        log.error("Could not visit file '{}'.", file, exc);
+        log.error("Could not visit file '{}'", file, exc);
         return FileVisitResult.CONTINUE;
     }
 

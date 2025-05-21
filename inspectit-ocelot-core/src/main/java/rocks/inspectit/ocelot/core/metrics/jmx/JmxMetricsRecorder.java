@@ -222,7 +222,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
                         blacklistedObjectNames.add(objectName);
                     }
                 } catch (Exception e) {
-                    log.warn("Error creating the object name from the configuration entry {}.", objectNameRepresentation, e);
+                    log.warn("Error creating the object name from the configuration entry {}", objectNameRepresentation, e);
                 }
             });
         }

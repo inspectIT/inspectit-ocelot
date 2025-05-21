@@ -46,7 +46,7 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
         RevisionAccess fileAccess = mappingsSerializer.getRevisionAccess();
 
         if (!fileAccess.agentMappingsExist()) {
-            log.error("No agent mappings file was found on the current branch! Please add '{}' to the current branch.",
+            log.error("No agent mappings file was found on the current branch! Please add '{}' to the current branch",
                     AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             onTaskSuccess(Collections.emptyList());
             return;
@@ -73,7 +73,7 @@ class AgentConfigurationReloadTask extends CancellableTask<List<AgentConfigurati
                 AgentConfiguration agentConfiguration = AgentConfiguration.create(mapping, fileAccessor);
                 newConfigurations.add(agentConfiguration);
             } catch (Exception e) {
-                log.error("Could not load agent mapping '{}'.", mapping.name(), e);
+                log.error("Could not load agent mapping '{}'", mapping.name(), e);
             }
         }
 

@@ -64,7 +64,7 @@ public class AgentCommandService extends DynamicallyActivatableService implement
 
             log.info("Starting agent command polling service with URL: {}", commandUri);
         } catch (Exception e) {
-            log.error("Could not enable the agent command polling service.", e);
+            log.error("Could not enable the agent command polling service", e);
             return false;
         }
 
@@ -78,7 +78,7 @@ public class AgentCommandService extends DynamicallyActivatableService implement
 
     @Override
     protected boolean doDisable() {
-        log.info("Stopping agent command polling service.");
+        log.info("Stopping agent command polling service");
 
         if (handlerFuture != null) {
             handlerFuture.cancel(true);
@@ -88,11 +88,11 @@ public class AgentCommandService extends DynamicallyActivatableService implement
 
     @Override
     public void run() {
-        log.debug("Trying to fetch new agent commands.");
+        log.debug("Trying to fetch new agent commands");
         try {
             commandHandler.nextCommand();
         } catch (Exception exception) {
-            log.error("Error while fetching agent command.", exception);
+            log.error("Error while fetching agent command", exception);
         }
     }
 
@@ -103,7 +103,7 @@ public class AgentCommandService extends DynamicallyActivatableService implement
         if (settings.isDeriveFromHttpConfigUrl()) {
             URL url = configuration.getConfig().getHttp().getUrl();
             if (url == null) {
-                throw new IllegalStateException("The URL cannot derived from the HTTP configuration URL because it is null.");
+                throw new IllegalStateException("The URL cannot derived from the HTTP configuration URL because it is null");
             }
 
             String urlBase = String.format("%s://%s", url.getProtocol(), url.getHost());

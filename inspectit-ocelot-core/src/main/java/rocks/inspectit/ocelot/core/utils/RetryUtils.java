@@ -28,7 +28,7 @@ public final class RetryUtils {
                                     retrySettings.getRandomizationFactor().doubleValue()))
                     .build();
             Retry retry = Retry.of(retryName, retryConfig);
-            retry.getEventPublisher().onRetry(event -> LOGGER.info("Retrying for {} in {}.", retryName, event.getWaitInterval()));
+            retry.getEventPublisher().onRetry(event -> LOGGER.info("Retrying for {} in {}", retryName, event.getWaitInterval()));
             return retry;
         }
         return null;
@@ -41,7 +41,7 @@ public final class RetryUtils {
                     .timeoutDuration(retrySettings.getTimeLimit())
                     .build();
             TimeLimiter timeLimiter = TimeLimiter.of(timeLimiterName, timeLimiterConfig);
-            timeLimiter.getEventPublisher().onTimeout(event -> LOGGER.info("Time limit for {} was exceeded.", timeLimiterName));
+            timeLimiter.getEventPublisher().onTimeout(event -> LOGGER.info("Time limit for {} was exceeded", timeLimiterName));
             return timeLimiter;
         }
         return null;

@@ -304,7 +304,7 @@ public class RevisionAccess extends AbstractFileAccessor {
             collectFiles(treeWalk, files);
             return files;
         } catch (IOException e) {
-            log.error("Exception while listing files in path '{}'.", path, e);
+            log.error("Exception while listing files in path '{}'", path, e);
             return Collections.emptyList();
         } finally {
             if (treeWalk != null) {

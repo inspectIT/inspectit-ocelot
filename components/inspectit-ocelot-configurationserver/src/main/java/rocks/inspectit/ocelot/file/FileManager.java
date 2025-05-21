@@ -174,7 +174,7 @@ public class FileManager {
     public void commitWorkingDirectory() throws GitAPIException {
         workingDirectoryLock.writeLock().lock();
         try {
-            versioningManager.commitAllChanges("Committing external changes.");
+            versioningManager.commitAllChanges("Committing external changes");
         } finally {
             workingDirectoryLock.writeLock().unlock();
         }
@@ -203,7 +203,7 @@ public class FileManager {
      * Synchronizes the local working directory with a configured remote configuration source.
      */
     public void synchronizeWorkspace() throws GitAPIException, IOException {
-        log.info("Synchronizing configuration workspace by pulling in remote configuration source.");
+        log.info("Synchronizing configuration workspace by pulling in remote configuration source");
         versioningManager.pullSourceBranch();
         workingDirectoryAccessor.invalidateCache();
     }

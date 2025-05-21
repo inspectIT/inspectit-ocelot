@@ -50,7 +50,7 @@ public class BeanConfiguration {
         }
 
         if (CollectionUtils.isEmpty(validTokens)) {
-            log.warn("Requests against webhook endpoints will be rejected because no access-tokens have been specified. See the documentation on how to specify access-tokens.");
+            log.warn("Requests against webhook endpoints will be rejected because no access-tokens have been specified. See the documentation on how to specify access-tokens");
         }
 
         WebhookAccessFilter accessFilter = new WebhookAccessFilter(validTokens);

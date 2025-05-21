@@ -42,7 +42,7 @@ public class InstrumentationScopeResolver {
         Map<String, InstrumentationScope> scopeMap = new HashMap<>();
 
         for (String scopeName : source.getScopes().keySet()) {
-            log.debug("Processing scope '{}'.", scopeName);
+            log.debug("Processing scope '{}'", scopeName);
 
             resolveScope(scopeName, source.getScopes(), scopeMap);
 

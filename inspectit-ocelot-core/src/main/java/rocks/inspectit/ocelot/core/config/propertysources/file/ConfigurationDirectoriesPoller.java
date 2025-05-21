@@ -57,7 +57,7 @@ public class ConfigurationDirectoriesPoller extends DynamicallyActivatableServic
                         .collect(Collectors.toList())
         );
         if (filePollers.isEmpty()) {
-            log.info("No directories to watch registered, terminating poll service.");
+            log.info("No directories to watch registered, terminating poll service");
             return false;
         } else {
             long freqMS = conf.getConfig().getFileBased().getFrequency().toMillis();
@@ -76,7 +76,7 @@ public class ConfigurationDirectoriesPoller extends DynamicallyActivatableServic
     @Override
     protected boolean doDisable() {
         if (pollingTask != null) {
-            log.info("Stopping config directory polling service.");
+            log.info("Stopping config directory polling service");
             pollingTask.cancel(true);
             for (val poller : filePollers) {
                 try {

@@ -163,7 +163,7 @@ public class RemoteConfigurationManagerTest {
             manager.updateRemoteRefs();
 
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> manager.fetchSourceBranch(sourceRepository))
-                    .withMessage("Specified configuration source branch 'branch' does not exists on remote 'source-remote'.");
+                    .withMessage("Specified configuration source branch 'branch' does not exists on remote 'source-remote'");
         }
     }
 }

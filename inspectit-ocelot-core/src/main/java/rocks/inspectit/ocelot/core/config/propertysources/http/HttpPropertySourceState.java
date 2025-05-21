@@ -152,7 +152,7 @@ public class HttpPropertySourceState {
                 currentPropertySource = new PropertiesPropertySource(name, properties);
                 return true;
             } catch (Exception e) {
-                log.error("Could not parse fetched configuration.", e);
+                log.error("Could not parse fetched configuration", e);
             }
         }
         return false;
@@ -227,11 +227,11 @@ public class HttpPropertySourceState {
             }
             isError = false;
         } catch (ClientProtocolException e) {
-            logFetchError("HTTP protocol error occurred while fetching configuration.", e);
+            logFetchError("HTTP protocol error occurred while fetching configuration", e);
         } catch (IOException e) {
-            logFetchError("A IO problem occurred while fetching configuration.", e);
+            logFetchError("A IO problem occurred while fetching configuration", e);
         } catch (Exception e) {
-            logFetchError("Exception occurred while fetching configuration.", e);
+            logFetchError("Exception occurred while fetching configuration", e);
         }
 
         if (configuration != null) {
@@ -298,7 +298,7 @@ public class HttpPropertySourceState {
             // Get the config from the response
             String configuration = processHttpResponse(response);
             if (errorCounter != 0) {
-                log.info("Configuration fetch has been successful after {} unsuccessful attempts.", errorCounter);
+                log.info("Configuration fetch has been successful after {} unsuccessful attempts", errorCounter);
                 errorCounter = 0;
             }
             return configuration;
@@ -389,11 +389,11 @@ public class HttpPropertySourceState {
                 latestETag = null;
             }
 
-            log.info("HTTP Configuration has successfully been fetched.");
+            log.info("HTTP Configuration has successfully been fetched");
 
             return responseBody;
         } else if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
-            log.debug("Server returned 304 - configuration has not been changed since the last time.");
+            log.debug("Server returned 304 - configuration has not been changed since the last time");
             return null;
         } else {
             throw new IOException("Server returned an unexpected status code: " + statusCode);
@@ -419,7 +419,7 @@ public class HttpPropertySourceState {
                 if (firstFileWriteAttempt) {
                     firstFileWriteAttemptSuccessful = false;
                 }
-                log.error("Could not write persistence file for HTTP-configuration.", e);
+                log.error("Could not write persistence file for HTTP-configuration", e);
             }
             firstFileWriteAttempt = false;
         }

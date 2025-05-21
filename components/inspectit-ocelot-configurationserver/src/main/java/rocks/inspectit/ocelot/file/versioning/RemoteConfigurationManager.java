@@ -63,14 +63,14 @@ public class RemoteConfigurationManager {
      */
     private void updateRemoteRef(RemoteRepositorySettings repositorySettings) throws GitAPIException {
         if (!hasConfigurationRemote(repositorySettings)) {
-            log.info("Remote ref '{}' for remote configurations does not exists in the local Git, so it will be added.", repositorySettings
+            log.info("Remote ref '{}' for remote configurations does not exists in the local Git, so it will be added", repositorySettings
                     .getRemoteName());
             git.remoteAdd()
                     .setName(repositorySettings.getRemoteName())
                     .setUri(repositorySettings.getGitRepositoryUri())
                     .call();
         } else {
-            log.debug("Remote ref '{}' for remote configurations exists in the local Git and will be updated.", repositorySettings
+            log.debug("Remote ref '{}' for remote configurations exists in the local Git and will be updated", repositorySettings
                     .getRemoteName());
             git.remoteSetUrl()
                     .setRemoteName(repositorySettings.getRemoteName())
@@ -123,7 +123,7 @@ public class RemoteConfigurationManager {
      */
     private RemoteRefUpdate.Status push(Branch localBranch, RemoteRepositorySettings targetRepository, boolean useForcePush) throws GitAPIException {
         if (targetRepository == null) {
-            throw new IllegalArgumentException("The repository settings must not be null.");
+            throw new IllegalArgumentException("The repository settings must not be null");
         }
 
         RefSpec refSpec = new RefSpec(localBranch.getBranchName() + ":refs/heads/" + targetRepository.getBranchName());
@@ -141,7 +141,7 @@ public class RemoteConfigurationManager {
         PushResult pushResult = pushResults.iterator().next();
 
         if (pushResult == null) {
-            log.warn("Pushing of local branch '{}' may have failed. No push-result available.", localBranch);
+            log.warn("Pushing of local branch '{}' may have failed. No push-result available", localBranch);
             return null;
         } else {
             RemoteRefUpdate remoteUpdate = pushResult.getRemoteUpdate("refs/heads/" + targetRepository.getBranchName());
@@ -162,11 +162,11 @@ public class RemoteConfigurationManager {
      * @param sourceRepository the definition of the remote repository and branch
      */
     public void fetchSourceBranch(RemoteRepositorySettings sourceRepository) throws GitAPIException {
-        log.info("Fetching branch '{}' from configuration remote '{}'.", sourceRepository.getBranchName(), sourceRepository
+        log.info("Fetching branch '{}' from configuration remote '{}'", sourceRepository.getBranchName(), sourceRepository
                 .getRemoteName());
 
         if (!sourceBranchExistsOnRemote(sourceRepository)) {
-            throw new IllegalStateException(String.format("Specified configuration source branch '%s' does not exists on remote '%s'.", sourceRepository
+            throw new IllegalStateException(String.format("Specified configuration source branch '%s' does not exists on remote '%s'", sourceRepository
                     .getBranchName(), sourceRepository.getRemoteName()));
         }
 
@@ -178,7 +178,7 @@ public class RemoteConfigurationManager {
         FetchResult fetchResult = fetchCommand.call();
 
         if (fetchResult.getTrackingRefUpdates().isEmpty()) {
-            log.info("No change has been fetched.");
+            log.info("No change has been fetched");
         } else {
             for (TrackingRefUpdate refUpdate : fetchResult.getTrackingRefUpdates()) {
                 log.info("Fetching from '{}' ended with result: {}", refUpdate.getRemoteName(), refUpdate.getResult());

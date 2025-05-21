@@ -108,7 +108,7 @@ public class AgentCommandServiceTest {
 
             assertThat(configuration.getConfig().getHttp().getUrl()).isNull();
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> service.getCommandUri(configuration))
-                    .withMessage("The URL cannot derived from the HTTP configuration URL because it is null.");
+                    .withMessage("The URL cannot derived from the HTTP configuration URL because it is null");
         }
 
         @Test

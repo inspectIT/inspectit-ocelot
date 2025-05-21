@@ -112,7 +112,7 @@ class JmxScraper {
                 JmxMBeanPropertyCache jmxMBeanPropertyCache = resolveJmxMBeanPropertyCache(server);
                 doScrape(server, jmxMBeanPropertyCache);
             } catch (Exception e) {
-                log.warn("Error scraping the MBeanServer with registered domains: {}.", server.getDomains(), e);
+                log.warn("Error scraping the MBeanServer with registered domains: {}", server.getDomains(), e);
             }
         }
     }

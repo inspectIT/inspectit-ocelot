@@ -96,10 +96,10 @@ public class AgentImpl implements IAgent {
         ctx.addApplicationListener((ApplicationListener<ContextClosedEvent>) event -> {
             if (AGENT_CLASS_LOADER instanceof URLClassLoader) {
                 try {
-                    LOGGER.info("Closing inspectIT class loader.");
+                    LOGGER.info("Closing inspectIT class loader");
                     ((URLClassLoader) AGENT_CLASS_LOADER).close();
                 } catch (IOException e) {
-                    LOGGER.error("Failed closing inspectIT class loader.", e);
+                    LOGGER.error("Failed closing inspectIT class loader", e);
                 }
             }
         });
@@ -130,7 +130,7 @@ public class AgentImpl implements IAgent {
             openTelemetryVersion = reader.readLine();
             agentBuildDate = reader.readLine();
         } catch (Exception e) {
-            LOGGER.warn("Could not read agent version information file.");
+            LOGGER.warn("Could not read agent version information file");
             agentVersion = "UNKNOWN";
             openTelemetryVersion = "UNKNOWN";
             agentBuildDate = "UNKNOWN";

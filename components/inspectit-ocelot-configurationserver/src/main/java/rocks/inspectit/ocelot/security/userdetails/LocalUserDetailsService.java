@@ -34,14 +34,14 @@ public class LocalUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOptional = userService.getUserByName(username);
         if (!userOptional.isPresent()) {
-            throw new UsernameNotFoundException("User with username '" + username + "' has not been found.");
+            throw new UsernameNotFoundException("User with username '" + username + "' has not been found");
         }
 
         User user = userOptional.get();
 
         if (user.isLdapUser()) {
-            log.debug("User is LDAP user, thus, not returned by this user details service.");
-            throw new UsernameNotFoundException("User with username '" + username + "' has not been found because it is a LDAP user.");
+            log.debug("User is LDAP user, thus, not returned by this user details service");
+            throw new UsernameNotFoundException("User with username '" + username + "' has not been found because it is a LDAP user");
         }
 
         return toUserDetails(user);
