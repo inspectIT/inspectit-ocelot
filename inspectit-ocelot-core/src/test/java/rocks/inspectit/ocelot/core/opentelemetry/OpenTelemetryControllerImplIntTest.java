@@ -8,11 +8,13 @@ import io.opentelemetry.context.Scope;
 import io.opentelemetry.exporter.logging.LoggingSpanExporter;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.apache.hc.core5.util.Timeout;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -60,8 +62,9 @@ public class OpenTelemetryControllerImplIntTest extends SpringTestBase {
     @BeforeAll
     static void initTestClient() {
         RequestConfig.Builder requestBuilder = RequestConfig.custom();
-        requestBuilder = requestBuilder.setConnectTimeout(1000);
-        requestBuilder = requestBuilder.setConnectionRequestTimeout(1000);
+        Timeout timeout = Timeout.of(1000, TimeUnit.MILLISECONDS);
+        requestBuilder = requestBuilder.setConnectTimeout(timeout);
+        requestBuilder = requestBuilder.setConnectionRequestTimeout(timeout);
 
         HttpClientBuilder builder = HttpClientBuilder.create();
         builder.setDefaultRequestConfig(requestBuilder.build());
@@ -74,16 +77,16 @@ public class OpenTelemetryControllerImplIntTest extends SpringTestBase {
     }
 
     void assertGet200(String url) throws Exception {
-        CloseableHttpResponse response = testClient.execute(new HttpGet(url));
-        int statusCode = response.getStatusLine().getStatusCode();
+        ClassicHttpRequest request = ClassicRequestBuilder.get().setUri(url).build();
+        CloseableHttpResponse response = testClient.execute(request);
+        int statusCode = response.getCode();
         assertThat(statusCode).isEqualTo(200);
         response.close();
     }
 
     void assertUnavailable(String url) {
-        Throwable throwable = catchThrowable(() -> testClient.execute(new HttpGet(url))
-                .getStatusLine()
-                .getStatusCode());
+        ClassicHttpRequest request = ClassicRequestBuilder.get().setUri(url).build();
+        Throwable throwable = catchThrowable(() -> testClient.execute(request).getCode());
 
         assertThat(throwable).isInstanceOf(IOException.class);
     }

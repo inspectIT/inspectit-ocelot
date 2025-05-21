@@ -1,11 +1,13 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import ch.qos.logback.classic.Level;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.apache.hc.core5.util.Timeout;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,7 +29,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 @DirtiesContext
 public class PrometheusExporterServiceIntTest extends SpringTestBase {
 
-    private static final int HTTP_TIMEOUT = 1000;
+    private static final Timeout HTTP_TIMEOUT = Timeout.of(1000, TimeUnit.MILLISECONDS);
 
     private static CloseableHttpClient testClient;
 
@@ -39,7 +41,7 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
         RequestConfig.Builder requestBuilder = RequestConfig.custom();
         requestBuilder = requestBuilder.setConnectTimeout(HTTP_TIMEOUT);
         requestBuilder = requestBuilder.setConnectionRequestTimeout(HTTP_TIMEOUT);
-        requestBuilder = requestBuilder.setSocketTimeout(HTTP_TIMEOUT);
+        requestBuilder = requestBuilder.setResponseTimeout(HTTP_TIMEOUT);
 
         HttpClientBuilder builder = HttpClientBuilder.create();
         builder.setDefaultRequestConfig(requestBuilder.build());
@@ -52,24 +54,22 @@ public class PrometheusExporterServiceIntTest extends SpringTestBase {
     }
 
     void assertGet200(String url) throws Exception {
-        CloseableHttpResponse response = testClient.execute(new HttpGet(url));
-        int statusCode = response.getStatusLine().getStatusCode();
+        ClassicHttpRequest request = ClassicRequestBuilder.get().setUri(url).build();
+        CloseableHttpResponse response = testClient.execute(request);
+        int statusCode = response.getCode();
         assertThat(statusCode).isEqualTo(200);
         response.close();
     }
 
     void assertUnavailable(String url) {
-        Throwable throwable = catchThrowable(() -> testClient.execute(new HttpGet(url))
-                .getStatusLine()
-                .getStatusCode());
+        ClassicHttpRequest request = ClassicRequestBuilder.get().setUri(url).build();
+        Throwable throwable = catchThrowable(() -> testClient.execute(request).getCode());
 
         assertThat(throwable).isInstanceOf(IOException.class);
     }
 
     /**
      * Sets the switch of 'inspectit.exporters.metrics.prometheus.enabled' to the given value
-     *
-     * @param enabled
      */
     void localSwitch(ExporterEnabledState enabled) {
         updateProperties(props -> {
