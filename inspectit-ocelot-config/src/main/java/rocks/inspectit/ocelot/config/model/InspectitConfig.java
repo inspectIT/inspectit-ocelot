@@ -11,6 +11,7 @@ import rocks.inspectit.ocelot.config.model.logging.LoggingSettings;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.plugins.PluginSettings;
 import rocks.inspectit.ocelot.config.model.privacy.PrivacySettings;
+import rocks.inspectit.ocelot.config.model.selfmonitoring.InstrumentationFeedbackSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.ocelot.config.model.tags.TagsSettings;
@@ -100,6 +101,9 @@ public class InspectitConfig {
      */
     @Valid
     private LogPreloadingSettings logPreloading;
+
+    @Valid
+    private InstrumentationFeedbackSettings instrumentationFeedback;
 
     @Valid
     private InstrumentationSettings instrumentation;

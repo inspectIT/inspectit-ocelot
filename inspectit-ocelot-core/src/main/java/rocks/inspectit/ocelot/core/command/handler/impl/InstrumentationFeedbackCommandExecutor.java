@@ -7,11 +7,10 @@ import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import rocks.inspectit.ocelot.commons.models.command.impl.InstrumentationFeedbackCommand;
 import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
-import rocks.inspectit.ocelot.core.instrumentation.hook.HookManager;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodHook;
+import rocks.inspectit.ocelot.core.selfmonitoring.instrumentation.InstrumentationFeedbackService;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,7 +21,7 @@ import java.util.Map;
 public class InstrumentationFeedbackCommandExecutor implements CommandExecutor {
 
     @Autowired
-    private HookManager hookManager;
+    private InstrumentationFeedbackService service;
 
     /**
      * Checks if the given {@link Command} is an instance of {@link InstrumentationFeedbackCommand}.
@@ -53,36 +52,13 @@ public class InstrumentationFeedbackCommandExecutor implements CommandExecutor {
 
         log.debug("Executing InstrumentationFeedbackCommand {}", command.getCommandId().toString());
 
-        Map<Class<?>, Map<String, MethodHook>> activeHooks = hookManager.getHooks();
         InstrumentationFeedbackCommand.Response response = new InstrumentationFeedbackCommand.Response();
         response.setCommandId(command.getCommandId());
 
-        Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> instrumentationFeedback = new HashMap<>();
-
-        activeHooks.forEach((clazz, methodHookMap) -> {
-            InstrumentationFeedbackCommand.ClassInstrumentation classInstrumentation = resolveClassInstrumentation(methodHookMap);
-            instrumentationFeedback.put(clazz.getName(), classInstrumentation);
-        });
-
+        Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> instrumentationFeedback = service.getInstrumentation();
         response.setInstrumentationFeedback(instrumentationFeedback);
 
         return response;
     }
 
-    /**
-     * @param methodHookMap the map of method signatures and {@link MethodHook}s
-     *
-     * @return the resolved {@link InstrumentationFeedbackCommand.ClassInstrumentation}
-     */
-    private InstrumentationFeedbackCommand.ClassInstrumentation resolveClassInstrumentation(Map<String, MethodHook> methodHookMap) {
-        Map<String, List<String>> methodInstrumentationFeedback = new HashMap<>();
-
-        methodHookMap.forEach((method, methodHook) -> {
-            List<String> rules = methodHook.getSourceConfiguration().getMatchedRulesNames();
-
-            methodInstrumentationFeedback.put(method, rules);
-        });
-
-        return new InstrumentationFeedbackCommand.ClassInstrumentation(methodInstrumentationFeedback);
-    }
 }
