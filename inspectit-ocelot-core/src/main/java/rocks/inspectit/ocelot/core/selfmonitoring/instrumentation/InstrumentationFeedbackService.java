@@ -16,10 +16,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Collects the currently APPLIED instrumentation. The service will ALWAYS collect instrumented classes.
- * The applied instrumentation does not always have to match with the configured instrumentation, thus we can use this
- * service to get feedback about the current state.
- * Additionally, for each class the instrumented methods and / or the particular rules, which causes the
+ * Collects the currently APPLIED instrumentation. The applied instrumentation does not always have to match with the
+ * configured instrumentation, thus we can use this service to get feedback about the current state.
+ * <br>
+ * The service will ALWAYS include instrumented classes, when feedback is requested.
+ * Additionally, for each class the instrumented methods and / or the particular rules, which cause the
  * instrumentation can be included.
  */
 @Component
