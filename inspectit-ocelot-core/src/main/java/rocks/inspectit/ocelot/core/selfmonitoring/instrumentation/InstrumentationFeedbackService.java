@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.selfmonitoring.instrumentation;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,8 @@ public class InstrumentationFeedbackService extends DynamicallyActivatableServic
     /**
      * If methods should not be included, but rules, use this placeholder, because we need at least one method
      */
-    private static final String NO_METHODS_PLACEHOLDER = "_rules";
+    @VisibleForTesting
+    static final String NO_METHODS_PLACEHOLDER = "_rules";
 
     @Autowired
     private HookManager hookManager;
@@ -36,6 +38,9 @@ public class InstrumentationFeedbackService extends DynamicallyActivatableServic
     private boolean includeMethods = true;
 
     private boolean includeRules = true;
+
+    /** additional boolean for testing, should always be the same as {@link #enabled} */
+    private boolean isActive = false;
 
     public InstrumentationFeedbackService() {
         super("instrumentationFeedback");
@@ -48,6 +53,8 @@ public class InstrumentationFeedbackService extends DynamicallyActivatableServic
      * @return the currently applied instrumentation
      */
     public Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> getInstrumentation() {
+        if(!isActive) return Collections.emptyMap();
+
         Map<Class<?>, Map<String, MethodHook>> activeHooks = hookManager.getHooks();
 
         Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> instrumentationFeedback = new HashMap<>();
@@ -73,6 +80,7 @@ public class InstrumentationFeedbackService extends DynamicallyActivatableServic
             log.info("Enabling InstrumentationFeedback");
             includeMethods = settings.isIncludeMethods();
             includeRules = settings.isIncludeRules();
+            isActive = true;
             return true;
         }
         return false;
@@ -81,6 +89,7 @@ public class InstrumentationFeedbackService extends DynamicallyActivatableServic
     @Override
     protected boolean doDisable() {
         log.info("Disabling InstrumentationFeedback");
+        isActive = false;
         return true;
     }
 
