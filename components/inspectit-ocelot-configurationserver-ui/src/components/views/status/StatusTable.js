@@ -180,11 +180,12 @@ class StatusTable extends React.Component {
     let agentCommandsEnabled = true;
     let serviceStatesAvailable = false;
     let supportArchiveAvailable = false;
+    let feedbackAvailable = false;
     let serviceStates = '{}';
 
     // in case of snapshot version, assume we are up to date
     if (agentVersion == 'SNAPSHOT') {
-      logAvailable = agentCommandsEnabled = serviceStatesAvailable = supportArchiveAvailable = true;
+      logAvailable = agentCommandsEnabled = serviceStatesAvailable = supportArchiveAvailable = feedbackAvailable = true;
     } else if (agentVersionTokens.length === 2 || agentVersionTokens.length === 3) {
       const agentVersionNumber =
         agentVersionTokens[0] * 10000 + agentVersionTokens[1] * 100 + (agentVersionTokens.length === 3 ? agentVersionTokens[2] * 1 : 0);
@@ -194,6 +195,8 @@ class StatusTable extends React.Component {
       supportArchiveAvailable = agentVersionNumber >= 20200;
       // service states are available at version 2.2.0+
       serviceStatesAvailable = agentVersionNumber >= 20200;
+      // instrumentation-feedback is available at version 2.6.11+
+      feedbackAvailable = agentVersionNumber >= 20611;
     }
 
     if (serviceStatesAvailable) {
@@ -201,6 +204,7 @@ class StatusTable extends React.Component {
         serviceStates = JSON.parse(metaInformation.serviceStates);
         logAvailable = serviceStates.LogPreloader;
         agentCommandsEnabled = serviceStates.AgentCommandService;
+        feedbackAvailable = serviceStates.InstrumentationFeedbackService;
         supportArchiveAvailable = agentCommandsEnabled;
       } catch (e) {
         //ignore
@@ -212,6 +216,7 @@ class StatusTable extends React.Component {
       serviceStatesAvailable: serviceStatesAvailable,
       supportArchiveAvailable: supportArchiveAvailable,
       serviceStates: serviceStates,
+      feedbackAvailable: feedbackAvailable,
     };
   };
 
@@ -227,13 +232,15 @@ class StatusTable extends React.Component {
     let logAvailable = false;
     let agentCommandsEnabled = false;
     let serviceStatesAvailable = false;
+    let feedbackAvailable = false;
     let serviceStates = '{}';
     let name = '-';
     let agentIdElement = <span></span>;
     let agentId = '';
 
     if (metaInformation && Object.entries(metaInformation).length > 0) {
-      ({ logAvailable, agentCommandsEnabled, serviceStatesAvailable, serviceStates } = this.resolveServiceAvailability(metaInformation));
+      ({ logAvailable, agentCommandsEnabled, serviceStatesAvailable, serviceStates, feedbackAvailable } =
+        this.resolveServiceAvailability(metaInformation));
 
       if (service) {
         name = service;
@@ -257,7 +264,7 @@ class StatusTable extends React.Component {
             background: #ddd;
             border-color: #ddd;
           }
-          .this :global(.log-button) {
+          .this :global(.instrumentation-feedback-button) {
             width: 1.2rem;
             height: 1.2rem;
             position: absolute;
@@ -266,11 +273,20 @@ class StatusTable extends React.Component {
             background: #ddd;
             border-color: #ddd;
           }
-          .this :global(.service-state-button) {
+          .this :global(.log-button) {
             width: 1.2rem;
             height: 1.2rem;
             position: absolute;
             right: 3rem;
+            top: 0;
+            background: #ddd;
+            border-color: #ddd;
+          }
+          .this :global(.service-state-button) {
+            width: 1.2rem;
+            height: 1.2rem;
+            position: absolute;
+            right: 4.5rem;
             top: 0;
             background: #ddd;
             border-color: #ddd;
@@ -318,6 +334,18 @@ class StatusTable extends React.Component {
           onClick={() => onShowDownloadDialog(agentId, attributes, 'config')}
           tooltip="Show Configuration"
           tooltipOptions={{ showDelay: 500 }}
+        />
+        <Button
+          className="instrumentation-feedback-button"
+          icon="pi pi-search"
+          onClick={() => onShowDownloadDialog(agentId, attributes, 'instrumentation-feedback')}
+          tooltip={
+            feedbackAvailable && agentCommandsEnabled
+              ? 'Show Current Instrumentation'
+              : "<b>Instrumentation not available!</b>\nMake sure to enable 'instrumentation-feedback' and 'agent-commands' in the config, and configure the URL for the agent commands.\nThis feature is only available for agent versions 2.6.11 and higher"
+          }
+          tooltipOptions={{ showDelay: 500 }}
+          disabled={!feedbackAvailable || !agentCommandsEnabled}
         />
         <Button
           className="log-button"
