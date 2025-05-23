@@ -42,7 +42,6 @@ public class InstrumentationFeedbackCommandHandlerTest {
             } catch (IllegalArgumentException e) {
                 assertThat(e.getMessage()).isEqualTo("InstrumentationFeedbackCommandHandler can only handle commands of type InstrumentationFeedbackCommand");
             }
-
         }
 
         @Test
@@ -54,7 +53,6 @@ public class InstrumentationFeedbackCommandHandlerTest {
             DeferredResult<ResponseEntity<?>> result = handler.prepareResponse(agentId, command);
 
             assertThat(result).isNotNull();
-
         }
     }
 
@@ -68,7 +66,7 @@ public class InstrumentationFeedbackCommandHandlerTest {
 
             handler.handleResponse(mockResponse, result);
 
-            assertThat(result.getResult()).isEqualTo(ResponseEntity.ok().body(Collections.emptyMap()));
+            assertThat(result.getResult()).isEqualTo(ResponseEntity.ok().build());
         }
     }
 }

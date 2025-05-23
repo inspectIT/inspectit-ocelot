@@ -37,6 +37,6 @@ public class InstrumentationFeedbackExecutorTest {
         InstrumentationFeedbackCommand.Response response = (InstrumentationFeedbackCommand.Response) executor.execute(command);
 
         assertThat(response.getCommandId()).isEqualTo(command.getCommandId());
-        assertThat(response.getInstrumentationFeedback()).hasSize(1);
+        assertThat(response.getInstrumentationFeedback()).isEqualTo("{}");
     }
 }
