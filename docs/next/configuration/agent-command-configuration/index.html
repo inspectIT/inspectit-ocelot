@@ -160,7 +160,7 @@ maximum number of attempts the reason is logged and the standard polling mechani
 retry cycle to start. Turn retries off by setting <code>inspectit.agent-commands.retry.enabled</code> to <code>false</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="command-specific-configuration"></a><a href="#command-specific-configuration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Command-specific Configuration</h2>
 <p>Some agent commands need specific configuration to work, which is described in the following.</p>
-<h3><a class="anchor" aria-hidden="true" id="log-preloading-for-logs-command"></a><a href="#log-preloading-for-logs-command" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Log Preloading for Logs Command</h3>
+<h3><a class="anchor" aria-hidden="true" id="logs-command-for-log-preloading"></a><a href="#logs-command-for-log-preloading" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Logs Command for Log Preloading</h3>
 <p>The Logs Command allows retrieving the agent logs via the configuration server.
 For that, the agent preloads its own logs into a memory buffer, from which log entries are then retrieved by the command.</p>
 <p>Log preloading is disabled by default and can be enabled as follows:</p>
@@ -185,7 +185,46 @@ For that, the agent preloads its own logs into a memory buffer, from which log e
       </div>
       <div class="admonition-content">
     <p>Please note that any change to the log preloading configuration will cause all previously preloaded messages to be dropped.</p>
-</div></div></span></div></article></div><div class="docLastUpdate"><em>Last updated on 5/19/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/configuration/plugin-configuration"><span class="arrow-prev">← </span><span>Plugin Configuration</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/metrics/metrics"><span>Metrics</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#how-it-works">How it works</a></li><li><a href="#general-configuration">General Configuration</a><ul class="toc-headings"><li><a href="#dynamic-agent-command-url">Dynamic Agent Command URL</a></li><li><a href="#additional-configuration-options">Additional Configuration Options</a></li></ul></li><li><a href="#command-specific-configuration">Command-specific Configuration</a><ul class="toc-headings"><li><a href="#log-preloading-for-logs-command">Log Preloading for Logs Command</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</div></div><h3><a class="anchor" aria-hidden="true" id="instrumentation-feedback-command"></a><a href="#instrumentation-feedback-command" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Instrumentation Feedback Command</h3>
+<p>The instrumentation feedback command allows you to check the currently applied instrumentation of an agent.
+When the configured instrumentation gets applied as asynchronously in batches, there might be a difference
+between configured instrumentation and applied instrumentation.
+Also, sometimes it is not clear, which exact classes will be instrumented.
+This is the case when instrumenting <code>interfaces</code> for instance.
+Therefore, you can enable the instrumentation feedback to check the applied instrumentation.</p>
+<p>Instrumentation feedback is disabled by default and can be enabled as follows:</p>
+<pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation-feedback:</span>
+    <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span>
+</code></pre>
+<p>The instrumentation feedback will always contain a list of instrumented classes.
+For each class the instrumented methods as well as the rules causing the instrumentation will be provided.
+Below, you can find an example:</p>
+<pre><code class="hljs css language-JSON">{
+  <span class="hljs-attr">"instrumented-class"</span>: <span class="hljs-string">"jakarta.servlet.http.HttpServlet"</span>,
+    <span class="hljs-attr">"details"</span>: {
+      <span class="hljs-attr">"service(jakarta.servlet.ServletRequest,jakarta.servlet.ServletResponse)"</span>: [
+        <span class="hljs-string">"r_http_server_record_metric"</span>,
+        <span class="hljs-string">"r_servletapi_extract_details"</span>,
+        <span class="hljs-string">"r_servletapi_detect_entry"</span>,
+        <span class="hljs-string">"r_servletapi_downPropagation"</span>,
+        <span class="hljs-string">"r_servletapi_tracing"</span>,
+        <span class="hljs-string">"..."</span>
+      ]
+  }
+}
+</code></pre>
+<p>Instrumentation feedback can be further configured, using the following properties below <code>inspectit.instrumentation-feedback</code>:</p>
+<table>
+<thead>
+<tr><th>Property</th><th>Default Value</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>include-methods</code></td><td><code>true</code></td><td>Include the instrumented methods to each instrumented class.</td></tr>
+<tr><td><code>include-rules</code></td><td><code>true</code></td><td>Include the rules causing the the instrumentation for the particular method/class.</td></tr>
+</tbody>
+</table>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 5/23/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/configuration/plugin-configuration"><span class="arrow-prev">← </span><span>Plugin Configuration</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/metrics/metrics"><span>Metrics</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#how-it-works">How it works</a></li><li><a href="#general-configuration">General Configuration</a><ul class="toc-headings"><li><a href="#dynamic-agent-command-url">Dynamic Agent Command URL</a></li><li><a href="#additional-configuration-options">Additional Configuration Options</a></li></ul></li><li><a href="#command-specific-configuration">Command-specific Configuration</a><ul class="toc-headings"><li><a href="#logs-command-for-log-preloading">Logs Command for Log Preloading</a></li><li><a href="#instrumentation-feedback-command">Instrumentation Feedback Command</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
