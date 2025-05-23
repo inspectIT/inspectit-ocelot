@@ -152,7 +152,20 @@ inspectit:
       # The maximum duration one retry may take. After the limit is exceeded, the retry will be cancelled.
       time-limit: 32m
 
+  # settings for getting preloading logs
   log-preloading:
+    # true, if logs should be preloaded (to request preloaded logs, agent-commands also have to be enabled!)
     enabled: false
+    # the used log level and higher
     log-level: WARN
+    # the maximum number of log messages to preload. When reaching the size, oldest messages are dropped first
     buffer-size: 128
+
+  # settings for feedback about the currently applied instrumentation
+  instrumentation-feedback:
+    # true, if instrumentation feedback should be available (to request feedback, agent-commands also have to be enabled!)
+    enabled: false
+    # include instrumented methods for each class
+    include-methods: true
+    # include the particular rules, which cause the instrumentation
+    include-rules: true

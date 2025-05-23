@@ -345,6 +345,9 @@ class StatusView extends React.Component {
           case 'log':
             this.fetchLog(agentId);
             break;
+          case 'instrumentation-feedback':
+            this.fetchInstrumentationFeedback(agentId);
+            break;
           case 'archive':
             this.downloadSupportArchive(agentId, attributes);
             break;
@@ -435,6 +438,34 @@ class StatusView extends React.Component {
       () => {
         axios
           .get('/command/logs', {
+            params: { 'agent-id': agentId },
+          })
+          .then((res) => {
+            this.setState({
+              contentValue: res.data,
+              contentLoadingFailed: false,
+              isLoading: false,
+            });
+          })
+          .catch(() => {
+            this.setState({
+              contentValue: null,
+              contentLoadingFailed: true,
+              isLoading: false,
+            });
+          });
+      }
+    );
+  };
+
+  fetchInstrumentationFeedback = (agentId) => {
+    this.setState(
+      {
+        isLoading: true,
+      },
+      () => {
+        axios
+          .get('/command/instrumentation-feedback', {
             params: { 'agent-id': agentId },
           })
           .then((res) => {

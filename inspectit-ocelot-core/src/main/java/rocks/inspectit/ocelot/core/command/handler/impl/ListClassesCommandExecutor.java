@@ -92,7 +92,7 @@ public class ListClassesCommandExecutor implements CommandExecutor {
         ListClassesCommand lcCommand = (ListClassesCommand) command;
         String filter = lcCommand.getFilter();
 
-        log.debug("Executing a ListClassesCommand: {}", lcCommand.getCommandId().toString());
+        log.debug("Executing ListClassesCommand: {}", lcCommand.getCommandId().toString());
 
         Set<Class<?>> setCopy = new HashSet<>(discoveryService.getKnownClasses());
         ListClassesCommand.Response.TypeElement[] result = setCopy.parallelStream()

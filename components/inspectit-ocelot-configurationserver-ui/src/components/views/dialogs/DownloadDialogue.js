@@ -27,6 +27,11 @@ const DownloadDialogue = ({
     contentType + (contextName ? '_' + contextName.replace(/[^a-z0-9-]/gi, '_').toLowerCase() : '') + dialogueSettings.fileExtension;
 
   const download = () => {
+    if (contentType === 'instrumentation-feedback') {
+      // the command returns a JSON string, which gets interpreted as an object, thus we call stringify()
+      contentValue = JSON.stringify(contentValue, null, 2);
+    }
+
     const blob = new Blob([contentValue], { type: dialogueSettings.mimeType });
     return window.URL.createObjectURL(blob);
   };
@@ -40,6 +45,10 @@ const DownloadDialogue = ({
       case 'archive':
         return `Downloading the Support Archive for ${contextName} failed. Make sure agent-commands are enabled and the agent-commands URL is correct in your agent configuration.\n
                 This feature is only available for agent versions 2.2.0 and higher`;
+      case 'instrumentation-feedback':
+        return `Loading the currently applied instrumentation failed.\n
+                Ensure that both agent-commands and instrumentation-feedback are enabled and the agent-commands URL is correct in your agent configuration.\n
+                This feature is only available for agent versions 2.6.11 and higher`;
       default:
         return `${dialogueSettings.header} could not be loaded due to an unexpected error.`;
     }

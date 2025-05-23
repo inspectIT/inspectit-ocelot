@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.command.handler.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
@@ -11,6 +12,7 @@ import java.lang.management.ManagementFactory;
 /**
  * Executor for executing {@link EnvironmentCommand}s.
  */
+@Slf4j
 @Component
 public class EnvironmentCommandExecutor implements CommandExecutor {
 
@@ -39,6 +41,8 @@ public class EnvironmentCommandExecutor implements CommandExecutor {
             String exceptionMessage = "Invalid command type. Executor does not support commands of type " + command.getClass();
             throw new IllegalArgumentException(exceptionMessage);
         }
+
+        log.debug("Executing EnvironmentCommand {}", command.getCommandId().toString());
 
         EnvironmentCommand.Response response = new EnvironmentCommand.Response();
         response.setCommandId(command.getCommandId());

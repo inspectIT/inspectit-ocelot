@@ -127,7 +127,7 @@ retry cycle to start. Turn retries off by setting `inspectit.agent-commands.retr
 
 Some agent commands need specific configuration to work, which is described in the following.
 
-### Log Preloading for Logs Command
+### Logs Command for Log Preloading
 
 The Logs Command allows retrieving the agent logs via the configuration server.
 For that, the agent preloads its own logs into a memory buffer, from which log entries are then retrieved by the command.
@@ -150,3 +150,47 @@ Preloading can be further configured, using the following properties below `insp
 :::warning
 Please note that any change to the log preloading configuration will cause all previously preloaded messages to be dropped.
 :::
+
+### Instrumentation Feedback Command
+
+The instrumentation feedback command allows you to check the currently applied instrumentation of an agent.
+When the configured instrumentation gets applied as asynchronously in batches, there might be a difference
+between configured instrumentation and applied instrumentation. 
+Also, sometimes it is not clear, which exact classes will be instrumented. 
+This is the case when instrumenting `interfaces` for instance.
+Therefore, you can enable the instrumentation feedback to check the applied instrumentation.
+
+Instrumentation feedback is disabled by default and can be enabled as follows:
+
+```YAML
+inspectit:
+  instrumentation-feedback:
+    enabled: true
+```
+
+The instrumentation feedback will always contain a list of instrumented classes. 
+For each class the instrumented methods as well as the rules causing the instrumentation will be provided.
+Below, you can find an example:
+
+```JSON
+{
+  "instrumented-class": "jakarta.servlet.http.HttpServlet",
+    "details": {
+      "service(jakarta.servlet.ServletRequest,jakarta.servlet.ServletResponse)": [
+        "r_http_server_record_metric",
+        "r_servletapi_extract_details",
+        "r_servletapi_detect_entry",
+        "r_servletapi_downPropagation",
+        "r_servletapi_tracing",
+        "..."
+      ]
+  }
+}
+```
+
+Instrumentation feedback can be further configured, using the following properties below `inspectit.instrumentation-feedback`:
+
+| Property          | Default Value | Description                                                                        |
+|-------------------|---------------|------------------------------------------------------------------------------------|
+| `include-methods` | `true`        | Include the instrumented methods to each instrumented class.                       |
+| `include-rules`   | `true`        | Include the rules causing the the instrumentation for the particular method/class. |

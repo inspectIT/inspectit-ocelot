@@ -5,6 +5,7 @@ import com.google.common.collect.Multiset;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
+import rocks.inspectit.ocelot.commons.models.command.impl.InstrumentationFeedbackCommand;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodHook;
@@ -24,6 +25,13 @@ public class MethodHookConfiguration {
      */
     @Builder.Default
     private RuleTracingSettings tracing = RuleTracingSettings.NO_TRACING_AND_ATTRIBUTES;
+
+    /**
+     * Stores the names of all enabled rules which have a scope which matches to this method.
+     * Used for debugging and {@link InstrumentationFeedbackCommand}.
+     */
+    @Singular
+    private List<String> matchedRulesNames;
 
     /**
      * Holds all actions executed in the specified order directly before the ones in {@link #entryActions}.

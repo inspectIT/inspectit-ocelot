@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.command.handler.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.impl.PingCommand;
@@ -9,6 +10,7 @@ import rocks.inspectit.ocelot.core.command.handler.CommandExecutor;
 /**
  * Executor for executing {@link PingCommand}s.
  */
+@Slf4j
 @Component
 public class PingCommandExecutor implements CommandExecutor {
 
@@ -38,6 +40,8 @@ public class PingCommandExecutor implements CommandExecutor {
             String exceptionMessage = "Invalid command type. Executor does not support commands of type " + command.getClass();
             throw new IllegalArgumentException(exceptionMessage);
         }
+
+        log.debug("Executing PingCommand {}", command.getCommandId().toString());
 
         return new PingCommand.Response(command.getCommandId());
     }

@@ -36,11 +36,16 @@ public class MethodHookConfigurationResolver {
      * @param allSettings  The global instrumentation configuration, used for the global master switches
      * @param matchedRules All enabled rules which have a scope which matches to this method, must contain at least one value
      *
-     * @return
+     * @return the configuration for the method
      */
     public MethodHookConfiguration buildHookConfiguration(InstrumentationConfiguration allSettings, Set<InstrumentationRule> matchedRules) throws Exception {
 
         val result = MethodHookConfiguration.builder();
+
+        Set<String> matchedRulesNames = matchedRules.stream()
+                .map(InstrumentationRule::getName)
+                .collect(Collectors.toSet());
+        result.matchedRulesNames(matchedRulesNames);
 
         result.preEntryActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getPreEntryActions));
         result.entryActions(combineAndOrderActionCalls(matchedRules, InstrumentationRule::getEntryActions));

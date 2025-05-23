@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 /**
  * Implementation for {@link IHookManager}.
  * However, this class does not directly implement the interface to avoid issues with spring annotation scanning.
- * Instead it assigns a lambda referring to HookManager{@link #getHook(Class, String)} to {@link Instances#hookManager}.
+ * Instead, it assigns a lambda referring to HookManager{@link #getHook(Class, String)} to {@link Instances#hookManager}.
  */
 @Slf4j
 @Service
@@ -179,6 +179,15 @@ public class HookManager {
     }
 
     /**
+     * Get the currently active hooks. The returned map is unmodifiable.
+     *
+     * @return the currently active hooks
+     */
+    public Map<Class<?>, Map<String, MethodHook>> getHooks() {
+        return Collections.unmodifiableMap(hooks);
+    }
+
+    /**
      * Starts an update of the hook configurations.
      * The returned HookUpdate copies all currently active hooks and resets them.
      * The configuration can be changed as needed and activated atomically using {@link HookUpdate#commitUpdate()}.
@@ -191,7 +200,7 @@ public class HookManager {
 
     /**
      * A {@link HookUpdate} instance represents a (potential) change to apply to the {@link HookManager}.
-     * Hooks for any class can be updated by calling {@link #updateHooksForClass(Class)}. This updates
+     * Hooks for any class can be updated by calling {@link #updateHooksForClass(Class)}. These updates
      * are stored in the {@link HookUpdate} and are NOT directly active on the {@link HookManager}.
      * <p>
      * All updates are applied atomically by calling {@link #commitUpdate()}.
