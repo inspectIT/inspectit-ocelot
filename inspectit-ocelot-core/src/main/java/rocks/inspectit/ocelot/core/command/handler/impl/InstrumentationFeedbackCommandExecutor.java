@@ -55,7 +55,7 @@ public class InstrumentationFeedbackCommandExecutor implements CommandExecutor {
         InstrumentationFeedbackCommand.Response response = new InstrumentationFeedbackCommand.Response();
         response.setCommandId(command.getCommandId());
 
-        Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> instrumentationFeedback = service.getInstrumentation();
+        String instrumentationFeedback = service.getInstrumentation();
         response.setInstrumentationFeedback(instrumentationFeedback);
 
         return response;

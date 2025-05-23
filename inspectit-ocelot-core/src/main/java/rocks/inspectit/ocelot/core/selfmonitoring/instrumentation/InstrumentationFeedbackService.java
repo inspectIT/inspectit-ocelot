@@ -1,11 +1,13 @@
 package rocks.inspectit.ocelot.core.selfmonitoring.instrumentation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.google.common.annotations.VisibleForTesting;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.commons.models.command.impl.InstrumentationFeedbackCommand;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.InstrumentationFeedbackSettings;
 import rocks.inspectit.ocelot.core.instrumentation.hook.HookManager;
@@ -33,8 +35,12 @@ public class InstrumentationFeedbackService extends DynamicallyActivatableServic
     @VisibleForTesting
     static final String NO_METHODS_PLACEHOLDER = "_rules";
 
+    private static final String EMPTY = "{}";
+
     @Autowired
     private HookManager hookManager;
+
+    private final ObjectMapper mapper;
 
     private boolean includeMethods = true;
 
@@ -45,27 +51,33 @@ public class InstrumentationFeedbackService extends DynamicallyActivatableServic
 
     public InstrumentationFeedbackService() {
         super("instrumentationFeedback");
+        mapper = initializeMapper();
     }
 
     /**
-     * Get the collection of instrumented classes. Additionally, the instrumented methods and/or the particular rules
+     * Get the currently instrumented classes. Additionally, the instrumented methods and/or the particular rules
      * might be included for each class.
      *
-     * @return the currently applied instrumentation
+     * @return the currently applied instrumentation as JSON string
      */
-    public Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> getInstrumentation() {
-        if(!isActive) return Collections.emptyMap();
+    public String getInstrumentation() {
+        if(!isActive) return EMPTY;
 
         Map<Class<?>, Map<String, MethodHook>> activeHooks = hookManager.getHooks();
-
-        Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> instrumentationFeedback = new HashMap<>();
+        List<ClassInstrumentation> instrumentationFeedback = new LinkedList<>();
 
         activeHooks.forEach((clazz, methodHookMap) -> {
-            InstrumentationFeedbackCommand.ClassInstrumentation classInstrumentation = resolveClassInstrumentation(methodHookMap);
-            instrumentationFeedback.put(clazz.getName(), classInstrumentation);
+            Map<String, List<String>> details = resolveInstrumentationDetails(methodHookMap);
+            ClassInstrumentation classInstrumentation = new ClassInstrumentation(clazz.getName(), details);
+            instrumentationFeedback.add(classInstrumentation);
         });
 
-        return instrumentationFeedback;
+        try {
+            return mapper.writeValueAsString(instrumentationFeedback);
+        } catch (JsonProcessingException e) {
+            log.error("Could not serialize instrumentation feedback: {}", e.getMessage());
+            return EMPTY;
+        }
     }
 
     @Override
@@ -97,18 +109,17 @@ public class InstrumentationFeedbackService extends DynamicallyActivatableServic
     /**
      * @param methodHookMap the map of method signatures and {@link MethodHook}s
      *
-     * @return the resolved {@link InstrumentationFeedbackCommand.ClassInstrumentation}
+     * @return the resolved instrumentation details for a particular class
      */
-    private InstrumentationFeedbackCommand.ClassInstrumentation resolveClassInstrumentation(Map<String, MethodHook> methodHookMap) {
-        Map<String, List<String>> methodInstrumentationFeedback = new HashMap<>();
-        val classInstrumentation = new InstrumentationFeedbackCommand.ClassInstrumentation(methodInstrumentationFeedback);
+    private Map<String, List<String>> resolveInstrumentationDetails(Map<String, MethodHook> methodHookMap) {
+        Map<String, List<String>> classInstrumentation = new HashMap<>();
 
-        // fill the methodInstrumentationFeedback according to the current settings
+        // fill the classInstrumentation according to the current settings
         if (includeOnlyClasses()) return classInstrumentation;
 
         else if (includeJustMethods()) {
             methodHookMap.keySet()
-                    .forEach(method -> methodInstrumentationFeedback.put(method, Collections.emptyList()));
+                    .forEach(method -> classInstrumentation.put(method, Collections.emptyList()));
         }
 
         else if (includeJustRules()) {
@@ -119,13 +130,13 @@ public class InstrumentationFeedbackService extends DynamicallyActivatableServic
                     .distinct()
                     .collect(Collectors.toList());
 
-            methodInstrumentationFeedback.put(NO_METHODS_PLACEHOLDER, matchedRules);
+            classInstrumentation.put(NO_METHODS_PLACEHOLDER, matchedRules);
         }
 
         else {
             methodHookMap.forEach((method, methodHook) -> {
                 List<String> matchedRules = methodHook.getSourceConfiguration().getMatchedRulesNames();
-                methodInstrumentationFeedback.put(method, matchedRules);
+                classInstrumentation.put(method, matchedRules);
             });
         }
 
@@ -151,5 +162,26 @@ public class InstrumentationFeedbackService extends DynamicallyActivatableServic
      */
     private boolean includeJustRules() {
         return includeRules && !includeMethods;
+    }
+
+    private ObjectMapper initializeMapper() {
+        return new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE);
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @VisibleForTesting
+    static class ClassInstrumentation {
+
+        /**
+         * The name of the instrumented class
+         */
+        String instrumentedClass;
+
+        /**
+         * The collection of instrumented methods with their particular rules
+         */
+        Map<String, List<String>> details;
     }
 }

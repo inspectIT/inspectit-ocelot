@@ -27,10 +27,7 @@ public class InstrumentationFeedbackExecutorTest {
 
     @BeforeEach
     void setUp() {
-        Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> instrumentation = new HashMap<>();
-        InstrumentationFeedbackCommand.ClassInstrumentation classInstrumentation = new InstrumentationFeedbackCommand.ClassInstrumentation();
-        instrumentation.put(InstrumentationFeedbackExecutorTest.class.getName(), classInstrumentation);
-        when(service.getInstrumentation()).thenReturn(instrumentation);
+        when(service.getInstrumentation()).thenReturn("{}");
     }
 
     @Test

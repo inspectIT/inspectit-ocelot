@@ -1,12 +1,15 @@
 package rocks.inspectit.ocelot.core.selfmonitoring.instrumentation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.commons.models.command.impl.InstrumentationFeedbackCommand;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.InstrumentationFeedbackSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
@@ -29,6 +32,8 @@ public class InstrumentationFeedbackServiceTest {
     @Mock
     private HookManager hookManager;
 
+    private static final ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(new PropertyNamingStrategies.KebabCaseStrategy());
+
     private static final String method1 = "method1";
 
     private static final String method2 = "method2";
@@ -50,64 +55,86 @@ public class InstrumentationFeedbackServiceTest {
     }
 
     @Test
-    void shouldCollectInstrumentationWithMethodsAndRules() {
+    void shouldCollectInstrumentationWithMethodsAndRules() throws JsonProcessingException {
         service.doEnable(createConfig(true, true));
 
-        Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> result = service.getInstrumentation();
+        String resultString = service.getInstrumentation();
+        List<InstrumentationFeedbackService.ClassInstrumentation> result = deserialize(resultString);
 
         assertThat(result).hasSize(1);
-        assertThat(result).containsKey(InstrumentationFeedbackServiceTest.class.getName());
-        Map<String, List<String>> classInstrumentation =
-                result.values().iterator().next().getClassInstrumentation();
-        assertThat(classInstrumentation).containsEntry(method1, rules1);
-        assertThat(classInstrumentation).containsEntry(method2, rules2);
+        InstrumentationFeedbackService.ClassInstrumentation classInstrumentation = result.iterator().next();
+        assertThat(classInstrumentation.getInstrumentedClass()).isEqualTo(InstrumentationFeedbackServiceTest.class.getName());
+
+        Map<String, List<String>> details = classInstrumentation.getDetails();
+        assertThat(details).hasSize(2);
+        assertThat(details).containsEntry(method1, rules1);
+        assertThat(details).containsEntry(method2, rules2);
     }
 
     @Test
-    void shouldCollectInstrumentationWithJustMethods() {
+    void shouldCollectInstrumentationWithJustMethods() throws JsonProcessingException {
         service.doEnable(createConfig(true, false));
 
-        Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> result = service.getInstrumentation();
+        String resultString = service.getInstrumentation();
+        List<InstrumentationFeedbackService.ClassInstrumentation> result = deserialize(resultString);
 
         assertThat(result).hasSize(1);
-        assertThat(result).containsKey(InstrumentationFeedbackServiceTest.class.getName());
-        Map<String, List<String>> classInstrumentation =
-                result.values().iterator().next().getClassInstrumentation();
-        assertThat(classInstrumentation).containsEntry(method1, Collections.emptyList());
-        assertThat(classInstrumentation).containsEntry(method2, Collections.emptyList());
+        InstrumentationFeedbackService.ClassInstrumentation classInstrumentation = result.iterator().next();
+        assertThat(classInstrumentation.getInstrumentedClass()).isEqualTo(InstrumentationFeedbackServiceTest.class.getName());
+
+        Map<String, List<String>> details = classInstrumentation.getDetails();
+        assertThat(details).hasSize(2);
+        assertThat(details).containsEntry(method1, Collections.emptyList());
+        assertThat(details).containsEntry(method2, Collections.emptyList());
     }
 
     @Test
-    void shouldCollectInstrumentationWithJustRules() {
+    void shouldCollectInstrumentationWithJustRules() throws JsonProcessingException {
         service.doEnable(createConfig(false, true));
 
-        Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> result = service.getInstrumentation();
+        String resultString = service.getInstrumentation();
+        List<InstrumentationFeedbackService.ClassInstrumentation> result = deserialize(resultString);
 
         assertThat(result).hasSize(1);
-        assertThat(result).containsKey(InstrumentationFeedbackServiceTest.class.getName());
-        Map<String, List<String>> classInstrumentation =
-                result.values().iterator().next().getClassInstrumentation();
-        assertThat(classInstrumentation).containsEntry(NO_METHODS_PLACEHOLDER, rules2);
+        InstrumentationFeedbackService.ClassInstrumentation classInstrumentation = result.iterator().next();
+        assertThat(classInstrumentation.getInstrumentedClass()).isEqualTo(InstrumentationFeedbackServiceTest.class.getName());
+
+        Map<String, List<String>> details = classInstrumentation.getDetails();
+        assertThat(details).hasSize(1);
+        assertThat(details).containsEntry(NO_METHODS_PLACEHOLDER, rules2);
     }
 
     @Test
-    void shouldCollectInstrumentationWithJustClasses() {
+    void shouldCollectInstrumentationWithJustClasses() throws JsonProcessingException {
         service.doEnable(createConfig(false, false));
 
-        Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> result = service.getInstrumentation();
+        String resultString = service.getInstrumentation();
+        List<InstrumentationFeedbackService.ClassInstrumentation> result = deserialize(resultString);
 
         assertThat(result).hasSize(1);
-        assertThat(result).containsKey(InstrumentationFeedbackServiceTest.class.getName());
-        Map<String, List<String>> classInstrumentation =
-                result.values().iterator().next().getClassInstrumentation();
-        assertThat(classInstrumentation).isEmpty();
+        InstrumentationFeedbackService.ClassInstrumentation classInstrumentation = result.iterator().next();
+        assertThat(classInstrumentation.getInstrumentedClass()).isEqualTo(InstrumentationFeedbackServiceTest.class.getName());
+        assertThat(classInstrumentation.getDetails()).isEmpty();
     }
 
     @Test
     void shouldCollectNothingWhenNotEnabled() {
-        Map<String, InstrumentationFeedbackCommand.ClassInstrumentation> result = service.getInstrumentation();
+        String result = service.getInstrumentation();
 
-        assertThat(result).isEmpty();
+        assertThat(result).isEqualTo("{}");
+    }
+
+    /**
+     * Converts the JSON string back to a Java object for easier testing.
+     *
+     * @param resultString the instrumentation feedback as JSON string
+     * @return the instrumentation feedback as Java object
+     */
+    private static List<InstrumentationFeedbackService.ClassInstrumentation> deserialize(String resultString) throws JsonProcessingException {
+        return mapper.readValue(
+                resultString,
+                new TypeReference<List<InstrumentationFeedbackService.ClassInstrumentation>>() {}
+        );
     }
 
     private static InspectitConfig createConfig(boolean includeMethods, boolean includeRules) {

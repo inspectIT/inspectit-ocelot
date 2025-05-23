@@ -7,12 +7,10 @@ import lombok.NoArgsConstructor;
 import rocks.inspectit.ocelot.commons.models.command.Command;
 import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * Command for requesting the currently applied instrumentation.
- * The command response contains a set of classes, theirs methods and the active rules for these methods.
+ * The command response contains a set of classes, theirs methods and the particular rules, which caused
+ * the instrumentation.
  */
 @Data
 @AllArgsConstructor
@@ -24,24 +22,15 @@ public class InstrumentationFeedbackCommand extends Command {
      */
     public static final String TYPE_IDENTIFIER = "instrumentation-feedback";
 
-    /**
-     * Contains the set of classes and their instrumentation
-     */
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @EqualsAndHashCode(callSuper = true)
     public static class Response extends CommandResponse {
-        private Map<String, ClassInstrumentation> instrumentationFeedback;
-    }
 
-    /**
-     * Contains the set of methods and their instrumentation rules for a specific class
-     */
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ClassInstrumentation {
-        private Map<String, List<String>> classInstrumentation;
+        /**
+         * JSON string with the currently applied instrumentation
+         */
+        private String instrumentationFeedback;
     }
 }
