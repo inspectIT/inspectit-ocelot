@@ -29,7 +29,7 @@
     "axios": "^1.9.0",
     "classnames": "^2.5.1",
     "dateformat": "^3.0.3",
-    "eslint-config-next": "^14.2.26",
+    "eslint-config-next": "^15.3.2",
     "file-saver": "^2.0.5",
     "js-yaml": "^4.1.0",
     "jszip": "^3.10.0",
