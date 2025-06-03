@@ -100,7 +100,7 @@ public class ApacheHttpClientContextPropagationTest {
             }
 
             verify(getRequestedFor(urlEqualTo("/test"))
-                    .withHeader("Correlation-Context", containing("down_propagated=myvalue")));
+                    .withHeader("Baggage", containing("down_propagated=myvalue")));
         }
 
     }

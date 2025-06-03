@@ -85,7 +85,7 @@ public class HttpUrlConnectionContextPropagationTest {
             }
 
             verify(getRequestedFor(urlEqualTo("/test"))
-                    .withHeader("Correlation-Context", containing("down_propagated=myvalue")));
+                    .withHeader("Baggage", containing("down_propagated=myvalue")));
         }
 
         @Test
@@ -99,7 +99,7 @@ public class HttpUrlConnectionContextPropagationTest {
             }
 
             verify(getRequestedFor(urlEqualTo("/test"))
-                    .withHeader("Correlation-Context", containing("down_propagated=myvalue")));
+                    .withHeader("Baggage", containing("down_propagated=myvalue")));
         }
 
         @Test
@@ -116,7 +116,7 @@ public class HttpUrlConnectionContextPropagationTest {
             urlConnection.getInputStream();
 
             verify(getRequestedFor(urlEqualTo("/test"))
-                    .withHeader("Correlation-Context", containing("down_propagated=myvalue")));
+                    .withHeader("Baggage", containing("down_propagated=myvalue")));
         }
 
         @Test
@@ -130,7 +130,7 @@ public class HttpUrlConnectionContextPropagationTest {
             }
 
             verify(getRequestedFor(urlEqualTo("/test"))
-                    .withHeader("Correlation-Context", containing("down_propagated=myvalue")));
+                    .withHeader("Baggage", containing("down_propagated=myvalue")));
         }
 
     }

@@ -31,8 +31,8 @@ inspectit:
     # global default sample mode used to decide if a trace shall be sampled or not. Can either be 'PARENT_BASED', 'TRACE_ID_RATIO_BASED' or 'HYBRID_PARENT_TRACE_ID_RATIO_BASED'
     sample-mode: PARENT_BASED
     # the format for propagating correlation headers
-    # options are: B3, TRACE_CONTEXT, DATADOG
-    propagation-format: B3
+    # options are: TRACE_CONTEXT, B3, DATADOG
+    propagation-format: TRACE_CONTEXT
     # defines when to add common tags as attributes to spans
     # options are: NEVER, ON_GLOBAL_ROOT, ON_LOCAL_ROOT, ALWAYS
     add-common-tags: ON_LOCAL_ROOT
