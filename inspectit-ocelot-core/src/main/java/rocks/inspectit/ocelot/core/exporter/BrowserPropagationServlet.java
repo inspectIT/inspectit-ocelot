@@ -23,8 +23,12 @@ import java.util.stream.Collectors;
  * <p>
  * The expected data format to receive and export data are EntrySets, for example:
  * [{"key1": "123"}, {"key2": "321"}]
+ * <p>
+ * <b>Marked for removal</b>, because the agent should not expose such an API to the outside.
+ * Instead, use any data within the application requests via the {@link BAGGAGE_HEADER}
  */
 @Slf4j
+@Deprecated
 public class BrowserPropagationServlet extends HttpServlet {
 
     /**
@@ -36,14 +40,16 @@ public class BrowserPropagationServlet extends HttpServlet {
      * List of allowed Origins, which are able to access the HTTP-server
      */
     private final List<String> allowedOrigins;
+
     private final ObjectMapper mapper;
+
     private final BrowserPropagationSessionStorage sessionStorage;
 
     public BrowserPropagationServlet(String sessionIdHeader, List<String> allowedOrigins) {
         this.sessionIdHeader = sessionIdHeader;
         this.allowedOrigins = allowedOrigins;
         this.mapper = new ObjectMapper();
-        this.sessionStorage = BrowserPropagationSessionStorage.getInstance();
+        this.sessionStorage = BrowserPropagationSessionStorage.get();
     }
 
     @Override

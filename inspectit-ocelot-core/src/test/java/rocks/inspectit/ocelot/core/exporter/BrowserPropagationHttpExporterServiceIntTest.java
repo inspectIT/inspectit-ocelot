@@ -67,7 +67,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
     void writeDataIntoStorage() {
         Map<String, Object> data = new HashMap<>();
         data.put("key", "value");
-        sessionStorage = BrowserPropagationSessionStorage.getInstance();
+        sessionStorage = BrowserPropagationSessionStorage.get();
         sessionStorage.getOrCreateDataStorage(sessionID).writeData(data);
     }
 
