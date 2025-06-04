@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -64,9 +65,9 @@ public class ContextPropagationUtil {
     private static final Set<String> PROPAGATION_FIELDS = new HashSet<>();
 
     /**
-     * The currently used propagation format. Defaults to {@link B3Propagator#injectingMultiHeaders()} ()}
+     * The currently used propagation format. Defaults to {@link W3CTraceContextPropagator}
      */
-    private static TextMapPropagator propagationFormat = B3Propagator.injectingMultiHeaders();
+    private static TextMapPropagator propagationFormat = W3CTraceContextPropagator.getInstance();
 
     public static final TextMapSetter<Map<String, String>> MAP_INJECTOR = new TextMapSetter<Map<String, String>>() {
         @Override
@@ -88,6 +89,7 @@ public class ContextPropagationUtil {
     };
 
     static {
+        // We could try to use the W3CBaggagePropagator for baggage like the W3CTraceContextPropagator for traces
         PROPAGATION_FIELDS.add(BAGGAGE_HEADER);
         PROPAGATION_FIELDS.add(SESSION_ID_HEADER);
         PROPAGATION_FIELDS.addAll(B3Propagator.injectingSingleHeader().fields());
@@ -202,7 +204,7 @@ public class ContextPropagationUtil {
      */
     public static void readPropagatedDataFromHeaderMap(Map<String, String> propagationMap, InspectitContextImpl target) {
         if (propagationMap.containsKey(BAGGAGE_HEADER))
-            readCorrelationContext(propagationMap.get(BAGGAGE_HEADER), target);
+            readBaggage(propagationMap.get(BAGGAGE_HEADER), target);
     }
 
     /**
@@ -265,9 +267,9 @@ public class ContextPropagationUtil {
      * Extracts the {@link SpanContext} from the given {@code propagator}
      *
      * @param propagator
-     * @param carrier    holds the propagation fields
+     * @param carrier holds the propagation fields
      *
-     * @return
+     * @return the extracted span context
      */
 
     private static SpanContext extractPropagatedSpanContext(TextMapPropagator propagator, Map<String, String> carrier) {
@@ -301,14 +303,14 @@ public class ContextPropagationUtil {
     }
 
     /**
-     * Parses the value of the Correlation-Context header, storing the propagated data values into the target context.
+     * Parses the value of the Baggage header, storing the propagated data values into the target context.
      *
-     * @param correlationContext the value of the Correlation-Context header
-     * @param target             the target context in which the data will be stored
+     * @param baggage the value of the Baggage header
+     * @param target  the target context in which the data will be stored
      */
-    private static void readCorrelationContext(String correlationContext, InspectitContextImpl target) {
-        correlationContext = correlationContext.trim();
-        for (String keyValuePair : COMMA_WITH_WHITESPACES.split(correlationContext)) {
+    private static void readBaggage(String baggage, InspectitContextImpl target) {
+        baggage = baggage.trim();
+        for (String keyValuePair : COMMA_WITH_WHITESPACES.split(baggage)) {
             try {
                 //split into assignment and attributes
                 String[] pairAndProperties = SEMICOLON_WITH_WHITESPACES.split(keyValuePair);
@@ -380,7 +382,8 @@ public class ContextPropagationUtil {
     }
 
     /**
-     * Updates the current session-id-header used for browser propagation
+     * Updates the current session-id-header used for browser propagation.
+     *
      * @param sessionIdHeader new session-id-header
      */
     public static void setSessionIdHeader(String sessionIdHeader) {
