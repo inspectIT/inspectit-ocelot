@@ -451,7 +451,7 @@ class StatusTable extends React.Component {
             width: 1.2rem;
             height: 1.2rem;
             position: absolute;
-            right: 0;
+            right: -0.5rem;
             top: 0;
             background: #ddd;
             border-color: #ddd;
@@ -617,7 +617,7 @@ class StatusTable extends React.Component {
         <DataTable value={agentValues} rowHover reorderableColumns>
           <Column body={this.iconTemplate} style={{ width: '34px' }} />
           <Column header="Name" field="name" body={this.nameTemplate} sortable style={{ width: '400px' }} />
-          <Column header="Agent State" field="health" body={this.agentHealthTemplate} sortable style={{ width: '150px' }} />
+          <Column header="Agent State" field="health" body={this.agentHealthTemplate} sortable style={{ width: '120px' }} />
           <Column
             header="Agent Version"
             field="metaInformation.agentVersion"
