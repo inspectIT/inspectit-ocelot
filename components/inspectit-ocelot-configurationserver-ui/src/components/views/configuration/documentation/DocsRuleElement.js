@@ -1,6 +1,5 @@
 import React from 'react';
 import _ from 'lodash';
-import ReactTooltip from 'react-tooltip';
 
 const KeyValueItem = ({ keyString, value, valueOrigin, ruleOrigin, scrollTo }) => {
   return (
@@ -106,8 +105,6 @@ const DocsRuleElement = ({ rule, scrollTo }) => {
           color: #e8a034;
         }
       `}</style>
-
-      <ReactTooltip effect="solid" />
 
       <div>
         {include.length > 0 && (
