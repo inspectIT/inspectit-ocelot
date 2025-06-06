@@ -86,7 +86,7 @@ const BaseDocsElement = ({ data, type, registerRef, scrollTo }) => {
           <div className="title-row">
             <span className="title">{element.name}</span>
             {element.since && (
-              <span className="since" title="This element exists since..">
+              <span className="since" title="This element exists since">
                 {element.since}
               </span>
             )}
