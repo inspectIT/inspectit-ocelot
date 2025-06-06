@@ -126,9 +126,11 @@ The configuration options are the following:</p>
 <tr><td><code>is-tag</code></td><td><code>true</code> if the data key is also a <a href="/inspectit-ocelot/docs/next/metrics/common-tags">common tag</a> or is used as tag in any <a href="/inspectit-ocelot/docs/next/metrics/custom-metrics">metric definition</a>, <code>false</code> otherwise</td><td>If true, this data will act as a tag when metrics are recorded. This does not influence propagation.</td></tr>
 </tbody>
 </table>
-<p>Note that you are free to use data keys without explicitly defining them in the <code>inspectit.instrumentation.data</code> section. In this case simply all settings will have their default value.</p>
+<p>Note that you are free to use data keys without explicitly defining them in the <code>inspectit.instrumentation.data</code> section.
+In this case simply all settings will have their default value.</p>
 <h2><a class="anchor" aria-hidden="true" id="interaction-with-opencensus-tags"></a><a href="#interaction-with-opencensus-tags" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Interaction with OpenCensus Tags</h2>
-<p>As explained previously, our inspectIT context can be seen as a more flexible variation of OpenCensus tags. In fact, we designed the inspectIT context so that it acts as a superset of the OpenCensus TagContext.</p>
+<p>As explained previously, our inspectIT context can be seen as a more flexible variation of OpenCensus tags.
+In fact, we designed the inspectIT context so that it acts as a superset of the OpenCensus TagContext.</p>
 <p>Firstly, when an instrumented method is entered, a new inspectIT context is created.
 At this point, it imports any tag values published by OpenCensus directly as data.
 This also includes the <a href="/inspectit-ocelot/docs/next/metrics/common-tags">common tags</a> created by inspectIT. This means, that you can simply read (and override)
@@ -140,19 +142,54 @@ these application tags will also be visible in the inspectIT context. Secondly, 
 of each rule, a new TagContext is opened making the tags written there accessible to metrics collected by your application.
 Hereby, only data for which down propagation was configured to be <code>JVM_LOCAL</code> or greater and for which <code>is-tag</code> is true
 will be visible as tags.</p>
+<h2><a class="anchor" aria-hidden="true" id="baggage"></a><a href="#baggage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Baggage</h2>
+<p>As mentioned previously, data tags can be used across JVM borders when configured for <code>GLOBAL</code> propagation.
+Then, the data can be read from incoming HTTP headers or can be written into outgoing HTTP headers.
+inspectIT Ocelot will always read or write all globally propagated data via the <code>baggage</code> header.
+The header contains a list of key-value pairs in the following format:</p>
+<pre><code class="hljs">baggage: key<span class="hljs-number">1</span>=<span class="hljs-keyword">value</span><span class="hljs-number">1</span>,key<span class="hljs-number">2</span>=<span class="hljs-keyword">value</span><span class="hljs-number">2</span>
+</code></pre>
+<p>You can find more information about the header format <a href="https://github.com/w3c/baggage/blob/main/baggage/HTTP_HEADER_FORMAT.md">here</a>.</p>
+<p>Within <a href="/inspectit-ocelot/docs/next/instrumentation/actions">actions</a>, data can be read from or written into HTTP headers.
+The <em>inspectIT context</em> <code>_context</code> <a href="/inspectit-ocelot/docs/next/instrumentation/actions#special-parameter">special parameter</a> offers
+multiple methods for <code>GLOBAL</code> propagation.</p>
+<ul>
+<li><code>readDownPropagationHeaders(Map&lt;String,String&gt; headers)</code>: Read the baggage header from incoming HTTP request headers</li>
+<li><code>readUpPropagationHeaders(Map&lt;String,String&gt; headers)</code>: Read the baggage header from returned HTTP response headers</li>
+<li><code>getDownPropagationHeaders()</code>: Get the recorded baggage header to include them in outgoing HTTP request headers</li>
+<li><code>getUpPropagationHeaders()</code>: Get the recorded baggage header to include them in answering HTTP response headers</li>
+</ul>
+<p>With these methods data can only be read from or written into the current <em>inspectIT context</em>. The data has to be further propagated
+to be accessible in other locations, e.g. other <a href="/inspectit-ocelot/docs/next/instrumentation/scopes">scopes</a>.
+The <a href="https://github.com/inspectIT/inspectit-ocelot/tree/master/inspectit-ocelot-config/src/main/resources/rocks/inspectit/ocelot/config/default/instrumentation/actions/http">inspectIT default instrumentation</a> provides some examples for using these methods.</p>
+
+    <div class="admonition admonition-important">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"/></svg></div> important</h5>
+      </div>
+      <div class="admonition-content">
+    <p>Please note that up to version <code>2.6.10</code> the header name was <code>correlation-context</code> instead of <code>baggage</code>. The header value format remained unchanged.</p>
+</div></div><h2><a class="anchor" aria-hidden="true" id="browser-propagation-deprecated"></a><a href="#browser-propagation-deprecated" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Browser Propagation (deprecated)</h2>
 <!-- 
-Please rework browser propagation, so it is no longer possible to speak with the agent from outside
+Please rework (or remove) browser propagation, so it is no longer possible to speak with the agent from outside
 See: https://github.com/inspectIT/inspectit-ocelot/issues/1703
 -->
-<h2><a class="anchor" aria-hidden="true" id="browser-propagation"></a><a href="#browser-propagation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Browser Propagation</h2>
 <p>Data enabled for browser propagation will be stored inside a special dictionary.
-This dictionary can be exposed via REST-API, if <a href="/inspectit-ocelot/docs/next/tags/tags-exporters#http-exporter">inspectit.exporters.tags.http</a> is enabled.
+This dictionary can be exposed via REST-API, if the <a href="/inspectit-ocelot/docs/next/tags/tags-exporters#http-exporter">Tags-HTTP-Exporter</a> is enabled.
 A browser can read this data via GET-requests.</p>
-<p>Additionally, a browser can write data into the storage via PUT-requests, if browser- as well as down-propagation is enabled for a data key, the data written by the browser will be stored in the <em>inspectIT context</em>.
+<p>Additionally, a browser can write data into the storage via PUT-requests, if browser- as well as down-propagation is
+enabled for a data key. The data written by the browser will be stored in the <em>inspectIT context</em>.
 Please note, before writing or reading browser propagation data, you need to provide a session-ID inside the request-header.
 After that, all data belonging to the current session will be stored behind this session-ID.
 For more information, see <a href="/inspectit-ocelot/docs/next/tags/tags-exporters#http-exporter">Tags-HTTP-Exporter</a>.</p>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 5/23/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/rules"><span class="arrow-prev">← </span><span>Rules</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/metrics"><span>Collecting Metrics</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li><li><a href="#browser-propagation">Browser Propagation</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+
+    <div class="admonition admonition-important">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"/></svg></div> important</h5>
+      </div>
+      <div class="admonition-content">
+    <p>We recommend to propagate data via <a href="#baggage">baggage</a> instead, so the agent does not expose an API.</p>
+</div></div></span></div></article></div><div class="docLastUpdate"><em>Last updated on 6/6/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/rules"><span class="arrow-prev">← </span><span>Rules</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/metrics"><span>Collecting Metrics</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li><li><a href="#baggage">Baggage</a></li><li><a href="#browser-propagation-deprecated">Browser Propagation (deprecated)</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
