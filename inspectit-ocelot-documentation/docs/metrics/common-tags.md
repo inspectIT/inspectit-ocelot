@@ -50,8 +50,8 @@ The service is resolved from the `inspectit.service-name` property, while the ho
 
 > On machines that have multiple network interfaces the `InetAddress.getLocalHost()` method might not provide desired values for host related tags.
 
-| Property                                                 | Default | Description                                                                                 |
-|----------------------------------------------------------|---------|---------------------------------------------------------------------------------------------|
-| `inspectit.tags.providers.environment.enabled`           | `true`  | Enables or disables the provider.                                                           |
-| `inspectit.tags.providers.environment.resolve-host-name` | `true`  | If `false`, the tag `host.name` containing the resolved host name will not be provided.     |
-| `inspectit.tags.providers.environment.resolve-host-ip`   | `true`  | If `false`, the tag `host.ip` containing the resolved host IP address will not be provided. |
+| Property                                                    | Default | Description                                                                                 |
+|-------------------------------------------------------------|---------|---------------------------------------------------------------------------------------------|
+| `inspectit.tags.providers.environment.enabled`              | `true`  | Enables or disables the provider.                                                           |
+| `inspectit.tags.providers.environment.resolve-host-name`    | `true`  | If `false`, the tag `host.name` containing the resolved host name will not be provided.     |
+| `inspectit.tags.providers.environment.resolve-host-address` | `true`  | If `false`, the tag `host.ip` containing the resolved host IP address will not be provided. |

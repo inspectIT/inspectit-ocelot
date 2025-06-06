@@ -18,8 +18,8 @@ public class EnvironmentTagsProviderSettings {
     private boolean resolveHostName;
 
     /**
-     * If true tries to resolve the host ip using {@link java.net.InetAddress}.
+     * If true tries to resolve the host address using {@link java.net.InetAddress}.
      */
-    private boolean resolveHostIp;
+    private boolean resolveHostAddress;
 
 }

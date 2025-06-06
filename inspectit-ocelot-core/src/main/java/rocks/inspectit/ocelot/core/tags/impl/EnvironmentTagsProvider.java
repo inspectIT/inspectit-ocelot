@@ -48,7 +48,7 @@ public class EnvironmentTagsProvider implements ICommonTagsProvider {
                 }
             }
 
-            if (conf.isResolveHostIp()) {
+            if (conf.isResolveHostAddress()) {
                 try {
                     envTags.put("host.ip", resolveHostAddress());
                 } catch (UnknownHostException e) {
