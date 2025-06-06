@@ -6,9 +6,9 @@ title: Tags Exporters
 Tags exporters represent special exporters of InspectIT, which allow to export internal tags to external applications like browsers.
 Currently, there is only one tags exporter:
 
-| Exporter                        |Supports run-time updates| Push / Pull |Enabled by default|
-|---------------------------------|---|-------------|---|
-| [HTTP Exporter](#http-exporter) |Yes| Push & Pull |No|
+| Exporter                        | Supports run-time updates | Push / Pull | Enabled by default |
+|---------------------------------|---------------------------|-------------|--------------------|
+| [HTTP Exporter](#http-exporter) | Yes                       | Push & Pull | No                 |
 
 ## HTTP Exporter
 
@@ -17,6 +17,10 @@ One GET-endpoint to expose data to external applications and one PUT-endpoint to
 The server is by default started on the port `9000` and data can then be accessed or written by 
 calling 'http://localhost:9000/inspectit'
 
+:::important
+We recommend to propagate data via [baggage](instrumentation/data-propagation.md#baggage) instead, so the agent does not expose an API.
+:::
+
 #### Production Environment
 
 The Tags HTTP exporter does not provide any encryption of data and does not perform any authentication.
@@ -24,7 +28,7 @@ Thus, this server should not be exposed directly to the public in a production e
 It is recommended to set up a proxy in front of this server, which handles encryption and authentication.
 
 Furthermore, please make sure to enable port forwarding, if you use servlet-containers like tomcat.
-You should also set _-Dinspectit.expoters.tags.http.host=0.0.0.0_ as parameter in the tomcat start configuration.
+You should also set _-Dinspectit.exporters.tags.http.host=0.0.0.0_ as parameter in the tomcat start configuration.
 
 Additionally, make sure that your firewall is not blocking the HTTP-server address.
 
@@ -37,7 +41,7 @@ Data tags will always be stored behind a provided session-ID to ensure data corr
 The session-ID will be read from a specific request-header. The _**session-id-header**_-property in the HTTP-exporter allows
 to specify, which exact header should be used to read the session-ID from. 
 
-The default-instrumentation of InspectIT will check the specified _session-id-header_ for a valid session-ID. 
+The default instrumentation of inspectIT will check the specified _session-id-header_ for a valid session-ID. 
 Thus, there is no additional configuration necessary to read session-ID from HTTP-headers.
 
 Behind every session-ID, there is a data storage containing all data tags for this session, as long as they are enabled for browser propagation.
@@ -46,10 +50,10 @@ _session_id_header_. If a data storage already exists for the specified
 session-ID, no new data storage will be created.
 
 You cannot create new data storages for example by pushing data into the HTTP-server by using the API. 
-If a request to the REST-API contains a session-ID, which does not exist in InspectIT, the API will always return 404.
+If a request to the REST-API contains a session-ID, which does not exist in inspectIT, the API will always return 404.
 
-The HTTP-exporter can only store a specific amount of sessions, which can be configured in the configuration server.
-Sessions will be deleted after their _time-to-live_ is expired. Their time-to-live will be reset everytime a request
+The HTTP-exporter can only store a specific amount of sessions, which can be configured.
+Sessions will be deleted after their _time-to-live_ is expired. Their time-to-live will be reset everytime
 the HTTP-server receives a successful request.
 
 #### Non-Remote Session Initialization
@@ -57,8 +61,8 @@ the HTTP-server receives a successful request.
 It is also possible to create a data storage behind a session-ID inside the inspectIT agent, without
 firstly providing it via an HTTP request to the target application.
 
-For this you can use the data key _remote_session_id_ in the configuration server. You can set the data key via
-the _a_assign_value_ action in the configuration server. After assigning a new value to the _remote_session_id_ data key,
+For this you can use the data key _remote_session_id_ in the instrumentation configuration. You can set the data key via
+any [action](instrumentation/actions.md). After assigning a new value to the _remote_session_id_ data key,
 a new data storage with the specified value as session-ID will be created.
 
 #### Session Limits

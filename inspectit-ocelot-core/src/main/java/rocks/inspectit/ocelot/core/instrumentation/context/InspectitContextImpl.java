@@ -204,11 +204,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private SpanContext remoteParentContext;
 
     /**
-     * Session storage for all data storages that should be created for each session
-     */
-    private BrowserPropagationSessionStorage browserPropagationSessionStorage;
-
-    /**
      * Data storage for all tags that should be propagated up to or down from the browser
      */
     private BrowserPropagationDataStorage browserPropagationDataStorage;
@@ -219,7 +214,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
         this.interactWithApplicationTagContexts = interactWithApplicationTagContexts;
         dataOverwrites = new HashMap<>();
         openingThread = Thread.currentThread();
-        browserPropagationSessionStorage = BrowserPropagationSessionStorage.getInstance();
 
         if (parent == null) {
             postEntryPhaseDownPropagatedData = new HashMap<>();
@@ -313,7 +307,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
     public void makeActive() {
         Object currentSessionID = getData(REMOTE_SESSION_ID);
         if(currentSessionID != null) {
-            browserPropagationDataStorage = browserPropagationSessionStorage.getOrCreateDataStorage(currentSessionID.toString());
+            browserPropagationDataStorage = BrowserPropagationSessionStorage.get()
+                    .getOrCreateDataStorage(currentSessionID.toString());
         }
 
 
@@ -477,15 +472,15 @@ public class InspectitContextImpl implements InternalInspectitContext {
         // Write browser propagation data to storage
         Map<String, Object> propagationData = getDataAsStream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         Map<String, Object> browserPropagationData = getBrowserPropagationData(propagationData);
-        if(browserPropagationDataStorage != null)
+        if (browserPropagationDataStorage != null)
             browserPropagationDataStorage.writeData(browserPropagationData);
 
         //If there is browser propagation data, but exporter is disabled, write error message
-        if(!browserPropagationData.isEmpty() && !browserPropagationSessionStorage.isExporterActive())
+        if (!browserPropagationData.isEmpty() && !BrowserPropagationSessionStorage.get().isExporterActive())
             log.error("Unable to propagate data: {} Browser propagation is disabled, since no Tags-exporter is enabled", browserPropagationData);
 
         // Delete session ID after root span is closed
-        if(parent == null) {
+        if (parent == null) {
             setData(REMOTE_SESSION_ID, null);
         }
 

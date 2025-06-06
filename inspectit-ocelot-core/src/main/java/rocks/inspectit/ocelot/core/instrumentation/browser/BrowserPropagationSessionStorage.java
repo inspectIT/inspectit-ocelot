@@ -32,7 +32,7 @@ public class BrowserPropagationSessionStorage {
         dataStorages = new ConcurrentHashMap<>();
     }
 
-    public static synchronized BrowserPropagationSessionStorage getInstance() {
+    public static synchronized BrowserPropagationSessionStorage get() {
         if(instance == null) instance = new BrowserPropagationSessionStorage();
         return instance;
     }

@@ -20,6 +20,12 @@ In addition, there is a new tag `service.name` which contains the same value as 
 The tag `service` is marked as **deprecated** and will be removed in future versions.
 Please use the tag `service.name` instead.
 
+### Renamed propagation header name
+
+Previously, globally propagated data was written into the `correlation-context` header.
+This header was renamed to `baggage` to comply with the currently defined [W3C format](https://github.com/w3c/baggage/blob/main/baggage/HTTP_HEADER_FORMAT.md).
+The header value format remained unchanged.
+
 ## Breaking changes in 2.6.10
 
 ### Restructured instrumentation documentation

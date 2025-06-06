@@ -21,14 +21,20 @@ import java.util.List;
  * The server contains two endpoints:
  *  1. GET: To query propagation data
  *  2. PUT: To overwrite propagation data
+ * <p>
+ * <b>Marked for removal</b>, because the agent should not expose such an API to the outside.
+ * Instead, use any data within the application requests via the {@link BAGGAGE_HEADER}
  */
-
 @Slf4j
 @Component
 @EnableScheduling
+@Deprecated
 public class BrowserPropagationHttpExporterService extends DynamicallyActivatableService {
+
     private Server server;
+
     private BrowserPropagationSessionStorage sessionStorage;
+
     private BrowserPropagationServlet httpServlet;
 
     /**
@@ -64,7 +70,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         timeToLive = settings.getTimeToLive();
 
         int sessionLimit = settings.getSessionLimit();
-        sessionStorage = BrowserPropagationSessionStorage.getInstance();
+        sessionStorage = BrowserPropagationSessionStorage.get();
         sessionStorage.setSessionLimit(sessionLimit);
         sessionStorage.setExporterActive(true);
 
@@ -98,6 +104,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         server.setStopAtShutdown(true);
 
         try {
+            log.warn("It is not recommended to use the Tags HTTP-Server. Instead read or write data via baggage headers");
             log.info("Starting Tags HTTP-Server on {}:{}{} ", host, port, path);
             server.start();
         } catch (Exception e) {
@@ -108,9 +115,9 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
     }
 
     /**
-     * Updates the session storage
-     * Browser propagation data is cached for a specific amount of time (timeToLive)
-     * If the time expires, clean up the storage
+     * Updates the session storage.
+     * Browser propagation data is cached for a specific amount of time (timeToLive).
+     * If the time expires, clean up the storage.
      */
     @Scheduled(fixedDelay = FIXED_DELAY)
     public void updateSessionStorage() {

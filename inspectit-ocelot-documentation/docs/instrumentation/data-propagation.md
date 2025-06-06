@@ -75,11 +75,13 @@ The configuration options are the following:
 | `browser-propagation` | `false`                                                                                                                                                          | If true, this data will be written to the inspectIT browser data storage                                                                                                                                | 
 | `is-tag`              | `true` if the data key is also a [common tag](metrics/common-tags.md) or is used as tag in any [metric definition](metrics/custom-metrics.md), `false` otherwise | If true, this data will act as a tag when metrics are recorded. This does not influence propagation.                                                                                                    | 
 
-Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. In this case simply all settings will have their default value.
+Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. 
+In this case simply all settings will have their default value.
 
 ## Interaction with OpenCensus Tags
 
-As explained previously, our inspectIT context can be seen as a more flexible variation of OpenCensus tags. In fact, we designed the inspectIT context so that it acts as a superset of the OpenCensus TagContext.
+As explained previously, our inspectIT context can be seen as a more flexible variation of OpenCensus tags. 
+In fact, we designed the inspectIT context so that it acts as a superset of the OpenCensus TagContext.
 
 Firstly, when an instrumented method is entered, a new inspectIT context is created. 
 At this point, it imports any tag values published by OpenCensus directly as data. 
@@ -94,19 +96,53 @@ of each rule, a new TagContext is opened making the tags written there accessibl
 Hereby, only data for which down propagation was configured to be `JVM_LOCAL` or greater and for which `is-tag` is true 
 will be visible as tags.
 
+## Baggage
+
+As mentioned previously, data tags can be used across JVM borders when configured for `GLOBAL` propagation.
+Then, the data can be read from incoming HTTP headers or can be written into outgoing HTTP headers.
+inspectIT Ocelot will always read or write all globally propagated data via the `baggage` header.
+The header contains a list of key-value pairs in the following format:
+
+```
+baggage: key1=value1,key2=value2
+```
+
+You can find more information about the header format [here](https://github.com/w3c/baggage/blob/main/baggage/HTTP_HEADER_FORMAT.md).
+
+Within [actions](instrumentation/actions.md), data can be read from or written into HTTP headers. 
+The _inspectIT context_ `_context` [special parameter](instrumentation/actions.md#special-parameter) offers 
+multiple methods for `GLOBAL` propagation. 
+
+- `readDownPropagationHeaders(Map<String,String> headers)`: Read the baggage header from incoming HTTP request headers
+- `readUpPropagationHeaders(Map<String,String> headers)`: Read the baggage header from returned HTTP response headers
+- `getDownPropagationHeaders()`: Get the recorded baggage header to include them in outgoing HTTP request headers 
+- `getUpPropagationHeaders()`: Get the recorded baggage header to include them in answering HTTP response headers
+
+With these methods data can only be read from or written into the current _inspectIT context_. The data has to be further propagated
+to be accessible in other locations, e.g. other [scopes](instrumentation/scopes.md).
+The [inspectIT default instrumentation](https://github.com/inspectIT/inspectit-ocelot/tree/master/inspectit-ocelot-config/src/main/resources/rocks/inspectit/ocelot/config/default/instrumentation/actions/http) provides some examples for using these methods.
+
+:::important
+Please note that up to version `2.6.10` the header name was `correlation-context` instead of `baggage`. The header value format remained unchanged.
+:::
+
+## Browser Propagation (deprecated)
 
 <!-- 
-Please rework browser propagation, so it is no longer possible to speak with the agent from outside
+Please rework (or remove) browser propagation, so it is no longer possible to speak with the agent from outside
 See: https://github.com/inspectIT/inspectit-ocelot/issues/1703
 -->
 
-## Browser Propagation
-
 Data enabled for browser propagation will be stored inside a special dictionary.
-This dictionary can be exposed via REST-API, if [inspectit.exporters.tags.http](tags/tags-exporters.md#http-exporter) is enabled.
+This dictionary can be exposed via REST-API, if the [Tags-HTTP-Exporter](tags/tags-exporters.md#http-exporter) is enabled.
 A browser can read this data via GET-requests.
 
-Additionally, a browser can write data into the storage via PUT-requests, if browser- as well as down-propagation is enabled for a data key, the data written by the browser will be stored in the _inspectIT context_.
+Additionally, a browser can write data into the storage via PUT-requests, if browser- as well as down-propagation is 
+enabled for a data key. The data written by the browser will be stored in the _inspectIT context_.
 Please note, before writing or reading browser propagation data, you need to provide a session-ID inside the request-header.
 After that, all data belonging to the current session will be stored behind this session-ID.
 For more information, see [Tags-HTTP-Exporter](tags/tags-exporters.md#http-exporter).
+
+:::important
+We recommend to propagate data via [baggage](#baggage) instead, so the agent does not expose an API.
+:::

@@ -47,7 +47,7 @@ public class BrowserPropagationUtil {
     @VisibleForTesting
     void setSessionIdHeader(String key) {
         sessionIdHeader = key;
-        log.info("Use of new session-id-header: " + sessionIdHeader);
+        log.info("Using new session-id-header: {}", sessionIdHeader);
         ContextPropagationUtil.setSessionIdHeader(sessionIdHeader);
     }
 

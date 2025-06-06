@@ -226,9 +226,9 @@ public class ServletApiContextPropagationTest {
 
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             urlConnection.setRequestMethod("GET");
-            String correlHeader = urlConnection.getHeaderField("Correlation-Context");
+            String baggageHeader = urlConnection.getHeaderField("Baggage");
 
-            assertThat(correlHeader).contains("up_propagated=" + Math.PI + ";type=d");
+            assertThat(baggageHeader).contains("up_propagated=" + Math.PI + ";type=d");
         }
 
         @Test
@@ -241,9 +241,9 @@ public class ServletApiContextPropagationTest {
 
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             urlConnection.setRequestMethod("GET");
-            String correlHeader = urlConnection.getHeaderField("Correlation-Context");
+            String baggageHeader = urlConnection.getHeaderField("Baggage");
 
-            assertThat(correlHeader).contains("up_propagated=" + Math.PI + ";type=d");
+            assertThat(baggageHeader).contains("up_propagated=" + Math.PI + ";type=d");
 
             assertThat(IOUtils.readLines(urlConnection.getInputStream())).containsExactly("Hallo Welt!");
         }
@@ -259,9 +259,9 @@ public class ServletApiContextPropagationTest {
 
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             urlConnection.setRequestMethod("GET");
-            String correlHeader = urlConnection.getHeaderField("Correlation-Context");
+            String baggageHeader = urlConnection.getHeaderField("Baggage");
 
-            assertThat(correlHeader).contains("up_propagated=" + Math.PI + ";type=d");
+            assertThat(baggageHeader).contains("up_propagated=" + Math.PI + ";type=d");
             assertThat(IOUtils.readLines(urlConnection.getInputStream())).containsExactly("Hallo Welt!");
         }
     }

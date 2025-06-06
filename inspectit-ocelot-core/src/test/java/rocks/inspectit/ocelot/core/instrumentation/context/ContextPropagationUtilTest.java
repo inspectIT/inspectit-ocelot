@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static rocks.inspectit.ocelot.core.instrumentation.context.ContextPropagationUtil.CORRELATION_CONTEXT_HEADER;
+import static rocks.inspectit.ocelot.core.instrumentation.context.ContextPropagationUtil.BAGGAGE_HEADER;
 
 @ExtendWith(MockitoExtension.class)
 public class ContextPropagationUtilTest {
@@ -66,7 +66,7 @@ public class ContextPropagationUtilTest {
 
         @Test
         public void testSingleString() {
-            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER, enc("my_val\u00FC") + " =  " + enc("stra\u00DFe=15") + ";someprop=42");
+            Map<String, String> headers = ImmutableMap.of(BAGGAGE_HEADER, enc("my_val\u00FC") + " =  " + enc("stra\u00DFe=15") + ";someprop=42");
 
             ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
@@ -76,7 +76,7 @@ public class ContextPropagationUtilTest {
 
         @Test
         public void testSingleLong() {
-            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER, enc("x") + " =  " + enc("42") + "; type = l");
+            Map<String, String> headers = ImmutableMap.of(BAGGAGE_HEADER, enc("x") + " =  " + enc("42") + "; type = l");
 
             ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
@@ -86,7 +86,7 @@ public class ContextPropagationUtilTest {
 
         @Test
         public void testSingleDouble() {
-            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER, enc("pi") + " =  " + enc(String.valueOf(Math.PI)) + "; blub=halloooo; type = d");
+            Map<String, String> headers = ImmutableMap.of(BAGGAGE_HEADER, enc("pi") + " =  " + enc(String.valueOf(Math.PI)) + "; blub=halloooo; type = d");
 
             ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
@@ -96,7 +96,7 @@ public class ContextPropagationUtilTest {
 
         @Test
         public void testBooleanAndString() {
-            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER, "is_something=true;type=b,hello=world");
+            Map<String, String> headers = ImmutableMap.of(BAGGAGE_HEADER, "is_something=true;type=b,hello=world");
 
             ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
@@ -107,7 +107,7 @@ public class ContextPropagationUtilTest {
 
         @Test
         public void testInvalidTypeIgnored() {
-            Map<String, String> headers = ImmutableMap.of(CORRELATION_CONTEXT_HEADER, "is_something=true;type=blub;type=x");
+            Map<String, String> headers = ImmutableMap.of(BAGGAGE_HEADER, "is_something=true;type=blub;type=x");
 
             ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, inspectitContext);
 
@@ -129,7 +129,7 @@ public class ContextPropagationUtilTest {
                     .stream(), null);
 
             assertThat(result).hasSize(1)
-                    .containsEntry(CORRELATION_CONTEXT_HEADER, enc("my_val\u00FC") + "=" + enc("stra\u00DFe=15"));
+                    .containsEntry(BAGGAGE_HEADER, enc("my_val\u00FC") + "=" + enc("stra\u00DFe=15"));
         }
 
         @Test
@@ -139,7 +139,7 @@ public class ContextPropagationUtilTest {
             Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet()
                     .stream(), null);
 
-            assertThat(result).hasSize(1).containsEntry(CORRELATION_CONTEXT_HEADER, "x=42;type=l");
+            assertThat(result).hasSize(1).containsEntry(BAGGAGE_HEADER, "x=42;type=l");
         }
 
         @Test
@@ -149,7 +149,7 @@ public class ContextPropagationUtilTest {
             Map<String, String> result = ContextPropagationUtil.buildPropagationHeaderMap(data.entrySet()
                     .stream(), null);
 
-            assertThat(result).hasSize(1).containsEntry(CORRELATION_CONTEXT_HEADER, "Pi=" + Math.PI + ";type=d");
+            assertThat(result).hasSize(1).containsEntry(BAGGAGE_HEADER, "Pi=" + Math.PI + ";type=d");
         }
 
         @Test
@@ -170,7 +170,7 @@ public class ContextPropagationUtilTest {
                     .stream(), null);
 
             assertThat(result).hasSize(1)
-                    .containsEntry(CORRELATION_CONTEXT_HEADER, "hello=world,is_something=true;type=b");
+                    .containsEntry(BAGGAGE_HEADER, "hello=world,is_something=true;type=b");
         }
 
         @Test
