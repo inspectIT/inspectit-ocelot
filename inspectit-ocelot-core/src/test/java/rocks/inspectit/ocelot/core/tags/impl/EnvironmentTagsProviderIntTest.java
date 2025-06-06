@@ -42,7 +42,7 @@ class EnvironmentTagsProviderIntTest {
     @DirtiesContext
     @TestPropertySource(properties = {
             "inspectit.tags.providers.environment.resolve-host-name=false",
-            "inspectit.tags.providers.environment.resolve-host-ip=false",
+            "inspectit.tags.providers.environment.resolve-host-address=false",
     })
     class Overwritten extends SpringTestBase {
 

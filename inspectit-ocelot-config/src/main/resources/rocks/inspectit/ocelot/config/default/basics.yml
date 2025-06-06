@@ -13,8 +13,8 @@ inspectit:
         enabled: true
         # should the host name be resolved using InetAddress.getLocalHost(), if false 'host.name' tag is not added by env provider
         resolve-host-name: true
-        # should the host ip be resolved using InetAddress.getLocalHost(), if false 'host.ip' tag is not added by env provider
-        resolve-host-ip: true
+        # should the host address be resolved using InetAddress.getLocalHost(), if false 'host.ip' tag is not added by env provider
+        resolve-host-address: true
     # specifies user defined tag keys and values as a map
     # these tag values would overwrite any value added by the providers, thus you can easily overwrite tags values by your own
     extra: { }
@@ -80,11 +80,17 @@ inspectit:
     #  - no views and measures are created
     enabled: true
 
+    # protection mechanism to prevent writing high cardinality tags
     tag-guard:
+      # true, if the tag-guard should be enabled
       enabled: true
+      # global value for the maximum amount of tag values, can be overwritten for specific measures
       max-values-per-tag: 1000
+      # the interval for checking the current amount of tag values
       schedule-delay: 30s
+      # the file to store the recorded tag values
       database-file: ${inspectit.env.agent-dir}/${inspectit.service-name}/tag-guard-database.json
+      # the replacement value for tags exceeding their specific limit
       overflow-replacement: "TAG_LIMIT_EXCEEDED"
 
   # logging settings
