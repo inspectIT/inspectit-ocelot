@@ -84,25 +84,21 @@ const ScopeWizardDialog = ({ visible, onHide, onApply, scope }) => {
 
   // Enable 'apply' button...
   useEffect(() => {
-    // ... if class matcher is completely specified
-    if (typeMatcher.type && typeMatcher.matcherType && typeMatcher.name) {
-      setIsApplyDisabled(false);
+    const isTypeMatcherValid = typeMatcher.type && typeMatcher.matcherType && typeMatcher.name;
+    let isMethodMatcherValid;
 
-      // ... if bot method matcher are completely or not at all specified
-      if ((methodMatcher.matcherType && methodMatcher.name) || (!methodMatcher.matcherType && !methodMatcher.name)) {
-        setIsApplyDisabled(false);
-      }
-    }
-
-    // Disable 'apply' button if method name is specified but no matcher-type
-    if (methodMatcher.name && !methodMatcher.matcherType) {
-      setIsApplyDisabled(true);
-    }
-
-    // Enable 'apply' button if 'constructor' is specified
     if (methodMatcher.isConstructor) {
-      setIsApplyDisabled(false);
+      isMethodMatcherValid = true;
+    } else {
+      const isMethodMatcherComplete = methodMatcher.matcherType && methodMatcher.name;
+      const isMethodMatcherEmpty = !methodMatcher.matcherType && !methodMatcher.name;
+      isMethodMatcherValid = isMethodMatcherComplete || isMethodMatcherEmpty;
     }
+
+    // ... if both typeMatcher and methodMatcher are valid
+    const shouldEnableApply = isTypeMatcherValid && isMethodMatcherValid;
+
+    setIsApplyDisabled(!shouldEnableApply);
   });
 
   /**
