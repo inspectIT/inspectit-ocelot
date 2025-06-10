@@ -2368,10 +2368,10 @@
   resolved "https://registry.npmjs.org/@xtuc/long/-/long-4.2.2.tgz"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-ace-builds@^1.13.2:
-  version "1.32.1"
-  resolved "https://registry.npmjs.org/ace-builds/-/ace-builds-1.32.1.tgz"
-  integrity sha512-UuJLPoONqxbEaJTGff40fRTM0FNHRMe5iF3zuy6oWNnfSpkKe/Reqae3n9Cc49/yQ7Dmwdh5eT5fW8i4WxsvnA==
+ace-builds@^1.42.0:
+  version "1.42.0"
+  resolved "https://registry.yarnpkg.com/ace-builds/-/ace-builds-1.42.0.tgz#2d4482521c5c1262ef1b249710df0cfb235a89b1"
+  integrity sha512-nRDbpHguujCh9Lb00jtJAblR6d5JEi6RVrHtj+TAlUqRYwWl5Es7iHnyXUOmTcMfkzQ2/TPn45G/yvdQGa0ZXw==
 
 acorn-import-attributes@^1.9.5:
   version "1.9.5"
