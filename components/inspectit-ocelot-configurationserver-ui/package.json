@@ -63,7 +63,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@babel/core": "^7.26.10",
-    "@babel/eslint-parser": "^7.26.10",
+    "@babel/eslint-parser": "^7.27.5",
     "@babel/helper-builder-react-jsx": "^7.25.9",
     "@babel/helper-call-delegate": "^7.12.13",
     "@babel/helper-define-map": "^7.18.6",
