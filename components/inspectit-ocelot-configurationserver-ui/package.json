@@ -25,7 +25,7 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
-    "ace-builds": "^1.13.2",
+    "ace-builds": "^1.42.0",
     "axios": "^1.9.0",
     "classnames": "^2.5.1",
     "dateformat": "^5.0.3",
