@@ -76,6 +76,7 @@ dependencies {
 
             // data validation
             libs.orgApacheTomcatEmbedTomcatEmbedEl,
+            "org.apache.tomcat:tomcat-catalina:9.0.105",
             libs.orgHibernateValidatorHibernateValidator,
 
             // logging
@@ -85,12 +86,6 @@ dependencies {
             libs.orgSlf4jJulToSlf4j,
             // logstash support (JSON logging)
             libs.netLogstashLogbackLogstashLogbackEncoder,
-
-            // jetty HTTP server for REST-API
-            // we use jetty instead of Spring-Boot-Web since it's more lightweight and
-            // it 's easier to adapt changes from the config-server
-            libs.orgEclipseJettyJettyServer,
-            libs.orgeclipseJettyJettyServlet,
 
             // utils
             libs.orgApacheCommonsCommonsLang3,

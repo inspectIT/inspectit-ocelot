@@ -2,6 +2,8 @@ package rocks.inspectit.ocelot.core.utils;
 
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
+import org.apache.commons.lang3.StringUtils;
+import rocks.inspectit.ocelot.bootstrap.AgentProperties;
 
 public class CoreUtils {
 
@@ -44,5 +46,23 @@ public class CoreUtils {
             stringBuilder.append(parameterType.getName());
         }
         return stringBuilder.append(')').toString();
+    }
+
+    /**
+     * @return the configured temp-dir or the java default temp-dir
+     */
+    public static String getTempDir() {
+        String configuredTempDir = null != System.getProperty(AgentProperties.INSPECTIT_TEMP_DIR_PROPERTY) ?
+                System.getProperty(AgentProperties.INSPECTIT_TEMP_DIR_PROPERTY) : System.getenv(AgentProperties.INSPECTIT_TEMP_DIR_ENV_PROPERTY);
+        if(configuredTempDir != null)
+            return configuredTempDir;
+
+        String tempdir = System.getProperty("java.io.tmpdir");
+        if (StringUtils.isBlank(tempdir))
+            return "";
+        else if (tempdir.endsWith("/") || tempdir.endsWith("\\"))
+            return tempdir.substring(0, tempdir.length() - 1);
+         else
+             return tempdir;
     }
 }

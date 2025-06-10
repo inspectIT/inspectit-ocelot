@@ -1,11 +1,10 @@
 package rocks.inspectit.ocelot.core.config.propertysources;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
-import rocks.inspectit.ocelot.bootstrap.AgentProperties;
 import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.core.utils.CoreUtils;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -60,21 +59,7 @@ public class EnvironmentInformationPropertySource extends PropertiesPropertySour
      * @return path of the used temp directory
      */
     private static String getTempDir() {
-        String configuredTempDir = null != System.getProperty(AgentProperties.INSPECTIT_TEMP_DIR_PROPERTY) ?
-                System.getProperty(AgentProperties.INSPECTIT_TEMP_DIR_PROPERTY) : System.getenv(AgentProperties.INSPECTIT_TEMP_DIR_ENV_PROPERTY);
-        if(configuredTempDir != null) {
-            return configuredTempDir;
-        }
-
-        String tempdir = System.getProperty("java.io.tmpdir");
-        if (StringUtils.isBlank(tempdir)) {
-            return "";
-        }
-        if (tempdir.endsWith("/") || tempdir.endsWith("\\")) {
-            return tempdir.substring(0, tempdir.length() - 1);
-        } else {
-            return tempdir;
-        }
+        return CoreUtils.getTempDir();
     }
 
     /**
