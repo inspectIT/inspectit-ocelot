@@ -1,11 +1,9 @@
 package rocks.inspectit.ocelot.core.instrumentation.browser;
 
 import lombok.extern.slf4j.Slf4j;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -27,15 +25,24 @@ public class BrowserPropagationDataStorage {
 
     private final ConcurrentMap<String, Object> propagationData = new ConcurrentHashMap<>();
 
-    public BrowserPropagationDataStorage() {
+    private PropagationMetaData propagation;
+
+    BrowserPropagationDataStorage() {
         latestTimestamp = System.currentTimeMillis();
+    }
+
+    /**
+     * Updates the propagation, if changed
+     */
+    public void setPropagation(PropagationMetaData propagation) {
+        if (propagation != null && !propagation.equals(this.propagation)) this.propagation = propagation;
     }
 
     public void writeData(Map<String, ?> newPropagationData) {
         Map <String, Object> validatedData = validateEntries(newPropagationData);
 
         if(exceedsTagLimit(validatedData)) {
-            log.debug("Unable to write data: Data count limit was exceeded");
+            log.debug("Unable to write data: tag limit was exceeded");
             return;
         }
         propagationData.putAll(validatedData);
@@ -55,6 +62,7 @@ public class BrowserPropagationDataStorage {
 
     /**
      * Calculates the elapsed time since latestTimestamp
+     *
      * @param currentTime current time in milliseconds
      * @return Elapsed time since latestTimestamp in milliseconds
      */
@@ -79,8 +87,20 @@ public class BrowserPropagationDataStorage {
     }
 
     private boolean validateEntry(String key, Object value) {
-        return value instanceof String &&
-                key.length() <= MAX_KEY_SIZE &&
+        return key.length() <= MAX_KEY_SIZE &&
+                isPropagated(key) &&
+                value instanceof String &&
                 ((String) value).length() <= MAX_VALUE_SIZE;
+    }
+
+    /**
+     * Only if browser-propagation is enabled for this key, it should be stored.
+     *
+     * @param key the key name
+     * @return true, if this key should be propagated
+     */
+    private boolean isPropagated(String key) {
+        if(propagation != null) return propagation.isPropagatedWithBrowser(key);
+        else return false;
     }
 }

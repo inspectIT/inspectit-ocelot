@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.browser;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -15,10 +16,12 @@ import java.util.concurrent.ConcurrentMap;
 public class BrowserPropagationSessionStorage {
 
     private static final int KEY_MIN_SIZE = 16;
+
     private static final int KEY_MAX_SIZE = 512;
 
     @Getter @Setter
     private int sessionLimit = 100;
+
     /**
      * Boolean, which helps to create error messages, if browser propagation is tried, but exporter is disabled
      */
@@ -26,6 +29,7 @@ public class BrowserPropagationSessionStorage {
     private boolean isExporterActive = false;
 
     private static BrowserPropagationSessionStorage instance;
+
     private final ConcurrentMap<String, BrowserPropagationDataStorage> dataStorages;
 
     private BrowserPropagationSessionStorage() {
@@ -37,7 +41,7 @@ public class BrowserPropagationSessionStorage {
         return instance;
     }
 
-    public BrowserPropagationDataStorage getOrCreateDataStorage(String sessionID) {
+    public BrowserPropagationDataStorage getOrCreateDataStorage(String sessionID, PropagationMetaData propagation) {
         return dataStorages.computeIfAbsent(sessionID, key -> {
             if(!validateSessionIdLength(key)) {
                 log.warn("Unable to create session: Invalid key length");
@@ -47,7 +51,9 @@ public class BrowserPropagationSessionStorage {
                 log.warn("Unable to create session: Session limit exceeded");
                 return null;
             }
-            return new BrowserPropagationDataStorage();
+            BrowserPropagationDataStorage dataStorage = new BrowserPropagationDataStorage();
+            dataStorage.setPropagation(propagation);
+            return dataStorage;
         });
     }
 
@@ -69,11 +75,11 @@ public class BrowserPropagationSessionStorage {
             long elapsedTime = storage.calculateElapsedTime(currentTime) / 1000;
             if(timeToLive < elapsedTime) {
                 dataStorages.remove(id);
-                log.debug("Time to Live expired for the following session: " + id);
+                log.debug("Time to Live expired for the following session: {}", id);
             }
             else {
                 int storageSize = storage.getStorageSize();
-                log.debug("There are " + storageSize + " data entries stored in session: " + id);
+                log.debug("There are {} data entries stored in session: {}", storageSize, id);
             }
         });
     }

@@ -31,6 +31,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
     Map<String, String> headers;
 
     private static final String sessionIdHeader = "Session-Id";
+
     private static final String sessionId = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
 
     @BeforeEach
@@ -50,6 +51,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
 
     @Nested
     public class WriteBrowserPropagationData {
+
         @Test
         void verifyNoDataHasBeenWritten() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(false);
@@ -89,7 +91,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
         void verifyDataHasBeenOverwritten() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId, propagation);
             Map<String, Object> oldData = new HashMap<>();
             oldData.put("keyA", "value0");
             dataStorage.writeData(oldData);
@@ -117,7 +119,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
         @Test
         void verifyAttributeCountLimit() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId, propagation);
             Map<String, Object> dummyMap = IntStream.rangeClosed(1, 128).boxed()
                     .collect(Collectors.toMap(i -> "key"+i, i -> "value"+i));
             dataStorage.writeData(dummyMap);
@@ -145,9 +147,9 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             ctx.makeActive();
             // Create too long key and value
             String dummyKey = IntStream.range(1, 130).mapToObj(i -> "x").collect(Collectors.joining());
-            String dummyValue = IntStream.range(1,2050).mapToObj(i -> "y").collect(Collectors.joining());
+            String dummyValue = IntStream.range(1, 2050).mapToObj(i -> "y").collect(Collectors.joining());
 
-            System.out.println(dummyKey.length() + " : " + dummyValue.length());
+            //System.out.println(dummyKey.length() + " : " + dummyValue.length());
 
             ctx.setData(dummyKey, dummyValue);
             BrowserPropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
@@ -188,7 +190,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(false);
             when(propagation.isPropagatedDownWithinJVM(eq(InternalInspectitContext.REMOTE_SESSION_ID))).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId, propagation);
             Map<String, Object> data = new HashMap<>();
             data.put("keyA", "valueA");
             dataStorage.writeData(data);
@@ -213,7 +215,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
         void verifyDownPropagation() {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId, propagation);
             InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             Map<String, Object> data = new HashMap<>();
             data.put("keyA", "valueA");
@@ -246,7 +248,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
             when(propagation.isPropagatedUpWithinJVM(eq("keyB"))).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
+            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId, propagation);
             InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
             Map<String, Object> data = new HashMap<>();
             data.put("keyA", "valueA");
