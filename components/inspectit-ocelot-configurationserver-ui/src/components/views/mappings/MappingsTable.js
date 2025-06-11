@@ -228,9 +228,8 @@ class MappingsTable extends React.Component {
           .p-datatable-scrollable .p-datatable-thead > tr > th,
           .p-datatable-scrollable .p-datatable-tbody > tr > td,
           .p-datatable-scrollable .p-datatable-tfoot > tr > td {
-            flex: unset;
-            display: flex;
-            text-align: center;
+            display: table-cell;
+            text-align: left;
           }
           .cell-text {
             display: inline-block;
@@ -251,28 +250,32 @@ class MappingsTable extends React.Component {
             flex: 0;
           }
           .drag-icon-col {
-            width: 10rem;
+            width: 3.5%;
+            min-width: 50px;
           }
           .mapping-name-col {
-            width: -moz-available;
-            width: -webkit-fill-available;
-            width: fill-available;
+            width: 27%;
+            min-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
           .source-branch-col {
-            width: 40rem;
+            width: 10%;
+            min-width: 100px;
           }
           .sources-col {
-            width: -moz-available;
-            width: -webkit-fill-available;
-            width: fill-available;
+            width: 28%;
+            min-width: 200px;
           }
           .attributes-col {
-            width: -moz-available;
-            width: -webkit-fill-available;
-            width: fill-available;
+            width: 27%;
+            min-width: 200px;
           }
           .buttons-col {
-            width: 15rem;
+            width: 4.5%;
+            min-width: 80px;
+            text-align: center;
           }
           .selection-information {
             display: flex;
