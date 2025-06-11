@@ -14,7 +14,7 @@ public class BrowserPropagationSessionStorageTest {
     @Test
     void verifyValidSessionID() {
         BrowserPropagationSessionStorage sessionStorage = BrowserPropagationSessionStorage.get();
-        BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(validSessionID);
+        BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(validSessionID, null);
 
         assertThat(dataStorage).isNotNull();
     }
@@ -22,8 +22,8 @@ public class BrowserPropagationSessionStorageTest {
     @Test
     void verifyInvalidSessionID() {
         BrowserPropagationSessionStorage sessionStorage = BrowserPropagationSessionStorage.get();
-        BrowserPropagationDataStorage dataStorage1 = sessionStorage.getOrCreateDataStorage(shortSessionID);
-        BrowserPropagationDataStorage dataStorage2 = sessionStorage.getOrCreateDataStorage(longSessionID);
+        BrowserPropagationDataStorage dataStorage1 = sessionStorage.getOrCreateDataStorage(shortSessionID, null);
+        BrowserPropagationDataStorage dataStorage2 = sessionStorage.getOrCreateDataStorage(longSessionID, null);
 
         assertThat(dataStorage1).isNull();
         assertThat(dataStorage2).isNull();
@@ -34,8 +34,8 @@ public class BrowserPropagationSessionStorageTest {
         BrowserPropagationSessionStorage sessionStorage = BrowserPropagationSessionStorage.get();
         sessionStorage.setSessionLimit(1);
 
-        BrowserPropagationDataStorage dataStorage1 = sessionStorage.getOrCreateDataStorage(validSessionID);
-        BrowserPropagationDataStorage dataStorage2 = sessionStorage.getOrCreateDataStorage(anotherValidSessionID);
+        BrowserPropagationDataStorage dataStorage1 = sessionStorage.getOrCreateDataStorage(validSessionID, null);
+        BrowserPropagationDataStorage dataStorage2 = sessionStorage.getOrCreateDataStorage(anotherValidSessionID, null);
 
         assertThat(dataStorage1).isNotNull();
         assertThat(dataStorage2).isNull();

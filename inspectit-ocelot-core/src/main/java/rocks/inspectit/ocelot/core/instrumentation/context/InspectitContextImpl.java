@@ -308,7 +308,9 @@ public class InspectitContextImpl implements InternalInspectitContext {
         Object currentSessionID = getData(REMOTE_SESSION_ID);
         if(currentSessionID != null) {
             browserPropagationDataStorage = BrowserPropagationSessionStorage.get()
-                    .getOrCreateDataStorage(currentSessionID.toString());
+                    .getOrCreateDataStorage(currentSessionID.toString(), propagation);
+            // Set propagation, if updated since creation
+            browserPropagationDataStorage.setPropagation(propagation);
         }
 
 

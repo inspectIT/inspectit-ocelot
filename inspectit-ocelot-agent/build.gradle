@@ -195,8 +195,6 @@ dependencies {
             // For inspectit-ocelot-core it is pulled in via the manually declared spring-boot dependency.
             // For inspectit-configurationserver it is pulled in as it is a full blown spring-boot application.
             libs.orgSpringframeworkSpringJcl,
-            libs.orgEclipseJettyJettyServer,
-            libs.orgeclipseJettyJettyServlet,
 
             libs.comH2databaseH2,
 

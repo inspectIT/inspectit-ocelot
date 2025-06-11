@@ -16,6 +16,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.util.SocketUtils;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
 import java.io.IOException;
 import java.util.*;
@@ -28,6 +29,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
     @Autowired
     private BrowserPropagationHttpExporterService exporterService;
     private BrowserPropagationSessionStorage sessionStorage;
+    private PropagationMetaData propagation;
     private CloseableHttpClient testClient;
 
     private static final String sessionID = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
@@ -41,6 +43,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
     @BeforeEach
     void prepareTest() throws IOException {
         startServer();
+        propagation = createPropagation();
         testClient = createHttpClient();
         writeDataIntoStorage();
     }
@@ -50,10 +53,10 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         sessionStorage.clearDataStorages();
     }
 
-    void startServer() {
+    void startServer() throws IOException {
         int port = SocketUtils.findAvailableTcpPort();
-        BrowserPropagationServlet servlet = new BrowserPropagationServlet(sessionIDHeader, Collections.singletonList(allowedOrigin));
-        exporterService.startServer(host, port, path, servlet);
+        BrowserPropagationHandler handler = new BrowserPropagationHandler(sessionIDHeader, Collections.singletonList(allowedOrigin));
+        exporterService.startServer(host, port, path, handler);
         url = "http://" + host + ":" + port + path;
     }
 
@@ -68,7 +71,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         Map<String, Object> data = new HashMap<>();
         data.put("key", "value");
         sessionStorage = BrowserPropagationSessionStorage.get();
-        sessionStorage.getOrCreateDataStorage(sessionID).writeData(data);
+        sessionStorage.getOrCreateDataStorage(sessionID, propagation).writeData(data);
     }
 
     @Nested
@@ -158,7 +161,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
             int statusCode = response.getCode();
 
             assertThat(statusCode).isEqualTo(200);
-            assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).containsEntry("newKey", "newValue");
+            assertThat(sessionStorage.getOrCreateDataStorage(sessionID, propagation).readData()).containsEntry("newKey", "newValue");
             response.close();
         }
 
@@ -190,7 +193,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
             int statusCode = response.getCode();
 
             assertThat(statusCode).isEqualTo(400);
-            assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
+            assertThat(sessionStorage.getOrCreateDataStorage(sessionID, propagation).readData()).doesNotContainEntry("newKey", "newValue");
             response.close();
         }
 
@@ -207,7 +210,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
             int statusCode = response.getCode();
 
             assertThat(statusCode).isEqualTo(404);
-            assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
+            assertThat(sessionStorage.getOrCreateDataStorage(sessionID, propagation).readData()).doesNotContainEntry("newKey", "newValue");
             response.close();
         }
 
@@ -224,7 +227,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
             int statusCode = response.getCode();
 
             assertThat(statusCode).isEqualTo(400);
-            assertThat(sessionStorage.getOrCreateDataStorage(sessionID).readData()).doesNotContainEntry("newKey", "newValue");
+            assertThat(sessionStorage.getOrCreateDataStorage(sessionID, propagation).readData()).doesNotContainEntry("newKey", "newValue");
             response.close();
         }
 
@@ -295,5 +298,12 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
             assertThat(statusCode).isEqualTo(403);
             response.close();
         }
+    }
+
+    private PropagationMetaData createPropagation() {
+        return PropagationMetaData.builder()
+                .setBrowserPropagation("key", true)
+                .setBrowserPropagation("newKey", true)
+                .build();
     }
 }

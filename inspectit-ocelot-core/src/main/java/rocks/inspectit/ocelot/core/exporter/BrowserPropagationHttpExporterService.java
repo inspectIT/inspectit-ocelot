@@ -1,9 +1,8 @@
 package rocks.inspectit.ocelot.core.exporter;
 
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,7 @@ import rocks.inspectit.ocelot.config.model.exporters.tags.HttpExporterSettings;
 import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
-import javax.servlet.http.HttpServlet;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -31,11 +30,11 @@ import java.util.List;
 @Deprecated
 public class BrowserPropagationHttpExporterService extends DynamicallyActivatableService {
 
-    private Server server;
+    private HttpServer server;
 
     private BrowserPropagationSessionStorage sessionStorage;
 
-    private BrowserPropagationServlet httpServlet;
+    private HttpHandler httpHandler;
 
     /**
      * Delay to rerun the scheduled method after the method finished in milliseconds
@@ -76,9 +75,14 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
 
         String sessionIdHeader = settings.getSessionIdHeader();
         List<String> allowedOrigins = settings.getAllowedOrigins();
-        httpServlet = new BrowserPropagationServlet(sessionIdHeader, allowedOrigins);
+        httpHandler = new BrowserPropagationHandler(sessionIdHeader, allowedOrigins);
 
-        return startServer(host, port, path, httpServlet);
+        try {
+            return startServer(host, port, path, httpHandler);
+        } catch (Exception e) {
+            log.error("Starting of Tags HTTP-Server failed", e);
+            return false;
+        }
     }
 
     @Override
@@ -86,7 +90,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         if(server != null) {
             try {
                 log.info("Stopping Tags HTTP-Server - All sessions will be removed");
-                server.stop();
+                server.stop(0);
                 sessionStorage.clearDataStorages();
                 sessionStorage.setExporterActive(false);
             } catch (Exception e) {
@@ -96,21 +100,14 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         return true;
     }
 
-    protected boolean startServer(String host, int port, String path, HttpServlet servlet) {
-        server = new Server(new InetSocketAddress(host, port));
-        String contextPath = "";
-        ServletContextHandler contextHandler = new ServletContextHandler(server, contextPath);
-        contextHandler.addServlet(new ServletHolder(servlet), path);
-        server.setStopAtShutdown(true);
+    protected boolean startServer(String host, int port, String path, HttpHandler handler) throws IOException {
+        server = HttpServer.create(new InetSocketAddress(host, port), 0);
+        server.createContext(path, handler);
+        server.setExecutor(null);
 
-        try {
-            log.warn("It is not recommended to use the Tags HTTP-Server. Instead read or write data via baggage headers");
-            log.info("Starting Tags HTTP-Server on {}:{}{} ", host, port, path);
-            server.start();
-        } catch (Exception e) {
-            log.error("Starting of Tags HTTP-Server failed", e);
-            return false;
-        }
+        log.warn("It is not recommended to use the Tags HTTP-Server. Instead read or write data via baggage headers");
+        log.info("Starting Tags HTTP-Server on {}:{}{} ", host, port, path);
+        server.start();
         return true;
     }
 
@@ -121,7 +118,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
      */
     @Scheduled(fixedDelay = FIXED_DELAY)
     public void updateSessionStorage() {
-        if(httpServlet == null) return;
+        if(httpHandler == null) return;
         sessionStorage.cleanUpData(timeToLive);
     }
 }

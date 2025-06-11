@@ -1,11 +1,9 @@
 package rocks.inspectit.ocelot.core.instrumentation.browser;
 
 import lombok.extern.slf4j.Slf4j;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -16,23 +14,35 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class BrowserPropagationDataStorage {
 
-    // Default AttributeCountLimit of OpenTelemetry is 128
-    private static final int ATTRIBUTE_COUNT_LIMIT = 128;
-    private static final int MAX_KEY_SIZE = 128;
-    private static final int MAX_VALUE_SIZE = 2048;
-    private long latestTimestamp;
-    private final ConcurrentMap<String, Object> propagationData;
+    // Default limit of OpenTelemetry is also 128
+    private static final int TAG_LIMIT = 128;
 
-    public BrowserPropagationDataStorage() {
+    private static final int MAX_KEY_SIZE = 128;
+
+    private static final int MAX_VALUE_SIZE = 2048;
+
+    private long latestTimestamp;
+
+    private final ConcurrentMap<String, Object> propagationData = new ConcurrentHashMap<>();
+
+    private PropagationMetaData propagation;
+
+    BrowserPropagationDataStorage() {
         latestTimestamp = System.currentTimeMillis();
-        propagationData = new ConcurrentHashMap<>();
+    }
+
+    /**
+     * Updates the propagation, if changed
+     */
+    public void setPropagation(PropagationMetaData propagation) {
+        if (propagation != null && !propagation.equals(this.propagation)) this.propagation = propagation;
     }
 
     public void writeData(Map<String, ?> newPropagationData) {
         Map <String, Object> validatedData = validateEntries(newPropagationData);
 
-        if(!validateAttributeCount(validatedData)) {
-            log.warn("Unable to write data: Data count limit was exceeded");
+        if(exceedsTagLimit(validatedData)) {
+            log.debug("Unable to write data: tag limit was exceeded");
             return;
         }
         propagationData.putAll(validatedData);
@@ -52,6 +62,7 @@ public class BrowserPropagationDataStorage {
 
     /**
      * Calculates the elapsed time since latestTimestamp
+     *
      * @param currentTime current time in milliseconds
      * @return Elapsed time since latestTimestamp in milliseconds
      */
@@ -59,25 +70,37 @@ public class BrowserPropagationDataStorage {
         return currentTime - latestTimestamp;
     }
 
-    private boolean validateAttributeCount(Map<String, ?> newPropagationData) {
+    private boolean exceedsTagLimit(Map<String, ?> newPropagationData) {
         Set<String> keySet = new HashSet<>(propagationData.keySet());
         keySet.retainAll(newPropagationData.keySet());
-        //Add size of both maps and subtract the common keys
-        return propagationData.size() + newPropagationData.size() - keySet.size() <= ATTRIBUTE_COUNT_LIMIT;
+        // Add size of both maps and subtract the common keys
+        return propagationData.size() + newPropagationData.size() - keySet.size() > TAG_LIMIT;
     }
 
     private Map<String, Object> validateEntries(Map<String, ?> newPropagationData) {
         Map<String, Object> validatedData = new HashMap<>();
         newPropagationData.forEach((k,v) -> {
             if(validateEntry(k,v)) validatedData.put(k,v);
-            else log.warn("Invalid data entry {} will not be stored", k);
+            else log.debug("Invalid data entry {} will not be stored", k);
         });
         return validatedData;
     }
 
     private boolean validateEntry(String key, Object value) {
-        return value instanceof String &&
-                key.length() <= MAX_KEY_SIZE &&
+        return key.length() <= MAX_KEY_SIZE &&
+                isPropagated(key) &&
+                value instanceof String &&
                 ((String) value).length() <= MAX_VALUE_SIZE;
+    }
+
+    /**
+     * Only if browser-propagation is enabled for this key, it should be stored.
+     *
+     * @param key the key name
+     * @return true, if this key should be propagated
+     */
+    private boolean isPropagated(String key) {
+        if(propagation != null) return propagation.isPropagatedWithBrowser(key);
+        else return false;
     }
 }
