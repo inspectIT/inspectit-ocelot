@@ -71,7 +71,7 @@ class KeyValueEditor extends React.Component {
     };
 
     return (
-      <DataTable value={dataArray} scrollable={true} scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'}>
+      <DataTable value={dataArray} editMode="cell" scrollable={true} scrollHeight={this.props.maxHeight ? this.props.maxHeight : '100%'}>
         <Column
           columnKey="key"
           field="key"
