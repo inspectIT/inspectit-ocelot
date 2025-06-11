@@ -79,11 +79,13 @@ jobs:
         run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-core:test --no-daemon
       - name: systemTest
         run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-agent:systemTest
+      - name: Sanitize image name # we cannot use ':' in upload-artifact names
+        run: echo "DOCKER_IMAGE=$(echo '${{ matrix.dockerimage }}' | sed 's/:/-/g')" >> $GITHUB_ENV
       - name: upload agent
         uses: actions/upload-artifact@v4
         if: ${{ success() }}
         with:
-          name: agent-${{ matrix.dockerimage }}
+          name: agent-${{ env.DOCKER_IMAGE }}
           path: ./inspectit-ocelot-agent/build/*.jar
       - name: upload test results
         uses: actions/upload-artifact@v4
