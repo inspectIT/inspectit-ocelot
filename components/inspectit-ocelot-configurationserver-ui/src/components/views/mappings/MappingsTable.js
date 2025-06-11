@@ -299,7 +299,7 @@ class MappingsTable extends React.Component {
             </div>
           </>
         )}
-        {mappings.length > 0 && (
+        {mappings.length > 0 ? (
           <div className="table-and-sidebar">
             <div className="table" ref={(el) => (this.mappingsTable = el)}>
               <DataTable
@@ -344,7 +344,7 @@ class MappingsTable extends React.Component {
                       mapping={data}
                       onEdit={this.props.onEditMapping}
                       onDelete={this.showDeleteMappingDialog}
-                      onDownload={this.configDownload.download}
+                      onDownload={this.configDownload?.download}
                       onDuplicate={this.duplicateMapping}
                       appendRef={this.mappingsTable}
                     />
@@ -361,6 +361,8 @@ class MappingsTable extends React.Component {
             </div>
             <div className="versioning-sidebar">{sidebar}</div>
           </div>
+        ) : (
+          <div style={{ padding: '1rem', textAlign: 'center' }}>No mappings available...</div>
         )}
       </>
     );
