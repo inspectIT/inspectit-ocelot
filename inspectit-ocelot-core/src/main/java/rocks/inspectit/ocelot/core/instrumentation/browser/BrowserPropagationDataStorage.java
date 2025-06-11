@@ -16,23 +16,26 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class BrowserPropagationDataStorage {
 
-    // Default AttributeCountLimit of OpenTelemetry is 128
-    private static final int ATTRIBUTE_COUNT_LIMIT = 128;
+    // Default limit of OpenTelemetry is also 128
+    private static final int TAG_LIMIT = 128;
+
     private static final int MAX_KEY_SIZE = 128;
+
     private static final int MAX_VALUE_SIZE = 2048;
+
     private long latestTimestamp;
-    private final ConcurrentMap<String, Object> propagationData;
+
+    private final ConcurrentMap<String, Object> propagationData = new ConcurrentHashMap<>();
 
     public BrowserPropagationDataStorage() {
         latestTimestamp = System.currentTimeMillis();
-        propagationData = new ConcurrentHashMap<>();
     }
 
     public void writeData(Map<String, ?> newPropagationData) {
         Map <String, Object> validatedData = validateEntries(newPropagationData);
 
-        if(!validateAttributeCount(validatedData)) {
-            log.warn("Unable to write data: Data count limit was exceeded");
+        if(exceedsTagLimit(validatedData)) {
+            log.debug("Unable to write data: Data count limit was exceeded");
             return;
         }
         propagationData.putAll(validatedData);
@@ -59,18 +62,18 @@ public class BrowserPropagationDataStorage {
         return currentTime - latestTimestamp;
     }
 
-    private boolean validateAttributeCount(Map<String, ?> newPropagationData) {
+    private boolean exceedsTagLimit(Map<String, ?> newPropagationData) {
         Set<String> keySet = new HashSet<>(propagationData.keySet());
         keySet.retainAll(newPropagationData.keySet());
-        //Add size of both maps and subtract the common keys
-        return propagationData.size() + newPropagationData.size() - keySet.size() <= ATTRIBUTE_COUNT_LIMIT;
+        // Add size of both maps and subtract the common keys
+        return propagationData.size() + newPropagationData.size() - keySet.size() > TAG_LIMIT;
     }
 
     private Map<String, Object> validateEntries(Map<String, ?> newPropagationData) {
         Map<String, Object> validatedData = new HashMap<>();
         newPropagationData.forEach((k,v) -> {
             if(validateEntry(k,v)) validatedData.put(k,v);
-            else log.warn("Invalid data entry {} will not be stored", k);
+            else log.debug("Invalid data entry {} will not be stored", k);
         });
         return validatedData;
     }

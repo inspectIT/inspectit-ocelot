@@ -14,8 +14,6 @@ ioOpentelemetryInstrumentation = "2.15.0-alpha"
 ioOpentelemetryProto = "1.5.0-alpha"
 ioOpentelemetrySemconv = "1.32.0"
 orgApacheLoggingLog4j = "2.24.3"
-# @pin 10+ does not support Java 8 - Maintain latest 9 version
-orgEclipseJetty = "9.4.57.v20241219"
 # @pin Starting with version 6.x requires Java 11
 # 5.10.* is not running
 orgJunitJupiter = "5.9.3"
@@ -92,8 +90,6 @@ orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0
 orgAssertjAssertjCore = "org.assertj:assertj-core:3.27.3"
 orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.27.3"
 orgAwaitility = "org.awaitility:awaitility:4.3.0"
-# @pin Jetty 9.4.* is the last version to support java 8
-orgEclipseJettyJettyServer = { module = "org.eclipse.jetty:jetty-server", version.ref = "orgEclipseJetty" }
 # @pin HibernateValidator 6.* is the last version to support java 8
 orgHibernateValidatorHibernateValidator = "org.hibernate.validator:hibernate-validator:6.2.5.Final"
 orgInfluxdbInfluxdbJava = "org.influxdb:influxdb-java:2.25"
@@ -114,7 +110,6 @@ orgTestcontainers = { module = "org.testcontainers:testcontainers", version.ref 
 orgTestcontainersJunitJupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "orgTestcontainers" }
 # @pin Version 2.* is not working with the current jackson-dependency of spring 2
 orgYamlSnakeyaml = "org.yaml:snakeyaml:1.33"
-orgeclipseJettyJettyServlet = { module = "org.eclipse.jetty:jetty-servlet", version.ref = "orgEclipseJetty" }
 # No updates available, necessary for our custom logging PiccoloSaxEventRecorder in inspectit-ocelot-core
 piccolo = "piccolo:piccolo:1.0.3"
 rocksInspectitOpencensusInfluxdbExporter = "rocks.inspectit:opencensus-influxdb-exporter:1.2"

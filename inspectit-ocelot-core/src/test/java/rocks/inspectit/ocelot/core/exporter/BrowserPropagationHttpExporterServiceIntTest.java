@@ -50,10 +50,10 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
         sessionStorage.clearDataStorages();
     }
 
-    void startServer() {
+    void startServer() throws IOException {
         int port = SocketUtils.findAvailableTcpPort();
-        BrowserPropagationServlet servlet = new BrowserPropagationServlet(sessionIDHeader, Collections.singletonList(allowedOrigin));
-        exporterService.startServer(host, port, path, servlet);
+        BrowserPropagationHandler handler = new BrowserPropagationHandler(sessionIDHeader, Collections.singletonList(allowedOrigin));
+        exporterService.startServer(host, port, path, handler);
         url = "http://" + host + ":" + port + path;
     }
 

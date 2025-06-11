@@ -86,12 +86,6 @@ dependencies {
             // logstash support (JSON logging)
             libs.netLogstashLogbackLogstashLogbackEncoder,
 
-            // jetty HTTP server for REST-API
-            // we use jetty instead of Spring-Boot-Web since it's more lightweight and
-            // it 's easier to adapt changes from the config-server
-            libs.orgEclipseJettyJettyServer,
-            libs.orgeclipseJettyJettyServlet,
-
             // utils
             libs.orgApacheCommonsCommonsLang3,
             libs.orgApacheCommonsCommonsMath3,
