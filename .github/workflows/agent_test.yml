@@ -30,6 +30,7 @@ on:
       - '**/package.json'
       - '**/yarn.lock'
   workflow_call:
+  workflow_dispatch:
 
 jobs:
   pr-check:
@@ -78,6 +79,12 @@ jobs:
         run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-core:test --no-daemon
       - name: systemTest
         run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-agent:systemTest
+      - name: upload agent
+        uses: actions/upload-artifact@v4
+        if: ${{ success() }}
+        with:
+          name: agent-${{ matrix.dockerimage }}
+          path: ./inspectit-ocelot-agent/build/*.jar
       - name: upload test results
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
