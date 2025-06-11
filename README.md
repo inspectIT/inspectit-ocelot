@@ -144,7 +144,7 @@ No. The agent is compatible to and can be used with any kind of JVM (Oracle JVM,
 
 Yes, you can use the inspectIT Ocelot Java agent if you already use the OpenTelemetry library.
 However, there are a few points that need to be considered to ensure a smooth operation.
-Please read the [corresponding section in the documentation](https://inspectit.github.io/inspectit-ocelot/docs/next/configuration/opentelemetry-configuration).
+Please read the [corresponding section in the documentation](https://inspectit.github.io/inspectit-ocelot/docs/configuration/opentelemetry-configuration).
 
 #### How can I start my application with the inspectIT Ocelot Java agent?
 
