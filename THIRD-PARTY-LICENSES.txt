@@ -4871,7 +4871,7 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
-95. Group: io.swagger.core.v3  Name: swagger-annotations  Version: 2.2.20
+95. Group: io.swagger.core.v3  Name: swagger-annotations-jakarta  Version: 2.2.30
 
 Manifest Project URL: https://github.com/swagger-api/swagger-core/modules/swagger-annotations
 
@@ -5095,7 +5095,7 @@ Copy of the Apache 2.0 license can be found in `LICENSE` file.
 
 --------------------------------------------------------------------------------
 
-96. Group: io.swagger.core.v3  Name: swagger-core  Version: 2.2.20
+96. Group: io.swagger.core.v3  Name: swagger-core-jakarta  Version: 2.2.30
 
 Manifest Project URL: https://github.com/swagger-api/swagger-core/modules/swagger-core
 
@@ -5319,7 +5319,7 @@ Copy of the Apache 2.0 license can be found in `LICENSE` file.
 
 --------------------------------------------------------------------------------
 
-97. Group: io.swagger.core.v3  Name: swagger-models  Version: 2.2.20
+97. Group: io.swagger.core.v3  Name: swagger-models-jakarta  Version: 2.2.30
 
 Manifest Project URL: https://github.com/swagger-api/swagger-core/modules/swagger-models
 
@@ -15199,7 +15199,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --------------------------------------------------------------------------------
 
-166. Group: org.springdoc  Name: springdoc-openapi-common  Version: 1.8.0
+166. Group: org.springdoc  Name: springdoc-openapi-starter-common  Version: 2.8.8
 
 POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0
 
@@ -15413,7 +15413,7 @@ Embedded license:
 
 --------------------------------------------------------------------------------
 
-167. Group: org.springdoc  Name: springdoc-openapi-ui  Version: 1.8.0
+167. Group: org.springdoc  Name: springdoc-openapi-starter-webmvc-api  Version: 2.8.8
 
 POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0
 
@@ -15627,7 +15627,7 @@ Embedded license:
 
 --------------------------------------------------------------------------------
 
-168. Group: org.springdoc  Name: springdoc-openapi-webmvc-core  Version: 1.8.0
+168. Group: org.springdoc  Name: springdoc-openapi-starter-webmvc-ui  Version: 2.8.8
 
 POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0
 
@@ -25363,15 +25363,23 @@ POM License: Apache License, Version 2.0 - https://www.apache.org/licenses/LICEN
 
 --------------------------------------------------------------------------------
 
-209. Group: org.webjars  Name: swagger-ui  Version: 5.11.8
+209. Group: org.webjars  Name: swagger-ui  Version: 5.21.0
 
-POM Project URL: http://webjars.org
+Manifest License: Apache-2.0 (Not packaged)
 
-POM License: Apache 2.0 - https://github.com/swagger-api/swagger-ui
+POM Project URL: https://www.webjars.org
+
+POM License: Apache-2.0--------------------------------------------------------------------------------
+
+210. Group: org.webjars  Name: webjars-locator-lite  Version: 1.1.0
+
+POM Project URL: https://webjars.org
+
+POM License: MIT - https://github.com/webjars/webjars-locator-lite/blob/main/LICENSE.md
 
 --------------------------------------------------------------------------------
 
-210. Group: org.xerial  Name: sqlite-jdbc  Version: 3.50.1.0
+211. Group: org.xerial  Name: sqlite-jdbc  Version: 3.50.1.0
 
 POM Project URL: https://github.com/xerial/sqlite-jdbc
 
@@ -25613,7 +25621,7 @@ SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
 
-211. Group: org.yaml  Name: snakeyaml  Version: 1.33
+212. Group: org.yaml  Name: snakeyaml  Version: 1.33
 
 POM Project URL: https://bitbucket.org/snakeyaml/snakeyaml
 
@@ -25621,7 +25629,7 @@ POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENS
 
 --------------------------------------------------------------------------------
 
-212. Group: org.yaml  Name: snakeyaml  Version: 2.4
+213. Group: org.yaml  Name: snakeyaml  Version: 2.4
 
 POM Project URL: https://bitbucket.org/snakeyaml/snakeyaml
 
@@ -25629,11 +25637,11 @@ POM License: Apache License, Version 2.0 - http://www.apache.org/licenses/LICENS
 
 --------------------------------------------------------------------------------
 
-213. Group: piccolo  Name: piccolo  Version: 1.0.3
+214. Group: piccolo  Name: piccolo  Version: 1.0.3
 
 --------------------------------------------------------------------------------
 
-214. Group: rocks.inspectit  Name: opencensus-influxdb-exporter  Version: 1.2
+215. Group: rocks.inspectit  Name: opencensus-influxdb-exporter  Version: 1.2
 
 POM Project URL: https://github.com/NovatecConsulting/opencensus-influx-exporter
 
@@ -25642,5 +25650,5 @@ POM License: The Apache License, Version 2.0 - http://www.apache.org/licenses/LI
 --------------------------------------------------------------------------------
 
 
-This report was generated at Thu Jun 12 14:31:16 UTC 2025.
+This report was generated at Thu Jun 12 14:39:37 UTC 2025.
 
