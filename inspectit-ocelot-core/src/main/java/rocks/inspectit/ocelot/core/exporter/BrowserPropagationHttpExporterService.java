@@ -14,6 +14,8 @@ import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Tags HTTP-Server to "export" data-tags to browsers
@@ -66,6 +68,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         String host = settings.getHost();
         int port = settings.getPort();
         String path = settings.getPath();
+        int threadLimit = settings.getThreadLimit();
         timeToLive = settings.getTimeToLive();
 
         int sessionLimit = settings.getSessionLimit();
@@ -78,7 +81,7 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         httpHandler = new BrowserPropagationHandler(sessionIdHeader, allowedOrigins);
 
         try {
-            return startServer(host, port, path, httpHandler);
+            return startServer(host, port, path, httpHandler, threadLimit);
         } catch (Exception e) {
             log.error("Starting of Tags HTTP-Server failed", e);
             return false;
@@ -100,10 +103,11 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         return true;
     }
 
-    protected boolean startServer(String host, int port, String path, HttpHandler handler) throws IOException {
+    protected boolean startServer(String host, int port, String path, HttpHandler handler, int threadLimit) throws IOException {
         server = HttpServer.create(new InetSocketAddress(host, port), 0);
         server.createContext(path, handler);
-        server.setExecutor(null);
+        ExecutorService executor = Executors.newFixedThreadPool(threadLimit);
+        server.setExecutor(executor);
 
         log.warn("It is not recommended to use the Tags HTTP-Server. Instead read or write data via baggage headers");
         log.info("Starting Tags HTTP-Server on {}:{}{} ", host, port, path);

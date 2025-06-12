@@ -142,11 +142,13 @@ public class BrowserPropagationHandler implements HttpHandler {
 
     private void addCorsHeaders(HttpExchange exchange) {
         String origin = exchange.getRequestHeaders().getFirst("Origin");
-        String method = exchange.getRequestMethod().toLowerCase(Locale.ROOT);
+        if(origin != null && !origin.isEmpty()) {
+            String method = exchange.getRequestMethod().toLowerCase(Locale.ROOT);
 
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", origin);
-        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", method);
-        exchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", origin);
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", method);
+            exchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+        }
     }
 
     /**

@@ -32,6 +32,11 @@ public class HttpExporterSettings {
     private String path;
 
     /**
+     * How many threads at most can process requests
+     */
+    private int threadLimit;
+
+    /**
      * List of allowed Origins, which are able to access the HTTP-server
      */
     private List<String> allowedOrigins;
