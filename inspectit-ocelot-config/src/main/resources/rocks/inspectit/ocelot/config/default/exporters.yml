@@ -55,7 +55,7 @@ inspectit:
         # headers
         headers: {}
         # compression method
-        compression: NONE
+        compression: none
         # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
         timeout: 10s
 
@@ -84,7 +84,7 @@ inspectit:
         # headers
         headers: {}
         # compression method
-        compression: NONE
+        compression: none
         # timeout, i.e., maximum time the OTLP exporter will wait for each batch export
         timeout: 10s
 
@@ -100,6 +100,8 @@ inspectit:
         port: 9000
         # the path for the endpoint of the http-server
         path: "/inspectit"
+        # how many threads at most can process requests
+        thread-limit: 100
         # list of allowed origins, which are able to access the http-server
         allowed-origins: ["*"]
         # how many sessions can be stored at the same time

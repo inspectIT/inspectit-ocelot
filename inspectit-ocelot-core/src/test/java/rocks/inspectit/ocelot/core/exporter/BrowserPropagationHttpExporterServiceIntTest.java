@@ -56,7 +56,7 @@ public class BrowserPropagationHttpExporterServiceIntTest extends SpringTestBase
     void startServer() throws IOException {
         int port = SocketUtils.findAvailableTcpPort();
         BrowserPropagationHandler handler = new BrowserPropagationHandler(sessionIDHeader, Collections.singletonList(allowedOrigin));
-        exporterService.startServer(host, port, path, handler);
+        exporterService.startServer(host, port, path, handler, 100);
         url = "http://" + host + ":" + port + path;
     }
 
