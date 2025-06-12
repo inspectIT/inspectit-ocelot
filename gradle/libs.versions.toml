@@ -39,8 +39,7 @@ comGithubOshiOshiCore = "com.github.oshi:oshi-core:6.8.2"
 comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.8-jre" } }
 # @pin protobuf 4.* is not running
-# Note: 3.25.6 breaks tests
-comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25.5"
+comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25.8"
 # Note: Updating to 2.3.* will break jmh tests
 comH2databaseH2 = "com.h2database:h2:2.2.224"
 comLinecorpArmeriaArmeriaGrpcProtocol = { module = "com.linecorp.armeria:armeria-grpc-protocol", version.ref = "comLinecorpArmeria" }
