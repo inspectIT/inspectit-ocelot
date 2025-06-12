@@ -6,6 +6,7 @@ import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.internal.DefaultExceptionAttributeResolver;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
@@ -123,11 +124,4 @@ public class OcelotSpanUtils {
             throw new RuntimeException("Cannot set spanId for " + span.getSpanContext(), e);
         }
     }
-
-    public static Span startSpan(SpanContext context, String name, SpanKind kind, Span parent, Clock clock, Attributes attributes, long startEpochNanos) {
-        TracerSharedState tracerSharedState = null;
-        return SdkSpan.startSpan(context, name, null, kind, parent, Context.current()
-                .with(parent), tracerSharedState.getSpanLimits(), tracerSharedState.getActiveSpanProcessor(), clock, tracerSharedState.getResource(), null, null, 0, startEpochNanos);
-    }
-
 }

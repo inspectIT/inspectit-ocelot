@@ -117,18 +117,14 @@ dependencies {
             configServerLibs.comGoogleGuava,
 
             // swagger
-            libs.orgSpringdocSpringdocOpenapiUi
+            configServerLibs.orgSpringdocSpringdocOpenapiStarterWebmvcUi
     )
     testImplementation(
             configServerLibs.orgSpringframeworkBootSpringBootStarterTest,
             configServerLibs.orgSpringframeworkSecuritySpringSecurityTest,
-            configServerLibs.orgMockitoMockitoJunitJupiter,
             configServerLibs.comH2databaseH2,
-            configServerLibs.orgJunitJupiterJunitJupiter,
-            configServerLibs.orgJunitJupiterJunitJupiterApi,
             configServerLibs.orgAwaitility
     )
-    testRuntimeOnly configServerLibs.orgJunitJupiterJunitJupiterEngine
 }
 
 tasks.register('copyServerJar', Copy) {

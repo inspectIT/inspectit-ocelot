@@ -14,9 +14,8 @@ publishing {
 
 dependencies {
     testImplementation(
-            configServerLibs.orgJunitJupiterJunitJupiter,
+            configServerLibs.orgSpringframeworkBootSpringBootStarterTest,
 
-            configServerLibs.orgMockitoMockitoJunitJupiter,
             configServerLibs.comGoogleGuava,
             libs.ioOpentelemetryOpentelemetryApi,
             libs.orgAssertjAssertjCore,

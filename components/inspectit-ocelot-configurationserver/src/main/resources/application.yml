@@ -126,11 +126,11 @@ inspectit-config-server:
 
 # ACTUATOR PROPERTIES
 management:
-  # Whether to enable or disable all endpoints by default.
-  endpoints.enabled-by-default: false
+  # Whether to enable or disable all endpoints by default
+  endpoints.access.default: none
   endpoint:
     # Whether to enable the health endpoint.
-    health.enabled: true
+    health.access: unrestricted
   # HEALTH INDICATORS
   health:
     # Whether to enable LDAP health check.
