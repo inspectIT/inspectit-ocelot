@@ -117,7 +117,7 @@ dependencies {
             configServerLibs.comGoogleGuava,
 
             // swagger
-            configServerLibs.orgSpringdocSpringdocOpenapiUi
+            configServerLibs.orgSpringdocSpringdocOpenapiStarterWebmvcUi
     )
     testImplementation(
             configServerLibs.orgSpringframeworkBootSpringBootStarterTest,
