@@ -85,6 +85,7 @@ The following properties are nested properties below the `inspectit.exporters.ta
 | `.host`              | `127.0.0.1`  | The hostname or network address to which the HTTP server should bind.                                       |
 | `.port`              | `9000`       | The port the HTTP server should use.                                                                        |
 | `.path`              | `/inspectit` | The path on which the HTTP endpoints will be available.                                                     |
+| `.thread-limit`      | `100`        | How many threads at most can process requests.                                                              |
 | `.allowed-origins`   | `["*"]`      | A list of allowed origins, which are able to access the http-server.                                        |
 | `.session-limit`     | `100`        | How many sessions can be stored in the server at the same time.                                             |
 | `.session-id-header` | `Session-Id` | The header, which will be read during propagation to extract the session-ID from                            |
