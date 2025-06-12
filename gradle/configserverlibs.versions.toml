@@ -1,7 +1,6 @@
 [versions]
 ioJsonwebtoken = "0.12.6"
 orgEclipseJgit = "7.3.0.202506031305-r"
-orgMockito = "5.18.0"
 # Use same version as spring boot
 orgJunitJupiter = "5.12.2"
 orgSpringframeworkBoot = { strictly = "3.5.0" }
@@ -26,9 +25,7 @@ orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.j
 orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:11.9.1"
 orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:6.6.15.Final"
 orgJunitJupiterJunitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "orgJunitJupiter" }
-orgJunitJupiterJunitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "orgJunitJupiter" }
-orgJunitJupiterJunitJupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "orgJunitJupiter" }
-orgMockitoMockitoJunitJupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "orgMockito" }
+orgSpringdocSpringdocOpenapiUi = "org.springdoc:springdoc-openapi-ui:1.8.0"
 orgSpringframeworkBootSpringBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterDataJpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "orgSpringframeworkBoot" }

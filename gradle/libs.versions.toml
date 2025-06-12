@@ -100,8 +100,7 @@ orgMockitoMockitoJunitJupiter = { module = "org.mockito:mockito-junit-jupiter", 
 orgProjectlombokLombok = "org.projectlombok:lombok:1.18.38"
 orgSlf4jJulToSlf4j = { module = "org.slf4j:jul-to-slf4j", version.ref = "orgSlf4j" }
 orgSlf4jslf4jApi = { module = "org.slf4j:slf4j-api", version.ref = "orgSlf4j" }
-orgSpringdocSpringdocOpenapiUi = "org.springdoc:springdoc-openapi-ui:1.8.0"
-orgSpringframeworkBootSpringBoot = { module = "org.springframework.boot:spring-boot", version.ref = "orgSpringframeworkBoot" }
+fixorgSpringframeworkBootSpringBoot = { module = "org.springframework.boot:spring-boot", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootTest = { module = "org.springframework.boot:spring-boot-test", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkSpringJcl = { module = "org.springframework:spring-jcl", version.ref = "orgSpringframework" }
 orgSpringframeworkSpringTest = { module = "org.springframework:spring-test", version.ref = "orgSpringframework" }
