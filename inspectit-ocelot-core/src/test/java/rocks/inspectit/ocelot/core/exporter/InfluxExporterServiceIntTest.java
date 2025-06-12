@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState.ENABLED;
 
 @Testcontainers
 public class InfluxExporterServiceIntTest extends SpringTestBase {
@@ -65,7 +66,7 @@ public class InfluxExporterServiceIntTest extends SpringTestBase {
     @Test
     void verifyInfluxDataWritten() {
         updateProperties(props -> {
-            props.setProperty("inspectit.exporters.metrics.influx.enabled", true);
+            props.setProperty("inspectit.exporters.metrics.influx.enabled", ENABLED);
             props.setProperty("inspectit.exporters.metrics.influx.export-interval", "1s");
             props.setProperty("inspectit.exporters.metrics.influx.endpoint", url);
             props.setProperty("inspectit.exporters.metrics.influx.database", DATABASE);
