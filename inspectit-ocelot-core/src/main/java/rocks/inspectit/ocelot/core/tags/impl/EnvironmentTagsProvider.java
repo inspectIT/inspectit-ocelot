@@ -31,11 +31,6 @@ public class EnvironmentTagsProvider implements ICommonTagsProvider {
         if (conf.isEnabled()) {
             Map<String, String> envTags = new HashMap<>();
 
-            // DEPRECATED: To comply with OTel semantic conventions, we should replace the 'service' tag
-            // with 'service.name'
-            envTags.put("service", configuration.getServiceName());
-
-            // We should use only this one in the future
             envTags.put(ServiceAttributes.SERVICE_NAME.getKey(), configuration.getServiceName());
 
             if (conf.isResolveHostName()) {

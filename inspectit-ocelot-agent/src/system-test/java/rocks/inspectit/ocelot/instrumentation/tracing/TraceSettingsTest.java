@@ -29,13 +29,12 @@ public class TraceSettingsTest extends TraceTestBase {
 
         assertTraceExported((spans) -> assertThat(spans).hasSize(1).anySatisfy((sp) -> {
                     assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetter");
-                    assertThat(sp.getAttributes().asMap()).hasSize(8)
+                    assertThat(sp.getAttributes().asMap()).hasSize(7)
                             .containsEntry(AttributeKey.stringKey("entry"), "const")
                             .containsEntry(AttributeKey.stringKey("exit"), "Hello A!")
                             .containsEntry(AttributeKey.stringKey("toObfuscate"), "***")
                             .containsEntry(AttributeKey.stringKey("anything"), "***")
                             // plus include all common tags (service + key validation only)
-                            .containsEntry(AttributeKey.stringKey("service"), "systemtest")
                             .containsEntry(AttributeKey.stringKey("service.name"), "systemtest")
                             .containsKeys(AttributeKey.stringKey("host.name"), AttributeKey.stringKey("host.ip"));
                 })
@@ -57,8 +56,8 @@ public class TraceSettingsTest extends TraceTestBase {
 
         assertTraceExported((spans) -> assertThat(spans).hasSize(1).anySatisfy((sp) -> {
                     assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetterWithConditions");
-                    assertThat(sp.getAttributes().asMap()).hasSize(4)
-                            .containsKeys(AttributeKey.stringKey("service"),  AttributeKey.stringKey("service.name"),
+                    assertThat(sp.getAttributes().asMap()).hasSize(3)
+                            .containsKeys(AttributeKey.stringKey("service.name"),
                                     AttributeKey.stringKey("host.name"), AttributeKey.stringKey("host.ip"));
                 })
 
@@ -66,10 +65,10 @@ public class TraceSettingsTest extends TraceTestBase {
 
         assertTraceExported((spans) -> assertThat(spans).hasSize(1).anySatisfy((sp) -> {
                     assertThat(sp.getName()).endsWith("TraceSettingsTest.attributesSetterWithConditions");
-                    assertThat(sp.getAttributes().asMap()).hasSize(6)
+                    assertThat(sp.getAttributes().asMap()).hasSize(5)
                             .containsEntry(AttributeKey.stringKey("entry"), "const")
                             .containsEntry(AttributeKey.stringKey("exit"), "Hello B!")
-                            .containsKeys(AttributeKey.stringKey("service"), AttributeKey.stringKey("service.name"),
+                            .containsKeys(AttributeKey.stringKey("service.name"),
                                     AttributeKey.stringKey("host.name"), AttributeKey.stringKey("host.ip"));
                 })
         );
@@ -136,7 +135,7 @@ public class TraceSettingsTest extends TraceTestBase {
 
         assertTraceExported((spans) -> assertThat(spans).hasSize(2).anySatisfy((sp) -> {
                     assertThat(SpanId.isValid(sp.getParentSpanId())).isFalse();
-                    assertThat(sp.getAttributes().asMap()).hasSize(4);
+                    assertThat(sp.getAttributes().asMap()).hasSize(3);
                 }).anySatisfy((sp) -> {
                     assertThat(SpanId.isValid(sp.getParentSpanId())).isTrue();
                     assertThat(sp.getAttributes().asMap()).hasSize(0);
@@ -186,16 +185,16 @@ public class TraceSettingsTest extends TraceTestBase {
             }
 
             //ensure that all method invocations have been combined to single spans
-            assertThat(firstSpan.getAttributes().asMap()).hasSize(6)
+            assertThat(firstSpan.getAttributes().asMap()).hasSize(5)
                     .containsEntry(AttributeKey.stringKey("1"), "a1")
                     .containsEntry(AttributeKey.stringKey("2"), "a2")
-                    .containsKeys(AttributeKey.stringKey("service"), AttributeKey.stringKey("service.name"),
+                    .containsKeys(AttributeKey.stringKey("service.name"),
                             AttributeKey.stringKey("host.name"), AttributeKey.stringKey("host.ip"));
-            assertThat(secondSpan.getAttributes().asMap()).hasSize(7)
+            assertThat(secondSpan.getAttributes().asMap()).hasSize(6)
                     .containsEntry(AttributeKey.stringKey("1"), "b1")
                     .containsEntry(AttributeKey.stringKey("2"), "b2")
                     .containsEntry(AttributeKey.stringKey("3"), "b3")
-                    .containsKeys(AttributeKey.stringKey("service"), AttributeKey.stringKey("service.name"),
+                    .containsKeys(AttributeKey.stringKey("service.name"),
                             AttributeKey.stringKey("host.name"), AttributeKey.stringKey("host.ip"));
 
             //ensure that the timings are valid
