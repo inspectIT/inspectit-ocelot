@@ -3,6 +3,12 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
+## Breaking changes in 2.6.12
+
+### Removed deprecated service tag
+
+The tag `service` was fully removed from metrics. Please work with the tag `service.name` instead.
+
 ## Breaking changes in 2.6.11
 
 ### Renamed environment tag keys

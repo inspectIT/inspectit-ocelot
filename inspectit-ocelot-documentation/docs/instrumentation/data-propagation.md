@@ -86,7 +86,7 @@ In fact, we designed the inspectIT context so that it acts as a superset of the 
 Firstly, when an instrumented method is entered, a new inspectIT context is created. 
 At this point, it imports any tag values published by OpenCensus directly as data. 
 This also includes the [common tags](metrics/common-tags.md) created by inspectIT. This means, that you can simply read (and override) 
-values for common tags such as `service` or `host_address` at any rule.
+values for common tags such as `service.name` or `host.name` at any rule.
 
 The integration is even deeper if you configured the agent to also extract the metrics from manual instrumentation 
 in your application via OpenCensus.
