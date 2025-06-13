@@ -86,7 +86,7 @@ public class HttpOutMetricTest {
         @Test
         void testSuccessStatus() throws Exception {
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
-            ctx.setData("service", "apache_client_test");
+            ctx.setData("service.name", "apache_client_test");
             ctx.makeActive();
             client.execute(new HttpGet(WIREMOCK_URL + PATH_200 + "?x=32423"));
             ctx.close();
@@ -94,7 +94,7 @@ public class HttpOutMetricTest {
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
-            tags.put("service", "apache_client_test");
+            tags.put("service.name", "apache_client_test");
             tags.put("http_host", WIREMOCK_HOST_PORT);
             tags.put("http_path", PATH_200);
             tags.put("http_status", "200");
@@ -112,7 +112,7 @@ public class HttpOutMetricTest {
         @Test
         void testErrorStatus() throws Exception {
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
-            ctx.setData("service", "apache_client_test");
+            ctx.setData("service.name", "apache_client_test");
             ctx.makeActive();
             client.execute(new HttpGet(WIREMOCK_URL + PATH_500 + "?x=32423"));
             ctx.close();
@@ -120,7 +120,7 @@ public class HttpOutMetricTest {
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
-            tags.put("service", "apache_client_test");
+            tags.put("service.name", "apache_client_test");
             tags.put("http_host", WIREMOCK_HOST_PORT);
             tags.put("http_path", PATH_500);
             tags.put("http_status", "500");
@@ -138,7 +138,7 @@ public class HttpOutMetricTest {
         @Test
         void testExceptionStatus() throws Exception {
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
-            ctx.setData("service", "apache_client_test");
+            ctx.setData("service.name", "apache_client_test");
             ctx.makeActive();
             Exception caughtException = null;
             try {
@@ -153,7 +153,7 @@ public class HttpOutMetricTest {
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
-            tags.put("service", "apache_client_test");
+            tags.put("service.name", "apache_client_test");
             tags.put("http_host", "idontexist");
             tags.put("http_path", "");
             tags.put("http_status", caughtException.getClass().getSimpleName());
@@ -180,7 +180,7 @@ public class HttpOutMetricTest {
         @Test
         void testSuccessStatus() throws Exception {
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
-            ctx.setData("service", "urlconn_client_test");
+            ctx.setData("service.name", "urlconn_client_test");
             ctx.makeActive();
 
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(WIREMOCK_URL + PATH_200 + "?x=32423").openConnection();
@@ -191,7 +191,7 @@ public class HttpOutMetricTest {
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
-            tags.put("service", "urlconn_client_test");
+            tags.put("service.name", "urlconn_client_test");
             tags.put("http_host", WIREMOCK_HOST_PORT);
             tags.put("http_path", PATH_200);
             tags.put("http_status", "200");
@@ -209,7 +209,7 @@ public class HttpOutMetricTest {
         @Test
         void testErrorStatus() throws Exception {
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
-            ctx.setData("service", "urlconn_client_test");
+            ctx.setData("service.name", "urlconn_client_test");
             ctx.makeActive();
 
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(WIREMOCK_URL + PATH_500 + "?x=32423").openConnection();
@@ -220,7 +220,7 @@ public class HttpOutMetricTest {
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
-            tags.put("service", "urlconn_client_test");
+            tags.put("service.name", "urlconn_client_test");
             tags.put("http_host", WIREMOCK_HOST_PORT);
             tags.put("http_path", PATH_500);
             tags.put("http_status", "500");
@@ -238,7 +238,7 @@ public class HttpOutMetricTest {
         @Test
         void testExceptionStatus() {
             InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
-            ctx.setData("service", "urlconn_client_test");
+            ctx.setData("service.name", "urlconn_client_test");
             ctx.makeActive();
 
             Exception caughtException = null;
@@ -255,7 +255,7 @@ public class HttpOutMetricTest {
             TestUtils.waitForOpenCensusQueueToBeProcessed();
 
             Map<String, String> tags = new HashMap<>();
-            tags.put("service", "urlconn_client_test");
+            tags.put("service.name", "urlconn_client_test");
             tags.put("http_host", "idontexist");
             tags.put("http_path", "");
             tags.put("http_status", caughtException.getClass().getSimpleName());
