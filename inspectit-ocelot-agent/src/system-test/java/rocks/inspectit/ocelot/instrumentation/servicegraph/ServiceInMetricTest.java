@@ -43,7 +43,7 @@ public class ServiceInMetricTest {
 
         try {
             InternalInspectitContext context = Instances.contextManager.enterNewContext();
-            context.setData("service", originService);
+            context.setData("service.name", originService);
             context.makeActive();
 
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
@@ -82,7 +82,7 @@ public class ServiceInMetricTest {
 
             Map<String, String> tags = new HashMap<>();
             tags.put("protocol", "http");
-            tags.put("service", SERVICE_NAME);
+            tags.put("service.name", SERVICE_NAME);
             tags.put("origin_service", "servlet_origin");
 
             await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {

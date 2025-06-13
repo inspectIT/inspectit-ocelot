@@ -17,10 +17,10 @@ Each provider specifies a priority and if the same tag keys are supplied by two 
 
 inspectIT Ocelot currently supports the following tag providers:
 
-| Provider                                | Tags provided                                                  | Supports run-time updates | Enabled by default | Priority |
-|-----------------------------------------|----------------------------------------------------------------|---------------------------|--------------------|----------|
-| [User Defined Tags](#user-defined-tags) | -                                                              | Yes                       | No                 | HIGH     |
-| [Environment Tags](#environment-tags)   | `service.name`, `host.name`, `host.ip`, `service` (deprecated) | Yes                       | Yes                | LOW      |
+| Provider                                | Tags provided                          | Supports run-time updates | Enabled by default | Priority |
+|-----------------------------------------|----------------------------------------|---------------------------|--------------------|----------|
+| [User Defined Tags](#user-defined-tags) | -                                      | Yes                       | No                 | HIGH     |
+| [Environment Tags](#environment-tags)   | `service.name`, `host.name`, `host.ip` | Yes                       | Yes                | LOW      |
 
 > Run-time updates currently only support changing of a tag value, but not adding or removing tags.
 

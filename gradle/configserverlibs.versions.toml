@@ -1,8 +1,6 @@
 [versions]
 ioJsonwebtoken = "0.12.6"
 orgEclipseJgit = "7.3.0.202506031305-r"
-# Use same version as spring boot
-orgJunitJupiter = "5.12.2"
 orgSpringframeworkBoot = { strictly = "3.5.0" }
 orgSpringframeworkSecurity = "6.5.0"
 jsonSchemaGenerator = "4.38.0"
@@ -24,7 +22,6 @@ orgEclipseJgitOrgEclipseJgit = { module = "org.eclipse.jgit:org.eclipse.jgit", v
 orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "orgEclipseJgit" }
 orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:11.9.1"
 orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:6.6.15.Final"
-orgJunitJupiterJunitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "orgJunitJupiter" }
 orgSpringdocSpringdocOpenapiStarterWebmvcUi = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8"
 orgSpringframeworkBootSpringBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterDataJpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "orgSpringframeworkBoot" }

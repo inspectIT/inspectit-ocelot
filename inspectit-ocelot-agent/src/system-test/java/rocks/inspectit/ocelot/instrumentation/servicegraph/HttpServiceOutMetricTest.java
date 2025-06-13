@@ -79,7 +79,7 @@ public class HttpServiceOutMetricTest {
                     Class.forName("org.apache.http.impl.client.InternalHttpClient")), true, 30, TimeUnit.SECONDS);
 
             InternalInspectitContext serviceOverride = Instances.contextManager.enterNewContext();
-            serviceOverride.setData("service", "apache_sg_test");
+            serviceOverride.setData("service.name", "apache_sg_test");
             serviceOverride.makeActive();
             client.execute(URIUtils.extractHost(URI.create(TEST_URL)), new HttpGet(TEST_URL));
             client.close();
@@ -89,7 +89,7 @@ public class HttpServiceOutMetricTest {
 
             Map<String, String> tags = new HashMap<>();
             tags.put("protocol", "http");
-            tags.put("service", "apache_sg_test");
+            tags.put("service.name", "apache_sg_test");
             tags.put("target_service", SERVICE_NAME);
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
@@ -111,7 +111,7 @@ public class HttpServiceOutMetricTest {
             TestUtils.waitForClassInstrumentation(Class.forName("sun.net.www.protocol.http.HttpURLConnection"), true, 30, TimeUnit.SECONDS);
 
             InternalInspectitContext serviceOverride = Instances.contextManager.enterNewContext();
-            serviceOverride.setData("service", "httpurlconn_sg_test");
+            serviceOverride.setData("service.name", "httpurlconn_sg_test");
             serviceOverride.makeActive();
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             urlConnection.getResponseCode();
@@ -121,7 +121,7 @@ public class HttpServiceOutMetricTest {
 
             Map<String, String> tags = new HashMap<>();
             tags.put("protocol", "http");
-            tags.put("service", "httpurlconn_sg_test");
+            tags.put("service.name", "httpurlconn_sg_test");
             tags.put("target_service", SERVICE_NAME);
 
             long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();

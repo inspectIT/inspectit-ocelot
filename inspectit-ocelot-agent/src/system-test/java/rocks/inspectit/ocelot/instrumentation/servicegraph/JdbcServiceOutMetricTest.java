@@ -59,7 +59,7 @@ public class JdbcServiceOutMetricTest {
         TestUtils.waitForClassInstrumentations(Arrays.asList(JdbcPreparedStatement.class), true, 30, TimeUnit.SECONDS);
 
         InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
-        ctx.setData("service", service);
+        ctx.setData("service.name", service);
         ctx.makeActive();
 
         preparedSelect.execute();
@@ -68,7 +68,7 @@ public class JdbcServiceOutMetricTest {
 
         Map<String, String> tags = new HashMap<>();
         tags.put("protocol", "jdbc");
-        tags.put("service", service);
+        tags.put("service.name", service);
         tags.put("target_external", DB_URL_WITHOUT_JDBC);
 
         long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
@@ -87,7 +87,7 @@ public class JdbcServiceOutMetricTest {
         TestUtils.waitForClassInstrumentations(Arrays.asList(JdbcPreparedStatement.class), true, 30, TimeUnit.SECONDS);
 
         InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
-        ctx.setData("service", service);
+        ctx.setData("service.name", service);
         ctx.makeActive();
 
         conn.createStatement().execute(SELECT_SQL);
@@ -96,7 +96,7 @@ public class JdbcServiceOutMetricTest {
 
         Map<String, String> tags = new HashMap<>();
         tags.put("protocol", "jdbc");
-        tags.put("service", service);
+        tags.put("service.name", service);
         tags.put("target_external", DB_URL_WITHOUT_JDBC);
 
         long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
