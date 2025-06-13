@@ -89,12 +89,12 @@ inspectit:
           'servicegraph_target_service':
             action: 'a_assign_value'
             data-input: 
-              'value': 'service'
+              'value': 'service.name'
         exit:
           'servicegraph_target_service':
             action: 'a_assign_value'
             data-input: 
-              'value': 'service'
+              'value': 'service.name'
 
       'r_servicegraph_prepare_down_propagation':
         docs:
@@ -107,7 +107,7 @@ inspectit:
           'servicegraph_origin_service':
             action: 'a_assign_value'
             data-input: 
-              'value': 'service'
+              'value': 'service.name'
 
       'r_servicegraph_inbound_record_method':
         docs:
@@ -205,4 +205,3 @@ inspectit:
             only-if-true: 'servicegraph_is_entry'
             data-input: 
               'value': 'method_duration'
-        

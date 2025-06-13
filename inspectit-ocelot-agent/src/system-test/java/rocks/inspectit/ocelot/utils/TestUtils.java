@@ -247,7 +247,7 @@ public class TestUtils {
         assertThat(orderedTagKeys).contains(tags.keySet().toArray(new String[]{}));
         List<String> expectedTagValues = orderedTagKeys.stream().map(tags::get).collect(Collectors.toList());
 
-        return view.getAggregationMap().entrySet().stream().filter(e -> {
+         List<Map.Entry<List<TagValue>, AggregationData>> entryList = view.getAggregationMap().entrySet().stream().filter(e -> {
             List<TagValue> tagValues = e.getKey();
             for (int i = 0; i < tagValues.size(); i++) {
                 String regex = expectedTagValues.get(i);
@@ -257,7 +257,8 @@ public class TestUtils {
                 }
             }
             return true;
-        }).map(Map.Entry::getValue).findFirst().orElse(null);
+        }).collect(Collectors.toList());
+         return entryList.stream().map(Map.Entry::getValue).findFirst().orElse(null);
     }
 
     public static TimeSeries getTimeseries(String metricName, Map<String, String> tags) {
