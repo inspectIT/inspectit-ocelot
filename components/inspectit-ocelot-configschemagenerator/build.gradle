@@ -1,6 +1,10 @@
+plugins {
+    alias(configServerLibs.plugins.orgSpringframeworkBoot)
+}
+
 dependencies {
     testImplementation(
-            configServerLibs.orgJunitJupiterJunitJupiter
+            configServerLibs.orgSpringframeworkBootSpringBootStarterTest,
     )
 
     implementation(
