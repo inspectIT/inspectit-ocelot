@@ -34,13 +34,18 @@ jobs:
         with:
           name: dependency-check-report-ocelot-agent
           path: ${{ github.workspace }}/reports
-      - name: Send Notification
-        uses: slackapi/slack-github-action@v2.0.0
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            text: "*Ocelot-Agent Dependency-Check Report*: ${{ steps.depcheck.outcome }}\nPlease check the report here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      # Since GitHub cannot send emails directly, we use an external API
+      - name: Send Notification via Resend
+        run: |
+          curl -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "from": "inspectIT Ocelot DepCheck <inspectit-ocelot-depcheck@github.com>",
+              "to": ["info.inspectit@novatec-gmbh.de"],
+              "subject": "Ocelot-Agent Dependency-Check Report - ${{ steps.depcheck.outcome }}",
+              "text": "The Dependency-Check for inspectit-ocelot-agent completed with status: ${{ steps.depcheck.outcome }}.\n\nPlease check the report here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }'
       # if DependencyCheck failed, the job should also fail, but only after the results were uploaded
       - name: Validate DependencyCheck outcome
         if: ${{ steps.depcheck.outcome == 'failure' }}
