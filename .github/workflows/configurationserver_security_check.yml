@@ -96,7 +96,7 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{
-              "from": "inspectIT Ocelot DepCheck <inspectit-ocelot-depcheck@resend.dev",
+              "from": "inspectIT Ocelot DepCheck <inspectit-ocelot-depcheck@resend.dev>",
               "to": ["info.inspectit@novatec-gmbh.de"],
               "subject": "Ocelot-Configuration-Server Dependency-Check Report - ${{ steps.depcheck.outcome }}",
               "html": "<p>The Dependency-Check for inspectit-ocelot-configurationserver completed with status: <strong>${{ steps.depcheck.outcome }}</strong></p><p>Please check the report here: <a href='https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'>View Report</a></p>"
