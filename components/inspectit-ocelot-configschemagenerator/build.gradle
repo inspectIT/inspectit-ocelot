@@ -1,11 +1,10 @@
-plugins {
-    alias(configServerLibs.plugins.orgSpringframeworkBoot)
-}
+// The test breaks from 5.12.* but since the tests here are not that important
+// we don't necessarily have to stay up-to-date with junit versions
+var jupiterVersion = "5.11.4"
 
 dependencies {
-    testImplementation(
-            configServerLibs.orgSpringframeworkBootSpringBootStarterTest,
-    )
+    testImplementation "org.junit.jupiter:junit-jupiter:${jupiterVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}"
 
     implementation(
             project(':inspectit-ocelot-config'),
@@ -29,7 +28,7 @@ task generateConfigSchema(type: JavaExec) {
     args outputPath
 }
 
-// build fatJar with dependencies included
+// build fatJar with dependencies included (needed for dependency checks)
 jar {
     manifest {
         attributes('Main-Class': 'rocks.inspectit.ocelot.configschemagenerator.InspectitSchemaGenerator')
