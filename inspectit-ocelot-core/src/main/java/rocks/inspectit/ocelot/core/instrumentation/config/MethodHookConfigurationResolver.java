@@ -193,8 +193,7 @@ public class MethodHookConfigurationResolver {
 
     /**
      * Resolves a set of rules to one {@link ConcurrentInvocationSettings} and adds it to the
-     * {@link MethodHookConfiguration}. If multiple rules define settings with different operation names, we just use
-     * the first name we find.
+     * {@link MethodHookConfiguration}.
      *
      * @param result the current {@link MethodHookConfiguration.MethodHookConfigurationBuilder} to add the resolved settings
      * @param matchedRules the set of rules, which should be resolved
@@ -204,17 +203,19 @@ public class MethodHookConfigurationResolver {
                 .filter(r -> r.getConcurrentInvocation() != null)
                 .collect(Collectors.toSet());
 
-        val builder = ConcurrentInvocationSettings.builder();
+        if (!rulesDefiningConcurrentInvocation.isEmpty()) {
+            val builder = ConcurrentInvocationSettings.builder();
 
-        Boolean isEnabled = getAndDetectConflicts(rulesDefiningConcurrentInvocation, r -> r.getConcurrentInvocation()
-                        .getEnabled(), ALWAYS_TRUE, "recording concurrent invocations");
-        boolean enabled = Optional.ofNullable(isEnabled).orElse(false);
-        builder.enabled(enabled);
-        String operation = getAndDetectConflicts(rulesDefiningConcurrentInvocation, r -> r.getConcurrentInvocation()
-                        .getOperation(), n -> !StringUtils.isEmpty(n), "recording concurrent invocations");
-        builder.operation(operation);
+            Boolean isEnabled = getAndDetectConflicts(rulesDefiningConcurrentInvocation, r -> r.getConcurrentInvocation()
+                    .getEnabled(), ALWAYS_TRUE, "recording concurrent invocations");
+            boolean enabled = Optional.ofNullable(isEnabled).orElse(false);
+            builder.enabled(enabled);
+            String operation = getAndDetectConflicts(rulesDefiningConcurrentInvocation, r -> r.getConcurrentInvocation()
+                    .getOperation(), n -> !StringUtils.isEmpty(n), "recording concurrent invocations");
+            builder.operation(operation);
 
-        result.concurrentInvocation(builder.build());
+            result.concurrentInvocation(builder.build());
+        }
     }
 
     /**

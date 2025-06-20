@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.ConcurrentInvocationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.ActionTracingMode;
@@ -319,11 +320,50 @@ class InstrumentationRuleResolverTest {
             assertThat(result).flatExtracting(InstrumentationRule::isActionTracing).containsExactly(false);
         }
 
+        @Test
+        void verifyConcurrentInvocationsPreserved() {
+            String operation = "operation-name";
+            ConcurrentInvocationSettings invocationSettings = new ConcurrentInvocationSettings(true, operation);
+            InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
+            ruleSettings.setConcurrentInvocation(invocationSettings);
+            InstrumentationSettings settings = new InstrumentationSettings();
+            settings.setRules(Collections.singletonMap("rule-key", ruleSettings));
+
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
+
+            assertThat(result).hasSize(1);
+            InstrumentationRule rule = result.iterator().next();
+            ConcurrentInvocationSettings resolvedSettings = rule.getConcurrentInvocation();
+
+            assertThat(resolvedSettings).isNotNull();
+            assertThat(resolvedSettings.getEnabled()).isTrue();
+            assertThat(resolvedSettings.getOperation()).isEqualTo(operation);
+        }
+
+        @Test
+        void verifyConcurrentInvocationsPreservedWithRuleName() {
+            String ruleKey = "rule-key";
+            ConcurrentInvocationSettings invocationSettings = new ConcurrentInvocationSettings(true, null);
+            InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
+            ruleSettings.setConcurrentInvocation(invocationSettings);
+            InstrumentationSettings settings = new InstrumentationSettings();
+            settings.setRules(Collections.singletonMap(ruleKey, ruleSettings));
+
+            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
+
+            assertThat(result).hasSize(1);
+            InstrumentationRule rule = result.iterator().next();
+            ConcurrentInvocationSettings resolvedSettings = rule.getConcurrentInvocation();
+
+            assertThat(resolvedSettings).isNotNull();
+            assertThat(resolvedSettings.getEnabled()).isTrue();
+            assertThat(resolvedSettings.getOperation()).isEqualTo(ruleKey);
+        }
+
         private void verifyActionCall(ActionCallConfig ac, String name, ActionCallSettings callSettings) {
             assertThat(ac.getDataKey()).isEqualTo(name);
             assertThat(ac.getCallSettings()).isSameAs(callSettings);
         }
-
     }
 
     @Nested
