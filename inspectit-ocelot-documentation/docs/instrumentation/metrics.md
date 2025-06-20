@@ -75,6 +75,7 @@ default value.
 
 When `concurrent-invocations` is enabled for the current rule, every invocation will be added to the 
 internal storage during the entry phase. In the exit phase the particular invocation will be removed again.
+Since invocations are started and ended within one method call, asynchronous operations are not fully supported yet.
 
 :::note
 Metrics for concurrent invocations can only be recorded, if the proper [metrics recorder](metrics/metric-recorders.md#concurrent-invocations) is enabled. Otherwise, the data will only be collected internally but never properly recorded and exported.
