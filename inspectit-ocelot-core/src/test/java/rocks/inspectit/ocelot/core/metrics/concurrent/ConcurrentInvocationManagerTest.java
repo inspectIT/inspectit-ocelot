@@ -31,22 +31,12 @@ public class ConcurrentInvocationManagerTest {
     @Test
     void shouldRemoveInvocation() {
         manager.addInvocation(OPERATION);
-        manager.addInvocation(OPERATION);
         manager.removeInvocation(OPERATION);
 
         Map<String, Long> invocations = manager.getActiveInvocations();
 
         assertEquals(1, invocations.size());
-    }
-
-    @Test
-    void shouldRemoveInvocationCompletelyWhenReachingZero() {
-        manager.addInvocation(OPERATION);
-        manager.removeInvocation(OPERATION);
-
-        Map<String, Long> invocations = manager.getActiveInvocations();
-
-        assertEquals(0, invocations.size());
+        assertEquals(0, invocations.get(OPERATION));
     }
 
     @Test

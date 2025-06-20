@@ -25,21 +25,22 @@ public class ConcurrentInvocationManager {
     /**
      * Adds one invocation to the specified operation
      *
-     * @param operation the name of the invoked scope
+     * @param operation the name of the invoked operation
      */
     public void addInvocation(String operation) {
         activeInvocations.merge(operation, 1L, Long::sum);
     }
 
     /**
-     * Removes one invocation from the specified operation.
-     * If the resulting amount of invocations reaches 0, the entry will be removed
+     * Removes one invocation from the specified operation. The minimum amount of invocations is 0. <br>
+     * We do not want to delete the entry, because we still want to export the metric value 0.
      *
      * @param operation the name of the invoked operation
      */
     public void removeInvocation(String operation) {
         activeInvocations.compute(operation, (key, count) -> {
-            if (count == null || count <= 1) return null; // remove entry
+            if (count == null) return null;
+            if (count <= 1) return 0L;
             return count - 1L;
         });
     }
