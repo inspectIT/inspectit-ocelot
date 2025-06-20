@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
 import rocks.inspectit.ocelot.commons.models.command.impl.InstrumentationFeedbackCommand;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.ConcurrentInvocationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodHook;
@@ -93,4 +94,10 @@ public class MethodHookConfiguration {
      */
     @Builder.Default
     private boolean traceExitHook = false;
+
+    /**
+     * The settings for recording concurrent invocations.
+     */
+    @Builder.Default
+    private ConcurrentInvocationSettings concurrentInvocation = ConcurrentInvocationSettings.NO_RECORDING;
 }

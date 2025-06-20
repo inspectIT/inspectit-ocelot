@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ConditionalActionSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.ConcurrentInvocationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.callsorting.CyclicDataDependencyException;
 import rocks.inspectit.ocelot.core.instrumentation.config.callsorting.GenericActionCallSorter;
@@ -82,6 +83,8 @@ public class MethodHookConfigurationResolver {
         if (allSettings.isTracingEnabled()) {
             resolveTracing(result, matchedRules);
         }
+
+        resolveConcurrentInvocation(result, matchedRules);
 
         return result.build();
     }
@@ -185,6 +188,33 @@ public class MethodHookConfigurationResolver {
                     .getSampleProbability(), n -> !StringUtils.isEmpty(n), "the trace sample probability"));
             builder.sampleMode(getAndDetectConflicts(matchedRules, r -> r.getTracing()
                     .getSampleMode(), n -> RuleTracingSettings.DEFAULT_SAMPLE_MODE != n, "the trace sample mode", RuleTracingSettings.DEFAULT_SAMPLE_MODE));
+        }
+    }
+
+    /**
+     * Resolves a set of rules to one {@link ConcurrentInvocationSettings} and adds it to the
+     * {@link MethodHookConfiguration}.
+     *
+     * @param result the current {@link MethodHookConfiguration.MethodHookConfigurationBuilder} to add the resolved settings
+     * @param matchedRules the set of rules, which should be resolved
+     */
+    private void resolveConcurrentInvocation(MethodHookConfiguration.MethodHookConfigurationBuilder result, Set<InstrumentationRule> matchedRules) throws ConflictingDefinitionsException {
+        Set<InstrumentationRule> rulesDefiningConcurrentInvocation = matchedRules.stream()
+                .filter(r -> r.getConcurrentInvocation() != null)
+                .collect(Collectors.toSet());
+
+        if (!rulesDefiningConcurrentInvocation.isEmpty()) {
+            val builder = ConcurrentInvocationSettings.builder();
+
+            Boolean isEnabled = getAndDetectConflicts(rulesDefiningConcurrentInvocation, r -> r.getConcurrentInvocation()
+                    .getEnabled(), ALWAYS_TRUE, "recording concurrent invocations");
+            boolean enabled = Optional.ofNullable(isEnabled).orElse(false);
+            builder.enabled(enabled);
+            String operation = getAndDetectConflicts(rulesDefiningConcurrentInvocation, r -> r.getConcurrentInvocation()
+                    .getOperation(), n -> !StringUtils.isEmpty(n), "recording concurrent invocations");
+            builder.operation(operation);
+
+            result.concurrentInvocation(builder.build());
         }
     }
 

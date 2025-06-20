@@ -31,12 +31,12 @@ public class PercentileViewManager {
     /**
      * Maps the name of measures to registered percentile views.
      */
-    private ConcurrentHashMap<String, CopyOnWriteArrayList<PercentileView>> measuresToViewsMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, CopyOnWriteArrayList<PercentileView>> measuresToViewsMap = new ConcurrentHashMap<>();
 
     /**
      * Computation of percentiles can be expensive.
      * For this reason we cache computed metrics for 1 second before recomputing them.
-     * Otherwise e.g. spamming F5 on the prometheus endpoint could lead to an increased CPU usage.
+     * Otherwise, e.g. spamming F5 on the prometheus endpoint could lead to an increased CPU usage.
      */
     private final MetricProducer producer = new CachingMetricProducer(this::computeMetrics, Duration.ofSeconds(1));
 

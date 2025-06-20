@@ -77,6 +77,14 @@ inspectit:
         buffer.capacity: true
       # specifies the frequency with which the memory metrics should be polled and recorded
       frequency: ${inspectit.metrics.frequency}
+    # settings regarding the capturing of concurrency related metrics
+    concurrent:
+      enabled:
+        # if true, it is possible to record concurrent invocations within rules
+        # concurrent invocations will not be recorded automatically but only when enabled within rules!
+        invocations: false
+      # specifies the frequency with which the concurrent invocations metrics should be polled and recorded
+      frequency: ${inspectit.metrics.frequency}
 
     definitions:
       '[disk/free]':
@@ -246,3 +254,13 @@ inspectit:
           '[jvm/threads/states]':
             aggregation: LAST_VALUE
             tags: {state : true}
+
+      '[inspectit/concurrent/invocations]':
+        enabled: '${inspectit.metrics.concurrent.enabled.invocations}'
+        type: LONG
+        unit: invocations
+        description: "the current amount of active invocations"
+        views:
+          '[inspectit/concurrent/invocations]':
+            aggregation: LAST_VALUE
+            tags: { operation: true }

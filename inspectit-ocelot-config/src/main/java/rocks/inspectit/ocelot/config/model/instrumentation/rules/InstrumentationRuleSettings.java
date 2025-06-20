@@ -108,10 +108,6 @@ public class InstrumentationRuleSettings {
      * Defines which metrics should be recorded at the instrumented method.
      * This map maps the name of the metric (=the name of the open census measure) to a corresponding {@link MetricRecordingSettings} instance.
      * The name hereby acts only as a default for {@link MetricRecordingSettings#getMetric()} and can be overridden by this property.
-     * <p>
-     * It is possible to directly assign a string or number value to metrics in this map due to the
-     * {@link rocks.inspectit.ocelot.config.conversion.NumberToMetricRecordingSettingsConverter} and
-     * {@link rocks.inspectit.ocelot.config.conversion.StringToMetricRecordingSettingsConverter}.
      */
     @NotNull
     private Map<@NotBlank String, @Valid MetricRecordingSettings> metrics = Collections.emptyMap();
@@ -121,6 +117,14 @@ public class InstrumentationRuleSettings {
      */
     @Valid
     private RuleTracingSettings tracing = null;
+
+    /**
+     * Defines whether the invocation of this rule's methods should be recorded.
+     * If so, there will be an entry-action to increment the amount of concurrent invocations and
+     * another exit-action to decrement the invocations.
+     */
+    @Valid
+    private ConcurrentInvocationSettings concurrentInvocations = null;
 
     /**
      * Validates this rule, invoked by {@link InstrumentationSettings#performValidation(InspectitConfig, ViolationBuilder)}

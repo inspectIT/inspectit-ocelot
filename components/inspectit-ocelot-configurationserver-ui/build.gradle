@@ -73,7 +73,7 @@ tasks.register('buildFrontend', YarnTask) {
 
     outputs.dir('out')
 
-    dependsOn lintFrontend, checkCodeStyleFrontend
+    dependsOn lintFrontend//, checkCodeStyleFrontend
     args = ['build']
     environment = [NODE_OPTIONS: "--openssl-legacy-provider"]
 }

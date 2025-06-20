@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.ConcurrentInvocationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.config.model.tracing.SampleMode;
@@ -384,6 +385,16 @@ public class MethodHookConfigurationResolverTest {
             assertThat(conf.getPostExitActions()).containsExactly(first, second);
         }
 
-    }
+        @Test
+        void verifyConcurrentInvocationsPreserved() throws Exception {
+            String operation = "operation-name";
+            ConcurrentInvocationSettings invocationSettings = new ConcurrentInvocationSettings(true, operation);
+            InstrumentationRule rule = InstrumentationRule.builder().concurrentInvocation(invocationSettings).build();
 
+            MethodHookConfiguration conf = resolver.buildHookConfiguration(config, Sets.newHashSet(rule));
+
+            assertThat(conf.getConcurrentInvocation().getEnabled()).isTrue();
+            assertThat(conf.getConcurrentInvocation().getOperation()).isEqualTo(operation);
+        }
+    }
 }

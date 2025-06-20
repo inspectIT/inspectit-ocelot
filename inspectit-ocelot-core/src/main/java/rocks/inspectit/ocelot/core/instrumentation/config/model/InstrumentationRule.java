@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.config.model;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import lombok.*;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.ConcurrentInvocationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 
@@ -100,4 +101,10 @@ public class InstrumentationRule {
      */
     @Builder.Default
     private RuleTracingSettings tracing = RuleTracingSettings.NO_TRACING_AND_ATTRIBUTES;
+
+    /**
+     * The settings for recording concurrent invocations.
+     */
+    @Builder.Default
+    private ConcurrentInvocationSettings concurrentInvocation = ConcurrentInvocationSettings.NO_RECORDING;
 }

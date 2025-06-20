@@ -1,19 +1,25 @@
-package rocks.inspectit.ocelot.core.metrics;
+package rocks.inspectit.ocelot.core.metrics.concurrent;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
-import rocks.inspectit.ocelot.core.metrics.system.DiskMetricsRecorder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DiskMetricsRecorderConfigTest extends SpringTestBase {
+public class ConcurrentMetricsRecorderTest extends SpringTestBase {
 
     @Autowired
-    DiskMetricsRecorder recorder;
+    ConcurrentMetricsRecorder recorder;
+
+    @BeforeEach
+    void beforeEach() {
+        updateProperties((mp) -> {
+            mp.setProperty("inspectit.metrics.concurrent.enabled.invocations", "true");
+        });
+    }
 
     @Nested
     class Defaults extends SpringTestBase {
@@ -32,18 +38,7 @@ public class DiskMetricsRecorderConfigTest extends SpringTestBase {
         void checkTotalDisabled() {
             assertThat(recorder.isEnabled()).isTrue();
             updateProperties((mp) -> {
-                mp.setProperty("inspectit.metrics.disk.enabled.total", "false");
-            });
-            assertThat(recorder.isEnabled()).isTrue();
-        }
-
-        @Test
-        @DirtiesContext
-        void checkAllDisabled() {
-            assertThat(recorder.isEnabled()).isTrue();
-            updateProperties((mp) -> {
-                mp.setProperty("inspectit.metrics.disk.enabled.total", "false");
-                mp.setProperty("inspectit.metrics.disk.enabled.free", "false");
+                mp.setProperty("inspectit.metrics.concurrent.enabled.invocations", "false");
             });
             assertThat(recorder.isEnabled()).isFalse();
         }

@@ -158,7 +158,7 @@ public class MeasuresAndViewsManager {
     }
 
     /**
-     * Tries to create a measure based on on the given definition, with checking measures and views reported by {@link #viewManager}.
+     * Tries to create a measure based on the given definition, with checking measures and views reported by {@link #viewManager}.
      * <p>
      * If the measure or a view already exists, info messages are printed out
      *
@@ -249,8 +249,8 @@ public class MeasuresAndViewsManager {
     }
 
     /**
-     * Creates a view if does not exist yet.
-     * Otherwise prints info messages indicating that updating the view is not possible.
+     * Creates a view if it does not exist yet.
+     * Otherwise, prints info messages indicating that updating the view is not possible.
      *
      * @param viewName        the name of the view
      * @param measure         the measure which is used for the view

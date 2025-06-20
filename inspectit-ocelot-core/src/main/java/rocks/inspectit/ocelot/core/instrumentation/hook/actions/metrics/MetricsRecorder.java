@@ -1,8 +1,9 @@
-package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
+package rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics;
 
 import io.opencensus.tags.TagContext;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.metrics.MeasureTagValueGuard;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
@@ -32,6 +33,9 @@ public class MetricsRecorder implements IHookAction {
      */
     private MeasuresAndViewsManager metricsManager;
 
+    /**
+     * Provides tag context. Overwrites tag values if they exceed their configured limit
+     */
     private MeasureTagValueGuard tagValueGuard;
 
     @Override

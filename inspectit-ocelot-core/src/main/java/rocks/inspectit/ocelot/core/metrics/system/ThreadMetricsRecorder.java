@@ -83,7 +83,6 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
                     .filter(s -> s == state)
                     .count();
             measureManager.tryRecordingMeasurement(stateMeasureName, count, tags);
-
         }
     }
 }
