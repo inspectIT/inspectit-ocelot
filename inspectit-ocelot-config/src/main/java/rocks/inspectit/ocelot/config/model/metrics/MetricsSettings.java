@@ -83,6 +83,12 @@ public class MetricsSettings {
     private StandardPollingMetricsRecorderSettings memory;
 
     /**
+     * Settings for {@link rocks.inspectit.ocelot.core.metrics.concurrent.ConcurrentMetricsRecorder}
+     */
+    @Valid
+    private StandardPollingMetricsRecorderSettings concurrent;
+
+    /**
      * Settings for {@link rocks.inspectit.ocelot.core.metrics.system.JmxMetricsRecorder}
      */
     @Valid

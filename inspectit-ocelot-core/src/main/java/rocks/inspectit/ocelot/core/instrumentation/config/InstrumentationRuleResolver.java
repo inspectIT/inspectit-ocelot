@@ -11,14 +11,12 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.ConcurrentInvocationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.ActionTracingMode;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationScope;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
 
 import java.util.Collections;
 import java.util.Map;
@@ -113,6 +111,8 @@ public class InstrumentationRuleResolver {
 
         result.tracing(settings.getTracing());
 
+        result.concurrentInvocation(resolveConcurrentInvocations(settings, name));
+
         return result.build();
     }
 
@@ -148,6 +148,27 @@ public class InstrumentationRuleResolver {
                 .map(entry -> entry.getValue()
                         .copyWithDefaultMetricName(entry.getKey())) //use map key as default metric name
                 .collect(Collectors.toCollection(HashMultiset::create));
+    }
+
+    /**
+     * Resolves the concurrent invocations settings from the rule.
+     * If no scope name for the invocation was explicitly defined, we use the rule name as backup.
+     *
+     * @param settings the rule settings
+     * @param ruleName the rule name
+     *
+     * @return the resolved settings
+     */
+    private ConcurrentInvocationSettings resolveConcurrentInvocations(InstrumentationRuleSettings settings, String ruleName) {
+        ConcurrentInvocationSettings concurrentInvocation = settings.getConcurrentInvocation();
+        if(concurrentInvocation == null) return null;
+
+        String scope = concurrentInvocation.getOperation();
+        if (scope == null || scope.isEmpty()) {
+            scope = ruleName;
+            concurrentInvocation.setOperation(scope);
+        }
+        return concurrentInvocation;
     }
 
     /**

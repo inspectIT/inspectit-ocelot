@@ -19,7 +19,7 @@ import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.Prop
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction.ExecutionContext;
-import rocks.inspectit.ocelot.core.instrumentation.hook.actions.MetricsRecorder;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics.MetricsRecorder;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.metrics.percentiles.PercentileViewManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
