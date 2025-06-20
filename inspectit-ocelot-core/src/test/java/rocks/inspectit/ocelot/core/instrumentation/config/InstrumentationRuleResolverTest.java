@@ -325,7 +325,7 @@ class InstrumentationRuleResolverTest {
             String operation = "operation-name";
             ConcurrentInvocationSettings invocationSettings = new ConcurrentInvocationSettings(true, operation);
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
-            ruleSettings.setConcurrentInvocation(invocationSettings);
+            ruleSettings.setConcurrentInvocations(invocationSettings);
             InstrumentationSettings settings = new InstrumentationSettings();
             settings.setRules(Collections.singletonMap("rule-key", ruleSettings));
 
@@ -345,7 +345,7 @@ class InstrumentationRuleResolverTest {
             String ruleKey = "rule-key";
             ConcurrentInvocationSettings invocationSettings = new ConcurrentInvocationSettings(true, null);
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
-            ruleSettings.setConcurrentInvocation(invocationSettings);
+            ruleSettings.setConcurrentInvocations(invocationSettings);
             InstrumentationSettings settings = new InstrumentationSettings();
             settings.setRules(Collections.singletonMap(ruleKey, ruleSettings));
 

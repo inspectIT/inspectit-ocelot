@@ -160,7 +160,7 @@ public class InstrumentationRuleResolver {
      * @return the resolved settings
      */
     private ConcurrentInvocationSettings resolveConcurrentInvocations(InstrumentationRuleSettings settings, String ruleName) {
-        ConcurrentInvocationSettings concurrentInvocation = settings.getConcurrentInvocation();
+        ConcurrentInvocationSettings concurrentInvocation = settings.getConcurrentInvocations();
         if(concurrentInvocation == null) return null;
 
         String scope = concurrentInvocation.getOperation();

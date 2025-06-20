@@ -124,7 +124,7 @@ public class InstrumentationRuleSettings {
      * another exit-action to decrement the invocations.
      */
     @Valid
-    private ConcurrentInvocationSettings concurrentInvocation = null;
+    private ConcurrentInvocationSettings concurrentInvocations = null;
 
     /**
      * Validates this rule, invoked by {@link InstrumentationSettings#performValidation(InspectitConfig, ViolationBuilder)}

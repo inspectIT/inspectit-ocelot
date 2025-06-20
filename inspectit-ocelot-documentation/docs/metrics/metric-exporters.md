@@ -12,12 +12,12 @@ In order to use run-time updates, you must enable one of the [externalized confi
 
 inspectIT Ocelot currently supports the following metrics exporters:
 
-|Exporter |Supports run-time updates| Push / Pull |Enabled by default|
-|---|---|---|---|
-|[Logging Exporter (Metrics)](#logging-exporter-metrics) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/blob/main/exporters/logging/src/main/java/io/opentelemetry/exporter/logging/LoggingMetricExporter.java)]|Yes|Push|No|
-|[Prometheus Exporter](#prometheus-exporter)|Yes|Pull|No|
-|[InfluxDB Exporter](#influxdb-exporter)|Yes|Push|No|
-|[OTLP Exporter (Metrics)](#otlp-exporter-metrics) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp/metrics)]|Yes|Push|No|
+| Exporter                                                                                                                                                                                                                          | Supports run-time updates | Push / Pull | Enabled by default |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------|-------------|--------------------|
+| [Logging Exporter (Metrics)](#logging-exporter-metrics) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/blob/main/exporters/logging/src/main/java/io/opentelemetry/exporter/logging/LoggingMetricExporter.java)] | Yes                       | Push        | No                 |
+| [Prometheus Exporter](#prometheus-exporter)                                                                                                                                                                                       | Yes                       | Pull        | No                 |
+| [InfluxDB Exporter](#influxdb-exporter)                                                                                                                                                                                           | Yes                       | Push        | No                 |
+| [OTLP Exporter (Metrics)](#otlp-exporter-metrics) [[Homepage](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp/metrics)]                                                                             | Yes                       | Push        | No                 |
 
 >**Important note**: Starting with version `2.0.0`, inspectIT Ocelot moved from OpenCensus to OpenTelemetry. As a result, the `OpenCensus Agent Exporter` is no longer supported.
 
@@ -26,10 +26,10 @@ inspectIT Ocelot currently supports the following metrics exporters:
 The Logging exporter exports the metrics to the system log. By default, the exporter is disabled. 
 The following properties are nested properties below the `inspectit.exporters.metrics.logging`:
 
-|Property |Default| Description
-|---|---|---|
-|`.enabled`| `DISABLED` |If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the Logging metrics exporter.
-|`.export-interval`|refers to `inspectit.metrics.frequency`|The export interval of the metrics.
+| Property           | Default                                 | Description                                                                                                 |
+|--------------------|-----------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| `.enabled`         | `DISABLED`                              | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the Logging metrics exporter. |
+| `.export-interval` | refers to `inspectit.metrics.frequency` | The export interval of the metrics.                                                                         |
 
 ## Prometheus Exporter
 
@@ -39,12 +39,11 @@ The server is by default started on the port `8888` and metrics can then be acce
 
 The following properties are nested properties below the `inspectit.exporters.metrics.prometheus` property:
 
-|Property | Default    | Description
-|---|------------|---|
-|`.enabled`| `DISABLED` |If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the Prometheus metrics exporter and Prometheus HTTP server.
-|`.host`| `0.0.0.0`  |The hostname or network address to which the Prometheus HTTP server should bind.
-|`.port`| `8888`     |The port the Prometheus HTTP server should use.
-
+| Property   | Default    | Description                                                                                                                               |
+|------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| `.enabled` | `DISABLED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the Prometheus metrics exporter and Prometheus HTTP server. |
+| `.host`    | `0.0.0.0`  | The hostname or network address to which the Prometheus HTTP server should bind.                                                          |
+| `.port`    | `8888`     | The port the Prometheus HTTP server should use.                                                                                           |
 
 > Don't forget to check [the official OpenTelemetry Prometheus exporter documentation](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/prometheus).
 
@@ -62,18 +61,18 @@ This can greatly reduce the amount of data written into the InfluxDB, especially
 
 The following properties are nested properties below the `inspectit.exporters.metrics.influx` property:
 
-|Property | Default                                 | Description|
-|---|-----------------------------------------|---|
-|`.enabled`| `IF_CONFIGURED`                         |If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Influx exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`.|
-|`.endpoint`| `null`                                  |The HTTP endpoint of the InfluxDB, e.g. `http://localhost:8086`.|
-|`.user`| `null`                                  | The user to use for connecting to the InfluxDB, can not be empty.|
-|`.password`| `null`                                  |The password to use for connecting to the InfluxDB, can be not be empty.|
-|`.database`| `inspectit`                             | The InfluxDB database to which the metrics are pushed.|
-|`.retention-policy`| `autogen`                               | The retention policy of the database to use for writing metrics.|
-|`.create-database`| `true`                                  | If enabled, the database defined by the `database` property is automatically created on startup with an `autogen` retention policy if it does not exist yet.|
-|`.export-interval`| refers to `inspectit.metrics.frequency` |Defines how often metrics are pushed to the InfluxDB.|
-|<nobr>`.counters-as-differences`</nobr>| `true`                                  |Defines whether counters are exported using their absolute value or as the increase between exports|
-|`buffer-size`| `40`                                    | In case the InfluxDB is not reachable, failed writes will be buffered and written on the next export. This value defines the maximum number of batches to buffer.|
+| Property                                | Default                                 | Description                                                                                                                                                                                     |
+|-----------------------------------------|-----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.enabled`                              | `IF_CONFIGURED`                         | If `ENABLED` or `IF_CONFIGURED`, the agent will try to start the Influx exporter. If the url is not set, it will log a warning if set to `ENABLED` but fail silently if set to `IF_CONFIGURED`. |
+| `.endpoint`                             | `null`                                  | The HTTP endpoint of the InfluxDB, e.g. `http://localhost:8086`.                                                                                                                                |
+| `.user`                                 | `null`                                  | The user to use for connecting to the InfluxDB, can not be empty.                                                                                                                               |
+| `.password`                             | `null`                                  | The password to use for connecting to the InfluxDB, can be not be empty.                                                                                                                        |
+| `.database`                             | `inspectit`                             | The InfluxDB database to which the metrics are pushed.                                                                                                                                          |
+| `.retention-policy`                     | `autogen`                               | The retention policy of the database to use for writing metrics.                                                                                                                                |
+| `.create-database`                      | `true`                                  | If enabled, the database defined by the `database` property is automatically created on startup with an `autogen` retention policy if it does not exist yet.                                    |
+| `.export-interval`                      | refers to `inspectit.metrics.frequency` | Defines how often metrics are pushed to the InfluxDB.                                                                                                                                           |
+| <nobr>`.counters-as-differences`</nobr> | `true`                                  | Defines whether counters are exported using their absolute value or as the increase between exports                                                                                             |
+| `buffer-size`                           | `40`                                    | In case the InfluxDB is not reachable, failed writes will be buffered and written on the next export. This value defines the maximum number of batches to buffer.                               |
 
 ## OTLP Exporter (Metrics)
 
@@ -82,14 +81,15 @@ To enable the OTLP exporters, it is only required to specify the `endpoint`.
 
 The following properties are nested properties below the `inspectit.exporters.metrics.otlp-grpc` property:
 
-| Property                | Default         | Description                                                                                                                                                                                                                  |
-|-------------------------|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `.enabled`              | `IF_CONFIGURED` | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC metrics exporter.                                                                                                                |
-| `.endpoint`             | `null`          | Target to which the exporter is going to send metrics, e.g. `http://localhost:4317`                                                                                                                                          |
-| `.protocol`             | `null`          | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`.                                              |
-| `.headers`              | `null`          | Key-value pairs to be used as headers associated with gRPC or HTTP requests, see [OTEL documentation](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md).|
-| `.compression` | `NONE`          | The compression method, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported compression methods are `gzip` and `none`.                                   |
-| `.timeout`     | `10s`           | Maximum time the OTLP exporter will wait for each batch export, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/).                           |
+| Property           | Default                                 | Description                                                                                                                                                                                                        |
+|--------------------|-----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `.enabled`         | `IF_CONFIGURED`                         | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC metrics exporter.                                                                                                      |
+| `.endpoint`        | `null`                                  | Target to which the exporter is going to send metrics, e.g. `http://localhost:4317`                                                                                                                                |
+| `.protocol`        | `null`                                  | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`.                                    |
+| `.export-interval` | refers to `inspectit.metrics.frequency` | Defines how often metrics are pushed to the endpoint.                                                                                                                                                              |
+| `.headers`         | `null`                                  | Key-value pairs to be used as headers associated with gRPC or HTTP requests, see [OTEL documentation](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md). |
+| `.compression`     | `NONE`                                  | The compression method, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported compression methods are `gzip` and `none`.                                   |
+| `.timeout`         | `10s`                                   | Maximum time the OTLP exporter will wait for each batch export, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/).                                                |
 
 To make inspectIT Ocelot push the metrics via OTLP to, e.g. an OpenTelemetry Collector running on the same machine as the agent, the following JVM property can be used:
 
