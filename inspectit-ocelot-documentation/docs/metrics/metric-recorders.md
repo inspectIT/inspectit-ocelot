@@ -203,7 +203,7 @@ The available JMX configuration properties are:
 Concurrent invocation metrics are recorded by the `inspectit.metrics.concurrent` recorder.
 This recorder polls the currently active invocations of operations with a frequency specified by 
 `inspectit.metrics.concurrent.frequency` which defaults to `inspectit.metrics.frequency`.
-By default, the recording of concurrent invocations is disabled. You can enable it by setting the following property:
+By default, the recording of concurrent invocations is **disabled**. You can enable it by setting the following property:
 
 ```YAML
 inspectit:
@@ -214,9 +214,9 @@ inspectit:
 ```
 
 The recorder will poll an internal storage, which tracks the current amount of concurrent invocations.
-Every invocation is related to a specific operation. The recorded metrics contain an `operation` tag, 
-which allows to filter metrics. The name of the metric is `inspectit/concurrent/invocations`.
+Every invocation is related to a specific operation. Thus, the recorded metrics contain an `operation` tag, 
+to filter metrics. The name of the metric is `inspectit/concurrent/invocations`.
 
-Adding and removing invocations from the storage has to be done via [rules](instrumentation/rules.md).
+Adding and removing invocations from the storage does not happen automatically, but has to be done via [rules](instrumentation/rules.md).
 If there are no rules [defining concurrent invocations](instrumentation/metrics.md#concurrent-invocations), 
 no metrics for concurrent invocations can be recorded.

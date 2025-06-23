@@ -68,13 +68,13 @@ The concurrent invocations of all methods within the current rule can be collect
 There is an internal storage, which holds every active invocation for each operation.
 An operation is just the name used for identifying invocations. If a [rule](instrumentation/rules.md) contains multiple methods within 
 it's [scopes](instrumentation/scopes.md), then all of these methods will use the same operation name.
-Calling any of these methods counts as a new invocation.
+Calling any of these methods counts as one new invocation.
 Currently, the operation name has to be defined via a constant string. The operation name will be used for the 
-`operation` tag of the recorded metric. If no operation name has been specified, the name of the rule will be used as 
-default value.
+`operation` tag of the recorded metric. If no operation name has been specified within the rule, the default operation
+name (_default_) will be used.
 
 When `concurrent-invocations` is enabled for the current rule, every invocation will be added to the 
-internal storage during the entry phase. In the exit phase the particular invocation will be removed again.
+internal storage during the entry phase. In the exit phase one invocation will be removed again.
 Since invocations are started and ended within one method call, asynchronous operations are not fully supported yet.
 
 :::note
