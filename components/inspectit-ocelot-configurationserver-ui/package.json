@@ -72,7 +72,7 @@
     "@babel/preset-react": "^7.27.1",
     "@next/eslint-plugin-next": "^15.3.2",
     "@storybook/addon-actions": "^9.0.8",
-    "@storybook/addon-essentials": "^7.6.19",
+    "@storybook/addon-essentials": "^8.1.11",
     "@storybook/addon-links": "^8.1.11",
     "@storybook/react": "^7.6.19",
     "babel-loader": "^9.2.1",
