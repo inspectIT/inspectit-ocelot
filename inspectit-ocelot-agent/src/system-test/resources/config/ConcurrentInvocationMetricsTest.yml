@@ -1,0 +1,21 @@
+inspectit:
+  metrics:
+    concurrent:
+      enabled:
+        invocations: true
+
+  instrumentation:
+    scopes:
+      ConcurrentInvocationMetricsTest-myMethod:
+        type:
+          name: ConcurrentInvocationMetricsSysTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: myMethod
+
+    rules:
+      ConcurrentInvocationMetricsTest-test:
+        scopes:
+          ConcurrentInvocationMetricsTest-myMethod: true
+        concurrent-invocations:
+          enabled: true
