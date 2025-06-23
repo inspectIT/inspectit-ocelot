@@ -1255,7 +1255,7 @@
   resolved "https://registry.npmjs.org/@sinclair/typebox/-/typebox-0.27.8.tgz"
   integrity sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==
 
-"@storybook/addon-actions@7.6.20", "@storybook/addon-actions@^7.6.19":
+"@storybook/addon-actions@7.6.20":
   version "7.6.20"
   resolved "https://registry.yarnpkg.com/@storybook/addon-actions/-/addon-actions-7.6.20.tgz#4264d1fba6e889f28f717ebb23c55b7d774a2f60"
   integrity sha512-c/GkEQ2U9BC/Ew/IMdh+zvsh4N6y6n7Zsn2GIhJgcu9YEAa5aF2a9/pNgEGBMOABH959XE8DAOMERw/5qiLR8g==
@@ -1266,6 +1266,11 @@
     dequal "^2.0.2"
     polished "^4.2.2"
     uuid "^9.0.0"
+
+"@storybook/addon-actions@^9.0.8":
+  version "9.0.8"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-actions/-/addon-actions-9.0.8.tgz#0a9a044c31dd20e5aaa22eb0cb4e36771f40def8"
+  integrity sha512-LFePu7PPnWN0Il/uoUpmA5T0J0C7d6haJIbg0pXrjxW2MQVSYXE4S4LSUz8fOImltBDV3xAl6tLPYHFj6VcrOA==
 
 "@storybook/addon-backgrounds@7.6.20":
   version "7.6.20"
