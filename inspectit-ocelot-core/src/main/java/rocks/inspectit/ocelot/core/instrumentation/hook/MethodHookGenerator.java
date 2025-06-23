@@ -8,6 +8,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.ConcurrentInvocationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.ActionTracingMode;
@@ -18,13 +19,16 @@ import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfig
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.ConditionalHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
-import rocks.inspectit.ocelot.core.instrumentation.hook.actions.MetricsRecorder;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics.EndInvocationAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics.MetricsRecorder;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.TracingHookAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics.StartInvocationAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
 import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
 import rocks.inspectit.ocelot.core.metrics.MeasureTagValueGuard;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.core.metrics.concurrent.ConcurrentInvocationManager;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.OcelotSamplerUtils;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
@@ -76,6 +80,9 @@ public class MethodHookGenerator {
     @Autowired
     private MeasureTagValueGuard tagValueGuard;
 
+    @Autowired
+    private ConcurrentInvocationManager concurrentInvocationManager;
+
     /**
      * Builds an executable method hook based on the given configuration.
      *
@@ -95,8 +102,11 @@ public class MethodHookGenerator {
 
         RuleTracingSettings tracingSettings = config.getTracing();
 
+        // ENTRY ACTIONS
         builder.entryActions(buildActionCalls(config.getPreEntryActions(), methodInfo));
         builder.entryActions(buildActionCalls(config.getEntryActions(), methodInfo));
+        buildStartInvocationAction(config).ifPresent(builder::entryAction);
+
         if (tracingSettings != null) {
             List<IHookAction> actions = buildTracingEntryActions(tracingSettings);
             if (isTracingInternalActions() && config.isTraceEntryHook()) {
@@ -106,6 +116,7 @@ public class MethodHookGenerator {
         }
         builder.entryActions(buildActionCalls(config.getPostEntryActions(), methodInfo));
 
+        // EXIT ACTIONS
         builder.exitActions(buildActionCalls(config.getPreExitActions(), methodInfo));
         builder.exitActions(buildActionCalls(config.getExitActions(), methodInfo));
         if (tracingSettings != null) {
@@ -115,6 +126,8 @@ public class MethodHookGenerator {
             }
             builder.exitActions(actions);
         }
+
+        buildEndInvocationAction(config).ifPresent(builder::exitAction);
         buildMetricsRecorder(config).ifPresent(builder::exitAction);
         builder.exitActions(buildActionCalls(config.getPostExitActions(), methodInfo));
 
@@ -246,6 +259,24 @@ public class MethodHookGenerator {
         return constantTags;
     }
 
+    private Optional<IHookAction> buildStartInvocationAction(MethodHookConfiguration config) {
+        ConcurrentInvocationSettings settings = config.getConcurrentInvocation();
+        if (settings != null && TRUE.equals(settings.getEnabled())) {
+            IHookAction startAction = new StartInvocationAction(settings.getOperation(), concurrentInvocationManager);
+            return Optional.of(startAction);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<IHookAction> buildEndInvocationAction(MethodHookConfiguration config) {
+        ConcurrentInvocationSettings settings = config.getConcurrentInvocation();
+        if (settings != null && TRUE.equals(settings.getEnabled())) {
+            IHookAction endAction = new EndInvocationAction(settings.getOperation(), concurrentInvocationManager);
+            return Optional.of(endAction);
+        }
+        return Optional.empty();
+    }
+
     private Optional<IHookAction> buildMetricsRecorder(MethodHookConfiguration config) {
         Collection<MetricRecordingSettings> metricRecordingSettings = config.getMetrics();
         if (!metricRecordingSettings.isEmpty()) {
@@ -259,9 +290,8 @@ public class MethodHookGenerator {
             }
 
             return Optional.of(recorder);
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     /**

@@ -38,7 +38,7 @@ public class MetricRecordingSettings {
     private String value;
 
     /**
-     * Constant tag key and values to add to the this metric when recorded. Constant tags will be overwritten by the
+     * Constant tag key and values to add to the metric when recorded. Constant tags will be overwritten by the
      * {@link #dataTags} if they share same key and data tag can be resolved.
      */
     @Builder.Default
@@ -46,7 +46,7 @@ public class MetricRecordingSettings {
     private Map<String, String> constantTags = Collections.emptyMap();
 
     /**
-     * Data tag key and values to add to the this metric when recorded. Actual data value is resolved from the active
+     * Data tag key and values to add to the metric when recorded. Actual data value is resolved from the active
      * inspectIT context.
      */
     @Builder.Default

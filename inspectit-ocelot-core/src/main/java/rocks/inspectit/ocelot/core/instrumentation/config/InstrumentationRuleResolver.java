@@ -11,14 +11,12 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import rocks.inspectit.ocelot.config.model.instrumentation.InstrumentationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.ActionCallSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.ConcurrentInvocationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.ActionTracingMode;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.ActionCallConfig;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.GenericActionConfig;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationRule;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.InstrumentationScope;
+import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
 
 import java.util.Collections;
 import java.util.Map;
@@ -112,6 +110,8 @@ public class InstrumentationRuleResolver {
         result.metrics(resolveMetricRecordings(settings));
 
         result.tracing(settings.getTracing());
+
+        result.concurrentInvocation(settings.getConcurrentInvocations());
 
         return result.build();
     }

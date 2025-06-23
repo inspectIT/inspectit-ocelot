@@ -14,6 +14,7 @@ import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rocks.inspectit.ocelot.config.model.instrumentation.rules.ConcurrentInvocationSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.MetricRecordingSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.RuleTracingSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.ActionTracingMode;
@@ -21,10 +22,13 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.MethodHookConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics.EndInvocationAction;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics.StartInvocationAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.EndSpanAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.SetSpanStatusAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.WriteSpanAttributesAction;
+import rocks.inspectit.ocelot.core.metrics.concurrent.ConcurrentInvocationManager;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 import rocks.inspectit.ocelot.core.testutils.Dummy;
@@ -54,8 +58,17 @@ public class MethodHookGeneratorTest {
     @Mock
     ObfuscationManager obfuscation;
 
+    @Mock
+    ConcurrentInvocationManager concurrentInvocationManager;
+
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     InspectitEnvironment environment;
+
+    private final TypeDescription dummyType = TypeDescription.ForLoadedType.of(Dummy.class);
+
+    private final MethodDescription method = dummyType.getDeclaredMethods().stream()
+            .filter(md -> md.getName().equals("doSomething"))
+            .findFirst().get();
 
     @BeforeEach
     public void setupEnvironment() {
@@ -65,13 +78,8 @@ public class MethodHookGeneratorTest {
     @Nested
     class BuildHook {
 
-        private final TypeDescription dummyType = TypeDescription.ForLoadedType.of(Dummy.class);
-
         @Test
         void verifyContextManagerProvided() {
-            MethodDescription method = dummyType.getDeclaredMethods().stream()
-                    .filter(md -> md.getName().equals("doSomething"))
-                    .findFirst().get();
             MethodHookConfiguration config = MethodHookConfiguration.builder().build();
 
             MethodHook result = generator.buildHook(Dummy.class, method, config);
@@ -95,9 +103,6 @@ public class MethodHookGeneratorTest {
 
         @Test
         void verifyMethodNameAndParameterTypesCorrect() {
-            MethodDescription method = dummyType.getDeclaredMethods().stream()
-                    .filter(md -> md.getName().equals("doSomething"))
-                    .findFirst().get();
             MethodHookConfiguration config = MethodHookConfiguration.builder().build();
 
             MethodHook result = generator.buildHook(Dummy.class, method, config);
@@ -108,9 +113,6 @@ public class MethodHookGeneratorTest {
 
         @Test
         void verifyDeclaringClassCorrect() {
-            MethodDescription method = dummyType.getDeclaredMethods().stream()
-                    .filter(md -> md.getName().equals("doSomething"))
-                    .findFirst().get();
             MethodHookConfiguration config = MethodHookConfiguration.builder().build();
 
             MethodHook result = generator.buildHook(Dummy.class, method, config);
@@ -473,6 +475,36 @@ public class MethodHookGeneratorTest {
             Map<String,VariableAccessor> accessors = attributeAction.getAttributeAccessors();
             assertThat(accessors.size()).isEqualTo(expectedResult.size());
             assertThat(accessors).containsAllEntriesOf(expectedResult);
+        }
+    }
+
+    @Nested
+    class BuildConcurrentInvocationActions {
+
+        final String operation = "operation-name";
+
+        @Test
+        void verifyActionsHaveBeenAdded() {
+            ConcurrentInvocationSettings invocationSettings = new ConcurrentInvocationSettings(true, operation);
+            MethodHookConfiguration config = MethodHookConfiguration.builder().concurrentInvocation(invocationSettings).build();
+            StartInvocationAction startAction = new StartInvocationAction(operation, concurrentInvocationManager);
+            EndInvocationAction endAction = new EndInvocationAction(operation, concurrentInvocationManager);
+
+            MethodHook hook = generator.buildHook(Dummy.class, method, config);
+
+            assertThat(hook.getEntryActions()).contains(startAction);
+            assertThat(hook.getExitActions()).contains(endAction);
+        }
+
+        @Test
+        void verifyActionsHaveNotBeenAdded() {
+            ConcurrentInvocationSettings invocationSettings = new ConcurrentInvocationSettings(false, operation);
+            MethodHookConfiguration config = MethodHookConfiguration.builder().concurrentInvocation(invocationSettings).build();
+
+            MethodHook hook = generator.buildHook(Dummy.class, method, config);
+
+            assertThat(hook.getEntryActions()).noneMatch(element -> element instanceof StartInvocationAction);
+            assertThat(hook.getExitActions()).noneMatch(element -> element instanceof EndInvocationAction);
         }
     }
 }

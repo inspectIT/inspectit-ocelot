@@ -69,5 +69,4 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
         pollingTask.cancel(true);
         return true;
     }
-
 }

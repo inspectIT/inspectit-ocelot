@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.hook.actions;
+package rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics;
 
 import io.opencensus.tags.TagContext;
 import io.opencensus.tags.TagKey;
@@ -14,6 +14,7 @@ import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
+import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.metrics.MeasureTagValueGuard;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
