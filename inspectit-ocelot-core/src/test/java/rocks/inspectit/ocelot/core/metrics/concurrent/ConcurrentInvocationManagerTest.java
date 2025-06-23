@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static rocks.inspectit.ocelot.core.metrics.concurrent.ConcurrentInvocationManager.DEFAULT_OPERATION;
 
 public class ConcurrentInvocationManagerTest {
 
@@ -29,6 +30,26 @@ public class ConcurrentInvocationManagerTest {
     }
 
     @Test
+    void shouldAddDefaultInvocationWhenNull() {
+        manager.addInvocation(null);
+
+        Map<String, Long> invocations = manager.getActiveInvocations();
+
+        assertEquals(1, invocations.size());
+        assertEquals(1, invocations.get(DEFAULT_OPERATION));
+    }
+
+    @Test
+    void shouldAddDefaultInvocationWhenEmpty() {
+        manager.addInvocation("");
+
+        Map<String, Long> invocations = manager.getActiveInvocations();
+
+        assertEquals(1, invocations.size());
+        assertEquals(1, invocations.get(DEFAULT_OPERATION));
+    }
+
+    @Test
     void shouldRemoveInvocation() {
         manager.addInvocation(OPERATION);
         manager.removeInvocation(OPERATION);
@@ -37,6 +58,28 @@ public class ConcurrentInvocationManagerTest {
 
         assertEquals(1, invocations.size());
         assertEquals(0, invocations.get(OPERATION));
+    }
+
+    @Test
+    void shouldRemoveDefaultInvocationWhenNull() {
+        manager.addInvocation(null);
+        manager.removeInvocation(null);
+
+        Map<String, Long> invocations = manager.getActiveInvocations();
+
+        assertEquals(1, invocations.size());
+        assertEquals(0, invocations.get(DEFAULT_OPERATION));
+    }
+
+    @Test
+    void shouldRemoveDefaultInvocationWhenEmpty() {
+        manager.addInvocation("");
+        manager.removeInvocation("");
+
+        Map<String, Long> invocations = manager.getActiveInvocations();
+
+        assertEquals(1, invocations.size());
+        assertEquals(0, invocations.get(DEFAULT_OPERATION));
     }
 
     @Test

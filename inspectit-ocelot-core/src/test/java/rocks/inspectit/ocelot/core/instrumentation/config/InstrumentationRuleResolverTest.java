@@ -340,26 +340,6 @@ class InstrumentationRuleResolverTest {
             assertThat(resolvedSettings.getOperation()).isEqualTo(operation);
         }
 
-        @Test
-        void verifyConcurrentInvocationsPreservedWithRuleName() {
-            String ruleKey = "rule-key";
-            ConcurrentInvocationSettings invocationSettings = new ConcurrentInvocationSettings(true, null);
-            InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
-            ruleSettings.setConcurrentInvocations(invocationSettings);
-            InstrumentationSettings settings = new InstrumentationSettings();
-            settings.setRules(Collections.singletonMap(ruleKey, ruleSettings));
-
-            Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
-
-            assertThat(result).hasSize(1);
-            InstrumentationRule rule = result.iterator().next();
-            ConcurrentInvocationSettings resolvedSettings = rule.getConcurrentInvocation();
-
-            assertThat(resolvedSettings).isNotNull();
-            assertThat(resolvedSettings.getEnabled()).isTrue();
-            assertThat(resolvedSettings.getOperation()).isEqualTo(ruleKey);
-        }
-
         private void verifyActionCall(ActionCallConfig ac, String name, ActionCallSettings callSettings) {
             assertThat(ac.getDataKey()).isEqualTo(name);
             assertThat(ac.getCallSettings()).isSameAs(callSettings);

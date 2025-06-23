@@ -20,7 +20,8 @@ import static org.awaitility.Awaitility.await;
  *    as OpenCensus measurement <br>
  * 4. We validate the recording via the {@code viewManager} <br>
  * 5. When {@code myMethod} finishes, it should remove the invocation from the {@code ConcurrentInvocationManager} <br>
- * 6. We wait until the {@code ConcurrentMetricsRecorder} has recorded the updated invocations as OpenCensus measurement
+ * 6. We wait until the {@code ConcurrentMetricsRecorder} has recorded the updated invocations as OpenCensus measurement <br>
+ * 7. We validate the recording via the {@code viewManager} <br>
  */
 public class ConcurrentInvocationMetricsSysTest extends InstrumentationSysTestBase {
 

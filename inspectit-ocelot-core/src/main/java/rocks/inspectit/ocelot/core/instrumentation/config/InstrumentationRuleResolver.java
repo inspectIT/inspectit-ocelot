@@ -111,7 +111,7 @@ public class InstrumentationRuleResolver {
 
         result.tracing(settings.getTracing());
 
-        result.concurrentInvocation(resolveConcurrentInvocations(settings, name));
+        result.concurrentInvocation(settings.getConcurrentInvocations());
 
         return result.build();
     }
@@ -148,27 +148,6 @@ public class InstrumentationRuleResolver {
                 .map(entry -> entry.getValue()
                         .copyWithDefaultMetricName(entry.getKey())) //use map key as default metric name
                 .collect(Collectors.toCollection(HashMultiset::create));
-    }
-
-    /**
-     * Resolves the concurrent invocations settings from the rule.
-     * If no scope name for the invocation was explicitly defined, we use the rule name as backup.
-     *
-     * @param settings the rule settings
-     * @param ruleName the rule name
-     *
-     * @return the resolved settings
-     */
-    private ConcurrentInvocationSettings resolveConcurrentInvocations(InstrumentationRuleSettings settings, String ruleName) {
-        ConcurrentInvocationSettings concurrentInvocation = settings.getConcurrentInvocations();
-        if(concurrentInvocation == null) return null;
-
-        String scope = concurrentInvocation.getOperation();
-        if (scope == null || scope.isEmpty()) {
-            scope = ruleName;
-            concurrentInvocation.setOperation(scope);
-        }
-        return concurrentInvocation;
     }
 
     /**

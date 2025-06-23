@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.metrics.concurrent;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -12,6 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class ConcurrentInvocationManager {
+
+    /**
+     * Default operation name, if nothing was specified by the user
+     */
+    @VisibleForTesting
+    static final String DEFAULT_OPERATION = "default";
 
     private final ConcurrentHashMap<String, Long> activeInvocations = new ConcurrentHashMap<>();
 
@@ -28,7 +35,10 @@ public class ConcurrentInvocationManager {
      * @param operation the name of the invoked operation
      */
     public void addInvocation(String operation) {
-        activeInvocations.merge(operation, 1L, Long::sum);
+        if(operation == null || operation.isEmpty())
+            activeInvocations.merge(DEFAULT_OPERATION, 1L, Long::sum);
+        else
+            activeInvocations.merge(operation, 1L, Long::sum);
     }
 
     /**
@@ -38,10 +48,19 @@ public class ConcurrentInvocationManager {
      * @param operation the name of the invoked operation
      */
     public void removeInvocation(String operation) {
-        activeInvocations.compute(operation, (key, count) -> {
-            if (count == null) return null;
-            if (count <= 1) return 0L;
-            return count - 1L;
-        });
+        if(operation == null || operation.isEmpty())
+            activeInvocations.compute(DEFAULT_OPERATION, (key, count) -> internalCompute(count));
+        else
+            activeInvocations.compute(operation, (key, count) -> internalCompute(count));
+    }
+
+    /**
+     * @param count the current count
+     * @return the updated count
+     */
+    private Long internalCompute(Long count) {
+        if (count == null) return null;
+        if (count <= 1) return 0L;
+        return count - 1L;
     }
 }
