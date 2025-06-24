@@ -13,6 +13,7 @@ import rocks.inspectit.ocelot.bootstrap.context.ContextTuple;
 import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.core.config.spring.BootstrapInitializerConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import javax.validation.constraints.NotNull;
@@ -41,6 +42,8 @@ public class ContextManager implements IContextManager {
 
     private CommonTagsManager commonTagsManager;
 
+    private PropagationSessionStorage sessionStorage;
+
     private InstrumentationConfigurationResolver configProvider;
 
     /**
@@ -54,8 +57,9 @@ public class ContextManager implements IContextManager {
      */
     private final ThreadLocal<Boolean> correlationFlag = ThreadLocal.withInitial(() -> false);
 
-    public ContextManager(CommonTagsManager commonTagsManager, InstrumentationConfigurationResolver configProvider) {
+    public ContextManager(CommonTagsManager commonTagsManager, PropagationSessionStorage sessionStorage, InstrumentationConfigurationResolver configProvider) {
         this.commonTagsManager = commonTagsManager;
+        this.sessionStorage = sessionStorage;
         this.configProvider = configProvider;
     }
 
@@ -104,7 +108,7 @@ public class ContextManager implements IContextManager {
     @Override
     public InspectitContextImpl enterNewContext() {
         return InspectitContextImpl.createFromCurrent(commonTagsManager.getCommonTagValueMap(), configProvider.getCurrentConfig()
-                .getPropagationMetaData(), IS_OPEN_CENSUS_ON_BOOTSTRAP);
+                .getPropagationMetaData(), sessionStorage, IS_OPEN_CENSUS_ON_BOOTSTRAP);
     }
 
     @Override

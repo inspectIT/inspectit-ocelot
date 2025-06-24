@@ -19,6 +19,7 @@ import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.testutils.GcUtils;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
@@ -39,6 +40,9 @@ public class InspectitContextImplTest extends SpringTestBase {
     @Mock
     PropagationMetaData propagation;
 
+    @Mock
+    PropagationSessionStorage sessionStorage;
+
     Map<String, String> getCurrentTagsAsMap() {
         HashMap<String, String> result = new HashMap<>();
         InternalUtils.getTags(Tags.getTagger().getCurrentTagContext())
@@ -51,7 +55,7 @@ public class InspectitContextImplTest extends SpringTestBase {
 
         @Test
         void verifyNullIfNoSpanSet() {
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, sessionStorage, false);
 
             assertThat(ctx.getAndClearCurrentRemoteSpanContext()).isNull();
         }
@@ -59,7 +63,7 @@ public class InspectitContextImplTest extends SpringTestBase {
         @Test
         void verifyCleared() {
             SpanContext span = OpenTelemetryUtils.getTracer().spanBuilder("blub").startSpan().getSpanContext();
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, sessionStorage, false);
             ctx.setData(InternalInspectitContext.REMOTE_PARENT_SPAN_CONTEXT_KEY, span);
 
             SpanContext result = ctx.getAndClearCurrentRemoteSpanContext();
@@ -74,7 +78,7 @@ public class InspectitContextImplTest extends SpringTestBase {
     public class CreateRemoteParentContext {
         @Test
         void verifyTraceContextFormat() {
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, sessionStorage, false);
             String traceContext = ctx.createRemoteParentContext();
             String w3cFormat = "00-([0-9a-f]{32})-([0-9a-f]{16})-01";
 
@@ -104,7 +108,7 @@ public class InspectitContextImplTest extends SpringTestBase {
         void spanEntered() {
             Span mySpan = OpenTelemetryUtils.getTracer().spanBuilder("blub").startSpan();
 
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, false);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, sessionStorage, false);
             assertThat(ctx.hasEnteredSpan()).isFalse();
 
             Scope scope = mySpan.makeCurrent();
@@ -131,7 +135,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             tags.put("tagA", "valueA");
             tags.put("tagB", "valueB");
 
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(tags, propagation, false);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(tags, propagation, sessionStorage, false);
             ctx.makeActive();
 
             assertThat(ctx.getData("tagA")).isEqualTo("valueA");
@@ -148,11 +152,11 @@ public class InspectitContextImplTest extends SpringTestBase {
             tags.put("tagB", "valueB");
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
 
-            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(tags, propagation, false);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(tags, propagation, sessionStorage, false);
             ctxA.setData("tagB", "overwritten");
             ctxA.makeActive();
 
-            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(tags, propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(tags, propagation, sessionStorage, false);
             ctxB.makeActive();
 
             assertThat(ctxB.getData("tagA")).isEqualTo("valueA");
@@ -168,16 +172,16 @@ public class InspectitContextImplTest extends SpringTestBase {
         void verifyOverwritesAreLocal() {
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
 
-            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxA.setData("keyA", "ctxA_valueA");
             ctxA.setData("keyB", "ctxA_valueB");
             ctxA.makeActive();
 
-            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxB.setData("keyB", "ctxB_valueB");
             ctxB.makeActive();
 
-            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxC.makeActive();
 
             assertThat(ctxA.getData("keyA")).isEqualTo("ctxA_valueA");
@@ -204,16 +208,16 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("keyA"));
             doReturn(false).when(propagation).isPropagatedDownWithinJVM(eq("keyB"));
 
-            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxA.setData("keyA", "ctxA_valueA");
             ctxA.setData("keyB", "ctxA_valueB");
             ctxA.makeActive();
 
-            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxB.setData("keyB", "ctxB_valueB");
             ctxB.makeActive();
 
-            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxC.makeActive();
 
             assertThat(ctxA.getData("keyA")).isEqualTo("ctxA_valueA");
@@ -238,14 +242,14 @@ public class InspectitContextImplTest extends SpringTestBase {
         @Test
         void verifyContextReleasedWhenAllChildrenAreClosed() {
 
-            InspectitContextImpl firstContext = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl firstContext = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             firstContext.makeActive();
 
-            InspectitContextImpl secondContext = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl secondContext = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             secondContext.makeActive();
             WeakReference<InspectitContextImpl> firstContextWeak = new WeakReference<>(firstContext);
 
-            InspectitContextImpl openRemainingContext = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl openRemainingContext = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
 
             secondContext.close();
             firstContext.close();
@@ -262,14 +266,14 @@ public class InspectitContextImplTest extends SpringTestBase {
         void verifyDownPropagationForChildrenOnDifferentThreadWithRootNotClosed() throws Exception {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             root.setData("tag", "rootValue");
             root.makeActive();
             root.setData("tag", "invisibleValue");
 
             AtomicReference<Object> tagValue = new AtomicReference<>();
             Thread asyncTask = new Thread(ContextUtil.current().wrap(() -> {
-                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
                 tagValue.set(asyncChild.getData("tag"));
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -287,14 +291,14 @@ public class InspectitContextImplTest extends SpringTestBase {
         void verifyDownPropagationForChildrenOnDifferentThreadWithRootClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             root.setData("tag", "rootValue");
             root.makeActive();
             root.setData("tag", "invisibleValue");
 
             AtomicReference<Object> tagValue = new AtomicReference<>();
             Thread asyncTask = new Thread(ContextUtil.current().wrap(() -> {
-                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
                 tagValue.set(asyncChild.getData("tag"));
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -312,14 +316,14 @@ public class InspectitContextImplTest extends SpringTestBase {
         void verifyDownPropagationForChildrenOnSameThreadWithRootClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             root.setData("tag", "rootValue");
             root.makeActive();
             root.setData("tag", "invisibleValue");
 
             AtomicReference<Object> tagValue = new AtomicReference<>();
             Runnable delayedTask = ContextUtil.current().wrap(() -> {
-                InspectitContextImpl delayedChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl delayedChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
                 tagValue.set(delayedChild.getData("tag"));
                 delayedChild.makeActive();
                 delayedChild.close();
@@ -342,11 +346,11 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(eq("tag1"));
             doReturn(false).when(propagation).isPropagatedUpWithinJVM(eq("tag2"));
 
-            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxA.makeActive();
-            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxB.makeActive();
-            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxC.makeActive();
 
             ctxC.setData("tag1", "ctxC_value1");
@@ -383,12 +387,12 @@ public class InspectitContextImplTest extends SpringTestBase {
         void verifyNoUpPropagationForChildrenOnDifferentThreadWithRootNotClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             root.setData("tag", "rootValue");
             root.makeActive();
 
             Thread asyncTask = new Thread(ContextUtil.current().wrap(() -> {
-                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
                 asyncChild.setData("tag", "asyncChildValue");
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -406,12 +410,12 @@ public class InspectitContextImplTest extends SpringTestBase {
         void verifyNoUpPropagationForChildrenOnDifferentThreadWithRootClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             root.setData("tag", "rootValue");
             root.makeActive();
 
             Thread asyncTask = new Thread(ContextUtil.current().wrap(() -> {
-                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
                 asyncChild.setData("tag", "asyncChildValue");
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -429,12 +433,12 @@ public class InspectitContextImplTest extends SpringTestBase {
         void verifyNoUpPropagationForChildrenOnSameThreadWithRootClosed() throws Exception {
             lenient().doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             root.setData("tag", "rootValue");
             root.makeActive();
 
             Runnable delayedTask = ContextUtil.current().wrap(() -> {
-                InspectitContextImpl delayedChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl delayedChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
                 delayedChild.setData("tag", "asyncChildValue");
                 delayedChild.makeActive();
                 delayedChild.close();
@@ -458,13 +462,13 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("tag1"));
             doReturn(false).when(propagation).isPropagatedDownWithinJVM(eq("tag2"));
 
-            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxA.setData("tag2", "ctxA_value2");
             ctxA.makeActive();
-            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxB.setData("tag2", "ctxB_value2");
             ctxB.makeActive();
-            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxC.setData("tag2", "ctxC_value2");
             ctxC.setData("tag1", "ctxC_value1");
             ctxC.makeActive();
@@ -486,7 +490,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             assertThat(ctxB.getData("tag1")).isEqualTo("ctxC_value1");
             assertThat(ctxB.getData("tag2")).isEqualTo("ctxB_value2");
 
-            InspectitContextImpl ctxC2 = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxC2 = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxC2.makeActive();
 
             assertThat(ctxB.getData("tag1")).isEqualTo("ctxC_value1");
@@ -515,18 +519,18 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             root.setData("tag", "rootValue");
             root.makeActive();
 
-            InspectitContextImpl syncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl syncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             syncChild.setData("tag", "syncChildValue");
             syncChild.makeActive();
             syncChild.close();
 
             AtomicReference<Object> asyncTaskTagValue = new AtomicReference<>();
             Thread asyncTask = new Thread(ContextUtil.current().wrap(() -> {
-                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
                 asyncTaskTagValue.set(asyncChild.getData("tag"));
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -546,18 +550,18 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             root.setData("tag", "rootValue");
             root.makeActive();
 
-            InspectitContextImpl syncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl syncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             syncChild.setData("tag", "syncChildValue");
             syncChild.makeActive();
             syncChild.close();
 
             AtomicReference<Object> asyncTaskTagValue = new AtomicReference<>();
             Thread asyncTask = new Thread(ContextUtil.current().wrap(() -> {
-                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
                 asyncTaskTagValue.set(asyncChild.getData("tag"));
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -577,18 +581,18 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             root.setData("tag", "rootValue");
             root.makeActive();
 
-            InspectitContextImpl syncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl syncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             syncChild.setData("tag", "syncChildValue");
             syncChild.makeActive();
             syncChild.close();
 
             AtomicReference<Object> asyncTaskTagValue = new AtomicReference<>();
             Runnable asyncTask = ContextUtil.current().wrap(() -> {
-                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+                InspectitContextImpl asyncChild = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
                 asyncTaskTagValue.set(asyncChild.getData("tag"));
                 asyncChild.makeActive();
                 asyncChild.close();
@@ -614,7 +618,7 @@ public class InspectitContextImplTest extends SpringTestBase {
                     .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (io.opencensus.common.Scope tc = tcb.buildScoped()) {
-                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
 
                 ctxA.makeActive();
@@ -636,10 +640,10 @@ public class InspectitContextImplTest extends SpringTestBase {
                     .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (io.opencensus.common.Scope tc = tcb.buildScoped()) {
-                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
                 ctxA.makeActive();
 
-                InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
                 ctxB.makeActive();
 
                 assertThat(getCurrentTagsAsMap()).hasSize(1);
@@ -660,7 +664,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isTag(eq("rootKey"));
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("rootKey"));
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
             root.setData("rootKey", "rootValue");
 
             root.makeActive();
@@ -669,7 +673,7 @@ public class InspectitContextImplTest extends SpringTestBase {
                     .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (io.opencensus.common.Scope tc = tcb.buildScoped()) {
-                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
 
                 ctxA.makeActive();
@@ -692,7 +696,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isTag(eq("rootKey"));
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("rootKey"));
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
             root.setData("rootKey", "rootValue");
 
             root.makeActive();
@@ -701,10 +705,10 @@ public class InspectitContextImplTest extends SpringTestBase {
                     .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (io.opencensus.common.Scope tc = tcb.buildScoped()) {
-                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
                 ctxA.makeActive();
 
-                InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
                 assertThat(ctxB.getData("myTag")).isEqualTo("myValue");
                 ctxB.makeActive();
 
@@ -727,14 +731,14 @@ public class InspectitContextImplTest extends SpringTestBase {
                     .setDownPropagation("rootKey", PropagationMode.NONE)).when(propagation).copy();
             doReturn(true).when(propagation).isTag(eq("myTag"));
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
             root.makeActive();
 
             TagContextBuilder tcb = Tags.getTagger()
                     .emptyBuilder()
                     .putLocal(TagKey.create("myTag"), TagValue.create("myValue"));
             try (io.opencensus.common.Scope tc = tcb.buildScoped()) {
-                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
                 ctxA.setData("rootKey", "childValue");
                 ctxA.makeActive();
 
@@ -758,7 +762,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(eq("my_tag"));
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
             root.setData("my_tag", "tagValue");
             root.setData("my_hidden", "hiddenValue");
 
@@ -776,7 +780,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
             root.setData("rootKey", "rootValue");
             root.setData("myTag", "rootValue");
             root.setData("longKey", 42L);
@@ -791,7 +795,7 @@ public class InspectitContextImplTest extends SpringTestBase {
                 Map<String, String> currentTagsAsMap = getCurrentTagsAsMap();
                 assertThat(currentTagsAsMap).containsEntry("longKey", "42");
 
-                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+                InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
                 ctxA.makeActive();
                 assertThat(ctxA.getData("myTag")).isEqualTo("myValue");
                 assertThat(ctxA.getData("rootKey")).isEqualTo("rootValue");
@@ -812,7 +816,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(tags, propagation, true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(tags, propagation, sessionStorage, true);
             ctx.makeActive();
 
             assertThat(getCurrentTagsAsMap()).hasSize(2);
@@ -829,7 +833,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(eq("global"));
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
             ctx.setData("local", "localValue");
             ctx.setData("global", "globalValue");
 
@@ -858,7 +862,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isPropagatedUpWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
             ctx.setData("rootKey1", "rootValue1");
             ctx.setData("rootKey2", "rootValue2");
 
@@ -868,7 +872,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             assertThat(getCurrentTagsAsMap()).containsEntry("rootKey1", "rootValue1");
             assertThat(getCurrentTagsAsMap()).containsEntry("rootKey2", "rootValue2");
 
-            InspectitContextImpl nested = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl nested = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
             nested.makeActive();
             nested.setData("rootKey1", "nestedValue1");
             nested.setData("nestedKey2", "nestedValue2");
@@ -899,7 +903,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
             doReturn(true).when(propagation).isTag(any());
 
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
             ctx.setData("d1", "string");
             ctx.setData("d2", 1);
             ctx.setData("d3", 2L);
@@ -936,7 +940,7 @@ public class InspectitContextImplTest extends SpringTestBase {
 
         @Test
         void verifySpanAttachedAndDetached() {
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
             Span sp = OpenTelemetryUtils.getTracer().spanBuilder("blub").startSpan();
             ctx.setSpanScope(Context.current().with(sp).makeCurrent());
             ctx.makeActive();

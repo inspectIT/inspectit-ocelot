@@ -11,8 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
-import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationDataStorage;
-import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationDataStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.tags.TagUtils;
 
@@ -204,12 +204,18 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private SpanContext remoteParentContext;
 
     /**
+     * Session storage for all active data storages
+     */
+    private final PropagationSessionStorage sessionStorage;
+
+    /**
      * Data storage for all tags that should be propagated up to or down from the browser
      */
-    private BrowserPropagationDataStorage browserPropagationDataStorage;
+    private PropagationDataStorage propagationDataStorage;
 
-    private InspectitContextImpl(InspectitContextImpl parent, PropagationMetaData defaultPropagation, boolean interactWithApplicationTagContexts) {
+    private InspectitContextImpl(InspectitContextImpl parent, PropagationMetaData defaultPropagation, PropagationSessionStorage sessionStorage, boolean interactWithApplicationTagContexts) {
         this.parent = parent;
+        this.sessionStorage = sessionStorage;
         propagation = parent == null ? defaultPropagation : parent.propagation;
         this.interactWithApplicationTagContexts = interactWithApplicationTagContexts;
         dataOverwrites = new HashMap<>();
@@ -237,10 +243,10 @@ public class InspectitContextImpl implements InternalInspectitContext {
      *
      * @return the newly created context
      */
-    public static InspectitContextImpl createFromCurrent(Map<String, String> commonTags, PropagationMetaData defaultPropagation, boolean interactWithApplicationTagContexts) {
+    public static InspectitContextImpl createFromCurrent(Map<String, String> commonTags, PropagationMetaData defaultPropagation,
+                                                         PropagationSessionStorage sessionStorage, boolean interactWithApplicationTagContexts) {
         InspectitContextImpl parent = ContextUtil.currentInspectitContext();
-
-        InspectitContextImpl result = new InspectitContextImpl(parent, defaultPropagation, interactWithApplicationTagContexts);
+        InspectitContextImpl result = new InspectitContextImpl(parent, defaultPropagation, sessionStorage, interactWithApplicationTagContexts);
 
         if (parent == null) {
             commonTags.forEach(result::setData);
@@ -307,17 +313,16 @@ public class InspectitContextImpl implements InternalInspectitContext {
     public void makeActive() {
         Object currentSessionID = getData(REMOTE_SESSION_ID);
         if(currentSessionID != null) {
-            browserPropagationDataStorage = BrowserPropagationSessionStorage.get()
-                    .getOrCreateDataStorage(currentSessionID.toString(), propagation);
+            propagationDataStorage = sessionStorage.getOrCreateDataStorage(currentSessionID.toString(), propagation);
             // Set propagation, if updated since creation
-            browserPropagationDataStorage.setPropagation(propagation);
+            propagationDataStorage.setPropagation(propagation);
         }
 
 
         if(parent == null) {
             // Add down-propagated data from browser to inspectIT
-            if(browserPropagationDataStorage != null) {
-                Map<String, Object> browserPropagationData = getBrowserPropagationData(browserPropagationDataStorage.readData());
+            if(propagationDataStorage != null) {
+                Map<String, Object> browserPropagationData = getBrowserPropagationData(propagationDataStorage.readData());
                 Map<String, Object> downPropagationBrowserData = getDownPropagationData(browserPropagationData);
                 dataOverwrites.putAll(downPropagationBrowserData);
             }
@@ -474,12 +479,12 @@ public class InspectitContextImpl implements InternalInspectitContext {
         // Write browser propagation data to storage
         Map<String, Object> propagationData = getDataAsStream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         Map<String, Object> browserPropagationData = getBrowserPropagationData(propagationData);
-        if (browserPropagationDataStorage != null)
-            browserPropagationDataStorage.writeData(browserPropagationData);
+        if (propagationDataStorage != null)
+            propagationDataStorage.writeData(browserPropagationData);
 
         //If there is browser propagation data, but exporter is disabled, write error message
-        if (!browserPropagationData.isEmpty() && !BrowserPropagationSessionStorage.get().isExporterActive())
-            log.error("Unable to propagate data: {} Browser propagation is disabled, since no Tags-exporter is enabled", browserPropagationData);
+        if (!browserPropagationData.isEmpty() && !sessionStorage.isExporterActive())
+            log.warn("Unable to propagate data: {} Browser propagation is disabled, since no Tags-exporter is enabled", browserPropagationData);
 
         // Delete session ID after root span is closed
         if (parent == null) {

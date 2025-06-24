@@ -3,12 +3,13 @@ package rocks.inspectit.ocelot.core.exporter;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.tags.HttpExporterSettings;
-import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.io.IOException;
@@ -32,9 +33,10 @@ import java.util.concurrent.Executors;
 @Deprecated
 public class BrowserPropagationHttpExporterService extends DynamicallyActivatableService {
 
-    private HttpServer server;
+    @Autowired
+    private PropagationSessionStorage sessionStorage;
 
-    private BrowserPropagationSessionStorage sessionStorage;
+    private HttpServer server;
 
     private HttpHandler httpHandler;
 
@@ -72,13 +74,12 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         timeToLive = settings.getTimeToLive();
 
         int sessionLimit = settings.getSessionLimit();
-        sessionStorage = BrowserPropagationSessionStorage.get();
         sessionStorage.setSessionLimit(sessionLimit);
         sessionStorage.setExporterActive(true);
 
         String sessionIdHeader = settings.getSessionIdHeader();
         List<String> allowedOrigins = settings.getAllowedOrigins();
-        httpHandler = new BrowserPropagationHandler(sessionIdHeader, allowedOrigins);
+        httpHandler = new BrowserPropagationHandler(sessionStorage, sessionIdHeader, allowedOrigins);
 
         try {
             return startServer(host, port, path, httpHandler, threadLimit);

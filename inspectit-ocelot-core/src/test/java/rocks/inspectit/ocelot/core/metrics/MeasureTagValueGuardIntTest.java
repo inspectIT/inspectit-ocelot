@@ -17,6 +17,7 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.ExporterServiceIntegrationTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction.ExecutionContext;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics.MetricsRecorder;
@@ -52,7 +53,8 @@ public class MeasureTagValueGuardIntTest extends ExporterServiceIntegrationTestB
     static final String OVERFLOW = "overflow";
 
     private ExecutionContext createExecutionContext() {
-        InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), PropagationMetaData.builder().build(), false);
+        InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), PropagationMetaData.builder().build(),
+                new PropagationSessionStorage(), false);
         return new ExecutionContext(null, this, "return", null, null,
                 ctx, null);
     }

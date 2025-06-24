@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.browser;
+package rocks.inspectit.ocelot.core.instrumentation.context.propagation;
 
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentMap;
  *  Normally, there should be only one data storage per session
  */
 @Slf4j
-public class BrowserPropagationDataStorage {
+public class PropagationDataStorage {
 
     // Default limit of OpenTelemetry is also 128
     private static final int TAG_LIMIT = 128;
@@ -27,7 +27,7 @@ public class BrowserPropagationDataStorage {
 
     private PropagationMetaData propagation;
 
-    BrowserPropagationDataStorage() {
+    PropagationDataStorage() {
         latestTimestamp = System.currentTimeMillis();
     }
 

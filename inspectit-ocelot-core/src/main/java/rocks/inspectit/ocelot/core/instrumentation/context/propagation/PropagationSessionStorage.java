@@ -1,19 +1,21 @@
-package rocks.inspectit.ocelot.core.instrumentation.browser;
+package rocks.inspectit.ocelot.core.instrumentation.context.propagation;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Singleton storage for multiple {@link BrowserPropagationDataStorage} objects,
+ * Singleton storage for multiple {@link PropagationDataStorage} objects,
  * which are referenced by a session-ID, normally provided by a remote browser
  */
 @Slf4j
-public class BrowserPropagationSessionStorage {
+@Component
+public class PropagationSessionStorage {
 
     private static final int KEY_MIN_SIZE = 16;
 
@@ -28,20 +30,9 @@ public class BrowserPropagationSessionStorage {
     @Getter @Setter
     private boolean isExporterActive = false;
 
-    private static BrowserPropagationSessionStorage instance;
+    private final ConcurrentMap<String, PropagationDataStorage> dataStorages = new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<String, BrowserPropagationDataStorage> dataStorages;
-
-    private BrowserPropagationSessionStorage() {
-        dataStorages = new ConcurrentHashMap<>();
-    }
-
-    public static synchronized BrowserPropagationSessionStorage get() {
-        if(instance == null) instance = new BrowserPropagationSessionStorage();
-        return instance;
-    }
-
-    public BrowserPropagationDataStorage getOrCreateDataStorage(String sessionID, PropagationMetaData propagation) {
+    public PropagationDataStorage getOrCreateDataStorage(String sessionID, PropagationMetaData propagation) {
         return dataStorages.computeIfAbsent(sessionID, key -> {
             if(!validateSessionIdLength(key)) {
                 log.warn("Unable to create session: Invalid key length");
@@ -51,13 +42,13 @@ public class BrowserPropagationSessionStorage {
                 log.warn("Unable to create session: Session limit exceeded");
                 return null;
             }
-            BrowserPropagationDataStorage dataStorage = new BrowserPropagationDataStorage();
+            PropagationDataStorage dataStorage = new PropagationDataStorage();
             dataStorage.setPropagation(propagation);
             return dataStorage;
         });
     }
 
-    public BrowserPropagationDataStorage getDataStorage(String sessionID) {
+    public PropagationDataStorage getDataStorage(String sessionID) {
         return dataStorages.get(sessionID);
     }
 

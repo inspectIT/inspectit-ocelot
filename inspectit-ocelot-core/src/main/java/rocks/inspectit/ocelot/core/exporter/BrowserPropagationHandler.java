@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import lombok.extern.slf4j.Slf4j;
-import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationDataStorage;
-import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationDataStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,9 +41,10 @@ public class BrowserPropagationHandler implements HttpHandler {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private final BrowserPropagationSessionStorage sessionStorage = BrowserPropagationSessionStorage.get();
+    private final PropagationSessionStorage sessionStorage;
 
-    public BrowserPropagationHandler(String sessionIdHeader, List<String> allowedOrigins) {
+    public BrowserPropagationHandler(PropagationSessionStorage sessionStorage, String sessionIdHeader, List<String> allowedOrigins) {
+        this.sessionStorage = sessionStorage;
         this.sessionIdHeader = sessionIdHeader;
         this.allowedOrigins = allowedOrigins;
     }
@@ -61,7 +62,7 @@ public class BrowserPropagationHandler implements HttpHandler {
                 addCorsHeaders(exchange);
 
                 String sessionID = exchange.getRequestHeaders().getFirst(sessionIdHeader);
-                BrowserPropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionID);
+                PropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionID);
                 if(dataStorage != null) {
                     dataStorage.updateTimestamp(System.currentTimeMillis());
                     switch (method) {
@@ -87,7 +88,7 @@ public class BrowserPropagationHandler implements HttpHandler {
         exchange.close();
     }
 
-    private void handleGet(HttpExchange exchange, BrowserPropagationDataStorage dataStorage) throws IOException {
+    private void handleGet(HttpExchange exchange, PropagationDataStorage dataStorage) throws IOException {
         Map<String, Object> propagationData = dataStorage.readData();
         String res = mapper.writeValueAsString(propagationData.entrySet());
         byte[] bytes = res.getBytes(StandardCharsets.UTF_8);
@@ -99,7 +100,7 @@ public class BrowserPropagationHandler implements HttpHandler {
         }
     }
 
-    private void handlePut(HttpExchange exchange, BrowserPropagationDataStorage dataStorage) throws IOException {
+    private void handlePut(HttpExchange exchange, PropagationDataStorage dataStorage) throws IOException {
         Map<String, String> newPropagationData = getRequestBody(exchange);
         if(newPropagationData != null) {
             dataStorage.writeData(newPropagationData);
