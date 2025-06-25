@@ -4,9 +4,12 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
+import rocks.inspectit.ocelot.core.instrumentation.context.ContextPropagationUtil;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextUtil;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 
@@ -21,11 +24,13 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DirtiesContext
 public class PropagationDataStorageTest extends SpringTestBase {
 
     @Mock
     PropagationMetaData propagation;
 
+    @Autowired
     PropagationSessionStorage sessionStorage;
 
     Map<String, String> headers;
@@ -36,9 +41,8 @@ public class PropagationDataStorageTest extends SpringTestBase {
 
     @BeforeEach
     void prepareTest() {
-        // Create session storage to store BrowserPropagationDataStorages
-        sessionStorage = new PropagationSessionStorage();
         sessionStorage.setExporterActive(true);
+        ContextPropagationUtil.setSessionIdHeader(sessionIdHeader);
         // Create HTTP header to pass it to the initial InspectIT-Context
         headers = new HashMap<>();
         headers.put(sessionIdHeader, sessionId);

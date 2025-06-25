@@ -25,6 +25,8 @@ public class PropagationDataStorage {
 
     private final ConcurrentMap<String, Object> propagationData = new ConcurrentHashMap<>();
 
+    // TODO We can remove this property, after browser-propagation was removed
+    //  Then only the inspectIT context can write into the storage, which already knows the propagation
     private PropagationMetaData propagation;
 
     PropagationDataStorage() {
@@ -48,6 +50,9 @@ public class PropagationDataStorage {
         propagationData.putAll(validatedData);
     }
 
+    /**
+     * @return a copy of the current propagation data
+     */
     public Map<String, Object> readData() {
         return new HashMap<>(propagationData);
     }
@@ -88,19 +93,19 @@ public class PropagationDataStorage {
 
     private boolean validateEntry(String key, Object value) {
         return key.length() <= MAX_KEY_SIZE &&
-                isPropagated(key) &&
+                shouldBeStored(key) &&
                 value instanceof String &&
                 ((String) value).length() <= MAX_VALUE_SIZE;
     }
 
     /**
-     * Only if browser-propagation is enabled for this key, it should be stored.
+     * Only if session-storage (or browser-propagation) is enabled for this key, it should be stored.
      *
      * @param key the key name
-     * @return true, if this key should be propagated
+     * @return true, if this key should be stored
      */
-    private boolean isPropagated(String key) {
-        if(propagation != null) return propagation.isPropagatedWithBrowser(key);
+    private boolean shouldBeStored(String key) {
+        if(propagation != null) return propagation.isStoredForSession(key) || propagation.isPropagatedWithBrowser(key);
         else return false;
     }
 }

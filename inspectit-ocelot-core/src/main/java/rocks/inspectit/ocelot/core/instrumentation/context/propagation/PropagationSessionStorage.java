@@ -76,7 +76,8 @@ public class PropagationSessionStorage {
     }
 
     private boolean validateSessionIdLength(String sessionID) {
-        int keyLength = sessionID.length();
-        return keyLength <= KEY_MAX_SIZE && keyLength >= KEY_MIN_SIZE;
+        return sessionID != null &&
+                sessionID.length() <= KEY_MAX_SIZE &&
+                sessionID.length() >= KEY_MIN_SIZE;
     }
 }

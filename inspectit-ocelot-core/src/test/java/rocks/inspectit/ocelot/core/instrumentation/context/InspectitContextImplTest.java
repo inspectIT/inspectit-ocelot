@@ -76,6 +76,7 @@ public class InspectitContextImplTest extends SpringTestBase {
 
     @Nested
     public class CreateRemoteParentContext {
+
         @Test
         void verifyTraceContextFormat() {
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, sessionStorage, false);
@@ -956,4 +957,8 @@ public class InspectitContextImplTest extends SpringTestBase {
 
     }
 
+    @Nested
+    public class SessionStorage {
+
+    }
 }

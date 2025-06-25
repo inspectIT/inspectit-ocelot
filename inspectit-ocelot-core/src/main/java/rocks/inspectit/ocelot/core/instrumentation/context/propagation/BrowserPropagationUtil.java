@@ -19,10 +19,12 @@ import javax.annotation.PostConstruct;
  */
 @Slf4j
 @Component
+// TODO This is not a util...
 public class BrowserPropagationUtil {
 
     @Autowired
     private InspectitEnvironment env;
+
     @Getter
     private static String sessionIdHeader = "Session-Id";
 

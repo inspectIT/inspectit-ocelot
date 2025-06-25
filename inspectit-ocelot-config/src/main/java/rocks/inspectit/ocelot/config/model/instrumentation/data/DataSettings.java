@@ -25,8 +25,15 @@ public class DataSettings {
     private PropagationMode downPropagation;
 
     /**
-     * Defines, if data is allowed to be propagated to browser
+     * Defines, if data should be stored for a specific session to be still accessible later
      */
+    private Boolean sessionStorage;
+
+    /**
+     * Defines, if data is allowed to be propagated to browser. <br>
+     * <b>Marked for removal</b>: Use {@link #sessionStorage} instead
+     */
+    @Deprecated
     private Boolean browserPropagation;
 
     /**

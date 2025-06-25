@@ -39,6 +39,13 @@ public interface PropagationMetaData {
      */
     boolean isTag(String dataKey);
 
+
+    /**
+     * @param dataKey the data key to check
+     * @return true, if the data key is configured to be stored for sessions
+     */
+    boolean isStoredForSession(String dataKey);
+
     /**
      *
      * @param dataKey the data key to check
@@ -75,6 +82,8 @@ public interface PropagationMetaData {
         Builder setDownPropagation(String dataKey, PropagationMode propagation);
 
         Builder setUpPropagation(String dataKey, PropagationMode propagation);
+
+        Builder setSessionStorage(String dataKey, Boolean isActive);
 
         Builder setBrowserPropagation(String dataKey, Boolean isActive);
 

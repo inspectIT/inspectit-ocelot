@@ -17,34 +17,40 @@ class RootPropagationMetaData implements PropagationMetaData {
     /**
      * Contains all data keys which have been defined to be used as tags.
      */
-    private Set<String> tagKeys = new HashSet<>();
+    private final Set<String> tagKeys = new HashSet<>();
 
     /**
      * Contains all data keys which have a down propagation of either JVM_LOCAL or GLOBAL.
      */
-    private Set<String> localDownPropagatedKeys = new HashSet<>();
+    private final Set<String> localDownPropagatedKeys = new HashSet<>();
 
     /**
      * Contains all data keys which have a down propagation of GLOBAL.
-     * Therefore this set is a subset of {@link #localDownPropagatedKeys}.
+     * Therefore, this set is a subset of {@link #localDownPropagatedKeys}.
      */
-    private Set<String> globalDownPropagatedKeys = new HashSet<>();
+    private final Set<String> globalDownPropagatedKeys = new HashSet<>();
 
     /**
      * Contains all data keys which have an up propagation of either JVM_LOCAL or GLOBAL.
      */
-    private Set<String> localUpPropagatedKeys = new HashSet<>();
+    private final Set<String> localUpPropagatedKeys = new HashSet<>();
 
     /**
      * Contains all data keys which have an up propagation of GLOBAL.
-     * Therefore this set is a subset of {@link #localUpPropagatedKeys}.
+     * Therefore, this set is a subset of {@link #localUpPropagatedKeys}.
      */
-    private Set<String> globalUpPropagatedKeys = new HashSet<>();
+    private final Set<String> globalUpPropagatedKeys = new HashSet<>();
+
+    /**
+     * Contains all data keys which should be stored for sessions.
+     */
+    private final Set<String> sessionStorageKeys = new HashSet<>();
 
     /**
      * Contains all data keys which have an active browser-propagation
      */
-    private Set<String> browserPropagatedKeys = new HashSet<>();
+    @Deprecated
+    private final Set<String> browserPropagatedKeys = new HashSet<>();
 
     private RootPropagationMetaData() {
     }
@@ -76,6 +82,11 @@ class RootPropagationMetaData implements PropagationMetaData {
     @Override
     public boolean isTag(String dataKey) {
         return tagKeys.contains(dataKey);
+    }
+
+    @Override
+    public boolean isStoredForSession(String dataKey) {
+        return sessionStorageKeys.contains(dataKey);
     }
 
     @Override
@@ -145,8 +156,15 @@ class RootPropagationMetaData implements PropagationMetaData {
         }
 
         @Override
+        public Builder setSessionStorage(String dataKey, Boolean isActive) {
+            if (isActive) result.sessionStorageKeys.add(dataKey);
+            else result.sessionStorageKeys.remove(dataKey);
+            return this;
+        }
+
+        @Override
         public Builder setBrowserPropagation(String dataKey, Boolean isActive) {
-            if(isActive) result.browserPropagatedKeys.add(dataKey);
+            if (isActive) result.browserPropagatedKeys.add(dataKey);
             else result.browserPropagatedKeys.remove(dataKey);
             return this;
         }

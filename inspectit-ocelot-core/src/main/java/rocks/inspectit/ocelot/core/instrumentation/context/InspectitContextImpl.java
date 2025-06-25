@@ -182,7 +182,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * This map only changes when an-up propagation of data occurs which also is down propagated.
      * <p>
      * At the end of the entry phase, the map is the same as {@link #postEntryPhaseDownPropagatedData}
-     * When now an up-propagation occurs, this map becomes stale. Therefore it is "reset" to null and recomputed when it is required.
+     * When now an up-propagation occurs, this map becomes stale. Therefore, it is "reset" to null and recomputed when it is required.
      * <p>
      * Note that the underlying map never gets altered! It gets replaced by a new object when it became stale.
      * This ensures that child context can use this map as their {@link #postEntryPhaseDownPropagatedData} without copying!
@@ -209,7 +209,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private final PropagationSessionStorage sessionStorage;
 
     /**
-     * Data storage for all tags that should be propagated up to or down from the browser
+     * Data storage for all tags that should be propagated up to or down from the browser.
+     * Can only be initialized, if a {@link #REMOTE_SESSION_ID} exists
      */
     private PropagationDataStorage propagationDataStorage;
 
@@ -318,10 +319,13 @@ public class InspectitContextImpl implements InternalInspectitContext {
             propagationDataStorage.setPropagation(propagation);
         }
 
+        if (propagationDataStorage != null) {
+            synchronizeWithSessionStorage(propagationDataStorage);
+        }
 
-        if(parent == null) {
+        if (parent == null) {
             // Add down-propagated data from browser to inspectIT
-            if(propagationDataStorage != null) {
+            if (propagationDataStorage != null) {
                 Map<String, Object> browserPropagationData = getBrowserPropagationData(propagationDataStorage.readData());
                 Map<String, Object> downPropagationBrowserData = getDownPropagationData(browserPropagationData);
                 dataOverwrites.putAll(downPropagationBrowserData);
@@ -363,6 +367,29 @@ public class InspectitContextImpl implements InternalInspectitContext {
             }
         }
         return false;
+    }
+
+    /**
+     * Synchronizes the current {@link #dataOverwrites} with the data stored for the session.
+     * The data of {@link #dataOverwrites} has higher priority than data in the storage.
+     * Thus, if a key already exists in {@link #dataOverwrites}, it will not be updated.
+     * However, the data will be updated in the storage.
+     *
+     * @param sessionDataStorage the data stored for the session
+     */
+    private void synchronizeWithSessionStorage(PropagationDataStorage sessionDataStorage) {
+        Map<String, Object> sessionStorageData = getSessionStorageData(propagationDataStorage.readData());
+        Map<String, Object> updatedData = new HashMap<>();
+
+        for (String dataKey : sessionStorageData.keySet()) {
+            if(!dataOverwrites.containsKey(dataKey)) {
+                Object storageValue = sessionStorageData.get(dataKey);
+                dataOverwrites.put(dataKey, storageValue);
+            }
+            else updatedData.put(dataKey, dataOverwrites.get(dataKey));
+        }
+
+        sessionDataStorage.writeData(updatedData);
     }
 
     /**
@@ -430,7 +457,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
     }
 
     /**
-     * /**
      * Sets the value for a given data key.
      * If this is called during the entry phase of the context, the changed datum will be reflected
      * in postEntryPhaseDownPropagatedData and {@link #getPostEntryPhaseTags()}.
@@ -478,9 +504,11 @@ public class InspectitContextImpl implements InternalInspectitContext {
 
         // Write browser propagation data to storage
         Map<String, Object> propagationData = getDataAsStream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Object> sessionStorageData = getSessionStorageData(propagationData);
         Map<String, Object> browserPropagationData = getBrowserPropagationData(propagationData);
+        sessionStorageData.putAll(browserPropagationData);
         if (propagationDataStorage != null)
-            propagationDataStorage.writeData(browserPropagationData);
+            propagationDataStorage.writeData(sessionStorageData);
 
         //If there is browser propagation data, but exporter is disabled, write error message
         if (!browserPropagationData.isEmpty() && !sessionStorage.isExporterActive())
@@ -517,40 +545,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
         }
     }
 
-    /**
-     * Returns a Map with key-value pairs, for all keys configured with browser-propagation
-     * @param data Map with key-value pairs
-     * @return Map with all entries of data, whose keys are configured with browser-propagation
-     */
-    private Map<String, Object> getBrowserPropagationData(Map<String, Object> data) {
-        Map<String, Object> browserPropagationData = new HashMap<>();
-        for (Map.Entry<String,Object> entry : data.entrySet()) {
-            if(propagation.isPropagatedWithBrowser(entry.getKey())) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                if(value != null) browserPropagationData.put(key, value);
-            }
-        }
-        return browserPropagationData;
-    }
-
-    /**
-     * Returns a Map with key-value pairs, for all keys configured with down-propagation
-     * @param data Map with key-value pairs
-     * @return Map with all entries of data, whose keys are configured with down-propagation
-     */
-    private Map<String, Object> getDownPropagationData(Map<String, Object> data) {
-        Map<String, Object> downPropagationData = new HashMap<>();
-        for (Map.Entry<String,Object> entry : data.entrySet()) {
-            if(propagation.isPropagatedDownWithinJVM(entry.getKey())) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                if (value != null) downPropagationData.put(key, value);
-            }
-        }
-        return downPropagationData;
-    }
-
     @Override
     public Map<String, String> getDownPropagationHeaders() {
         SpanContext spanContext = io.opentelemetry.api.trace.Span.current().getSpanContext();
@@ -581,8 +575,60 @@ public class InspectitContextImpl implements InternalInspectitContext {
         SpanContext remote_span = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(headers);
         setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, remote_span);
         String sessionId = ContextPropagationUtil.readPropagatedSessionIdFromHeaderMap(headers);
-        if(sessionId != null) setData(REMOTE_SESSION_ID, sessionId);
+        if (sessionId != null) setData(REMOTE_SESSION_ID, sessionId);
     }
+
+    /**
+     * @param data the unfiltered data
+     *
+     * @return the data configured for session-storage
+     */
+    private Map<String, Object> getSessionStorageData(Map<String, Object> data) {
+        Map<String, Object> sessionStorageData = new HashMap<>();
+        for (Map.Entry<String,Object> entry : data.entrySet()) {
+            if (propagation.isStoredForSession(entry.getKey())) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (value != null) sessionStorageData.put(key, value);
+            }
+        }
+        return sessionStorageData;
+    }
+
+    /**
+     * @param data the unfiltered data
+     *
+     * @return the data configured with browser-propagation
+     */
+    private Map<String, Object> getBrowserPropagationData(Map<String, Object> data) {
+        Map<String, Object> browserPropagationData = new HashMap<>();
+        for (Map.Entry<String,Object> entry : data.entrySet()) {
+            if (propagation.isPropagatedWithBrowser(entry.getKey())) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (value != null) browserPropagationData.put(key, value);
+            }
+        }
+        return browserPropagationData;
+    }
+
+    /**
+     * @param data the unfiltered data
+     *
+     * @return the configured with down-propagation
+     */
+    private Map<String, Object> getDownPropagationData(Map<String, Object> data) {
+        Map<String, Object> downPropagationData = new HashMap<>();
+        for (Map.Entry<String,Object> entry : data.entrySet()) {
+            if (propagation.isPropagatedDownWithinJVM(entry.getKey())) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (value != null) downPropagationData.put(key, value);
+            }
+        }
+        return downPropagationData;
+    }
+
 
     @Override
     public Set<String> getPropagationHeaderNames() {

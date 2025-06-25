@@ -33,6 +33,7 @@ import java.util.stream.Stream;
  * When tracing is added, additional header formats, such as B3 will be used.
  */
 @Slf4j
+// TODO util classes should not have a state...
 public class ContextPropagationUtil {
 
     /**
