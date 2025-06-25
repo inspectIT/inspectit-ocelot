@@ -19,8 +19,8 @@ import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationDataStorage;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationDataStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.testutils.GcUtils;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 

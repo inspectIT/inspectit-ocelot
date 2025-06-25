@@ -16,7 +16,7 @@ import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachmentsImpl;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.LogTraceCorrelatorImpl;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MdcAccessManager;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.opentelemetry.OpenTelemetryControllerImpl;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 

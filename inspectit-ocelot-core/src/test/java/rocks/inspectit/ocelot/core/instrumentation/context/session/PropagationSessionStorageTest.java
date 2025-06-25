@@ -1,10 +1,23 @@
-package rocks.inspectit.ocelot.core.instrumentation.context.propagation;
+package rocks.inspectit.ocelot.core.instrumentation.context.session;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import rocks.inspectit.ocelot.core.SpringTestBase;
+
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState.ENABLED;
 
-public class PropagationSessionStorageTest {
+@DirtiesContext
+public class PropagationSessionStorageTest extends SpringTestBase {
+
+    @Autowired
+    PropagationSessionStorage sessionStorage;
 
     private static final String validSessionID = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
 
@@ -14,9 +27,13 @@ public class PropagationSessionStorageTest {
 
     private static final String longSessionID = "test1=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-49c42-45b3a-9243-7d8422803604-92439b443924;test2=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-49c42-45b3a-9243-7d8422803604-92439b443924;test3=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-49c42-45b3a-9243-7d8422803604-92439b443924;test4=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-49c42-45b3a-9243-7d8422803604-92439b443924;test5=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-49c42-45b3a-9243-7d8422803604-92439b443924;test6=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-49c42-45b3a-9243-7d8422803604-92439b443924;";
 
+    @BeforeEach
+    void beforeEach() {
+        sessionStorage.clearDataStorages();
+    }
+
     @Test
     void verifyValidSessionID() {
-        PropagationSessionStorage sessionStorage = new PropagationSessionStorage();
         PropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(validSessionID, null);
 
         assertThat(dataStorage).isNotNull();
@@ -24,7 +41,6 @@ public class PropagationSessionStorageTest {
 
     @Test
     void verifyInvalidSessionID() {
-        PropagationSessionStorage sessionStorage = new PropagationSessionStorage();
         PropagationDataStorage dataStorage1 = sessionStorage.getOrCreateDataStorage(shortSessionID, null);
         PropagationDataStorage dataStorage2 = sessionStorage.getOrCreateDataStorage(longSessionID, null);
 
@@ -34,13 +50,29 @@ public class PropagationSessionStorageTest {
 
     @Test
     void verifySessionLimit() {
-        PropagationSessionStorage sessionStorage = new PropagationSessionStorage();
-        sessionStorage.setSessionLimit(1);
+        updateProperties(props -> {
+            props.setProperty("inspectit.instrumentation.sessions.session-limit", 1);
+        });
 
         PropagationDataStorage dataStorage1 = sessionStorage.getOrCreateDataStorage(validSessionID, null);
         PropagationDataStorage dataStorage2 = sessionStorage.getOrCreateDataStorage(anotherValidSessionID, null);
 
         assertThat(dataStorage1).isNotNull();
         assertThat(dataStorage2).isNull();
+    }
+
+    @Test
+    void verifyTimeToLive() {
+        Duration ttl = Duration.ofMillis(100);
+        updateProperties(props -> {
+            props.setProperty("inspectit.instrumentation.sessions.time-to-live", ttl);
+        });
+
+        sessionStorage.fixedDelay = Duration.ofMillis(50);
+        sessionStorage.getOrCreateDataStorage(validSessionID, null);
+
+        await().atMost(200, TimeUnit.MILLISECONDS).untilAsserted(() -> {
+            assertThat(sessionStorage.getDataStorage(validSessionID)).isNull();
+        });
     }
 }

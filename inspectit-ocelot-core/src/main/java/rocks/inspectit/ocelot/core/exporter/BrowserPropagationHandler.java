@@ -4,9 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationDataStorage;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationDataStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +34,8 @@ public class BrowserPropagationHandler implements HttpHandler {
     /**
      * Header, which should be used to store session-Ids
      */
-    private final String sessionIdHeader;
+    @Getter @Setter
+    private String sessionIdHeader;
 
     /**
      * List of allowed origins, which are able to access the HTTP-server
@@ -64,7 +67,6 @@ public class BrowserPropagationHandler implements HttpHandler {
                 String sessionID = exchange.getRequestHeaders().getFirst(sessionIdHeader);
                 PropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionID);
                 if(dataStorage != null) {
-                    dataStorage.updateTimestamp(System.currentTimeMillis());
                     switch (method) {
                         case "get":
                             handleGet(exchange, dataStorage);

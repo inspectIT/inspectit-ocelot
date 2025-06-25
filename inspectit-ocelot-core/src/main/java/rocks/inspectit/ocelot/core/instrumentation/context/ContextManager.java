@@ -13,7 +13,7 @@ import rocks.inspectit.ocelot.bootstrap.context.ContextTuple;
 import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.core.config.spring.BootstrapInitializerConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import javax.validation.constraints.NotNull;

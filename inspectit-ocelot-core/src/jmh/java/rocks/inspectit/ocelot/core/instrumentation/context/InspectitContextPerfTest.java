@@ -3,8 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.context;
 import org.openjdk.jmh.annotations.*;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationDataStorage;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 
 import java.util.Collections;
 import java.util.HashMap;

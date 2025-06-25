@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.context.propagation;
+package rocks.inspectit.ocelot.core.instrumentation.context.session;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;

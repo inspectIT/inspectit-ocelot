@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opentelemetry.api.baggage.propagation.W3CBaggagePropagator;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -13,7 +12,7 @@ import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.BrowserPropagationUtil;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.BrowserPropagationUtil;
 import rocks.inspectit.ocelot.core.instrumentation.context.propagation.DatadogFormat;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 

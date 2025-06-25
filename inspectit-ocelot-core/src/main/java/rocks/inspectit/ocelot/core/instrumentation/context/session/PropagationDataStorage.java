@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.context.propagation;
+package rocks.inspectit.ocelot.core.instrumentation.context.session;
 
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
@@ -26,7 +26,7 @@ public class PropagationDataStorage {
     private final ConcurrentMap<String, Object> propagationData = new ConcurrentHashMap<>();
 
     // TODO We can remove this property, after browser-propagation was removed
-    //  Then only the inspectIT context can write into the storage, which already knows the propagation
+    //  Then only the inspectIT context uses the storage, which already knows the propagation
     private PropagationMetaData propagation;
 
     PropagationDataStorage() {
@@ -40,13 +40,21 @@ public class PropagationDataStorage {
         if (propagation != null && !propagation.equals(this.propagation)) this.propagation = propagation;
     }
 
+    /**
+     * Writes the provided data into the storage, if the storage is not exceeded.
+     * Invalid data entries will not be written into the storage.
+     *
+     * @param newPropagationData the new data
+     */
     public void writeData(Map<String, ?> newPropagationData) {
         Map <String, Object> validatedData = validateEntries(newPropagationData);
 
-        if(exceedsTagLimit(validatedData)) {
+        if (exceedsTagLimit(validatedData)) {
             log.debug("Unable to write data: tag limit was exceeded");
             return;
         }
+
+        updateTimestamp();
         propagationData.putAll(validatedData);
     }
 
@@ -54,6 +62,7 @@ public class PropagationDataStorage {
      * @return a copy of the current propagation data
      */
     public Map<String, Object> readData() {
+        updateTimestamp();
         return new HashMap<>(propagationData);
     }
 
@@ -61,8 +70,8 @@ public class PropagationDataStorage {
         return propagationData.size();
     }
 
-    public void updateTimestamp(long newTimestamp) {
-        latestTimestamp = newTimestamp;
+    private void updateTimestamp() {
+        latestTimestamp = System.currentTimeMillis();
     }
 
     /**
@@ -85,7 +94,7 @@ public class PropagationDataStorage {
     private Map<String, Object> validateEntries(Map<String, ?> newPropagationData) {
         Map<String, Object> validatedData = new HashMap<>();
         newPropagationData.forEach((k,v) -> {
-            if(validateEntry(k,v)) validatedData.put(k,v);
+            if (validateEntry(k,v)) validatedData.put(k,v);
             else log.debug("Invalid data entry {} will not be stored", k);
         });
         return validatedData;
@@ -105,7 +114,7 @@ public class PropagationDataStorage {
      * @return true, if this key should be stored
      */
     private boolean shouldBeStored(String key) {
-        if(propagation != null) return propagation.isStoredForSession(key) || propagation.isPropagatedWithBrowser(key);
+        if (propagation != null) return propagation.isStoredForSession(key) || propagation.isPropagatedWithBrowser(key);
         else return false;
     }
 }

@@ -11,8 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationDataStorage;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationDataStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.tags.TagUtils;
 
@@ -381,15 +381,16 @@ public class InspectitContextImpl implements InternalInspectitContext {
         Map<String, Object> sessionStorageData = getSessionStorageData(propagationDataStorage.readData());
         Map<String, Object> updatedData = new HashMap<>();
 
-        for (String dataKey : sessionStorageData.keySet()) {
-            if(!dataOverwrites.containsKey(dataKey)) {
-                Object storageValue = sessionStorageData.get(dataKey);
-                dataOverwrites.put(dataKey, storageValue);
+        if (!sessionStorageData.isEmpty()) {
+            for (String dataKey : sessionStorageData.keySet()) {
+                if(!dataOverwrites.containsKey(dataKey)) {
+                    Object storageValue = sessionStorageData.get(dataKey);
+                    dataOverwrites.put(dataKey, storageValue);
+                }
+                else updatedData.put(dataKey, dataOverwrites.get(dataKey));
             }
-            else updatedData.put(dataKey, dataOverwrites.get(dataKey));
+            sessionDataStorage.writeData(updatedData);
         }
-
-        sessionDataStorage.writeData(updatedData);
     }
 
     /**

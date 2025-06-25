@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.context.propagation;
+package rocks.inspectit.ocelot.core.instrumentation.context.session;
 
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
@@ -14,7 +14,7 @@ import javax.annotation.PostConstruct;
 
 /**
  * Class to regulate the currently used session-id-key.
- * The session-id-key is used to extract session-ids from http-request-headers to allow browser propagation.
+ * The session-id-key is used to extract session-ids from http-headers.
  * The session-id-key can change during runtime and needs to be updated inside the PROPAGATION_FIELDS in ContextPropagationUtil.
  */
 @Slf4j
@@ -30,30 +30,19 @@ public class BrowserPropagationUtil {
 
     @PostConstruct
     public void initialize() {
-        if(isBrowserPropagationEnabled())
-            setSessionIdHeader(env.getCurrentConfig().getExporters().getTags().getHttp().getSessionIdHeader());
-        else
-            ContextPropagationUtil.removeSessionIdHeader();
+        setSessionIdHeader(env.getCurrentConfig().getInstrumentation().getSessions().getSessionIdHeader());
     }
 
     @EventListener
     private void configEventListener(InspectitConfigChangedEvent event) {
-        if(isBrowserPropagationEnabled()) {
-            String oldSessionIdHeader = event.getOldConfig().getExporters().getTags().getHttp().getSessionIdHeader();
-            String newSessionIdHeader = event.getNewConfig().getExporters().getTags().getHttp().getSessionIdHeader();
-
-            if(!oldSessionIdHeader.equals(newSessionIdHeader)) setSessionIdHeader(newSessionIdHeader);
-        }
+         String newSessionIdHeader = event.getNewConfig().getInstrumentation().getSessions().getSessionIdHeader();
+         if(newSessionIdHeader != null && !newSessionIdHeader.equals(sessionIdHeader)) setSessionIdHeader(newSessionIdHeader);
     }
 
     @VisibleForTesting
     void setSessionIdHeader(String key) {
         sessionIdHeader = key;
-        log.info("Using new session-id-header: {}", sessionIdHeader);
+        log.info("Using new session-id header: {}", sessionIdHeader);
         ContextPropagationUtil.setSessionIdHeader(sessionIdHeader);
-    }
-
-    private boolean isBrowserPropagationEnabled() {
-        return !env.getCurrentConfig().getExporters().getTags().getHttp().getEnabled().isDisabled();
     }
 }

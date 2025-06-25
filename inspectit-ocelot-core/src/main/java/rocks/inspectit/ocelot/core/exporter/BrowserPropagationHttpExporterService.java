@@ -4,12 +4,12 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.tags.HttpExporterSettings;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
+import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.io.IOException;
@@ -29,7 +29,6 @@ import java.util.concurrent.Executors;
  */
 @Slf4j
 @Component
-@EnableScheduling
 @Deprecated
 public class BrowserPropagationHttpExporterService extends DynamicallyActivatableService {
 
@@ -38,20 +37,21 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
 
     private HttpServer server;
 
-    private HttpHandler httpHandler;
-
-    /**
-     * Delay to rerun the scheduled method after the method finished in milliseconds
-     */
-    private static final int FIXED_DELAY = 10000;
-
-    /**
-     * Time to live for browser propagation data in seconds
-     */
-    private int timeToLive = 300;
+    private BrowserPropagationHandler httpHandler;
 
     public BrowserPropagationHttpExporterService() {
         super("exporters.tags.http");
+    }
+
+    @EventListener
+    private void configEventListener(InspectitConfigChangedEvent event) {
+        if (httpHandler != null) {
+            String currentSessionIdHeader = httpHandler.getSessionIdHeader();
+            String newSessionIdHeader = event.getNewConfig().getInstrumentation().getSessions().getSessionIdHeader();
+
+            if (newSessionIdHeader != null && !newSessionIdHeader.equals(currentSessionIdHeader))
+                httpHandler.setSessionIdHeader(newSessionIdHeader);
+        }
     }
 
     @Override
@@ -71,14 +71,9 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         int port = settings.getPort();
         String path = settings.getPath();
         int threadLimit = settings.getThreadLimit();
-        timeToLive = settings.getTimeToLive();
-
-        int sessionLimit = settings.getSessionLimit();
-        sessionStorage.setSessionLimit(sessionLimit);
-        sessionStorage.setExporterActive(true);
-
-        String sessionIdHeader = settings.getSessionIdHeader();
         List<String> allowedOrigins = settings.getAllowedOrigins();
+        String sessionIdHeader = configuration.getInstrumentation().getSessions().getSessionIdHeader();
+
         httpHandler = new BrowserPropagationHandler(sessionStorage, sessionIdHeader, allowedOrigins);
 
         try {
@@ -95,7 +90,6 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
             try {
                 log.info("Stopping Tags HTTP-Server - All sessions will be removed");
                 server.stop(0);
-                sessionStorage.clearDataStorages();
                 sessionStorage.setExporterActive(false);
             } catch (Exception e) {
                 log.error("Error disabling Tags HTTP-Server", e);
@@ -110,20 +104,10 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         ExecutorService executor = Executors.newFixedThreadPool(threadLimit);
         server.setExecutor(executor);
 
-        log.warn("It is not recommended to use the Tags HTTP-Server. Instead read or write data via baggage headers");
+        log.warn("It is not recommended to use the Tags HTTP-Server. Instead read or write data via baggage header");
         log.info("Starting Tags HTTP-Server on {}:{}{} ", host, port, path);
         server.start();
+        sessionStorage.setExporterActive(true);
         return true;
-    }
-
-    /**
-     * Updates the session storage.
-     * Browser propagation data is cached for a specific amount of time (timeToLive).
-     * If the time expires, clean up the storage.
-     */
-    @Scheduled(fixedDelay = FIXED_DELAY)
-    public void updateSessionStorage() {
-        if(httpHandler == null) return;
-        sessionStorage.cleanUpData(timeToLive);
     }
 }

@@ -3,7 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.context;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
-import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.util.concurrent.TimeUnit;
