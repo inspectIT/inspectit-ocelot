@@ -61,7 +61,6 @@ import java.util.stream.Stream;
  * <p>
  * As noted previously the tag context opened by the context at the end of its entry phase will be stale for teh exit phase:
  * It does not contain any up-propagated data, neither does it contain any changes performed during the exit phase.
- * For this reason, an up-to-date tag context can be acquired using {@link #enterFullTagScope()} within which then metrics can be collected.
  * <p>
  * Finally, a context finishes the exit phase with a call to {@link #close()}
  * If the context is synchronous, it will perform its up-propagation.
@@ -416,27 +415,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     private boolean isInDifferentThreadThanParentOrIsParentClosed() {
         return parent != null && (parent.openingThread != openingThread || !parent.isInActiveOrExitPhase());
-    }
-
-    /**
-     * Enters a new tag scope, which contains the tags currently present in {@link #getData()}.
-     * In contrast to the tag scope opened by {@link #makeActive()} this tag scope will reflect
-     * all recent updates performed through setData or via up-propagation.
-     * In addition, this tag scopes contains all tags for which down-propagation is set to false.
-     *
-     * @return the newly opened tag scope.
-     * // TODO Remove? This becomes obsolete now
-     */
-    public io.opencensus.common.Scope enterFullTagScope() {
-        TagContextBuilder builder = Tags.getTagger().emptyBuilder();
-        dataTagsStream().forEach(e -> builder.putLocal(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getKey(), e.getValue()
-                .toString())));
-        return builder.buildScoped();
-    }
-
-    private Stream<Map.Entry<String, Object>> dataTagsStream() {
-        return getDataAsStream().filter(e -> propagation.isTag(e.getKey()))
-                .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()));
     }
 
     /**
