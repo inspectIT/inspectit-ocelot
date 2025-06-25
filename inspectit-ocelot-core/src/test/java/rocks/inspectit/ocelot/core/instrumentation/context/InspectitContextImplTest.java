@@ -19,6 +19,7 @@ import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationDataStorage;
 import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.testutils.GcUtils;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
@@ -820,5 +821,71 @@ public class InspectitContextImplTest extends SpringTestBase {
     @Nested
     public class SessionStorage {
 
+        private final String SESSION = "session";
+
+        private final String KEY = "my-key";
+
+        private final String VALUE = "my-value";
+
+        private final String SESSION_VALUE = "my-session-value";
+
+        @Mock
+        private PropagationDataStorage dataStorage;
+
+        @Test
+        void shouldReadDataFromSessionStorage() {
+            Map<String, Object> storageDate = new HashMap<>();
+            storageDate.put(KEY, SESSION_VALUE);
+
+            doReturn(true).when(propagation).isStoredForSession(any());
+            doReturn(dataStorage).when(sessionStorage).getOrCreateDataStorage(SESSION, propagation);
+            doReturn(storageDate).when(dataStorage).readData();
+
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
+            root.setData(InternalInspectitContext.REMOTE_SESSION_ID, SESSION);
+
+            root.makeActive();
+
+            assertThat(root.getData(KEY)).isEqualTo(SESSION_VALUE);
+
+            root.close();
+        }
+
+        @Test
+        void shouldKeepContextDataAndUpdateStorageData() {
+            Map<String, Object> storageDate = new HashMap<>();
+            storageDate.put(KEY, SESSION_VALUE);
+            Map<String, Object> expectedUpdate = new HashMap<>();
+            expectedUpdate.put(KEY, VALUE);
+
+            doReturn(true).when(propagation).isStoredForSession(any());
+            doReturn(dataStorage).when(sessionStorage).getOrCreateDataStorage(SESSION, propagation);
+            doReturn(storageDate).when(dataStorage).readData();
+
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
+            root.setData(KEY, VALUE);
+            root.setData(InternalInspectitContext.REMOTE_SESSION_ID, SESSION);
+
+            root.makeActive();
+
+            assertThat(root.getData(KEY)).isEqualTo(VALUE);
+
+            root.close();
+
+            assertThat(root.getData(KEY)).isEqualTo(VALUE);
+            verify(dataStorage).writeData(expectedUpdate);
+        }
+
+        @Test
+        void shouldNotReadDataWithoutSessionId() {
+            Map<String, Object> storageDate = new HashMap<>();
+            storageDate.put(KEY, SESSION_VALUE);
+
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
+            root.makeActive();
+            root.close();
+
+            verifyNoInteractions(dataStorage);
+        }
     }
 }

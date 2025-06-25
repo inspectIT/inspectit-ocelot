@@ -51,6 +51,7 @@ public interface PropagationMetaData {
      * @param dataKey the data key to check
      * @return true, if the dataKey is configured with browser-propagation = true
      */
+    @Deprecated
     boolean isPropagatedWithBrowser(String dataKey);
 
     /**
@@ -85,6 +86,7 @@ public interface PropagationMetaData {
 
         Builder setSessionStorage(String dataKey, Boolean isActive);
 
+        @Deprecated
         Builder setBrowserPropagation(String dataKey, Boolean isActive);
 
         PropagationMetaData build();

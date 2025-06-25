@@ -322,6 +322,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
             synchronizeWithSessionStorage(propagationDataStorage);
         }
 
+        // TODO Remove this if-block after browser-propagation is removed
         if (parent == null) {
             // Add down-propagated data from browser to inspectIT
             if (propagationDataStorage != null) {
@@ -485,7 +486,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         Map<String, Object> sessionStorageData = getSessionStorageData(propagationData);
         Map<String, Object> browserPropagationData = getBrowserPropagationData(propagationData);
         sessionStorageData.putAll(browserPropagationData);
-        if (propagationDataStorage != null)
+        if (propagationDataStorage != null && !sessionStorageData.isEmpty())
             propagationDataStorage.writeData(sessionStorageData);
 
         //If there is browser propagation data, but exporter is disabled, write error message
