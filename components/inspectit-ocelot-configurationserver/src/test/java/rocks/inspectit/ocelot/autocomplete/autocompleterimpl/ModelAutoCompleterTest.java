@@ -29,7 +29,7 @@ public class ModelAutoCompleterTest {
 
             List<String> result = completer.getSuggestions(input);
 
-            assertThat(result).containsExactlyInAnyOrder("actions", "data", "exclude-lambdas", "ignored-bootstrap-packages", "ignored-packages", "internal", "rules", "scopes", "special", "enabled");
+            assertThat(result).containsExactlyInAnyOrder("actions", "data", "sessions", "exclude-lambdas", "ignored-bootstrap-packages", "ignored-packages", "internal", "rules", "scopes", "special", "enabled");
         }
 
         @Test
