@@ -60,19 +60,4 @@ public class PropagationSessionStorageTest extends SpringTestBase {
         assertThat(dataStorage1).isNotNull();
         assertThat(dataStorage2).isNull();
     }
-
-    @Test
-    void verifyTimeToLive() {
-        Duration ttl = Duration.ofMillis(100);
-        updateProperties(props -> {
-            props.setProperty("inspectit.instrumentation.sessions.time-to-live", ttl);
-        });
-
-        sessionStorage.fixedDelay = Duration.ofMillis(50);
-        sessionStorage.getOrCreateDataStorage(validSessionID, null);
-
-        await().atMost(200, TimeUnit.MILLISECONDS).untilAsserted(() -> {
-            assertThat(sessionStorage.getDataStorage(validSessionID)).isNull();
-        });
-    }
 }

@@ -27,6 +27,11 @@ public class PropagationSessionStorage {
 
     private static final int KEY_MAX_SIZE = 512;
 
+    /**
+     * Delay for the cleaning scheduler
+     */
+    private static final Duration FIXED_DELAY = Duration.ofMillis(30);
+
     @Autowired
     private ScheduledExecutorService executor;
 
@@ -39,15 +44,9 @@ public class PropagationSessionStorage {
     private int sessionLimit = 100;
 
     /**
-     * Time to live for browser propagation data in seconds
+     * Time to live for session data in seconds
      */
     private Duration timeToLive = Duration.ofMinutes(5);
-
-    /**
-     * Delay for the cleaning scheduler
-     */
-    @VisibleForTesting
-    Duration fixedDelay = Duration.ofMillis(30);
 
     /**
      * Boolean, which helps to create error messages, if browser propagation is tried, but exporter is disabled
@@ -66,7 +65,7 @@ public class PropagationSessionStorage {
         sessionLimit = env.getCurrentConfig().getInstrumentation().getSessions().getSessionLimit();
         timeToLive = env.getCurrentConfig().getInstrumentation().getSessions().getTimeToLive();
 
-        executor.scheduleWithFixedDelay(this::cleanUpData, fixedDelay.toMillis(), fixedDelay.toMillis(), TimeUnit.MILLISECONDS);
+        executor.scheduleWithFixedDelay(this::cleanUpData, FIXED_DELAY.toMillis(), FIXED_DELAY.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     @EventListener
