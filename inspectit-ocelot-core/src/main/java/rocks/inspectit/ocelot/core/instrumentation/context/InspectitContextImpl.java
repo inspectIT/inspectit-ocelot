@@ -539,25 +539,25 @@ public class InspectitContextImpl implements InternalInspectitContext {
                 spanContext = null;
             }
         }
-        return ContextPropagationUtil.buildPropagationHeaderMap(getDataAsStream().filter(e -> propagation.isPropagatedDownGlobally(e.getKey())), spanContext);
+        return ContextPropagation.get().buildPropagationHeaderMap(getDataAsStream().filter(e -> propagation.isPropagatedDownGlobally(e.getKey())), spanContext);
     }
 
     @Override
     public Map<String, String> getUpPropagationHeaders() {
-        return ContextPropagationUtil.buildPropagationHeaderMap(getDataAsStream().filter(e -> propagation.isPropagatedUpGlobally(e.getKey())));
+        return ContextPropagation.get().buildPropagationHeaderMap(getDataAsStream().filter(e -> propagation.isPropagatedUpGlobally(e.getKey())));
     }
 
     @Override
     public void readUpPropagationHeaders(Map<String, String> headers) {
-        ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, this);
+        ContextPropagation.get().readPropagatedDataFromHeaderMap(headers, this);
     }
 
     @Override
     public void readDownPropagationHeaders(Map<String, String> headers) {
-        ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, this);
-        SpanContext remote_span = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(headers);
+        ContextPropagation.get().readPropagatedDataFromHeaderMap(headers, this);
+        SpanContext remote_span = ContextPropagation.get().readPropagatedSpanContextFromHeaderMap(headers);
         setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, remote_span);
-        String sessionId = ContextPropagationUtil.readPropagatedSessionIdFromHeaderMap(headers);
+        String sessionId = ContextPropagation.get().readPropagatedSessionIdFromHeaderMap(headers);
         if (sessionId != null) setData(REMOTE_SESSION_ID, sessionId);
     }
 
@@ -615,11 +615,11 @@ public class InspectitContextImpl implements InternalInspectitContext {
 
     @Override
     public Set<String> getPropagationHeaderNames() {
-        return ContextPropagationUtil.getPropagationHeaderNames();
+        return ContextPropagation.get().getPropagationHeaderNames();
     }
 
     /**
-     * Only invoked by {@link #createFromCurrent(Map, PropagationMetaData, boolean)}
+     * Only invoked by {@link #createFromCurrent(Map, PropagationMetaData, PropagationSessionStorage, boolean)}
      * <p>
      * Reads the currently active tag context and makes this context inherit all values which
      * have changed in comparison to the values published by the parent context.
@@ -727,5 +727,4 @@ public class InspectitContextImpl implements InternalInspectitContext {
                         .toString()), TagMetadata.create(TagMetadata.TagTtl.UNLIMITED_PROPAGATION)))
                 .iterator();
     }
-
 }

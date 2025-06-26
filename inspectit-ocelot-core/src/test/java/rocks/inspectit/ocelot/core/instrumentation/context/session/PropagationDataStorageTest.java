@@ -9,7 +9,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
-import rocks.inspectit.ocelot.core.instrumentation.context.ContextPropagationUtil;
+import rocks.inspectit.ocelot.core.instrumentation.context.ContextPropagation;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextUtil;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 
@@ -35,14 +35,13 @@ public class PropagationDataStorageTest extends SpringTestBase {
 
     Map<String, String> headers;
 
-    private static final String sessionIdHeader = "Session-Id";
-
-    private static final String sessionId = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
+    private final String sessionId = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
 
     @BeforeEach
     void prepareTest() {
         sessionStorage.setExporterActive(true);
-        ContextPropagationUtil.setSessionIdHeader(sessionIdHeader);
+        String sessionIdHeader = "Session-Id";
+        ContextPropagation.get().setSessionIdHeader(sessionIdHeader);
         // Create HTTP header to pass it to the initial InspectIT-Context
         headers = new HashMap<>();
         headers.put(sessionIdHeader, sessionId);

@@ -12,7 +12,7 @@ import javax.annotation.PostConstruct;
 
 /**
  * This component only exists for listening on configuration changes and correctly setting the propagation format
- * in the {@link ContextPropagationUtil}.
+ * in the {@link ContextPropagation}.
  */
 @Component
 public class PropagationFormatManager {
@@ -24,7 +24,7 @@ public class PropagationFormatManager {
     private void postConstruct() {
         InspectitConfig currentConfig = env.getCurrentConfig();
         PropagationFormat propagationFormat = currentConfig.getTracing().getPropagationFormat();
-        ContextPropagationUtil.setPropagationFormat(propagationFormat);
+        ContextPropagation.get().setPropagationFormat(propagationFormat);
     }
 
     @EventListener
@@ -33,8 +33,7 @@ public class PropagationFormatManager {
         PropagationFormat newFormat = event.getNewConfig().getTracing().getPropagationFormat();
 
         if (oldFormat != newFormat) {
-            ContextPropagationUtil.setPropagationFormat(newFormat);
+            ContextPropagation.get().setPropagationFormat(newFormat);
         }
     }
-
 }

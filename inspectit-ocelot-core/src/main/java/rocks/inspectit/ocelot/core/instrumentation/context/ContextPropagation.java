@@ -12,7 +12,7 @@ import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
-import rocks.inspectit.ocelot.core.instrumentation.context.session.BrowserPropagationUtil;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.SessionIdManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.propagation.DatadogFormat;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 
@@ -25,15 +25,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Implements the logic for generating and reading the http headers related to context propagation.
+ * Singleton, which implements the logic for generating and reading the http headers related to context propagation.
  * Currently, the propagation happens only via the Baggage headers:
  * <a href="https://github.com/w3c/baggage/blob/main/baggage/HTTP_HEADER_FORMAT.md">Check out the W3C documentation</a>
  * <br>
  * When tracing is added, additional header formats, such as B3 will be used.
  */
 @Slf4j
-// TODO util classes should not have a state...
-public class ContextPropagationUtil {
+public class ContextPropagation {
+
+    private static ContextPropagation instance;
 
     /**
      * Maps each serializable type to its identifier.
@@ -41,37 +42,49 @@ public class ContextPropagationUtil {
      * Baggage: pi=3.14;type=d
      * (d is the identifier for "Double")
      */
-    private static final Map<Class<?>, Character> TYPE_TO_ID_MAP = new HashMap<>();
+    private final Map<Class<?>, Character> TYPE_TO_ID_MAP = new HashMap<>();
 
-    private static final Map<Character, Function<String, Object>> TYPE_ID_TO_PARSER_MAP = new HashMap<>();
+    private final Map<Character, Function<String, Object>> TYPE_ID_TO_PARSER_MAP = new HashMap<>();
 
-    private static final String ENCODING_CHARSET = java.nio.charset.StandardCharsets.UTF_8.toString();
-
-    public static final String BAGGAGE_HEADER = "Baggage";
+    private final String ENCODING_CHARSET = java.nio.charset.StandardCharsets.UTF_8.toString();
 
     /**
-     * Session-ID-key to allow browser propagation
+     * We use this header to propagate data between different services via HTTP
      */
-    private static String SESSION_ID_HEADER = BrowserPropagationUtil.getSessionIdHeader();
-
-    private static final String B3_HEADER_PREFIX = "X-B3-";
-
-    private static final Pattern COMMA_WITH_WHITESPACES = Pattern.compile(" *, *");
-
-    private static final Pattern SEMICOLON_WITH_WHITESPACES = Pattern.compile(" *; *");
-
-    private static final Pattern EQUALS_WITH_WHITESPACES = Pattern.compile(" *= *");
-
-    private static final Set<String> PROPAGATION_FIELDS = new HashSet<>();
+    public final String BAGGAGE_HEADER = "Baggage";
 
     /**
-     * The currently used propagation format. Defaults to {@link W3CTraceContextPropagator}
+     * We use this header to allow JavaScript in frontends to also read the {@code Baggage} header.
+     * Normally, browser security prevents JavaScript to read such "custom" HTTP headers in cross-origin requests.
+     * JVMs do not require this additional header to read {@code Baggage}.
      */
-    private static TextMapPropagator propagationFormat = W3CTraceContextPropagator.getInstance();
+    public final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+
+    private final String B3_HEADER_PREFIX = "X-B3-";
+
+    private final Pattern COMMA_WITH_WHITESPACES = Pattern.compile(" *, *");
+
+    private final Pattern SEMICOLON_WITH_WHITESPACES = Pattern.compile(" *; *");
+
+    private final Pattern EQUALS_WITH_WHITESPACES = Pattern.compile(" *= *");
+
+    private final Set<String> PROPAGATION_FIELDS = new HashSet<>();
+
+    /**
+     * The currently used propagation format. Defaults to {@link W3CTraceContextPropagator}.
+     * Will be set via {@link PropagationFormatManager}
+     */
+    private TextMapPropagator propagationFormat = W3CTraceContextPropagator.getInstance();
+
+    /**
+     * HTTP header to read session ids. Defaults to {@code Session-Id}.
+     * Will be set via {@link SessionIdManager}
+     */
+    private String sessionIdHeader = "Session-Id";
 
     public static final TextMapSetter<Map<String, String>> MAP_INJECTOR = new TextMapSetter<Map<String, String>>() {
         @Override
-        public void set( Map<String, String> carrier, String key, String value) {
+        public void set(Map<String, String> carrier, String key, String value) {
             carrier.put(key, value);
         }
     };
@@ -88,17 +101,22 @@ public class ContextPropagationUtil {
         }
     };
 
-    static {
+    // Private constructor for singleton
+    private ContextPropagation() {
+        addPropagationFields();
+        addTypeParser();
+    }
+
+    private void addPropagationFields() {
         // We could try to use the W3CBaggagePropagator for baggage like the W3CTraceContextPropagator for traces
         PROPAGATION_FIELDS.add(BAGGAGE_HEADER);
-        PROPAGATION_FIELDS.add(SESSION_ID_HEADER);
         PROPAGATION_FIELDS.addAll(B3Propagator.injectingSingleHeader().fields());
         PROPAGATION_FIELDS.addAll(B3Propagator.injectingMultiHeaders().fields());
         PROPAGATION_FIELDS.addAll(W3CTraceContextPropagator.getInstance().fields());
         PROPAGATION_FIELDS.addAll(DatadogFormat.INSTANCE.fields());
     }
 
-    static {
+    private void addTypeParser() {
         TYPE_TO_ID_MAP.put(Byte.class, 'a'); //use a because b is already taken for boolean
         TYPE_ID_TO_PARSER_MAP.put('a', Byte::parseByte);
         TYPE_TO_ID_MAP.put(Short.class, 's');
@@ -118,13 +136,21 @@ public class ContextPropagationUtil {
     }
 
     /**
+     * @return the singleton instance of {@link ContextPropagation}
+     */
+    public static ContextPropagation get() {
+        if (instance == null) instance = new ContextPropagation();
+        return instance;
+    }
+
+    /**
      * Takes the given key-value pairs and encodes them into the Baggage header.
      *
      * @param dataToPropagate the key-value pairs to propagate.
      *
      * @return the result propagation map
      */
-    public static Map<String, String> buildPropagationHeaderMap(Stream<Map.Entry<String, Object>> dataToPropagate) {
+    public Map<String, String> buildPropagationHeaderMap(Stream<Map.Entry<String, Object>> dataToPropagate) {
         return buildPropagationHeaderMap(dataToPropagate, null);
     }
 
@@ -136,7 +162,7 @@ public class ContextPropagationUtil {
      *
      * @return the result propagation map
      */
-    public static Map<String, String> buildPropagationHeaderMap(Stream<Map.Entry<String, Object>> dataToPropagate, SpanContext spanToPropagate) {
+    public Map<String, String> buildPropagationHeaderMap(Stream<Map.Entry<String, Object>> dataToPropagate, SpanContext spanToPropagate) {
         String baggageHeader = buildBaggageHeader(dataToPropagate);
         HashMap<String, String> result = new HashMap<>();
         if (spanToPropagate != null) {
@@ -157,12 +183,14 @@ public class ContextPropagationUtil {
         }
         if (!baggageHeader.isEmpty()) {
             result.put(BAGGAGE_HEADER, baggageHeader);
+            // Make sure frontends can also read the baggage header
+            result.put(ACCESS_CONTROL_EXPOSE_HEADERS, BAGGAGE_HEADER);
         }
 
         return result;
     }
 
-    private static String buildBaggageHeader(Stream<Map.Entry<String, Object>> dataToPropagate) {
+    private String buildBaggageHeader(Stream<Map.Entry<String, Object>> dataToPropagate) {
         StringBuilder baggageData = new StringBuilder();
         dataToPropagate.forEach(e -> {
             try {
@@ -180,8 +208,8 @@ public class ContextPropagationUtil {
                         baggageData.append(";type=").append(typeId);
                     }
                 }
-            } catch (Throwable t) {
-                log.error("Error encoding baggage header", e);
+            } catch (Exception ex) {
+                log.error("Error encoding baggage header", ex);
             }
         });
         return baggageData.toString();
@@ -192,7 +220,7 @@ public class ContextPropagationUtil {
      *
      * @return the set of header names
      */
-    public static Set<String> getPropagationHeaderNames() {
+    public Set<String> getPropagationHeaderNames() {
         return PROPAGATION_FIELDS;
     }
 
@@ -202,7 +230,7 @@ public class ContextPropagationUtil {
      * @param propagationMap the headers to decode
      * @param target         the context in which the decoded data key-value pairs will be stored.
      */
-    public static void readPropagatedDataFromHeaderMap(Map<String, String> propagationMap, InspectitContextImpl target) {
+    public void readPropagatedDataFromHeaderMap(Map<String, String> propagationMap, InspectitContextImpl target) {
         if (propagationMap.containsKey(BAGGAGE_HEADER))
             readBaggage(propagationMap.get(BAGGAGE_HEADER), target);
     }
@@ -214,7 +242,7 @@ public class ContextPropagationUtil {
      *
      * @return the {@code SpanContext} if the data contained any trace correlation, {@code null} otherwise.
      */
-    public static SpanContext readPropagatedSpanContextFromHeaderMap(Map<String, String> propagationMap) {
+    public SpanContext readPropagatedSpanContextFromHeaderMap(Map<String, String> propagationMap) {
         boolean anyB3Header = B3Propagator.injectingMultiHeaders()
                 .fields()
                 .stream()
@@ -222,9 +250,9 @@ public class ContextPropagationUtil {
         if (anyB3Header) {
             try {
                 return extractPropagatedSpanContext(B3Propagator.injectingMultiHeaders(), propagationMap);
-            } catch (Throwable t) {
+            } catch (Exception ex) {
                 String headerString = getB3HeadersAsString(propagationMap);
-                log.error("Error reading trace correlation data from B3 headers: {}", headerString, t);
+                log.error("Error reading trace correlation data from B3 headers: {}", headerString, ex);
             }
         }
 
@@ -235,8 +263,8 @@ public class ContextPropagationUtil {
         if (anyTraceContextHeader) {
             try {
                 return extractPropagatedSpanContext(W3CTraceContextPropagator.getInstance(), propagationMap);
-            } catch (Throwable t) {
-                log.error("Error reading trace correlation data from the trace context headers", t);
+            } catch (Exception ex) {
+                log.error("Error reading trace correlation data from the trace context headers", ex);
             }
         }
 
@@ -244,8 +272,8 @@ public class ContextPropagationUtil {
         if (anyDatadogHeader) {
             try {
                 return extractPropagatedSpanContext(DatadogFormat.INSTANCE, propagationMap);
-            } catch (Throwable t) {
-                log.error("Error reading trace correlation data from the Datadog headers", t);
+            } catch (Exception ex) {
+                log.error("Error reading trace correlation data from the Datadog headers", ex);
             }
         }
 
@@ -259,8 +287,8 @@ public class ContextPropagationUtil {
      *
      * @return session-id if existing, otherwise null
      */
-    public static String readPropagatedSessionIdFromHeaderMap(Map<String,String> propagationMap) {
-        return propagationMap.get(ContextPropagationUtil.SESSION_ID_HEADER);
+    public String readPropagatedSessionIdFromHeaderMap(Map<String,String> propagationMap) {
+        return propagationMap.get(sessionIdHeader);
     }
 
     /**
@@ -272,7 +300,7 @@ public class ContextPropagationUtil {
      * @return the extracted span context
      */
 
-    private static SpanContext extractPropagatedSpanContext(TextMapPropagator propagator, Map<String, String> carrier) {
+    private SpanContext extractPropagatedSpanContext(TextMapPropagator propagator, Map<String, String> carrier) {
         return Span.fromContext(propagator.extract(Context.current(), carrier, MAP_EXTRACTOR)).getSpanContext();
     }
 
@@ -285,7 +313,7 @@ public class ContextPropagationUtil {
      * @return string representation of the headers (["key": "value"]).
      */
     @VisibleForTesting
-    static String getB3HeadersAsString(Map<String, String> headers) {
+    String getB3HeadersAsString(Map<String, String> headers) {
         StringBuilder builder = new StringBuilder("[");
 
         if (!CollectionUtils.isEmpty(headers)) {
@@ -308,7 +336,7 @@ public class ContextPropagationUtil {
      * @param baggage the value of the Baggage header
      * @param target  the target context in which the data will be stored
      */
-    private static void readBaggage(String baggage, InspectitContextImpl target) {
+    private void readBaggage(String baggage, InspectitContextImpl target) {
         baggage = baggage.trim();
         for (String keyValuePair : COMMA_WITH_WHITESPACES.split(baggage)) {
             try {
@@ -323,8 +351,8 @@ public class ContextPropagationUtil {
                 List<String> properties = Arrays.asList(pairAndProperties).subList(1, pairAndProperties.length);
                 Object resultValue = parseTyped(stringValue, properties);
                 target.setData(key, resultValue);
-            } catch (Throwable t) {
-                log.error("Error decoding Baggage header", t);
+            } catch (Exception ex) {
+                log.error("Error decoding Baggage header", ex);
             }
         }
     }
@@ -339,7 +367,7 @@ public class ContextPropagationUtil {
      *
      * @return the parsed value
      */
-    private static Object parseTyped(String stringValue, Collection<String> properties) {
+    private Object parseTyped(String stringValue, Collection<String> properties) {
         for (String property : properties) {
             String[] propertyNameAndValue = EQUALS_WITH_WHITESPACES.split(property);
             if (propertyNameAndValue.length == 2) {
@@ -361,7 +389,7 @@ public class ContextPropagationUtil {
      *
      * @param format the format to use
      */
-    public static void setPropagationFormat(PropagationFormat format) {
+    public void setPropagationFormat(PropagationFormat format) {
         switch (format) {
             case B3:
                 log.info("Using B3 format for context propagation");
@@ -382,21 +410,13 @@ public class ContextPropagationUtil {
     }
 
     /**
-     * Updates the current session-id-header used for browser propagation.
+     * Updates the current session-id-header used for storing tags for a certain time in sessions.
      *
      * @param sessionIdHeader new session-id-header
      */
-    public static void setSessionIdHeader(String sessionIdHeader) {
-        PROPAGATION_FIELDS.remove(SESSION_ID_HEADER);
-        SESSION_ID_HEADER = sessionIdHeader;
-        PROPAGATION_FIELDS.add(SESSION_ID_HEADER);
-    }
-
-    /**
-     * Remove session-id-header.
-     * For example, if the tags-http-exporter is disabled and thus no session-ids need to be extracted
-     */
-    public static void removeSessionIdHeader() {
-        PROPAGATION_FIELDS.remove(SESSION_ID_HEADER);
+    public void setSessionIdHeader(String sessionIdHeader) {
+        PROPAGATION_FIELDS.remove(this.sessionIdHeader);
+        this.sessionIdHeader = sessionIdHeader;
+        PROPAGATION_FIELDS.add(this.sessionIdHeader);
     }
 }

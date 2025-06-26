@@ -5,39 +5,39 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.core.instrumentation.context.ContextPropagationUtil;
+import rocks.inspectit.ocelot.core.instrumentation.context.ContextPropagation;
 
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class BrowserPropagationUtilTest {
+public class SessionIdManagerTest {
 
     @InjectMocks
-    BrowserPropagationUtil browserPropagationUtil;
+    SessionIdManager sessionIdManager;
 
     final static String key = "Session-Id";
 
     @BeforeEach
     void setUp() {
-        browserPropagationUtil.setSessionIdHeader(key);
+        sessionIdManager.setSessionIdHeader(key);
     }
 
     @Test
     void verifySessionIdKeyExists() {
-        Set<String> headers = ContextPropagationUtil.getPropagationHeaderNames();
+        Set<String> headers = ContextPropagation.get().getPropagationHeaderNames();
 
         assertThat(headers.contains(key)).isTrue();
     }
 
     @Test
     void verifySessionIdKeyIsUpdated() {
-        Set<String> headers = ContextPropagationUtil.getPropagationHeaderNames();
+        Set<String> headers = ContextPropagation.get().getPropagationHeaderNames();
         assertThat(headers.contains(key)).isTrue();
 
         String newKey = "NewCookie";
-        browserPropagationUtil.setSessionIdHeader(newKey);
+        sessionIdManager.setSessionIdHeader(newKey);
 
         assertThat(headers.contains(key)).isFalse();
         assertThat(headers.contains(newKey)).isTrue();
