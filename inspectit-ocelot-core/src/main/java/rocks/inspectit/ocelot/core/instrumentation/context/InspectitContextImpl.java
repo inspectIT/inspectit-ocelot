@@ -482,11 +482,14 @@ public class InspectitContextImpl implements InternalInspectitContext {
             parent.performUpPropagation(dataOverwrites);
         }
 
-        // Write browser propagation data to storage
+        // Write data to the session storage
         Map<String, Object> propagationData = getDataAsStream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         Map<String, Object> sessionStorageData = getSessionStorageData(propagationData);
+
+        // TODO Remove these two lines after browser-propagation is removed
         Map<String, Object> browserPropagationData = getBrowserPropagationData(propagationData);
         sessionStorageData.putAll(browserPropagationData);
+
         if (propagationDataStorage != null && !sessionStorageData.isEmpty())
             propagationDataStorage.writeData(sessionStorageData);
 

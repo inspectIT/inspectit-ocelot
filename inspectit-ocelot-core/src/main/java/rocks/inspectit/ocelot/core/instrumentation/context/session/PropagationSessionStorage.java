@@ -109,7 +109,6 @@ public class PropagationSessionStorage {
         long currentTime = System.currentTimeMillis();
         dataStorages.forEach((id, storage) -> {
             long elapsedTime = storage.calculateElapsedTime(currentTime);
-            System.out.println("ELAPSED: " + elapsedTime);
             if(timeToLive.toMillis() < elapsedTime) {
                 dataStorages.remove(id);
                 log.debug("Time to Live expired for the following session: {}", id);
