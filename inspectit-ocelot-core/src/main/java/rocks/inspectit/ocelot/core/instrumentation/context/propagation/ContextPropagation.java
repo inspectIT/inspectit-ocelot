@@ -3,7 +3,6 @@ package rocks.inspectit.ocelot.core.instrumentation.context.propagation;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.extension.trace.propagation.B3Propagator;
-import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.context.session.SessionIdManager;
@@ -13,7 +12,6 @@ import java.util.*;
 /**
  * Singleton, which implements the logic for generating and reading the http headers related to context propagation.
  */
-@Slf4j
 public class ContextPropagation {
 
     private static ContextPropagation instance;

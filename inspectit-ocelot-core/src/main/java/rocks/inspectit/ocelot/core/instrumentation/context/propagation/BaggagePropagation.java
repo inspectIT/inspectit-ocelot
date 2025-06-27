@@ -1,10 +1,13 @@
 package rocks.inspectit.ocelot.core.instrumentation.context.propagation;
 
+import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -29,6 +32,12 @@ public class BaggagePropagation {
     public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 
     /**
+     * We allow maximum baggage of 4 KB. Most tools should not have a problem with this header size.
+     * Also, we reject baggage greater than 4 KB for security reasons.
+     */
+    public static final int MAX_BAGGAGE_HEADER_SIZE = 4096;
+
+    /**
      * Maps each serializable type to its identifier.
      * If a non-string type is serialized, this d is used in the Baggage Header, e.g.:
      * Baggage: pi=3.14;type=d
@@ -38,7 +47,7 @@ public class BaggagePropagation {
 
     private final Map<Character, Function<String, Object>> TYPE_ID_TO_PARSER_MAP = new HashMap<>();
 
-    private final String ENCODING_CHARSET = java.nio.charset.StandardCharsets.UTF_8.toString();
+    private final String ENCODING_CHARSET = StandardCharsets.UTF_8.toString();
 
     private final Pattern COMMA_WITH_WHITESPACES = Pattern.compile(" *, *");
 
@@ -62,26 +71,6 @@ public class BaggagePropagation {
     }
 
     /**
-     * Takes the given key-value pairs and encodes them into the Baggage header.
-     *
-     * @param dataToPropagate the key-value pairs to propagate.
-     *
-     * @return the result propagation map
-     */
-    Map<String, String> buildBaggageHeaderMap(Map<String, Object> dataToPropagate) {
-        String baggageHeader = buildBaggageHeader(dataToPropagate);
-        HashMap<String, String> result = new HashMap<>();
-
-        if (!baggageHeader.isEmpty()) {
-            result.put(BAGGAGE_HEADER, baggageHeader);
-            // Make sure frontends can also read the baggage header
-            result.put(ACCESS_CONTROL_EXPOSE_HEADERS, BAGGAGE_HEADER);
-        }
-
-        return result;
-    }
-
-    /**
      * Parses the value of the Baggage header, storing the propagated data values into the target context.
      *
      * @param baggage the value of the Baggage header
@@ -89,6 +78,12 @@ public class BaggagePropagation {
      */
     private void readBaggage(String baggage, InspectitContextImpl target) {
         baggage = baggage.trim();
+
+        if(baggage.length() > MAX_BAGGAGE_HEADER_SIZE) {
+            log.debug("Incoming baggage header exceeds maximum header size and will not be read");
+            return;
+        }
+
         for (String keyValuePair : COMMA_WITH_WHITESPACES.split(baggage)) {
             try {
                 //split into assignment and attributes
@@ -108,27 +103,68 @@ public class BaggagePropagation {
         }
     }
 
-    private String buildBaggageHeader(Map<String, Object> dataToPropagate) {
+    /**
+     * Takes the given key-value pairs and encodes them into the Baggage header.
+     *
+     * @param dataToPropagate the key-value pairs to propagate.
+     *
+     * @return the result propagation map
+     */
+    Map<String, String> buildBaggageHeaderMap(Map<String, Object> dataToPropagate) {
+        String baggageHeader = buildBaggageHeader(dataToPropagate);
+        Map<String, String> result = new HashMap<>();
+
+        if (!baggageHeader.isEmpty()) {
+            result.put(BAGGAGE_HEADER, baggageHeader);
+            // Make sure frontends can also read the baggage header
+            result.put(ACCESS_CONTROL_EXPOSE_HEADERS, BAGGAGE_HEADER);
+        }
+
+        return result;
+    }
+
+    @VisibleForTesting
+    String buildBaggageHeader(Map<String, Object> dataToPropagate) {
         StringBuilder baggageData = new StringBuilder();
-        dataToPropagate.forEach((key,value) -> {
+        int headerSize = 0;
+
+        for (Map.Entry<String, Object> entry : dataToPropagate.entrySet()) {
             try {
+                Object value = entry.getValue();
                 Character typeId = TYPE_TO_ID_MAP.get(value.getClass());
                 if (value instanceof String || typeId != null) {
                     String encodedValue = URLEncoder.encode(value.toString(), ENCODING_CHARSET);
-                    String encodedKey = URLEncoder.encode(key, ENCODING_CHARSET);
-                    if (baggageData.length() > 0) {
-                        baggageData.append(',');
+                    String encodedKey = URLEncoder.encode(entry.getKey(), ENCODING_CHARSET);
+                    StringBuilder entryBuilder = new StringBuilder();
+
+                    if (baggageData.length() > 0)
+                        entryBuilder.append(',');
+
+                    entryBuilder.append(encodedKey).append('=').append(encodedValue);
+
+                    if (typeId != null)
+                        entryBuilder.append(";type=").append(typeId);
+
+                    String nextEntry = entryBuilder.toString();
+                    int entrySize = calculateSize(nextEntry);
+
+                    if(headerSize + entrySize > MAX_BAGGAGE_HEADER_SIZE) {
+                        log.debug("Outgoing baggage header has exceeded maximum header size");
+                        break;
                     }
-                    baggageData.append(encodedKey).append('=').append(encodedValue);
-                    if (typeId != null) {
-                        baggageData.append(";type=").append(typeId);
-                    }
+
+                    headerSize += entrySize;
+                    baggageData.append(nextEntry);
                 }
             } catch (Exception ex) {
                 log.error("Error encoding baggage header", ex);
             }
-        });
+        }
         return baggageData.toString();
+    }
+
+    private int calculateSize(String s) {
+        return s.getBytes(StandardCharsets.UTF_8).length;
     }
 
     /**
