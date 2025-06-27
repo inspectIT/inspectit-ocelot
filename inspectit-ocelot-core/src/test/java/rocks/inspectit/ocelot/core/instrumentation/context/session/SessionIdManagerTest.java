@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.core.instrumentation.context.ContextPropagation;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.ContextPropagation;
 
 import java.util.Set;
 

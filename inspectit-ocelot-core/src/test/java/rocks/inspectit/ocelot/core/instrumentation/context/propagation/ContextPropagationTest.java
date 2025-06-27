@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.context;
+package rocks.inspectit.ocelot.core.instrumentation.context.propagation;
 
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.api.trace.SpanContext;
@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
+import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -51,9 +52,9 @@ public class ContextPropagationTest {
 
     private final ContextPropagation contextPropagation = ContextPropagation.get();
 
-    private final String BAGGAGE_HEADER = contextPropagation.BAGGAGE_HEADER;
+    private final String BAGGAGE_HEADER = BaggagePropagation.BAGGAGE_HEADER;
 
-    private final String ACCESS_CONTROL_EXPOSE_HEADERS = contextPropagation.ACCESS_CONTROL_EXPOSE_HEADERS;
+    private final String ACCESS_CONTROL_EXPOSE_HEADERS = BaggagePropagation.ACCESS_CONTROL_EXPOSE_HEADERS;
 
     @Mock
     InspectitContextImpl inspectitContext;
@@ -220,53 +221,6 @@ public class ContextPropagationTest {
             assertThat(result).contains(entry(X_DATADOG_PARENT_ID, SPAN_ID_DATADOG));
 
             contextPropagation.setPropagationFormat(PropagationFormat.B3); // set back to default
-        }
-    }
-
-    @Nested
-    public class GetB3HeadersAsString {
-
-        @Test
-        public void nullMap() {
-            String result = contextPropagation.getB3HeadersAsString(null);
-
-            assertThat(result).isEqualTo("[]");
-        }
-
-        @Test
-        public void emptyMap() {
-            Map<String, String> data = Collections.emptyMap();
-
-            String result = contextPropagation.getB3HeadersAsString(data);
-
-            assertThat(result).isEqualTo("[]");
-        }
-
-        @Test
-        public void mapWithoutB3() {
-            Map<String, String> data = ImmutableMap.of("key-one", "value-one");
-
-            String result = contextPropagation.getB3HeadersAsString(data);
-
-            assertThat(result).isEqualTo("[]");
-        }
-
-        @Test
-        public void singleB3Header() {
-            Map<String, String> data = ImmutableMap.of("key-one", "value-one", "X-B3-TraceId", "traceId");
-
-            String result = contextPropagation.getB3HeadersAsString(data);
-
-            assertThat(result).isEqualTo("[\"X-B3-TraceId\": \"traceId\"]");
-        }
-
-        @Test
-        public void multipleB3Header() {
-            Map<String, String> data = ImmutableMap.of("key-one", "value-one", "X-B3-TraceId", "traceId", "X-B3-SpanId", "spanId");
-
-            String result = contextPropagation.getB3HeadersAsString(data);
-
-            assertThat(result).isEqualTo("[\"X-B3-TraceId\": \"traceId\", \"X-B3-SpanId\": \"spanId\"]");
         }
     }
 

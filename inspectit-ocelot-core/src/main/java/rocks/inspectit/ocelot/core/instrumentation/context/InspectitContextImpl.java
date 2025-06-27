@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.ContextPropagation;
 import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationDataStorage;
 import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;

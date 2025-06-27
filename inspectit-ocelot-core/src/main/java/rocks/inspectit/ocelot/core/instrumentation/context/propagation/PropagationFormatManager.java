@@ -7,7 +7,6 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.instrumentation.context.ContextPropagation;
 
 import javax.annotation.PostConstruct;
 
