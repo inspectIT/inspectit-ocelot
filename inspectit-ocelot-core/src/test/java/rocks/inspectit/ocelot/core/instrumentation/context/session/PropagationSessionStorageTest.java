@@ -34,15 +34,15 @@ public class PropagationSessionStorageTest extends SpringTestBase {
 
     @Test
     void verifyValidSessionID() {
-        PropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(validSessionID, null);
+        PropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(validSessionID);
 
         assertThat(dataStorage).isNotNull();
     }
 
     @Test
     void verifyInvalidSessionID() {
-        PropagationDataStorage dataStorage1 = sessionStorage.getOrCreateDataStorage(shortSessionID, null);
-        PropagationDataStorage dataStorage2 = sessionStorage.getOrCreateDataStorage(longSessionID, null);
+        PropagationDataStorage dataStorage1 = sessionStorage.getOrCreateDataStorage(shortSessionID);
+        PropagationDataStorage dataStorage2 = sessionStorage.getOrCreateDataStorage(longSessionID);
 
         assertThat(dataStorage1).isNull();
         assertThat(dataStorage2).isNull();
@@ -54,8 +54,8 @@ public class PropagationSessionStorageTest extends SpringTestBase {
             props.setProperty("inspectit.instrumentation.sessions.session-limit", 1);
         });
 
-        PropagationDataStorage dataStorage1 = sessionStorage.getOrCreateDataStorage(validSessionID, null);
-        PropagationDataStorage dataStorage2 = sessionStorage.getOrCreateDataStorage(anotherValidSessionID, null);
+        PropagationDataStorage dataStorage1 = sessionStorage.getOrCreateDataStorage(validSessionID);
+        PropagationDataStorage dataStorage2 = sessionStorage.getOrCreateDataStorage(anotherValidSessionID);
 
         assertThat(dataStorage1).isNotNull();
         assertThat(dataStorage2).isNull();

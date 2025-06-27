@@ -47,9 +47,12 @@ inspectit:
       # used for storing a received remote span id
       remote_parent_span_context:
         down-propagation: JVM_LOCAL
-      # used for storing session ids, which are used for browser-propagation
+      # used for accessing session storages
       remote_session_id:
+        # will be propagated down after it was set
         down-propagation: JVM_LOCAL
+        # the session-id itself must not be stored inside a session storage
+        session-storage: false
 
     # defines the behaviour of how data can be stored for sessions
     sessions:

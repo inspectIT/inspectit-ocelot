@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.core.instrumentation.context;
+package rocks.inspectit.ocelot.core.instrumentation.context.propagation;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -7,6 +7,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.instrumentation.context.ContextPropagation;
 
 import javax.annotation.PostConstruct;
 

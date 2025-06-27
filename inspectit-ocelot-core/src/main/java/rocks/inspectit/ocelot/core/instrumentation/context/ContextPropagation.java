@@ -12,6 +12,7 @@ import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.PropagationFormatManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.session.SessionIdManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.propagation.DatadogFormat;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
@@ -22,7 +23,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Singleton, which implements the logic for generating and reading the http headers related to context propagation.
@@ -150,7 +150,7 @@ public class ContextPropagation {
      *
      * @return the result propagation map
      */
-    public Map<String, String> buildPropagationHeaderMap(Stream<Map.Entry<String, Object>> dataToPropagate) {
+    public Map<String, String> buildPropagationHeaderMap(Map<String, Object> dataToPropagate) {
         return buildPropagationHeaderMap(dataToPropagate, null);
     }
 
@@ -162,7 +162,7 @@ public class ContextPropagation {
      *
      * @return the result propagation map
      */
-    public Map<String, String> buildPropagationHeaderMap(Stream<Map.Entry<String, Object>> dataToPropagate, SpanContext spanToPropagate) {
+    public Map<String, String> buildPropagationHeaderMap(Map<String, Object> dataToPropagate, SpanContext spanToPropagate) {
         String baggageHeader = buildBaggageHeader(dataToPropagate);
         HashMap<String, String> result = new HashMap<>();
         if (spanToPropagate != null) {
@@ -190,14 +190,12 @@ public class ContextPropagation {
         return result;
     }
 
-    private String buildBaggageHeader(Stream<Map.Entry<String, Object>> dataToPropagate) {
+    private String buildBaggageHeader(Map<String, Object> dataToPropagate) {
         StringBuilder baggageData = new StringBuilder();
-        dataToPropagate.forEach(e -> {
+        dataToPropagate.forEach((key,value) -> {
             try {
-                Object value = e.getValue();
                 Character typeId = TYPE_TO_ID_MAP.get(value.getClass());
                 if (value instanceof String || typeId != null) {
-                    String key = e.getKey();
                     String encodedValue = URLEncoder.encode(value.toString(), ENCODING_CHARSET);
                     String encodedKey = URLEncoder.encode(key, ENCODING_CHARSET);
                     if (baggageData.length() > 0) {
@@ -216,7 +214,7 @@ public class ContextPropagation {
     }
 
     /**
-     * Returns all header names which can potentially be output by {@link #buildPropagationHeaderMap(Stream, SpanContext)}.
+     * Returns all header names which can potentially be output by {@link #buildPropagationHeaderMap(Map, SpanContext)}.
      *
      * @return the set of header names
      */

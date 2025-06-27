@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.context.session;
 
 import com.google.common.annotations.VisibleForTesting;
-import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +8,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
 import javax.annotation.PostConstruct;
@@ -17,7 +17,10 @@ import java.util.concurrent.*;
 
 /**
  * Singleton storage for multiple {@link PropagationDataStorage} objects,
- * which are referenced by a session-ID, normally provided by a remote browser
+ * which are referenced by a session-ID, normally provided by a remote service.
+ * <p>
+ * The idea is similar to the {@link rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments}, but here we are
+ * independent of specific Java objects.
  */
 @Slf4j
 @Component
@@ -49,10 +52,11 @@ public class PropagationSessionStorage {
     private Duration timeToLive = Duration.ofMinutes(5);
 
     /**
-     * Boolean, which helps to create error messages, if browser propagation is tried, but exporter is disabled
+     * Current propagation format to check, which data should be stored in sessions.
+     * Will be used for each data storage.
      */
-    @Getter @Setter
-    private boolean isExporterActive = false;
+    @Setter
+    private PropagationMetaData propagation;
 
     private final ConcurrentMap<String, PropagationDataStorage> dataStorages = new ConcurrentHashMap<>();
 
@@ -77,9 +81,24 @@ public class PropagationSessionStorage {
         if (newTimeToLive != null && !newTimeToLive.equals(timeToLive)) timeToLive = newTimeToLive;
     }
 
-    public PropagationDataStorage getOrCreateDataStorage(String sessionID, PropagationMetaData propagation) {
-        return dataStorages.computeIfAbsent(sessionID, key -> {
-            if(!validateSessionIdLength(key)) {
+    @EventListener
+    private void instrumentationConfigEventListener(InstrumentationConfigurationChangedEvent event) {
+        PropagationMetaData newPropagation = event.getNewConfig().getPropagationMetaData();
+
+        if (newPropagation != null && newPropagation != propagation)
+            updatePropagation(newPropagation);
+    }
+
+    /**
+     * Get a data storage for the provided session-id. If no storage exists, we will try to create a new one.
+     * A storage cannot be created if the session-id is invalid or the session limit as been exceeded.
+     *
+     * @param sessionId the session id for the storage
+     * @return the storage for the provided id or {@code null}
+     */
+    public PropagationDataStorage getOrCreateDataStorage(String sessionId) {
+        return dataStorages.computeIfAbsent(sessionId, key -> {
+            if(!isValidSessionId(key)) {
                 log.debug("Unable to create session: Invalid key length");
                 return null;
             }
@@ -87,25 +106,25 @@ public class PropagationSessionStorage {
                 log.debug("Unable to create session: Session limit exceeded");
                 return null;
             }
-            PropagationDataStorage dataStorage = new PropagationDataStorage();
-            dataStorage.setPropagation(propagation);
-            return dataStorage;
+            return new PropagationDataStorage(propagation);
         });
     }
 
-    public PropagationDataStorage getDataStorage(String sessionID) {
-        return dataStorages.get(sessionID);
-    }
-
-    public void clearDataStorages() {
-        dataStorages.clear();
+    /**
+     * Get a data storage for the provided session-id. If no storage exists, return {@code null}.
+     *
+     * @param sessionId the session id for the storage
+     * @return the storage for the provided id or {@code null}
+     */
+    public PropagationDataStorage getDataStorage(String sessionId) {
+        return dataStorages.get(sessionId);
     }
 
     /**
      * Checks if data storages are expired and removes them.
      * We use milliseconds for calculation.
      */
-    public void cleanUpData() {
+    private void cleanUpData() {
         long currentTime = System.currentTimeMillis();
         dataStorages.forEach((id, storage) -> {
             long elapsedTime = storage.calculateElapsedTime(currentTime);
@@ -120,9 +139,30 @@ public class PropagationSessionStorage {
         });
     }
 
-    private boolean validateSessionIdLength(String sessionID) {
-        return sessionID != null &&
-                sessionID.length() <= KEY_MAX_SIZE &&
-                sessionID.length() >= KEY_MIN_SIZE;
+    /**
+     * Updates the propagation settings for all data storages.
+     */
+    private void updatePropagation(PropagationMetaData propagation) {
+        this.propagation = propagation;
+        dataStorages.forEach((id, storage) -> storage.setPropagation(propagation));
+    }
+
+    /**
+     * The session id must not be null and has restrictions for its length.
+     *
+     * @param sessionId the provided session id
+     * @return true, if the session id is valid
+     */
+    private boolean isValidSessionId(String sessionId) {
+        return sessionId != null &&
+                sessionId.length() <= KEY_MAX_SIZE &&
+                sessionId.length() >= KEY_MIN_SIZE;
+    }
+
+    /**
+     * Helper method for testing
+     */
+    public void clearDataStorages() {
+        dataStorages.clear();
     }
 }

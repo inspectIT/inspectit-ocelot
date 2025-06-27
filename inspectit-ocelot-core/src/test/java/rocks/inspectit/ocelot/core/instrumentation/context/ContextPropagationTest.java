@@ -130,8 +130,7 @@ public class ContextPropagationTest {
 
             Map<String, Object> data = ImmutableMap.of("my_val\u00FC", "stra\u00DFe=15");
 
-            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data.entrySet()
-                    .stream(), null);
+            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data, null);
 
             assertThat(result).hasSize(2)
                     .containsEntry(BAGGAGE_HEADER, enc("my_val\u00FC") + "=" + enc("stra\u00DFe=15"))
@@ -142,8 +141,7 @@ public class ContextPropagationTest {
         public void testSingleLong() {
             Map<String, Object> data = ImmutableMap.of("x", 42L);
 
-            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data.entrySet()
-                    .stream(), null);
+            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data, null);
 
             assertThat(result).hasSize(2)
                     .containsEntry(BAGGAGE_HEADER, "x=42;type=l")
@@ -154,8 +152,7 @@ public class ContextPropagationTest {
         public void testSingleDouble() {
             Map<String, Object> data = ImmutableMap.of("Pi", Math.PI);
 
-            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data.entrySet()
-                    .stream(), null);
+            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data, null);
 
             assertThat(result).hasSize(2)
                     .containsEntry(BAGGAGE_HEADER, "Pi=" + Math.PI + ";type=d")
@@ -166,8 +163,7 @@ public class ContextPropagationTest {
         public void testInvalidTypeIgnored() {
             Map<String, Object> data = ImmutableMap.of("Pi", new ArrayList<>());
 
-            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data.entrySet()
-                    .stream(), null);
+            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data, null);
 
             assertThat(result).hasSize(0);
         }
@@ -176,8 +172,7 @@ public class ContextPropagationTest {
         public void testBooleanAndString() {
             Map<String, Object> data = ImmutableMap.of("hello", "world", "is_something", true);
 
-            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data.entrySet()
-                    .stream(), null);
+            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data, null);
 
             assertThat(result).hasSize(2)
                     .containsEntry(BAGGAGE_HEADER, "hello=world,is_something=true;type=b")
@@ -191,8 +186,7 @@ public class ContextPropagationTest {
             Map<String, Object> data = Collections.emptyMap();
             SpanContext spanContext = SpanContext.create(TRACE_ID, SPAN_ID, TRACE_OPTIONS, TRACESTATE_DEFAULT);
 
-            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data.entrySet()
-                    .stream(), spanContext);
+            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data, spanContext);
 
             assertThat(result).contains(entry(X_B3_TRACE_ID, TRACE_ID));
             assertThat(result).contains(entry(X_B3_SPAN_ID, SPAN_ID));
@@ -205,8 +199,7 @@ public class ContextPropagationTest {
             Map<String, Object> data = Collections.emptyMap();
             SpanContext spanContext = SpanContext.create(TRACE_ID, SPAN_ID, TRACE_OPTIONS, TRACESTATE_DEFAULT);
 
-            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data.entrySet()
-                    .stream(), spanContext);
+            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data, spanContext);
 
             String header = "00-" + TRACE_ID + "-" + SPAN_ID + "-00";
             assertThat(result).contains(entry(TRACEPARENT, header));
@@ -221,8 +214,7 @@ public class ContextPropagationTest {
             Map<String, Object> data = Collections.emptyMap();
             SpanContext spanContext = SpanContext.create(TRACE_ID, SPAN_ID, TRACE_OPTIONS, TRACESTATE_DEFAULT);
 
-            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data.entrySet()
-                    .stream(), spanContext);
+            Map<String, String> result = contextPropagation.buildPropagationHeaderMap(data, spanContext);
 
             assertThat(result).contains(entry(X_DATADOG_TRACE_ID, TRACE_ID_DATADOG));
             assertThat(result).contains(entry(X_DATADOG_PARENT_ID, SPAN_ID_DATADOG));

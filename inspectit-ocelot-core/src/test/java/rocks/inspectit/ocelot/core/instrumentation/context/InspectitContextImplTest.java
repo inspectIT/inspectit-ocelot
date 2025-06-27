@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.SpringTestBase;
@@ -34,6 +33,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext.REMOTE_PARENT_SPAN_CONTEXT_KEY;
+import static rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext.REMOTE_SESSION_ID;
 
 @ExtendWith(MockitoExtension.class)
 public class InspectitContextImplTest extends SpringTestBase {
@@ -65,7 +66,7 @@ public class InspectitContextImplTest extends SpringTestBase {
         void verifyCleared() {
             SpanContext span = OpenTelemetryUtils.getTracer().spanBuilder("blub").startSpan().getSpanContext();
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, sessionStorage, false);
-            ctx.setData(InternalInspectitContext.REMOTE_PARENT_SPAN_CONTEXT_KEY, span);
+            ctx.setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, span);
 
             SpanContext result = ctx.getAndClearCurrentRemoteSpanContext();
 
@@ -833,21 +834,17 @@ public class InspectitContextImplTest extends SpringTestBase {
         private PropagationDataStorage dataStorage;
 
         @Test
-        void shouldReadDataFromSessionStorage() {
-            Map<String, Object> storageDate = new HashMap<>();
-            storageDate.put(KEY, SESSION_VALUE);
-
-            doReturn(true).when(propagation).isStoredForSession(any());
-            doReturn(dataStorage).when(sessionStorage).getOrCreateDataStorage(SESSION, propagation);
-            doReturn(storageDate).when(dataStorage).readData();
+        void shouldReadDataFromSessionStorage() {;
+            doReturn(dataStorage).when(sessionStorage).getOrCreateDataStorage(SESSION);
+            doReturn(SESSION_VALUE).when(dataStorage).readData(KEY);
 
             InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
-            root.setData(InternalInspectitContext.REMOTE_SESSION_ID, SESSION);
+            root.setData(REMOTE_SESSION_ID, SESSION);
 
             root.makeActive();
+            Object value = root.getData(KEY);
 
-            assertThat(root.getData(KEY)).isEqualTo(SESSION_VALUE);
-
+            assertThat(value).isEqualTo(SESSION_VALUE);
             root.close();
         }
 
@@ -856,15 +853,15 @@ public class InspectitContextImplTest extends SpringTestBase {
             Map<String, Object> storageDate = new HashMap<>();
             storageDate.put(KEY, SESSION_VALUE);
             Map<String, Object> expectedUpdate = new HashMap<>();
+            expectedUpdate.put(REMOTE_SESSION_ID, SESSION);
             expectedUpdate.put(KEY, VALUE);
 
-            doReturn(true).when(propagation).isStoredForSession(any());
-            doReturn(dataStorage).when(sessionStorage).getOrCreateDataStorage(SESSION, propagation);
-            doReturn(storageDate).when(dataStorage).readData();
+            doReturn(dataStorage).when(sessionStorage).getOrCreateDataStorage(SESSION);
+            lenient().doReturn(storageDate).when(dataStorage).readData(KEY);
 
             InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
             root.setData(KEY, VALUE);
-            root.setData(InternalInspectitContext.REMOTE_SESSION_ID, SESSION);
+            root.setData(REMOTE_SESSION_ID, SESSION);
 
             root.makeActive();
 
@@ -873,7 +870,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             root.close();
 
             assertThat(root.getData(KEY)).isEqualTo(VALUE);
-            verify(dataStorage).writeData(expectedUpdate);
+            verify(dataStorage, times(2)).writeData(expectedUpdate);
         }
 
         @Test

@@ -1,6 +1,8 @@
 package rocks.inspectit.ocelot.core.instrumentation.context.session;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 
 import java.util.*;
@@ -8,8 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- *  DataStorage for all tags, that should be propagated to one browser
- *  Normally, there should be only one data storage per session
+ *  Data storage for all tags, that should be available for a specific amount of time.
+ *  There should be only one data storage per session.
  */
 @Slf4j
 public class PropagationDataStorage {
@@ -21,49 +23,57 @@ public class PropagationDataStorage {
 
     private static final int MAX_VALUE_SIZE = 2048;
 
+    /**
+     * Last time, when data was updated
+     */
     private long latestTimestamp;
+
+    /**
+     * The current propagation settings, to check which data should be stored
+     */
+    @Setter
+    private PropagationMetaData propagation;
 
     private final ConcurrentMap<String, Object> propagationData = new ConcurrentHashMap<>();
 
-    // TODO We can remove this property, after browser-propagation was removed
-    //  Then only the inspectIT context uses the storage, which already knows the propagation
-    private PropagationMetaData propagation;
-
-    PropagationDataStorage() {
-        latestTimestamp = System.currentTimeMillis();
-    }
-
-    /**
-     * Updates the propagation, if changed
-     */
-    public void setPropagation(PropagationMetaData propagation) {
-        if (propagation != null && !propagation.equals(this.propagation)) this.propagation = propagation;
+    PropagationDataStorage(PropagationMetaData propagation) {
+        this.latestTimestamp = System.currentTimeMillis();
+        this.propagation = propagation;
     }
 
     /**
      * Writes the provided data into the storage, if the storage is not exceeded.
      * Invalid data entries will not be written into the storage.
+     * Updates the data timestamp.
      *
      * @param newPropagationData the new data
      */
     public void writeData(Map<String, ?> newPropagationData) {
         Map <String, Object> validatedData = validateEntries(newPropagationData);
 
-        if (exceedsTagLimit(validatedData)) {
-            log.debug("Unable to write data: tag limit was exceeded");
-            return;
+        if (!validatedData.isEmpty()) {
+            if (exceedsTagLimit(validatedData)) {
+                log.debug("Unable to write data: tag limit was exceeded");
+            } else {
+                updateTimestamp();
+                propagationData.putAll(validatedData);
+            }
         }
-
-        updateTimestamp();
-        propagationData.putAll(validatedData);
     }
 
     /**
-     * @return a copy of the current propagation data
+     * @return a copy of all the propagation data
      */
     public Map<String, Object> readData() {
-        updateTimestamp();
         return new HashMap<>(propagationData);
+    }
+
+    /**
+     * @param key the data key
+     * @return the specific entry for the provided key
+     */
+    public Object readData(String key) {
+        return propagationData.get(key);
     }
 
     public int getStorageSize() {
@@ -93,16 +103,23 @@ public class PropagationDataStorage {
 
     private Map<String, Object> validateEntries(Map<String, ?> newPropagationData) {
         Map<String, Object> validatedData = new HashMap<>();
-        newPropagationData.forEach((k,v) -> {
-            if (validateEntry(k,v)) validatedData.put(k,v);
-            else log.debug("Invalid data entry {} will not be stored", k);
+        newPropagationData.forEach((key,value) -> {
+            if (isValidEntry(key, value)) validatedData.put(key, value);
+            else log.debug("Invalid data entry {} will not be stored", key);
         });
         return validatedData;
     }
 
-    private boolean validateEntry(String key, Object value) {
+    /**
+     * Keys and values have size restrictions.
+     * Additionally, we only write data, which is configured to be stored in session.
+     * We cannot store session ids (with key {@code remote_session_id}) themselves here,
+     * because they should be provided via instrumentation actions.
+     */
+    private boolean isValidEntry(String key, Object value) {
         return key.length() <= MAX_KEY_SIZE &&
                 shouldBeStored(key) &&
+                !key.equals(InternalInspectitContext.REMOTE_SESSION_ID) &&
                 value instanceof String &&
                 ((String) value).length() <= MAX_VALUE_SIZE;
     }

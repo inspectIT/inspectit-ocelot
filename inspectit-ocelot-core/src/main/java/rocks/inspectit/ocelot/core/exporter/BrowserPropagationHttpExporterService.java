@@ -90,7 +90,6 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
             try {
                 log.info("Stopping Tags HTTP-Server - All sessions will be removed");
                 server.stop(0);
-                sessionStorage.setExporterActive(false);
             } catch (Exception e) {
                 log.error("Error disabling Tags HTTP-Server", e);
             }
@@ -107,7 +106,6 @@ public class BrowserPropagationHttpExporterService extends DynamicallyActivatabl
         log.warn("It is not recommended to use the Tags HTTP-Server. Instead read or write data via baggage header");
         log.info("Starting Tags HTTP-Server on {}:{}{} ", host, port, path);
         server.start();
-        sessionStorage.setExporterActive(true);
         return true;
     }
 }
