@@ -57,10 +57,11 @@ public class ContextPropagation {
      *
      * @param dataToPropagate the key-value pairs to propagate.
      *
-     * @return the result propagation map
+     * @return the result up propagation map
      */
-    public Map<String, String> buildPropagationHeaderMap(Map<String, Object> dataToPropagate) {
-        return buildPropagationHeaderMap(dataToPropagate, null);
+    public Map<String, String> buildUpPropagationHeaderMap(Map<String, Object> dataToPropagate) {
+        Map<String, String> baggage = baggagePropagation.buildBaggageHeaderMap(dataToPropagate, true);
+        return baggage;
     }
 
     /**
@@ -71,17 +72,17 @@ public class ContextPropagation {
      *
      * @return the result propagation map
      */
-    public Map<String, String> buildPropagationHeaderMap(Map<String, Object> dataToPropagate, SpanContext spanToPropagate) {
+    public Map<String, String> buildDownPropagationHeaderMap(Map<String, Object> dataToPropagate, SpanContext spanToPropagate) {
         Map<String, String> result = traceContextPropagation.buildPropagationHeaderMap(spanToPropagate);
 
-        Map<String, String> baggage = baggagePropagation.buildBaggageHeaderMap(dataToPropagate);
+        Map<String, String> baggage = baggagePropagation.buildBaggageHeaderMap(dataToPropagate, false);
         if (!baggage.isEmpty()) result.putAll(baggage);
 
         return result;
     }
 
     /**
-     * Returns all header names which can potentially be output by {@link #buildPropagationHeaderMap(Map, SpanContext)}.
+     * Returns all header names which can potentially be output for propagation.
      *
      * @return the set of header names
      */

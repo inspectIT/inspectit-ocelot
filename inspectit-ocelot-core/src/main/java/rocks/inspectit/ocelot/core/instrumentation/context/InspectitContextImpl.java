@@ -537,7 +537,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         Map<String, Object> dataToPropagate = getDataAsStream()
                 .filter(e -> propagation.isPropagatedDownGlobally(e.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        return ContextPropagation.get().buildPropagationHeaderMap(dataToPropagate, spanContext);
+        return ContextPropagation.get().buildDownPropagationHeaderMap(dataToPropagate, spanContext);
     }
 
     @Override
@@ -545,7 +545,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         Map<String, Object> dataToPropagate = getDataAsStream()
                 .filter(e -> propagation.isPropagatedUpGlobally(e.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        return ContextPropagation.get().buildPropagationHeaderMap(dataToPropagate);
+        return ContextPropagation.get().buildUpPropagationHeaderMap(dataToPropagate);
     }
 
     @Override

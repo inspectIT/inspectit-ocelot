@@ -105,19 +105,21 @@ public class BaggagePropagation {
 
     /**
      * Takes the given key-value pairs and encodes them into the Baggage header.
+     * For up-propagation, we will add a header to allow JavaScript to read the baggage in cross-origin requests.
      *
      * @param dataToPropagate the key-value pairs to propagate.
+     * @param isUpPropagation flag for up-propagation
      *
      * @return the result propagation map
      */
-    Map<String, String> buildBaggageHeaderMap(Map<String, Object> dataToPropagate) {
+    Map<String, String> buildBaggageHeaderMap(Map<String, Object> dataToPropagate, boolean isUpPropagation) {
         String baggageHeader = buildBaggageHeader(dataToPropagate);
         Map<String, String> result = new HashMap<>();
 
         if (!baggageHeader.isEmpty()) {
             result.put(BAGGAGE_HEADER, baggageHeader);
-            // Make sure frontends can also read the baggage header
-            result.put(ACCESS_CONTROL_EXPOSE_HEADERS, BAGGAGE_HEADER);
+
+            if(isUpPropagation) result.put(ACCESS_CONTROL_EXPOSE_HEADERS, BAGGAGE_HEADER);
         }
 
         return result;
