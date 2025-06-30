@@ -19,6 +19,7 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.TypeDescriptionWithClassLoader;
 import rocks.inspectit.ocelot.core.instrumentation.config.event.InstrumentationConfigurationChangedEvent;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.*;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.instrumentation.special.SpecialSensor;
 import rocks.inspectit.ocelot.core.instrumentation.transformer.AsyncClassTransformer;
 import rocks.inspectit.ocelot.core.utils.CoreUtils;
@@ -58,6 +59,9 @@ public class InstrumentationConfigurationResolver {
     @Autowired
     private PropagationMetaDataResolver propagationMetaDataResolver;
 
+    @Autowired
+    private PropagationSessionStorage sessionStorage;
+
     /**
      * Holds the currently active instrumentation configuration.
      */
@@ -68,6 +72,8 @@ public class InstrumentationConfigurationResolver {
     private void init() {
         InspectitConfig conf = env.getCurrentConfig();
         currentConfig = resolveConfiguration(conf);
+        // set the initial propagation for the session storage
+        sessionStorage.setPropagation(currentConfig.getPropagationMetaData());
     }
 
     /**

@@ -40,19 +40,4 @@ public class HttpExporterSettings {
      * List of allowed Origins, which are able to access the HTTP-server
      */
     private List<String> allowedOrigins;
-
-    /**
-     * How many sessions can be stored at the same time
-     */
-    private int sessionLimit;
-
-    /**
-     * Header, which will be read during browser-propagation to receive the session-ID
-     */
-    private String sessionIdHeader;
-
-    /**
-     * How long the data should be stored in the server
-     */
-    private int timeToLive;
 }
