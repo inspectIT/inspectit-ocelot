@@ -142,7 +142,7 @@ the root span is created.
 If the business transaction was detected later, because of up propagation you will be able to use it as an attribute 
 in the span of the entrypoint, even tough the data was only available after that.
 
-For more detailed information, view the section [Data propagation](instrumentation/rules.md#data-propagation).
+For more detailed information, view the section [Data propagation](instrumentation/data-propagation.md).
 
 ```yaml
 inspectit:

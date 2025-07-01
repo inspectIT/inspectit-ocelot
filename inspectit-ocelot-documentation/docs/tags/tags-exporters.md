@@ -3,7 +3,12 @@ id: tags-exporters
 title: Tags Exporters
 ---
 
-Tags exporters represent special exporters of InspectIT, which allow to export internal tags to external applications like browsers.
+:::warning
+**This features is deprecated!** We recommend to propagate data via [baggage](instrumentation/data-propagation.md#baggage) instead, so the agent does not expose an API.
+:::
+
+Tags exporters represent special exporters of InspectIT, which allow to export internal tags to external applications 
+like frontends running in browsers.
 Currently, there is only one tags exporter:
 
 | Exporter                        | Supports run-time updates | Push / Pull | Enabled by default |
@@ -17,10 +22,6 @@ One GET-endpoint to expose data to external applications and one PUT-endpoint to
 The server is by default started on the port `9000` and data can then be accessed or written by 
 calling 'http://localhost:9000/inspectit'
 
-:::important
-We recommend to propagate data via [baggage](instrumentation/data-propagation.md#baggage) instead, so the agent does not expose an API.
-:::
-
 #### Production Environment
 
 The Tags HTTP exporter does not provide any encryption of data and does not perform any authentication.
@@ -33,44 +34,29 @@ You should also set _-Dinspectit.exporters.tags.http.host=0.0.0.0_ as parameter 
 Additionally, make sure that your firewall is not blocking the HTTP-server address.
 
 The server performs authorization with checking, whether the request origin is allowed to access the server. 
-Additionally, every request has to provide a session-ID to access their own session data.
+Additionally, every request has to provide a session ID to access their own session data.
 
 #### Session Identification
 
-Data tags will always be stored behind a provided session-ID to ensure data correlation with its browser.
-The session-ID will be read from a specific request-header. The _**session-id-header**_-property in the HTTP-exporter allows
-to specify, which exact header should be used to read the session-ID from. 
+Data tags will always be stored behind a provided session ID to ensure data correlation with its remote service.
+The session ID will be read from a specific request-header. The 
+_**inspectit.instrumentation.sessions.session-id-header**_ options allows to specify, which exact header 
+should be used to read the session ID from. 
 
-The default instrumentation of inspectIT will check the specified _session-id-header_ for a valid session-ID. 
-Thus, there is no additional configuration necessary to read session-ID from HTTP-headers.
+The default instrumentation of inspectIT will check the specified _session-id-header_ for a valid session ID. 
+Thus, there is no additional configuration necessary to read session ID from HTTP-headers.
 
-Behind every session-ID, there is a data storage containing all data tags for this session, as long as they are enabled for browser propagation.
-A data storage will be created, if an HTTP request to the target application contains a session-ID inside the
+Behind every session ID, there is a data storage containing all data tags for this session, as long as they are 
+enabled for [browser-propagation](instrumentation/data-propagation.md#browser-propagation) or 
+[session-storage](instrumentation/data-propagation.md#session-storage).
+A data storage will be created, if an HTTP request to the target application contains a session ID inside the
 _session_id_header_. If a data storage already exists for the specified
-session-ID, no new data storage will be created.
+session ID, no new data storage will be created.
 
 You cannot create new data storages for example by pushing data into the HTTP-server by using the API. 
-If a request to the REST-API contains a session-ID, which does not exist in inspectIT, the API will always return 404.
+If a request to the REST-API contains a session ID, which does not exist in inspectIT, the API will always return 404.
 
-The HTTP-exporter can only store a specific amount of sessions, which can be configured.
-Sessions will be deleted after their _time-to-live_ is expired. Their time-to-live will be reset everytime
-the HTTP-server receives a successful request.
-
-#### Non-Remote Session Initialization
-
-It is also possible to create a data storage behind a session-ID inside the inspectIT agent, without
-firstly providing it via an HTTP request to the target application.
-
-For this you can use the data key _remote_session_id_ in the instrumentation configuration. You can set the data key via
-any [action](instrumentation/actions.md). After assigning a new value to the _remote_session_id_ data key,
-a new data storage with the specified value as session-ID will be created.
-
-#### Session Limits
-
-There are some limitations for every session to prevent excessive memory consumption.
-The length of the session-ID is restricted to a minimum of 16 characters and a maximum of 512 characters.
-Furthermore, every session is able to contain up to **128 data keys**. 
-The maximum length for data keys are **128 chars**. The maximum length for data values are **2048 chars**.
+For more detailed information, view the section [Session Storage](instrumentation/data-propagation.md#session-storage).
 
 #### Runtime Updates
 
@@ -86,13 +72,10 @@ The following properties are nested properties below the `inspectit.exporters.ta
 | `.port`              | `9000`       | The port the HTTP server should use.                                                                        |
 | `.path`              | `/inspectit` | The path on which the HTTP endpoints will be available.                                                     |
 | `.thread-limit`      | `100`        | How many threads at most can process requests.                                                              |
-| `.allowed-origins`   | `["*"]`      | A list of allowed origins, which are able to access the http-server.                                        |
-| `.session-limit`     | `100`        | How many sessions can be stored in the server at the same time.                                             |
-| `.session-id-header` | `Session-Id` | The header, which will be read during propagation to extract the session-ID from                            |
-| `.time-to-live`      | `300`        | How long sessions should be stored in the server in seconds.                                                |
+| `.allowed-origins`   | `["*"]`      | A list of allowed origins, which are able to access the http-server.                                        | |
 
 The data of the HTTP exporter is stored inside internal data storages. Data tags will only be written to the storage,
-if they are enabled for [browser propagation](../instrumentation/rules.md#data-propagation).
+if they are enabled for [browser propagation](instrumentation/data-propagation.md#browser-propagation).
 
 ### Client Example
 
