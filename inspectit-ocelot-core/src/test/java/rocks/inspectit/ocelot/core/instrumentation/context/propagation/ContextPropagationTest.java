@@ -18,12 +18,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ContextPropagationTest {
@@ -52,6 +52,8 @@ public class ContextPropagationTest {
 
     private final ContextPropagation contextPropagation = ContextPropagation.get();
 
+    private final Predicate<String> ALWAYS_TRUE = (key) -> true;
+
     private final String BAGGAGE_HEADER = BaggagePropagation.BAGGAGE_HEADER;
 
     private final String ACCESS_CONTROL_EXPOSE_HEADERS = BaggagePropagation.ACCESS_CONTROL_EXPOSE_HEADERS;
@@ -74,7 +76,7 @@ public class ContextPropagationTest {
         public void testSingleString() {
             Map<String, String> headers = ImmutableMap.of(BAGGAGE_HEADER, enc("my_val\u00FC") + " =  " + enc("stra\u00DFe=15") + ";someprop=42");
 
-            contextPropagation.readPropagatedDataFromHeaderMap(headers, inspectitContext);
+            contextPropagation.readPropagatedDataFromHeaderMap(headers, inspectitContext, ALWAYS_TRUE);
 
             verify(inspectitContext).setData(eq("my_val\u00FC"), eq("stra\u00DFe=15"));
             verifyNoMoreInteractions(inspectitContext);
@@ -84,7 +86,7 @@ public class ContextPropagationTest {
         public void testSingleLong() {
             Map<String, String> headers = ImmutableMap.of(BAGGAGE_HEADER, enc("x") + " =  " + enc("42") + "; type = l");
 
-            contextPropagation.readPropagatedDataFromHeaderMap(headers, inspectitContext);
+            contextPropagation.readPropagatedDataFromHeaderMap(headers, inspectitContext, ALWAYS_TRUE);
 
             verify(inspectitContext).setData(eq("x"), eq(42L));
             verifyNoMoreInteractions(inspectitContext);
@@ -94,7 +96,7 @@ public class ContextPropagationTest {
         public void testSingleDouble() {
             Map<String, String> headers = ImmutableMap.of(BAGGAGE_HEADER, enc("pi") + " =  " + enc(String.valueOf(Math.PI)) + "; blub=halloooo; type = d");
 
-            contextPropagation.readPropagatedDataFromHeaderMap(headers, inspectitContext);
+            contextPropagation.readPropagatedDataFromHeaderMap(headers, inspectitContext, ALWAYS_TRUE);
 
             verify(inspectitContext).setData(eq("pi"), eq(Math.PI));
             verifyNoMoreInteractions(inspectitContext);
@@ -104,7 +106,7 @@ public class ContextPropagationTest {
         public void testBooleanAndString() {
             Map<String, String> headers = ImmutableMap.of(BAGGAGE_HEADER, "is_something=true;type=b,hello=world");
 
-            contextPropagation.readPropagatedDataFromHeaderMap(headers, inspectitContext);
+            contextPropagation.readPropagatedDataFromHeaderMap(headers, inspectitContext, ALWAYS_TRUE);
 
             verify(inspectitContext).setData(eq("is_something"), eq(true));
             verify(inspectitContext).setData(eq("hello"), eq("world"));
@@ -115,10 +117,19 @@ public class ContextPropagationTest {
         public void testInvalidTypeIgnored() {
             Map<String, String> headers = ImmutableMap.of(BAGGAGE_HEADER, "is_something=true;type=blub;type=x");
 
-            contextPropagation.readPropagatedDataFromHeaderMap(headers, inspectitContext);
+            contextPropagation.readPropagatedDataFromHeaderMap(headers, inspectitContext, ALWAYS_TRUE);
 
             verify(inspectitContext).setData(eq("is_something"), eq("true"));
             verifyNoMoreInteractions(inspectitContext);
+        }
+
+        @Test
+        public void testNotConfiguredDataKeyIgnored() {
+            Map<String, String> headers = ImmutableMap.of(BAGGAGE_HEADER, "is_something=true");
+
+            contextPropagation.readPropagatedDataFromHeaderMap(headers, inspectitContext, (key) -> false);
+
+            verifyNoInteractions(inspectitContext);
         }
 
     }

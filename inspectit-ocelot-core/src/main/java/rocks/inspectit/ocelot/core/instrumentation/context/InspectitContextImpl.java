@@ -18,6 +18,7 @@ import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.Prop
 import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -550,12 +551,14 @@ public class InspectitContextImpl implements InternalInspectitContext {
 
     @Override
     public void readUpPropagationHeaders(Map<String, String> headers) {
-        ContextPropagation.get().readPropagatedDataFromHeaderMap(headers, this);
+        Predicate<String> propagationFilter = (key) -> propagation.isPropagatedUpGlobally(key);
+        ContextPropagation.get().readPropagatedDataFromHeaderMap(headers, this, propagationFilter);
     }
 
     @Override
     public void readDownPropagationHeaders(Map<String, String> headers) {
-        ContextPropagation.get().readPropagatedDataFromHeaderMap(headers, this);
+        Predicate<String> propagationFilter = (key) -> propagation.isPropagatedDownGlobally(key);
+        ContextPropagation.get().readPropagatedDataFromHeaderMap(headers, this, propagationFilter);
         SpanContext remote_span = ContextPropagation.get().readPropagatedSpanContextFromHeaderMap(headers);
         setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, remote_span);
         String sessionId = ContextPropagation.get().readPropagatedSessionIdFromHeaderMap(headers);

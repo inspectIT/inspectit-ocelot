@@ -8,6 +8,7 @@ import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.context.session.SessionIdManager;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Singleton, which implements the logic for generating and reading the http headers related to context propagation.
@@ -94,10 +95,11 @@ public class ContextPropagation {
      * Decodes the given header to value map into the given target context.
      *
      * @param propagationMap the headers to decode
-     * @param target         the context in which the decoded data key-value pairs will be stored.
+     * @param target         the context in which the decoded data key-value pairs will be stored
+     * @param propagation    the function to test, if a data key is configured for global propagation
      */
-    public void readPropagatedDataFromHeaderMap(Map<String, String> propagationMap, InspectitContextImpl target) {
-        baggagePropagation.readPropagatedDataFromHeaderMap(propagationMap, target);
+    public void readPropagatedDataFromHeaderMap(Map<String, String> propagationMap, InspectitContextImpl target, Predicate<String> propagation) {
+        baggagePropagation.readPropagatedDataFromHeaderMap(propagationMap, target, propagation);
     }
 
     /**

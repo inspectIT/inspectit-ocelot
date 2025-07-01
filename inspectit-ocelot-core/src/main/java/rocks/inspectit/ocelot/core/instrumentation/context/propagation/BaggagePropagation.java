@@ -10,6 +10,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -64,10 +65,11 @@ public class BaggagePropagation {
      *
      * @param propagationMap the headers to decode
      * @param target         the context in which the decoded data key-value pairs will be stored.
+     * @param propagation    the function to test, if a data key is configured for global propagation
      */
-    void readPropagatedDataFromHeaderMap(Map<String, String> propagationMap, InspectitContextImpl target) {
+    void readPropagatedDataFromHeaderMap(Map<String, String> propagationMap, InspectitContextImpl target, Predicate<String> propagation) {
         if (propagationMap.containsKey(BAGGAGE_HEADER))
-            readBaggage(propagationMap.get(BAGGAGE_HEADER), target);
+            readBaggage(propagationMap.get(BAGGAGE_HEADER), target, propagation);
     }
 
     /**
@@ -75,8 +77,9 @@ public class BaggagePropagation {
      *
      * @param baggage the value of the Baggage header
      * @param target  the target context in which the data will be stored
+     * @param propagation the function to test, if a data key is configured for global propagation
      */
-    private void readBaggage(String baggage, InspectitContextImpl target) {
+    private void readBaggage(String baggage, InspectitContextImpl target, Predicate<String> propagation) {
         baggage = baggage.trim();
 
         if(baggage.length() > MAX_BAGGAGE_HEADER_SIZE) {
@@ -96,7 +99,9 @@ public class BaggagePropagation {
                 String stringValue = URLDecoder.decode(keyAndValue[1], ENCODING_CHARSET);
                 List<String> properties = Arrays.asList(pairAndProperties).subList(1, pairAndProperties.length);
                 Object resultValue = parseTyped(stringValue, properties);
-                target.setData(key, resultValue);
+
+                if(propagation.test(key))
+                    target.setData(key, resultValue);
             } catch (Exception ex) {
                 log.error("Error decoding Baggage header", ex);
             }
