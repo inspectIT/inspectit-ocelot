@@ -13,6 +13,7 @@ import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.Prop
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
+import java.util.Set;
 import java.util.concurrent.*;
 
 /**
@@ -31,9 +32,22 @@ public class PropagationSessionStorage {
     private static final int KEY_MAX_SIZE = 512;
 
     /**
-     * Delay for the cleaning scheduler
+     * Delay for the cleaning scheduler.
      */
-    private static final Duration FIXED_DELAY = Duration.ofMillis(30);
+    private static final Duration FIXED_DELAY = Duration.ofSeconds(30);
+
+    /**
+     * The data storages for each session.
+     */
+    private final ConcurrentMap<String, PropagationDataStorage> dataStorages = new ConcurrentHashMap<>();
+
+    /**
+     * Sessions, which are marked for removal. Such sessions will be removed at  If a session reaches 0 data tags,
+     * it will be marked for removal when calling {@link #clearDataStorages()}. When calling the method again,
+     * every session inside this set will be fully removed, if it's still empty. <br>
+     * This should prevent, freshly created data storages will be removed before any data could have been written.
+     */
+    private final Set<String> sessionsForRemoval = ConcurrentHashMap.newKeySet();
 
     @Autowired
     private ScheduledExecutorService executor;
@@ -58,27 +72,25 @@ public class PropagationSessionStorage {
     @Setter
     private PropagationMetaData propagation;
 
-    private final ConcurrentMap<String, PropagationDataStorage> dataStorages = new ConcurrentHashMap<>();
-
     /**
-     * Data storages are cached for a specific amount of time (timeToLive).
-     * If the time expires, clean up the storage.
+     * Data storages cache their entries for a specific amount of time (timeToLive).
+     * The storages are cleaned up regularly to remove expired data.
      */
     @PostConstruct
     void initialize() {
         sessionLimit = env.getCurrentConfig().getInstrumentation().getSessions().getSessionLimit();
         timeToLive = env.getCurrentConfig().getInstrumentation().getSessions().getTimeToLive();
 
-        executor.scheduleWithFixedDelay(this::cleanUpData, FIXED_DELAY.toMillis(), FIXED_DELAY.toMillis(), TimeUnit.MILLISECONDS);
+        executor.scheduleWithFixedDelay(this::cleanUpStorages, FIXED_DELAY.toMillis(), FIXED_DELAY.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     @EventListener
     private void configEventListener(InspectitConfigChangedEvent event) {
-        int newSessionLimit = event.getNewConfig().getInstrumentation().getSessions().getSessionLimit();
-        if (newSessionLimit != sessionLimit) sessionLimit = newSessionLimit;
+        sessionLimit = event.getNewConfig().getInstrumentation().getSessions().getSessionLimit();
 
         Duration newTimeToLive = event.getNewConfig().getInstrumentation().getSessions().getTimeToLive();
-        if (newTimeToLive != null && !newTimeToLive.equals(timeToLive)) timeToLive = newTimeToLive;
+        if (newTimeToLive != null && !newTimeToLive.equals(timeToLive))
+            updateTimeToLive(newTimeToLive);
     }
 
     @EventListener
@@ -106,7 +118,7 @@ public class PropagationSessionStorage {
                 log.debug("Unable to create session: Session limit exceeded");
                 return null;
             }
-            return new PropagationDataStorage(propagation);
+            return new PropagationDataStorage(propagation, timeToLive);
         });
     }
 
@@ -121,22 +133,36 @@ public class PropagationSessionStorage {
     }
 
     /**
-     * Checks if data storages are expired and removes them.
-     * We use milliseconds for calculation.
+     * Triggers the cleanup of each data storage.
+     * If the storage is empty, the session will be marked for removal.
+     * If the session is empty and already marked for removal, it will be completely removed.
+     * If the session is not empty but marked for removal, it will be unmarked.
      */
-    private void cleanUpData() {
-        long currentTime = System.currentTimeMillis();
+    @VisibleForTesting
+    void cleanUpStorages() {
         dataStorages.forEach((id, storage) -> {
-            long elapsedTime = storage.calculateElapsedTime(currentTime);
-            if(timeToLive.toMillis() < elapsedTime) {
-                dataStorages.remove(id);
-                log.debug("Time to Live expired for the following session: {}", id);
+            storage.cleanUp();
+
+            if (storage.getSize() < 1) {
+                if (sessionsForRemoval.contains(id)) {
+                    dataStorages.remove(id);
+                    sessionsForRemoval.remove(id);
+                }
+                else {
+                    sessionsForRemoval.add(id);
+                }
             }
-            else {
-                int storageSize = storage.getStorageSize();
-                log.debug("There are {} data entries stored in session: {}", storageSize, id);
-            }
+            else sessionsForRemoval.remove(id);
         });
+    }
+
+    /**
+     * Updates the ttl for all data storages.
+     * @param ttl the new time-to-live
+     */
+    private void updateTimeToLive(Duration ttl) {
+        this.timeToLive = ttl;
+        dataStorages.forEach((id, storage) -> storage.reconfigure(timeToLive));
     }
 
     /**
@@ -160,7 +186,7 @@ public class PropagationSessionStorage {
     }
 
     /**
-     * Helper method for testing
+     * Helper method for testing.
      */
     public void clearDataStorages() {
         dataStorages.clear();

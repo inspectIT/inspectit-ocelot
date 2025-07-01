@@ -18,6 +18,7 @@ import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.BaggagePropagation;
 import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationDataStorage;
 import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.testutils.GcUtils;
@@ -60,6 +61,8 @@ public class InspectitContextImplTest extends SpringTestBase {
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, sessionStorage, false);
 
             assertThat(ctx.getAndClearCurrentRemoteSpanContext()).isNull();
+
+            ctx.close();
         }
 
         @Test
@@ -72,6 +75,7 @@ public class InspectitContextImplTest extends SpringTestBase {
 
             assertThat(ctx.getAndClearCurrentRemoteSpanContext()).isNull();
             assertThat(result).isSameAs(span);
+            ctx.close();
         }
 
     }
@@ -339,6 +343,24 @@ public class InspectitContextImplTest extends SpringTestBase {
             assertThat(tagValue.get()).isEqualTo("rootValue");
         }
 
+        @Test
+        void verifySessionIdDownPropagationViaSessionIdHeaderWhenBaggageAlsoExists() {
+            String sessionIdHeader = "Session-Id"; // We use the default header set in ContextPropagation
+            String expectedSessionId = "test123456789987654321";
+            String baggageSessionId = "remote_session_id=test333456789987654333,wallah=was-geht";
+            Map<String, String> headers = new HashMap<>();
+            headers.put(sessionIdHeader, expectedSessionId);
+            headers.put(BaggagePropagation.BAGGAGE_HEADER, baggageSessionId);
+
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
+            ctxA.readDownPropagationHeaders(headers);
+            ctxA.makeActive();
+
+            assertThat(ctxA.getData(REMOTE_SESSION_ID)).isEqualTo(expectedSessionId);
+
+            ctxA.close();
+            assertThat(ContextUtil.currentInspectitContext()).isNull();
+        }
     }
 
     @Nested
@@ -822,13 +844,13 @@ public class InspectitContextImplTest extends SpringTestBase {
     @Nested
     public class SessionStorage {
 
-        private final String SESSION = "session";
+        private static final String SESSION = "session";
 
-        private final String KEY = "my-key";
+        private static final String KEY = "my-key";
 
-        private final String VALUE = "my-value";
+        private static final String VALUE = "my-value";
 
-        private final String SESSION_VALUE = "my-session-value";
+        private static final String SESSION_VALUE = "my-session-value";
 
         @Mock
         private PropagationDataStorage dataStorage;
@@ -875,9 +897,6 @@ public class InspectitContextImplTest extends SpringTestBase {
 
         @Test
         void shouldNotReadDataWithoutSessionId() {
-            Map<String, Object> storageDate = new HashMap<>();
-            storageDate.put(KEY, SESSION_VALUE);
-
             InspectitContextImpl root = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, true);
             root.makeActive();
             root.close();

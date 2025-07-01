@@ -7,11 +7,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState.ENABLED;
 
 @DirtiesContext
 public class PropagationSessionStorageTest extends SpringTestBase {
@@ -59,5 +58,47 @@ public class PropagationSessionStorageTest extends SpringTestBase {
 
         assertThat(dataStorage1).isNotNull();
         assertThat(dataStorage2).isNull();
+    }
+
+    @Test
+    void verifySessionCleanedUpAfterMarkedForRemoval() throws InterruptedException {
+        updateProperties(props -> {
+            props.setProperty("inspectit.instrumentation.sessions.time-to-live", Duration.ofMillis(50));
+            props.setProperty("inspectit.instrumentation.data.test-key.session-storage", true);
+        });
+
+        Map<String, String> data = new HashMap<>();
+        data.put("test-key", "test-value");
+
+        PropagationDataStorage dataStorage1 = sessionStorage.getOrCreateDataStorage(validSessionID);
+        PropagationDataStorage dataStorage2 = sessionStorage.getOrCreateDataStorage(anotherValidSessionID);
+
+        Thread.sleep(100);
+        // Mark storages for removal
+        sessionStorage.cleanUpStorages();
+
+        assertThat(sessionStorage.getDataStorage(validSessionID)).isNotNull();
+        assertThat(sessionStorage.getDataStorage(anotherValidSessionID)).isNotNull();
+
+        // Refresh storage 2
+        dataStorage2.writeData(data);
+        // Remove storage 1
+        sessionStorage.cleanUpStorages();
+
+        assertThat(sessionStorage.getDataStorage(validSessionID)).isNull();
+        assertThat(sessionStorage.getDataStorage(anotherValidSessionID)).isNotNull();
+
+        Thread.sleep(100);
+        // Mark storage 2 for removal
+        sessionStorage.cleanUpStorages();
+
+        assertThat(sessionStorage.getDataStorage(validSessionID)).isNull();
+        assertThat(sessionStorage.getDataStorage(anotherValidSessionID)).isNotNull();
+
+        // Remove storage 2
+        sessionStorage.cleanUpStorages();
+
+        assertThat(sessionStorage.getDataStorage(validSessionID)).isNull();
+        assertThat(sessionStorage.getDataStorage(anotherValidSessionID)).isNull();
     }
 }
