@@ -7,6 +7,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericAction
 import rocks.inspectit.ocelot.config.model.instrumentation.data.DataSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.rules.InstrumentationRuleSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.scope.InstrumentationScopeSettings;
+import rocks.inspectit.ocelot.config.model.instrumentation.session.SessionSettings;
 import rocks.inspectit.ocelot.config.validation.ViolationBuilder;
 
 import javax.validation.Valid;
@@ -62,19 +63,19 @@ public class InstrumentationSettings {
 
     /**
      * All defined custom generic actions, the key defines their name.
-     * The name is case sensitive!
+     * The name is case-sensitive!
      */
     @NotNull
     private Map<@NotBlank String, @Valid GenericActionSettings> actions = Collections.emptyMap();
 
     /**
-     * The configuration of the defined scopes. The map's key represents an unique id for the related instrumentation scope.
+     * The configuration of the defined scopes. The map's key represents a unique id for the related instrumentation scope.
      */
     @NotNull
     private Map<@NotBlank String, @Valid InstrumentationScopeSettings> scopes = Collections.emptyMap();
 
     /**
-     * The configuration of the defined rules. The map's key represents an unique id for the related instrumentation rule.
+     * The configuration of the defined rules. The map's key represents a unique id for the related instrumentation rule.
      */
     @NotNull
     private Map<@NotBlank String, @Valid InstrumentationRuleSettings> rules = Collections.emptyMap();
@@ -87,12 +88,19 @@ public class InstrumentationSettings {
     private Map<@NotBlank String, @Valid DataSettings> data = Collections.emptyMap();
 
     /**
+     * Defines the behaviour of how data can be stored for sessions.
+     * Session data is available for all threads.
+     */
+    @NotNull
+    private SessionSettings sessions;
+
+    /**
      * Defines whether lambda classes should be excluded from the declared scope.
      */
     private boolean excludeLambdas = true;
 
     /**
-     * Allows all nested configs to evaluate context sensitive config properties regarding their correctness.
+     * Allows all nested configs to evaluate context-sensitive config properties regarding their correctness.
      * This is called by {@link InspectitConfig#performValidation(ViolationBuilder)}
      *
      * @param container the object containing this instance

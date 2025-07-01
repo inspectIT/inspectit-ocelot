@@ -11,12 +11,14 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
-import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationDataStorage;
-import rocks.inspectit.ocelot.core.instrumentation.browser.BrowserPropagationSessionStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.ContextPropagation;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationDataStorage;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.tags.TagUtils;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,7 +37,7 @@ import java.util.stream.Stream;
  * When {@link #makeActive()} is called, the current context transitions from the "Entry" to the "Active" state.
  * This means that the data the context stores is now immutable and also published as TagContext.
  * In addition, the context now replaces its parent in GRPC, so that all newly created contexts will be children of this one.
- * There is one exception to the data immutability: child contexts perform the data up-propagation during this contexts active phase.
+ * There is one exception to the data immutability: child contexts perform the data up-propagation during this context's active phase.
  * <p>
  * All synchronous child contexts are opened and closed during the "active" phase of their parent.
  * When such a child context is closed, it writes the up-propagated data it changed to the parent by calling {@link #performUpPropagation(Map)}.
@@ -61,7 +63,6 @@ import java.util.stream.Stream;
  * <p>
  * As noted previously the tag context opened by the context at the end of its entry phase will be stale for teh exit phase:
  * It does not contain any up-propagated data, neither does it contain any changes performed during the exit phase.
- * For this reason, an up-to-date tag context can be acquired using {@link #enterFullTagScope()} within which then metrics can be collected.
  * <p>
  * Finally, a context finishes the exit phase with a call to {@link #close()}
  * If the context is synchronous, it will perform its up-propagation.
@@ -182,7 +183,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * This map only changes when an-up propagation of data occurs which also is down propagated.
      * <p>
      * At the end of the entry phase, the map is the same as {@link #postEntryPhaseDownPropagatedData}
-     * When now an up-propagation occurs, this map becomes stale. Therefore it is "reset" to null and recomputed when it is required.
+     * When now an up-propagation occurs, this map becomes stale. Therefore, it is "reset" to null and recomputed when it is required.
      * <p>
      * Note that the underlying map never gets altered! It gets replaced by a new object when it became stale.
      * This ensures that child context can use this map as their {@link #postEntryPhaseDownPropagatedData} without copying!
@@ -204,12 +205,13 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private SpanContext remoteParentContext;
 
     /**
-     * Data storage for all tags that should be propagated up to or down from the browser
+     * Session storage for all active data storages. Data storages can only be accessed if a {@link #REMOTE_SESSION_ID} exists
      */
-    private BrowserPropagationDataStorage browserPropagationDataStorage;
+    private final PropagationSessionStorage sessionStorage;
 
-    private InspectitContextImpl(InspectitContextImpl parent, PropagationMetaData defaultPropagation, boolean interactWithApplicationTagContexts) {
+    private InspectitContextImpl(InspectitContextImpl parent, PropagationMetaData defaultPropagation, PropagationSessionStorage sessionStorage, boolean interactWithApplicationTagContexts) {
         this.parent = parent;
+        this.sessionStorage = sessionStorage;
         propagation = parent == null ? defaultPropagation : parent.propagation;
         this.interactWithApplicationTagContexts = interactWithApplicationTagContexts;
         dataOverwrites = new HashMap<>();
@@ -237,10 +239,10 @@ public class InspectitContextImpl implements InternalInspectitContext {
      *
      * @return the newly created context
      */
-    public static InspectitContextImpl createFromCurrent(Map<String, String> commonTags, PropagationMetaData defaultPropagation, boolean interactWithApplicationTagContexts) {
+    public static InspectitContextImpl createFromCurrent(Map<String, String> commonTags, PropagationMetaData defaultPropagation,
+                                                         PropagationSessionStorage sessionStorage, boolean interactWithApplicationTagContexts) {
         InspectitContextImpl parent = ContextUtil.currentInspectitContext();
-
-        InspectitContextImpl result = new InspectitContextImpl(parent, defaultPropagation, interactWithApplicationTagContexts);
+        InspectitContextImpl result = new InspectitContextImpl(parent, defaultPropagation, sessionStorage, interactWithApplicationTagContexts);
 
         if (parent == null) {
             commonTags.forEach(result::setData);
@@ -305,23 +307,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     @Override
     public void makeActive() {
-        Object currentSessionID = getData(REMOTE_SESSION_ID);
-        if(currentSessionID != null) {
-            browserPropagationDataStorage = BrowserPropagationSessionStorage.get()
-                    .getOrCreateDataStorage(currentSessionID.toString(), propagation);
-            // Set propagation, if updated since creation
-            browserPropagationDataStorage.setPropagation(propagation);
-        }
-
-
-        if(parent == null) {
-            // Add down-propagated data from browser to inspectIT
-            if(browserPropagationDataStorage != null) {
-                Map<String, Object> browserPropagationData = getBrowserPropagationData(browserPropagationDataStorage.readData());
-                Map<String, Object> downPropagationBrowserData = getDownPropagationData(browserPropagationData);
-                dataOverwrites.putAll(downPropagationBrowserData);
-            }
-        }
+        // Update session data after entry actions
+        performSessionUpdate();
 
         boolean anyDownPropagatedDataOverwritten = anyDownPropagatedDataOverridden();
 
@@ -387,29 +374,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
     }
 
     /**
-     * Enters a new tag scope, which contains the tags currently present in {@link #getData()}.
-     * In contrast to the tag scope opened by {@link #makeActive()} this tag scope will reflect
-     * all recent updates performed through setData or via up-propagation.
-     * In addition, this tag scopes contains all tags for which down-propagation is set to false.
-     *
-     * @return the newly opened tag scope.
-     * // TODO Remove? This becomes obsolete now
-     */
-    public io.opencensus.common.Scope enterFullTagScope() {
-        TagContextBuilder builder = Tags.getTagger().emptyBuilder();
-        dataTagsStream().forEach(e -> builder.putLocal(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getKey(), e.getValue()
-                .toString())));
-        return builder.buildScoped();
-    }
-
-    private Stream<Map.Entry<String, Object>> dataTagsStream() {
-        return getDataAsStream().filter(e -> propagation.isTag(e.getKey()))
-                .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()));
-    }
-
-    /**
-     * Returns the most recent value for data, which either was inherited form the parent context,
-     * set via {@link #setData(String, Object)} or changed due to an up-propagation.
+     * Returns the most recent value for data, which either was inherited from the parent context,
+     * set via {@link #setData(String, Object)}, changed due to an up-propagation or stored inside a session.
      *
      * @param key the name of the data to query
      *
@@ -419,13 +385,16 @@ public class InspectitContextImpl implements InternalInspectitContext {
     public Object getData(String key) {
         if (dataOverwrites.containsKey(key)) {
             return dataOverwrites.get(key);
-        } else {
+        } else if (postEntryPhaseDownPropagatedData.containsKey(key)) {
             return postEntryPhaseDownPropagatedData.get(key);
+        } else {
+            PropagationDataStorage dataStorage = getDataStorage();
+            if (dataStorage != null) return dataStorage.readData(key);
+            return null;
         }
     }
 
     /**
-     * /**
      * Sets the value for a given data key.
      * If this is called during the entry phase of the context, the changed datum will be reflected
      * in postEntryPhaseDownPropagatedData and {@link #getPostEntryPhaseTags()}.
@@ -436,6 +405,30 @@ public class InspectitContextImpl implements InternalInspectitContext {
     @Override
     public void setData(String key, Object value) {
         dataOverwrites.put(key, value);
+    }
+
+
+    /**
+     * Returns all the most recent data as a stream, which either was inherited from the parent context,
+     * set via {@link #setData(String, Object)}, changed due to an up-propagation or stored inside a session.
+     *
+     * @return the recent data as stream
+     */
+    private Stream<Map.Entry<String, Object>> getDataAsStream() {
+        val dataStream = Stream.concat(postEntryPhaseDownPropagatedData.entrySet()
+                .stream()
+                .filter(e -> !dataOverwrites.containsKey(e.getKey())), dataOverwrites.entrySet()
+                .stream()
+                .filter(e -> e.getValue() != null));
+
+        PropagationDataStorage dataStorage = getDataStorage();
+        if (dataStorage != null) {
+            return Stream.concat(dataStorage.readData().entrySet().stream()
+                            .filter(e -> !dataOverwrites.containsKey(e.getKey()) &&
+                                    !postEntryPhaseDownPropagatedData.containsKey(e.getKey())),
+                    dataStream);
+        }
+        return dataStream;
     }
 
     /**
@@ -471,20 +464,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
             parent.performUpPropagation(dataOverwrites);
         }
 
-        // Write browser propagation data to storage
-        Map<String, Object> propagationData = getDataAsStream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        Map<String, Object> browserPropagationData = getBrowserPropagationData(propagationData);
-        if (browserPropagationDataStorage != null)
-            browserPropagationDataStorage.writeData(browserPropagationData);
-
-        //If there is browser propagation data, but exporter is disabled, write error message
-        if (!browserPropagationData.isEmpty() && !BrowserPropagationSessionStorage.get().isExporterActive())
-            log.error("Unable to propagate data: {} Browser propagation is disabled, since no Tags-exporter is enabled", browserPropagationData);
-
-        // Delete session ID after root span is closed
-        if (parent == null) {
-            setData(REMOTE_SESSION_ID, null);
-        }
+        // Update session data after exit actions
+        performSessionUpdate();
 
         //clear the references to prevent memory leaks
         openedDownPropagationScope = null;
@@ -513,37 +494,33 @@ public class InspectitContextImpl implements InternalInspectitContext {
     }
 
     /**
-     * Returns a Map with key-value pairs, for all keys configured with browser-propagation
-     * @param data Map with key-value pairs
-     * @return Map with all entries of data, whose keys are configured with browser-propagation
+     * Updates the data storage for the current session with the most recent data.
+     * {@link #dataOverwrites} are higher prioritized than {@link #postEntryPhaseDownPropagatedData}.
+     * The storage will filter which data should be stored.
      */
-    private Map<String, Object> getBrowserPropagationData(Map<String, Object> data) {
-        Map<String, Object> browserPropagationData = new HashMap<>();
-        for (Map.Entry<String,Object> entry : data.entrySet()) {
-            if(propagation.isPropagatedWithBrowser(entry.getKey())) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                if(value != null) browserPropagationData.put(key, value);
-            }
+    private void performSessionUpdate() {
+        PropagationDataStorage dataStorage = getDataStorage();
+        if (dataStorage != null) {
+            Map<String, Object> mergedData = new HashMap<>();
+            mergedData.putAll(postEntryPhaseDownPropagatedData);
+            mergedData.putAll(dataOverwrites);
+            dataStorage.writeData(mergedData);
         }
-        return browserPropagationData;
     }
 
     /**
-     * Returns a Map with key-value pairs, for all keys configured with down-propagation
-     * @param data Map with key-value pairs
-     * @return Map with all entries of data, whose keys are configured with down-propagation
+     * Tries to access the data storage for the current session.
+     * To determine the session, {@link #REMOTE_SESSION_ID} has to be set.
+     *
+     * @return the data storage for the current session or {@code null}
      */
-    private Map<String, Object> getDownPropagationData(Map<String, Object> data) {
-        Map<String, Object> downPropagationData = new HashMap<>();
-        for (Map.Entry<String,Object> entry : data.entrySet()) {
-            if(propagation.isPropagatedDownWithinJVM(entry.getKey())) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                if (value != null) downPropagationData.put(key, value);
-            }
+    private PropagationDataStorage getDataStorage() {
+        // Prevent endless loop to find the session-id in data storages
+        if(dataOverwrites.containsKey(REMOTE_SESSION_ID) || postEntryPhaseDownPropagatedData.containsKey(REMOTE_SESSION_ID)) {
+            Object sessionId = getData(REMOTE_SESSION_ID);
+            if(sessionId != null) return sessionStorage.getOrCreateDataStorage(sessionId.toString());
         }
-        return downPropagationData;
+        return null;
     }
 
     @Override
@@ -557,35 +534,44 @@ public class InspectitContextImpl implements InternalInspectitContext {
                 spanContext = null;
             }
         }
-        return ContextPropagationUtil.buildPropagationHeaderMap(getDataAsStream().filter(e -> propagation.isPropagatedDownGlobally(e.getKey())), spanContext);
+
+        Map<String, Object> dataToPropagate = getDataAsStream()
+                .filter(e -> propagation.isPropagatedDownGlobally(e.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return ContextPropagation.get().buildDownPropagationHeaderMap(dataToPropagate, spanContext);
     }
 
     @Override
     public Map<String, String> getUpPropagationHeaders() {
-        return ContextPropagationUtil.buildPropagationHeaderMap(getDataAsStream().filter(e -> propagation.isPropagatedUpGlobally(e.getKey())));
+        Map<String, Object> dataToPropagate = getDataAsStream()
+                .filter(e -> propagation.isPropagatedUpGlobally(e.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return ContextPropagation.get().buildUpPropagationHeaderMap(dataToPropagate);
     }
 
     @Override
     public void readUpPropagationHeaders(Map<String, String> headers) {
-        ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, this);
+        Predicate<String> propagationFilter = (key) -> propagation.isPropagatedUpGlobally(key);
+        ContextPropagation.get().readPropagatedDataFromHeaderMap(headers, this, propagationFilter);
     }
 
     @Override
     public void readDownPropagationHeaders(Map<String, String> headers) {
-        ContextPropagationUtil.readPropagatedDataFromHeaderMap(headers, this);
-        SpanContext remote_span = ContextPropagationUtil.readPropagatedSpanContextFromHeaderMap(headers);
+        Predicate<String> propagationFilter = (key) -> propagation.isPropagatedDownGlobally(key);
+        ContextPropagation.get().readPropagatedDataFromHeaderMap(headers, this, propagationFilter);
+        SpanContext remote_span = ContextPropagation.get().readPropagatedSpanContextFromHeaderMap(headers);
         setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, remote_span);
-        String sessionId = ContextPropagationUtil.readPropagatedSessionIdFromHeaderMap(headers);
-        if(sessionId != null) setData(REMOTE_SESSION_ID, sessionId);
+        String sessionId = ContextPropagation.get().readPropagatedSessionIdFromHeaderMap(headers);
+        if (sessionId != null) setData(REMOTE_SESSION_ID, sessionId);
     }
 
     @Override
     public Set<String> getPropagationHeaderNames() {
-        return ContextPropagationUtil.getPropagationHeaderNames();
+        return ContextPropagation.get().getPropagationHeaderNames();
     }
 
     /**
-     * Only invoked by {@link #createFromCurrent(Map, PropagationMetaData, boolean)}
+     * Only invoked by {@link #createFromCurrent(Map, PropagationMetaData, PropagationSessionStorage, boolean)}
      * <p>
      * Reads the currently active tag context and makes this context inherit all values which
      * have changed in comparison to the values published by the parent context.
@@ -633,7 +619,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * @param tagKey          the key of the found tag
      * @param existingBuilder an existing builder to which the settings shall be added. If it is null, a builder is created using copy() on {@link #propagation}.
      *
-     * @return exisitingBuilder or the newly created builder if it was null.
+     * @return existingBuilder or the newly created builder if it was null.
      */
     private PropagationMetaData.Builder configureTagPropagation(String tagKey, PropagationMetaData.Builder existingBuilder) {
         PropagationMetaData.Builder result = existingBuilder;
@@ -649,14 +635,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
             }
         }
         return result;
-    }
-
-    private Stream<Map.Entry<String, Object>> getDataAsStream() {
-        return Stream.concat(postEntryPhaseDownPropagatedData.entrySet()
-                .stream()
-                .filter(e -> !dataOverwrites.containsKey(e.getKey())), dataOverwrites.entrySet()
-                .stream()
-                .filter(e -> e.getValue() != null));
     }
 
     private Map<String, Object> getOrComputeActivePhaseDownPropagatedData() {
@@ -693,5 +671,4 @@ public class InspectitContextImpl implements InternalInspectitContext {
                         .toString()), TagMetadata.create(TagMetadata.TagTtl.UNLIMITED_PROPAGATION)))
                 .iterator();
     }
-
 }

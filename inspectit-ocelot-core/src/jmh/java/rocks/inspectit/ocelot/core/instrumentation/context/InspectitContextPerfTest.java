@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.context;
 import org.openjdk.jmh.annotations.*;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +19,8 @@ public class InspectitContextPerfTest {
 
     private PropagationMetaData dataProperties;
 
+    private PropagationSessionStorage sessionStorage;
+
     @Param(value = {"false", "true"})
     private boolean interactWithAppTagContext;
 
@@ -31,11 +34,13 @@ public class InspectitContextPerfTest {
                 .setUpPropagation("propagate-1", PropagationMode.JVM_LOCAL)
                 .setUpPropagation("propagate-2", PropagationMode.JVM_LOCAL)
                 .build();
+
+        sessionStorage = new PropagationSessionStorage();
     }
 
     @Benchmark
     public void rootOnly() {
-        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, sessionStorage, interactWithAppTagContext);
 
         fromCurrent.makeActive();
         fromCurrent.close();
@@ -43,7 +48,7 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootOnly_with2CommonTags() {
-        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, sessionStorage, interactWithAppTagContext);
 
         fromCurrent.makeActive();
         fromCurrent.close();
@@ -51,7 +56,7 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootOnly_with2Tags() {
-        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, sessionStorage, interactWithAppTagContext);
         fromCurrent.setData("data-1", "data-1");
         fromCurrent.setData("data-2", "data-2");
         fromCurrent.makeActive();
@@ -60,10 +65,10 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootPlusOne() {
-        InspectitContextImpl parent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
+        InspectitContextImpl parent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, sessionStorage, interactWithAppTagContext);
         parent.makeActive();
 
-        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, sessionStorage, interactWithAppTagContext);
         fromCurrent.makeActive();
         fromCurrent.close();
 
@@ -72,10 +77,10 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootPlusOne_with2UpPropagatedTags() {
-        InspectitContextImpl parent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
+        InspectitContextImpl parent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, sessionStorage, interactWithAppTagContext);
         parent.makeActive();
 
-        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, sessionStorage, interactWithAppTagContext);
         fromCurrent.setData("propagate-3", "propagate-3");
         fromCurrent.setData("propagate-4", "propagate-4");
         fromCurrent.makeActive();

@@ -9,6 +9,17 @@ title: Breaking Changes
 
 The tag `service` was fully removed. Please work with the tag `service.name` instead.
 
+### Reworked propagation
+
+The behaviour of [data propagation](instrumentation/data-propagation.md) has been refactored. The option `session-storage` has been added to the data key
+configuration, which should replace the `browser-propagation` option. At the moment both options exist and have the same effect.
+Data keys enabled for `session-storage` will be stored inside a global session storage. Every _inspectIT context_
+can access the session data, if the particular session identification has been assigned. Find more information about the session
+storage [here](instrumentation/data-propagation.md#session-storage).
+
+Additionally, if data tags are up propagated globally via the `baggage` header, an additional `Access-Control-Expose-Headers`
+will be added, so frontends running in browsers are also able to read the custom `baggage` header in cross-origin requests.
+
 ## Breaking changes in 2.6.11
 
 ### Renamed environment tag keys

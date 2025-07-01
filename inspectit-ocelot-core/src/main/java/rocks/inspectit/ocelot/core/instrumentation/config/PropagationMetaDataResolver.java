@@ -75,6 +75,9 @@ public class PropagationMetaDataResolver {
             if (settings.getUpPropagation() != null) {
                 builder.setUpPropagation(key, settings.getUpPropagation());
             }
+            if (settings.getSessionStorage() != null) {
+                builder.setSessionStorage(key, settings.getSessionStorage());
+            }
             if (settings.getBrowserPropagation() != null) {
                 builder.setBrowserPropagation(key, settings.getBrowserPropagation());
             }

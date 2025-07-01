@@ -1,12 +1,14 @@
-package rocks.inspectit.ocelot.core.instrumentation.browser;
+package rocks.inspectit.ocelot.core.instrumentation.context.session;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
+import rocks.inspectit.ocelot.core.instrumentation.context.propagation.ContextPropagation;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextUtil;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 
@@ -19,26 +21,28 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext.REMOTE_SESSION_ID;
 
 @ExtendWith(MockitoExtension.class)
-public class BrowserPropagationDataStorageTest extends SpringTestBase {
+@DirtiesContext
+public class PropagationDataStorageTest extends SpringTestBase {
 
     @Mock
     PropagationMetaData propagation;
 
-    BrowserPropagationSessionStorage sessionStorage;
+    @Autowired
+    PropagationSessionStorage sessionStorage;
 
     Map<String, String> headers;
 
-    private static final String sessionIdHeader = "Session-Id";
-
-    private static final String sessionId = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
+    private final String sessionId = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
 
     @BeforeEach
     void prepareTest() {
-        // Create session storage to store BrowserPropagationDataStorages
-        sessionStorage = BrowserPropagationSessionStorage.get();
-        sessionStorage.setExporterActive(true);
+        sessionStorage.setPropagation(propagation);
+
+        String sessionIdHeader = "Session-Id";
+        ContextPropagation.get().setSessionIdHeader(sessionIdHeader);
         // Create HTTP header to pass it to the initial InspectIT-Context
         headers = new HashMap<>();
         headers.put(sessionIdHeader, sessionId);
@@ -50,35 +54,35 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
     }
 
     @Nested
-    public class WriteBrowserPropagationData {
+    public class WriteSessionData {
 
         @Test
         void verifyNoDataHasBeenWritten() {
-            when(propagation.isPropagatedWithBrowser(any())).thenReturn(false);
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            when(propagation.isStoredForSession(any())).thenReturn(false);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctx.readDownPropagationHeaders(headers);
             ctx.makeActive();
             ctx.setData("keyA", "valueA");
 
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
+            PropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
             assertThat(dataStorage.readData()).isEmpty();
 
             ctx.close();
-            assertThat(dataStorage.getStorageSize()).isZero();
+            assertThat(dataStorage.getSize()).isZero();
             assertThat(ContextUtil.currentInspectitContext()).isNull();
         }
 
         @Test
         void verifyDataHasBeenWritten() {
-            when(propagation.isPropagatedWithBrowser(anyString())).thenReturn(false);
-            when(propagation.isPropagatedWithBrowser(eq("keyA"))).thenReturn(true);
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            when(propagation.isStoredForSession(anyString())).thenReturn(false);
+            when(propagation.isStoredForSession(eq("keyA"))).thenReturn(true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctx.readDownPropagationHeaders(headers);
             ctx.makeActive();
             ctx.setData("keyA", "valueA");
             ctx.setData("keyB", "valueB");
 
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
+            PropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
             assertThat(dataStorage.readData()).isEmpty();
 
             ctx.close();
@@ -89,17 +93,17 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
 
         @Test
         void verifyDataHasBeenOverwritten() {
-            when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
+            when(propagation.isStoredForSession(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId, propagation);
+            PropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
             Map<String, Object> oldData = new HashMap<>();
             oldData.put("keyA", "value0");
             dataStorage.writeData(oldData);
 
-            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxA.readDownPropagationHeaders(headers);
             ctxA.makeActive();
-            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxB.makeActive();
 
             ctxA.setData("keyA", "value1");
@@ -117,32 +121,20 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
         }
 
         @Test
-        void verifyAttributeCountLimit() {
-            when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId, propagation);
-            Map<String, Object> dummyMap = IntStream.rangeClosed(1, 128).boxed()
+        void verifyTagLimit() {
+            when(propagation.isStoredForSession(any())).thenReturn(true);
+            PropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
+            Map<String, Object> dummyMap = IntStream.rangeClosed(1, 130).boxed()
                     .collect(Collectors.toMap(i -> "key"+i, i -> "value"+i));
             dataStorage.writeData(dummyMap);
 
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
-            ctx.readDownPropagationHeaders(headers);
-            ctx.makeActive();
-
-            ctx.setData("key1", "value321");
-            ctx.setData("keyABC", "valueABC");
-            assertThat(dataStorage.readData()).doesNotContainEntry("key1", "value321");
-            assertThat(dataStorage.readData()).doesNotContainEntry("keyABC", "valueABC");
-
-            ctx.close();
-            assertThat(dataStorage.readData()).doesNotContainEntry("key1", "value321");
-            assertThat(dataStorage.readData()).doesNotContainEntry("keyABC", "valueABC");
-            assertThat(dataStorage.getStorageSize()).isEqualTo(128);
+            assertThat(dataStorage.getSize()).isLessThanOrEqualTo(128);
         }
 
         @Test
         void verifyValidEntries() {
-            when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            when(propagation.isStoredForSession(any())).thenReturn(true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctx.readDownPropagationHeaders(headers);
             ctx.makeActive();
             // Create too long key and value
@@ -152,7 +144,7 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             //System.out.println(dummyKey.length() + " : " + dummyValue.length());
 
             ctx.setData(dummyKey, dummyValue);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
+            PropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
             assertThat(dataStorage.readData()).doesNotContainEntry(dummyKey, dummyValue);
 
             ctx.close();
@@ -160,20 +152,31 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
         }
 
         @Test
+        void verifySessionIdHasNotBeenWritten() {
+            Map<String, Object> data = new HashMap<>();
+            data.put(REMOTE_SESSION_ID, "value");
+
+            PropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
+            dataStorage.writeData(data);
+
+            assertThat(dataStorage.readData()).isEmpty();
+        }
+
+        @Test
         void verifyDataHasBeenDownPropagatedToLateDataStorage() {
-            when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
+            when(propagation.isStoredForSession(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
-            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxA.setData("keyA", "valueA");
             ctxA.makeActive();
 
-            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
-            ctxB.setData(InternalInspectitContext.REMOTE_SESSION_ID, sessionId);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
+            ctxB.setData(REMOTE_SESSION_ID, sessionId);
             ctxB.setData("keyB", "valueB");
             ctxB.makeActive();
             ctxB.close();
 
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
+            PropagationDataStorage dataStorage = sessionStorage.getDataStorage(sessionId);
             assertThat(dataStorage.readData()).containsEntry("keyA", "valueA");
             assertThat(dataStorage.readData()).containsEntry("keyB", "valueB");
 
@@ -183,48 +186,22 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
     }
 
     @Nested
-    public class ReadBrowserPropagationData {
+    public class ReadSessionData {
 
         @Test
-        void verifyNoDownPropagation() {
-            when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
-            when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(false);
-            when(propagation.isPropagatedDownWithinJVM(eq(InternalInspectitContext.REMOTE_SESSION_ID))).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId, propagation);
-            Map<String, Object> data = new HashMap<>();
-            data.put("keyA", "valueA");
-            dataStorage.writeData(data);
-            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
-            ctxA.readDownPropagationHeaders(headers);
-            ctxA.makeActive();
-            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
-            ctxB.makeActive();
-
-            assertThat(ctxA.getData("keyA")).isNull();
-            assertThat(ctxB.getData("keyA")).isNull();
-
-            ctxB.close();
-            assertThat(ctxB.getData("keyA")).isNull();
-
-            ctxA.close();
-            assertThat(ctxA.getData("keyA")).isNull();
-            assertThat(ContextUtil.currentInspectitContext()).isNull();
-        }
-
-        @Test
-        void verifyDownPropagation() {
-            when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
+        void verifySessionDataUpdated() {
+            when(propagation.isStoredForSession(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId, propagation);
-            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            PropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             Map<String, Object> data = new HashMap<>();
             data.put("keyA", "valueA");
             dataStorage.writeData(data);
             ctxA.readDownPropagationHeaders(headers);
             ctxA.makeActive();
-            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxB.makeActive();
-            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxC.makeActive();
 
             assertThat(ctxA.getData("keyA")).isEqualTo("valueA");
@@ -234,10 +211,10 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
             assertThat(ctxC.getData("keyA")).isEqualTo("valueB");
 
             ctxC.close();
-            assertThat(ctxB.getData("keyA")).isEqualTo("valueA");
+            assertThat(ctxB.getData("keyA")).isEqualTo("valueB");
 
             ctxB.close();
-            assertThat(ctxA.getData("keyA")).isEqualTo("valueA");
+            assertThat(ctxA.getData("keyA")).isEqualTo("valueB");
 
             ctxA.close();
             assertThat(ContextUtil.currentInspectitContext()).isNull();
@@ -245,20 +222,20 @@ public class BrowserPropagationDataStorageTest extends SpringTestBase {
 
         @Test
         void verifyUpPropagation() {
-            when(propagation.isPropagatedWithBrowser(any())).thenReturn(true);
+            when(propagation.isStoredForSession(any())).thenReturn(true);
             when(propagation.isPropagatedDownWithinJVM(any())).thenReturn(true);
             when(propagation.isPropagatedUpWithinJVM(eq("keyB"))).thenReturn(true);
-            BrowserPropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId, propagation);
-            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            PropagationDataStorage dataStorage = sessionStorage.getOrCreateDataStorage(sessionId);
+            InspectitContextImpl ctxA = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             Map<String, Object> data = new HashMap<>();
             data.put("keyA", "valueA");
             data.put("keyB", "valueB");
             dataStorage.writeData(data);
             ctxA.readDownPropagationHeaders(headers);
             ctxA.makeActive();
-            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxB = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxB.makeActive();
-            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, false);
+            InspectitContextImpl ctxC = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), propagation, sessionStorage, false);
             ctxC.makeActive();
 
             assertThat(ctxA.getData("keyA")).isEqualTo("valueA");
