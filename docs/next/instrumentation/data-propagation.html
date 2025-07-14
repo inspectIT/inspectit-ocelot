@@ -67,18 +67,18 @@ This object is basically a local variable for the method. <strong>Whenever data 
 under the given data key in this dictionary. Similarly, whenever data is read, inspectIT looks it up based on the
 data key in the dictionary.</p>
 <p>This dictionary is called <strong>inspectIT context</strong>.</p>
-<p>If the inspectIT context was truly implemented as explained above, all data would be only visible in the method where it was collected.
+<p>If the <em>inspectIT context</em> was truly implemented as explained above, all data would be only visible in the method where it was collected.
 This however often is not the desired behaviour.
 Consider the following example: you instrument the entry method of your HTTP server and collect the request URL as data there.
 You now of course want this data to be visible as tag for metrics collected in methods called by your entry point.
 With the implementation above, the request URL would only be visible within the HTTP entry method.</p>
-<p>For this reason the inspectIT context implements <em>data propagation</em>.</p>
+<p>For this reason the <em>inspectIT context</em> implements <em>data propagation</em>.</p>
 <ul>
 <li><strong>Down Propagation:</strong> Data collected in your instrumented method will also be visible to all methods directly
 or indirectly called by your method. This behaviour already comes <a href="https://opencensus.io/tag/#propagation">with the OpenCensus Library for tags</a>.</li>
 <li><strong>Up Propagation:</strong> Data collected in your instrumented method will be visible to the methods which caused the
 invocation of your method. This means that all methods which lie on the call stack will have access to the data written by your method</li>
-<li><strong>Browser Propagation:</strong> An additional form of propagation. Data collected in your instrumented method will be
+<li><strong>Browser Propagation</strong> (deprecated): An additional form of propagation. Data collected in your instrumented method will be
 stored inside a data storage, which is accessible to the outside.</li>
 </ul>
 <p>Up- and down propagation can also be combined. In this case then the data is attached to the control flow,
@@ -101,17 +101,15 @@ property <code>inspectit.instrumentation.data</code>. Here are some examples ext
       <span class="hljs-attr">'prop_origin_service':</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">"GLOBAL"</span><span class="hljs-string">,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-string">"false"</span><span class="hljs-string">}</span>
       <span class="hljs-attr">'prop_target_service':</span> <span class="hljs-string">{up-propagation:</span> <span class="hljs-string">"GLOBAL"</span><span class="hljs-string">,</span> <span class="hljs-attr">down-propagation:</span> <span class="hljs-string">"JVM_LOCAL"</span><span class="hljs-string">,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-string">"false"</span><span class="hljs-string">}</span>
 
-      <span class="hljs-comment">#we allow the application to be defined at the beginning and to be down propagated from there</span>
+      <span class="hljs-comment"># we allow the application to be defined at the beginning and to be down propagated from there</span>
       <span class="hljs-attr">'application':</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">"GLOBAL"</span><span class="hljs-string">,</span> <span class="hljs-attr">is-tag:</span> <span class="hljs-string">"true"</span><span class="hljs-string">}</span>
 
-      <span class="hljs-comment">#this data will only be visible locally in the method where it is collected</span>
+      <span class="hljs-comment"># this data will only be visible locally in the method where it is collected</span>
       <span class="hljs-attr">'http_method':</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">"NONE"</span><span class="hljs-string">}</span>
       <span class="hljs-attr">'http_status':</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">"NONE"</span><span class="hljs-string">}</span>
 
-      <span class="hljs-comment">#this data will be written to the inspectIT browser data storage</span>
-      <span class="hljs-attr">'database_tag':</span> <span class="hljs-string">{browser-propagation:</span> <span class="hljs-literal">true</span><span class="hljs-string">}</span>
-      <span class="hljs-comment">#this data can be written by the browser</span>
-      <span class="hljs-attr">'transaction_id':</span> <span class="hljs-string">{down-propagation:</span> <span class="hljs-string">"JVM_LOCAL"</span><span class="hljs-string">,</span> <span class="hljs-attr">browser-propagation:</span> <span class="hljs-literal">true</span><span class="hljs-string">}</span>
+      <span class="hljs-comment"># this data will be written to the inspectIT session storage</span>
+      <span class="hljs-attr">'database_table':</span> <span class="hljs-string">{session-storage:</span> <span class="hljs-literal">true</span><span class="hljs-string">}</span>
 </code></pre>
 <p>Under <code>inspectit.instrumentation.data</code>, the data keys are mapped to their desired behaviour.
 The configuration options are the following:</p>
@@ -122,35 +120,43 @@ The configuration options are the following:</p>
 <tbody>
 <tr><td><code>down-propagation</code></td><td><code>JVM_LOCAL</code> if the data key is also a <a href="/inspectit-ocelot/docs/next/metrics/common-tags">common tag</a>, <code>NONE</code> otherwise</td><td>Configures if values for this data key propagate down and the level of propagation. Possible values are <code>NONE</code>, <code>JVM_LOCAL</code> and <code>GLOBAL</code>. If <code>NONE</code> is configured, no down propagation will take place.</td></tr>
 <tr><td><code>up-propagation</code></td><td><code>NONE</code></td><td>Configures if values for this data key propagate up and the level of propagation. Possible values are <code>NONE</code>, <code>JVM_LOCAL</code> and <code>GLOBAL</code>. If <code>NONE</code> is configured, no up propagation will take place.</td></tr>
-<tr><td><code>browser-propagation</code></td><td><code>false</code></td><td>If true, this data will be written to the inspectIT browser data storage</td></tr>
+<tr><td><code>session-storage</code></td><td><code>false</code></td><td>If true, this data will be written to the inspectIT session storage</td></tr>
+<tr><td><code>browser-propagation</code> (deprecated)</td><td><code>false</code></td><td>If true, this data will be written to the inspectIT session storage</td></tr>
 <tr><td><code>is-tag</code></td><td><code>true</code> if the data key is also a <a href="/inspectit-ocelot/docs/next/metrics/common-tags">common tag</a> or is used as tag in any <a href="/inspectit-ocelot/docs/next/metrics/custom-metrics">metric definition</a>, <code>false</code> otherwise</td><td>If true, this data will act as a tag when metrics are recorded. This does not influence propagation.</td></tr>
 </tbody>
 </table>
 <p>Note that you are free to use data keys without explicitly defining them in the <code>inspectit.instrumentation.data</code> section.
 In this case simply all settings will have their default value.</p>
 <h2><a class="anchor" aria-hidden="true" id="interaction-with-opencensus-tags"></a><a href="#interaction-with-opencensus-tags" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Interaction with OpenCensus Tags</h2>
-<p>As explained previously, our inspectIT context can be seen as a more flexible variation of OpenCensus tags.
-In fact, we designed the inspectIT context so that it acts as a superset of the OpenCensus TagContext.</p>
-<p>Firstly, when an instrumented method is entered, a new inspectIT context is created.
+<p>As explained previously, our <em>inspectIT context</em> can be seen as a more flexible variation of OpenCensus tags.
+In fact, we designed the <em>inspectIT context</em> so that it acts as a superset of the OpenCensus TagContext.</p>
+<p>Firstly, when an instrumented method is entered, a new i<em>nspectIT context</em> is created.
 At this point, it imports any tag values published by OpenCensus directly as data.
 This also includes the <a href="/inspectit-ocelot/docs/next/metrics/common-tags">common tags</a> created by inspectIT. This means, that you can simply read (and override)
 values for common tags such as <code>service.name</code> or <code>host.name</code> at any rule.</p>
 <p>The integration is even deeper if you configured the agent to also extract the metrics from manual instrumentation
 in your application via OpenCensus.
 Firstly, if a method instrumented by inspectIT Ocelot is executed within a TagContext opened by your application,
-these application tags will also be visible in the inspectIT context. Secondly, after the execution of the entry phase
+these application tags will also be visible in the <em>inspectIT context</em>. Secondly, after the execution of the entry phase
 of each rule, a new TagContext is opened making the tags written there accessible to metrics collected by your application.
 Hereby, only data for which down propagation was configured to be <code>JVM_LOCAL</code> or greater and for which <code>is-tag</code> is true
 will be visible as tags.</p>
 <h2><a class="anchor" aria-hidden="true" id="baggage"></a><a href="#baggage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Baggage</h2>
 <p>As mentioned previously, data tags can be used across JVM borders when configured for <code>GLOBAL</code> propagation.
 Then, the data can be read from incoming HTTP headers or can be written into outgoing HTTP headers.
-inspectIT Ocelot will always read or write all globally propagated data via the <code>baggage</code> header.
+InspectIT Ocelot will always read or write all globally propagated data via the <code>baggage</code> header.
 The header contains a list of key-value pairs in the following format:</p>
 <pre><code class="hljs">baggage: key<span class="hljs-number">1</span>=<span class="hljs-keyword">value</span><span class="hljs-number">1</span>,key<span class="hljs-number">2</span>=<span class="hljs-keyword">value</span><span class="hljs-number">2</span>
 </code></pre>
 <p>You can find more information about the header format <a href="https://github.com/w3c/baggage/blob/main/baggage/HTTP_HEADER_FORMAT.md">here</a>.</p>
-<p>Within <a href="/inspectit-ocelot/docs/next/instrumentation/actions">actions</a>, data can be read from or written into HTTP headers.
+
+    <div class="admonition admonition-important">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"/></svg></div> important</h5>
+      </div>
+      <div class="admonition-content">
+    <p>Please note that up to version <code>2.6.10</code> the header name was <code>correlation-context</code> instead of <code>baggage</code>. The header value format remained unchanged.</p>
+</div></div><p>Within <a href="/inspectit-ocelot/docs/next/instrumentation/actions">actions</a>, data can be read from or written into HTTP headers.
 The <em>inspectIT context</em> <code>_context</code> <a href="/inspectit-ocelot/docs/next/instrumentation/actions#special-parameter">special parameter</a> offers
 multiple methods for <code>GLOBAL</code> propagation.</p>
 <ul>
@@ -162,34 +168,110 @@ multiple methods for <code>GLOBAL</code> propagation.</p>
 <p>With these methods data can only be read from or written into the current <em>inspectIT context</em>. The data has to be further propagated
 to be accessible in other locations, e.g. other <a href="/inspectit-ocelot/docs/next/instrumentation/scopes">scopes</a>.
 The <a href="https://github.com/inspectIT/inspectit-ocelot/tree/master/inspectit-ocelot-config/src/main/resources/rocks/inspectit/ocelot/config/default/instrumentation/actions/http">inspectIT default instrumentation</a> provides some examples for using these methods.</p>
+<h3><a class="anchor" aria-hidden="true" id="restrictions"></a><a href="#restrictions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Restrictions</h3>
+<p>InspectIT Ocelot allows a maximum size of <strong>4 KB</strong> for the <code>baggage</code> header.
+If incoming baggage exceeds this limit, inspectIT will not read the header at all.
+If outgoing baggage exceeds this limit, all data tags exceeding the size limit will be dropped.
+Thus, the outgoing baggage will be incomplete.</p>
+<h3><a class="anchor" aria-hidden="true" id="browser-security"></a><a href="#browser-security" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Browser Security</h3>
+<p>Browser security measurements prevent JavaScript from reading custom headers such as <code>baggage</code> from cross-origin
+requests. Thus, since version <code>2.6.12</code> the methods mentioned above will automatically add another
+<code>Access-Control-Expose-Headers</code> header for up-propagation. This additional header allows JavaScript
+to read the <code>baggage</code> header. Cross-origin requests between JVMs normally do not require this header.</p>
+<pre><code class="hljs"><span class="hljs-keyword">access</span>-control-expose-headers: baggage
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="session-storage"></a><a href="#session-storage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Session Storage</h2>
+<p>If data should be available across multiple requests to the JVM, inspectIT Ocelot allows you to cache such data
+within a global session storage. After data has been written into the storage, every <em>inspectIT context</em>
+assigned to the session has access to this data. To assign a session to a context,
+you will have to write the session identification into the <code>remote_session_id</code> key via <a href="/inspectit-ocelot/docs/next/instrumentation/actions">actions</a>.
+By default, this data key will be down propagated within the JVM.
+<strong>Only after</strong> this specific data key has been set within the context, it can read from or write into the session storage.
+Note, that every context can be assigned to only <strong>one</strong> session.</p>
+<p>How the session ID is determined depends on your particular application and is not subject to any further restrictions.
+It is also possible to read the session ID from HTTP headers, which will be explained in more detail below.</p>
+<p>The following example shows how to read or write via the session storage.
+Reading a data from the storage - for example for tracing - only works, if the <a href="/inspectit-ocelot/docs/next/instrumentation/rules">rule</a> writing the tag
+has been executed before the reading one. Also note, that both contexts have to use the exact same session ID
+to access the storage. Otherwise, the contexts will use different storages with different data.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">data:</span>
+      <span class="hljs-attr">my-tag:</span>
+        <span class="hljs-comment"># enable this tag to be stored for sessions</span>
+        <span class="hljs-attr">session-storage:</span> <span class="hljs-literal">true</span> 
+        
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">r_write_session:</span>
+        <span class="hljs-comment"># ...</span>
+        <span class="hljs-attr">pre-entry:</span>
+          <span class="hljs-comment"># assign the session id to the context</span>
+          <span class="hljs-attr">remote_session_id:</span> 
+            <span class="hljs-attr">action:</span> <span class="hljs-string">a_read_my_session_id</span>
+        <span class="hljs-attr">entry:</span>
+          <span class="hljs-attr">my-tag:</span>
+            <span class="hljs-attr">action:</span> <span class="hljs-string">a_set_tag</span>
+        
+      <span class="hljs-attr">r_read_session:</span>
+        <span class="hljs-comment"># ...</span>
+        <span class="hljs-attr">pre-entry:</span>
+          <span class="hljs-comment"># assign the session id to the context</span>
+          <span class="hljs-attr">remote_session_id:</span>
+            <span class="hljs-attr">action:</span> <span class="hljs-string">a_read_my_session_id</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">attributes:</span>
+            <span class="hljs-comment"># use the tag in the session storage e.g. for tracing</span>
+            <span class="hljs-attr">tag:</span> <span class="hljs-string">my-tag</span>
 
-    <div class="admonition admonition-important">
+</code></pre>
+<p>Under <code>inspectit.instrumentation.sessions</code>, there are some additional configuration options available.
+All options can be updated at runtime.</p>
+<table>
+<thead>
+<tr><th>Config Property</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>session-id-header</code></td><td><code>Session-Id</code></td><td>HTTP-header, which will be used to determine the session.</td></tr>
+<tr><td><code>session-limit</code></td><td><code>100</code></td><td>The maximum limit of sessions stored at the same time.</td></tr>
+<tr><td><code>time-to-live</code></td><td><code>5m</code></td><td>The duration for which data will be stored.</td></tr>
+</tbody>
+</table>
+<h3><a class="anchor" aria-hidden="true" id="reading-session-id-via-http"></a><a href="#reading-session-id-via-http" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Reading Session ID via HTTP</h3>
+<p>The session ID can also be passed to the <em>inspectIT context</em> via HTTP headers.
+Within <a href="/inspectit-ocelot/docs/next/instrumentation/actions">actions</a>, you can call the method <code>readDownPropagationHeaders(Map&lt;String,String&gt; headers)</code>
+via the <code>_context</code> <a href="/inspectit-ocelot/docs/next/instrumentation/actions#special-parameter">special parameter</a> to read the session ID.
+The method will look for the configured <code>session-id-header</code> and will store its value in the <code>remote_session_id</code>
+data key. The inspectIT <a href="/inspectit-ocelot/docs/next/default-instrumentation/default-instrumentation">default instrumentation</a>
+of the HTTP Servlet already reads the down propagated headers automatically to extract the session ID.</p>
+<p>Alternatively, you can always include the session ID into the <a href="#baggage">baggage</a> header by configuring the data key
+<code>remote_session_id</code> for <code>GLOBAL</code> propagation. However, the context will always prioritize the value of
+the <code>session-id-header</code>, if it can be found.</p>
+<h3><a class="anchor" aria-hidden="true" id="restrictions-1"></a><a href="#restrictions-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Restrictions</h3>
+<p>To prevent excessive memory consumption, the maximum amount of active sessions can be configured via the <code>session-limit</code> option.
+The session ID itself is restricted to a minimum of 16 characters and a maximum of 512 characters. Otherwise, the session
+cannot be created. One session can store up to 128 data tags. Inside one session, data keys are restricted to a
+maximum of 128 characters and data value are restricted to a maximum of 2048 chars.
+If a date entry does not comply with these size restrictions, the entry will not be stored.</p>
+<p>The configuration option <code>time-to-live</code> determines, how long each tag should be stored after it's last update.
+Every 30 seconds all expired data tags from each session storage will be cleaned up. If a session storage has been empty
+for at least 60 seconds, the session storage will be removed completely.</p>
+<h2><a class="anchor" aria-hidden="true" id="browser-propagation"></a><a href="#browser-propagation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Browser Propagation</h2>
+
+    <div class="admonition admonition-warning">
       <div class="admonition-heading">
-        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"/></svg></div> important</h5>
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></div> warning</h5>
       </div>
       <div class="admonition-content">
-    <p>Please note that up to version <code>2.6.10</code> the header name was <code>correlation-context</code> instead of <code>baggage</code>. The header value format remained unchanged.</p>
-</div></div><h2><a class="anchor" aria-hidden="true" id="browser-propagation-deprecated"></a><a href="#browser-propagation-deprecated" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Browser Propagation (deprecated)</h2>
-<!-- 
-Please rework (or remove) browser propagation, so it is no longer possible to speak with the agent from outside
-See: https://github.com/inspectIT/inspectit-ocelot/issues/1703
--->
-<p>Data enabled for browser propagation will be stored inside a special dictionary.
-This dictionary can be exposed via REST-API, if the <a href="/inspectit-ocelot/docs/next/tags/tags-exporters#http-exporter">Tags-HTTP-Exporter</a> is enabled.
+    <p><strong>This features is deprecated!</strong> We recommend to propagate data via <a href="#baggage">baggage</a> instead, so the agent does not expose an API.</p>
+</div></div><p>Data enabled for browser propagation will be also be stored inside <a href="#session-storage">session storages</a>.
+These storages can be exposed via REST-API, if the <a href="/inspectit-ocelot/docs/next/tags/tags-exporters#http-exporter">Tags-HTTP-Exporter</a> is enabled.
 A browser can read this data via GET-requests.</p>
-<p>Additionally, a browser can write data into the storage via PUT-requests, if browser- as well as down-propagation is
-enabled for a data key. The data written by the browser will be stored in the <em>inspectIT context</em>.
-Please note, before writing or reading browser propagation data, you need to provide a session-ID inside the request-header.
-After that, all data belonging to the current session will be stored behind this session-ID.
+<p>Additionally, a browser can write data into the storage via PUT-requests, if browser-propagation is
+enabled for the data key.
+Please note, before writing or reading browser propagation data, you need to provide a session ID inside the request-header.
+After that, all data belonging to the current session will be stored behind this session ID.
 For more information, see <a href="/inspectit-ocelot/docs/next/tags/tags-exporters#http-exporter">Tags-HTTP-Exporter</a>.</p>
-
-    <div class="admonition admonition-important">
-      <div class="admonition-heading">
-        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"/></svg></div> important</h5>
-      </div>
-      <div class="admonition-content">
-    <p>We recommend to propagate data via <a href="#baggage">baggage</a> instead, so the agent does not expose an API.</p>
-</div></div></span></div></article></div><div class="docLastUpdate"><em>Last updated on 6/23/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/rules"><span class="arrow-prev">← </span><span>Rules</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/metrics"><span>Collecting Metrics</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li><li><a href="#baggage">Baggage</a></li><li><a href="#browser-propagation-deprecated">Browser Propagation (deprecated)</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 7/14/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/rules"><span class="arrow-prev">← </span><span>Rules</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/metrics"><span>Collecting Metrics</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li><li><a href="#baggage">Baggage</a><ul class="toc-headings"><li><a href="#restrictions">Restrictions</a></li><li><a href="#browser-security">Browser Security</a></li></ul></li><li><a href="#session-storage">Session Storage</a><ul class="toc-headings"><li><a href="#reading-session-id-via-http">Reading Session ID via HTTP</a></li><li><a href="#restrictions-1">Restrictions</a></li></ul></li><li><a href="#browser-propagation">Browser Propagation</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
