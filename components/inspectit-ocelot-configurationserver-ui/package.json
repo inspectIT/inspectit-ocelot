@@ -75,7 +75,7 @@
     "@storybook/addon-essentials": "^8.1.11",
     "@storybook/addon-links": "^8.1.11",
     "@storybook/react": "^7.6.19",
-    "babel-loader": "^9.2.1",
+    "babel-loader": "^10.0.0",
     "eslint": "8.55.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-webpack": "^0.13.2",
