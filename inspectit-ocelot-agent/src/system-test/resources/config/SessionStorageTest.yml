@@ -1,0 +1,98 @@
+inspectit:
+  metrics:
+    definitions:
+      # use these metrics to validate the existence of the tag
+      first-session-call:
+        unit: calls
+        views:
+          first-session-call:
+            aggregation: COUNT
+            tags:
+              session-storage-sys-test-key: true
+      second-session-call:
+        unit: calls
+        views:
+          second-session-call:
+            aggregation: COUNT
+            tags:
+              session-storage-sys-test-key: true
+      third-session-call:
+        unit: calls
+        views:
+          third-session-call:
+            aggregation: COUNT
+            tags:
+              session-storage-sys-test-key: true
+
+  instrumentation:
+    # tag to store for a session
+    data:
+      session-storage-sys-test:
+        session-storage: true
+
+    scopes:
+      SessionStorageTest-firstMethod:
+        type:
+          name: SessionStorageSysTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: firstMethod
+
+      SessionStorageTest-secondMethod:
+        type:
+          name: SessionStorageSysTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: secondMethod
+
+      SessionStorageTest-thirdMethod:
+        type:
+          name: SessionStorageSysTest
+          matcher-mode: ENDS_WITH
+        methods:
+          - name: thirdMethod
+
+    rules:
+      # set tag in first method for session
+      SessionStorageTest-first:
+        scopes:
+          SessionStorageTest-firstMethod: true
+        entry:
+          remote_session_id: # special data key for session-id
+            action: a_assign_value
+            constant-input:
+              value: my-very-awesome-session-id
+        post-entry:
+          session-storage-sys-test:
+            action: a_assign_value
+            constant-input:
+              value: session-storage-sys-test-value
+        metrics:
+          first-session-call:
+            value: 1
+            data-tags:
+              session-storage-sys-test-key: session-storage-sys-test
+
+      # use tag from session without explicitly setting it
+      SessionStorageTest-second:
+        scopes:
+          SessionStorageTest-secondMethod: true
+        entry:
+          remote_session_id: # special data key for session-id
+            action: a_assign_value
+            constant-input:
+              value: my-very-awesome-session-id
+        metrics:
+          second-session-call:
+            value: 1
+            data-tags:
+              session-storage-sys-test-key: session-storage-sys-test
+
+      SessionStorageTest-third:
+        scopes:
+          SessionStorageTest-thirdMethod: true
+        metrics:
+          third-session-call:
+            value: 1
+            data-tags:
+              session-storage-sys-test-key: session-storage-sys-test

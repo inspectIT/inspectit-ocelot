@@ -30,8 +30,14 @@ class CompositePropagationMetaData implements PropagationMetaData {
     private Map<String, PropagationMode> upPropagationOverrides;
 
     /**
+     * Maps data keys to override for the session-storage settings.
+     */
+    private Map<String, Boolean> sessionStorageOverrides;
+
+    /**
      * Maps data keys to overrides for the browser-propagation settings.
      */
+    @Deprecated
     private Map<String, Boolean> browserPropagationOverrides;
 
     /**
@@ -101,6 +107,12 @@ class CompositePropagationMetaData implements PropagationMetaData {
     }
 
     @Override
+    public boolean isStoredForSession(String dataKey) {
+        Boolean isActive = sessionStorageOverrides.get(dataKey);
+        return isActive != null ? isActive : parent.isStoredForSession(dataKey);
+    }
+
+    @Override
     public boolean isPropagatedWithBrowser(String dataKey) {
         Boolean isActive = browserPropagationOverrides.get(dataKey);
         return isActive != null ? isActive : parent.isPropagatedWithBrowser(dataKey);
@@ -122,12 +134,14 @@ class CompositePropagationMetaData implements PropagationMetaData {
                 result.parent = cParent.parent;
                 result.downPropagationOverrides = new HashMap<>(cParent.downPropagationOverrides);
                 result.upPropagationOverrides = new HashMap<>(cParent.upPropagationOverrides);
+                result.sessionStorageOverrides = new HashMap<>(cParent.sessionStorageOverrides);
                 result.browserPropagationOverrides = new HashMap<>(cParent.browserPropagationOverrides);
                 result.tagOverrides = new HashMap<>(cParent.tagOverrides);
             } else {
                 result.parent = parent;
                 result.downPropagationOverrides = new HashMap<>();
                 result.upPropagationOverrides = new HashMap<>();
+                result.sessionStorageOverrides = new HashMap<>();
                 result.browserPropagationOverrides = new HashMap<>();
                 result.tagOverrides = new HashMap<>();
             }
@@ -148,6 +162,12 @@ class CompositePropagationMetaData implements PropagationMetaData {
         @Override
         public Builder setUpPropagation(String dataKey, PropagationMode propagation) {
             result.upPropagationOverrides.put(dataKey, propagation);
+            return this;
+        }
+
+        @Override
+        public Builder setSessionStorage(String dataKey, Boolean isActive) {
+            result.sessionStorageOverrides.put(dataKey, isActive);
             return this;
         }
 

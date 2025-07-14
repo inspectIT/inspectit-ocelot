@@ -3,6 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.context;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.util.concurrent.TimeUnit;
@@ -20,8 +21,9 @@ public class ContextManagerPerfTest {
     public void init() {
         CommonTagsManager commonTagsManager = new CommonTagsManager();
         InstrumentationConfigurationResolver configurationResolver = new InstrumentationConfigurationResolver();
+        PropagationSessionStorage sessionStorage = new PropagationSessionStorage();
 
-        myContextManager = new ContextManager(commonTagsManager, configurationResolver);
+        myContextManager = new ContextManager(commonTagsManager, sessionStorage, configurationResolver);
         thread = Thread.currentThread();
     }
 

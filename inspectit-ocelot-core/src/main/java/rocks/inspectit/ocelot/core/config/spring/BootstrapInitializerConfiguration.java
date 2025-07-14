@@ -16,6 +16,7 @@ import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachmentsImpl;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.LogTraceCorrelatorImpl;
 import rocks.inspectit.ocelot.core.instrumentation.correlation.log.MdcAccessManager;
+import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.opentelemetry.OpenTelemetryControllerImpl;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
@@ -33,8 +34,8 @@ import javax.annotation.PreDestroy;
 public class BootstrapInitializerConfiguration {
 
     @Bean(ContextManager.BEAN_NAME)
-    public ContextManager getContextManager(CommonTagsManager commonTagsManager, InstrumentationConfigurationResolver config) {
-        ContextManager contextManager = new ContextManager(commonTagsManager, config);
+    public ContextManager getContextManager(CommonTagsManager commonTagsManager, PropagationSessionStorage sessionStorage, InstrumentationConfigurationResolver config) {
+        ContextManager contextManager = new ContextManager(commonTagsManager, sessionStorage, config);
         Instances.contextManager = contextManager;
         return contextManager;
     }
