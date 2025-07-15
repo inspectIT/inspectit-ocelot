@@ -10,10 +10,14 @@ public class GenericActionTemplate implements IGenericAction, DoNotInstrumentMar
 
     public static final IGenericAction INSTANCE = new GenericActionTemplate();
 
+    /**
+     * Global general purpose cache, which can be used within every action.
+     * No input variable is required to use {@code _cache} within actions.
+     */
     private static final Map<Object, Object> _cache = new ConcurrentHashMap<>();
 
     /**
-     * This methods body will be replaced via javassist to the actual generic action code.
+     * This method's body will be replaced via javassist to the actual generic action code.
      */
     public static Object executeImpl(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] actionArguments) {
         return null;

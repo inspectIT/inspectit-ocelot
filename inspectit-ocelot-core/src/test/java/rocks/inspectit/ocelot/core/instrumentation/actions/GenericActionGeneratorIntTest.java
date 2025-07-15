@@ -268,6 +268,4 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
         assertThat(getInstance(action).execute(null, null, new int[]{1, 2, 3}, null, new Object[]{cachedValue})).isNull();
         assertThat(getInstance(action).execute(null, null, new int[]{1, 2, 3}, null, new Object[]{"something"})).isSameAs(cachedValue);
     }
-
 }
-
