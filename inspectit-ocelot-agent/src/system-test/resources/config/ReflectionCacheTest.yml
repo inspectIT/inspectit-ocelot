@@ -1,0 +1,46 @@
+inspectit:
+  metrics:
+    definitions:
+      reflectionInvokedMethod:
+        unit: invocations
+        views:
+          reflectionInvokedMethod:
+            aggregation: COUNT
+            tags:
+              field: true
+
+  instrumentation:
+    scopes:
+      ReflectionCacheTest-instrumentedMethod:
+        type: { name: ReflectionCacheTest, matcher-mode: ENDS_WITH}
+        methods: [{name: instrumentedMethod}]
+
+
+    actions:
+      ReflectionCacheTest-getFieldValue:
+        input:
+          _class: Class
+          _this: Object
+          _reflection: ReflectionCache
+        value: _reflection.getFieldValue(_class, _this, "hiddenField")
+
+      ReflectionCacheTest-invokeMethod:
+        input:
+          _class: Class
+          _this: Object
+          _reflection: ReflectionCache
+        value: _reflection.invokeMethod(_class, _this, "hiddenMethod", null)
+
+    rules:
+      ReflectionCacheTest:
+        scopes: { ReflectionCacheTest-instrumentedMethod: true }
+        entry:
+          fieldValue:
+            action: ReflectionCacheTest-getFieldValue
+          invokedMethodResult:
+            action: ReflectionCacheTest-invokeMethod
+        metrics:
+          reflectionInvokedMethod:
+            value: invokedMethodResult
+            data-tags:
+              field: fieldValue
