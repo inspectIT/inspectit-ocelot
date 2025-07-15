@@ -131,6 +131,74 @@ Normally, all non `java.lang.*` types have to be referred to using their fully q
 in the example above. However, just like in Java you can import packages using the `import` config option. 
 In this example this allows us to refer to `ServletRequest` and `HttpServletRequest` without using the fully qualified name.
 
+## Caching
+
+Repeatedly accessing the same data might create unnecessary performance overhead. Thus, actions allow to cache data 
+for general purpose. Such data can be read or overwritten within the same action. If multiple rules use the same action,
+all of these rules will use the same cache. If an action has been changed, the cached data will be dropped.
+The cache resembles an ordinary Java map and provides all of its methods. The cache is also thread safe.
+You can use the cache via the `_cache` variable, which does not have to be included as input parameter.
+
+The example below shows how to use the cache:
+
+```yaml
+inspectit:
+  instrumentation:
+    actions:
+      # access the data, cache after first access
+      a_get_data:
+        input:
+          key: Object
+        value-body: |
+          Object data = _cache.get(key);
+          if (data == null) {
+            data = "Reading data...";
+            _cache.put(key, data);
+          }
+          return data;
+
+      # this action will use another cache
+      a_get_other_data:
+        # ...
+```
+
+### Reflection
+
+In order to access and cache `java.lang.reflect.Field` or `java.lang.reflect.Method` instances, you can use the `_reflection` variable,
+which works similarly to the `_cache` variable. Reflection helps you to access fields or invoke methods, which are normally
+not accessible. Note that trying to access non-existing fields or methods will throw an exception and disable the action
+until it has been updated. If a `Field` or `Method` has been found, it will be cached. However, you can only access these instances
+via the `_reflection` variable.
+The method `getFieldValue()` expects a class, an instance of such class and the field name.
+The method `invokeMethod()` expects a class, an instance of such class, the method name and the method arguments, if existing.
+
+The example below shows how to use reflection:
+
+```yaml
+inspectit:
+  instrumentation:
+    actions:
+      # access a field via reflection
+      a_get_field:
+        input:
+          _class: Class
+          instance: MyClass
+          fieldName: String
+        # return the field value
+        value: _reflection.getFieldValue(_class, instance, fieldName)
+
+      # invoke a method via reflection
+      a_invoke_method:
+        input:
+          _class: Class
+          instance: MyClass
+          methodName: String
+          firstArg: Object
+          secondArg: Object
+        # return the result of the invoked method
+        value: _reflection.invokeMethod(_class, instance, methodName, firstArg, secondArg)
+```
+
 ## Default Actions
 
 InspectIT Ocelot provides a large set of default actions, which can be used within any configuration.
