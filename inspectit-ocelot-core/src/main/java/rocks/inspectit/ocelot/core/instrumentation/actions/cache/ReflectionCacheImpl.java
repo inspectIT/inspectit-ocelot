@@ -1,5 +1,7 @@
 package rocks.inspectit.ocelot.core.instrumentation.actions.cache;
 
+import rocks.inspectit.ocelot.bootstrap.exposed.ReflectionCache;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -7,10 +9,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * A specialized cache specifically for instances accessed via reflection.
- */
-public class ReflectionCache {
+public class ReflectionCacheImpl implements ReflectionCache {
+
+    /**
+     * The name of this bean, initialized via the {@link rocks.inspectit.ocelot.core.config.spring.BootstrapInitializerConfiguration}
+     */
+    public static final String BEAN_NAME = "reflectionCache";
 
     /** Cached fields */
     private final Map<FieldKey, Field> fieldCache = new ConcurrentHashMap<>();
@@ -18,30 +22,13 @@ public class ReflectionCache {
     /** Cached methods */
     private final Map<MethodKey, Method> methodCache = new ConcurrentHashMap<>();
 
-    /**
-     * Access a specific field value via reflection. Can be called within actions via {@code _reflection}.
-     *
-     * @param clazz the class containing the field
-     * @param instance the instance of the class
-     * @param fieldName the name of the field
-     *
-     * @return the value of field
-     */
+    @Override
     public Object getFieldValue(Class<?> clazz, Object instance, String fieldName) throws NoSuchFieldException, IllegalAccessException {
         Field field = getField(clazz, fieldName);
         return field.get(instance);
     }
 
-    /**
-     * Invokes a specific method via reflection. Can be called within actions via {@code _reflection}.
-     *
-     * @param clazz the class defining the method
-     * @param instance the instance of the class
-     * @param methodName the name of the method
-     * @param args the provided method arguments, if existing
-     *
-     * @return the result of the invoked method
-     */
+   @Override
     public Object invokeMethod(Class<?> clazz, Object instance, String methodName, Object... args) throws ReflectiveOperationException {
         if (args == null) args = new Object[]{};
 

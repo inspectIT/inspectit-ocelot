@@ -6,15 +6,17 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class ReflectionCacheTest {
+public class ReflectionCacheImplTest {
 
     private static final String fieldValue = "test";
 
-    private ReflectionCache reflectionCache;
+    private static final Integer methodResult = 0;
+
+    private ReflectionCacheImpl reflectionCache;
 
     @BeforeEach
     void beforeEach() {
-        reflectionCache = new ReflectionCache();
+        reflectionCache = new ReflectionCacheImpl();
     }
 
     @Test
@@ -55,7 +57,7 @@ public class ReflectionCacheTest {
     void shouldReturnResultOfInvokedStaticMethod() throws Exception {
         Object result = reflectionCache.invokeMethod(DummyClass.class, null, "zero");
 
-        assertThat(result).isEqualTo(0);
+        assertThat(result).isEqualTo(methodResult);
     }
 
     @Test
@@ -95,7 +97,7 @@ public class ReflectionCacheTest {
         }
 
         private static int zero() {
-            return 0;
+            return methodResult;
         }
 
         private void empty() {}
