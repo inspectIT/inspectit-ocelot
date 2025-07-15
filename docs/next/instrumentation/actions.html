@@ -145,6 +145,7 @@ input parameter is given below:</p>
 <tr><td><code>_thrown</code></td><td><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html">Throwable</a></td><td>The exception thrown by the instrumented method within which this action is getting executed. If the method returned normally or the action is executed in the entry phase this is <code>null</code>.</td></tr>
 <tr><td><code>_context</code></td><td><a href="https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitContext.java">InspectitContext</a></td><td>Gives direct read and write access to the current <a href="/inspectit-ocelot/docs/next/instrumentation/data-propagation">context</a>. Can be used as data dictionary or to implement custom data propagation.</td></tr>
 <tr><td><code>_attachments</code></td><td><a href="https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/ObjectAttachments.java">ObjectAttachments</a></td><td>Allows you to attach values to Java objects instead of to the control flow, as done via <code>_context</code>. This enables sharing data across multiple threads.</td></tr>
+<tr><td><code>_reflection</code></td><td><a href="https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/ReflectionCache.java">ReflectionCache</a></td><td>Allows you to access and cache fields and methods via reflection.</td></tr>
 </tbody>
 </table>
 <h2><a class="anchor" aria-hidden="true" id="multiple-statements-and-imports"></a><a href="#multiple-statements-and-imports" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Multiple Statements and Imports</h2>
@@ -174,6 +175,66 @@ For this reason the action performs an instance-of check only returning the HTTP
 <p>Normally, all non <code>java.lang.*</code> types have to be referred to using their fully qualified name, as done for <code>java.net.URI</code>
 in the example above. However, just like in Java you can import packages using the <code>import</code> config option.
 In this example this allows us to refer to <code>ServletRequest</code> and <code>HttpServletRequest</code> without using the fully qualified name.</p>
+<h2><a class="anchor" aria-hidden="true" id="caching"></a><a href="#caching" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Caching</h2>
+<p>Repeatedly accessing the same data might create unnecessary performance overhead. Thus, actions allow to cache data
+for general purpose. Such data can be read or overwritten within the same action. If multiple <a href="/inspectit-ocelot/docs/next/instrumentation/rules">rules</a>
+use the same action, all of these rules will use the same cache. If an action has been changed, the cached data will be dropped.
+The cache resembles an ordinary Java <code>Map&lt;Object, Object&gt;</code> and is thread safe.
+You can use the cache via the <code>_cache</code> variable, which does not have to be included as input parameter.</p>
+<p>The example below shows how to use the cache:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">actions:</span>
+      <span class="hljs-comment"># access the data, cache after first access</span>
+      <span class="hljs-attr">a_get_data:</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">key:</span> <span class="hljs-string">Object</span>
+        <span class="hljs-attr">value-body:</span> <span class="hljs-string">|
+          Object data = _cache.get(key);
+          if (data == null) {
+            data = "Reading data...";
+            _cache.put(key, data);
+          }
+          return data;
+</span>
+      <span class="hljs-comment"># this action will use another cache</span>
+      <span class="hljs-attr">a_get_other_data:</span>
+        <span class="hljs-comment"># ...</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="reflection"></a><a href="#reflection" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Reflection</h3>
+<p>As mentioned above, in order to access and cache <code>java.lang.reflect.Field</code> or <code>java.lang.reflect.Method</code> instances,
+you can use the <code>_reflection</code> special parameter. Reflection helps you to access fields or invoke methods, which are normally
+not accessible, because they are not visible for the instrumented method. Note that trying to access non-existing fields
+or methods will throw an exception and disable the action until it has been updated.
+If a <code>Field</code> or <code>Method</code> has been found, it will be cached. However, you can only use these instances via the <code>_reflection</code> variable.
+The method <code>getFieldValue()</code> expects a class, an instance of such class and the field name.
+The method <code>invokeMethod()</code> expects a class, an instance of such class, the method name and the method arguments, if existing.</p>
+<p>The example below shows how to use reflection:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">actions:</span>
+      <span class="hljs-comment"># access a field via reflection</span>
+      <span class="hljs-attr">a_get_field_value:</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">_reflection:</span> <span class="hljs-string">ReflectionCache</span>
+          <span class="hljs-attr">_class:</span> <span class="hljs-string">Class</span>
+          <span class="hljs-attr">instance:</span> <span class="hljs-string">Object</span>
+          <span class="hljs-attr">fieldName:</span> <span class="hljs-string">String</span>
+        <span class="hljs-comment"># return the field value</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">_reflection.getFieldValue(_class,</span> <span class="hljs-string">instance,</span> <span class="hljs-string">fieldName)</span>
+
+      <span class="hljs-comment"># access a method via reflection</span>
+      <span class="hljs-attr">a_invoke_method:</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">_reflection:</span> <span class="hljs-string">ReflectionCache</span>
+          <span class="hljs-attr">_class:</span> <span class="hljs-string">Class</span>
+          <span class="hljs-attr">instance:</span> <span class="hljs-string">Object</span>
+          <span class="hljs-attr">methodName:</span> <span class="hljs-string">String</span>
+          <span class="hljs-attr">firstArg:</span> <span class="hljs-string">Object</span>
+          <span class="hljs-attr">secondArg:</span> <span class="hljs-string">Object</span>
+        <span class="hljs-comment"># return the result of the invoked method</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">_reflection.invokeMethod(_class,</span> <span class="hljs-string">instance,</span> <span class="hljs-string">methodName,</span> <span class="hljs-string">firstArg,</span> <span class="hljs-string">secondArg)</span>
+</code></pre>
 <h2><a class="anchor" aria-hidden="true" id="default-actions"></a><a href="#default-actions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Default Actions</h2>
 <p>InspectIT Ocelot provides a large set of default actions, which can be used within any configuration.
 Such actions allow you for example to assign values to data keys, print debug information or replace strings via regex.
@@ -267,17 +328,17 @@ For this, we provide the default actions <code>a_attachment_get</code>, <code>a_
 <pre><code class="hljs css language-yaml"><span class="hljs-attr">rules:</span>
   <span class="hljs-attr">r_rule:</span>
     <span class="hljs-attr">entry:</span>
-      <span class="hljs-attr">isEntry:</span>
+      <span class="hljs-attr">isEntry:</span> <span class="hljs-comment"># true</span>
         <span class="hljs-attr">action:</span> <span class="hljs-string">a_assign_true</span>
-      <span class="hljs-attr">isFalse:</span>
+      <span class="hljs-attr">isFalse:</span> <span class="hljs-comment"># false because isEntry is not null</span>
         <span class="hljs-attr">action:</span> <span class="hljs-string">a_logic_isNull</span>
         <span class="hljs-attr">data-input:</span>
           <span class="hljs-attr">value:</span> <span class="hljs-string">isEntry</span>
-      <span class="hljs-attr">isTrue:</span>
+      <span class="hljs-attr">isTrue:</span> <span class="hljs-comment"># true because isExit is null</span>
         <span class="hljs-attr">action:</span> <span class="hljs-string">a_logic_isNull</span>
         <span class="hljs-attr">data-input:</span> 
           <span class="hljs-attr">value:</span> <span class="hljs-string">isExit</span> <span class="hljs-comment"># data value not set</span>
-      <span class="hljs-attr">isAlsoFalse:</span>
+      <span class="hljs-attr">isAlsoFalse:</span> <span class="hljs-comment"># false because only one is true</span>
         <span class="hljs-attr">action:</span> <span class="hljs-string">a_logic_and</span>
         <span class="hljs-attr">data-input:</span>
           <span class="hljs-attr">a:</span> <span class="hljs-string">isFalse</span>
@@ -301,7 +362,7 @@ and <code>a_regex_extractMatch_multi</code>.</p>
           <span class="hljs-attr">'pattern':</span> <span class="hljs-string">'\/apps\/.+\/.+'</span>
           <span class="hljs-attr">'replacement':</span> <span class="hljs-string">'/apps/{service}/{location}'</span>
 </code></pre>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 7/14/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/scopes"><span class="arrow-prev">← </span><span>Scopes</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/rules"><span>Rules</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#defining-actions">Defining Actions</a></li><li><a href="#input-parameter">Input Parameter</a><ul class="toc-headings"><li><a href="#special-parameter">Special Parameter</a></li></ul></li><li><a href="#multiple-statements-and-imports">Multiple Statements and Imports</a></li><li><a href="#default-actions">Default Actions</a><ul class="toc-headings"><li><a href="#assigning-values">Assigning Values</a></li><li><a href="#attaching-values">Attaching Values</a></li><li><a href="#debugging">Debugging</a></li><li><a href="#logical-operators">Logical Operators</a></li><li><a href="#replacing-strings-via-regex">Replacing Strings via Regex</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 7/15/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/scopes"><span class="arrow-prev">← </span><span>Scopes</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/instrumentation/rules"><span>Rules</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#defining-actions">Defining Actions</a></li><li><a href="#input-parameter">Input Parameter</a><ul class="toc-headings"><li><a href="#special-parameter">Special Parameter</a></li></ul></li><li><a href="#multiple-statements-and-imports">Multiple Statements and Imports</a></li><li><a href="#caching">Caching</a><ul class="toc-headings"><li><a href="#reflection">Reflection</a></li></ul></li><li><a href="#default-actions">Default Actions</a><ul class="toc-headings"><li><a href="#assigning-values">Assigning Values</a></li><li><a href="#attaching-values">Attaching Values</a></li><li><a href="#debugging">Debugging</a></li><li><a href="#logical-operators">Logical Operators</a></li><li><a href="#replacing-strings-via-regex">Replacing Strings via Regex</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
