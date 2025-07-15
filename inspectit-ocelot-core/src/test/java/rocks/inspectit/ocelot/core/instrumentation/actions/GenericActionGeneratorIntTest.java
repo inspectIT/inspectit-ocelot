@@ -269,5 +269,20 @@ public class GenericActionGeneratorIntTest extends SpringTestBase {
         assertThat(getInstance(action).execute(null, null, new int[]{1, 2, 3}, null, new Object[]{"something"})).isSameAs(cachedValue);
     }
 
-}
+    @Test
+    @DirtiesContext
+    void testReflectionCacheWorking() {
+        MyDummyClass dummyInstance = new MyDummyClass();
+        GenericActionConfig config = GenericActionConfig.builder()
+                .name("my-action")
+                .actionArgumentType("_this", "Object")
+                .expectedReturnValueType("Object")
+                .valueBody("return _reflection.getFieldValue(_this.getClass(), _this, \"MY_VALUE\");")
+                .build();
 
+        InjectedClass<? extends IGenericAction> action = generator.getOrGenerateGenericAction(config, dummyClass);
+
+        assertThat(getInstance(action).execute(null, dummyInstance, new int[]{1, 2, 3}, null, new Object[]{dummyInstance}))
+                .isEqualTo(0);
+    }
+}

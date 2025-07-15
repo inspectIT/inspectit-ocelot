@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.core.instrumentation.actions.template;
 
 import rocks.inspectit.ocelot.bootstrap.instrumentation.DoNotInstrumentMarker;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IGenericAction;
+import rocks.inspectit.ocelot.core.instrumentation.actions.cache.ReflectionCache;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,10 +11,20 @@ public class GenericActionTemplate implements IGenericAction, DoNotInstrumentMar
 
     public static final IGenericAction INSTANCE = new GenericActionTemplate();
 
+    /**
+     * Global general purpose cache, which can be used within every action.
+     * No input variable is required to use {@code _cache} within actions.
+     */
     private static final Map<Object, Object> _cache = new ConcurrentHashMap<>();
 
     /**
-     * This methods body will be replaced via javassist to the actual generic action code.
+     * Global cache to provide field and method instances via reflection.
+     * No input variable is required to use {@code _reflection} within actions.
+     */
+    private static final ReflectionCache _reflection = new ReflectionCache();
+
+    /**
+     * This method's body will be replaced via javassist to the actual generic action code.
      */
     public static Object executeImpl(Object[] instrumentedMethodArgs, Object thiz, Object returnValue, Throwable thrown, Object[] actionArguments) {
         return null;
