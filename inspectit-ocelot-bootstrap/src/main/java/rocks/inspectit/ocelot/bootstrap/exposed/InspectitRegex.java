@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.bootstrap.exposed;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -10,11 +11,20 @@ public interface InspectitRegex {
 
     /**
      * @param regex the regex expression
-     * @param toTest the string to test for the expression
+     * @param string the string to test for the expression
      *
      * @return true if the provided string matches the expression
      */
-    boolean matches(String regex, String toTest);
+    boolean matches(String regex, String string);
+
+    /**
+     *
+     * @param regex the regex expression
+     * @param string the string to test for the expression
+     *
+     * @return the matcher for the provided regex expression and string
+     */
+    Matcher matcher(String regex, String string);
 
     /**
      * Compiles and caches the pattern.

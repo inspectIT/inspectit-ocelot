@@ -9,39 +9,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class InspectitRegexImplTest {
 
-    private InspectitRegexImpl regexCache;
+    private InspectitRegexImpl regex;
 
     @BeforeEach
     void beforeEach() {
-        regexCache = new InspectitRegexImpl();
+        regex = new InspectitRegexImpl();
     }
 
     @Test
     void shouldMatchCorrectRegex() {
-        boolean result = regexCache.matches("\\d+", "12345");
+        boolean result = regex.matches("\\d+", "12345");
 
         assertThat(result).isTrue();
     }
 
     @Test
     void shouldNotMatchIncorrectRegex() {
-        boolean result = regexCache.matches("\\d+", "abc123");
+        boolean result = regex.matches("\\d+", "abc123");
 
         assertThat(result).isFalse();
     }
 
     @Test
     void shouldCacheCompiledPattern() {
-        Pattern first = regexCache.pattern("\\w+");
-        Pattern second = regexCache.pattern("\\w+");
+        Pattern first = regex.pattern("\\w+");
+        Pattern second = regex.pattern("\\w+");
 
         assertThat(first).isSameAs(second);
     }
 
     @Test
     void shouldReturnDifferentPatternsForDifferentRegexes() {
-        Pattern first = regexCache.pattern("\\w+");
-        Pattern second = regexCache.pattern("\\d+");
+        Pattern first = regex.pattern("\\w+");
+        Pattern second = regex.pattern("\\d+");
 
         assertThat(first).isNotSameAs(second);
     }

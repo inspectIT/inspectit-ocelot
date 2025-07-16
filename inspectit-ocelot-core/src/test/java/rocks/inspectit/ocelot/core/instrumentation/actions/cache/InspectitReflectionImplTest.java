@@ -12,25 +12,25 @@ public class InspectitReflectionImplTest {
 
     private static final Integer methodResult = 0;
 
-    private InspectitReflectionImpl reflectionCache;
+    private InspectitReflectionImpl reflection;
 
     @BeforeEach
     void beforeEach() {
-        reflectionCache = new InspectitReflectionImpl();
+        reflection = new InspectitReflectionImpl();
     }
 
     @Test
     void shouldReturnHiddenFieldValue() throws Exception {
         DummyClass dummy = new DummyClass();
 
-        Object result = reflectionCache.getFieldValue(DummyClass.class, dummy, "field");
+        Object result = reflection.getFieldValue(DummyClass.class, dummy, "field");
 
         assertThat(result).isEqualTo(fieldValue);
     }
 
     @Test
     void shouldReturnHiddenStaticFieldValue() throws Exception {
-        Object result = reflectionCache.getFieldValue(DummyClass.class, null, "staticField");
+        Object result = reflection.getFieldValue(DummyClass.class, null, "staticField");
 
         assertThat(result).isEqualTo(fieldValue);
     }
@@ -39,7 +39,7 @@ public class InspectitReflectionImplTest {
     void shouldThrowExceptionForMissingField() {
         DummyClass dummy = new DummyClass();
 
-        assertThatThrownBy(() -> reflectionCache.getFieldValue(DummyClass.class, dummy, "missing"))
+        assertThatThrownBy(() -> reflection.getFieldValue(DummyClass.class, dummy, "missing"))
                 .isInstanceOf(NoSuchFieldException.class);
     }
 
@@ -48,14 +48,14 @@ public class InspectitReflectionImplTest {
         DummyClass dummy = new DummyClass();
         String argument = "hello";
 
-        Object result = reflectionCache.invokeMethod(DummyClass.class, dummy, "greet", argument);
+        Object result = reflection.invokeMethod(DummyClass.class, dummy, "greet", argument);
 
         assertThat(result).isEqualTo(argument);
     }
 
     @Test
     void shouldReturnResultOfInvokedStaticMethod() throws Exception {
-        Object result = reflectionCache.invokeMethod(DummyClass.class, null, "zero");
+        Object result = reflection.invokeMethod(DummyClass.class, null, "zero");
 
         assertThat(result).isEqualTo(methodResult);
     }
@@ -64,7 +64,7 @@ public class InspectitReflectionImplTest {
     void shouldReturnNullForInvokedVoidMethod() throws Exception {
         DummyClass dummy = new DummyClass();
 
-        Object result = reflectionCache.invokeMethod(DummyClass.class, dummy, "empty");
+        Object result = reflection.invokeMethod(DummyClass.class, dummy, "empty");
 
         assertThat(result).isNull();
     }
@@ -74,15 +74,15 @@ public class InspectitReflectionImplTest {
         DummyClass dummy = new DummyClass();
 
         // Wrong name
-        assertThatThrownBy(() -> reflectionCache.invokeMethod(DummyClass.class, dummy, "missing"))
+        assertThatThrownBy(() -> reflection.invokeMethod(DummyClass.class, dummy, "missing"))
                 .isInstanceOf(NoSuchMethodException.class);
 
         // Too many arguments
-        assertThatThrownBy(() -> reflectionCache.invokeMethod(DummyClass.class, dummy, "greet", "arg1", "arg2"))
+        assertThatThrownBy(() -> reflection.invokeMethod(DummyClass.class, dummy, "greet", "arg1", "arg2"))
                 .isInstanceOf(NoSuchMethodException.class);
 
         // Wrong argument type
-        assertThatThrownBy(() -> reflectionCache.invokeMethod(DummyClass.class, dummy, "greet",0))
+        assertThatThrownBy(() -> reflection.invokeMethod(DummyClass.class, dummy, "greet",0))
                 .isInstanceOf(NoSuchMethodException.class);
     }
 

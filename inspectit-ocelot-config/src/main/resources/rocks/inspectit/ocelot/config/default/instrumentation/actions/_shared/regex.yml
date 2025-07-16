@@ -87,8 +87,7 @@ inspectit:
           if (string == null) {
             return null;
           }
-          Pattern regex = _regex.pattern(pattern);
-          Matcher m = regex.matcher(string);
+          Matcher m = _regex.matcher(pattern, string);
           if (m.matches()) {
             StringBuffer result = new StringBuffer();
             m.appendReplacement(result, replacement);
@@ -133,8 +132,7 @@ inspectit:
             Map patAndRepl = (Map) patterns_and_replacements.get(String.valueOf(i));
             String pattern = (String) patAndRepl.get("pattern");
             String replacement = Objects.toString(patAndRepl.get("replacement"));
-            Pattern regex = _regex.pattern(pattern);
-            Matcher m = regex.matcher(result);
+            Matcher m = _regex.matcher(pattern, result);
             if (m.matches()) {
               StringBuffer sb = new StringBuffer();
               m.appendReplacement(sb, replacement);
@@ -166,8 +164,7 @@ inspectit:
           if (string == null) {
             return null;
           }
-          Pattern regex = _regex.pattern(pattern);
-          Matcher m = regex.matcher(string);
+          Matcher m = _regex.matcher(pattern, string);
           if (m.matches()) {
             return m.replaceFirst(replacement);
           }
@@ -205,8 +202,7 @@ inspectit:
           if (string == null) {
             return null;
           }
-          Pattern regex = _regex.pattern(pattern);
-          Matcher m = regex.matcher(string);
+          Matcher m = _regex.matcher(pattern, string);
           if (m.matches()) {
             if (result instanceof String) {
               StringBuffer sb = new StringBuffer();
@@ -263,8 +259,7 @@ inspectit:
             Map patAndRepl = (Map) patterns_and_results.get(String.valueOf(i));
             String pattern = (String) patAndRepl.get("pattern");
             Object result = patAndRepl.get("result");
-            Pattern regex = _regex.pattern(pattern);
-            Matcher m = regex.matcher(string);
+            Matcher m = _regex.matcher(pattern, string);
             if (m.matches()) {
               if (result instanceof String) {
                 StringBuffer sb = new StringBuffer();
@@ -309,8 +304,7 @@ inspectit:
           if(string == null) {
             return null;
           }
-          Pattern regex = _regex.pattern(pattern);
-          Matcher m = regex.matcher(string);
+          Matcher m = _regex.matcher(pattern, string);
           if (m.find()) {
             if(result instanceof String) {
               StringBuffer sb = new StringBuffer();
@@ -366,8 +360,7 @@ inspectit:
             Map patAndRepl = (Map) patterns_and_results.get(String.valueOf(i));
             String pattern = (String) patAndRepl.get("pattern");
             Object result = patAndRepl.get("result");
-            Pattern regex = _regex.pattern(pattern);
-            Matcher m = regex.matcher(string);
+            Matcher m = _regex.matcher(pattern, string);
             if (m.find()) {
               if (result instanceof String) {
                 StringBuffer sb = new StringBuffer();
