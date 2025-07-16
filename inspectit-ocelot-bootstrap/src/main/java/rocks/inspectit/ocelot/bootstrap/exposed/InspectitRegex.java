@@ -14,7 +14,7 @@ public interface InspectitRegex {
      *
      * @return true if the provided string matches the expression
      */
-    Boolean matches(String regex, String toTest);
+    boolean matches(String regex, String toTest);
 
     /**
      * Compiles and caches the pattern.

@@ -9,7 +9,7 @@ public class NoopInspectitRegex implements InspectitRegex {
     public static final NoopInspectitRegex INSTANCE = new NoopInspectitRegex();
 
     @Override
-    public Boolean matches(String regex, String toTest) {
+    public boolean matches(String regex, String toTest) {
         return false;
     }
 

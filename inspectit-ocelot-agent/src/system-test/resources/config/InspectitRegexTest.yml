@@ -19,7 +19,7 @@ inspectit:
       InspectitRegexTest-matches:
         input:
           _regex: InspectitRegex
-        value: _regex.matches("\\d+", "12345")
+        value: Boolean.valueOf(_regex.matches("\\d+", "12345"))
 
     rules:
       InspectitRegexTest:

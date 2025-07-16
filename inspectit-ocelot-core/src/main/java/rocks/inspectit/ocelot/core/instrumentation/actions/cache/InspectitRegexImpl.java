@@ -20,7 +20,7 @@ public class InspectitRegexImpl implements InspectitRegex {
     private final Map<String, Pattern> patterns = new ConcurrentHashMap<>();
 
     @Override
-    public Boolean matches(String regex, String toTest) {
+    public boolean matches(String regex, String toTest) {
         Pattern pattern = pattern(regex);
         return pattern.matcher(toTest).matches();
     }

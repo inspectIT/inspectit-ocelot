@@ -82,11 +82,12 @@ inspectit:
           'string': 'String'
           'pattern': 'String'
           'replacement': 'String'
+          '_regex': 'InspectitRegex'
         value-body: |
           if (string == null) {
             return null;
           }
-          Pattern regex = Pattern.compile(pattern);
+          Pattern regex = _regex.pattern(pattern);
           Matcher m = regex.matcher(string);
           if (m.matches()) {
             StringBuffer result = new StringBuffer();
@@ -122,6 +123,7 @@ inspectit:
         input:
           'string': 'String'
           'patterns_and_replacements': 'Map'
+          '_regex': 'InspectitRegex'
         value-body: |
           if (string == null) {
             return null;
@@ -131,7 +133,7 @@ inspectit:
             Map patAndRepl = (Map) patterns_and_replacements.get(String.valueOf(i));
             String pattern = (String) patAndRepl.get("pattern");
             String replacement = Objects.toString(patAndRepl.get("replacement"));
-            Pattern regex = Pattern.compile(pattern);
+            Pattern regex = _regex.pattern(pattern);
             Matcher m = regex.matcher(result);
             if (m.matches()) {
               StringBuffer sb = new StringBuffer();
@@ -159,11 +161,12 @@ inspectit:
           'string': 'String'
           'pattern': 'String'
           'replacement': 'String'
+          '_regex': 'InspectitRegex'
         value-body: |
           if (string == null) {
             return null;
           }
-          Pattern regex = Pattern.compile(pattern);
+          Pattern regex = _regex.pattern(pattern);
           Matcher m = regex.matcher(string);
           if (m.matches()) {
             return m.replaceFirst(replacement);
@@ -197,11 +200,12 @@ inspectit:
           'string': 'String'
           'pattern': 'String'
           'result': 'Object'
+          '_regex': 'InspectitRegex'
         value-body: |
           if (string == null) {
             return null;
           }
-          Pattern regex = Pattern.compile(pattern);
+          Pattern regex = _regex.pattern(pattern);
           Matcher m = regex.matcher(string);
           if (m.matches()) {
             if (result instanceof String) {
@@ -250,6 +254,7 @@ inspectit:
         input:
           'string': 'String'
           'patterns_and_results': 'Map'
+          '_regex': 'InspectitRegex'
         value-body: |
           if (string == null) {
             return null;
@@ -258,7 +263,7 @@ inspectit:
             Map patAndRepl = (Map) patterns_and_results.get(String.valueOf(i));
             String pattern = (String) patAndRepl.get("pattern");
             Object result = patAndRepl.get("result");
-            Pattern regex = Pattern.compile(pattern);
+            Pattern regex = _regex.pattern(pattern);
             Matcher m = regex.matcher(string);
             if (m.matches()) {
               if (result instanceof String) {
@@ -299,11 +304,12 @@ inspectit:
           'string': 'String'
           'pattern': 'String'
           'result': 'Object'
+          '_regex': 'InspectitRegex'
         value: |
           if(string == null) {
             return null;
           }
-          Pattern regex = Pattern.compile(pattern);
+          Pattern regex = _regex.pattern(pattern);
           Matcher m = regex.matcher(string);
           if (m.find()) {
             if(result instanceof String) {
@@ -351,6 +357,7 @@ inspectit:
         input:
           'string': 'String'
           'patterns_and_results': 'Map'
+          '_regex': 'InspectitRegex'
         value-body: |
           if (string == null) {
             return null;
@@ -359,7 +366,7 @@ inspectit:
             Map patAndRepl = (Map) patterns_and_results.get(String.valueOf(i));
             String pattern = (String) patAndRepl.get("pattern");
             Object result = patAndRepl.get("result");
-            Pattern regex = Pattern.compile(pattern);
+            Pattern regex = _regex.pattern(pattern);
             Matcher m = regex.matcher(string);
             if (m.find()) {
               if (result instanceof String) {
