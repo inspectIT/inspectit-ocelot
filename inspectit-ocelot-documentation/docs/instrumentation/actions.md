@@ -99,6 +99,7 @@ input parameter is given below:
 | `_attachments`          | [ObjectAttachments](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/ObjectAttachments.java)     | Allows you to attach values to Java objects instead of to the control flow, as done via `_context`. This enables sharing data across multiple threads.                                                                  |
 | `_reflection`           | [InspectitReflection](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitReflection.java) | Allows you to access and cache fields and methods via reflection.                                                                                                                                                       |
 | `_regex`                | [InspectitRegex](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitRegex.java)           | Allows you to match and cache regex expressions.                                                                                                                                                                        |
+| `_agent`                | [InspectitAgentInfo](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitAgentInfo.java)   | Allows you to read agent information like the current version.                                                                                                                                                          |
 
 ## Multiple Statements and Imports
 
@@ -327,6 +328,24 @@ rules:
         data-input:
           a: some_value
           b: another_value
+```
+
+### Agent Information
+
+Under certain circumstances, you may not want to execute certain actions, or you may only want to execute them 
+if a certain agent version is used. For example, if a used function is only available from a certain version.
+Thus, we provide some actions to read or compare the agent version: `a_agent_version` and `a_agent_isAtLeast`
+
+```yaml
+rules:
+  r_rule:
+    entry:
+      version:
+        action: a_agent_version
+      isAvailable: 
+        action: a_agent_isAtLeast
+        constant-input:
+          version: "2.0.0"
 ```
 
 ### Logical Operators
