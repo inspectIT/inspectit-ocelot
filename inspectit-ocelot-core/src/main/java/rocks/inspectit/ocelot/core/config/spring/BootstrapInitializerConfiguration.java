@@ -58,7 +58,7 @@ public class BootstrapInitializerConfiguration {
         return reflection;
     }
 
-    @Bean
+    @Bean(InspectitRegexImpl.BEAN_NAME)
     public InspectitRegexImpl getInspectitRegex() {
         InspectitRegexImpl regex = new InspectitRegexImpl();
         Instances.regex = regex;

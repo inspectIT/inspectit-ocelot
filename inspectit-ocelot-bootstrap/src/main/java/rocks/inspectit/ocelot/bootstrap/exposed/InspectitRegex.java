@@ -18,7 +18,6 @@ public interface InspectitRegex {
     boolean matches(String regex, String string);
 
     /**
-     *
      * @param regex the regex expression
      * @param string the string to test for the expression
      *
