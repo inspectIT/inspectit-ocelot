@@ -2,16 +2,15 @@ package rocks.inspectit.ocelot.core.config.spring;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import rocks.inspectit.ocelot.bootstrap.AgentManager;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.noop.NoopContextManager;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopTraceIdInjector;
-import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopHookManager;
-import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopObjectAttachments;
-import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopInspectitReflection;
-import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopInspectitRegex;
+import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.*;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.NoopOpenTelemetryController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.core.AgentInfoImpl;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.actions.cache.InspectitReflectionImpl;
 import rocks.inspectit.ocelot.core.instrumentation.actions.cache.InspectitRegexImpl;
@@ -51,6 +50,14 @@ public class BootstrapInitializerConfiguration {
         return attachments;
     }
 
+    @Bean(AgentInfoImpl.BEAN_NAME)
+    public AgentInfoImpl getInspectitAgentInfo() {
+        String version = AgentManager.getAgentVersion();
+        AgentInfoImpl agentInfo = new AgentInfoImpl(version);
+        Instances.agentInfo = agentInfo;
+        return agentInfo;
+    }
+
     @Bean(InspectitReflectionImpl.BEAN_NAME)
     public InspectitReflectionImpl getInspectitReflection() {
         InspectitReflectionImpl reflection = new InspectitReflectionImpl();
@@ -82,6 +89,7 @@ public class BootstrapInitializerConfiguration {
     void destroy() {
         Instances.contextManager = NoopContextManager.INSTANCE;
         Instances.attachments = NoopObjectAttachments.INSTANCE;
+        Instances.agentInfo = NoopInspectitAgentInfo.INSTANCE;
         Instances.reflection = NoopInspectitReflection.INSTANCE;
         Instances.regex = NoopInspectitRegex.INSTANCE;
         Instances.hookManager = NoopHookManager.INSTANCE;
