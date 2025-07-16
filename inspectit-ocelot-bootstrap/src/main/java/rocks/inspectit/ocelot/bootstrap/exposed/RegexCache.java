@@ -14,7 +14,7 @@ public interface RegexCache {
      *
      * @return true if the provided string matches the expression
      */
-    boolean matches(String regex, String toTest);
+    Boolean matches(String regex, String toTest);
 
     /**
      * Compiles and caches the pattern.

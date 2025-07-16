@@ -9,7 +9,7 @@ public class NoopRegexCache implements RegexCache {
     public static final NoopRegexCache INSTANCE = new NoopRegexCache();
 
     @Override
-    public boolean matches(String regex, String toTest) {
+    public Boolean matches(String regex, String toTest) {
         return false;
     }
 

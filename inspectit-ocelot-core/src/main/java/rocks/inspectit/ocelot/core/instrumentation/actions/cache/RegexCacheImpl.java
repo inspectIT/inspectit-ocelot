@@ -13,10 +13,11 @@ public class RegexCacheImpl implements RegexCache {
      */
     public static final String BEAN_NAME = "regexCache";
 
+    /** Cached patterns */
     private final Map<String, Pattern> patterns = new ConcurrentHashMap<>();
 
     @Override
-    public boolean matches(String regex, String toTest) {
+    public Boolean matches(String regex, String toTest) {
         Pattern pattern = pattern(regex);
         return pattern.matcher(toTest).matches();
     }
