@@ -85,19 +85,20 @@ This means that for example `a_method_getClassFQN` can be called without manuall
 like it was done in the example of the [rules section](instrumentation/rules.md). An overview of all available special 
 input parameter is given below:
 
-| Parameter Name          | Type                                                                                                                                                                                    | Description                                                                                                                                                                                                             |
-|-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `_methodName`           | [String](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html)                                                                                                               | The name of the instrumented method within which this action is getting executed.                                                                                                                                       |
-| `_class`                | [Class](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)                                                                                                                 | The class declaring the instrumented method within which this action is getting executed.                                                                                                                               |
-| `_parameterTypes`       | [Class](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)[]                                                                                                               | The types of the parameter which the instrumented method declares for which the action is executed.                                                                                                                     |
-| `_this`                 | (depends on context)                                                                                                                                                                    | The this-instance in the context of the instrumented method within which this action is getting executed.                                                                                                               |
-| `_args`                 | [Object](https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html)[]                                                                                                             | The arguments with which the instrumented method was called within which this action is getting executed. The arguments are boxed if necessary and packed into an array.                                                |
-| `_arg0,_arg1,...,_argN` | (depends on context)                                                                                                                                                                    | The N-th argument with which the instrumented method was called within which this action is getting executed.                                                                                                           |
-| `_returnValue`          | (depends on context)                                                                                                                                                                    | The value returned by the instrumented method within which this action is getting executed. If the method terminated with an exception or the action is executed in the entry phase this is `null`.                     |
-| `_thrown`               | [Throwable](https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html)                                                                                                         | The exception thrown by the instrumented method within which this action is getting executed. If the method returned normally, the method is a constructor or the action is executed in the entry phase this is `null`. |
-| `_context`              | [InspectitContext](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitContext.java)   | Gives direct read and write access to the current [context](instrumentation/data-propagation.md). Can be used as data dictionary or to implement custom data propagation.                                               |
-| `_attachments`          | [ObjectAttachments](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/ObjectAttachments.java) | Allows you to attach values to Java objects instead of to the control flow, as done via `_context`. This enables sharing data across multiple threads.                                                                  |
-| `_reflection`           | [ReflectionCache](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/ReflectionCache.java)     | Allows you to access and cache fields and methods via reflection.                                                                                                                                                       |
+| Parameter Name          | Type                                                                                                                                                                                        | Description                                                                                                                                                                                                             |
+|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `_methodName`           | [String](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html)                                                                                                                   | The name of the instrumented method within which this action is getting executed.                                                                                                                                       |
+| `_class`                | [Class](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)                                                                                                                     | The class declaring the instrumented method within which this action is getting executed.                                                                                                                               |
+| `_parameterTypes`       | [Class](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html)[]                                                                                                                   | The types of the parameter which the instrumented method declares for which the action is executed.                                                                                                                     |
+| `_this`                 | (depends on context)                                                                                                                                                                        | The this-instance in the context of the instrumented method within which this action is getting executed.                                                                                                               |
+| `_args`                 | [Object](https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html)[]                                                                                                                 | The arguments with which the instrumented method was called within which this action is getting executed. The arguments are boxed if necessary and packed into an array.                                                |
+| `_arg0,_arg1,...,_argN` | (depends on context)                                                                                                                                                                        | The N-th argument with which the instrumented method was called within which this action is getting executed.                                                                                                           |
+| `_returnValue`          | (depends on context)                                                                                                                                                                        | The value returned by the instrumented method within which this action is getting executed. If the method terminated with an exception or the action is executed in the entry phase this is `null`.                     |
+| `_thrown`               | [Throwable](https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html)                                                                                                             | The exception thrown by the instrumented method within which this action is getting executed. If the method returned normally, the method is a constructor or the action is executed in the entry phase this is `null`. |
+| `_context`              | [InspectitContext](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitContext.java)       | Gives direct read and write access to the current [context](instrumentation/data-propagation.md). Can be used as data dictionary or to implement custom data propagation.                                               |
+| `_attachments`          | [ObjectAttachments](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/ObjectAttachments.java)     | Allows you to attach values to Java objects instead of to the control flow, as done via `_context`. This enables sharing data across multiple threads.                                                                  |
+| `_reflection`           | [InspectitReflection](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitReflection.java) | Allows you to access and cache fields and methods via reflection.                                                                                                                                                       |
+| `_regex`                | [InspectitRegex](https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitRegex.java)           | Allows you to match and cache regex expressions.                                                                                                                                                                        |
 
 ## Multiple Statements and Imports
 
@@ -169,11 +170,13 @@ As mentioned above, in order to access and cache `java.lang.reflect.Field` or `j
 you can use the `_reflection` special parameter. Reflection helps you to access fields or invoke methods, which are normally
 not accessible, because they are not visible for the instrumented method. Note that trying to access non-existing fields 
 or methods will throw an exception and disable the action until it has been updated. 
-If a `Field` or `Method` has been found, it will be cached. However, you can only use these instances via the `_reflection` variable.
-The method `getFieldValue()` expects a class, an instance of such class and the field name.
-The method `invokeMethod()` expects a class, an instance of such class, the method name and the method arguments, if existing.
+If a `Field` or `Method` has been found, it will be cached globally. Thus, all actions use the same cached instances. 
+However, you can only use these instances via the `_reflection` variable.
+The method `getFieldValue()` expects a class, an instance of such class and the field name and returns the field value.
+The method `invokeMethod()` expects a class, an instance of such class, the method name and the method arguments - if existing -
+and returns the result of the invoked method.
 
-The example below shows how to use reflection:
+The example below shows how to use the reflection variable:
 
 ```yaml
 inspectit:
@@ -182,24 +185,46 @@ inspectit:
       # access a field via reflection
       a_get_field_value:
         input:
-          _reflection: ReflectionCache
+          _reflection: InspectitReflection
           _class: Class
           instance: Object
           fieldName: String
-        # return the field value
         value: _reflection.getFieldValue(_class, instance, fieldName)
 
       # access a method via reflection
       a_invoke_method:
         input:
-          _reflection: ReflectionCache
+          _reflection: InspectitReflection
           _class: Class
           instance: Object
           methodName: String
           firstArg: Object
           secondArg: Object
-        # return the result of the invoked method
         value: _reflection.invokeMethod(_class, instance, methodName, firstArg, secondArg)
+```
+
+### Regex
+
+Since compiling regex expressions is relatively expensive, it makes sense to compile them once and cache the result.
+When using the `_regex` special parameter, all compiled results will be cached globally.
+Thus, all actions use the same cached regex patterns.
+However, you can only use these patterns via the `_regex` variable.
+The method `pattern()` compiles a single regex expression and returns the pattern.
+The method `matcher()` expects a regex expression and some input string and returns the matcher.
+The method `matches()` expects a regex expression and some input string and returns a boolean.
+
+The example below shows how to use regex variable:
+
+```yaml
+inspectit:
+  instrumentation:
+    actions:
+      a_input_matches:
+        input:
+          _regex: InspectitRegex
+          regex: String
+          input: String
+        value: Boolean.valueOf(_regex.matches(regex, input))
 ```
 
 ## Default Actions
