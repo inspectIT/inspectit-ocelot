@@ -13,14 +13,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 2. When calling {@code instrumentedMethod}, we will use {@code _regex} and write the result into a metric tag. <br>
  * 3. Check if the metric was recorded with the tag.
  */
-public class RegexCacheTest extends InstrumentationSysTestBase {
+public class InspectitRegexTest extends InstrumentationSysTestBase {
 
     private static final String key = "isMatch";
 
     private void instrumentedMethod() {}
 
     @Test
-    void shouldAccessHiddenValueAndHiddenMethod() {
+    void shouldUseInspectitRegex() {
         instrumentedMethod();
 
         TestUtils.waitForOpenCensusQueueToBeProcessed();

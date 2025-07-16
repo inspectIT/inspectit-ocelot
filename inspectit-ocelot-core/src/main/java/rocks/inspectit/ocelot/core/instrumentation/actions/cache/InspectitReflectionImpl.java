@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.actions.cache;
 
-import rocks.inspectit.ocelot.bootstrap.exposed.ReflectionCache;
+import rocks.inspectit.ocelot.bootstrap.exposed.InspectitReflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -9,12 +9,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ReflectionCacheImpl implements ReflectionCache {
+/**
+ * Caches accessed fields or methods for further use.
+ */
+public class InspectitReflectionImpl implements InspectitReflection {
 
     /**
      * The name of this bean, initialized via the {@link rocks.inspectit.ocelot.core.config.spring.BootstrapInitializerConfiguration}
      */
-    public static final String BEAN_NAME = "reflectionCache";
+    public static final String BEAN_NAME = "inspectitReflection";
 
     /** Cached fields */
     private final Map<FieldKey, Field> fields = new ConcurrentHashMap<>();

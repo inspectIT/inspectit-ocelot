@@ -1,17 +1,20 @@
 package rocks.inspectit.ocelot.core.instrumentation.actions.cache;
 
-import rocks.inspectit.ocelot.bootstrap.exposed.RegexCache;
+import rocks.inspectit.ocelot.bootstrap.exposed.InspectitRegex;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-public class RegexCacheImpl implements RegexCache {
+/**
+ * Caches regex patterns for further use.
+ */
+public class InspectitRegexImpl implements InspectitRegex {
 
     /**
      * The name of this bean, initialized via the {@link rocks.inspectit.ocelot.core.config.spring.BootstrapInitializerConfiguration}
      */
-    public static final String BEAN_NAME = "regexCache";
+    public static final String BEAN_NAME = "inspectitRegex";
 
     /** Cached patterns */
     private final Map<String, Pattern> patterns = new ConcurrentHashMap<>();

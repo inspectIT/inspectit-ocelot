@@ -7,13 +7,13 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RegexCacheImplTest {
+public class InspectitRegexImplTest {
 
-    private RegexCacheImpl regexCache;
+    private InspectitRegexImpl regexCache;
 
     @BeforeEach
     void beforeEach() {
-        regexCache = new RegexCacheImpl();
+        regexCache = new InspectitRegexImpl();
     }
 
     @Test

@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
  * The regex API, which is accessible from actions.
  * A specialized cache specifically for regex patterns.
  */
-public interface RegexCache {
+public interface InspectitRegex {
 
     /**
      * @param regex the regex expression

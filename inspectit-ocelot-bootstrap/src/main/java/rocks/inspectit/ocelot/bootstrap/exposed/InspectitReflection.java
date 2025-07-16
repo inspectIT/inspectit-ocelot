@@ -4,7 +4,7 @@ package rocks.inspectit.ocelot.bootstrap.exposed;
  * The reflection API, which is accessible from actions.
  * A specialized cache specifically for instances accessed via reflection.
  */
-public interface ReflectionCache {
+public interface InspectitReflection {
 
     /**
      * Access a specific field value via reflection. Can be called within actions via {@code _reflection}.

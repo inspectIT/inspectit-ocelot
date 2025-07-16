@@ -1,12 +1,12 @@
 package rocks.inspectit.ocelot.bootstrap.instrumentation.noop;
 
-import rocks.inspectit.ocelot.bootstrap.exposed.RegexCache;
+import rocks.inspectit.ocelot.bootstrap.exposed.InspectitRegex;
 
 import java.util.regex.Pattern;
 
-public class NoopRegexCache implements RegexCache {
+public class NoopInspectitRegex implements InspectitRegex {
 
-    public static final NoopRegexCache INSTANCE = new NoopRegexCache();
+    public static final NoopInspectitRegex INSTANCE = new NoopInspectitRegex();
 
     @Override
     public Boolean matches(String regex, String toTest) {

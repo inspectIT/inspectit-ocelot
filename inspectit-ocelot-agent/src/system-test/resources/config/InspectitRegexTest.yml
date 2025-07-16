@@ -11,22 +11,22 @@ inspectit:
 
   instrumentation:
     scopes:
-      RegexCacheTest-instrumentedMethod:
-        type: { name: RegexCacheTest, matcher-mode: ENDS_WITH}
+      InspectitRegexTest-instrumentedMethod:
+        type: { name: InspectitRegexTest, matcher-mode: ENDS_WITH}
         methods: [{name: instrumentedMethod}]
 
     actions:
-      RegexCacheTest-matches:
+      InspectitRegexTest-matches:
         input:
-          _regex: RegexCache
+          _regex: InspectitRegex
         value: _regex.matches("\\d+", "12345")
 
     rules:
-      RegexCacheTest:
-        scopes: { RegexCacheTest-instrumentedMethod: true }
+      InspectitRegexTest:
+        scopes: { InspectitRegexTest-instrumentedMethod: true }
         entry:
           matches:
-            action: RegexCacheTest-matches
+            action: InspectitRegexTest-matches
         metrics:
           regexCache:
             value: 1
