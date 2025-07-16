@@ -1,0 +1,43 @@
+inspectit:
+  metrics:
+    definitions:
+      agentInfo:
+        unit: calls
+        views:
+          agentInfo:
+            aggregation: COUNT
+            tags:
+              agentVersion: true
+              isSnapshot: true
+
+  instrumentation:
+    scopes:
+      InspectitAgentInfoTest-instrumentedMethod:
+        type: { name: InspectitAgentInfoTest, matcher-mode: ENDS_WITH}
+        methods: [{name: instrumentedMethod}]
+
+    actions:
+      InspectitAgentInfoTest-currentVersion:
+        input:
+          _agent: InspectitAgentInfo
+        value: _agent.currentVersion()
+
+      InspectitAgentInfoTest-isAtLeastVersion:
+        input:
+          _agent: InspectitAgentInfo
+        value: Boolean.valueOf(_agent.isAtLeastVersion("2.6.12"))
+
+    rules:
+      InspectitAgentInfoTest:
+        scopes: { InspectitAgentInfoTest-instrumentedMethod: true }
+        entry:
+          version:
+            action: InspectitAgentInfoTest-currentVersion
+          snapshot:
+            action: InspectitAgentInfoTest-isAtLeastVersion
+        metrics:
+          agentInfo:
+            value: 1
+            data-tags:
+              agentVersion: version
+              isSnapshot: snapshot
