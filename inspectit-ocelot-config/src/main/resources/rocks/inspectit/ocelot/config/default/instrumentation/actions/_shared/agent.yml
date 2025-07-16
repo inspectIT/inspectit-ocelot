@@ -1,0 +1,22 @@
+inspectit:
+  instrumentation:
+    actions:
+
+      'a_agent_version':
+        docs:
+          since: '2.6.12'
+          description: 'Returns the current agent version'
+          return-value: 'The current agent version'
+        input:
+          _agent: InspectitAgentInfo
+        value: '_agent.currentVersion()'
+
+      'a_agent_isAtLeast':
+        docs:
+          since: '2.6.12'
+          description: 'Checks if the current agent is at least the required version'
+          return-value: 'True if the agent is at least the required version'
+        input:
+          version: String
+          _agent: InspectitAgentInfo
+        value: 'Boolean.valueOf(_agent.isAtLeastVersion(version))'
