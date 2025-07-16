@@ -37,7 +37,7 @@ public class GenericActionSettings {
     public static final String CONTEXT_VARIABLE = "_context";
     public static final String OBJECT_ATTACHMENTS_VARIABLE = "_attachments";
     public static final String REFLECTION_CACHE_VARIABLE = "_reflection";
-
+    public static final String REGEX_CACHE_VARIABLE = "_regex";
 
     private static final List<Pattern> SPECIAL_VARIABLES_REGEXES = Arrays.asList(
             Pattern.compile(THIS_VARIABLE),
@@ -50,7 +50,8 @@ public class GenericActionSettings {
             Pattern.compile(METHOD_PARAMETER_TYPES_VARIABLE),
             Pattern.compile(CONTEXT_VARIABLE),
             Pattern.compile(OBJECT_ATTACHMENTS_VARIABLE),
-            Pattern.compile(REFLECTION_CACHE_VARIABLE)
+            Pattern.compile(REFLECTION_CACHE_VARIABLE),
+            Pattern.compile(REGEX_CACHE_VARIABLE)
     );
 
     /**
@@ -81,8 +82,9 @@ public class GenericActionSettings {
      * - _parameterTypes: the types of the arguments with which the method is declared in form of a Class[] array
      * - _attachments: an {@link ObjectAttachments} instance which allows you to "attach" values to a given object
      * - _reflection: an {@link ReflectionCache} instance which allows you to access and cache fields or methods via reflection
+     * - _regex: an {@link RegexCache} instance which allow to cache regex patterns and test strings
      * - _context: gives read and write access to the current {@link InspectitContext}, allowing you to attach values to the control flow
-     * - _thrown: the {@link Throwable}-Object raised by the the executed method, the type must be java.lang.Throwable
+     * - _thrown: the {@link Throwable}-Object raised by the executed method, the type must be java.lang.Throwable
      * null if no throwable was raised
      * <p>
      * In addition, arbitrary custom input variables may be defined.
@@ -182,6 +184,12 @@ public class GenericActionSettings {
     private boolean isReflectionCacheTypeCorrect() {
         String type = input.get(REFLECTION_CACHE_VARIABLE);
         return type == null || "ReflectionCache".equals(type);
+    }
+
+    @AssertTrue(message = "The '_regex' input must have the type 'RegexCache'")
+    private boolean isRegexCacheTypeCorrect() {
+        String type = input.get(REGEX_CACHE_VARIABLE);
+        return type == null || "RegexCache".equals(type);
     }
 
     public static boolean isSpecialVariable(String varName) {

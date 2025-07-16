@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
 import rocks.inspectit.ocelot.bootstrap.exposed.ReflectionCache;
+import rocks.inspectit.ocelot.bootstrap.exposed.RegexCache;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import static rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings.*;
@@ -27,6 +28,9 @@ public class VariableAccessorFactory {
 
     @Autowired
     private ReflectionCache reflectionCache;
+
+    @Autowired
+    private RegexCache regexCache;
 
     /**
      * Creates a {@link VariableAccessor} for a given fixed variable.
@@ -90,6 +94,8 @@ public class VariableAccessorFactory {
                 return context -> attachments;
             case REFLECTION_CACHE_VARIABLE:
                 return context -> reflectionCache;
+            case REGEX_CACHE_VARIABLE:
+                return context -> regexCache;
         }
         if (variable.startsWith(ARG_VARIABLE_PREFIX)) {
             try {
@@ -125,6 +131,8 @@ public class VariableAccessorFactory {
                 return attachments;
             case REFLECTION_CACHE_VARIABLE:
                 return reflectionCache;
+            case REGEX_CACHE_VARIABLE:
+                return regexCache;
         }
         return null;
     }

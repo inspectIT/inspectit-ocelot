@@ -9,10 +9,12 @@ import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopTraceIdInjector;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopHookManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopObjectAttachments;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopReflectionCache;
+import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopRegexCache;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.NoopOpenTelemetryController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.actions.cache.ReflectionCacheImpl;
+import rocks.inspectit.ocelot.core.instrumentation.actions.cache.RegexCacheImpl;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachmentsImpl;
@@ -56,6 +58,13 @@ public class BootstrapInitializerConfiguration {
         return reflection;
     }
 
+    @Bean
+    public RegexCacheImpl getRegexCache() {
+        RegexCacheImpl regex = new RegexCacheImpl();
+        Instances.regex = regex;
+        return regex;
+    }
+
     @Bean(LogTraceCorrelatorImpl.BEAN_NAME)
     public LogTraceCorrelatorImpl getLogTraceCorrelator(MdcAccessManager mdcAccessManager, InspectitEnvironment environment) {
         InspectitConfig configuration = environment.getCurrentConfig();
@@ -74,6 +83,7 @@ public class BootstrapInitializerConfiguration {
         Instances.contextManager = NoopContextManager.INSTANCE;
         Instances.attachments = NoopObjectAttachments.INSTANCE;
         Instances.reflection = NoopReflectionCache.INSTANCE;
+        Instances.regex = NoopRegexCache.INSTANCE;
         Instances.hookManager = NoopHookManager.INSTANCE;
         Instances.logTraceCorrelator = NoopLogTraceCorrelator.INSTANCE;
         Instances.traceIdInjector = NoopTraceIdInjector.INSTANCE;
