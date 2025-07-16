@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *    via reflection. <br>
  * 4. The result of the invoked method will be written as metric value. The hidden field will be used as tag <br>
  */
-public class ReflectionCacheTest extends InstrumentationSysTestBase {
+public class InspectitReflectionTest extends InstrumentationSysTestBase {
 
     private final String hiddenField = "hidden";
 

@@ -8,11 +8,13 @@ import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopTraceIdInjector;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopHookManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopObjectAttachments;
-import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopReflectionCache;
+import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopInspectitReflection;
+import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.NoopInspectitRegex;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.NoopOpenTelemetryController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.instrumentation.actions.cache.ReflectionCacheImpl;
+import rocks.inspectit.ocelot.core.instrumentation.actions.cache.InspectitReflectionImpl;
+import rocks.inspectit.ocelot.core.instrumentation.actions.cache.InspectitRegexImpl;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.ocelot.core.instrumentation.context.ContextManager;
 import rocks.inspectit.ocelot.core.instrumentation.context.ObjectAttachmentsImpl;
@@ -49,11 +51,18 @@ public class BootstrapInitializerConfiguration {
         return attachments;
     }
 
-    @Bean(ReflectionCacheImpl.BEAN_NAME)
-    public ReflectionCacheImpl getReflectionCache() {
-        ReflectionCacheImpl reflection = new ReflectionCacheImpl();
+    @Bean(InspectitReflectionImpl.BEAN_NAME)
+    public InspectitReflectionImpl getInspectitReflection() {
+        InspectitReflectionImpl reflection = new InspectitReflectionImpl();
         Instances.reflection = reflection;
         return reflection;
+    }
+
+    @Bean(InspectitRegexImpl.BEAN_NAME)
+    public InspectitRegexImpl getInspectitRegex() {
+        InspectitRegexImpl regex = new InspectitRegexImpl();
+        Instances.regex = regex;
+        return regex;
     }
 
     @Bean(LogTraceCorrelatorImpl.BEAN_NAME)
@@ -73,7 +82,8 @@ public class BootstrapInitializerConfiguration {
     void destroy() {
         Instances.contextManager = NoopContextManager.INSTANCE;
         Instances.attachments = NoopObjectAttachments.INSTANCE;
-        Instances.reflection = NoopReflectionCache.INSTANCE;
+        Instances.reflection = NoopInspectitReflection.INSTANCE;
+        Instances.regex = NoopInspectitRegex.INSTANCE;
         Instances.hookManager = NoopHookManager.INSTANCE;
         Instances.logTraceCorrelator = NoopLogTraceCorrelator.INSTANCE;
         Instances.traceIdInjector = NoopTraceIdInjector.INSTANCE;

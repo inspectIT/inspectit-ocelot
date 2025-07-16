@@ -4,7 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
-import rocks.inspectit.ocelot.bootstrap.exposed.ReflectionCache;
+import rocks.inspectit.ocelot.bootstrap.exposed.InspectitReflection;
+import rocks.inspectit.ocelot.bootstrap.exposed.InspectitRegex;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import static rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings.*;
@@ -26,7 +27,10 @@ public class VariableAccessorFactory {
     private ObjectAttachments attachments;
 
     @Autowired
-    private ReflectionCache reflectionCache;
+    private InspectitReflection inspectitReflection;
+
+    @Autowired
+    private InspectitRegex inspectitRegex;
 
     /**
      * Creates a {@link VariableAccessor} for a given fixed variable.
@@ -88,8 +92,10 @@ public class VariableAccessorFactory {
                 return IHookAction.ExecutionContext::getInspectitContext;
             case OBJECT_ATTACHMENTS_VARIABLE:
                 return context -> attachments;
-            case REFLECTION_CACHE_VARIABLE:
-                return context -> reflectionCache;
+            case REFLECTION_VARIABLE:
+                return context -> inspectitReflection;
+            case REGEX_VARIABLE:
+                return context -> inspectitRegex;
         }
         if (variable.startsWith(ARG_VARIABLE_PREFIX)) {
             try {
@@ -123,8 +129,10 @@ public class VariableAccessorFactory {
                 return contextMethod.getName();
             case OBJECT_ATTACHMENTS_VARIABLE:
                 return attachments;
-            case REFLECTION_CACHE_VARIABLE:
-                return reflectionCache;
+            case REFLECTION_VARIABLE:
+                return inspectitReflection;
+            case REGEX_VARIABLE:
+                return inspectitRegex;
         }
         return null;
     }

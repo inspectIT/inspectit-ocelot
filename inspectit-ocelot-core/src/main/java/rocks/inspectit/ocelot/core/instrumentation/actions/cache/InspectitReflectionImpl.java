@@ -1,6 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.actions.cache;
 
-import rocks.inspectit.ocelot.bootstrap.exposed.ReflectionCache;
+import rocks.inspectit.ocelot.bootstrap.exposed.InspectitReflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -9,18 +9,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ReflectionCacheImpl implements ReflectionCache {
+/**
+ * Caches accessed fields or methods for further use.
+ */
+public class InspectitReflectionImpl implements InspectitReflection {
 
     /**
      * The name of this bean, initialized via the {@link rocks.inspectit.ocelot.core.config.spring.BootstrapInitializerConfiguration}
      */
-    public static final String BEAN_NAME = "reflectionCache";
+    public static final String BEAN_NAME = "inspectitReflection";
 
     /** Cached fields */
-    private final Map<FieldKey, Field> fieldCache = new ConcurrentHashMap<>();
+    private final Map<FieldKey, Field> fields = new ConcurrentHashMap<>();
 
     /** Cached methods */
-    private final Map<MethodKey, Method> methodCache = new ConcurrentHashMap<>();
+    private final Map<MethodKey, Method> methods = new ConcurrentHashMap<>();
 
     @Override
     public Object getFieldValue(Class<?> clazz, Object instance, String fieldName) throws NoSuchFieldException, IllegalAccessException {
@@ -38,12 +41,12 @@ public class ReflectionCacheImpl implements ReflectionCache {
 
     private Field getField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
         FieldKey key = new FieldKey(clazz, fieldName);
-        Field field = fieldCache.get(key);
+        Field field = fields.get(key);
 
         if (field == null) {
             field = clazz.getDeclaredField(fieldName);
             field.setAccessible(true);
-            fieldCache.putIfAbsent(key, field);
+            fields.putIfAbsent(key, field);
         }
 
         return field;
@@ -52,12 +55,12 @@ public class ReflectionCacheImpl implements ReflectionCache {
     private Method getMethod(Class<?> clazz, String methodName, Object[] args)
             throws NoSuchMethodException {
         MethodKey key = new MethodKey(clazz, methodName, getArgTypes(args));
-        Method method = methodCache.get(key);
+        Method method = methods.get(key);
 
         if (method == null) {
             method = findMatchingMethod(clazz, methodName, args);
             method.setAccessible(true);
-            methodCache.putIfAbsent(key, method);
+            methods.putIfAbsent(key, method);
         }
 
         return method;

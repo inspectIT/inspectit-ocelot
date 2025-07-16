@@ -1,0 +1,34 @@
+inspectit:
+  metrics:
+    definitions:
+      regexCache:
+        unit: calls
+        views:
+          regexCache:
+            aggregation: COUNT
+            tags:
+              isMatch: true
+
+  instrumentation:
+    scopes:
+      InspectitRegexTest-instrumentedMethod:
+        type: { name: InspectitRegexTest, matcher-mode: ENDS_WITH}
+        methods: [{name: instrumentedMethod}]
+
+    actions:
+      InspectitRegexTest-matches:
+        input:
+          _regex: InspectitRegex
+        value: Boolean.valueOf(_regex.matches("\\d+", "12345"))
+
+    rules:
+      InspectitRegexTest:
+        scopes: { InspectitRegexTest-instrumentedMethod: true }
+        entry:
+          matches:
+            action: InspectitRegexTest-matches
+        metrics:
+          regexCache:
+            value: 1
+            data-tags:
+              isMatch: matches

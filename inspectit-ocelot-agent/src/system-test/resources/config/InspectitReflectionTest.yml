@@ -11,34 +11,34 @@ inspectit:
 
   instrumentation:
     scopes:
-      ReflectionCacheTest-instrumentedMethod:
-        type: { name: ReflectionCacheTest, matcher-mode: ENDS_WITH}
+      InspectitReflectionTest-instrumentedMethod:
+        type: { name: InspectitReflectionTest, matcher-mode: ENDS_WITH}
         methods: [{name: instrumentedMethod}]
 
 
     actions:
-      ReflectionCacheTest-getFieldValue:
+      InspectitReflectionTest-getFieldValue:
         input:
           _class: Class
           _this: Object
-          _reflection: ReflectionCache
+          _reflection: InspectitReflection
         value: _reflection.getFieldValue(_class, _this, "hiddenField")
 
-      ReflectionCacheTest-invokeMethod:
+      InspectitReflectionTest-invokeMethod:
         input:
           _class: Class
           _this: Object
-          _reflection: ReflectionCache
+          _reflection: InspectitReflection
         value: _reflection.invokeMethod(_class, _this, "hiddenMethod", null)
 
     rules:
-      ReflectionCacheTest:
-        scopes: { ReflectionCacheTest-instrumentedMethod: true }
+      InspectitReflectionTest:
+        scopes: { InspectitReflectionTest-instrumentedMethod: true }
         entry:
           fieldValue:
-            action: ReflectionCacheTest-getFieldValue
+            action: InspectitReflectionTest-getFieldValue
           invokedMethodResult:
-            action: ReflectionCacheTest-invokeMethod
+            action: InspectitReflectionTest-invokeMethod
         metrics:
           reflectionInvokedMethod:
             value: invokedMethodResult

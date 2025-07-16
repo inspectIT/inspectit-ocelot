@@ -1,10 +1,10 @@
 package rocks.inspectit.ocelot.bootstrap.instrumentation.noop;
 
-import rocks.inspectit.ocelot.bootstrap.exposed.ReflectionCache;
+import rocks.inspectit.ocelot.bootstrap.exposed.InspectitReflection;
 
-public class NoopReflectionCache implements ReflectionCache {
+public class NoopInspectitReflection implements InspectitReflection {
 
-    public static final NoopReflectionCache INSTANCE = new NoopReflectionCache();
+    public static final NoopInspectitReflection INSTANCE = new NoopInspectitReflection();
 
     @Override
     public Object getFieldValue(Class<?> clazz, Object instance, String fieldName) {
