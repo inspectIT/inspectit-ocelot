@@ -38,6 +38,7 @@ public class GenericActionSettings {
     public static final String OBJECT_ATTACHMENTS_VARIABLE = "_attachments";
     public static final String REFLECTION_VARIABLE = "_reflection";
     public static final String REGEX_VARIABLE = "_regex";
+    public static final String AGENT_VARIABLE = "_agent";
 
     private static final List<Pattern> SPECIAL_VARIABLES_REGEXES = Arrays.asList(
             Pattern.compile(THIS_VARIABLE),
@@ -51,7 +52,8 @@ public class GenericActionSettings {
             Pattern.compile(CONTEXT_VARIABLE),
             Pattern.compile(OBJECT_ATTACHMENTS_VARIABLE),
             Pattern.compile(REFLECTION_VARIABLE),
-            Pattern.compile(REGEX_VARIABLE)
+            Pattern.compile(REGEX_VARIABLE),
+            Pattern.compile(AGENT_VARIABLE)
     );
 
     /**
@@ -82,7 +84,8 @@ public class GenericActionSettings {
      * - _parameterTypes: the types of the arguments with which the method is declared in form of a Class[] array
      * - _attachments: an {@link ObjectAttachments} instance which allows you to "attach" values to a given object
      * - _reflection: an {@link InspectitReflection} instance which allows you to access and cache fields or methods via reflection
-     * - _regex: an {@link InspectitRegex} instance which allow to cache regex patterns and test strings
+     * - _regex: an {@link InspectitRegex} instance which allows to cache regex patterns and test strings
+     * - _agent: an {@link InspectitAgentInfo} instance which allows to access meta information about the current agent
      * - _context: gives read and write access to the current {@link InspectitContext}, allowing you to attach values to the control flow
      * - _thrown: the {@link Throwable}-Object raised by the executed method, the type must be java.lang.Throwable
      * null if no throwable was raised
@@ -115,10 +118,10 @@ public class GenericActionSettings {
     private String valueBody;
 
     /*
-    Why don't we use Lombok generated getters / setters here?
-    Lombok would generate methods named isVoid() and setVoid(),
-    which imply that the property is named "void" and not "is-void".
-    This would confuse the spring configuration binding.
+        Why don't we use Lombok generated getters / setters here?
+        Lombok would generate methods named isVoid() and setVoid(),
+        which imply that the property is named "void" and not "is-void".
+        This would confuse the spring configuration binding.
      */
     public boolean getIsVoid() {
         return isVoid;
@@ -181,15 +184,21 @@ public class GenericActionSettings {
     }
 
     @AssertTrue(message = "The '_reflection' input must have the type 'InspectitReflection'")
-    private boolean isReflectionCacheTypeCorrect() {
+    private boolean isInspectitReflectionTypeCorrect() {
         String type = input.get(REFLECTION_VARIABLE);
         return type == null || "InspectitReflection".equals(type);
     }
 
     @AssertTrue(message = "The '_regex' input must have the type 'InspectitRegex'")
-    private boolean isRegexCacheTypeCorrect() {
+    private boolean isInspectitRegexTypeCorrect() {
         String type = input.get(REGEX_VARIABLE);
         return type == null || "InspectitRegex".equals(type);
+    }
+
+    @AssertTrue(message = "The '_agent' input must have the type 'InspectitAgentInfo'")
+    private boolean isInspectitAgentInfoTypeCorrect() {
+        String type = input.get(AGENT_VARIABLE);
+        return type == null || "InspectitAgentInfo".equals(type);
     }
 
     public static boolean isSpecialVariable(String varName) {
