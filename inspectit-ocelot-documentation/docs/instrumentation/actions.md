@@ -69,7 +69,9 @@ As previously mentioned actions are also free to define any kind of _input param
 This is done using the `input` configuration property.
 This property maps the names of the input parameter to their expected Java type.
 For example, the `a_timing_elapsedMillis` action declares a single input variable named `sinceNanos`
-which has the type `long`. Note that for input parameter automatic primitive unboxing is supported.
+which has the type `long`. Note that for input parameter automatic primitive unboxing is supported. 
+Currently, array types like `long[]` are not supported for input parameter. 
+Instead, you could use `java.util.List` as input type.
 
 Another example where the action even defines multiple inputs is `a_string_replace_all`.
 Guess what this action does? ([Hint](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#replaceAll-java.lang.String-java.lang.String))
