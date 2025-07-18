@@ -2,7 +2,6 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     id 'maven-publish'
-    id("com.palantir.docker") version "${comPalantirDockerVersion}"
     alias(configServerLibs.plugins.orgSpringframeworkBoot)
     alias(libs.plugins.orgCyclonedxBom)
     alias(configServerLibs.plugins.ioSpringDependencyManagement)
@@ -127,19 +126,11 @@ dependencies {
     )
 }
 
+// Copy the jar into the docker folder without version suffix
 tasks.register('copyServerJar', Copy) {
     dependsOn bootJarWithFrontend
-    from("${buildDir}/libs/inspectit-ocelot-configurationserver-${version}.jar")
-    into("${buildDir}/docker-jar")
+    from("$buildDir/libs/inspectit-ocelot-configurationserver-${version}.jar")
+    into("$projectDir/docker")
     rename("inspectit-ocelot-configurationserver-${version}\\.jar",
             'inspectit-ocelot-configurationserver.jar')
-}
-
-docker {
-    name "inspectit/inspectit-ocelot-configurationserver"
-    dependsOn copyServerJar
-
-    tag 'versioned', "hub.docker.com/${name}:${version}"
-    dockerfile file('docker/Dockerfile')
-    files 'docker/entrypoint.sh', "$buildDir/docker-jar/inspectit-ocelot-configurationserver.jar"
 }

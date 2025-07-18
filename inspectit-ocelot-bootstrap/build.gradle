@@ -39,8 +39,12 @@ test {
 }
 
 group = 'rocks.inspectit.ocelot'
-sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
-targetCompatibility = 1.8 // Java version to generate classes for.
+
+java {
+    sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source
+    targetCompatibility = 1.8 // Java version to generate classes for
+}
+
 jar {
     archiveFileName = "${project.name}.jar"
 

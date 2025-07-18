@@ -1,9 +1,9 @@
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
     alias(libs.plugins.meChampeauJmh)
     id 'maven-publish'
-    id("com.palantir.docker") version "${comPalantirDockerVersion}"
     alias(libs.plugins.orgSpringframeworkBoot) apply false
     alias(libs.plugins.ioSpringDependencyManagement)
 }
@@ -35,8 +35,10 @@ test {
 
 group = 'rocks.inspectit.ocelot'
 
-sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
-targetCompatibility = 1.8 // Java version to generate classes for.
+java {
+    sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source
+    targetCompatibility = 1.8 // Java version to generate classes for
+}
 
 configurations {
     opentelemetry
@@ -49,12 +51,12 @@ dependencies {
     )
 
     opentelemetry(
-        libs.ioOpentelemetryOpentelemetrySdk,
-        libs.ioOpentelemetryOpentelemetryOpencensusShim,
-        libs.ioOpencensusOpencensusImpl,
-        libs.ioOpentelemetryOpentelemetrySemconv,
-        libs.ioOpentelemetryInstrumentationOpentelemetryResources,
-        libs.comGoogleGuava
+            libs.ioOpentelemetryOpentelemetrySdk,
+            libs.ioOpentelemetryOpentelemetryOpencensusShim,
+            libs.ioOpencensusOpencensusImpl,
+            libs.ioOpentelemetryOpentelemetrySemconv,
+            libs.ioOpentelemetryInstrumentationOpentelemetryResources,
+            libs.comGoogleGuava
     )
     annotationProcessor libs.orgProjectlombokLombok
     testImplementation (
@@ -68,28 +70,20 @@ dependencies {
     testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 }
 
-task copyAgent(type: Copy) {
+// Copy the jar into the docker folder without version suffix
+tasks.register('copyAgentJar', Copy) {
     dependsOn jar
-    from(buildDir.toString() + "/inspectit-ocelot-agent-${version}.jar")
-    into(buildDir)
-    rename ("inspectit-ocelot-agent-${version}\\.jar", 'inspectit-ocelot-agent.jar')
+    from("$buildDir/inspectit-ocelot-agent-${version}.jar")
+    into("$projectDir/docker")
+    rename("inspectit-ocelot-agent-${version}\\.jar", 'inspectit-ocelot-agent.jar')
 }
 
-docker {
-    dependsOn copyAgent
-
-    name "inspectit/inspectit-ocelot-agent"
-    tag 'versioned', "hub.docker.com/${name}:${version}"
-    dockerfile file('docker/Dockerfile')
-    files 'docker/entrypoint.sh', "$buildDir/inspectit-ocelot-agent.jar"
-}
-
-task buildOpenTelemetryFatJar(type: Jar){
+tasks.register('buildOpenTelemetryFatJar', Jar) {
     archiveFileName = "opentelemetry-fat.jar"
     destinationDirectory = file("$buildDir/jarGen")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from{
-        configurations.opentelemetry.collect{it.isDirectory() ? it : zipTree(it) }
+    from {
+        configurations.opentelemetry.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 
@@ -97,7 +91,7 @@ processJmhResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-task generateVersionFile {
+tasks.register('generateVersionFile') {
     ext.versionFile = new File(buildDir, "ocelot-version.info")
     doLast {
         ext.versionFile.withWriter('UTF-8') { writer ->
@@ -128,6 +122,8 @@ jar {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -235,8 +231,8 @@ task systemTest {
     def javaExecutables = ("${systemTestJavaHomes}")
             .tokenize(File.pathSeparator)
             .collect {
-                org.apache.tools.ant.taskdefs.condition.Os.isFamily(
-                        org.apache.tools.ant.taskdefs.condition.Os.FAMILY_WINDOWS)
+                Os.isFamily(
+                        Os.FAMILY_WINDOWS)
                         ? "${it}/bin/java.exe"
                         : "${it}/bin/java"
             }
@@ -288,7 +284,6 @@ task systemTest {
             maxHeapSize = "2048m"
 
 
-
             // The JaCoCo agent must be specified first so that it can instrument our agent.
             // This is a work around for the issue that the JaCoCo agent is added last, cf.
             // https://discuss.gradle.org/t/jacoco-gradle-adds-the-agent-last-to-jvm-args/7124.
@@ -324,7 +319,7 @@ task systemTest {
                 maxHeapSize = "2048m"
 
                 // enable reflection used in TestUtils#initializeOpenTelemetryForSystemTesting for JDK 11 and later
-                if(JavaVersion.current() >= JavaVersion.VERSION_11) {
+                if (JavaVersion.current() >= JavaVersion.VERSION_11) {
                     // --add-opens has the following syntax: {A}/{package}={B}
                     jvmArgs "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED"
                 }
@@ -341,10 +336,10 @@ task systemTest {
         }
 
         systemTest.dependsOn perVersionSystemTest
+        systemTest.mustRunAfter test
     }
 }
 
-systemTest.mustRunAfter test
 check.dependsOn systemTest
 
 jmh {
