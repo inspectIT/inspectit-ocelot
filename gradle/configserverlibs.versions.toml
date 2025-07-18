@@ -52,3 +52,4 @@ jsonwebtoken = [
 [plugins]
 ioSpringDependencyManagement = "io.spring.dependency-management:1.1.7"
 orgSpringframeworkBoot = { id = "org.springframework.boot", version.ref = "orgSpringframeworkBoot" }
+comGithubNodeGradleNode = "com.github.node-gradle.node:7.1.0"

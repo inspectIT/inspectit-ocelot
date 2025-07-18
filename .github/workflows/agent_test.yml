@@ -50,35 +50,14 @@ jobs:
       - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Determine JDK version
-        id: determine-jdk
-        # if Java 21 is used, update com.palantir.docker to 0.36.0, because 0.34.0 is not compatible with gradle 8
-        # Java 21 needs at least gradle 8
-        shell: bash
-        run: |
-          java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
-          echo "Java version: $java_version"
-          if [[ "$java_version" == 21* ]]; then
-            echo "::set-output name=gradle_property::comPalantirDockerVersion=0.36.0"
-          else
-            echo "::set-output name=gradle_property::comPalantirDockerVersion=0.34.0"
-          fi
-      - name: Upgrade Wrapper to 8.7 for Java 21
-        # Java 21 needs at least gradle 8
-        shell: bash
-        run: |
-          if [[ "${{ matrix.dockerimage }}" == "eclipse-temurin:21" ]]; then
-            sed -i 's/gradle-7.6.4-bin.zip/gradle-8.7-bin.zip/' gradle/wrapper/gradle-wrapper.properties
-            cat gradle/wrapper/gradle-wrapper.properties
-          fi
       - name: Clean Gradle cache
-        run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} clean
+        run: ./gradlew clean
       - name: assemble
-        run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-core:assemble
+        run: ./gradlew :inspectit-ocelot-core:assemble
       - name: test
-        run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-core:test --no-daemon
+        run: ./gradlew :inspectit-ocelot-core:test --no-daemon
       - name: systemTest
-        run: ./gradlew -P${{ steps.determine-jdk.outputs.gradle_property }} :inspectit-ocelot-agent:systemTest
+        run: ./gradlew :inspectit-ocelot-agent:systemTest
       - name: Sanitize image name # we cannot use ':' in upload-artifact names
         run: echo "DOCKER_IMAGE=$(echo '${{ matrix.dockerimage }}' | sed 's/:/-/g')" >> $GITHUB_ENV
       - name: upload agent

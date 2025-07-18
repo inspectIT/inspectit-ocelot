@@ -41,9 +41,11 @@ test {
 }
 
 group = 'rocks.inspectit.ocelot'
-sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
-targetCompatibility = 1.8 // Java version to generate classes for.
 
+java {
+    sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source
+    targetCompatibility = 1.8 // Java version to generate classes for
+}
 
 dependencies {
     compileOnly(
@@ -198,15 +200,15 @@ dependencies {
     }
 }
 
-task compileJarCheck(type: JavaCompile){
+tasks.register('compileJarCheck', JavaCompile) {
     source = sourceSets.main.java.srcDirs
     include 'com/mindprod/jarcheck/JarCheck.java'
     classpath = sourceSets.main.compileClasspath
-    destinationDirectory =  new File("${buildDir}/classes/java/main")
+    destinationDirectory = new File("${buildDir}/classes/java/main")
 }
 
 // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
-task checkDependencyJavaVersions {
+tasks.register('checkDependencyJavaVersions') {
     def jarCheckPath = "$buildDir/jarCheck"
     outputs.dir jarCheckPath
 
@@ -228,7 +230,9 @@ task checkDependencyJavaVersions {
 }
 checkDependencyJavaVersions.dependsOn compileJarCheck
 
-task generateVersionFile {
+compileTestJava.dependsOn compileJarCheck
+
+tasks.register('generateVersionFile') {
     ext.versionFile = new File(buildDir, "ocelot-version.info")
     doLast {
         def currentDate = new Date().toString()
@@ -263,7 +267,7 @@ jar {
 }
 
 /**
- * JMH-Perf tests.
+ * JMH-Perf tests
  */
 jmhJar {
     doFirst {

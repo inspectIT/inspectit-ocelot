@@ -124,10 +124,6 @@ opentelemetry = [
 comGithubBenManesVersions = "com.github.ben-manes.versions:0.52.0"
 # @pin There is a newer version 2.1, but it is not Java 8 compatible
 comGithubJk1DependencyLicenseReport = "com.github.jk1.dependency-license-report:2.0"
-comGithubNodeGradleNode = "com.github.node-gradle.node:7.1.0"
-# @pin There is a newer Version 0.35.0, but it is not Java 8 compatible
-# For the Agent, this is currently provided via gradle.properties to make it dynamic.
-comPalantirDocker = "com.palantir.docker:0.34.0"
 ioSpringDependencyManagement = "io.spring.dependency-management:1.1.7"
 meChampeauJmh = "me.champeau.jmh:0.7.3"
 nlLittlerobotsVersionCatalogUpdate = "nl.littlerobots.version-catalog-update:0.8.5"
