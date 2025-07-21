@@ -58,24 +58,24 @@ public class SystemInfoCollector {
      */
     private AgentSystemInformation collectSystemInfo() {
         AgentSystemInformation agentSystemInfo = new AgentSystemInformation();
-        RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
-        agentSystemInfo.setVmName(runtime.getVmName());
-        agentSystemInfo.setVmVendor(runtime.getVmVendor());
-
-        SystemInfo systemInfo = new SystemInfo();
-        OperatingSystem os = systemInfo.getOperatingSystem();
-        String osName = os.getFamily() + " " + os.getVersionInfo().getVersion();
-        agentSystemInfo.setOsName(osName);
-        agentSystemInfo.setOsArch(System.getProperty("os.arch"));
-        agentSystemInfo.setOsStartTime(convertToStartTime(os.getSystemUptime()));
-
-        ComputerSystem computerSystem = systemInfo.getHardware().getComputerSystem();
-        String csModel = computerSystem.getManufacturer() + " " + computerSystem.getModel();
-        agentSystemInfo.setCsModel(csModel);
-
-        CentralProcessor.ProcessorIdentifier processorId = systemInfo.getHardware().getProcessor().getProcessorIdentifier();
-        agentSystemInfo.setProcessorName(processorId.getName());
-        agentSystemInfo.setProcessorIdentifier(processorId.getIdentifier());
+//        RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+//        agentSystemInfo.setVmName(runtime.getVmName());
+//        agentSystemInfo.setVmVendor(runtime.getVmVendor());
+//
+//        SystemInfo systemInfo = new SystemInfo();
+//        OperatingSystem os = systemInfo.getOperatingSystem();
+//        String osName = os.getFamily() + " " + os.getVersionInfo().getVersion();
+//        agentSystemInfo.setOsName(osName);
+//        agentSystemInfo.setOsArch(System.getProperty("os.arch"));
+//        agentSystemInfo.setOsStartTime(convertToStartTime(os.getSystemUptime()));
+//
+//        ComputerSystem computerSystem = systemInfo.getHardware().getComputerSystem();
+//        String csModel = computerSystem.getManufacturer() + " " + computerSystem.getModel();
+//        agentSystemInfo.setCsModel(csModel);
+//
+//        CentralProcessor.ProcessorIdentifier processorId = systemInfo.getHardware().getProcessor().getProcessorIdentifier();
+//        agentSystemInfo.setProcessorName(processorId.getName());
+//        agentSystemInfo.setProcessorIdentifier(processorId.getIdentifier());
 
         return agentSystemInfo;
     }

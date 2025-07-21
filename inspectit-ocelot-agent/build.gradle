@@ -1,11 +1,13 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.springframework.boot.gradle.plugin.SpringBootPlugin
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     alias(libs.plugins.meChampeauJmh)
     id 'maven-publish'
     alias(libs.plugins.orgSpringframeworkBoot) apply false
     alias(libs.plugins.ioSpringDependencyManagement)
+    id 'com.gradleup.shadow' version '8.3.8'
 }
 
 publishing {
@@ -87,6 +89,25 @@ tasks.register('buildOpenTelemetryFatJar', Jar) {
     }
 }
 
+tasks.register('buildOpenTelemetryFatJarShaded', ShadowJar) {
+    archiveFileName = "opentelemetry-fat-shaded.jar"
+    destinationDirectory = file("$buildDir/jarGenShaded")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from {
+        project.configurations.opentelemetry.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    enableRelocation = true
+    relocationPrefix = "shadow" // default TODO: non-constant
+
+    relocate("com", "${relocationPrefix}.com")
+    relocate("io", "${relocationPrefix}.io")
+    relocate("org", "${relocationPrefix}.org")
+
+    mergeServiceFiles()
+}
+
 processJmhResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
@@ -100,6 +121,7 @@ tasks.register('generateVersionFile') {
     }
 }
 
+// Build the ordinary agent-jar with nested core-jar, bootstrap-jar and otel-fat-jar
 jar {
     destinationDirectory = buildDir
     archivesBaseName = "${project.name}"
@@ -122,9 +144,64 @@ jar {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-
-
 }
+
+// Build the agent-jar with shaded classes
+shadowJar {
+    archiveBaseName.set(project.name)
+    archiveClassifier.set("")
+    destinationDirectory.set(buildDir)
+
+    manifest {
+        attributes(
+                "Main-Class": "${relocationPrefix}.rocks.inspectit.ocelot.agent.AgentMain",
+                "Premain-Class": "${relocationPrefix}.rocks.inspectit.ocelot.agent.AgentMain",
+                "Agent-Class": "${relocationPrefix}.rocks.inspectit.ocelot.agent.AgentMain",
+                "Can-Redefine-Classes": "true",
+                "Can-Retransform-Classes": "true"
+        )
+    }
+
+    dependsOn(generateVersionFile, buildOpenTelemetryFatJarShaded)
+    from generateVersionFile.versionFile
+//    from "$buildDir/jarGen"
+//
+    from project(':inspectit-ocelot-bootstrap').jar.outputs
+//    from project(':inspectit-ocelot-core').jar.outputs
+
+    relocationPrefix = "shadow" // default TODO: non-constant
+
+    relocate("rocks.inspectit.ocelot.agent", "${relocationPrefix}.rocks.inspectit.ocelot.agent")
+    relocate("rocks.inspectit.ocelot.bootstrap", "${relocationPrefix}.rocks.inspectit.ocelot.bootstrap")
+
+    mergeServiceFiles()
+}
+
+def mergeModules = tasks.register("mergeModules", Zip) {
+    dependsOn(copyModules)
+    from tasks.copyModules.destinationDir
+    destinationDirectory = layout.buildDirectory.get().asFile
+    archiveFileName.set("$project.name-shaded.jar")
+}
+
+// Copies the output of your submodules to a temporary directory
+def copyModules = tasks.register("copyModules", Copy) {
+    dependsOn(shadowJar)
+    dependsOn(project(":inspectit-ocelot-bootstrap").tasks.shadowJar)
+    dependsOn(project(":inspectit-ocelot-core").tasks.shadowJar)
+    dependsOn(buildOpenTelemetryFatJarShaded)
+
+    destinationDir = layout.buildDirectory.dir('copy').get().asFile
+
+    from(zipTree(tasks.shadowJar.archiveFile.get()))
+    from(project(":inspectit-ocelot-bootstrap").shadowJar.outputs)
+    from(project(":inspectit-ocelot-core").shadowJar.outputs)
+    from(buildOpenTelemetryFatJarShaded.outputs)
+
+    finalizedBy(mergeModules)
+}
+
+shadowJar.finalizedBy(copyModules)
 
 //----------------------------------------------------------------------------------------------------------------------
 // Based on the integration tests of https://github.com/census-instrumentation/opencensus-java/tree/master/contrib/agent

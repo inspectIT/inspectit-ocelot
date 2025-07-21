@@ -4,6 +4,7 @@ plugins {
     id 'maven-publish'
     alias(libs.plugins.orgSpringframeworkBoot) apply false
     alias(libs.plugins.ioSpringDependencyManagement)
+    id 'com.gradleup.shadow' version '8.3.8'
 }
 
 publishing {
@@ -52,4 +53,13 @@ jar {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+}
+
+shadowJar {
+    archiveFileName = "${project.name}-shaded.jar"
+
+    relocationPrefix = "shadow" // default TODO: non-constant
+    relocate("rocks", "${relocationPrefix}.rocks")
+
+    mergeServiceFiles()
 }

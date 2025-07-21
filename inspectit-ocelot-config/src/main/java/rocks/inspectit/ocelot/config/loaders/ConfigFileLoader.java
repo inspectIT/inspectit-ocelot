@@ -28,12 +28,12 @@ public class ConfigFileLoader {
     /**
      * This String resembles the classpaths that are searched to get the default config files.
      */
-    static final String DEFAULT_CLASSPATH = "classpath:rocks/inspectit/ocelot/config/default/**/*.yml";
+    static final String DEFAULT_CLASSPATH = "classpath:shadow/rocks/inspectit/ocelot/config/default/**/*.yml";
 
     /**
      * This String resembles the classpaths that are searched to get the fallback config files.
      */
-    static final String FALLBACK_CLASSPATH = "classpath:rocks/inspectit/ocelot/config/fallback/**/*.yml";
+    static final String FALLBACK_CLASSPATH = "classpath:shadow/rocks/inspectit/ocelot/config/fallback/**/*.yml";
 
     /**
      * Returns all files found in the default config path as a key value pair consisting of the path to the file and

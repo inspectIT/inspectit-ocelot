@@ -85,6 +85,7 @@ public class AgentMain {
 
         try {
             InspectITClassLoader icl = initializeInspectitLoader(inst, includeOpenTelemetryInInspectitLoader);
+            System.out.println("TEST");
             AgentManager.startOrReplaceInspectitCore(icl, agentArgs, inst);
         } catch (Exception e) {
             System.err.println("Error starting inspectIT Agent!");

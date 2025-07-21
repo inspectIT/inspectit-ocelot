@@ -5,7 +5,6 @@ import rocks.inspectit.ocelot.bootstrap.AgentProperties;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,15 +19,15 @@ import java.nio.file.StandardCopyOption;
  */
 public class AgentJars {
 
-    private static final String INSPECTIT_BOOTSTRAP_JAR_PATH = "/inspectit-ocelot-bootstrap.jar";
+    private static final String INSPECTIT_BOOTSTRAP_JAR_PATH = "/inspectit-ocelot-bootstrap-shaded.jar";
 
     private static final String INSPECTIT_BOOTSTRAP_JAR_TEMP_PREFIX = "ocelot-bootstrap-";
 
-    private static final String INSPECTIT_CORE_JAR_PATH = "/inspectit-ocelot-core.jar";
+    private static final String INSPECTIT_CORE_JAR_PATH = "/inspectit-ocelot-core-shaded.jar";
 
     private static final String INSPECTIT_CORE_JAR_TEMP_PREFIX = "ocelot-core-";
 
-    private static final String OPEN_TELEMETRY_FAT_JAR_PATH = "/opentelemetry-fat.jar";
+    private static final String OPEN_TELEMETRY_FAT_JAR_PATH = "/opentelemetry-fat-shaded.jar";
 
     private static final String OPEN_TELEMETRY_FAT_JAR_TEMP_PREFIX = "ocelot-opentelemetry-fat-";
 
