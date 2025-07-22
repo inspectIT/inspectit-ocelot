@@ -66,40 +66,144 @@ jobs:
             "You can also find the corresponding documentation online under the following link: [inspectIT Ocelot Documentation](http://docs.inspectit.rocks)"
             ${{ steps.build_changelog.outputs.changelog }}
 
-  build_and_publish_docker_images:
-    name: "Build and Push Docker Images"
+  # Build the docker images for multiple platforms and prepare for publishing
+  build_docker_images:
+    name: "Build Docker Images"
     runs-on: ubuntu-latest
     needs: build_and_release
     environment: release
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+          - linux/arm/v6
+          - linux/arm/v7
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Prepare
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build and push agent
+        id: build-agent
         uses: docker/build-push-action@v6
         with:
           context: inspectit-ocelot-agent/docker
           file: Dockerfile
-          push: true
-          tags: |
-            inspectit/inspectit-ocelot-agent:${{ github.ref_name }}
-            inspectit/inspectit-ocelot-agent:latest
+          platforms: ${{ matrix.platform }}
+          outputs: type=image,name=inspectit/inspectit-ocelot-agent,push-by-digest=true,name-canonical=true,push=true
+      - name: Export digest agent
+        run: |
+          mkdir -p ${{ runner.temp }}/digests-agent
+          digest="${{ steps.build-agent.outputs.digest }}"
+          touch "${{ runner.temp }}/digests-agent/${digest#sha256:}"
+      - name: Upload digest agent
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-agent-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests-agent/*
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Build and push configurationserver
+        id: build-configurationserver
         uses: docker/build-push-action@v6
         with:
           context: components/inspectit-ocelot-configurationserver/docker
           file: Dockerfile
-          push: true
+          platforms: ${{ matrix.platform }}
+          outputs: type=image,name=inspectit/inspectit-ocelot-configurationserver,push-by-digest=true,name-canonical=true,push=true
+      - name: Export digest configurationserver
+        run: |
+          mkdir -p ${{ runner.temp }}/digests-configurationserver
+          digest="${{ steps.build-configurationserver.outputs.digest }}"
+          touch "${{ runner.temp }}/digests-configurationserver/${digest#sha256:}"
+
+      - name: Upload digest configurationserver
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-configurationserver-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests-configurationserver/*
+          if-no-files-found: error
+          retention-days: 1
+
+  # Merge the prepared docker images and publish to DockerHub
+  merge_and_publish_docker_images:
+    name: "Merge and Publish Docker Images"
+    runs-on: ubuntu-latest
+    environment: release
+    needs: build_docker_images
+    steps:
+      - name: Download digests agent
+        uses: actions/download-artifact@v4
+        with:
+          name: digests-agent-*
+          path: ${{ runner.temp }}/digests-agent
+          pattern: digests-agent-*
+          merge-multiple: true
+      - name: Download digests for configurationserver
+        uses: actions/download-artifact@v4
+        with:
+          name: digests-configurationserver-*
+          path: ${{ runner.temp }}/digests-configurationserver
+          pattern: digests-configurationserver-*
+          merge-multiple: true
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta agent
+        id: meta-agent
+        uses: docker/metadata-action@v5
+        with:
+          images: inspectit/inspectit-ocelot-agent
           tags: |
-            inspectit/inspectit-ocelot-configurationserver:${{ github.ref_name }}
-            inspectit/inspectit-ocelot-configurationserver:latest
+            type=ref,event=tag
+            type=raw,value=latest
+      - name: Docker meta configurationserver
+        id: meta-configurationserver
+        uses: docker/metadata-action@v5
+        with:
+          images: inspectit/inspectit-ocelot-configurationserver
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest
+
+      - name: Push agent
+        working-directory: ${{ runner.temp }}/digests-agent
+        run: |
+          docker buildx imagetools create ${{ steps.meta-agent.outputs.tags }} \
+          $(printf 'inspectit/inspectit-ocelot-agent@sha256:%s ' *)
+      - name: Inspect manifest agent
+        run: |
+          docker buildx imagetools inspect inspectit/inspectit-ocelot-agent:${{ github.ref_name }}
+
+      - name: Push configurationserver
+        working-directory: ${{ runner.temp }}/digests-configurationserver
+        run: |
+          docker buildx imagetools create ${{ steps.meta-configurationserver.outputs.tags }} \
+            $(printf 'inspectit/inspectit-ocelot-configurationserver@sha256:%s ' *)
+      - name: Inspect manifest configurationserver
+        run: |
+          docker buildx imagetools inspect inspectit/inspectit-ocelot-configurationserver:${{ github.ref_name }}
 
   build_documentation:
     name: "Build and Publish Release Documentation"
@@ -108,7 +212,7 @@ jobs:
     defaults:
       run:
         working-directory: inspectit-ocelot-documentation/website
-    needs: build_and_release
+    needs: merge_and_publish_docker_images
     steps:
       - name: Checkout
         uses: actions/checkout@v3
