@@ -1,5 +1,7 @@
 [versions]
-comLinecorpArmeria = "1.32.5"
+# versions 1.32.* breaks exporter tests
+# NoClassDefFoundError in OtlpMetricsExporterServiceIntTest, OtlpTraceExporterServiceIntTest, ZipkinExporterServiceInt2Test
+comLinecorpArmeria = "1.31.3"
 # @pin 1.3.* are the latest versions, which support java 8
 chQosLogback= "1.3.15"
 ioGithubNetmikeyLogunit = "2.0.0"
@@ -39,7 +41,10 @@ comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.8-jre" } }
 # @pin protobuf 4.* is not running
 comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25.8"
-comH2databaseH2 = "com.h2database:h2:2.3.232"
+# Note: Updating to 2.3.* breaks jmh GitHub workflow
+# bad class file: /root/.gradle/caches/modules-2/files-2.1/com.h2database/h2/2.3.232/4fcc05d966ccdb2812ae8b9a718f69226c0cf4e2/h2-2.3.232.jar(org/h2/jdbc/JdbcPreparedStatement.class)
+# class file has wrong version 55.0, should be 52.0
+comH2databaseH2 = "com.h2database:h2:2.2.224"
 comLinecorpArmeriaArmeriaGrpcProtocol = { module = "com.linecorp.armeria:armeria-grpc-protocol", version.ref = "comLinecorpArmeria" }
 comLinecorpArmeriaArmeriaJunit5 = { module = "com.linecorp.armeria:armeria-junit5", version.ref = "comLinecorpArmeria" }
 comSquareupOkio = "com.squareup.okio:okio:3.15.0"
