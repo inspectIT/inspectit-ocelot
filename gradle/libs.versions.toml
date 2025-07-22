@@ -12,7 +12,7 @@ ioOpencensus = "0.31.1"
 ioOpentelemetry = "1.52.0"
 ioOpentelemetryAlpha = "1.52.0-alpha"
 ioOpentelemetryInstrumentation = "2.15.0-alpha"
-ioOpentelemetryProto = "1.5.0-alpha"
+ioOpentelemetryProto = "1.7.0-alpha"
 ioOpentelemetrySemconv = "1.34.0"
 orgApacheLoggingLog4j = "2.24.3"
 # @pin Starting with version 6.x requires Java 11
@@ -39,8 +39,7 @@ comGithubOshiOshiCore = "com.github.oshi:oshi-core:6.8.2"
 # @pin Wiremock 3.* doesn't support java 8
 comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.8-jre" } }
-# @pin protobuf 4.* is not running
-comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25.8"
+comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:4.31.0"
 # Note: Updating to 2.3.* breaks jmh GitHub workflow
 # bad class file: /root/.gradle/caches/modules-2/files-2.1/com.h2database/h2/2.3.232/4fcc05d966ccdb2812ae8b9a718f69226c0cf4e2/h2-2.3.232.jar(org/h2/jdbc/JdbcPreparedStatement.class)
 # class file has wrong version 55.0, should be 52.0
