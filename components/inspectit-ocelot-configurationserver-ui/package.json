@@ -58,7 +58,7 @@
     "reselect": "^5.1.1",
     "strip-ansi": "^7.0.1",
     "uuid": "^11.1.0",
-    "webpack": "^5.94.0"
+    "webpack": "^5.100.2"
   },
   "license": "Apache-2.0",
   "devDependencies": {
