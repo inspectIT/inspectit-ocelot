@@ -67,6 +67,8 @@ jobs:
             ${{ steps.build_changelog.outputs.changelog }}
 
   # Build the docker images for multiple platforms and prepare for publishing
+  # Check out: https://github.com/docker/build-push-action
+  # And: https://docs.docker.com/build/ci/github-actions/multi-platform/
   build_docker_images:
     name: "Build Docker Images"
     runs-on: ubuntu-latest
