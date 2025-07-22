@@ -1,8 +1,8 @@
 [versions]
 ioJsonwebtoken = "0.12.6"
 orgEclipseJgit = "7.3.0.202506031305-r"
-orgSpringframeworkBoot = { strictly = "3.5.0" }
-orgSpringframeworkSecurity = "6.5.0"
+orgSpringframeworkBoot = { strictly = "3.5.3" }
+orgSpringframeworkSecurity = "6.5.2"
 jsonSchemaGenerator = "4.38.0"
 
 [libraries]
@@ -12,30 +12,30 @@ comGithubVictoolsJsonschemaModuleJavaxValidation = { module = "com.github.victoo
 comGoogleCodeGson = "com.google.code.gson:gson:2.13.1"
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.8-jre" } }
 comH2databaseH2 = "com.h2database:h2:2.3.232"
-commonsIo = "commons-io:commons-io:2.19.0"
+commonsIo = "commons-io:commons-io:2.20.0"
 ioJsonwebtokenJjwtApi = { module = "io.jsonwebtoken:jjwt-api", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtImpl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "ioJsonwebtoken" }
 ioJsonwebtokenJjwtJackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "ioJsonwebtoken" }
-orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.17.0"
+orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.18.0"
 orgAwaitility = "org.awaitility:awaitility:4.3.0"
 orgEclipseJgitOrgEclipseJgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "orgEclipseJgit" }
 orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "orgEclipseJgit" }
-orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:11.9.1"
-orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:6.6.15.Final"
-orgSpringdocSpringdocOpenapiStarterWebmvcUi = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8"
+orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:11.10.3"
+orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:7.0.6.Final"
+orgSpringdocSpringdocOpenapiStarterWebmvcUi = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9"
 orgSpringframeworkBootSpringBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterDataJpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStartervalidation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "orgSpringframeworkBoot" }
-orgSpringframeworkLdapSpringLdapCore = "org.springframework.ldap:spring-ldap-core:3.3.0"
+orgSpringframeworkLdapSpringLdapCore = "org.springframework.ldap:spring-ldap-core:3.3.2"
 orgSpringframeworkSecuritySpringSecurityLdap = { module = "org.springframework.security:spring-security-ldap", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityTest = { module = "org.springframework.security:spring-security-test", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworkSecuritySpringSecurityWeb = { module = "org.springframework.security:spring-security-web", version.ref = "orgSpringframeworkSecurity" }
 orgSpringframeworksecuritySpringSecurityConfig = { module = "org.springframework.security:spring-security-config", version.ref = "orgSpringframeworkSecurity" }
 chQosLogbackLogbackClassic = "ch.qos.logback:logback-classic:1.5.18"
 chQosLogbackLogbackCore = "ch.qos.logback:logback-core:1.5.18"
-orgXerialSqliteJdbc = "org.xerial:sqlite-jdbc:3.50.1.0"
+orgXerialSqliteJdbc = "org.xerial:sqlite-jdbc:3.50.3.0"
 orgYamlSnakeyaml = "org.yaml:snakeyaml:2.4"
 
 [bundles]
