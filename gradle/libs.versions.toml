@@ -8,8 +8,8 @@ ioGrpc = "1.73.0"
 # Ensure to adapt the netty version when changing the OpenCensus version
 ioOpencensus = "0.31.1"
 # If you rename this OTel variable or move it to another file, adjust the release-workflow
-ioOpentelemetry = "1.51.0"
-ioOpentelemetryAlpha = "1.51.0-alpha"
+ioOpentelemetry = "1.52.0"
+ioOpentelemetryAlpha = "1.52.0-alpha"
 ioOpentelemetryInstrumentation = "2.15.0-alpha"
 ioOpentelemetryProto = "1.5.0-alpha"
 ioOpentelemetrySemconv = "1.34.0"
@@ -25,7 +25,7 @@ orgSlf4j = "2.0.7"
 orgSpringframework = "5.3.39"
 # @pin 2.7.18 is the latest release which runs on Java 8, this version marks the end of open source support for SB 2.x
 orgSpringframeworkBoot = "2.7.18"
-orgTestcontainers = "1.21.1"
+orgTestcontainers = "1.21.3"
 # @pin resilience4j 2.* uses Java 17 APIs
 ioGithubResilience4j = "1.7.1"
 
@@ -44,8 +44,8 @@ comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:3.25
 comH2databaseH2 = "com.h2database:h2:2.2.224"
 comLinecorpArmeriaArmeriaGrpcProtocol = { module = "com.linecorp.armeria:armeria-grpc-protocol", version.ref = "comLinecorpArmeria" }
 comLinecorpArmeriaArmeriaJunit5 = { module = "com.linecorp.armeria:armeria-junit5", version.ref = "comLinecorpArmeria" }
-comSquareupOkio = "com.squareup.okio:okio:3.12.0"
-commonsIo = "commons-io:commons-io:2.19.0"
+comSquareupOkio = "com.squareup.okio:okio:3.15.0"
+commonsIo = "commons-io:commons-io:2.20.0"
 ioGithubNetmikeyLogunitLogunitCore = { module = "io.github.netmikey.logunit:logunit-core", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubNetmikeyLogunitLogunitLogback = { module = "io.github.netmikey.logunit:logunit-logback", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubResilience4jResilience4jRetry = { module = "io.github.resilience4j:resilience4j-retry", version.ref = "ioGithubResilience4j" }
@@ -73,10 +73,10 @@ ioOpentelemetryOpentelemetrySemconv = { module = "io.opentelemetry.semconv:opent
 ioPrometheusSimpleclientHttpserver = "io.prometheus:simpleclient_httpserver:0.16.0"
 javaxAnnotationJavaxAnnotationApi = "javax.annotation:javax.annotation-api:1.3.2"
 log4j = "log4j:log4j:1.2.17"
-netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.17.5"
+netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.17.6"
 # @pin logback 7.* is the last version for Java 8
 netLogstashLogbackLogstashLogbackEncoder = "net.logstash.logback:logstash-logback-encoder:7.4"
-orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.17.0"
+orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.18.0"
 orgApacheCommonsCommonsMath3 = "org.apache.commons:commons-math3:3.6.1"
 orgApacheHttpcomponentsHttpclient = "org.apache.httpcomponents:httpclient:4.5.14"
 orgApacheHttpcomponentsClient5Httpclient5 = "org.apache.httpcomponents.client5:httpclient5:5.5"
@@ -85,7 +85,7 @@ orgApacheHttpcomponentsCore5Httpcore5 = "org.apache.httpcomponents.core5:httpcor
 orgApacheLoggingLog4jLog4jApi = { module = "org.apache.logging.log4j:log4j-api", version.ref = "orgApacheLoggingLog4j" }
 orgApacheLoggingLog4jLog4jCore = { module = "org.apache.logging.log4j:log4j-core", version.ref = "orgApacheLoggingLog4j" }
 # @pin Tomcat 9.0.* is the last version to support java 8
-orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0.105"
+orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0.107"
 orgAssertjAssertjCore = "org.assertj:assertj-core:3.27.3"
 orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.27.3"
 orgAwaitility = "org.awaitility:awaitility:4.3.0"

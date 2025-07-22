@@ -1,12 +1,6 @@
 package io.opentelemetry.sdk.trace;
 
-import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanContext;
-import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.context.Context;
-import io.opentelemetry.sdk.common.Clock;
-import io.opentelemetry.sdk.internal.DefaultExceptionAttributeResolver;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
