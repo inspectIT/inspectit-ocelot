@@ -77,7 +77,7 @@
     "@storybook/react": "^7.6.19",
     "babel-loader": "^10.0.0",
     "eslint": "8.55.0",
-    "eslint-config-prettier": "^10.1.5",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-webpack": "^0.13.2",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.3",
