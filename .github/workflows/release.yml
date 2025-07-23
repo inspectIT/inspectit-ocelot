@@ -12,7 +12,7 @@ jobs:
     environment: release
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -33,8 +33,16 @@ jobs:
           cp ./components/inspectit-ocelot-configurationserver/build/reports/bom.json ./boms/inspectit-ocelot-configurationserver-bom.json
           cp ./components/inspectit-ocelot-configurationserver/build/reports/bom.xml ./boms/inspectit-ocelot-configurationserver-bom.xml
           zip -r ./artifacts/software-bill-of-materials.zip ./boms
-      - name: Prepare docker artifacts
+        # copy jars into Docker folders
+      - name: Prepare Docker artifacts
         run: ./gradlew :inspectit-ocelot-agent:copyAgentJar :inspectit-ocelot-configurationserver:copyServerJar
+      - name: Upload Docker artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-artifacts
+          path: |
+            inspectit-ocelot-agent/docker/inspectit-ocelot-agent.jar
+            components/inspectit-ocelot-configurationserver/docker/inspectit-ocelot-configurationserver.jar
       - name: Calculate checksums of release artifacts
         working-directory: ./artifacts
         run: for f in *; do sha256sum "$f" >> inspectit-ocelot-sha256-checksums.txt; done
@@ -66,7 +74,7 @@ jobs:
             "You can also find the corresponding documentation online under the following link: [inspectIT Ocelot Documentation](http://docs.inspectit.rocks)"
             ${{ steps.build_changelog.outputs.changelog }}
 
-  # Build the docker images for multiple platforms and prepare for publishing
+  # Build the Docker images for multiple platforms and prepare for publishing
   # Check out: https://github.com/docker/build-push-action
   # And: https://docs.docker.com/build/ci/github-actions/multi-platform/
   build_docker_images:
@@ -80,8 +88,6 @@ jobs:
         platform:
           - linux/amd64
           - linux/arm64
-          - linux/arm/v6
-          - linux/arm/v7
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -99,12 +105,22 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Download Docker artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-artifacts
+          path: ./docker-artifacts
+      - name: Move artifacts into Docker folders
+        run: |
+          mv docker-artifacts/inspectit-ocelot-agent/docker/inspectit-ocelot-agent.jar inspectit-ocelot-agent/docker
+          mv docker-artifacts/components/inspectit-ocelot-configurationserver/docker/inspectit-ocelot-configurationserver.jar components/inspectit-ocelot-configurationserver/docker
+
       - name: Build and push agent
         id: build-agent
         uses: docker/build-push-action@v6
         with:
           context: inspectit-ocelot-agent/docker
-          file: Dockerfile
+          file: inspectit-ocelot-agent/docker/Dockerfile
           platforms: ${{ matrix.platform }}
           outputs: type=image,name=inspectit/inspectit-ocelot-agent,push-by-digest=true,name-canonical=true,push=true
       - name: Export digest agent
@@ -125,7 +141,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: components/inspectit-ocelot-configurationserver/docker
-          file: Dockerfile
+          file: components/inspectit-ocelot-configurationserver/docker/Dockerfile
           platforms: ${{ matrix.platform }}
           outputs: type=image,name=inspectit/inspectit-ocelot-configurationserver,push-by-digest=true,name-canonical=true,push=true
       - name: Export digest configurationserver
@@ -133,7 +149,6 @@ jobs:
           mkdir -p ${{ runner.temp }}/digests-configurationserver
           digest="${{ steps.build-configurationserver.outputs.digest }}"
           touch "${{ runner.temp }}/digests-configurationserver/${digest#sha256:}"
-
       - name: Upload digest configurationserver
         uses: actions/upload-artifact@v4
         with:
@@ -142,7 +157,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  # Merge the prepared docker images and publish to DockerHub
+  # Merge the prepared Docker images and publish to DockerHub
   merge_and_publish_docker_images:
     name: "Merge and Publish Docker Images"
     runs-on: ubuntu-latest
@@ -152,16 +167,14 @@ jobs:
       - name: Download digests agent
         uses: actions/download-artifact@v4
         with:
-          name: digests-agent-*
-          path: ${{ runner.temp }}/digests-agent
           pattern: digests-agent-*
+          path: ${{ runner.temp }}/digests-agent
           merge-multiple: true
-      - name: Download digests for configurationserver
+      - name: Download digests configurationserver
         uses: actions/download-artifact@v4
         with:
-          name: digests-configurationserver-*
-          path: ${{ runner.temp }}/digests-configurationserver
           pattern: digests-configurationserver-*
+          path: ${{ runner.temp }}/digests-configurationserver
           merge-multiple: true
 
       - name: Login to DockerHub
@@ -172,6 +185,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+        # publish agent
       - name: Docker meta agent
         id: meta-agent
         uses: docker/metadata-action@v5
@@ -180,6 +194,16 @@ jobs:
           tags: |
             type=ref,event=tag
             type=raw,value=latest
+      - name: Push agent
+        working-directory: ${{ runner.temp }}/digests-agent
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+          $(printf 'inspectit/inspectit-ocelot-agent@sha256:%s ' *)
+      - name: Inspect manifest agent
+        run: |
+          docker buildx imagetools inspect inspectit/inspectit-ocelot-agent:${{ github.ref_name }}
+
+        # publish configuration-server
       - name: Docker meta configurationserver
         id: meta-configurationserver
         uses: docker/metadata-action@v5
@@ -188,21 +212,11 @@ jobs:
           tags: |
             type=ref,event=tag
             type=raw,value=latest
-
-      - name: Push agent
-        working-directory: ${{ runner.temp }}/digests-agent
-        run: |
-          docker buildx imagetools create ${{ steps.meta-agent.outputs.tags }} \
-          $(printf 'inspectit/inspectit-ocelot-agent@sha256:%s ' *)
-      - name: Inspect manifest agent
-        run: |
-          docker buildx imagetools inspect inspectit/inspectit-ocelot-agent:${{ github.ref_name }}
-
       - name: Push configurationserver
         working-directory: ${{ runner.temp }}/digests-configurationserver
         run: |
-          docker buildx imagetools create ${{ steps.meta-configurationserver.outputs.tags }} \
-            $(printf 'inspectit/inspectit-ocelot-configurationserver@sha256:%s ' *)
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+          $(printf 'inspectit/inspectit-ocelot-configurationserver@sha256:%s ' *)
       - name: Inspect manifest configurationserver
         run: |
           docker buildx imagetools inspect inspectit/inspectit-ocelot-configurationserver:${{ github.ref_name }}
@@ -217,7 +231,7 @@ jobs:
     needs: merge_and_publish_docker_images
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Uses Personal Access Token of GitHub user NTTechnicalUser.
           # This stores git credentials for all subsequent steps.
