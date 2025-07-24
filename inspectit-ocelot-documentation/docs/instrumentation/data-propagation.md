@@ -18,14 +18,14 @@ Consider the following example: you instrument the entry method of your HTTP ser
 You now of course want this data to be visible as tag for metrics collected in methods called by your entry point. 
 With the implementation above, the request URL would only be visible within the HTTP entry method.
 
+## Up- & Down-Propagation
+
 For this reason the _inspectIT context_ implements _data propagation_.
 
 * **Down Propagation:** Data collected in your instrumented method will also be visible to all methods directly 
   or indirectly called by your method. This behaviour already comes [with the OpenCensus Library for tags](https://opencensus.io/tag/#propagation).
 * **Up Propagation:** Data collected in your instrumented method will be visible to the methods which caused the 
   invocation of your method. This means that all methods which lie on the call stack will have access to the data written by your method
-* **Browser Propagation** (deprecated): An additional form of propagation. Data collected in your instrumented method will be 
-  stored inside a data storage, which is accessible to the outside. 
 
 Up- and down propagation can also be combined. In this case then the data is attached to the control flow, 
 meaning that it will appear as if its value will be passed around with every method call and return.
@@ -38,6 +38,15 @@ calling another one via HTTP? In inspectIT Ocelot we provide the following two s
 
 * **JVM local:** The data is propagated within the JVM, even across thread borders. The behaviour when data moves from one thread to another is defined through [Special Sensors](instrumentation/special-sensors.md).
 * **Global:** Data is propagated within the JVM and even across JVM borders. For example, when an application issues an HTTP request, the globally down propagated data is added to the headers of the request. When the response arrives, up propagated data is collected from the response headers. This protocol specific behaviour is realized through default instrumentation rules provided with the agent, but can be extended as needed.
+
+## Cross-Thread Propagation
+
+Besides the data propagation via _inspectIT context_, which occurs within one thread, there are some possibilities
+to exchange data across multiple threads via global storages:
+
+* **[Action Cache](instrumentation/actions.md#caching)**: Data is stored within one action and can be accessed in every call of this particular action.
+* **[Object Attachments](instrumentation/actions.md#attaching-values)**: Data is attached to a Java object and can be accessed via this Java object globally.
+* **[Session Storage](#session-storage)**: Data is stored for one specific session and can be accessed via the session ID globally.
 
 ## Defining the Behaviour
 
@@ -61,6 +70,7 @@ inspectit:
 
       # this data will be written to the inspectIT session storage
       'database_table': {session-storage: true}
+      'browser': {session-storage: true}
 ```
 
 Under `inspectit.instrumentation.data`, the data keys are mapped to their desired behaviour.
@@ -77,7 +87,7 @@ The configuration options are the following:
 Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. 
 In this case simply all settings will have their default value.
 
-## Interaction with OpenCensus Tags
+### Interaction with OpenCensus Tags
 
 As explained previously, our _inspectIT context_ can be seen as a more flexible variation of OpenCensus tags. 
 In fact, we designed the _inspectIT context_ so that it acts as a superset of the OpenCensus TagContext.
@@ -157,7 +167,7 @@ How the session ID is determined depends on your particular application and is n
 It is also possible to read the session ID from HTTP headers, which will be explained in more detail below.
 
 The following example shows how to read or write via the session storage. 
-Reading a data from the storage - for example for tracing - only works, if the [rule](instrumentation/rules.md) writing the tag 
+Reading data from the storage - for example for tracing - only works, if the [rule](instrumentation/rules.md) writing the tag 
 has been executed before the reading one. Also note, that both contexts have to use the exact same session ID 
 to access the storage. Otherwise, the contexts will use different storages with different data.
 
