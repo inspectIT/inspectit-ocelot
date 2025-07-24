@@ -43,7 +43,7 @@ inspectit:
       frequency: 50ms
       shutdown-delay: 30s
     # whether the agent should use 64 bit trace ids instead of 128 bit trace ids
-    use-64-bit-trace-ids: false
+    use64-bit-trace-ids: false
     # settings regarding log correlation
     log-correlation:
       trace-id-mdc-injection:
