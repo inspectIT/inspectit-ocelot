@@ -34,3 +34,17 @@ inspectit:
           return-value: 'false'
         value: 'Boolean.FALSE'
 
+      # Let's celebrate the 1000th commit for inspectIT Ocelot!!!
+      'a_approve':
+        docs:
+          description: 'Approve the instrumentation'
+        is-void: true
+        value-body: |
+          System.out.println("###          THIS INSTRUMENTATION HAS BEEN           ###");
+          System.out.println("#     ___    ____  ____  ____  ____ _    ____________  #");
+          System.out.println("#    /   |  / __ \\/ __ \\/ __ \\/ __ \\ |  / / ____/ __ \\ #");
+          System.out.println("#   / /| | / /_/ / /_/ / /_/ / / / / | / / __/ / / / / #");
+          System.out.println("#  / ___ |/ ____/ ____/ _, _/ /_/ /| |/ / /___/ /_/ /  #");
+          System.out.println("# /_/  |_/_/   /_/   /_/ |_|\\____/ |___/_____/_____/   #");
+          System.out.println("#                                                      #");
+          System.out.println("###                    BY EddeCCC                    ###");
