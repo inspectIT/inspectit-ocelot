@@ -150,7 +150,7 @@ The functionality that trace IDs with a length of 64 bits are generated can be a
 ```YAML
 inspectit:
   tracing:
-    use-64-bit-trace-ids: true
+    use64-bit-trace-ids: true
 ```
 
 :::important
