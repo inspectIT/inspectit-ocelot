@@ -133,4 +133,9 @@ public class HttpServiceOutMetricTest {
         }
     }
 
+    @Nested
+    class JmsAPI {
+        // TODO
+    }
+
 }
