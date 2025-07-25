@@ -6,14 +6,18 @@ import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tags;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.BrokerService;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.bootstrap.Instances;
+import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import javax.jms.*;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -36,8 +40,6 @@ public class JmsApiContextPropagationTest {
     private MessageProducer producer;
 
     private MessageConsumer consumer;
-
-    private final Map<String, Object> dataToPropagate = new HashMap<>();
 
     @BeforeEach
     void setUp() throws Exception {
@@ -65,7 +67,6 @@ public class JmsApiContextPropagationTest {
 
     @AfterEach
     void tearDown() throws Exception {
-        dataToPropagate.clear();
         connection.close();
         broker.stop();
     }
@@ -77,15 +78,40 @@ public class JmsApiContextPropagationTest {
         void shouldWriteDownPropagatedData() throws Exception {
             try (Scope s = Tags.getTagger().emptyBuilder()
                     .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
+                    .buildScoped()
+            ) {
+                TextMessage message = session.createTextMessage("test");
+                producer.send(message);
+            }
+
+            Message received = consumer.receive(2000);
+
+            String baggage = received.getStringProperty("Baggage");
+            assertThat(baggage).contains("down_propagated=myvalue");
+        }
+
+        @Test
+        void shouldReadDownPropagatedData() throws Exception {
+            CountDownLatch latch = new CountDownLatch(1);
+            List<Object> propagationData = new LinkedList<>();
+            // Use asynchronous message listener to read down propagated data
+            consumer.setMessageListener(message -> {
+                InternalInspectitContext myCtx = Instances.contextManager.enterNewContext();
+                myCtx.makeActive();
+                propagationData.add(myCtx.getData("down_propagated"));
+                myCtx.close();
+                latch.countDown();
+            });
+
+            try (Scope s = Tags.getTagger().emptyBuilder()
+                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
                     .buildScoped()) {
 
                 TextMessage message = session.createTextMessage("test");
                 producer.send(message);
             }
 
-            Message received = consumer.receive(2000);
-            String baggage = received.getStringProperty("Baggage");
-            assertThat(baggage).contains("down_propagated=myvalue");
+            Assertions.assertThat(propagationData).contains("myvalue");
         }
     }
 }
