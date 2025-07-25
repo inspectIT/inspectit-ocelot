@@ -50,6 +50,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+      - name: Sanitize image name # we cannot use ':' in upload-artifact names
+        run: echo "DOCKER_IMAGE=$(echo '${{ matrix.dockerimage }}' | sed 's/:/-/g')" >> $GITHUB_ENV
       - name: Clean Gradle cache
         run: ./gradlew clean
       - name: assemble
@@ -58,8 +60,6 @@ jobs:
         run: ./gradlew :inspectit-ocelot-core:test --no-daemon
       - name: systemTest
         run: ./gradlew :inspectit-ocelot-agent:systemTest
-      - name: Sanitize image name # we cannot use ':' in upload-artifact names
-        run: echo "DOCKER_IMAGE=$(echo '${{ matrix.dockerimage }}' | sed 's/:/-/g')" >> $GITHUB_ENV
       - name: upload agent
         uses: actions/upload-artifact@v4
         if: ${{ success() }}
@@ -70,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
-          name: 'test-results'
+          name: test-results-${{ env.DOCKER_IMAGE }}
           path: |
             inspectit-ocelot-agent/build/test-results
             inspectit-ocelot-core/build/test-results

@@ -1,0 +1,69 @@
+inspectit:
+  instrumentation:
+    rules:
+      'r_jms_tracing_defaults':
+        docs:
+          since: '2.7.0'
+          description: 'Enables tracing of JMS messages.'
+        default-rule: true
+        entry:
+          'method_fqn':
+            action: 'a_method_getFQN'
+        tracing:
+          start-span: true
+          start-span-conditions:
+            only-if-true: 'jms_is_entry'
+          error-status: _thrown
+          attributes:
+            'java.exception': _thrown
+            'java.fqn': 'method_fqn'
+
+      'r_jms_tracing_send':
+        docs:
+          since: '2.7.0'
+          description: 'Starts a span for a sent message.'
+        default-rule: true
+        include:
+          'r_jms_tracing_defaults': true
+          'r_jms_send_extract_details': true
+        scopes:
+          's_jms_MessageProducer_send_arg0msg': true
+          's_jms_MessageProducer_send_arg1msg': true
+          's_jms_QueueSender_send_arg0msg': true
+          's_jms_QueueSender_send_arg1msg': true
+          's_jms_TopicPublisher_publish_arg0msg': true
+          's_jms_TopicPublisher_publish_arg1msg': true
+        entry:
+          'span_name':
+            action: 'a_string_concat'
+            constant-input:
+              'a': "JMS: Send to "
+            data-input:
+              'b': 'jms_destination'
+        tracing:
+          name: 'span_name'
+          attributes:
+            'jms.destination': 'jms_destination'
+
+      'r_jms_tracing_receive':
+        docs:
+          since: '2.7.0'
+          description: 'Starts a span for a received message.'
+        default-rule: true
+        include:
+          'r_jms_tracing_defaults': true
+          'r_jms_receive_extract_details': true
+        scopes:
+          's_jms_MessageListener_onMessage': true
+          's_jms_SessionAwareMessageListener_onMessage': true
+        entry:
+          'span_name':
+            action: 'a_string_concat'
+            constant-input:
+              'a': "JMS: Receive from "
+            data-input:
+              'b': 'jms_origin'
+        tracing:
+          name: 'span_name'
+          attributes:
+            'jms.origin': 'jms_origin'

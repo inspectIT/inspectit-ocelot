@@ -1,0 +1,68 @@
+inspectit:
+  instrumentation:
+    rules:
+      'r_jms_servicegraph_send':
+        docs:
+          since: '2.7.0'
+          description: 'Records messages done via JMS in the [service/out/responsetime] metric for the service graph.'
+        default-rule: true
+        include:
+          'r_jms_send_extract_details': true
+          'r_servicegraph_prepare_down_propagation': true
+          'r_servicegraph_outbound_record_method': true
+        scopes:
+          's_jms_MessageProducer_send_arg0msg': true
+          's_jms_MessageProducer_send_arg1msg': true
+          's_jms_QueueSender_send_arg0msg': true
+          's_jms_QueueSender_send_arg1msg': true
+          's_jms_TopicPublisher_publish_arg0msg': true
+          's_jms_TopicPublisher_publish_arg1msg': true
+        entry:
+          'servicegraph_is_entry':
+            only-if-true: 'jms_is_entry'
+            action: 'a_entrypoint_check'
+            constant-input:
+              'marker': 'servicegraph_inbound_marker'
+        exit:
+          'servicegraph_target_external':
+            action: 'a_assign_value'
+            data-input:
+              'value': 'jms_destination'
+          'servicegraph_is_error':
+            action: 'a_assign_value'
+            data-input:
+              'value': 'jms_is_error'
+          'servicegraph_protocol':
+            action: 'a_assign_value'
+            constant-input:
+              'value': 'jms'
+
+      'r_jms_servicegraph_receive':
+        docs:
+          since: '2.7.0'
+          description: 'Records messages done via JMS in the [service/in/responsetime] metric for the service graph.'
+        default-rule: true
+        include:
+          'r_jms_receive_extract_details': true
+          'r_servicegraph_inbound_record_method': true
+        scopes:
+          's_jms_MessageListener_onMessage' : true
+          's_jms_SessionAwareMessageListener_onMessage': true
+        entry:
+          'servicegraph_is_entry':
+            action: 'a_assign_value'
+            data-input:
+              'value': 'jms_is_entry'
+        exit:
+          'servicegraph_origin_external':
+            action: 'a_assign_value'
+            data-input:
+              'value': 'jms_origin'
+          'servicegraph_is_error':
+            action: 'a_assign_value'
+            data-input:
+              'value': 'jms_is_error'
+          'servicegraph_protocol':
+            action: 'a_assign_value'
+            constant-input:
+              'value': 'jms'

@@ -1,0 +1,60 @@
+inspectit:
+  instrumentation:
+    data:
+      'jms_send_marker':
+        down-propagation: JVM_LOCAL
+      'jms_receive_marker':
+        down-propagation: JVM_LOCAL
+
+    rules:
+      'r_jms_send_detect_entry':
+        docs:
+          since: '2.7.0'
+          description: 'Can be included to detect and exclude nested send message calls.'
+        entry:
+          'jms_is_entry':
+            action: 'a_entrypoint_check'
+            constant-input:
+              'marker': 'jms_send_marker'
+
+      'r_jms_receive_detect_entry':
+        docs:
+          since: '2.7.0'
+          description: 'Can be included to detect and exclude nested receive message calls.'
+        entry:
+          'jms_is_entry':
+            action: 'a_entrypoint_check'
+            constant-input:
+              'marker': 'jms_receive_marker'
+
+      'r_jms_send_extract_details':
+        docs:
+          since: '2.7.0'
+          description: 'Extracts all information such as jms_destination, jms_is_error from a sent message.'
+        include:
+          'r_jms_send_detect_entry': true
+        entry:
+          'jms_destination':
+            only-if-true: 'jms_is_entry'
+            action: 'a_jms_getDestination'
+          'jms_is_error':
+            only-if-true: 'jms_is_entry'
+            action: 'a_logic_isNotNull'
+            data-input:
+              'value': _thrown
+
+      'r_jms_receive_extract_details':
+        docs:
+          since: '2.7.0'
+          description: 'Extracts all information such as jms_origin, jms_is_error from a received message.'
+        include:
+          'r_jms_receive_detect_entry': true
+        entry:
+          'jms_origin':
+            only-if-true: 'jms_is_entry'
+            action: 'a_jms_getDestination'
+          'jms_is_error':
+            only-if-true: 'jms_is_entry'
+            action: 'a_logic_isNotNull'
+            data-input:
+              'value': _thrown

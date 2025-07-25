@@ -2,6 +2,7 @@
 #used by:
 # - HttpUrlConnectionContextPropagationTest
 # - ServletApiContextPropagationTest
+# - JmsApiContextPropagationTest
 inspectit:
   instrumentation:
     data:

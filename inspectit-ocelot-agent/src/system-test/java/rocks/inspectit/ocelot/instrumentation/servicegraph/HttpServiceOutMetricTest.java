@@ -2,6 +2,8 @@ package rocks.inspectit.ocelot.instrumentation.servicegraph;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.opencensus.stats.AggregationData;
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.broker.BrokerService;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIUtils;
@@ -15,6 +17,7 @@ import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
+import javax.jms.*;
 import javax.servlet.http.HttpServlet;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -133,4 +136,67 @@ public class HttpServiceOutMetricTest {
         }
     }
 
+    @Nested
+    class JmsAPI {
+        private BrokerService broker;
+        private Connection connection;
+        private Session session;
+        private MessageProducer producer;
+        private final String QUEUE_NAME = "serviceGraphTestQueue";
+
+        @BeforeEach
+        void setUp() throws Exception {
+            broker = new BrokerService();
+            broker.setPersistent(false);
+            broker.setUseJmx(false);
+            broker.start();
+
+            ConnectionFactory factory = new ActiveMQConnectionFactory("vm://localhost?broker.persistent=false");
+            connection = factory.createConnection();
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination queue = session.createQueue(QUEUE_NAME);
+            producer = session.createProducer(queue);
+
+            TestUtils.waitForClassInstrumentations(Arrays.asList(
+                    Class.forName("javax.jms.MessageProducer"),
+                    Class.forName("javax.jms.MessageListener"),
+                    Class.forName("org.apache.activemq.ActiveMQMessageProducer")
+            ), true, 30, TimeUnit.SECONDS);
+        }
+
+        @AfterEach
+        void tearDown() throws Exception {
+            connection.close();
+            broker.stop();
+        }
+
+        @Test
+        void testInternalCallRecording() throws Exception {
+            InternalInspectitContext serviceOverride = Instances.contextManager.enterNewContext();
+            serviceOverride.setData("service.name", "jms_sg_test");
+            serviceOverride.makeActive();
+
+            TextMessage message = session.createTextMessage("test");
+            producer.send(message);
+
+            serviceOverride.close();
+
+            TestUtils.waitForOpenCensusQueueToBeProcessed();
+
+            Map<String, String> tags = new HashMap<>();
+            tags.put("protocol", "jms");
+            tags.put("service.name", "jms_sg_test");
+            tags.put("target_external", QUEUE_NAME);
+            // no target_service tag, since we do receive an answer from the target because of message queue
+
+            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
+            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags))
+                    .getSum();
+
+            assertThat(cnt).isEqualTo(1);
+            assertThat(respSum).isGreaterThan(0);
+        }
+    }
 }

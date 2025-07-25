@@ -1,0 +1,49 @@
+# ----------------------------------------------------------------------------------
+# Defines Rules and Actions enabling down & up propagation on the JMS API
+# ----------------------------------------------------------------------------------
+inspectit:
+  instrumentation:
+    rules:
+      'r_jms_write_down_propagation_arg0':
+        docs:
+          since: '2.7.0'
+          description: 'Performs down-propagation via sent messages in the first method argument.'
+        default-rule: true
+        scopes:
+          's_jms_MessageProducer_send_arg0msg': true
+          's_jms_QueueSender_send_arg0msg': true
+          's_jms_TopicPublisher_publish_arg0msg': true
+        post-entry:
+          do_propagation:
+            action: 'a_jms_write_down_propagation'
+            constant-input:
+              'msgIndex': 0
+
+      'r_jms_write_down_propagation_arg1':
+        docs:
+          since: '2.7.0'
+          description: 'Performs down-propagation via sent messages in the second method argument.'
+        default-rule: true
+        scopes:
+          's_jms_MessageProducer_send_arg1msg': true
+          's_jms_QueueSender_send_arg1msg': true
+          's_jms_TopicPublisher_publish_arg1msg': true
+        post-entry:
+          do_propagation:
+            action: 'a_jms_write_down_propagation'
+            constant-input:
+              'msgIndex': 1
+
+      'r_jms_message_listener_read_down_propagation':
+        docs:
+          since: '2.7.0'
+          description: 'Performs down-propagation via received messages.'
+        default-rule: true
+        scopes:
+          's_jms_MessageListener_onMessage': true
+          's_jms_SessionAwareMessageListener_onMessage': true
+        pre-entry:
+          do_propagation:
+            action: 'a_jms_read_down_propagation'
+            constant-input:
+              'msgIndex': 0
