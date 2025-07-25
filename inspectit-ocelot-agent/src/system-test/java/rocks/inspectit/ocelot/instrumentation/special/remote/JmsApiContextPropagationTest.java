@@ -116,6 +116,8 @@ public class JmsApiContextPropagationTest {
                 producer.send(message);
             }
 
+            boolean completed = latch.await(3, TimeUnit.SECONDS);
+            assertThat(completed).isTrue();
             Assertions.assertThat(propagationData).contains(value);
         }
     }
