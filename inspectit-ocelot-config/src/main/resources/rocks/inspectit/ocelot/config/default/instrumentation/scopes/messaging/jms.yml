@@ -1,0 +1,106 @@
+inspectit:
+  instrumentation:
+    scopes:
+      's_jms_SessionAwareMessageListener_onMessage':
+        docs:
+          since: '2.7.0'
+          description: "Targets the 'onMessage' method for any class inheriting from org.springframework.jms.listener.SessionAwareMessageListener"
+        interfaces:
+          - name: 'org.springframework.jms.listener.SessionAwareMessageListener'
+        methods:
+          - name: 'onMessage'
+        advanced:
+          instrument-only-inherited-methods: true
+
+      's_jms_MessageListener_onMessage':
+        docs:
+          since: '2.7.0'
+          description: "Targets the 'onMessage' method for any class inheriting from javax.jms.MessageListener'"
+        interfaces:
+          - name: 'javax.jms.MessageListener'
+        methods:
+          - name: 'onMessage'
+        advanced:
+          instrument-only-inherited-methods: true
+
+      's_jms_MessageProducer_send_arg0msg':
+        docs:
+          since: '2.7.0'
+          description: "Targets 'send' methods with the message as first argument for any class inheriting from javax.jms.MessageProducer"
+        interfaces:
+          - name: 'javax.jms.MessageProducer'
+        methods:
+          - name: 'send'
+            arguments: ['javax.jms.Message']
+          - name: 'send'
+            arguments: ['javax.jms.Message', 'javax.jms.CompletionListener']
+          - name: 'send'
+            arguments: ['javax.jms.Message', int, int, long]
+          - name: 'send'
+            arguments: ['javax.jms.Message',int, int, long, 'javax.jms.CompletionListener']
+
+      's_jms_MessageProducer_send_arg1msg':
+        docs:
+          since: '2.7.0'
+          description: "Targets 'send' methods with the message as second argument for any class inheriting from javax.jms.MessageProducer"
+        interfaces:
+          - name: 'javax.jms.MessageProducer'
+        methods:
+          - name: 'send'
+            arguments: ['javax.jms.Destination', 'javax.jms.Message']
+          - name: 'send'
+            arguments: ['javax.jms.Destination', 'javax.jms.Message', 'javax.jms.CompletionListener']
+          - name: 'send'
+            arguments: ['javax.jms.Destination', 'javax.jms.Message', int, int, long]
+          - name: 'send'
+            arguments: ['javax.jms.Destination', 'javax.jms.Message',int, int, long, 'javax.jms.CompletionListener']
+
+
+      's_jms_QueueSender_send_arg0msg':
+        docs:
+          since: '2.7.0'
+          description: "Targets 'send' methods with the message as first argument for any class inheriting from javax.jms.QueueSender"
+        interfaces:
+          - name: 'javax.jms.QueueSender'
+        methods:
+          - name: 'send'
+            arguments: ['javax.jms.Message']
+          - name: 'send'
+            arguments: ['javax.jms.Message', int, int, long]
+
+      's_jms_QueueSender_send_arg1msg':
+        docs:
+          since: '2.7.0'
+          description: "Targets 'send' methods with the message as second argument for any class inheriting from javax.jms.QueueSender"
+        interfaces:
+          - name: 'javax.jms.QueueSender'
+        methods:
+          - name: 'send'
+            arguments: ['javax.jms.Queue', 'javax.jms.Message']
+          - name: 'send'
+            arguments: ['javax.jms.Queue', 'javax.jms.Message', int, int, long]
+
+
+      's_jms_TopicPublisher_publish_arg0msg':
+        docs:
+          since: '2.7.0'
+          description: "Targets 'send' methods with the message as first argument for any class inheriting from javax.jms.TopicPublisher"
+        interfaces:
+          - name: 'javax.jms.TopicPublisher'
+        methods:
+          - name: 'publish'
+            arguments: ['javax.jms.Message']
+          - name: 'publish'
+            arguments: ['javax.jms.Message', int, int, long]
+
+      s_jms_TopicPublisher_publish_arg1msg:
+        docs:
+          since: '2.7.0'
+          description: "Targets 'send' methods with the message as second argument for any class inheriting from javax.jms.TopicPublisher"
+        interfaces:
+          - name: 'javax.jms.TopicPublisher'
+        methods:
+          - name: 'publish'
+            arguments: ['javax.jms.Topic', 'javax.jms.Message']
+          - name: 'publish'
+            arguments: ['javax.jms.Topic', 'javax.jms.Message', int, int, long]
