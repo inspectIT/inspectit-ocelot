@@ -31,6 +31,10 @@ public class JmsApiContextPropagationTest {
 
     private static final String QUEUE_NAME = "testQueue";
 
+    private static final String key = "down_propagated";
+
+    private static final String value = "my-value";
+
     private BrokerService broker;
 
     private Connection connection;
@@ -78,7 +82,7 @@ public class JmsApiContextPropagationTest {
         @Test
         void shouldWriteDownPropagatedData() throws Exception {
             try (Scope s = Tags.getTagger().emptyBuilder()
-                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
+                    .putLocal(TagKey.create(key), TagValue.create(value))
                     .buildScoped()
             ) {
                 TextMessage message = session.createTextMessage("test");
@@ -88,7 +92,7 @@ public class JmsApiContextPropagationTest {
             Message received = consumer.receive(2000);
 
             String baggage = received.getStringProperty("Baggage");
-            assertThat(baggage).contains("down_propagated=myvalue");
+            assertThat(baggage).contains(key + "=" + value);
         }
 
         @Test
@@ -99,20 +103,20 @@ public class JmsApiContextPropagationTest {
             consumer.setMessageListener(message -> {
                 InternalInspectitContext myCtx = Instances.contextManager.enterNewContext();
                 myCtx.makeActive();
-                propagationData.add(myCtx.getData("down_propagated"));
+                propagationData.add(myCtx.getData(key));
                 myCtx.close();
                 latch.countDown();
             });
 
             try (Scope s = Tags.getTagger().emptyBuilder()
-                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
+                    .putLocal(TagKey.create(key), TagValue.create(value))
                     .buildScoped()) {
 
                 TextMessage message = session.createTextMessage("test");
                 producer.send(message);
             }
 
-            Assertions.assertThat(propagationData).contains("myvalue");
+            Assertions.assertThat(propagationData).contains(value);
         }
     }
 }
