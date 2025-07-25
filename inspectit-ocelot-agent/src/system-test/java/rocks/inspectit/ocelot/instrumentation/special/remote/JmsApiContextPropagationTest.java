@@ -60,7 +60,8 @@ public class JmsApiContextPropagationTest {
         TestUtils.waitForClassInstrumentations(
                 Arrays.asList(
                         Class.forName("javax.jms.MessageProducer"),
-                        Class.forName("javax.jms.MessageListener")
+                        Class.forName("javax.jms.MessageListener"),
+                        Class.forName("org.apache.activemq.ActiveMQMessageProducer")
                 ),
                 true, 30, TimeUnit.SECONDS);
     }
