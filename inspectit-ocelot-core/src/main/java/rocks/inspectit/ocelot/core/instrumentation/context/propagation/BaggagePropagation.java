@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -14,8 +13,10 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
- * Currently, the propagation happens only via the Baggage headers:
+ * Currently, the data propagation happens via the Baggage headers:
  * <a href="https://github.com/w3c/baggage/blob/main/baggage/HTTP_HEADER_FORMAT.md">Check out the W3C documentation</a>
+ * <p>
+ * Idea: We could try to use the W3CBaggagePropagator for baggage like the W3CTraceContextPropagator for traces
  */
 @Slf4j
 public class BaggagePropagation {
@@ -61,6 +62,13 @@ public class BaggagePropagation {
     }
 
     /**
+     * @return the fields that will be used to read baggage propagation data
+     */
+    public List<String> fields() {
+        return Arrays.asList(BAGGAGE_HEADER, BAGGAGE_HEADER.toLowerCase());
+    }
+
+    /**
      * Decodes the given header to value map into the given target context.
      *
      * @param propagationMap the headers to decode
@@ -70,6 +78,8 @@ public class BaggagePropagation {
     void readPropagatedDataFromHeaderMap(Map<String, String> propagationMap, InspectitContextImpl target, Predicate<String> propagation) {
         if (propagationMap.containsKey(BAGGAGE_HEADER))
             readBaggage(propagationMap.get(BAGGAGE_HEADER), target, propagation);
+        else if(propagationMap.containsKey(BAGGAGE_HEADER.toLowerCase()))
+            readBaggage(propagationMap.get(BAGGAGE_HEADER.toLowerCase()), target, propagation);
     }
 
     /**

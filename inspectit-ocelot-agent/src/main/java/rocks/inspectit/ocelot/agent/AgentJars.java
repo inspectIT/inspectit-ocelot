@@ -5,7 +5,6 @@ import rocks.inspectit.ocelot.bootstrap.AgentProperties;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -132,7 +131,7 @@ public class AgentJars {
     /**
      * Tries to recycle a jar file while using a file lock to prevent multiple processes from writing the file concurrently.
      * This could happen when multiple agents start at the same time and no jar file exists at the start.
-     * Thus, it is only possible to access the jare file when acquiring the lock for the lock file.
+     * Thus, it is only possible to access the jar file when acquiring the lock for the lock file.
      *
      * @param resourcePath the path to the resource, used if no jar has been found
      * @param jarPath the path of the jar file

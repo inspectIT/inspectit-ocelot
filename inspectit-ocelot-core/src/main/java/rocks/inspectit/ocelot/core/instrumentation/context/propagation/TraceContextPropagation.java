@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.core.instrumentation.context.propagation;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
@@ -10,21 +9,18 @@ import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.context.propagation.TextMapSetter;
 import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * For context propagation, when tracing is added, additional header formats, such as B3 will be used.
+ * For context propagation, when tracing is added, additional header formats such as B3 will be used.
  */
 @Slf4j
 public class TraceContextPropagation {
-
-    private final String B3_HEADER_PREFIX = "X-B3-";
 
     /**
      * The currently used propagation format. Defaults to {@link W3CTraceContextPropagator}.
@@ -52,6 +48,21 @@ public class TraceContextPropagation {
     };
 
     TraceContextPropagation() {}
+
+    /**
+     * @return the fields that will be used to read trace-context propagation data
+     */
+    public List<String> fields() {
+        List<String> datadogFields = DatadogFormat.INSTANCE.fields();
+        List<String> b3Fields = B3Format.INSTANCE.fields();
+        Collection<String> traceContextFields = W3CTraceContextPropagator.getInstance().fields();
+
+        return Stream.of(datadogFields, b3Fields, traceContextFields)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+
 
     /**
      * Takes the given key-value pairs and the span context.
@@ -89,15 +100,13 @@ public class TraceContextPropagation {
      * @return the {@code SpanContext} if the data contained any trace correlation, {@code null} otherwise.
      */
     SpanContext readPropagatedSpanContextFromHeaderMap(Map<String, String> propagationMap) {
-        boolean anyB3Header = B3Propagator.injectingMultiHeaders()
-                .fields()
-                .stream()
-                .anyMatch(s -> propagationMap.containsKey(s) && s.startsWith(B3_HEADER_PREFIX));
+        boolean anyB3Header = B3Format.INSTANCE.anyB3Header(propagationMap);
         if (anyB3Header) {
             try {
-                return extractPropagatedSpanContext(B3Propagator.injectingMultiHeaders(), propagationMap);
+                Map<String, String> b3Headers = B3Format.INSTANCE.getB3Headers(propagationMap);
+                return extractPropagatedSpanContext(B3Propagator.injectingMultiHeaders(), b3Headers);
             } catch (Exception ex) {
-                String headerString = getB3HeadersAsString(propagationMap);
+                String headerString = B3Format.INSTANCE.getB3HeadersAsString(propagationMap);
                 log.error("Error reading trace correlation data from B3 headers: {}", headerString, ex);
             }
         }
@@ -140,32 +149,6 @@ public class TraceContextPropagation {
     }
 
     /**
-     * Returns a string representation of all B3 headers (headers which key is starting with {@link #B3_HEADER_PREFIX})
-     * in the given map.
-     *
-     * @param headers the map containing the headers
-     *
-     * @return string representation of the headers (["key": "value"]).
-     */
-    @VisibleForTesting
-    String getB3HeadersAsString(Map<String, String> headers) {
-        StringBuilder builder = new StringBuilder("[");
-
-        if (!CollectionUtils.isEmpty(headers)) {
-            String headerString = headers.entrySet()
-                    .stream()
-                    .filter(entry -> entry.getKey().startsWith(B3_HEADER_PREFIX))
-                    .map(entry -> "\"" + entry.getKey() + "\": \"" + entry.getValue() + "\"")
-                    .collect(Collectors.joining(", "));
-
-            builder.append(headerString);
-        }
-
-        builder.append("]");
-        return builder.toString();
-    }
-
-    /**
      * Sets the currently used propagation format to the specified one.
      *
      * @param format the format to use
@@ -185,8 +168,8 @@ public class TraceContextPropagation {
                 propagationFormat = DatadogFormat.INSTANCE;
                 break;
             default:
-                log.warn("The specified propagation format {} is not supported. Falling back to B3 format", format);
-                propagationFormat = B3Propagator.injectingMultiHeaders();
+                log.warn("The specified propagation format {} is not supported. Falling back to TraceContext format", format);
+                propagationFormat = W3CTraceContextPropagator.getInstance();
         }
     }
 }
