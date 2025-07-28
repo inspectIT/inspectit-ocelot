@@ -282,6 +282,17 @@ public class ContextPropagationTest {
         }
 
         @Test
+        public void readB3Header_lowercase() {
+            Map<String, String> data = ImmutableMap.of("key-one", "value-one", "x-b3-traceid", TRACE_ID, "x-b3-spanid", SPAN_ID, "x-b3-sampled", "1");
+
+            SpanContext spanContext = contextPropagation.readPropagatedSpanContextFromHeaderMap(data);
+
+            assertThat(spanContext.getTraceId()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceFlags().isSampled()).isTrue();
+        }
+
+        @Test
         public void readTraceContextHeader_sampled() {
             String header = "00-" + TRACE_ID + "-" + SPAN_ID + "-01";
             Map<String, String> data = ImmutableMap.of("key-one", "value-one", "traceparent", header);

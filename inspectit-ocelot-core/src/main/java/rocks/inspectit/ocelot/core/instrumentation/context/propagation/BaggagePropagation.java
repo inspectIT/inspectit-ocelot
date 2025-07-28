@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +15,8 @@ import java.util.regex.Pattern;
 /**
  * Currently, the propagation happens only via the Baggage headers:
  * <a href="https://github.com/w3c/baggage/blob/main/baggage/HTTP_HEADER_FORMAT.md">Check out the W3C documentation</a>
+ * <p>
+ * Idea: We could try to use the W3CBaggagePropagator for baggage like the W3CTraceContextPropagator for traces
  */
 @Slf4j
 public class BaggagePropagation {
@@ -61,7 +62,7 @@ public class BaggagePropagation {
     }
 
     /**
-     * @return the fields that will be used to read propagation data
+     * @return the fields that will be used to read baggage propagation data
      */
     public List<String> fields() {
         return Arrays.asList(BAGGAGE_HEADER, BAGGAGE_HEADER.toLowerCase());

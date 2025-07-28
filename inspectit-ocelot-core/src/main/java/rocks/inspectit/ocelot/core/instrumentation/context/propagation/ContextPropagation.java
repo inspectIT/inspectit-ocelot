@@ -1,8 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.context.propagation;
 
 import io.opentelemetry.api.trace.SpanContext;
-import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
-import io.opentelemetry.extension.trace.propagation.B3Propagator;
 import rocks.inspectit.ocelot.config.model.tracing.PropagationFormat;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.context.session.SessionIdManager;
@@ -36,13 +34,12 @@ public class ContextPropagation {
         addPropagationFields();
     }
 
+    /**
+     * Add propagation fields, which we support for reading
+     */
     private void addPropagationFields() {
-        // We could try to use the W3CBaggagePropagator for baggage like the W3CTraceContextPropagator for traces
         PROPAGATION_FIELDS.addAll(baggagePropagation.fields());
-        PROPAGATION_FIELDS.addAll(B3Propagator.injectingSingleHeader().fields());
-        PROPAGATION_FIELDS.addAll(B3Propagator.injectingMultiHeaders().fields());
-        PROPAGATION_FIELDS.addAll(DatadogFormat.INSTANCE.fields());
-        PROPAGATION_FIELDS.addAll(W3CTraceContextPropagator.getInstance().fields());
+        PROPAGATION_FIELDS.addAll(traceContextPropagation.fields());
     }
 
     /**
