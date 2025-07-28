@@ -10,7 +10,7 @@ inspectIT Ocelot allows you to link such business transactions with the correspo
 
 :::note
 This chapter assumes you are already familiar with instrumentation. 
-Please make sure to read the previous chapters about [scopes](instrumentation/scopes.md), [rules](instrumentation/rules.md) & [actions](instrumentation/actions.md).
+Please make sure to read the previous chapters about [scopes](instrumentation/scopes.md), [actions](instrumentation/actions.md) & [rules](instrumentation/rules.md).
 :::
 
 ## Detecting Business Transactions

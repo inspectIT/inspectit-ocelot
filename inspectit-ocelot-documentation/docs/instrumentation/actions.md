@@ -140,7 +140,7 @@ In this example this allows us to refer to `ServletRequest` and `HttpServletRequ
 
 Repeatedly accessing the same data might create unnecessary performance overhead. Thus, actions allow to cache data 
 for general purpose. Such data can be read or overwritten within the same action. If multiple [rules](instrumentation/rules.md) 
-use the same action, all of these rules will use the same cache. If an action has been changed, the cached data will be dropped.
+use the same action, all of these actions will use the same cache. If an action has been changed, the cached data will be dropped.
 The cache resembles an ordinary Java `Map<Object, Object>` and is thread safe.
 You can use the cache via the `_cache` variable, which does not have to be included as input parameter.
 
@@ -169,7 +169,7 @@ inspectit:
 
 ### Reflection
 
-As mentioned above, in order to access and cache `java.lang.reflect.Field` or `java.lang.reflect.Method` instances, 
+In order to access and cache `java.lang.reflect.Field` or `java.lang.reflect.Method` instances, 
 you can use the `_reflection` special parameter. Reflection helps you to access fields or invoke methods, which are normally
 not accessible, because they are not visible for the instrumented method. Note that trying to access non-existing fields 
 or methods will throw an exception and disable the action until it has been updated. 
