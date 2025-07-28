@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
- * Currently, the propagation happens only via the Baggage headers:
+ * Currently, the data propagation happens via the Baggage headers:
  * <a href="https://github.com/w3c/baggage/blob/main/baggage/HTTP_HEADER_FORMAT.md">Check out the W3C documentation</a>
  * <p>
  * Idea: We could try to use the W3CBaggagePropagator for baggage like the W3CTraceContextPropagator for traces
