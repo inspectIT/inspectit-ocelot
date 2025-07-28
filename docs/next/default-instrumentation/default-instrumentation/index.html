@@ -61,13 +61,18 @@
               }
             });
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/default-instrumentation/default-instrumentation.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Default Instrumentation</h1></header><article><div><span><p>The inspectIT Ocelot Java agent already comes with an extensive default instrumentation,
-which collects traces and metrics for several technologies,
-like JDBC, Apache Client, HttpURLConnection or the Javax HTTP Servlet.</p>
+which collects traces and metrics for several technologies:</p>
+<ul>
+<li>JDBC</li>
+<li>Apache Client</li>
+<li>HttpURLConnection</li>
+<li>HTTP Servlet API</li>
+<li>JMS API</li>
+</ul>
 <p>The default instrumentation can always be overwritten by your custom instrumentation. You can also turn off
 parts of the instrumentation by disabling the particular rules.</p>
 <ul>
-<li><p>You can examine the default instrumentation in GitHub:
-<a href="https://github.com/inspectIT/inspectit-ocelot/tree/master/inspectit-ocelot-config/src/main/resources/rocks/inspectit/ocelot/config/default/instrumentation">inspectit-ocelot-default-instrumentation</a></p></li>
+<li><p>You can examine the default instrumentation in our <a href="https://github.com/inspectIT/inspectit-ocelot/tree/master/inspectit-ocelot-config/src/main/resources/rocks/inspectit/ocelot/config/default/instrumentation">GitHub</a></p></li>
 <li><p>You can find more detailed information about instrumentation in the section <a href="/inspectit-ocelot/docs/next/instrumentation/instrumentation">Instrumentation</a>.</p></li>
 <li><p>Furthermore, you can view the complete default configuration in <a href="https://github.com/inspectIT/inspectit-ocelot/tree/master/inspectit-ocelot-config/src/main/resources/rocks/inspectit/ocelot/config/default">GitHub</a>
 or in the <a href="/inspectit-ocelot/docs/next/config-server/overview">Configuration Server</a></p></li>
@@ -77,14 +82,14 @@ or in the <a href="/inspectit-ocelot/docs/next/config-server/overview">Configura
 As the agent was originally developed to support mainly Java 8 applications,
 you have to overwrite the default instrumentation to work again.</p>
 <ul>
-<li>View <a href="/inspectit-ocelot/docs/next/default-instrumentation/jakarta">Upgrade to Jakarta Namespace</a> to enable instrumentation for the Jakarta HTTP Servlet.</li>
-<li>View <a href="/inspectit-ocelot/docs/next/default-instrumentation/apache-client5">Upgrade to Apache Client 5</a> to enable instrumentation for the Apache Client 5.</li>
+<li>View <a href="/inspectit-ocelot/docs/next/default-instrumentation/jakarta">Upgrade to Jakarta Namespace</a> to enable instrumentation for the Jakarta Servlet API or JMS API.</li>
+<li>View <a href="/inspectit-ocelot/docs/next/default-instrumentation/apache-client5">Upgrade to Apache Client 5</a> to enable instrumentation for the Apache Client v5.</li>
 </ul>
 </blockquote>
 <hr>
 <p>The default configuration in the Configuration Server:
 <img src="/inspectit-ocelot/docs/assets/default-instrumentation.png" alt="Default-Instrumentation-Files"></p>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 7/24/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/process"><span class="arrow-prev">← </span><span>Instrumentation Process</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/default-instrumentation/jakarta"><span>Upgrade to Jakarta Namespace</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 7/28/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/next/instrumentation/process"><span class="arrow-prev">← </span><span>Instrumentation Process</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/next/default-instrumentation/jakarta"><span>Upgrade to Jakarta Namespace</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
