@@ -226,7 +226,7 @@ public class ContextPropagationTest {
             String header = "00-" + TRACE_ID + "-" + SPAN_ID + "-00";
             assertThat(result).contains(entry(TRACEPARENT, header));
 
-            contextPropagation.setPropagationFormat(PropagationFormat.B3); // set back to default
+            contextPropagation.setPropagationFormat(PropagationFormat.TRACE_CONTEXT); // set back to default
         }
 
         @Test
@@ -241,7 +241,7 @@ public class ContextPropagationTest {
             assertThat(result).contains(entry(X_DATADOG_TRACE_ID, TRACE_ID_DATADOG));
             assertThat(result).contains(entry(X_DATADOG_PARENT_ID, SPAN_ID_DATADOG));
 
-            contextPropagation.setPropagationFormat(PropagationFormat.B3); // set back to default
+            contextPropagation.setPropagationFormat(PropagationFormat.TRACE_CONTEXT); // set back to default
         }
     }
 
@@ -336,6 +336,17 @@ public class ContextPropagationTest {
             assertThat(spanContext.getTraceId()).isEqualTo(TRACE_ID);
             assertThat(spanContext.getSpanId()).isEqualTo(SPAN_ID);
             assertThat(spanContext.getTraceFlags().isSampled()).isFalse();
+        }
+
+        @Test
+        public void readDatadogHeader_lowercase() {
+            Map<String, String> data = ImmutableMap.of("key-one", "value-one", "x-datadog-trace-id", TRACE_ID_DATADOG, "x-datadog-parent-id", SPAN_ID_DATADOG, "x-datadog-sampling-priority", "1");
+
+            SpanContext spanContext = contextPropagation.readPropagatedSpanContextFromHeaderMap(data);
+
+            assertThat(spanContext.getTraceId()).isEqualTo(TRACE_ID);
+            assertThat(spanContext.getSpanId()).isEqualTo(SPAN_ID);
+            assertThat(spanContext.getTraceFlags().isSampled()).isTrue();
         }
     }
 }
