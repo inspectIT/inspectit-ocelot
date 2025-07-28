@@ -25,6 +25,8 @@ public class BaggagePropagation {
      */
     public static final String BAGGAGE_HEADER = "Baggage";
 
+    public static final String BAGGAGE_HEADER_LOWER = "baggage";
+
     /**
      * We use this header to allow JavaScript in frontends to also read the {@code Baggage} header.
      * Normally, browser security prevents JavaScript to read such "custom" HTTP headers in cross-origin requests.
@@ -70,6 +72,8 @@ public class BaggagePropagation {
     void readPropagatedDataFromHeaderMap(Map<String, String> propagationMap, InspectitContextImpl target, Predicate<String> propagation) {
         if (propagationMap.containsKey(BAGGAGE_HEADER))
             readBaggage(propagationMap.get(BAGGAGE_HEADER), target, propagation);
+        else if(propagationMap.containsKey(BAGGAGE_HEADER_LOWER))
+            readBaggage(propagationMap.get(BAGGAGE_HEADER_LOWER), target, propagation);
     }
 
     /**

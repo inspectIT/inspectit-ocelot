@@ -39,6 +39,7 @@ public class ContextPropagation {
     private void addPropagationFields() {
         // We could try to use the W3CBaggagePropagator for baggage like the W3CTraceContextPropagator for traces
         PROPAGATION_FIELDS.add(BaggagePropagation.BAGGAGE_HEADER);
+        PROPAGATION_FIELDS.add(BaggagePropagation.BAGGAGE_HEADER_LOWER);
         PROPAGATION_FIELDS.addAll(B3Propagator.injectingSingleHeader().fields());
         PROPAGATION_FIELDS.addAll(B3Propagator.injectingMultiHeaders().fields());
         PROPAGATION_FIELDS.addAll(W3CTraceContextPropagator.getInstance().fields());

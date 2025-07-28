@@ -132,6 +132,16 @@ public class ContextPropagationTest {
             verifyNoInteractions(inspectitContext);
         }
 
+        @Test
+        public void testLowerCaseBaggageHeader() {
+            String lowerCaseBaggage = BAGGAGE_HEADER.toLowerCase();
+            Map<String, String> headers = ImmutableMap.of(lowerCaseBaggage, "someprop=42");
+
+            contextPropagation.readPropagatedDataFromHeaderMap(headers, inspectitContext, ALWAYS_TRUE);
+
+            verify(inspectitContext).setData(eq("someprop"), eq("42"));
+            verifyNoMoreInteractions(inspectitContext);
+        }
     }
 
     @Nested
