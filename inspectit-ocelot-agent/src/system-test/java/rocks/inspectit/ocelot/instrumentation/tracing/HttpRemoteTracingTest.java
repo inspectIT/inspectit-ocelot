@@ -2,6 +2,8 @@ package rocks.inspectit.ocelot.instrumentation.tracing;
 
 import io.opentelemetry.api.trace.SpanId;
 import io.opentelemetry.api.trace.SpanKind;
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.broker.BrokerService;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIUtils;
@@ -9,12 +11,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
+import javax.jms.*;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -23,7 +23,10 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -144,7 +147,85 @@ public class HttpRemoteTracingTest extends TraceTestBase {
             );
 
         }
+    }
 
+    @Nested
+    class JmsTracingTest {
+
+        private BrokerService broker;
+        private Connection connection;
+        private Session session;
+        private MessageProducer producer;
+        private MessageConsumer consumer;
+        private CountDownLatch latch;
+
+        private static final String QUEUE_NAME = "tracingTestQueue";
+
+        @BeforeEach
+        void setUp() throws Exception {
+            broker = new BrokerService();
+            broker.setPersistent(false);
+            broker.setUseJmx(false);
+            broker.start();
+
+            ConnectionFactory factory = new ActiveMQConnectionFactory("vm://localhost?broker.persistent=false");
+            connection = factory.createConnection();
+            connection.start();
+
+            session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination queue = session.createQueue(QUEUE_NAME);
+            producer = session.createProducer(queue);
+            consumer = session.createConsumer(queue);
+
+            latch = new CountDownLatch(1);
+            consumer.setMessageListener(msg -> {
+                TracingServlet servlet = new TracingServlet();
+                servlet.myHandler();
+                latch.countDown();
+            });
+
+            TestUtils.waitForClassInstrumentations(
+                    Arrays.asList(
+                            Class.forName("javax.jms.MessageProducer"),
+                            Class.forName("javax.jms.MessageListener"),
+                            Class.forName("org.apache.activemq.ActiveMQMessageProducer"),
+                            JmsTracingTest.class,
+                            TracingServlet.class
+                    ),
+                    true, 30, TimeUnit.SECONDS);
+        }
+
+        @AfterEach
+        void tearDown() throws Exception {
+            connection.close();
+            broker.stop();
+        }
+
+        void clientSpan() {
+            try {
+                TextMessage message = session.createTextMessage("hello");
+                producer.send(message);
+            } catch (JMSException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Test
+        void testProducerAndConsumer() throws Exception {
+            clientSpan();
+            boolean done = latch.await(3, TimeUnit.SECONDS);
+
+            assertThat(done).isTrue();
+
+            assertTraceExported((spans) -> assertThat(spans).anySatisfy(sp -> {
+                assertThat(sp.getName()).endsWith("JmsTracingTest.clientSpan");
+                assertThat(sp.getKind()).isEqualTo(SpanKind.CLIENT);
+                assertThat(SpanId.isValid(sp.getParentSpanId())).isFalse();
+            }).anySatisfy(sp -> {
+                assertThat(sp.getName()).endsWith("TracingServlet.myHandler");
+                assertThat(sp.getKind()).isEqualTo(SpanKind.SERVER);
+                assertThat(SpanId.isValid(sp.getParentSpanId())).isTrue();
+            }));
+        }
     }
 }
-

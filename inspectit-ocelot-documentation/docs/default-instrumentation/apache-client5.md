@@ -9,8 +9,7 @@ Thus, there are some efforts necessary to migrate from previous versions to vers
 
 Since the default instrumentation of inspectIT Ocelot only addresses the Apache Client 4,
 you have to include an additional configuration to instrument version 5 for traces and metrics.
-
-You can find the configuration in GitHub: [inspectit-ocelot-apache-client5-configuration](https://github.com/inspectIT/inspectit-ocelot-configurations/tree/master/extensions/apache-client5)
+You can find the configuration in our [GitHub](https://github.com/inspectIT/inspectit-ocelot-configurations/tree/master/extensions/apache-client5).
 
 ---
 

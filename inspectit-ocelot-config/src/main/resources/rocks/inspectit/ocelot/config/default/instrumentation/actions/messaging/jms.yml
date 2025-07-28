@@ -1,0 +1,88 @@
+inspectit:
+  instrumentation:
+    actions:
+      'a_jms_getDestination':
+        docs:
+          since: '2.7.0'
+          description: 'Extracts the destination of the message.'
+          return-value: 'The destination name as a String or null.'
+        imports:
+          - 'javax.jms'
+        input:
+          _arg0: Object
+          _this: Object
+        value-body: |
+          Destination dest = null;
+          if(_arg0 instanceof Destination) {
+            dest = (Destination) _arg0;
+          } 
+          if(_this instanceof MessageProducer && dest == null){
+            dest = ((MessageProducer)_this).getDestination();          
+          } 
+          if(_arg0 instanceof Message && dest == null) {
+            dest = ((Message) _arg0).getJMSDestination();
+          }
+          if(dest instanceof Queue) {
+            return ((Queue)dest).getQueueName();
+          }
+          if(dest instanceof Topic) {
+            return ((Topic)dest).getTopicName();
+          }
+          return null;
+
+      'a_jms_write_down_propagation':
+        docs:
+          since: '2.7.0'
+          description: 'Writes down-propagated context data to the message.'
+        is-void: true
+        imports:
+          - 'java.util'
+          - 'javax.jms'
+        input:
+          msgIndex: int
+          _args: Object[]
+          _attachments: ObjectAttachments
+          _context: InspectitContext
+        value-body: |
+          Message msg = (Message)_args[msgIndex];
+          Object propagationAlreadyPerformed = _attachments.attach(msg, "down_prop_performed", Boolean.TRUE);
+          if(propagationAlreadyPerformed == null) {
+            Map headers = _context.getDownPropagationHeaders();
+            Iterator it = headers.entrySet().iterator();
+            while(it.hasNext()) {
+              Map$Entry e = (Map$Entry) it.next();
+              //we remove hyphens as they are not allowed as property names by the JMS spec
+              msg.setStringProperty( ((String) e.getKey()).replaceAll("-",""), (String) e.getValue());
+            }
+          }
+
+      'a_jms_read_down_propagation':
+        docs:
+          since: '2.7.0'
+          description: 'Reads down-propagated context data from the message.'
+        is-void: true
+        imports:
+          - 'java.util'
+          - 'javax.jms'
+        input:
+          msgIndex: int
+          _args: Object[]
+          _attachments: ObjectAttachments
+          _context: InspectitContext
+        value-body: |
+          Message msg = (Message)_args[msgIndex];
+          Object propagationAlreadyPerformed = _attachments.attach(msg, "down_prop_read", Boolean.TRUE);
+          if(propagationAlreadyPerformed == null) {
+            Collection headerKeys = _context.getPropagationHeaderNames();
+            Map presentHeaders = new HashMap();
+            Iterator it = headerKeys.iterator();
+            while(it.hasNext()) {
+              String name = (String) it.next();
+              String nameWithoutHyphens = name.replaceAll("-","");
+              String value = msg.getStringProperty(nameWithoutHyphens);
+              if (value != null) {
+                presentHeaders.put(name, value);
+              }
+            }
+            _context.readDownPropagationHeaders(presentHeaders);
+          }
