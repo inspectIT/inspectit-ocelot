@@ -182,7 +182,7 @@ In this example this allows us to refer to <code>ServletRequest</code> and <code
 <h2><a class="anchor" aria-hidden="true" id="caching"></a><a href="#caching" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Caching</h2>
 <p>Repeatedly accessing the same data might create unnecessary performance overhead. Thus, actions allow to cache data
 for general purpose. Such data can be read or overwritten within the same action. If multiple <a href="/inspectit-ocelot/docs/next/instrumentation/rules">rules</a>
-use the same action, all of these rules will use the same cache. If an action has been changed, the cached data will be dropped.
+use the same action, all of these actions will use the same cache. If an action has been changed, the cached data will be dropped.
 The cache resembles an ordinary Java <code>Map&lt;Object, Object&gt;</code> and is thread safe.
 You can use the cache via the <code>_cache</code> variable, which does not have to be included as input parameter.</p>
 <p>The example below shows how to use the cache:</p>
@@ -206,7 +206,7 @@ You can use the cache via the <code>_cache</code> variable, which does not have 
         <span class="hljs-comment"># ...</span>
 </code></pre>
 <h3><a class="anchor" aria-hidden="true" id="reflection"></a><a href="#reflection" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Reflection</h3>
-<p>As mentioned above, in order to access and cache <code>java.lang.reflect.Field</code> or <code>java.lang.reflect.Method</code> instances,
+<p>In order to access and cache <code>java.lang.reflect.Field</code> or <code>java.lang.reflect.Method</code> instances,
 you can use the <code>_reflection</code> special parameter. Reflection helps you to access fields or invoke methods, which are normally
 not accessible, because they are not visible for the instrumented method. Note that trying to access non-existing fields
 or methods will throw an exception and disable the action until it has been updated.

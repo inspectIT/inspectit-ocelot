@@ -126,11 +126,11 @@ Available options are:</p>
 <h3><a class="anchor" aria-hidden="true" id="trace-correlation-and-distributed-tracing"></a><a href="#trace-correlation-and-distributed-tracing" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Trace Correlation and Distributed Tracing</h3>
 <p>The inspectIT Ocelot agent supports out-of-the-box distributed tracing, which allows traces to be correlated across multiple components to trace the entire flow through a system.
 By default, the agent supports correlating a communication via HTTP and JMS.
-To achieve this, correlation information is exchanged during the communication (for example by injecting additional headers into requests), for which the <strong>B3 Propagation format is used by default</strong>.</p>
-<p>If you want to use the agent together with other components that also perform distributed tracing but do not support the correlation information in B3 format, this can be adjusted with the following configuration:</p>
+To achieve this, correlation information is exchanged during the communication (for example by injecting additional headers into requests), for which the <strong>W3C Trace Context Propagation format is used by default</strong>.</p>
+<p>If you want to use the agent together with other components that also perform distributed tracing but do not support the correlation information in W3C format, this can be adjusted with the following configuration:</p>
 <pre><code class="hljs css language-YAML"><span class="hljs-attr">inspectit:</span>
   <span class="hljs-attr">tracing:</span>
-    <span class="hljs-attr">propagation-format:</span> <span class="hljs-string">B3</span> <span class="hljs-comment"># the format for propagating correlation headers</span>
+    <span class="hljs-attr">propagation-format:</span> <span class="hljs-string">TRACE_CONTEXT</span> <span class="hljs-comment"># the format for propagating correlation headers</span>
 </code></pre>
 <p>Currently, the following formats are supported for sending correlation information:</p>
 <table>
@@ -159,17 +159,12 @@ However, it is only possible to use metric tags as tracing attributes, but not v
   <span class="hljs-attr">tracing:</span>
     <span class="hljs-attr">add-metric-tags:</span> <span class="hljs-literal">false</span>
 </code></pre>
-<p>In this example, both tags of the metric <code>my_counter</code> will be used as attributes for the tracing within this rule.</p>
+<p>In this example, both tags of the metric <code>my_metric</code> will be used as attributes for the tracing within this rule.</p>
 <pre><code class="hljs css language-YAML"><span class="hljs-attr">rules:</span>
   <span class="hljs-attr">'r_example':</span>
-    <span class="hljs-attr">include:</span>
-      <span class="hljs-attr">'r_myRule':</span> <span class="hljs-literal">true</span>
-    <span class="hljs-attr">entry:</span>
-      <span class="hljs-attr">'my_data':</span>
-        <span class="hljs-attr">action:</span> <span class="hljs-string">'a_getData'</span>
+    <span class="hljs-comment"># ...</span>
     <span class="hljs-attr">metrics:</span>
-      <span class="hljs-attr">my_counter:</span>
-        <span class="hljs-attr">value:</span> <span class="hljs-number">1</span>
+      <span class="hljs-attr">my_metric:</span>
         <span class="hljs-attr">data-tags:</span>
           <span class="hljs-attr">'example':</span> <span class="hljs-string">'my_data'</span>
         <span class="hljs-attr">constant-tags:</span>
