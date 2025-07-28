@@ -154,7 +154,7 @@ Please note that any change to the log preloading configuration will cause all p
 ### Instrumentation Feedback Command
 
 The instrumentation feedback command allows you to check the currently applied instrumentation of an agent.
-When the configured instrumentation gets applied as asynchronously in batches, there might be a difference
+When the configured instrumentation gets applied asynchronously in batches, there might be a difference
 between configured instrumentation and applied instrumentation. 
 Also, sometimes it is not clear, which exact classes will be instrumented. 
 This is the case when instrumenting `interfaces` for instance.

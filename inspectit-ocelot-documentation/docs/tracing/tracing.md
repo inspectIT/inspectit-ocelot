@@ -65,14 +65,14 @@ Available options are:
 
 The inspectIT Ocelot agent supports out-of-the-box distributed tracing, which allows traces to be correlated across multiple components to trace the entire flow through a system.
 By default, the agent supports correlating a communication via HTTP and JMS.
-To achieve this, correlation information is exchanged during the communication (for example by injecting additional headers into requests), for which the **B3 Propagation format is used by default**.
+To achieve this, correlation information is exchanged during the communication (for example by injecting additional headers into requests), for which the **W3C Trace Context Propagation format is used by default**.
 
-If you want to use the agent together with other components that also perform distributed tracing but do not support the correlation information in B3 format, this can be adjusted with the following configuration:
+If you want to use the agent together with other components that also perform distributed tracing but do not support the correlation information in W3C format, this can be adjusted with the following configuration:
 
 ```YAML
 inspectit:
   tracing:
-    propagation-format: B3 # the format for propagating correlation headers
+    propagation-format: TRACE_CONTEXT # the format for propagating correlation headers
 ```
 
 Currently, the following formats are supported for sending correlation information:
@@ -101,19 +101,14 @@ inspectit:
     add-metric-tags: false
 ```
 
-In this example, both tags of the metric `my_counter` will be used as attributes for the tracing within this rule.
+In this example, both tags of the metric `my_metric` will be used as attributes for the tracing within this rule.
 
 ```YAML
 rules:
   'r_example':
-    include:
-      'r_myRule': true
-    entry:
-      'my_data':
-        action: 'a_getData'
+    # ...
     metrics:
-      my_counter:
-        value: 1
+      my_metric:
         data-tags:
           'example': 'my_data'
         constant-tags:
