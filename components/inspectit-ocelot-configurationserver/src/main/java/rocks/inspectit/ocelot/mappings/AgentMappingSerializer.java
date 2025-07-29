@@ -86,7 +86,7 @@ public class AgentMappingSerializer {
         mappingsListType = ymlMapper.getTypeFactory().constructCollectionType(List.class, AgentMapping.class);
 
         if (!fileManager.getWorkspaceRevision().agentMappingsExist()) {
-            log.info("Generating default agent mappings for workspace branch");
+            log.info("Generating default agent mappings for WORKSPACE branch");
             List<AgentMapping> defaultMappings = Collections.singletonList(DEFAULT_MAPPING);
             writeAgentMappings(defaultMappings);
         }

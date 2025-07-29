@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.file.accessor.workingdirectory;
 
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.util.ObjectUtils;
@@ -39,11 +38,6 @@ public class WorkingDirectoryAccessor extends AbstractWorkingDirectoryAccessor {
         this.readLock = readLock;
         this.writeLock = writeLock;
         this.workingDirectory = workingDirectory;
-    }
-
-    @PostConstruct
-    private void init() throws IOException {
-        Files.createDirectories(workingDirectory);
     }
 
     /**

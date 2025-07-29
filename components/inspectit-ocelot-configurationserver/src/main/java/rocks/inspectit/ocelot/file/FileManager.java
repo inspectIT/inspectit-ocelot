@@ -16,6 +16,7 @@ import rocks.inspectit.ocelot.file.accessor.workingdirectory.AbstractWorkingDire
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.AutoCommitWorkingDirectoryProxy;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.CachingWorkingDirectoryAccessor;
 import rocks.inspectit.ocelot.file.accessor.workingdirectory.WorkingDirectoryAccessor;
+import rocks.inspectit.ocelot.file.versioning.GitUtil;
 import rocks.inspectit.ocelot.file.versioning.PromotionResult;
 import rocks.inspectit.ocelot.file.versioning.VersioningManager;
 import rocks.inspectit.ocelot.file.versioning.model.Promotion;
@@ -76,6 +77,8 @@ public class FileManager {
 
         WorkingDirectoryAccessor workingDirectoryAccessorImpl = new WorkingDirectoryAccessor(workingDirectoryLock.readLock(), workingDirectoryLock
                 .writeLock(), workingDirectory);
+
+        GitUtil.createGitIgnore(workingDirectory);
 
         Supplier<Authentication> authenticationSupplier = () -> SecurityContextHolder.getContext().getAuthentication();
         versioningManager = new VersioningManager(workingDirectory, authenticationSupplier, asyncPublisher, settings);
