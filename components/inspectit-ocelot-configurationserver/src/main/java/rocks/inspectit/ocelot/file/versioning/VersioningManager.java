@@ -45,6 +45,7 @@ import java.util.stream.StreamSupport;
 /**
  * This manager handles the interaction with the versioned (Git) representation of the working directory.
  * When using this class, ensure to lock the working directory or resource accordingly to prevent any racing conditions.
+ * (Sorry, but this class is a mess...)
  */
 @Slf4j
 public class VersioningManager {
@@ -142,6 +143,7 @@ public class VersioningManager {
                 setCurrentBranchToTarget();
             }
 
+            // The AGENT_MAPPINGS cannot be committed here at first start-up, because the file does not exist yet
             stageFiles();
             commitAllFiles(GIT_SYSTEM_AUTHOR, "Initializing Git repository using existing working directory", false);
 
@@ -204,7 +206,7 @@ public class VersioningManager {
      * Expects the target branch to be present (in configuration and remote push repository).
      */
     private void setCurrentBranchToTarget() throws GitAPIException, IOException {
-        log.info("Synchronizing local live branch with target branch of remote push repository");
+        log.info("Synchronizing local LIVE branch with target branch of remote push repository");
 
         RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
         RemoteRepositorySettings sourceRepository = settings.getRemoteConfigurations().getPullRepository();
@@ -257,9 +259,7 @@ public class VersioningManager {
      * show that files were not processed by the configuration server, but from external sources.
      */
     public synchronized void commitAsExternalChange() throws GitAPIException {
-        if (isClean()) {
-            return;
-        }
+        if (isClean()) return;
         log.info("Staging and committing of external changes to the configuration files or agent mappings");
 
         stageFiles();
@@ -272,7 +272,7 @@ public class VersioningManager {
             String workspaceRef = "refs/heads/" + Branch.WORKSPACE.getBranchName();
             return workspaceRef.equals(fullBranch);
         } catch (IOException e) {
-            throw new RuntimeException("Exception while accessing Git workspace repository", e);
+            throw new RuntimeException("Exception while accessing Git WORKSPACE repository", e);
         }
     }
 
@@ -288,7 +288,7 @@ public class VersioningManager {
      */
     public void commitAllChanges(String message) throws GitAPIException {
         if (!isWorkspaceBranch()) {
-            throw new IllegalStateException("The workspace branch is currently not checked out. Ensure your working directory is in a correct state!");
+            throw new IllegalStateException("The WORKSPACE branch is currently not checked out. Ensure your working directory is in a correct state!");
         }
 
         PersonIdent author = getCurrentAuthor();
@@ -340,25 +340,27 @@ public class VersioningManager {
     }
 
     /**
-     * Stage all modified/added/removed configuration files and, if specified, the agent mapping file.
+     * Stage all modified/added/removed configuration files and the agent mapping file.
      */
     private void stageFiles() throws GitAPIException {
-        log.debug("Staging all configuration files and agent mappings");
+        log.debug("Staging all files");
 
         AddCommand addCommand = git.add().addFilepattern(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER);
         addCommand.addFilepattern(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
+        addCommand.addFilepattern(GitUtil.GIT_IGNORE_FILE_NAME);
 
         addCommand.call();
     }
 
     /**
-     * @return Returns whether the working directory is in a clean stage. A clean state means that no configuration file
-     * nor the agent mappings have been modified.
+     * @return Returns whether the working directory is in a clean stage. A clean state means that no configuration file,
+     * the agent mappings or the {@code .gitignore} have been modified.
      */
     public boolean isClean() throws GitAPIException {
         Status status = git.status()
                 .addPath(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER)
                 .addPath(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME)
+                .addPath(GitUtil.GIT_IGNORE_FILE_NAME)
                 .call();
 
         return status.isClean();
@@ -878,7 +880,7 @@ public class VersioningManager {
                     .getObjectId();
 
             if (!liveCommitId.equals(currentLiveBranchId)) {
-                throw new ConcurrentModificationException("Live branch has been modified. The provided promotion definition is out of sync");
+                throw new ConcurrentModificationException("LIVE branch has been modified. The provided promotion definition is out of sync");
             }
 
             // get modified files between the specified diff - we only consider files which exists in the diff
@@ -1027,7 +1029,7 @@ public class VersioningManager {
      */
     @VisibleForTesting
     synchronized void mergeSourceBranch() throws GitAPIException, IOException {
-        log.info("Merging remote configurations into the workspace");
+        log.info("Merging remote configurations into WORKSPACE");
 
         RemoteConfigurationsSettings remoteSettings = settings.getRemoteConfigurations();
         if (remoteSettings == null) {
@@ -1060,7 +1062,7 @@ public class VersioningManager {
             if (workspaceCommit.isPresent()) {
                 mergeBranch(workspaceCommit.get(), diffTarget, false, "Initial configuration synchronization");
             } else {
-                log.error("Cannot merge configuration source into local workspace because the workspace branch has no commits");
+                log.error("Cannot merge configuration source into local WORKSPACE because the WORKSPACE branch has no commits");
             }
         } else {
             // otherwise, nothing will be merged
@@ -1110,7 +1112,7 @@ public class VersioningManager {
                 .collect(Collectors.toList());
 
         if (fileToRemove.isEmpty() && checkoutFiles.isEmpty()) {
-            log.info("There is nothing to merge from the source configuration branch into the current workspace branch");
+            log.info("There is nothing to merge from the source configuration branch into the current WORKSPACE branch");
             return;
         }
 
@@ -1126,7 +1128,7 @@ public class VersioningManager {
                     .collect(Collectors.toList());
 
             Promotion promotion = Promotion.builder()
-                    .commitMessage("Auto-promotion due to workspace remote synchronization")
+                    .commitMessage("Auto-promotion due to WORKSPACE remote synchronization")
                     .workspaceCommitId(getLatestCommit(Branch.WORKSPACE).get().getId().getName())
                     .liveCommitId(getLatestCommit(Branch.LIVE).get().getId().getName())
                     .files(diffFiles)
