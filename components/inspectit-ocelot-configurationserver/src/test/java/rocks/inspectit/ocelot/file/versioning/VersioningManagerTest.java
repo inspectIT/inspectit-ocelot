@@ -258,7 +258,7 @@ class VersioningManagerTest extends FileTestBase {
             git.checkout().setName(Branch.LIVE.getBranchName()).call();
 
             assertThatIllegalStateException().isThrownBy(() -> versioningManager.commitAllChanges("test"))
-                    .withMessage("The workspace branch is currently not checked out. Ensure your working directory is in a correct state!");
+                    .withMessage("The WORKSPACE branch is currently not checked out. Ensure your working directory is in a correct state!");
 
             assertThat(versioningManager.getCommitCount()).isOne();
             assertThat(versioningManager.isClean()).isFalse();
@@ -636,7 +636,7 @@ class VersioningManagerTest extends FileTestBase {
             secondPromotion.setFiles(Arrays.asList("/file_added.yml"));
 
             assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> versioningManager.promote(secondPromotion, true))
-                    .withMessage("Live branch has been modified. The provided promotion definition is out of sync");
+                    .withMessage("LIVE branch has been modified. The provided promotion definition is out of sync");
         }
 
         @Test
