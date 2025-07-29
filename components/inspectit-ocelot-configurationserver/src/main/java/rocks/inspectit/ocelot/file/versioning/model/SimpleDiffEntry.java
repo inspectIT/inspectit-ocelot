@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.eclipse.jgit.diff.DiffEntry;
 import rocks.inspectit.ocelot.file.accessor.AbstractFileAccessor;
+import rocks.inspectit.ocelot.file.versioning.GitUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -75,7 +76,8 @@ public class SimpleDiffEntry {
      * @return the same {@link SimpleDiffEntry} object
      */
     public SimpleDiffEntry shortenName() {
-        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME)) return this;
+        if(file.equals(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME) || file.equals(GitUtil.GIT_IGNORE_FILE_NAME))
+            return this;
 
         file = file.substring(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER.length());
         return this;

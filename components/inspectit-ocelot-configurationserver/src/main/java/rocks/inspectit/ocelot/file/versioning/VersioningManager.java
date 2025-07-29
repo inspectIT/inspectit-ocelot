@@ -537,6 +537,7 @@ public class VersioningManager {
         List<SimpleDiffEntry> simpleDiffEntries = diffEntries.stream()
                 .map(SimpleDiffEntry::of)
                 .map(SimpleDiffEntry::shortenName)
+                .filter(entry -> !entry.getFile().equals(GitUtil.GIT_IGNORE_FILE_NAME)) // We do not want to display the .gitignore file
                 .collect(Collectors.toList());
 
         // the diff entries will get their file difference if specified
