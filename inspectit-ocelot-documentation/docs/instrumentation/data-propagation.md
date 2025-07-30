@@ -39,15 +39,6 @@ calling another one via HTTP? In inspectIT Ocelot we provide the following two s
 * **JVM local:** The data is propagated within the JVM, even across thread borders. The behaviour when data moves from one thread to another is defined through [Special Sensors](instrumentation/special-sensors.md).
 * **Global:** Data is propagated within the JVM and even across JVM borders. For example, when an application issues an HTTP request, the globally down propagated data is added to the headers of the request. When the response arrives, up propagated data is collected from the response headers. This protocol specific behaviour is realized through default instrumentation rules provided with the agent, but can be extended as needed.
 
-## Cross-Thread Propagation
-
-Besides the data propagation via _inspectIT context_, which occurs within one thread, there are some possibilities
-to exchange data across multiple threads via global storages:
-
-* **[Action Cache](instrumentation/actions.md#caching)**: Data is stored within one action and can be accessed in every call of this particular action.
-* **[Object Attachments](instrumentation/actions.md#attaching-values)**: Data is attached to a Java object and can be accessed via this Java object globally.
-* **[Session Storage](#session-storage)**: Data is stored for one specific session and can be accessed via the session ID globally.
-
 ## Defining the Behaviour
 
 The propagation behaviour is not defined on rule level but instead globally based on the data keys under the configuration
@@ -103,6 +94,15 @@ these application tags will also be visible in the _inspectIT context_. Secondly
 of each rule, a new TagContext is opened making the tags written there accessible to metrics collected by your application. 
 Hereby, only data for which down propagation was configured to be `JVM_LOCAL` or greater and for which `is-tag` is true 
 will be visible as tags.
+
+## Data Tag Storages
+
+Besides the propagation via _inspectIT context_ and special sensors, there are some possibilities
+to exchange data via tag storages:
+
+* **[Action Cache](instrumentation/actions.md#caching)**: Data is stored within one action and can be accessed in every call of this particular action.
+* **[Object Attachments](instrumentation/actions.md#attaching-values)**: Data is attached to a Java object and can be accessed via this Java object globally.
+* **[Session Storage](#session-storage)**: Data is stored for one specific session and can be accessed via the session ID globally.
 
 ## Baggage
 
