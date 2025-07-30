@@ -30,13 +30,6 @@ public class DataSettings {
     private Boolean sessionStorage;
 
     /**
-     * Defines, if data is allowed to be propagated to browser. <br>
-     * <b>Marked for removal</b>: Use {@link #sessionStorage} instead
-     */
-    @Deprecated
-    private Boolean browserPropagation;
-
-    /**
      * Defines whether this data is visible as an OpenCensus Tag.
      */
     @Setter(AccessLevel.NONE)

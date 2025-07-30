@@ -46,14 +46,7 @@ class RootPropagationMetaData implements PropagationMetaData {
      */
     private final Set<String> sessionStorageKeys = new HashSet<>();
 
-    /**
-     * Contains all data keys which have an active browser-propagation
-     */
-    @Deprecated
-    private final Set<String> browserPropagatedKeys = new HashSet<>();
-
-    private RootPropagationMetaData() {
-    }
+    private RootPropagationMetaData() {}
 
     public static Builder builder() {
         return new RootPropagationMetaDataBuilder();
@@ -87,11 +80,6 @@ class RootPropagationMetaData implements PropagationMetaData {
     @Override
     public boolean isStoredForSession(String dataKey) {
         return sessionStorageKeys.contains(dataKey);
-    }
-
-    @Override
-    public boolean isPropagatedWithBrowser(String dataKey) {
-        return browserPropagatedKeys.contains(dataKey);
     }
 
     @Override
@@ -163,16 +151,8 @@ class RootPropagationMetaData implements PropagationMetaData {
         }
 
         @Override
-        public Builder setBrowserPropagation(String dataKey, Boolean isActive) {
-            if (isActive) result.browserPropagatedKeys.add(dataKey);
-            else result.browserPropagatedKeys.remove(dataKey);
-            return this;
-        }
-
-        @Override
         public PropagationMetaData build() {
             return result;
         }
     }
-
 }

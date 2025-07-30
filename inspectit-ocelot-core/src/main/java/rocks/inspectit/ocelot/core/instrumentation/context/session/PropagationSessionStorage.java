@@ -19,9 +19,6 @@ import java.util.concurrent.*;
 /**
  * Singleton storage for multiple {@link PropagationDataStorage} objects,
  * which are referenced by a session-ID, normally provided by a remote service.
- * <p>
- * The idea is similar to the {@link rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments}, but here we are
- * independent of specific Java objects.
  */
 @Slf4j
 @Component

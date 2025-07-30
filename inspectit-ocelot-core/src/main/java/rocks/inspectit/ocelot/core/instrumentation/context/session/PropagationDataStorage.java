@@ -18,7 +18,7 @@ public class PropagationDataStorage {
 
     /**
      * The maximum amount of tags per storage. OpenTelemetry also uses a limit of 128.
-     * Warning: the cache may evict entries before this limit is exceeded-- typically when the cache size is approaching the limit.
+     * Warning: the cache may evict entries before this limit is exceeded -- typically when the cache size is approaching the limit.
      */
     private static final int TAG_LIMIT = 128;
 
@@ -147,13 +147,13 @@ public class PropagationDataStorage {
     }
 
     /**
-     * Only if session-storage (or browser-propagation) is enabled for this key, it should be stored.
+     * Only if session-storage is enabled for this key, it should be stored.
      *
      * @param key the key name
      * @return true, if this key should be stored
      */
     private boolean shouldBeStored(String key) {
-        if (propagation != null) return propagation.isStoredForSession(key) || propagation.isPropagatedWithBrowser(key);
+        if (propagation != null) return propagation.isStoredForSession(key);
         else return false;
     }
 }
