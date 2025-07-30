@@ -12,6 +12,9 @@ on:
 
 jobs:
   build:
+    # DISABLE SNYK WORKFLOW
+    # because we use the DependencyCheck plugin to find security vulnerabilities
+    if: false
     name: Snyk test and upload SARIF
     environment: snyk
     runs-on: ubuntu-latest
@@ -43,4 +46,3 @@ jobs:
         with:
           # Path to SARIF file relative to the root of the repository
           sarif_file: snyk_test_result.sarif
-          category: open-source
