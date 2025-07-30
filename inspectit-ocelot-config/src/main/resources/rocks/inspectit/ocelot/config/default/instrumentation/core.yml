@@ -59,7 +59,7 @@ inspectit:
       # HTTP-header, which will be used to determine the session
       session-id-header: "Session-Id"
       # how many sessions can be stored at the same time
-      # Additional limitations: key-length -> 128, value-length -> 2048, attribute-count -> 128
+      # Additional limitations: tag-key-length -> 128, tag-value-length -> 2048, tag-limit -> 128
       session-limit: 100
       # how long the data should be stored
       time-to-live: 5m
