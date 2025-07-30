@@ -47,7 +47,7 @@ jobs:
           - 'eclipse-temurin:21'
     container: ${{ matrix.dockerimage }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Sanitize image name # we cannot use ':' in upload-artifact names
@@ -83,7 +83,7 @@ jobs:
     container: eclipse-temurin:8-jdk
     needs: [ pr-check ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Run code coverage
@@ -101,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     container: eclipse-temurin:8-jdk
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: build
@@ -136,7 +136,7 @@ jobs:
     runs-on: ubuntu-latest
     container: eclipse-temurin:8-jdk
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: jmhCompile
@@ -147,7 +147,7 @@ jobs:
     runs-on: ubuntu-latest
     container: eclipse-temurin:8-jdk
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: assemble

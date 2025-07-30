@@ -16,7 +16,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          java-version: 17  # Spring 3 needs at least java 17
+          java-version: 21
           distribution: temurin
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew

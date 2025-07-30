@@ -30,9 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       working-directory: ./components/inspectit-ocelot-configurationserver
-    container: eclipse-temurin:17
+    container: eclipse-temurin:21
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: assemble
@@ -53,9 +53,9 @@ jobs:
   dependency-scan:
     name: Dependency Scan
     runs-on: ubuntu-latest
-    container: eclipse-temurin:17
+    container: eclipse-temurin:21
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: build Configuration-Server

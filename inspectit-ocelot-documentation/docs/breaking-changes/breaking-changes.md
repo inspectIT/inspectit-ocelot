@@ -3,6 +3,12 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
+## Breaking changes in 2.7.0
+
+### Configuration Server requires Java 21
+
+Starting with the current release, the configuration server requires at least Java 21 to run.
+
 ## Breaking changes in 2.6.12
 
 ### Removed deprecated service tag
