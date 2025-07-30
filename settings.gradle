@@ -6,7 +6,7 @@ include 'inspectit-ocelot-documentation'
 include 'inspectit-ocelot-sdk'
 
 println("Current Java version: " + JavaVersion.current())
-if(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
+if(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
     include 'inspectit-ocelot-configurationserver'
     include 'inspectit-ocelot-configurationserver-ui'
     include 'inspectit-ocelot-configdocsgenerator'
@@ -16,7 +16,7 @@ if(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
     project(':inspectit-ocelot-configdocsgenerator').projectDir = new File('./components/inspectit-ocelot-configdocsgenerator')
     project(':inspectit-ocelot-configschemagenerator').projectDir = new File('./components/inspectit-ocelot-configschemagenerator')
 
-    // separate version catalog for configuration server until everything is migrated to Java 17
+    // separate version catalog for configuration server, since it runs on different Java version than agent
     dependencyResolutionManagement {
         versionCatalogs {
             configServerLibs {
