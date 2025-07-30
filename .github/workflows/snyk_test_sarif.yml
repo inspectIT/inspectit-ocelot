@@ -1,6 +1,7 @@
 name: Snyk Test SARIF
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
     paths:
@@ -17,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [20.x]
         
     steps:
       - uses: actions/checkout@v4
@@ -38,7 +39,8 @@ jobs:
         continue-on-error: true
       - name: Upload SARIF file
         if: steps.test.outcome == 'success'
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           # Path to SARIF file relative to the root of the repository
           sarif_file: snyk_test_result.sarif
+          category: open-source
