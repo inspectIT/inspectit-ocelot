@@ -81,7 +81,6 @@ The configuration options are the following:
 | `down-propagation`                 | `JVM_LOCAL` if the data key is also a [common tag](metrics/common-tags.md), `NONE` otherwise                                                                     | Configures if values for this data key propagate down and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place. | 
 | `up-propagation`                   | `NONE`                                                                                                                                                           | Configures if values for this data key propagate up and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no up propagation will take place.     | 
 | `session-storage`                  | `false`                                                                                                                                                          | If true, this data will be written to the inspectIT session storage                                                                                                                                     |
-| `browser-propagation` (deprecated) | `false`                                                                                                                                                          | If true, this data will be written to the inspectIT session storage                                                                                                                                     | 
 | `is-tag`                           | `true` if the data key is also a [common tag](metrics/common-tags.md) or is used as tag in any [metric definition](metrics/custom-metrics.md), `false` otherwise | If true, this data will act as a tag when metrics are recorded. This does not influence propagation.                                                                                                    | 
 
 Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. 
@@ -236,19 +235,3 @@ If a date entry does not comply with these size restrictions, the entry will not
 The configuration option `time-to-live` determines, how long each tag should be stored after it's last update.
 Every 30 seconds all expired data tags from each session storage will be cleaned up. If a session storage has been empty
 for at least 60 seconds, the session storage will be removed completely.
-
-## Browser Propagation
-
-:::warning
-**This features is deprecated!** We recommend to propagate data via [baggage](#baggage) instead, so the agent does not expose an API.
-:::
-
-Data enabled for browser propagation will be also be stored inside [session storages](#session-storage).
-These storages can be exposed via REST-API, if the [Tags-HTTP-Exporter](tags/tags-exporters.md#http-exporter) is enabled.
-A browser can read this data via GET-requests.
-
-Additionally, a browser can write data into the storage via PUT-requests, if browser-propagation is 
-enabled for the data key. 
-Please note, before writing or reading browser propagation data, you need to provide a session ID inside the request-header.
-After that, all data belonging to the current session will be stored behind this session ID.
-For more information, see [Tags-HTTP-Exporter](tags/tags-exporters.md#http-exporter).

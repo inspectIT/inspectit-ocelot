@@ -5,6 +5,16 @@ title: Breaking Changes
 
 ## Breaking changes in 2.7.0
 
+### Tags exporter was fully removed
+
+In order to comply with our security guidelines, the tags exporter was fully removed.
+The agent does no longer expose an API to read or write data tags. Furthermore, the option `browser-propagation`
+was removed for data keys.
+
+The exchange of data tags with remote services - including browsers - is still possible via propagation 
+of the [Baggage](instrumentation/data-propagation.md#baggage) header.
+Tags can still can be [stored for sessions](instrumentation/data-propagation.md#session-storage) by enabling `session-storage` for specific data keys.
+
 ### Configuration Server requires Java 21
 
 Starting with the current release, the configuration server requires at least Java 21 to run.
@@ -115,6 +125,9 @@ If a tag value has exceeded its limit, the agent health will change to `ERROR`. 
 evaluated carefully.
 You can find more information [here](metrics/tag-guard.md).
 
+### Configuration Server requires Java 17
+
+Starting with the current release, the configuration server requires at least Java 17 to run.
 
 ## Breaking changes in 2.4.0
 
