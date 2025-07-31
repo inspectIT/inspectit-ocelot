@@ -28,7 +28,7 @@ bootJar {
 }
 
 /**
- * Builds the configuration server and the web frontend.
+ * Builds the configuration server and the web frontend
  */
 tasks.register('bootJarWithFrontend', BootJar) {
     group = "build"
@@ -88,6 +88,8 @@ dependencies {
             // only use a compile-only (see details over there)
             libs.ioOpentelemetryOpentelemetrySdkMetrics,
             project(':inspectit-ocelot-configdocsgenerator'),
+
+            // spring related
             configServerLibs.orgSpringframeworkBootSpringBootStarterWeb,
             configServerLibs.orgSpringframeworkBootSpringBootStarterDataJpa,
             configServerLibs.orgSpringframeworkBootSpringBootStartervalidation,
@@ -96,21 +98,21 @@ dependencies {
             configServerLibs.orgSpringframeworkLdapSpringLdapCore,
             configServerLibs.orgSpringframeworkSecuritySpringSecurityLdap,
             configServerLibs.orgSpringframeworkBootSpringBootStarterActuator,
+            configServerLibs.orgYamlSnakeyaml,
 
+            // logging
             configServerLibs.chQosLogbackLogbackClassic,
             configServerLibs.chQosLogbackLogbackCore,
-
-            configServerLibs.orgYamlSnakeyaml,
 
             libs.orgApacheHttpcomponentsClient5Httpclient5, // Required for PATCH-Requests to Kapacitor
             libs.orgApacheHttpcomponentsCore5Httpcore5,
 
             configServerLibs.orgXerialSqliteJdbc,
             configServerLibs.orgHibernateOrmHibernateCommunityDialects,
+            configServerLibs.orgFlywaydbFlywayCore,
             configServerLibs.bundles.jsonwebtoken,
             configServerLibs.commonsIo,
             configServerLibs.orgApacheCommonsCommonsLang3,
-            configServerLibs.orgFlywaydbFlywayCore,
             configServerLibs.bundles.jgit,
             configServerLibs.comGoogleCodeGson,
             configServerLibs.comGoogleGuava,
@@ -129,8 +131,8 @@ dependencies {
 // Copy the jar into the docker folder without version suffix
 tasks.register('copyServerJar', Copy) {
     dependsOn bootJarWithFrontend
-    from("$buildDir/libs/inspectit-ocelot-configurationserver-${version}.jar")
-    into("$projectDir/docker")
+    from(layout.buildDirectory.file("libs/inspectit-ocelot-configurationserver-${version}.jar"))
+    into(layout.projectDirectory.dir("docker"))
     rename("inspectit-ocelot-configurationserver-${version}\\.jar",
             'inspectit-ocelot-configurationserver.jar')
 }

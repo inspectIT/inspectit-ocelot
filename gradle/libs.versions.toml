@@ -1,8 +1,12 @@
+######################################################
+# At the moment, the Java agent has to support Java 8
+# Thus, all dependencies also have to support Java 8
+######################################################
 [versions]
 # versions 1.32.* breaks exporter tests
 # NoClassDefFoundError in OtlpMetricsExporterServiceIntTest, OtlpTraceExporterServiceIntTest, ZipkinExporterServiceInt2Test
 comLinecorpArmeria = "1.31.3"
-# @pin 1.3.* are the latest versions, which support java 8
+# @pin 1.3.* is the last version to support java 8
 chQosLogback= "1.3.15"
 ioGithubNetmikeyLogunit = "2.0.0"
 ioGrpc = "1.73.0"
@@ -76,9 +80,9 @@ ioPrometheusSimpleclientHttpserver = "io.prometheus:simpleclient_httpserver:0.16
 javaxAnnotationJavaxAnnotationApi = "javax.annotation:javax.annotation-api:1.3.2"
 log4j = "log4j:log4j:1.2.17"
 netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.17.6"
-# @pin logback 7.* is the last version for Java 8
+# @pin logback 7.* is the last version to support java 8
 netLogstashLogbackLogstashLogbackEncoder = "net.logstash.logback:logstash-logback-encoder:7.4"
-# @pin 5.16.* is last version to support Java 8
+# @pin 5.16.* is the last version to support java 8
 orgApacheActivemqApacheActivemq = "org.apache.activemq:apache-activemq:5.16.8"
 orgApacheCommonsCommonsLang3 = "org.apache.commons:commons-lang3:3.18.0"
 orgApacheCommonsCommonsMath3 = "org.apache.commons:commons-math3:3.6.1"
@@ -131,8 +135,7 @@ comGithubJk1DependencyLicenseReport = "com.github.jk1.dependency-license-report:
 ioSpringDependencyManagement = "io.spring.dependency-management:1.1.7"
 meChampeauJmh = "me.champeau.jmh:0.7.3"
 nlLittlerobotsVersionCatalogUpdate = "nl.littlerobots.version-catalog-update:0.8.5"
-# version > 2.0 breaks gradle setup
-orgCyclonedxBom = "org.cyclonedx.bom:2.0.0"
-# @pin Dependency-Check 11.* requires Java 11, 10.0.4 does not work with Gradle 7
+orgCyclonedxBom = "org.cyclonedx.bom:2.3.1"
+# @pin Dependency-Check 11.* requires Java 11
 orgOwaspDependencycheck = "org.owasp.dependencycheck:10.0.3"
 orgSpringframeworkBoot = { id = "org.springframework.boot", version.ref = "orgSpringframeworkBoot" }

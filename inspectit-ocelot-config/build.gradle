@@ -25,8 +25,8 @@ test {
 group = 'rocks.inspectit.ocelot'
 
 java {
-    sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source.
-    targetCompatibility = 1.8 // Java version to generate classes for.
+    sourceCompatibility = 1.8 // Java version compatibility to use when compiling Java source
+    targetCompatibility = 1.8 // Java version to generate classes for
 }
 
 dependencyManagement {
@@ -37,31 +37,34 @@ dependencyManagement {
 
 dependencies {
     compileOnly libs.orgProjectlombokLombok
+
     annotationProcessor libs.orgProjectlombokLombok
-    testImplementation (
-            libs.orgJunitJupiterJunitJupiterApi,
-            libs.orgMockitoMockitoJunitJupiter,
-            libs.orgAssertjAssertjCore
-    )
-    testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 
     implementation(
             libs.orgSpringframeworkBootSpringBoot,
+            libs.comFasterxmlJacksonCoreJacksonDatabind,
             libs.orgHibernateValidatorHibernateValidator,
+            // utils
             libs.orgApacheCommonsCommonsLang3,
             libs.commonsIo,
-            libs.comFasterxmlJacksonCoreJacksonDatabind,
             // logging
             libs.chQosLogbackLogbackClassic,
             libs.chQosLogbackLogbackCore
     )
 
-    // the api is included as compile only because the open census api has to be decoupled
+    // the api is included as compile only because the opencensus api has to be decoupled
     // from the inspectIT core to allow it to be pushed to the bootstrap
     compileOnly (
             libs.ioOpencensusOpencensusApi,
-            // OpenTelemetry
             platform(libs.ioOpentelemetryOpentelemetryBom),
             libs.ioOpentelemetryOpentelemetrySdkMetrics,
     )
+
+    testImplementation (
+            libs.orgJunitJupiterJunitJupiterApi,
+            libs.orgMockitoMockitoJunitJupiter,
+            libs.orgAssertjAssertjCore
+    )
+
+    testRuntimeOnly libs.orgJunitJupiterJunitJupiterEngine
 }

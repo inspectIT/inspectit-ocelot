@@ -10,7 +10,7 @@ dependencies {
             project(':inspectit-ocelot-config'),
             libs.ioOpentelemetryOpentelemetryApi,
 
-            // We chose this generator, because it has a great feature-set and is actively maintained
+            // We chose this generator, because it has a great feature set and is actively maintained
             configServerLibs.comGithubVictoolsJsonschemaGenerator,
             configServerLibs.comGithubVictoolsJsonschemaModuleJackson,
             configServerLibs.comGithubVictoolsJsonschemaModuleJavaxValidation,
@@ -20,8 +20,8 @@ dependencies {
     annotationProcessor libs.orgProjectlombokLombok
 }
 
-task generateConfigSchema(type: JavaExec) {
-    def outputPath = "$buildDir/inspectit-ocelot-configuration-schema-${version}.json"
+tasks.register("generateConfigSchema", JavaExec) {
+    def outputPath = layout.buildDirectory.file("inspectit-ocelot-configuration-schema-${version}.json").get().asFile.absolutePath
 
     classpath = sourceSets.main.runtimeClasspath
     mainClass.set("rocks.inspectit.ocelot.configschemagenerator.InspectitSchemaGenerator")

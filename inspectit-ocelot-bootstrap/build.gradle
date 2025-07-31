@@ -20,9 +20,12 @@ dependencyManagement {
     }
 }
 
+// DO NOT INCLUDE ANY RUNTIME DEPENDENCIES HERE
+// WE DO NOT WANT TO PUSH ANY DEPENDENCIES TO BOOTSTRAP
 dependencies {
     compileOnly libs.orgProjectlombokLombok
     annotationProcessor libs.orgProjectlombokLombok
+
     testImplementation (
             libs.orgJunitJupiterJunitJupiterApi,
             libs.orgMockitoMockitoJunitJupiter
