@@ -175,13 +175,13 @@ Please rework (or remove) browser propagation, so it is no longer possible to sp
 See: https://github.com/inspectIT/inspectit-ocelot/issues/1703
 -->
 <p>Data enabled for browser propagation will be stored inside a special dictionary.
-This dictionary can be exposed via REST-API, if the <a href="/inspectit-ocelot/docs/2.6.11/tags/tags-exporters#http-exporter">Tags-HTTP-Exporter</a> is enabled.
+This dictionary can be exposed via REST-API, if the <a href="tags/tags-exporters.md#http-exporter">Tags-HTTP-Exporter</a> is enabled.
 A browser can read this data via GET-requests.</p>
 <p>Additionally, a browser can write data into the storage via PUT-requests, if browser- as well as down-propagation is
 enabled for a data key. The data written by the browser will be stored in the <em>inspectIT context</em>.
 Please note, before writing or reading browser propagation data, you need to provide a session-ID inside the request-header.
 After that, all data belonging to the current session will be stored behind this session-ID.
-For more information, see <a href="/inspectit-ocelot/docs/2.6.11/tags/tags-exporters#http-exporter">Tags-HTTP-Exporter</a>.</p>
+For more information, see <a href="tags/tags-exporters.md#http-exporter">Tags-HTTP-Exporter</a>.</p>
 
     <div class="admonition admonition-important">
       <div class="admonition-heading">
@@ -189,7 +189,7 @@ For more information, see <a href="/inspectit-ocelot/docs/2.6.11/tags/tags-expor
       </div>
       <div class="admonition-content">
     <p>We recommend to propagate data via <a href="#baggage">baggage</a> instead, so the agent does not expose an API.</p>
-</div></div></span></div></article></div><div class="docLastUpdate"><em>Last updated on 7/30/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/2.6.11/instrumentation/rules"><span class="arrow-prev">← </span><span>Rules</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/2.6.11/instrumentation/metrics"><span>Collecting Metrics</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li><li><a href="#baggage">Baggage</a></li><li><a href="#browser-propagation-deprecated">Browser Propagation (deprecated)</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</div></div></span></div></article></div><div class="docLastUpdate"><em>Last updated on 7/31/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/2.6.11/instrumentation/rules"><span class="arrow-prev">← </span><span>Rules</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/2.6.11/instrumentation/metrics"><span>Collecting Metrics</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#defining-the-behaviour">Defining the Behaviour</a></li><li><a href="#interaction-with-opencensus-tags">Interaction with OpenCensus Tags</a></li><li><a href="#baggage">Baggage</a></li><li><a href="#browser-propagation-deprecated">Browser Propagation (deprecated)</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
