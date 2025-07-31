@@ -43,3 +43,19 @@ In case changed were requested, please fix them (or discuss the changes) and the
 
 As soon as everything is approved, the inspectIT admins will merge your pull request.
 Your change will become a single commit with the title of the PR as commit message.
+
+### Testing
+
+When creating a PR or pushing to main, a lot of tests will be executed, especially when editing the agent.
+Running agent unit and integration tests can take up to 10 min. 
+Running agent system tests can take up to 5 min.
+
+There are some known flaky tests (test which fail randomly).
+Therefore, it may be necessary to re-run those tests for a successful build.
+We are always looking for someone to improve our testing pipeline!
+
+The following tests are known to be flaky:
+
+- Unit test: `CustomSpanBuilderTest > Timestamps > verifyTimingsChanged()`
+- System test: Multiple tests > `java.lang.NoClassDefFoundError: Could not initialize class io.opentelemetry.context.LazyStorage`
+- System test: Unknown (only on `imbjava8-sdk`) > `Processing dump event "systhrow", detail "java/lang/OutOfMemoryError"`
