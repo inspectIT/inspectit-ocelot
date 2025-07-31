@@ -76,7 +76,7 @@ inspectit:
           Iterator it = headers.entrySet().iterator();
           while (it.hasNext()) {
             Map$Entry e = (Map$Entry) it.next();
-            _arg1.setHeader((String) e.getKey(), (String) e.getValue());
+            _arg1.addHeader((String) e.getKey(), (String) e.getValue());
           }
 
       'a_apacheclient_upPropagation':

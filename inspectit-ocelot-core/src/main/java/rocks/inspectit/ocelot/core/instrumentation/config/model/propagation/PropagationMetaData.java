@@ -47,14 +47,6 @@ public interface PropagationMetaData {
     boolean isStoredForSession(String dataKey);
 
     /**
-     *
-     * @param dataKey the data key to check
-     * @return true, if the dataKey is configured with browser-propagation = true
-     */
-    @Deprecated
-    boolean isPropagatedWithBrowser(String dataKey);
-
-    /**
      * Copies the currently active settings to a new Builder.
      * This builder can then be altered as required and used to generate a new PropagationMetaData instance.
      * *
@@ -85,9 +77,6 @@ public interface PropagationMetaData {
         Builder setUpPropagation(String dataKey, PropagationMode propagation);
 
         Builder setSessionStorage(String dataKey, Boolean isActive);
-
-        @Deprecated
-        Builder setBrowserPropagation(String dataKey, Boolean isActive);
 
         PropagationMetaData build();
     }

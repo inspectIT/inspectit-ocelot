@@ -29,3 +29,11 @@ inspectit:
       r_servletapi_servicegraph_propagation: {enabled: false }
       r_servletapi_servicegraph_record: {enabled: false }
       r_servletapi_tracing: {enabled: false }
+
+      r_jms_write_down_propagation_arg0: {enabled: false }
+      r_jms_write_down_propagation_arg1: {enabled: false }
+      r_jms_message_listener_read_down_propagation: {enabled: false }
+      r_jms_servicegraph_send: {enabled: false }
+      r_jms_servicegraph_receive: {enabled: false }
+      r_jms_tracing_send: {enabled: false }
+      r_jms_tracing_receive: {enabled: false }

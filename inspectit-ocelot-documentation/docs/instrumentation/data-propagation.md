@@ -39,15 +39,6 @@ calling another one via HTTP? In inspectIT Ocelot we provide the following two s
 * **JVM local:** The data is propagated within the JVM, even across thread borders. The behaviour when data moves from one thread to another is defined through [Special Sensors](instrumentation/special-sensors.md).
 * **Global:** Data is propagated within the JVM and even across JVM borders. For example, when an application issues an HTTP request, the globally down propagated data is added to the headers of the request. When the response arrives, up propagated data is collected from the response headers. This protocol specific behaviour is realized through default instrumentation rules provided with the agent, but can be extended as needed.
 
-## Cross-Thread Propagation
-
-Besides the data propagation via _inspectIT context_, which occurs within one thread, there are some possibilities
-to exchange data across multiple threads via global storages:
-
-* **[Action Cache](instrumentation/actions.md#caching)**: Data is stored within one action and can be accessed in every call of this particular action.
-* **[Object Attachments](instrumentation/actions.md#attaching-values)**: Data is attached to a Java object and can be accessed via this Java object globally.
-* **[Session Storage](#session-storage)**: Data is stored for one specific session and can be accessed via the session ID globally.
-
 ## Defining the Behaviour
 
 The propagation behaviour is not defined on rule level but instead globally based on the data keys under the configuration
@@ -81,7 +72,6 @@ The configuration options are the following:
 | `down-propagation`                 | `JVM_LOCAL` if the data key is also a [common tag](metrics/common-tags.md), `NONE` otherwise                                                                     | Configures if values for this data key propagate down and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no down propagation will take place. | 
 | `up-propagation`                   | `NONE`                                                                                                                                                           | Configures if values for this data key propagate up and the level of propagation. Possible values are `NONE`, `JVM_LOCAL` and `GLOBAL`. If `NONE` is configured, no up propagation will take place.     | 
 | `session-storage`                  | `false`                                                                                                                                                          | If true, this data will be written to the inspectIT session storage                                                                                                                                     |
-| `browser-propagation` (deprecated) | `false`                                                                                                                                                          | If true, this data will be written to the inspectIT session storage                                                                                                                                     | 
 | `is-tag`                           | `true` if the data key is also a [common tag](metrics/common-tags.md) or is used as tag in any [metric definition](metrics/custom-metrics.md), `false` otherwise | If true, this data will act as a tag when metrics are recorded. This does not influence propagation.                                                                                                    | 
 
 Note that you are free to use data keys without explicitly defining them in the `inspectit.instrumentation.data` section. 
@@ -104,6 +94,15 @@ these application tags will also be visible in the _inspectIT context_. Secondly
 of each rule, a new TagContext is opened making the tags written there accessible to metrics collected by your application. 
 Hereby, only data for which down propagation was configured to be `JVM_LOCAL` or greater and for which `is-tag` is true 
 will be visible as tags.
+
+## Data Tag Storages
+
+Besides the propagation via _inspectIT context_ and special sensors, there are some possibilities
+to exchange data via tag storages:
+
+* **[Action Cache](instrumentation/actions.md#caching)**: Data is stored within one action and can be accessed in every call of this particular action.
+* **[Object Attachments](instrumentation/actions.md#attaching-values)**: Data is attached to a Java object and can be accessed via this Java object globally.
+* **[Session Storage](#session-storage)**: Data is stored for one specific session and can be accessed via the session ID globally.
 
 ## Baggage
 
@@ -236,19 +235,3 @@ If a date entry does not comply with these size restrictions, the entry will not
 The configuration option `time-to-live` determines, how long each tag should be stored after it's last update.
 Every 30 seconds all expired data tags from each session storage will be cleaned up. If a session storage has been empty
 for at least 60 seconds, the session storage will be removed completely.
-
-## Browser Propagation
-
-:::warning
-**This features is deprecated!** We recommend to propagate data via [baggage](#baggage) instead, so the agent does not expose an API.
-:::
-
-Data enabled for browser propagation will be also be stored inside [session storages](#session-storage).
-These storages can be exposed via REST-API, if the [Tags-HTTP-Exporter](tags/tags-exporters.md#http-exporter) is enabled.
-A browser can read this data via GET-requests.
-
-Additionally, a browser can write data into the storage via PUT-requests, if browser-propagation is 
-enabled for the data key. 
-Please note, before writing or reading browser propagation data, you need to provide a session ID inside the request-header.
-After that, all data belonging to the current session will be stored behind this session ID.
-For more information, see [Tags-HTTP-Exporter](tags/tags-exporters.md#http-exporter).

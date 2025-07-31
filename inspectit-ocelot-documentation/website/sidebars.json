@@ -31,9 +31,6 @@
       "tracing/privacy",
       "tracing/tracing-self-monitoring"
     ],
-    "Tags": [
-      "tags/tags-exporters"
-    ],
     "Instrumentation": [
       "instrumentation/instrumentation",
       "instrumentation/scopes",
