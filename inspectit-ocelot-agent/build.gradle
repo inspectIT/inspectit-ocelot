@@ -50,6 +50,7 @@ dependencies {
             libs.orgProjectlombokLombok
     )
 
+    // dependencies for opentelemetry-fat.jar
     opentelemetry(
             libs.ioOpentelemetryOpentelemetrySdk,
             libs.ioOpentelemetryOpentelemetryOpencensusShim,
@@ -58,7 +59,9 @@ dependencies {
             libs.ioOpentelemetryInstrumentationOpentelemetryResources,
             libs.comGoogleGuava
     )
+
     annotationProcessor libs.orgProjectlombokLombok
+
     testImplementation (
             libs.orgJunitJupiterJunitJupiterApi,
             libs.orgMockitoMockitoJunitJupiter,
@@ -73,14 +76,14 @@ dependencies {
 // Copy the jar into the docker folder without version suffix
 tasks.register('copyAgentJar', Copy) {
     dependsOn jar
-    from("$buildDir/inspectit-ocelot-agent-${version}.jar")
-    into("$projectDir/docker")
+    from(layout.buildDirectory.file("inspectit-ocelot-agent-${version}.jar"))
+    into(layout.projectDirectory.dir("docker"))
     rename("inspectit-ocelot-agent-${version}\\.jar", 'inspectit-ocelot-agent.jar')
 }
 
 tasks.register('buildOpenTelemetryFatJar', Jar) {
     archiveFileName = "opentelemetry-fat.jar"
-    destinationDirectory = file("$buildDir/jarGen")
+    destinationDirectory = layout.buildDirectory.dir("jarGen")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from {
         configurations.opentelemetry.collect { it.isDirectory() ? it : zipTree(it) }
@@ -92,7 +95,7 @@ processJmhResources {
 }
 
 tasks.register('generateVersionFile') {
-    ext.versionFile = new File(buildDir, "ocelot-version.info")
+    ext.versionFile = layout.buildDirectory.file("ocelot-version.info").get().asFile
     doLast {
         ext.versionFile.withWriter('UTF-8') { writer ->
             writer << "$version"
@@ -101,7 +104,7 @@ tasks.register('generateVersionFile') {
 }
 
 jar {
-    destinationDirectory = buildDir
+    destinationDirectory = layout.buildDirectory
     archivesBaseName = "${project.name}"
 
     manifest {
@@ -113,17 +116,15 @@ jar {
 
     // include the open-telemetry dependencies as a fat jar
     dependsOn buildOpenTelemetryFatJar
-    from "$buildDir/jarGen"
+    from layout.buildDirectory.dir("jarGen")
 
     from project(':inspectit-ocelot-bootstrap').jar.outputs
     from project(':inspectit-ocelot-core').jar.outputs
 
-    //include all "implementation" dependencies in fat jar
+    // include all "implementation" dependencies in fat jar
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-
-
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -179,22 +180,12 @@ dependencies {
             libs.comGithubTomakehurstWiremockJre8,
             libs.orgYamlSnakeyaml,
 
+            // testing of apache client instrumentation
             // we still use the v4 client in system tests, since the default instrumentation does not work for v5
             libs.orgApacheHttpcomponentsHttpclient,
-
             // testing of the jms instrumentation
             libs.orgApacheActivemqApacheActivemq,
-
-            // Switching to spring-boot dependency management excludes somehow magically the transitive
-            // dependency commons-logging:commons-logging of org.apache.httpcomponents:httpclient.
-            // Spring-Boot applications include org.springframework:spring-jcl, which provides a better
-            // version of commons-logging
-            // (see https://docs.spring.io/spring-framework/docs/5.3.25/javadoc-api/org/apache/commons/logging/package-summary.html)
-            // In our special setup spring-jcl is not on the classpath, hence we need to add it manually.
-            // For inspectit-ocelot-core it is pulled in via the manually declared spring-boot dependency.
-            // For inspectit-configurationserver it is pulled in as it is a full blown spring-boot application.
-            libs.orgSpringframeworkSpringJcl,
-
+            // testing of jdbc instrumentation
             libs.comH2databaseH2,
 
             // only used for log-correlation tests
@@ -222,7 +213,7 @@ dependencies {
 if (!project.hasProperty("systemTestJavaHomes")) {
     ext.systemTestJavaHomes = System.properties['java.home']
 }
-def agentJarPath = jar.archivePath.toString()
+def agentJarPath = jar.archiveFile.get().asFile.absolutePath
 
 task systemTest {
     group = 'Verification'
@@ -264,10 +255,10 @@ task systemTest {
 
             testLogging {
                 // Let Gradle output the stdout and stderr from tests, too. This is useful for investigating
-                // test failures on Travis, where we can't view Gradle's test reports.
+                // test failures on Travis, where we can't view Gradle's test reports
                 showStandardStreams = true
 
-                // Include the exception message and full stacktrace for failed tests.
+                // Include the exception message and full stacktrace for failed tests
                 exceptionFormat 'full'
             }
 
@@ -312,10 +303,10 @@ task systemTest {
                 jvmArgs "-Dinspectit.publishOpenTelemetryToBootstrap=true"  // make inspectIT push OTEL to the bootstrap
                 jvmArgs jacoco.asJvmArg + ",inclbootstrapclasses=true"
                 // JaCoCo agent first + bootstrap instrumentation
-                jvmArgs "-javaagent:${agentJarPath}"  // Our agent second.
+                jvmArgs "-javaagent:${agentJarPath}"  // Our agent second
 
                 // stricter checker makes sure that {@link Scope}s are closed on the correct thread and
-                // that they are not garbage collected before being closed.
+                // that they are not garbage collected before being closed
                 jvmArgs "-Dio.opentelemetry.context.enableStrictContext=true"
 
                 minHeapSize = "128m"
@@ -335,7 +326,7 @@ task systemTest {
 
             }
 
-            doFirst { logger.lifecycle("Running system tests using ${javaExecutable}.") }
+            doFirst { logger.lifecycle("Running system tests using ${javaExecutable}") }
         }
 
         systemTest.dependsOn perVersionSystemTest
@@ -346,7 +337,6 @@ task systemTest {
 check.dependsOn systemTest
 
 jmh {
-
     /**
      * Use -PjmhInclude='regular expression' to specify what tests to run with JMH.
      */
@@ -375,7 +365,8 @@ jmh {
         allJmvArgs.addAll(['-XX:+UnlockCommercialFeatures', '-XX:+FlightRecorder', '-XX:+UnlockDiagnosticVMOptions', '-XX:+DebugNonSafepoints', frProperties, '-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl'])
     }
 
-    String loggingPath = "-Dinspectit.logging.file.path=$buildDir/jmh/inspectit-logs".toString()
+    def loggingDir = layout.buildDirectory.dir("jmh/inspectit-logs")
+    String loggingPath = "-Dinspectit.logging.file.path=${loggingDir.get().asFile.absolutePath}"
     String configPath = "-Dinspectit.config.file-based.path=$projectDir/src/jmh/resources/config".toString()
     String agentSetup = "-javaagent:${agentJarPath}".toString()
 
@@ -383,8 +374,8 @@ jmh {
     jvmArgs = allJmvArgs
 
     // output of results and duplicateClassesStrategy
-    humanOutputFile = file("$buildDir/jmh/human.txt")
-    resultsFile = file("$buildDir/jmh/results.txt")
+    humanOutputFile = layout.buildDirectory.file("jmh/human.txt").get()
+    resultsFile = layout.buildDirectory.file("jmh/results.txt").get()
     duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
 
     // shared settings if not defined on the class level

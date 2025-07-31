@@ -1,16 +1,6 @@
 import com.github.jk1.license.render.TextReportRenderer
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
-// There is a transitive dependency which causes the bootJar task to fail.
-// This fixes the issue by forcing the correct version of the dependency.
-buildscript {
-    configurations.configureEach {
-        resolutionStrategy {
-            force "org.apache.commons:commons-compress:1.26.2"
-        }
-    }
-}
-
 plugins {
     alias(libs.plugins.nlLittlerobotsVersionCatalogUpdate)
     alias(libs.plugins.comGithubJk1DependencyLicenseReport)
@@ -40,6 +30,8 @@ allprojects {
 
     version = "$buildVersion"
 
+    // Normally we use the dependency-check GitHub action to check dependencies
+    // We keep this configuration, if you want to run the dependency-check locally
     dependencyCheck {
         //failBuildOnCVSS = 6
         nvd {
@@ -151,16 +143,15 @@ tasks.register('codeCoverageReport', JacocoReport) {
     dependsOn(':inspectit-ocelot-config:test')
     dependsOn(':inspectit-ocelot-core:test')
 
-
     [project(':inspectit-ocelot-agent'), project(':inspectit-ocelot-bootstrap'), project(':inspectit-ocelot-config'), project(':inspectit-ocelot-core')].each {
         sourceSets it.sourceSets.main
     }
 
     reports {
         xml.required = true
-        xml.destination file("${buildDir}/reports/jacoco/report.xml")
+        xml.destination layout.buildDirectory.file("reports/jacoco/report.xml").get().asFile
         html.required = true
-        html.destination file("${buildDir}/reports/jacoco/html")
+        html.destination layout.buildDirectory.file("reports/jacoco/html").get().asFile
         csv.required = false
     }
 }

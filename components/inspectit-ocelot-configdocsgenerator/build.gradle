@@ -13,14 +13,6 @@ publishing {
 }
 
 dependencies {
-    testImplementation(
-            configServerLibs.orgSpringframeworkBootSpringBootStarterTest,
-
-            configServerLibs.comGoogleGuava,
-            libs.ioOpentelemetryOpentelemetryApi,
-            libs.orgAssertjAssertjCore,
-    )
-
     implementation(
             project(':inspectit-ocelot-config'),
             configServerLibs.chQosLogbackLogbackClassic,
@@ -32,6 +24,14 @@ dependencies {
 
     compileOnly libs.orgProjectlombokLombok
     annotationProcessor libs.orgProjectlombokLombok
+
+    testImplementation(
+            configServerLibs.orgSpringframeworkBootSpringBootStarterTest,
+
+            configServerLibs.comGoogleGuava,
+            libs.ioOpentelemetryOpentelemetryApi,
+            libs.orgAssertjAssertjCore,
+    )
 }
 
 // there is no main class here

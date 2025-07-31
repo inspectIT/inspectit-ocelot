@@ -91,19 +91,21 @@ dependencies {
             // utils
             libs.orgApacheCommonsCommonsLang3,
             libs.orgApacheCommonsCommonsMath3,
-            libs.orgApacheHttpcomponentsClient5Httpclient5,
-            libs.orgApacheHttpcomponentsCore5Httpcore5,
             libs.commonsIo,
             libs.piccolo,
             libs.comFasterxmlJacksonCoreJacksonDatabind,
+            // http-client
+            libs.orgApacheHttpcomponentsClient5Httpclient5,
+            libs.orgApacheHttpcomponentsCore5Httpcore5,
+            // retries
             libs.ioGithubResilience4jResilience4jRetry,
             libs.ioGithubResilience4jResilience4jTimelimiter,
+            // collect system info
             libs.comGithubOshiOshiCore,
 
-            libs.orgJavassist,
-
-            // Metrics exporters
+            // metrics exporters
             libs.ioPrometheusSimpleclientHttpserver,
+            libs.rocksInspectitOpencensusInfluxdbExporter,
 
             // this overwrites version of guava that opencensus-impl pulls in transitively, too.
             libs.comGoogleGuava,
@@ -121,10 +123,9 @@ dependencies {
             platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
             libs.ioOpentelemetryOpentelemetryExporterPrometheus,
 
-            libs.rocksInspectitOpencensusInfluxdbExporter,
-
             // bytecode manipulation
-            libs.netBytebuddyByteBuddy
+            libs.netBytebuddyByteBuddy,
+            libs.orgJavassist
     )
 
     testImplementation(
@@ -140,7 +141,6 @@ dependencies {
             libs.ioOpentelemetryInstrumentationOpentelemetryResources,
 
             libs.orgSpringframeworkSpringTest,
-
             libs.orgJunitJupiterJunitJupiterApi,
             libs.orgMockitoMockitoJunitJupiter,
 
@@ -204,16 +204,19 @@ tasks.register('compileJarCheck', JavaCompile) {
     source = sourceSets.main.java.srcDirs
     include 'com/mindprod/jarcheck/JarCheck.java'
     classpath = sourceSets.main.compileClasspath
-    destinationDirectory = new File("${buildDir}/classes/java/main")
+    destinationDirectory.set(layout.buildDirectory.dir("classes/java/main"))
 }
+
+compileTestJava.dependsOn compileJarCheck
 
 // use jarCheck to make sure all classes in our dependencies are at maximum in version 1.8
 tasks.register('checkDependencyJavaVersions') {
-    def jarCheckPath = "$buildDir/jarCheck"
+    dependsOn compileJarCheck
+    def jarCheckPath = layout.buildDirectory.dir("jarCheck")
     outputs.dir jarCheckPath
 
     doFirst {
-        def jarCheckOutput = new File(jarCheckPath)
+        def jarCheckOutput = jarCheckPath.get().asFile
         jarCheckOutput.mkdirs()
         configurations.runtimeClasspath.each { file ->
             def name = file.name
@@ -228,12 +231,9 @@ tasks.register('checkDependencyJavaVersions') {
         }
     }
 }
-checkDependencyJavaVersions.dependsOn compileJarCheck
-
-compileTestJava.dependsOn compileJarCheck
 
 tasks.register('generateVersionFile') {
-    ext.versionFile = new File(buildDir, "ocelot-version.info")
+    ext.versionFile = layout.buildDirectory.file("ocelot-version.info").get().asFile
     doLast {
         def currentDate = new Date().toString()
         def openTelemetry = libs.versions.ioOpentelemetry.get()
@@ -249,10 +249,10 @@ cyclonedxBom {
     projectType = "application"
 }
 
-jar.dependsOn checkDependencyJavaVersions
-jar.dependsOn generateVersionFile
-
 jar {
+    dependsOn checkDependencyJavaVersions
+    dependsOn generateVersionFile
+
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     archiveFileName = "${project.name}.jar"
@@ -304,8 +304,8 @@ jmh {
     }
 
     // output of results and duplicateClassesStrategy
-    humanOutputFile = file("$buildDir/jmh/human.txt")
-    resultsFile = file("$buildDir/jmh/results.txt")
+    humanOutputFile = layout.buildDirectory.file("jmh/human.txt").get()
+    resultsFile = layout.buildDirectory.file("jmh/results.txt").get()
     duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
 
     // shared settings if not defined on the class level
