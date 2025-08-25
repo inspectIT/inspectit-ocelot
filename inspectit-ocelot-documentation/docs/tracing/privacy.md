@@ -54,15 +54,15 @@ inspectit:
   privacy:
     obfuscation:
       patterns:
-        - pattern: 'address'
+        - pattern: '.*address.*'  # contains 'address' 
 ```
 The following table shows the effect of the previous obfuscation configuration on collected span attributes:
 
-| Collected Attributes                 | Resulting Attributes         |
-|--------------------------------------|------------------------------|
-| `"companyAddress": "Sunny Road 13B"` | `"companyAddress": "***"`    |
-| `"address": "Milkey Road 17"`        | `"address": "***"`           |
-| `"action": "address update"`         | `"action": "address update"` |
+| Collected Attributes                 | Resulting Attributes          |
+|--------------------------------------|-------------------------------|
+| `"companyAddress": "Sunny Road 13B"` | `"companyAddress": "***"`     |
+| `"address": "Milkey Road 17"`        | `"address": "***"`            |
+| `"action0": "address update"`        | `"action1": "address update"` |
 
 ### Example 2
 
@@ -73,7 +73,7 @@ inspectit:
   privacy:
     obfuscation:
       patterns:
-        - pattern: 'address'
+        - pattern: '.*address.*'    
           case-insensitive: false   # ignore capitalization
           check-key: true           # this is true by default
           check-data: true          # also check the attributes value
@@ -85,7 +85,7 @@ The following table shows the effect of the previous obfuscation configuration o
 |--------------------------------------|--------------------------------------|
 | `"companyAddress": "Sunny Road 13B"` | `"companyAddress": "Sunny Road 13B"` |
 | `"address": "Milkey Road 17"`        | `"address": "***"`                   |
-| `"action": "address update"`         | `"action": "***"`                    |
+| `"action0": "address update"`        | `"action1": "***"`                   |
 
 ### Example 3
 
@@ -96,11 +96,11 @@ inspectit:
   privacy:
     obfuscation:
       patterns:
-        - pattern: 'address'
-          case-insensitive: false  
+        - pattern: '.*address.*'
+          case-insensitive: true  
           check-key: true           
           check-data: true          
-          replace-regex: [0-9]+     # replace any numbers
+          replace-regex: '[0-9]+'   # replace any numbers
 ```
 
 The following table shows the effect of the previous obfuscation configuration on collected span attributes:
@@ -109,4 +109,4 @@ The following table shows the effect of the previous obfuscation configuration o
 |--------------------------------------|---------------------------------------|
 | `"companyAddress": "Sunny Road 13B"` | `"companyAddress": "Sunny Road ***B"` |
 | `"address": "Milkey Road 17"`        | `"address": "Milkey Road ***"`        |
-| `"action1": "address update"`        | `"action1": "address update"`         |
+| `"action0": "address update"`        | `"action1": "address update"`         |
