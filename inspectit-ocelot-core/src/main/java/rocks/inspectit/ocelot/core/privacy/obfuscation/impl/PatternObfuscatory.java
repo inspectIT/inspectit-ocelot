@@ -6,6 +6,7 @@ import io.opentelemetry.api.trace.Span;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
+import rocks.inspectit.ocelot.config.model.privacy.obfuscation.ObfuscationPattern;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.IObfuscatory;
 
 import java.util.Collection;
@@ -19,12 +20,12 @@ public class PatternObfuscatory implements IObfuscatory {
     private static final Function<String, Object> DEFAULT_OBFUSCATION_FUNCTION = (v) -> "***";
 
     /**
-     * Patterns that need to be checked.
+     * Patterns that need to be checked
      */
     private final Collection<PatternEntry> patternEntries;
 
     /**
-     * Map holding already checked keys as key and info if the data should be obfuscated or not.
+     * Map holding already checked keys as key and info if the data should be obfuscated or not
      */
     private final Cache<String, CheckedKeyObfuscationValue> checkedKeysMap = CacheBuilder.newBuilder()
             .maximumSize(1000)
@@ -36,7 +37,9 @@ public class PatternObfuscatory implements IObfuscatory {
     @Override
     public void putSpanAttribute(Span span, String key, Object value) {
         String strValue = value.toString();
-        Object obfuscatedValue = shouldObfuscate(key, strValue).map(function -> function.apply(strValue)).orElse(value);
+        Object obfuscatedValue = shouldObfuscate(key, strValue)
+                .map(function -> function.apply(strValue))
+                .orElse(value);
 
         IObfuscatory.super.putSpanAttribute(span, key, obfuscatedValue);
     }
@@ -56,9 +59,9 @@ public class PatternObfuscatory implements IObfuscatory {
             Optional<Function<String, Object>> keyBasedObfuscation = shouldObfuscateKey(key);
             CheckedKeyObfuscationValue.CheckedKeyObfuscationValueBuilder checkedKeyObfuscationValueBuilder = CheckedKeyObfuscationValue.builder();
 
-            // if function is present, then we know obfuscation is needed and we save both boolean and function to the map
-            keyBasedObfuscation.ifPresent(stringStringFunction -> checkedKeyObfuscationValueBuilder.shouldObfuscate(true)
-                    .obfuscationFunction(stringStringFunction));
+            // if function is present, then we know obfuscation is needed, and we save both boolean and function to the map
+            keyBasedObfuscation.ifPresent(stringObjectFunction -> checkedKeyObfuscationValueBuilder.shouldObfuscate(true)
+                    .obfuscationFunction(stringObjectFunction));
             CheckedKeyObfuscationValue cacheValue = checkedKeyObfuscationValueBuilder.build();
             checkedKeysMap.put(key, cacheValue);
 
@@ -87,53 +90,55 @@ public class PatternObfuscatory implements IObfuscatory {
     }
 
     /**
-     * Used in the cache as value.
+     * Used in the cache as value
      */
     @Builder
     @Value
-    private static final class CheckedKeyObfuscationValue {
+    private static class CheckedKeyObfuscationValue {
 
         /**
          * If key should be obfuscated
          */
-        private final boolean shouldObfuscate;
+        boolean shouldObfuscate;
 
         /**
-         * What's the obfuscation function.
+         * What's the obfuscation function
          */
-        private final Function<String, Object> obfuscationFunction;
+        Function<String, Object> obfuscationFunction;
 
     }
 
+    /**
+     * Also see {@link ObfuscationPattern}
+     */
     @Builder
     @Value
-    public static final class PatternEntry {
+    public static class PatternEntry {
 
         /**
          * Pattern to be used when checking keys/values for needed obfuscation.
+         * Already includes case-(in)sensitivity
          */
-        private final Pattern pattern;
+        Pattern pattern;
 
         /**
-         * Replace regex to use when obfuscating value. Can be <code>null</code>.
-         * <p>
-         * <b>This is reserved for future use and has no impact at the moment.</b>
+         * Replace regex to use when obfuscating value. Can be <code>null</code>
          */
-        private final String replaceRegex;
+        Pattern replaceRegex;
 
         /**
-         * If key check should be performed.
+         * If key check should be performed
          *
          * @see #matchesKey(String)
          */
-        private final boolean checkKey;
+        boolean checkKey;
 
         /**
-         * If data check should be performed.
+         * If data check should be performed
          *
          * @see #matchesData(String)
          */
-        private final boolean checkData;
+        boolean checkData;
 
         boolean matchesKey(String key) {
             return checkKey && pattern.matcher(key).matches();
@@ -144,9 +149,8 @@ public class PatternObfuscatory implements IObfuscatory {
         }
 
         Function<String, Object> getObfuscationFunction() {
-            return DEFAULT_OBFUSCATION_FUNCTION;
+            if (replaceRegex == null) return DEFAULT_OBFUSCATION_FUNCTION;
+            else return value -> replaceRegex.matcher(value).replaceAll("***");
         }
-
     }
-
 }

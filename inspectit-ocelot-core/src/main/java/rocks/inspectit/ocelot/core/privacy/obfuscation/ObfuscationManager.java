@@ -74,11 +74,16 @@ public class ObfuscationManager {
                     try {
                         int compileFlag = p.isCaseInsensitive() ? Pattern.CASE_INSENSITIVE : 0;
                         Pattern compiledPattern = Pattern.compile(p.getPattern(), compileFlag);
+
+                        Pattern compiledReplaceRegex = null;
+                        if (p.getReplaceRegex() != null && !p.getReplaceRegex().isEmpty())
+                            compiledReplaceRegex = Pattern.compile(p.getReplaceRegex(), compileFlag);
+
                         PatternObfuscatory.PatternEntry patternEntry = PatternObfuscatory.PatternEntry.builder()
                                 .pattern(compiledPattern)
                                 .checkKey(p.isCheckKey())
                                 .checkData(p.isCheckData())
-                                .replaceRegex(p.getReplaceRegex())
+                                .replaceRegex(compiledReplaceRegex)
                                 .build();
                         return Stream.of(patternEntry);
                     } catch (Exception e) {
