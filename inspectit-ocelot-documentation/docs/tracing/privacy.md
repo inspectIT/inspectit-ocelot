@@ -3,14 +3,14 @@ id: privacy
 title: Data Privacy
 ---
 
-InspectIT Ocelot offers you a mechanism to protect your privacy when collecting traces and to prevent the collection of sensitive data.
-This ensures that no sensitive data will leave your application.
+InspectIT Ocelot offers you a mechanism to protect your privacy when collecting traces and to prevent the collection of 
+sensitive data. This ensures that no sensitive data will leave your application.
 
 ## Data Obfuscation
 
 The Ocelot agent configuration allows specification of the data obfuscation rules which will be applied when:
 
-1. collecting span attributes
+1. Collecting span attributes
 
 This way you can globally protect against collecting and storing user sensitive information.
 This can help to implement requirements regarding the strict GDPR rules.
@@ -33,12 +33,13 @@ Note that obfuscation is enabled by default. However, setting `inspectit.privacy
 
 Each pattern entry can be customized by following properties: 
 
-|Property |Default| Description
-|---|---|---|
-|`pattern`|-| The regular expression used to match data for obfuscation.
-|`case-insensitive`|`true`| Denoting whether this pattern should be complied as case insensitive.
-|`check-key`|`true`| Denoting whether this pattern should be tested against the key of the collected attribute.
-|`check-data`|`false`| Denoting whether this pattern should be tested against the actual value of the collected data.
+| Property           | Default | Description                                                                                    |
+|--------------------|---------|------------------------------------------------------------------------------------------------|
+| `pattern`          | -       | The regular expression used to match data for obfuscation.                                     |
+| `case-insensitive` | `true`  | Denoting whether this pattern should be complied as case insensitive.                          |
+| `check-key`        | `true`  | Denoting whether this pattern should be tested against the key of the collected attribute.     |
+| `check-data`       | `false` | Denoting whether this pattern should be tested against the actual value of the collected data. |
+| `replace-regex`    | -       | The regular expression used to obfuscate specific parts of the data value                      |
 
 ## Examples
 
@@ -53,15 +54,15 @@ inspectit:
   privacy:
     obfuscation:
       patterns:
-        - pattern: 'address'
+        - pattern: '.*address.*'  # contains 'address' 
 ```
 The following table shows the effect of the previous obfuscation configuration on collected span attributes:
 
-|Collected Attributes|Resulting Attributes
-|---|---|
-|`"companyAddress": "Sunny Road 13B"`|`"companyAddress": "***"`
-|`"address": "Milkey Road 17"`|`"address": "***"`
-|`"action": "address update"`|`"action": "address update"`
+| Collected Attributes                 | Resulting Attributes          |
+|--------------------------------------|-------------------------------|
+| `"companyAddress": "Sunny Road 13B"` | `"companyAddress": "***"`     |
+| `"address": "Milkey Road 17"`        | `"address": "***"`            |
+| `"action0": "address update"`        | `"action1": "address update"` |
 
 ### Example 2
 
@@ -72,7 +73,7 @@ inspectit:
   privacy:
     obfuscation:
       patterns:
-        - pattern: 'address'
+        - pattern: '.*address.*'    
           case-insensitive: false   # ignore capitalization
           check-key: true           # this is true by default
           check-data: true          # also check the attributes value
@@ -80,12 +81,32 @@ inspectit:
 
 The following table shows the effect of the previous obfuscation configuration on collected span attributes:
 
-|Collected Attributes|Resulting Attributes
-|---|---|
-|`"companyAddress": "Sunny Road 13B"`|`"companyAddress": "Sunny Road 13B"`
-|`"address": "Milkey Road 17"`|`"address": "***"`
-|`"action": "address update"`|`"action": "***"`
+| Collected Attributes                 | Resulting Attributes                 |
+|--------------------------------------|--------------------------------------|
+| `"companyAddress": "Sunny Road 13B"` | `"companyAddress": "Sunny Road 13B"` |
+| `"address": "Milkey Road 17"`        | `"address": "***"`                   |
+| `"action0": "address update"`        | `"action1": "***"`                   |
 
-:::note Obfuscation Value and Pattern
-For now, all obfuscated values are replaced with three stars `***`. This could be changed in future Ocelot releases in favor of a replace regex.
-:::
+### Example 3
+
+This configuration masks all attribute values where the corresponding attribute key or the value itself contain `address`. In this example, the pattern is case-sensitive.
+
+```yaml
+inspectit:
+  privacy:
+    obfuscation:
+      patterns:
+        - pattern: '.*address.*'
+          case-insensitive: true  
+          check-key: true           
+          check-data: true          
+          replace-regex: '[0-9]+'   # replace any numbers
+```
+
+The following table shows the effect of the previous obfuscation configuration on collected span attributes:
+
+| Collected Attributes                 | Resulting Attributes                  |
+|--------------------------------------|---------------------------------------|
+| `"companyAddress": "Sunny Road 13B"` | `"companyAddress": "Sunny Road ***B"` |
+| `"address": "Milkey Road 17"`        | `"address": "Milkey Road ***"`        |
+| `"action0": "address update"`        | `"action1": "address update"`         |

@@ -150,7 +150,7 @@ class ObfuscationManagerTest {
             obfuscatory.putSpanAttribute(span, "ABC", "abc");
             obfuscatory.putSpanAttribute(span, "DEF", "123");
 
-            verify(span).setAttribute(AttributeKey.stringKey("abc"), "***");
+            verify(span).setAttribute(AttributeKey.stringKey("abc"), "a***");
             verify(span).setAttribute(AttributeKey.stringKey("ABC"), "abc");
             verify(span).setAttribute(AttributeKey.stringKey("DEF"), "123");
         }
@@ -262,7 +262,6 @@ class ObfuscationManagerTest {
             obfuscatory.putSpanAttribute(span, "double", Double.valueOf(1.338d));
             verify(span).setAttribute(AttributeKey.doubleKey("double"), 1.338d);
             obfuscatory.putSpanAttribute(span, "float", Float.valueOf(1.337f));
-            // TODO: do we want to avoid the 'added' precision by double? Then we need to change it accordingly in the IObfuscatory.
             verify(span).setAttribute(AttributeKey.doubleKey("float"), 1.337d);
             verifyNoMoreInteractions(span);
 
@@ -308,5 +307,4 @@ class ObfuscationManagerTest {
             verifyNoMoreInteractions(span);
         }
     }
-
 }
