@@ -32,15 +32,13 @@ public class TraceSettingsTest extends TraceTestBase {
                     assertThat(sp.getAttributes().asMap()).hasSize(7)
                             .containsEntry(AttributeKey.stringKey("entry"), "const")
                             .containsEntry(AttributeKey.stringKey("exit"), "Hello A!")
-                            .containsEntry(AttributeKey.stringKey("toObfuscate"), "***")
-                            .containsEntry(AttributeKey.stringKey("anything"), "***")
+                            .containsEntry(AttributeKey.stringKey("toObfuscate"), "***") // obfuscate everything for key 'toObfuscate'
+                            .containsEntry(AttributeKey.stringKey("anything"), "to***Value") // obfuscate the term 'Obfuscate' for values 'toObfuscateValue'
                             // plus include all common tags (service + key validation only)
                             .containsEntry(AttributeKey.stringKey("service.name"), "systemtest")
                             .containsKeys(AttributeKey.stringKey("host.name"), AttributeKey.stringKey("host.ip"));
                 })
-
         );
-
     }
 
     String attributesSetterWithConditions(boolean captureAttributes) {
@@ -60,7 +58,6 @@ public class TraceSettingsTest extends TraceTestBase {
                             .containsKeys(AttributeKey.stringKey("service.name"),
                                     AttributeKey.stringKey("host.name"), AttributeKey.stringKey("host.ip"));
                 })
-
         );
 
         assertTraceExported((spans) -> assertThat(spans).hasSize(1).anySatisfy((sp) -> {
@@ -92,7 +89,6 @@ public class TraceSettingsTest extends TraceTestBase {
                     assertThat(sp.getName()).endsWith("TraceSettingsTest.nestedC");
                     assertThat(SpanId.isValid(sp.getParentSpanId())).isFalse();
                 })
-
         );
         assertTraceExported((spans) -> assertThat(spans).hasSize(2).anySatisfy((sp) -> {
                     assertThat(sp.getName()).endsWith("TraceSettingsTest.conditionalRoot");
@@ -378,7 +374,6 @@ public class TraceSettingsTest extends TraceTestBase {
                     .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNestedDefault"))
                     .noneSatisfy(sp -> assertThat(sp.getName()).isEqualTo("TraceSettingsTest.nestedSamplingTestNested"));
         }
-
     }
 
     void withErrorStatus(Object status) {
