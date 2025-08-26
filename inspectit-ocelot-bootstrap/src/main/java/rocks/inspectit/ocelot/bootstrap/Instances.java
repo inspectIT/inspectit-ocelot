@@ -6,10 +6,7 @@ import rocks.inspectit.ocelot.bootstrap.correlation.LogTraceCorrelator;
 import rocks.inspectit.ocelot.bootstrap.correlation.TraceIdInjector;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopTraceIdInjector;
-import rocks.inspectit.ocelot.bootstrap.exposed.InspectitAgentInfo;
-import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
-import rocks.inspectit.ocelot.bootstrap.exposed.InspectitReflection;
-import rocks.inspectit.ocelot.bootstrap.exposed.InspectitRegex;
+import rocks.inspectit.ocelot.bootstrap.exposed.*;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IHookManager;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.noop.*;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.IOpenTelemetryController;
@@ -51,6 +48,8 @@ public class Instances {
     public static LogTraceCorrelator logTraceCorrelator = NoopLogTraceCorrelator.INSTANCE;
 
     public static TraceIdInjector traceIdInjector = NoopTraceIdInjector.INSTANCE;
+
+    public static InspectitWrapper wrapper = NoopInspectitWrapper.INSTANCE;
 
     public static IOpenTelemetryController openTelemetryController = NoopOpenTelemetryController.INSTANCE;
 }

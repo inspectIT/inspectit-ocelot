@@ -9,6 +9,8 @@ import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
 import rocks.inspectit.ocelot.bootstrap.instrumentation.IMethodHook;
 
+import java.util.function.BiConsumer;
+
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 /**
@@ -48,16 +50,24 @@ public class DispatchHookAdvices {
         @Advice.OnMethodEnter
         public static void onEnter(@Advice.Origin Class<?> declaringClass,
                                    @Advice.Origin("#m#s") String signature,
-                                   @Advice.AllArguments Object[] args,
+                                   @Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
                                    @Advice.This Object thiz,
                                    @Advice.Local("hook") IMethodHook hook,
                                    @Advice.Local("context") InternalInspectitContext context) {
             hook = Instances.hookManager.getHook(declaringClass, signature);
             context = hook.onEnter(args, thiz);
+
+            /*
+             * This works (for a picked example demo), but we still need to figure out a more generous approach
+             * The instrumented method: testMethod(BiConsumer<String,String> callback, String test)
+             */
+
+            Object wrapper = Instances.wrapper.wrap((BiConsumer) args[0]);
+            args = new Object[]{wrapper, "test"};
         }
 
         @Advice.OnMethodExit(onThrowable = Throwable.class)
-        public static void onExit(@Advice.AllArguments Object[] args,
+        public static void onExit(@Advice.AllArguments(readOnly = false, typing = Assigner.Typing.DYNAMIC) Object[] args,
                                   @Advice.This Object thiz,
                                   @Advice.Return(typing = Assigner.Typing.DYNAMIC) Object returnValue,
                                   @Advice.Thrown Throwable thrown,

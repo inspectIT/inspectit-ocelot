@@ -146,7 +146,8 @@ public class GenericActionGenerator {
         }
 
         CtMethod method = action.getDeclaredMethod("executeImpl");
-        method.setBody(buildActionMethod(actionConfig));
+        String methodBody = buildActionMethod(actionConfig);
+        method.setBody(methodBody);
 
         return action.toBytecode();
     }

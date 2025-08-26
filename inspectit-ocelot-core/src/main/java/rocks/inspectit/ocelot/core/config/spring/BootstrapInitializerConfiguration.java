@@ -12,6 +12,7 @@ import rocks.inspectit.ocelot.bootstrap.opentelemetry.NoopOpenTelemetryControlle
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.core.AgentInfoImpl;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.instrumentation.actions.InspectitWrapperImpl;
 import rocks.inspectit.ocelot.core.instrumentation.actions.cache.InspectitReflectionImpl;
 import rocks.inspectit.ocelot.core.instrumentation.actions.cache.InspectitRegexImpl;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
@@ -72,6 +73,13 @@ public class BootstrapInitializerConfiguration {
         return regex;
     }
 
+    @Bean(InspectitWrapperImpl.BEAN_NAME)
+    public InspectitWrapperImpl getInspectitWrapper() {
+        InspectitWrapperImpl wrapper = new InspectitWrapperImpl();
+        Instances.wrapper = wrapper;
+        return wrapper;
+    }
+
     @Bean(LogTraceCorrelatorImpl.BEAN_NAME)
     public LogTraceCorrelatorImpl getLogTraceCorrelator(MdcAccessManager mdcAccessManager, InspectitEnvironment environment) {
         InspectitConfig configuration = environment.getCurrentConfig();
@@ -92,6 +100,7 @@ public class BootstrapInitializerConfiguration {
         Instances.agentInfo = NoopInspectitAgentInfo.INSTANCE;
         Instances.reflection = NoopInspectitReflection.INSTANCE;
         Instances.regex = NoopInspectitRegex.INSTANCE;
+        Instances.wrapper = NoopInspectitWrapper.INSTANCE;
         Instances.hookManager = NoopHookManager.INSTANCE;
         Instances.logTraceCorrelator = NoopLogTraceCorrelator.INSTANCE;
         Instances.traceIdInjector = NoopTraceIdInjector.INSTANCE;

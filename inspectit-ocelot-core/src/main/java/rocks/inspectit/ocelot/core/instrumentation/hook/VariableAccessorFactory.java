@@ -3,10 +3,7 @@ package rocks.inspectit.ocelot.core.instrumentation.hook;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import rocks.inspectit.ocelot.bootstrap.exposed.InspectitAgentInfo;
-import rocks.inspectit.ocelot.bootstrap.exposed.ObjectAttachments;
-import rocks.inspectit.ocelot.bootstrap.exposed.InspectitReflection;
-import rocks.inspectit.ocelot.bootstrap.exposed.InspectitRegex;
+import rocks.inspectit.ocelot.bootstrap.exposed.*;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 
 import static rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings.*;
@@ -32,6 +29,9 @@ public class VariableAccessorFactory {
 
     @Autowired
     private InspectitRegex inspectitRegex;
+
+    @Autowired
+    private InspectitWrapper inspectitWrapper;
 
     @Autowired
     private InspectitAgentInfo agentInfo;
@@ -102,6 +102,8 @@ public class VariableAccessorFactory {
                 return context -> inspectitRegex;
             case AGENT_VARIABLE:
                 return context -> agentInfo;
+            case WRAPPER_VARIABLE:
+                return context -> inspectitWrapper;
         }
         if (variable.startsWith(ARG_VARIABLE_PREFIX)) {
             try {
@@ -141,6 +143,8 @@ public class VariableAccessorFactory {
                 return inspectitRegex;
             case AGENT_VARIABLE:
                 return agentInfo;
+            case WRAPPER_VARIABLE:
+                return inspectitWrapper;
         }
         return null;
     }

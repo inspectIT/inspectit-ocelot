@@ -39,6 +39,7 @@ public class GenericActionSettings {
     public static final String REFLECTION_VARIABLE = "_reflection";
     public static final String REGEX_VARIABLE = "_regex";
     public static final String AGENT_VARIABLE = "_agent";
+    public static final String WRAPPER_VARIABLE = "_wrapper";
 
     private static final List<Pattern> SPECIAL_VARIABLES_REGEXES = Arrays.asList(
             Pattern.compile(THIS_VARIABLE),
@@ -53,7 +54,8 @@ public class GenericActionSettings {
             Pattern.compile(OBJECT_ATTACHMENTS_VARIABLE),
             Pattern.compile(REFLECTION_VARIABLE),
             Pattern.compile(REGEX_VARIABLE),
-            Pattern.compile(AGENT_VARIABLE)
+            Pattern.compile(AGENT_VARIABLE),
+            Pattern.compile(WRAPPER_VARIABLE)
     );
 
     /**
@@ -86,6 +88,7 @@ public class GenericActionSettings {
      * - _reflection: an {@link InspectitReflection} instance which allows you to access and cache fields or methods via reflection
      * - _regex: an {@link InspectitRegex} instance which allows to cache regex patterns and test strings
      * - _agent: an {@link InspectitAgentInfo} instance which allows to access meta information about the current agent
+     * - _wrapper: an {@link InspectitWrapper} instance which allows to wrap function interfaces
      * - _context: gives read and write access to the current {@link InspectitContext}, allowing you to attach values to the control flow
      * - _thrown: the {@link Throwable}-Object raised by the executed method, the type must be java.lang.Throwable
      * null if no throwable was raised
@@ -199,6 +202,12 @@ public class GenericActionSettings {
     private boolean isInspectitAgentInfoTypeCorrect() {
         String type = input.get(AGENT_VARIABLE);
         return type == null || "InspectitAgentInfo".equals(type);
+    }
+
+    @AssertTrue(message = "The '_wrapper' input must have the type 'InspectitWrapper'")
+    private boolean isInspectitWrapperTypeCorrect() {
+        String type = input.get(WRAPPER_VARIABLE);
+        return type == null || "InspectitWrapper".equals(type);
     }
 
     public static boolean isSpecialVariable(String varName) {
