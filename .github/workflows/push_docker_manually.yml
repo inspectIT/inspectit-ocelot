@@ -1,7 +1,7 @@
 name: Push Docker Images Manually
 
 # Use with care!!!
-# Use this workflow to push new docker images to the latest version manually
+# Use this workflow to push new docker images, currently HARDCODED to 2.7.0 and latest
 # Same workflow as in release.yml
 
 on:
@@ -144,6 +144,7 @@ jobs:
 
   # Merge the prepared Docker images and publish to DockerHub
   merge_and_publish_docker_images:
+    # TODO Tag should not be hardcoded
     name: "Merge and Publish Docker Images"
     runs-on: ubuntu-latest
     needs: build_docker_images
@@ -179,7 +180,7 @@ jobs:
         with:
           images: inspectit/inspectit-ocelot-agent
           tags: |
-            type=raw,value=${{ env.LATEST_TAG }}
+            type=raw,value=2.7.0
             type=raw,value=latest
       - name: Push agent
         working-directory: ${{ runner.temp }}/digests-agent
@@ -188,7 +189,7 @@ jobs:
           $(printf 'inspectit/inspectit-ocelot-agent@sha256:%s ' *)
       - name: Inspect manifest agent
         run: |
-          docker buildx imagetools inspect inspectit/inspectit-ocelot-agent:$LATEST_TAG
+          docker buildx imagetools inspect inspectit/inspectit-ocelot-agent:2.7.0
 
         # publish configuration-server
       - name: Docker meta configurationserver
@@ -197,7 +198,7 @@ jobs:
         with:
           images: inspectit/inspectit-ocelot-configurationserver
           tags: |
-            type=raw,value=${{ env.LATEST_TAG }}
+            type=raw,value=2.7.0
             type=raw,value=latest
       - name: Push configurationserver
         working-directory: ${{ runner.temp }}/digests-configurationserver
@@ -206,4 +207,4 @@ jobs:
           $(printf 'inspectit/inspectit-ocelot-configurationserver@sha256:%s ' *)
       - name: Inspect manifest configurationserver
         run: |
-          docker buildx imagetools inspect inspectit/inspectit-ocelot-configurationserver:$LATEST_TAG
+          docker buildx imagetools inspect inspectit/inspectit-ocelot-configurationserver2.7.0
