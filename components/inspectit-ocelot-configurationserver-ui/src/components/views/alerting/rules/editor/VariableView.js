@@ -260,7 +260,7 @@ const validators = {
   regex: (value) => {
     try {
       new RegExp(value);
-    } catch (e) {
+    } catch {
       return 'This is not a valid regular expression!';
     }
 

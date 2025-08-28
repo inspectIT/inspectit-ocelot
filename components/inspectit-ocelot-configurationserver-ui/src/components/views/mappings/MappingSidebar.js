@@ -46,13 +46,13 @@ const MappingSidebar = () => {
       </style>
 
       <div className="sidebar">
-        <div className="content-container">{currentSidebar == SidebarTypes.HISTORY && <MappingsHistoryView />}</div>
+        <div className="content-container">{currentSidebar === SidebarTypes.HISTORY && <MappingsHistoryView />}</div>
         <div>
           <button
-            className={'vert-button p-button p-togglebutton' + (currentSidebar == SidebarTypes.HISTORY ? 'p-highlight' : '')}
+            className={'vert-button p-button p-togglebutton' + (currentSidebar === SidebarTypes.HISTORY ? 'p-highlight' : '')}
             onClick={toggleHistoryView}
           >
-            <i className={'pi pi-chevron-' + (currentSidebar == SidebarTypes.HISTORY ? 'right' : 'left')} />
+            <i className={'pi pi-chevron-' + (currentSidebar === SidebarTypes.HISTORY ? 'right' : 'left')} />
             <span>Versioning</span>
           </button>
         </div>

@@ -184,7 +184,7 @@ class StatusTable extends React.Component {
     let serviceStates = '{}';
 
     // in case of snapshot version, assume we are up to date
-    if (agentVersion == 'SNAPSHOT') {
+    if (agentVersion === 'SNAPSHOT') {
       logAvailable = agentCommandsEnabled = serviceStatesAvailable = supportArchiveAvailable = feedbackAvailable = true;
     } else if (agentVersionTokens.length === 2 || agentVersionTokens.length === 3) {
       const agentVersionNumber =
@@ -206,7 +206,7 @@ class StatusTable extends React.Component {
         agentCommandsEnabled = serviceStates.AgentCommandService;
         feedbackAvailable = serviceStates.InstrumentationFeedbackService;
         supportArchiveAvailable = agentCommandsEnabled;
-      } catch (e) {
+      } catch {
         //ignore
       }
     }

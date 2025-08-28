@@ -33,7 +33,7 @@ class YamlParserCache {
       let config;
       try {
         config = yaml.load(yamlString);
-      } catch (error) {
+      } catch {
         config = null;
       }
       this.cache[this.writeIndex] = { yamlString, config };

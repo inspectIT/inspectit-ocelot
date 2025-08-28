@@ -92,7 +92,7 @@ const PromotionView = () => {
     try {
       const { data } = await axios.post('/configuration/promote', payload);
 
-      if (data.result && data.result != 'OK') {
+      if (data.result && data.result !== 'OK') {
         setShowWarningDialog(true);
         setPromotionResult(data.result);
       }

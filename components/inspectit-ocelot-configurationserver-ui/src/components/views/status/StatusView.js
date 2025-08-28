@@ -90,7 +90,7 @@ class StatusView extends React.Component {
           },
           this.mergeAgents
         );
-      } catch (error) {
+      } catch {
         this.setState(
           {
             error: true,
@@ -180,7 +180,7 @@ class StatusView extends React.Component {
         return true;
       }
     }
-    if (agent.metaInformation != null) {
+    if (agent.metaInformation) {
       if (regex.test(agent.metaInformation.agentVersion)) {
         return true;
       }
