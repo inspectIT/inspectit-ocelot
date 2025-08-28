@@ -1,4 +1,4 @@
-Name: Push Docker images manually
+name: Push Docker images manually
 
 # Use with care!!!
 # Use this workflow to push new docker images to the latest version manually
