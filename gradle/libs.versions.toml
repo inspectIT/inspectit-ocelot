@@ -9,16 +9,16 @@ comLinecorpArmeria = "1.31.3"
 # @pin 1.3.* is the last version to support java 8
 chQosLogback= "1.3.15"
 ioGithubNetmikeyLogunit = "2.0.0"
-ioGrpc = "1.73.0"
+ioGrpc = "1.75.0"
 # Ensure to adapt the netty version when changing the OpenCensus version
 ioOpencensus = "0.31.1"
 # If you rename this OTel variable or move it to another file, adjust the release-workflow
-ioOpentelemetry = "1.52.0"
-ioOpentelemetryAlpha = "1.52.0-alpha"
+ioOpentelemetry = "1.53.0"
+ioOpentelemetryAlpha = "1.53.0-alpha"
 ioOpentelemetryInstrumentation = "2.15.0-alpha"
 ioOpentelemetryProto = "1.7.0-alpha"
-ioOpentelemetrySemconv = "1.34.0"
-orgApacheLoggingLog4j = "2.24.3"
+ioOpentelemetrySemconv = "1.37.0"
+orgApacheLoggingLog4j = "2.25.1"
 # @pin Starting with version 6.x requires Java 11
 # 5.10.* is not running
 orgJunitJupiter = "5.9.3"
@@ -39,7 +39,7 @@ chQosLogbackLogbackClassic = { module = "ch.qos.logback:logback-classic", versio
 chQosLogbackLogbackCore = { module = "ch.qos.logback:logback-core", version.ref = "chQosLogback" }
 # @pin 2.13.5 since this version is used by Spring Boot 2.7.18
 comFasterxmlJacksonCoreJacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:2.13.5"
-comGithubOshiOshiCore = "com.github.oshi:oshi-core:6.8.2"
+comGithubOshiOshiCore = "com.github.oshi:oshi-core:6.8.3"
 # @pin Wiremock 3.* doesn't support java 8
 comGithubTomakehurstWiremockJre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 comGoogleGuava = { module = "com.google.guava:guava", version = { strictly = "33.4.8-jre" } }
@@ -50,7 +50,7 @@ comGoogleProtobufProtobufJavaUtil = "com.google.protobuf:protobuf-java-util:4.31
 comH2databaseH2 = "com.h2database:h2:2.2.224"
 comLinecorpArmeriaArmeriaGrpcProtocol = { module = "com.linecorp.armeria:armeria-grpc-protocol", version.ref = "comLinecorpArmeria" }
 comLinecorpArmeriaArmeriaJunit5 = { module = "com.linecorp.armeria:armeria-junit5", version.ref = "comLinecorpArmeria" }
-comSquareupOkio = "com.squareup.okio:okio:3.15.0"
+comSquareupOkio = "com.squareup.okio:okio:3.16.0"
 commonsIo = "commons-io:commons-io:2.20.0"
 ioGithubNetmikeyLogunitLogunitCore = { module = "io.github.netmikey.logunit:logunit-core", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubNetmikeyLogunitLogunitLogback = { module = "io.github.netmikey.logunit:logunit-logback", version.ref = "ioGithubNetmikeyLogunit" }
@@ -79,7 +79,7 @@ ioOpentelemetryOpentelemetrySemconv = { module = "io.opentelemetry.semconv:opent
 ioPrometheusSimpleclientHttpserver = "io.prometheus:simpleclient_httpserver:0.16.0"
 javaxAnnotationJavaxAnnotationApi = "javax.annotation:javax.annotation-api:1.3.2"
 log4j = "log4j:log4j:1.2.17"
-netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.17.6"
+netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.17.7"
 # @pin logback 7.* is the last version to support java 8
 netLogstashLogbackLogstashLogbackEncoder = "net.logstash.logback:logstash-logback-encoder:7.4"
 # @pin 5.16.* is the last version to support java 8
@@ -93,9 +93,9 @@ orgApacheHttpcomponentsCore5Httpcore5 = "org.apache.httpcomponents.core5:httpcor
 orgApacheLoggingLog4jLog4jApi = { module = "org.apache.logging.log4j:log4j-api", version.ref = "orgApacheLoggingLog4j" }
 orgApacheLoggingLog4jLog4jCore = { module = "org.apache.logging.log4j:log4j-core", version.ref = "orgApacheLoggingLog4j" }
 # @pin Tomcat 9.0.* is the last version to support java 8
-orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0.107"
-orgAssertjAssertjCore = "org.assertj:assertj-core:3.27.3"
-orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.27.3"
+orgApacheTomcatEmbedTomcatEmbedEl = "org.apache.tomcat.embed:tomcat-embed-el:9.0.108"
+orgAssertjAssertjCore = "org.assertj:assertj-core:3.27.4"
+orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.27.4"
 orgAwaitility = "org.awaitility:awaitility:4.3.0"
 # @pin HibernateValidator 6.* is the last version to support java 8
 orgHibernateValidatorHibernateValidator = "org.hibernate.validator:hibernate-validator:6.2.5.Final"
