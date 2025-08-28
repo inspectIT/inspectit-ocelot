@@ -19,7 +19,7 @@ const nextConfig = {
   },
 
   env: {
-    VERSION: process.env.GITHUB_REF_NAME || 'SNAPSHOT',
+    VERSION: '2.7.0',
     BUILD_DATE: new Date().toUTCString(),
   },
 };
