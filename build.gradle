@@ -25,10 +25,10 @@ allprojects {
     apply plugin: 'org.owasp.dependencycheck'
 
     if (!project.hasProperty('buildVersion') || project.getProperty('buildVersion').empty) {
-        ext.buildVersion = 'SNAPSHOT'
+        ext.buildVersion = '2.7.0'
     }
 
-    version = "2.7.0"//"$buildVersion"
+    version = "$buildVersion"
 
     // Normally we use the dependency-check GitHub action to check dependencies
     // We keep this configuration, if you want to run the dependency-check locally
