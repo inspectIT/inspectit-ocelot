@@ -46,7 +46,7 @@
         "no-multi-spaces": "error",
         "import/first": "error",
         "import/no-useless-path-segments": "error",
-        "react/prop-types": "warn",
+        "react/prop-types": "off",
         "prettier/prettier": ["error", { "endOfLine": "auto" }],
         "react/no-unknown-property": ["error", { "ignore": ["jsx", "global", "align"] }]
     }

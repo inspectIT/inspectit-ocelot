@@ -68,14 +68,14 @@ const AlertingChannelsTreeContainer = ({ topicNodes, selection, readOnly, update
           try {
             const handlers = await fetchHandlers(topicName);
             callback(handlers.map((h) => h.id));
-          } catch (error) {
+          } catch {
             callback([]);
           }
         }}
         onSuccess={async (handler, topic, handlerType) => {
           try {
             await createHandler(handler, topic, handlerType);
-          } catch (error) {
+          } catch {
             dispatch(notificationActions.showErrorMessage('Failed creating alerting handler', ''));
           }
           onSelectionChanged({ topic, handler, isSupportedHandlerKind: true }, [topic]);
@@ -92,7 +92,7 @@ const AlertingChannelsTreeContainer = ({ topicNodes, selection, readOnly, update
           try {
             const handlers = await fetchHandlers(topicName);
             callback(handlers.map((h) => h.id));
-          } catch (error) {
+          } catch {
             callback([]);
           }
         }}
@@ -100,7 +100,7 @@ const AlertingChannelsTreeContainer = ({ topicNodes, selection, readOnly, update
           try {
             await copyHandler(selection.handler, handler, selection.topic, topic);
             onSelectionChanged({ topic, handler, isSupportedHandlerKind: true }, [topic]);
-          } catch (error) {
+          } catch {
             dispatch(notificationActions.showErrorMessage('Failed copying alerting handler', ''));
           }
           setCopyDialogShown(false);
@@ -117,7 +117,7 @@ const AlertingChannelsTreeContainer = ({ topicNodes, selection, readOnly, update
           try {
             const handlers = await fetchHandlers(topicName);
             callback(handlers.map((h) => h.id));
-          } catch (error) {
+          } catch {
             callback([]);
           }
         }}
@@ -125,7 +125,7 @@ const AlertingChannelsTreeContainer = ({ topicNodes, selection, readOnly, update
           try {
             await editHandler(selection.handler, handler, selection.topic, topic);
             onSelectionChanged({ topic, handler, isSupportedHandlerKind: true }, [selection.topic, topic]);
-          } catch (error) {
+          } catch {
             dispatch(notificationActions.showErrorMessage('Failed editing alerting handler', ''));
           }
           setEditDialogShown(false);
@@ -140,7 +140,7 @@ const AlertingChannelsTreeContainer = ({ topicNodes, selection, readOnly, update
           try {
             await deleteHandler(handlerName, selection.topic);
             onSelectionChanged({ topic: selection.topic, handler: null, isSupportedHandlerKind: false }, [selection.topic]);
-          } catch (error) {
+          } catch {
             dispatch(notificationActions.showErrorMessage('Failed deleting alerting handler', ''));
           }
         }}

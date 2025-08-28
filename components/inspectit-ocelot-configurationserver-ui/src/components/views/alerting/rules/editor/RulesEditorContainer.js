@@ -39,7 +39,7 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection, onSaved })
         newRuleContent = rulePromise ? await rulePromise : undefined;
         setTemplateContent(newTemplateContent);
         setRuleContent(newRuleContent);
-      } catch (error) {
+      } catch {
         dispatch(notificationActions.showErrorMessage('Failed fetching rule / template contents', ''));
         setTemplateContent(undefined);
         setRuleContent(undefined);
@@ -77,7 +77,7 @@ const RulesEditorContainer = ({ readOnly, availableTopics, selection, onSaved })
         dispatch(alertingActions.ruleContentsChanged(unsavedRuleData));
         setRuleContent(newRule);
         onSaved();
-      } catch (error) {
+      } catch {
         setRuleContent(undefined);
       }
     }

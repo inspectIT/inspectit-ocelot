@@ -61,9 +61,9 @@ const EditorView = ({
 
   let editorContent;
 
-  if (configurationType == CONFIGURATION_TYPES.METHOD_CONFIGURATION) {
+  if (configurationType === CONFIGURATION_TYPES.METHOD_CONFIGURATION) {
     editorContent = <MethodConfigurationEditor yamlConfiguration={value} />;
-  } else if (configurationType == CONFIGURATION_TYPES.YAML && showVisualConfigurationView) {
+  } else if (configurationType === CONFIGURATION_TYPES.YAML && showVisualConfigurationView) {
     editorContent = (
       <YamlParser yamlConfig={value} onUpdate={onChange}>
         {(onUpdate, config) => (
@@ -214,7 +214,7 @@ const EditorView = ({
         )}
       </div>
 
-      {notificationText && configurationType == CONFIGURATION_TYPES.YAML ? (
+      {notificationText && configurationType === CONFIGURATION_TYPES.YAML ? (
         <Notificationbar text={notificationText} isError={isErrorNotification} icon={notificationIcon} />
       ) : null}
     </div>

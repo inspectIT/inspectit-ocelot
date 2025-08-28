@@ -37,7 +37,7 @@ const HandlerEditorContainer = ({ selection, savedHandlerContent, readOnly, avai
       await updateHandler(handlerContent.topic, handlerContent);
       await onSaved();
       dispatch(alertingActions.handlerContentsChanged(omit({ ...unsavedHandlerContents }, uniqueHandlerId)));
-    } catch (error) {
+    } catch {
       dispatch(notificationActions.showErrorMessage('Failed saving alerting handler', ''));
     }
   };

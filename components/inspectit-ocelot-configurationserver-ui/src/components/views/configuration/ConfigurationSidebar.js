@@ -53,23 +53,23 @@ const ConfigurationSidebar = () => {
 
       <div className="sidebar">
         <div className="content-container">
-          {currentSidebar == SidebarTypes.HISTORY && <ConfigurationHistoryView />}
-          {currentSidebar == SidebarTypes.CONFIGURATION_DOCS && <DocumentationView />}
+          {currentSidebar === SidebarTypes.HISTORY && <ConfigurationHistoryView />}
+          {currentSidebar === SidebarTypes.CONFIGURATION_DOCS && <DocumentationView />}
         </div>
 
         <div>
           <button
-            className={'vert-button p-button p-togglebutton' + (currentSidebar == SidebarTypes.HISTORY ? 'p-highlight' : '')}
+            className={'vert-button p-button p-togglebutton' + (currentSidebar === SidebarTypes.HISTORY ? 'p-highlight' : '')}
             onClick={toggleHistoryView}
           >
-            <i className={'pi pi-chevron-' + (currentSidebar == SidebarTypes.HISTORY ? 'right' : 'left')} />
+            <i className={'pi pi-chevron-' + (currentSidebar === SidebarTypes.HISTORY ? 'right' : 'left')} />
             <span>Versioning</span>
           </button>
           <button
-            className={'vert-button p-button p-togglebutton' + (currentSidebar == SidebarTypes.CONFIGURATION_DOCS ? 'p-highlight' : '')}
+            className={'vert-button p-button p-togglebutton' + (currentSidebar === SidebarTypes.CONFIGURATION_DOCS ? 'p-highlight' : '')}
             onClick={toggleDocumentationView}
           >
-            <i className={'pi pi-chevron-' + (currentSidebar == SidebarTypes.CONFIGURATION_DOCS ? 'right' : 'left')} />
+            <i className={'pi pi-chevron-' + (currentSidebar === SidebarTypes.CONFIGURATION_DOCS ? 'right' : 'left')} />
             <span>Configuration Docs</span>
           </button>
         </div>

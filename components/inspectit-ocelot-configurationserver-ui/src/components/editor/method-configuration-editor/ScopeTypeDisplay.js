@@ -18,7 +18,7 @@ const ScopeTypeDisplay = ({ scope }) => {
   } else if (superclass) {
     targetMatcher = superclass;
     typeDescriptor = <HighlightText value="Classes with a superclass" />;
-  } else if (interfaces && interfaces.length == 1) {
+  } else if (interfaces && interfaces.length === 1) {
     targetMatcher = interfaces[0];
     typeDescriptor = <HighlightText value="Classes implementing an interface" />;
   } else {

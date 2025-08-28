@@ -31,7 +31,7 @@ export const getConfigurationType = (yamlConfiguration) => {
   try {
     const { type } = JSON.parse(jsonString);
     return _.find(CONFIGURATION_TYPES, { name: type }, CONFIGURATION_TYPES.YAML);
-  } catch (error) {
+  } catch {
     // YAML type in case the first comment is no JSON object
     return CONFIGURATION_TYPES.YAML;
   }

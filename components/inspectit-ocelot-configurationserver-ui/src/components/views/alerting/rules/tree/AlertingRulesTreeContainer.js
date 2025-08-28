@@ -42,7 +42,7 @@ const AlertingRulesTreeContainer = ({
       const newRule = await createRule(ruleName, templateName, description);
       onRefresh();
       onSelectionChanged({ rule: newRule.id, template: newRule.template });
-    } catch (error) {
+    } catch {
       dispatch(notificationActions.showErrorMessage('Failed creating rule', ''));
       onSelectionChanged({ rule: null, template: null });
     }
@@ -59,7 +59,7 @@ const AlertingRulesTreeContainer = ({
       }
       onRefresh();
       onSelectionChanged({ rule: newName, template: selection.template });
-    } catch (error) {
+    } catch {
       dispatch(notificationActions.showErrorMessage('Failed renaming rule', ''));
     }
   };
@@ -75,7 +75,7 @@ const AlertingRulesTreeContainer = ({
       }
       onRefresh();
       onSelectionChanged({ rule: targetName, template: selection.template });
-    } catch (error) {
+    } catch {
       dispatch(notificationActions.showErrorMessage('Failed copying rule', ''));
     }
   };
@@ -86,7 +86,7 @@ const AlertingRulesTreeContainer = ({
       await deleteRule(ruleName);
       onRefresh();
       onSelectionChanged({ rule: null, template: selection.template });
-    } catch (error) {
+    } catch {
       dispatch(notificationActions.showErrorMessage('Failed deleting rule', ''));
     }
   };

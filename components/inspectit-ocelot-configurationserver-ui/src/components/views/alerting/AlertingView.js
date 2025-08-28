@@ -61,7 +61,7 @@ const AlertingView = () => {
 
       setData({ templates, rules, topics });
       setUpdateDate(Date.now());
-    } catch (error) {
+    } catch {
       setData({ templates: [], rules: [], topics: [] });
     }
   };

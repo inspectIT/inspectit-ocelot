@@ -1,6 +1,6 @@
 /**
  * A heuristic for getting the "JSON-path" at a given position within a YAML document.
- * This fuunction takes the list of lines of the document.
+ * This function takes the list of lines of the document.
  * The cursor is considered to be after the last character of the last line.
  *
  * The return value is an array of path segments found in order, e.g. [inspectit,config,http].
@@ -11,7 +11,7 @@
  */
 export const getYamlPath = (allLines) => {
   let lines = allLines;
-  if (findNonQuotedChar(lines[lines.length - 1], '#') != -1) {
+  if (findNonQuotedChar(lines[lines.length - 1], '#') !== -1) {
     return null; // we are in a comment
   }
 
@@ -25,7 +25,7 @@ export const getYamlPath = (allLines) => {
   let parentLineNumber = getNonListParent(lastLineIndentation - 1, lines, lines.length - 1, listIndices);
   path = listIndices.concat(path);
 
-  while (parentLineNumber != -1) {
+  while (parentLineNumber !== -1) {
     const indentation = getIndentation(lines[parentLineNumber]);
     const statement = decodeStatment(lines[parentLineNumber].substring(indentation));
     if (statement.value) {
@@ -51,7 +51,7 @@ export const getYamlPath = (allLines) => {
 const beginPath = (cursorLine) => {
   const indentation = getIndentation(cursorLine);
   const lastStatement = decodeStatment(cursorLine.substring(indentation));
-  if (lastStatement.value != null) {
+  if (lastStatement.value) {
     return [lastStatement.key, lastStatement.value];
   } else {
     return [lastStatement.key];
@@ -66,7 +66,7 @@ const beginPath = (cursorLine) => {
 const removeCommentsAndBlankLines = (lines) => {
   lines = lines.map((line) => {
     const idx = findNonQuotedChar(line, '#');
-    return idx != -1 ? line.substring(0, idx) : line;
+    return idx !== -1 ? line.substring(0, idx) : line;
   });
   // remove all empty lines (except for the last one)
   const lastLine = lines[lines.length - 1];
@@ -98,26 +98,26 @@ const removeCommentsAndBlankLines = (lines) => {
  * @param {*} indices the array to place found list-indices within.
  */
 const getNonListParent = (pos, lines, lineNumber, indices) => {
-  if (pos == -1) {
+  if (pos === -1) {
     return -1;
   }
   const line = lines[lineNumber];
   const firstDash = getFirstDash(line);
   const lastDash = getLastDash(line, pos);
-  if (firstDash != lastDash) {
+  if (firstDash !== lastDash) {
     const result = getNonListParent(lastDash - 1, lines, lineNumber, indices);
     indices.push(0);
     return result;
   }
 
-  if (firstDash == -1) {
+  if (firstDash === -1) {
     // no more dashes
     let parentLine = lineNumber - 1;
     const leadingSpaces = pos + 1;
     while (parentLine >= 0 && getLeadingSpaces(lines[parentLine]) >= leadingSpaces) {
       parentLine--;
     }
-    if (parentLine != -1) {
+    if (parentLine !== -1) {
       const parentIndent = getIndentation(lines[parentLine]);
       if (parentIndent >= leadingSpaces) {
         return getNonListParent(leadingSpaces - 1, lines, parentLine, indices);
@@ -128,17 +128,17 @@ const getNonListParent = (pos, lines, lineNumber, indices) => {
     const leadingSpaces = firstDash;
     let parentLine = lineNumber - 1;
     let listIndex = 0;
-    while (parentLine >= 0 && (getLeadingSpaces(lines[parentLine]) > leadingSpaces || getFirstDash(lines[parentLine]) == firstDash)) {
-      if (lines[parentLine].length > firstDash && lines[parentLine][firstDash] == '-') {
+    while (parentLine >= 0 && (getLeadingSpaces(lines[parentLine]) > leadingSpaces || getFirstDash(lines[parentLine]) === firstDash)) {
+      if (lines[parentLine].length > firstDash && lines[parentLine][firstDash] === '-') {
         listIndex++;
       }
       parentLine--;
     }
-    if (parentLine >= 0 && lines[parentLine].length > firstDash && lines[parentLine][firstDash] == '-') {
+    if (parentLine >= 0 && lines[parentLine].length > firstDash && lines[parentLine][firstDash] === '-') {
       listIndex++;
     }
     let result = parentLine;
-    if (parentLine != -1) {
+    if (parentLine !== -1) {
       const indent = firstDash + 1;
       const parentIndent = getIndentation(lines[parentLine]);
       if (parentIndent >= indent) {
@@ -164,8 +164,8 @@ const getNonListParent = (pos, lines, lineNumber, indices) => {
  */
 const decodeStatment = (statement) => {
   const colonIndex = findNonQuotedChar(statement, ':');
-  let key = unquote(colonIndex != -1 ? statement.substring(0, colonIndex).trim() : statement.trim());
-  const value = colonIndex != -1 ? unquote(statement.substring(colonIndex + 1).trim()) : null;
+  let key = unquote(colonIndex !== -1 ? statement.substring(0, colonIndex).trim() : statement.trim());
+  const value = colonIndex !== -1 ? unquote(statement.substring(colonIndex + 1).trim()) : null;
   key = removeBrackets(key);
 
   return { key, value };
@@ -222,18 +222,18 @@ const findNonQuotedChar = (str, char) => {
   const DOUBLE_QUOTED = 2;
   let state = NORMAL;
   for (let i = 0; i < str.length; i++) {
-    if (str[i] == char && state == NORMAL) {
+    if (str[i] === char && state === NORMAL) {
       return i;
-    } else if (str[i] == "'") {
-      if (state == NORMAL) {
+    } else if (str[i] === "'") {
+      if (state === NORMAL) {
         state = SINGLE_QUOTED;
-      } else if (state == SINGLE_QUOTED) {
+      } else if (state === SINGLE_QUOTED) {
         state = NORMAL;
       }
-    } else if (str[i] == '"') {
-      if (state == NORMAL) {
+    } else if (str[i] === '"') {
+      if (state === NORMAL) {
         state = DOUBLE_QUOTED;
-      } else if (state == DOUBLE_QUOTED) {
+      } else if (state === DOUBLE_QUOTED) {
         state = NORMAL;
       }
     }
@@ -248,7 +248,7 @@ const findNonQuotedChar = (str, char) => {
  */
 const getIndentation = (line) => {
   let pos = 0;
-  while (pos < line.length && (line[pos] == ' ' || line[pos] == '-')) {
+  while (pos < line.length && (line[pos] === ' ' || line[pos] === '-')) {
     pos++;
   }
   return pos;
@@ -261,7 +261,7 @@ const getIndentation = (line) => {
  */
 const getLeadingSpaces = (line) => {
   let pos = 0;
-  while (pos < line.length && line[pos] == ' ') {
+  while (pos < line.length && line[pos] === ' ') {
     pos++;
   }
   return pos;
@@ -275,10 +275,10 @@ const getLeadingSpaces = (line) => {
  */
 const getFirstDash = (line) => {
   let pos = 0;
-  while (pos < line.length && line[pos] == ' ') {
+  while (pos < line.length && line[pos] === ' ') {
     pos++;
   }
-  if (pos < line.length && line[pos] == '-') {
+  if (pos < line.length && line[pos] === '-') {
     return pos;
   } else {
     return -1;
@@ -295,7 +295,7 @@ const getFirstDash = (line) => {
  */
 const getLastDash = (line, posInclusive) => {
   let pos = posInclusive;
-  while (pos >= 0 && line[pos] != '-') {
+  while (pos >= 0 && line[pos] !== '-') {
     pos--;
   }
   return pos;

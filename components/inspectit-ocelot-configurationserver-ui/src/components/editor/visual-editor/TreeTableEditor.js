@@ -334,7 +334,7 @@ class TreeTableEditor extends React.Component {
           />
         );
       case schemaType.ENUM:
-        if (this.state.oldNode.key != node.key) {
+        if (this.state.oldNode.key !== node.key) {
           this.fetchDropdownOptions(node.key, type);
           this.setState({ oldNode: node, enumOptions: [] });
         }
@@ -382,7 +382,7 @@ class TreeTableEditor extends React.Component {
   };
 
   fetchDropdownOptions = (configPath, schemaType) => {
-    if (schemaType == 'ENUM') {
+    if (schemaType === 'ENUM') {
       axios
         .post('/autocomplete', {
           path: configPath,

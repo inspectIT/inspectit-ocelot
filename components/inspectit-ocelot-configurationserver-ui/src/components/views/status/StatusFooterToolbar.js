@@ -7,7 +7,7 @@ const StatusFooterToolbar = ({ fullData, filteredData }) => {
   const totalCount = fullData.length;
   const agentCount = filter(fullData, (d) => d.metaInformation).length;
 
-  const showFilterDetails = shownTotalCount != totalCount;
+  const showFilterDetails = shownTotalCount !== totalCount;
 
   return (
     <>
