@@ -21,7 +21,8 @@ orgAwaitility = "org.awaitility:awaitility:4.3.0"
 orgEclipseJgitOrgEclipseJgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "orgEclipseJgit" }
 orgEclipseJgitOrgEclipseJgitSshApache= {module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "orgEclipseJgit" }
 orgFlywaydbFlywayCore = "org.flywaydb:flyway-core:11.11.2"
-orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:7.1.0.Final"
+# The class 'org.hibernate.community.dialect.SQLiteDialect' is missing in 7.1.0.Final
+orgHibernateOrmHibernateCommunityDialects = "org.hibernate.orm:hibernate-community-dialects:7.0.6.Final"
 orgSpringdocSpringdocOpenapiStarterWebmvcUi = "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.11"
 orgSpringframeworkBootSpringBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootStarterDataJpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "orgSpringframeworkBoot" }
