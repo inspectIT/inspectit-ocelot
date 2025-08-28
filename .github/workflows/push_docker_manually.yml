@@ -1,4 +1,4 @@
-name: Push Docker images manually
+name: Push Docker Images Manually
 
 # Use with care!!!
 # Use this workflow to push new docker images to the latest version manually
@@ -22,9 +22,10 @@ jobs:
       - name: Get latest Git tag
         id: get_tag
         run: |
-          LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1) | tr -d '\n')
           echo "Latest tag is $LATEST_TAG"
           echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "End"
 
   build:
     needs: fetch_latest_tag
