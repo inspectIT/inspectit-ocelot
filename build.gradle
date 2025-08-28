@@ -25,7 +25,7 @@ allprojects {
     apply plugin: 'org.owasp.dependencycheck'
 
     if (!project.hasProperty('buildVersion') || project.getProperty('buildVersion').empty) {
-        ext.buildVersion = '2.7.0'
+        ext.buildVersion = 'SNAPSHOT'
     }
 
     version = "$buildVersion"
