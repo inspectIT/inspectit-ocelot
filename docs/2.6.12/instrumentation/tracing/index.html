@@ -1,0 +1,310 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Collecting Tracing · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="The inspectIT Ocelot agent allows you to record method invocations as [OpenTelemetry spans](https://opentelemetry.io/docs/concepts/signals/traces/#spans) with the help"/><meta name="docsearch:version" content="2.6.12"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Collecting Tracing · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content="The inspectIT Ocelot agent allows you to record method invocations as [OpenTelemetry spans](https://opentelemetry.io/docs/concepts/signals/traces/#spans) with the help"/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>2.6.12</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Instrumentation</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Getting Started<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/doc1">Hello World</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/getting-started/quick-start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/getting-started/docker-examples">Demo Application</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/getting-started/installation">Installation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/configuration-sources">Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/external-configuration-sources">External Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/logging-configuration">Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/start-configuration">Start Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/opentelemetry-configuration">OpenTelemetry Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/plugin-configuration">Plugin Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/agent-command-configuration">Agent Command Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Metrics<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/metrics">Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/metric-recorders">Metrics Recorders</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/metric-exporters">Metrics Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/common-tags">Common Tags</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/custom-metrics">Custom Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/self-monitoring">Self-Monitoring</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/tag-guard">Tag-Guard</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tracing<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/tracing/tracing">Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/tracing/trace-exporters">Trace Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/tracing/log-correlation">Log Correlation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/tracing/privacy">Data Privacy</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/tracing/tracing-self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tags<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/tags/tags-exporters">Tags Exporters</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/instrumentation">Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/scopes">Scopes</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/actions">Actions</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/rules">Rules</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/data-propagation">Data Propagation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/metrics">Collecting Metrics</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/tracing">Collecting Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/business-transactions">Business Transactions</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/code-style">Configuration Code Style</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/special-sensors">Special Sensors</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/process">Instrumentation Process</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Default Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/default-instrumentation/default-instrumentation">Default Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/default-instrumentation/jakarta">Upgrade to Jakarta Namespace</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/default-instrumentation/apache-client5">Upgrade to Apache Client 5</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">End User Monitoring<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/enduser-monitoring/enduser-monitoring-server">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/enduser-monitoring/eum-server-setup">Server Setup</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/enduser-monitoring/eum-server-configuration">Server, Metrics and Exporter Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/enduser-monitoring/install-eum-agent">Install EUM Agent</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration Server<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/cs-configuration">Server Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/managing-files">Managing Files</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/files-staging">File Staging</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/agent-mappings">Agent Mappings</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/scope-wizard">Scope Wizard</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/class-browser">Class Browser</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/user-authentication">User Authentication</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/config-docs">Configuration Docs</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/log-config">Server Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/yaml-editor">YAML Editor</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/status-table-view">Agent Status Table View</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/alerting">Alerting</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Breaking Changes<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/breaking-changes/Breaking Changes">Breaking Changes</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/instrumentation/tracing.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Collecting Tracing</h1></header><article><div><span><p>The inspectIT Ocelot agent allows you to record method invocations as <a href="https://opentelemetry.io/docs/concepts/signals/traces/#spans">OpenTelemetry spans</a> with the help
+of <a href="/inspectit-ocelot/docs/2.6.12/instrumentation/rules">rules</a>.</p>
+<p>In order to make your collected spans visible, you must first set up a <a href="/inspectit-ocelot/docs/2.6.12/tracing/trace-exporters">trace exporter</a>.
+Afterward you can define that all methods matching a certain rule will be traced:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">'r_example_rule':</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
+</code></pre>
+<p>For example, using the previous configuration snippet, each method that matches the scope definition of the <code>example_rule</code>
+rule will appear within a trace.
+Its appearance can be customized using the following properties which can be set in the rule's <code>tracing</code> section.</p>
+<table>
+<thead>
+<tr><th>Property</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>start-span</code></td><td><code>false</code></td><td>If true, all method invocations of methods matching any scope of this rule will be collected as spans.</td></tr>
+<tr><td><code>name</code></td><td><code>null</code></td><td>Defines a data key whose value will be used as name for the span. If it is <code>null</code> or the value for the data key is <code>null</code>, the fully qualified name of the method will be used. Note that the value for the data key must be written in the entry section of the rule at latest!</td></tr>
+<tr><td><code>kind</code></td><td><code>null</code></td><td>Can be <code>null</code>, <code>CLIENT</code> or <code>SERVER</code> corresponding to the <a href="https://opentelemetry.io/docs/concepts/signals/traces/#span-kind">OpenTelemetry values</a>.</td></tr>
+<tr><td><code>attributes</code></td><td><code>{}</code> (empty dictionary)</td><td>Maps names of attributes to data keys whose values will be used on exit to populate the given attributes.</td></tr>
+</tbody>
+</table>
+<p>Commonly, you do not want to have the fully qualified name of the instrumented method as span name.
+For example, for HTTP requests you typically want the HTTP path as span name.
+This behaviour can be customized using the <code>name</code> property:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">'r_servlet_api_service':</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">name:</span> <span class="hljs-string">'http_path'</span>
+        <span class="hljs-attr">entry:</span>
+          <span class="hljs-attr">'http_path':</span>
+           <span class="hljs-comment">#... action call to fetch the http path here</span>
+</code></pre>
+
+    <div class="admonition admonition-note">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"/></svg></div> note</h5>
+      </div>
+      <div class="admonition-content">
+    <p>The name must exist at the end of the entry section and cannot be set in the exit section.</p>
+</div></div><h2><a class="anchor" aria-hidden="true" id="trace-sampling"></a><a href="#trace-sampling" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Trace Sampling</h2>
+<p>It is often desirable to not capture every trace, but instead <a href="https://opentelemetry.io/docs/concepts/sampling/">sample</a>
+only a subset.
+This can be configured using the <code>sample-probability</code> and <code>sample-mode</code> setting under the <code>tracing</code> section:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">'r_servlet_api_service':</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">sample-probability:</span> <span class="hljs-string">'0.2'</span>
+          <span class="hljs-attr">sample-mode:</span> <span class="hljs-string">PARENT_BASED</span>
+</code></pre>
+<p>The example shown above will ensure that only 20% of all traces starting at the given rule will actually be exported.
+Instead of specifying a fixed value, you can also specify a data key here, just like for <code>name</code>.
+In this case, the value from the given data key is read and used as sampling probability.
+This allows you for example to vary the sample probability based on the HTTP url.</p>
+<p>The <code>sample-mode</code> is explained at <a href="/inspectit-ocelot/docs/2.6.12/tracing/tracing">tracing</a> and can either be <code>PARENT_BASED</code>, <code>TRACE_ID_RATIO_BASED</code>,
+or <code>HYBRID_PARENT_TRACE_ID_RATIO_BASED</code>.</p>
+<p>By default, <code>HYBRID_PARENT_TRACE_ID_RATIO_BASED</code> sampler is used if <code>sample-mode</code> is unset and the <code>sample-probability</code>
+has been specified.</p>
+<p>If no sample probability is defined for a rule, the <a href="/inspectit-ocelot/docs/2.6.12/tracing/tracing">default probability</a> is used.</p>
+<h2><a class="anchor" aria-hidden="true" id="adding-attributes"></a><a href="#adding-attributes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding Attributes</h2>
+<p>Another useful property of spans is that you can attach any additional information in form of attributes.
+In most tracing backends such as Zipkin and Jaeger, you can search your traces based on attributes.
+The example below shows how you can define attributes:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">'r_servlet_api_service':</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-string">'true'</span>
+          <span class="hljs-attr">attributes:</span>
+            <span class="hljs-attr">'http_host':</span> <span class="hljs-string">'host_name'</span>
+        <span class="hljs-attr">entry:</span>
+          <span class="hljs-attr">'host_name':</span>
+           <span class="hljs-comment">#... action call to fetch the http host here</span>
+</code></pre>
+<p>The attributes property maps the names of attributes to data keys.
+After the rule's exit phase, the corresponding data keys are read and attached as attributes to the span started or continued by the method.</p>
+<p>Note that if a rule does not start or continue a span, no attributes will be written.</p>
+<p>The <a href="/inspectit-ocelot/docs/2.6.12/metrics/common-tags">common tags</a> are added as attributes in all local span roots by default.
+This behavior can be configured in the global <a href="/inspectit-ocelot/docs/2.6.12/tracing/tracing#common-tags-as-attributes">tracing settings</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="visualizing-span-errors"></a><a href="#visualizing-span-errors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Visualizing Span Errors</h2>
+<p>Most tracing backends support highlighting of spans which are marked as errors.
+InspectIT Ocelot allows you to configure exactly under which circumstances your spans are interpreted
+as errors or successes.
+This is done via the <code>error-status</code> configuration property of a rule's tracing section:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">'r_example_rule':</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">error-status:</span> <span class="hljs-string">_thrown</span>
+</code></pre>
+<p>The value of the <code>error-status</code> property can be any value from the context or any <a href="/inspectit-ocelot/docs/2.6.12/instrumentation/actions#input-parameter">special variable</a>.</p>
+<p>When the instrumented method finishes, inspectIT Ocelot will read the value of the given variable.
+If the value is neither <code>null</code> nor <code>false</code>, the span will be marked as an error.</p>
+<p>In the example above, the special variable <code>_thrown</code> is used to define the error status.
+This means if <code>_thrown</code> is not null (which means the method threw an exception), the span will be marked as error.</p>
+<h2><a class="anchor" aria-hidden="true" id="adding-span-conditions"></a><a href="#adding-span-conditions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Adding Span Conditions</h2>
+<p>It is possible to conditionalize the span starting as well as the attribute writing:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">'r_span_starting_rule':</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">start-span-conditions:</span>
+            <span class="hljs-attr">only-if-true:</span> <span class="hljs-string">'my_condition_data'</span>
+<span class="hljs-comment">#....</span>
+      <span class="hljs-attr">'r_attribute_writing_rule':</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">attributes:</span>
+            <span class="hljs-attr">'attrA':</span> <span class="hljs-string">'data_a'</span>
+            <span class="hljs-attr">'attrB':</span> <span class="hljs-string">'data_b'</span>
+          <span class="hljs-attr">attribute-conditions:</span>
+            <span class="hljs-attr">only-if-true:</span> <span class="hljs-string">'my_condition_data'</span>
+</code></pre>
+<p>If any <code>start-span-conditions</code> are defined, a span will only be created when all conditions are met.
+Analogous to this, attributes will only be written if each condition defined in <code>attribute-conditions</code> is fulfilled.
+The conditions that can be defined are equal to the ones of actions, thus, please see the <a href="/inspectit-ocelot/docs/2.6.12/instrumentation/rules#adding-conditions">action conditions description</a> for detailed information.</p>
+<h2><a class="anchor" aria-hidden="true" id="auto-tracing"></a><a href="#auto-tracing" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Auto-Tracing</h2>
+
+    <div class="admonition admonition-warning">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg></div>  Experimental Feature</h5>
+      </div>
+      <div class="admonition-content">
+    <p>Please note that this is an experimental feature.</p>
+<p>This feature is currently experimental and can potentially have a high performance impact. We do <strong>not</strong> recommend using it for production environments yet!</p>
+</div></div><p>With the shown approach traces will only contain exactly the methods you instrumented.
+Often however, one observes certain methods taking a long time without knowing where exactly the time is spent.
+The &quot;auto-tracing&quot; feature can be used to solve this problem.</p>
+<p>When auto-tracing is enabled, inspectIT Ocelot uses a profiler-like approach for recording traces.
+With auto-tracing, stack traces of threads are collected periodically.
+Based on these samples, inspectIT Ocelot will reconstruct an approximate trace showing where the time was spent.</p>
+<p>Auto-tracing can be enabled on methods which are traced using either the <code>start-span</code> or <code>continue-span</code> options.
+To enable it you can simply add the <code>auto-tracing</code> setting:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">'r_example_rule':</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">auto-tracing:</span> <span class="hljs-literal">true</span>
+</code></pre>
+<p>When auto-tracing is enabled, callees of the method will be traced by periodically capturing stack traces.
+Methods recorded via auto-tracing will be marked in the traces by a leading asterisk.</p>
+<p>You can also set the <code>auto-tracing</code> option to <code>false</code>, which disables auto-tracing for the methods affected by this rule.
+In this case any active <code>auto-traces</code> will be paused for the duration of the method, no samples will be recorded.</p>
+<p>The frequency at which stack trace samples are captured is defined globally:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">tracing:</span>
+    <span class="hljs-attr">auto-tracing:</span>
+      <span class="hljs-attr">frequency:</span> <span class="hljs-string">50ms</span>
+</code></pre>
+<p>This setting specifies that each thread for which auto-tracing is enabled will be stopped every 50ms in order to capture a stack trace.
+It also implicitly defines the granularity of your traces: Only methods with at least this duration will appear in your traces.</p>
+<h2><a class="anchor" aria-hidden="true" id="tracing-asynchronous-invocations"></a><a href="#tracing-asynchronous-invocations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tracing Asynchronous Invocations</h2>
+<p>With the previous shown settings, it is possible to add an instrumentation which creates exactly one span per invocation of an instrumented method.
+Especially in asynchronous scenarios, this might not be the desired behaviour:
+For these cases inspectIT Ocelot offers the possibility to record multiple method invocations into a single span.
+The resulting span then has the following properties:</p>
+<ul>
+<li>the span starts with the first invoked method and ends as soon as the last one returns</li>
+<li>all attributes written by each method are combined into the single span</li>
+<li>all invocations made from the methods which compose the single span will appear as children of this span</li>
+</ul>
+<p>This can be configured by defining for rules that they (A) can continue existing spans and (B)
+can optionally end the span they started or continued.</p>
+<p>Firstly, it is possible to &quot;remember&quot; the span created or continued using the <code>store-span</code> option:</p>
+<pre><code class="hljs css language-yaml">    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">'r_span_starting_rule':</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">start-span:</span> <span class="hljs-literal">true</span>
+          <span class="hljs-attr">store-span:</span> <span class="hljs-string">'my_span_data'</span>
+          <span class="hljs-attr">end-span:</span> <span class="hljs-literal">false</span>
+</code></pre>
+<p>With this option, the span created at the end of the entry phase will be stored in the context with the data key <code>my_span_data</code>.
+Usually this span reference is then extracted from the context and attached to an object via the <a href="/inspectit-ocelot/docs/2.6.12/instrumentation/actions#attaching-values">Object Attachments</a>.</p>
+<p>Without the <code>end-span: false</code> definition above, the span would be ended as soon as the instrumented method returns.
+By setting <code>end-span</code> to false, the span is kept open instead. It can then be continued when another method is executed as follows:</p>
+<pre><code class="hljs css language-yaml">    <span class="hljs-attr">rules:</span>
+      <span class="hljs-attr">'r_span_finishing_rule':</span>
+        <span class="hljs-attr">tracing:</span>
+          <span class="hljs-attr">continue-span:</span> <span class="hljs-string">'my_span_data'</span>
+          <span class="hljs-attr">end-span:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># actually not necessary as it is the default value</span>
+</code></pre>
+<p>Methods instrumented with this rule will not create a new span.
+Instead, at the end of the entry phase the data for the key <code>my_span_data</code> is read from the context.
+If it contains a valid span written via <code>store-span</code>, this span is continued in this method.
+This implies that all spans started by callees of this method will appear as children of the span stored in <code>my_span_data</code>.
++In addition, this rule also then causes the continued span to end with the execution of the method due to the <code>end-span</code> option.
+This is not required to happen: a span can be continued by any number of rules before it is finally ended.</p>
+<p>It also is possible to define rules for which both <code>start-span</code> and <code>continue-span</code> is configured.
+In this case, the rule will first attempt to continue the existing span. Only if this fails
+(e.g. because the specified span does not exist yet or the conditions are not met) a new span is started.</p>
+<p>Again, conditions for the span continuing and span ending can be specified just like for the span starting.
+The properties <code>continue-span-conditions</code> and <code>end-span-conditions</code> work just like <code>start-span-conditions</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="distributed-tracing-with-remote-parent-context"></a><a href="#distributed-tracing-with-remote-parent-context" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Distributed Tracing with Remote Parent Context</h2>
+<p>The inspectIT default configuration provides two options to use a remote parent context for distributed tracing.
+Of course, you may write another action by yourself.
+If the remote parent context exists before your service gets called, you can use <em>readDownPropagationHeaders()</em>
+inside your propagation action. If the remote parent context will be created after calling your service,
+you can use <em>createRemoteParentContext()</em> inside your action and pass the context information to the client.</p>
+<h4><a class="anchor" aria-hidden="true" id="readdownpropagationheaders"></a><a href="#readdownpropagationheaders" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>readDownPropagationHeaders()</h4>
+<p>The method takes a <em>Map&lt;String,String&gt;</em> as a parameter. This map should contain at least the trace context, which was sent by a Http request header.
+The remote parent trace context should be in either B3-format, W3C-format or datadog-format.
+The action, which uses this function, should be called in the <code>pre-entry</code> or <code>entry</code> phase.</p>
+<p>InspectIT Ocelot offers a default action to read down propagated headers in javax HTTP Servlets: <code>a_servletapi_downPropagation</code></p>
+<h4><a class="anchor" aria-hidden="true" id="createremoteparentcontext"></a><a href="#createremoteparentcontext" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>createRemoteParentContext()</h4>
+<p>The method takes no parameter. It can be used, if the remote context will be created after calling your service,
+but still should be used as a parent.
+The function creates a span context, which will be used as a parent for the current context. It returns a string, which contains
+the trace context of the remote parent in W3C-format. You can pass the returned trace context to your remote client
+via HTTP response header and use the information to create the remote parent context there.</p>
+<p>Note that, if a remote parent context was down propagated via <em>readDownPropagationHeaders()</em>, inspectIT Ocelot will
+use the down propagated context as a parent and ignore the context created with <em>createRemoteParentContext()</em>.</p>
+<p>The action, which uses this function, should be called in the <code>pre-entry</code> or <code>entry</code> phase.</p>
+<p>InspectIT Ocelot offers a default action to create a remote parent context when using javax HTTP Servlets: <code>a_servletapi_remoteParentContext</code></p>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 8/28/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/2.6.12/instrumentation/metrics"><span class="arrow-prev">← </span><span>Collecting Metrics</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/2.6.12/instrumentation/business-transactions"><span>Business Transactions</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#trace-sampling">Trace Sampling</a></li><li><a href="#adding-attributes">Adding Attributes</a></li><li><a href="#visualizing-span-errors">Visualizing Span Errors</a></li><li><a href="#adding-span-conditions">Adding Span Conditions</a></li><li><a href="#auto-tracing">Auto-Tracing</a></li><li><a href="#tracing-asynchronous-invocations">Tracing Asynchronous Invocations</a></li><li><a href="#distributed-tracing-with-remote-parent-context">Distributed Tracing with Remote Parent Context</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'P7JV0ZK66K',
+                apiKey: 'd499024131bf8d92e6d469a6c14f4798',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:2.6.12"]}
+              });
+            </script></body></html>

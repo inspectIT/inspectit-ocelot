@@ -1,0 +1,421 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Actions · inspectIT Ocelot Documentation</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Actions are the tool for extracting arbitrary data from your application or the context."/><meta name="docsearch:version" content="2.6.12"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Actions · inspectIT Ocelot Documentation"/><meta property="og:type" content="website"/><meta property="og:url" content="https://inspectit.github.io/inspectit-ocelot/"/><meta property="og:description" content="Actions are the tool for extracting arbitrary data from your application or the context."/><meta property="og:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://inspectit.github.io/inspectit-ocelot/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/inspectit-ocelot/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="https://unpkg.com/vanilla-back-to-top@7.1.14/dist/vanilla-back-to-top.min.js"></script><script>
+        document.addEventListener('DOMContentLoaded', function() {
+          addBackToTop(
+            {"zIndex":100}
+          )
+        });
+        </script><script src="/inspectit-ocelot/js/scrollSpy.js"></script><link rel="stylesheet" href="/inspectit-ocelot/css/main.css"/><script src="/inspectit-ocelot/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/inspectit-ocelot/"><img class="logo" src="/inspectit-ocelot/img/ocelot_head_sil_logo.svg" alt="inspectIT Ocelot Documentation"/><h2 class="headerTitleWithLogo">inspectIT Ocelot Documentation</h2></a><a href="/inspectit-ocelot/versions"><h3>2.6.12</h3></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="https://inspectit.rocks/" target="_self">inspectIT Ocelot Website</a></li><li class=""><a href="https://github.com/inspectIT/inspectit-ocelot" target="_self">GitHub Repository</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Instrumentation</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Getting Started<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/doc1">Hello World</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/getting-started/quick-start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/getting-started/docker-examples">Demo Application</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/getting-started/installation">Installation</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/configuration-sources">Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/external-configuration-sources">External Configuration Sources</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/logging-configuration">Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/start-configuration">Start Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/opentelemetry-configuration">OpenTelemetry Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/plugin-configuration">Plugin Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/configuration/agent-command-configuration">Agent Command Configuration</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Metrics<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/metrics">Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/metric-recorders">Metrics Recorders</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/metric-exporters">Metrics Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/common-tags">Common Tags</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/custom-metrics">Custom Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/self-monitoring">Self-Monitoring</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/metrics/tag-guard">Tag-Guard</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tracing<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/tracing/tracing">Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/tracing/trace-exporters">Trace Exporters</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/tracing/log-correlation">Log Correlation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/tracing/privacy">Data Privacy</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/tracing/tracing-self-monitoring">Self-Monitoring</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Tags<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/tags/tags-exporters">Tags Exporters</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/instrumentation">Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/scopes">Scopes</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/actions">Actions</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/rules">Rules</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/data-propagation">Data Propagation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/metrics">Collecting Metrics</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/tracing">Collecting Tracing</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/business-transactions">Business Transactions</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/code-style">Configuration Code Style</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/special-sensors">Special Sensors</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/instrumentation/process">Instrumentation Process</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Default Instrumentation<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/default-instrumentation/default-instrumentation">Default Instrumentation</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/default-instrumentation/jakarta">Upgrade to Jakarta Namespace</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/default-instrumentation/apache-client5">Upgrade to Apache Client 5</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">End User Monitoring<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/enduser-monitoring/enduser-monitoring-server">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/enduser-monitoring/eum-server-setup">Server Setup</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/enduser-monitoring/eum-server-configuration">Server, Metrics and Exporter Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/enduser-monitoring/install-eum-agent">Install EUM Agent</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Configuration Server<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/cs-configuration">Server Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/managing-files">Managing Files</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/files-staging">File Staging</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/agent-mappings">Agent Mappings</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/scope-wizard">Scope Wizard</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/class-browser">Class Browser</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/user-authentication">User Authentication</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/config-docs">Configuration Docs</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/log-config">Server Logging Configuration</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/yaml-editor">YAML Editor</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/status-table-view">Agent Status Table View</a></li><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/config-server/alerting">Alerting</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Breaking Changes<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/inspectit-ocelot/docs/2.6.12/breaking-changes/Breaking Changes">Breaking Changes</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><a class="edit-page-link button" href="https://github.com/inspectIT/inspectit-ocelot/edit/master/inspectit-ocelot-documentation/docs/instrumentation/actions.md" target="_blank" rel="noreferrer noopener">Edit</a><h1 id="__docusaurus" class="postHeaderTitle">Actions</h1></header><article><div><span><p>Actions are the tool for extracting arbitrary data from your application or the context.
+They are effectively lambda-like functions you can invoke from the entry and the exit phase of rules.
+They are defined by (A) specifying their input parameter and (B) giving a Java code snippet which defines
+how the result value is computed from these.</p>
+<h2><a class="anchor" aria-hidden="true" id="defining-actions"></a><a href="#defining-actions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining Actions</h2>
+<p>Again, this is best explained by giving some simple examples extracted from the inspectIT Ocelot default configuration:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">actions:</span>
+
+      <span class="hljs-comment">#computes a nanosecond-timestamp as a long for the current point in time</span>
+      <span class="hljs-attr">'a_timing_nanos':</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">'new Long(System.nanoTime())'</span>
+
+      <span class="hljs-comment">#computes the elapsed milliseconds as double since a given nanosecond-timestamp</span>
+      <span class="hljs-attr">'a_timing_elapsedMillis':</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-comment">#the timestamp captured via System.nanoTime() to compare against</span>
+          <span class="hljs-attr">'since_nanos':</span> <span class="hljs-string">'long'</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">'new Double( (System.nanoTime() - sinceNanos) * 1E-6)'</span>
+
+      <span class="hljs-attr">'a_string_replace_all':</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">'regex':</span> <span class="hljs-string">'String'</span>
+          <span class="hljs-attr">'replacement':</span> <span class="hljs-string">'String'</span>
+          <span class="hljs-attr">'string':</span> <span class="hljs-string">'String'</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">'string.replaceAll(regex,replacement)'</span>
+
+      <span class="hljs-attr">'a_method_getClassFQN':</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">_class:</span> <span class="hljs-string">Class</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">'_class.getName()'</span>
+</code></pre>
+<p>The code executed when an action is invoked is defined through the <code>value</code> configuration property.
+In YAML, this is simply a string. InspectIT however will interpret this string as a Java expression to evaluate. The result value of this expression will be used as result for the action invocation.</p>
+<p>Note that the code will not be interpreted at runtime, but instead inspectIT Ocelot will compile the expression
+to bytecode at runtime to ensure maximum efficiency.
+As indicated by the manual primitive boxing performed for <code>timestamp_nanos</code> the compiler has some restrictions.
+For example Autoboxing is not supported!
+However, actions are expected to return <code>Object</code> instances, therefore manual boxing has to be performed.
+Under the hood, inspectIT uses the <a href="http://www.javassist.org/">javassist</a> library, where all imposed restrictions can be found.
+The most important ones are that neither Autoboxing, Generics, Anonymous Classes nor Lambda expressions are supported.</p>
+<p>After actions have been compiled, they are placed in the same class loader as the class you instrument with them.
+<strong>This means that they can access any class that your application class could also access.</strong></p>
+
+    <div class="admonition admonition-note">
+      <div class="admonition-heading">
+        <h5><div class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"/></svg></div> note</h5>
+      </div>
+      <div class="admonition-content">
+    <p><strong>Exceptions within actions</strong></p>
+<p>Even if your action terminates with an exception or error, inspectIT will make sure that this does not affect your application.
+InspectIT will print information about the error and the faulting action. The execution of the action in the rule where the</p>
+<p>failure occurred will be disabled until you update your instrumentation configuration.</p>
+</div></div><h2><a class="anchor" aria-hidden="true" id="input-parameter"></a><a href="#input-parameter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Input Parameter</h2>
+<p>As previously mentioned actions are also free to define any kind of <em>input parameter</em> they need.
+This is done using the <code>input</code> configuration property.
+This property maps the names of the input parameter to their expected Java type.
+For example, the <code>a_timing_elapsedMillis</code> action declares a single input variable named <code>sinceNanos</code>
+which has the type <code>long</code>. Note that for input parameter automatic primitive unboxing is supported.
+Currently, array types like <code>long[]</code> are not supported for input parameter.
+Instead, you could use <code>java.util.List</code> as input type.</p>
+<p>Another example where the action even defines multiple inputs is <code>a_string_replace_all</code>.
+Guess what this action does? (<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#replaceAll-java.lang.String-java.lang.String">Hint</a>)</p>
+<h3><a class="anchor" aria-hidden="true" id="special-parameter"></a><a href="#special-parameter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Special Parameter</h3>
+<p>The fourth example shown above is <code>a_method_getClassFQN</code>, which uses the <em>special</em> input parameter <code>_class</code>.
+The fact that these variables are special is indicated by the leading underscore.
+When normally invoking actions from rules, the user has to take care that all input parameter are assigned a value.</p>
+<p>For special input parameter inspectIT automatically assigns the desired value.
+This means that for example <code>a_method_getClassFQN</code> can be called without manually assigning any parameter,
+like it was done in the example of the <a href="/inspectit-ocelot/docs/2.6.12/instrumentation/rules">rules section</a>. An overview of all available special
+input parameter is given below:</p>
+<table>
+<thead>
+<tr><th>Parameter Name</th><th>Type</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>_methodName</code></td><td><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html">String</a></td><td>The name of the instrumented method within which this action is getting executed.</td></tr>
+<tr><td><code>_class</code></td><td><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a></td><td>The class declaring the instrumented method within which this action is getting executed.</td></tr>
+<tr><td><code>_parameterTypes</code></td><td><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a>[]</td><td>The types of the parameter which the instrumented method declares for which the action is executed.</td></tr>
+<tr><td><code>_this</code></td><td>(depends on context)</td><td>The this-instance in the context of the instrumented method within which this action is getting executed.</td></tr>
+<tr><td><code>_args</code></td><td><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html">Object</a>[]</td><td>The arguments with which the instrumented method was called within which this action is getting executed. The arguments are boxed if necessary and packed into an array.</td></tr>
+<tr><td><code>_arg0,_arg1,...,_argN</code></td><td>(depends on context)</td><td>The N-th argument with which the instrumented method was called within which this action is getting executed.</td></tr>
+<tr><td><code>_returnValue</code></td><td>(depends on context)</td><td>The value returned by the instrumented method within which this action is getting executed. If the method terminated with an exception or the action is executed in the entry phase this is <code>null</code>.</td></tr>
+<tr><td><code>_thrown</code></td><td><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html">Throwable</a></td><td>The exception thrown by the instrumented method within which this action is getting executed. If the method returned normally, the method is a constructor or the action is executed in the entry phase this is <code>null</code>.</td></tr>
+<tr><td><code>_context</code></td><td><a href="https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitContext.java">InspectitContext</a></td><td>Gives direct read and write access to the current <a href="/inspectit-ocelot/docs/2.6.12/instrumentation/data-propagation">context</a>. Can be used as data dictionary or to implement custom data propagation.</td></tr>
+<tr><td><code>_attachments</code></td><td><a href="https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/ObjectAttachments.java">ObjectAttachments</a></td><td>Allows you to attach values to Java objects instead of to the control flow, as done via <code>_context</code>. This enables sharing data across multiple threads.</td></tr>
+<tr><td><code>_reflection</code></td><td><a href="https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitReflection.java">InspectitReflection</a></td><td>Allows you to access and cache fields and methods via reflection.</td></tr>
+<tr><td><code>_regex</code></td><td><a href="https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitRegex.java">InspectitRegex</a></td><td>Allows you to match and cache regex expressions.</td></tr>
+<tr><td><code>_agent</code></td><td><a href="https://github.com/inspectIT/inspectit-ocelot/blob/master/inspectit-ocelot-bootstrap/src/main/java/rocks/inspectit/ocelot/bootstrap/exposed/InspectitAgentInfo.java">InspectitAgentInfo</a></td><td>Allows you to read agent information like the current version.</td></tr>
+</tbody>
+</table>
+<h2><a class="anchor" aria-hidden="true" id="multiple-statements-and-imports"></a><a href="#multiple-statements-and-imports" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Multiple Statements and Imports</h2>
+<p>Actions can easily become more complex, so that a single expression is not sufficient for expressing the functionality.
+For this purpose we introduced the <code>value-body</code> configuration property for actions as an alternative to <code>value</code>.
+<code>value-body</code> allows you to specify a Java method body which returns the result of the action.
+The body is given without surrounding curly braces. One example action from the default configuration making use of this is given below:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">actions:</span>
+      <span class="hljs-attr">'a_get_servlet_request_path':</span>
+        <span class="hljs-attr">imports:</span>
+          <span class="hljs-bullet">-</span> <span class="hljs-string">'javax.servlet'</span>
+          <span class="hljs-bullet">-</span> <span class="hljs-string">'javax.servlet.http'</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">_arg0:</span> <span class="hljs-string">ServletRequest</span>
+        <span class="hljs-attr">value-body:</span> <span class="hljs-string">|
+          if(_arg0 instanceof HttpServletRequest) {
+            return java.net.URI.create(((HttpServletRequest)_arg0).getRequestURI()).getPath();
+          }
+          return null;
+</span></code></pre>
+<p>This action is designed to be applied on the Servlet API <a href="https://javaee.github.io/javaee-spec/javadocs/javax/servlet/Filter.html#doFilter-javax.servlet.ServletRequest-javax.servlet.ServletResponse-javax.servlet.FilterChain">doFilter</a> and
+<a href="https://javaee.github.io/javaee-spec/javadocs/javax/servlet/Servlet.html#service-javax.servlet.ServletRequest-javax.servlet.ServletResponse">service</a> methods.
+Its purpose is to extract HTTP path, however in the servlet API it is not guaranteed that the <code>ServletRequest</code> is a <code>HttpServletRequest</code>.
+For this reason the action performs an instance-of check only returning the HTTP path if it is available, otherwise <code>null</code>.</p>
+<p>Normally, all non <code>java.lang.*</code> types have to be referred to using their fully qualified name, as done for <code>java.net.URI</code>
+in the example above. However, just like in Java you can import packages using the <code>import</code> config option.
+In this example this allows us to refer to <code>ServletRequest</code> and <code>HttpServletRequest</code> without using the fully qualified name.</p>
+<h2><a class="anchor" aria-hidden="true" id="caching"></a><a href="#caching" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Caching</h2>
+<p>Repeatedly accessing the same data might create unnecessary performance overhead. Thus, actions allow to cache data
+for general purpose. Such data can be read or overwritten within the same action. If multiple <a href="/inspectit-ocelot/docs/2.6.12/instrumentation/rules">rules</a>
+use the same action, all of these rules will use the same cache. If an action has been changed, the cached data will be dropped.
+The cache resembles an ordinary Java <code>Map&lt;Object, Object&gt;</code> and is thread safe.
+You can use the cache via the <code>_cache</code> variable, which does not have to be included as input parameter.</p>
+<p>The example below shows how to use the cache:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">actions:</span>
+      <span class="hljs-comment"># access the data, cache after first access</span>
+      <span class="hljs-attr">a_get_data:</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">key:</span> <span class="hljs-string">Object</span>
+        <span class="hljs-attr">value-body:</span> <span class="hljs-string">|
+          Object data = _cache.get(key);
+          if (data == null) {
+            data = "Reading data...";
+            _cache.put(key, data);
+          }
+          return data;
+</span>
+      <span class="hljs-comment"># this action will use another cache</span>
+      <span class="hljs-attr">a_get_other_data:</span>
+        <span class="hljs-comment"># ...</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="reflection"></a><a href="#reflection" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Reflection</h3>
+<p>As mentioned above, in order to access and cache <code>java.lang.reflect.Field</code> or <code>java.lang.reflect.Method</code> instances,
+you can use the <code>_reflection</code> special parameter. Reflection helps you to access fields or invoke methods, which are normally
+not accessible, because they are not visible for the instrumented method. Note that trying to access non-existing fields
+or methods will throw an exception and disable the action until it has been updated.
+If a <code>Field</code> or <code>Method</code> has been found, it will be cached globally. Thus, all actions use the same cached instances.
+However, you can only use these instances via the <code>_reflection</code> variable.
+The method <code>getFieldValue()</code> expects a class, an instance of such class and the field name and returns the field value.
+The method <code>invokeMethod()</code> expects a class, an instance of such class, the method name and the method arguments - if existing -
+and returns the result of the invoked method.</p>
+<p>The example below shows how to use the reflection variable:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">actions:</span>
+      <span class="hljs-comment"># access a field via reflection</span>
+      <span class="hljs-attr">a_get_field_value:</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">_reflection:</span> <span class="hljs-string">InspectitReflection</span>
+          <span class="hljs-attr">_class:</span> <span class="hljs-string">Class</span>
+          <span class="hljs-attr">instance:</span> <span class="hljs-string">Object</span>
+          <span class="hljs-attr">fieldName:</span> <span class="hljs-string">String</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">_reflection.getFieldValue(_class,</span> <span class="hljs-string">instance,</span> <span class="hljs-string">fieldName)</span>
+
+      <span class="hljs-comment"># access a method via reflection</span>
+      <span class="hljs-attr">a_invoke_method:</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">_reflection:</span> <span class="hljs-string">InspectitReflection</span>
+          <span class="hljs-attr">_class:</span> <span class="hljs-string">Class</span>
+          <span class="hljs-attr">instance:</span> <span class="hljs-string">Object</span>
+          <span class="hljs-attr">methodName:</span> <span class="hljs-string">String</span>
+          <span class="hljs-attr">firstArg:</span> <span class="hljs-string">Object</span>
+          <span class="hljs-attr">secondArg:</span> <span class="hljs-string">Object</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">_reflection.invokeMethod(_class,</span> <span class="hljs-string">instance,</span> <span class="hljs-string">methodName,</span> <span class="hljs-string">firstArg,</span> <span class="hljs-string">secondArg)</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="regex"></a><a href="#regex" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Regex</h3>
+<p>Since compiling regex expressions is relatively expensive, it makes sense to compile them once and cache the result.
+When using the <code>_regex</code> special parameter, all compiled results will be cached globally.
+Thus, all actions use the same cached regex patterns.
+However, you can only use these patterns via the <code>_regex</code> variable.
+The method <code>pattern()</code> compiles a single regex expression and returns the pattern.
+The method <code>matcher()</code> expects a regex expression and some input string and returns the matcher.
+The method <code>matches()</code> expects a regex expression and some input string and returns a boolean.</p>
+<p>The example below shows how to use regex variable:</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">inspectit:</span>
+  <span class="hljs-attr">instrumentation:</span>
+    <span class="hljs-attr">actions:</span>
+      <span class="hljs-attr">a_input_matches:</span>
+        <span class="hljs-attr">input:</span>
+          <span class="hljs-attr">_regex:</span> <span class="hljs-string">InspectitRegex</span>
+          <span class="hljs-attr">regex:</span> <span class="hljs-string">String</span>
+          <span class="hljs-attr">input:</span> <span class="hljs-string">String</span>
+        <span class="hljs-attr">value:</span> <span class="hljs-string">Boolean.valueOf(_regex.matches(regex,</span> <span class="hljs-string">input))</span>
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="default-actions"></a><a href="#default-actions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Default Actions</h2>
+<p>InspectIT Ocelot provides a large set of default actions, which can be used within any configuration.
+Such actions allow you for example to assign values to data keys, print debug information or replace strings via regex.
+You can find the full set of default actions <a href="https://github.com/inspectIT/inspectit-ocelot/tree/master/inspectit-ocelot-config/src/main/resources/rocks/inspectit/ocelot/config/default/instrumentation/actions/_shared">here</a>.</p>
+<p>Below, some important actions are explained in more detail.
+The examples show how to apply the actions within <a href="/inspectit-ocelot/docs/2.6.12/instrumentation/rules">rules</a>.
+In the upcoming section you will find more detailed information about <a href="/inspectit-ocelot/docs/2.6.12/instrumentation/rules#invoking-actions">Invoking Actions</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="assigning-values"></a><a href="#assigning-values" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Assigning Values</h3>
+<p>Data keys can only be used withing rules (e.g. for metric tags or tracing attributes), if they have an assigned value.
+You can assign values via any action. If you would like to assign a constant value or copy another value to a data key,
+you can use the actions <code>a_assign_value</code>, <code>a_assign_null</code>, <code>a_assign_true</code> or <code>a_assign_false</code>.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">rules:</span>
+  <span class="hljs-attr">r_rule:</span>
+    <span class="hljs-attr">entry:</span>
+      <span class="hljs-attr">some_value:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_any_action</span>
+      <span class="hljs-attr">copied_value:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_assign_value</span>
+        <span class="hljs-attr">data-input:</span>
+          <span class="hljs-attr">value:</span> <span class="hljs-string">some_value</span>
+      <span class="hljs-attr">constant_value:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_assign_value</span>
+        <span class="hljs-attr">constant-input:</span>
+          <span class="hljs-attr">value:</span> <span class="hljs-string">"constant"</span>
+      <span class="hljs-attr">is_entry:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_assign_true</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="attaching-values"></a><a href="#attaching-values" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Attaching Values</h3>
+<p>Object attachments allow you to store and access data outside the current control flow.
+The inspectIT agent provides one global dictionary, where any Java object can serve as a key,
+which points to another dictionary of data keys and values.
+In Java, this would be resembled by a <code>Map&lt;Object, Map&lt;String, Object&gt;&gt;</code>.
+For instance, you would like to use recorded data within two separate threads.
+If these threads are accessing the same Java object, you can attach this object to the global dictionary
+together with its data key and value in the first thread. After that, you can read the data in the second thread
+via the attached Java object.
+For this, we provide the default actions <code>a_attachment_get</code>, <code>a_attachment_put</code> and <code>a_attachment_remove</code>.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">rules:</span>
+  <span class="hljs-attr">r_first:</span> <span class="hljs-comment"># first thread</span>
+    <span class="hljs-attr">entry:</span>
+      <span class="hljs-attr">some_value:</span> <span class="hljs-comment"># record value</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_any_action</span>
+      <span class="hljs-attr">shared_object:</span> <span class="hljs-comment"># somehow access shared object</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_assign_value</span>
+        <span class="hljs-attr">data-input:</span> 
+          <span class="hljs-attr">value:</span> <span class="hljs-string">_arg0</span>
+      <span class="hljs-attr">attach:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_attachment_put</span>
+        <span class="hljs-attr">data-input:</span>
+          <span class="hljs-attr">target:</span> <span class="hljs-string">shared_object</span>
+          <span class="hljs-attr">value:</span> <span class="hljs-string">some_value</span>
+        <span class="hljs-attr">constant-input:</span>
+          <span class="hljs-attr">key:</span> <span class="hljs-string">'my-key'</span>
+
+  <span class="hljs-attr">r_second:</span> <span class="hljs-comment"># second thread</span>
+    <span class="hljs-attr">entry:</span>
+      <span class="hljs-attr">shared_object:</span> <span class="hljs-comment"># somehow access shared object</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_assign_value</span> 
+        <span class="hljs-attr">data-input:</span> 
+          <span class="hljs-attr">value:</span> <span class="hljs-string">_arg0</span>
+      <span class="hljs-attr">some_value:</span> <span class="hljs-comment"># get previously recorded value</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_attachment_get</span>
+        <span class="hljs-attr">data-input:</span>
+          <span class="hljs-attr">target:</span> <span class="hljs-string">shared_object</span>
+        <span class="hljs-attr">constant-input:</span>
+          <span class="hljs-attr">key:</span> <span class="hljs-string">'my-key
+</span></code></pre>
+<h3><a class="anchor" aria-hidden="true" id="debugging"></a><a href="#debugging" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Debugging</h3>
+<p>We provide two debug actions, which might help you with understanding the data flow of your instrumentation:
+<code>a_debug_println</code> and <code>a_debug_println_2</code>. These will print the provided values at the standard system output.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">rules:</span>
+  <span class="hljs-attr">r_rule:</span>
+    <span class="hljs-attr">entry:</span>
+      <span class="hljs-attr">some_value:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_any_action</span>
+      <span class="hljs-attr">another_value:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_another_action</span>
+      <span class="hljs-attr">debug:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_debug_println</span>
+        <span class="hljs-attr">data-input:</span> 
+          <span class="hljs-attr">value:</span> <span class="hljs-string">some_value</span>
+      <span class="hljs-attr">debug_2:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_debug_println_2</span>
+        <span class="hljs-attr">data-input:</span>
+          <span class="hljs-attr">a:</span> <span class="hljs-string">some_value</span>
+          <span class="hljs-attr">b:</span> <span class="hljs-string">another_value</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="agent-information"></a><a href="#agent-information" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Agent Information</h3>
+<p>Under certain circumstances, you may not want to execute certain actions, or you may only want to execute them
+if a certain agent version is used. For example, if a used function is only available from a certain version.
+Thus, we provide some actions to read or compare the agent version: <code>a_agent_version</code> and <code>a_agent_isAtLeast</code></p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">rules:</span>
+  <span class="hljs-attr">r_rule:</span>
+    <span class="hljs-attr">entry:</span>
+      <span class="hljs-attr">version:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_agent_version</span>
+      <span class="hljs-attr">isAvailable:</span> 
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_agent_isAtLeast</span>
+        <span class="hljs-attr">constant-input:</span>
+          <span class="hljs-attr">version:</span> <span class="hljs-string">"2.0.0"</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="logical-operators"></a><a href="#logical-operators" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Logical Operators</h3>
+<p>We also provide some logical operators for checking specific conditions of data values:
+<code>a_logic_isNull</code>, <code>a_logic_isNotNull</code>, <code>a_logic_and</code>, <code>a_logic_or</code> and <code>a_logic_isTrueOrNotNull</code>.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">rules:</span>
+  <span class="hljs-attr">r_rule:</span>
+    <span class="hljs-attr">entry:</span>
+      <span class="hljs-attr">isEntry:</span> <span class="hljs-comment"># true</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_assign_true</span>
+      <span class="hljs-attr">isFalse:</span> <span class="hljs-comment"># false because isEntry is not null</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_logic_isNull</span>
+        <span class="hljs-attr">data-input:</span>
+          <span class="hljs-attr">value:</span> <span class="hljs-string">isEntry</span>
+      <span class="hljs-attr">isTrue:</span> <span class="hljs-comment"># true because isExit is null</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_logic_isNull</span>
+        <span class="hljs-attr">data-input:</span> 
+          <span class="hljs-attr">value:</span> <span class="hljs-string">isExit</span> <span class="hljs-comment"># data value not set</span>
+      <span class="hljs-attr">isAlsoFalse:</span> <span class="hljs-comment"># false because only one is true</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_logic_and</span>
+        <span class="hljs-attr">data-input:</span>
+          <span class="hljs-attr">a:</span> <span class="hljs-string">isFalse</span>
+          <span class="hljs-attr">b:</span> <span class="hljs-string">isTrue</span>
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="replacing-strings-via-regex"></a><a href="#replacing-strings-via-regex" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Replacing Strings via Regex</h3>
+<p>If you would like to sanitize some strings, for instance to remove sensitive data, you can use the following default
+actions: <code>a_regex_replaceAll</code>, <code>a_regex_replaceAll_multi</code>, <code>a_regex_replaceMatch</code>, <code>a_regex_replaceMatch_multi</code>,
+<code>a_regex_replaceFirst</code>, <code>a_regex_extractFirst</code>, <code>a_regex_extractFirst_multi</code>, <code>a_regex_extractMatch</code>
+and <code>a_regex_extractMatch_multi</code>.</p>
+<pre><code class="hljs css language-yaml"><span class="hljs-attr">rules:</span>
+  <span class="hljs-attr">r_rule:</span>
+    <span class="hljs-attr">entry:</span>
+      <span class="hljs-attr">http_path_raw:</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_any_action</span>
+      <span class="hljs-attr">http_path:</span> <span class="hljs-comment"># sanitize http path</span>
+        <span class="hljs-attr">action:</span> <span class="hljs-string">a_regex_replaceMatch</span>
+        <span class="hljs-attr">data-input:</span>
+          <span class="hljs-attr">string:</span> <span class="hljs-string">http_path_raw</span>
+        <span class="hljs-attr">constant-input:</span>
+          <span class="hljs-attr">'pattern':</span> <span class="hljs-string">'\/apps\/.+\/.+'</span>
+          <span class="hljs-attr">'replacement':</span> <span class="hljs-string">'/apps/{service}/{location}'</span>
+</code></pre>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 8/28/2025 by EddeCCC</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/inspectit-ocelot/docs/2.6.12/instrumentation/scopes"><span class="arrow-prev">← </span><span>Scopes</span></a><a class="docs-next button" href="/inspectit-ocelot/docs/2.6.12/instrumentation/rules"><span>Rules</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#defining-actions">Defining Actions</a></li><li><a href="#input-parameter">Input Parameter</a><ul class="toc-headings"><li><a href="#special-parameter">Special Parameter</a></li></ul></li><li><a href="#multiple-statements-and-imports">Multiple Statements and Imports</a></li><li><a href="#caching">Caching</a><ul class="toc-headings"><li><a href="#reflection">Reflection</a></li><li><a href="#regex">Regex</a></li></ul></li><li><a href="#default-actions">Default Actions</a><ul class="toc-headings"><li><a href="#assigning-values">Assigning Values</a></li><li><a href="#attaching-values">Attaching Values</a></li><li><a href="#debugging">Debugging</a></li><li><a href="#agent-information">Agent Information</a></li><li><a href="#logical-operators">Logical Operators</a></li><li><a href="#replacing-strings-via-regex">Replacing Strings via Regex</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="copyright">Copyright © 2025 Novatec Consulting GmbH</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                appId: 'P7JV0ZK66K',
+                apiKey: 'd499024131bf8d92e6d469a6c14f4798',
+                indexName: 'inspectit-ocelot',
+                inputSelector: '#search_input_react',
+                algoliaOptions: {"facetFilters":["version:2.6.12"]}
+              });
+            </script></body></html>
