@@ -207,4 +207,4 @@ jobs:
           $(printf 'inspectit/inspectit-ocelot-configurationserver@sha256:%s ' *)
       - name: Inspect manifest configurationserver
         run: |
-          docker buildx imagetools inspect inspectit/inspectit-ocelot-configurationserver2.7.0
+          docker buildx imagetools inspect inspectit/inspectit-ocelot-configurationserver:2.7.0
