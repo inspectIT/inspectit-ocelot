@@ -3,6 +3,8 @@ id: custom-metrics
 title: Custom Metrics
 ---
 
+# TODO Update this page for 3.0.0
+
 One of the main benefits of inspectIT Ocelot is that it gives you complete
 freedom in what data you want to capture and how you want to capture it.
 You can easily define custom performance and business metrics depending on your needs.
@@ -43,12 +45,12 @@ us to compute the average, for example for creating dashboards.
 
 The configuration options given above are only a subset of the available options. The full set of options for metrics is shown below:
 
-|Config Property|Default| Description
-|---|---|---|
-|`enabled`|`true`|When a metric is not enabled, it and all of it's views will *not* be registered at the OpenCensus library.
-|`unit`|-|*Required*. A textual representation of the unit of the data represented by the metric.
-|`description`| Generated based on name and unit| A textual description of the purpose of the metric.
-|`type`|`DOUBLE`|Specifies whether the metric data is given as integer (`LONG`) or floating point number (`DOUBLE`).
+| Config Property | Default                          | Description                                                                                                |
+|-----------------|----------------------------------|------------------------------------------------------------------------------------------------------------|
+| `enabled`       | `true`                           | When a metric is not enabled, it and all of it's views will *not* be registered at the OpenCensus library. |
+| `unit`          | -                                | *Required*. A textual representation of the unit of the data represented by the metric.                    |
+| `description`   | Generated based on name and unit | A textual description of the purpose of the metric.                                                        |
+| `type`          | `DOUBLE`                         | Specifies whether the metric data is given as integer (`LONG`) or floating point number (`DOUBLE`).        |
 
 For a metric to be exposed it is necessary to define [views](https://opencensus.io/stats/view/) in OpenCensus.
 This can be done through the `views` config property shown in the sample YAML above.
@@ -104,3 +106,44 @@ If this limit is exceeded, the quantiles will become meaningless due to data dro
 
 The quantiles aggregation of a view also allows the capturing of minimum and maximum values of metrics.
 This can be done by using the special quantiles `0` and `1`, which enables the export of the minimum and maximum observed value respectively.
+
+### Smoothed Average View
+
+In addition to the [Quantile View](../metrics/custom-metrics#quantile-views), which is already described in the inspectIT Ocelot Java agent configuration,
+the EUM Server provides a Smoothed Average View.
+In contrast to the quantiles, it is possible to drop values of a certain time window. This can be useful to deliberately remove outliers before averaging.
+
+:::note
+Please read the section on [Quantile Views](../metrics/custom-metrics#quantile-views) to get an insight into the data collection. The Smoothed Average View is based on the same principle.
+:::
+
+The actual metric [configuration](../metrics/custom-metrics#configurations) are extended in the EUM server by the following properties:
+|Config Property|Default| Description
+|---|---|---|
+|`aggregation`|`LAST_VALUE`|Specifies how the measurement data is aggregated in this view. Possible values are `LAST_VALUE`, `COUNT`, `SUM`, `HISTOGRAM` `QUANTILES` and `SMOOTHED_AVERAGE`. Except for `QUANTILES` and `SMOOTHED_AVERAGE`, these correspond to the [OpenCensus Aggregations](https://opencensus.io/stats/view/#aggregations).
+|`drop-upper`|`0.0`| *Required if aggregation is `SMOOTHED_AVERAGE`.* Specifies the percentage of the highest values to be dropped before calculating the average.
+|`drop-lower`|`0.0`| *Required if aggregation is `SMOOTHED_AVERAGE`.* Specifies the percentage of the lowest values to be dropped before calculating the average.
+|`time-window`|`${inspectit.metrics.frequency}`| *Required if aggregation is `QUANTILES` or `SMOOTHED_AVERAGE`.* The time window over which the quantiles or the smoothed average are captured.
+|`max-buffered-points`|`16384`| *Required if aggregation is `QUANTILES` or `SMOOTHED_AVERAGE`.* A safety limit defining the maximum number of points to be buffered.
+
+As an example, the following snippet defines a metric with the name `load_time` and a view `loadtime/smoothed`:
+The configuration has the effect of ordering the values in a 1-minute time window by size and dropping the upper 10 percent before calculating the average.
+
+```YAML
+inspectit:
+  metrics:
+    definitions:
+      load_time:
+        measure-type: LONG
+        value-expression: "{t_done}"
+        beacon-requirements:
+          - field: rt.quit
+            requirement: NOT_EXISTS
+        unit: ms
+        views:
+          '[load_time/smoothed]':
+              aggregation: SMOOTHED_AVERAGE
+              time-window: 1m
+              drop-upper: 0.1
+              drop-lower: 0.0
+```

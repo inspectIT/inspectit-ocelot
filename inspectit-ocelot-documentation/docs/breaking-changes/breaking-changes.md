@@ -3,6 +3,21 @@ id: Breaking Changes
 title: Breaking Changes
 ---
 
+## Breaking changes in 3.0.0
+
+### Full integration of OpenTelemetry
+
+Starting with the current release, inspectIT Ocelot fully migrates from OpenCensus to [OpenTelemetry](https://github.com/open-telemetry).
+OpenCensus has been completely removed from the Java agent as well as the EUM server.
+
+### Updated metrics definition
+
+...
+
+### Removed exporters
+
+...
+
 ## Breaking changes in 2.7.0
 
 ### Tags exporter was fully removed

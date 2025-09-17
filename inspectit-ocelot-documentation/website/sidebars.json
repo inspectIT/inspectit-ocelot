@@ -52,7 +52,9 @@
     "End User Monitoring": [
       "enduser-monitoring/enduser-monitoring-server",
       "enduser-monitoring/eum-server-setup",
-      "enduser-monitoring/eum-server-configuration",
+      "enduser-monitoring/eum-server-metrics",
+      "enduser-monitoring/eum-server-tracing",
+      "enduser-monitoring/eum-server-security",
       "enduser-monitoring/install-eum-agent"
     ],
     "Configuration Server": [
