@@ -46,7 +46,7 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
     "react-redux": "^9.2.0",
-    "react-syntax-highlighter": "^15.6.1",
+    "react-syntax-highlighter": "^15.6.6",
     "react-timeago": "^8.3.0",
     "react-tooltip": "^5.29.1",
     "react-transition-group": "^4.4.2",
