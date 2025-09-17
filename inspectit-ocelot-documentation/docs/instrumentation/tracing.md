@@ -1,6 +1,6 @@
 ---
 id: tracing
-title: Collecting Tracing
+title: Collecting Traces
 ---
 
 The inspectIT Ocelot agent allows you to record method invocations as [OpenTelemetry spans](https://opentelemetry.io/docs/concepts/signals/traces/#spans) with the help
