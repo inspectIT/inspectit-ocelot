@@ -526,11 +526,11 @@ Self-Monitoring is enabled by default and can be disabled by setting the propert
 For the purpose of self-monitoring, the EUM server offers a set of metrics that reflect its state and are recorded automatically.
 Currently, the following self monitoring metrics are available:
 
-| Metric name                               | Description                              |
-|-------------------------------------------|------------------------------------------|
-| `inspectit_eum_self_beacons_received`     | The number of received beacons           | 
-| `inspectit_eum_self_beacons_export`       | Histogram for exporting beacons          | 
-| `inspectit_eum_self_beacons_export_batch` | The number of exported beacons per batch | 
-| `inspectit_eum_self_beacons_processor`    | Histogram for processing beacons         | 
-| `inspectit_eum_self_traces_received`      | Histogram for receiving traces           | 
-| `inspectit_eum_self_traces_span_size`     | The number of exported spans per trace   | 
+| Metric name                               | Description                                                |
+|-------------------------------------------|------------------------------------------------------------|
+| `inspectit_eum_self_beacons_received`     | The total number of received beacons                       | 
+| `inspectit_eum_self_beacons_export`       | Histogram for exporting beacons with count, sum & buckets  | 
+| `inspectit_eum_self_beacons_export_batch` | The total number of exported beacons per batch             | 
+| `inspectit_eum_self_beacons_processor`    | Histogram for processing beacons with count, sum & buckets | 
+| `inspectit_eum_self_traces_received`      | Histogram for receiving traces with count, sum & buckets   | 
+| `inspectit_eum_self_traces_span_size`     | The total number of exported spans per trace               | 

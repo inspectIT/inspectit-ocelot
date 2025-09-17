@@ -72,6 +72,8 @@ Due to a limitation of the current OpenCensus library, it is **not possible to r
 However, you can still add new views and metrics through dynamic configuration updates after the agent has already started.
 :::
 
+<!-- TODO Does this still apply with our OpenTelemetry implementation? -->
+
 ## Time Windowed Views
 
 inspectIT Ocelot also offers some custom aggregations, which allow to create time windowed views additionally to
@@ -90,11 +92,14 @@ the [metric configuration](#metrics) will be ignored for such views.
 
 OpenTelemetry itself does not provide support for computing percentiles of a given metric.
 However, the average value alone is not always useful when analyzing response times.
-Hereby, the `HISTOGRAM` aggregation can help. However, it can be very difficult to define the boundaries of the histogram.
+Hereby, the `HISTOGRAM` aggregation can help. Observability backends like Prometheus then allow to interpolate 
+percentiles from histogram buckets.
+However, it can be very difficult to define the bucket boundaries of the histogram.
+
 For this reason, the inspectIT Ocelot agent contains a custom implemented aggregation type, 
 providing the possibility to compute percentiles for any metric on top of OpenTelemetry.
 
-The calculation of percentiles is done by keeping **all** observed values for a given metric in memory over a fixed time window.
+The calculation of percentiles is done by keeping **all raw** observed values for a given metric in memory over a fixed time window.
 This time window can be configured using the `time-window` option of the view, which defaults to `15s`.
 You can use this feature by settings the `aggregation` of your view to `PERCENTILES`.
 
