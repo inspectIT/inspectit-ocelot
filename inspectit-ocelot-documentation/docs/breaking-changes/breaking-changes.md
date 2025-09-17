@@ -8,15 +8,21 @@ title: Breaking Changes
 ### Full integration of OpenTelemetry
 
 Starting with the current release, inspectIT Ocelot fully migrates from OpenCensus to [OpenTelemetry](https://github.com/open-telemetry).
-OpenCensus has been completely removed from the Java agent as well as the EUM server.
+OpenCensus has been completely replaced by OpenTelemetry within the Java agent as well as the EUM server.
 
 ### Updated metrics definition
 
-...
+TODO:
 
-### Removed exporters
+- New metrics model
+- New metric names (default metrics, self-monitoring)
+- Migration guide
+- New naming conventions?
 
-...
+### InfluxDB exporter removed
+
+Since the previous InfluxDB exporter was specifically designed for OpenCensus,
+due to the migration to OpenTelemetry the exporter was fully removed. Please use the OTLP metrics exporter instead.
 
 ## Breaking changes in 2.7.0
 
