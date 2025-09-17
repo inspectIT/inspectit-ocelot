@@ -3,14 +3,12 @@ id: custom-metrics
 title: Custom Metrics
 ---
 
-# TODO Update this page for 3.0.0
-
 One of the main benefits of inspectIT Ocelot is that it gives you complete
 freedom in what data you want to capture and how you want to capture it.
 You can easily define custom performance and business metrics depending on your needs.
 
-In this section we explain how you can define custom OpenCensus [metrics](https://opencensus.io/stats/)
-and [views](https://opencensus.io/stats/view/). We only show how to define the structure of both,
+In this section we explain how you can define custom OpenTelemetry [metrics](https://opentelemetry.io/docs/concepts/signals/metrics/)
+and [views](https://opentelemetry.io/docs/concepts/signals/metrics/#views). We only show how to define the structure of both,
 not how the data is collected. For details on the data collection please see the [instrumentation section](instrumentation/metrics.md).
 
 ## Configuration
@@ -24,124 +22,153 @@ inspectit:
   metrics:
     definitions:
       '[method/duration]':
+        instrument-type: HISTOGRAM
         unit: ms
         description: 'the duration from method entry to method exit'
         views:
-          '[method/duration/sum]':
-            aggregation: SUM
+          '[method/duration]':
+            aggregation: HISTOGRAM
             tags:
-              'method_name' : true
-          '[method/duration/count]':
-            aggregation: COUNT
-            tags:
-              'method_name': true
+              method-name: true
 ```
 
-This snippet defines a metric with the name `method/duration` and the two views `method/duration/sum`
-and `method/duration/count`. Note that the special quoting syntax `'[...]'` is required because of
-the slashes in the names. As the name suggests, the first view stores the total sum of all observed
-response times whereas the second one stores the number of observations. These two views therefore allow
-us to compute the average, for example for creating dashboards.
+This snippet defines a metric and view with the name `method/duration`.
+The view will store all observed method durations as histogram, which exposes multiple calculations like
+count, sum, min or max.
+By using the sum and count values, we will be able to also compute the average durations, for example for creating dashboards.
+
+### Metrics
 
 The configuration options given above are only a subset of the available options. The full set of options for metrics is shown below:
 
-| Config Property | Default                          | Description                                                                                                |
-|-----------------|----------------------------------|------------------------------------------------------------------------------------------------------------|
-| `enabled`       | `true`                           | When a metric is not enabled, it and all of it's views will *not* be registered at the OpenCensus library. |
-| `unit`          | -                                | *Required*. A textual representation of the unit of the data represented by the metric.                    |
-| `description`   | Generated based on name and unit | A textual description of the purpose of the metric.                                                        |
-| `type`          | `DOUBLE`                         | Specifies whether the metric data is given as integer (`LONG`) or floating point number (`DOUBLE`).        |
+| Config Property   | Default                          | Description                                                                                                               |
+|-------------------|----------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `enabled`         | `true`                           | When a metric is not enabled, it and all of it's views will *not* be registered in OpenTelemetry.                         |
+| `unit`            | -                                | *Required*. A textual representation of the unit of the data represented by the metric.                                   |
+| `description`     | Generated based on name and unit | A textual description of the purpose of the metric.                                                                       |
+| `instrument-type` | `GAUGE`                          | Specifies which OpenTelemetry instrument to use for recording value (`COUNTER`, `UP_DOWN_COUNTER`, `GAUGE`, `HISTOGRAM`). |
+| `value-type`      | `DOUBLE`                         | Specifies whether the metric data is given as integer (`LONG`) or floating point number (`DOUBLE`).                       |
+| `views`           | -                                | A list of view, which should be exposed. If no view are specified, OpenTelemetry will create default views automatically. |
 
-For a metric to be exposed it is necessary to define [views](https://opencensus.io/stats/view/) in OpenCensus.
-This can be done through the `views` config property shown in the sample YAML above.
 
-If you do not explicitly define any view for a metric you defined, inspectIT Ocelot will automatically generate one:
-The view will have the same name as the metric and will simply expose the last recorded value.
-As soon as you specify at least one view for a metric yourself, inspectIT will not add the default view.
+### Views
 
 All configuration options for customizing views are given below:
 
-| Config Property       | Default                                 | Description                                                                                                                                                                                                                                                                                   |
-|-----------------------|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `enabled`             | `true`                                  | When set to `false`, the view will not be registered at the OpenCensus library.                                                                                                                                                                                                               |
-| `description`         | Generated based on name and aggregation | A textual description of the purpose of this view.                                                                                                                                                                                                                                            |
-| `aggregation`         | `LAST_VALUE`                            | Specifies how the measurement data is aggregated in this view. Possible values are `LAST_VALUE`, `COUNT`, `SUM`, `HISTOGRAM` and `QUANTILES`. Except for `QUANTILES`, these correspond to the [OpenCensus Aggregations](https://opencensus.io/stats/view/#aggregations).                      |
-| `with-common-tags`    | `true`                                  | If true, all [common tags](metrics/common-tags.md) will be used for this view. Individual tags can still be disabled via the `tags` option.                                                                                                                                                   |
-| `tags`                | `{}`                                    | Specifies which tags should be used for this view. `tags` is a map containing tag names as key and either `true` or false as value. For example the value `{service.name: false, my_tag: true}` would remove the common tag `service.name` from the view and add the user tag `my_tag` to it. |
-| `bucket-boundaries`   | -                                       | *Required if aggregation is `HISTOGRAM`.* A list of the boundaries of the histogram buckets. E.g. `[7.5,42]` defines three histogram buckets split at `7.5` and `42`.                                                                                                                         |
-| `quantiles`           | `[0, 0.5, 0.9, 0.95, 0.99, 1]`          | *Required if aggregation is `QUANTILES`.* A list of quantiles to capture - see the section below for details.                                                                                                                                                                                 |
-| `time-window`         | `${inspectit.metrics.frequency}`        | *Required if aggregation is `QUANTILES`.* The time window over which the quantiles are captured.                                                                                                                                                                                              |
-| `max-buffered-points` | `16384`                                 | *Required if aggregation is `QUANTILES`.* A safety limit defining the maximum number of points to be buffered.                                                                                                                                                                                |
+| Config Property          | Default                                                              | Description                                                                                                                                                                                                                                                                                                                   |
+|--------------------------|----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `enabled`                | `true`                                                               | When set to `false`, the view will not be registered in OpenTelemetry.                                                                                                                                                                                                                                                        |
+| `description`            | Generated based on name and aggregation                              | A textual description of the purpose of this view.                                                                                                                                                                                                                                                                            |
+| `aggregation`            | `LAST_VALUE`                                                         | Specifies how the metric data is aggregated in this view. There are OTel aggregations (`SUM`, `LAST_VALUE`, `HISTORGRAM`; `EXPONENTIAL_HISTOGRAM`) as well as custom aggregations (`PERCENTILES`, `SMOOTHED_AVERAGE`).                                                                                                        |
+| `attributes`             | `{}`                                                                 | Specifies which attributes should be used for this view. `attributes` is a map containing attribute names as key and either `true` or false as value. For example the value `{service.name: false, my_attr: true}` would remove the common attribute `service.name` from the view and add the user attribute `my_attr` to it. |
+| `with-common-attributes` | `true`                                                               | If true, all [common tags](metrics/common-tags.md) will be used for this view. Individual attributes can still be disabled via the `attributes` option.                                                                                                                                                                       |
+| `cardinality-limit`      | `2000`                                                               | Specifies the maximum amount of unique combinations of attributes for this view.                                                                                                                                                                                                                                              |
+| `bucket-boundaries`      | `[0,5,10,25,50,75,100,250,500,`<br/>`750,1000,2500,5000,7500,10000]` | *Required if aggregation is `HISTOGRAM`.* A list of the boundaries of the histogram buckets. E.g. `[7.5,42]` defines three histogram buckets split at `7.5` and `42`.                                                                                                                                                         |
+| `max-buckets`            | `160`                                                                | *Required if aggregation is `EXPONENTIAL_HISTOGRAM`.* The max number of positive buckets and negative buckets                                                                                                                                                                                                                 |
+| `max-scale`              | `20`                                                                 | *Required if aggregation is `EXPONENTIAL_HISTOGRAM`.* The maximum and initial scale.                                                                                                                                                                                                                                          |
 
 :::note
 Due to a limitation of the current OpenCensus library, it is **not possible to remove or alter views and metrics** once they have been registered.
 However, you can still add new views and metrics through dynamic configuration updates after the agent has already started.
 :::
 
-## Quantile Views
+## Time Windowed Views
 
-OpenCensus itself does not provide support for computing quantiles or the minimum and maximum value of a given metric.
+inspectIT Ocelot also offers some custom aggregations, which allow to create time windowed views additionally to
+OpenTelemetry views. To use time windowed views, the following configuration options extend the [view configuration](#views).
+All of them have to be specified when using time windowed views!
+
+| Config Property       | Default                          | Description                                                          |
+|-----------------------|----------------------------------|----------------------------------------------------------------------|
+| `time-window`         | `${inspectit.metrics.frequency}` | The time window over which the data points are captured.             |
+| `max-buffered-points` | `16384`                          | A safety limit defining the maximum number of points to be buffered. |
+
+Note that time-windowed view will always use `GAUGE` as instrument type. the specified `instrument-type` of 
+the [metric configuration](#metrics) will be ignored for such views.
+
+### Percentiles View
+
+OpenTelemetry itself does not provide support for computing percentiles of a given metric.
 However, the average value alone is not always useful when analyzing response times.
-Hereby, the `HISTOGRAM` aggregation can help, however, it can be very difficult to define the boundaries of the histogram.
-For this reason, the inspectIT Ocelot agent contains a custom implemented aggregation type, providing the possibility to compute quantiles for any metric on top of OpenCensus.
+Hereby, the `HISTOGRAM` aggregation can help. However, it can be very difficult to define the boundaries of the histogram.
+For this reason, the inspectIT Ocelot agent contains a custom implemented aggregation type, 
+providing the possibility to compute percentiles for any metric on top of OpenTelemetry.
 
-The calculation of quantiles is done by keeping **all** observed values for a given metric in memory over a fixed time window.
+The calculation of percentiles is done by keeping **all** observed values for a given metric in memory over a fixed time window.
 This time window can be configured using the `time-window` option of the view, which defaults to `15s`.
-You can use this feature by settings the `aggregation` of your view to `QUANTILES`.
+You can use this feature by settings the `aggregation` of your view to `PERCENTILES`.
 
-The quantiles to export can be defined via the `quantiles` option of the view, where values from `0` to `1` can be specified.
+The percentiles to export can be defined via the additional `percentiles` option within the view:
 
-Whenever the recorded metrics are exported, inspectIT Ocelot computes the requested quantiles adhoc based on the buffered values of the given metric.
-For example, when using the default time window of 15 seconds, the inspectIT Ocelot agent will expose the quantiles of the metric values observed within the last 15 seconds at the point of time when doing the export.
+| Config Property | Default                   | Description                                                       |
+|-----------------|---------------------------|-------------------------------------------------------------------|
+| `percentiles`   | `[0,0.5,0.9,0.95,0.99,1]` | A list of percentiles between `0` and `1` to capture data points. |
+
+Whenever the recorded metrics are exported, inspectIT Ocelot computes the requested percentiles adhoc based on the 
+buffered values of the given metric.
+For example, when using the default time window of 15 seconds, the inspectIT Ocelot agent will expose the percentiles 
+of the metric values observed within the last 15 seconds at the point of time when doing the export.
 For this reason, `time-window` property should always be **equal or greater** than your metrics scrape or export interval.
 
 :::important
 It is important to note that depending on the amount of gathered data the computations of percentiles can be a lot more expensive than just sums or histograms!
 To avoid that this feature causes a too high memory footprint, the `max-buffered-points` property exists, limiting the amount of data buffered for a view.
 The default value of `16384` was chosen so that the view can handle roughly 1000 data points per second with the default time window of `15s`.
-If this limit is exceeded, the quantiles will become meaningless due to data dropping and a warning will be printed in the logs.
+If this limit is exceeded, the percentiles will become meaningless due to data dropping and a warning will be printed in the logs.
 :::
 
-### Collecting Min and Max Values
+#### Collecting Min and Max Values
 
-The quantiles aggregation of a view also allows the capturing of minimum and maximum values of metrics.
-This can be done by using the special quantiles `0` and `1`, which enables the export of the minimum and maximum observed value respectively.
+The percentiles aggregation of a view also allows the capturing of minimum and maximum values of metrics.
+This can be done by using the special percentiles `0` and `1`, which enables the export of the minimum and 
+maximum observed value respectively.
 
-### Smoothed Average View
 
-In addition to the [Quantile View](../metrics/custom-metrics#quantile-views), which is already described in the inspectIT Ocelot Java agent configuration,
-the EUM Server provides a Smoothed Average View.
-In contrast to the quantiles, it is possible to drop values of a certain time window. This can be useful to deliberately remove outliers before averaging.
-
-:::note
-Please read the section on [Quantile Views](../metrics/custom-metrics#quantile-views) to get an insight into the data collection. The Smoothed Average View is based on the same principle.
-:::
-
-The actual metric [configuration](../metrics/custom-metrics#configurations) are extended in the EUM server by the following properties:
-|Config Property|Default| Description
-|---|---|---|
-|`aggregation`|`LAST_VALUE`|Specifies how the measurement data is aggregated in this view. Possible values are `LAST_VALUE`, `COUNT`, `SUM`, `HISTOGRAM` `QUANTILES` and `SMOOTHED_AVERAGE`. Except for `QUANTILES` and `SMOOTHED_AVERAGE`, these correspond to the [OpenCensus Aggregations](https://opencensus.io/stats/view/#aggregations).
-|`drop-upper`|`0.0`| *Required if aggregation is `SMOOTHED_AVERAGE`.* Specifies the percentage of the highest values to be dropped before calculating the average.
-|`drop-lower`|`0.0`| *Required if aggregation is `SMOOTHED_AVERAGE`.* Specifies the percentage of the lowest values to be dropped before calculating the average.
-|`time-window`|`${inspectit.metrics.frequency}`| *Required if aggregation is `QUANTILES` or `SMOOTHED_AVERAGE`.* The time window over which the quantiles or the smoothed average are captured.
-|`max-buffered-points`|`16384`| *Required if aggregation is `QUANTILES` or `SMOOTHED_AVERAGE`.* A safety limit defining the maximum number of points to be buffered.
-
-As an example, the following snippet defines a metric with the name `load_time` and a view `loadtime/smoothed`:
-The configuration has the effect of ordering the values in a 1-minute time window by size and dropping the upper 10 percent before calculating the average.
+As an example, the following snippet defines a metric with the name `load/time` and a view `load/time/percentile`:
+The configuration has the effect of capturing the 50th and 95th percentile for values in a 1 minuted time window.
+Additionally, the minimum and maximum values for these time windows will be observed.
 
 ```YAML
 inspectit:
   metrics:
     definitions:
-      load_time:
-        measure-type: LONG
-        value-expression: "{t_done}"
-        beacon-requirements:
-          - field: rt.quit
-            requirement: NOT_EXISTS
+      '[load/time]':
         unit: ms
         views:
-          '[load_time/smoothed]':
+          '[load/time/percentile]':
+              aggregation: SMOOTHED_AVERAGE
+              time-window: 1m
+              percentiles: [ 0.0, 0.5, 0.95, 1.0 ]
+```
+
+### Smoothed Average View
+
+In contrast to the percentiles, the smoothed-average view allows to drop values of a certain time window. 
+This can be useful to deliberately remove outliers before averaging.
+
+:::note
+Please read the section on [Percentiles View](#percentiles-view) to get an insight into the data collection. The smoothed-average view is based on the same principle.
+:::
+
+The actual [view configuration](#views) is extended by the following properties:
+
+| Config Property       | Default                          | Description                                                                                  |
+|-----------------------|----------------------------------|----------------------------------------------------------------------------------------------|
+| `drop-upper`          | `0.0`                            | Specifies the percentage of the highest values to be dropped before calculating the average. |
+| `drop-lower`          | `0.0`                            | Specifies the percentage of the lowest values to be dropped before calculating the average.  |
+
+As an example, the following snippet defines a metric with the name `load/time` and a view `load/time/smoothed`:
+The configuration has the effect of ordering the values in a 1 minute time window by size and dropping the upper 
+10 percent before calculating the average.
+
+```YAML
+inspectit:
+  metrics:
+    definitions:
+      '[load/time]':
+        unit: ms
+        views:
+          '[load/time/smoothed]':
               aggregation: SMOOTHED_AVERAGE
               time-window: 1m
               drop-upper: 0.1
