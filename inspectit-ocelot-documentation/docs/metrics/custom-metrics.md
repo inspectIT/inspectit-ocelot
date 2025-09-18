@@ -59,7 +59,7 @@ All configuration options for customizing views are given below:
 |--------------------------|----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `enabled`                | `true`                                                               | When set to `false`, the view will not be registered in OpenTelemetry.                                                                                                                                                                                                                                                        |
 | `description`            | Generated based on name and aggregation                              | A textual description of the purpose of this view.                                                                                                                                                                                                                                                                            |
-| `aggregation`            | `LAST_VALUE`                                                         | Specifies how the metric data is aggregated in this view. There are OTel aggregations (`SUM`, `LAST_VALUE`, `HISTORGRAM`; `EXPONENTIAL_HISTOGRAM`) as well as custom aggregations (`PERCENTILES`, `SMOOTHED_AVERAGE`).                                                                                                        |
+| `aggregation`            | `LAST_VALUE`                                                         | Specifies how the metric data is aggregated in this view. There are OTel aggregations (`SUM`, `LAST_VALUE`, `HISTORGRAM`; `EXPONENTIAL_HISTOGRAM`) as well as custom aggregations (`QUANTILES`, `SMOOTHED_AVERAGE`).                                                                                                          |
 | `attributes`             | `{}`                                                                 | Specifies which attributes should be used for this view. `attributes` is a map containing attribute names as key and either `true` or false as value. For example the value `{service.name: false, my_attr: true}` would remove the common attribute `service.name` from the view and add the user attribute `my_attr` to it. |
 | `with-common-attributes` | `true`                                                               | If true, all [common tags](metrics/common-tags.md) will be used for this view. Individual attributes can still be disabled via the `attributes` option.                                                                                                                                                                       |
 | `cardinality-limit`      | `2000`                                                               | Specifies the maximum amount of unique combinations of attributes for this view.                                                                                                                                                                                                                                              |
@@ -88,7 +88,7 @@ All of them have to be specified when using time windowed views!
 Note that time-windowed view will always use `GAUGE` as instrument type. the specified `instrument-type` of 
 the [metric configuration](#metrics) will be ignored for such views.
 
-### Percentiles View
+### Quantiles View
 
 OpenTelemetry itself does not provide support for computing percentiles of a given metric.
 However, the average value alone is not always useful when analyzing response times.
@@ -101,17 +101,17 @@ providing the possibility to compute percentiles for any metric on top of OpenTe
 
 The calculation of percentiles is done by keeping **all raw** observed values for a given metric in memory over a fixed time window.
 This time window can be configured using the `time-window` option of the view, which defaults to `15s`.
-You can use this feature by settings the `aggregation` of your view to `PERCENTILES`.
+You can use this feature by setting the `aggregation` of your view to `QUANTILES`.
 
-The percentiles to export can be defined via the additional `percentiles` option within the view:
+The percentiles to export can be defined via the additional `quantiles` option within the view:
 
-| Config Property | Default                   | Description                                                       |
-|-----------------|---------------------------|-------------------------------------------------------------------|
-| `percentiles`   | `[0,0.5,0.9,0.95,0.99,1]` | A list of percentiles between `0` and `1` to capture data points. |
+| Config Property | Default                   | Description                                                     |
+|-----------------|---------------------------|-----------------------------------------------------------------|
+| `quantiles`     | `[0,0.5,0.9,0.95,0.99,1]` | A list of quantiles between `0` and `1` to capture data points. |
 
 Whenever the recorded metrics are exported, inspectIT Ocelot computes the requested percentiles adhoc based on the 
 buffered values of the given metric.
-For example, when using the default time window of 15 seconds, the inspectIT Ocelot agent will expose the percentiles 
+For example, when using the default time window of 15 seconds, the inspectIT Ocelot will expose the percentiles 
 of the metric values observed within the last 15 seconds at the point of time when doing the export.
 For this reason, `time-window` property should always be **equal or greater** than your metrics scrape or export interval.
 
@@ -124,12 +124,12 @@ If this limit is exceeded, the percentiles will become meaningless due to data d
 
 #### Collecting Min and Max Values
 
-The percentiles aggregation of a view also allows the capturing of minimum and maximum values of metrics.
-This can be done by using the special percentiles `0` and `1`, which enables the export of the minimum and 
+The `QUANTILES` aggregation of a view also allows the capturing of minimum and maximum values of metrics.
+This can be done by using the special quantiles `0` and `1`, which enables the export of the minimum and 
 maximum observed value respectively.
 
 
-As an example, the following snippet defines a metric with the name `load/time` and a view `load/time/percentile`:
+As an example, the following snippet defines a metric with the name `load_time` and a view `load_time_quantiles`:
 The configuration has the effect of capturing the 50th and 95th percentile for values in a 1 minuted time window.
 Additionally, the minimum and maximum values for these time windows will be observed.
 
@@ -137,22 +137,22 @@ Additionally, the minimum and maximum values for these time windows will be obse
 inspectit:
   metrics:
     definitions:
-      '[load/time]':
+      load_time:
         unit: ms
         views:
-          '[load/time/percentile]':
-              aggregation: SMOOTHED_AVERAGE
+          load_time_quantiles:
+              aggregation: QUANTILES
               time-window: 1m
-              percentiles: [ 0.0, 0.5, 0.95, 1.0 ]
+              quantiles: [ 0.0, 0.5, 0.95, 1.0 ]
 ```
 
 ### Smoothed Average View
 
-In contrast to the percentiles, the smoothed-average view allows to drop values of a certain time window. 
+In contrast to the quantiles, the smoothed-average view allows to drop values of a certain time window. 
 This can be useful to deliberately remove outliers before averaging.
 
 :::note
-Please read the section on [Percentiles View](#percentiles-view) to get an insight into the data collection. The smoothed-average view is based on the same principle.
+Please read the section on [Quantiles View](#quantiles-view) to get an insight into the data collection. The smoothed-average view is based on the same principle.
 :::
 
 The actual [view configuration](#views) is extended by the following properties:
@@ -162,18 +162,18 @@ The actual [view configuration](#views) is extended by the following properties:
 | `drop-upper`          | `0.0`                            | Specifies the percentage of the highest values to be dropped before calculating the average. |
 | `drop-lower`          | `0.0`                            | Specifies the percentage of the lowest values to be dropped before calculating the average.  |
 
-As an example, the following snippet defines a metric with the name `load/time` and a view `load/time/smoothed`:
-The configuration has the effect of ordering the values in a 1 minute time window by size and dropping the upper 
+As an example, the following snippet defines a metric with the name `load_time` and a view `load_time_smoothed`:
+The configuration has the effect of ordering the values in a 1-minute time window by size and dropping the upper 
 10 percent before calculating the average.
 
 ```YAML
 inspectit:
   metrics:
     definitions:
-      '[load/time]':
+      load_time:
         unit: ms
         views:
-          '[load/time/smoothed]':
+          load_time_smoothed:
               aggregation: SMOOTHED_AVERAGE
               time-window: 1m
               drop-upper: 0.1
