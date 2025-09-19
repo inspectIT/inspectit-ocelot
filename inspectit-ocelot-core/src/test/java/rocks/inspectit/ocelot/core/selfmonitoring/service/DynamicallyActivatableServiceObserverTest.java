@@ -60,7 +60,7 @@ public class DynamicallyActivatableServiceObserverTest {
         @Test
         public void testAsJson() {
             setupTest();
-            String expectedJson = "{\"LoggingMetricExporterService\":false,\"MemoryMetricsRecorder\":true,\"HttpConfigurationPoller\":true,\"OtlpTraceExporterService\":false,\"DiskMetricsRecorder\":true,\"ActionMetricsRecorder\":false,\"PrometheusExporterService\":false,\"InstrumentationFeedbackService\":false,\"LoggingTraceExporterService\":false,\"GCMetricsRecorder\":true,\"InfluxExporterService\":false,\"OtlpMetricsExporterService\":false,\"JmxMetricsRecorder\":false,\"ProcessorMetricsRecorder\":true,\"ThreadMetricsRecorder\":true,\"AgentCommandService\":false,\"ConcurrentMetricsRecorder\":false,\"ConfigurationDirectoriesPoller\":false,\"LogPreloader\":false,\"ClassLoaderMetricsRecorder\":true,\"ZipkinExporterService\":false}";
+            String expectedJson = "{\"LoggingMetricExporterService\":false,\"MemoryMetricsRecorder\":true,\"HttpConfigurationPoller\":true,\"OtlpTraceExporterService\":false,\"DiskMetricsRecorder\":true,\"ActionMetricsRecorder\":false,\"PrometheusExporterService\":false,\"InstrumentationFeedbackService\":false,\"LoggingTraceExporterService\":false,\"GCMetricsRecorder\":true,\"OtlpMetricsExporterService\":false,\"JmxMetricsRecorder\":false,\"ProcessorMetricsRecorder\":true,\"ThreadMetricsRecorder\":true,\"AgentCommandService\":false,\"ConcurrentMetricsRecorder\":false,\"ConfigurationDirectoriesPoller\":false,\"LogPreloader\":false,\"ClassLoaderMetricsRecorder\":true,\"ZipkinExporterService\":false}";
 
             assertThat(serviceObserver.asJson()).isEqualTo(expectedJson);
         }
