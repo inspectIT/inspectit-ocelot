@@ -60,10 +60,6 @@ dependencies {
             libs.ioOpentelemetryOpentelemetrySdkMetrics,
             libs.ioOpentelemetryOpentelemetrySemconv,
             libs.ioOpentelemetryInstrumentationOpentelemetryResources,
-            // OC-OTel bridge
-            libs.ioOpentelemetryOpentelemetryOpencensusShim,
-
-
     )
     annotationProcessor libs.orgProjectlombokLombok
 
@@ -104,20 +100,16 @@ dependencies {
             libs.comGithubOshiOshiCore,
 
             // metrics exporters
-            libs.ioPrometheusSimpleclientHttpserver,
-            libs.rocksInspectitOpencensusInfluxdbExporter,
+            libs.ioPrometheusSimpleclientHttpserver, // TODO Replace?
 
-            // this overwrites version of guava that opencensus-impl pulls in transitively, too.
             libs.comGoogleGuava,
-            // we still need the OpenCensus SDK for the metric exporters to work, as the shim only includes opencensus-impl-core
-            libs.ioOpencensusOpencensusImpl,
 
-            // OpenTelemetry exporters
+            // opentelemetry exporters
             platform(libs.ioOpentelemetryOpentelemetryBom),
             libs.ioOpentelemetryOpentelemetryExporterLogging,
             libs.ioOpentelemetryOpentelemetryExporterZipkin,
             libs.ioOpentelemetryOpentelemetryExporterOtlp,
-            // Update okio, due to security concerns
+            // update okio, due to security concerns
             libs.comSquareupOkio,
 
             platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
@@ -134,7 +126,6 @@ dependencies {
             platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
             libs.ioOpentelemetryOpentelemetrySdk,
             libs.ioOpentelemetryOpentelemetrySdkMetrics,
-            libs.ioOpentelemetryOpentelemetryOpencensusShim,
             libs.ioOpentelemetryOpentelemetrySemconv,
             libs.ioOpentelemetryOpentelemetrySdkTesting,
             libs.ioOpentelemetryOpentelemetryProto,

@@ -52,10 +52,7 @@ dependencies {
             libs.chQosLogbackLogbackCore
     )
 
-    // the api is included as compile only because the opencensus api has to be decoupled
-    // from the inspectIT core to allow it to be pushed to the bootstrap
     compileOnly (
-            libs.ioOpencensusOpencensusApi,
             platform(libs.ioOpentelemetryOpentelemetryBom),
             libs.ioOpentelemetryOpentelemetrySdkMetrics,
     )

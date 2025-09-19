@@ -118,7 +118,6 @@ orgTestcontainersJunitJupiter = { module = "org.testcontainers:junit-jupiter", v
 orgYamlSnakeyaml = "org.yaml:snakeyaml:1.33"
 # No updates available, necessary for our custom logging PiccoloSaxEventRecorder in inspectit-ocelot-core
 piccolo = "piccolo:piccolo:1.0.3"
-rocksInspectitOpencensusInfluxdbExporter = "rocks.inspectit:opencensus-influxdb-exporter:1.2"
 
 [bundles]
 opentelemetry = [
