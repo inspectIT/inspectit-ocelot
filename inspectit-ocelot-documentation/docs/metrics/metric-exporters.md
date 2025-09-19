@@ -45,7 +45,7 @@ The following properties are nested properties below the `inspectit.exporters.me
 | `.host`    | `0.0.0.0`  | The hostname or network address to which the Prometheus HTTP server should bind.                                                          |
 | `.port`    | `8888`     | The port the Prometheus HTTP server should use.                                                                                           |
 
-> Don't forget to check [the official OpenTelemetry Prometheus exporter documentation](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/prometheus).
+> Don't forget to check [the official OpenTelemetry Prometheus exporter documentation](https://opentelemetry.io/docs/specs/otel/metrics/sdk_exporters/prometheus/).
 
 ## InfluxDB Exporter
 If enabled, metrics are pushed at a specified interval directly to a given InfluxDB v1.x instance.
@@ -85,18 +85,16 @@ The following properties are nested properties below the `inspectit.exporters.me
 |--------------------|-----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `.enabled`         | `IF_CONFIGURED`                         | If `ENABLED` or `IF_CONFIGURED`, the inspectIT Ocelot agent will try to start the OTLP gRPC metrics exporter.                                                                                                      |
 | `.endpoint`        | `null`                                  | Target to which the exporter is going to send metrics, e.g. `http://localhost:4317`                                                                                                                                |
-| `.protocol`        | `null`                                  | The transport protocol, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`.                                    |
+| `.protocol`        | `null`                                  | The transport protocol, see [OTel documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported protocols are `grpc` and `http/protobuf`.                                    |
 | `.export-interval` | refers to `inspectit.metrics.frequency` | Defines how often metrics are pushed to the endpoint.                                                                                                                                                              |
-| `.headers`         | `null`                                  | Key-value pairs to be used as headers associated with gRPC or HTTP requests, see [OTEL documentation](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md). |
-| `.compression`     | `NONE`                                  | The compression method, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported compression methods are `gzip` and `none`.                                   |
-| `.timeout`         | `10s`                                   | Maximum time the OTLP exporter will wait for each batch export, see [OTEL documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/).                                                |
+| `.headers`         | `null`                                  | Key-value pairs to be used as headers associated with gRPC or HTTP requests, see [OTel documentation](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md). |
+| `.compression`     | `NONE`                                  | The compression method, see [OTel documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/). Supported compression methods are `gzip` and `none`.                                   |
+| `.timeout`         | `10s`                                   | Maximum time the OTLP exporter will wait for each batch export, see [OTel documentation](https://opentelemetry.io/docs/reference/specification/protocol/exporter/).                                                |
 
-To make inspectIT Ocelot push the metrics via OTLP to, e.g. an OpenTelemetry Collector running on the same machine as the agent, the following JVM property can be used:
+To make inspectIT Ocelot push the metrics via OTLP to, e.g. an OpenTelemetry Collector running on the same machine as the agent, 
+the following JVM property can be used:
 
 ```
 -Dinspectit.exporters.metrics.otlp.endpoint=http://127.0.0.1:4317
 -Dinspectit.exporters.metrics.otlp.protocol=grpc
 ```
-
-> The property `preferredTemporality` was removed, since the aggregation temporality cannot be configured for metrics
-created via OpenCensus. Currently, we still use OpenCensus to record metrics and OpenTelemetry to create spans.

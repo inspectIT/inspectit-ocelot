@@ -5,24 +5,45 @@ title: Breaking Changes
 
 ## Breaking changes in 3.0.0
 
-### Full integration of OpenTelemetry
+### Full integration of native OpenTelemetry
 
 Starting with the current release, inspectIT Ocelot fully migrates from OpenCensus to [OpenTelemetry](https://github.com/open-telemetry).
-OpenCensus has been completely replaced by OpenTelemetry within the Java agent as well as the EUM server.
+OpenCensus has been completely replaced by OpenTelemetry within the **Java agent** as well as the **EUM server**.
 
-### Updated metrics definition
+### New metric definition
 
 TODO:
 
-- New metrics model
+- New metric definition model
 - New metric names (default metrics, self-monitoring)
-- Migration guide
 - New naming conventions?
+- New metrics output: https://opentelemetry.io/docs/specs/otel/metrics/data-model/
 
 ### InfluxDB exporter removed
 
 Since the previous InfluxDB exporter was specifically designed for OpenCensus,
-due to the migration to OpenTelemetry the exporter was fully removed. Please use the OTLP metrics exporter instead.
+due to the migration to OpenTelemetry the exporter was fully removed. Please use the other exporters instead.
+
+### Migration Guide
+
+#### Update metric definitions
+
+TODO
+
+#### Replace InfluxDB exporter
+
+Even tough inspectIT Ocelot does no longer offer a dedicated InfluxDB exporter, there a plenty other options to
+export metrics to InfluxDB.
+
+First, there is a [Prometheus Input Plugin](https://github.com/influxdata/telegraf/blob/master/plugins/inputs/prometheus/README.md) 
+for [Telegraf](https://github.com/influxdata/telegraf/tree/master), which is able to gather metrics from a Prometheus endpoint.
+You can enable the [Prometheus exporter](metrics/metric-exporters.md#prometheus-exporter) of inspectIT Ocelot and collect metrics via Telegraf from the configured endpoint.
+After that, Telegraf can further send the metrics to InfluxDB.
+
+Another alternative would be to use the [InfluxDB Exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/influxdbexporter/README.md) 
+of the [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector-contrib). 
+You can export metrics via the [OTLP exporter](metrics/metric-exporters.md#otlp-exporter-metrics) to the OTel collector. 
+After that, the collector will further send the metrics to InfluxDB.
 
 ## Breaking changes in 2.7.0
 
