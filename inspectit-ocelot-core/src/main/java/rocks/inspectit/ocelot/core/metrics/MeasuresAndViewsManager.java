@@ -13,10 +13,10 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.metrics.percentiles.PercentileViewManager;
+import rocks.inspectit.ocelot.core.metrics.timewindow.PercentileViewManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import javax.annotation.PostConstruct;
@@ -324,7 +324,7 @@ public class MeasuresAndViewsManager {
     /**
      * Collects the tags which should be used for the given view.
      * This function includes the common tags if requested,
-     * then applies the {@link ViewDefinitionSettings#getTags()}
+     * then applies the {@link ViewDefinitionSettings#getAttributes()}
      * and finally converts them to {@link TagKey}s.
      *
      * @param def the view definition for which the tags should be collected.
@@ -333,12 +333,12 @@ public class MeasuresAndViewsManager {
      */
     private Set<TagKey> getTagKeysForView(ViewDefinitionSettings def) {
         Set<TagKey> viewTags = new HashSet<>();
-        if (def.isWithCommonTags()) {
+        if (def.isWithCommonAttributes()) {
             commonTags.getCommonTagKeys().stream()
-                    .filter(t -> def.getTags().get(t.getName()) != Boolean.FALSE)
+                    .filter(t -> def.getAttributes().get(t.getName()) != Boolean.FALSE)
                     .forEach(viewTags::add);
         }
-        def.getTags().entrySet().stream()
+        def.getAttributes().entrySet().stream()
                 .filter(Map.Entry::getValue)
                 .map(Map.Entry::getKey)
                 .map(TagKey::create)

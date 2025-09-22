@@ -11,7 +11,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.jmx.JmxMetricsRecorderSettings;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
@@ -134,7 +134,7 @@ class JmxMetricsRecorderTest {
                 assertThat(metricDefinitionSettings.getType()).isEqualTo(MetricDefinitionSettings.MeasureType.DOUBLE);
                 assertThat(metricDefinitionSettings.getViews().values()).hasOnlyOneElementSatisfying(view -> {
                     assertThat(view.getAggregation()).isEqualTo(ViewDefinitionSettings.Aggregation.LAST_VALUE);
-                    assertThat(view.getTags()).isEmpty();
+                    assertThat(view.getAttributes()).isEmpty();
                     assertThat(view.getDescription()).isNotBlank();
                 });
             });

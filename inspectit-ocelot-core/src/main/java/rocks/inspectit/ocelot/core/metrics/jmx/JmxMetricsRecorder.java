@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.jmx.JmxMetricsRecorderSettings;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
 import rocks.inspectit.ocelot.core.metrics.system.AbstractPollingMetricsRecorder;
@@ -150,7 +150,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
         MetricDefinitionSettings definitionSettingsWithLastValueView = MetricDefinitionSettings.builder()
                 .description(attrDescription)
                 .unit("na")
-                .view(metricName, ViewDefinitionSettings.builder().tags(tags).build())
+                .view(metricName, ViewDefinitionSettings.builder().attributes(tags).build())
                 .build()
                 .getCopyWithDefaultsPopulated(metricName);
 

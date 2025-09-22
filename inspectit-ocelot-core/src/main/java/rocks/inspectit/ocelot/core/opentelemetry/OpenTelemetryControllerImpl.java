@@ -34,6 +34,7 @@ import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporte
 import rocks.inspectit.ocelot.core.opentelemetry.resource.ResourceAttributesProvider;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.DynamicSampler;
+import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
@@ -45,7 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The implementation of {@link IOpenTelemetryController}. The {@link OpenTelemetryControllerImpl} configures {@link GlobalOpenTelemetry}.
- * The individual {@link rocks.inspectit.ocelot.core.service.DynamicallyActivatableService services} register to and unregister from {@link OpenTelemetryControllerImpl this}.
+ * The individual {@link DynamicallyActivatableService services} register to and unregister from {@link OpenTelemetryControllerImpl this}.
  * <b>Important note:</b> {@link #shutdown() shutting down} the {@link OpenTelemetryControllerImpl} is final and cannot be revoked.
  */
 @Slf4j

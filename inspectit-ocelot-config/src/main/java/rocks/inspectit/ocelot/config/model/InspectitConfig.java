@@ -14,7 +14,7 @@ import rocks.inspectit.ocelot.config.model.privacy.PrivacySettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.InstrumentationFeedbackSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.LogPreloadingSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.SelfMonitoringSettings;
-import rocks.inspectit.ocelot.config.model.tags.TagsSettings;
+import rocks.inspectit.ocelot.config.model.attributes.AttributeSettings;
 import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.config.ui.UISettings;
 import rocks.inspectit.ocelot.config.validation.AdditionalValidation;
@@ -33,7 +33,7 @@ import javax.validation.constraints.NotBlank;
  * Note that in configuration files fields have to be referred to in kebab-case instead of camelCase!
  * <p>
  * Instances of this class should be treated as values, therefore the setters should never be called!
- * The setters have to be there to work with  the {@link org.springframework.boot.context.properties.bind.Binder}.
+ * The setters have to be there to work with the {@link org.springframework.boot.context.properties.bind.Binder}.
  *
  * @author Jonas Kunz
  */
@@ -49,10 +49,10 @@ public class InspectitConfig {
     private String serviceName;
 
     /**
-     * Common tags settings.
+     * Common attribute settings.
      */
     @Valid
-    private TagsSettings tags;
+    private AttributeSettings attributes;
 
     /**
      * Defines all configuration sources.
@@ -138,7 +138,7 @@ public class InspectitConfig {
     private EnvironmentSettings env;
 
     /**
-     * Allows all nested configs to evaluate context sensitive config properties regarding their correctness.
+     * Allows all nested configs to evaluate context-sensitive config properties regarding their correctness.
      *
      * @param vios the violation builder which is used to output violations
      */

@@ -14,7 +14,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.data.DataSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
@@ -67,7 +67,7 @@ public class PropagationMetaDataResolverTest {
         void commonTagPropagationCorrect() {
             MetricDefinitionSettings def = new MetricDefinitionSettings();
             ViewDefinitionSettings defView = new ViewDefinitionSettings();
-            defView.setTags(ImmutableMap.of("my_key", true, "removed_tag", false));
+            defView.setAttributes(ImmutableMap.of("my_key", true, "removed_tag", false));
             def.setViews(Collections.singletonMap("view", defView));
 
             resolver.collectTagsFromMetricDefinitions(Collections.singletonMap("metric", def), mockBuilder);
@@ -92,7 +92,7 @@ public class PropagationMetaDataResolverTest {
         void nullTags() {
             MetricDefinitionSettings def = new MetricDefinitionSettings();
             ViewDefinitionSettings defView = new ViewDefinitionSettings();
-            defView.setTags(null);
+            defView.setAttributes(null);
             def.setViews(Collections.singletonMap("view", defView));
 
             resolver.collectTagsFromMetricDefinitions(Collections.singletonMap("metric", def), mockBuilder);
@@ -224,7 +224,7 @@ public class PropagationMetaDataResolverTest {
 
             MetricDefinitionSettings def = new MetricDefinitionSettings();
             ViewDefinitionSettings defView = new ViewDefinitionSettings();
-            defView.setTags(ImmutableMap.of("metric_key", true));
+            defView.setAttributes(ImmutableMap.of("metric_key", true));
             def.setViews(Collections.singletonMap("view", defView));
             metricsSettings.setDefinitions(Collections.singletonMap("my_metric", def));
 
@@ -249,7 +249,7 @@ public class PropagationMetaDataResolverTest {
 
             MetricDefinitionSettings def = new MetricDefinitionSettings();
             ViewDefinitionSettings defView = new ViewDefinitionSettings();
-            defView.setTags(ImmutableMap.of("metric_key", true));
+            defView.setAttributes(ImmutableMap.of("metric_key", true));
             def.setViews(Collections.singletonMap("view", defView));
             metricsSettings.setDefinitions(Collections.singletonMap("my_metric", def));
 

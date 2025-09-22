@@ -11,8 +11,8 @@ import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings.MeasureType;
-import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings.Aggregation;
+import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings.Aggregation;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.ExporterServiceIntegrationTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
@@ -22,7 +22,7 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction.ExecutionContext;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics.MetricsRecorder;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
-import rocks.inspectit.ocelot.core.metrics.percentiles.PercentileViewManager;
+import rocks.inspectit.ocelot.core.metrics.timewindow.PercentileViewManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.time.Duration;
@@ -68,7 +68,7 @@ public class MeasureTagValueGuardIntTest extends ExporterServiceIntegrationTestB
         GlobalOpenTelemetry.resetForTest();
         ViewDefinitionSettings viewDefinition = new ViewDefinitionSettings();
         viewDefinition.setAggregation(Aggregation.SUM);
-        viewDefinition.setTags(Collections.singletonMap(TAG_KEY, true));
+        viewDefinition.setAttributes(Collections.singletonMap(TAG_KEY, true));
 
         MetricDefinitionSettings metricDefinition = new MetricDefinitionSettings();
         metricDefinition.setEnabled(true);

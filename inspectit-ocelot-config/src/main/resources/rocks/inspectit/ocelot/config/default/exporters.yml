@@ -15,28 +15,6 @@ inspectit:
         # the port on which the /metrics endpoint of prometheus will be started
         port: 8888
 
-      influx:
-        # Whether the exporter should be enabled, possible states are DISABLED, IF_CONFIGURED and ENABLED
-        enabled: IF_CONFIGURED
-        # the Url under which the InfluxDB can be accessed, e.g. http://localhost:8086
-        endpoint: null
-        # the export interval of the metrics
-        export-interval: ${inspectit.metrics.frequency}
-        # the database to write to
-        database: "inspectit"
-        # the retention policy to write to
-        retention-policy: "autogen"
-        # If true, the specified database will be created with the autogen retention policy
-        create-database: true
-        # If disabled, the raw values of each counter will be written to the InfluxDB on each export.
-        # When enabled, only the change of the counter in comparison to the previous export will be written.
-        # This difference will only be written if the counter has changed (=the difference is non-zero).
-        # This can greatly reduce the total data written to influx and makes writing queries easier.
-        counters-as-differences: true
-        # The size of the buffer for failed batches.
-        # E.g. if the exportInterval is 15s and the buffer-size is 4, the export will keep up to one minute of data in memory.
-        buffer-size: 40
-
       # settings used in LoggingMetricsExporterService for the LoggingMetricExporter (https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/logging)
       logging:
         enabled: DISABLED

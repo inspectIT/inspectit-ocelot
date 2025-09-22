@@ -12,9 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.metrics.percentiles.PercentileViewManager;
+import rocks.inspectit.ocelot.core.metrics.timewindow.PercentileViewManager;
 import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 
 import java.time.Duration;
@@ -211,7 +211,7 @@ public class MeasuresAndViewsManagerTest {
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
                     .unit("my-unit")
                     .view("custom-view", ViewDefinitionSettings.builder()
-                            .tag("my-tag", true)
+                            .attribute("my-tag", true)
                             .description("Cool view")
                             .aggregation(ViewDefinitionSettings.Aggregation.HISTOGRAM)
                             .bucketBoundaries(Arrays.asList(7.0, 42.0))
@@ -249,9 +249,9 @@ public class MeasuresAndViewsManagerTest {
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
                     .unit("my-unit")
                     .view("my-unit", ViewDefinitionSettings.builder()
-                            .withCommonTags(false)
-                            .tag("my-tag", true)
-                            .tag("disabled-tag", false)
+                            .withCommonAttributes(false)
+                            .attribute("my-tag", true)
+                            .attribute("disabled-tag", false)
                             .build())
                     .build()
                     .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
@@ -272,8 +272,8 @@ public class MeasuresAndViewsManagerTest {
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
                     .unit("my-unit")
                     .view("my-unit", ViewDefinitionSettings.builder()
-                            .tag("my-tag", true)
-                            .tag("common-A", false)
+                            .attribute("my-tag", true)
+                            .attribute("common-A", false)
                             .build())
                     .build()
                     .getCopyWithDefaultsPopulated(metricName, Duration.ofMillis(123));
@@ -367,7 +367,7 @@ public class MeasuresAndViewsManagerTest {
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
                     .unit("my-unit")
                     .view("custom-view", ViewDefinitionSettings.builder()
-                            .tag("my-tag", true)
+                            .attribute("my-tag", true)
                             .description("Cool view")
                             .aggregation(ViewDefinitionSettings.Aggregation.QUANTILES)
                             .quantiles(Arrays.asList(0.0, 0.5))
@@ -405,7 +405,7 @@ public class MeasuresAndViewsManagerTest {
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
                     .unit("my-unit")
                     .view("custom-view", ViewDefinitionSettings.builder()
-                            .tag("my-tag", true)
+                            .attribute("my-tag", true)
                             .description("Cool view")
                             .aggregation(ViewDefinitionSettings.Aggregation.QUANTILES)
                             .quantiles(Arrays.asList(0.0, 0.5))
@@ -442,7 +442,7 @@ public class MeasuresAndViewsManagerTest {
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
                     .unit("my-unit")
                     .view("custom-view", ViewDefinitionSettings.builder()
-                            .tag("my-tag", true)
+                            .attribute("my-tag", true)
                             .description("Cool view")
                             .aggregation(ViewDefinitionSettings.Aggregation.SUM)
                             .build())
@@ -463,7 +463,7 @@ public class MeasuresAndViewsManagerTest {
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
                     .unit("my-unit")
                     .view("custom-view", ViewDefinitionSettings.builder()
-                            .tag("my-tag", true)
+                            .attribute("my-tag", true)
                             .description("Cool view")
                             .aggregation(ViewDefinitionSettings.Aggregation.QUANTILES)
                             .build())

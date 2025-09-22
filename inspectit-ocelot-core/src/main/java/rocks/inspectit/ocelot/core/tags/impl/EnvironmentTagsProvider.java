@@ -4,7 +4,7 @@ import io.opentelemetry.semconv.ServiceAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.model.tags.providers.EnvironmentTagsProviderSettings;
+import rocks.inspectit.ocelot.config.model.attributes.providers.EnvironmentAttributesProviderSettings;
 import rocks.inspectit.ocelot.core.tags.ICommonTagsProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
@@ -27,7 +27,7 @@ public class EnvironmentTagsProvider implements ICommonTagsProvider {
 
     @Override
     public Map<String, String> getTags(InspectitConfig configuration) {
-        @Valid EnvironmentTagsProviderSettings conf = configuration.getTags().getProviders().getEnvironment();
+        @Valid EnvironmentAttributesProviderSettings conf = configuration.getAttributes().getProviders().getEnvironment();
         if (conf.isEnabled()) {
             Map<String, String> envTags = new HashMap<>();
 

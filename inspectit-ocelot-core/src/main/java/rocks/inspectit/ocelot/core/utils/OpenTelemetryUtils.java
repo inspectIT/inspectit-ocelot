@@ -102,7 +102,8 @@ public class OpenTelemetryUtils {
     }
 
     /**
-     * Gets the {@link OpenTelemetry} registered at {@link GlobalOpenTelemetry#globalOpenTelemetry} without calling {@link GlobalOpenTelemetry#get()} to avoid that it is assigned to {@link OpenTelemetry#noop()} on the first call.
+     * Gets the {@link OpenTelemetry} registered at {@link GlobalOpenTelemetry#globalOpenTelemetry}
+     * without calling {@link GlobalOpenTelemetry#get()} to avoid that it is assigned to {@link OpenTelemetry#noop()} on the first call.
      *
      * @return The {@link OpenTelemetry} registered at {@link GlobalOpenTelemetry#globalOpenTelemetry}
      */

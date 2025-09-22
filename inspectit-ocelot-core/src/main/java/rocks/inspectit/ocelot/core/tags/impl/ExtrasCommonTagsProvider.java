@@ -20,7 +20,7 @@ public class ExtrasCommonTagsProvider implements ICommonTagsProvider {
 
     @Override
     public Map<String, String> getTags(InspectitConfig configuration) {
-        return configuration.getTags().getExtra();
+        return configuration.getAttributes().getExtra();
     }
 
 }

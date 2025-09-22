@@ -1,11 +1,11 @@
-package rocks.inspectit.ocelot.config.model.tags.providers;
+package rocks.inspectit.ocelot.config.model.attributes.providers;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class EnvironmentTagsProviderSettings {
+public class EnvironmentAttributesProviderSettings {
 
     /**
      * If providers is enabled.
@@ -21,5 +21,4 @@ public class EnvironmentTagsProviderSettings {
      * If true tries to resolve the host address using {@link java.net.InetAddress}.
      */
     private boolean resolveHostAddress;
-
 }
