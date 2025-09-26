@@ -100,21 +100,17 @@ dependencies {
             // collect system info
             libs.comGithubOshiOshiCore,
 
-            // metrics exporters
-            libs.ioPrometheusSimpleclientHttpserver, // TODO Replace?
-
             libs.comGoogleGuava,
 
             // opentelemetry exporters
             platform(libs.ioOpentelemetryOpentelemetryBom),
+            platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
+            libs.ioOpentelemetryOpentelemetryExporterPrometheus,
             libs.ioOpentelemetryOpentelemetryExporterLogging,
             libs.ioOpentelemetryOpentelemetryExporterZipkin,
             libs.ioOpentelemetryOpentelemetryExporterOtlp,
             // update okio, due to security concerns
             libs.comSquareupOkio,
-
-            platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
-            libs.ioOpentelemetryOpentelemetryExporterPrometheus,
 
             // bytecode manipulation
             libs.netBytebuddyByteBuddy,
