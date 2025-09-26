@@ -34,7 +34,6 @@ import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
 import rocks.inspectit.ocelot.core.testutils.Dummy;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
@@ -133,8 +132,8 @@ public class MethodHookGeneratorTest {
             MetricAccessor accessor = generator.buildMetricAccessor(settings);
 
             assertThat(accessor.getVariableAccessor()).isSameAs(mockAccessor);
-            assertThat(accessor.getConstantTags()).isEmpty();
-            assertThat(accessor.getDataTagAccessors()).isEmpty();
+            assertThat(accessor.getConstantAttributes()).isEmpty();
+            assertThat(accessor.getDataAttributeAccessors()).isEmpty();
         }
 
         @Test
@@ -146,8 +145,8 @@ public class MethodHookGeneratorTest {
             MetricAccessor accessor = generator.buildMetricAccessor(settings);
 
             assertThat(accessor.getVariableAccessor()).isSameAs(mockAccessor);
-            assertThat(accessor.getConstantTags()).isEmpty();
-            assertThat(accessor.getDataTagAccessors()).isEmpty();
+            assertThat(accessor.getConstantAttributes()).isEmpty();
+            assertThat(accessor.getDataAttributeAccessors()).isEmpty();
         }
 
         @Test
@@ -160,8 +159,8 @@ public class MethodHookGeneratorTest {
             MetricAccessor accessor = generator.buildMetricAccessor(settings);
 
             assertThat(accessor.getVariableAccessor()).isSameAs(mockAccessor);
-            assertThat(accessor.getConstantTags()).containsOnly(entry("tag-key", "tag-key"));
-            assertThat(accessor.getDataTagAccessors()).isEmpty();
+            assertThat(accessor.getConstantAttributes()).containsOnly(entry("tag-key", "tag-key"));
+            assertThat(accessor.getDataAttributeAccessors()).isEmpty();
         }
 
         @Test
@@ -176,8 +175,8 @@ public class MethodHookGeneratorTest {
             MetricAccessor accessor = generator.buildMetricAccessor(settings);
 
             assertThat(accessor.getVariableAccessor()).isSameAs(mockAccessorA);
-            assertThat(accessor.getConstantTags()).isEmpty();
-            assertThat(accessor.getDataTagAccessors()).containsOnly(entry("tag-key", mockAccessorB));
+            assertThat(accessor.getConstantAttributes()).isEmpty();
+            assertThat(accessor.getDataAttributeAccessors()).containsOnly(entry("tag-key", mockAccessorB));
         }
     }
 
@@ -261,7 +260,7 @@ public class MethodHookGeneratorTest {
 
         @Test
         public void verifyTagsHaveBeenAdded() {
-            when(environment.getCurrentConfig().getTracing().isAddMetricTags()).thenReturn(true);
+            when(environment.getCurrentConfig().getTracing().isAddMetricAttributes()).thenReturn(true);
             VariableAccessor tracingAccessor = (context) -> "tracing-text";
             VariableAccessor dataAccessor = (context) -> "data-text";
             VariableAccessor constantAccessor = (context) -> "constant-text";
@@ -296,7 +295,7 @@ public class MethodHookGeneratorTest {
 
         @Test
         public void verifyNoTagsHaveBeenAdded() {
-            when(environment.getCurrentConfig().getTracing().isAddMetricTags()).thenReturn(false);
+            when(environment.getCurrentConfig().getTracing().isAddMetricAttributes()).thenReturn(false);
             VariableAccessor tracingAccessor = (context) -> "tracing-text";
             when(variableAccessorFactory.getVariableAccessor("tracing-value")).thenReturn(tracingAccessor);
             Map<String, VariableAccessor> expectedResult = new HashMap<>();
@@ -325,7 +324,7 @@ public class MethodHookGeneratorTest {
 
         @Test
         void verifyTracingOverwritesMetrics() {
-            when(environment.getCurrentConfig().getTracing().isAddMetricTags()).thenReturn(true);
+            when(environment.getCurrentConfig().getTracing().isAddMetricAttributes()).thenReturn(true);
             VariableAccessor tracingAccessor = (context) -> "tracing-text";
             when(variableAccessorFactory.getVariableAccessor("tracing-value")).thenReturn(tracingAccessor);
             Map<String, VariableAccessor> expectedResult = new HashMap<>();
@@ -354,7 +353,7 @@ public class MethodHookGeneratorTest {
 
         @Test
         void verifyDataTagsOverwriteConstantTags() {
-            when(environment.getCurrentConfig().getTracing().isAddMetricTags()).thenReturn(true);
+            when(environment.getCurrentConfig().getTracing().isAddMetricAttributes()).thenReturn(true);
             VariableAccessor dataAccessor = (context) -> "data-text";
             when(variableAccessorFactory.getVariableAccessor("data-value")).thenReturn(dataAccessor);
             Map<String, VariableAccessor> expectedResult = new HashMap<>();
@@ -383,7 +382,7 @@ public class MethodHookGeneratorTest {
 
         @Test
         void verifyOnlyDataTags() {
-            when(environment.getCurrentConfig().getTracing().isAddMetricTags()).thenReturn(true);
+            when(environment.getCurrentConfig().getTracing().isAddMetricAttributes()).thenReturn(true);
             VariableAccessor dataAccessor = (context) -> "data-text";
             when(variableAccessorFactory.getVariableAccessor("data-value")).thenReturn(dataAccessor);
             Map<String, VariableAccessor> expectedResult = new HashMap<>();
@@ -412,7 +411,7 @@ public class MethodHookGeneratorTest {
 
         @Test
         void verifyOnlyConstantTags() {
-            when(environment.getCurrentConfig().getTracing().isAddMetricTags()).thenReturn(true);
+            when(environment.getCurrentConfig().getTracing().isAddMetricAttributes()).thenReturn(true);
             VariableAccessor constantAccessor = (context) -> "constant-text";
             when(variableAccessorFactory.getConstantAccessor(any())).thenReturn(constantAccessor);
             Map<String, VariableAccessor> expectedResult = new HashMap<>();
@@ -441,7 +440,7 @@ public class MethodHookGeneratorTest {
 
         @Test
         void verifyTagsOfMultipleMetrics() {
-            when(environment.getCurrentConfig().getTracing().isAddMetricTags()).thenReturn(true);
+            when(environment.getCurrentConfig().getTracing().isAddMetricAttributes()).thenReturn(true);
             VariableAccessor tracingAccessor = (context) -> "tracing-text";
             VariableAccessor dataAccessor1 = (context) -> "data-text-1";
             VariableAccessor dataAccessor2 = (context) -> "data-text-2";

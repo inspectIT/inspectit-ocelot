@@ -97,20 +97,20 @@ public class MetricsSettings {
 
     @AdditionalValidation
     public void noDuplicateViewNames(ViolationBuilder vios) {
-        Map<String, String> viewsToMeasuresMap = new HashMap<>();
-        definitions.forEach((measure, def) -> {
-            val views = def.getCopyWithDefaultsPopulated(measure, Duration.ZERO).getViews();
+        Map<String, String> viewsToMetricsMap = new HashMap<>();
+        definitions.forEach((metric, def) -> {
+            val views = def.getCopyWithDefaultsPopulated(metric).getViews();
             if (!CollectionUtils.isEmpty(views)) {
                 views.forEach((view, viewDef) -> {
                     if (viewDef.isEnabled()) {
-                        if (viewsToMeasuresMap.containsKey(view)) {
-                            vios.message("View with name '{view}' is defined for both measures '{m1}' an '{m2}'")
+                        if (viewsToMetricsMap.containsKey(view)) {
+                            vios.message("View with name '{view}' is defined for both metrics '{m1}' an '{m2}'")
                                     .parameter("view", view)
-                                    .parameter("m1", viewsToMeasuresMap.get(view))
-                                    .parameter("m2", measure)
+                                    .parameter("m1", viewsToMetricsMap.get(view))
+                                    .parameter("m2", metric)
                                     .buildAndPublish();
                         } else {
-                            viewsToMeasuresMap.put(view, measure);
+                            viewsToMetricsMap.put(view, metric);
                         }
                     }
                 });

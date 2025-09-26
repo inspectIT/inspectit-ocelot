@@ -41,9 +41,8 @@ public class OtlpMetricsExporterSettings {
     /**
      * The time period over which metrics should be aggregated.
      * Valid values are CUMULATIVE and DELTA
-     * NOTE: Removed, since the temporality will not be applied to OpenCensus metrics
      */
-    //private AggregationTemporality preferredTemporality;
+    private AggregationTemporality preferredTemporality;
 
     /**
      * Key-value pairs to be used as headers associated with gRPC or HTTP requests.
@@ -63,9 +62,7 @@ public class OtlpMetricsExporterSettings {
 
     /**
      * Gets the OTLP metrics endpoint. The endpoint is padded with 'http' to meet OTEL's requirement that the URI needs to start with 'http://' or 'https://'.
-     * E.g., if you set the endpoint to 'localhost:4317', it will be returned as 'http://localhost:4317'.
-     *
-     * @return
+     * E.g., if you set the endpoint to 'localhost:4317', it will be returned as 'http://localhost:4317'
      */
     public String getEndpoint() {
         return EndpointUtils.padEndpoint(endpoint);

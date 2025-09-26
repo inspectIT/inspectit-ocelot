@@ -14,7 +14,7 @@ import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSe
 import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.jmx.JmxMetricsRecorderSettings;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 
 import java.util.*;
 
@@ -33,11 +33,11 @@ class JmxMetricsRecorderTest {
     MeasuresAndViewsManager measuresManager;
 
     @Mock
-    CommonTagsManager commonTagsManager;
+    CommonAttributesManager commonAttributesManager;
 
     @BeforeEach
     public void initMocks() {
-        jmxMetricsRecorder = new JmxMetricsRecorder(tagger, measuresManager, commonTagsManager);
+        jmxMetricsRecorder = new JmxMetricsRecorder(tagger, measuresManager, commonAttributesManager);
     }
 
     @Nested
@@ -66,7 +66,7 @@ class JmxMetricsRecorderTest {
             verify(measuresManager).getMeasureDouble(expectedMeasureName);
             verify(tagger).currentBuilder();
             verify(measuresManager).tryRecordingMeasurement(expectedMeasureName, value, tagContext);
-            verifyNoMoreInteractions(measuresManager, commonTagsManager, tagger);
+            verifyNoMoreInteractions(measuresManager, commonAttributesManager, tagger);
         }
 
         @Test
@@ -85,7 +85,7 @@ class JmxMetricsRecorderTest {
             verify(measuresManager).getMeasureDouble(expectedMeasureName);
             verify(tagger).currentBuilder();
             verify(measuresManager).tryRecordingMeasurement(expectedMeasureName, 1d, tagContext);
-            verifyNoMoreInteractions(measuresManager, commonTagsManager, tagger);
+            verifyNoMoreInteractions(measuresManager, commonAttributesManager, tagger);
         }
 
         @Test
@@ -104,7 +104,7 @@ class JmxMetricsRecorderTest {
             verify(measuresManager).getMeasureDouble(expectedMeasureName);
             verify(tagger).currentBuilder();
             verify(measuresManager).tryRecordingMeasurement(expectedMeasureName, 0d, tagContext);
-            verifyNoMoreInteractions(measuresManager, commonTagsManager, tagger);
+            verifyNoMoreInteractions(measuresManager, commonAttributesManager, tagger);
         }
 
         @Test
@@ -126,7 +126,7 @@ class JmxMetricsRecorderTest {
             verify(measuresManager).addOrUpdateAndCacheMeasureWithViews(eq(expectedMeasureName), definitionCaptor.capture());
             verify(tagger).currentBuilder();
             verify(measuresManager).tryRecordingMeasurement(expectedMeasureName, value, tagContext);
-            verifyNoMoreInteractions(measuresManager, commonTagsManager, tagger);
+            verifyNoMoreInteractions(measuresManager, commonAttributesManager, tagger);
 
             assertThat(definitionCaptor.getValue()).satisfies(metricDefinitionSettings -> {
                 assertThat(metricDefinitionSettings.getDescription()).isEqualTo("desc");
@@ -170,21 +170,21 @@ class JmxMetricsRecorderTest {
             verify(measuresManager).getMeasureDouble(expectedMeasureName);
             verify(tagger).currentBuilder();
             verify(measuresManager).tryRecordingMeasurement(expectedMeasureName, value, tagContext);
-            verifyNoMoreInteractions(measuresManager, commonTagsManager, tagger);
+            verifyNoMoreInteractions(measuresManager, commonAttributesManager, tagger);
         }
 
         @Test
         public void valueNegative() {
             jmxMetricsRecorder.recordBean(null, null, null, null, null, null, -1d);
 
-            verifyNoMoreInteractions(measuresManager, commonTagsManager);
+            verifyNoMoreInteractions(measuresManager, commonAttributesManager);
         }
 
         @Test
         public void valueNotNumber() {
             jmxMetricsRecorder.recordBean(null, null, null, null, null, null, "something");
 
-            verifyNoMoreInteractions(measuresManager, commonTagsManager);
+            verifyNoMoreInteractions(measuresManager, commonAttributesManager);
         }
 
     }

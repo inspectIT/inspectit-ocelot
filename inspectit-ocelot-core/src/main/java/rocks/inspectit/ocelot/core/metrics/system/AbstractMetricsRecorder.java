@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
-import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.core.metrics.InstrumentManager;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 
 /**
  * Base class for dynamically enabled metrics recorders.
@@ -15,13 +15,12 @@ import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
 public abstract class AbstractMetricsRecorder extends DynamicallyActivatableService {
 
     @Autowired
-    protected MeasuresAndViewsManager measureManager;
+    protected InstrumentManager instrumentManager;
 
     @Autowired
-    protected CommonTagsManager commonTags;
+    protected CommonAttributesManager commonAttributes;
 
     /**
-     * Constructor.
      * This class already handles the dependency to the master switch.
      *
      * @param configDependency the configuration dependency of the recorder.
@@ -45,5 +44,4 @@ public abstract class AbstractMetricsRecorder extends DynamicallyActivatableServ
      * @return true if the recorder should be enabled
      */
     protected abstract boolean checkEnabledForConfig(MetricsSettings ms);
-
 }

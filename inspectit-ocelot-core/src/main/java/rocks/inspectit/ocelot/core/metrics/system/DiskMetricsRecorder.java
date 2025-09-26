@@ -33,14 +33,14 @@ public class DiskMetricsRecorder extends AbstractPollingMetricsRecorder {
     }
 
     @Override
-    protected void takeMeasurement(MetricsSettings config) {
+    protected void takeMetric(MetricsSettings config) {
         val disk = config.getDisk();
         if (disk.getEnabled().getOrDefault(FREE_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + FREE_METRIC_NAME,
+            instrumentManager.tryRecordingMetric(METRIC_NAME_PREFIX + FREE_METRIC_NAME,
                     new File("/").getFreeSpace());
         }
         if (disk.getEnabled().getOrDefault(TOTAL_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + TOTAL_METRIC_NAME,
+            instrumentManager.tryRecordingMetric(METRIC_NAME_PREFIX + TOTAL_METRIC_NAME,
                     new File("/").getTotalSpace());
         }
     }

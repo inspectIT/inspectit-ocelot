@@ -16,7 +16,7 @@ import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 
 import java.util.Collections;
 
@@ -32,7 +32,7 @@ public class PropagationMetaDataResolverTest {
     PropagationMetaData.Builder mockBuilder;
 
     @Mock
-    CommonTagsManager commonTags;
+    CommonAttributesManager commonTags;
 
     @InjectMocks
     PropagationMetaDataResolver resolver;
@@ -49,7 +49,7 @@ public class PropagationMetaDataResolverTest {
 
         @Test
         void commonTagPropagationCorrect() {
-            doReturn(Collections.singletonMap("my_key", "foo")).when(commonTags).getCommonTagValueMap();
+            doReturn(Collections.singletonMap("my_key", "foo")).when(commonTags).getCommonAttributeValueMap();
 
             resolver.collectCommonTags(mockBuilder);
 
@@ -181,7 +181,7 @@ public class PropagationMetaDataResolverTest {
             data.setIsTag(true);
             instr.setData(Collections.singletonMap("user_key", data));
 
-            doReturn(Collections.emptyMap()).when(commonTags).getCommonTagValueMap();
+            doReturn(Collections.emptyMap()).when(commonTags).getCommonAttributeValueMap();
 
             PropagationMetaData result = resolver.resolve(config);
 
@@ -200,7 +200,7 @@ public class PropagationMetaDataResolverTest {
             config.setInstrumentation(instr);
             config.setMetrics(metricsSettings);
 
-            doReturn(Collections.singletonMap("common_key", "value")).when(commonTags).getCommonTagValueMap();
+            doReturn(Collections.singletonMap("common_key", "value")).when(commonTags).getCommonAttributeValueMap();
 
             PropagationMetaData result = resolver.resolve(config);
 
@@ -220,7 +220,7 @@ public class PropagationMetaDataResolverTest {
             config.setInstrumentation(instr);
             config.setMetrics(metricsSettings);
 
-            doReturn(Collections.emptyMap()).when(commonTags).getCommonTagValueMap();
+            doReturn(Collections.emptyMap()).when(commonTags).getCommonAttributeValueMap();
 
             MetricDefinitionSettings def = new MetricDefinitionSettings();
             ViewDefinitionSettings defView = new ViewDefinitionSettings();
@@ -245,7 +245,7 @@ public class PropagationMetaDataResolverTest {
             config.setInstrumentation(instr);
             config.setMetrics(metricsSettings);
 
-            doReturn(Collections.singletonMap("common_key", "value")).when(commonTags).getCommonTagValueMap();
+            doReturn(Collections.singletonMap("common_key", "value")).when(commonTags).getCommonAttributeValueMap();
 
             MetricDefinitionSettings def = new MetricDefinitionSettings();
             ViewDefinitionSettings defView = new ViewDefinitionSettings();

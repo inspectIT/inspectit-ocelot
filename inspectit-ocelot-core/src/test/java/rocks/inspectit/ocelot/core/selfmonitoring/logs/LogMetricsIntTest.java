@@ -84,7 +84,7 @@ public class LogMetricsIntTest {
         appendEvent(createLoggingEvent(Level.ERROR, "error_test"));
         appendEvent(createLoggingEvent(Level.ERROR, "error_test"));
 
-        verify(monitoringService, times(2)).recordMeasurement(eq("logs"), eq(1L), eq(Collections.singletonMap("level", "ERROR")));
+        verify(monitoringService, times(2)).recordMetric(eq("logs"), eq(1L), eq(Collections.singletonMap("level", "ERROR")));
         verifyNoMoreInteractions(monitoringService);
     }
 }

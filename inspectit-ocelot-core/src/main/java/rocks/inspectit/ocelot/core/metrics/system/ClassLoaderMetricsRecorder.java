@@ -24,14 +24,14 @@ public class ClassLoaderMetricsRecorder extends AbstractPollingMetricsRecorder {
     }
 
     @Override
-    protected void takeMeasurement(MetricsSettings config) {
+    protected void takeMetric(MetricsSettings config) {
         val cl = config.getClassloader();
         if (cl.getEnabled().getOrDefault(LOADED_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + LOADED_METRIC_NAME,
+            instrumentManager.tryRecordingMetric(METRIC_NAME_PREFIX + LOADED_METRIC_NAME,
                     classLoadingBean.getLoadedClassCount());
         }
         if (cl.getEnabled().getOrDefault(UNLOADED_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + UNLOADED_METRIC_NAME,
+            instrumentManager.tryRecordingMetric(METRIC_NAME_PREFIX + UNLOADED_METRIC_NAME,
                     classLoadingBean.getUnloadedClassCount());
         }
     }

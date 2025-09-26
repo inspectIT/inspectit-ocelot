@@ -35,7 +35,7 @@ public class LogMetricsRecorderTest {
         @Test
         void incrementOneInfoMessage() {
             logMetricsRecorder.onLoggingEvent(infoEvent, null);
-            verify(selfMonitoringService, times(1)).recordMeasurement(anyString(), eq(1L), anyMap());
+            verify(selfMonitoringService, times(1)).recordMetric(anyString(), eq(1L), anyMap());
             verifyNoMoreInteractions(selfMonitoringService);
 
         }
@@ -47,7 +47,7 @@ public class LogMetricsRecorderTest {
                 logMetricsRecorder.onLoggingEvent(infoEvent, null);
             }
 
-            verify(selfMonitoringService, times(8)).recordMeasurement(anyString(), eq(1L), anyMap());
+            verify(selfMonitoringService, times(8)).recordMetric(anyString(), eq(1L), anyMap());
 
             verifyNoMoreInteractions(selfMonitoringService);
         }

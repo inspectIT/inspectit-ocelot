@@ -43,7 +43,7 @@ public class CustomTracer implements Tracer {
 
     @Override
     public SpanBuilder spanBuilder(String spanName) {
-        return tracerProvider.get(OpenTelemetryUtils.DEFAULT_INSTRUMENTATION_SCOPE_INFO, OpenTelemetryUtils.DEFAULT_INSTRUMENTATION_SCOPE_VERSION)
+        return tracerProvider.get(OpenTelemetryUtils.DEFAULT_INSTRUMENTATION_SCOPE_NAME, OpenTelemetryUtils.DEFAULT_INSTRUMENTATION_SCOPE_VERSION)
                 .spanBuilder(spanName);
     }
 }

@@ -15,7 +15,7 @@ import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSe
 import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.metrics.timewindow.PercentileViewManager;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 
 import java.time.Duration;
 import java.util.*;
@@ -35,7 +35,7 @@ public class MeasuresAndViewsManagerTest {
     InspectitEnvironment environment;
 
     @Mock
-    CommonTagsManager commonTagsManager;
+    CommonAttributesManager commonAttributesManager;
 
     @Mock
     StatsRecorder recorder;
@@ -176,7 +176,7 @@ public class MeasuresAndViewsManagerTest {
 
         @Test
         void testMetricWithDefaultsAndDefaultViewCreation() {
-            when(commonTagsManager.getCommonTagKeys()).thenReturn(Arrays.asList(commonTags));
+            when(commonAttributesManager.getCommonAttributeKeys()).thenReturn(Arrays.asList(commonTags));
 
             String metricName = "my-metric";
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
@@ -205,7 +205,7 @@ public class MeasuresAndViewsManagerTest {
 
         @Test
         void testMetricWithDefaultsAndCustomViewCreation() {
-            when(commonTagsManager.getCommonTagKeys()).thenReturn(Arrays.asList(commonTags));
+            when(commonAttributesManager.getCommonAttributeKeys()).thenReturn(Arrays.asList(commonTags));
 
             String metricName = "my-metric";
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
@@ -244,7 +244,7 @@ public class MeasuresAndViewsManagerTest {
 
         @Test
         void testCommonTagsCanBeDisabled() {
-            lenient().when(commonTagsManager.getCommonTagKeys()).thenReturn(Arrays.asList(commonTags));
+            lenient().when(commonAttributesManager.getCommonAttributeKeys()).thenReturn(Arrays.asList(commonTags));
             String metricName = "my-metric";
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
                     .unit("my-unit")
@@ -267,7 +267,7 @@ public class MeasuresAndViewsManagerTest {
 
         @Test
         void testCommonTagsCanBeOverridden() {
-            when(commonTagsManager.getCommonTagKeys()).thenReturn(Arrays.asList(commonTags));
+            when(commonAttributesManager.getCommonAttributeKeys()).thenReturn(Arrays.asList(commonTags));
             String metricName = "my-metric";
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
                     .unit("my-unit")
@@ -304,7 +304,7 @@ public class MeasuresAndViewsManagerTest {
 
         @Test
         void testExistingViewsAndMeasuresNotReRegistered() {
-            when(commonTagsManager.getCommonTagKeys()).thenReturn(Arrays.asList(commonTags));
+            when(commonAttributesManager.getCommonAttributeKeys()).thenReturn(Arrays.asList(commonTags));
 
             String metricName = "my-metric";
             Measure existingMeasure = Measure.MeasureLong.create(metricName, "abc", "def");
@@ -361,7 +361,7 @@ public class MeasuresAndViewsManagerTest {
 
         @Test
         void testQuantilesViewRegistrations() {
-            when(commonTagsManager.getCommonTagKeys()).thenReturn(Arrays.asList(commonTags));
+            when(commonAttributesManager.getCommonAttributeKeys()).thenReturn(Arrays.asList(commonTags));
 
             String metricName = "my-metric";
             MetricDefinitionSettings metricDefinition = MetricDefinitionSettings.builder()
@@ -398,7 +398,7 @@ public class MeasuresAndViewsManagerTest {
 
         @Test
         void testQuantilesViewUpdate() {
-            when(commonTagsManager.getCommonTagKeys()).thenReturn(Arrays.asList(commonTags));
+            when(commonAttributesManager.getCommonAttributeKeys()).thenReturn(Arrays.asList(commonTags));
             when(percentileViewManager.isViewRegistered("my-metric", "custom-view")).thenReturn(true);
 
             String metricName = "my-metric";

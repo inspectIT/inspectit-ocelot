@@ -10,20 +10,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.correlation.LogTraceCorrelator;
-import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
 import rocks.inspectit.ocelot.config.model.tracing.SampleMode;
 import rocks.inspectit.ocelot.core.instrumentation.autotracing.StackTraceSampler;
-import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodHook;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
-import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
+import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonAttributesToSpanAttributesManager;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
-
-import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -99,7 +93,7 @@ public class ContinueOrStartSpanActionTest {
         @Mock
         StackTraceSampler stackTraceSampler;
         @Mock
-        CommonTagsToAttributesManager commonTagsToAttributesManager;
+        CommonAttributesToSpanAttributesManager commonAttributesToSpanAttributesManager;
         @Mock
         InspectitContextImpl inspectitContext;
 
@@ -114,7 +108,7 @@ public class ContinueOrStartSpanActionTest {
                     .continueSpanCondition(x -> false)
                     .startSpanCondition(x -> true)
                     .stackTraceSampler(stackTraceSampler)
-                    .commonTagsToAttributesManager(commonTagsToAttributesManager)
+                    .commonAttributesToSpanAttributesManager(commonAttributesToSpanAttributesManager)
                     .build();
         }
 

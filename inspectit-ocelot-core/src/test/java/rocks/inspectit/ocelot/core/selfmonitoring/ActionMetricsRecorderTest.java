@@ -55,7 +55,7 @@ public class ActionMetricsRecorderTest extends SpringTestBase {
             recorder.record("my-action", 1000L);
 
             // verify that the execution time has been recorded
-            verify(selfMonitoringService, times(1)).recordMeasurement(anyString(), eq(1000L), anyMap());
+            verify(selfMonitoringService, times(1)).recordMetric(anyString(), eq(1000L), anyMap());
 
             // verify that no other unverified interactions are left
             verifyNoMoreInteractions(selfMonitoringService);
@@ -74,7 +74,7 @@ public class ActionMetricsRecorderTest extends SpringTestBase {
             recorder.record("my-action", 1000L);
 
             // verify execution time
-            verify(selfMonitoringService, times(1)).recordMeasurement(anyString(), eq(1000L), anyMap());
+            verify(selfMonitoringService, times(1)).recordMetric(anyString(), eq(1000L), anyMap());
 
             // verify that no other unverified interactions are left
             verifyNoMoreInteractions(selfMonitoringService);

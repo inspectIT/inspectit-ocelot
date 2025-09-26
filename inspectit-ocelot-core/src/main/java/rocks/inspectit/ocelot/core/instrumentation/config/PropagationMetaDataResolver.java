@@ -8,7 +8,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.data.DataSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 
 import java.util.Map;
 
@@ -19,7 +19,7 @@ import java.util.Map;
 public class PropagationMetaDataResolver {
 
     @Autowired
-    private CommonTagsManager commonTags;
+    private CommonAttributesManager commonTags;
 
     /**
      * Configures the {@link PropagationMetaData} based on all sources of settings in the given configuration.
@@ -39,7 +39,7 @@ public class PropagationMetaDataResolver {
 
     @VisibleForTesting
     void collectCommonTags(PropagationMetaData.Builder builder) {
-        commonTags.getCommonTagValueMap()
+        commonTags.getCommonAttributeValueMap()
                 .keySet()
                 .forEach(key -> builder
                         .setTag(key, true)

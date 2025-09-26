@@ -25,14 +25,14 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.actions.TracingHookActio
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics.StartInvocationAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.span.*;
-import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
-import rocks.inspectit.ocelot.core.metrics.MeasureTagValueGuard;
-import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonAttributesToSpanAttributesManager;
+import rocks.inspectit.ocelot.core.metrics.InstrumentManager;
+import rocks.inspectit.ocelot.core.metrics.MetricTagValueGuard;
 import rocks.inspectit.ocelot.core.metrics.concurrent.ConcurrentInvocationManager;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.OcelotSamplerUtils;
 import rocks.inspectit.ocelot.core.privacy.obfuscation.ObfuscationManager;
 import rocks.inspectit.ocelot.core.selfmonitoring.ActionScopeFactory;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,10 +54,10 @@ public class MethodHookGenerator {
     private ContextManager contextManager;
 
     @Autowired
-    private CommonTagsManager commonTagsManager;
+    private CommonAttributesManager commonAttributesManager;
 
     @Autowired
-    private MeasuresAndViewsManager metricsManager;
+    private InstrumentManager instrumentManager;
 
     @Autowired
     private ActionCallGenerator actionCallGenerator;
@@ -69,7 +69,7 @@ public class MethodHookGenerator {
     private ObfuscationManager obfuscationManager;
 
     @Autowired
-    private CommonTagsToAttributesManager commonTagsToAttributesManager;
+    private CommonAttributesToSpanAttributesManager commonAttributesToSpanAttributesManager;
 
     @Autowired
     private StackTraceSampler stackTraceSampler;
@@ -78,7 +78,7 @@ public class MethodHookGenerator {
     private ActionScopeFactory actionScopeFactory;
 
     @Autowired
-    private MeasureTagValueGuard tagValueGuard;
+    private MetricTagValueGuard tagGuard;
 
     @Autowired
     private ConcurrentInvocationManager concurrentInvocationManager;
@@ -140,7 +140,7 @@ public class MethodHookGenerator {
         if (TRUE.equals(tracing.getStartSpan()) || tracing.getContinueSpan() != null) {
 
             val actionBuilder = ContinueOrStartSpanAction.builder();
-            actionBuilder.commonTagsToAttributesManager(commonTagsToAttributesManager);
+            actionBuilder.commonAttributesToSpanAttributesManager(commonAttributesToSpanAttributesManager);
 
             if (TRUE.equals(tracing.getStartSpan())) {
                 VariableAccessor name = Optional.ofNullable(tracing.getName())
@@ -283,7 +283,7 @@ public class MethodHookGenerator {
             List<MetricAccessor> metricAccessors = metricRecordingSettings.stream()
                     .map(this::buildMetricAccessor)
                     .collect(Collectors.toList());
-            IHookAction recorder = new MetricsRecorder(metricAccessors, commonTagsManager, metricsManager, tagValueGuard);
+            IHookAction recorder = new MetricsRecorder(metricAccessors, tagGuard, instrumentManager);
 
             if (isTracingInternalActions() && config.isTraceExitHook()) {
                 recorder = TracingHookAction.wrap(recorder, null, "INTERNAL");
@@ -298,7 +298,7 @@ public class MethodHookGenerator {
      * @return Returns whether metrics tags should be added to tracing as attributes
      */
     private boolean addMetricsToTracing() {
-        return environment.getCurrentConfig().getTracing().isAddMetricTags();
+        return environment.getCurrentConfig().getTracing().isAddMetricAttributes();
     }
 
     /**

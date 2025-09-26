@@ -3,7 +3,6 @@ package io.opentelemetry.sdk.trace;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import lombok.extern.slf4j.Slf4j;
-import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 import rocks.inspectit.ocelot.core.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -60,7 +59,7 @@ public class OcelotSpanUtils {
     }
 
     /**
-     * Returns the {@link AnchoredClock} for the given {@link SdkSpan} or {@link io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl#otelSpan}
+     * Returns the {@link AnchoredClock} for the given {@link SdkSpan}
      *
      * @param span
      *
@@ -71,7 +70,7 @@ public class OcelotSpanUtils {
             throw new IllegalArgumentException(span.getClass() + " is not of type " + SDKSPAN_CLASS + " or " + OPENTELEMETRYSPANIMPL_CLASS);
         }
         try {
-            return SDKSPAN_CLOCK.get(SDKSPAN_CLASS.isInstance(span) ? span : OpenCensusShimUtils.getOtelSpan((io.opencensus.trace.Span) span));
+            return SDKSPAN_CLOCK.get(span);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }

@@ -34,7 +34,7 @@ public class MetricDefinitionSettings {
     private String unit;
 
     @Builder.Default
-    private int maxValuesPerTag = -1;
+    private int maxValuesPerAttribute = -1;
 
     @NotNull
     @Builder.Default

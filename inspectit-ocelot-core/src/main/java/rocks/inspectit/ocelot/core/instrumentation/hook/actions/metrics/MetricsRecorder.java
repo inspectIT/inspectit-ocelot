@@ -1,18 +1,17 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics;
 
-import io.opencensus.tags.TagContext;
+import io.opentelemetry.api.baggage.Baggage;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
-import rocks.inspectit.ocelot.core.metrics.MeasureTagValueGuard;
-import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.metrics.InstrumentManager;
+import rocks.inspectit.ocelot.core.metrics.MetricTagValueGuard;
 
 import java.util.List;
 
 /**
- * Hook action responsible for recording measurements at the exit of an instrumented method
+ * Hook action responsible for recording metrics at the exit of an instrumented method
  */
 @Value
 @Slf4j
@@ -21,22 +20,17 @@ public class MetricsRecorder implements IHookAction {
     /**
      * A list of metric accessors which will be used to find the value and tags for the metric.
      */
-    private final List<MetricAccessor> metrics;
+    List<MetricAccessor> metrics;
 
     /**
-     * Common tags manager needed for gathering common tags when recording metrics.
+     * Provides baggage, overwrites tag values if they exceed their configured limit.
      */
-    private CommonTagsManager commonTagsManager;
+    MetricTagValueGuard tagValueGuard;
 
     /**
-     * The manager to acquire the actual OpenCensus metrics from
+     * The manager to acquire the actual OpenTelemetry instruments from.
      */
-    private MeasuresAndViewsManager metricsManager;
-
-    /**
-     * Provides tag context. Overwrites tag values if they exceed their configured limit
-     */
-    private MeasureTagValueGuard tagValueGuard;
+    InstrumentManager instrumentManager;
 
     @Override
     public void execute(ExecutionContext context) {
@@ -46,8 +40,8 @@ public class MetricsRecorder implements IHookAction {
             // only record metrics where a value is present
             // this allows to disable the recording of a metric depending on the results of action executions
             if (value instanceof Number) {
-                TagContext tagContext = tagValueGuard.getTagContext(context, metricAccessor);
-                metricsManager.tryRecordingMeasurement(metricAccessor.getName(), (Number) value, tagContext);
+                Baggage baggage = tagValueGuard.getBaggage(context, metricAccessor);
+                instrumentManager.tryRecordingMetric(metricAccessor.getName(), (Number) value, baggage);
             }
         }
     }

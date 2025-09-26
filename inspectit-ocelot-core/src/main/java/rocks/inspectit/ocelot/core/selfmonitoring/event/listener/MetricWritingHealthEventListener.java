@@ -23,13 +23,13 @@ public class MetricWritingHealthEventListener implements HealthEventListener {
     void sendInitialHealthMetric() {
         HashMap<String, String> tags = new HashMap<>();
         tags.put("message", INITIAL_METRIC_MESSAGE);
-        selfMonitoringService.recordMeasurement("health", AgentHealth.OK.ordinal(), tags);
+        selfMonitoringService.recordMetric("health", AgentHealth.OK.ordinal(), tags);
     }
     @Override
     public void onAgentHealthEvent(AgentHealthChangedEvent event) {
         HashMap<String, String> tags = new HashMap<>();
         tags.put("message", event.getMessage());
         tags.put("source", event.getSource().getClass().getName());
-        selfMonitoringService.recordMeasurement("health", event.getNewHealth().ordinal(), tags);
+        selfMonitoringService.recordMetric("health", event.getNewHealth().ordinal(), tags);
     }
 }

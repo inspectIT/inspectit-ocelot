@@ -16,9 +16,9 @@ import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
-import rocks.inspectit.ocelot.core.metrics.MeasureTagValueGuard;
+import rocks.inspectit.ocelot.core.metrics.MetricTagValueGuard;
 import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
 public class MetricsRecorderTest extends SpringTestBase {
 
     @Mock
-    CommonTagsManager commonTagsManager;
+    CommonAttributesManager commonAttributesManager;
 
     @Mock
     MeasuresAndViewsManager metricsManager;
@@ -41,7 +41,7 @@ public class MetricsRecorderTest extends SpringTestBase {
 
     @Spy
     @InjectMocks
-    MeasureTagValueGuard tagValueGuard;
+    MetricTagValueGuard tagValueGuard;
 
     @Mock
     InspectitContextImpl inspectitContext;
@@ -51,7 +51,7 @@ public class MetricsRecorderTest extends SpringTestBase {
 
     @BeforeEach
     void setupMock() {
-        when(commonTagsManager.getCommonTagKeys()).thenReturn(Collections.emptyList());
+        when(commonAttributesManager.getCommonAttributeKeys()).thenReturn(Collections.emptyList());
         when(executionContext.getInspectitContext()).thenReturn(inspectitContext);
     }
 
@@ -63,7 +63,7 @@ public class MetricsRecorderTest extends SpringTestBase {
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(null);
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.emptyMap());
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonAttributesManager, metricsManager, tagValueGuard);
 
             rec.execute(executionContext);
 
@@ -89,7 +89,7 @@ public class MetricsRecorderTest extends SpringTestBase {
             MetricAccessor metricAccessorA = new MetricAccessor("my_metric1", dataA, Collections.emptyMap(), Collections.emptyMap());
             MetricAccessor metricAccessorB = new MetricAccessor("my_metric2", dataB, Collections.emptyMap(), Collections.emptyMap());
 
-            MetricsRecorder rec = new MetricsRecorder(Arrays.asList(metricAccessorA, metricAccessorB), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Arrays.asList(metricAccessorA, metricAccessorB), commonAttributesManager, metricsManager, tagValueGuard);
 
             rec.execute(executionContext);
 
@@ -111,13 +111,13 @@ public class MetricsRecorderTest extends SpringTestBase {
         @Test
         void commonTagsIncluded() {
             when(inspectitContext.getData("common")).thenReturn("overwrite");
-            when(commonTagsManager.getCommonTagKeys()).thenReturn(Collections.singletonList(TagKey.create("common")));
+            when(commonAttributesManager.getCommonAttributeKeys()).thenReturn(Collections.singletonList(TagKey.create("common")));
 
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.emptyMap());
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonAttributesManager, metricsManager, tagValueGuard);
 
             rec.execute(executionContext);
 
@@ -135,7 +135,7 @@ public class MetricsRecorderTest extends SpringTestBase {
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.singletonMap("constant", "tag"), Collections.emptyMap());
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonAttributesManager, metricsManager, tagValueGuard);
 
             rec.execute(executionContext);
 
@@ -155,7 +155,7 @@ public class MetricsRecorderTest extends SpringTestBase {
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.singletonMap("data", mockAccessor));
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonAttributesManager, metricsManager, tagValueGuard);
 
             rec.execute(executionContext);
 
@@ -173,7 +173,7 @@ public class MetricsRecorderTest extends SpringTestBase {
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.singletonMap("data", mockAccessor));
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonAttributesManager, metricsManager, tagValueGuard);
 
             rec.execute(executionContext);
 
@@ -209,7 +209,7 @@ public class MetricsRecorderTest extends SpringTestBase {
             dataTags2.put("existing2", mockAccessorC);
             MetricAccessor metricAccessorB = new MetricAccessor("my_metric2", dataB, Collections.singletonMap("cA", "200"), dataTags2);
 
-            MetricsRecorder rec = new MetricsRecorder(Arrays.asList(metricAccessorA, metricAccessorB), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Arrays.asList(metricAccessorA, metricAccessorB), commonAttributesManager, metricsManager, tagValueGuard);
 
             rec.execute(executionContext);
 
@@ -244,7 +244,7 @@ public class MetricsRecorderTest extends SpringTestBase {
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.singletonMap("data", "constant"), Collections.singletonMap("data", mockAccessor));
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonAttributesManager, metricsManager, tagValueGuard);
 
             rec.execute(executionContext);
 

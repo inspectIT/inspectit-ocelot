@@ -14,7 +14,7 @@ import rocks.inspectit.ocelot.bootstrap.context.IContextManager;
 import rocks.inspectit.ocelot.core.config.spring.BootstrapInitializerConfiguration;
 import rocks.inspectit.ocelot.core.instrumentation.config.InstrumentationConfigurationResolver;
 import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.Callable;
@@ -40,7 +40,7 @@ public class ContextManager implements IContextManager {
 
     private static final boolean IS_OPEN_CENSUS_ON_BOOTSTRAP = Tags.class.getClassLoader() == null;
 
-    private CommonTagsManager commonTagsManager;
+    private CommonAttributesManager commonAttributesManager;
 
     private PropagationSessionStorage sessionStorage;
 
@@ -57,8 +57,8 @@ public class ContextManager implements IContextManager {
      */
     private final ThreadLocal<Boolean> correlationFlag = ThreadLocal.withInitial(() -> false);
 
-    public ContextManager(CommonTagsManager commonTagsManager, PropagationSessionStorage sessionStorage, InstrumentationConfigurationResolver configProvider) {
-        this.commonTagsManager = commonTagsManager;
+    public ContextManager(CommonAttributesManager commonAttributesManager, PropagationSessionStorage sessionStorage, InstrumentationConfigurationResolver configProvider) {
+        this.commonAttributesManager = commonAttributesManager;
         this.sessionStorage = sessionStorage;
         this.configProvider = configProvider;
     }
@@ -107,7 +107,7 @@ public class ContextManager implements IContextManager {
 
     @Override
     public InspectitContextImpl enterNewContext() {
-        return InspectitContextImpl.createFromCurrent(commonTagsManager.getCommonTagValueMap(), configProvider.getCurrentConfig()
+        return InspectitContextImpl.createFromCurrent(commonAttributesManager.getCommonAttributeValueMap(), configProvider.getCurrentConfig()
                 .getPropagationMetaData(), sessionStorage, IS_OPEN_CENSUS_ON_BOOTSTRAP);
     }
 

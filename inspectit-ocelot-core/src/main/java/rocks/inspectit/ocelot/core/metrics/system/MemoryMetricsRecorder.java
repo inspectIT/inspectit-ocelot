@@ -1,13 +1,10 @@
 package rocks.inspectit.ocelot.core.metrics.system;
 
-import io.opencensus.tags.TagContext;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.Tagger;
+import io.opentelemetry.api.baggage.Baggage;
 import lombok.val;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
-import rocks.inspectit.ocelot.core.tags.TagUtils;
+import rocks.inspectit.ocelot.core.utils.AttributeUtils;
 
 import java.lang.management.BufferPoolMXBean;
 import java.lang.management.ManagementFactory;
@@ -43,19 +40,16 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     private static final String BUFFER_CAPACITY_METRIC_FULL_NAME = "jvm/buffer/total/capacity";
 
-    private TagKey idTagKey = TagKey.create("id");
+    private final String idKey = "id";
 
-    private TagKey areaTagKey = TagKey.create("area");
-
-    @Autowired
-    private Tagger tagger;
+    private final String areaKey = "area";
 
     public MemoryMetricsRecorder() {
         super("metrics.memory");
     }
 
     @Override
-    protected void takeMeasurement(MetricsSettings config) {
+    protected void takeMetric(MetricsSettings config) {
         val enabled = config.getMemory().getEnabled();
         recordMemoryMetrics(enabled);
         recordBufferMetrics(enabled);
@@ -78,25 +72,25 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
         if (usedEnabled || committedEnabled || maxEnabled) {
             for (MemoryPoolMXBean memoryPoolBean : ManagementFactory.getPlatformMXBeans(MemoryPoolMXBean.class)) {
                 String area = MemoryType.HEAP.equals(memoryPoolBean.getType()) ? "heap" : "nonheap";
-                TagContext tags = tagger.currentBuilder()
-                        .putLocal(idTagKey, TagUtils.createTagValue(idTagKey.getName(), memoryPoolBean.getName()))
-                        .putLocal(areaTagKey, TagUtils.createTagValue(areaTagKey.getName(), area))
+                Baggage baggage = Baggage.current().toBuilder()
+                        .put(idKey, AttributeUtils.resolveValue(idKey, memoryPoolBean.getName()))
+                        .put(areaKey, AttributeUtils.resolveValue(areaKey, area))
                         .build();
 
                 if (usedEnabled) {
-                    measureManager.tryRecordingMeasurement(USED_METRIC_FULL_NAME, memoryPoolBean.getUsage()
-                            .getUsed(), tags);
+                    instrumentManager.tryRecordingMetric(USED_METRIC_FULL_NAME, memoryPoolBean.getUsage()
+                            .getUsed(), baggage);
                 }
                 if (committedEnabled) {
-                    measureManager.tryRecordingMeasurement(COMMITTED_METRIC_FULL_NAME, memoryPoolBean.getUsage()
-                            .getCommitted(), tags);
+                    instrumentManager.tryRecordingMetric(COMMITTED_METRIC_FULL_NAME, memoryPoolBean.getUsage()
+                            .getCommitted(), baggage);
                 }
                 if (maxEnabled) {
                     long max = memoryPoolBean.getUsage().getMax();
-                    if (max == -1) { //max memory not set
-                        max = 0L; //negative values are not supported by OpenCensus
+                    if (max == -1) { // max memory not set
+                        max = 0L;    // negative values are not supported
                     }
-                    measureManager.tryRecordingMeasurement(MAX_METRIC_FULL_NAME, max, tags);
+                    instrumentManager.tryRecordingMetric(MAX_METRIC_FULL_NAME, max, baggage);
 
                 }
             }
@@ -109,18 +103,18 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
         boolean bufferCapacityEnabled = enabledMetrics.getOrDefault(BUFFER_CAPACITY_METRIC_NAME, false);
         if (bufferCountEnabled || bufferUsedEnabled || bufferCapacityEnabled) {
             for (BufferPoolMXBean bufferPoolBean : ManagementFactory.getPlatformMXBeans(BufferPoolMXBean.class)) {
-                TagContext tags = tagger.currentBuilder()
-                        .putLocal(idTagKey, TagUtils.createTagValue(idTagKey.getName(), bufferPoolBean.getName()))
+                Baggage baggage = Baggage.current().toBuilder()
+                        .put(idKey, AttributeUtils.resolveValue(idKey, bufferPoolBean.getName()))
                         .build();
 
                 if (bufferCountEnabled) {
-                    measureManager.tryRecordingMeasurement(BUFFER_COUNT_METRIC_FULL_NAME, bufferPoolBean.getCount(), tags);
+                    instrumentManager.tryRecordingMetric(BUFFER_COUNT_METRIC_FULL_NAME, bufferPoolBean.getCount(), baggage);
                 }
                 if (bufferUsedEnabled) {
-                    measureManager.tryRecordingMeasurement(BUFFER_USED_METRIC_FULL_NAME, bufferPoolBean.getMemoryUsed(), tags);
+                    instrumentManager.tryRecordingMetric(BUFFER_USED_METRIC_FULL_NAME, bufferPoolBean.getMemoryUsed(), baggage);
                 }
                 if (bufferCapacityEnabled) {
-                    measureManager.tryRecordingMeasurement(BUFFER_CAPACITY_METRIC_FULL_NAME, bufferPoolBean.getTotalCapacity(), tags);
+                    instrumentManager.tryRecordingMetric(BUFFER_CAPACITY_METRIC_FULL_NAME, bufferPoolBean.getTotalCapacity(), baggage);
                 }
             }
         }

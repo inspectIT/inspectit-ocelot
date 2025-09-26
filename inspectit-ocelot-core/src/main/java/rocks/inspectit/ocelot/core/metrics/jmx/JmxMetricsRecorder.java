@@ -3,11 +3,9 @@ package rocks.inspectit.ocelot.core.metrics.jmx;
 import static java.lang.Boolean.TRUE;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.opencensus.common.Scope;
-import io.opencensus.stats.Measure;
-import io.opencensus.tags.TagContextBuilder;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.Tagger;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.api.baggage.BaggageBuilder;
+import io.opentelemetry.context.Scope;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,10 +14,10 @@ import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.config.model.metrics.jmx.JmxMetricsRecorderSettings;
-import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
+import rocks.inspectit.ocelot.core.metrics.InstrumentManager;
 import rocks.inspectit.ocelot.core.metrics.system.AbstractPollingMetricsRecorder;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
-import rocks.inspectit.ocelot.core.tags.TagUtils;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
+import rocks.inspectit.ocelot.core.utils.AttributeUtils;
 
 import javax.management.ObjectName;
 import java.time.Duration;
@@ -48,11 +46,6 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
     private static final char METRIC_SEPARATOR = '/';
 
     /**
-     * Tagger.
-     */
-    public final Tagger tagger;
-
-    /**
      * Scraper of the MBean objects.
      */
     private JmxScraper jmxScraper;
@@ -63,17 +56,15 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
     private boolean lowerCaseMetricName;
 
     @Autowired
-    public JmxMetricsRecorder(Tagger tagger) {
+    public JmxMetricsRecorder() {
         super("metrics.jmx");
-        this.tagger = tagger;
     }
 
     @VisibleForTesting
-    JmxMetricsRecorder(Tagger tagger, MeasuresAndViewsManager measuresAndViewsManager, CommonTagsManager commonTagsManager) {
+    JmxMetricsRecorder(InstrumentManager instrumentManager, CommonAttributesManager commonAttributes) {
         super("metrics.jmx");
-        this.tagger = tagger;
-        measureManager = measuresAndViewsManager;
-        commonTags = commonTagsManager;
+        this.instrumentManager = instrumentManager;
+        this.commonAttributes = commonAttributes;
     }
 
     /**
@@ -95,8 +86,8 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
      * {@inheritDoc}
      */
     @Override
-    protected void takeMeasurement(MetricsSettings metricsSettings) {
-        try (Scope commonTagScope = commonTags.withCommonTagScope()) {
+    protected void takeMetric(MetricsSettings metricsSettings) {
+        try (Scope scope = commonAttributes.withCommonAttributesScope()) {
             jmxScraper.doScrape();
         }
     }
@@ -125,37 +116,37 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
         // get the metric value first, if we have no value here skip
         metricValue(value).ifPresent(metricValue -> {
             String metricName = metricName(domain, beanProperties, attrKeys, attrName);
-            Measure.MeasureDouble measure = measureManager.getMeasureDouble(metricName).orElseGet(() -> {
-                Map<String, Boolean> tags = beanProperties.keySet()
-                        .stream()
+
+            if (!instrumentManager.isInstrumentRegistered(metricName)) {
+                Map<String, Boolean> attributes = beanProperties.keySet().stream()
                         .skip(1)
                         .collect(Collectors.toMap(Function.identity(), k -> true));
 
-                return registerMeasure(metricName, attrDescription, tags);
-            });
+                registerMetric(metricName, attrDescription, attributes);
+            }
 
-            TagContextBuilder tagContextBuilder = tagger.currentBuilder();
-            beanProperties.entrySet()
-                    .stream()
+            BaggageBuilder builder = Baggage.current().toBuilder();
+            beanProperties.entrySet().stream()
                     .skip(1)
-                    .forEach(entry -> tagContextBuilder.putLocal(TagKey.create(entry.getKey()), TagUtils.createTagValue(entry
-                            .getKey(), entry.getValue())));
+                    .forEach(entry ->
+                            builder.put(entry.getKey(), AttributeUtils.resolveValue(entry.getKey(), entry.getValue()))
+                    );
 
-            measureManager.tryRecordingMeasurement(measure.getName(), metricValue, tagContextBuilder.build());
+            instrumentManager.tryRecordingMetric(metricName, metricValue, builder.build());
         });
     }
 
-    private Measure.MeasureDouble registerMeasure(String metricName, String attrDescription, Map<String, Boolean> tags) {
+    private void registerMetric(String metricName, String attrDescription, Map<String, Boolean> attributes) {
         // TODO better description here, include the FQN as well?
         MetricDefinitionSettings definitionSettingsWithLastValueView = MetricDefinitionSettings.builder()
                 .description(attrDescription)
                 .unit("na")
-                .view(metricName, ViewDefinitionSettings.builder().attributes(tags).build())
+                .view(metricName, ViewDefinitionSettings.builder().attributes(attributes).build())
                 .build()
                 .getCopyWithDefaultsPopulated(metricName);
 
-        measureManager.addOrUpdateAndCacheMeasureWithViews(metricName, definitionSettingsWithLastValueView);
-        return measureManager.getMeasureDouble(metricName).orElse(null);
+        Map<String, MetricDefinitionSettings> metric = Collections.singletonMap(metricName, definitionSettingsWithLastValueView);
+        instrumentManager.processInstrumentUpdates(metric);
     }
 
     /**
@@ -179,7 +170,7 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
         StringBuilder stringBuilder = new StringBuilder(METRIC_NAME_PREFIX);
         stringBuilder.append(domain.replace('.', METRIC_SEPARATOR));
 
-        if (beanProperties != null && beanProperties.size() > 0) {
+        if (beanProperties != null && !beanProperties.isEmpty()) {
             stringBuilder.append(METRIC_SEPARATOR);
             stringBuilder.append(beanProperties.values().iterator().next());
         }
@@ -226,8 +217,6 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
                 }
             });
         }
-
         return new JmxScraper(whitelistedObjectNames, blacklistedObjectNames, receiver, jmx.isForcePlatformServer());
     }
-
 }

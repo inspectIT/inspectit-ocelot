@@ -70,6 +70,7 @@ ioOpentelemetryOpentelemetryExporterLogging = { module = "io.opentelemetry:opent
 ioOpentelemetryOpentelemetryExporterOtlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryExporterPrometheus = { module = "io.opentelemetry:opentelemetry-exporter-prometheus", version.ref = "ioOpentelemetryAlpha" }
 ioOpentelemetryOpentelemetryExporterZipkin = { module = "io.opentelemetry:opentelemetry-exporter-zipkin", version.ref = "ioOpentelemetry" }
+ioOpentelemetryOpentelemetryExtensionTracePropagators = { module = "io.opentelemetry:opentelemetry-extension-trace-propagators", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryOpencensusShim = { module = "io.opentelemetry:opentelemetry-opencensus-shim", version.ref = "ioOpentelemetryAlpha" }
 ioOpentelemetryOpentelemetryProto = { module = "io.opentelemetry.proto:opentelemetry-proto", version.ref = "ioOpentelemetryProto" }
 ioOpentelemetryOpentelemetrySdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "ioOpentelemetry" }

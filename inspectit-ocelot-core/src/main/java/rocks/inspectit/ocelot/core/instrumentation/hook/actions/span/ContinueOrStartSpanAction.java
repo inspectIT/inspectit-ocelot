@@ -17,7 +17,7 @@ import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodReflectionInformation;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
-import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonTagsToAttributesManager;
+import rocks.inspectit.ocelot.core.instrumentation.hook.tags.CommonAttributesToSpanAttributesManager;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.HybridParentTraceIdRatioBasedSampler;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.samplers.OcelotSamplerUtils;
 
@@ -88,7 +88,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
     /**
      * Action that optionally adds common tags to the newly started span.
      */
-    private CommonTagsToAttributesManager commonTagsToAttributesManager;
+    private CommonAttributesToSpanAttributesManager commonAttributesToSpanAttributesManager;
 
     @Override
     public String getName() {
@@ -144,7 +144,7 @@ public class ContinueOrStartSpanAction implements IHookAction {
             Sampler sampler = getSampler(context);
             AutoCloseable spanCtx = Instances.logTraceCorrelator.startCorrelatedSpanScope(() -> stackTraceSampler.createAndEnterSpan(spanName, finalRemoteParent, sampler, spanKind, methodInfo, autoTrace));
             ctx.setSpanScope(spanCtx);
-            commonTagsToAttributesManager.writeCommonTags(Span.current(), remoteParent != null, hasLocalParent);
+            commonAttributesToSpanAttributesManager.writeCommonAttributes(Span.current(), remoteParent != null, hasLocalParent);
         }
     }
 

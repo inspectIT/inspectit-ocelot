@@ -60,6 +60,7 @@ dependencies {
             libs.ioOpentelemetryOpentelemetrySdkMetrics,
             libs.ioOpentelemetryOpentelemetrySemconv,
             libs.ioOpentelemetryInstrumentationOpentelemetryResources,
+            libs.ioOpentelemetryOpentelemetryExtensionTracePropagators
     )
     annotationProcessor libs.orgProjectlombokLombok
 
@@ -130,6 +131,7 @@ dependencies {
             libs.ioOpentelemetryOpentelemetrySdkTesting,
             libs.ioOpentelemetryOpentelemetryProto,
             libs.ioOpentelemetryInstrumentationOpentelemetryResources,
+            libs.ioOpentelemetryOpentelemetryExtensionTracePropagators,
 
             libs.orgSpringframeworkSpringTest,
             libs.orgJunitJupiterJunitJupiterApi,
