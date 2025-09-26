@@ -33,7 +33,7 @@ public class CustomSpanBuilder {
     private String spanId;
 
     /**
-     * The {@link AnchoredClock} (known as timestamp converter in OpenCensus) to use for the overridden timestamp {@link #entryNanos} and {@link #exitNanos}.
+     * The {@link AnchoredClock} to use for the overridden timestamp {@link #entryNanos} and {@link #exitNanos}.
      */
     private Object anchoredClock;
 
@@ -65,11 +65,11 @@ public class CustomSpanBuilder {
 
     /**
      * Replaces the timings on the resulting Span.
-     * An {@link io.opentelemetry.sdk.trace.AnchoredClock} (known as timestamp converter in OpenCensus) must be given if the parent is not a sampled span, otherwise it can be null.
+     * An {@link AnchoredClock} must be given if the parent is not a sampled span, otherwise it can be null.
      *
      * @param entryNanos    the nano entry timestamp
      * @param exitNanos     the nano exit timestamp
-     * @param anchoredClock the anchored clock (timestamp converter) to use, if null it will be derived from the parent span.
+     * @param anchoredClock the anchored clock to use, if null it will be derived from the parent span.
      *
      * @return the builder
      */

@@ -14,10 +14,11 @@ import java.lang.reflect.Method;
 @Slf4j
 public class WeakMethodReference {
 
-    private WeakReference<Class<?>> declaringClass;
+    private final WeakReference<Class<?>> declaringClass;
 
-    private String name;
-    private Class<?>[] parameterTypes;
+    private final String name;
+
+    private final Class<?>[] parameterTypes;
 
     private WeakReference<Method> methodReference;
 
@@ -48,7 +49,6 @@ public class WeakMethodReference {
         return method;
     }
 
-
     private Method lookup() throws NoSuchMethodException {
         Class<?> declaring = declaringClass.get();
         if (declaring != null) {
@@ -56,5 +56,4 @@ public class WeakMethodReference {
         }
         return null;
     }
-
 }

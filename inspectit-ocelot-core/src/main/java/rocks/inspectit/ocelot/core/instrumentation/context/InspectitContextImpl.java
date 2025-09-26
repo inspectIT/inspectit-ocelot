@@ -1,11 +1,16 @@
 package rocks.inspectit.ocelot.core.instrumentation.context;
 
-import io.opencensus.tags.*;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.api.baggage.BaggageBuilder;
+import io.opentelemetry.api.baggage.BaggageEntry;
+import io.opentelemetry.api.baggage.BaggageEntryMetadata;
+import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
+import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.trace.IdGenerator;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -15,13 +20,15 @@ import rocks.inspectit.ocelot.core.instrumentation.context.propagation.ContextPr
 import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationDataStorage;
 import rocks.inspectit.ocelot.core.instrumentation.context.session.PropagationSessionStorage;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
-import rocks.inspectit.ocelot.core.attributes.TagUtils;
+import rocks.inspectit.ocelot.core.utils.AttributeUtils;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
+// TODO Update this documentation properly
 /**
  * This class allows the storage and configurable up and down propagation of data.
  * An inspectIT context has four lifecycle phases which correspond to the phased of hooks added to methods:
@@ -31,8 +38,8 @@ import java.util.stream.Stream;
  * <p>
  * When a method is entered, the entry hook is executed.
  * In this phase a new InspectitContextImpl is created but not yet made active.
- * This context inherits all down-propagated data from the currently active context as well as all tags from the active {@link TagContext}.
- * In the entry phase, the contexts data can be altered via {@link #setData(String, Object)}, even though the context is not yet active.
+ * This context inherits all down-propagated data from the currently active context as well as all attributes from the active {@link Baggage}.
+ * In the entry phase, the context data can be altered via {@link #setData(String, Object)}, even though the context is not yet active.
  * <p>
  * When {@link #makeActive()} is called, the current context transitions from the "Entry" to the "Active" state.
  * This means that the data the context stores is now immutable and also published as TagContext.
@@ -45,7 +52,7 @@ import java.util.stream.Stream;
  * <p>
  * The up-propagation does not have an effect on the tag-context opened by the parent during the "active" phase.
  * E.g. if a child adds or overwrites a value its parent through up-propagation, this new value will not be visible in the tag context.
- * However, as soon as a new, synchronous child context of the parent is created and it opens a tag context, the changes wil lbe visible in the new context
+ * However, as soon as a new, synchronous child context of the parent is created, and it opens a tag context, the changes wil lbe visible in the new context
  * <p>
  * When data is configured to be both up and down propagated, the down propagated data depends on whether the child is synchronous or not.
  * Consider a simple example where the context "parent" has two children "firstChild" and "secondChild" which are executed after each other.
@@ -77,13 +84,11 @@ import java.util.stream.Stream;
 public class InspectitContextImpl implements InternalInspectitContext {
 
     /**
-     * We only allow "data" of the following types to be used as tags
+     * We only allow "data" of the following types to be used as attributes
      */
-    private static final Set<Class<?>> ALLOWED_TAG_TYPES = new HashSet<>(Arrays.asList(String.class, Character.class, Long.class, Integer.class, Short.class, Byte.class, Double.class, Float.class, Boolean.class));
+    private static final Set<Class<?>> ALLOWED_ATTRIBUTE_TYPES = new HashSet<>(Arrays.asList(String.class, Character.class, Long.class, Integer.class, Short.class, Byte.class, Double.class, Float.class, Boolean.class));
 
-    static final io.opentelemetry.context.ContextKey<InspectitContextImpl> INSPECTIT_KEY = ContextKey.named("inspectit-context");
-
-    static final io.grpc.Context.Key<InspectitContextImpl> INSPECTIT_KEY_GRPC = io.grpc.Context.key("inspectit-context");
+    static final ContextKey<InspectitContextImpl> INSPECTIT_KEY = ContextKey.named("inspectit-context");
 
     /**
      * Points to the parent from which this context inherits its data and to which potential up-propagation is performed.
@@ -97,12 +102,12 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private PropagationMetaData propagation;
 
     /**
-     * Defines whether the context should interact with TagContexts opened by the instrumented application.
+     * Defines whether the context should interact with Baggage opened by the instrumented application.
      * <p>
-     * If this is true, the context will inherit all values from the current {@link TagContext} which was opened by the target application.
-     * In addition, if this value is true makeActive will open a TagContext containing all down propagated tags stored in this InspectIT context.
+     * If this is true, the context will inherit all values from the current {@link Baggage} which was opened by the target application.
+     * In addition, if this value is true {@link #makeActive()} will open a {@link Baggage} containing all down propagated attributes stored in this InspectIT context.
      */
-    private final boolean interactWithApplicationTagContexts;
+    private final boolean interactWithApplicationBaggage;
 
     /**
      * Contains the thread in which this context was created.
@@ -111,14 +116,16 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private final Thread openingThread;
 
     /**
-     * Holds the previous GRPC context which was overridden when attaching this context as active in GRPC.
+     * Holds the current {@link Scope} associated with OTELs {@link Context},
+     * which was obtained when attaching this context as active in OTel
      */
-    private io.grpc.Context overriddenGrpcContext;
+    private Scope currentOtelScope;
 
     /**
-     * Holds the current {@link io.opentelemetry.context.Scope} associated with OTELs {@link Context}, which was obtained when attaching this context as active in OTEL
+     * If this context opened a new {@link #activePhaseDownPropagationBaggage} during {@link #makeActive()},
+     * the corresponding scope is stored in this variable and will be used in {@link #close()} to clean up the context.
      */
-    private io.opentelemetry.context.Scope currentOtelScope;
+    private Scope openedDownPropagationScope;
 
     /**
      * The span scope which was (potentially) opened by invoking {@link #setSpanScope(AutoCloseable)}
@@ -126,28 +133,23 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private AutoCloseable currentSpanScope;
 
     /**
-     * Holds the tag context which was opened by this context with the call to {@link #makeActive()}.
+     * Holds the baggage which was opened by this context with the call to {@link #makeActive()}.
      * If none was opened, this variable is null.
-     * Note that this tag context is not necessarily owned by this {@link InspectitContextImpl}.
-     * If it did not change any value, the context can simply keep the current context and reference it using this variable.
+     * Note that this baggage is not necessarily owned by this {@link InspectitContextImpl}.
+     * If it did not change any value, the context can simply keep the current baggage and reference it using this variable.
      * <p>
-     * The tag context is guaranteed to contain the same tags as returned by {@link #getPostEntryPhaseTags()}
+     * The baggage is guaranteed to contain the same attributes as returned by {@link #getPostEntryPhaseAttributes()}
      */
-    private TagContext activePhaseDownPropagationTagContext;
+    private Baggage activePhaseDownPropagationBaggage;
 
     /**
-     * Marker variable to indicate that {@link #activePhaseDownPropagationTagContext} is stale.
-     * The tag context can become stale due to up-propagation when a child context up-propagates a new value for a tag which is present in the context.
-     * This variable is used to indicate for child contexts that they should not reuse activePhaseDownPropagationTagContext
-     * but instead should open a new tag context.
+     * Marker variable to indicate that {@link #activePhaseDownPropagationBaggage} is stale.
+     * The baggage can become stale due to up-propagation when a child context up-propagates a new value for an attribute
+     * which is present in the context.
+     * This variable is used to indicate for child contexts that they should not reuse {@link #activePhaseDownPropagationBaggage}
+     * but instead should open a new baggage.
      */
-    private boolean isActivePhaseDownPropagationTagContextStale;
-
-    /**
-     * If this context opened a new {@link #activePhaseDownPropagationTagContext} during {@link #makeActive()},
-     * the corresponding scope is stored in this variable and will be used in {@link #close()} to clean up the context.
-     */
-    private io.opencensus.common.Scope openedDownPropagationScope;
+    private boolean isActivePhaseDownPropagationBaggageStale;
 
     /**
      * When a new context is created, this map contains the down-propagated data it inherited from its parent context.
@@ -180,9 +182,9 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * it inherits all {@link #postEntryPhaseDownPropagatedData} in combination with all down-propagated data from {@link #dataOverwrites}
      * With a naive implementation this result map would be recomputed for every child context, even if nothing has changed.
      * <p>
-     * This map only changes when an-up propagation of data occurs which also is down propagated.
+     * This map only changes when an up-propagation of data occurs which also is down propagated.
      * <p>
-     * At the end of the entry phase, the map is the same as {@link #postEntryPhaseDownPropagatedData}
+     * At the end of the entry phase, the map is the same as {@link #postEntryPhaseDownPropagatedData}.
      * When now an up-propagation occurs, this map becomes stale. Therefore, it is "reset" to null and recomputed when it is required.
      * <p>
      * Note that the underlying map never gets altered! It gets replaced by a new object when it became stale.
@@ -192,15 +194,17 @@ public class InspectitContextImpl implements InternalInspectitContext {
 
     /**
      * This span context serves as a placeholder for a remote parent context.
-     * This can be useful, if the local SpanContext is created before the actual remote context.
+     * This can be useful, if the local span context is created before the remote context.
+     * For example, a frontend web page requests it's content first and after building the page, it creates the frontend
+     * span context. Via server timing headers the span timestamps can be fixed afterward so the frontend spans appear to
+     * have started before the backend spans.
      * Thus, the remote context could not be down-propagated.
      * <p>
      * If a remote parent context was specified, the locally created SpanContext will use it as a remote parent.
      * Later on, you can transmit the remote parent context via http-response-header to your remote service and create
      * a new span with the provided context.
      * <p>
-     * Note that the remote parent context will not be used as a remote parent, if a REMOTE_PARENT_SPAN_CONTEXT_KEY was
-     * specified by down-propagation.
+     * Note that the remote parent context will not be used as a remote parent, if {@link #REMOTE_PARENT_SPAN_CONTEXT_KEY} exists.
      */
     private SpanContext remoteParentContext;
 
@@ -209,11 +213,11 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     private final PropagationSessionStorage sessionStorage;
 
-    private InspectitContextImpl(InspectitContextImpl parent, PropagationMetaData defaultPropagation, PropagationSessionStorage sessionStorage, boolean interactWithApplicationTagContexts) {
+    private InspectitContextImpl(InspectitContextImpl parent, PropagationMetaData defaultPropagation, PropagationSessionStorage sessionStorage, boolean interactWithApplicationBaggage) {
         this.parent = parent;
         this.sessionStorage = sessionStorage;
         propagation = parent == null ? defaultPropagation : parent.propagation;
-        this.interactWithApplicationTagContexts = interactWithApplicationTagContexts;
+        this.interactWithApplicationBaggage = interactWithApplicationBaggage;
         dataOverwrites = new HashMap<>();
         openingThread = Thread.currentThread();
 
@@ -233,23 +237,23 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * Creates a new context which enters its "entry" lifecycle phase.
      * The created context will be a synchronous or asynchronous child of the currently active context.
      *
-     * @param commonTags                         the common tags used to populate the data if this is a root context
+     * @param commonAttributes                   the common attributes used to populate the data if this is a root context
      * @param defaultPropagation                 the data propagation settings to use if this is a root context. Otherwise, the parent context's settings will be inherited.
-     * @param interactWithApplicationTagContexts if true, data from the currently active {@link TagContext} will be inherited and makeActive will publish the data as a TagContext
+     * @param interactWithApplicationBaggage      if true, data from the currently active {@link Baggage} will be inherited and makeActive will publish the data as a Baggage
      *
      * @return the newly created context
      */
-    public static InspectitContextImpl createFromCurrent(Map<String, String> commonTags, PropagationMetaData defaultPropagation,
-                                                         PropagationSessionStorage sessionStorage, boolean interactWithApplicationTagContexts) {
+    public static InspectitContextImpl createFromCurrent(Map<String, String> commonAttributes, PropagationMetaData defaultPropagation,
+                                                         PropagationSessionStorage sessionStorage, boolean interactWithApplicationBaggage) {
         InspectitContextImpl parent = ContextUtil.currentInspectitContext();
-        InspectitContextImpl result = new InspectitContextImpl(parent, defaultPropagation, sessionStorage, interactWithApplicationTagContexts);
+        InspectitContextImpl result = new InspectitContextImpl(parent, defaultPropagation, sessionStorage, interactWithApplicationBaggage);
 
         if (parent == null) {
-            commonTags.forEach(result::setData);
+            commonAttributes.forEach(result::setData);
         }
 
-        if (interactWithApplicationTagContexts) {
-            result.readOverridesFromCurrentTagContext();
+        if (interactWithApplicationBaggage) {
+            result.readOverridesFromCurrentBaggage();
         }
 
         return result;
@@ -275,6 +279,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     /**
      * @return A remote parent context, that was created via {@link #createRemoteParentContext()}
      */
+    @SuppressWarnings({})
     public SpanContext getRemoteParentContext() {
         return this.remoteParentContext;
     }
@@ -318,23 +323,21 @@ public class InspectitContextImpl implements InternalInspectitContext {
         }
         cachedActivePhaseDownPropagatedData = postEntryPhaseDownPropagatedData;
 
-        // store the Context in OTEL
-        currentOtelScope = ContextUtil.current().with(INSPECTIT_KEY, this).makeCurrent();
-        // store the Context in GRPC context
-        overriddenGrpcContext = ContextUtil.currentGrpc().withValue(INSPECTIT_KEY_GRPC, this).attach();
+        // store the context in OTel
+        currentOtelScope = Context.current().with(INSPECTIT_KEY, this).makeCurrent();
 
-        if (interactWithApplicationTagContexts) {
-            Tagger tagger = Tags.getTagger();
-            //check if we can reuse the parent context
-            if (anyDownPropagatedDataOverwritten || (parent != null && parent.isActivePhaseDownPropagationTagContextStale)) {
-                openedDownPropagationScope = tagger.withTagContext(new TagContext() {
-                    @Override
-                    protected Iterator<Tag> getIterator() {
-                        return getPostEntryPhaseTags();
-                    }
-                });
+        // TODO I am unsure this is correct...
+        if (interactWithApplicationBaggage) {
+            // check if we can reuse the parent context
+            if (anyDownPropagatedDataOverwritten || (parent != null && parent.isActivePhaseDownPropagationBaggageStale)) {
+                BaggageBuilder builder =  Baggage.current().toBuilder();
+
+                for (Map.Entry<String, String> attribute : getPostEntryPhaseAttributes().entrySet()) {
+                    builder.put(attribute.getKey(), attribute.getValue());
+                }
+                openedDownPropagationScope = builder.build().makeCurrent();
             }
-            activePhaseDownPropagationTagContext = tagger.getCurrentTagContext();
+            activePhaseDownPropagationBaggage = Baggage.current();
         }
     }
 
@@ -397,7 +400,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
     /**
      * Sets the value for a given data key.
      * If this is called during the entry phase of the context, the changed datum will be reflected
-     * in postEntryPhaseDownPropagatedData and {@link #getPostEntryPhaseTags()}.
+     * in postEntryPhaseDownPropagatedData and {@link #getPostEntryPhaseAttributes()}.
      *
      * @param key   the key of the data to set
      * @param value the value to set
@@ -406,7 +409,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
     public void setData(String key, Object value) {
         dataOverwrites.put(key, value);
     }
-
 
     /**
      * Returns all the most recent data as a stream, which either was inherited from the parent context,
@@ -433,23 +435,14 @@ public class InspectitContextImpl implements InternalInspectitContext {
 
     /**
      * Closes this context.
-     * If any {@link TagContext} was opened during {@link #makeActive()}, this context is also closed.
+     * If any {@link Baggage} was opened during {@link #makeActive()}, this context is also closed.
      * In addition, up-propagation is performed if this context is not asynchronous.
      */
     @Override
     public void close() {
-        if (openedDownPropagationScope != null) {
-            openedDownPropagationScope.close();
-        }
-
         // close the current OTEL scope to restore the previous scope
         if (null != currentOtelScope) {
             currentOtelScope.close();
-        }
-
-        // detach the overridden GRPC context
-        if (null != overriddenGrpcContext) {
-            ContextUtil.currentGrpc().detach(overriddenGrpcContext);
         }
 
         if (currentSpanScope != null) {
@@ -468,11 +461,9 @@ public class InspectitContextImpl implements InternalInspectitContext {
         performSessionUpdate();
 
         //clear the references to prevent memory leaks
-        openedDownPropagationScope = null;
         currentSpanScope = null;
         parent = null;
         currentOtelScope = null;
-        overriddenGrpcContext = null;
     }
 
     private void performUpPropagation(Map<String, Object> dataWrittenByChild) {
@@ -482,9 +473,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
                 Object value = entry.getValue();
                 dataOverwrites.put(key, value);
                 if (propagation.isPropagatedDownWithinJVM(key)) {
-                    if (propagation.isTag(key)) {
-                        isActivePhaseDownPropagationTagContextStale = true;
-                    }
                     if (cachedActivePhaseDownPropagatedData != null && cachedActivePhaseDownPropagatedData.get(key) != value) {
                         cachedActivePhaseDownPropagatedData = null;
                     }
@@ -515,17 +503,17 @@ public class InspectitContextImpl implements InternalInspectitContext {
      * @return the data storage for the current session or {@code null}
      */
     private PropagationDataStorage getDataStorage() {
-        // Prevent endless loop to find the session-id in data storages
-        if(dataOverwrites.containsKey(REMOTE_SESSION_ID) || postEntryPhaseDownPropagatedData.containsKey(REMOTE_SESSION_ID)) {
+        // prevent endless loop to find the session-id in data storages
+        if (dataOverwrites.containsKey(REMOTE_SESSION_ID) || postEntryPhaseDownPropagatedData.containsKey(REMOTE_SESSION_ID)) {
             Object sessionId = getData(REMOTE_SESSION_ID);
-            if(sessionId != null) return sessionStorage.getOrCreateDataStorage(sessionId.toString());
+            if (sessionId != null) return sessionStorage.getOrCreateDataStorage(sessionId.toString());
         }
         return null;
     }
 
     @Override
     public Map<String, String> getDownPropagationHeaders() {
-        SpanContext spanContext = io.opentelemetry.api.trace.Span.current().getSpanContext();
+        SpanContext spanContext = Span.current().getSpanContext();
         if (!spanContext.isValid()) {
             Object remoteParent = getData(REMOTE_PARENT_SPAN_CONTEXT_KEY);
             if (remoteParent instanceof SpanContext) {
@@ -573,34 +561,34 @@ public class InspectitContextImpl implements InternalInspectitContext {
     /**
      * Only invoked by {@link #createFromCurrent(Map, PropagationMetaData, PropagationSessionStorage, boolean)}
      * <p>
-     * Reads the currently active tag context and makes this context inherit all values which
+     * Reads the currently active baggage and makes this context inherit all values which
      * have changed in comparison to the values published by the parent context.
      */
-    private void readOverridesFromCurrentTagContext() {
-        TagContext currentTags = Tags.getTagger().getCurrentTagContext();
-        if (currentTags != null) {
+    private void readOverridesFromCurrentBaggage() {
+        Baggage baggage = Baggage.current();
+        if (!baggage.isEmpty()) {
             PropagationMetaData.Builder alteredPropagation = null;
             if (parent == null) {
-                //we are the first inspectit context, therefore we inherit all values
-                for (Iterator<Tag> it = InternalUtils.getTags(currentTags); it.hasNext(); ) {
-                    Tag tag = it.next();
-                    setData(tag.getKey().getName(), tag.getValue().asString());
-                    alteredPropagation = configureTagPropagation(tag.getKey().getName(), alteredPropagation);
+                // for the first inspectit context we inherit all values
+                for (Map.Entry<String, BaggageEntry> entry : baggage.asMap().entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue().getValue();
+                    setData(key, value);
+                    alteredPropagation = configureTagPropagation(key, alteredPropagation);
                 }
             } else {
                 // a new context was opened between our parent and ourselves
                 // we look for all values which have changed and inherit them
-                if (currentTags != parent.activePhaseDownPropagationTagContext) {
-                    for (Iterator<Tag> it = InternalUtils.getTags(currentTags); it.hasNext(); ) {
-                        Tag tag = it.next();
-                        String tagKey = tag.getKey().getName();
-                        String tagValue = tag.getValue().asString();
-                        Object parentValueForTag = parent.postEntryPhaseDownPropagatedData.get(tagKey);
-                        //only inherit changed values
-                        if (parentValueForTag == null || !parentValueForTag.toString().equals(tagValue)) {
-                            setData(tagKey, tagValue);
+                if (baggage != parent.activePhaseDownPropagationBaggage) {
+                    for (Map.Entry<String, BaggageEntry> entry : baggage.asMap().entrySet()) {
+                        String key = entry.getKey();
+                        String value = entry.getValue().getValue();
+                        Object parentValueForAttribute = parent.postEntryPhaseDownPropagatedData.get(key);
+                        // only inherit changed values
+                        if (parentValueForAttribute == null || !parentValueForAttribute.toString().equals(value)) {
+                            setData(key, value);
                         }
-                        alteredPropagation = configureTagPropagation(tagKey, alteredPropagation);
+                        alteredPropagation = configureTagPropagation(key, alteredPropagation);
                     }
                 }
             }
@@ -611,28 +599,24 @@ public class InspectitContextImpl implements InternalInspectitContext {
     }
 
     /**
-     * Checks if the given key is already configured in {@link #propagation} for down-propagation and as a tag.
+     * Checks if the given key is already configured in {@link #propagation} for down-propagation.
      * If it is the case, the passed in builder is returned without changes.
      * <p>
-     * Otherwise, the key is configured in the given builder to be down-propagated JVM-locally and to be a tag.
+     * Otherwise, the key is configured in the given builder to be down-propagated JVM-locally.
      *
-     * @param tagKey          the key of the found tag
-     * @param existingBuilder an existing builder to which the settings shall be added. If it is null, a builder is created using copy() on {@link #propagation}.
+     * @param attributeKey      the key of the found attribute
+     * @param existingBuilder   an existing builder to which the settings shall be added. If it is null, a builder is created using copy() on {@link #propagation}
      *
-     * @return existingBuilder or the newly created builder if it was null.
+     * @return existingBuilder or the newly created builder if it was null
      */
-    private PropagationMetaData.Builder configureTagPropagation(String tagKey, PropagationMetaData.Builder existingBuilder) {
+    private PropagationMetaData.Builder configureTagPropagation(String attributeKey, PropagationMetaData.Builder existingBuilder) {
         PropagationMetaData.Builder result = existingBuilder;
-        boolean isTag = propagation.isTag(tagKey);
-        boolean isPropagatedDown = propagation.isPropagatedDownWithinJVM(tagKey);
-        if (!isTag || !isPropagatedDown) {
+        boolean isPropagatedDown = propagation.isPropagatedDownWithinJVM(attributeKey);
+        if (!isPropagatedDown) {
             if (result == null) {
                 result = propagation.copy();
             }
-            result.setTag(tagKey, true);
-            if (!isPropagatedDown) {
-                result.setDownPropagation(tagKey, PropagationMode.JVM_LOCAL);
-            }
+            result.setDownPropagation(attributeKey, PropagationMode.JVM_LOCAL);
         }
         return result;
     }
@@ -658,17 +642,17 @@ public class InspectitContextImpl implements InternalInspectitContext {
                 }
             }
         }
-
         return result;
     }
 
-    private Iterator<Tag> getPostEntryPhaseTags() {
-        return postEntryPhaseDownPropagatedData.entrySet()
+    // TODO Don't know if we use this correct
+    private Map<String, String> getPostEntryPhaseAttributes() {
+        Map<String, String> postEntryPhaseAttributes = new HashMap<>();
+        postEntryPhaseDownPropagatedData.entrySet()
                 .stream()
-                .filter(e -> propagation.isTag(e.getKey()))
-                .filter(e -> ALLOWED_TAG_TYPES.contains(e.getValue().getClass()))
-                .map(e -> Tag.create(TagKey.create(e.getKey()), TagUtils.createTagValue(e.getKey(), e.getValue()
-                        .toString()), TagMetadata.create(TagMetadata.TagTtl.UNLIMITED_PROPAGATION)))
-                .iterator();
+                .filter(e -> ALLOWED_ATTRIBUTE_TYPES.contains(e.getValue().getClass()))
+                .forEach(e -> postEntryPhaseAttributes.put(e.getKey(), AttributeUtils.resolveValue(e.getKey(), e.getValue())));
+
+        return postEntryPhaseAttributes;
     }
 }

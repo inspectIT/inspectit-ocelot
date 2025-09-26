@@ -51,7 +51,7 @@ public class PropagationMetaDataResolverTest {
         void commonTagPropagationCorrect() {
             doReturn(Collections.singletonMap("my_key", "foo")).when(commonTags).getCommonAttributeValueMap();
 
-            resolver.collectCommonTags(mockBuilder);
+            resolver.collectCommonAttributes(mockBuilder);
 
             verify(mockBuilder).setDownPropagation(eq("my_key"), eq(PropagationMode.JVM_LOCAL));
             verify(mockBuilder).setTag(eq("my_key"), eq(true));

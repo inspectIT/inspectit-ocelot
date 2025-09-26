@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * A wrapper for an Array of {@link StackTraceElement}s as returned by {@link Thread#getStackTrace}.
  * This wrapper performs a cleanup removing the following stack frames:
- * - All top stackframes containining inspectit-code or Thread.getStackTrace
+ * - All top stackframes containing inspectit-code or Thread.getStackTrace
  * - All stack frames which are in Lambda-code
  * <p>
  * Lambda-stackframes are removed due to an inconsistency between calling {@link Thread#getStackTrace} for the own vs another thread.

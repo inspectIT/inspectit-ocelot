@@ -15,11 +15,6 @@ import java.util.Set;
 class RootPropagationMetaData implements PropagationMetaData {
 
     /**
-     * Contains all data keys which have been defined to be used as tags.
-     */
-    private final Set<String> tagKeys = new HashSet<>();
-
-    /**
      * Contains all data keys which have a down propagation of either JVM_LOCAL or GLOBAL.
      */
     private final Set<String> localDownPropagatedKeys = new HashSet<>();
@@ -73,11 +68,6 @@ class RootPropagationMetaData implements PropagationMetaData {
     }
 
     @Override
-    public boolean isTag(String dataKey) {
-        return tagKeys.contains(dataKey);
-    }
-
-    @Override
     public boolean isStoredForSession(String dataKey) {
         return sessionStorageKeys.contains(dataKey);
     }
@@ -89,17 +79,7 @@ class RootPropagationMetaData implements PropagationMetaData {
 
     private static class RootPropagationMetaDataBuilder implements RootPropagationMetaData.Builder {
 
-        private RootPropagationMetaData result = new RootPropagationMetaData();
-
-        @Override
-        public Builder setTag(String dataKey, boolean isTag) {
-            if (isTag) {
-                result.tagKeys.add(dataKey);
-            } else {
-                result.tagKeys.remove(dataKey);
-            }
-            return this;
-        }
+        private final RootPropagationMetaData result = new RootPropagationMetaData();
 
         @Override
         public Builder setDownPropagation(String dataKey, PropagationMode propagation) {

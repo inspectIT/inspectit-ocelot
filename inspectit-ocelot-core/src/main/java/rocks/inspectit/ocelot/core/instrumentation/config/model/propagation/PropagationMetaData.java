@@ -35,13 +35,6 @@ public interface PropagationMetaData {
 
     /**
      * @param dataKey the data key to check
-     * @return true, if the data key is configured to be used as tag
-     */
-    boolean isTag(String dataKey);
-
-
-    /**
-     * @param dataKey the data key to check
      * @return true, if the data key is configured to be stored for sessions
      */
     boolean isStoredForSession(String dataKey);
@@ -69,8 +62,6 @@ public interface PropagationMetaData {
      * Builder for construction a {@link PropagationMetaData} instance.
      */
     interface Builder {
-
-        Builder setTag(String dataKey, boolean isTag);
 
         Builder setDownPropagation(String dataKey, PropagationMode propagation);
 

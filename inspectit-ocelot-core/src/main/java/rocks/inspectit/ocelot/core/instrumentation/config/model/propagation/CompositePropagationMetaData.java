@@ -94,12 +94,6 @@ class CompositePropagationMetaData implements PropagationMetaData {
     }
 
     @Override
-    public boolean isTag(String dataKey) {
-        Boolean isTag = tagOverrides.get(dataKey);
-        return isTag != null ? isTag : parent.isTag(dataKey);
-    }
-
-    @Override
     public boolean isStoredForSession(String dataKey) {
         Boolean isActive = sessionStorageOverrides.get(dataKey);
         return isActive != null ? isActive : parent.isStoredForSession(dataKey);
@@ -112,7 +106,7 @@ class CompositePropagationMetaData implements PropagationMetaData {
 
     private static class CompositePropagationMetaDataBuilder implements PropagationMetaData.Builder {
 
-        private CompositePropagationMetaData result;
+        private final CompositePropagationMetaData result;
 
         CompositePropagationMetaDataBuilder(PropagationMetaData parent) {
             result = new CompositePropagationMetaData();
@@ -130,12 +124,6 @@ class CompositePropagationMetaData implements PropagationMetaData {
                 result.sessionStorageOverrides = new HashMap<>();
                 result.tagOverrides = new HashMap<>();
             }
-        }
-
-        @Override
-        public Builder setTag(String dataKey, boolean isTag) {
-            result.tagOverrides.put(dataKey, isTag);
-            return this;
         }
 
         @Override

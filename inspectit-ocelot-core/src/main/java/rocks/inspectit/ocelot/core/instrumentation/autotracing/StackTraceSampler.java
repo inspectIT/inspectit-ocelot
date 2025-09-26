@@ -68,20 +68,20 @@ public class StackTraceSampler {
     private ScheduledExecutorService executor;
 
     /**
-     * The task periodicalyl executed for ptocessing the {@link #tracesToExport} queue.
+     * The task periodically executed for processing the {@link #tracesToExport} queue.
      */
     private Future<?> exportTask;
 
     /**
      * A bounded queue containing all traces which have finished but need to be processed for exporting.
      */
-    private ArrayBlockingQueue<SampledTrace> tracesToExport = new ArrayBlockingQueue<>(4096);
+    private final ArrayBlockingQueue<SampledTrace> tracesToExport = new ArrayBlockingQueue<>(4096);
 
     /**
      * Global map which stores all threads for which stack-trace sampling is currently active.
      * If a thread is present in this map, it will be sampled and the stack trace will be added to the corresponding trace.
      */
-    private ConcurrentHashMap<Thread, SampledTrace> activeSamplings = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Thread, SampledTrace> activeSamplings = new ConcurrentHashMap<>();
 
     /**
      * The timer used to trigger the capturing of stack-trace samples.
@@ -92,7 +92,7 @@ public class StackTraceSampler {
      * The clock used for timing the stack-traces.
      * This clock must be the same as used for OpenTelemetry {@link io.opentelemetry.api.trace.Span}s, to make sure that the timings are consistent.
      */
-    private Clock clock = Clock.getDefault();
+    private final Clock clock = Clock.getDefault();
 
     @PostConstruct
     void init() {
@@ -327,5 +327,4 @@ public class StackTraceSampler {
             }
         }
     }
-
 }
