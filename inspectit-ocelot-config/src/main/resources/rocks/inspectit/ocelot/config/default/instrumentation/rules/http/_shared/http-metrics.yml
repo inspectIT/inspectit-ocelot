@@ -8,45 +8,34 @@ inspectit:
   metrics:
     definitions:
 
-      '[http/in/responsetime]':
+      http_in_responsetime:
         unit: ms
         description: 'the response time of incoming HTTP requests'
+        instrument-type: HISTOGRAM
+        value-type: DOUBLE
         views:
-          '[http/in/count]':
-            aggregation: COUNT
-            tags: 
-              'http_path': true
-              'http_status': true
-              'http_method': true
-              'error': true
-          '[http/in/responsetime/sum]':
-            aggregation: SUM
-            tags: 
-              'http_path': true
-              'http_status': true
-              'http_method': true
-              'error': true
-            
-      '[http/out/responsetime]':
+          http_in_responsetime:
+            aggregation: HISTOGRAM
+            attributes:
+              http_path: true
+              http_status: true
+              http_method: true
+              error: true
+
+      http_out_responsetime:
         unit: ms
         description: 'the response time of outgoing HTTP requests'
+        instrument-type: HISTOGRAM
+        value-type: DOUBLE
         views:
-          '[http/out/count]':
-            aggregation: COUNT
-            tags:
-              'http_host': true
-              'http_path': true
-              'http_status': true
-              'http_method': true
-              'error': true
-          '[http/out/responsetime/sum]':
-            aggregation: SUM
-            tags:
-              'http_host': true
-              'http_path': true
-              'http_status': true
-              'http_method': true
-              'error': true
+          http_out_responsetime:
+            aggregation: HISTOGRAM
+            attributes:
+              http_host: true
+              http_path: true
+              http_status: true
+              http_method: true
+              error: true
 
   # # # # # # # # # # # # # # # # # # # # # #
   # Instrumentation Configuration
@@ -85,14 +74,14 @@ inspectit:
             It is expected that the http data (http_path, http_status, etc) has been populated.
         default-rule: true
         metrics:
-          '[http/out/responsetime]':
+          http_out_responsetime:
             value: 'http_duration'
             data-tags:
-              'http_host': 'http_target_host'
-              'http_path': 'http_path'
-              'http_status': 'http_status'
-              'http_method': 'http_method'
-              'error': 'http_is_error'
+              http_host: 'http_target_host'
+              http_path: 'http_path'
+              http_status: 'http_status'
+              http_method: 'http_method'
+              error: 'http_is_error'
 
       'r_http_server_record_metric':
         docs:
@@ -102,13 +91,13 @@ inspectit:
             It is expected that the http data (http_path, http_status, etc) has been populated.
         default-rule: true
         metrics:
-          '[http/in/responsetime]':
+          http_in_responsetime:
             value: 'http_duration'
             data-tags:
-              'http_path': 'http_path'
-              'http_status': 'http_status'
-              'http_method': 'http_method'
-              'error': 'http_is_error'
+              http_path: 'http_path'
+              http_status: 'http_status'
+              http_method: 'http_method'
+              error: 'http_is_error'
 
       'r_http_capture_method_duration':
         docs:

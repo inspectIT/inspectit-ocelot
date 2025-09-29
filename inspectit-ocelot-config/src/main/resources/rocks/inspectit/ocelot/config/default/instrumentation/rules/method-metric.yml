@@ -4,20 +4,15 @@ inspectit:
   metrics:
     definitions:
 
-      '[method/duration]':
-        type: DOUBLE
+      method_duration:
         unit: ms
         description: "the duration from method entry to method exit"
+        instrument-type: HISTOGRAM
+        value-type: DOUBLE
         views:
-          '[method/duration/sum]':
-            aggregation: SUM
-            tags:
-              class: true
-              method: true
-              error: true
-          '[method/duration/count]':
-            aggregation: COUNT
-            tags:
+          method_duration:
+            aggregation: HISTOGRAM
+            attributes:
               class: true
               method: true
               error: true
@@ -49,9 +44,9 @@ inspectit:
             data-input:
               'value': _thrown
         metrics:
-          '[method/duration]':
+          method_duration:
             value: 'method_duration'
             data-tags:
-              'class': 'class_name'
-              'method': 'method_name_with_params'
-              'error': 'method_is_error'
+              class: 'class_name'
+              method: 'method_name_with_params'
+              error: 'method_is_error'

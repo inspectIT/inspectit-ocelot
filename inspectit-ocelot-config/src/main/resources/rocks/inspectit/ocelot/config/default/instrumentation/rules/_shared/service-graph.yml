@@ -9,43 +9,33 @@ inspectit:
   metrics:
     definitions:
 
-      '[service/in/responsetime]':
+      service_in_responsetime:
         unit: ms
         description: 'the response time of incoming service calls'
+        instrument-type: HISTOGRAM
+        value-type: DOUBLE
         views:
-          '[service/in/count]':
-            aggregation: COUNT
-            tags: 
-              'origin_external' : true
-              'origin_service': true
-              'protocol': true
-              'error': true
-          '[service/in/responsetime/sum]':
-            aggregation: SUM
-            tags:
-              'origin_external' : true
-              'origin_service': true
-              'protocol': true
-              'error': true
+          service_in_responsetime:
+            aggregation: HISTOGRAM
+            attributes:
+              origin_external: true
+              origin_service: true
+              protocol: true
+              error: true
             
-      '[service/out/responsetime]':
+      service_out_responsetime:
         unit: ms
         description: 'the response time of outgoing service calls'
+        instrument-type: HISTOGRAM
+        value-type: DOUBLE
         views:
-          '[service/out/count]':
-            aggregation: COUNT
-            tags: 
-              'target_external' : true
-              'target_service': true
-              'protocol': true
-              'error': true
-          '[service/out/responsetime/sum]':
-            aggregation: SUM
-            tags: 
-              'target_external' : true
-              'target_service': true
-              'protocol': true
-              'error': true
+          service_out_responsetime:
+            aggregation: HISTOGRAM
+            attributes:
+              target_external: true
+              target_service: true
+              protocol: true
+              error: true
 
   # # # # # # # # # # # # # # # # # # # # # #
   # Instrumentation Configuration
@@ -155,7 +145,7 @@ inspectit:
             only-if-not-null: 'servicegraph_origin_service'
             action: 'a_assign_null'
         metrics:
-          '[service/in/responsetime]':
+          service_in_responsetime:
             value: 'servicegraph_duration'
             data-tags:
               'origin_service': 'servicegraph_origin_service_local'
@@ -177,13 +167,13 @@ inspectit:
             only-if-not-null: 'servicegraph_duration'
             action: 'a_assign_null'
         metrics:
-          '[service/out/responsetime]':
+          service_out_responsetime:
             value: 'servicegraph_duration'
             data-tags:
-              'target_service': 'servicegraph_target_service'
-              'target_external': 'servicegraph_target_external'
-              'protocol': 'servicegraph_protocol'
-              'error': 'servicegraph_is_error'
+              target_service: 'servicegraph_target_service'
+              target_external: 'servicegraph_target_external'
+              protocol: 'servicegraph_protocol'
+              error: 'servicegraph_is_error'
 
       'r_servicegraph_capture_method_duration':
         docs:
