@@ -309,7 +309,7 @@ public class ViewManager {
 
         currentViews.forEach((metricName, viewsMap) -> {
             toBeRemovedMetrics.add(metricName);
-            toBeRemovedViews.put(metricName, viewsMap.keySet());
+            toBeRemovedViews.put(metricName, new HashSet<>(viewsMap.keySet()));
         });
     }
 

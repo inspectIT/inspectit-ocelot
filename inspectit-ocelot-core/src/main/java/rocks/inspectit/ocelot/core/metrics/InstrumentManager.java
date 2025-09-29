@@ -16,10 +16,10 @@ import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.metrics.timewindow.worker.TimeWindowRecorder;
 import rocks.inspectit.ocelot.core.opentelemetry.metrics.ViewManager;
-import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 import rocks.inspectit.ocelot.core.utils.AttributeUtils;
 
 import javax.annotation.PostConstruct;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,7 +59,7 @@ public class InstrumentManager {
      * Updates the instruments defined via {@link MetricsSettings#getDefinitions()}.
      */
     @EventListener(InspectitConfigChangedEvent.class)
-    @Order(CommonAttributesManager.CONFIG_EVENT_LISTENER_ORDER_PRIORITY + 1) // to ensure common attributes are updated first
+    @Order() // to ensure the OpenTelemetry SDK is updated first // TODO This is not working atm...
     @PostConstruct
     public void updateInstruments() {
         MetricsSettings metricsSettings = env.getCurrentConfig().getMetrics();
@@ -68,8 +68,6 @@ public class InstrumentManager {
             instrumentsToRemove.forEach(this::removeInstrument);
             log.info("Successfully updated OpenTelemetry instruments");
         }
-        // TODO Is there some required order for updating instruments here and views in the ViewManager?
-        //      I believe we should update instruments AFTER OTel - including views - have been configured
     }
 
     /**
@@ -81,7 +79,7 @@ public class InstrumentManager {
      * @return the set of instrument names, which are no longer required
      */
     public Set<String> processInstrumentUpdates(Map<String, MetricDefinitionSettings> newDefinitions) {
-        Set<String> instrumentsToRemove = cachedInstruments.keySet();
+        Set<String> instrumentsToRemove = new HashSet<>(cachedInstruments.keySet());
 
         newDefinitions.forEach((name, def) -> {
             val defWithDefaults = def.getCopyWithDefaultsPopulated(name);
