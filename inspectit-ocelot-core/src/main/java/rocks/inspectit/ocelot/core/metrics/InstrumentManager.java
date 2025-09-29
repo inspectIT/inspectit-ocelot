@@ -59,7 +59,7 @@ public class InstrumentManager {
      * Updates the instruments defined via {@link MetricsSettings#getDefinitions()}.
      */
     @EventListener(InspectitConfigChangedEvent.class)
-    @Order(CommonAttributesManager.CONFIG_EVENT_LISTENER_ORDER_PRIORITY + 1) //to ensure common attributes are updated first
+    @Order(CommonAttributesManager.CONFIG_EVENT_LISTENER_ORDER_PRIORITY + 1) // to ensure common attributes are updated first
     @PostConstruct
     public void updateInstruments() {
         MetricsSettings metricsSettings = env.getCurrentConfig().getMetrics();
@@ -69,6 +69,7 @@ public class InstrumentManager {
             log.info("Successfully updated OpenTelemetry instruments");
         }
         // TODO Is there some required order for updating instruments here and views in the ViewManager?
+        //      I believe we should update instruments AFTER OTel - including views - have been configured
     }
 
     /**
@@ -153,6 +154,9 @@ public class InstrumentManager {
     public boolean tryRecordingMetric(String metricName, Number value, Baggage baggage) {
         log.trace("Trying to record metric '{}' with value '{}'", metricName, value);
 
+        // TODO We include the whole baggage as attributes for recording
+        //  The actual filtering is done via AttributesProcessor in views
+        //  What happens, if we do not specify any views for a metric and use the default OTel views?
         Attributes attributes = AttributeUtils.toAttributes(baggage);
 
         boolean recordedInstrument = false;

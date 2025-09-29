@@ -222,12 +222,16 @@ public class ViewManager {
                 .setDescription(settings.getDescription())
                 .setAggregation(aggregation)
                 .setCardinalityLimit(settings.getCardinalityLimit());
+        boolean withCommonAttributes = settings.isWithCommonAttributes();
 
         if (!CollectionUtils.isEmpty(settings.getAttributes())) {
-            builder.setAttributeFilter((attribute) -> filterAttribute(settings, attribute));
+            builder.setAttributeFilter((attribute) -> filterAttribute(settings, attribute, withCommonAttributes));
+        }
+        else if (withCommonAttributes) {
+            builder.setAttributeFilter(this::isCommonAttribute);
         }
         else {
-            builder.setAttributeFilter(this::isCommonAttribute);
+            builder.setAttributeFilter((attr) -> false); // Reject all attributes
         }
 
         return builder.build();
@@ -251,15 +255,16 @@ public class ViewManager {
      * Checks, if the view includes the provided attribute key. Common attributes are included by default,
      * expect they are explicitly disabled for the view.
      *
-     * @param settings the view settings
-     * @param attribute the current attribute key
+     * @param settings              the view settings
+     * @param attribute             the current attribute key
+     * @param withCommonAttributes  whether we should include common attributes to the filter
      *
      * @return true, if this attribute key should be used for the provided view
      */
-    private boolean filterAttribute(ViewDefinitionSettings settings, String attribute) {
+    private boolean filterAttribute(ViewDefinitionSettings settings, String attribute, boolean withCommonAttributes) {
         val viewAttributes = settings.getAttributes();
 
-        if (isCommonAttribute(attribute))
+        if (withCommonAttributes && isCommonAttribute(attribute))
             return viewAttributes.getOrDefault(attribute, true);
 
         return viewAttributes.getOrDefault(attribute, false);
