@@ -15,20 +15,20 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class InspectitContextPerfTest {
 
-    private Map<String, String> commonTags;
+    private Map<String, String> commonAttributes;
 
     private PropagationMetaData dataProperties;
 
     private PropagationSessionStorage sessionStorage;
 
     @Param(value = {"false", "true"})
-    private boolean interactWithAppTagContext;
+    private boolean interactWithAppBaggage;
 
     @Setup
     public void init() {
-        commonTags = new HashMap<>();
-        commonTags.put("common-tag-1", "common-tag-1");
-        commonTags.put("common-tag-2", "common-tag-2");
+        commonAttributes = new HashMap<>();
+        commonAttributes.put("common-attr-1", "common-attr-1");
+        commonAttributes.put("common-attr-2", "common-attr-2");
 
         dataProperties = PropagationMetaData.builder()
                 .setUpPropagation("propagate-1", PropagationMode.JVM_LOCAL)
@@ -40,7 +40,7 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootOnly() {
-        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, sessionStorage, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, sessionStorage, interactWithAppBaggage);
 
         fromCurrent.makeActive();
         fromCurrent.close();
@@ -48,7 +48,7 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootOnly_with2CommonTags() {
-        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, sessionStorage, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, sessionStorage, interactWithAppBaggage);
 
         fromCurrent.makeActive();
         fromCurrent.close();
@@ -56,7 +56,7 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootOnly_with2Tags() {
-        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, sessionStorage, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(Collections.emptyMap(), dataProperties, sessionStorage, interactWithAppBaggage);
         fromCurrent.setData("data-1", "data-1");
         fromCurrent.setData("data-2", "data-2");
         fromCurrent.makeActive();
@@ -65,10 +65,10 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootPlusOne() {
-        InspectitContextImpl parent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, sessionStorage, interactWithAppTagContext);
+        InspectitContextImpl parent = InspectitContextImpl.createFromCurrent(commonAttributes, dataProperties, sessionStorage, interactWithAppBaggage);
         parent.makeActive();
 
-        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, sessionStorage, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(commonAttributes, dataProperties, sessionStorage, interactWithAppBaggage);
         fromCurrent.makeActive();
         fromCurrent.close();
 
@@ -77,10 +77,10 @@ public class InspectitContextPerfTest {
 
     @Benchmark
     public void rootPlusOne_with2UpPropagatedTags() {
-        InspectitContextImpl parent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, sessionStorage, interactWithAppTagContext);
+        InspectitContextImpl parent = InspectitContextImpl.createFromCurrent(commonAttributes, dataProperties, sessionStorage, interactWithAppBaggage);
         parent.makeActive();
 
-        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(commonTags, dataProperties, sessionStorage, interactWithAppTagContext);
+        InspectitContextImpl fromCurrent = InspectitContextImpl.createFromCurrent(commonAttributes, dataProperties, sessionStorage, interactWithAppBaggage);
         fromCurrent.setData("propagate-3", "propagate-3");
         fromCurrent.setData("propagate-4", "propagate-4");
         fromCurrent.makeActive();
@@ -88,6 +88,4 @@ public class InspectitContextPerfTest {
 
         parent.close();
     }
-
-
 }
