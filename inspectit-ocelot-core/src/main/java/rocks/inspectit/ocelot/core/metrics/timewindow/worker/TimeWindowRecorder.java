@@ -85,7 +85,6 @@ public class TimeWindowRecorder {
             MetricRecord record = recordsQueue.take();
             doRecord(record.metricName, record.value, record.time, record.baggage);
         } catch (InterruptedException e) {
-            log.error("TimeWindowRecorder interrupted");
             Thread.currentThread().interrupt();
         } catch (Exception e) {
             log.error("Error processing record: ", e);
@@ -115,7 +114,6 @@ public class TimeWindowRecorder {
     /** Queued metric record */
     @Value
     private static class MetricRecord {
-
         String metricName;
         double value;
         Instant time;
