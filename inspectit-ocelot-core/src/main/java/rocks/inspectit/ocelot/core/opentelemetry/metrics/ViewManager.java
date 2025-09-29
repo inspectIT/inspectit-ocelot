@@ -148,7 +148,9 @@ public class ViewManager {
      */
     private void processView(String metricName, String viewName, ViewDefinitionSettings newSettings) {
         log.debug("Processing view: {}", viewName);
-        toBeRemovedViews.get(metricName).remove(viewName);
+        if (toBeRemovedViews.containsKey(metricName))
+            toBeRemovedViews.get(metricName).remove(viewName);
+
         val currentViewsForMetric = currentViews.computeIfAbsent(metricName, (name) -> new HashMap<>());
         boolean updated;
 
@@ -279,7 +281,8 @@ public class ViewManager {
         // remove views for metrics
         toBeRemovedViews.forEach((metric, views) ->
                 views.forEach(view -> {
-                    currentViews.get(metric).remove(view);
+                    if (currentViews.containsKey(metric))
+                        currentViews.get(metric).remove(view);
                     timeWindowViewManager.removeView(metric, view);
                 })
         );

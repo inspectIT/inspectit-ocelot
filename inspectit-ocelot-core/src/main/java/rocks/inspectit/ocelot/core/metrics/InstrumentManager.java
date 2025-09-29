@@ -151,8 +151,7 @@ public class InstrumentManager {
      * @return true, if a metric was recorded
      */
     public boolean tryRecordingMetric(String metricName, Number value, Baggage baggage) {
-        if (log.isDebugEnabled())
-            log.debug("Trying to record metric '{}' with value '{}'", metricName, value);
+        log.trace("Trying to record metric '{}' with value '{}'", metricName, value);
 
         Attributes attributes = AttributeUtils.toAttributes(baggage);
 
