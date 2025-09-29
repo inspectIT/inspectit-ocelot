@@ -3,20 +3,20 @@ inspectit:
   # the name of the service which is being instrumented
   service-name: "InspectIT Agent"
 
-  # defines common tags to be set on the metrics
-  tags:
-    # different tag providers that can be configured
+  # defines common attributes to be set on the metrics
+  attributes:
+    # different attribute providers that can be configured
     providers:
-      # environment provider adds 'service', 'host.name' and 'host-ip' tags
+      # environment provider adds 'service', 'host.name' and 'host.ip' attributes
       environment:
         # if environment provider is enabled
         enabled: true
-        # should the host name be resolved using InetAddress.getLocalHost(), if false 'host.name' tag is not added by env provider
+        # should the host name be resolved using InetAddress.getLocalHost(), if false 'host.name' attribute is not added by env provider
         resolve-host-name: true
-        # should the host address be resolved using InetAddress.getLocalHost(), if false 'host.ip' tag is not added by env provider
+        # should the host address be resolved using InetAddress.getLocalHost(), if false 'host.ip' attribute is not added by env provider
         resolve-host-address: true
-    # specifies user defined tag keys and values as a map
-    # these tag values would overwrite any value added by the providers, thus you can easily overwrite tags values by your own
+    # specifies user defined attribute keys and values as a map
+    # these attribute values would overwrite any value added by the providers, thus you can easily overwrite attribute values by your own
     extra: { }
 
   # general settings regarding trace capturing

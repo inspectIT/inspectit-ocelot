@@ -109,19 +109,19 @@ public class SelfMonitoringService {
     }
 
     /**
-     * Records a self-monitoring metric with the common tags. Adds customTags to the tag context.
+     * Records a self-monitoring metric with the common attributes. Adds customAttributes to the baggage.
      * The measure has to be defined correctly in the {@link MetricsSettings#getDefinitions()}.
      * Only records a metric if self monitoring is enabled.
      *
-     * @param measureName the name of the metric, excluding the {@link #METRICS_PREFIX}
-     * @param value       the actual value
-     * @param customTags  additional attributes, which are added to the metric
+     * @param measureName       the name of the metric, excluding the {@link #METRICS_PREFIX}
+     * @param value             the actual value
+     * @param customAttributes  additional attributes, which are added to the metric
      */
-    public void recordMetric(String measureName, long value, Map<String, String> customTags) {
+    public void recordMetric(String measureName, long value, Map<String, String> customAttributes) {
         SelfMonitoringSettings conf = env.getCurrentConfig().getSelfMonitoring();
         if (conf.isEnabled()) {
             String fullMetricName = METRICS_PREFIX + measureName;
-            try (Scope scope = commonAttributes.withCommonAttributesScope(customTags)) {
+            try (Scope scope = commonAttributes.withCommonAttributesScope(customAttributes)) {
                 instrumentManager.tryRecordingMetric(fullMetricName, value);
             }
         }

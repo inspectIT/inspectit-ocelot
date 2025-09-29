@@ -23,4 +23,3 @@ inspectit:
       '[com.intellij.]': true
       '[org.gradle.]': true
       '[net.bytebuddy.]': true
-

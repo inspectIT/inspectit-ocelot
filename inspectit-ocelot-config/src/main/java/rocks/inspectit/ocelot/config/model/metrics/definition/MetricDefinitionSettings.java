@@ -42,7 +42,7 @@ public class MetricDefinitionSettings {
 
     @NotNull
     @Builder.Default
-    private InstrumentValueType valueType = InstrumentValueType.DOUBLE;
+    private InstrumentValueType valueType = InstrumentValueType.LONG;
 
     /**
      * The description of the metric.

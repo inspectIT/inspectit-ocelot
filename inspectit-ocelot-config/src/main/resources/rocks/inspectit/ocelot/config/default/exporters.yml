@@ -1,6 +1,6 @@
 inspectit:
 
-  # settings for configuring OpenTelemetry metrics and trace exporters
+  # settings for configuring metrics and trace exporters
   exporters:
 
     # settings for metrics exporters
