@@ -4,8 +4,6 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
 import rocks.inspectit.ocelot.bootstrap.exposed.InspectitContext;
 
-
-// TODO Do we need still this?
 /**
  * Utility class to get the current OTEL {@link io.opentelemetry.context.Context}
  */

@@ -122,12 +122,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
     private Scope currentOtelScope;
 
     /**
-     * If this context opened a new {@link #activePhaseDownPropagationBaggage} during {@link #makeActive()},
-     * the corresponding scope is stored in this variable and will be used in {@link #close()} to clean up the context.
-     */
-    private Scope openedDownPropagationScope;
-
-    /**
      * The span scope which was (potentially) opened by invoking {@link #setSpanScope(AutoCloseable)}
      */
     private AutoCloseable currentSpanScope;
@@ -312,12 +306,12 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     @Override
     public void makeActive() {
-        // Update session data after entry actions
+        // update session data after entry actions
         performSessionUpdate();
 
         boolean anyDownPropagatedDataOverwritten = anyDownPropagatedDataOverridden();
 
-        //only copy if any down-propagating value has been written
+        // only copy if any down-propagating value has been written
         if (anyDownPropagatedDataOverwritten) {
             postEntryPhaseDownPropagatedData = getDownPropagatedDataAsNewMap();
         }
@@ -326,16 +320,16 @@ public class InspectitContextImpl implements InternalInspectitContext {
         // store the context in OTel
         currentOtelScope = Context.current().with(INSPECTIT_KEY, this).makeCurrent();
 
-        // TODO I am unsure this is correct...
         if (interactWithApplicationBaggage) {
             // check if we can reuse the parent context
             if (anyDownPropagatedDataOverwritten || (parent != null && parent.isActivePhaseDownPropagationBaggageStale)) {
                 BaggageBuilder builder =  Baggage.current().toBuilder();
-
                 for (Map.Entry<String, String> attribute : getPostEntryPhaseAttributes().entrySet()) {
                     builder.put(attribute.getKey(), attribute.getValue());
                 }
-                openedDownPropagationScope = builder.build().makeCurrent();
+                Baggage mergedBaggage = builder.build();
+                // store baggage in OTel
+                currentOtelScope = Context.current().with(mergedBaggage).makeCurrent();
             }
             activePhaseDownPropagationBaggage = Baggage.current();
         }
@@ -440,7 +434,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
      */
     @Override
     public void close() {
-        // close the current OTEL scope to restore the previous scope
+        // close the current OTel scope to restore the previous scope
         if (null != currentOtelScope) {
             currentOtelScope.close();
         }
@@ -457,10 +451,10 @@ public class InspectitContextImpl implements InternalInspectitContext {
             parent.performUpPropagation(dataOverwrites);
         }
 
-        // Update session data after exit actions
+        // update session data after exit actions
         performSessionUpdate();
 
-        //clear the references to prevent memory leaks
+        // clear the references to prevent memory leaks
         currentSpanScope = null;
         parent = null;
         currentOtelScope = null;
@@ -473,6 +467,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
                 Object value = entry.getValue();
                 dataOverwrites.put(key, value);
                 if (propagation.isPropagatedDownWithinJVM(key)) {
+                    isActivePhaseDownPropagationBaggageStale = true; // TODO Is this correct?
                     if (cachedActivePhaseDownPropagatedData != null && cachedActivePhaseDownPropagatedData.get(key) != value) {
                         cachedActivePhaseDownPropagatedData = null;
                     }
@@ -547,8 +542,10 @@ public class InspectitContextImpl implements InternalInspectitContext {
     public void readDownPropagationHeaders(Map<String, String> headers) {
         Predicate<String> propagationFilter = (key) -> propagation.isPropagatedDownGlobally(key);
         ContextPropagation.get().readPropagatedDataFromHeaderMap(headers, this, propagationFilter);
+
         SpanContext remote_span = ContextPropagation.get().readPropagatedSpanContextFromHeaderMap(headers);
         setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, remote_span);
+
         String sessionId = ContextPropagation.get().readPropagatedSessionIdFromHeaderMap(headers);
         if (sessionId != null) setData(REMOTE_SESSION_ID, sessionId);
     }
@@ -645,7 +642,6 @@ public class InspectitContextImpl implements InternalInspectitContext {
         return result;
     }
 
-    // TODO Don't know if we use this correct
     private Map<String, String> getPostEntryPhaseAttributes() {
         Map<String, String> postEntryPhaseAttributes = new HashMap<>();
         postEntryPhaseDownPropagatedData.entrySet()

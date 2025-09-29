@@ -45,47 +45,49 @@ public class MethodHook implements IMethodHook {
      * The configuration on which this hook is based.
      * This object can be compared against newly derived configurations to see if the hook requires an update.
      */
-    private final MethodHookConfiguration sourceConfiguration;
+    MethodHookConfiguration sourceConfiguration;
 
     /**
      * The context manager used to create the inspectit context.
      */
-    private final ContextManager inspectitContextManager;
+    ContextManager inspectitContextManager;
 
     /**
      * The list of actions to execute when the instrumented method is entered.
      */
-    private final List<IHookAction> entryActions;
+    List<IHookAction> entryActions;
 
     /**
      * The list of actions to execute when the instrumented method is exited.
      */
-    private final List<IHookAction> exitActions;
+    List<IHookAction> exitActions;
 
     /**
      * The subset of {@link #entryActions}, which are actually active.
      * Initially, this list contains the same elements as {@link #entryActions}.
      */
-    private final CopyOnWriteArrayList<IHookAction> activeEntryActions;
+    CopyOnWriteArrayList<IHookAction> activeEntryActions;
 
     /**
      * The subset of {@link #exitActions}, which are actually active.
      * Initially, this list contains the same elements as {@link #exitActions}.
      */
-    private final CopyOnWriteArrayList<IHookAction> activeExitActions;
+    CopyOnWriteArrayList<IHookAction> activeExitActions;
 
     /**
-     * Stores details regarding the hooked method
+     * Stores details regarding the hooked method<
      */
-    private final MethodReflectionInformation methodInformation;
+    MethodReflectionInformation methodInformation;
 
     /**
      * The factory that creates/spawns new scopes for an {@link IHookAction}
      */
-    private final ActionScopeFactory actionScopeFactory;
+    ActionScopeFactory actionScopeFactory;
 
     @Builder
-    public MethodHook(MethodHookConfiguration sourceConfiguration, ContextManager inspectitContextManager, @Singular List<IHookAction> entryActions, @Singular List<IHookAction> exitActions, MethodReflectionInformation methodInformation, ActionScopeFactory actionScopeFactory) {
+    public MethodHook(MethodHookConfiguration sourceConfiguration, ContextManager inspectitContextManager,
+                      @Singular List<IHookAction> entryActions, @Singular List<IHookAction> exitActions,
+                      MethodReflectionInformation methodInformation, ActionScopeFactory actionScopeFactory) {
         this.sourceConfiguration = sourceConfiguration;
         this.inspectitContextManager = inspectitContextManager;
         this.entryActions = new ArrayList<>(entryActions);
@@ -111,7 +113,8 @@ public class MethodHook implements IMethodHook {
             hookSpan = getEntryHookTracingSpan();
             recordContextDataInSpan(hookSpan, inspectitContext, "before.");
 
-            IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, null, null, this, inspectitContext, hookSpan);
+            IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, null,
+                    null, this, inspectitContext, hookSpan);
 
             for (IHookAction action : activeEntryActions) {
                 try (IActionScope scope = actionScopeFactory.createScope(action)) {
@@ -145,7 +148,8 @@ public class MethodHook implements IMethodHook {
             hookSpan = getExitHookTracingSpan();
             recordContextDataInSpan(hookSpan, context, "before.");
 
-            IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue, thrown, this, (InspectitContextImpl) context, hookSpan);
+            IHookAction.ExecutionContext executionContext = new IHookAction.ExecutionContext(args, thiz, returnValue,
+                    thrown, this, (InspectitContextImpl) context, hookSpan);
 
             for (IHookAction action : activeExitActions) {
                 try (IActionScope scope = actionScopeFactory.createScope(action)) {
@@ -169,14 +173,14 @@ public class MethodHook implements IMethodHook {
     }
 
     /**
-     * @return An exact copy of this method hook but with all deactivated actions reactivated.
+     * @return the exact copy of this method hook but with all deactivated actions reactivated.
      */
     public MethodHook getResetCopy() {
         return new MethodHook(sourceConfiguration, inspectitContextManager, entryActions, exitActions, methodInformation, actionScopeFactory);
     }
 
     /**
-     * @return Returns a span representing the entry hook of this method hook. It will be used as parent for action tracing spans.
+     * @return the span representing the entry hook of this method hook. It will be used as parent for action tracing spans.
      */
     private Span getEntryHookTracingSpan() {
         if (sourceConfiguration.isTraceEntryHook()) {
@@ -187,7 +191,7 @@ public class MethodHook implements IMethodHook {
     }
 
     /**
-     * @return Returns a span representing the exit hook of this method hook. It will be used as parent for action tracing spans.
+     * @return the span representing the exit hook of this method hook. It will be used as parent for action tracing spans.
      */
     private Span getExitHookTracingSpan() {
         if (sourceConfiguration.isTraceExitHook()) {
@@ -204,7 +208,7 @@ public class MethodHook implements IMethodHook {
     }
 
     /**
-     * Utility method for adding a the existing context as span attributes to the given span.
+     * Utility method for adding the existing context as span attributes to the given span.
      *
      * @param span    the span to add the attributes
      * @param context the context containing the data
