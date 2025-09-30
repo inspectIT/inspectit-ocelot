@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
-import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.metrics.timewindow.views.QuantilesView;
 import rocks.inspectit.ocelot.core.metrics.timewindow.views.SmoothedAverageView;
 import rocks.inspectit.ocelot.core.metrics.timewindow.views.TimeWindowView;
@@ -27,9 +26,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class TimeWindowViewManager {
-
-    @Autowired
-    private InspectitEnvironment env;
 
     @Autowired
     private CommonAttributesManager commonAttributes;

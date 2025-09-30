@@ -1,6 +1,7 @@
 package inspectit.ocelot.configdocsgenerator.parsing;
 
 import com.google.common.io.Resources;
+import io.opentelemetry.sdk.metrics.InstrumentValueType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +53,7 @@ class ConfigParserTest {
 
             MetricDefinitionSettings metricDefinitionMock = Mockito.mock(MetricDefinitionSettings.class);
             when(metricDefinitionMock.isEnabled()).thenReturn(true);
-            when(metricDefinitionMock.getType()).thenReturn(MetricDefinitionSettings.MeasureType.LONG);
+            when(metricDefinitionMock.getValueType()).thenReturn(InstrumentValueType.LONG);
             when(metricDefinitionMock.getUnit()).thenReturn("bytes");
             when(metricDefinitionMock.getMaxValuesPerAttribute()).thenReturn(5);
             when(metricDefinitionMock.getDescription()).thenReturn("free disk space");

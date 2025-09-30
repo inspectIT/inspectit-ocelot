@@ -18,7 +18,6 @@ public class RootPropagationMetaDataTest {
                     .copy()
                     .build();
 
-            assertThat(result.isTag("not_present")).isFalse();
             assertThat(result.isPropagatedDownGlobally("not_present")).isFalse();
             assertThat(result.isPropagatedDownWithinJVM("not_present")).isFalse();
             assertThat(result.isPropagatedUpGlobally("not_present")).isFalse();
@@ -29,16 +28,13 @@ public class RootPropagationMetaDataTest {
         @Test
         void verifySettingsOverridable() {
             PropagationMetaData result = RootPropagationMetaData.builder()
-                    .setTag("root", true)
                     .setDownPropagation("root", PropagationMode.JVM_LOCAL)
                     .setUpPropagation("root", PropagationMode.JVM_LOCAL)
                     .build()
                     .copy()
-                    .setTag("root", false)
                     .setUpPropagation("root", PropagationMode.GLOBAL)
                     .build();
 
-            assertThat(result.isTag("root")).isFalse();
             assertThat(result.isPropagatedDownGlobally("root")).isFalse();
             assertThat(result.isPropagatedDownWithinJVM("root")).isTrue();
             assertThat(result.isPropagatedUpGlobally("root")).isTrue();
@@ -49,17 +45,14 @@ public class RootPropagationMetaDataTest {
         @Test
         void verifyNewSettingsCanBeAdded() {
             PropagationMetaData result = RootPropagationMetaData.builder()
-                    .setTag("root", true)
                     .setDownPropagation("root", PropagationMode.JVM_LOCAL)
                     .setUpPropagation("root", PropagationMode.JVM_LOCAL)
                     .build()
                     .copy()
-                    .setTag("child", true)
                     .setDownPropagation("child", PropagationMode.GLOBAL)
                     .setUpPropagation("child", PropagationMode.GLOBAL)
                     .build();
 
-            assertThat(result.isTag("child")).isTrue();
             assertThat(result.isPropagatedDownGlobally("child")).isTrue();
             assertThat(result.isPropagatedDownWithinJVM("child")).isTrue();
             assertThat(result.isPropagatedUpGlobally("child")).isTrue();
@@ -174,46 +167,6 @@ public class RootPropagationMetaDataTest {
 
             assertThat(result.isPropagatedUpWithinJVM("my_key")).isFalse();
             assertThat(result.isPropagatedUpGlobally("my_key")).isFalse();
-        }
-    }
-
-    @Nested
-    class SetTag {
-
-        @Test
-        void defaultTag() {
-            PropagationMetaData result = RootPropagationMetaData.builder()
-                    .build();
-
-            assertThat(result.isTag("my_key")).isFalse();
-        }
-
-        @Test
-        void isNotATag() {
-            PropagationMetaData result = RootPropagationMetaData.builder()
-                    .setTag("my_key", false)
-                    .build();
-
-            assertThat(result.isTag("my_key")).isFalse();
-        }
-
-        @Test
-        void isTag() {
-            PropagationMetaData result = RootPropagationMetaData.builder()
-                    .setTag("my_key", true)
-                    .build();
-
-            assertThat(result.isTag("my_key")).isTrue();
-        }
-
-        @Test
-        void overridesRespected() {
-            PropagationMetaData result = RootPropagationMetaData.builder()
-                    .setTag("my_key", true)
-                    .setTag("my_key", false)
-                    .build();
-
-            assertThat(result.isTag("my_key")).isFalse();
         }
     }
 }

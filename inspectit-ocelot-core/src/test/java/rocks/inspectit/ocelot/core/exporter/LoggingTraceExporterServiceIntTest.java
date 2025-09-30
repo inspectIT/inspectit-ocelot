@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.github.netmikey.logunit.api.LogCapturer;
-import io.opencensus.trace.Tracing;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
@@ -155,7 +154,7 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
 
         @DirtiesContext
         @Test
-        void testLoggingExporterDisabled() throws InterruptedException {
+        void testLoggingExporterDisabled() {
             assertThat(service.isEnabled()).isTrue();
 
             // disable exporter service
@@ -167,65 +166,6 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
 
             // make sure that no spans were exported
             assertThat(spanLogs.getEvents()).hasSize(0);
-        }
-
-    }
-
-    @Nested
-    class OpenCensusLogging {
-
-        @DirtiesContext
-        @Test
-        void verifyOpenCensusTraceSent() throws InterruptedException {
-            assertThat(service.isEnabled()).isTrue();
-
-            // make some spans
-            makeSpansAndFlush();
-
-            // assert that both spans are logged
-            Awaitility.waitAtMost(5, TimeUnit.SECONDS)
-                    .pollInterval(1, TimeUnit.SECONDS)
-                    .untilAsserted(() -> assertThat(spanLogs.getEvents()).hasSize(2));
-            assertThat(spanLogs.getEvents().get(0).getMessage()).contains("openCensusChild");
-
-            int numEvents = spanLogs.size();
-
-            // turn off tracing exporter
-            localSwitch(ExporterEnabledState.DISABLED);
-            // make sure no more spans are recorded
-            Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isFalse());
-            assertThat(spanLogs.size()).isEqualTo(numEvents);
-
-            // turn tracing exporter back on
-            localSwitch(ExporterEnabledState.ENABLED);
-            Awaitility.waitAtMost(5, TimeUnit.SECONDS).untilAsserted(() -> assertThat(service.isEnabled()).isTrue());
-
-            // make spans
-            makeSpansAndFlush();
-            // verify logging of spans
-            Awaitility.waitAtMost(10, TimeUnit.SECONDS)
-                    .pollInterval(1, TimeUnit.SECONDS)
-                    .untilAsserted(() -> assertThat(spanLogs.size()).isEqualTo(numEvents + 2));
-        }
-
-        private io.opencensus.trace.Tracer getOCTracer() {
-            return Tracing.getTracer();
-        }
-
-        private void makeSpansAndFlush() {
-            // get OC tracer and start spans
-            io.opencensus.trace.Tracer tracer = getOCTracer();
-
-            // start span and nested span
-            try (io.opencensus.common.Scope scope = tracer.spanBuilder("openCensusParent").startScopedSpan()) {
-                try (io.opencensus.common.Scope childScope = tracer.spanBuilder("openCensusChild").startScopedSpan()) {
-                    io.opencensus.trace.Span span = tracer.getCurrentSpan();
-                    span.addAnnotation("invoking stuff in openCensusChild");
-                }
-            }
-
-            // flush pending spans
-            Instances.openTelemetryController.flush();
         }
 
     }

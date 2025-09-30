@@ -5,9 +5,11 @@ import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.ServiceRequestContext;
 import com.linecorp.armeria.server.grpc.protocol.AbstractUnaryGrpcService;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
-import io.opencensus.stats.*;
-import io.opencensus.tags.*;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
@@ -180,33 +182,19 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
         Instances.openTelemetryController.flush();
     }
 
-    protected Measure.MeasureLong createMeasure(String measureName, String tagKey) {
-        Measure.MeasureLong measure = Measure.MeasureLong.create(measureName, "desc", "1");
-
-        View view = View.create(View.Name.create(measureName), "desc", measure, Aggregation.Sum.create(),
-                Collections.singletonList(TagKey.create(tagKey)));
-        Stats.getViewManager().registerView(view);
-
-        return measure;
+    void recordMetricsAndFlush() {
+        recordMetricsAndFlush("my-counter", 1, "my-key", "my-val");
     }
 
-    /**
-     * Records a sum with the given value and tag.
-     * Since we are still not using OTel to create metrics with the agent, we should stick to OC in tests.
-     *
-     * @param measure the measure to record
-     * @param value  the value to add to the measure
-     * @param tagKey the key of the tag
-     * @param tagVal the value of the tag
-     */
-    protected void recordMeasureAndFlush(Measure.MeasureLong measure, int value, String tagKey, String tagVal) {
-        TagContext tagContext = Tags.getTagger().emptyBuilder()
-                .putLocal(TagKey.create(tagKey), TagValue.create(tagVal))
+    protected void recordMetricsAndFlush(String measureName, int value, String attributeKey, String attributeValue) {
+        // get the meter and create a counter
+        Meter meter = GlobalOpenTelemetry.getMeterProvider()
+                .meterBuilder("rocks.inspectit.ocelot")
+                .setInstrumentationVersion("0.0.1")
                 .build();
 
-        Stats.getStatsRecorder().newMeasureMap()
-                .put(measure, value)
-                .record(tagContext);
+        LongCounter counter = meter.counterBuilder(measureName).setDescription("My counter").setUnit("1").build();
+        counter.add(value, Attributes.of(AttributeKey.stringKey(attributeKey), attributeValue));
 
         Instances.openTelemetryController.flush();
     }

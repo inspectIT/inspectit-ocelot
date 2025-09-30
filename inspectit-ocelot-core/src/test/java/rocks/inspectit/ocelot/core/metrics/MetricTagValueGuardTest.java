@@ -1,10 +1,7 @@
 package rocks.inspectit.ocelot.core.metrics;
 
 import com.google.common.collect.Maps;
-import io.opencensus.tags.TagContext;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
-import io.opencensus.tags.Tags;
+import io.opentelemetry.api.baggage.Baggage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -43,34 +40,42 @@ class MetricTagValueGuardTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private InspectitEnvironment environment;
+
     @Mock
     private CommonAttributesManager commonAttributesManager;
+
     @Mock
     PersistedAttributesReaderWriter readerWriter;
+
     @Mock
     private AgentHealthManager agentHealthManager;
+
     @Mock
     private ScheduledExecutorService executor;
+
     @InjectMocks
-    private MetricTagValueGuard guard = new MetricTagValueGuard();
+    private MetricTagValueGuard tagGuard;
 
     private ExecutionContext context;
-    private final static int defaultMaxValuePerTag = 42;
+
+    private final static int defaultMaxValuePerAttribute = 42;
+
     private final static String OVERFLOW = "overflow";
 
     /**
-     * Helper method to configure tag value limits as well as metrics settings before testing
-     * @param maxValuesPerTagByMeasure Map with measures and their tag value limits
-     * @param settings MetricDefinitionSettings, which should be applied for "measure"
+     * Helper method to configure tag value limits as well as metrics settings before testing.
+     *
+     * @param maxValuesPerAttributeByMetric Map with metrics and their attribute value limits
+     * @param settings MetricDefinitionSettings, which should be applied for "metric"
      */
-    private void setupTagGuard(Map<String, Integer> maxValuesPerTagByMeasure, MetricDefinitionSettings settings) {
+    private void setupTagGuard(Map<String, Integer> maxValuesPerAttributeByMetric, MetricDefinitionSettings settings) {
         TagGuardSettings tagGuardSettings = new TagGuardSettings();
         tagGuardSettings.setEnabled(true);
         tagGuardSettings.setScheduleDelay(Duration.ofSeconds(1));
         tagGuardSettings.setOverflowReplacement(OVERFLOW);
-        tagGuardSettings.setMaxValuesPerAttribute(defaultMaxValuePerTag);
-        if (maxValuesPerTagByMeasure != null)
-            tagGuardSettings.setMaxValuesPerAttributeByMetric(maxValuesPerTagByMeasure);
+        tagGuardSettings.setMaxValuesPerAttribute(defaultMaxValuePerAttribute);
+        if (maxValuesPerAttributeByMetric != null)
+            tagGuardSettings.setMaxValuesPerAttributeByMetric(maxValuesPerAttributeByMetric);
 
         when(environment.getCurrentConfig().getMetrics().getTagGuard()).thenReturn(tagGuardSettings);
 
@@ -78,7 +83,7 @@ class MetricTagValueGuardTest {
             when(environment.getCurrentConfig()
                     .getMetrics()
                     .getDefinitions()
-                    .get("measure")).thenReturn(settings);
+                    .get("metric")).thenReturn(settings);
     }
 
     @Nested
@@ -96,19 +101,19 @@ class MetricTagValueGuardTest {
             }
         }
 
-        private Map<String, Map<String, Set<String>>> createTagValues() {
-            Set<String> tagValue = new HashSet<>();
-            tagValue.add("value1");
-            tagValue.add("value2");
-            tagValue.add("value3");
+        private Map<String, Map<String, Set<String>>> createMetricAttributeValues() {
+            Set<String> attributeValues = new HashSet<>();
+            attributeValues.add("value1");
+            attributeValues.add("value2");
+            attributeValues.add("value3");
 
-            Map<String, Set<String>> tagKeys2Values = Maps.newHashMap();
-            tagKeys2Values.put("tagKey_1", tagValue);
+            Map<String, Set<String>> attributes = Maps.newHashMap();
+            attributes.put("attrKey_1", attributeValues);
 
-            Map<String, Map<String, Set<String>>> measure2TagKeys = Maps.newHashMap();
-            measure2TagKeys.put("measure_1", tagKeys2Values);
+            Map<String, Map<String, Set<String>>> metrics = Maps.newHashMap();
+            metrics.put("metric_1", attributes);
 
-            return measure2TagKeys;
+            return metrics;
         }
 
         @Test
@@ -116,12 +121,12 @@ class MetricTagValueGuardTest {
             String tempFileName = generateTempFilePath();
 
             PersistedAttributesReaderWriter readerWriter = PersistedAttributesReaderWriter.of(tempFileName);
-            Map<String, Map<String, Set<String>>> tagValues = createTagValues();
-            readerWriter.write(tagValues);
+            Map<String, Map<String, Set<String>>> attributes = createMetricAttributeValues();
+            readerWriter.write(attributes);
             Map<String, Map<String, Set<String>>> loaded = readerWriter.read();
 
-            assertThat(loaded).flatExtracting("measure_1")
-                    .flatExtracting("tagKey_1")
+            assertThat(loaded).flatExtracting("metric_1")
+                    .flatExtracting("attrKey_1")
                     .containsExactlyInAnyOrder("value1", "value2", "value3");
 
         }
@@ -134,17 +139,17 @@ class MetricTagValueGuardTest {
         public void getMaxValuesPerTagByDefault() {
             setupTagGuard(null, null);
 
-            assertThat(guard.getMaxValuesPerAttribute("measure", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerTag);
+            assertThat(tagGuard.getMaxValuesPerAttribute("metric", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerAttribute);
         }
 
         @Test
         public void getMaxValuesPerTagByMeasure() {
             Map<String, Integer> maxValuesPerTagByMeasure = new HashMap<>();
-            maxValuesPerTagByMeasure.put("measure", 43);
+            maxValuesPerTagByMeasure.put("metric", 43);
             setupTagGuard(maxValuesPerTagByMeasure, null);
 
-            assertThat(guard.getMaxValuesPerAttribute("measure", environment.getCurrentConfig())).isEqualTo(43);
-            assertThat(guard.getMaxValuesPerAttribute("measure1", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerTag);
+            assertThat(tagGuard.getMaxValuesPerAttribute("metric", environment.getCurrentConfig())).isEqualTo(43);
+            assertThat(tagGuard.getMaxValuesPerAttribute("metric1", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerAttribute);
         }
 
         @Test
@@ -153,33 +158,34 @@ class MetricTagValueGuardTest {
             settings.setMaxValuesPerAttribute(43);
             setupTagGuard(null, settings);
 
-            assertThat(guard.getMaxValuesPerAttribute("measure", environment.getCurrentConfig())).isEqualTo(43);
-            assertThat(guard.getMaxValuesPerAttribute("measure1", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerTag);
+            assertThat(tagGuard.getMaxValuesPerAttribute("metric", environment.getCurrentConfig())).isEqualTo(43);
+            assertThat(tagGuard.getMaxValuesPerAttribute("metric1", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerAttribute);
         }
 
         @Test
         public void getMaxValuesPerTagWhenAllSettingsAreSet() {
             Map<String, Integer> maxValuesPerTagByMeasure = new HashMap<>();
-            maxValuesPerTagByMeasure.put("measure", 43);
-            maxValuesPerTagByMeasure.put("measure2", 48);
+            maxValuesPerTagByMeasure.put("metric", 43);
+            maxValuesPerTagByMeasure.put("metric2", 48);
 
             MetricDefinitionSettings settings = new MetricDefinitionSettings();
             settings.setMaxValuesPerAttribute(44);
 
             setupTagGuard(maxValuesPerTagByMeasure, settings);
 
-            assertThat(guard.getMaxValuesPerAttribute("measure", environment.getCurrentConfig())).isEqualTo(44);
-            assertThat(guard.getMaxValuesPerAttribute("measure2", environment.getCurrentConfig())).isEqualTo(48);
-            assertThat(guard.getMaxValuesPerAttribute("measure3", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerTag);
+            assertThat(tagGuard.getMaxValuesPerAttribute("metric", environment.getCurrentConfig())).isEqualTo(44);
+            assertThat(tagGuard.getMaxValuesPerAttribute("metric2", environment.getCurrentConfig())).isEqualTo(48);
+            assertThat(tagGuard.getMaxValuesPerAttribute("metric3", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerAttribute);
         }
     }
 
     @Nested
-    public class getTagContext {
+    public class getBaggage {
 
-        static final String TAG_KEY = "test-tag-key";
-        static final String TAG_VALUE_1 = "test-tag-value-1";
-        static final String TAG_VALUE_2 = "test-tag-value-2";
+        static final String ATTRIBUTE_KEY = "test-key";
+        static final String ATTRIBUTE_VALUE_1 = "test-value-1";
+        static final String ATTRIBUTE_VALUE_2 = "test-value-2";
+
         private MetricAccessor metricAccessor1;
         private MetricAccessor metricAccessor2;
 
@@ -193,10 +199,10 @@ class MetricTagValueGuardTest {
         @BeforeEach
         void setUp() {
             VariableAccessor metricValueAccess = Mockito.mock(VariableAccessor.class);
-            metricAccessor1 = new MetricAccessor("measure", metricValueAccess, Collections.emptyMap(),
-                    Collections.singletonMap(TAG_KEY, (context) -> TAG_VALUE_1));
-            metricAccessor2 = new MetricAccessor("measure", metricValueAccess, Collections.emptyMap(),
-                    Collections.singletonMap(TAG_KEY, (context) -> TAG_VALUE_2));
+            metricAccessor1 = new MetricAccessor("metric", metricValueAccess, Collections.emptyMap(),
+                    Collections.singletonMap(ATTRIBUTE_KEY, (context) -> ATTRIBUTE_VALUE_1));
+            metricAccessor2 = new MetricAccessor("metric", metricValueAccess, Collections.emptyMap(),
+                    Collections.singletonMap(ATTRIBUTE_KEY, (context) -> ATTRIBUTE_VALUE_2));
 
             context = createExecutionContext();
 
@@ -210,93 +216,94 @@ class MetricTagValueGuardTest {
             maxValuesPerTagByMeasure.put("measure", 1);
             setupTagGuard(maxValuesPerTagByMeasure, null);
 
-            TagContext expectedTagContext = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create(TAG_KEY), TagValue.create(TAG_VALUE_1))
+            Baggage expectedBaggage = Baggage.builder()
+                    .put(ATTRIBUTE_KEY, ATTRIBUTE_VALUE_1)
                     .build();
 
-            TagContext expectedOverflow = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create(TAG_KEY), TagValue.create(OVERFLOW))
+            Baggage expectedOverflow = Baggage.builder()
+                    .put(ATTRIBUTE_KEY, OVERFLOW)
                     .build();
 
-            // first tag value should be accepted
-            TagContext tagContext = guard.getBaggage(context, metricAccessor1);
-            guard.blockAttributeValuesTask.run();
-            // second tag value will exceed the limit
-            TagContext overflow = guard.getBaggage(context, metricAccessor2);
+            // first attribute value should be accepted
+            Baggage baggage = tagGuard.getBaggage(context, metricAccessor1);
 
-            assertThat(tagContext.equals(expectedTagContext)).isTrue();
+            tagGuard.blockAttributeValuesTask.run();
+
+            // second attribute value will exceed the limit
+            Baggage overflow = tagGuard.getBaggage(context, metricAccessor2);
+
+            assertThat(baggage.equals(expectedBaggage)).isTrue();
             assertThat(overflow.equals(expectedOverflow)).isTrue();
         }
 
         @Test
         void verifyOverflowResolvedAfterLimitIncrease() {
-            Map<String, Integer> maxValuesPerTagByMeasure = new HashMap<>();
-            maxValuesPerTagByMeasure.put("measure", 1);
-            setupTagGuard(maxValuesPerTagByMeasure, null);
+            Map<String, Integer> maxValuesPerAttributeByMetric = new HashMap<>();
+            maxValuesPerAttributeByMetric.put("metric", 1);
+            setupTagGuard(maxValuesPerAttributeByMetric, null);
 
-            TagContext expectedTagContext1 = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create(TAG_KEY), TagValue.create(TAG_VALUE_1))
+            Baggage expectedBaggage1 = Baggage.builder()
+                    .put(ATTRIBUTE_KEY, ATTRIBUTE_VALUE_1)
                     .build();
 
-            TagContext expectedTagContext2 = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create(TAG_KEY), TagValue.create(TAG_VALUE_2))
+            Baggage expectedBaggage2 = Baggage.builder()
+                    .put(ATTRIBUTE_KEY, ATTRIBUTE_VALUE_2)
                     .build();
 
-            TagContext expectedOverflow = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create(TAG_KEY), TagValue.create(OVERFLOW))
+            Baggage expectedOverflow = Baggage.builder()
+                    .put(ATTRIBUTE_KEY, OVERFLOW)
                     .build();
 
             // first tag value should be accepted
-            TagContext tagContext1 = guard.getBaggage(context, metricAccessor1);
-            guard.blockAttributeValuesTask.run();
-            // second tag value will exceed the limit
-            TagContext overflow = guard.getBaggage(context, metricAccessor2);
-            // increase tag limit to resolve overflow
-            maxValuesPerTagByMeasure.put("measure", 5);
-            setupTagGuard(maxValuesPerTagByMeasure, null);
-            guard.blockAttributeValuesTask.run();
-            // second tag value should be accepted
-            TagContext tagContext2 = guard.getBaggage(context, metricAccessor2);
+            Baggage baggage1 = tagGuard.getBaggage(context, metricAccessor1);
+            tagGuard.blockAttributeValuesTask.run();
 
-            assertThat(tagContext1.equals(expectedTagContext1)).isTrue();
+            // second tag value will exceed the limit
+            Baggage overflow = tagGuard.getBaggage(context, metricAccessor2);
+
+            // increase tag limit to resolve overflow
+            maxValuesPerAttributeByMetric.put("metric", 5);
+            setupTagGuard(maxValuesPerAttributeByMetric, null);
+            tagGuard.blockAttributeValuesTask.run();
+
+            // second tag value should be accepted
+            Baggage baggage2 = tagGuard.getBaggage(context, metricAccessor2);
+
+            assertThat(baggage1.equals(expectedBaggage1)).isTrue();
             assertThat(overflow.equals(expectedOverflow)).isTrue();
-            assertThat(tagContext2.equals(expectedTagContext2)).isTrue();
+            assertThat(baggage2.equals(expectedBaggage2)).isTrue();
         }
 
         @Test
         void verifyOverflowNotResolvedAfterLimitIncrease() {
-            Map<String, Integer> maxValuesPerTagByMeasure = new HashMap<>();
-            maxValuesPerTagByMeasure.put("measure", 1);
-            setupTagGuard(maxValuesPerTagByMeasure, null);
+            Map<String, Integer> maxValuesPerAttributeByMetric = new HashMap<>();
+            maxValuesPerAttributeByMetric.put("measure", 1);
+            setupTagGuard(maxValuesPerAttributeByMetric, null);
 
-            TagContext expectedTagContext1 = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create(TAG_KEY), TagValue.create(TAG_VALUE_1))
+            Baggage expectedBaggage1 = Baggage.builder()
+                    .put(ATTRIBUTE_KEY, ATTRIBUTE_VALUE_1)
                     .build();
 
-            TagContext expectedOverflow = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create(TAG_KEY), TagValue.create(OVERFLOW))
+            Baggage expectedOverflow = Baggage.builder()
+                    .put(ATTRIBUTE_KEY, OVERFLOW)
                     .build();
 
             // first tag value should be accepted
-            TagContext tagContext1 = guard.getBaggage(context, metricAccessor1);
-            guard.blockAttributeValuesTask.run();
-            // second tag value will exceed the limit
-            TagContext overflow1 = guard.getBaggage(context, metricAccessor2);
-            // increase tag limit to resolve overflow
-            maxValuesPerTagByMeasure.put("measure", 2);
-            setupTagGuard(maxValuesPerTagByMeasure, null);
-            guard.blockAttributeValuesTask.run();
-            // second tag value should be accepted
-            TagContext overflow2 = guard.getBaggage(context, metricAccessor2);
+            Baggage baggage1 = tagGuard.getBaggage(context, metricAccessor1);
+            tagGuard.blockAttributeValuesTask.run();
 
-            assertThat(tagContext1.equals(expectedTagContext1)).isTrue();
+            // second tag value will exceed the limit
+            Baggage overflow1 = tagGuard.getBaggage(context, metricAccessor2);
+
+            // increase tag limit to resolve overflow
+            maxValuesPerAttributeByMetric.put("metric", 2);
+            setupTagGuard(maxValuesPerAttributeByMetric, null);
+            tagGuard.blockAttributeValuesTask.run();
+
+            // second tag value should be accepted
+            Baggage overflow2 = tagGuard.getBaggage(context, metricAccessor2);
+
+            assertThat(baggage1.equals(expectedBaggage1)).isTrue();
             assertThat(overflow1.equals(expectedOverflow)).isTrue();
             assertThat(overflow2.equals(expectedOverflow)).isTrue();
         }

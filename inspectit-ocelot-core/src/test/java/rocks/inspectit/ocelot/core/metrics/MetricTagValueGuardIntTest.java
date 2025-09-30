@@ -10,9 +10,8 @@ import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings.MeasureType;
+import rocks.inspectit.ocelot.config.model.metrics.definition.views.AggregationType;
 import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
-import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings.Aggregation;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.ExporterServiceIntegrationTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
@@ -22,7 +21,6 @@ import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction.ExecutionContext;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics.MetricsRecorder;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
-import rocks.inspectit.ocelot.core.metrics.timewindow.PercentileViewManager;
 import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 
 import java.time.Duration;
@@ -36,20 +34,21 @@ public class MetricTagValueGuardIntTest extends ExporterServiceIntegrationTestBa
 
     @Autowired
     InspectitEnvironment env;
+
     @Autowired
-    CommonAttributesManager commonAttributesManager;
+    CommonAttributesManager commonAttributes;
+
     @Autowired
-    MeasuresAndViewsManager metricsManager;
+    InstrumentManager instrumentManager;
+
     @Autowired
     MetricTagValueGuard tagValueGuard;
-    @Autowired
-    PercentileViewManager percentileViewManager;
 
-    static final String MEASURE_NAME = "my-counter";
+    static final String METRIC_NAME = "my-counter";
     static final int VALUE = 42;
-    static final String TAG_KEY = "test-tag-key";
-    static final String TAG_VALUE_1 = "test-tag-value-1";
-    static final String TAG_VALUE_2 = "test-tag-value-2";
+    static final String ATTRIBUTE_KEY = "test-tag-key";
+    static final String VALUE_1 = "test-tag-value-1";
+    static final String VALUE_2 = "test-tag-value-2";
     static final String OVERFLOW = "overflow";
 
     private ExecutionContext createExecutionContext() {
@@ -61,23 +60,22 @@ public class MetricTagValueGuardIntTest extends ExporterServiceIntegrationTestBa
 
     /**
      * Update properties for OpenTelemetry-Collector & Tag-Guard
-     * Create metric-definition for MEASURE_NAME
+     * Create metric-definition for METRIC_NAME
      */
     @BeforeEach
     void updateProperties() {
         GlobalOpenTelemetry.resetForTest();
         ViewDefinitionSettings viewDefinition = new ViewDefinitionSettings();
-        viewDefinition.setAggregation(Aggregation.SUM);
-        viewDefinition.setAttributes(Collections.singletonMap(TAG_KEY, true));
+        viewDefinition.setAggregation(AggregationType.SUM);
+        viewDefinition.setAttributes(Collections.singletonMap(ATTRIBUTE_KEY, true));
 
         MetricDefinitionSettings metricDefinition = new MetricDefinitionSettings();
         metricDefinition.setEnabled(true);
         metricDefinition.setUnit("1");
-        metricDefinition.setType(MeasureType.LONG);
-        metricDefinition.setViews(Collections.singletonMap(MEASURE_NAME, viewDefinition));
+        metricDefinition.setViews(Collections.singletonMap(METRIC_NAME, viewDefinition));
 
         MetricsSettings metricsSettings = new MetricsSettings();
-        metricsSettings.setDefinitions(Collections.singletonMap(MEASURE_NAME, metricDefinition));
+        metricsSettings.setDefinitions(Collections.singletonMap(METRIC_NAME, metricDefinition));
 
         updateProperties(mps -> {
             mps.setProperty("inspectit.exporters.metrics.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_GRPC_PORT));
@@ -85,10 +83,10 @@ public class MetricTagValueGuardIntTest extends ExporterServiceIntegrationTestBa
             mps.setProperty("inspectit.exporters.metrics.otlp.enabled", ExporterEnabledState.ENABLED);
             mps.setProperty("inspectit.exporters.metrics.otlp.protocol", TransportProtocol.GRPC);
             mps.setProperty("inspectit.metrics.tag-guard.enabled", true);
-            mps.setProperty("inspectit.metrics.tag-guard.max-values-per-tag", 1);
+            mps.setProperty("inspectit.metrics.tag-guard.max-values-per-attribute", 1);
             mps.setProperty("inspectit.metrics.tag-guard.schedule-delay", Duration.ofMillis(500));
             mps.setProperty("inspectit.metrics.tag-guard.overflow-replacement", OVERFLOW);
-            mps.setProperty("inspectit.metrics.definitions." + MEASURE_NAME, metricDefinition);
+            mps.setProperty("inspectit.metrics.definitions." + METRIC_NAME, metricDefinition);
         });
     }
 
@@ -101,24 +99,24 @@ public class MetricTagValueGuardIntTest extends ExporterServiceIntegrationTestBa
     @Test
     void verifyTagValueOverflowReplacement() {
         VariableAccessor variableAccessor = (context) -> VALUE;
-        Map<String, VariableAccessor> dataTags = new HashMap<>();
-        dataTags.put(TAG_KEY, (context) -> TAG_VALUE_1);
-        MetricAccessor metricAccessor = new MetricAccessor(MEASURE_NAME, variableAccessor, new HashMap<>(), dataTags);
+        Map<String, VariableAccessor> data = new HashMap<>();
+        data.put(ATTRIBUTE_KEY, (context) -> VALUE_1);
+        MetricAccessor metricAccessor = new MetricAccessor(METRIC_NAME, variableAccessor, new HashMap<>(), data);
         List<MetricAccessor> metrics = new LinkedList<>();
         metrics.add(metricAccessor);
 
-        MetricsRecorder metricsRecorder = new MetricsRecorder(metrics, commonAttributesManager, metricsManager, tagValueGuard);
+        MetricsRecorder metricsRecorder = new MetricsRecorder(metrics, tagValueGuard, instrumentManager);
         ExecutionContext executionContext = createExecutionContext();
 
         metricsRecorder.execute(executionContext);
-        awaitMetricsExported(MEASURE_NAME, VALUE, TAG_KEY, TAG_VALUE_1);
+        awaitMetricsExported(METRIC_NAME, VALUE, ATTRIBUTE_KEY, VALUE_1);
 
         // for some reason, the ScheduledExecutorService is not working inside tests
         tagValueGuard.blockAttributeValuesTask.run();
 
-        dataTags.put(TAG_KEY, (context) -> TAG_VALUE_2);
+        data.put(ATTRIBUTE_KEY, (context) -> VALUE_2);
         metricsRecorder.execute(executionContext);
         // tag should have been replaced, due to overflow
-        awaitMetricsExported(MEASURE_NAME, VALUE, TAG_KEY, OVERFLOW);
+        awaitMetricsExported(METRIC_NAME, VALUE, ATTRIBUTE_KEY, OVERFLOW);
     }
 }

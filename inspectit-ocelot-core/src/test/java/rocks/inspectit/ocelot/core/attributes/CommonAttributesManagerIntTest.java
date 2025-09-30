@@ -1,9 +1,6 @@
 package rocks.inspectit.ocelot.core.attributes;
 
-import io.opencensus.tags.InternalUtils;
-import io.opencensus.tags.TagContext;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
+import io.opentelemetry.api.baggage.Baggage;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,20 +21,23 @@ class CommonAttributesManagerIntTest {
         @Autowired
         CommonAttributesManager provider;
 
-        public void contextAvailable() {
-            TagContext commonTagContext = provider.getCommonBaggage();
+        @Test
+        public void baggageAvailable() {
+            Baggage commonBaggage = provider.getCommonBaggage();
 
-            assertThat(InternalUtils.getTags(commonTagContext)).toIterable().isNotEmpty();
+            assertThat(commonBaggage.isEmpty()).isFalse();
         }
 
-        public void tagKeysCorrect() {
-            TagContext commonTagContext = provider.getCommonBaggage();
-            List<TagKey> commonTagKeys = provider.getCommonAttributeKeys();
+        @Test
+        public void attributeKeysCorrect() {
+            Baggage commonBaggage = provider.getCommonBaggage();
+            List<String> commonAttributeKeys = provider.getCommonAttributeKeys();
 
-            assertThat(InternalUtils.getTags(commonTagContext))
-                    .toIterable().allSatisfy(tag -> assertThat(commonTagKeys.contains(tag.getKey())).isTrue());
+            assertThat(commonBaggage.asMap())
+                    .allSatisfy((key, valueEntry) -> assertThat(commonAttributeKeys.contains(key)).isTrue());
         }
 
+        @Test
         public void scopeAvailable() {
             assertThat(provider.withCommonAttributesScope()).isNotNull();
         }
@@ -47,7 +47,7 @@ class CommonAttributesManagerIntTest {
     @Nested
     @DirtiesContext
     @TestPropertySource(properties = {
-            "inspectit.tags.extra.service-name=my-service-name"
+            "inspectit.attributes.extra.service-name=my-service-name"
     })
     class PriorityRespected extends SpringTestBase {
 
@@ -56,12 +56,12 @@ class CommonAttributesManagerIntTest {
 
         @Test
         public void extraOverwritesProviders() {
-            TagContext commonTagContext = provider.getCommonBaggage();
+            Baggage commonBaggage = provider.getCommonBaggage();
 
-            assertThat(InternalUtils.getTags(commonTagContext))
-                    .toIterable().anySatisfy(tag -> {
-                        assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
-                        assertThat(tag.getValue()).isEqualTo(TagValue.create("my-service-name"));
+            assertThat(commonBaggage.asMap())
+                    .anySatisfy((key, valueEntry) -> {
+                        assertThat(key).isEqualTo("service-name");
+                        assertThat(valueEntry.getValue()).isEqualTo("my-service-name");
                     });
         }
     }
@@ -86,40 +86,39 @@ class CommonAttributesManagerIntTest {
                             .withProperty("inspectit.tags.extra.service-name", "my-service-name")
             );
 
-            TagContext commonTagContext = provider.getCommonBaggage();
+            Baggage commonBaggage = provider.getCommonBaggage();
 
-            assertThat(InternalUtils.getTags(commonTagContext))
-                    .toIterable().anySatisfy(tag -> {
-                        assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
-                        assertThat(tag.getValue()).isEqualTo(TagValue.create("my-service-name"));
+            assertThat(commonBaggage.asMap())
+                    .anySatisfy((key, valueEntry) -> {
+                        assertThat(key).isEqualTo("service-name");
+                        assertThat(valueEntry.getValue()).isEqualTo("my-service-name");
                     })
-                    .allSatisfy(tag -> {
-                        assertThat(tag.getKey()).isNotIn("host", "host-address");
-                    });
+                    .allSatisfy((key, valueEntry) ->
+                        assertThat(key).isNotIn("host", "host-address")
+                    );
         }
     }
 
     @Nested
     @DirtiesContext
     @TestPropertySource(properties = {
-            "inspectit.tags.extra.service-name=this-value-is-over-255-characters-long ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
-            "inspectit.tags.extra.service-name2=non-printable-character-\u007f"
+            "inspectit.attributes.extra.service-name=this-value-is-over-255-characters-long ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+            "inspectit.attributes.extra.service-name2=non-printable-character-\u007f"
     })
-    class VeryLongTagValues extends SpringTestBase {
+    class VeryLongAttributeValues extends SpringTestBase {
 
         @Autowired
         CommonAttributesManager provider;
 
         @Test
         public void extraOverwritesProviders() {
-            TagContext commonTagContext = provider.getCommonBaggage();
+            Baggage commonBaggage = provider.getCommonBaggage();
 
-            assertThat(InternalUtils.getTags(commonTagContext))
-                    .toIterable().anySatisfy(tag -> {
-                        assertThat(tag.getKey()).isEqualTo(TagKey.create("service-name"));
-                        assertThat(tag.getValue()).isEqualTo(TagValue.create("<invalid>"));
+            assertThat(commonBaggage.asMap())
+                    .anySatisfy((key, valueEntry) -> {
+                        assertThat(key).isEqualTo("service-name");
+                        assertThat(valueEntry.getValue()).isEqualTo("<invalid>");
                     });
         }
     }
-
 }

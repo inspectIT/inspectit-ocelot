@@ -30,6 +30,7 @@ dependencies {
 
             configServerLibs.comGoogleGuava,
             libs.ioOpentelemetryOpentelemetryApi,
+            libs.ioOpentelemetryOpentelemetrySdkMetrics,
             libs.orgAssertjAssertjCore,
     )
 }

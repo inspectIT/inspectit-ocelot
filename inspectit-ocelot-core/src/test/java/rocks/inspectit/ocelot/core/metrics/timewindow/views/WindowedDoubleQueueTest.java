@@ -1,8 +1,9 @@
-package rocks.inspectit.ocelot.core.metrics.timewindow;
+package rocks.inspectit.ocelot.core.metrics.timewindow.views;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +40,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void testAlignedGrowth() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(1));
 
             for (int i = 0; i <= WindowedDoubleQueue.MIN_CAPACITY; i++) {
                 queue.insert(i * 100 + 1, 42);
@@ -56,7 +57,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void testUnalignedGrowth() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(1));
 
             queue.insert(-12345, 0);
             queue.insert(-12345, 0);
@@ -77,7 +78,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void verifyStreamingMaintainsCapacity() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(WindowedDoubleQueue.MIN_CAPACITY);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(WindowedDoubleQueue.MIN_CAPACITY));
 
             for (int i = 0; i < WindowedDoubleQueue.MIN_CAPACITY * 10; i++) {
                 queue.removeStaleValues(i);
@@ -90,7 +91,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void invalidTimestamp() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(42);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(42));
 
             queue.insert(1.0, 10);
             assertThatThrownBy(() -> queue.insert(2.0, 9)).isInstanceOf(IllegalArgumentException.class);
@@ -102,7 +103,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void removeAllValues() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(1));
 
             for (int i = 0; i < WindowedDoubleQueue.MIN_CAPACITY * 100; i++) {
                 queue.insert(i, 0);
@@ -116,7 +117,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void removeAllExceptOneValues() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(2);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(1));
 
             for (int i = 0; i < WindowedDoubleQueue.MIN_CAPACITY * 100; i++) {
                 queue.insert(i, 0);
@@ -131,7 +132,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void removeAllExceptFew() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(2);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(2));
 
             int keepCount = WindowedDoubleQueue.MIN_CAPACITY + 1;
             for (int i = 0; i < WindowedDoubleQueue.MIN_CAPACITY * 100; i++) {
@@ -150,7 +151,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void removeAllExceptFewWithOverflow() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(WindowedDoubleQueue.MIN_CAPACITY * 2);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(WindowedDoubleQueue.MIN_CAPACITY * 2));
 
             int keepCount = WindowedDoubleQueue.MIN_CAPACITY + 1;
             int time = 0;
@@ -179,7 +180,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void copyEmptyIntoNewBuffer() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(1));
 
             double[] copy = queue.copy();
 
@@ -188,7 +189,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void copyEmptyIntoExistingBuffer() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(1));
             double[] buffer = new double[42];
 
             queue.copy(buffer);
@@ -198,7 +199,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void copyValuesIntoNewBuffer() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(1));
             for (int i = 0; i < 100; i++) {
                 queue.insert(i, 0);
             }
@@ -211,7 +212,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void copyValuesIntoExistingBuffer() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(1));
             double[] buffer = new double[100];
             for (int i = 0; i < 100; i++) {
                 queue.insert(i, 0);
@@ -225,7 +226,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void copyValuesIntoTooSmallBuffer() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(1);
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(1));
             for (int i = 0; i < 100; i++) {
                 queue.insert(i, 0);
             }
