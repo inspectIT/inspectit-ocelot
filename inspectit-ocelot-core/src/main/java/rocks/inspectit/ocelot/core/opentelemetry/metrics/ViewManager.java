@@ -10,6 +10,7 @@ import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSe
 import rocks.inspectit.ocelot.config.model.metrics.definition.views.AggregationType;
 import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.metrics.InstrumentManager;
 import rocks.inspectit.ocelot.core.metrics.timewindow.TimeWindowViewManager;
 import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 
@@ -17,9 +18,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Stores all user-specified metric views.
- * Even if the user has not specified any metric view at all, OpenTelemetry will automatically register default views
- * for every created instrument. Those views will not be accessible from here.
+ * Stores all active OpenTelemetry metric views.
+ * <br>
+ * Note that if we do not register any view for an instrument (see {@link InstrumentManager}),
+ * OpenTelemetry would use a default view automatically to record data.
+ * However, this default view would not filter any attributes and thus would use every attribute,
+ * which was passed during recording. To prevent this, we should register at least one view for every metric by ourselves.
  */
 @Component
 @Slf4j
@@ -34,10 +38,13 @@ public class ViewManager {
     @Autowired
     private CommonAttributesManager commonAttributes;
 
-    /** Stores for each metric all of it's registered views */
+    /**
+     * Stores for each metric all of it's registered views.
+     * This map should always use definitions with {@link ViewDefinitionSettings#getCopyWithDefaultsPopulated populated defaults}.
+     */
     private final Map<String, Map<String, ViewDefinitionSettings>> currentViews = new ConcurrentHashMap<>();
 
-    /** Cached OpenTelemetry views, which should be registered via {@link SdkMeterProviderBuilder} */
+    /** Cached OpenTelemetry views, which should be registered via {@link SdkMeterProviderBuilder}. */
     private final Map<InstrumentSelector, View> cachedViews = new ConcurrentHashMap<>();
 
     /**
@@ -53,6 +60,8 @@ public class ViewManager {
     private final Map<String, Set<String>> toBeRemovedViews = new HashMap<>();
 
     /**
+     * Checks, if at least one view is not up-to-date anymore.
+     *
      * @return true, if the currently configured views do not match with the registered views
      */
     public boolean shouldUpdateViews() {
@@ -231,7 +240,7 @@ public class ViewManager {
             builder.setAttributeFilter(this::isCommonAttribute);
         }
         else {
-            builder.setAttributeFilter((attr) -> false); // Reject all attributes
+            builder.setAttributeFilter((attr) -> false); // reject all attributes
         }
 
         return builder.build();

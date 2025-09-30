@@ -7,19 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
-import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.metrics.timewindow.worker.TimeWindowRecorder;
 import rocks.inspectit.ocelot.core.opentelemetry.events.OpenTelemetryConfiguredEvent;
 import rocks.inspectit.ocelot.core.opentelemetry.metrics.ViewManager;
 import rocks.inspectit.ocelot.core.utils.AttributeUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Central component, which is responsible for writing communication with the OpenTelemetry instruments.
- * Views will be registered via {@link ViewManager}.
+ * Views will be handled via {@link ViewManager}.
  */
 @Component
 @Slf4j
@@ -153,10 +150,10 @@ public class InstrumentManager {
     public boolean tryRecordingMetric(String metricName, Number value, Baggage baggage) {
         log.trace("Trying to record metric '{}' with value '{}'", metricName, value);
 
-        // TODO We include the whole baggage as attributes for recording
-        //  The actual filtering is done via AttributesProcessor in views
-        //  What happens, if we do not specify any views for a metric and use the default OTel views?
-        //  What if we filter the baggage for attributes earlier?
+        /*
+            We include the whole baggage here. The attributes will be filtered via AttributesProcessor of the
+            particular views, which are configured in the ViewManager.
+         */
         Attributes attributes = AttributeUtils.toAttributes(baggage);
 
         boolean recordedInstrument = false;
