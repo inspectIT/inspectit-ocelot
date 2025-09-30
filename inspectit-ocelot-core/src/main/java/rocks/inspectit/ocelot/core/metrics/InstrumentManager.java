@@ -15,6 +15,7 @@ import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSe
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.metrics.timewindow.worker.TimeWindowRecorder;
+import rocks.inspectit.ocelot.core.opentelemetry.events.OpenTelemetryConfiguredEvent;
 import rocks.inspectit.ocelot.core.opentelemetry.metrics.ViewManager;
 import rocks.inspectit.ocelot.core.utils.AttributeUtils;
 
@@ -57,13 +58,14 @@ public class InstrumentManager {
 
     /**
      * Updates the instruments defined via {@link MetricsSettings#getDefinitions()}.
+     * We should only update the instruments after the OpenTelemetry SDK has been configured.
+     * Otherwise, we will create NOOP-instruments.
      */
-    @EventListener(InspectitConfigChangedEvent.class)
-    @Order() // to ensure the OpenTelemetry SDK is updated first // TODO This is not working atm...
-    @PostConstruct
-    public void updateInstruments() {
+    @EventListener
+    public void updateInstruments(OpenTelemetryConfiguredEvent event) {
         MetricsSettings metricsSettings = env.getCurrentConfig().getMetrics();
-        if (metricsSettings.isEnabled()) {
+
+        if (event.isSuccess() && metricsSettings.isEnabled()) {
             Set<String> instrumentsToRemove = processInstrumentUpdates(metricsSettings.getDefinitions());
             instrumentsToRemove.forEach(this::removeInstrument);
             log.info("Successfully updated OpenTelemetry instruments");
@@ -155,6 +157,7 @@ public class InstrumentManager {
         // TODO We include the whole baggage as attributes for recording
         //  The actual filtering is done via AttributesProcessor in views
         //  What happens, if we do not specify any views for a metric and use the default OTel views?
+        //  What if we filter the baggage for attributes earlier?
         Attributes attributes = AttributeUtils.toAttributes(baggage);
 
         boolean recordedInstrument = false;

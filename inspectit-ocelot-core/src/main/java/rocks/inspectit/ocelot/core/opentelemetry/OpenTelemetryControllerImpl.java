@@ -24,11 +24,13 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.opentelemetry.IOpenTelemetryController;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
@@ -39,6 +41,7 @@ import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
+import rocks.inspectit.ocelot.core.opentelemetry.events.OpenTelemetryConfiguredEvent;
 import rocks.inspectit.ocelot.core.opentelemetry.metrics.ViewManager;
 import rocks.inspectit.ocelot.core.opentelemetry.resource.ResourceAttributesProvider;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
@@ -148,6 +151,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @Autowired
     @VisibleForTesting
     InspectitEnvironment env;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     ViewManager viewManager;
@@ -264,6 +270,10 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         isConfiguring.set(false);
         tracingSettingsChanged = false;
         metricSettingsChanged = false;
+
+        OpenTelemetryConfiguredEvent event = new OpenTelemetryConfiguredEvent(this, success);
+        eventPublisher.publishEvent(event);
+
         return success;
     }
 
@@ -457,8 +467,14 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             }
 
             // register metric reader for each service
-            for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {
-                builder.registerMetricReader(metricsExportService.getNewMetricReader());
+            if (!CollectionUtils.isEmpty(registeredMetricExporterServices)) {
+                for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {
+                    builder.registerMetricReader(metricsExportService.getNewMetricReader());
+                }
+            }
+            else {
+                log.warn("OpenTelemetry has not registered any MetricReader! " +
+                        "Thus no metrics can be recorded. Enable at least one metrics exporter to record metrics");
             }
 
             // register additional metric producers

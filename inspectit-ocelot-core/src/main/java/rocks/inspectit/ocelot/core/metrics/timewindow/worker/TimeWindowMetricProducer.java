@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * Otherwise, e.g. spamming F5 on the prometheus endpoint could lead to an increased CPU usage.
  */
 @Component
-public class CachingMetricProducer implements MetricProducer {
+public class TimeWindowMetricProducer implements MetricProducer {
 
     @Autowired
     private TimeWindowViewManager viewManager;

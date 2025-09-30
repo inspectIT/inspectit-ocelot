@@ -153,5 +153,4 @@ public class OpenTelemetryUtils {
     public static Tracer getTracer(Sampler customSampler) {
         return CustomTracer.builder().sampler(customSampler).build();
     }
-
 }

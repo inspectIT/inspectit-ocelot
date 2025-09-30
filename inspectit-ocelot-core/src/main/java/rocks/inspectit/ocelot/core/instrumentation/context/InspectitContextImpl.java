@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 
 // TODO Update this documentation properly
+// TODO Can we also bring some structure into this class???
 /**
  * This class allows the storage and configurable up and down propagation of data.
  * An inspectIT context has four lifecycle phases which correspond to the phased of hooks added to methods:
@@ -318,6 +319,8 @@ public class InspectitContextImpl implements InternalInspectitContext {
         // update the current OTel context
         Context updatedContext = Context.current().with(INSPECTIT_KEY, this);
 
+        // TODO If this is false, we do not attach baggage to the context
+        //  Is this our intention? Debug previous implementation
         if (interactWithApplicationBaggage) {
             Baggage updatedBaggage = Baggage.current();
             // check if we can reuse the parent context
