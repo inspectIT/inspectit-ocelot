@@ -12,6 +12,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
+import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
@@ -26,8 +27,8 @@ import java.util.*;
 public class CommonAttributesManager {
 
     /**
-     * Defines with which @{@link Order} the event listener for updating the common tags in reaction to an updated configuration is executed.
-     * The Common tags manager defines highest precedence to ensure that all other registered listeners have access to the updated tags.
+     * Defines with which @{@link Order} the event listener for updating the common attributes in reaction to an updated configuration is executed.
+     * The Common attributes manager defines highest precedence to ensure that all other registered listeners have access to the updated attributes.
      */
     public static final int CONFIG_EVENT_LISTENER_ORDER_PRIORITY = Ordered.HIGHEST_PRECEDENCE;
 
@@ -47,7 +48,7 @@ public class CommonAttributesManager {
     private Map<String, String> commonAttributeValueMap = Collections.emptyMap();
 
     /**
-     * OpenCensus tag context representing common tag context.
+     * OpenTelemetry baggage representing common baggage.
      */
     @Getter
     private Baggage commonBaggage = Baggage.empty();
@@ -105,6 +106,25 @@ public class CommonAttributesManager {
         attributes.forEach(builder::put);
 
         return builder.build().makeCurrent();
+    }
+
+    /**
+     * @return the attributes which are exposed for the given view
+     */
+    public Set<String> getAttributeKeysForView(ViewDefinitionSettings settings) {
+        Set<String> viewAttributes = new HashSet<>();
+        if (settings.isWithCommonAttributes()) {
+            getCommonAttributeKeys().stream()
+                    .filter(attr -> settings.getAttributes().get(attr) != Boolean.FALSE)
+                    .forEach(viewAttributes::add);
+        }
+
+        settings.getAttributes().entrySet().stream()
+                .filter(Map.Entry::getValue)
+                .map(Map.Entry::getKey)
+                .forEach(viewAttributes::add);
+
+        return viewAttributes;
     }
 
     /**

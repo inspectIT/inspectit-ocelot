@@ -100,7 +100,6 @@ public class InstrumentManager {
         return instrumentsToRemove;
     }
 
-
     /**
      * Updates an instrument in {@link #cachedInstruments}, if the metric definition requires one.
      * Otherwise, we will remove the instrument.

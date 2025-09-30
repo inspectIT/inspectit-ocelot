@@ -145,7 +145,7 @@ public class TimeWindowViewManager {
 
         SmoothedAverageView currentSmoothedAverageView = (SmoothedAverageView) currentView;
         String description = newSettings.getDescription();
-        Set<String> attributeKeys = getAttributeKeysForView(newSettings);
+        Set<String> attributeKeys = commonAttributes.getAttributeKeysForView(newSettings);
         Duration timeWindow = newSettings.getTimeWindow();
         int bufferLimit = newSettings.getMaxBufferedPoints();
         double dropUpper = newSettings.getDropUpper();
@@ -166,7 +166,7 @@ public class TimeWindowViewManager {
 
         QuantilesView currentQuantilesView = (QuantilesView) currentView;
         String description = newSettings.getDescription();
-        Set<String> attributeKeys = getAttributeKeysForView(newSettings);
+        Set<String> attributeKeys = commonAttributes.getAttributeKeysForView(newSettings);
         Duration timeWindow = newSettings.getTimeWindow();
         int bufferLimit = newSettings.getMaxBufferedPoints();
         List<Double> quantiles = newSettings.getQuantiles();
@@ -196,7 +196,7 @@ public class TimeWindowViewManager {
 
     private TimeWindowView createSmoothedAverageView(String viewName, String unit, ViewDefinitionSettings settings) {
         String description = settings.getDescription();
-        Set<String> attributes = getAttributeKeysForView(settings);
+        Set<String> attributes = commonAttributes.getAttributeKeysForView(settings);
         Duration timeWindow = settings.getTimeWindow();
         int bufferLimit = settings.getMaxBufferedPoints();
         double dropUpper = settings.getDropUpper();
@@ -207,7 +207,7 @@ public class TimeWindowViewManager {
 
     private TimeWindowView createQuantilesView(String viewName, String unit, ViewDefinitionSettings settings) {
         String description = settings.getDescription();
-        Set<String> attributes = getAttributeKeysForView(settings);
+        Set<String> attributes = commonAttributes.getAttributeKeysForView(settings);
         Duration timeWindow = settings.getTimeWindow();
         int bufferLimit = settings.getMaxBufferedPoints();
         List<Double> quantiles = settings.getQuantiles();
@@ -218,25 +218,5 @@ public class TimeWindowViewManager {
                 .collect(Collectors.toSet());
 
         return new QuantilesView(viewName, description, unit, attributes, timeWindow, bufferLimit, quantilesFiltered, includeMin, includeMax);
-    }
-
-    // TODO We should move this method into another class
-    /**
-     * @return the attributes which are exposed for the given view
-     */
-    private Set<String> getAttributeKeysForView(ViewDefinitionSettings settings) {
-        Set<String> viewTags = new HashSet<>();
-        if (settings.isWithCommonAttributes()) {
-            commonAttributes.getCommonAttributeKeys().stream()
-                    .filter(attr -> settings.getAttributes().get(attr) != Boolean.FALSE)
-                    .forEach(viewTags::add);
-        }
-
-        settings.getAttributes().entrySet().stream()
-                .filter(Map.Entry::getValue)
-                .map(Map.Entry::getKey)
-                .forEach(viewTags::add);
-
-        return viewTags;
     }
 }
