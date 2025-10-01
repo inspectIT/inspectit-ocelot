@@ -308,11 +308,6 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
                     try {
                         ExportMetricsServiceRequest request = ExportMetricsServiceRequest.parseFrom(message);
                         metricRequests.add(request);
-                        Metric m = request.getResourceMetricsList().getFirst().getScopeMetrics(0).getMetricsList().getFirst();
-                        if (m.getName().contains("-delta") || m.getName().contains("-cumulative")) {
-                            System.out.println("TESTEDI");
-                            System.out.println(m);
-                        }
                     } catch (InvalidProtocolBufferException e) {
                         throw new UncheckedIOException(e);
                     }
