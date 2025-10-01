@@ -270,6 +270,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         isConfiguring.set(false);
         tracingSettingsChanged = false;
         metricSettingsChanged = false;
+        viewsChanged = false;
 
         OpenTelemetryConfiguredEvent event = new OpenTelemetryConfiguredEvent(this, success);
         eventPublisher.publishEvent(event);
@@ -473,7 +474,7 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
                 }
             }
             else {
-                log.warn("OpenTelemetry has not registered any MetricReader! " +
+                log.info("OpenTelemetry has not registered any MetricReader! " +
                         "Thus no metrics can be recorded. Enable at least one metrics exporter to record metrics");
             }
 

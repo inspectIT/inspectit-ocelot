@@ -21,6 +21,7 @@ import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse;
 import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
+import io.opentelemetry.proto.metrics.v1.Metric;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,7 @@ import org.testcontainers.utility.DockerImageName;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import java.io.UncheckedIOException;
 import java.util.*;
@@ -182,54 +184,50 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
         Instances.openTelemetryController.flush();
     }
 
-    void recordMetricsAndFlush() {
-        recordMetricsAndFlush("my-counter", 1, "my-key", "my-val");
-    }
-
-    protected void recordMetricsAndFlush(String measureName, int value, String attributeKey, String attributeValue) {
+    protected void recordMetricsAndFlush(String metricName, int value, String attributeKey, String attributeValue) {
         // get the meter and create a counter
         Meter meter = GlobalOpenTelemetry.getMeterProvider()
                 .meterBuilder("rocks.inspectit.ocelot")
                 .setInstrumentationVersion("0.0.1")
                 .build();
 
-        LongCounter counter = meter.counterBuilder(measureName).setDescription("My counter").setUnit("1").build();
+        LongCounter counter = meter.counterBuilder(metricName).setDescription("My counter").setUnit("1").build();
         counter.add(value, Attributes.of(AttributeKey.stringKey(attributeKey), attributeValue));
 
+        // flushing pending metrics
         Instances.openTelemetryController.flush();
     }
 
     /**
-     * Verifies that the metric with the given value and key/value attribute (tag) has been exported to and received
+     * Verifies that the metric with the given value and key/value attribute has been exported to and received
      * by the {@link #grpcServer}
      *
-     * @param measureName the name of the measure
-     * @param value  the value of the measure
-     * @param tagKey the key of the tag
-     * @param tagVal the value of the tag
+     * @param metricName the name of the metric
+     * @param value  the value of the metric
+     * @param attributeKey the key of the attribute
+     * @param attributeValue the value of the attribute
      */
-    protected void awaitMetricsExported(String measureName, int value, String tagKey, String tagVal) {
-        // create the attribute that we will use to verify that the metric has been written
-        KeyValue attribute = KeyValue.newBuilder()
-                .setKey(tagKey)
-                .setValue(AnyValue.newBuilder().setStringValue(tagVal).build())
-                .build();
+    protected void awaitMetricsExported(String metricName, int value, String attributeKey, String attributeValue) {
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+            Stream<Metric> metrics = grpcServer.metricRequests.stream()
+                    .flatMap(mReq ->  mReq.getResourceMetricsList().stream()
+                            .flatMap(rm -> rm.getScopeMetrics(0).getMetricsList().stream()));
 
-        await().atMost(30, TimeUnit.SECONDS)
-                .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream())
-                        .anyMatch(mReq -> mReq.getResourceMetricsList().stream()
-                            .anyMatch(rm ->  rm.getScopeMetrics(0)
-                                .getMetricsList().stream()
-                                // check for the specific attribute and value
-                                .anyMatch(metric -> {
-                                    boolean validName = metric.getName().equals(measureName);
-                                    boolean validData = metric.getSum()
-                                            .getDataPointsList()
-                                            .stream()
-                                            .anyMatch(d -> d.getAttributesList()
-                                                    .contains(attribute) && d.getAsInt() == value);
-                                    return validName && validData;
-                                }))));
+            // check for the name, value & attribute
+            assertThat(metrics).anyMatch(metric -> {
+                boolean validName = metric.getName().equals(metricName);
+                boolean validData = metric.getSum()
+                        .getDataPointsList().stream()
+                        .anyMatch(d -> d.getAsInt() == value &&
+                                d.getAttributesList().stream()
+                                        .anyMatch(keyValue ->
+                                                attributeKey.equals(keyValue.getKey()) &&
+                                                attributeValue.equals(keyValue.getValue().getStringValue())
+                                        )
+                        );
+                return validName && validData;
+            });
+        });
     }
 
     /**
@@ -241,7 +239,6 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
      * @param childSpanName  the name of the child span
      */
     void awaitSpansExported(String parentSpanName, String childSpanName) {
-
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
 
             // get a flat list of spans
@@ -271,9 +268,7 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
                 return childSpan.get().getParentSpanId().equals(parentSpan.get().getSpanId());
 
             })).isTrue();
-
         });
-
     }
 
     /**
@@ -313,6 +308,11 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
                     try {
                         ExportMetricsServiceRequest request = ExportMetricsServiceRequest.parseFrom(message);
                         metricRequests.add(request);
+                        Metric m = request.getResourceMetricsList().getFirst().getScopeMetrics(0).getMetricsList().getFirst();
+                        if (m.getName().contains("-delta") || m.getName().contains("-cumulative")) {
+                            System.out.println("TESTEDI");
+                            System.out.println(m);
+                        }
                     } catch (InvalidProtocolBufferException e) {
                         throw new UncheckedIOException(e);
                     }
