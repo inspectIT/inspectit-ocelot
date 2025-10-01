@@ -68,9 +68,6 @@ class CommonAttributesManagerIntTest {
 
     @Nested
     @DirtiesContext
-    @TestPropertySource(properties = {
-            "inspectit.tags.extra.service-name=my-service-name"
-    })
     class Updates extends SpringTestBase {
 
         @Autowired
@@ -80,10 +77,10 @@ class CommonAttributesManagerIntTest {
         public void extraOverwritesProviders() {
             updateProperties(
                     properties -> properties
-                            .withProperty("inspectit.tags.providers.environment.resolve-host-address", Boolean.FALSE)
-                            .withProperty("inspectit.tags.providers.environment.resolve-host-name", Boolean.FALSE)
+                            .withProperty("inspectit.attributes.providers.environment.resolve-host-address", Boolean.FALSE)
+                            .withProperty("inspectit.attributes.providers.environment.resolve-host-name", Boolean.FALSE)
                             .withProperty("inspectit.service-name", "some-service-name")
-                            .withProperty("inspectit.tags.extra.service-name", "my-service-name")
+                            .withProperty("inspectit.attributes.extra.service-name", "my-service-name")
             );
 
             Baggage commonBaggage = provider.getCommonBaggage();
@@ -117,6 +114,10 @@ class CommonAttributesManagerIntTest {
             assertThat(commonBaggage.asMap())
                     .anySatisfy((key, valueEntry) -> {
                         assertThat(key).isEqualTo("service-name");
+                        assertThat(valueEntry.getValue()).isEqualTo("<invalid>");
+                    })
+                    .anySatisfy((key, valueEntry) -> {
+                        assertThat(key).isEqualTo("service-name2");
                         assertThat(valueEntry.getValue()).isEqualTo("<invalid>");
                     });
         }

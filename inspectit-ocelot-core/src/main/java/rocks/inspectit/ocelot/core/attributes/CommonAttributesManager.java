@@ -15,6 +15,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.utils.AttributeUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -148,7 +149,7 @@ public class CommonAttributesManager {
 
         newCommonAttributeValueMap.forEach((key, value) -> {
             newCommonAttributeKeys.add(key);
-            builder.put(key, value);
+            builder.put(key, AttributeUtils.resolveValue(key, value));
         });
 
         commonAttributeKeys = newCommonAttributeKeys;

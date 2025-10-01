@@ -10,7 +10,7 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ExtrasTagsProviderIntTest {
+class ExtrasAttributesProviderIntTest {
 
     @Nested
     class Defaults extends SpringTestBase {
@@ -31,8 +31,8 @@ class ExtrasTagsProviderIntTest {
     @Nested
     @DirtiesContext
     @TestPropertySource(properties = {
-            "inspectit.tags.extra.key1=value1",
-            "inspectit.tags.extra[key2]=value2",
+            "inspectit.attributes.extra.key1=value1",
+            "inspectit.attributes.extra[key2]=value2",
     })
     class Defined extends SpringTestBase {
 
@@ -55,8 +55,8 @@ class ExtrasTagsProviderIntTest {
     @Nested
     @DirtiesContext
     @TestPropertySource(properties = {
-            "inspectit.tags.extra.key1=value1",
-            "inspectit.tags.extra[key2]=value2",
+            "inspectit.attributes.extra.key1=value1",
+            "inspectit.attributes.extra[key2]=value2",
     })
     class Updated extends SpringTestBase {
 
@@ -68,14 +68,12 @@ class ExtrasTagsProviderIntTest {
 
         @Test
         public void happyPath() {
-            updateProperties(properties -> properties.withProperty("inspectit.tags.extra.key1", "updatedValue"));
+            updateProperties(properties -> properties.withProperty("inspectit.attributes.extra.key1", "updatedValue"));
 
             assertThat(provider.getAttributes(env.getCurrentConfig()))
                     .hasSize(2)
                     .containsEntry("key1", "updatedValue")
                     .containsEntry("key2", "value2");
         }
-
     }
-
 }

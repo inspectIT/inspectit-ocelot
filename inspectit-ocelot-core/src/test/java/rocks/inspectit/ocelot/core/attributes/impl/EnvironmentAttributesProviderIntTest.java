@@ -10,7 +10,7 @@ import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class EnvironmentTagsProviderIntTest {
+class EnvironmentAttributesProviderIntTest {
 
     @Nested
     @DirtiesContext
@@ -40,8 +40,8 @@ class EnvironmentTagsProviderIntTest {
     @Nested
     @DirtiesContext
     @TestPropertySource(properties = {
-            "inspectit.tags.providers.environment.resolve-host-name=false",
-            "inspectit.tags.providers.environment.resolve-host-address=false",
+            "inspectit.attributes.providers.environment.resolve-host-name=false",
+            "inspectit.attributes.providers.environment.resolve-host-address=false",
     })
     class Overwritten extends SpringTestBase {
 
@@ -62,7 +62,7 @@ class EnvironmentTagsProviderIntTest {
     @Nested
     @DirtiesContext
     @TestPropertySource(properties = {
-            "inspectit.tags.providers.environment.enabled=false"
+            "inspectit.attributes.providers.environment.enabled=false"
     })
     class Disabled extends SpringTestBase {
 
@@ -81,7 +81,7 @@ class EnvironmentTagsProviderIntTest {
     @Nested
     @DirtiesContext
     @TestPropertySource(properties = {
-            "inspectit.tags.providers.environment.enabled=false"
+            "inspectit.attributes.providers.environment.enabled=false"
     })
     class Update extends SpringTestBase {
 
@@ -93,8 +93,9 @@ class EnvironmentTagsProviderIntTest {
 
         @Test
         public void enable() {
-            updateProperties(properties -> properties.withProperty("inspectit.tags.providers.environment.enabled", Boolean.TRUE));
-
+            updateProperties(properties ->
+                    properties.withProperty("inspectit.attributes.providers.environment.enabled", Boolean.TRUE)
+            );
             assertThat(provider.getAttributes(env.getCurrentConfig())).hasSize(3);
         }
     }

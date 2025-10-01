@@ -117,7 +117,7 @@ public class WindowedDoubleQueueTest {
 
         @Test
         void removeAllExceptOneValues() {
-            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(1));
+            WindowedDoubleQueue queue = new WindowedDoubleQueue(Duration.ofMillis(2));
 
             for (int i = 0; i < WindowedDoubleQueue.MIN_CAPACITY * 100; i++) {
                 queue.insert(i, 0);
