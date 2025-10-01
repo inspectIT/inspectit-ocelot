@@ -35,7 +35,7 @@ inspectit:
             db.url: jdbc_url
           error-status: _thrown
         metrics:
-          '[service/in/responsetime]':
+          service_in_responsetime:
             value: servicegraph_duration
             data-tags:
               origin_service: servicegraph_origin_service_local

@@ -5,9 +5,8 @@ inspectit:
         # if true, the free disk space will be measured and the view "disk/free" is registered
         free: true
     definitions:
-      '[disk/free]':
+      disk_free:
         enabled: ${inspectit.metrics.disk.enabled.free}
-        type: LONG
-        max-values-per-tag: 5
+        max-values-per-attribute: 5
         unit: bytes
         description: free disk space

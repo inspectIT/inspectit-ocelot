@@ -1,6 +1,7 @@
 package inspectit.ocelot.configdocsgenerator.parsing;
 
 import com.google.common.io.Resources;
+import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.InstrumentValueType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -54,12 +55,13 @@ class ConfigParserTest {
             MetricDefinitionSettings metricDefinitionMock = Mockito.mock(MetricDefinitionSettings.class);
             when(metricDefinitionMock.isEnabled()).thenReturn(true);
             when(metricDefinitionMock.getValueType()).thenReturn(InstrumentValueType.LONG);
+            when(metricDefinitionMock.getInstrumentType()).thenReturn(InstrumentType.GAUGE);
             when(metricDefinitionMock.getUnit()).thenReturn("bytes");
             when(metricDefinitionMock.getMaxValuesPerAttribute()).thenReturn(5);
             when(metricDefinitionMock.getDescription()).thenReturn("free disk space");
             when(metricDefinitionMock.getViews()).thenReturn(null);
 
-            assertThat(result.getMetrics().getDefinitions().get("disk/free")).usingRecursiveComparison()
+            assertThat(result.getMetrics().getDefinitions().get("disk_free")).usingRecursiveComparison()
                     .isEqualTo(metricDefinitionMock);
           // Build the expected result by hand
             Map<String, Boolean> enabledMap = new HashMap<>();
