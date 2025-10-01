@@ -3,12 +3,14 @@ package rocks.inspectit.ocelot.core.metrics.timewindow;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.attributes.AttributeSettings;
 import rocks.inspectit.ocelot.config.model.metrics.definition.views.AggregationType;
 import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.metrics.timewindow.views.TimeWindowView;
 
@@ -26,8 +28,11 @@ class TimeWindowViewManagerTest {
     @InjectMocks
     TimeWindowViewManager viewManager;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     InspectitEnvironment env;
+
+    @Mock
+    CommonAttributesManager commonAttributes;
 
     @BeforeEach
     void beforeEach() {
@@ -92,6 +97,9 @@ class TimeWindowViewManagerTest {
         ViewDefinitionSettings settings = new ViewDefinitionSettings();
         settings.setAggregation(AggregationType.HISTOGRAM);
 
-        assertThrows(IllegalArgumentException.class, () -> viewManager.createOrUpdateView(metricName, viewName, unit, settings));
+        viewManager.createOrUpdateView(metricName, viewName, unit, settings);
+        Collection<TimeWindowView> views = viewManager.getViews(metricName);
+
+        assertThat(views).isEmpty();
     }
 }

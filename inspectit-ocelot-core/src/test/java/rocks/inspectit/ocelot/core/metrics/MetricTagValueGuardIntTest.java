@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.metrics;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.sdk.metrics.InstrumentType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,11 +27,14 @@ import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 import java.time.Duration;
 import java.util.*;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+
 /**
  * Integration Test Class for {@link MetricTagValueGuard}
  */
 @DirtiesContext
-public class MetricTagValueGuardIntTest extends ExporterServiceIntegrationTestBase {
+class MetricTagValueGuardIntTest extends ExporterServiceIntegrationTestBase {
 
     @Autowired
     InspectitEnvironment env;
@@ -45,10 +49,15 @@ public class MetricTagValueGuardIntTest extends ExporterServiceIntegrationTestBa
     MetricTagValueGuard tagValueGuard;
 
     static final String METRIC_NAME = "my-counter";
+
     static final int VALUE = 42;
-    static final String ATTRIBUTE_KEY = "test-tag-key";
-    static final String VALUE_1 = "test-tag-value-1";
-    static final String VALUE_2 = "test-tag-value-2";
+
+    static final String ATTRIBUTE_KEY = "test-key";
+
+    static final String VALUE_1 = "test-value-1";
+
+    static final String VALUE_2 = "test-value-2";
+
     static final String OVERFLOW = "overflow";
 
     private ExecutionContext createExecutionContext() {
@@ -64,14 +73,13 @@ public class MetricTagValueGuardIntTest extends ExporterServiceIntegrationTestBa
      */
     @BeforeEach
     void updateProperties() {
-        GlobalOpenTelemetry.resetForTest();
         ViewDefinitionSettings viewDefinition = new ViewDefinitionSettings();
         viewDefinition.setAggregation(AggregationType.SUM);
         viewDefinition.setAttributes(Collections.singletonMap(ATTRIBUTE_KEY, true));
 
         MetricDefinitionSettings metricDefinition = new MetricDefinitionSettings();
-        metricDefinition.setEnabled(true);
         metricDefinition.setUnit("1");
+        metricDefinition.setInstrumentType(InstrumentType.COUNTER);
         metricDefinition.setViews(Collections.singletonMap(METRIC_NAME, viewDefinition));
 
         MetricsSettings metricsSettings = new MetricsSettings();
@@ -95,15 +103,13 @@ public class MetricTagValueGuardIntTest extends ExporterServiceIntegrationTestBa
         GlobalOpenTelemetry.resetForTest();
     }
 
-
     @Test
     void verifyTagValueOverflowReplacement() {
         VariableAccessor variableAccessor = (context) -> VALUE;
         Map<String, VariableAccessor> data = new HashMap<>();
         data.put(ATTRIBUTE_KEY, (context) -> VALUE_1);
-        MetricAccessor metricAccessor = new MetricAccessor(METRIC_NAME, variableAccessor, new HashMap<>(), data);
-        List<MetricAccessor> metrics = new LinkedList<>();
-        metrics.add(metricAccessor);
+        MetricAccessor metricAccessor = new MetricAccessor(METRIC_NAME, variableAccessor, emptyMap(), data);
+        List<MetricAccessor> metrics = singletonList(metricAccessor);
 
         MetricsRecorder metricsRecorder = new MetricsRecorder(metrics, tagValueGuard, instrumentManager);
         ExecutionContext executionContext = createExecutionContext();

@@ -39,6 +39,7 @@ import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -211,7 +212,8 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
             Stream<Metric> metrics = grpcServer.metricRequests.stream()
                     .flatMap(mReq ->  mReq.getResourceMetricsList().stream()
-                            .flatMap(rm -> rm.getScopeMetrics(0).getMetricsList().stream()));
+                            .flatMap(rm -> rm.getScopeMetricsList().stream()
+                                    .flatMap(sm -> sm.getMetricsList().stream())));
 
             // check for the name, value & attribute
             assertThat(metrics).anyMatch(metric -> {
@@ -276,11 +278,11 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
      */
     public static class OtlpGrpcServer extends ServerExtension {
 
-        final List<ExportTraceServiceRequest> traceRequests = new ArrayList<>();
+        final List<ExportTraceServiceRequest> traceRequests = new CopyOnWriteArrayList<>();
 
-        final List<ExportMetricsServiceRequest> metricRequests = new ArrayList<>();
+        final List<ExportMetricsServiceRequest> metricRequests = new CopyOnWriteArrayList<>();
 
-        final List<ExportLogsServiceRequest> logRequests = new ArrayList<>();
+        final List<ExportLogsServiceRequest> logRequests = new CopyOnWriteArrayList<>();
 
         private void reset() {
             traceRequests.clear();

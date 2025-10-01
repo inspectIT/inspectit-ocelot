@@ -124,13 +124,8 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
         assertThat(otlp.getTimeout()).isEqualTo(Duration.ofSeconds(10));
     }
 
-    /**
-     * Disabled, because this test is flaky.
-     * Same as for {@link #testAggregationTemporalityDelta}
-     */
     @DirtiesContext
     @Test
-    @Disabled
     void testAggregationTemporalityCumulative() {
         updateProperties(mps -> {
             mps.setProperty("inspectit.exporters.metrics.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_GRPC_PORT));
@@ -150,14 +145,7 @@ public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegratio
         awaitMetricsExported(metricName, 3, "key", "val");
     }
 
-    /**
-     * Disabled, because this test is flaky.
-     * I cannot explain why, but sometimes the second value won't be exported.
-     * Thus, only one data point with value 1 will be found.
-     */
-    @DirtiesContext
     @Test
-    @Disabled
     void testAggregationTemporalityDelta() {
         updateProperties(mps -> {
             mps.setProperty("inspectit.exporters.metrics.otlp.endpoint", getEndpoint(COLLECTOR_OTLP_GRPC_PORT));

@@ -36,14 +36,14 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
     /**
      * Prefix for all metrics exposed by this recorder.
      */
-    private static final String METRIC_NAME_PREFIX = "jvm/jmx/";
+    private static final String METRIC_NAME_PREFIX = "jvm_jmx_";
 
     /**
      * Separator used to construct metric names.
      *
      * @see #metricName(String, LinkedHashMap, LinkedList, String)
      */
-    private static final char METRIC_SEPARATOR = '/';
+    private static final char METRIC_SEPARATOR = '_';
 
     /**
      * Scraper of the MBean objects.

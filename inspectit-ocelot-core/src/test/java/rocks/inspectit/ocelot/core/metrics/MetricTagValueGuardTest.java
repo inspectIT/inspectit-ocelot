@@ -213,7 +213,7 @@ class MetricTagValueGuardTest {
         @Test
         void verifyOverflow() {
             Map<String, Integer> maxValuesPerTagByMeasure = new HashMap<>();
-            maxValuesPerTagByMeasure.put("measure", 1);
+            maxValuesPerTagByMeasure.put("metric", 1);
             setupTagGuard(maxValuesPerTagByMeasure, null);
 
             Baggage expectedBaggage = Baggage.builder()
@@ -277,7 +277,7 @@ class MetricTagValueGuardTest {
         @Test
         void verifyOverflowNotResolvedAfterLimitIncrease() {
             Map<String, Integer> maxValuesPerAttributeByMetric = new HashMap<>();
-            maxValuesPerAttributeByMetric.put("measure", 1);
+            maxValuesPerAttributeByMetric.put("metric", 1);
             setupTagGuard(maxValuesPerAttributeByMetric, null);
 
             Baggage expectedBaggage1 = Baggage.builder()

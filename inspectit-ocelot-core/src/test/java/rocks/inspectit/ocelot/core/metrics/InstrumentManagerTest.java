@@ -1,5 +1,8 @@
 package rocks.inspectit.ocelot.core.metrics;
 
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.metrics.LongCounter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -29,6 +32,15 @@ class InstrumentManagerTest {
     InspectitEnvironment env;
 
     final String metricName = "my-metric";
+
+    @BeforeEach
+    void setUp() {
+        LongCounter counter = OpenTelemetry.noop()
+                .getMeter("inspectit.test")
+                .counterBuilder("noop-test-counter")
+                .build();
+        lenient().when(factory.createInstrument(anyString(), any())).thenReturn(counter);
+    }
 
     @Test
     void shouldCreateInstrumentAndProcessAttributes() {

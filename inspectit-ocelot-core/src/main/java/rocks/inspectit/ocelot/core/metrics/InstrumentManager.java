@@ -188,9 +188,11 @@ public class InstrumentManager {
             case LONG:
                 LongCounter longCounter = (LongCounter) cachedInstruments.get(instrumentName);
                 longCounter.add(value.longValue(), attributes);
+                break;
             case DOUBLE:
                 DoubleCounter doubleCounter = (DoubleCounter) cachedInstruments.get(instrumentName);
                 doubleCounter.add(value.doubleValue(), attributes);
+                break;
         }
     }
 
@@ -199,9 +201,11 @@ public class InstrumentManager {
             case LONG:
                 LongUpDownCounter longCounter = (LongUpDownCounter) cachedInstruments.get(instrumentName);
                 longCounter.add(value.longValue(), attributes);
+                break;
             case DOUBLE:
                 DoubleUpDownCounter doubleCounter = (DoubleUpDownCounter) cachedInstruments.get(instrumentName);
                 doubleCounter.add(value.doubleValue(), attributes);
+                break;
         }
     }
 
@@ -210,9 +214,11 @@ public class InstrumentManager {
             case LONG:
                 LongGauge longGauge = (LongGauge) cachedInstruments.get(instrumentName);
                 longGauge.set(value.longValue(), attributes);
+                break;
             case DOUBLE:
                 DoubleGauge doubleGauge = (DoubleGauge) cachedInstruments.get(instrumentName);
                 doubleGauge.set(value.doubleValue(), attributes);
+                break;
         }
     }
 
@@ -221,9 +227,11 @@ public class InstrumentManager {
             case LONG:
                 LongHistogram longHistogram = (LongHistogram) cachedInstruments.get(instrumentName);
                 longHistogram.record(value.longValue(), attributes);
+                break;
             case DOUBLE:
                 DoubleHistogram doubleHistogram = (DoubleHistogram) cachedInstruments.get(instrumentName);
                 doubleHistogram.record(value.doubleValue(), attributes);
+                break;
         }
     }
 
