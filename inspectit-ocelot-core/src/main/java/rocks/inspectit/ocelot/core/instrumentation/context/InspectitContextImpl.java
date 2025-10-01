@@ -319,6 +319,7 @@ public class InspectitContextImpl implements InternalInspectitContext {
         // update the current OTel context
         Context updatedContext = Context.current().with(INSPECTIT_KEY, this);
 
+        // if we interact with application baggage, we need to update the baggage with our attributes
         if (interactWithApplicationBaggage) {
             Baggage updatedBaggage = Baggage.current();
             // check if we can reuse the parent context

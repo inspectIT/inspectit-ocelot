@@ -153,9 +153,11 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     InspectitEnvironment env;
 
     @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    @VisibleForTesting
+    ApplicationEventPublisher eventPublisher;
 
     @Autowired
+    @VisibleForTesting
     ViewManager viewManager;
 
     @Autowired

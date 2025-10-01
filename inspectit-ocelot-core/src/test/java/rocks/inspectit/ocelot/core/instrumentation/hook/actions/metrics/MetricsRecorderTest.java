@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.core.SpringTestBase;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
@@ -38,6 +39,9 @@ public class MetricsRecorderTest extends SpringTestBase {
 
     @Mock
     InspectitContextImpl inspectitContext;
+
+    @Mock
+    CommonAttributesManager commonAttributes;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private InspectitEnvironment environment;
@@ -95,8 +99,9 @@ public class MetricsRecorderTest extends SpringTestBase {
         }
 
         @Test
-        void commonTagsIncluded() {
+        void commonAttributesIncluded() {
             when(inspectitContext.getData("common")).thenReturn("overwrite");
+            when(commonAttributes.getCommonAttributeKeys()).thenReturn(Collections.singletonList("common"));
 
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(100L);

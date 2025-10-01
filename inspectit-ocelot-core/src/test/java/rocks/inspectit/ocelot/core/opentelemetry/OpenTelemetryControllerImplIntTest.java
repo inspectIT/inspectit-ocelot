@@ -32,6 +32,8 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
+// TODO add view-changed tests
+
 /**
  * Integration test class for the {@link OpenTelemetryControllerImpl}
  */
