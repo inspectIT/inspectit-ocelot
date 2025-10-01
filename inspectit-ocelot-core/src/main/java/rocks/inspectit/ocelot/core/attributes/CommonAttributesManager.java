@@ -70,6 +70,7 @@ public class CommonAttributesManager {
 
     /**
      * Returns newly created scope with common attributes.
+     * ALWAYS close the scope returned by the method.
      * Metrics collectors should use this scope with the try/resource block:
      * <code>
      * try (Scope scope = withCommonAttributesScope()) {
@@ -85,6 +86,7 @@ public class CommonAttributesManager {
 
     /**
      * Returns newly created scope with common attributes including the additional given attributes.
+     * ALWAYS close the scope returned by the method.
      * Metrics collectors should use this scope with the try/resource block:
      * <code>
      * try (Scope scope = withCommonAttributesScope()) {

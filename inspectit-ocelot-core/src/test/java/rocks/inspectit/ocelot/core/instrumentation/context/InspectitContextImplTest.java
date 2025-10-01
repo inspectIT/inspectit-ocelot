@@ -15,7 +15,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.correlation.noop.NoopLogTraceCorrelator;
-import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
 import rocks.inspectit.ocelot.core.instrumentation.context.propagation.BaggagePropagation;
@@ -25,7 +24,6 @@ import rocks.inspectit.ocelot.core.testutils.GcUtils;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import java.lang.ref.WeakReference;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,10 +31,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext.REMOTE_PARENT_SPAN_CONTEXT_KEY;
 import static rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext.REMOTE_SESSION_ID;
+
 
 @ExtendWith(MockitoExtension.class)
 public class InspectitContextImplTest extends SpringTestBase {
@@ -59,7 +59,7 @@ public class InspectitContextImplTest extends SpringTestBase {
 
         @Test
         void verifyNullIfNoSpanSet() {
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, sessionStorage, false);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, false);
 
             assertThat(ctx.getAndClearCurrentRemoteSpanContext()).isNull();
 
@@ -69,7 +69,7 @@ public class InspectitContextImplTest extends SpringTestBase {
         @Test
         void verifyCleared() {
             SpanContext span = OpenTelemetryUtils.getTracer().spanBuilder("blub").startSpan().getSpanContext();
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, sessionStorage, false);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, false);
             ctx.setData(REMOTE_PARENT_SPAN_CONTEXT_KEY, span);
 
             SpanContext result = ctx.getAndClearCurrentRemoteSpanContext();
@@ -78,7 +78,6 @@ public class InspectitContextImplTest extends SpringTestBase {
             assertThat(result).isSameAs(span);
             ctx.close();
         }
-
     }
 
     @Nested
@@ -86,7 +85,7 @@ public class InspectitContextImplTest extends SpringTestBase {
 
         @Test
         void verifyTraceContextFormat() {
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, sessionStorage, false);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, false);
             String traceContext = ctx.createRemoteParentContext();
             String w3cFormat = "00-([0-9a-f]{32})-([0-9a-f]{16})-01";
 
@@ -104,7 +103,6 @@ public class InspectitContextImplTest extends SpringTestBase {
         @BeforeEach
         void setup() {
             Instances.logTraceCorrelator = traceCorrelator;
-
         }
 
         @AfterEach
@@ -116,7 +114,7 @@ public class InspectitContextImplTest extends SpringTestBase {
         void spanEntered() {
             Span mySpan = OpenTelemetryUtils.getTracer().spanBuilder("blub").startSpan();
 
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), propagation, sessionStorage, false);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, false);
             assertThat(ctx.hasEnteredSpan()).isFalse();
 
             Scope scope = mySpan.makeCurrent();
@@ -673,7 +671,7 @@ public class InspectitContextImplTest extends SpringTestBase {
 
         @Test
         void verifyAttributesExtractedWithinTrace() {
-            doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
+            doReturn(true).when(propagation).isPropagatedDownWithinJVM(anyString());
 
             InspectitContextImpl root = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, true);
             root.setData("rootKey", "rootValue");
@@ -701,7 +699,7 @@ public class InspectitContextImplTest extends SpringTestBase {
 
         @Test
         void verifyAttributePropagationPreservedWithinTrace() {
-            doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
+            doReturn(true).when(propagation).isPropagatedDownWithinJVM(anyString());
 
             InspectitContextImpl root = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, true);
             root.setData("rootKey", "rootValue");
@@ -766,10 +764,10 @@ public class InspectitContextImplTest extends SpringTestBase {
 
         @Test
         void verifyCommonAttributesPublished() {
-            HashMap<String, String> attributes = new HashMap<>();
+            Map<String, String> attributes = new HashMap<>();
             attributes.put("tagA", "valueA");
             attributes.put("tagB", "valueB");
-            doReturn(true).when(propagation).isPropagatedDownWithinJVM(any());
+            doReturn(true).when(propagation).isPropagatedDownWithinJVM(anyString());
 
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(attributes, propagation, sessionStorage, true);
             ctx.makeActive();
@@ -788,7 +786,7 @@ public class InspectitContextImplTest extends SpringTestBase {
 
         @Test
         void verifySpanAttachedAndDetached() {
-            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, true);
+            InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, false);
             Span sp = OpenTelemetryUtils.getTracer().spanBuilder("blub").startSpan();
             ctx.setSpanScope(Context.current().with(sp).makeCurrent());
             ctx.makeActive();
@@ -823,7 +821,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(dataStorage).when(sessionStorage).getOrCreateDataStorage(SESSION);
             doReturn(SESSION_VALUE).when(dataStorage).readData(KEY);
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, true);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, false);
             root.setData(REMOTE_SESSION_ID, SESSION);
 
             root.makeActive();
@@ -844,7 +842,7 @@ public class InspectitContextImplTest extends SpringTestBase {
             doReturn(dataStorage).when(sessionStorage).getOrCreateDataStorage(SESSION);
             lenient().doReturn(storageDate).when(dataStorage).readData(KEY);
 
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, true);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, false);
             root.setData(KEY, VALUE);
             root.setData(REMOTE_SESSION_ID, SESSION);
 
@@ -860,7 +858,7 @@ public class InspectitContextImplTest extends SpringTestBase {
 
         @Test
         void shouldNotReadDataWithoutSessionId() {
-            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, true);
+            InspectitContextImpl root = InspectitContextImpl.createFromCurrent(emptyMap(), propagation, sessionStorage, false);
             root.makeActive();
             root.close();
 

@@ -1,6 +1,7 @@
 package rocks.inspectit.ocelot.core.attributes;
 
 import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.context.Scope;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +40,11 @@ class CommonAttributesManagerIntTest {
 
         @Test
         public void scopeAvailable() {
-            assertThat(provider.withCommonAttributesScope()).isNotNull();
+            Scope scope = provider.withCommonAttributesScope();
+            assertThat(scope).isNotNull();
+            scope.close();
         }
     }
-
 
     @Nested
     @DirtiesContext
