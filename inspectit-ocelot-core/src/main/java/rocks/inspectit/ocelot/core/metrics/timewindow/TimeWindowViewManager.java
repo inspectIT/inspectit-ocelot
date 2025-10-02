@@ -50,7 +50,10 @@ public class TimeWindowViewManager {
      * @return the collection of registered time-window vies for the provided metric
      */
     public Collection<TimeWindowView> getViews(String metricName) {
-        return measuresToViewsMap.get(metricName);
+        if (areAnyViewsRegistered(metricName))
+            return new LinkedList<>(measuresToViewsMap.get(metricName));
+
+        return Collections.emptyList();
     }
 
     /**
@@ -136,7 +139,7 @@ public class TimeWindowViewManager {
 
     private Optional<TimeWindowView> updateSmoothedAverageView(String viewName, String unit, ViewDefinitionSettings newSettings, TimeWindowView currentView) {
         if (currentView instanceof QuantilesView) {
-            return Optional.of(createQuantilesView(viewName, unit, newSettings));
+            return Optional.of(createSmoothedAverageView(viewName, unit, newSettings));
         }
 
         SmoothedAverageView currentSmoothedAverageView = (SmoothedAverageView) currentView;
@@ -157,7 +160,7 @@ public class TimeWindowViewManager {
 
     private Optional<TimeWindowView> updateQuantilesView(String viewName, String unit, ViewDefinitionSettings newSettings, TimeWindowView currentView) {
         if (currentView instanceof SmoothedAverageView) {
-            return Optional.of(createSmoothedAverageView(viewName, unit, newSettings));
+            return Optional.of(createQuantilesView(viewName, unit, newSettings));
         }
 
         QuantilesView currentQuantilesView = (QuantilesView) currentView;
@@ -166,9 +169,14 @@ public class TimeWindowViewManager {
         Duration timeWindow = newSettings.getTimeWindow();
         int bufferLimit = newSettings.getMaxBufferedPoints();
         List<Double> quantiles = newSettings.getQuantiles();
+        boolean includeMin = quantiles.contains(0.0);
+        boolean includeMax = quantiles.contains(1.0);
+        Set<Double> quantilesFiltered = quantiles.stream()
+                .filter(p -> p > 0 && p < 1)
+                .collect(Collectors.toSet());
 
         if (!currentQuantilesView.isSameConfiguration(description, unit, attributeKeys, timeWindow,
-                bufferLimit, quantiles)) {
+                bufferLimit, quantilesFiltered, includeMin, includeMax)) {
             return Optional.of(createQuantilesView(viewName, unit, newSettings));
         }
 

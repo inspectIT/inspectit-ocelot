@@ -5,6 +5,7 @@ import io.opentelemetry.api.common.Attributes;
 import lombok.Getter;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
+import sun.jvm.hotspot.debugger.cdbg.Sym;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -100,13 +101,15 @@ public class QuantilesView extends TimeWindowView {
      * @return true, if this view uses the same properties as provided
      */
     public boolean isSameConfiguration(String description, String unit, Set<String> attributes, Duration timeWindow,
-                                       int bufferLimit, Collection<Double> quantiles) {
+                                       int bufferLimit, Collection<Double> quantiles, boolean includeMin, boolean includeMax) {
         return this.description.equals(description) &&
                 this.unit.equals(unit) &&
                 this.timeWindow.equals(timeWindow) &&
                 this.bufferLimit == bufferLimit &&
                 this.getAttributeKeys().equals(attributes) &&
-                this.quantiles == quantiles;
+                this.quantiles.equals(quantiles) &&
+                this.isMinEnabled() == includeMin &&
+                this.isMaxEnabled() == includeMax;
     }
 
     public boolean isMinEnabled() {
