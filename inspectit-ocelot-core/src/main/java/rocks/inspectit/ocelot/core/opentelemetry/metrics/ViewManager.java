@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.opentelemetry.metrics;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.sdk.metrics.*;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -42,7 +43,8 @@ public class ViewManager {
      * Stores for each metric all of it's registered views.
      * This map should always use definitions with {@link ViewDefinitionSettings#getCopyWithDefaultsPopulated populated defaults}.
      */
-    private final Map<String, Map<String, ViewDefinitionSettings>> currentViews = new ConcurrentHashMap<>();
+    @VisibleForTesting
+    final Map<String, Map<String, ViewDefinitionSettings>> currentViews = new ConcurrentHashMap<>();
 
     /** Cached OpenTelemetry views, which should be registered via {@link SdkMeterProviderBuilder}. */
     private final Map<InstrumentSelector, View> cachedViews = new ConcurrentHashMap<>();

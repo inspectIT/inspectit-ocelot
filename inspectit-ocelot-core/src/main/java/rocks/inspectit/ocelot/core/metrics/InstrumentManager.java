@@ -151,8 +151,9 @@ public class InstrumentManager {
         log.trace("Trying to record metric '{}' with value '{}'", metricName, value);
 
         /*
-            We include the whole baggage here. The attributes will be filtered via AttributesProcessor of the
-            particular views, which are configured in the ViewManager.
+            We include the whole baggage here.
+            The attributes will be filtered via AttributesProcessor of the particular views,
+            which are configured in the ViewManager.
          */
         Attributes attributes = AttributeUtils.toAttributes(baggage);
 
@@ -237,19 +238,17 @@ public class InstrumentManager {
 
     /**
      * Checks, if the provided metric requires an instrument. We only need an instrument, if the metric definition
-     * contains a view, which uses an OpenTelemetry aggregation <b>OR</b>
-     * if there are no views specified at all. Then we will use the default OpenTelemetry views,
-     * which OpenTelemetry handles by itself automatically.
-     * For time-window aggregations we will record metrics via {@link TimeWindowRecorder} later.
+     * contains a view, which uses an OpenTelemetry aggregation.
+     * If there are no views specified, we will not record anything.
+     * For time-window aggregations we will record metrics via {@link TimeWindowRecorder}.
      *
      * @param metricDefinition the metric definition
      *
      * @return true, if the metric requires an instrument
      */
     private boolean requiresInstrument(MetricDefinitionSettings metricDefinition) {
-        if (metricDefinition.isEnabled()) {
-            boolean useDefaultView = CollectionUtils.isEmpty(metricDefinition.getViews());
-            return useDefaultView || metricDefinition.getViews()
+        if (metricDefinition.isEnabled() && !CollectionUtils.isEmpty(metricDefinition.getViews())) {
+            return metricDefinition.getViews()
                     .values().stream()
                     .anyMatch(view -> view.getAggregation().isOpenTelemetryAggregation());
         }

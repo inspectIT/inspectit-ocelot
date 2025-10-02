@@ -7,6 +7,9 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.internal.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Copied {@link #printWarning} from the previous TagUtils
+ */
 @Slf4j
 public final class AttributeUtils {
 
@@ -63,6 +66,9 @@ public final class AttributeUtils {
         return INVALID_VALUE;
     }
 
+    /**
+     * @return true, if the value is printable and not too long
+     */
     private static boolean isAttributeValueValid(Object value) {
         if (value != null) {
             String valueString = value.toString();
