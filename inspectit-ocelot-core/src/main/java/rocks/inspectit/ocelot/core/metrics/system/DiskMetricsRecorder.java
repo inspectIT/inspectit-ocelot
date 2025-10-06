@@ -12,7 +12,7 @@ import java.time.Duration;
 @Slf4j
 public class DiskMetricsRecorder extends AbstractPollingMetricsRecorder {
 
-    private static final String METRIC_NAME_PREFIX = "disk/";
+    private static final String METRIC_NAME_PREFIX = "disk_";
 
     private static final String FREE_METRIC_NAME = "free";
 

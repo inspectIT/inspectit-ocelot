@@ -284,7 +284,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
 
     @EventListener(classes = {InspectitConfigChangedEvent.class}, condition = "!#root.event.oldConfig.selfMonitoring.enabled")
     private void recordPendingClassesQueueSize() {
-        selfMonitoring.recordMetric("instrumentation-queue-size", pendingClasses.size());
+        selfMonitoring.recordMetric("instrumentation_queue_size", pendingClasses.size());
     }
 
     /**

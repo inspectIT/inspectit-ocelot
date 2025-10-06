@@ -18,27 +18,27 @@ public class MemoryMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     private static final String USED_METRIC_NAME = "used";
 
-    private static final String USED_METRIC_FULL_NAME = "jvm/memory/used";
+    private static final String USED_METRIC_FULL_NAME = "jvm_memory_used";
 
     private static final String COMMITTED_METRIC_NAME = "committed";
 
-    private static final String COMMITTED_METRIC_FULL_NAME = "jvm/memory/committed";
+    private static final String COMMITTED_METRIC_FULL_NAME = "jvm_memory_committed";
 
     private static final String MAX_METRIC_NAME = "max";
 
-    private static final String MAX_METRIC_FULL_NAME = "jvm/memory/max";
+    private static final String MAX_METRIC_FULL_NAME = "jvm_memory_max";
 
     private static final String BUFFER_COUNT_METRIC_NAME = "buffer.count";
 
-    private static final String BUFFER_COUNT_METRIC_FULL_NAME = "jvm/buffer/count";
+    private static final String BUFFER_COUNT_METRIC_FULL_NAME = "jvm_buffer_count";
 
     private static final String BUFFER_USED_METRIC_NAME = "buffer.used";
 
-    private static final String BUFFER_USED_METRIC_FULL_NAME = "jvm/buffer/memory/used";
+    private static final String BUFFER_USED_METRIC_FULL_NAME = "jvm_buffer_memory_used";
 
     private static final String BUFFER_CAPACITY_METRIC_NAME = "buffer.capacity";
 
-    private static final String BUFFER_CAPACITY_METRIC_FULL_NAME = "jvm/buffer/total/capacity";
+    private static final String BUFFER_CAPACITY_METRIC_FULL_NAME = "jvm_buffer_total_capacity";
 
     private final String idKey = "id";
 

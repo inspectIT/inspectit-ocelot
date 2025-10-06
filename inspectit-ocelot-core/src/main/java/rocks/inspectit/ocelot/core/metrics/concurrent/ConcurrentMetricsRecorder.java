@@ -20,7 +20,7 @@ public class ConcurrentMetricsRecorder extends AbstractPollingMetricsRecorder {
     /**
      *  See {@code system-and-jvm-metrics.yml} in default configuration
      */
-    private static final String METRIC_NAME_PREFIX = "inspectit/concurrent/";
+    private static final String METRIC_NAME_PREFIX = "inspectit_concurrent_";
 
     private static final String INVOCATIONS_METRIC_NAME = "invocations";
 
@@ -40,7 +40,7 @@ public class ConcurrentMetricsRecorder extends AbstractPollingMetricsRecorder {
             String metricName = METRIC_NAME_PREFIX + INVOCATIONS_METRIC_NAME;
 
             concurrentInvocations.getActiveInvocations().forEach((operation, count) -> {
-                Baggage baggage = Baggage.builder()
+                Baggage baggage = Baggage.current().toBuilder()
                         .put(attributeKey, AttributeUtils.resolveValue(attributeKey, operation))
                         .build();
 

@@ -252,7 +252,7 @@ public abstract class AbstractClassTransformer implements ClassTransformer {
 
     /**
      * Derives the {@link ClassInstrumentationConfiguration} based on the latest environment configuration for a given class.
-     * In addition the class is added to {@link #instrumentedClasses} if it is instrumented or removed from the set otherwise.
+     * In addition, the class is added to {@link #instrumentedClasses} if it is instrumented or removed from the set otherwise.
      * If the class transformer is shutting down, this returns {@link ClassInstrumentationConfiguration#NO_INSTRUMENTATION}
      * for every class (= all classes should be deinstrumented).
      *
@@ -283,6 +283,6 @@ public abstract class AbstractClassTransformer implements ClassTransformer {
 
     @EventListener(classes = {InspectitConfigChangedEvent.class}, condition = "!#root.event.oldConfig.selfMonitoring.enabled")
     private void selfMonitorInstrumentedClassesCount() {
-        selfMonitoring.recordMetric("instrumented-classes", instrumentedClasses.size());
+        selfMonitoring.recordMetric("instrumented_classes", instrumentedClasses.size());
     }
 }

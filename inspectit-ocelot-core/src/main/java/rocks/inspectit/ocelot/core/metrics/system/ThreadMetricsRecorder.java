@@ -16,7 +16,7 @@ import java.util.Objects;
 @Service
 public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
 
-    private static final String METRIC_NAME_PREFIX = "jvm/threads/";
+    private static final String METRIC_NAME_PREFIX = "jvm_threads_";
 
     private static final String PEAK_METRIC_NAME = "peak";
 
