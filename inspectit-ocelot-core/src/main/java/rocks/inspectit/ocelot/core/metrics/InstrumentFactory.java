@@ -1,35 +1,43 @@
 package rocks.inspectit.ocelot.core.metrics;
 
 import io.opentelemetry.api.metrics.*;
+import io.opentelemetry.sdk.metrics.OcelotMetricUtils;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
+
+import java.util.Optional;
 
 @Component
 public class InstrumentFactory {
 
     /**
-     * Creates a new instrument. Since {@code AbstractInstrument} is package-private, we return an {@code Object}
+     * Creates a new instrument. Since {@code AbstractInstrument} is package-private, we return an {@code Object}.
+     * If the configured OTel Meter uses a noop-implementation, we do not create an instrument.
      *
      * @param name the instrument name
      * @param metricDefinition the metric settings
      *
-     * @return the created instrument as {@code Object}
+     * @return the created instrument as {@code Object} or empty
      */
-    public Object createInstrument(String name, MetricDefinitionSettings metricDefinition) {
+    public Optional<Object> createInstrument(String name, MetricDefinitionSettings metricDefinition) {
         Meter meter = OpenTelemetryUtils.getMeter();
-        switch (metricDefinition.getInstrumentType()) {
-            case COUNTER:
-                return createCounter(name, metricDefinition, meter);
-            case UP_DOWN_COUNTER:
-                return createUpDownCounter(name, metricDefinition,meter);
-            case GAUGE:
-                return createGauge(name, metricDefinition, meter);
-            case HISTOGRAM:
-                return createHistogram(name, metricDefinition, meter);
-            default:
-                throw new IllegalArgumentException("Tried to create unsupported instrument type:" + metricDefinition.getInstrumentType().name());
+        // Do not create noop-instruments
+        if (OcelotMetricUtils.isSdkMeter(meter)) {
+            switch (metricDefinition.getInstrumentType()) {
+                case COUNTER:
+                    return Optional.of(createCounter(name, metricDefinition, meter));
+                case UP_DOWN_COUNTER:
+                    return Optional.of(createUpDownCounter(name, metricDefinition,meter));
+                case GAUGE:
+                    return Optional.of(createGauge(name, metricDefinition, meter));
+                case HISTOGRAM:
+                    return Optional.of(createHistogram(name, metricDefinition, meter));
+                default:
+                    return Optional.empty();
+            }
         }
+        return Optional.empty();
     }
 
     private Object createCounter(String name, MetricDefinitionSettings metricDefinition, Meter meter) {

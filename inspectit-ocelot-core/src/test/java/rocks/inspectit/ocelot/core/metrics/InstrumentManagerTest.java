@@ -19,6 +19,7 @@ import rocks.inspectit.ocelot.core.metrics.timewindow.worker.TimeWindowRecorder;
 import rocks.inspectit.ocelot.core.opentelemetry.events.OpenTelemetryConfiguredEvent;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Collections.emptyMap;
@@ -53,7 +54,7 @@ class InstrumentManagerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(factory.createInstrument(anyString(), any())).thenReturn(gauge);
+        lenient().when(factory.createInstrument(anyString(), any())).thenReturn(Optional.ofNullable(gauge));
         lenient().when(env.getCurrentConfig().getMetrics().isEnabled()).thenReturn(true);
     }
 

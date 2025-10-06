@@ -19,6 +19,7 @@ import rocks.inspectit.ocelot.core.utils.AttributeUtils;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -108,10 +109,13 @@ public class InstrumentManager {
      */
     private boolean updateInstrument(String metricName, MetricDefinitionSettings metricDefinition) {
         if (requiresInstrument(metricDefinition)) {
-            Object instrument = instrumentFactory.createInstrument(metricName, metricDefinition);
-            cachedInstruments.put(metricName, instrument);
-            currentMetricDefinitions.put(metricName, metricDefinition);
-            return true;
+            Optional<Object> maybeInstrument = instrumentFactory.createInstrument(metricName, metricDefinition);
+
+            if (maybeInstrument.isPresent()) {
+                cachedInstruments.put(metricName, maybeInstrument.get());
+                currentMetricDefinitions.put(metricName, metricDefinition);
+                return true;
+            }
         }
         return false;
     }
