@@ -19,7 +19,7 @@ import static org.awaitility.Awaitility.await;
 
 public class TraceTestBase extends InstrumentationSysTestBase {
 
-    final static InMemorySpanExporter spanExporter = TestUtils.initializeOpenTelemetryForSystemTesting();
+    final static InMemorySpanExporter spanExporter = TestUtils.initializeSpanExporterForSystemTesting();
 
     protected List<SpanData> getExportedSpans() {
         return spanExporter.getFinishedSpanItems();

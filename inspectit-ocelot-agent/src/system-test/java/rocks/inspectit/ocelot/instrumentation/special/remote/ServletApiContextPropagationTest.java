@@ -87,7 +87,7 @@ public class ServletApiContextPropagationTest {
 
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
-            lastTags = TestUtils.getCurrentTagsAsMap();
+            lastTags = TestUtils.getCurrentBaggageAsMap();
 
             InternalInspectitContext ctx = null;
             try {
@@ -140,7 +140,7 @@ public class ServletApiContextPropagationTest {
 
         @Override
         public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-            lastTags = TestUtils.getCurrentTagsAsMap();
+            lastTags = TestUtils.getCurrentBaggageAsMap();
             if (overrideTags != null) {
                 InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
                 overrideTags.forEach(ctx::setData);

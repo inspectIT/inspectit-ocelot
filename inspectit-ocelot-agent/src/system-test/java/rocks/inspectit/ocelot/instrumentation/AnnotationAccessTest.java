@@ -52,6 +52,4 @@ public class AnnotationAccessTest extends InstrumentationSysTestBase {
         assertThat(((AggregationData.LastValueDataLong) data).getLastValue())
                 .isEqualTo(42);
     }
-
 }
-

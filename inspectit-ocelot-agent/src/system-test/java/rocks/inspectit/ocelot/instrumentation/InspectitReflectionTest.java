@@ -1,20 +1,23 @@
 package rocks.inspectit.ocelot.instrumentation;
 
 import com.google.common.collect.ImmutableMap;
-import io.opencensus.stats.AggregationData;
+import io.opentelemetry.sdk.metrics.data.LongPointData;
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.ocelot.utils.TestUtils;
+import rocks.inspectit.ocelot.utils.MetricsTestUtils;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 /**
  * Summary: <br>
  * 1. Only {@code instrumentedMethod} will be instrumented, thus other fields of the class are normally not accessible
  *    in actions. <br>
- * 2. The view is registered in OpenCensus. <br>
+ * 2. The view is registered in OpenTelemetry. <br>
  * 3. When calling {@code instrumentedMethod}, we will access both {@code hiddenField} and the result of {@code hiddenMethod}
  *    via reflection. <br>
- * 4. The result of the invoked method will be written as metric value. The hidden field will be used as tag <br>
+ * 4. The result of the invoked method will be written as metric value. The hidden field will be used as attribute <br>
  */
 public class InspectitReflectionTest extends InstrumentationSysTestBase {
 
@@ -30,12 +33,13 @@ public class InspectitReflectionTest extends InstrumentationSysTestBase {
     void shouldAccessHiddenValueAndHiddenMethod() {
         instrumentedMethod();
 
-        TestUtils.waitForOpenCensusQueueToBeProcessed();
-
-        assertThat(TestUtils.getDataForView("reflectionInvokedMethod",
-                ImmutableMap.of("field", hiddenField)))
-                .isNotNull().isInstanceOfSatisfying(AggregationData.CountData.class, (c) ->
-                assertThat(c.getCount()).isEqualTo(1) // same as return value of hiddenMethod()
+        await().atMost(20, TimeUnit.SECONDS).untilAsserted(() ->
+                assertThat(MetricsTestUtils.getDataForView("reflectionInvokedMethod",
+                        ImmutableMap.of("field", hiddenField)))
+                        .isNotNull()
+                        .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
+                                assertThat(pointData.getValue()).isEqualTo(1)
+                        )
         );
     }
 }

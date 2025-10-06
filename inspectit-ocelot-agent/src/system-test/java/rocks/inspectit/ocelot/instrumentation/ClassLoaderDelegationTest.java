@@ -134,7 +134,7 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
                 .putLocal(TagKey.create("test_key"), TagValue.create("test_value"))
                 .buildScoped()) {
             exec.execute(() -> {
-                Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+                Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
                 assertThat(tags).containsEntry("test_key", "test_value");
             });
         }
@@ -158,7 +158,7 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
                 .putLocal(TagKey.create("test_key"), TagValue.create("test_value"))
                 .buildScoped()) {
             exec.execute(() -> {
-                Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+                Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
                 assertThat(tags).containsEntry("test_key", "test_value");
             });
         }
@@ -182,7 +182,7 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
                 .putLocal(TagKey.create("test_key"), TagValue.create("test_value"))
                 .buildScoped()) {
             exec.execute(() -> {
-                Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+                Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
                 assertThat(tags).containsEntry("test_key", "test_value");
             });
         }

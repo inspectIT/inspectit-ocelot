@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +22,7 @@ public class InstrumentationScopesTest extends InstrumentationSysTestBase {
         TestUtils.waitForInstrumentationToComplete(); //wait because until here the class has most likely not been loaded yet
 
         n1.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
             assertThat(tags).containsEntry("name", "blablub");
         });
     }
@@ -35,7 +34,7 @@ public class InstrumentationScopesTest extends InstrumentationSysTestBase {
         TestUtils.waitForInstrumentationToComplete(); //wait because until here the class has most likely not been loaded yet
 
         n1.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
             assertThat(tags).containsEntry("name", "i'm a lambda");
         });
     }
@@ -60,11 +59,11 @@ public class InstrumentationScopesTest extends InstrumentationSysTestBase {
         TestUtils.waitForInstrumentationToComplete();
 
         n1.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
             assertThat(tags).containsEntry("name", "something");
         });
         n1.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
             assertThat(tags).containsEntry("name", "somethingelse");
         });
     }

@@ -1,8 +1,6 @@
 package rocks.inspectit.ocelot.instrumentation;
 
 import com.google.common.collect.ImmutableMap;
-import io.opencensus.stats.*;
-import io.opencensus.tags.TagValue;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.utils.TestUtils;
 

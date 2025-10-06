@@ -18,7 +18,7 @@ public class GenericActionsTest extends InstrumentationSysTestBase {
     @Test
     void verifyArgumentsAccessible() {
         argumentAccessTest(() -> "test123", () -> {
-            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
             assertThat(tags).containsEntry("name_via_arg0", "test123");
             assertThat(tags).containsEntry("name_via_args", "test123");
             assertThat(tags).containsEntry("name_reversed", "321tset");
@@ -33,7 +33,7 @@ public class GenericActionsTest extends InstrumentationSysTestBase {
     @Test
     void verifyConstantArgumentsParsedCorrectly() {
         constantParsingTest(Duration.ofMillis(1500), () -> {
-            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
             assertThat(tags).containsEntry("result", "3500");
         });
     }
@@ -42,7 +42,7 @@ public class GenericActionsTest extends InstrumentationSysTestBase {
     void testDefaultMethodInstrumented() {
         NamedElement n1 = () -> "blablub";
         n1.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
             assertThat(tags).containsEntry("name", "blablub");
         });
 
@@ -65,15 +65,15 @@ public class GenericActionsTest extends InstrumentationSysTestBase {
         n2.getName();
         waitForInstrumentation(); //wait because until here the class has most likely not been loaded yet
         n1.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
             assertThat(tags).containsEntry("name", "blablub");
         });
         n2.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
             assertThat(tags).containsEntry("name", "something");
         });
         n2.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
             assertThat(tags).containsEntry("name", "somethingelse");
         });
     }
@@ -86,7 +86,7 @@ public class GenericActionsTest extends InstrumentationSysTestBase {
     @Test
     void verifyConditionsBehaveAsExpected() {
         conditionsTest(() -> {
-            Map<String, String> tags = TestUtils.getCurrentTagsAsMap();
+            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
             assertThat(tags).containsKey("only_if_true_executed");
             assertThat(tags).doesNotContainKey("only_if_true_skipped");
             assertThat(tags).doesNotContainKey("only_if_true_also_skipped");

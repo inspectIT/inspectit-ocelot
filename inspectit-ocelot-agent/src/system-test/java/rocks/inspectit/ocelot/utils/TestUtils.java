@@ -1,16 +1,7 @@
 package rocks.inspectit.ocelot.utils;
 
 import com.google.common.cache.Cache;
-import io.opencensus.impl.internal.DisruptorEventQueue;
-import io.opencensus.metrics.LabelKey;
-import io.opencensus.metrics.LabelValue;
-import io.opencensus.metrics.Metrics;
-import io.opencensus.metrics.export.TimeSeries;
-import io.opencensus.stats.*;
-import io.opencensus.tags.InternalUtils;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
-import io.opencensus.tags.Tags;
+import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import org.awaitility.core.ConditionTimeoutException;
 import org.slf4j.Logger;
@@ -23,9 +14,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -185,19 +174,13 @@ public class TestUtils {
         }
     }
 
-    /**
-     * OpenCensus internally manages a queue of events.
-     * We simply add an event to the queue and wait until it is processed.
-     */
-    public static void waitForOpenCensusQueueToBeProcessed() {
-        CountDownLatch latch = new CountDownLatch(1);
-        // TODO: re-implement with OTel
-        DisruptorEventQueue.getInstance().enqueue(latch::countDown);
-        try {
-            latch.await(3, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public static void waitForInstrumentationToComplete() {
+        await().atMost(30, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
+            assertThat(MetricsTestUtils.getInstrumentationClassesCount()).isGreaterThan(0);
+            assertThat(MetricsTestUtils.getInstrumentationQueueSize()).isZero();
+            Thread.sleep(500); // to ensure that new-class-discovery has been executed
+            assertThat(MetricsTestUtils.getInstrumentationQueueSize()).isZero();
+        });
     }
 
     public static void waitForAgentInitialization() {
@@ -210,91 +193,6 @@ public class TestUtils {
         }
     }
 
-    @Deprecated
-    public static void waitForInstrumentationToComplete() {
-        await().atMost(30, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
-            assertThat(getInstrumentationClassesCount()).isGreaterThan(0);
-            assertThat(getInstrumentationQueueLength()).isZero();
-            Thread.sleep(200); //to ensure that new-class-discovery has been executed
-            waitForOpenCensusQueueToBeProcessed();
-            assertThat(getInstrumentationQueueLength()).isZero();
-        });
-    }
-
-    public static Map<String, String> getCurrentTagsAsMap() {
-        Map<String, String> result = new HashMap<>();
-        InternalUtils.getTags(Tags.getTagger().getCurrentTagContext())
-                .forEachRemaining(t -> result.put(t.getKey().getName(), t.getValue().asString()));
-        return result;
-    }
-
-    /**
-     * Returns the first found value for the view with the given tag values.
-     *
-     * @param viewName the name of the views
-     * @param tags     the expected tag values
-     *
-     * @return the found aggregation data, null otherwise
-     */
-    public static AggregationData getDataForView(String viewName, Map<String, String> tags) {
-        ViewManager viewManager = Stats.getViewManager();
-        ViewData view = viewManager.getView(View.Name.create(viewName));
-        List<String> orderedTagKeys = view.getView()
-                .getColumns()
-                .stream()
-                .map(TagKey::getName)
-                .collect(Collectors.toList());
-        assertThat(orderedTagKeys).contains(tags.keySet().toArray(new String[]{}));
-        List<String> expectedTagValues = orderedTagKeys.stream().map(tags::get).collect(Collectors.toList());
-
-         List<Map.Entry<List<TagValue>, AggregationData>> entryList = view.getAggregationMap().entrySet().stream().filter(e -> {
-            List<TagValue> tagValues = e.getKey();
-            for (int i = 0; i < tagValues.size(); i++) {
-                String regex = expectedTagValues.get(i);
-                TagValue tagValue = tagValues.get(i);
-                if (regex != null && (tagValue == null || !tagValue.asString().matches(regex))) {
-                    return false;
-                }
-            }
-            return true;
-        }).collect(Collectors.toList());
-         return entryList.stream().map(Map.Entry::getValue).findFirst().orElse(null);
-    }
-
-    public static TimeSeries getTimeseries(String metricName, Map<String, String> tags) {
-        Optional<TimeSeries> series = Metrics.getExportComponent()
-                .getMetricProducerManager()
-                .getAllMetricProducer()
-                .stream()
-                .flatMap(mp -> mp.getMetrics().stream())
-                .filter(m -> m.getMetricDescriptor().getName().equals(metricName))
-                .flatMap(m -> {
-                    List<String> orderedTagKeys = m.getMetricDescriptor()
-                            .getLabelKeys()
-                            .stream()
-                            .map(LabelKey::getKey)
-                            .collect(Collectors.toList());
-                    assertThat(orderedTagKeys).contains(tags.keySet().toArray(new String[]{}));
-                    List<String> expectedTagValues = orderedTagKeys.stream()
-                            .map(tags::get)
-                            .collect(Collectors.toList());
-                    return m.getTimeSeriesList().stream().filter(ts -> {
-                        List<LabelValue> tagValues = ts.getLabelValues();
-                        for (int i = 0; i < tagValues.size(); i++) {
-                            String regex = expectedTagValues.get(i);
-                            LabelValue tagValue = tagValues.get(i);
-                            if (regex != null && (tagValue == null || !tagValue.getValue().matches(regex))) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    });
-                })
-                .findFirst();
-        assertThat(series).isNotEmpty();
-        return series.get();
-    }
-
     static InMemorySpanExporter inMemorySpanExporter;
 
     /**
@@ -302,14 +200,14 @@ public class TestUtils {
      *
      * @return The {@link InMemorySpanExporter} that can be used to retrieve exported {@link io.opentelemetry.api.trace.Span Spans}
      */
-    public static InMemorySpanExporter initializeOpenTelemetryForSystemTesting() {
-        // if OTEL was already initialized with the inMemorySpanExporter, just reset and return it
+    public static InMemorySpanExporter initializeSpanExporterForSystemTesting() {
+        // if OTel was already initialized with the inMemorySpanExporter, just reset and return it
         if (null != inMemorySpanExporter && NoopOpenTelemetryController.INSTANCE != Instances.openTelemetryController) {
             inMemorySpanExporter.reset();
             return inMemorySpanExporter;
         }
 
-        // wait until OTEL is initialized
+        // wait until OTel is initialized
         await().atMost(10, TimeUnit.SECONDS)
                 .pollInterval(100, TimeUnit.MILLISECONDS)
                 .until(() -> NoopOpenTelemetryController.INSTANCE != Instances.openTelemetryController);
@@ -318,28 +216,4 @@ public class TestUtils {
         Instances.openTelemetryController.registerTraceExporterService(inMemorySpanExporter, "InMemorySpanExporterService");
         return inMemorySpanExporter;
     }
-
-    private static long getInstrumentationQueueLength() {
-        ViewManager viewManager = Stats.getViewManager();
-        AggregationData.LastValueDataLong queueSize = (AggregationData.LastValueDataLong) viewManager.getView(View.Name.create("inspectit/self/instrumentation-queue-size"))
-                .getAggregationMap()
-                .values()
-                .stream()
-                .findFirst()
-                .get();
-        return queueSize.getLastValue();
-    }
-
-    private static long getInstrumentationClassesCount() {
-        ViewManager viewManager = Stats.getViewManager();
-        AggregationData.LastValueDataLong queueSize = (AggregationData.LastValueDataLong) viewManager.getView(View.Name.create("inspectit/self/instrumented-classes"))
-                .getAggregationMap()
-                .values()
-                .stream()
-                .findFirst()
-                .get();
-        return queueSize.getLastValue();
-    }
-
 }
-
