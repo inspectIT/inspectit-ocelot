@@ -18,11 +18,8 @@ public class ReflectionUtils {
      * @param field
      *
      * @return The {@link Field} with updated modifiers
-     *
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
      */
-    public static Field makeFieldAccessibleAndRemoveFinal(Field field) throws NoSuchFieldException, IllegalAccessException {
+    public static Field makeFieldAccessibleAndRemoveFinal(Field field){
         field.setAccessible(true);
         FieldUtils.removeFinalModifier(field);
         return field;
@@ -33,9 +30,6 @@ public class ReflectionUtils {
      *
      * @param field    The final static {@link Field}
      * @param newValue
-     *
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
      */
     public static void setFinalStatic(Field field, Object newValue) throws NoSuchFieldException, IllegalAccessException {
         // see https://stackoverflow.com/questions/61141836/change-static-final-field-in-java-12
@@ -60,8 +54,6 @@ public class ReflectionUtils {
      * @param fieldName The name of the field
      *
      * @return the specified field of the given class
-     *
-     * @throws NoSuchFieldException
      */
 
     public static Field getFieldAndMakeAccessible(Class clazz, String fieldName) throws NoSuchFieldException {
@@ -76,10 +68,7 @@ public class ReflectionUtils {
      * @param className The name of the {@link Class}
      * @param fieldName The name of the {@link Field}
      *
-     * @return
-     *
-     * @throws ClassNotFoundException
-     * @throws NoSuchFieldException
+     * @return the accessible field
      */
     public static Field getFieldAndMakeAccessible(String className, String fieldName) throws ClassNotFoundException, NoSuchFieldException {
         Class clazz = Class.forName(className);

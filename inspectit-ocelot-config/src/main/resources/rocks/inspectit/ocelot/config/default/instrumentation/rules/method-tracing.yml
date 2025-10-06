@@ -16,4 +16,3 @@ inspectit:
         tracing:
           start-span: true
           error-status: _thrown
-          

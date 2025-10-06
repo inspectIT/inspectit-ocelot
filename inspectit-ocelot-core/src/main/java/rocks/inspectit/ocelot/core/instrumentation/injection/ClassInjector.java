@@ -38,14 +38,14 @@ public class ClassInjector {
     @Autowired
     private InspectitEnvironment inspectitEnv;
 
-    private InjectionClassLoader bootstrapChildLoader = new InjectionClassLoader();
+    private final InjectionClassLoader bootstrapChildLoader = new InjectionClassLoader();
+
+    private final Random nameGenerationRandom = new Random();
 
     /**
      * The protection domain of the inspectIT Classloader.
      */
     private static final ProtectionDomain INSPECTIT_PROTECTION_DOMAIN;
-
-    private Random nameGenerationRandom = new Random();
 
     /**
      * For each class loader this map holds a map, mapping a "structural identifier" to orphan classes.
@@ -58,19 +58,19 @@ public class ClassInjector {
      * <p>
      * We never directly inject classes to the bootstrap. Instead, we use our {@link #bootstrapChildLoader}.
      */
-    private WeakHashMap<ClassLoader, Map<String, LinkedList<WeakReference<Class<?>>>>> orphanClasses = new WeakHashMap<>();
+    private final WeakHashMap<ClassLoader, Map<String, LinkedList<WeakReference<Class<?>>>>> orphanClasses = new WeakHashMap<>();
 
     /**
      * With this reference queue we detected that an {@link InjectedClass} has been garbage collected, meaning that the underlying class object is now an orphan.
      * We process this queue and add all found orphans to {@link #orphanClasses}.
      */
-    private ReferenceQueue<InjectedClass<?>> unusedInjectedClassesQueue = new ReferenceQueue<>();
+    private final ReferenceQueue<InjectedClass<?>> unusedInjectedClassesQueue = new ReferenceQueue<>();
 
     /**
      * We need to store our {@link InjectedClassReference} to be notified when a {@link InjectedClass} is garbage collected.
      * Without this set, {@link InjectedClassReference}s get garbage collected immediately and {@link #unusedInjectedClassesQueue} never gets notified.
      */
-    private Set<InjectedClassReference> activeReferences = new HashSet<>();
+    private final Set<InjectedClassReference> activeReferences = new HashSet<>();
 
     static {
         //Taken from spring ClassDefinitionUtils
@@ -85,10 +85,10 @@ public class ClassInjector {
      * If possible, this method tries to reuse an orphan class which was previously injected into the given classloader.
      * <p>
      * A class is considered to be an orphan as soon as the {@link InjectedClass} returned by this method is garbage collected.
-     * Therefore NEVER EVER store and use the class object {@link InjectedClass#getInjectedClassObject()} without also storing the {@link InjectedClass} instance.
+     * Therefore, NEVER EVER store and use the class object {@link InjectedClass#getInjectedClassObject()} without also storing the {@link InjectedClass} instance.
      * <p>
      * NOTE: If the neighborClass comes from the bootstrap, the classes are not actually added to the bootstrap.
-     * Instead a child-classloader is used.
+     * Instead, a child-classloader is used.
      *
      * @param classStructureIdentifier A symbolic identifier for the "structure" of the class to inject. It must be guaranteed that two injected classes with the same "classStructureIdentifier" could be redefined into each other.
      *                                 This means that as described for {@link Instrumentation#redefineClasses(ClassDefinition...)}, the classes must have the same methods (including their signatures), fields and all modifieres must be the same.

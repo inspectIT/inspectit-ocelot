@@ -2,8 +2,10 @@ package rocks.inspectit.ocelot.core.utils;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -22,11 +24,11 @@ import java.util.concurrent.TimeUnit;
 public class OpenTelemetryUtils {
 
     /**
-     * {@link SdkMeterProvider#close() closes} the given {@link SdkMeterProvider} and blocks waiting for it to complete.
+     * {@link SdkMeterProvider#close() Closes} the given {@link SdkMeterProvider} and blocks waiting for it to complete.
      *
-     * @param meterProvider The {@link SdkMeterProvider} to stop.
+     * @param meterProvider the provider to stop
      *
-     * @return The {@link CompletableResultCode}
+     * @return the {@link CompletableResultCode}
      */
     public static CompletableResultCode stopMeterProvider(SdkMeterProvider meterProvider) {
         return stopMeterProvider(meterProvider, false);
@@ -35,10 +37,10 @@ public class OpenTelemetryUtils {
     /**
      * {@link SdkMeterProvider#close() Closes} the given {@link SdkMeterProvider} and optionally {@link SdkMeterProvider#forceFlush() force flushes}, and blocks waiting for it to complete.
      *
-     * @param meterProvider
-     * @param forceFlush    Whether to call {@link SdkMeterProvider#forceFlush()}
+     * @param meterProvider the provider to stop
+     * @param forceFlush    whether to call {@link SdkMeterProvider#forceFlush()}
      *
-     * @return The {@link CompletableResultCode}
+     * @return the {@link CompletableResultCode}
      */
     public static CompletableResultCode stopMeterProvider(SdkMeterProvider meterProvider, boolean forceFlush) {
         // force flush if applicable
@@ -66,7 +68,7 @@ public class OpenTelemetryUtils {
     /**
      * {@link SdkTracerProvider#close() Closes} the given {@link SdkTracerProvider} and blocks waiting for it to complete.
      *
-     * @param tracerProvider The {@link SdkTracerProvider} to shut down
+     * @param tracerProvider the provider to shut down
      */
     public static CompletableResultCode stopTracerProvider(SdkTracerProvider tracerProvider) {
         return stopTracerProvider(tracerProvider, false);
@@ -75,8 +77,8 @@ public class OpenTelemetryUtils {
     /**
      * {@link SdkTracerProvider#close() stops} the given {@link SdkTracerProvider} and optionally {@link SdkTracerProvider#forceFlush() flushes} it before {@link SdkTracerProvider#close() closing}, and blocks waiting for it to complete.
      *
-     * @param tracerProvider The {@link SdkTracerProvider} to stop
-     * @param forceFlush     Whether to call {@link SdkTracerProvider#forceFlush()} before closing it.
+     * @param tracerProvider the provider to stop
+     * @param forceFlush     whether to call {@link SdkTracerProvider#forceFlush()} before closing it.
      */
     public static CompletableResultCode stopTracerProvider(SdkTracerProvider tracerProvider, boolean forceFlush) {
         if (null != tracerProvider) {
@@ -102,7 +104,8 @@ public class OpenTelemetryUtils {
     }
 
     /**
-     * Gets the {@link OpenTelemetry} registered at {@link GlobalOpenTelemetry#globalOpenTelemetry} without calling {@link GlobalOpenTelemetry#get()} to avoid that it is assigned to {@link OpenTelemetry#noop()} on the first call.
+     * Gets the {@link OpenTelemetry} registered at {@link GlobalOpenTelemetry#globalOpenTelemetry}
+     * without calling {@link GlobalOpenTelemetry#get()} to avoid that it is assigned to {@link OpenTelemetry#noop()} on the first call.
      *
      * @return The {@link OpenTelemetry} registered at {@link GlobalOpenTelemetry#globalOpenTelemetry}
      */
@@ -124,28 +127,30 @@ public class OpenTelemetryUtils {
         Instances.openTelemetryController.flush();
     }
 
-    public final static String DEFAULT_INSTRUMENTATION_SCOPE_INFO = "rocks.inspectit.ocelot";
+    public static final String DEFAULT_INSTRUMENTATION_SCOPE_NAME = "rocks.inspectit.ocelot";
 
-    public final static String DEFAULT_INSTRUMENTATION_SCOPE_VERSION = "0.0.1";
+    public static final String DEFAULT_INSTRUMENTATION_SCOPE_VERSION = "0.0.1";
+
+    public static final InstrumentationScopeInfo DEFAULT_INSTRUMENTATION_SCOPE_INFO = InstrumentationScopeInfo.create(DEFAULT_INSTRUMENTATION_SCOPE_NAME);
 
     /**
-     * Gets the current {@link Tracer} registered at {@link GlobalOpenTelemetry#getTracer(String, String)} under the instrumentationScopeName 'rocks.inspectit.ocelot'
-     *
-     * @return
+     * @return the current {@link Meter} registered at {@link GlobalOpenTelemetry#getMeter(String)}
      */
-    public static Tracer getTracer() {
-        return getGlobalOpenTelemetry().getTracer(DEFAULT_INSTRUMENTATION_SCOPE_INFO, DEFAULT_INSTRUMENTATION_SCOPE_VERSION);
+    public static Meter getMeter() {
+        return getGlobalOpenTelemetry().getMeter(DEFAULT_INSTRUMENTATION_SCOPE_NAME);
     }
 
     /**
-     * Gets a custom {@link Tracer tracer} with custom {@link Sampler sampler}
-     *
-     * @param customSampler
-     *
-     * @return
+     * @return the current {@link Tracer} registered at {@link GlobalOpenTelemetry#getTracer(String, String)}
+     */
+    public static Tracer getTracer() {
+        return getGlobalOpenTelemetry().getTracer(DEFAULT_INSTRUMENTATION_SCOPE_NAME, DEFAULT_INSTRUMENTATION_SCOPE_VERSION);
+    }
+
+    /**
+     * @return the custom {@link Tracer tracer} with {@link Sampler customSampler}
      */
     public static Tracer getTracer(Sampler customSampler) {
         return CustomTracer.builder().sampler(customSampler).build();
     }
-
 }

@@ -31,7 +31,7 @@ public class MetricWritingHealthEventListenerTest {
 
         metricWritingHealthEventListener.sendInitialHealthMetric();
 
-        verify(selfMonitoringService).recordMeasurement("health", AgentHealth.OK.ordinal(), tags);
+        verify(selfMonitoringService).recordMetric("health", AgentHealth.OK.ordinal(), tags);
     }
 
     @Test
@@ -43,6 +43,6 @@ public class MetricWritingHealthEventListenerTest {
 
         metricWritingHealthEventListener.onAgentHealthEvent(event);
 
-        verify(selfMonitoringService).recordMeasurement("health", event.getNewHealth().ordinal(), tags);
+        verify(selfMonitoringService).recordMetric("health", event.getNewHealth().ordinal(), tags);
     }
 }

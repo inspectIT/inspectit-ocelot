@@ -55,7 +55,7 @@ class ConfigDocsGeneratorTest {
      * correctly scopeDoc.
      */
     @BeforeAll
-    private static void createDocObjects() {
+    static void createDocObjects() {
 
         // Create a sample ActionDoc object where there was documentation values in the YAML, i.e. content behind the
         // doc-key
@@ -116,12 +116,12 @@ class ConfigDocsGeneratorTest {
 
         // Create a sample MetricDoc object
         metricDoc = Mockito.mock(MetricDocs.class);
-        when(metricDoc.getName()).thenReturn("disk/free");
+        when(metricDoc.getName()).thenReturn("disk_free");
         when(metricDoc.getDescription()).thenReturn("free disk space");
         when(metricDoc.getSince()).thenReturn(null);
         when(metricDoc.getUnit()).thenReturn("bytes");
 
-        // Create a sample RuleDoc object to include inside of the other RuleDoc object
+        // Create a sample RuleDoc object to include inside the other RuleDoc object
         // Create the actionCallsMap for the RuleDoc object
         Map<String, Map<String, ActionCallDocs>> actionCallsMapParent = RuleDocsTest.getEmptyActionCallsMap();
         Map<String, ActionCallDocs> actionCallsParent = new HashMap<>();
@@ -162,7 +162,7 @@ class ConfigDocsGeneratorTest {
         constantTags.put("error", "servicegraph_is_error");
 
         RuleMetricsDocs ruleMetricsDocsMock = Mockito.mock(RuleMetricsDocs.class);
-        when(ruleMetricsDocsMock.getName()).thenReturn("service/in/responsetime");
+        when(ruleMetricsDocsMock.getName()).thenReturn("service_in_responsetime");
         when(ruleMetricsDocsMock.getValue()).thenReturn("servicegraph_duration");
         when(ruleMetricsDocsMock.getDataTags()).thenReturn(dataTags);
         when(ruleMetricsDocsMock.getConstantTags()).thenReturn(constantTags);

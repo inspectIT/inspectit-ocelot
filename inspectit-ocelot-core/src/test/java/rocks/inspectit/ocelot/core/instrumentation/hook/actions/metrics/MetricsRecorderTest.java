@@ -1,9 +1,6 @@
 package rocks.inspectit.ocelot.core.instrumentation.hook.actions.metrics;
 
-import io.opencensus.tags.TagContext;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
-import io.opencensus.tags.Tags;
+import io.opentelemetry.api.baggage.Baggage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,14 +8,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.core.SpringTestBase;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.instrumentation.context.InspectitContextImpl;
 import rocks.inspectit.ocelot.core.instrumentation.hook.VariableAccessor;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.instrumentation.hook.actions.model.MetricAccessor;
-import rocks.inspectit.ocelot.core.metrics.MeasureTagValueGuard;
-import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.metrics.MetricTagValueGuard;
+import rocks.inspectit.ocelot.core.metrics.InstrumentManager;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,27 +28,26 @@ import static org.mockito.Mockito.*;
 public class MetricsRecorderTest extends SpringTestBase {
 
     @Mock
-    CommonTagsManager commonTagsManager;
-
-    @Mock
-    MeasuresAndViewsManager metricsManager;
+    InstrumentManager instrumentManager;
 
     @Mock
     IHookAction.ExecutionContext executionContext;
 
     @Spy
     @InjectMocks
-    MeasureTagValueGuard tagValueGuard;
+    MetricTagValueGuard tagValueGuard;
 
     @Mock
     InspectitContextImpl inspectitContext;
+
+    @Mock
+    CommonAttributesManager commonAttributes;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private InspectitEnvironment environment;
 
     @BeforeEach
     void setupMock() {
-        when(commonTagsManager.getCommonTagKeys()).thenReturn(Collections.emptyList());
         when(executionContext.getInspectitContext()).thenReturn(inspectitContext);
     }
 
@@ -63,21 +59,19 @@ public class MetricsRecorderTest extends SpringTestBase {
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(null);
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.emptyMap());
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), tagValueGuard, instrumentManager);
 
             rec.execute(executionContext);
 
-            verify(metricsManager, never()).tryRecordingMeasurement(eq("my_metric"), any(Number.class));
-            verify(metricsManager, never()).tryRecordingMeasurement(eq("my_metric"), any(Number.class), any());
+            verify(instrumentManager, never()).tryRecordingMetric(eq("my_metric"), any(Number.class));
+            verify(instrumentManager, never()).tryRecordingMetric(eq("my_metric"), any(Number.class), any());
 
             when(variableAccess.get(any())).thenReturn(100L);
 
             rec.execute(executionContext);
 
-            verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), any(Number.class), eq(Tags.getTagger()
-                    .empty()));
-            verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), eq((Number) 100L), eq(Tags.getTagger()
-                    .empty()));
+            verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric"), any(Number.class), eq(Baggage.empty()));
+            verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric"), eq((Number) 100L), eq(Baggage.empty()));
         }
 
         @Test
@@ -89,43 +83,36 @@ public class MetricsRecorderTest extends SpringTestBase {
             MetricAccessor metricAccessorA = new MetricAccessor("my_metric1", dataA, Collections.emptyMap(), Collections.emptyMap());
             MetricAccessor metricAccessorB = new MetricAccessor("my_metric2", dataB, Collections.emptyMap(), Collections.emptyMap());
 
-            MetricsRecorder rec = new MetricsRecorder(Arrays.asList(metricAccessorA, metricAccessorB), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Arrays.asList(metricAccessorA, metricAccessorB), tagValueGuard, instrumentManager);
 
             rec.execute(executionContext);
 
             verify(dataB).get(any());
-            verify(metricsManager, times(1)).tryRecordingMeasurement(any(String.class), any(Number.class), eq(Tags.getTagger()
-                    .empty()));
-            verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric1"), eq((Number) 100.0d), eq(Tags.getTagger()
-                    .empty()));
+            verify(instrumentManager, times(1)).tryRecordingMetric(any(String.class), any(Number.class), eq(Baggage.empty()));
+            verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric1"), eq((Number) 100.0d), eq(Baggage.empty()));
 
             rec.execute(executionContext);
 
             verify(dataB, times(2)).get(any());
-            verify(metricsManager, times(2)).tryRecordingMeasurement(any(String.class), any(Number.class), eq(Tags.getTagger()
-                    .empty()));
-            verify(metricsManager, times(2)).tryRecordingMeasurement(eq("my_metric1"), eq((Number) 100.0d), eq(Tags.getTagger()
-                    .empty()));
+            verify(instrumentManager, times(2)).tryRecordingMetric(any(String.class), any(Number.class), eq(Baggage.empty()));
+            verify(instrumentManager, times(2)).tryRecordingMetric(eq("my_metric1"), eq((Number) 100.0d), eq(Baggage.empty()));
         }
 
         @Test
-        void commonTagsIncluded() {
+        void commonAttributesIncluded() {
             when(inspectitContext.getData("common")).thenReturn("overwrite");
-            when(commonTagsManager.getCommonTagKeys()).thenReturn(Collections.singletonList(TagKey.create("common")));
+            when(commonAttributes.getCommonAttributeKeys()).thenReturn(Collections.singletonList("common"));
 
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.emptyMap());
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), tagValueGuard, instrumentManager);
 
             rec.execute(executionContext);
 
-            TagContext expected = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create("common"), TagValue.create("overwrite"))
-                    .build();
-            verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), eq((Number) 100L), eq(expected));
+            Baggage expected = Baggage.builder().put("common", "overwrite").build();
+            verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric"), eq((Number) 100L), eq(expected));
             verifyNoMoreInteractions(inspectitContext);
         }
 
@@ -134,17 +121,14 @@ public class MetricsRecorderTest extends SpringTestBase {
             VariableAccessor variableAccess = Mockito.mock(VariableAccessor.class);
             when(variableAccess.get(any())).thenReturn(100L);
 
-            MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.singletonMap("constant", "tag"), Collections.emptyMap());
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, tagValueGuard);
+            MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.singletonMap("constant", "attribute"), Collections.emptyMap());
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), tagValueGuard, instrumentManager);
 
             rec.execute(executionContext);
 
-            TagContext expected = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create("constant"), TagValue.create("tag"))
-                    .build();
-            verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), any(Number.class), eq(expected));
-            verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), eq((Number) 100L), eq(expected));
+            Baggage expected = Baggage.builder().put("constant", "attribute").build();
+            verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric"), any(Number.class), eq(expected));
+            verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric"), eq((Number) 100L), eq(expected));
         }
 
         @Test
@@ -155,13 +139,12 @@ public class MetricsRecorderTest extends SpringTestBase {
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.singletonMap("data", mockAccessor));
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), tagValueGuard, instrumentManager);
 
             rec.execute(executionContext);
 
-            TagContext expected = Tags.getTagger().empty();
-            verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), any(Number.class), eq(expected));
-            verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), eq((Number) 100L), eq(expected));
+            verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric"), any(Number.class), eq(Baggage.empty()));
+            verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric"), eq((Number) 100L), eq(Baggage.empty()));
         }
 
         @Test
@@ -173,16 +156,13 @@ public class MetricsRecorderTest extends SpringTestBase {
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.emptyMap(), Collections.singletonMap("data", mockAccessor));
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), tagValueGuard, instrumentManager);
 
             rec.execute(executionContext);
 
-            TagContext expected = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create("data"), TagValue.create("value"))
-                    .build();
-            verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), any(Number.class), eq(expected));
-            verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), eq((Number) 100L), eq(expected));
+            Baggage expected = Baggage.builder().put("data", "value").build();
+            verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric"), any(Number.class), eq(expected));
+            verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric"), eq((Number) 100L), eq(expected));
         }
 
         @Test
@@ -209,28 +189,28 @@ public class MetricsRecorderTest extends SpringTestBase {
             dataTags2.put("existing2", mockAccessorC);
             MetricAccessor metricAccessorB = new MetricAccessor("my_metric2", dataB, Collections.singletonMap("cA", "200"), dataTags2);
 
-            MetricsRecorder rec = new MetricsRecorder(Arrays.asList(metricAccessorA, metricAccessorB), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Arrays.asList(metricAccessorA, metricAccessorB), tagValueGuard, instrumentManager);
 
             rec.execute(executionContext);
 
-            InOrder inOrder = inOrder(metricsManager);
+            InOrder inOrder = inOrder(instrumentManager);
             // first recording
-            TagContext expected1 = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create("cA"), TagValue.create("100"))
-                    .putLocal(TagKey.create("existing"), TagValue.create("data1"))
+            Baggage expected1 = Baggage.builder()
+                    .put("cA", "100")
+                    .put("existing", "data1")
                     .build();
-            inOrder.verify(metricsManager)
-                    .tryRecordingMeasurement(eq("my_metric1"), eq((Number) 100.0d), eq(expected1));
+
+            inOrder.verify(instrumentManager).tryRecordingMetric(eq("my_metric1"), eq((Number) 100.0d), eq(expected1));
+
             // second recording
-            TagContext expected2 = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create("cA"), TagValue.create("200"))
-                    .putLocal(TagKey.create("existing1"), TagValue.create("12"))
-                    .putLocal(TagKey.create("existing2"), TagValue.create("false"))
+            Baggage expected2 = Baggage.builder()
+                    .put("cA", "200")
+                    .put("existing1", "12")
+                    .put("existing2", "false")
                     .build();
-            inOrder.verify(metricsManager, times(1))
-                    .tryRecordingMeasurement(eq("my_metric2"), eq((Number) 200.0d), eq(expected2));
+
+            inOrder.verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric2"), eq((Number) 200.0d), eq(expected2));
+
             // and no more
             inOrder.verifyNoMoreInteractions();
         }
@@ -244,16 +224,13 @@ public class MetricsRecorderTest extends SpringTestBase {
             when(variableAccess.get(any())).thenReturn(100L);
 
             MetricAccessor metricAccessor = new MetricAccessor("my_metric", variableAccess, Collections.singletonMap("data", "constant"), Collections.singletonMap("data", mockAccessor));
-            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), commonTagsManager, metricsManager, tagValueGuard);
+            MetricsRecorder rec = new MetricsRecorder(Collections.singletonList(metricAccessor), tagValueGuard, instrumentManager);
 
             rec.execute(executionContext);
 
-            TagContext expected = Tags.getTagger()
-                    .emptyBuilder()
-                    .putLocal(TagKey.create("data"), TagValue.create("value"))
-                    .build();
-            verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), any(Number.class), eq(expected));
-            verify(metricsManager, times(1)).tryRecordingMeasurement(eq("my_metric"), eq((Number) 100L), eq(expected));
+            Baggage expected = Baggage.builder().put("data", "value").build();
+            verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric"), any(Number.class), eq(expected));
+            verify(instrumentManager, times(1)).tryRecordingMetric(eq("my_metric"), eq((Number) 100L), eq(expected));
         }
     }
 }

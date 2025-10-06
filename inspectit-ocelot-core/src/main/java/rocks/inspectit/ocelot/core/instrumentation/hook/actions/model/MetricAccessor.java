@@ -9,7 +9,7 @@ import java.util.Map;
  * Contains all the information needed for recording a single metric value using @{@link VariableAccessor}.
  * <p>
  * Besides the accessor that defines the value, this class wraps name of the metric as well as the constant and data
- * tags that should be recorded with the metric.
+ * attributes that should be recorded with the metric.
  */
 @Value
 public class MetricAccessor {
@@ -17,21 +17,21 @@ public class MetricAccessor {
     /**
      * Metric name.
      */
-    private final String name;
+    String name;
 
     /**
      * Metric value variable accessors.
      */
-    private final VariableAccessor variableAccessor;
+    VariableAccessor variableAccessor;
 
     /**
-     * Constant tags keys and values.
+     * Constant attributes keys and values.
      */
-    private final Map<String, String> constantTags;
+    Map<String, String> constantAttributes;
 
     /**
-     * VariableAccessors for the data tags.
+     * VariableAccessors for the data attributes.
      */
-    private final Map<String, VariableAccessor> dataTagAccessors;
+    Map<String, VariableAccessor> dataAttributeAccessors;
 
 }

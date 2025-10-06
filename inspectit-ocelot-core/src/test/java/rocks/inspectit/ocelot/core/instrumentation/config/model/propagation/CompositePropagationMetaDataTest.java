@@ -23,16 +23,13 @@ public class CompositePropagationMetaDataTest {
         @Test
         void verifySettingsOverridable() {
             PropagationMetaData result = CompositePropagationMetaData.builder(parent)
-                    .setTag("root", true)
                     .setDownPropagation("root", PropagationMode.JVM_LOCAL)
                     .setUpPropagation("root", PropagationMode.JVM_LOCAL)
                     .build()
                     .copy()
-                    .setTag("root", false)
                     .setUpPropagation("root", PropagationMode.GLOBAL)
                     .build();
 
-            assertThat(result.isTag("root")).isFalse();
             assertThat(result.isPropagatedDownGlobally("root")).isFalse();
             assertThat(result.isPropagatedDownWithinJVM("root")).isTrue();
             assertThat(result.isPropagatedUpGlobally("root")).isTrue();
@@ -43,17 +40,14 @@ public class CompositePropagationMetaDataTest {
         @Test
         void verifyNewSettingsCanBeAdded() {
             PropagationMetaData result = CompositePropagationMetaData.builder(parent)
-                    .setTag("root", true)
                     .setDownPropagation("root", PropagationMode.JVM_LOCAL)
                     .setUpPropagation("root", PropagationMode.JVM_LOCAL)
                     .build()
                     .copy()
-                    .setTag("child", true)
                     .setDownPropagation("child", PropagationMode.GLOBAL)
                     .setUpPropagation("child", PropagationMode.GLOBAL)
                     .build();
 
-            assertThat(result.isTag("child")).isTrue();
             assertThat(result.isPropagatedDownGlobally("child")).isTrue();
             assertThat(result.isPropagatedDownWithinJVM("child")).isTrue();
             assertThat(result.isPropagatedUpGlobally("child")).isTrue();
@@ -180,51 +174,6 @@ public class CompositePropagationMetaDataTest {
 
             assertThat(result.isPropagatedUpWithinJVM("my_key")).isFalse();
             assertThat(result.isPropagatedUpGlobally("my_key")).isFalse();
-            verifyNoMoreInteractions(parent);
-        }
-    }
-
-    @Nested
-    class SetTag {
-
-        @Test
-        void inheritedTag() {
-            PropagationMetaData result = CompositePropagationMetaData.builder(parent)
-                    .build();
-
-            assertThat(result.isTag("my_key")).isFalse();
-            verify(parent).isTag(eq("my_key"));
-            verifyNoMoreInteractions(parent);
-        }
-
-        @Test
-        void isNotATag() {
-            PropagationMetaData result = CompositePropagationMetaData.builder(parent)
-                    .setTag("my_key", false)
-                    .build();
-
-            assertThat(result.isTag("my_key")).isFalse();
-            verifyNoMoreInteractions(parent);
-        }
-
-        @Test
-        void isTag() {
-            PropagationMetaData result = CompositePropagationMetaData.builder(parent)
-                    .setTag("my_key", true)
-                    .build();
-
-            assertThat(result.isTag("my_key")).isTrue();
-            verifyNoMoreInteractions(parent);
-        }
-
-        @Test
-        void overridesRespected() {
-            PropagationMetaData result = CompositePropagationMetaData.builder(parent)
-                    .setTag("my_key", true)
-                    .setTag("my_key", false)
-                    .build();
-
-            assertThat(result.isTag("my_key")).isFalse();
             verifyNoMoreInteractions(parent);
         }
     }

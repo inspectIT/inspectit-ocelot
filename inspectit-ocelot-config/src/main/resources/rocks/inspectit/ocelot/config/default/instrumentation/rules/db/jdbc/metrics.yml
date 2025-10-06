@@ -2,23 +2,19 @@ inspectit:
   metrics:
     definitions:
 
-      '[jdbc/query/duration]':
+      jdbc_query_duration:
         unit: ms
         description: 'the duration of JDBC queries'
+        instrument-type: HISTOGRAM
+        value-type: DOUBLE
         views:
-          '[jdbc/query/duration/sum]':
-            aggregation: SUM
-            tags:
-              'db.connection_string': true
-              'db.operation' : true # e.g., SELECT, UPDATE, CALL, ...
-              'jdbc_operation': true # e.g., execute, executeUpdate, executeBatch, ...
-          '[jdbc/query/duration/count]':
-            aggregation: COUNT
-            tags:
-              'db.connection_string': true
-              'db.operation': true
-              'jdbc_operation': true
-  
+          jdbc_query_duration:
+            aggregation: HISTOGRAM
+            attributes:
+              db_connection_string: true
+              db_operation: true          # e.g., SELECT, UPDATE, CALL, ...
+              jdbc_operation: true        # e.g., execute, executeUpdate, executeBatch, ...
+
   instrumentation:
     rules:
       
@@ -85,9 +81,9 @@ inspectit:
             data-input:
               'statement': 'c_db_sql_query' # is set by the specific rules above
         metrics:
-          '[jdbc/query/duration]':
+          jdbc_query_duration:
             value: 'method_duration'
             data-tags:
-              'db.connection_string': 'jdbc_url'
-              'db.operation': 'c_sql_command'
-              'jdbc_operation': _methodName
+              db_connection_string: 'jdbc_url'
+              db_operation: 'c_sql_command'
+              jdbc_operation: _methodName

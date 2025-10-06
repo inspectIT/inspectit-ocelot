@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.github.netmikey.logunit.api.LogCapturer;
-import io.opencensus.stats.*;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
@@ -19,7 +18,6 @@ import rocks.inspectit.ocelot.core.SLF4JBridgeHandlerUtils;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -119,55 +117,4 @@ public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
             });
         }
     }
-
-    @Nested
-    class OpenCensusLogging {
-
-        StatsRecorder statsRecorder = Stats.getStatsRecorder();
-
-        @DirtiesContext
-        @Test
-        void verifyOpenCensusMetricsWritten() throws InterruptedException {
-            assertThat(service.isEnabled()).isTrue();
-
-            // capture some metrics
-            captureOpenCensusMetrics();
-
-            Instances.openTelemetryController.flush();
-
-            // wait until the metrics are exported
-            Awaitility.waitAtMost(15, TimeUnit.SECONDS).pollInterval(2, TimeUnit.SECONDS).untilAsserted(() -> {
-                assertThat(metricLogs.getEvents().size()).isGreaterThan(0);
-                // assert that the latest metric is our custom log
-                assertThat(metricLogs.getEvents()).anyMatch(evt -> evt.getArgumentArray() != null && evt.getArgumentArray()[0].toString()
-                        .contains("oc.desc") || evt.getMessage().contains("description=oc.desc"));
-
-            });
-
-            // now turn the exporter off and make sure that no more metrics are exported to the log
-            localSwitch(ExporterEnabledState.DISABLED);
-            // wait until everything is flushed
-            Thread.sleep(500);
-            int numEvents = metricLogs.getEvents().size();
-
-            Thread.sleep(environment.getCurrentConfig()
-                    .getExporters()
-                    .getMetrics()
-                    .getLogging()
-                    .getExportInterval()
-                    .toMillis() + 1000);
-            assertThat(metricLogs.getEvents().size()).isEqualTo(numEvents);
-
-        }
-
-        private void captureOpenCensusMetrics() {
-            Measure.MeasureLong measure = Measure.MeasureLong.create("oc.measure", "oc.desc", "oc.unit");
-            Stats.getViewManager()
-                    .registerView(View.create(View.Name.create("oc.sum"), "oc.desc", measure, Aggregation.Count.create(), Collections.emptyList()));
-
-            statsRecorder.newMeasureMap().put(measure, 1).record();
-
-        }
-    }
-
 }

@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import io.opencensus.common.Scope;
+import io.opentelemetry.context.Scope;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -139,7 +139,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
     /**
      * Processes a given amount of classes from {@link #pendingClasses}.
      * For the classes where it is required a retransform is triggered.
-     * In addition for each class the hooks are updated.
+     * In addition, for each class the hooks are updated.
      *
      * @param batchSize the number of classes to take from {@link #pendingClasses} and to retransform per batch
      */
@@ -147,7 +147,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
     void checkClassesForConfigurationUpdates(BatchSize batchSize) {
         List<Class<?>> classesToRetransform = new ArrayList<>(getBatchOfClassesToRetransform(batchSize));
 
-        try (Scope sm = selfMonitoring.withDurationSelfMonitoring("instrumentation-retransformation")) {
+        try (Scope scope = selfMonitoring.withDurationSelfMonitoring("instrumentation-retransformation")) {
             Stopwatch watch = Stopwatch.createStarted();
             if (!classesToRetransform.isEmpty()) {
                 try {
@@ -284,7 +284,7 @@ public class InstrumentationTriggerer implements IClassDiscoveryListener {
 
     @EventListener(classes = {InspectitConfigChangedEvent.class}, condition = "!#root.event.oldConfig.selfMonitoring.enabled")
     private void recordPendingClassesQueueSize() {
-        selfMonitoring.recordMeasurement("instrumentation-queue-size", pendingClasses.size());
+        selfMonitoring.recordMetric("instrumentation-queue-size", pendingClasses.size());
     }
 
     /**

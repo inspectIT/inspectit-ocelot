@@ -77,19 +77,19 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
     }
 
     @Override
-    protected void takeMeasurement(MetricsSettings config) {
+    protected void takeMetric(MetricsSettings config) {
         Map<String, Boolean> enabled = config.getProcessor().getEnabled();
         if (enabled.getOrDefault(CPU_COUNT_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(CPU_COUNT_METRIC_FULL_NAME, runtime.availableProcessors());
+            instrumentManager.tryRecordingMetric(CPU_COUNT_METRIC_FULL_NAME, runtime.availableProcessors());
         }
         if (enabled.getOrDefault(AVERAGE_LOAD_METRIC_NAME, false) && averageLoadAvailable) {
-            measureManager.tryRecordingMeasurement(AVERAGE_LOAD_METRIC_FULL_NAME, operatingSystemBean.getSystemLoadAverage());
+            instrumentManager.tryRecordingMetric(AVERAGE_LOAD_METRIC_FULL_NAME, operatingSystemBean.getSystemLoadAverage());
         }
         if (enabled.getOrDefault(SYSTEM_USAGE_METRIC_NAME, false) && systemCpuUsage.isPresent()) {
             try {
                 double value = (double) systemCpuUsage.get().invoke(operatingSystemBean);
                 if (value >= 0D) {
-                    measureManager.tryRecordingMeasurement(SYSTEM_USAGE_METRIC_FULL_NAME, value);
+                    instrumentManager.tryRecordingMetric(SYSTEM_USAGE_METRIC_FULL_NAME, value);
                 }
             } catch (Exception e) {
                 log.error("Error reading system cpu usage", e);
@@ -99,7 +99,7 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
             try {
                 double value = (double) processCpuUsage.get().invoke(operatingSystemBean);
                 if (value >= 0D) {
-                    measureManager.tryRecordingMeasurement(PROCESS_USAGE_METRIC_FULL_NAME, value);
+                    instrumentManager.tryRecordingMetric(PROCESS_USAGE_METRIC_FULL_NAME, value);
                 }
             } catch (Exception e) {
                 log.error("Error reading system cpu usage", e);
@@ -143,5 +143,4 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
             }
         }).findFirst();
     }
-
 }

@@ -4,9 +4,7 @@ import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.instrumentation.resources.*;
-import io.opentelemetry.api.trace.TracerProvider;
 import io.opentelemetry.semconv.TelemetryAttributes;
-import lombok.Getter;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
 
 /**
@@ -16,22 +14,38 @@ import rocks.inspectit.ocelot.bootstrap.AgentManager;
  */
 public class ResourceAttributesProvider {
 
-    @Getter
-    private final static Attributes tracerProviderResourceAttributes = createTracerProviderResourceAttributes();
+    private static Attributes tracerProviderResourceAttributes;
+
+    private static Attributes meterProviderResourceAttributes;
+
+    /**
+     * @return the resource attributes for traces
+     */
+    public static Attributes getTracerProviderResourceAttributes() {
+        if (tracerProviderResourceAttributes == null)
+            tracerProviderResourceAttributes = createTracerProviderResourceAttributes();
+        return tracerProviderResourceAttributes;
+    }
+
+    /**
+     * @return the resource attributes for metrics
+     */
+    public static Attributes getMeterProviderResourceAttributes() {
+        if (meterProviderResourceAttributes == null)
+            meterProviderResourceAttributes = createMeterProviderResourceAttributes();
+        return meterProviderResourceAttributes;
+    }
 
     /**
      * First, we create inspectIT specific attributes by ourselves.
      * Then, we use the OpenTelemetry {@code ResourceProvider} to create additional resources.
      *
-     * @return the static resource attributes for the {@link TracerProvider}
+     * @return the resource attributes for traces
      */
     private static Attributes createTracerProviderResourceAttributes() {
-        AttributesBuilder builder = Attributes.builder();
+        AttributesBuilder builder = getDefaultResourceAttributesBuilder();
 
         builder.put(AttributeKey.stringKey("inspectit.agent.version"), AgentManager.getAgentVersion());
-        builder.put(TelemetryAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion());
-        builder.put(TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java");
-        builder.put(TelemetryAttributes.TELEMETRY_SDK_NAME, "opentelemetry");
 
         // we already use host.name as environment tag, see EnvironmentTagsProvider
         AttributeKey<String> hostArchKey = AttributeKey.stringKey("host.arch");
@@ -43,5 +57,26 @@ public class ResourceAttributesProvider {
         builder.putAll(ContainerResource.get().getAttributes());
 
         return builder.build();
+    }
+
+    /**
+     * @return the resource attributes for metrics
+     */
+    private static Attributes createMeterProviderResourceAttributes() {
+        AttributesBuilder builder = getDefaultResourceAttributesBuilder();
+        return builder.build();
+    }
+
+    /**
+     * @return the default resource attributes for all signals
+     */
+    private static AttributesBuilder getDefaultResourceAttributesBuilder() {
+        AttributesBuilder builder = Attributes.builder();
+
+        builder.put(TelemetryAttributes.TELEMETRY_SDK_VERSION, AgentManager.getOpenTelemetryVersion());
+        builder.put(TelemetryAttributes.TELEMETRY_SDK_LANGUAGE, "java");
+        builder.put(TelemetryAttributes.TELEMETRY_SDK_NAME, "opentelemetry");
+
+        return builder;
     }
 }

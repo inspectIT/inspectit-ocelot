@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 /**
  * This is the data structure which holds all recorded information to reconstruct a trace based on both instrumented methods
- * as well as collected stack trace samples.
+ * and collected stack trace samples.
  * Namely, this information is simply a list of events.
  * <p>
  * The actual algorithm for this reconstruction is defined by the {@link InvocationResolver}.
@@ -58,7 +58,7 @@ public class SampledTrace {
     /**
      * The span which acts as a root for all sampled methods.
      */
-    private Span rootSpan;
+    private final Span rootSpan;
 
     /**
      * The list storing the sequence of events.
@@ -67,12 +67,11 @@ public class SampledTrace {
      * <p>
      * This means that the order of the events in this List corresponds to the order in time in which the events occurred!
      */
-    private ArrayList<TraceEvent> events;
+    private final ArrayList<TraceEvent> events = new ArrayList<>();
 
     public SampledTrace(Span rootSpan, Supplier<StackTrace> rootStackTraceProvider) {
         this.rootStackTraceProvider = rootStackTraceProvider;
         this.rootSpan = rootSpan;
-        events = new ArrayList<>();
         isFinished = false;
         isPaused = false;
     }

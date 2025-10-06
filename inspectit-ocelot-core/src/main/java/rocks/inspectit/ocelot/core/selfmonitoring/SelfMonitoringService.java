@@ -1,12 +1,9 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
-import io.opencensus.common.Scope;
-import io.opencensus.stats.StatsRecorder;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.Tags;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.context.Scope;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -14,9 +11,8 @@ import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.selfmonitoring.SelfMonitoringSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.metrics.MeasuresAndViewsManager;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
-import rocks.inspectit.ocelot.core.tags.TagUtils;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
+import rocks.inspectit.ocelot.core.metrics.InstrumentManager;
 
 import java.util.Collections;
 import java.util.Map;
@@ -30,36 +26,32 @@ public class SelfMonitoringService {
 
     private static final String DURATION_MEASURE_NAME = "duration";
 
-    private static final TagKey COMPONENT_TAG_KEY = TagKey.create("component-name");
+    private static final String COMPONENT_TAG_KEY = "component-name";
 
     @Autowired
     private InspectitEnvironment env;
 
     @Autowired
-    private StatsRecorder statsRecorder;
+    private InstrumentManager instrumentManager;
 
     @Autowired
-    private MeasuresAndViewsManager measureManager;
-
-    @Autowired
-    private CommonTagsManager commonTags;
+    private CommonAttributesManager commonAttributes;
 
     /**
      * Provides an auto-closable that can be used in try-with-resource form.
      * <p>
-     * If self monitoring is enabled the {@link SelfMonitoringScope} instance is create that handles time measuring and measure recording.
+     * If self monitoring is enabled the {@link SelfMonitoringScope} instance is created that handles time measuring and metric recording.
      * If self monitoring is disabled, returns a no-ops closable.
      *
-     * @param componentName the human readable name of the component of which the time is measured, is used as tag value
+     * @param componentName the human-readable name of the component of which the time is measured, is used as attribute value
      *
-     * @return the scope performing the measurement
+     * @return the scope performing the metric
      */
     public Scope withDurationSelfMonitoring(String componentName) {
         if (isSelfMonitoringEnabled()) {
             return new SelfMonitoringScope(componentName, System.nanoTime());
         } else {
-            return () -> {
-            };
+            return () -> {};
         }
     }
 
@@ -87,62 +79,56 @@ public class SelfMonitoringService {
     }
 
     /**
-     * Records a self-monitoring measurement with the common tags.
-     * The measure has to be defined correctly in the {@link MetricsSettings#getDefinitions()}.
-     * Only records a measurement if self monitoring is enabled.
+     * Records a self-monitoring metric with the common attributes.
+     * The metric has to be defined correctly in the {@link MetricsSettings#getDefinitions()}.
+     * Only records a metric if self monitoring is enabled.
      *
-     * @param measureName the name of the measure, excluding the {@link #METRICS_PREFIX}
+     * @param metricName  the name of the metric, excluding the {@link #METRICS_PREFIX}
      * @param value       the actual value
      */
-    public void recordMeasurement(String measureName, double value) {
+    public void recordMetric(String metricName, double value) {
         SelfMonitoringSettings conf = env.getCurrentConfig().getSelfMonitoring();
         if (conf.isEnabled()) {
-            String fullMeasureName = METRICS_PREFIX + measureName;
-            val measure = measureManager.getMeasureDouble(fullMeasureName);
-            measure.ifPresent(m -> {
-                try (val ct = commonTags.withCommonTagScope()) {
-                    statsRecorder.newMeasureMap().put(m, value).record();
-                }
-            });
+            String fullMetricName = METRICS_PREFIX + metricName;
+            try (Scope scope = commonAttributes.withCommonAttributesScope()) {
+                instrumentManager.tryRecordingMetric(fullMetricName, value);
+            }
         }
     }
 
     /**
-     * Records a self-monitoring measurement with the common tags.
+     * Records a self-monitoring metric with the common attributes.
      * The measure has to be defined correctly in the {@link MetricsSettings#getDefinitions()}.
-     * Only records a measurement if self monitoring is enabled.
+     * Only records a metric if self monitoring is enabled.
      *
-     * @param measureName the name of the measure, excluding the {@link #METRICS_PREFIX}
+     * @param metricName  the name of the metric, excluding the {@link #METRICS_PREFIX}
      * @param value       the actual value
      */
-    public void recordMeasurement(String measureName, long value) {
-        recordMeasurement(measureName, value, Collections.emptyMap());
+    public void recordMetric(String metricName, long value) {
+        recordMetric(metricName, value, Collections.emptyMap());
     }
 
     /**
-     * Records a self-monitoring measurement with the common tags. Adds customTags to the tag context.
+     * Records a self-monitoring metric with the common attributes. Adds customAttributes to the baggage.
      * The measure has to be defined correctly in the {@link MetricsSettings#getDefinitions()}.
-     * Only records a measurement if self monitoring is enabled.
+     * Only records a metric if self monitoring is enabled.
      *
-     * @param measureName the name of the measure, excluding the {@link #METRICS_PREFIX}
-     * @param value       the actual value
-     * @param customTags  additional tags, which are added to the measurement.
+     * @param measureName       the name of the metric, excluding the {@link #METRICS_PREFIX}
+     * @param value             the actual value
+     * @param customAttributes  additional attributes, which are added to the metric
      */
-    public void recordMeasurement(String measureName, long value, Map<String, String> customTags) {
+    public void recordMetric(String measureName, long value, Map<String, String> customAttributes) {
         SelfMonitoringSettings conf = env.getCurrentConfig().getSelfMonitoring();
         if (conf.isEnabled()) {
-            String fullMeasureName = METRICS_PREFIX + measureName;
-            val measure = measureManager.getMeasureLong(fullMeasureName);
-            measure.ifPresent(m -> {
-                try (val ct = commonTags.withCommonTagScope(customTags)) {
-                    statsRecorder.newMeasureMap().put(m, value).record();
-                }
-            });
+            String fullMetricName = METRICS_PREFIX + measureName;
+            try (Scope scope = commonAttributes.withCommonAttributesScope(customAttributes)) {
+                instrumentManager.tryRecordingMetric(fullMetricName, value);
+            }
         }
     }
 
     @Data
-    public class SelfMonitoringScope implements Scope {
+    private class SelfMonitoringScope implements Scope {
 
         private final String componentName;
 
@@ -151,18 +137,17 @@ public class SelfMonitoringService {
         @Override
         public void close() {
             double durationInMicros = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - start);
-            val measure = measureManager.getMeasureDouble(METRICS_PREFIX + DURATION_MEASURE_NAME);
-            measure.ifPresent(m -> statsRecorder.newMeasureMap()
-                    .put(m, durationInMicros)
-                    .record(Tags.getTagger()
-                            .toBuilder(commonTags.getCommonTagContext())
-                            .putLocal(COMPONENT_TAG_KEY, TagUtils.createTagValue(COMPONENT_TAG_KEY.getName(), componentName))
-                            .build()));
+            String fullMetricName = METRICS_PREFIX + DURATION_MEASURE_NAME;
+            Baggage baggage = commonAttributes.getCommonBaggage()
+                    .toBuilder()
+                    .put(COMPONENT_TAG_KEY, componentName)
+                    .build();
+
+            instrumentManager.tryRecordingMetric(fullMetricName, durationInMicros, baggage);
 
             if (log.isTraceEnabled()) {
                 log.trace(String.format("%s reported %.1f\u00B5s", componentName, durationInMicros));
             }
         }
     }
-
 }

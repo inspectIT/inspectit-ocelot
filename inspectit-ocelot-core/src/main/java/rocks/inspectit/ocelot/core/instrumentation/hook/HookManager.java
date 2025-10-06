@@ -2,7 +2,7 @@ package rocks.inspectit.ocelot.core.instrumentation.hook;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
-import io.opencensus.common.Scope;
+import io.opentelemetry.context.Scope;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.description.method.MethodDescription;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,7 +142,7 @@ public class HookManager {
             return lazyLoadedHooks.get(clazz);
         }
         synchronized (clazz) {
-            try (Scope sm = selfMonitoring.withDurationSelfMonitoring(LAZY_LOADING_HOOK_COMPONENT_NAME)) {
+            try (Scope scope = selfMonitoring.withDurationSelfMonitoring(LAZY_LOADING_HOOK_COMPONENT_NAME)) {
                 Map<MethodDescription, MethodHookConfiguration> hookConfigs = configResolver.getHookConfigurations(clazz);
 
                 HashMap<String, MethodHook> lazyHooks = Maps.newHashMap();
@@ -265,7 +265,7 @@ public class HookManager {
             ensureNotCommitted();
             hooks = newHooks;
             // Remove all updated hooks from lazy loaded map
-            if (lazyLoadedHooks.size() > 0) {
+            if (!lazyLoadedHooks.isEmpty()) {
                 lazyLoadedHooks.forEach((k, v) -> {
                     if (hooks.containsKey(k)) {
                         lazyLoadedHooks.remove(k);

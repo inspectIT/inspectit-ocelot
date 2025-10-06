@@ -283,6 +283,6 @@ public abstract class AbstractClassTransformer implements ClassTransformer {
 
     @EventListener(classes = {InspectitConfigChangedEvent.class}, condition = "!#root.event.oldConfig.selfMonitoring.enabled")
     private void selfMonitorInstrumentedClassesCount() {
-        selfMonitoring.recordMeasurement("instrumented-classes", instrumentedClasses.size());
+        selfMonitoring.recordMetric("instrumented-classes", instrumentedClasses.size());
     }
 }

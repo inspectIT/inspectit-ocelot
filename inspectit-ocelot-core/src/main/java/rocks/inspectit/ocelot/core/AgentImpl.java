@@ -79,6 +79,7 @@ public class AgentImpl implements IAgent {
     public void start(String cmdArgs, Instrumentation instrumentation) {
         LOGGER.info("Starting inspectIT Ocelot Agent...");
         LOGGER.info("\tVersion: {}", getVersion());
+        LOGGER.info("\tOpenTelemetry Version: {}", getOpenTelemetryVersion());
         LOGGER.info("\tBuild Date: {}", getBuildDate());
 
         logOpenTelemetryClassLoader();

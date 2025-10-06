@@ -14,9 +14,9 @@ import javax.validation.constraints.Positive;
 public class TracingSettings {
 
     /**
-     * Enum that defines when are common tags added to span attributes.
+     * Enum that defines when are common attributes added to spans.
      */
-    public enum AddCommonTags {
+    public enum AddCommonAttributes {
         NEVER, ON_GLOBAL_ROOT, ON_LOCAL_ROOT, ALWAYS
     }
 
@@ -49,16 +49,16 @@ public class TracingSettings {
     private LogCorrelationSettings logCorrelation = new LogCorrelationSettings();
 
     /**
-     * Generically defines behavior of adding common tags to spans.
+     * Generically defines behavior of adding common attributes to spans.
      */
     @NotNull
-    private AddCommonTags addCommonTags;
+    private TracingSettings.AddCommonAttributes addCommonAttributes;
 
     /**
-     * If enabled, metric tags will be added as attributes to tracing within the same rule
+     * If enabled, metric attributes will be added to spans within the same rule
      */
     @NotNull
-    private boolean addMetricTags;
+    private boolean addMetricAttributes;
 
     /**
      * Settings for automatic tracing (stack trace sampling)
@@ -79,7 +79,7 @@ public class TracingSettings {
     private int maxExportBatchSize = 512;
 
     /**
-     * Delay interval between two consecutive exports in milliseconds..
+     * Delay interval between two consecutive exports in milliseconds.
      */
     @Positive
     private long scheduleDelayMillis = 5000;

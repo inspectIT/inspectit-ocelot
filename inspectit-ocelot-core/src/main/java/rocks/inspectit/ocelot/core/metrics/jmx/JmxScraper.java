@@ -355,7 +355,4 @@ class JmxScraper {
         objectNames.add(null);
         new JmxScraper(objectNames, new LinkedList<ObjectName>(), new JmxScraper.StdoutWriter(), true).doScrape();
     }
-
 }
-
-

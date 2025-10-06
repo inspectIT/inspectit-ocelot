@@ -3,7 +3,6 @@ package io.opentelemetry.sdk.trace;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import lombok.extern.slf4j.Slf4j;
-import rocks.inspectit.ocelot.core.utils.OpenCensusShimUtils;
 import rocks.inspectit.ocelot.core.utils.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -19,11 +18,6 @@ import java.lang.reflect.Field;
  */
 @Slf4j
 public class OcelotSpanUtils {
-
-    /**
-     * The class of {@link io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl}
-     */
-    private static final Class<Span> OPENTELEMETRYSPANIMPL_CLASS;
 
     /**
      * The {@link io.opentelemetry.sdk.trace.AnchoredClock clock} member of {@link io.opentelemetry.sdk.trace.SdkSpan}
@@ -43,13 +37,10 @@ public class OcelotSpanUtils {
     /**
      * The {@link io.opentelemetry.api.internal.AutoValue_ImmutableSpanContext#spanId spanId} member of the {@link io.opentelemetry.api.internal.AutoValue_ImmutableSpanContext spanContext}
      */
-
     private static Field SPANCONTEXT_SPANID;
 
     static {
         try {
-            OPENTELEMETRYSPANIMPL_CLASS = (Class<Span>) Class.forName("io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl");
-
             SDKSPAN_CLASS = (Class<Span>) Class.forName("io.opentelemetry.sdk.trace.SdkSpan");
             SDKSPAN_CLOCK = ReflectionUtils.getFieldAndMakeAccessible(SDKSPAN_CLASS, "clock");
 
@@ -60,18 +51,14 @@ public class OcelotSpanUtils {
     }
 
     /**
-     * Returns the {@link AnchoredClock} for the given {@link SdkSpan} or {@link io.opentelemetry.opencensusshim.OpenTelemetrySpanImpl#otelSpan}
-     *
-     * @param span
-     *
-     * @return
+     * Returns the {@link AnchoredClock} for the given {@link SdkSpan}
      */
     public static Object getAnchoredClock(Span span) {
-        if (!SDKSPAN_CLASS.isInstance(span) && !OPENTELEMETRYSPANIMPL_CLASS.isInstance(span)) {
-            throw new IllegalArgumentException(span.getClass() + " is not of type " + SDKSPAN_CLASS + " or " + OPENTELEMETRYSPANIMPL_CLASS);
+        if (!SDKSPAN_CLASS.isInstance(span)) {
+            throw new IllegalArgumentException(span.getClass() + " is not of type " + SDKSPAN_CLASS);
         }
         try {
-            return SDKSPAN_CLOCK.get(SDKSPAN_CLASS.isInstance(span) ? span : OpenCensusShimUtils.getOtelSpan((io.opencensus.trace.Span) span));
+            return SDKSPAN_CLOCK.get(span);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -79,11 +66,6 @@ public class OcelotSpanUtils {
 
     /**
      * Sets the {@link SdkSpan#clock} for the given {@link SdkSpan span} with the given {@link AnchoredClock}
-     *
-     * @param span
-     * @param anchoredClock
-     *
-     * @return
      */
     public static void setAnchoredClock(Span span, Object anchoredClock) {
         if (!SDKSPAN_CLASS.isInstance(span)) {
@@ -101,9 +83,6 @@ public class OcelotSpanUtils {
 
     /**
      * Sets the span id of the {@link Span#getSpanContext() span context} ({@link io.opentelemetry.api.internal.AutoValue_ImmutableSpanContext#spanId}) for the given {@link Span}
-     *
-     * @param span
-     * @param spanId
      */
     public static void setSpanId(Span span, String spanId) {
         try {

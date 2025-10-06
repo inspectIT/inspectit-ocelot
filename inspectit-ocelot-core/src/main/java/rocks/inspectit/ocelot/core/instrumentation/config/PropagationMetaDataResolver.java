@@ -6,9 +6,8 @@ import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.DataSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
-import rocks.inspectit.ocelot.config.model.metrics.definition.MetricDefinitionSettings;
 import rocks.inspectit.ocelot.core.instrumentation.config.model.propagation.PropagationMetaData;
-import rocks.inspectit.ocelot.core.tags.CommonTagsManager;
+import rocks.inspectit.ocelot.core.attributes.CommonAttributesManager;
 
 import java.util.Map;
 
@@ -19,7 +18,7 @@ import java.util.Map;
 public class PropagationMetaDataResolver {
 
     @Autowired
-    private CommonTagsManager commonTags;
+    private CommonAttributesManager commonAttributes;
 
     /**
      * Configures the {@link PropagationMetaData} based on all sources of settings in the given configuration.
@@ -30,45 +29,23 @@ public class PropagationMetaDataResolver {
     public PropagationMetaData resolve(InspectitConfig config) {
         PropagationMetaData.Builder builder = PropagationMetaData.builder();
 
-        collectCommonTags(builder);
-        collectTagsFromMetricDefinitions(config.getMetrics().getDefinitions(), builder);
+        collectCommonAttributes(builder);
         collectUserSettings(config.getInstrumentation().getData(), builder);
 
         return builder.build();
     }
 
     @VisibleForTesting
-    void collectCommonTags(PropagationMetaData.Builder builder) {
-        commonTags.getCommonTagValueMap()
+    void collectCommonAttributes(PropagationMetaData.Builder builder) {
+        commonAttributes.getCommonAttributeValueMap()
                 .keySet()
                 .forEach(key -> builder
-                        .setTag(key, true)
                         .setDownPropagation(key, PropagationMode.JVM_LOCAL));
-    }
-
-    @VisibleForTesting
-    void collectTagsFromMetricDefinitions(Map<String, MetricDefinitionSettings> definitions, PropagationMetaData.Builder builder) {
-        definitions.values()
-                .stream()
-                .filter(definition -> definition.getViews() != null)
-                .flatMap(definition -> definition.getViews().values().stream())
-                .filter(view -> view.getTags() != null)
-                .flatMap(view -> view.getTags()
-                        .entrySet()
-                        .stream()
-                        .filter(entry -> Boolean.TRUE.equals(entry.getValue()))
-                        .map(Map.Entry::getKey)
-                )
-                .forEach(key -> builder.setTag(key, true));
-
     }
 
     @VisibleForTesting
     void collectUserSettings(Map<String, DataSettings> dataSettings, PropagationMetaData.Builder builder) {
         dataSettings.forEach((key, settings) -> {
-            if (settings.getIsTag() != null) {
-                builder.setTag(key, settings.getIsTag());
-            }
             if (settings.getDownPropagation() != null) {
                 builder.setDownPropagation(key, settings.getDownPropagation());
             }

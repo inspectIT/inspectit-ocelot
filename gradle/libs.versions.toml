@@ -70,13 +70,13 @@ ioOpentelemetryOpentelemetryExporterLogging = { module = "io.opentelemetry:opent
 ioOpentelemetryOpentelemetryExporterOtlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryExporterPrometheus = { module = "io.opentelemetry:opentelemetry-exporter-prometheus", version.ref = "ioOpentelemetryAlpha" }
 ioOpentelemetryOpentelemetryExporterZipkin = { module = "io.opentelemetry:opentelemetry-exporter-zipkin", version.ref = "ioOpentelemetry" }
+ioOpentelemetryOpentelemetryExtensionTracePropagators = { module = "io.opentelemetry:opentelemetry-extension-trace-propagators", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryOpencensusShim = { module = "io.opentelemetry:opentelemetry-opencensus-shim", version.ref = "ioOpentelemetryAlpha" }
 ioOpentelemetryOpentelemetryProto = { module = "io.opentelemetry.proto:opentelemetry-proto", version.ref = "ioOpentelemetryProto" }
 ioOpentelemetryOpentelemetrySdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetrySdkMetrics = { module = "io.opentelemetry:opentelemetry-sdk-metrics", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetrySdkTesting = { module = "io.opentelemetry:opentelemetry-sdk-testing", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetrySemconv = { module = "io.opentelemetry.semconv:opentelemetry-semconv", version.ref = "ioOpentelemetrySemconv" }
-ioPrometheusSimpleclientHttpserver = "io.prometheus:simpleclient_httpserver:0.16.0"
 javaxAnnotationJavaxAnnotationApi = "javax.annotation:javax.annotation-api:1.3.2"
 log4j = "log4j:log4j:1.2.17"
 netBytebuddyByteBuddy = "net.bytebuddy:byte-buddy:1.17.7"
@@ -118,7 +118,6 @@ orgTestcontainersJunitJupiter = { module = "org.testcontainers:junit-jupiter", v
 orgYamlSnakeyaml = "org.yaml:snakeyaml:1.33"
 # No updates available, necessary for our custom logging PiccoloSaxEventRecorder in inspectit-ocelot-core
 piccolo = "piccolo:piccolo:1.0.3"
-rocksInspectitOpencensusInfluxdbExporter = "rocks.inspectit:opencensus-influxdb-exporter:1.2"
 
 [bundles]
 opentelemetry = [

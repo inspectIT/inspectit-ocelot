@@ -1,13 +1,14 @@
 package inspectit.ocelot.configdocsgenerator.parsing;
 
 import com.google.common.io.Resources;
+import io.opentelemetry.sdk.metrics.InstrumentType;
+import io.opentelemetry.sdk.metrics.InstrumentValueType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.instrumentation.actions.GenericActionSettings;
 import rocks.inspectit.ocelot.config.model.instrumentation.documentation.ActionDocumentation;
 import rocks.inspectit.ocelot.config.model.metrics.StandardPollingMetricsRecorderSettings;
@@ -53,13 +54,14 @@ class ConfigParserTest {
 
             MetricDefinitionSettings metricDefinitionMock = Mockito.mock(MetricDefinitionSettings.class);
             when(metricDefinitionMock.isEnabled()).thenReturn(true);
-            when(metricDefinitionMock.getType()).thenReturn(MetricDefinitionSettings.MeasureType.LONG);
+            when(metricDefinitionMock.getValueType()).thenReturn(InstrumentValueType.LONG);
+            when(metricDefinitionMock.getInstrumentType()).thenReturn(InstrumentType.GAUGE);
             when(metricDefinitionMock.getUnit()).thenReturn("bytes");
-            when(metricDefinitionMock.getMaxValuesPerTag()).thenReturn(5);
+            when(metricDefinitionMock.getMaxValuesPerAttribute()).thenReturn(5);
             when(metricDefinitionMock.getDescription()).thenReturn("free disk space");
             when(metricDefinitionMock.getViews()).thenReturn(null);
 
-            assertThat(result.getMetrics().getDefinitions().get("disk/free")).usingRecursiveComparison()
+            assertThat(result.getMetrics().getDefinitions().get("disk_free")).usingRecursiveComparison()
                     .isEqualTo(metricDefinitionMock);
           // Build the expected result by hand
             Map<String, Boolean> enabledMap = new HashMap<>();

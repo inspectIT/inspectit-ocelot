@@ -2,18 +2,16 @@ package rocks.inspectit.ocelot.core.metrics.system;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
-import io.opencensus.tags.TagContext;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.Tagger;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.context.Scope;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.metrics.StandardMetricsSettings;
 import rocks.inspectit.ocelot.core.selfmonitoring.SelfMonitoringService;
-import rocks.inspectit.ocelot.core.tags.TagUtils;
+import rocks.inspectit.ocelot.core.utils.AttributeUtils;
 
 import javax.management.ListenerNotFoundException;
 import javax.management.Notification;
@@ -63,18 +61,15 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
 
     private StandardMetricsSettings config;
 
-    private final TagKey actionTagKey = TagKey.create("action");
+    private final String actionKey = "action";
 
-    private final TagKey causeTagKey = TagKey.create("cause");
+    private final String causeKey = "cause";
 
     private String youngGenPoolName;
 
     private String oldGenPoolName;
 
     private long youngGenSizeAfter = 0L;
-
-    @Autowired
-    private Tagger tagger;
 
     @Autowired
     private SelfMonitoringService selfMonitoringService;
@@ -134,7 +129,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
         if (!isEnabled()) {
             return;
         }
-        try (val sm = selfMonitoringService.withDurationSelfMonitoring(getClass().getSimpleName())) {
+        try (Scope scope = selfMonitoringService.withDurationSelfMonitoring(getClass().getSimpleName())) {
 
             String type = notification.getType();
             if (type.equals(GarbageCollectionNotificationInfo.GARBAGE_COLLECTION_NOTIFICATION)) {
@@ -208,37 +203,37 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
     }
 
     private void recordConcurrentPhaseTime(GarbageCollectionNotificationInfo notificationInfo) {
-        TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
-                .putLocal(actionTagKey, TagUtils.createTagValue(actionTagKey.getName(), notificationInfo.getGcAction()))
-                .putLocal(causeTagKey, TagUtils.createTagValue(causeTagKey.getName(), notificationInfo.getGcCause()))
+        Baggage baggage = commonAttributes.getCommonBaggage().toBuilder()
+                .put(actionKey, AttributeUtils.resolveValue(actionKey, notificationInfo.getGcAction()))
+                .put(causeKey, AttributeUtils.resolveValue(causeKey, notificationInfo.getGcCause()))
                 .build();
-        measureManager.tryRecordingMeasurement(CONCURRENT_PHASE_TIME_METRIC_FULL_NAME, notificationInfo.getGcInfo()
-                .getDuration(), tags);
+        instrumentManager.tryRecordingMetric(CONCURRENT_PHASE_TIME_METRIC_FULL_NAME, notificationInfo.getGcInfo()
+                .getDuration(), baggage);
     }
 
     private void recordGCPause(GarbageCollectionNotificationInfo notificationInfo) {
-        TagContext tags = tagger.toBuilder(commonTags.getCommonTagContext())
-                .putLocal(actionTagKey, TagUtils.createTagValue(actionTagKey.getName(), notificationInfo.getGcAction()))
-                .putLocal(causeTagKey, TagUtils.createTagValue(causeTagKey.getName(), notificationInfo.getGcCause()))
+        Baggage baggage = commonAttributes.getCommonBaggage().toBuilder()
+                .put(actionKey, AttributeUtils.resolveValue(actionKey, notificationInfo.getGcAction()))
+                .put(causeKey, AttributeUtils.resolveValue(causeKey, notificationInfo.getGcCause()))
                 .build();
-        measureManager.tryRecordingMeasurement(PAUSE_METRIC_FULL_NAME, notificationInfo.getGcInfo()
-                .getDuration(), tags);
+        instrumentManager.tryRecordingMetric(PAUSE_METRIC_FULL_NAME, notificationInfo.getGcInfo()
+                .getDuration(), baggage);
     }
 
     private void recordPromotedBytes(long bytes) {
-        measureManager.tryRecordingMeasurement(MEMORY_PROMOTED_METRIC_FULL_NAME, bytes, commonTags.getCommonTagContext());
+        instrumentManager.tryRecordingMetric(MEMORY_PROMOTED_METRIC_FULL_NAME, bytes, commonAttributes.getCommonBaggage());
     }
 
     private void recordAllocatedBytes(long bytes) {
-        measureManager.tryRecordingMeasurement(MEMORY_ALLOCATED_METRIC_FULL_NAME, bytes, commonTags.getCommonTagContext());
+        instrumentManager.tryRecordingMetric(MEMORY_ALLOCATED_METRIC_FULL_NAME, bytes, commonAttributes.getCommonBaggage());
     }
 
     private void recordLiveDataSize(long bytes) {
-        measureManager.tryRecordingMeasurement(LIVE_DATA_SIZE_METRIC_FULL_NAME, bytes, commonTags.getCommonTagContext());
+        instrumentManager.tryRecordingMetric(LIVE_DATA_SIZE_METRIC_FULL_NAME, bytes, commonAttributes.getCommonBaggage());
     }
 
     private void recordMaxDataSize(long bytes) {
-        measureManager.tryRecordingMeasurement(MAX_DATA_SIZE_METRIC_FULL_NAME, bytes, commonTags.getCommonTagContext());
+        instrumentManager.tryRecordingMetric(MAX_DATA_SIZE_METRIC_FULL_NAME, bytes, commonAttributes.getCommonBaggage());
     }
 
     private static boolean isManagementExtensionsPresent() {
@@ -269,7 +264,7 @@ public class GCMetricsRecorder extends AbstractMetricsRecorder {
 enum GcGenerationAge {
     OLD, YOUNG, UNKNOWN;
 
-    private static Map<String, GcGenerationAge> knownCollectors = new HashMap<String, GcGenerationAge>() {{
+    private static final Map<String, GcGenerationAge> knownCollectors = new HashMap<String, GcGenerationAge>() {{
         put("ConcurrentMarkSweep", OLD);
         put("Copy", YOUNG);
         put("G1 Old Generation", OLD);

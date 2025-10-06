@@ -30,14 +30,14 @@ public class PlaceholderSpan implements Span {
 
     private String spanName;
 
-    private SpanKind spanKind;
+    private final SpanKind spanKind;
 
-    private Supplier<Long> clock;
+    private final Supplier<Long> clock;
 
     /**
      * Start time in nanoTime, see {@link Clock#nanoTime()}
      */
-    private long startNanoTime;
+    private final long startNanoTime;
 
     /**
      * End time in nanoTime, see {@link Clock#nanoTime()}

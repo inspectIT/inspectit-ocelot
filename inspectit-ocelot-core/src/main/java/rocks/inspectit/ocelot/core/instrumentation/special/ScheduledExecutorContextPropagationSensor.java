@@ -31,8 +31,8 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  * In the advices which are injected into the executor methods, the following is done:
  * <p>
  * The advice will wrap the {@link java.lang.Runnable} or {@link java.util.concurrent.Callable} for attaching and
- * detaching the current context and doing log-trace correlation. See also {@link io.grpc.Context#wrap(Runnable)}. This
- * is only done in case the Runnable is a lambda class.
+ * detaching the current context and doing log-trace correlation.
+ * This is only done in case the Runnable is a lambda class.
  * <p>
  * If the Runnable's class is a named or anonymous class, the current context is stored in a global cache related to
  * the Runnable. See also {@link rocks.inspectit.ocelot.bootstrap.context.IContextManager#storeContext(Object, boolean)}.
@@ -41,7 +41,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  * into a known class.
  * <p>
  * In order to prevent unnecessary context passing (e.g. in case multiple executors are being called via delegation
- * executors ({@link java.util.concurrent.Executors.FinalizableDelegatedExecutorService})), the method
+ * executors ({@link java.util.concurrent.Executors.FinalizableDelegatedExecutorService}), the method
  * {@link IContextManager#enterCorrelation()} is called. This is done to set a flag on the current thread in order to
  * mark that a correlation has been done (wrapping or storing the context) and following executors should not doing
  * a correlation as well. This flag is cleaned once the executor's method finishes.

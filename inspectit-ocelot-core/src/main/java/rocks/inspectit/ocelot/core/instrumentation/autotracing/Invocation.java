@@ -8,10 +8,10 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * After a trace is reconstructed from a •list of {@link TraceEvent},
+ * After a trace is reconstructed from a list of {@link TraceEvent},
  * the individual method calls are represented by an {@link Invocation} each.
  * <p>
- * Afterwards, only a subset of {@link Invocation} are exported as actual spans,
+ * Afterward, only a subset of {@link Invocation} are exported as actual spans,
  * based on the {@link #isHidden()} value.
  */
 public class Invocation {
@@ -21,14 +21,14 @@ public class Invocation {
      * The timestamp of the event corresponds to point in time when the invocation was started.
      */
     @Getter
-    private TraceEvent start;
+    private final TraceEvent start;
 
     /**
      * The event defining when this method invocation ended.
      * The timestamp of the event corresponds to point in time when the invocation was finished.
      */
     @Getter
-    private TraceEvent end;
+    private final TraceEvent end;
 
     /**
      * If this method invocation was reconstructed from stack-trace-samples,
@@ -82,7 +82,7 @@ public class Invocation {
     private Invocation parent = null;
 
     /**
-     * Constructs a Invocation representing an instrumented method call.
+     * Constructs an Invocation representing an instrumented method call.
      * Exactly one of placeholderSpan or continuedSpan must not be null.
      *
      * @param start           the event when the call started
@@ -98,11 +98,11 @@ public class Invocation {
     }
 
     /**
-     * Construct a Invocation representing a method call which was reconstructed based on stack trace samples.
+     * Construct an Invocation representing a method call which was reconstructed based on stack trace samples.
      *
      * @param start  the start of this method call
-     * @param end    the end of this method call.
-     * @param method
+     * @param end    the end of this method call
+     * @param method the sampled method
      */
     public Invocation(TraceEvent start, TraceEvent end, StackTraceElement method) {
         this.start = start;
@@ -132,7 +132,7 @@ public class Invocation {
 
     /**
      * To preserve clarity of exported traces, we "hide" certain invocations, meaning that they will not be exported.
-     * We hide invocation which fulfill all of the following conditions:
+     * We hide invocation which fulfill all the following conditions:
      * - the invocation was generated based on stack trace samples (and NOT via instrumentation!) (A)
      * - the invocation has exactly one child-invocation (B)
      * - the start and end of the invocation matches its only child (C)
@@ -172,5 +172,4 @@ public class Invocation {
             return next;
         }
     }
-
 }

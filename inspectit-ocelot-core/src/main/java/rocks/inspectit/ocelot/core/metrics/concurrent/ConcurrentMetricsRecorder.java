@@ -1,14 +1,12 @@
 package rocks.inspectit.ocelot.core.metrics.concurrent;
 
-import io.opencensus.tags.TagContext;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.Tagger;
+import io.opentelemetry.api.baggage.Baggage;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.core.metrics.system.AbstractPollingMetricsRecorder;
-import rocks.inspectit.ocelot.core.tags.TagUtils;
+import rocks.inspectit.ocelot.core.utils.AttributeUtils;
 
 import java.time.Duration;
 
@@ -26,10 +24,7 @@ public class ConcurrentMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     private static final String INVOCATIONS_METRIC_NAME = "invocations";
 
-    private final TagKey operationTagKey = TagKey.create("operation");
-
-    @Autowired
-    private Tagger tagger;
+    private final String attributeKey = "operation";
 
     @Autowired
     private ConcurrentInvocationManager concurrentInvocations;
@@ -39,16 +34,17 @@ public class ConcurrentMetricsRecorder extends AbstractPollingMetricsRecorder {
     }
 
     @Override
-    protected void takeMeasurement(MetricsSettings config) {
+    protected void takeMetric(MetricsSettings config) {
         val enabled = config.getConcurrent().getEnabled();
         if (enabled.getOrDefault(INVOCATIONS_METRIC_NAME, false)) {
-            String measureName = METRIC_NAME_PREFIX + INVOCATIONS_METRIC_NAME;
+            String metricName = METRIC_NAME_PREFIX + INVOCATIONS_METRIC_NAME;
 
             concurrentInvocations.getActiveInvocations().forEach((operation, count) -> {
-                TagContext tags = tagger.currentBuilder()
-                        .putLocal(operationTagKey, TagUtils.createTagValue(operationTagKey.getName(), operation))
+                Baggage baggage = Baggage.builder()
+                        .put(attributeKey, AttributeUtils.resolveValue(attributeKey, operation))
                         .build();
-                measureManager.tryRecordingMeasurement(measureName, count, tags);
+
+                instrumentManager.tryRecordingMetric(metricName, count, baggage);
             });
         }
     }

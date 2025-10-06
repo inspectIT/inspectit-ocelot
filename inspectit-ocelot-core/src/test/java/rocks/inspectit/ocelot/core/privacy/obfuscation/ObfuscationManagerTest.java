@@ -1,8 +1,8 @@
 package rocks.inspectit.ocelot.core.privacy.obfuscation;
 
-import io.opencensus.internal.NoopScope;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -195,7 +195,7 @@ class ObfuscationManagerTest {
             obfuscationPattern2.setCheckData(true);
 
             when(selfMonitoringService.isSelfMonitoringEnabled()).thenReturn(true);
-            when(selfMonitoringService.withDurationSelfMonitoring(any())).thenReturn(NoopScope.getInstance());
+            when(selfMonitoringService.withDurationSelfMonitoring(any())).thenReturn(Scope.noop());
             when(obfuscationSettings.isEnabled()).thenReturn(true);
             when(obfuscationSettings.getPatterns()).thenReturn(Arrays.asList(obfuscationPattern1, obfuscationPattern2));
 

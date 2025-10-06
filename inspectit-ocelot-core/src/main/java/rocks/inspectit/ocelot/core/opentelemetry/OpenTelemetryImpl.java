@@ -20,7 +20,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Custom implementation of {@link OpenTelemetry} that wraps {@link OpenTelemetrySdk}.
- * This wrapper class is used to change {@link #openTelemetry} without the exception handling of {@link io.opentelemetry.api.GlobalOpenTelemetry#set(OpenTelemetry)}
+ * This wrapper class is used to change {@link #openTelemetry} without the exception handling
+ * of {@link GlobalOpenTelemetry#set(OpenTelemetry)}.
  */
 @Slf4j
 @AllArgsConstructor
@@ -50,18 +51,14 @@ public class OpenTelemetryImpl implements OpenTelemetry {
     }
 
     /**
-     * Gets the {@link SdkMeterProvider} of the currently registered {@link #openTelemetry}}
-     *
-     * @return
+     * @return the {@link SdkMeterProvider} of the currently registered {@link #openTelemetry}}
      */
     private SdkMeterProvider getSdkMeterProvider() {
         return openTelemetry.getSdkMeterProvider();
     }
 
     /**
-     * Gets the {@link SdkTracerProvider} of the currently registered {@link #openTelemetry}}
-     *
-     * @return
+     * @return the {@link SdkTracerProvider} of the currently registered {@link #openTelemetry}}
      */
     private SdkTracerProvider getSdkTracerProvider() {
         return openTelemetry.getSdkTracerProvider();
@@ -125,5 +122,4 @@ public class OpenTelemetryImpl implements OpenTelemetry {
     public void registerGlobal() {
         GlobalOpenTelemetry.set(this);
     }
-
 }

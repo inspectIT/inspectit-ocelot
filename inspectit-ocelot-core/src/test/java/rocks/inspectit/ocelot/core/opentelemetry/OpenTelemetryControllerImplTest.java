@@ -20,11 +20,13 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.tracing.SampleMode;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
 import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
+import rocks.inspectit.ocelot.core.opentelemetry.metrics.ViewManager;
 import rocks.inspectit.ocelot.core.opentelemetry.trace.CustomIdGenerator;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
@@ -50,6 +52,12 @@ class OpenTelemetryControllerImplTest {
     @Mock
     CustomIdGenerator idGenerator;
 
+    @Mock
+    ViewManager viewManager;
+
+    @Mock
+    ApplicationEventPublisher eventPublisher;
+
     @BeforeEach
     void initOpenTelemetryController() {
         // mock max-export-batch-size to avoid exceptions
@@ -58,6 +66,8 @@ class OpenTelemetryControllerImplTest {
         when(env.getCurrentConfig().getTracing().getSampleMode()).thenReturn(SampleMode.PARENT_BASED);
         openTelemetryController.env = env;
         openTelemetryController.idGenerator = idGenerator;
+        openTelemetryController.viewManager = viewManager;
+        openTelemetryController.eventPublisher = eventPublisher;
         openTelemetryController.init();
         openTelemetryController.start();
         clearInvocations(openTelemetryController);

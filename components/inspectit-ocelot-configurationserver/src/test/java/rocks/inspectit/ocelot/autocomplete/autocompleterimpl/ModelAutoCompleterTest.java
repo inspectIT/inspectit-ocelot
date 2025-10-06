@@ -47,7 +47,7 @@ public class ModelAutoCompleterTest {
 
             List<String> result = completer.getSuggestions(input);
 
-            assertThat(result).containsExactlyInAnyOrder("config", "exporters", "instrumentation", "instrumentation-feedback", "logging", "metrics", "plugins", "privacy", "publish-open-telemetry-to-bootstrap", "self-monitoring", "service-name", "tags", "thread-pool-size", "tracing", "agent-commands", "log-preloading");
+            assertThat(result).containsExactlyInAnyOrder("config", "exporters", "instrumentation", "instrumentation-feedback", "logging", "metrics", "plugins", "privacy", "publish-open-telemetry-to-bootstrap", "self-monitoring", "service-name", "attributes", "thread-pool-size", "tracing", "agent-commands", "log-preloading");
         }
 
         @Test
@@ -61,7 +61,7 @@ public class ModelAutoCompleterTest {
 
         @Test
         void endsInEnum() {
-            List<String> input = Arrays.asList("inspectit", "tracing", "add-common-tags");
+            List<String> input = Arrays.asList("inspectit", "tracing", "add-common-attributes");
 
             List<String> result = completer.getSuggestions(input);
 
@@ -74,7 +74,7 @@ public class ModelAutoCompleterTest {
 
         @Test
         void propertyIsPresentAndReadMethodIsNull() {
-            List<String> input = Arrays.asList("inspectit", "instrumentation", "data", "method_duration", "is-tag");
+            List<String> input = Arrays.asList("inspectit", "instrumentation", "data", "method_duration", "session-storage");
 
             List<String> result = completer.getSuggestions(input);
 
@@ -152,7 +152,7 @@ public class ModelAutoCompleterTest {
         void getPropertiesInspectit() {
             List<String> result = completer.getProperties(InspectitConfig.class);
 
-            assertThat(result).containsExactlyInAnyOrder("config", "env", "exporters", "instrumentation", "instrumentation-feedback", "logging", "metrics", "plugins", "privacy", "publish-open-telemetry-to-bootstrap", "self-monitoring", "service-name", "tags", "thread-pool-size", "tracing", "agent-commands", "log-preloading");
+            assertThat(result).containsExactlyInAnyOrder("config", "env", "exporters", "instrumentation", "instrumentation-feedback", "logging", "metrics", "plugins", "privacy", "publish-open-telemetry-to-bootstrap", "self-monitoring", "service-name", "attributes", "thread-pool-size", "tracing", "agent-commands", "log-preloading");
         }
     }
 }

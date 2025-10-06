@@ -30,7 +30,7 @@ public class LogMetricsRecorder implements InternalProcessingAppender.LogEventCo
     public void onLoggingEvent(ILoggingEvent event, Class<?> invalidator) {
         Map<String, String> customTags = new HashMap<>();
         customTags.put("level", event.getLevel().toString());
-        selfMonitoringService.recordMeasurement("logs", 1, customTags);
+        selfMonitoringService.recordMetric("logs", 1, customTags);
     }
 
     @PostConstruct

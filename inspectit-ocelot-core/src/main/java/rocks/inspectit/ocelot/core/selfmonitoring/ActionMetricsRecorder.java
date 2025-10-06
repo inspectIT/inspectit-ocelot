@@ -1,13 +1,10 @@
 package rocks.inspectit.ocelot.core.selfmonitoring;
 
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
-import rocks.inspectit.ocelot.config.model.selfmonitoring.ActionMetricsSettings;
 import rocks.inspectit.ocelot.core.instrumentation.hook.MethodHook;
-import rocks.inspectit.ocelot.core.instrumentation.hook.actions.IHookAction;
 import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import java.util.HashMap;
@@ -63,7 +60,7 @@ public class ActionMetricsRecorder extends DynamicallyActivatableService {
         }};
 
         // record the action's execution time
-        selfMonitoringService.recordMeasurement(MEASUREMENT_NAME, executionTimeMicros, customTags);
+        selfMonitoringService.recordMetric(MEASUREMENT_NAME, executionTimeMicros, customTags);
     }
 
     @Override

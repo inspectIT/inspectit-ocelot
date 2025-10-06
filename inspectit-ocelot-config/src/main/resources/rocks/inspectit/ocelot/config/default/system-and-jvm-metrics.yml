@@ -1,6 +1,8 @@
 inspectit:
   metrics:
+    # GLOBAL value for metrics frequency
     frequency: 15s
+
     # settings regarding disk related metrics
     disk:
       enabled:
@@ -10,6 +12,7 @@ inspectit:
         total: true
       # specifies the frequency with which the disk metrics should be polled and recorded
       frequency: ${inspectit.metrics.frequency}
+
     # settings regarding the measurement of the loaded classes
     classloader:
       enabled:
@@ -19,6 +22,7 @@ inspectit:
         unloaded: true
       # specifies the frequency with which the classloader metrics should be polled and recorded
       frequency: ${inspectit.metrics.frequency}
+
     # settings regarding the capturing of processor related metrics
     processor:
       enabled:
@@ -32,6 +36,7 @@ inspectit:
         process.usage: true
       # specifies the frequency with which the processor metrics should be polled and recorded
       frequency: ${inspectit.metrics.frequency}
+
     # settings regarding the capturing of threads related metrics
     threads:
       enabled:
@@ -45,6 +50,7 @@ inspectit:
         states: true
       # specifies the frequency with which the thread metrics should be polled and recorded
       frequency: ${inspectit.metrics.frequency}
+
     # settings regarding the capturing of garbage collection related metrics
     gc:
       enabled:
@@ -60,6 +66,7 @@ inspectit:
         memory.promoted: true
         # if true, the increase in the size of the young generation memory pool after one GC to before the next is captured
         memory.allocated: true
+
     # settings regarding the capturing of memory related metrics
     memory:
       enabled:
@@ -77,6 +84,7 @@ inspectit:
         buffer.capacity: true
       # specifies the frequency with which the memory metrics should be polled and recorded
       frequency: ${inspectit.metrics.frequency}
+
     # settings regarding the capturing of concurrency related metrics
     concurrent:
       enabled:
@@ -87,180 +95,172 @@ inspectit:
       frequency: ${inspectit.metrics.frequency}
 
     definitions:
-      '[disk/free]':
+      disk_free:
         enabled: '${inspectit.metrics.disk.enabled.free}'
-        type: LONG
         unit: bytes
         description: "free disk space"
-      '[disk/total]':
+
+      disk_total:
         enabled: ${inspectit.metrics.disk.enabled.total}
-        type: LONG
         unit: bytes
         description: "total disk space"
 
-      '[jvm/classes/loaded]':
+      jvm_classes_loaded:
         enabled: ${inspectit.metrics.classloader.enabled.loaded}
-        type: LONG
         unit: classes
         description: "total number of classes currently loaded in the JVM"
-      '[jvm/classes/unloaded]':
+
+      jvm_classes_unloaded:
         enabled: ${inspectit.metrics.classloader.enabled.unloaded}
-        type: LONG
         unit: classes
         description: "total number of classes which have been unloaded since the start of the JVM"
 
-      '[jvm/gc/concurrent/phase/time]':
+      jvm_gc_concurrent_phase_time:
         enabled: ${inspectit.metrics.gc.enabled.concurrent.phase.time}
-        type: LONG
         unit: ms
         description: "the time spent in concurrent GC phases"
+        instrument-type: COUNTER
         views:
-          '[jvm/gc/concurrent/phase/time]':
+          jvm_gc_concurrent_phase_time:
             aggregation: SUM
-            tags: {cause: true, action: true}
-      '[jvm/gc/pause]':
+            attributes: { cause: true, action: true }
+
+      jvm_gc_pause:
         enabled: ${inspectit.metrics.gc.enabled.pause}
-        type: LONG
         unit: ms
         description: "the time spent in GC pause"
+        instrument-type: COUNTER
         views:
-          '[jvm/gc/pause]':
+          jvm_gc_pause:
             aggregation: SUM
-            tags: {cause: true, action: true}
-      '[jvm/gc/memory/promoted]':
+            attributes: { cause: true, action: true }
+
+      jvm_gc_memory_promoted:
         enabled: ${inspectit.metrics.gc.enabled.memory.promoted}
-        type: LONG
         unit: bytes
         description: "the count of positive increases in the size of the old generation memory pool before GC to after GC"
+        instrument-type: COUNTER
         views:
-          '[jvm/gc/memory/promoted]': {aggregation: SUM}
-      '[jvm/gc/live/data/size]':
+          jvm_gc_memory_promoted: { aggregation: SUM }
+
+      jvm_gc_live_data_size:
         enabled: ${inspectit.metrics.gc.enabled.live.data.size}
-        type: LONG
         unit: bytes
         description: "the size of the old generation memory pool after a full GC"
-      '[jvm/gc/max/data/size]':
+
+      jvm_gc_max_data_size:
         enabled: ${inspectit.metrics.gc.enabled.max.data.size}
-        type: LONG
         unit: bytes
         description: "the maximum size of the old generation memory pool"
-      '[jvm/gc/memory/allocated]':
+
+      jvm_gc_memory_allocated:
         enabled: ${inspectit.metrics.gc.enabled.memory.allocated}
-        type: LONG
         unit: bytes
         description: "the increase in the size of the young generation memory pool after one GC to before the next"
+        instrument-type: COUNTER
         views:
-          '[jvm/gc/memory/allocated]': {aggregation: SUM}
+          jvm_gc_memory_allocated: { aggregation: SUM }
 
-      '[jvm/memory/used]':
+      jvm_memory_used:
         enabled: ${inspectit.metrics.memory.enabled.used}
-        type: LONG
         unit: bytes
         description: "the amount of used memory"
         views:
-          '[jvm/memory/used]':
-            aggregation: LAST_VALUE
-            tags: {id : true, area : true}
-      '[jvm/memory/committed]':
+          jvm_memory_used:
+            attributes: { id: true, area: true }
+
+      jvm_memory_committed:
         enabled: ${inspectit.metrics.memory.enabled.committed}
-        type: LONG
         unit: bytes
         description: "the amount of memory that is committed for the JVM to use"
         views:
-          '[jvm/memory/committed]':
-            aggregation: LAST_VALUE
-            tags: {id: true, area: true}
-      '[jvm/memory/max]':
+          jvm_memory_committed:
+            attributes: {id: true, area: true}
+
+      jvm_memory_max:
         enabled: ${inspectit.metrics.memory.enabled.max}
-        type: LONG
         unit: bytes
         description: "the maximum amount of memory that can be used for memory management"
         views:
-          '[jvm/memory/max]':
-            aggregation: LAST_VALUE
-            tags: {id: true, area: true}
-      '[jvm/buffer/count]':
+          jvm_memory_max:
+            attributes: { id: true, area: true }
+
+      jvm_buffer_count:
         enabled: ${inspectit.metrics.memory.enabled.buffer.count}
-        type: LONG
         unit: buffers
         description: "an estimate of the number of buffers in the pool"
         views:
-          '[jvm/buffer/count]':
-            aggregation: LAST_VALUE
-            tags: {id: true}
-      '[jvm/buffer/memory/used]':
+          jvm_buffer_count:
+            attributes: { id: true }
+
+      jvm_buffer_memory_used:
         enabled: ${inspectit.metrics.memory.enabled.buffer.used}
-        type: LONG
         unit: bytes
         description: "an estimate of the memory that the JVM is using for this buffer pool"
         views:
-          '[jvm/buffer/memory/used]':
-            aggregation: LAST_VALUE
-            tags: {id: true}
-      '[jvm/buffer/total/capacity]':
+          jvm_buffer_memory_used:
+            attributes: { id: true }
+
+      jvm_buffer_total_capacity:
         enabled: ${inspectit.metrics.memory.enabled.buffer.capacity}
-        type: LONG
         unit: bytes
         description: "an estimate of the total capacity of the buffers in this pool"
         views:
-          '[jvm/buffer/total/capacity]':
-            aggregation: LAST_VALUE
-            tags: {id: true}
+          jvm_buffer_total_capacity:
+            attributes: { id: true }
 
-      '[system/cpu/count]':
+      system_cpu_count:
         enabled: ${inspectit.metrics.processor.enabled.count}
-        type: LONG
         unit: cores
         description: "the number of processors available to the JVM"
-      '[system/load/average/1m]':
+
+      system_load_average_1m:
         enabled: ${inspectit.metrics.processor.enabled.system.average}
-        type: DOUBLE
         unit: percentage
         description: >-
           the sum of the number of runnable entities queued to available processors and the number
           of runnable entities running on the available processors averaged over a period of time
-      '[system/cpu/usage]':
+        value-type: DOUBLE
+
+      system_cpu_usage:
         enabled: ${inspectit.metrics.processor.enabled.system.usage}
-        type: DOUBLE
         unit: cores
         description: "the recent cpu usage for the whole system"
-      '[process/cpu/usage]':
+        value-type: DOUBLE
+
+      process_cpu_usage:
         enabled: ${inspectit.metrics.processor.enabled.process.usage}
-        type: DOUBLE
         unit: cores
         description: "the recent cpu usage for the JVM's process"
+        value-type: DOUBLE
 
-      '[jvm/threads/peak]':
+      jvm_threads_peak:
         enabled: ${inspectit.metrics.threads.enabled.peak}
-        type: LONG
         unit: threads
         description: "the peak number of live threads since the JVM start"
-      '[jvm/threads/daemon]':
+
+      jvm_threads_daemon:
         enabled: ${inspectit.metrics.threads.enabled.daemon}
-        type: LONG
         unit: threads
         description: "the current number of live daemon threads"
-      '[jvm/threads/live]':
+
+      jvm_threads_live:
         enabled: ${inspectit.metrics.threads.enabled.live}
-        type: LONG
         unit: threads
         description: "the current number of total live threads"
-      '[jvm/threads/states]':
+
+      jvm_threads_states:
         enabled: ${inspectit.metrics.threads.enabled.states}
-        type: LONG
         unit: threads
         description: "the number of live threads for each state"
         views:
-          '[jvm/threads/states]':
-            aggregation: LAST_VALUE
-            tags: {state : true}
+          jvm_threads_states:
+            attributes: { state: true }
 
-      '[inspectit/concurrent/invocations]':
+      inspectit_concurrent_invocations:
         enabled: '${inspectit.metrics.concurrent.enabled.invocations}'
-        type: LONG
         unit: invocations
         description: "the current amount of active invocations"
         views:
-          '[inspectit/concurrent/invocations]':
-            aggregation: LAST_VALUE
-            tags: { operation: true }
+          inspectit_concurrent_invocations:
+            attributes: { operation: true }

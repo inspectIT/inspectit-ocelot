@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.core.metrics.system;
 
+import io.opentelemetry.context.Scope;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Base class for all metrics recorders which perform polling to acquire the measurement data.
+ * Base class for all metrics recorders which perform polling to acquire the metric data.
  */
 @Slf4j
 public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsRecorder {
@@ -30,14 +31,13 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
         super(configDependency);
     }
 
-
     /**
-     * Called to take a measurement. This method is invoked in a scope where the common tags are set.
+     * Called to take a metric. This method is invoked in a scope where the common attributes are set.
      * This method is invoked with the frequency returned by {@link #getFrequency(MetricsSettings)} when enabled.
      *
      * @param config the current configuration
      */
-    protected abstract void takeMeasurement(MetricsSettings config);
+    protected abstract void takeMetric(MetricsSettings config);
 
     /**
      * Extracts the polling frequency from the given metrics configuration.
@@ -52,12 +52,12 @@ public abstract class AbstractPollingMetricsRecorder extends AbstractMetricsReco
         log.info("Enabling {}", getClass().getSimpleName());
         val conf = configuration.getMetrics();
         pollingTask = executor.scheduleWithFixedDelay(() -> {
-            try (val scope = selfMonitoringService.withDurationSelfMonitoring(getClass().getSimpleName())) {
-                try (val tags = commonTags.withCommonTagScope()) {
-                    takeMeasurement(conf);
+            try (Scope scope = selfMonitoringService.withDurationSelfMonitoring(getClass().getSimpleName())) {
+                try (Scope attributes = commonAttributes.withCommonAttributesScope()) {
+                    takeMetric(conf);
                 }
             } catch (Exception e) {
-                log.error("Error taking measurement", e);
+                log.error("Error taking metric", e);
             }
         }, 0, getFrequency(conf).toMillis(), TimeUnit.MILLISECONDS);
         return true;

@@ -35,7 +35,7 @@ public class HighPrecisionTimer {
     /**
      * A counter of how many timer executions have passed with no actions being performed ({@link #function} returned false)
      */
-    private AtomicLong inactivityCounter;
+    private final AtomicLong inactivityCounter;
 
     /**
      * As soon as {@link #inactivityLimit} reaches this value, the timer shuts itself down
@@ -45,7 +45,7 @@ public class HighPrecisionTimer {
     /**
      * The timer action to execute.
      */
-    private BooleanSupplier function;
+    private final BooleanSupplier function;
 
     /**
      * The timer runnable.
@@ -56,7 +56,7 @@ public class HighPrecisionTimer {
     /**
      * The name of the timer, used for the timer thread.
      */
-    private String name;
+    private final String name;
 
     /**
      * True if {@link #destroy()} has been called.

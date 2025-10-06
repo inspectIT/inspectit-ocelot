@@ -1,5 +1,6 @@
 package rocks.inspectit.ocelot.config.model.exporters.trace;
 
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.time.DurationMin;
@@ -30,6 +31,12 @@ public class OtlpTraceExporterSettings {
      * Supported protocols are {@link TransportProtocol#GRPC} and {@link TransportProtocol#HTTP_PROTOBUF}
      */
     private TransportProtocol protocol;
+
+    /**
+     * The time period over which metrics should be aggregated.
+     * Valid values are CUMULATIVE and DELTA
+     */
+    private AggregationTemporality preferredTemporality;
 
     /**
      * Key-value pairs to be used as headers associated with gRPC or HTTP requests.

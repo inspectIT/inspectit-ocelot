@@ -5,9 +5,11 @@ import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.ServiceRequestContext;
 import com.linecorp.armeria.server.grpc.protocol.AbstractUnaryGrpcService;
 import com.linecorp.armeria.testing.junit5.server.ServerExtension;
-import io.opencensus.stats.*;
-import io.opencensus.tags.*;
 import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
@@ -19,6 +21,7 @@ import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceResponse;
 import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
+import io.opentelemetry.proto.metrics.v1.Metric;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,10 +34,12 @@ import org.testcontainers.utility.DockerImageName;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
+import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -180,68 +185,51 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
         Instances.openTelemetryController.flush();
     }
 
-    protected Measure.MeasureLong createMeasure(String measureName, String tagKey) {
-        Measure.MeasureLong measure = Measure.MeasureLong.create(measureName, "desc", "1");
-
-        View view = View.create(View.Name.create(measureName), "desc", measure, Aggregation.Sum.create(),
-                Collections.singletonList(TagKey.create(tagKey)));
-        Stats.getViewManager().registerView(view);
-
-        return measure;
-    }
-
-    /**
-     * Records a sum with the given value and tag.
-     * Since we are still not using OTel to create metrics with the agent, we should stick to OC in tests.
-     *
-     * @param measure the measure to record
-     * @param value  the value to add to the measure
-     * @param tagKey the key of the tag
-     * @param tagVal the value of the tag
-     */
-    protected void recordMeasureAndFlush(Measure.MeasureLong measure, int value, String tagKey, String tagVal) {
-        TagContext tagContext = Tags.getTagger().emptyBuilder()
-                .putLocal(TagKey.create(tagKey), TagValue.create(tagVal))
+    protected void recordMetricsAndFlush(String metricName, int value, String attributeKey, String attributeValue) {
+        // get the meter and create a counter
+        Meter meter = GlobalOpenTelemetry.getMeterProvider()
+                .meterBuilder("rocks.inspectit.ocelot")
+                .setInstrumentationVersion("0.0.1")
                 .build();
 
-        Stats.getStatsRecorder().newMeasureMap()
-                .put(measure, value)
-                .record(tagContext);
+        LongCounter counter = meter.counterBuilder(metricName).setDescription("My counter").setUnit("1").build();
+        counter.add(value, Attributes.of(AttributeKey.stringKey(attributeKey), attributeValue));
 
+        // flushing pending metrics
         Instances.openTelemetryController.flush();
     }
 
     /**
-     * Verifies that the metric with the given value and key/value attribute (tag) has been exported to and received
+     * Verifies that the metric with the given value and key/value attribute has been exported to and received
      * by the {@link #grpcServer}
      *
-     * @param measureName the name of the measure
-     * @param value  the value of the measure
-     * @param tagKey the key of the tag
-     * @param tagVal the value of the tag
+     * @param metricName the name of the metric
+     * @param value  the value of the metric
+     * @param attributeKey the key of the attribute
+     * @param attributeValue the value of the attribute
      */
-    protected void awaitMetricsExported(String measureName, int value, String tagKey, String tagVal) {
-        // create the attribute that we will use to verify that the metric has been written
-        KeyValue attribute = KeyValue.newBuilder()
-                .setKey(tagKey)
-                .setValue(AnyValue.newBuilder().setStringValue(tagVal).build())
-                .build();
+    protected void awaitMetricsExported(String metricName, int value, String attributeKey, String attributeValue) {
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+            Stream<Metric> metrics = grpcServer.metricRequests.stream()
+                    .flatMap(mReq ->  mReq.getResourceMetricsList().stream()
+                            .flatMap(rm -> rm.getScopeMetricsList().stream()
+                                    .flatMap(sm -> sm.getMetricsList().stream())));
 
-        await().atMost(30, TimeUnit.SECONDS)
-                .untilAsserted(() -> assertThat(grpcServer.metricRequests.stream())
-                        .anyMatch(mReq -> mReq.getResourceMetricsList().stream()
-                            .anyMatch(rm ->  rm.getScopeMetrics(0)
-                                .getMetricsList().stream()
-                                // check for the specific attribute and value
-                                .anyMatch(metric -> {
-                                    boolean validName = metric.getName().equals(measureName);
-                                    boolean validData = metric.getSum()
-                                            .getDataPointsList()
-                                            .stream()
-                                            .anyMatch(d -> d.getAttributesList()
-                                                    .contains(attribute) && d.getAsInt() == value);
-                                    return validName && validData;
-                                }))));
+            // check for the name, value & attribute
+            assertThat(metrics).anyMatch(metric -> {
+                boolean validName = metric.getName().equals(metricName);
+                boolean validData = metric.getSum()
+                        .getDataPointsList().stream()
+                        .anyMatch(d -> d.getAsInt() == value &&
+                                d.getAttributesList().stream()
+                                        .anyMatch(keyValue ->
+                                                attributeKey.equals(keyValue.getKey()) &&
+                                                attributeValue.equals(keyValue.getValue().getStringValue())
+                                        )
+                        );
+                return validName && validData;
+            });
+        });
     }
 
     /**
@@ -253,7 +241,6 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
      * @param childSpanName  the name of the child span
      */
     void awaitSpansExported(String parentSpanName, String childSpanName) {
-
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
 
             // get a flat list of spans
@@ -283,9 +270,7 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
                 return childSpan.get().getParentSpanId().equals(parentSpan.get().getSpanId());
 
             })).isTrue();
-
         });
-
     }
 
     /**
@@ -293,11 +278,11 @@ public abstract class ExporterServiceIntegrationTestBase extends SpringTestBase 
      */
     public static class OtlpGrpcServer extends ServerExtension {
 
-        final List<ExportTraceServiceRequest> traceRequests = new ArrayList<>();
+        final List<ExportTraceServiceRequest> traceRequests = new CopyOnWriteArrayList<>();
 
-        final List<ExportMetricsServiceRequest> metricRequests = new ArrayList<>();
+        final List<ExportMetricsServiceRequest> metricRequests = new CopyOnWriteArrayList<>();
 
-        final List<ExportLogsServiceRequest> logRequests = new ArrayList<>();
+        final List<ExportLogsServiceRequest> logRequests = new CopyOnWriteArrayList<>();
 
         private void reset() {
             traceRequests.clear();

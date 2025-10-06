@@ -53,7 +53,7 @@ public class ContextPropagation {
     /**
      * Takes the given key-value pairs and encodes them into the Baggage header.
      *
-     * @param dataToPropagate the key-value pairs to propagate.
+     * @param dataToPropagate the key-value pairs to propagate
      *
      * @return the result up propagation map
      */
@@ -65,7 +65,7 @@ public class ContextPropagation {
     /**
      * Takes the given key-value pairs and the span context and encodes them into the Baggage header.
      *
-     * @param dataToPropagate the key-value pairs to propagate.
+     * @param dataToPropagate the key-value pairs to propagate
      * @param spanToPropagate the span context to propagate, null if none shall be propagated
      *
      * @return the result propagation map

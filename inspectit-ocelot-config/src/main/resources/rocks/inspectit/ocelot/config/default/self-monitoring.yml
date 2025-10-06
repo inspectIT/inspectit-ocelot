@@ -30,57 +30,48 @@ inspectit:
   # definitions of existing self-monitoring metrics
   metrics:
     definitions:
-      '[inspectit/self/duration]':
+      inspectit_self_duration:
         enabled: ${inspectit.self-monitoring.enabled}
         unit: us
         description: "inspectIT Ocelot self-monitoring duration"
+        instrument-type: COUNTER
+        value-type: DOUBLE
         views:
-          '[inspectit/self/duration]':
+          inspectit_self_duration:
             aggregation: SUM
-            tags: {"component-name" : true}
+            attributes: { component-name: true }
 
-      '[inspectit/self/instrumentation-queue-size]':
+      inspectit_self_instrumentation_queue_size:
         enabled: ${inspectit.self-monitoring.enabled}
-        type: LONG
         unit: classes
         description: "the number of pending classes inspectIT has to check if they require instrumentation updates"
 
-      '[inspectit/self/instrumented-classes]':
+      inspectit_self_instrumented_classes:
         enabled: ${inspectit.self-monitoring.enabled}
-        type: LONG
         unit: classes
         description: "the number of classes currently instrumented by inspectIT"
 
-      '[inspectit/self/logs]':
+      inspectit_self_logs:
         enabled: ${inspectit.self-monitoring.enabled}
-        type: LONG
         unit: log events
         description: "the number of log events"
+        instrument-type: COUNTER
         views:
-          '[inspectit/self/logs]':
+          inspectit_self_logs:
             aggregation: SUM
-            tags: {"level": true}
+            attributes: { level: true }
 
-      '[inspectit/self/health]':
+      inspectit_self_health:
         enabled: ${inspectit.self-monitoring.enabled}
-        type: LONG
         unit: health
         description: "current health status of the agent (0 = OK, 1 = WARNING, 2 = ERROR)"
-        views:
-          '[inspectit/self/health]':
-            aggregation: LAST_VALUE
 
-      '[inspectit/self/action/execution-time]':
+      inspectit_self_action_execution_time:
         enabled: ${inspectit.self-monitoring.action-metrics.enabled}
-        type: LONG
         unit: us
         description: "the execution time of the action"
+        instrument-type: HISTOGRAM
         views:
-          '[inspectit/self/action/execution-time]':
-            aggregation: SUM
-            tags:
-              action_name: true
-          '[inspectit/self/action/count]':
-            aggregation: COUNT
-            tags:
-              action_name: true
+          inspectit_self_action_execution_time:
+            aggregation: HISTOGRAM
+            attributes: { action_name: true }

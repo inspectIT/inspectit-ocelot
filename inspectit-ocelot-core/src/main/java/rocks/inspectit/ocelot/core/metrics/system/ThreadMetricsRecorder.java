@@ -1,13 +1,10 @@
 package rocks.inspectit.ocelot.core.metrics.system;
 
-import io.opencensus.tags.TagContext;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.Tagger;
+import io.opentelemetry.api.baggage.Baggage;
 import lombok.val;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
-import rocks.inspectit.ocelot.core.tags.TagUtils;
+import rocks.inspectit.ocelot.core.utils.AttributeUtils;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
@@ -31,30 +28,25 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     private static final String STATE_TAG_NAME = "state";
 
-    private TagKey stateTag;
+    private final String stateKey = "state";
 
-    private ThreadMXBean threadBean;
-
-    @Autowired
-    private Tagger tagger;
+    private ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
 
     public ThreadMetricsRecorder() {
         super("metrics.threads");
-        stateTag = TagKey.create(STATE_TAG_NAME);
-        threadBean = ManagementFactory.getThreadMXBean();
     }
 
     @Override
-    protected void takeMeasurement(MetricsSettings config) {
+    protected void takeMetric(MetricsSettings config) {
         val enabled = config.getThreads().getEnabled();
         if (enabled.getOrDefault(PEAK_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + PEAK_METRIC_NAME, threadBean.getPeakThreadCount());
+            instrumentManager.tryRecordingMetric(METRIC_NAME_PREFIX + PEAK_METRIC_NAME, threadBean.getPeakThreadCount());
         }
         if (enabled.getOrDefault(DAEMON_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + DAEMON_METRIC_NAME, threadBean.getDaemonThreadCount());
+            instrumentManager.tryRecordingMetric(METRIC_NAME_PREFIX + DAEMON_METRIC_NAME, threadBean.getDaemonThreadCount());
         }
         if (enabled.getOrDefault(LIVE_METRIC_NAME, false)) {
-            measureManager.tryRecordingMeasurement(METRIC_NAME_PREFIX + LIVE_METRIC_NAME, threadBean.getThreadCount());
+            instrumentManager.tryRecordingMetric(METRIC_NAME_PREFIX + LIVE_METRIC_NAME, threadBean.getThreadCount());
         }
         if (enabled.getOrDefault(STATE_METRIC_NAME, false)) {
             recordStateMetric();
@@ -74,15 +66,15 @@ public class ThreadMetricsRecorder extends AbstractPollingMetricsRecorder {
     private void recordStateMetric() {
         String stateMeasureName = METRIC_NAME_PREFIX + STATE_METRIC_NAME;
         for (Thread.State state : Thread.State.values()) {
-            TagContext tags = tagger.currentBuilder()
-                    .putLocal(stateTag, TagUtils.createTagValue(stateTag.getName(), state.name()))
+            Baggage baggage = Baggage.current().toBuilder()
+                    .put(stateKey, AttributeUtils.resolveValue(stateKey, state.name()))
                     .build();
             long count = Arrays.stream(threadBean.getThreadInfo(threadBean.getAllThreadIds()))
                     .filter(Objects::nonNull)
                     .map(ThreadInfo::getThreadState)
                     .filter(s -> s == state)
                     .count();
-            measureManager.tryRecordingMeasurement(stateMeasureName, count, tags);
+            instrumentManager.tryRecordingMetric(stateMeasureName, count, baggage);
         }
     }
 }
