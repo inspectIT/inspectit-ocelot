@@ -25,9 +25,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+// Sorry for this very dirty class...
+// We should outsource some methods into new classes
 
-// TODO Update this documentation properly
-// TODO Can we also bring some structure into this class???
 /**
  * This class allows the storage and configurable up and down propagation of data.
  * An inspectIT context has four lifecycle phases which correspond to the phased of hooks added to methods:
@@ -41,17 +41,16 @@ import java.util.stream.Stream;
  * In the entry phase, the context data can be altered via {@link #setData(String, Object)}, even though the context is not yet active.
  * <p>
  * When {@link #makeActive()} is called, the current context transitions from the "Entry" to the "Active" state.
- * This means that the data the context stores is now immutable and also published as TagContext.
- * In addition, the context now replaces its parent in GRPC, so that all newly created contexts will be children of this one.
+ * This means that the data the context stores is now immutable and also published as Baggage.
  * There is one exception to the data immutability: child contexts perform the data up-propagation during this context's active phase.
  * <p>
  * All synchronous child contexts are opened and closed during the "active" phase of their parent.
  * When such a child context is closed, it writes the up-propagated data it changed to the parent by calling {@link #performUpPropagation(Map)}.
  * Note that this only happens if the child context is synchronous, no up-propagation is performed for asynchronous children!
  * <p>
- * The up-propagation does not have an effect on the tag-context opened by the parent during the "active" phase.
- * E.g. if a child adds or overwrites a value its parent through up-propagation, this new value will not be visible in the tag context.
- * However, as soon as a new, synchronous child context of the parent is created, and it opens a tag context, the changes wil lbe visible in the new context
+ * The up-propagation does not have an effect on the baggage opened by the parent during the "active" phase.
+ * E.g. if a child adds or overwrites a value its parent through up-propagation, this new value will not be visible in the baggage.
+ * However, as soon as a new, synchronous child context of the parent is created, and it creates a baggage, the changes will be visible in the new context
  * <p>
  * When data is configured to be both up and down propagated, the down propagated data depends on whether the child is synchronous or not.
  * Consider a simple example where the context "parent" has two children "firstChild" and "secondChild" which are executed after each other.
@@ -67,13 +66,13 @@ import java.util.stream.Stream;
  * During the exit phase, the contexts data can be modified again.
  * Note again that for any asynchronous child at any point of time the parent data will be visible as it was after the parents entry phase.
  * <p>
- * As noted previously the tag context opened by the context at the end of its entry phase will be stale for teh exit phase:
+ * As noted previously the baggage created by the context at the end of its entry phase will be stale for the exit phase:
  * It does not contain any up-propagated data, neither does it contain any changes performed during the exit phase.
  * <p>
  * Finally, a context finishes the exit phase with a call to {@link #close()}
  * If the context is synchronous, it will perform its up-propagation.
- * In addition ,the tag-context opened by the call to makeActive will be closed and the
- * previous parent will be registered back in GRPC as active context.
+ * In addition ,the baggage created by the call to makeActive will be closed and the
+ * previous parent will be registered back as active baggage.
  * <p>
  * In addition, an {@link InspectitContextImpl} instance can be used for tracing. Hereby, one instance can record exactly one span.
  * To do this {@link #setSpanScope(AutoCloseable)} must be called BEFORE {@link #makeActive()}.

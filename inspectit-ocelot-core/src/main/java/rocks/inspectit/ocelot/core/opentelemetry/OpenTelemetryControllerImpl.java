@@ -57,7 +57,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-// TODO We should separate this class into multiple ones. Maybe at least separate metrics and tracing.
+// Sorry for this very dirty class...
+// Metrics and tracing should be outsourced into new classes
 
 /**
  * The implementation of {@link IOpenTelemetryController}. The {@link OpenTelemetryControllerImpl} configures {@link GlobalOpenTelemetry}.
@@ -212,6 +213,45 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         shutdown();
     }
 
+    @Override
+    synchronized public boolean start() {
+        // if OTel is not already up and running, configure and start it
+        if (active) {
+            throw new IllegalStateException("The OpenTelemetry controller is already running and cannot be started again.");
+        } else {
+            active = configureOpenTelemetry();
+            return active;
+        }
+    }
+
+    /**
+     * Initializes tracer and meter provider components but does not set {@link #active}!
+     */
+    @VisibleForTesting
+    void initializeOpenTelemetry(InspectitConfig configuration) {
+        meterProvider = getMeterProviderBuilder(configuration).build();
+        tracerProvider = getTracerProviderBuilder(configuration).build();
+
+        OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
+                .setTracerProvider(tracerProvider)
+                .setMeterProvider(meterProvider)
+                .build();
+
+        openTelemetry = new OpenTelemetryImpl(openTelemetrySdk);
+
+        // if any OpenTelemetry has already been registered to GlobalOpenTelemetry, reset it.
+        if (null != OpenTelemetryUtils.getGlobalOpenTelemetry()) {
+            // we need to reset it before we can register our custom OpenTelemetryImpl, as GlobalOpenTelemetry is throwing an exception if we want to register a new OpenTelemetry if a previous one is still registered.
+            log.info("Reset previously registered GlobalOpenTelemetry ({}) during the initialization of {} to register {}",
+                    GlobalOpenTelemetry.get().getClass().getName(),
+                    getName(),
+                    openTelemetry.getClass().getSimpleName());
+            // currently, this is the only existing method to reset GlobalOpenTelemetry during runtime
+            GlobalOpenTelemetry.resetForTest();
+        }
+        openTelemetry.registerGlobal();
+    }
+
     /**
      * Configures and registers {@link OpenTelemetry}, triggered by the {@link InspectitConfigChangedEvent} triggered
      * For tracing, the {@link SdkTracerProvider} is reconfigured and updated in the {@link GlobalOpenTelemetry}.
@@ -282,17 +322,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         return success;
     }
 
-    @Override
-    synchronized public boolean start() {
-        // if OTel is not already up and running, configure and start it
-        if (active) {
-            throw new IllegalStateException("The OpenTelemetry controller is already running and cannot be started again.");
-        } else {
-            active = configureOpenTelemetry();
-            return active;
-        }
-    }
-
     /**
      * Flushes all pending spans ({@link #openTelemetry}) and metrics ({@link #meterProvider}) and waits for it to complete.
      */
@@ -351,34 +380,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @Override
     synchronized public void notifyMetricsSettingsChanged() {
         metricSettingsChanged = true;
-    }
-
-    /**
-     * Initializes tracer and meter provider components but does not set {@link #active}!
-     */
-    @VisibleForTesting
-    void initializeOpenTelemetry(InspectitConfig configuration) {
-        meterProvider = getMeterProviderBuilder(configuration).build();
-        tracerProvider = getTracerProviderBuilder(configuration).build();
-
-        OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
-                .setTracerProvider(tracerProvider)
-                .setMeterProvider(meterProvider)
-                .build();
-
-        openTelemetry = new OpenTelemetryImpl(openTelemetrySdk);
-
-        // if any OpenTelemetry has already been registered to GlobalOpenTelemetry, reset it.
-        if (null != OpenTelemetryUtils.getGlobalOpenTelemetry()) {
-            // we need to reset it before we can register our custom OpenTelemetryImpl, as GlobalOpenTelemetry is throwing an exception if we want to register a new OpenTelemetry if a previous one is still registered.
-            log.info("Reset previously registered GlobalOpenTelemetry ({}) during the initialization of {} to register {}",
-                    GlobalOpenTelemetry.get().getClass().getName(),
-                    getName(),
-                    openTelemetry.getClass().getSimpleName());
-            // currently, this is the only existing method to reset GlobalOpenTelemetry during runtime
-            GlobalOpenTelemetry.resetForTest();
-        }
-        openTelemetry.registerGlobal();
     }
 
     /**
