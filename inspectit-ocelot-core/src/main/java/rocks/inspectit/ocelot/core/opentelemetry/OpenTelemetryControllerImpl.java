@@ -240,8 +240,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         }
 
         viewsChanged = viewManager.shouldUpdateViews();
+        boolean configurationChanged = !active || metricSettingsChanged || tracingSettingsChanged || viewsChanged;
 
-        if (!active || metricSettingsChanged || tracingSettingsChanged) {
+        if (configurationChanged) {
 
             // configure tracing if not configured or when tracing settings changed
             SdkTracerProvider sdkTracerProvider = !(tracingSettingsChanged || !active) ? tracerProvider : configureTracerProvider(configuration);
@@ -251,7 +252,6 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
 
             // only if metrics/views settings changed or OTel has not been configured and is running, we need to rebuild the OpenTelemetrySdk
             if (metricSettingsChanged || viewsChanged || !active) {
-
                 OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
                         .setTracerProvider(sdkTracerProvider)
                         .setMeterProvider(sdkMeterProvider)
@@ -269,13 +269,15 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             log.error("Failed to configure OpenTelemetry. Please scan the logs for detailed failure messages");
         }
 
+        if (configurationChanged) {
+            OpenTelemetryConfiguredEvent event = new OpenTelemetryConfiguredEvent(this, success);
+            eventPublisher.publishEvent(event);
+        }
+
         isConfiguring.set(false);
         tracingSettingsChanged = false;
         metricSettingsChanged = false;
         viewsChanged = false;
-
-        OpenTelemetryConfiguredEvent event = new OpenTelemetryConfiguredEvent(this, success);
-        eventPublisher.publishEvent(event);
 
         return success;
     }
