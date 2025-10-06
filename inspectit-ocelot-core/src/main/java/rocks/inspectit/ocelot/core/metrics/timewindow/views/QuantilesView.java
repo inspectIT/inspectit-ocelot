@@ -4,8 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import io.opentelemetry.api.common.Attributes;
 import lombok.Getter;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-import rocks.inspectit.ocelot.config.model.metrics.definition.views.ViewDefinitionSettings;
-import sun.jvm.hotspot.debugger.cdbg.Sym;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
