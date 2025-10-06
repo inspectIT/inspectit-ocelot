@@ -2,14 +2,15 @@
 inspectit:
   metrics:
     definitions:
-      '[quantiles/test]':
+      quantiles_test:
         unit: values
+        # instrument-type will be ignored for QUANTILES
         views:
-          '[quantiles/test/view]':
+          quantiles_test:
             aggregation: QUANTILES
             time-window: 60s
-            tags:
-              'foo': true
+            attributes:
+              foo: true
 
   instrumentation:
     scopes:
@@ -24,8 +25,7 @@ inspectit:
         scopes:
           QuantileMetricsTest-record: true
         metrics:
-          '[quantiles/test]':
+          quantiles_test:
             value: _arg0
             data-tags:
-              'foo': _arg1
-
+              foo: _arg1

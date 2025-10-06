@@ -1,13 +1,13 @@
 inspectit:
   metrics:
     definitions:
-      '[annotation/test]':
-        type: LONG
+      annotation_test:
         unit: black magic
         views:
-          '[annotation/test]':
+          annotation_test:
             aggregation: LAST_VALUE
-            tags: {anno_value : true}
+            attributes: {anno_value : true}
+
   instrumentation:
     actions:
       #-----------------------GenericActionsTest.verifyArgumentsAccessible ------------------------
@@ -52,7 +52,7 @@ inspectit:
         entry:
           anno_value: {action: read_MyMethodAnnotation_value}
         metrics:
-          '[annotation/test]':
+          annotation_test:
             value: 42
             data-tags: {anno_value : anno_value}
 

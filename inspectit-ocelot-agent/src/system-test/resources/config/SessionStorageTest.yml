@@ -4,24 +4,27 @@ inspectit:
       # use these metrics to validate the existence of the tag
       first-session-call:
         unit: calls
+        instrument-type: COUNTER
         views:
           first-session-call:
-            aggregation: COUNT
-            tags:
+            aggregation: SUM
+            attributes:
               session-storage-sys-test-key: true
       second-session-call:
         unit: calls
+        instrument-type: COUNTER
         views:
           second-session-call:
-            aggregation: COUNT
-            tags:
+            aggregation: SUM
+            attributes:
               session-storage-sys-test-key: true
       third-session-call:
         unit: calls
+        instrument-type: COUNTER
         views:
           third-session-call:
-            aggregation: COUNT
-            tags:
+            aggregation: SUM
+            attributes:
               session-storage-sys-test-key: true
 
   instrumentation:

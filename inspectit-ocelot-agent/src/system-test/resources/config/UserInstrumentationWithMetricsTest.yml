@@ -1,20 +1,14 @@
 inspectit:
   metrics:
     definitions:
-      '[my/invocation]':
-        type: LONG
+      my_invocation:
         unit: invocations
+        instrument-type: HISTOGRAM
         views:
-          '[my/invocation/count]':
-            aggregation: count
-            with-common-tags: false
-            tags:
-              method_name: true
-              user_tag: true
-          '[my/invocation/sum]':
-            aggregation: sum
-            with-common-tags: false
-            tags:
+          my_invocation:
+            aggregation: HISTOGRAM
+            with-common-attributes: false
+            attributes:
               method_name: true
 
   instrumentation:
@@ -38,7 +32,7 @@ inspectit:
         entry:
           current_method_name:  {action: a_method_getFQN}
         metrics:
-          '[my/invocation]':
+          my_invocation:
             value: 42
             data-tags: {method_name: current_method_name, user_tag: user_tag}
 

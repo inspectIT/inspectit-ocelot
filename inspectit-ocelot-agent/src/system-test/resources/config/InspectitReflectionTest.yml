@@ -3,10 +3,11 @@ inspectit:
     definitions:
       reflectionInvokedMethod:
         unit: invocations
+        instrument-type: COUNTER
         views:
           reflectionInvokedMethod:
-            aggregation: COUNT
-            tags:
+            aggregation: SUM
+            attributes:
               field: true
 
   instrumentation:
