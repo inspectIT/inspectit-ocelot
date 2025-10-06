@@ -47,4 +47,9 @@ public class NoopOpenTelemetryController implements IOpenTelemetryController {
         return false;
     }
 
+    @Override
+    public boolean registerMetricReader(Object metricReader, String serviceName) {
+        return false;
+    }
+
 }

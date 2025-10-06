@@ -14,6 +14,7 @@ import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledState;
 import rocks.inspectit.ocelot.config.model.exporters.TransportProtocol;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.OtlpMetricsExporterSettings;
+import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.validation.Valid;
 import java.util.Arrays;
@@ -26,7 +27,7 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExporterService {
+public class OtlpMetricsExporterService extends DynamicallyActivatableService {
 
     private final List<TransportProtocol> SUPPORTED_PROTOCOLS = Arrays.asList(TransportProtocol.GRPC, TransportProtocol.HTTP_PROTOBUF);
 
@@ -37,9 +38,9 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
     MetricExporter metricExporter;
 
     /**
-     * The {@link PeriodicMetricReaderBuilder} for reading metrics to the log
+     * The {@link PeriodicMetricReader} for reading metrics
      */
-    private PeriodicMetricReaderBuilder metricReaderBuilder;
+    private MetricReader metricReader;
 
     public OtlpMetricsExporterService() {
         super("metrics.enabled", "exporters.metrics.otlp");
@@ -104,9 +105,11 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
                     break;
                 }
             }
-            metricReaderBuilder = PeriodicMetricReader.builder(metricExporter).setInterval(otlp.getExportInterval());
+            metricReader = PeriodicMetricReader.builder(metricExporter)
+                    .setInterval(otlp.getExportInterval())
+                    .build();
 
-            boolean success = openTelemetryController.registerMetricExporterService(this);
+            boolean success = openTelemetryController.registerMetricReader(metricReader, getName());
             if (success) {
                 log.info("Starting {} with protocol {} on endpoint {}", getName(), otlp.getProtocol(), otlp.getEndpoint());
             } else {
@@ -123,16 +126,11 @@ public class OtlpMetricsExporterService extends DynamicallyActivatableMetricsExp
     protected boolean doDisable() {
         try {
             log.info("Stopping OtlpMetricsExporter");
-            openTelemetryController.unregisterMetricExporterService(this);
+            openTelemetryController.unregisterMetricExporterService(getName());
             return true;
         } catch (Exception e) {
             log.error("Failed to stop OtlpMetricsExporter", e);
             return false;
         }
-    }
-
-    @Override
-    public MetricReader getNewMetricReader() {
-        return metricReaderBuilder.build();
     }
 }

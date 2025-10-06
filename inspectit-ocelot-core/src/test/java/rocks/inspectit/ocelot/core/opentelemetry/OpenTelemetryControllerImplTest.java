@@ -224,10 +224,10 @@ class OpenTelemetryControllerImplTest {
          * @param expected Whether the registration is expected to succeed.
          */
         private void registerTestMetricExporterServiceAndVerify(boolean expected) {
-            int numRegisteredServices = openTelemetryController.registeredMetricExporterServices.size();
-            assertThat(openTelemetryController.registerMetricExporterService(testMetricsExporterService)).isEqualTo(expected);
-            assertThat(openTelemetryController.registeredMetricExporterServices.size()).isEqualTo(numRegisteredServices + (expected ? 1 : 0));
-            verify(openTelemetryController, times(1)).registerMetricExporterService(testMetricsExporterService);
+            int numRegisteredServices = openTelemetryController.registeredMetricReaders.size();
+            assertThat(openTelemetryController.registerMetricReader(testMetricsExporterService.getNewMetricReader(), testMetricsExporterService.getName())).isEqualTo(expected);
+            assertThat(openTelemetryController.registeredMetricReaders.size()).isEqualTo(numRegisteredServices + (expected ? 1 : 0));
+            verify(openTelemetryController, times(1)).registerMetricReader(testMetricsExporterService.getNewMetricReader(), testMetricsExporterService.getName());
             verify(openTelemetryController, times(expected ? 1 : 0)).notifyMetricsSettingsChanged();
             clearInvocations(openTelemetryController);
         }
@@ -238,10 +238,10 @@ class OpenTelemetryControllerImplTest {
          * @param expected Whether the unregistration is expected to succeed.
          */
         private void unregisterTestMetricExporterServiceAndVerify(boolean expected) {
-            int numRegisteredServices = openTelemetryController.registeredMetricExporterServices.size();
-            assertThat(openTelemetryController.unregisterMetricExporterService(testMetricsExporterService)).isEqualTo(expected);
-            assertThat(openTelemetryController.registeredMetricExporterServices.size()).isEqualTo(numRegisteredServices - (expected ? 1 : 0));
-            verify(openTelemetryController, times(1)).unregisterMetricExporterService(testMetricsExporterService);
+            int numRegisteredServices = openTelemetryController.registeredMetricReaders.size();
+            assertThat(openTelemetryController.unregisterMetricExporterService(testMetricsExporterService.getName())).isEqualTo(expected);
+            assertThat(openTelemetryController.registeredMetricReaders.size()).isEqualTo(numRegisteredServices - (expected ? 1 : 0));
+            verify(openTelemetryController, times(1)).unregisterMetricExporterService(testMetricsExporterService.getName());
             verify(openTelemetryController, times(expected ? 1 : 0)).notifyMetricsSettingsChanged();
             clearInvocations(openTelemetryController);
         }
@@ -301,9 +301,8 @@ class OpenTelemetryControllerImplTest {
         /**
          * A noop {@link DynamicallyActivatableService metric exporter service} for testing
          */
-        class TestMetricsExporterService extends DynamicallyActivatableMetricsExporterService {
+        class TestMetricsExporterService extends DynamicallyActivatableService {
 
-            @Override
             public MetricReader getNewMetricReader() {
                 return PeriodicMetricReader.create(LoggingMetricExporter.create());
             }

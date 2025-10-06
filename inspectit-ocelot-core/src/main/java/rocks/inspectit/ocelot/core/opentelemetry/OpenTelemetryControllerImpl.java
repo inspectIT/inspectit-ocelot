@@ -11,6 +11,7 @@ import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
 import io.opentelemetry.sdk.metrics.View;
 import io.opentelemetry.sdk.metrics.export.MetricProducer;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
@@ -40,7 +41,6 @@ import rocks.inspectit.ocelot.config.model.metrics.MetricsSettings;
 import rocks.inspectit.ocelot.config.model.tracing.TracingSettings;
 import rocks.inspectit.ocelot.core.config.InspectitConfigChangedEvent;
 import rocks.inspectit.ocelot.core.config.InspectitEnvironment;
-import rocks.inspectit.ocelot.core.exporter.DynamicallyActivatableMetricsExporterService;
 import rocks.inspectit.ocelot.core.opentelemetry.events.OpenTelemetryConfiguredEvent;
 import rocks.inspectit.ocelot.core.opentelemetry.metrics.ViewManager;
 import rocks.inspectit.ocelot.core.opentelemetry.resource.ResourceAttributesProvider;
@@ -115,11 +115,11 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     Map<String, SpanExporter> registeredTraceExportServices = new ConcurrentHashMap<>();
 
     /**
-     * The registered {@link DynamicallyActivatableMetricsExporterService}.
+     * The registered {@link MetricReader}
      */
     @VisibleForTesting
     @Getter(AccessLevel.PACKAGE)
-    Map<String, DynamicallyActivatableMetricsExporterService> registeredMetricExporterServices = new ConcurrentHashMap<>();
+    Map<String, MetricReader> registeredMetricReaders = new ConcurrentHashMap<>();
 
     /**
      * The registered {@link MetricProducer}
@@ -380,6 +380,10 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
     @Override
     synchronized public void notifyMetricsSettingsChanged() {
         metricSettingsChanged = true;
+        // we have to update the SDK when the metric readers change, if already active
+        if (active) {
+            configureOpenTelemetry();
+        }
     }
 
     /**
@@ -473,9 +477,9 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
             }
 
             // register metric reader for each service
-            if (!CollectionUtils.isEmpty(registeredMetricExporterServices)) {
-                for (DynamicallyActivatableMetricsExporterService metricsExportService : registeredMetricExporterServices.values()) {
-                    builder.registerMetricReader(metricsExportService.getNewMetricReader());
+            if (!CollectionUtils.isEmpty(registeredMetricReaders)) {
+                for (MetricReader metricReader : registeredMetricReaders.values()) {
+                    builder.registerMetricReader(metricReader);
                 }
             }
             else {
@@ -558,55 +562,53 @@ public class OpenTelemetryControllerImpl implements IOpenTelemetryController {
         }
     }
 
+    @Override
+    public boolean registerMetricReader(Object metricReader, String serviceName) {
+        if (!(metricReader instanceof MetricReader)) {
+            throw new RuntimeException(String.format("Cannot register metric reader. The object '%s' is not instance of '%s'", metricReader.getClass(), MetricReader.class));
+        }
+        return registerMetricReader((MetricReader) metricReader, serviceName);
+    }
+
     /**
-     * Registers a {@link DynamicallyActivatableMetricsExporterService}
+     * Registers a {@link MetricReader}
      *
-     * @param service The {@link DynamicallyActivatableMetricsExporterService} to register
+     * @param metricReader The metric reader
+     * @param serviceName The service name of the registered reader
      *
-     * @return Whether the {@link DynamicallyActivatableMetricsExporterService} was successfully registered
+     * @return Whether the {@link MetricReader} was successfully registered
      */
-    public boolean registerMetricExporterService(DynamicallyActivatableMetricsExporterService service) {
+    public boolean registerMetricReader(MetricReader metricReader, String serviceName) {
         try {
-            if (null == registeredMetricExporterServices.put(service.getName(), service)) {
+            if (null == registeredMetricReaders.put(serviceName, metricReader)) {
+                log.info("The service {} was successfully registered", serviceName);
                 notifyMetricsSettingsChanged();
-                log.info("The service {} was successfully registered", service.getName());
                 return true;
             } else {
-                log.warn("The service {} was already registered!", service.getName());
+                log.warn("The service {} was already registered!", serviceName);
                 return false;
             }
         } catch (Exception e) {
-            log.error("Failed to register {}", service.getName(), e);
+            log.error("Failed to register {}", serviceName, e);
             return false;
         }
     }
 
     /**
-     * Unregisters a {@link DynamicallyActivatableMetricsExporterService} with the given name.
+     * Unregisters a {@link MetricReader} with the given name.
      *
-     * @param serviceName The name of the {@link DynamicallyActivatableMetricsExporterService service}
+     * @param serviceName The name of the {@link MetricReader service}
      *
-     * @return Whether the {@link DynamicallyActivatableMetricsExporterService service} was successfully unregistered. Returns false if a service with the given name was already registered and has been overwritten.
+     * @return Whether the {@link MetricReader service} was successfully unregistered. Returns false if a service with the given name was already registered and has been overwritten.
      */
-    private boolean unregisterMetricExporterService(String serviceName) {
-        if (null != registeredMetricExporterServices.remove(serviceName)) {
+    public boolean unregisterMetricExporterService(String serviceName) {
+        if (null != registeredMetricReaders.remove(serviceName)) {
             notifyMetricsSettingsChanged();
             return true;
         } else {
             log.warn("Failed to unregister {}. The service has not been registered", serviceName);
             return false;
         }
-    }
-
-    /**
-     * Unregisters a {@link DynamicallyActivatableMetricsExporterService}
-     *
-     * @param service The {@link DynamicallyActivatableMetricsExporterService} to unregister
-     *
-     * @return Whether the {@link DynamicallyActivatableMetricsExporterService service} was successfully registered. Returns false if the service was already registered.
-     */
-    public boolean unregisterMetricExporterService(DynamicallyActivatableMetricsExporterService service) {
-        return unregisterMetricExporterService(service.getName());
     }
 
     /**

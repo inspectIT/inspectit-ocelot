@@ -65,6 +65,16 @@ public interface IOpenTelemetryController {
      *
      * @return Whether the registration was successful
      */
-
     boolean registerTraceExporterService(Object spanExporter, String serviceName);
+
+    /**
+     * Registers a new {@link rocks.inspectit.ocelot.core.service.DynamicallyActivatableService metric reader} that is used to read recorded metrics.
+     * <b><br/> IMPORTANT: This method should ONLY be used in tests of the {@code agent} package.</b>
+     *
+     * @param metricReader The {@link MetricReader}
+     * @param serviceName  The name of the metric reader service
+     *
+     * @return Whether the registration was successful
+     */
+    boolean registerMetricReader(Object metricReader, String serviceName);
 }
