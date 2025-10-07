@@ -10,6 +10,7 @@ inspectit:
             with-common-attributes: false
             attributes:
               method_name: true
+              user_tag: true
 
   instrumentation:
     scopes:

@@ -2,8 +2,10 @@ package rocks.inspectit.ocelot.instrumentation;
 
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.ocelot.utils.MetricsTestUtils;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
+import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -29,12 +31,17 @@ public class InspectitReflectionTest extends InstrumentationSysTestBase {
 
     private void instrumentedMethod() {}
 
+    @BeforeAll
+    static void waitForClassInstrumentation() {
+        TestUtils.waitForClassInstrumentation(InspectitReflectionTest.class, true, 30, TimeUnit.SECONDS);
+    }
+
     @Test
     void shouldAccessHiddenValueAndHiddenMethod() {
         instrumentedMethod();
 
-        await().atMost(20, TimeUnit.SECONDS).untilAsserted(() ->
-                assertThat(MetricsTestUtils.getDataForView("reflectionInvokedMethod",
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                assertThat(MetricTestUtils.getDataForView("reflectionInvokedMethod",
                         ImmutableMap.of("field", hiddenField)))
                         .isNotNull()
                         .isInstanceOfSatisfying(LongPointData.class, (pointData) ->

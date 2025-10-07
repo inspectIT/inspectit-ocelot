@@ -2,6 +2,7 @@ package rocks.inspectit.ocelot.utils;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.PointData;
@@ -20,8 +21,11 @@ import static org.awaitility.Awaitility.await;
 /**
  * Utils to set up and read OpenTelemetry metric data
  */
-public class MetricsTestUtils {
+public class MetricTestUtils {
 
+    /**
+     * MetricReader which is able to read recorded metrics instantly
+     */
     private static InMemoryMetricReader metricReader;
 
     private final static String instrumentationQueueSize = "inspectit_self_instrumentation_queue_size";
@@ -45,13 +49,9 @@ public class MetricsTestUtils {
                 .pollInterval(100, TimeUnit.MILLISECONDS)
                 .until(() -> NoopOpenTelemetryController.INSTANCE != Instances.openTelemetryController);
 
-        // create an InMemorySpanExporter and register it with OTel
+        // create an InMemoryMetricReader and register it with OTel
         metricReader = InMemoryMetricReader.create();
-        Instances.openTelemetryController.registerMetricReader(metricReader, "InMemorySpanExporterService");
-    }
-
-    public static void flushMetrics() {
-        metricReader.forceFlush();
+        Instances.openTelemetryController.registerMetricReader(metricReader, "InMemoryMetricReader");
     }
 
     /**
@@ -68,14 +68,10 @@ public class MetricsTestUtils {
     }
 
     /**
-     * @return The point data for the view with the provided attributes
+     * @return The point data for the gauge view with the provided attributes
      */
     public static PointData getDataForView(String viewName, Map<String, String> attributes) {
-        Collection<MetricData> data = getRecordedMetrics();
-
-        Collection<MetricData> filteredData =  data.stream()
-                .filter(metricData -> metricData.getName().equals(viewName))
-                .collect(Collectors.toList());
+        Collection<MetricData> filteredData = getFilteredData(viewName);
 
         Collection<PointData> results = filteredData.stream()
                 .flatMap(metricData -> metricData.getData().getPoints().stream())
@@ -86,22 +82,45 @@ public class MetricsTestUtils {
         return maybeResult.orElse(null);
     }
 
+    /**
+     * @return The point data for the histogram view with the provided attributes
+     */
+    public static HistogramPointData getDataForHistogramView(String viewName, Map<String, String> attributes) {
+        Collection<MetricData> filteredData = getFilteredData(viewName);
+
+        Collection<HistogramPointData> results = filteredData.stream()
+                .flatMap(metricData -> metricData.getHistogramData().getPoints().stream())
+                .filter(pointData -> containsAttributes(pointData.getAttributes(), attributes))
+                .collect(Collectors.toList());
+
+        Optional<HistogramPointData> maybeResult = results.stream().findFirst();
+        return maybeResult.orElse(null);
+    }
+
+    private static Collection<MetricData> getFilteredData(String viewName) {
+        Collection<MetricData> data = getRecordedMetrics();
+
+        return data.stream()
+                .filter(metricData -> metricData.getName().equals(viewName))
+                .collect(Collectors.toList());
+    }
+
     public static long getInstrumentationQueueSize() {
-        return getLongGaugeData(instrumentationQueueSize);
+        return getLongData(instrumentationQueueSize);
     }
 
     public static long getInstrumentationClassesCount() {
-        return getLongGaugeData(instrumentedClassesSize);
+        return getLongData(instrumentedClassesSize);
     }
 
-    private static long getLongGaugeData(String metricName) {
+    private static long getLongData(String metricName) {
         Collection<MetricData> data = getRecordedMetrics();
         Collection<MetricData> filteredData = data.stream()
                 .filter(metricData -> metricData.getName().equals(metricName))
                 .collect(Collectors.toList());
 
         Optional<Long> maybeSize = filteredData.stream()
-                .map(MetricsTestUtils::getLastLongPointDataValue).findFirst();
+                .map(MetricTestUtils::getLastLongPointDataValue).findFirst();
 
         if (maybeSize.isPresent())
             return maybeSize.get();
@@ -124,7 +143,7 @@ public class MetricsTestUtils {
             String expectedValue = entry.getValue();
             String attributeValue = attributes.get(key);
 
-            if(attributeValue == null || !attributeValue.equals(expectedValue)) {
+            if (attributeValue == null || !attributeValue.equals(expectedValue)) {
                 return false;
             }
         }

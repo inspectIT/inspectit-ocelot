@@ -2,10 +2,9 @@ package rocks.inspectit.ocelot.instrumentation;
 
 import com.google.common.collect.ImmutableMap;
 import io.opentelemetry.sdk.metrics.data.LongPointData;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.ocelot.utils.MetricsTestUtils;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -20,13 +19,9 @@ public class ObjectAttachmentsTest extends InstrumentationSysTestBase {
         TestUtils.waitForClassInstrumentation(ObjectAttachmentsTest.class, true, 15, TimeUnit.SECONDS);
     }
 
-    public void writeAttachments(String obj, String firstAttachment, String secondAttachment) {
+    public void writeAttachments(String obj, String firstAttachment, String secondAttachment) {}
 
-    }
-
-    public void readAttachments(String obj) {
-
-    }
+    public void readAttachments(String obj) {}
 
     @Test
     void writeReadTest() {
@@ -40,14 +35,14 @@ public class ObjectAttachmentsTest extends InstrumentationSysTestBase {
         readAttachments(target);
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
-            assertThat(MetricsTestUtils.getDataForView("writeAttachment",
+            assertThat(MetricTestUtils.getDataForView("writeAttachment",
                     ImmutableMap.of("target", target)))
                     .isNotNull()
                     .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
                             assertThat(pointData.getValue()).isEqualTo(1)
                     );
 
-            assertThat(MetricsTestUtils.getDataForView("readAttachment",
+            assertThat(MetricTestUtils.getDataForView("readAttachment",
                     ImmutableMap.of("target", target, "firstVal", first, "secondVal", second)))
                     .isNotNull()
                     .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
@@ -63,7 +58,7 @@ public class ObjectAttachmentsTest extends InstrumentationSysTestBase {
         readAttachments(target);
 
         await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
-                assertThat(MetricsTestUtils.getDataForView("readAttachment",
+                assertThat(MetricTestUtils.getDataForView("readAttachment",
                         ImmutableMap.of("target", target, "firstVal", ".*", "secondVal", ".*")))
                         .isNull()
         );
@@ -81,28 +76,28 @@ public class ObjectAttachmentsTest extends InstrumentationSysTestBase {
         readAttachments(target);
 
         await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
-            assertThat(MetricsTestUtils.getDataForView("writeAttachment",
+            assertThat(MetricTestUtils.getDataForView("writeAttachment",
                     ImmutableMap.of("target", target)))
                     .isNotNull()
                     .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
                             assertThat(pointData.getValue()).isEqualTo(1)
                     );
 
-            assertThat(MetricsTestUtils.getDataForView("writeAttachment",
+            assertThat(MetricTestUtils.getDataForView("writeAttachment",
                     ImmutableMap.of("target", target, "firstVal", initFirst, "secondVal", initSecond)))
                     .isNotNull()
                     .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
                             assertThat(pointData.getValue()).isEqualTo(1)
                     );
 
-            assertThat(MetricsTestUtils.getDataForView("readAttachment",
+            assertThat(MetricTestUtils.getDataForView("readAttachment",
                     ImmutableMap.of("target", target, "firstVal", finalFirst)))
                     .isNotNull()
                     .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
                             assertThat(pointData.getValue()).isEqualTo(1)
                     );
 
-            assertThat(MetricsTestUtils.getDataForView("readAttachment",
+            assertThat(MetricTestUtils.getDataForView("readAttachment",
                     ImmutableMap.of("target", target, "firstVal", finalFirst, "secondVal", ".*")))
                     .isNull();
         });

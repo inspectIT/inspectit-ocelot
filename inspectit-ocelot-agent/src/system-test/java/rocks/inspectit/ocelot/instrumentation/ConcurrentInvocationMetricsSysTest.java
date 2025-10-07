@@ -1,8 +1,11 @@
 package rocks.inspectit.ocelot.instrumentation;
 
 import io.opentelemetry.sdk.metrics.data.LongPointData;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.ocelot.utils.MetricsTestUtils;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
+import rocks.inspectit.ocelot.utils.TestUtils;
+
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.emptyMap;
@@ -26,6 +29,11 @@ public class ConcurrentInvocationMetricsSysTest extends InstrumentationSysTestBa
         assertions.run();
     }
 
+    @BeforeAll
+    static void waitForClassInstrumentation() {
+        TestUtils.waitForClassInstrumentation(ConcurrentInvocationMetricsSysTest.class, true, 30, TimeUnit.SECONDS);
+    }
+
     @Test
     void shouldRecordInvocationWhenMethodIsCalled() {
         myMethod(() -> assertInvocation(1));
@@ -35,8 +43,8 @@ public class ConcurrentInvocationMetricsSysTest extends InstrumentationSysTestBa
     }
 
     private void assertInvocation(long expected) {
-        await().atMost(30, TimeUnit.SECONDS).untilAsserted(() ->
-            assertThat(MetricsTestUtils.getDataForView("inspectit_concurrent_invocations", emptyMap()))
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+            assertThat(MetricTestUtils.getDataForView("inspectit_concurrent_invocations", emptyMap()))
                     .isNotNull()
                     .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
                             assertThat(pointData.getValue()).isEqualTo(expected))

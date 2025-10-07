@@ -1,25 +1,26 @@
 package rocks.inspectit.ocelot.instrumentation;
 
-import io.opencensus.stats.AggregationData;
-import org.assertj.core.util.Maps;
+import com.google.common.collect.ImmutableMap;
+import io.opentelemetry.sdk.metrics.data.LongPointData;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
+import java.util.concurrent.TimeUnit;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 public class AnnotationAccessTest extends InstrumentationSysTestBase {
 
-
     @MyMethodAnnotation("helloworld")
-    void myAnnotatedMethod(String someArgument) {
-
-    }
+    void myAnnotatedMethod(String someArgument) {}
 
     private static class ConstructorAnnotated {
 
         @MyMethodAnnotation("helloconstructor")
-        private ConstructorAnnotated() {
-        }
+        private ConstructorAnnotated() {}
 
         public static ConstructorAnnotated createInstance() {
             return new ConstructorAnnotated();
@@ -27,29 +28,41 @@ public class AnnotationAccessTest extends InstrumentationSysTestBase {
     }
 
     static {
-        //force the initialization of the class
+        // force the initialization of the class
         AnnotationAccessTest.class.getDeclaredMethods();
         ConstructorAnnotated.class.getDeclaredMethods();
+    }
+
+    @BeforeAll
+    static void waitForClassInstrumentation() {
+        TestUtils.waitForClassInstrumentation(AnnotationAccessTest.class, true, 30, TimeUnit.SECONDS);
     }
 
     @Test
     void verifyAnnotationValuesExtractedFromMethod() {
         myAnnotatedMethod("blub");
-        TestUtils.waitForOpenCensusQueueToBeProcessed();
 
-        AggregationData data = TestUtils.getDataForView("annotation/test", Maps.newHashMap("anno_value", "helloworld"));
-
-        assertThat(((AggregationData.LastValueDataLong) data).getLastValue())
-                .isEqualTo(42);
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+            assertThat(MetricTestUtils.getDataForView("annotation_test",
+                    ImmutableMap.of("anno_value", "helloworld")))
+                    .isNotNull()
+                    .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
+                            assertThat(pointData.getValue()).isEqualTo(42)
+                    )
+        );
     }
 
     @Test
     void verifyAnnotationValuesExtractedFromConstructor() {
         ConstructorAnnotated.createInstance();
-        TestUtils.waitForOpenCensusQueueToBeProcessed();
 
-        AggregationData data = TestUtils.getDataForView("annotation/test", Maps.newHashMap("anno_value", "helloconstructor"));
-        assertThat(((AggregationData.LastValueDataLong) data).getLastValue())
-                .isEqualTo(42);
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                assertThat(MetricTestUtils.getDataForView("annotation_test",
+                        ImmutableMap.of("anno_value", "helloconstructor")))
+                        .isNotNull()
+                        .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
+                                assertThat(pointData.getValue()).isEqualTo(42)
+                        )
+        );
     }
 }

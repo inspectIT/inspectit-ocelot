@@ -2,13 +2,10 @@ package rocks.inspectit.ocelot.utils;
 
 import com.google.common.cache.Cache;
 import io.opentelemetry.api.baggage.Baggage;
-import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import org.awaitility.core.ConditionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
-import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.opentelemetry.NoopOpenTelemetryController;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -19,13 +16,27 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+/**
+ * We access data from inside the agent via reflection to check for specific events like
+ * instrumenting a class
+ */
 public class TestUtils {
+    private static final Logger logger = LoggerFactory.getLogger(TestUtils.class);
 
+    /**
+     * Active instrumentations from the {@code InstrumentationManager} in inspectit-ocelot-core
+     */
     private static Cache<Class<?>, Object> activeInstrumentations = null;
 
+    /**
+     * Stores for each class the time, when we have discovered its instrumentation
+     */
     public static ConcurrentHashMap<Class<?>, Long> instrumentationTimeStamp = new ConcurrentHashMap<>();
 
-    private static final Logger logger = LoggerFactory.getLogger(TestUtils.class);
+    /**
+     * Object used to access specific Class objects
+     */
+    public static Object sink;
 
     static {
         Thread poller = new Thread(() -> {
@@ -46,8 +57,6 @@ public class TestUtils {
         poller.setDaemon(true);
         poller.start();
     }
-
-    public static Object sink;
 
     private static Field getField(Class clazz, String fieldName) {
         try {
@@ -176,10 +185,10 @@ public class TestUtils {
 
     public static void waitForInstrumentationToComplete() {
         await().atMost(30, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
-            assertThat(MetricsTestUtils.getInstrumentationClassesCount()).isGreaterThan(0);
-            assertThat(MetricsTestUtils.getInstrumentationQueueSize()).isZero();
+            assertThat(MetricTestUtils.getInstrumentationClassesCount()).isGreaterThan(0);
+            assertThat(MetricTestUtils.getInstrumentationQueueSize()).isZero();
             Thread.sleep(500); // to ensure that new-class-discovery has been executed
-            assertThat(MetricsTestUtils.getInstrumentationQueueSize()).isZero();
+            assertThat(MetricTestUtils.getInstrumentationQueueSize()).isZero();
         });
     }
 
@@ -193,27 +202,37 @@ public class TestUtils {
         }
     }
 
-    static InMemorySpanExporter inMemorySpanExporter;
-
     /**
-     * Initialize {@link io.opentelemetry.api.OpenTelemetry} with a {@link InMemorySpanExporter} so that we can access the exported {@link io.opentelemetry.api.trace.Span Spans}
-     *
-     * @return The {@link InMemorySpanExporter} that can be used to retrieve exported {@link io.opentelemetry.api.trace.Span Spans}
+     * Waits until the {@code TimeWindowRecorder} has recorded all values
      */
-    public static InMemorySpanExporter initializeSpanExporterForSystemTesting() {
-        // if OTel was already initialized with the inMemorySpanExporter, just reset and return it
-        if (null != inMemorySpanExporter && NoopOpenTelemetryController.INSTANCE != Instances.openTelemetryController) {
-            inMemorySpanExporter.reset();
-            return inMemorySpanExporter;
-        }
+    public static void waitForTimeWindowRecorder() {
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+            Collection<?> recordsQueue = getTimeWindowRecordsQueue();
+            assertThat(recordsQueue.isEmpty());
+        });
+    }
 
-        // wait until OTel is initialized
-        await().atMost(10, TimeUnit.SECONDS)
-                .pollInterval(100, TimeUnit.MILLISECONDS)
-                .until(() -> NoopOpenTelemetryController.INSTANCE != Instances.openTelemetryController);
-        // create an InMemorySpanExporter and register it with OTEL
-        inMemorySpanExporter = InMemorySpanExporter.create();
-        Instances.openTelemetryController.registerTraceExporterService(inMemorySpanExporter, "InMemorySpanExporterService");
-        return inMemorySpanExporter;
+    private static Collection<?> getTimeWindowRecordsQueue() {
+        waitForAgentInitialization();
+        try {
+            Object agentInstance = getField(AgentManager.class, "agentInstance").get(null);
+            Object ctx = getField(agentInstance.getClass(), "ctx").get(agentInstance);
+
+            Method getBean = ctx.getClass().getMethod("getBean", String.class);
+            getBean.setAccessible(true);
+            Object timeWindowRecorder = getBean.invoke(ctx, "timeWindowRecorder");
+
+            return (Collection<?>) getField(timeWindowRecorder.getClass(), "recordsQueue").get(timeWindowRecorder);
+
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public static Map<String, String> getCurrentAttributesAsMap() {
+        Map<String, String> result = new HashMap<>();
+        Baggage current = Baggage.current();
+        current.asMap().forEach((key, valueEntry) -> result.put(key, valueEntry.getValue()));
+        return result;
     }
 }

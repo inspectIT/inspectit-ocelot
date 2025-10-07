@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class InstrumentationScopesTest extends InstrumentationSysTestBase {
 
-
     @Test
     void testNonOverriddenDefaultMethodInstrumentedForAnonymousClass() {
         NamedElement n1 = new NamedElement() {
@@ -19,11 +18,11 @@ public class InstrumentationScopesTest extends InstrumentationSysTestBase {
             }
         };
 
-        TestUtils.waitForInstrumentationToComplete(); //wait because until here the class has most likely not been loaded yet
+        TestUtils.waitForInstrumentationToComplete(); // wait because until here the class has most likely not been loaded yet
 
         n1.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
-            assertThat(tags).containsEntry("name", "blablub");
+            Map<String, String> attributes = TestUtils.getCurrentAttributesAsMap();
+            assertThat(attributes).containsEntry("name", "blablub");
         });
     }
 
@@ -31,11 +30,11 @@ public class InstrumentationScopesTest extends InstrumentationSysTestBase {
     void testNonOverriddenDefaultMethodInstrumentedForLambda() {
         NamedElement n1 = () -> "i'm a lambda";
 
-        TestUtils.waitForInstrumentationToComplete(); //wait because until here the class has most likely not been loaded yet
+        TestUtils.waitForInstrumentationToComplete(); // wait because until here the class has most likely not been loaded yet
 
         n1.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
-            assertThat(tags).containsEntry("name", "i'm a lambda");
+            Map<String, String> attributes = TestUtils.getCurrentAttributesAsMap();
+            assertThat(attributes).containsEntry("name", "i'm a lambda");
         });
     }
 
@@ -59,12 +58,12 @@ public class InstrumentationScopesTest extends InstrumentationSysTestBase {
         TestUtils.waitForInstrumentationToComplete();
 
         n1.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
-            assertThat(tags).containsEntry("name", "something");
+            Map<String, String> attributes = TestUtils.getCurrentAttributesAsMap();
+            assertThat(attributes).containsEntry("name", "something");
         });
         n1.doSomething(() -> {
-            Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
-            assertThat(tags).containsEntry("name", "somethingelse");
+            Map<String, String> attributes = TestUtils.getCurrentAttributesAsMap();
+            assertThat(attributes).containsEntry("name", "somethingelse");
         });
     }
 

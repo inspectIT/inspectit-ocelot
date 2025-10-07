@@ -1,9 +1,7 @@
 package rocks.inspectit.ocelot.instrumentation;
 
-import io.opencensus.common.Scope;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
-import io.opencensus.tags.Tags;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.context.Scope;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.utils.DummyClassLoader;
 import rocks.inspectit.ocelot.utils.TestUtils;
@@ -78,9 +76,7 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
         }
     }
 
-    static class InherentlyBadClassLoader extends BadClassLoader2 {
-
-    }
+    static class InherentlyBadClassLoader extends BadClassLoader2 {}
 
     static class StackCheckingClassLoader extends DummyClassLoader {
 
@@ -130,11 +126,9 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
 
         TestUtils.waitForClassInstrumentation(execClass, false, 15, TimeUnit.SECONDS);
 
-        try (Scope tcb = Tags.getTagger().emptyBuilder()
-                .putLocal(TagKey.create("test_key"), TagValue.create("test_value"))
-                .buildScoped()) {
+        try (Scope scope = Baggage.builder().put("test_key", "test_value").build().makeCurrent()) {
             exec.execute(() -> {
-                Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
+                Map<String, String> tags = TestUtils.getCurrentAttributesAsMap();
                 assertThat(tags).containsEntry("test_key", "test_value");
             });
         }
@@ -154,14 +148,13 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
 
         TestUtils.waitForClassInstrumentation(execClass, false, 15, TimeUnit.SECONDS);
 
-        try (Scope tcb = Tags.getTagger().emptyBuilder()
-                .putLocal(TagKey.create("test_key"), TagValue.create("test_value"))
-                .buildScoped()) {
+        try (Scope scope = Baggage.builder().put("test_key", "test_value").build().makeCurrent()) {
             exec.execute(() -> {
-                Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
+                Map<String, String> tags = TestUtils.getCurrentAttributesAsMap();
                 assertThat(tags).containsEntry("test_key", "test_value");
             });
         }
+
         Method runCommand = exec.getClass().getDeclaredMethod("runCommand");
         runCommand.setAccessible(true);
         runCommand.invoke(exec);
@@ -178,14 +171,13 @@ public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
 
         TestUtils.waitForClassInstrumentation(execClass, false, 15, TimeUnit.SECONDS);
 
-        try (Scope tcb = Tags.getTagger().emptyBuilder()
-                .putLocal(TagKey.create("test_key"), TagValue.create("test_value"))
-                .buildScoped()) {
+        try (Scope scope = Baggage.builder().put("test_key", "test_value").build().makeCurrent()) {
             exec.execute(() -> {
-                Map<String, String> tags = TestUtils.getCurrentBaggageAsMap();
+                Map<String, String> tags = TestUtils.getCurrentAttributesAsMap();
                 assertThat(tags).containsEntry("test_key", "test_value");
             });
         }
+
         Method runCommand = exec.getClass().getDeclaredMethod("runCommand");
         runCommand.setAccessible(true);
         runCommand.invoke(exec);
@@ -205,5 +197,3 @@ class MyExecutor implements Executor {
         command.run();
     }
 }
-
-

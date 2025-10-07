@@ -5,7 +5,7 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
-import rocks.inspectit.ocelot.utils.TestUtils;
+import rocks.inspectit.ocelot.utils.TraceTestUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,7 +19,7 @@ import static org.awaitility.Awaitility.await;
 
 public class TraceTestBase extends InstrumentationSysTestBase {
 
-    final static InMemorySpanExporter spanExporter = TestUtils.initializeSpanExporterForSystemTesting();
+    static final InMemorySpanExporter spanExporter = TraceTestUtils.initializeSpanExporterForSystemTesting();
 
     protected List<SpanData> getExportedSpans() {
         return spanExporter.getFinishedSpanItems();
@@ -59,5 +59,4 @@ public class TraceTestBase extends InstrumentationSysTestBase {
             assertions.accept(getExportedSpans());
         });
     }
-
 }
