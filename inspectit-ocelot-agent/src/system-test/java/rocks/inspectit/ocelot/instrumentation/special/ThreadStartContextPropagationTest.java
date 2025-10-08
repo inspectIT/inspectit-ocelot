@@ -13,14 +13,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ThreadStartContextPropagationTest extends InstrumentationSysTestBase {
+class ThreadStartContextPropagationTest extends InstrumentationSysTestBase {
 
-    private final static String attrKey = "test-key";
+    final static String attrKey = "test-key";
 
-    private final static String attrValue = "test-value";
+    final static String attrValue = "test-value";
 
     /**
-     * Abstract thread class.
+     * Abstract thread class
      */
     private abstract class AbstractThread extends Thread {
 
@@ -55,7 +55,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
     }
 
     @Test
-    public void verifyContextPropagationViaAbstractThreads() throws InterruptedException {
+    void verifyContextPropagationViaAbstractThreads() throws InterruptedException {
         long rand = System.nanoTime();
         String attributeKey = attrKey + rand;
         String attributeValue = attrValue + rand;
@@ -82,7 +82,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
     }
 
     @Test
-    public void verifyContextPropagation() throws InterruptedException {
+    void verifyContextPropagation() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
@@ -106,7 +106,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
     }
 
     @Test
-    public void verifyContextPropagationUsingSubClasses() throws InterruptedException {
+    void verifyContextPropagationUsingSubClasses() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
@@ -135,7 +135,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
     }
 
     @Test
-    public void noContextPropagationViaConstructor() throws InterruptedException {
+    void noContextPropagationViaConstructor() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
@@ -157,7 +157,7 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
     }
 
     @Test
-    public void noCorrelationInExecutor() throws Exception {
+    void noCorrelationInExecutor() throws Exception {
         AtomicReference<Baggage> refBaggageInner = new AtomicReference<>();
         Runnable runnable = HelperClasses.getRunnableAsNamed(refBaggageInner);
 

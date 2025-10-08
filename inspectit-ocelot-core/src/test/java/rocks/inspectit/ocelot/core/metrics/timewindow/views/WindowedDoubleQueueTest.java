@@ -9,13 +9,13 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class WindowedDoubleQueueTest {
+class WindowedDoubleQueueTest {
 
     @Nested
     class RoundUpToPowerOfTwo {
 
         @Test
-        public void nonPowerOfTwoValues() {
+        void nonPowerOfTwoValues() {
             assertThat(WindowedDoubleQueue.roundUpToPowerOfTwo(0)).isEqualTo(0);
             assertThat(WindowedDoubleQueue.roundUpToPowerOfTwo(3)).isEqualTo(4);
             assertThat(WindowedDoubleQueue.roundUpToPowerOfTwo(5)).isEqualTo(8);
@@ -25,7 +25,7 @@ public class WindowedDoubleQueueTest {
         }
 
         @Test
-        public void powerOfTwoValues() {
+        void powerOfTwoValues() {
             assertThat(WindowedDoubleQueue.roundUpToPowerOfTwo(2)).isEqualTo(2);
             assertThat(WindowedDoubleQueue.roundUpToPowerOfTwo(4)).isEqualTo(4);
             assertThat(WindowedDoubleQueue.roundUpToPowerOfTwo(16)).isEqualTo(16);
@@ -36,7 +36,7 @@ public class WindowedDoubleQueueTest {
     }
 
     @Nested
-    public class Insert {
+    class Insert {
 
         @Test
         void testAlignedGrowth() {

@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class JigsawTest extends TraceTestBase {
 
     @BeforeAll
-    static void setup() throws ClassNotFoundException {
+    static void setup() {
         TestUtils.waitForClassInstrumentation(DriverManager.class, true, 15, TimeUnit.SECONDS);
     }
 

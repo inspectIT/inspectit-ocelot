@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.guava.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class MethodHookConfigurationResolverTest {
+class MethodHookConfigurationResolverTest {
 
     @Spy
     GenericActionCallSorter scheduler = new GenericActionCallSorter();

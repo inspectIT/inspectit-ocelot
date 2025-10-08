@@ -11,10 +11,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests the configuration for {@link ActionMetricsRecorder}
  */
-public class ActionMetricsRecorderConfigTest extends SpringTestBase {
+class ActionMetricsRecorderConfigTest extends SpringTestBase {
 
     @Autowired
-    private ActionMetricsRecorder recorder;
+    ActionMetricsRecorder recorder;
 
     @Nested
     class Defaults extends SpringTestBase {

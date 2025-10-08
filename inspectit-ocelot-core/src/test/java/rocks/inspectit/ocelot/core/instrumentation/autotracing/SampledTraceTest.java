@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 
-public class SampledTraceTest {
+class SampledTraceTest {
 
     private static StackTrace createStackTrace(String... classMethods) {
         StackTraceElement[] elements = Arrays.stream(classMethods)
@@ -314,7 +314,5 @@ public class SampledTraceTest {
             assertThat(invocations).first()
                     .satisfies(new InvocationCheck("Top.firstMethod", 0, 4, new InvocationCheck("Do.recurse", 0, 4, new InvocationCheck("Middle.myMethod", 1, 3, new InvocationCheck("Do.recurse", 1, 3)))));
         }
-
     }
-
 }

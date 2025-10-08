@@ -9,14 +9,14 @@ import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InspectitConfigConversionServiceTest {
+class InspectitConfigConversionServiceTest {
 
-    private final InspectitConfigConversionService converter = InspectitConfigConversionService.getInstance();
+    final InspectitConfigConversionService converter = InspectitConfigConversionService.getInstance();
 
     @Nested
     class TransportProtocolConverter {
 
-        private final TypeDescriptor TARGET = TypeDescriptor.valueOf(TransportProtocol.class);
+        final TypeDescriptor TARGET = TypeDescriptor.valueOf(TransportProtocol.class);
 
         @Test
         void fromString() {
@@ -36,11 +36,11 @@ public class InspectitConfigConversionServiceTest {
     @Nested
     class DurationConverter {
 
-        private final InspectitConfigConversionService converter = InspectitConfigConversionService.getParserInstance();
+        final InspectitConfigConversionService converter = InspectitConfigConversionService.getParserInstance();
 
-        private final TypeDescriptor TARGET = TypeDescriptor.valueOf(Duration.class);
+        final TypeDescriptor TARGET = TypeDescriptor.valueOf(Duration.class);
 
-        private final Duration DUMMY_DURATION = Duration.ofHours(1);
+        final Duration DUMMY_DURATION = Duration.ofHours(1);
 
         @Test
         void fromPlaceholder() {

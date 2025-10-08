@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
+class ClassLoaderDelegationTest extends InstrumentationSysTestBase {
 
     static class BadClassLoader extends DummyClassLoader {
 

@@ -24,13 +24,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test class for {@link HighlightRulesMapController}
  */
-public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
+class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
 
     @Autowired
     HighlightRulesMapController controller;
 
     @Nested
-    public class GetHighlightingRulesMapTest {
+    class GetHighlightingRulesMapTest {
         @Test
         void testGetHighlightingRulesMap() {
 
@@ -57,7 +57,7 @@ public class HighlightRulesMapControllerIntTest extends IntegrationTestBase {
     }
 
     @Nested
-    public class GenerateMapTest {
+    class GenerateMapTest {
 
         // Using a test-class all branches except for one in the generateMap method are visited at least once.
         @Test

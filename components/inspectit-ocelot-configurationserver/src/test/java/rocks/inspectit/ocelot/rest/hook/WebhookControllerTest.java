@@ -15,19 +15,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
-public class WebhookControllerTest {
+class WebhookControllerTest {
 
     @InjectMocks
-    protected WebhookController controller;
+    WebhookController controller;
 
     @Mock
-    private FileManager fileManager;
+    FileManager fileManager;
 
     @Nested
-    public class SynchronizeWorkspace {
+    class SynchronizeWorkspace {
 
         @Test
-        public void triggerSynchronization() throws Exception {
+        void triggerSynchronization() throws Exception {
             ResponseEntity<?> result = controller.synchronizeWorkspace();
 
             verify(fileManager).synchronizeWorkspace();

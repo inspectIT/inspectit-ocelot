@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class GenericActionsTest extends InstrumentationSysTestBase {
+class GenericActionsTest extends InstrumentationSysTestBase {
 
     void argumentAccessTest(NamedElement elem, Runnable assertions) {
         assertions.run();
@@ -107,4 +107,3 @@ public class GenericActionsTest extends InstrumentationSysTestBase {
     }
 
 }
-

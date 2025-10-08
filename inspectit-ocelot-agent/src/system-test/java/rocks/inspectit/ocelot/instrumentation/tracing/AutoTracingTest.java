@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AutoTracingTest extends TraceTestBase {
+class AutoTracingTest extends TraceTestBase {
 
     @BeforeAll
     static void setup() {
@@ -85,5 +85,4 @@ public class AutoTracingTest extends TraceTestBase {
         activeWait(150);
         nestedWait(100);
     }
-
 }

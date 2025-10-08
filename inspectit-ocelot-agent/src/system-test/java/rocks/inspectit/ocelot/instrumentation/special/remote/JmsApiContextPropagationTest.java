@@ -23,25 +23,25 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 /**
  * uses global-propagation-tests.yml
  */
-public class JmsApiContextPropagationTest {
+class JmsApiContextPropagationTest {
 
-    private static final String BROKER_URL = "vm://localhost?broker.persistent=false";
+    static final String BROKER_URL = "vm://localhost?broker.persistent=false";
 
-    private static final String QUEUE_NAME = "testQueue";
+    static final String QUEUE_NAME = "testQueue";
 
-    private static final String key = "down_propagated";
+    static final String key = "down_propagated";
 
-    private static final String value = "my-value";
+    static final String value = "my-value";
 
-    private BrokerService broker;
+    BrokerService broker;
 
-    private Connection connection;
+    Connection connection;
 
-    private Session session;
+    Session session;
 
-    private MessageProducer producer;
+    MessageProducer producer;
 
-    private MessageConsumer consumer;
+    MessageConsumer consumer;
 
     @BeforeEach
     void setUp() throws Exception {

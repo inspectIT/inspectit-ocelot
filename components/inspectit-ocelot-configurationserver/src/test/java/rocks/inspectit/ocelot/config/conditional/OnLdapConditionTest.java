@@ -29,10 +29,10 @@ class OnLdapConditionTest {
     Environment environment;
 
     @Nested
-    public class Matches {
+    class Matches {
 
         @Test
-        public void ldapEnabled() {
+        void ldapEnabled() {
             when(context.getEnvironment()).thenReturn(environment);
             when(environment.getProperty("inspectit-config-server.security.ldap-authentication", "false")).thenReturn("true");
 
@@ -42,7 +42,7 @@ class OnLdapConditionTest {
         }
 
         @Test
-        public void ldapDisabled() {
+        void ldapDisabled() {
             when(context.getEnvironment()).thenReturn(environment);
             when(environment.getProperty("inspectit-config-server.security.ldap-authentication", "false")).thenReturn("false");
 
@@ -52,7 +52,7 @@ class OnLdapConditionTest {
         }
 
         @Test
-        public void ldapPropertyMissing() {
+        void ldapPropertyMissing() {
             when(context.getEnvironment()).thenReturn(environment);
             when(environment.getProperty("inspectit-config-server.security.ldap-authentication", "false")).thenReturn(null);
 

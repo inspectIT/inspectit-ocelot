@@ -39,28 +39,28 @@ import static org.mockito.Mockito.when;
 class MetricTagValueGuardTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private InspectitEnvironment environment;
+    InspectitEnvironment environment;
 
     @Mock
-    private CommonAttributesManager commonAttributesManager;
+    CommonAttributesManager commonAttributesManager;
 
     @Mock
     PersistedAttributesReaderWriter readerWriter;
 
     @Mock
-    private AgentHealthManager agentHealthManager;
+    AgentHealthManager agentHealthManager;
 
     @Mock
-    private ScheduledExecutorService executor;
+    ScheduledExecutorService executor;
 
     @InjectMocks
-    private MetricTagValueGuard tagGuard;
+    MetricTagValueGuard tagGuard;
 
-    private ExecutionContext context;
+    ExecutionContext context;
 
-    private final static int defaultMaxValuePerAttribute = 42;
+    final static int defaultMaxValuePerAttribute = 42;
 
-    private final static String OVERFLOW = "overflow";
+    final static String OVERFLOW = "overflow";
 
     /**
      * Helper method to configure tag value limits as well as metrics settings before testing.
@@ -87,7 +87,7 @@ class MetricTagValueGuardTest {
     }
 
     @Nested
-    public class ReaderWrite {
+    class ReaderWrite {
 
         private String generateTempFilePath() {
             try {
@@ -117,7 +117,7 @@ class MetricTagValueGuardTest {
         }
 
         @Test
-        public void testReadWriteTagsFromDisk() {
+        void testReadWriteTagsFromDisk() {
             String tempFileName = generateTempFilePath();
 
             PersistedAttributesReaderWriter readerWriter = PersistedAttributesReaderWriter.of(tempFileName);
@@ -133,17 +133,17 @@ class MetricTagValueGuardTest {
     }
 
     @Nested
-    public class getMaxValuesPerTag {
+    class getMaxValuesPerTag {
 
         @Test
-        public void getMaxValuesPerTagByDefault() {
+        void getMaxValuesPerTagByDefault() {
             setupTagGuard(null, null);
 
             assertThat(tagGuard.getMaxValuesPerAttribute("metric", environment.getCurrentConfig())).isEqualTo(defaultMaxValuePerAttribute);
         }
 
         @Test
-        public void getMaxValuesPerTagByMeasure() {
+        void getMaxValuesPerTagByMeasure() {
             Map<String, Integer> maxValuesPerTagByMeasure = new HashMap<>();
             maxValuesPerTagByMeasure.put("metric", 43);
             setupTagGuard(maxValuesPerTagByMeasure, null);
@@ -153,7 +153,7 @@ class MetricTagValueGuardTest {
         }
 
         @Test
-        public void getMaxValuesPerTagByMetricDefinitionSettings() {
+        void getMaxValuesPerTagByMetricDefinitionSettings() {
             MetricDefinitionSettings settings = new MetricDefinitionSettings();
             settings.setMaxValuesPerAttribute(43);
             setupTagGuard(null, settings);
@@ -163,7 +163,7 @@ class MetricTagValueGuardTest {
         }
 
         @Test
-        public void getMaxValuesPerTagWhenAllSettingsAreSet() {
+        void getMaxValuesPerTagWhenAllSettingsAreSet() {
             Map<String, Integer> maxValuesPerTagByMeasure = new HashMap<>();
             maxValuesPerTagByMeasure.put("metric", 43);
             maxValuesPerTagByMeasure.put("metric2", 48);
@@ -180,14 +180,14 @@ class MetricTagValueGuardTest {
     }
 
     @Nested
-    public class getBaggage {
+    class getBaggage {
 
         static final String ATTRIBUTE_KEY = "test-key";
         static final String ATTRIBUTE_VALUE_1 = "test-value-1";
         static final String ATTRIBUTE_VALUE_2 = "test-value-2";
 
-        private MetricAccessor metricAccessor1;
-        private MetricAccessor metricAccessor2;
+        MetricAccessor metricAccessor1;
+        MetricAccessor metricAccessor2;
 
         private ExecutionContext createExecutionContext() {
             InspectitContextImpl ctx = InspectitContextImpl.createFromCurrent(new HashMap<>(), PropagationMetaData.builder().build(),

@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AgentConfigurationManagerTest {
+class AgentConfigurationManagerTest {
 
     @InjectMocks
     AgentConfigurationManager configManager;
@@ -41,7 +41,7 @@ public class AgentConfigurationManagerTest {
     RevisionAccess fileAccessor;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         lenient().when(fileManager.getWorkspaceRevision()).thenReturn(fileAccessor);
         lenient().when(serializer.getRevisionAccess()).thenReturn(fileAccessor);
     }

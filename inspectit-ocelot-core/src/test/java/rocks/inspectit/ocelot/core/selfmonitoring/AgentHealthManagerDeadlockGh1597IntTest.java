@@ -16,12 +16,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Regression test for <a href="https://github.com/inspectIT/inspectit-ocelot/issues/1597">Github issue 1597</a>.
  */
 @DirtiesContext
-public class AgentHealthManagerDeadlockGh1597IntTest extends SpringTestBase {
+class AgentHealthManagerDeadlockGh1597IntTest extends SpringTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger("test-logger");
 
     @Autowired
-    private AgentHealthManager cut;
+    AgentHealthManager cut;
 
     @Test
     void testLogging() {
@@ -61,5 +61,4 @@ public class AgentHealthManagerDeadlockGh1597IntTest extends SpringTestBase {
 
         Awaitility.waitAtMost(millisToRun * 2, TimeUnit.MILLISECONDS).until(isInvalidationThreadDone::get);
     }
-
 }

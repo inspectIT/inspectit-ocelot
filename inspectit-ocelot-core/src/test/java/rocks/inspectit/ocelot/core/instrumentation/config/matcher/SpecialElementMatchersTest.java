@@ -22,17 +22,17 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class SpecialElementMatchersTest {
 
     @Nested
-    public class NameIs {
+    class NameIs {
 
         @Test
-        public void nullArgument() {
+        void nullArgument() {
             ElementMatcher.Junction<NamedElement> result = SpecialElementMatchers.nameIs(null);
 
             assertThat(result).isNull();
         }
 
         @Test
-        public void validSettings() {
+        void validSettings() {
             NameMatcherSettings settings = new NameMatcherSettings();
             settings.setName("name");
             settings.setMatcherMode(MatcherMode.MATCHES);
@@ -43,7 +43,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void emptyName() {
+        void emptyName() {
             NameMatcherSettings settings = new NameMatcherSettings();
             settings.setMatcherMode(MatcherMode.MATCHES);
 
@@ -53,7 +53,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void verifyAllMatcherModesHandled() {
+        void verifyAllMatcherModesHandled() {
             for (MatcherMode mode : MatcherMode.values()) {
                 NameMatcherSettings settings = new NameMatcherSettings();
                 settings.setName("something");
@@ -64,7 +64,7 @@ class SpecialElementMatchersTest {
     }
 
     @Nested
-    public class NotEquals {
+    class NotEquals {
 
         // define some name pattern
         String NAME_PATTERN_A = "rocks.inspectit.ocelot.core.class.method";
@@ -76,7 +76,7 @@ class SpecialElementMatchersTest {
         String NAME_PATTERN_C = NAME_PATTERN_A + "2";
 
         @Test
-        public void notEquals() {
+        void notEquals() {
             // create the NameMatcherSettings
             NameMatcherSettings notEqualsSettings = new NameMatcherSettings();
             notEqualsSettings.setName(NAME_PATTERN_A);
@@ -94,7 +94,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void notEqualsIgnoreCase() {
+        void notEqualsIgnoreCase() {
 
             // create the NameMatcherSettings
             NameMatcherSettings notEqualsIgnoreCaseSettings = new NameMatcherSettings();
@@ -114,24 +114,24 @@ class SpecialElementMatchersTest {
     }
 
     @Nested
-    public class ArgumentsAre {
+    class ArgumentsAre {
 
         @Test
-        public void nullArgument() {
+        void nullArgument() {
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.argumentsAre(null);
 
             assertThat(result).isNull();
         }
 
         @Test
-        public void emptyArguments() {
+        void emptyArguments() {
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.argumentsAre(Collections.emptyList());
 
             assertThat(result).isEqualTo(takesArguments(0));
         }
 
         @Test
-        public void singleArgument() {
+        void singleArgument() {
             List<String> arguments = Arrays.asList("class0");
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.argumentsAre(arguments);
@@ -141,7 +141,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void multipleArguments() {
+        void multipleArguments() {
             List<String> arguments = Arrays.asList("class0", "class1");
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.argumentsAre(arguments);
@@ -153,24 +153,24 @@ class SpecialElementMatchersTest {
     }
 
     @Nested
-    public class VisibilityIs {
+    class VisibilityIs {
 
         @Test
-        public void nullArgument() {
+        void nullArgument() {
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(null);
 
             assertThat(result).isNull();
         }
 
         @Test
-        public void emptyModifier() {
+        void emptyModifier() {
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(Collections.emptyList());
 
             assertThat(result).isNull();
         }
 
         @Test
-        public void onlyPublic() {
+        void onlyPublic() {
             List<AccessModifier> modifiers = Collections.singletonList(AccessModifier.PUBLIC);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
@@ -180,7 +180,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void onlyPrivate() {
+        void onlyPrivate() {
             List<AccessModifier> modifiers = Collections.singletonList(AccessModifier.PRIVATE);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
@@ -190,7 +190,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void onlyProtected() {
+        void onlyProtected() {
             List<AccessModifier> modifiers = Collections.singletonList(AccessModifier.PROTECTED);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
@@ -200,7 +200,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void onlyPackage() {
+        void onlyPackage() {
             List<AccessModifier> modifiers = Collections.singletonList(AccessModifier.PACKAGE);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
@@ -210,7 +210,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void multipleModifiers() {
+        void multipleModifiers() {
             List<AccessModifier> modifiers = Arrays.asList(AccessModifier.PUBLIC, AccessModifier.PRIVATE);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
@@ -220,7 +220,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void eachModifier() {
+        void eachModifier() {
             List<AccessModifier> modifiers = Arrays.asList(AccessModifier.PUBLIC, AccessModifier.PRIVATE, AccessModifier.PROTECTED, AccessModifier.PACKAGE);
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.visibilityIs(modifiers);
@@ -229,7 +229,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void duplicateModifiers() {
+        void duplicateModifiers() {
             List<AccessModifier> modifiers = Arrays.asList(AccessModifier.PUBLIC, AccessModifier.PUBLIC);
 
             Object result = SpecialElementMatchers.visibilityIs(modifiers);
@@ -239,10 +239,10 @@ class SpecialElementMatchersTest {
     }
 
     @Nested
-    public class OnlyOverridenMethodsOf {
+    class OnlyOverridenMethodsOf {
 
         @Test
-        public void nullInterfacesAndSuperclass() {
+        void nullInterfacesAndSuperclass() {
             InstrumentationScopeSettings scope = new InstrumentationScopeSettings();
 
             ElementMatcher.Junction<MethodDescription> result = SpecialElementMatchers.onlyOverridenMethodsOf(scope);
@@ -251,7 +251,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void onlyInterface() {
+        void onlyInterface() {
             ElementDescriptionMatcherSettings interfaceSettings = new ElementDescriptionMatcherSettings();
             interfaceSettings.setName("interface1");
 
@@ -265,7 +265,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void onlySuperclass() {
+        void onlySuperclass() {
             ElementDescriptionMatcherSettings superclassSettings = new ElementDescriptionMatcherSettings();
             superclassSettings.setName("superclass1");
 
@@ -279,7 +279,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void fullScope() {
+        void fullScope() {
             ElementDescriptionMatcherSettings interfaceSettings = new ElementDescriptionMatcherSettings();
             interfaceSettings.setName("interface1");
             ElementDescriptionMatcherSettings superclassSettings = new ElementDescriptionMatcherSettings();
@@ -298,17 +298,17 @@ class SpecialElementMatchersTest {
     }
 
     @Nested
-    public class DescribedBy {
+    class DescribedBy {
 
         @Test
-        public void nullArgument() {
+        void nullArgument() {
             ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(null);
 
             assertThat(result).isNull();
         }
 
         @Test
-        public void emptySettings() {
+        void emptySettings() {
             ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
 
             ElementMatcher.Junction<TypeDescription> result = SpecialElementMatchers.describedBy(settings);
@@ -317,7 +317,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void onlyName() {
+        void onlyName() {
             ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setName("name1");
 
@@ -328,7 +328,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void onlyAnnotation() {
+        void onlyAnnotation() {
             NameMatcherSettings annotationMatcher = new NameMatcherSettings();
             annotationMatcher.setName("annotation1");
             ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
@@ -341,7 +341,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void nameAndAnnotation() {
+        void nameAndAnnotation() {
             NameMatcherSettings annotationMatcher = new NameMatcherSettings();
             annotationMatcher.setName("annotation1");
             ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
@@ -355,7 +355,7 @@ class SpecialElementMatchersTest {
         }
 
         @Test
-        public void multipleAnnotations() {
+        void multipleAnnotations() {
             NameMatcherSettings annotationMatcher1 = new NameMatcherSettings();
             annotationMatcher1.setName("annotation1");
             NameMatcherSettings annotationMatcher2 = new NameMatcherSettings();

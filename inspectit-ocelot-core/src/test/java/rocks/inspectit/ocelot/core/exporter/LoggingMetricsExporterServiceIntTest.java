@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
+class LoggingMetricsExporterServiceIntTest extends SpringTestBase {
 
     @RegisterExtension
     LogCapturer metricLogs = LogCapturer.create().captureForType(LoggingMetricExporter.class);

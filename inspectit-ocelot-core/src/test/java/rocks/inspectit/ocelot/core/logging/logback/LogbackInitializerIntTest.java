@@ -28,15 +28,15 @@ import static rocks.inspectit.ocelot.core.logging.logback.LoggingProperties.*;
 
 class LogbackInitializerIntTest {
 
-    private static final String EXCEPTIONS_LOG_FILE = "exceptions.log";
+    static final String EXCEPTIONS_LOG_FILE = "exceptions.log";
 
-    private static final String AGENT_LOG_FILE = "agent.log";
+    static final String AGENT_LOG_FILE = "agent.log";
 
     @Nested
     @DirtiesContext
     class Defaults extends SpringTestBase {
 
-        private Path tempDirectory;
+        Path tempDirectory;
 
         @Autowired
         InspectitEnvironment environment;

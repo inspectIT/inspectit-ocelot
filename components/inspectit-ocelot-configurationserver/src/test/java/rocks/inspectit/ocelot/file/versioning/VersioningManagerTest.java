@@ -50,18 +50,18 @@ class VersioningManagerTest extends FileTestBase {
      * For convenience: if this field is not null, it will be used as working directory during tests.
      * Note: the specified directory is CLEANED before each run, thus, if you have files there, they will be gone ;)
      */
-    public static final String TEST_DIRECTORY = null;
+    static final String TEST_DIRECTORY = null;
 
-    private VersioningManager versioningManager;
+    VersioningManager versioningManager;
 
-    private Authentication authentication;
+    Authentication authentication;
 
-    private ApplicationEventPublisher eventPublisher;
+    ApplicationEventPublisher eventPublisher;
 
-    private InspectitServerSettings settings;
+    InspectitServerSettings settings;
 
     @BeforeEach
-    public void beforeEach() throws IOException {
+    void beforeEach() throws IOException {
         if (TEST_DIRECTORY == null) {
             tempDirectory = Files.createTempDirectory("ocelot");
         } else {
@@ -81,7 +81,7 @@ class VersioningManagerTest extends FileTestBase {
     }
 
     @AfterEach
-    public void afterEach() throws IOException {
+    void afterEach() throws IOException {
         Git git = (Git) ReflectionTestUtils.getField(versioningManager, "git");
         if (git != null) {
             git.close();
@@ -96,7 +96,7 @@ class VersioningManagerTest extends FileTestBase {
     class Init {
 
         @Test
-        public void initAndStageFiles() throws GitAPIException, IOException {
+        void initAndStageFiles() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
 
             boolean before = Files.exists(tempDirectory.resolve(".git"));
@@ -114,7 +114,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void multipleCalls() throws GitAPIException, IOException {
+        void multipleCalls() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
 
             boolean initFirst = Files.exists(tempDirectory.resolve(".git"));
@@ -140,7 +140,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void externalChanges() throws GitAPIException, IOException {
+        void externalChanges() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
 
             boolean initFirst = Files.exists(tempDirectory.resolve(".git"));
@@ -173,7 +173,7 @@ class VersioningManagerTest extends FileTestBase {
     class CommitAllChanges {
 
         @Test
-        public void commitFile() throws GitAPIException, IOException {
+        void commitFile() throws GitAPIException, IOException {
             versioningManager.initialize();
             assertThat(versioningManager.getCommitCount()).isOne();
 
@@ -189,7 +189,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void amendCommit() throws GitAPIException, IOException {
+        void amendCommit() throws GitAPIException, IOException {
             versioningManager.initialize();
             assertThat(versioningManager.getCommitCount()).isOne();
 
@@ -209,7 +209,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void noAmendAfterTimeout() throws GitAPIException, IOException {
+        void noAmendAfterTimeout() throws GitAPIException, IOException {
             versioningManager.initialize();
             versioningManager.setAmendTimeout(-2000);
             assertThat(versioningManager.getCommitCount()).isOne();
@@ -230,7 +230,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void noChanges() throws GitAPIException, IOException {
+        void noChanges() throws GitAPIException, IOException {
             versioningManager.initialize();
             versioningManager.setAmendTimeout(-2000);
 
@@ -249,7 +249,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void invalidState() throws GitAPIException, IOException {
+        void invalidState() throws GitAPIException, IOException {
             versioningManager.initialize();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
@@ -271,7 +271,7 @@ class VersioningManagerTest extends FileTestBase {
     class IsClean {
 
         @Test
-        public void cleanRepository() throws GitAPIException, IOException {
+        void cleanRepository() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml", "untracked-file");
             versioningManager.initialize();
 
@@ -281,7 +281,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void modificationChanges() throws GitAPIException, IOException {
+        void modificationChanges() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             versioningManager.initialize();
 
@@ -296,7 +296,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void untrackedChanges() throws GitAPIException, IOException {
+        void untrackedChanges() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             versioningManager.initialize();
 
@@ -311,7 +311,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void ignoredFile() throws GitAPIException, IOException {
+        void ignoredFile() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME, "ignored-file");
             versioningManager.initialize();
 
@@ -325,7 +325,7 @@ class VersioningManagerTest extends FileTestBase {
     class Destroy {
 
         @Test
-        public void callDestroy() {
+        void callDestroy() {
             Git gitMock = mock(Git.class);
             ReflectionTestUtils.setField(versioningManager, "git", gitMock);
 
@@ -340,7 +340,7 @@ class VersioningManagerTest extends FileTestBase {
     class GetLatestCommit {
 
         @Test
-        public void emptyCommit() throws GitAPIException, IOException {
+        void emptyCommit() throws GitAPIException, IOException {
             versioningManager.initialize();
 
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
@@ -352,7 +352,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void commitExists() throws GitAPIException, IOException {
+        void commitExists() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
             versioningManager.initialize();
 
@@ -364,7 +364,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void getLatestCommit() throws GitAPIException, IOException {
+        void getLatestCommit() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
@@ -377,7 +377,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void getLatestCommitFromLive() throws GitAPIException, IOException {
+        void getLatestCommitFromLive() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=content");
@@ -395,7 +395,7 @@ class VersioningManagerTest extends FileTestBase {
     class GetWorkspaceDiff {
 
         @Test
-        public void getDiff() throws IOException, GitAPIException {
+        void getDiff() throws IOException, GitAPIException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
@@ -424,7 +424,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void getDiffWithContent() throws IOException, GitAPIException {
+        void getDiffWithContent() throws IOException, GitAPIException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
@@ -457,7 +457,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void getDiffById() throws IOException, GitAPIException {
+        void getDiffById() throws IOException, GitAPIException {
             // initial
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
             versioningManager.initialize();
@@ -500,7 +500,7 @@ class VersioningManagerTest extends FileTestBase {
     class PromoteFile {
 
         @Test
-        public void promoteEverything() throws GitAPIException, IOException {
+        void promoteEverything() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.AGENT_MAPPINGS_FILE_NAME);
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
@@ -529,7 +529,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void partialPromotion() throws GitAPIException, IOException {
+        void partialPromotion() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
@@ -559,7 +559,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void multiplePromotions() throws GitAPIException, IOException {
+        void multiplePromotions() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
@@ -610,7 +610,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void differentLiveBranch() throws GitAPIException, IOException {
+        void differentLiveBranch() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_removed.yml=content");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_no_change.yml");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
@@ -640,7 +640,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void promotionWithModification() throws GitAPIException, IOException {
+        void promotionWithModification() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
@@ -674,7 +674,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void selfPromotionProtectionEnabled() throws GitAPIException, IOException {
+        void selfPromotionProtectionEnabled() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
@@ -701,7 +701,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void selfPromotionPrevented() throws GitAPIException, IOException {
+        void selfPromotionPrevented() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml");
             versioningManager.initialize();
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_modified.yml=content_A");
@@ -727,7 +727,7 @@ class VersioningManagerTest extends FileTestBase {
     class GetRevisionById {
 
         @Test
-        public void getRevision() throws GitAPIException, IOException {
+        void getRevision() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=a");
             versioningManager.initialize();
 
@@ -783,7 +783,7 @@ class VersioningManagerTest extends FileTestBase {
     @Nested
     class FillInAuthors {
 
-        private void promote(String... files) throws Exception {
+        void promote(String... files) throws Exception {
             String liveId = versioningManager.getLatestCommit(Branch.LIVE).get().getId().name();
             String workspaceId = versioningManager.getLatestCommit(Branch.WORKSPACE).get().getId().name();
 
@@ -794,7 +794,7 @@ class VersioningManagerTest extends FileTestBase {
             versioningManager.promote(promotion, true);
         }
 
-        private void buildDummyHistory() throws Exception {
+        void buildDummyHistory() throws Exception {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/c0_file_a=content");
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/c0_file_b.yml");
             versioningManager.initialize();
@@ -1055,10 +1055,10 @@ class VersioningManagerTest extends FileTestBase {
     @Nested
     class ListVersions {
 
-        private String prevCommitId;
+        String prevCommitId;
 
         @BeforeEach
-        private void createCommits() throws GitAPIException, IOException {
+        void createCommits() throws GitAPIException, IOException {
             createTestFiles(AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file.yml=1", AbstractFileAccessor.CONFIGURATION_FILES_SUBFOLDER + "/file_b.yml=1");
             versioningManager.initialize();
             prevCommitId = versioningManager.getWorkspaceRevision().getRevisionId();
@@ -1071,7 +1071,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void test() throws GitAPIException, IOException {
+        void test() throws GitAPIException, IOException {
             List<WorkspaceVersion> result = versioningManager.listWorkspaceVersions();
 
             assertThat(result).flatExtracting(WorkspaceVersion::getMessage)
@@ -1083,16 +1083,16 @@ class VersioningManagerTest extends FileTestBase {
     @Nested
     class MergeSourceBranch {
 
-        private Path directoryOne;
+        Path directoryOne;
 
-        private Path directoryTwo;
+        Path directoryTwo;
 
-        private Git repositoryOne;
+        Git repositoryOne;
 
-        private Git repositoryTwo;
+        Git repositoryTwo;
 
         @BeforeEach
-        private void createRepository() throws IOException, GitAPIException {
+        void createRepository() throws IOException, GitAPIException {
             directoryOne = Files.createTempDirectory("git-test-remote");
             directoryTwo = Files.createTempDirectory("git-test-remote");
 
@@ -1101,7 +1101,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @AfterEach
-        private void afterEach() throws IOException {
+        void afterEach() throws IOException {
             repositoryOne.close();
             repositoryTwo.close();
 
@@ -1110,13 +1110,13 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void missingRemoteConfiguration() {
+        void missingRemoteConfiguration() {
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> versioningManager.mergeSourceBranch())
                     .withMessage("The remote configuration settings must not be null");
         }
 
         @Test
-        public void missingSourceRepository() {
+        void missingSourceRepository() {
             when(settings.getRemoteConfigurations()).thenReturn(mock(RemoteConfigurationsSettings.class));
 
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> versioningManager.mergeSourceBranch())
@@ -1124,7 +1124,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void syncTagMissing() throws URISyntaxException, GitAPIException, IOException {
+        void syncTagMissing() throws URISyntaxException, GitAPIException, IOException {
             RemoteRepositorySettings repositorySettings = RemoteRepositorySettings.builder()
                     .branchName("branch")
                     .remoteName("remote")
@@ -1173,7 +1173,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void mergeBranch() throws URISyntaxException, GitAPIException, IOException {
+        void mergeBranch() throws URISyntaxException, GitAPIException, IOException {
             RemoteRepositorySettings repositorySettings = RemoteRepositorySettings.builder()
                     .branchName("branch")
                     .remoteName("remote")
@@ -1233,7 +1233,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void initialConfigurationSyncOneRemoteWithoutLocalFiles() throws URISyntaxException, GitAPIException, IOException {
+        void initialConfigurationSyncOneRemoteWithoutLocalFiles() throws URISyntaxException, GitAPIException, IOException {
             // ////////////////////////
             // test without local files --> should only reset to remote
             doInitialConfigurationSyncOneRemote(false);
@@ -1250,7 +1250,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void initialConfigurationSyncOneRemoteWithLocalFiles() throws URISyntaxException, GitAPIException, IOException {
+        void initialConfigurationSyncOneRemoteWithLocalFiles() throws URISyntaxException, GitAPIException, IOException {
             // ////////////////////////
             // test with local files --> should overwrite those local files that exist in remote and keep others
             doInitialConfigurationSyncOneRemote(true);
@@ -1268,7 +1268,7 @@ class VersioningManagerTest extends FileTestBase {
             assertThat(new String(Files.readAllBytes(tempDirectory.resolve("files/from_remote.yml")))).isEmpty(); // file from remote should have remote content (empty)
         }
 
-        private void doInitialConfigurationSyncOneRemote(boolean localFiles) throws URISyntaxException, GitAPIException, IOException {
+        void doInitialConfigurationSyncOneRemote(boolean localFiles) throws URISyntaxException, GitAPIException, IOException {
             RemoteRepositorySettings remoteRepositorySettings = RemoteRepositorySettings.builder()
                     .branchName("remote")
                     .remoteName("remote")
@@ -1301,7 +1301,7 @@ class VersioningManagerTest extends FileTestBase {
         }
 
         @Test
-        public void initialConfigurationSyncTwoRemotes() throws URISyntaxException, GitAPIException, IOException {
+        void initialConfigurationSyncTwoRemotes() throws URISyntaxException, GitAPIException, IOException {
             RemoteRepositorySettings pullRepositorySettings = RemoteRepositorySettings.builder()
                     .branchName("pull")
                     .remoteName("pull")

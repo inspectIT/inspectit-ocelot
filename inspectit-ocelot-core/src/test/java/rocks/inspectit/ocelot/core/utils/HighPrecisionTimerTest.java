@@ -13,9 +13,9 @@ import java.util.function.BooleanSupplier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class HighPrecisionTimerTest {
+class HighPrecisionTimerTest {
 
-    private HighPrecisionTimer timer;
+    HighPrecisionTimer timer;
 
     private void createSpyTimer(long periodMillis, long inactivityLimitMillis, BooleanSupplier function) {
         timer = Mockito.spy(new HighPrecisionTimer("test", Duration.ofMillis(periodMillis), Duration.ofMillis(inactivityLimitMillis), function));

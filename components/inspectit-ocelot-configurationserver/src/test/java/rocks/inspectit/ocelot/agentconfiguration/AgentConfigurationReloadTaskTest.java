@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 @ExtendWith(MockitoExtension.class)
-public class AgentConfigurationReloadTaskTest {
+class AgentConfigurationReloadTaskTest {
 
     @Mock
     AgentMappingSerializer serializer;
@@ -59,7 +59,7 @@ public class AgentConfigurationReloadTaskTest {
     class Run {
 
         @Test
-        void runTaskWithValidOutput() throws Exception {
+        void runTaskWithValidOutput() {
             when(workspaceAccessor.readConfigurationFile(anyString())).thenReturn(Optional.of("key: valid"));
 
             AgentMapping mapping = AgentMapping.builder()

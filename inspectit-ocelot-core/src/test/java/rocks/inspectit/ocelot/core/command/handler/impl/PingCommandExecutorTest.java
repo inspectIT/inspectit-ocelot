@@ -12,35 +12,33 @@ import rocks.inspectit.ocelot.commons.models.command.CommandResponse;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class PingCommandExecutorTest {
+class PingCommandExecutorTest {
 
     @InjectMocks
-    private PingCommandExecutor executor;
+    PingCommandExecutor executor;
 
 
     @Nested
-    public class CanExecute {
+    class CanExecute {
 
-        private class NonPingCommand extends Command {
-
-        }
+        private class NonPingCommand extends Command {}
 
         @Test
-        public void nullParam(){
+        void nullParam() {
             boolean result = executor.canExecute(null);
 
             assertFalse(result);
         }
 
         @Test
-        public void nonPingCommand(){
+        void nonPingCommand() {
             boolean result = executor.canExecute(new NonPingCommand());
 
             assertFalse(result);
         }
 
         @Test
-        public void pingCommand(){
+        void pingCommand() {
             boolean result = executor.canExecute(new PingCommand());
 
             assertTrue(result);
@@ -48,10 +46,10 @@ public class PingCommandExecutorTest {
     }
 
     @Nested
-    public class execute {
+    class execute {
 
         @Test
-        public void executes(){
+        void executes() {
             PingCommand command = new PingCommand();
 
             CommandResponse response = executor.execute(command);

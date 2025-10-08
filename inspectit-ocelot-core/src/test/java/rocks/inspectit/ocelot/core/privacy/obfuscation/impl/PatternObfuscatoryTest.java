@@ -28,7 +28,7 @@ class PatternObfuscatoryTest {
         Pattern p2 = Pattern.compile("[0-9]+");
 
         @Test
-        public void keyOnlyNoObfuscation() {
+        void keyOnlyNoObfuscation() {
             PatternObfuscatory.PatternEntry.PatternEntryBuilder entryBuilder = PatternObfuscatory.PatternEntry.builder();
             entryBuilder.pattern(p1);
             entryBuilder.checkKey(true);
@@ -41,7 +41,7 @@ class PatternObfuscatoryTest {
         }
 
         @Test
-        public void keyOnlyObfuscation() {
+        void keyOnlyObfuscation() {
             PatternObfuscatory.PatternEntry.PatternEntryBuilder entryBuilder = PatternObfuscatory.PatternEntry.builder();
             entryBuilder.pattern(p1);
             entryBuilder.checkKey(true);
@@ -54,7 +54,7 @@ class PatternObfuscatoryTest {
         }
 
         @Test
-        public void keyOnlyObfuscationMapShortCut() {
+        void keyOnlyObfuscationMapShortCut() {
             PatternObfuscatory.PatternEntry.PatternEntryBuilder entryBuilder = PatternObfuscatory.PatternEntry.builder();
             entryBuilder.pattern(p1);
             entryBuilder.checkKey(true);
@@ -72,7 +72,7 @@ class PatternObfuscatoryTest {
         }
 
         @Test
-        public void keyOnlyObfuscationWithReplaceRegex() {
+        void keyOnlyObfuscationWithReplaceRegex() {
             PatternObfuscatory.PatternEntry.PatternEntryBuilder entryBuilder = PatternObfuscatory.PatternEntry.builder();
             entryBuilder.pattern(p1);
             entryBuilder.checkKey(true);
@@ -88,7 +88,7 @@ class PatternObfuscatoryTest {
         }
 
         @Test
-        public void dataOnlyNoObfuscation() {
+        void dataOnlyNoObfuscation() {
             PatternObfuscatory.PatternEntry.PatternEntryBuilder entryBuilder = PatternObfuscatory.PatternEntry.builder();
             entryBuilder.pattern(p1);
             entryBuilder.checkData(true);
@@ -101,7 +101,7 @@ class PatternObfuscatoryTest {
         }
 
         @Test
-        public void dataOnlyObfuscation() {
+        void dataOnlyObfuscation() {
             PatternObfuscatory.PatternEntry.PatternEntryBuilder entryBuilder = PatternObfuscatory.PatternEntry.builder();
             entryBuilder.pattern(p1);
             entryBuilder.checkData(true);
@@ -114,7 +114,7 @@ class PatternObfuscatoryTest {
         }
 
         @Test
-        public void dataOnlyObfuscationWithReplaceRegex() {
+        void dataOnlyObfuscationWithReplaceRegex() {
             PatternObfuscatory.PatternEntry.PatternEntryBuilder entryBuilder = PatternObfuscatory.PatternEntry.builder();
             entryBuilder.pattern(p1);
             entryBuilder.checkData(true);
@@ -130,7 +130,7 @@ class PatternObfuscatoryTest {
         }
 
         @Test
-        public void mixed() {
+        void mixed() {
             // numbers everywhere, lower-case letters only in key
             PatternObfuscatory.PatternEntry.PatternEntryBuilder entryBuilder1 = PatternObfuscatory.PatternEntry.builder();
             entryBuilder1.pattern(p1);

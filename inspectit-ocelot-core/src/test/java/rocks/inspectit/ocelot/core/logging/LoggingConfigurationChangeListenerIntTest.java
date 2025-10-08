@@ -14,7 +14,7 @@ class LoggingConfigurationChangeListenerIntTest {
     class Update extends SpringTestBase {
 
         @Test
-        public void loggingProperty() {
+        void loggingProperty() {
             updateProperties(properties -> properties.withProperty("inspectit.logging.trace", Boolean.TRUE));
 
             // make sure config was updated
@@ -22,7 +22,7 @@ class LoggingConfigurationChangeListenerIntTest {
         }
 
         @Test
-        public void serviceName() {
+        void serviceName() {
             String value = "my-service-name";
             updateProperties(properties -> {
                 properties.withProperty("inspectit.service-name", value);
@@ -33,7 +33,7 @@ class LoggingConfigurationChangeListenerIntTest {
         }
 
         @Test
-        public void notRelated() {
+        void notRelated() {
             String invalid = "something_not_valid";
             System.setProperty("INSPECTIT_LOG_SERVICE_NAME", invalid);
 
@@ -44,5 +44,4 @@ class LoggingConfigurationChangeListenerIntTest {
         }
 
     }
-
 }

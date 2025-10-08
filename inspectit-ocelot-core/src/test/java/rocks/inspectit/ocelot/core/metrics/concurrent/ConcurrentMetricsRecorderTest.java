@@ -9,7 +9,7 @@ import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ConcurrentMetricsRecorderTest extends SpringTestBase {
+class ConcurrentMetricsRecorderTest extends SpringTestBase {
 
     @Autowired
     ConcurrentMetricsRecorder recorder;

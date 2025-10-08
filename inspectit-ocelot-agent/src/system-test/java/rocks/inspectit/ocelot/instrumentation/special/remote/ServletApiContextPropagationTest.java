@@ -31,15 +31,15 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 /**
  * uses global-propagation-tests.yml
  */
-public class ServletApiContextPropagationTest {
+class ServletApiContextPropagationTest {
 
-    public static final int PORT = 9999;
+    static final int PORT = 9999;
 
-    public static final String TEST_PATH = "/test";
+    static final String TEST_PATH = "/test";
 
-    public static final String TEST_URL = "http://localhost:" + PORT + TEST_PATH;
+    static final String TEST_URL = "http://localhost:" + PORT + TEST_PATH;
 
-    private Server server;
+    Server server;
 
     @BeforeAll
     static void waitForInstrumentation() throws Exception {
@@ -68,17 +68,17 @@ public class ServletApiContextPropagationTest {
         }
     }
 
-    public static class TestServlet extends HttpServlet {
+    static class TestServlet extends HttpServlet {
 
-        public static Map<String, String> lastAttributes;
+        static Map<String, String> lastAttributes;
 
-        public static String writerResponse;
+        static String writerResponse;
 
-        public static String outputStreamResponse;
+        static String outputStreamResponse;
 
-        public static Object upPropagationValue;
+        static Object upPropagationValue;
 
-        public static void reset() {
+        static void reset() {
             lastAttributes = null;
             writerResponse = null;
             outputStreamResponse = null;
@@ -120,13 +120,13 @@ public class ServletApiContextPropagationTest {
         }
     }
 
-    public static class TestFilter implements Filter {
+    static class TestFilter implements Filter {
 
-        public static Map<String, String> lastAttributes;
+        static Map<String, String> lastAttributes;
 
-        public static Map<String, String> overrideAttributes;
+        static Map<String, String> overrideAttributes;
 
-        public static void reset() {
+        static void reset() {
             lastAttributes = null;
             overrideAttributes = null;
         }
@@ -263,5 +263,4 @@ public class ServletApiContextPropagationTest {
             assertThat(IOUtils.readLines(urlConnection.getInputStream())).containsExactly("Hallo Welt!");
         }
     }
-
 }

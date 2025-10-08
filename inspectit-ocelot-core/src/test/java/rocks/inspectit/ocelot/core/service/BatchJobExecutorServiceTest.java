@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class BatchJobExecutorServiceTest {
+class BatchJobExecutorServiceTest {
 
     @Mock
     ScheduledExecutorService scheduledExecutor;
@@ -29,7 +29,7 @@ public class BatchJobExecutorServiceTest {
 
 
     @Test
-    public void testJobTermination() {
+    void testJobTermination() {
         ScheduledFuture<?> future = Mockito.mock(ScheduledFuture.class);
 
         when(scheduledExecutor.schedule(isA(Runnable.class), anyLong(), any())).then((invoc) -> {
@@ -57,7 +57,7 @@ public class BatchJobExecutorServiceTest {
 
 
     @Test
-    public void testJobBatchSizeUpdate() {
+    void testJobBatchSizeUpdate() {
         ScheduledFuture<?> future = Mockito.mock(ScheduledFuture.class);
 
         AtomicReference<Runnable> runnableToInvoke = new AtomicReference<>();
@@ -89,7 +89,7 @@ public class BatchJobExecutorServiceTest {
     }
 
     @Test
-    public void testJobBatchDelayUpdate() {
+    void testJobBatchDelayUpdate() {
         ScheduledFuture<?> future = Mockito.mock(ScheduledFuture.class);
 
         AtomicReference<Runnable> runnableToInvoke = new AtomicReference<>();
@@ -128,7 +128,7 @@ public class BatchJobExecutorServiceTest {
 
 
     @Test
-    public void testExceptionsDontPreventFutureBatches() {
+    void testExceptionsDontPreventFutureBatches() {
         ScheduledFuture<?> future = Mockito.mock(ScheduledFuture.class);
 
         AtomicReference<Runnable> runnableToInvoke = new AtomicReference<>();
@@ -161,7 +161,7 @@ public class BatchJobExecutorServiceTest {
     }
 
     @Test
-    public void testJobCancellation() {
+    void testJobCancellation() {
         ScheduledFuture<?> future = Mockito.mock(ScheduledFuture.class);
 
         AtomicReference<Runnable> runnableToInvoke = new AtomicReference<>();
@@ -185,7 +185,5 @@ public class BatchJobExecutorServiceTest {
 
         runnableToInvoke.get().run();
         verify(scheduledExecutor, times(2)).schedule(isA(Runnable.class), eq(delay.toNanos()), eq(TimeUnit.NANOSECONDS));
-
     }
-
 }

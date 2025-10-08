@@ -8,7 +8,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static rocks.inspectit.ocelot.core.instrumentation.context.propagation.BaggagePropagation.MAX_BAGGAGE_HEADER_SIZE;
 
-public class BaggagePropagationTest {
+class BaggagePropagationTest {
 
     BaggagePropagation baggagePropagation = new BaggagePropagation();
 

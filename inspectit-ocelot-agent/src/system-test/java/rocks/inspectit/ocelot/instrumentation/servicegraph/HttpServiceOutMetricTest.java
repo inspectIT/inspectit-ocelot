@@ -37,19 +37,19 @@ import static org.awaitility.Awaitility.await;
 /**
  * uses global-propagation-tests.yml
  */
-public class HttpServiceOutMetricTest extends InstrumentationSysTestBase {
+class HttpServiceOutMetricTest extends InstrumentationSysTestBase {
 
-    public static final int PORT = 9999;
+    static final int PORT = 9999;
 
-    public static final String TEST_PATH = "/test";
+    static final String TEST_PATH = "/test";
 
-    public static final String TEST_URL = "http://localhost:" + PORT + TEST_PATH;
+    static final String TEST_URL = "http://localhost:" + PORT + TEST_PATH;
 
-    public static final String SERVICE_NAME = "systemtest"; //configured in agent-overwrites.yml
+    static final String SERVICE_NAME = "systemtest"; //configured in agent-overwrites.yml
 
-    private WireMockServer wireMockServer;
+    WireMockServer wireMockServer;
 
-    public static String targetName;
+    static String targetName;
 
     @BeforeEach
     void setupWiremock() {

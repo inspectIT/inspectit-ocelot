@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ConfigurationFilesCacheReloadTaskTest {
+class ConfigurationFilesCacheReloadTaskTest {
 
     ConfigurationFilesCacheReloadTask reloadTask;
 
@@ -30,15 +30,15 @@ public class ConfigurationFilesCacheReloadTaskTest {
     private Collection<Object> resultHolder;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         reloadTask = new ConfigurationFilesCacheReloadTask(fileAccessor, (result) -> resultHolder = result);
     }
 
     @Nested
-    public class LoadYamlFile {
+    class LoadYamlFile {
 
         @Test
-        public void testLoadYaml() {
+        void testLoadYaml() {
             String testPath = "mockPath";
             String yamlContent = "i am a:\n        - test\n        - yaml";
             when(fileAccessor.readConfigurationFile(any())).thenReturn(Optional.of(yamlContent));
@@ -50,7 +50,7 @@ public class ConfigurationFilesCacheReloadTaskTest {
         }
 
         @Test
-        public void fileManagerReturnsNull() {
+        void fileManagerReturnsNull() {
             String testPath = "mockPath";
             when(fileAccessor.readConfigurationFile(any())).thenReturn(Optional.empty());
 
@@ -60,7 +60,7 @@ public class ConfigurationFilesCacheReloadTaskTest {
         }
 
         @Test
-        public void exceptionOnYamlParsing() {
+        void exceptionOnYamlParsing() {
             String testPath = "mockPath";
             String yamlContent = "foo:bar";
             when(fileAccessor.readConfigurationFile(any())).thenReturn(Optional.of(yamlContent));
@@ -74,10 +74,10 @@ public class ConfigurationFilesCacheReloadTaskTest {
     }
 
     @Nested
-    public class GetAllPaths {
+    class GetAllPaths {
 
         @Test
-        public void getYamlPaths() throws IOException {
+        void getYamlPaths() {
             FileInfo mockFileInfo = Mockito.mock(FileInfo.class);
             Stream<String> streamA = Stream.of("path/a.yml");
             when(mockFileInfo.getAbsoluteFilePaths(any())).thenReturn(streamA);
@@ -95,7 +95,7 @@ public class ConfigurationFilesCacheReloadTaskTest {
         }
 
         @Test
-        public void containsNonYamlFile() {
+        void containsNonYamlFile() {
             FileInfo mockFileInfo = Mockito.mock(FileInfo.class);
             Stream<String> streamA = Stream.of("path/a.xml");
             when(mockFileInfo.getAbsoluteFilePaths(any())).thenReturn(streamA);
@@ -109,10 +109,10 @@ public class ConfigurationFilesCacheReloadTaskTest {
     }
 
     @Nested
-    public class Run {
+    class Run {
 
         @Test
-        public void testYamlLoadingMap() throws IOException {
+        void testYamlLoadingMap() {
             String yamlContent1 = "i am a:\n        - test\n        - yaml";
             String yamlContent2 = "so:\n    am: i";
             when(fileAccessor.readConfigurationFile(any())).thenReturn(Optional.of(yamlContent1), Optional.of(yamlContent2));
@@ -136,4 +136,3 @@ public class ConfigurationFilesCacheReloadTaskTest {
         }
     }
 }
-

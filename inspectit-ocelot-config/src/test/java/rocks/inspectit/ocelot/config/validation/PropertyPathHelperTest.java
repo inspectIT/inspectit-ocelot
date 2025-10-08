@@ -14,10 +14,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class PropertyPathHelperTest {
+class PropertyPathHelperTest {
 
     @Nested
-    public class Parse {
+    class Parse {
+
         @Test
         void kebabCaseTest() {
             List<String> output = Arrays.asList("inspectit", "iCan-parse-kebab", "case", "even-in-brackets\\wow", "thisIs-awesome");
@@ -62,14 +63,13 @@ public class PropertyPathHelperTest {
                 assertThat(e.getMessage()).isEqualTo("invalid property path");
             }
         }
-
     }
 
     @Nested
-    public class IsBean {
+    class IsBean {
 
         @Test
-        public void genericTypeIsNotABean() throws NoSuchFieldException {
+        void genericTypeIsNotABean() throws NoSuchFieldException {
             Type type = new Object() {
                 AtomicReference<Boolean> genericMember;
             }.getClass().getDeclaredField("genericMember").getGenericType();
@@ -79,37 +79,37 @@ public class PropertyPathHelperTest {
         }
 
         @Test
-        public void mapIsNotABean() {
+        void mapIsNotABean() {
             boolean result = PropertyPathHelper.isBean(Map.class);
             assertThat(result).isFalse();
         }
 
         @Test
-        public void setIsNotABean() {
+        void setIsNotABean() {
             boolean result = PropertyPathHelper.isBean(Set.class);
             assertThat(result).isFalse();
         }
 
         @Test
-        public void listIsNotABean() {
+        void listIsNotABean() {
             boolean result = PropertyPathHelper.isBean(List.class);
             assertThat(result).isFalse();
         }
 
         @Test
-        public void durationIsNotABean() {
+        void durationIsNotABean() {
             boolean result = PropertyPathHelper.isBean(Duration.class);
             assertThat(result).isFalse();
         }
 
         @Test
-        public void integerIsNotABean() {
+        void integerIsNotABean() {
             boolean result = PropertyPathHelper.isBean(Integer.class);
             assertThat(result).isFalse();
         }
 
         @Test
-        public void pojoIsABean() {
+        void pojoIsABean() {
             Class<?> pojo = new Object() {
                 String member;
             }.getClass();
@@ -120,31 +120,31 @@ public class PropertyPathHelperTest {
     }
 
     @Nested
-    public class IsTerminal {
+    class IsTerminal {
 
         @Test
-        public void terminalType() {
+        void terminalType() {
             boolean result = PropertyPathHelper.isTerminal(Boolean.class);
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void primitive() {
+        void primitive() {
             boolean result = PropertyPathHelper.isTerminal(boolean.class);
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void enumType() {
+        void enumType() {
             boolean result = PropertyPathHelper.isTerminal(DayOfWeek.class);
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void nonTerminalType() {
+        void nonTerminalType() {
             boolean result = PropertyPathHelper.isTerminal(getClass());
 
             assertThat(result).isFalse();
@@ -153,7 +153,7 @@ public class PropertyPathHelperTest {
     }
 
     @Nested
-    public class CheckPropertyExists {
+    class CheckPropertyExists {
         @Test
         void terminalTest() {
             List<String> list = Arrays.asList("config", "file-based", "path");
@@ -212,7 +212,7 @@ public class PropertyPathHelperTest {
     }
 
     @Nested
-    public class CheckPropertyExistsInMap {
+    class CheckPropertyExistsInMap {
         @Test
         void nonTerminalMapTest() {
             List<String> list = Arrays.asList("matcher-mode");
@@ -223,7 +223,7 @@ public class PropertyPathHelperTest {
     }
 
     @Nested
-    public class CheckPropertyExistsInList {
+    class CheckPropertyExistsInList {
         @Test
         void nonTerminalListTest() {
             List<String> list = Arrays.asList("instrumentation", "scopes", "jdbc_statement_execute", "interfaces", "0", "matcher-mode");
@@ -234,7 +234,7 @@ public class PropertyPathHelperTest {
     }
 
     @Nested
-    public class ComparePaths {
+    class ComparePaths {
         @Test
         void identicalPaths() {
             List<String> pathA = Arrays.asList("i", "am", "a", "path");
@@ -285,7 +285,7 @@ public class PropertyPathHelperTest {
     }
 
     @Nested
-    public class HasPathPrefix {
+    class HasPathPrefix {
         @Test
         void identicalPrefix() {
             List<String> path = Arrays.asList("i", "am", "a", "path", "and", "that's", "cool");

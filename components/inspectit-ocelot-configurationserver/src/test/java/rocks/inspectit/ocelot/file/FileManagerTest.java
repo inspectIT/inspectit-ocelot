@@ -18,13 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-public class FileManagerTest {
+class FileManagerTest {
 
     @Nested
     class GetWorkingDirectory {
 
         @Test
-        public void getAccessor() throws GitAPIException, IOException {
+        void getAccessor() throws GitAPIException, IOException {
             File temporaryFolder = Files.newTemporaryFolder();
 
             InspectitServerSettings settings = new InspectitServerSettings();

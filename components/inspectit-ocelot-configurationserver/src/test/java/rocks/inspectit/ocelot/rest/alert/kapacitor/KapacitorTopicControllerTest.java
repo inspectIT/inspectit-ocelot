@@ -16,9 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-public class KapacitorTopicControllerTest extends KapacitorControllerTestBase {
+class KapacitorTopicControllerTest extends KapacitorControllerTestBase {
 
-    private KapacitorTopicController controller;
+    KapacitorTopicController controller;
 
     @BeforeEach
     void setup() {

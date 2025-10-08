@@ -26,7 +26,7 @@ import static org.awaitility.Awaitility.await;
 /**
  * uses global-propagation-tests.yml
  */
-public class JdbcServiceOutMetricTest extends InstrumentationSysTestBase {
+class JdbcServiceOutMetricTest extends InstrumentationSysTestBase {
 
     static Connection conn;
 

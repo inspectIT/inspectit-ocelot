@@ -43,7 +43,7 @@ class SecurityConfigurationTest {
         DaoAuthenticationConfigurer daoAuthenticationConfigurer;
 
         @Test
-        public void useLocalUserService() throws Exception {
+        void useLocalUserService() throws Exception {
             SecuritySettings securitySettings = SecuritySettings.builder().ldapAuthentication(false).build();
             InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).build();
             configuration.serverSettings = settings;
@@ -58,7 +58,7 @@ class SecurityConfigurationTest {
         }
 
         @Test
-        public void useLdapUserService() throws Exception {
+        void useLdapUserService() throws Exception {
             LdapSettings ldapSettings = LdapSettings.builder()
                     .userSearchFilter("user-filter")
                     .userSearchBase("user-base")

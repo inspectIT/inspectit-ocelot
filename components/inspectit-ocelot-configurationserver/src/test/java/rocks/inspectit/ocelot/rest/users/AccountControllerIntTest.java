@@ -19,7 +19,7 @@ import rocks.inspectit.ocelot.user.UserService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static rocks.inspectit.ocelot.rest.users.AccountController.PasswordChangeRequest;
 
-public class AccountControllerIntTest extends IntegrationTestBase {
+class AccountControllerIntTest extends IntegrationTestBase {
 
     @Autowired
     UserService userService;

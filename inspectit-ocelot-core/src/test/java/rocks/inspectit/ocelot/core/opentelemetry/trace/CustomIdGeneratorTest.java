@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class CustomIdGeneratorTest {
+class CustomIdGeneratorTest {
 
     int getBitSize(String string) {
         return string.getBytes(StandardCharsets.UTF_8).length * 8;
@@ -24,7 +24,7 @@ public class CustomIdGeneratorTest {
     class TestGenerateSpanId {
 
         @Test
-        public void is64Bit() {
+        void is64Bit() {
             String id = idGenerator.generateSpanId();
             assertThat(getBitSize(id)).isEqualTo(128);
         }
@@ -34,7 +34,7 @@ public class CustomIdGeneratorTest {
     class TestGenerateTraceId {
 
         @Test
-        public void is64Bit() {
+        void is64Bit() {
             idGenerator.setMode(true);
 
             String id = idGenerator.generateTraceId();
@@ -45,7 +45,7 @@ public class CustomIdGeneratorTest {
 
 
         @Test
-        public void is128Bit() {
+        void is128Bit() {
             idGenerator.setMode(false);
 
             String id = idGenerator.generateTraceId();
@@ -55,12 +55,11 @@ public class CustomIdGeneratorTest {
         }
 
         @Test
-        public void defaultMode() {
+        void defaultMode() {
             String id = idGenerator.generateTraceId();
 
             assertThat(id.substring(0,16)).isNotEqualTo("0000000000000000");
             assertThat(getBitSize(id)).isEqualTo(256);
         }
     }
-
 }

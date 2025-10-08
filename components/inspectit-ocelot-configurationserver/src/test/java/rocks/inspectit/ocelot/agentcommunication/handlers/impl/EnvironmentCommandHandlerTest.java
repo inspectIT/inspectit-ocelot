@@ -20,7 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class EnvironmentCommandHandlerTest {
+class EnvironmentCommandHandlerTest {
 
     @InjectMocks
     EnvironmentCommandHandler environmentCommandHandler;
@@ -32,7 +32,7 @@ public class EnvironmentCommandHandlerTest {
     class PrepareResponse {
 
         @Test
-        public void cantHandleCommand() {
+        void cantHandleCommand() {
             Command command = null;
             String agentId = "test-id";
 
@@ -45,7 +45,7 @@ public class EnvironmentCommandHandlerTest {
         }
 
         @Test
-        public void preparesResponse() {
+        void preparesResponse() {
             when(configuration.getAgentCommand().getResponseTimeout()).thenReturn(Duration.ofMinutes(1));
             EnvironmentCommand command = new EnvironmentCommand();
             String agentId = "test-id";
@@ -62,7 +62,7 @@ public class EnvironmentCommandHandlerTest {
     class HandleResponse {
 
         @Test
-        public void handlesResponse() {
+        void handlesResponse() {
             EnvironmentCommand.Response mockResponse = mock(EnvironmentCommand.Response.class);
             DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
 

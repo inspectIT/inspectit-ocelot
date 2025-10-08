@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 import static rocks.inspectit.ocelot.file.versioning.Branch.WORKSPACE;
 
 @ExtendWith(MockitoExtension.class)
-public class AgentConfigurationTest {
+class AgentConfigurationTest {
 
     @Mock
     RevisionAccess revisionAccess;

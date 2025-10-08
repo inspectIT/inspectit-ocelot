@@ -18,9 +18,9 @@ import static org.awaitility.Awaitility.await;
  * 2. When calling {@code instrumentedMethod}, we will use {@code _agent} to read the agent information. <br>
  * 3. Check if the metric was recorded with the tags.
  */
-public class InspectitAgentInfoTest extends InstrumentationSysTestBase {
+class InspectitAgentInfoTest extends InstrumentationSysTestBase {
 
-    private void instrumentedMethod() {}
+    void instrumentedMethod() {}
 
     @BeforeAll
     static void waitForClassInstrumentation() {

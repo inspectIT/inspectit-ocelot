@@ -22,28 +22,28 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AgentCommandServiceTest {
+class AgentCommandServiceTest {
 
     @InjectMocks
-    private AgentCommandService service;
+    AgentCommandService service;
 
     @Mock
-    private ScheduledExecutorService executor;
+    ScheduledExecutorService executor;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private InspectitConfig configuration;
+    InspectitConfig configuration;
 
     @Mock
-    private HttpCommandFetcher commandFetcher;
+    HttpCommandFetcher commandFetcher;
 
     @Nested
-    public class DoEnable {
+    class DoEnable {
 
         @Captor
-        private ArgumentCaptor<URI> uriCaptor;
+        ArgumentCaptor<URI> uriCaptor;
 
         @Test
-        public void successfullyEnabled() throws MalformedURLException {
+        void successfullyEnabled() throws MalformedURLException {
             when(configuration.getAgentCommands().getPollingInterval()).thenReturn(Duration.ofSeconds(1));
             lenient().when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://inspectit.rocks"));
             when(configuration.getConfig().getHttp().getUrl()).thenReturn(new URL("http://example.org/api/endpoint"));
@@ -61,10 +61,10 @@ public class AgentCommandServiceTest {
     }
 
     @Nested
-    public class DoDisable {
+    class DoDisable {
 
         @Test
-        public void notEnabled() {
+        void notEnabled() {
             boolean result = service.doDisable();
 
             assertThat(result).isTrue();
@@ -72,7 +72,7 @@ public class AgentCommandServiceTest {
         }
 
         @Test
-        public void isEnabled() throws MalformedURLException {
+        void isEnabled() throws MalformedURLException {
             when(configuration.getAgentCommands().getPollingInterval()).thenReturn(Duration.ofSeconds(1));
             when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://example.org"));
             ScheduledFuture futureMock = mock(ScheduledFuture.class);
@@ -90,10 +90,10 @@ public class AgentCommandServiceTest {
     }
 
     @Nested
-    public class GetCommandUri {
+    class GetCommandUri {
 
         @Test
-        public void validCommandUrl() throws Exception {
+        void validCommandUrl() throws Exception {
             when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://example.org:8090/api"));
 
             URI result = service.getCommandUri(configuration);
@@ -102,7 +102,7 @@ public class AgentCommandServiceTest {
         }
 
         @Test
-        public void deriveUrlWithoutConfigUrl() {
+        void deriveUrlWithoutConfigUrl() {
             when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
             when(configuration.getConfig().getHttp().getUrl()).thenReturn(null);
 
@@ -112,7 +112,7 @@ public class AgentCommandServiceTest {
         }
 
         @Test
-        public void deriveUrl() throws Exception {
+        void deriveUrl() throws Exception {
             when(configuration.getConfig()
                     .getHttp()
                     .getUrl()).thenReturn(new URL("http://example.org:8090/api/endpoint"));
@@ -124,7 +124,7 @@ public class AgentCommandServiceTest {
         }
 
         @Test
-        public void deriveUrlWithoutPort() throws Exception {
+        void deriveUrlWithoutPort() throws Exception {
             when(configuration.getConfig().getHttp().getUrl()).thenReturn(new URL("http://example.org/api/endpoint"));
             when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);
             when(configuration.getAgentCommands().getAgentCommandPath()).thenReturn("/api/command");
@@ -134,7 +134,7 @@ public class AgentCommandServiceTest {
         }
 
         @Test
-        public void verifyPrioritization() throws Exception {
+        void verifyPrioritization() throws Exception {
             lenient().when(configuration.getAgentCommands().getUrl()).thenReturn(new URL("http://example.org"));
             when(configuration.getConfig().getHttp().getUrl()).thenReturn(new URL("http://example.org/api/endpoint"));
             when(configuration.getAgentCommands().isDeriveFromHttpConfigUrl()).thenReturn(true);

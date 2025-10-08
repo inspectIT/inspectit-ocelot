@@ -41,9 +41,9 @@ import static org.awaitility.Awaitility.waitAtMost;
 /**
  * Integration test class for the {@link OpenTelemetryControllerImpl}
  */
-public class OpenTelemetryControllerImplIntTest extends SpringTestBase {
+class OpenTelemetryControllerImplIntTest extends SpringTestBase {
 
-    private static CloseableHttpClient testClient;
+    static CloseableHttpClient testClient;
 
     @Autowired
     OpenTelemetryControllerImpl openTelemetryController;

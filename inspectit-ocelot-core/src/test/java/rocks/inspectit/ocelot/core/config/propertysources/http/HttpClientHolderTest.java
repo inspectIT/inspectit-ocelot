@@ -9,7 +9,7 @@ import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HttpClientHolderTest {
+class HttpClientHolderTest {
 
     @Test
     void shouldNotCreateNewHttpClientWhenConfigIsSame() throws IOException {

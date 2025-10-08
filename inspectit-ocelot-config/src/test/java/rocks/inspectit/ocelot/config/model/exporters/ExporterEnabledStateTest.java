@@ -7,10 +7,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test class for {@link rocks.inspectit.ocelot.config.model.exporters.ExporterEnabledStatep}
  */
-public class ExporterEnabledStateTest {
+class ExporterEnabledStateTest {
 
     @Test
-    public void testDisabled(){
+    void testDisabled() {
 
         // test that isDisabled() is only true for DISABLED
         assertThat(ExporterEnabledState.DISABLED.isDisabled());

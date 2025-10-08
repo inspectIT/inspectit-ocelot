@@ -25,7 +25,7 @@ import static rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext.
 
 @ExtendWith(MockitoExtension.class)
 @DirtiesContext
-public class PropagationDataStorageTest extends SpringTestBase {
+class PropagationDataStorageTest extends SpringTestBase {
 
     @Mock
     PropagationMetaData propagation;
@@ -35,7 +35,7 @@ public class PropagationDataStorageTest extends SpringTestBase {
 
     Map<String, String> headers;
 
-    private final String sessionId = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
+    final String sessionId = "test=83311527d6a6de76a60a72a041808a63;b0b2b4cf=ad9fef38-4942-453a-9243-7d8422803604";
 
     @BeforeEach
     void prepareTest() {
@@ -54,7 +54,7 @@ public class PropagationDataStorageTest extends SpringTestBase {
     }
 
     @Nested
-    public class WriteSessionData {
+    class WriteSessionData {
 
         @Test
         void verifyNoDataHasBeenWritten() {
@@ -186,7 +186,7 @@ public class PropagationDataStorageTest extends SpringTestBase {
     }
 
     @Nested
-    public class ReadSessionData {
+    class ReadSessionData {
 
         @Test
         void verifySessionDataUpdated() {

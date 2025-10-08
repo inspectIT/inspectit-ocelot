@@ -7,7 +7,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InstrumentationScopesTest extends InstrumentationSysTestBase {
+class InstrumentationScopesTest extends InstrumentationSysTestBase {
 
     @Test
     void testNonOverriddenDefaultMethodInstrumentedForAnonymousClass() {

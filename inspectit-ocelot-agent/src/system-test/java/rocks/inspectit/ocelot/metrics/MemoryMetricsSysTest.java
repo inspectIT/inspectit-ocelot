@@ -2,13 +2,13 @@ package rocks.inspectit.ocelot.metrics;
 
 import org.junit.jupiter.api.Test;
 
-public class MemoryMetricsSysTest extends MetricsSysTestBase {
+class MemoryMetricsSysTest extends MetricsSysTestBase {
 
     /**
      * This test assumes that the JVM was started with a non-concurrent GC
      */
     @Test
-    public void testMemoryCapturing() {
+    void testMemoryCapturing() {
         assertMetric("jvm_memory_used");
         assertMetric("jvm_memory_committed");
         assertMetric("jvm_memory_max");

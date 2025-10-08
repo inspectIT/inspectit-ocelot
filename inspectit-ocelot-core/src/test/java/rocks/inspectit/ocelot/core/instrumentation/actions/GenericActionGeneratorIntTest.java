@@ -25,13 +25,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
-public class GenericActionGeneratorIntTest extends SpringTestBase {
+class GenericActionGeneratorIntTest extends SpringTestBase {
 
     @Autowired
     GenericActionGenerator generator;
 
-    private static DummyClassLoader dummyLoader;
-    private static Class<?> dummyClass;
+    static DummyClassLoader dummyLoader;
+
+    static Class<?> dummyClass;
 
     @BeforeAll
     static void initDummyClassloader() throws Exception {

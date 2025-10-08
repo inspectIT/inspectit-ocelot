@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AdditionalValidationsValidatorTest {
+class AdditionalValidationsValidatorTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     HibernateConstraintValidatorContext ctx;
@@ -74,6 +74,5 @@ public class AdditionalValidationsValidatorTest {
 
             verify(ctx, times(1)).buildConstraintViolationWithTemplate(eq("my violation"));
         }
-
     }
 }

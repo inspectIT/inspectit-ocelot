@@ -27,7 +27,7 @@ class ActionScopeFactoryTest {
         private IHookAction action;
 
         @Test
-        public void enabled() {
+        void enabled() {
             when(recorder.isEnabled()).thenReturn(true);
 
             IActionScope scope = factory.createScope(action);
@@ -36,7 +36,7 @@ class ActionScopeFactoryTest {
         }
 
         @Test
-        public void disabled() {
+        void disabled() {
             when(recorder.isEnabled()).thenReturn(false);
 
             IActionScope scope = factory.createScope(action);

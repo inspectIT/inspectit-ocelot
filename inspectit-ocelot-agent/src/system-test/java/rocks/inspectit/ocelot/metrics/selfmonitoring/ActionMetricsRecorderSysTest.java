@@ -13,16 +13,16 @@ import static org.awaitility.Awaitility.await;
 /**
  * Tests the {@link rocks.inspectit.ocelot.core.selfmonitoring.ActionsMetricsRecorder}
  */
-public class ActionMetricsRecorderSysTest extends MetricsSysTestBase {
+class ActionMetricsRecorderSysTest extends MetricsSysTestBase {
 
-    public static double blackhole;
+    static double blackhole;
 
-    public void trigger() {
+    void trigger() {
         blackhole = Math.random();
     }
 
     @Test
-    public void testActionsMetricsRecorder() {
+    void testActionsMetricsRecorder() {
         await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
             HistogramPointData executionData = MetricTestUtils.getDataForHistogramView("inspectit_self_action_execution_time", emptyMap());
 

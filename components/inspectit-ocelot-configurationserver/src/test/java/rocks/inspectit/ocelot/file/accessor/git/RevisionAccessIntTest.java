@@ -30,14 +30,14 @@ class RevisionAccessIntTest extends FileTestBase {
      * For convenience: if this field is not null, it will used as working directory during tests.
      * Note: the specified directory is CLEANED before each run, thus, if you have files there, they will be gone ;)
      */
-    public static final String TEST_DIRECTORY = null;
+    static final String TEST_DIRECTORY = null;
 
-    private RevisionAccess revision;
+    RevisionAccess revision;
 
-    private VersioningManager versioningManager;
+    VersioningManager versioningManager;
 
     @BeforeEach
-    public void beforeEach() throws IOException, GitAPIException {
+    void beforeEach() throws IOException, GitAPIException {
         if (TEST_DIRECTORY == null) {
             tempDirectory = Files.createTempDirectory("ocelot");
         } else {
@@ -58,13 +58,13 @@ class RevisionAccessIntTest extends FileTestBase {
     }
 
     @AfterEach
-    public void afterEach() throws IOException {
+    void afterEach() throws IOException {
         if (TEST_DIRECTORY == null) {
             FileUtils.deleteDirectory(tempDirectory.toFile());
         }
     }
 
-    public void setupRepository() throws GitAPIException, IOException {
+    void setupRepository() throws GitAPIException, IOException {
         versioningManager.setAmendTimeout(-1);
 
         // initial files - will be included in the live branch
@@ -82,7 +82,7 @@ class RevisionAccessIntTest extends FileTestBase {
     class ListConfigurationFiles {
 
         @Test
-        public void listFiles() {
+        void listFiles() {
             List<FileInfo> result = revision.listConfigurationFiles("");
 
             assertThat(result).hasSize(2);
@@ -106,7 +106,7 @@ class RevisionAccessIntTest extends FileTestBase {
         }
 
         @Test
-        public void listFiles_Deep() throws GitAPIException {
+        void listFiles_Deep() throws GitAPIException {
             createTestFiles("files/sub_a/deep/file_x.yml=x", "files/z_file_z.yml");
             versioningManager.commitAllChanges("third");
 
@@ -154,7 +154,7 @@ class RevisionAccessIntTest extends FileTestBase {
     class ListFiles {
 
         @Test
-        public void listFiles() {
+        void listFiles() {
             List<FileInfo> result = revision.listFiles("files");
 
             assertThat(result).hasSize(2);
@@ -178,7 +178,7 @@ class RevisionAccessIntTest extends FileTestBase {
         }
 
         @Test
-        public void listFilesNullPath() {
+        void listFilesNullPath() {
             List<FileInfo> result = revision.listFiles(null);
 
             assertThat(result).hasSize(1);
@@ -206,42 +206,42 @@ class RevisionAccessIntTest extends FileTestBase {
     class ReadConfigurationFile {
 
         @Test
-        public void readFile() {
+        void readFile() {
             Optional<String> result = revision.readConfigurationFile("file_a.yml");
 
             assertThat(result).hasValue("a1");
         }
 
         @Test
-        public void traversalRead() {
+        void traversalRead() {
             Optional<String> result = revision.readConfigurationFile("dir/../file_a.yml");
 
             assertThat(result).hasValue("a1");
         }
 
         @Test
-        public void readNestedFile() {
+        void readNestedFile() {
             Optional<String> result = revision.readConfigurationFile("sub/file_z.yml");
 
             assertThat(result).hasValue("z1");
         }
 
         @Test
-        public void readDirectory() {
+        void readDirectory() {
             Optional<String> result = revision.readConfigurationFile("sub");
 
             assertThat(result).isEmpty();
         }
 
         @Test
-        public void readMissingFile() {
+        void readMissingFile() {
             Optional<String> result = revision.readConfigurationFile("not_existing.yml");
 
             assertThat(result).isEmpty();
         }
 
         @Test
-        public void illegalPath() {
+        void illegalPath() {
             assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> revision.readConfigurationFile("../untracked.yml"));
         }
     }
@@ -250,35 +250,35 @@ class RevisionAccessIntTest extends FileTestBase {
     class ConfigurationFileExists {
 
         @Test
-        public void checkFile() {
+        void checkFile() {
             boolean result = revision.configurationFileExists("file_a.yml");
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void checkNestedFile() {
+        void checkNestedFile() {
             boolean result = revision.configurationFileExists("sub/file_z.yml");
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void checkDirectory() {
+        void checkDirectory() {
             boolean result = revision.configurationFileExists("sub");
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void fileNotExisting() {
+        void fileNotExisting() {
             boolean result = revision.configurationFileExists("not_existing.yml");
 
             assertThat(result).isFalse();
         }
 
         @Test
-        public void illegalPath() {
+        void illegalPath() {
             assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> revision.configurationFileExists("../untracked.yml"));
         }
     }
@@ -287,28 +287,28 @@ class RevisionAccessIntTest extends FileTestBase {
     class ConfigurationFileIsDirectory {
 
         @Test
-        public void checkFile() {
+        void checkFile() {
             boolean result = revision.configurationFileIsDirectory("file_a.yml");
 
             assertThat(result).isFalse();
         }
 
         @Test
-        public void checkDirectory() {
+        void checkDirectory() {
             boolean result = revision.configurationFileIsDirectory("sub");
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void fileNotExisting() {
+        void fileNotExisting() {
             boolean result = revision.configurationFileIsDirectory("not_existing");
 
             assertThat(result).isFalse();
         }
 
         @Test
-        public void illegalPath() {
+        void illegalPath() {
             assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> revision.configurationFileExists(".."));
         }
     }

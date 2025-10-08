@@ -22,10 +22,10 @@ import static org.mockito.Mockito.mock;
 
 class WorkingDirectoryAccessorTest extends FileTestBase {
 
-    private AbstractWorkingDirectoryAccessor accessor;
+    AbstractWorkingDirectoryAccessor accessor;
 
     @BeforeEach
-    public void beforeEach() throws IOException {
+    void beforeEach() throws IOException {
         tempDirectory = Files.createTempDirectory("ocelot");
 
         Lock readLock = mock(Lock.class);
@@ -35,7 +35,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
     }
 
     @AfterEach
-    public void afterEach() throws IOException {
+    void afterEach() throws IOException {
         FileUtils.deleteDirectory(tempDirectory.toFile());
     }
 
@@ -43,14 +43,14 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
     class ReadConfigurationFile {
 
         @Test
-        public void fileNotExisting() {
+        void fileNotExisting() {
             Optional<String> result = accessor.readConfigurationFile("test.yml");
 
             assertThat(result).isEmpty();
         }
 
         @Test
-        public void emptyFile() {
+        void emptyFile() {
             createTestFiles("files/test.yml");
 
             Optional<String> result = accessor.readConfigurationFile("test.yml");
@@ -59,7 +59,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void readFile() {
+        void readFile() {
             createTestFiles("files/test.yml=content");
 
             Optional<String> result = accessor.readConfigurationFile("./test.yml");
@@ -68,7 +68,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void readNestedFile() {
+        void readNestedFile() {
             createTestFiles("files/sub/test.yml=content");
 
             Optional<String> result = accessor.readConfigurationFile("sub/test.yml");
@@ -77,7 +77,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void validTraversal() {
+        void validTraversal() {
             createTestFiles("files/test.yml");
 
             Optional<String> result = accessor.readConfigurationFile("sub/../test.yml");
@@ -86,7 +86,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void illegalPath() {
+        void illegalPath() {
             createTestFiles("files/test.yml");
 
             assertThatExceptionOfType(IllegalArgumentException.class)
@@ -95,7 +95,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void absolutePath() {
+        void absolutePath() {
             createTestFiles("files/test.yml");
 
             String path;
@@ -115,14 +115,14 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
     class ReadAgentMappings {
 
         @Test
-        public void agentMappingsDoesNotExist() {
+        void agentMappingsDoesNotExist() {
             Optional<String> result = accessor.readAgentMappings();
 
             assertThat(result).isEmpty();
         }
 
         @Test
-        public void readEmptyAgentMappings() {
+        void readEmptyAgentMappings() {
             createTestFiles("agent_mappings.yaml");
 
             Optional<String> result = accessor.readAgentMappings();
@@ -131,7 +131,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void readAgentMappings() {
+        void readAgentMappings() {
             createTestFiles("agent_mappings.yaml=content");
 
             Optional<String> result = accessor.readAgentMappings();
@@ -145,7 +145,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
     class ListFiles {
 
         @Test
-        public void listFiles() {
+        void listFiles() {
             createTestFiles("one.yml", "files/second.yml", "files/sub/third.yml", "files/sub/deep/four.yml", "files/sub/five.yml", "files/six.yml");
 
             List<FileInfo> result = accessor.listConfigurationFiles(".");
@@ -195,7 +195,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void listNestedFiles() {
+        void listNestedFiles() {
             createTestFiles("one.yml", "files/second.yml", "files/sub/third.yml");
 
             List<FileInfo> result = accessor.listConfigurationFiles("sub");
@@ -211,7 +211,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void directoryDoesNotExist() {
+        void directoryDoesNotExist() {
             createTestFiles("one.yml", "files/second.yml");
 
             List<FileInfo> result = accessor.listConfigurationFiles("not-existing");
@@ -224,7 +224,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
     class WriteAgentMappings {
 
         @Test
-        public void writeAgentMappings() throws IOException {
+        void writeAgentMappings() throws IOException {
             accessor.writeAgentMappings("new content");
 
             Optional<String> result = accessor.readAgentMappings();
@@ -233,7 +233,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void overwriteAgentMappings() throws IOException {
+        void overwriteAgentMappings() throws IOException {
             createTestFiles("agent_mappings.yaml=old content");
 
             Optional<String> before = accessor.readAgentMappings();
@@ -251,14 +251,14 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
     class DeleteConfiguration {
 
         @Test
-        public void deleteNonExistingFile() {
+        void deleteNonExistingFile() {
             assertThatExceptionOfType(IOException.class)
                     .isThrownBy(() -> accessor.deleteConfiguration("first.yml"))
                     .withMessageStartingWith("Path cannot be deleted because it does not exist: ");
         }
 
         @Test
-        public void deleteRoot() {
+        void deleteRoot() {
             createTestFiles("files/file.yml");
 
             assertThatExceptionOfType(IllegalArgumentException.class)
@@ -267,7 +267,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void deleteRootTraversal() {
+        void deleteRootTraversal() {
             createTestFiles("files/file.yml");
 
             assertThatExceptionOfType(IllegalArgumentException.class)
@@ -276,7 +276,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void deleteFile() throws IOException {
+        void deleteFile() throws IOException {
             createTestFiles("files/first.yml");
 
             List<FileInfo> before = accessor.listConfigurationFiles("");
@@ -290,7 +290,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void deleteDirectory() throws IOException {
+        void deleteDirectory() throws IOException {
             createTestFiles("files/sub/first.yml");
 
             List<FileInfo> before = accessor.listConfigurationFiles("sub");
@@ -308,7 +308,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
     class WriteConfigurationFile {
 
         @Test
-        public void writeFile() throws IOException {
+        void writeFile() throws IOException {
             List<FileInfo> before = accessor.listConfigurationFiles("");
 
             accessor.writeConfigurationFile("first.yml", "new content");
@@ -328,7 +328,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void overwriteFile() throws IOException {
+        void overwriteFile() throws IOException {
             createTestFiles("files/first.yml=old content");
 
             Optional<String> before = accessor.readConfigurationFile("first.yml");
@@ -342,7 +342,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void fileIsDirectory() {
+        void fileIsDirectory() {
             createTestFiles("files/sub/first.yml");
 
             assertThatExceptionOfType(IOException.class)
@@ -355,7 +355,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
     class MoveConfiguration {
 
         @Test
-        public void moveFile() throws IOException {
+        void moveFile() throws IOException {
             createTestFiles("files/first.yml=my file");
 
             Optional<String> beforeA = accessor.readConfigurationFile("first.yml");
@@ -373,7 +373,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void moveDirectory() throws IOException {
+        void moveDirectory() throws IOException {
             createTestFiles("files/sub_a/file.yml=my file");
 
             Optional<String> beforeA = accessor.readConfigurationFile("sub_a/file.yml");
@@ -395,7 +395,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
     class CreateConfigurationDirectory {
 
         @Test
-        public void createDirectory() throws IOException {
+        void createDirectory() throws IOException {
             accessor.createConfigurationDirectory("test");
 
             Path targetDirectory = tempDirectory.resolve("files/test");
@@ -403,7 +403,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void alreadyExists() {
+        void alreadyExists() {
             createTestFiles("files/test/file");
 
             assertThatExceptionOfType(FileAlreadyExistsException.class)
@@ -412,7 +412,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void fileWithSameName() {
+        void fileWithSameName() {
             createTestFiles("files/test");
 
             assertThatExceptionOfType(FileAlreadyExistsException.class)
@@ -421,7 +421,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void invalidLocation() {
+        void invalidLocation() {
             createTestFiles("test/file");
 
             assertThatExceptionOfType(IllegalArgumentException.class)
@@ -434,14 +434,14 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
     class ConfigurationFileExists {
 
         @Test
-        public void doesNotExist() {
+        void doesNotExist() {
             boolean result = accessor.configurationFileExists("file");
 
             assertThat(result).isFalse();
         }
 
         @Test
-        public void fileExist() {
+        void fileExist() {
             createTestFiles("files/sub/file");
 
             boolean result = accessor.configurationFileExists("sub/file");
@@ -450,7 +450,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void directoryExist() {
+        void directoryExist() {
             createTestFiles("files/sub/file");
 
             boolean result = accessor.configurationFileExists("sub");
@@ -463,14 +463,14 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
     class ConfigurationFileIsDirectory {
 
         @Test
-        public void doesNotExist() {
+        void doesNotExist() {
             boolean result = accessor.configurationFileIsDirectory("target");
 
             assertThat(result).isFalse();
         }
 
         @Test
-        public void isDirectory() {
+        void isDirectory() {
             createTestFiles("files/target/file");
 
             boolean result = accessor.configurationFileIsDirectory("target");
@@ -479,7 +479,7 @@ class WorkingDirectoryAccessorTest extends FileTestBase {
         }
 
         @Test
-        public void isNotDirectory() {
+        void isNotDirectory() {
             createTestFiles("files/target/file");
 
             boolean result = accessor.configurationFileIsDirectory("target/file");

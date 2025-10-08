@@ -16,11 +16,11 @@ import static org.mockito.Mockito.when;
 /**
  * Test class for {@link HybridParentTraceIdRatioBasedSampler}
  */
-public class HybridParentTraceIdRatioBasedSamplerTest {
+class HybridParentTraceIdRatioBasedSamplerTest {
 
-    private final static HybridParentTraceIdRatioBasedSampler zero = HybridParentTraceIdRatioBasedSampler.create(0.0);
+    final static HybridParentTraceIdRatioBasedSampler zero = HybridParentTraceIdRatioBasedSampler.create(0.0);
 
-    private final static HybridParentTraceIdRatioBasedSampler one = HybridParentTraceIdRatioBasedSampler.create(1.0);
+    final static HybridParentTraceIdRatioBasedSampler one = HybridParentTraceIdRatioBasedSampler.create(1.0);
 
     private Context getMockContext(boolean isSampled) {
         Context context = mock(Context.class);

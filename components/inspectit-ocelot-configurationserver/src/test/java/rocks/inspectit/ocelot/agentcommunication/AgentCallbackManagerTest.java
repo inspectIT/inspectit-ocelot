@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AgentCallbackManagerTest {
+class AgentCallbackManagerTest {
 
     @InjectMocks
     AgentCallbackManager agentCallbackManager;
@@ -35,7 +35,7 @@ public class AgentCallbackManagerTest {
     InspectitServerSettings configuration;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         when(configuration.getAgentCommand().getResponseTimeout()).thenReturn(Duration.ofSeconds(5));
 
         agentCallbackManager.postConstruct();
@@ -45,7 +45,7 @@ public class AgentCallbackManagerTest {
     class AddCallbackCommand {
 
         @Test
-        public void addCallbackCommand() {
+        void addCallbackCommand() {
             UUID id = UUID.randomUUID();
             DeferredResult<ResponseEntity<?>> testResult = new DeferredResult<>();
 
@@ -57,7 +57,7 @@ public class AgentCallbackManagerTest {
         }
 
         @Test
-        public void ignoresNullParams() {
+        void ignoresNullParams() {
             UUID id = UUID.randomUUID();
 
             agentCallbackManager.addCommandCallback(id, null);
@@ -67,7 +67,7 @@ public class AgentCallbackManagerTest {
         }
 
         @Test
-        public void throwsExceptionOnNullId() {
+        void throwsExceptionOnNullId() {
             DeferredResult<ResponseEntity<?>> testResult = new DeferredResult<>();
 
             assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> agentCallbackManager.addCommandCallback(null, testResult))
@@ -79,7 +79,7 @@ public class AgentCallbackManagerTest {
     class RunNextCommandWithId {
 
         @Test
-        public void hasCommand() {
+        void hasCommand() {
             DeferredResult<ResponseEntity<?>> testResult = new DeferredResult<>();
             UUID id = UUID.randomUUID();
             agentCallbackManager.resultCache.put(id, testResult);
@@ -99,7 +99,7 @@ public class AgentCallbackManagerTest {
         }
 
         @Test
-        public void commandIdNull() {
+        void commandIdNull() {
             agentCallbackManager.resultCache = mock(LoadingCache.class);
 
             assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> agentCallbackManager.handleCommandResponse(null, null))

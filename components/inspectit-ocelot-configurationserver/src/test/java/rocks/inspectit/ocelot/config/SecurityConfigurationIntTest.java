@@ -14,10 +14,11 @@ import static org.assertj.core.api.Assertions.assertThat;
         "inspectit-config-server.default-user.password=foo",
         "inspectit-config-server.token-lifespan=2s"
 })
-public class SecurityConfigurationIntTest extends IntegrationTestBase {
+class SecurityConfigurationIntTest extends IntegrationTestBase {
 
-    private static final String DIRECTORIES_URL = "/api/v1/directories";
-    private static final String NEW_TOKEN_URL = "/api/v1/account/token";
+    static final String DIRECTORIES_URL = "/api/v1/directories";
+
+    static final String NEW_TOKEN_URL = "/api/v1/account/token";
 
     @Nested
     class AuthenticationActive {
@@ -143,5 +144,4 @@ public class SecurityConfigurationIntTest extends IntegrationTestBase {
             assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         }
     }
-
 }

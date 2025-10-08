@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StackTraceTest {
+class StackTraceTest {
 
     @Nested
     class Cleanup {
@@ -47,6 +47,5 @@ public class StackTraceTest {
             assertThat(st.get(0)).isSameAs(rootFrame);
             assertThat(st.get(1)).isSameAs(calleeFrame);
         }
-
     }
 }

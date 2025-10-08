@@ -12,10 +12,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class InstrumentationScopeTest {
 
     @Nested
-    public class Equals {
+    class Equals {
 
         @Test
-        public void isEqual() {
+        void isEqual() {
 
             ElementMatcher.Junction<TypeDescription> typeA = ElementMatchers.named("name")
                     .and(ElementMatchers.hasSuperType(ElementMatchers.nameMatches("whatever")))
@@ -39,7 +39,7 @@ class InstrumentationScopeTest {
         }
 
         @Test
-        public void methodNotEqual() {
+        void methodNotEqual() {
 
             ElementMatcher.Junction<TypeDescription> typeA = ElementMatchers.named("name")
                     .and(ElementMatchers.hasSuperType(ElementMatchers.nameMatches("whatever")))
@@ -63,7 +63,7 @@ class InstrumentationScopeTest {
         }
 
         @Test
-        public void classNotEqual() {
+        void classNotEqual() {
 
             ElementMatcher.Junction<TypeDescription> typeA = ElementMatchers.named("name")
                     .and(ElementMatchers.hasSuperType(ElementMatchers.nameMatches("whatever_thisIsMissing")))
@@ -88,10 +88,10 @@ class InstrumentationScopeTest {
     }
 
     @Nested
-    public class HashCode {
+    class HashCode {
 
         @Test
-        public void isEqual() {
+        void isEqual() {
 
             ElementMatcher.Junction<TypeDescription> typeA = ElementMatchers.named("name")
                     .and(ElementMatchers.hasSuperType(ElementMatchers.nameMatches("whatever")))
@@ -115,7 +115,7 @@ class InstrumentationScopeTest {
         }
 
         @Test
-        public void methodNotEqual() {
+        void methodNotEqual() {
 
             ElementMatcher.Junction<TypeDescription> typeA = ElementMatchers.named("name")
                     .and(ElementMatchers.hasSuperType(ElementMatchers.nameMatches("whatever")))
@@ -139,7 +139,7 @@ class InstrumentationScopeTest {
         }
 
         @Test
-        public void classNotEqual() {
+        void classNotEqual() {
 
             ElementMatcher.Junction<TypeDescription> typeA = ElementMatchers.named("name")
                     .and(ElementMatchers.hasSuperType(ElementMatchers.nameMatches("whatever_thisIsMissing")))

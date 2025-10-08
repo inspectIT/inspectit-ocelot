@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 import static rocks.inspectit.ocelot.agentconfiguration.DocsObjectsLoader.OCELOT_DEFAULT_CONFIG_PREFIX;
 
 @ExtendWith(MockitoExtension.class)
-public class ConfigurationControllerTest {
+class ConfigurationControllerTest {
 
     @InjectMocks
     ConfigurationController configurationController;
@@ -47,22 +47,22 @@ public class ConfigurationControllerTest {
     FileManager fileManager;
 
     @Mock
-    private AgentMappingManager mappingManager;
+    AgentMappingManager mappingManager;
 
     @Mock
-    private ConfigDocsGenerator configDocsGenerator;
+    ConfigDocsGenerator configDocsGenerator;
 
     @Mock
-    private DefaultConfigController defaultConfigController;
+    DefaultConfigController defaultConfigController;
 
     @Mock
-    private Yaml yaml;
+    Yaml yaml;
 
     @Nested
-    public class FetchConfiguration {
+    class FetchConfiguration {
 
         @Test
-        public void returningConfiguration() {
+        void returningConfiguration() {
             when(agentConfiguration.getConfigYaml()).thenReturn("yaml");
             when(agentConfigurationManager.getConfiguration(any())).thenReturn(agentConfiguration);
 
@@ -73,7 +73,7 @@ public class ConfigurationControllerTest {
         }
 
         @Test
-        public void noConfigurationAvailable() {
+        void noConfigurationAvailable() {
             when(agentConfigurationManager.getConfiguration(any())).thenReturn(null);
 
             ResponseEntity<String> output = configurationController.fetchConfiguration(null);
@@ -83,10 +83,10 @@ public class ConfigurationControllerTest {
     }
 
     @Nested
-    public class ReloadConfiguration {
+    class ReloadConfiguration {
 
         @Test
-        public void initiatesCommit() throws GitAPIException {
+        void initiatesCommit() throws GitAPIException {
             configurationController.reloadConfiguration();
 
             verify(fileManager).commitWorkingDirectory();
@@ -94,7 +94,7 @@ public class ConfigurationControllerTest {
     }
 
     @Nested
-    public class GetConfigDocumentationTest {
+    class GetConfigDocumentationTest {
 
         private final String mappingName = "name";
         private final AgentMapping agentMapping = AgentMapping.builder().build();

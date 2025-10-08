@@ -27,11 +27,11 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 
 @TestPropertySource(properties = {"inspectit.exporters.metrics.prometheus.enabled=ENABLED"})
 @DirtiesContext
-public class PrometheusExporterServiceIntTest extends SpringTestBase {
+class PrometheusExporterServiceIntTest extends SpringTestBase {
 
-    private static final Timeout HTTP_TIMEOUT = Timeout.of(1000, TimeUnit.MILLISECONDS);
+    static final Timeout HTTP_TIMEOUT = Timeout.of(1000, TimeUnit.MILLISECONDS);
 
-    private static CloseableHttpClient testClient;
+    static CloseableHttpClient testClient;
 
     @Autowired
     PrometheusExporterService service;

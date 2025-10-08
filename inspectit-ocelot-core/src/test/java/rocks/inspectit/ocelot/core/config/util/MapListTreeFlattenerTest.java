@@ -11,10 +11,10 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class MapListTreeFlattenerTest {
+class MapListTreeFlattenerTest {
 
     @Test
-    public void testListFlattening() {
+    void testListFlattening() {
 
         Map<String, Object> root = new HashMap<>();
         root.put("l1", Arrays.asList("A", "B", "C"));
@@ -30,7 +30,7 @@ public class MapListTreeFlattenerTest {
     }
 
     @Test
-    public void testComplexKeys() {
+    void testComplexKeys() {
 
         Map<String, Object> root = new HashMap<>();
         Map<String, Object> nested = new HashMap<>();
@@ -47,14 +47,14 @@ public class MapListTreeFlattenerTest {
     }
 
     @Test
-    public void testInvalidType() {
+    void testInvalidType() {
         assertThatThrownBy(() -> MapListTreeFlattener.flatten(new HashSet<>()))
                 .isInstanceOf(RuntimeException.class);
     }
 
 
     @Test
-    public void testNestingInArray() {
+    void testNestingInArray() {
 
         Map<String, Object> objA = new HashMap<>();
         objA.put("name", "Hans");
@@ -68,5 +68,4 @@ public class MapListTreeFlattenerTest {
 
 
     }
-
 }

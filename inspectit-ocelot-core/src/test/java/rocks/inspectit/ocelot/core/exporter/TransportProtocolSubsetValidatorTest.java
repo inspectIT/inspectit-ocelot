@@ -20,7 +20,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
  * Test class for {@link rocks.inspectit.ocelot.config.model.exporters.TransportProtocolSubsetValidator}
  */
 @ExtendWith(MockitoExtension.class)
-public class TransportProtocolSubsetValidatorTest {
+class TransportProtocolSubsetValidatorTest {
 
     private static final Logger logger = LoggerFactory.getLogger(TransportProtocolSubsetValidatorTest.class);
 
@@ -60,7 +60,4 @@ public class TransportProtocolSubsetValidatorTest {
             this.protocol = protocol;
         }
     }
-
 }
-
-

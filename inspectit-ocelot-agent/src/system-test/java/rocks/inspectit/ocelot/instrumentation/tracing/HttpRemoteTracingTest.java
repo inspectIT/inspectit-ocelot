@@ -29,15 +29,15 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HttpRemoteTracingTest extends TraceTestBase {
+class HttpRemoteTracingTest extends TraceTestBase {
 
-    public static final int PORT = 9999;
+    static final int PORT = 9999;
 
-    public static final String TEST_PATH = "/test";
+    static final String TEST_PATH = "/test";
 
-    public static final String TEST_URL = "http://localhost:" + PORT + TEST_PATH;
+    static final String TEST_URL = "http://localhost:" + PORT + TEST_PATH;
 
-    private static Server server;
+    static Server server;
 
     @BeforeAll
     static void setupJetty() {
@@ -57,7 +57,7 @@ public class HttpRemoteTracingTest extends TraceTestBase {
         server.stop();
     }
 
-    public static class TracingServlet extends HttpServlet {
+    static class TracingServlet extends HttpServlet {
 
         @Override
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
@@ -150,14 +150,14 @@ public class HttpRemoteTracingTest extends TraceTestBase {
     @Nested
     class JmsTracingTest {
 
-        private BrokerService broker;
-        private Connection connection;
-        private Session session;
-        private MessageProducer producer;
-        private MessageConsumer consumer;
-        private CountDownLatch latch;
+        BrokerService broker;
+        Connection connection;
+        Session session;
+        MessageProducer producer;
+        MessageConsumer consumer;
+        CountDownLatch latch;
 
-        private static final String QUEUE_NAME = "tracingTestQueue";
+        static final String QUEUE_NAME = "tracingTestQueue";
 
         @BeforeEach
         void setUp() throws Exception {

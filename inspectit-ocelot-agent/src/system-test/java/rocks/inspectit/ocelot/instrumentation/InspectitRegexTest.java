@@ -18,11 +18,11 @@ import static org.awaitility.Awaitility.await;
  * 2. When calling {@code instrumentedMethod}, we will use {@code _regex} and write the result into a metric attribute. <br>
  * 3. Check if the metric was recorded with the attribute.
  */
-public class InspectitRegexTest extends InstrumentationSysTestBase {
+class InspectitRegexTest extends InstrumentationSysTestBase {
 
-    private static final String key = "isMatch";
+    static final String key = "isMatch";
 
-    private void instrumentedMethod() {}
+    void instrumentedMethod() {}
 
     @BeforeAll
     static void waitForClassInstrumentation() {

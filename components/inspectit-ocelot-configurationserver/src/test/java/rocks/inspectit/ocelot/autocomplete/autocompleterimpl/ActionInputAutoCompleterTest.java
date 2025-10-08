@@ -17,7 +17,7 @@ import static org.mockito.Mockito.doReturn;
 
 
 @ExtendWith(MockitoExtension.class)
-public class ActionInputAutoCompleterTest {
+class ActionInputAutoCompleterTest {
 
     @InjectMocks
     ActionInputAutoCompleter actionInputAutoCompleter;
@@ -26,9 +26,10 @@ public class ActionInputAutoCompleterTest {
     ConfigurationQueryHelper configurationQueryHelper;
 
     @Nested
-    public class GetSuggestions {
+    class GetSuggestions {
+
         @Test
-        public void getSuggestionsTest() {
+        void getSuggestionsTest() {
             List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "data-input");
             doReturn(Arrays.asList("action_A", "action_B"))
                     .when(configurationQueryHelper).getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "action")));
@@ -47,7 +48,7 @@ public class ActionInputAutoCompleterTest {
         }
 
         @Test
-        public void wrongPath() {
+        void wrongPath() {
             List<String> testPath = Arrays.asList("inspectit", "instrumentation", "scopes", "my_scopes");
 
             List<String> output = actionInputAutoCompleter.getSuggestions(testPath);
@@ -56,7 +57,7 @@ public class ActionInputAutoCompleterTest {
         }
 
         @Test
-        public void ignoresUnderscoredValues() {
+        void ignoresUnderscoredValues() {
             List<String> testPath = Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "data-input");
             doReturn(Arrays.asList("action_A", "action_B"))
                     .when(configurationQueryHelper).getKeysForPath(eq(Arrays.asList("inspectit", "instrumentation", "rules", "my_method", "entry", "span_name", "action")));

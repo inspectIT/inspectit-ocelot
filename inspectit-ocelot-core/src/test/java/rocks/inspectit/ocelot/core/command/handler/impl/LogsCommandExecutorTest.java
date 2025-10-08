@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @ExtendWith(MockitoExtension.class)
-public class LogsCommandExecutorTest {
+class LogsCommandExecutorTest {
 
     static final String tmpDir = "tmpconf_int_test";
 
@@ -57,13 +57,13 @@ public class LogsCommandExecutorTest {
     @Nested
     @DirtiesContext
     @TestPropertySource(properties = {"inspectit.config.file-based.path=" + tmpDir, "inspectit.config.file-based.frequency=50ms"})
-    public class Configuration extends SpringTestBase {
+    class Configuration extends SpringTestBase {
 
         @Autowired
         InspectitEnvironment env;
 
         @Test
-        public void test() throws IOException {
+        void test() throws IOException {
             testConfiguration(configurationA, true, Level.WARN, 512);
             testConfiguration(configurationB, true, Level.ERROR, 1024);
         }
@@ -86,7 +86,7 @@ public class LogsCommandExecutorTest {
 
     @Nested
     @DirtiesContext
-    public class Execute {
+    class Execute {
 
         @Mock
         LogPreloader preloader;
@@ -95,7 +95,7 @@ public class LogsCommandExecutorTest {
         LogsCommandExecutor executor;
 
         @Test
-        public void testLogFormat() {
+        void testLogFormat() {
             Mockito.when(preloader.getPreloadedLogs())
                     .thenReturn(Arrays.asList(new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.ERROR, "Message", null, new String[]{}), new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.WARN, "Message {}", null, new String[]{"Foo"}), new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogsCommandExecutorTest.class), Level.ERROR, "Exception", new RuntimeException(), new String[]{})));
 
@@ -124,7 +124,5 @@ public class LogsCommandExecutorTest {
             // should contain timestamps
             assertThat(response.getLogs()).containsPattern("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}");
         }
-
     }
-
 }

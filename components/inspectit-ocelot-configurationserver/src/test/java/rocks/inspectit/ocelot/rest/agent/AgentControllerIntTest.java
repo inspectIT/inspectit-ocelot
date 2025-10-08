@@ -22,13 +22,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class AgentControllerIntTest extends IntegrationTestBase {
+class AgentControllerIntTest extends IntegrationTestBase {
 
     @Autowired
     InspectitServerSettings serverSettings;
 
     @BeforeEach
-    private void resetServerSettings() {
+    void resetServerSettings() {
         serverSettings.setAgentCommand(AgentCommandSettings.builder().build());
     }
 
@@ -47,7 +47,7 @@ public class AgentControllerIntTest extends IntegrationTestBase {
     }
 
     @Test
-    public void shouldFetchSupportArchive() {
+    void shouldFetchSupportArchive() {
 
         String agentId = "testAgent";
         String testLog = "Logs cannot be retrieved because log preloading (inspectit.log-preloading) is not enabled. To retrieve agent logs, please enable the log preloading.";
@@ -90,7 +90,7 @@ public class AgentControllerIntTest extends IntegrationTestBase {
     }
 
     @Test
-    public void shouldTimeoutWhileFetchingSupportArchive() {
+    void shouldTimeoutWhileFetchingSupportArchive() {
         serverSettings.getAgentCommand().setResponseTimeout(Duration.ofSeconds(1));
         serverSettings.getAgentCommand().setCommandTimeout(Duration.ofSeconds(1));
 
@@ -105,7 +105,7 @@ public class AgentControllerIntTest extends IntegrationTestBase {
     }
 
     @Test
-    public void fetchCommand() throws InterruptedException {
+    void fetchCommand() throws InterruptedException {
         ResponseEntity<Command> result = fetchCommand("drogon ", null, false);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
@@ -124,7 +124,7 @@ public class AgentControllerIntTest extends IntegrationTestBase {
     }
 
     @Test
-    public void waitForCommand() throws InterruptedException {
+    void waitForCommand() throws InterruptedException {
         // agent is fetching a command and waits for it
         new Thread(() -> {
             // fetch and wait for a command

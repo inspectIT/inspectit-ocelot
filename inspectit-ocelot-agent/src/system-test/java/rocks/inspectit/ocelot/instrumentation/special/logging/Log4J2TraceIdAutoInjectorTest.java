@@ -16,14 +16,14 @@ import rocks.inspectit.ocelot.utils.TestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
+class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
     private static final Logger LOGGER = LogManager.getLogger(Log4J2TraceIdAutoInjectorTest.class);
 
-    private static Tracer tracer;
+    static Tracer tracer;
 
     @BeforeAll
-    public static void waitForClassInstrumentation() {
+    static void waitForClassInstrumentation() {
         TestUtils.waitForClassInstrumentations(AbstractMessageFactory.class, MessageFactory.class);
         tracer = GlobalOpenTelemetry.getTracer("rocks.inspectit.ocelot.test", "0.0.1");
     }
@@ -77,7 +77,7 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
     }
 
     @Test
-    public void logCharSequenceAndTraceExists() {
+    void logCharSequenceAndTraceExists() {
         Log4J2LoggingRecorder.loggingEvents.clear();
         CharSequence message = "This is a traced CharSequence in Log4J2.";
         String traceId = startSpanAndExtractTraceIdAndLogMessage(message);
@@ -90,7 +90,7 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
     }
 
     @Test
-    public void logObjectAndTraceExists() {
+    void logObjectAndTraceExists() {
         Log4J2LoggingRecorder.loggingEvents.clear();
         Object message = "This is a traced Object in Log4J2.";
 
@@ -103,7 +103,7 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
     }
 
     @Test
-    public void logNullAndTraceExists() {
+    void logNullAndTraceExists() {
         Log4J2LoggingRecorder.loggingEvents.clear();
         Object message = null;
 
@@ -116,7 +116,7 @@ public class Log4J2TraceIdAutoInjectorTest extends InstrumentationSysTestBase {
     }
 
     @Test
-    public void traceNotExists() {
+    void traceNotExists() {
         Log4J2LoggingRecorder.loggingEvents.clear();
         String message = "This is {}.";
 

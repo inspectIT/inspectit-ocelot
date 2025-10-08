@@ -8,21 +8,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RecursionInstrumentationTest extends InstrumentationSysTestBase {
+class RecursionInstrumentationTest extends InstrumentationSysTestBase {
 
-    private static AtomicInteger invocationCount = new AtomicInteger(0);
+    static AtomicInteger invocationCount = new AtomicInteger(0);
 
     /**
      * This method is instrumented and will be called in the instrumentation itself
      * which would result in endless loop and StackOverflowError.
      */
-    public static void helloWorld() {
+    static void helloWorld() {
         System.out.println("Hello World!");
         invocationCount.incrementAndGet();
     }
 
     @Test
-    public void recursiveInstrumentation() {
+    void recursiveInstrumentation() {
         TestUtils.waitForClassInstrumentations(RecursionInstrumentationTest.class);
 
         helloWorld();

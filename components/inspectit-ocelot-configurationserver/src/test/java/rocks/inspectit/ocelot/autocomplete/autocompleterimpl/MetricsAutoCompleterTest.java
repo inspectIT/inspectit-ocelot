@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class MetricsAutoCompleterTest {
+class MetricsAutoCompleterTest {
 
     @InjectMocks
     MetricsAutoCompleter metricsAutoCompleter;
@@ -26,9 +26,10 @@ public class MetricsAutoCompleterTest {
     ConfigurationQueryHelper configurationQueryHelper;
 
     @Nested
-    public class GetSuggestions {
+    class GetSuggestions {
+
         @Test
-        public void wrongPath() {
+        void wrongPath() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "rules");
 
             List<String> output = metricsAutoCompleter.getSuggestions(path);
@@ -37,7 +38,7 @@ public class MetricsAutoCompleterTest {
         }
 
         @Test
-        public void correctPath() {
+        void correctPath() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "rules", "test_rule", "metrics");
             List<String> mockOutput = Collections.singletonList("test_metric");
             when(configurationQueryHelper.getKeysForPath(any())).thenReturn(mockOutput);
@@ -49,7 +50,7 @@ public class MetricsAutoCompleterTest {
         }
 
         @Test
-        public void correctPathNothingDefined() {
+        void correctPathNothingDefined() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "rules", "test_rule", "metrics");
 
             List<String> output = metricsAutoCompleter.getSuggestions(path);

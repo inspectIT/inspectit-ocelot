@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @ExtendWith(MockitoExtension.class)
-public class EnvironmentCommandExecutorTest {
+class EnvironmentCommandExecutorTest {
 
     static final String tmpDir = "tmpconf_int_test";
 
@@ -54,13 +54,13 @@ public class EnvironmentCommandExecutorTest {
     @Nested
     @DirtiesContext
     @TestPropertySource(properties = {"inspectit.config.file-based.path=" + tmpDir, "inspectit.config.file-based.frequency=50ms"})
-    public class Configuration extends SpringTestBase {
+    class Configuration extends SpringTestBase {
 
         @Autowired
         InspectitEnvironment env;
 
         @Test
-        public void test() throws IOException {
+        void test() throws IOException {
             testConfiguration(configurationA, true, new URL("http://localhost:8090/api/v1/agent/command"));
         }
 
@@ -74,18 +74,17 @@ public class EnvironmentCommandExecutorTest {
                 assertThat(settings.getUrl()).isEqualTo(commandUrl);
             });
         }
-
     }
 
     @Nested
     @DirtiesContext
-    public class Execute {
+    class Execute {
 
         @InjectMocks
         EnvironmentCommandExecutor executor;
 
         @Test
-        public void testEnvironmentDetailsBeingBuiltCorrectly() {
+        void testEnvironmentDetailsBeingBuiltCorrectly() {
 
             EnvironmentCommand command = new EnvironmentCommand();
             command.setCommandId(UUID.randomUUID());
@@ -105,14 +104,12 @@ public class EnvironmentCommandExecutorTest {
         }
 
         @Test
-        public void testInvalidCommand() {
+        void testInvalidCommand() {
             LogsCommand command = new LogsCommand();
             command.setCommandId(UUID.randomUUID());
 
             IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> executor.execute(command));
             assertThat(exception.getMessage()).isEqualTo("Invalid command type. Executor does not support commands of type " + command.getClass());
         }
-
     }
-
 }

@@ -18,17 +18,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class GCMetricsSysTest extends MetricsSysTestBase {
+class GCMetricsSysTest extends MetricsSysTestBase {
 
     private static final Logger log = LoggerFactory.getLogger(GCMetricsSysTest.class);
 
-    public static List blackhole;
+    static List blackhole;
 
     /**
      * This test assumes that the JVM was started with a non-concurrent GC
      */
     @Test
-    public void testGCPauseCapturing() throws Exception {
+    void testGCPauseCapturing() throws Exception {
         // we try triggering a (non-concurrent) GC with stuff to do
         for (int i = 0; i < 1000000; i++) {
             blackhole = new ArrayList<>();

@@ -19,16 +19,16 @@ import static org.mockito.Mockito.when;
 class ListClassesCommandExecutorTest {
 
     @InjectMocks
-    private ListClassesCommandExecutor executor;
+    ListClassesCommandExecutor executor;
 
     @Mock
-    private NewClassDiscoveryService discoveryService;
+    NewClassDiscoveryService discoveryService;
 
     @Nested
-    public class Execute {
+    class Execute {
 
         @Test
-        public void success(){
+        void success(){
             Set<Class<?>> set = new HashSet<>();
             set.add(String.class);
             when(discoveryService.getKnownClasses()).thenReturn(set);
@@ -40,6 +40,5 @@ class ListClassesCommandExecutorTest {
 
             System.out.println(response);
         }
-
     }
 }

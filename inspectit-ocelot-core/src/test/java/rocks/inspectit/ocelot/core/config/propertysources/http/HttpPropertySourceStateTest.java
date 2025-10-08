@@ -42,17 +42,17 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class HttpPropertySourceStateTest {
 
-    private HttpPropertySourceState state;
+    HttpPropertySourceState state;
 
     @Nested
-    public class Update {
+    class Update {
 
-        private WireMockServer mockServer;
+        WireMockServer mockServer;
 
-        private HttpConfigSettings httpSettings;
+        HttpConfigSettings httpSettings;
 
         @BeforeEach
-        public void setup() throws MalformedURLException {
+        void setup() throws MalformedURLException {
             mockServer = new WireMockServer(options().dynamicPort());
             mockServer.start();
 
@@ -64,12 +64,12 @@ class HttpPropertySourceStateTest {
         }
 
         @AfterEach
-        public void teardown() {
+        void teardown() {
             mockServer.stop();
         }
 
         @Test
-        public void fetchingYaml() {
+        void fetchingYaml() {
             String config = "inspectit:\n  service-name: test-name";
 
             mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
@@ -107,7 +107,7 @@ class HttpPropertySourceStateTest {
         }
 
         @Test
-        public void fetchingJson() {
+        void fetchingJson() {
             String json = "{\"inspectit\": {\"service-name\": \"test-name\"}}";
             mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
                     .withBody(json)
@@ -120,7 +120,7 @@ class HttpPropertySourceStateTest {
         }
 
         @Test
-        public void fetchingEmptyResponse() {
+        void fetchingEmptyResponse() {
             mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200).withBody("")));
 
             boolean updateResult = state.update(false);
@@ -133,7 +133,7 @@ class HttpPropertySourceStateTest {
         }
 
         @Test
-        public void multipleFetchingWithoutCaching() {
+        void multipleFetchingWithoutCaching() {
             String config = "{\"inspectit\": {\"service-name\": \"test-name\"}}";
             mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200).withBody(config)));
 
@@ -152,7 +152,7 @@ class HttpPropertySourceStateTest {
         }
 
         @Test
-        public void usingLastModifiedHeader() {
+        void usingLastModifiedHeader() {
             String config = "{\"inspectit\": {\"service-name\": \"test-name\"}}";
             mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
                     .withBody(config)
@@ -174,7 +174,7 @@ class HttpPropertySourceStateTest {
         }
 
         @Test
-        public void usingETagHeader() {
+        void usingETagHeader() {
             String config = "{\"inspectit\": {\"service-name\": \"test-name\"}}";
             mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
                     .withBody(config)
@@ -196,7 +196,7 @@ class HttpPropertySourceStateTest {
         }
 
         @Test
-        public void serverReturnsErrorNoFallback() throws IOException {
+        void serverReturnsErrorNoFallback() throws IOException {
             Files.write(Paths.get(httpSettings.getPersistenceFile()), "test: testvalue".getBytes());
 
             mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(500)));
@@ -210,7 +210,7 @@ class HttpPropertySourceStateTest {
         }
 
         @Test
-        public void serverReturnsErrorWithFallback() throws IOException {
+        void serverReturnsErrorWithFallback() throws IOException {
             Files.write(Paths.get(httpSettings.getPersistenceFile()), "test: testvalue".getBytes());
 
             mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(500)));
@@ -224,7 +224,7 @@ class HttpPropertySourceStateTest {
         }
 
         @Test
-        public void serverReturnsErrorWithoutFallbackFile() {
+        void serverReturnsErrorWithoutFallbackFile() {
             mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(500)));
 
             boolean updateResult = state.update(false);
@@ -237,7 +237,7 @@ class HttpPropertySourceStateTest {
     }
 
     @Nested
-    public class GetEffectiveRequestUri {
+    class GetEffectiveRequestUri {
 
         @Test
         void emptyParametersIgnored() throws Exception {
@@ -269,7 +269,7 @@ class HttpPropertySourceStateTest {
     }
 
     @Nested
-    public class Retries {
+    class Retries {
 
         private final WireMockServer mockServer = new WireMockServer(options().dynamicPort());;
 
@@ -285,7 +285,7 @@ class HttpPropertySourceStateTest {
                 .withFixedDelay(5000);
 
         @BeforeEach
-        public void setup() throws MalformedURLException {
+        void setup() throws MalformedURLException {
             mockServer.start();
 
             HttpConfigSettings httpSettings = new HttpConfigSettings();
@@ -304,7 +304,7 @@ class HttpPropertySourceStateTest {
         }
 
         @AfterEach
-        public void tearDown() {
+        void tearDown() {
             mockServer.stop();
         }
 
@@ -377,14 +377,14 @@ class HttpPropertySourceStateTest {
     }
 
     @Nested
-    public class SkipPersistenceFileWriteOnError {
+    class SkipPersistenceFileWriteOnError {
 
         private WireMockServer mockServer;
 
         private HttpConfigSettings httpSettings;
 
         @BeforeEach
-        public void setup() throws Exception {
+        void setup() throws Exception {
             mockServer = new WireMockServer(options().dynamicPort());
             mockServer.start();
 
@@ -395,12 +395,12 @@ class HttpPropertySourceStateTest {
         }
 
         @AfterEach
-        public void teardown() {
+        void teardown() {
             mockServer.stop();
         }
 
         @Test
-        public void fileWritesSkippedOnError() {
+        void fileWritesSkippedOnError() {
             // "/dev/null/*inspectit-config" will fail on Unix and Windows systems
             when(httpSettings.getPersistenceFile()).thenReturn("/dev/null/*inspectit-config");
 
@@ -416,7 +416,7 @@ class HttpPropertySourceStateTest {
         }
 
         @Test
-        public void fileWritesContinuedOnSuccess() {
+        void fileWritesContinuedOnSuccess() {
             when(httpSettings.getPersistenceFile()).thenReturn(generateTempFilePath());
             mockServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(200)
                     .withBody("{\"inspectit\": {\"service-name\": \"test-name\"}}")));

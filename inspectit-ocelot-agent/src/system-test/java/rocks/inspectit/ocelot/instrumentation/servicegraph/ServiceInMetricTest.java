@@ -29,17 +29,17 @@ import static org.awaitility.Awaitility.await;
 /**
  * uses global-propagation-tests.yml
  */
-public class ServiceInMetricTest extends InstrumentationSysTestBase {
+class ServiceInMetricTest extends InstrumentationSysTestBase {
 
-    public static final int PORT = 9999;
+    static final int PORT = 9999;
 
-    public static final String TEST_PATH = "/test";
+    static final String TEST_PATH = "/test";
 
-    public static final String TEST_URL = "http://localhost:" + PORT + TEST_PATH;
+    static final String TEST_URL = "http://localhost:" + PORT + TEST_PATH;
 
-    public static final String SERVICE_NAME = "systemtest";
+    static final String SERVICE_NAME = "systemtest";
 
-    private Server server;
+    Server server;
 
     void fireRequest(String originService) {
 
@@ -59,7 +59,7 @@ public class ServiceInMetricTest extends InstrumentationSysTestBase {
         }
     }
 
-    public static class TestServlet extends HttpServlet {
+    static class TestServlet extends HttpServlet {
 
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

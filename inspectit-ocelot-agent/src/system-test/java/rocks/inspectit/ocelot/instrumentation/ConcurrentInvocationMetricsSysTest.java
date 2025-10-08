@@ -23,7 +23,7 @@ import static org.awaitility.Awaitility.await;
  * 6. We wait until the {@code ConcurrentMetricsRecorder} has recorded the updated invocations as OpenTelemetry metric <br>
  * 7. We validate the recording via {@code MetricReader} <br>
  */
-public class ConcurrentInvocationMetricsSysTest extends InstrumentationSysTestBase {
+class ConcurrentInvocationMetricsSysTest extends InstrumentationSysTestBase {
 
     void myMethod(Runnable assertions) {
         assertions.run();

@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class InspectitReflectionImplTest {
+class InspectitReflectionImplTest {
 
-    private static final String fieldValue = "test";
+    static final String fieldValue = "test";
 
-    private static final Integer methodResult = 0;
+    static final Integer methodResult = 0;
 
-    private InspectitReflectionImpl reflection;
+    InspectitReflectionImpl reflection;
 
     @BeforeEach
     void beforeEach() {

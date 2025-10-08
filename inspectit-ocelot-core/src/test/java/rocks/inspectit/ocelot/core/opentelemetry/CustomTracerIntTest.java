@@ -15,15 +15,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Integration test class for {@link CustomTracer}
  */
-public class CustomTracerIntTest extends SpringTestBase {
+class CustomTracerIntTest extends SpringTestBase {
 
-    private static final Class<?> TRACERSHAREDSTATE_CLASS;
+    static final Class<?> TRACERSHAREDSTATE_CLASS;
 
-    private static final Field SDKTRACERBUILDER_TRACERSHAREDSTATE;
+    static final Field SDKTRACERBUILDER_TRACERSHAREDSTATE;
 
-    private static final Field TRACERSHAREDSTATE_CLOCK;
+    static final Field TRACERSHAREDSTATE_CLOCK;
 
-    private static final Field TRACERSHAREDSTATE_SAMPLER;
+    static final Field TRACERSHAREDSTATE_SAMPLER;
 
     @Autowired
     OpenTelemetryControllerImpl openTelemetryController;

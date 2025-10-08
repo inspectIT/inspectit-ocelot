@@ -19,7 +19,7 @@ class EnvironmentInformationPropertySourceTest {
     class Constructor {
 
         @Test
-        public void verifyJavaVersion() {
+        void verifyJavaVersion() {
             String version = System.getProperty("java.version");
 
             EnvironmentInformationPropertySource result = new EnvironmentInformationPropertySource("test");
@@ -28,7 +28,7 @@ class EnvironmentInformationPropertySourceTest {
         }
 
         @Test
-        public void verifyAgentVersion() {
+         void verifyAgentVersion() {
             IAgent mockAgent = mock(IAgent.class);
             when(mockAgent.getVersion()).thenReturn("1.0");
             ReflectionUtils.writeStaticField(AgentManager.class, "agentInstance", mockAgent);
@@ -39,7 +39,7 @@ class EnvironmentInformationPropertySourceTest {
         }
 
         @Test
-        public void verifyAgentVersionWithNullAgent() {
+        void verifyAgentVersionWithNullAgent() {
             ReflectionUtils.writeStaticField(AgentManager.class, "agentInstance", null);
 
             EnvironmentInformationPropertySource result = new EnvironmentInformationPropertySource("test");

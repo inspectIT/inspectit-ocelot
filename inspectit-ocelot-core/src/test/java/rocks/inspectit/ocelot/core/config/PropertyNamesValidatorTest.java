@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-public class PropertyNamesValidatorTest {
+class PropertyNamesValidatorTest {
 
     PropertyNamesValidator validator;
 
@@ -17,7 +16,8 @@ public class PropertyNamesValidatorTest {
     }
 
     @Nested
-    public class CheckPropertyName {
+    class CheckPropertyName {
+
         @Test
         void wrongProperty() {
             String property = "inspectit.iDoNotExist";

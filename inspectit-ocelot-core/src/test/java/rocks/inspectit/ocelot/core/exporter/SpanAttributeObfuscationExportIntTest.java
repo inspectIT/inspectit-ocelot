@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration test for exporting span with obfuscated attributes to ensure that no exceptions are thrown by the {@link rocks.inspectit.ocelot.core.opentelemetry.DynamicMultiSpanExporter} when obfuscation is activated and OTLP trace exporters are enabled.
  */
 @DirtiesContext
-public class SpanAttributeObfuscationExportIntTest extends SpringTestBase {
+class SpanAttributeObfuscationExportIntTest extends SpringTestBase {
 
     @Autowired
     ObfuscationManager obfuscationManager;
@@ -101,5 +101,4 @@ public class SpanAttributeObfuscationExportIntTest extends SpringTestBase {
         // assert that the DynamicMultiSpanExporter throws the underlying ClassCastException in the execute method.
         dynamicMultiSpanExporterErrorLogs.assertContains("execute");
     }
-
 }

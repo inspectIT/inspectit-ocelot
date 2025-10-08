@@ -25,9 +25,9 @@ import static org.awaitility.Awaitility.await;
 /**
  * Test class for {@link OtlpMetricsExporterService}.
  */
-public class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegrationTestBase {
+class OtlpMetricsExporterServiceIntTest extends ExporterServiceIntegrationTestBase {
 
-    public static final String OTLP_METRICS_PATH = "/v1/metrics";
+    static final String OTLP_METRICS_PATH = "/v1/metrics";
 
     @RegisterExtension
     LogCapturer warnLogs = LogCapturer.create()

@@ -26,19 +26,19 @@ import static org.mockito.Mockito.*;
 class HttpConfigurationPollerTest {
 
     @InjectMocks
-    private HttpConfigurationPoller poller;
+    HttpConfigurationPoller poller;
 
     @Mock
-    private InspectitEnvironment env;
+    InspectitEnvironment env;
 
     @Mock
-    private ScheduledExecutorService executor;
+    ScheduledExecutorService executor;
 
     @Nested
-    public class DoEnable {
+    class DoEnable {
 
         @Test
-        public void successfullyEnabled() {
+        void successfullyEnabled() {
             InspectitConfig configuration = new InspectitConfig();
             configuration.setConfig(new ConfigSettings());
             configuration.getConfig().setHttp(new HttpConfigSettings());
@@ -56,17 +56,17 @@ class HttpConfigurationPollerTest {
     }
 
     @Nested
-    public class DoDisable {
+    class DoDisable {
 
         @Test
-        public void notEnabled() {
+        void notEnabled() {
             boolean result = poller.doDisable();
 
             assertTrue(result);
         }
 
         @Test
-        public void isEnabled() {
+        void isEnabled() {
             InspectitConfig configuration = new InspectitConfig();
             configuration.setConfig(new ConfigSettings());
             configuration.getConfig().setHttp(new HttpConfigSettings());
@@ -84,20 +84,20 @@ class HttpConfigurationPollerTest {
     }
 
     @Nested
-    public class Run {
+    class Run {
 
         @Mock
-        private HttpPropertySourceState currentState;
+        HttpPropertySourceState currentState;
 
         @BeforeEach
-        public void beforeEach() throws Exception {
+        void beforeEach() throws Exception {
             Field field = poller.getClass().getDeclaredField("currentState");
             field.setAccessible(true);
             field.set(poller, currentState);
         }
 
         @Test
-        public void stateNotUpdated() {
+        void stateNotUpdated() {
             doReturn(false).when(currentState).update(anyBoolean());
 
             poller.run();
@@ -107,7 +107,7 @@ class HttpConfigurationPollerTest {
         }
 
         @Test
-        public void stateUpdated() {
+        void stateUpdated() {
             doReturn(true).when(currentState).update(anyBoolean());
 
             poller.run();

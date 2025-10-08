@@ -24,9 +24,9 @@ import static org.awaitility.Awaitility.await;
  * Test for the {@link OtlpTraceExporterService}
  */
 @DirtiesContext
-public class OtlpTraceExporterServiceIntTest extends ExporterServiceIntegrationTestBase {
+class OtlpTraceExporterServiceIntTest extends ExporterServiceIntegrationTestBase {
 
-    public static final String OTLP_TRACING_PATH = "/v1/traces";
+    static final String OTLP_TRACING_PATH = "/v1/traces";
 
     @RegisterExtension
     LogCapturer warnLogs = LogCapturer.create()

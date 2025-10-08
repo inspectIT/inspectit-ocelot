@@ -27,20 +27,24 @@ import static org.mockito.Mockito.verify;
 import static rocks.inspectit.ocelot.file.versioning.Branch.LIVE;
 
 @ExtendWith(MockitoExtension.class)
-public class AgentMappingSerializerTest {
+class AgentMappingSerializerTest {
 
     AgentMappingSerializer serializer;
+
     @Mock
     AbstractWorkingDirectoryAccessor workingDirectoryAccessor;
+
     @Mock
     FileManager fileManager;
+
     @Mock
     ApplicationEventPublisher eventPublisher;
+
     @Mock
     RevisionAccess revisionAccess;
 
     @BeforeEach
-    public void setup() throws IOException {
+    void setup() throws IOException {
         lenient().doReturn(workingDirectoryAccessor).when(fileManager).getWorkingDirectory();
         lenient().doReturn(revisionAccess).when(fileManager).getWorkspaceRevision();
         when(revisionAccess.agentMappingsExist()).thenReturn(true);
@@ -51,10 +55,10 @@ public class AgentMappingSerializerTest {
     }
 
     @Nested
-    public class PostConstruct {
+    class PostConstruct {
 
         @Test
-        public void defaultMappingUsedForInitialization() throws IOException {
+        void defaultMappingUsedForInitialization() throws IOException {
             doReturn(false).when(revisionAccess).agentMappingsExist();
 
             InspectitServerSettings settings = InspectitServerSettings.builder().initialAgentMappingsSourceBranch("workspace").build();
@@ -68,16 +72,16 @@ public class AgentMappingSerializerTest {
         }
 
         @Test
-        public void noOverrideOfExistingMappings() throws IOException {
+        void noOverrideOfExistingMappings() throws IOException {
             verify(workingDirectoryAccessor, never()).writeAgentMappings(anyString());
         }
     }
 
     @Nested
-    public class WriteAgentMappings {
+    class WriteAgentMappings {
 
         @Test
-        public void successfullyWriteYaml() throws IOException {
+        void successfullyWriteYaml() throws IOException {
             AgentMapping mapping = AgentMapping.builder()
                     .name("mapping")
                     .source("/any-source")
@@ -101,10 +105,10 @@ public class AgentMappingSerializerTest {
     }
 
     @Nested
-    public class ReadAgentMappings {
+    class ReadAgentMappings {
 
         @Test
-        public void successfullyReadYaml() {
+        void successfullyReadYaml() {
             String dummyYaml = "- name: \"mapping\"\n" +
                     "  sourceBranch: \"LIVE\"\n" +
                     "  sources:\n" +
@@ -126,7 +130,7 @@ public class AgentMappingSerializerTest {
     }
 
     @Nested
-    public class setAgentMappingsSourceBranch {
+    class setAgentMappingsSourceBranch {
 
         @Test
         void verifySourceBranchHasChanged() {

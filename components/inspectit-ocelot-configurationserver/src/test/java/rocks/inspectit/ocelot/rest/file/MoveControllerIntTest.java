@@ -19,7 +19,7 @@ class MoveControllerIntTest extends IntegrationTestBase {
     class MoveFileOrDirectory {
 
         @Test
-        public void srcNotExisting() {
+        void srcNotExisting() {
             HttpEntity<FileMoveDescription> request = new HttpEntity<>(FileMoveDescription.builder()
                     .source("src")
                     .target("trgt")
@@ -30,7 +30,7 @@ class MoveControllerIntTest extends IntegrationTestBase {
         }
 
         @Test
-        public void targetExists() {
+        void targetExists() {
             // create test files
             authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
             authRest.exchange("/api/v1/files/trgt/file.yml", HttpMethod.PUT, null, Void.class);
@@ -45,7 +45,7 @@ class MoveControllerIntTest extends IntegrationTestBase {
         }
 
         @Test
-        public void successfulMove() {
+        void successfulMove() {
             // create test files
             authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
 

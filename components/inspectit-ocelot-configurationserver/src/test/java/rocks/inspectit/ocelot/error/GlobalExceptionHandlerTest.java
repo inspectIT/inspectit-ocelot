@@ -17,31 +17,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
 
-    private static MockMvc mockMvc;
+    static MockMvc mockMvc;
 
     @Controller
-    public static class ExceptionController {
+    static class ExceptionController {
 
         @RequestMapping("/exception")
-        public void exception() throws Exception {
+        void exception() throws Exception {
             throw new Exception("custom-message");
         }
 
         @RequestMapping("/notSupportedWithLdapException")
-        public void notSupportedWithLdapException() {
+        void notSupportedWithLdapException() {
             throw new NotSupportedWithLdapException();
         }
     }
 
     @BeforeAll
-    public static void before() {
+    static void before() {
         mockMvc = MockMvcBuilders.standaloneSetup(new ExceptionController())
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
 
     @Test
-    public void handleException() throws Exception {
+    void handleException() throws Exception {
         mockMvc.perform(get("/exception"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().contentType(APPLICATION_JSON))
@@ -50,7 +50,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void handleNotSupportedWithLdapException() throws Exception {
+    void handleNotSupportedWithLdapException() throws Exception {
         mockMvc.perform(get("/notSupportedWithLdapException"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(APPLICATION_JSON))

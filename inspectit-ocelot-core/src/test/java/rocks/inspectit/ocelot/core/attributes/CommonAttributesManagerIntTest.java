@@ -23,14 +23,14 @@ class CommonAttributesManagerIntTest {
         CommonAttributesManager provider;
 
         @Test
-        public void baggageAvailable() {
+        void baggageAvailable() {
             Baggage commonBaggage = provider.getCommonBaggage();
 
             assertThat(commonBaggage.isEmpty()).isFalse();
         }
 
         @Test
-        public void attributeKeysCorrect() {
+        void attributeKeysCorrect() {
             Baggage commonBaggage = provider.getCommonBaggage();
             List<String> commonAttributeKeys = provider.getCommonAttributeKeys();
 
@@ -39,7 +39,7 @@ class CommonAttributesManagerIntTest {
         }
 
         @Test
-        public void scopeAvailable() {
+        void scopeAvailable() {
             Scope scope = provider.withCommonAttributesScope();
             assertThat(scope).isNotNull();
             scope.close();
@@ -57,7 +57,7 @@ class CommonAttributesManagerIntTest {
         CommonAttributesManager provider;
 
         @Test
-        public void extraOverwritesProviders() {
+        void extraOverwritesProviders() {
             Baggage commonBaggage = provider.getCommonBaggage();
 
             assertThat(commonBaggage.asMap())
@@ -76,7 +76,7 @@ class CommonAttributesManagerIntTest {
         CommonAttributesManager provider;
 
         @Test
-        public void extraOverwritesProviders() {
+        void extraOverwritesProviders() {
             updateProperties(
                     properties -> properties
                             .withProperty("inspectit.attributes.providers.environment.resolve-host-address", Boolean.FALSE)
@@ -110,7 +110,7 @@ class CommonAttributesManagerIntTest {
         CommonAttributesManager provider;
 
         @Test
-        public void extraOverwritesProviders() {
+        void extraOverwritesProviders() {
             Baggage commonBaggage = provider.getCommonBaggage();
 
             assertThat(commonBaggage.asMap())

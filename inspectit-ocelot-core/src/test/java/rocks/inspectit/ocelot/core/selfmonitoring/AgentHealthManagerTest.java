@@ -26,18 +26,22 @@ import static org.mockito.Mockito.*;
  * Tests for {@link AgentHealthManager}
  */
 @ExtendWith(MockitoExtension.class)
-public class AgentHealthManagerTest {
+class AgentHealthManagerTest {
 
     @InjectMocks
-    private AgentHealthManager healthManager;
+    AgentHealthManager healthManager;
+
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private InspectitEnvironment environment;
+    InspectitEnvironment environment;
+
     @Mock
-    private ScheduledExecutorService executor;
+    ScheduledExecutorService executor;
+
     @Mock
-    private ApplicationContext ctx;
+    ApplicationContext ctx;
+
     @Mock
-    private AgentHealthIncidentBuffer incidentBuffer;
+    AgentHealthIncidentBuffer incidentBuffer;
 
     @Nested
     class InvalidatableHealth {

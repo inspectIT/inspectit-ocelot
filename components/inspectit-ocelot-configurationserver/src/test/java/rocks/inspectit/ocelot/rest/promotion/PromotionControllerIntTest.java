@@ -22,7 +22,7 @@ class PromotionControllerIntTest extends IntegrationTestBase {
     class GetPromotions {
 
         @Test
-        public void noPromotionsAvailable() {
+        void noPromotionsAvailable() {
             ResponseEntity<WorkspaceDiff> result = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -30,7 +30,7 @@ class PromotionControllerIntTest extends IntegrationTestBase {
         }
 
         @Test
-        public void getPromotionFiles() {
+        void getPromotionFiles() {
             authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
 
             ResponseEntity<WorkspaceDiff> result = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
@@ -48,7 +48,7 @@ class PromotionControllerIntTest extends IntegrationTestBase {
     class PromoteConfiguration {
 
         @Test
-        public void promoteFiles() {
+        void promoteFiles() {
             authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
 
             ResponseEntity<WorkspaceDiff> diff = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
@@ -66,7 +66,7 @@ class PromotionControllerIntTest extends IntegrationTestBase {
         }
 
         @Test
-        public void promoteNoFiles() {
+        void promoteNoFiles() {
             authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
 
             ResponseEntity<WorkspaceDiff> diff = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
@@ -83,7 +83,7 @@ class PromotionControllerIntTest extends IntegrationTestBase {
         }
 
         @Test
-        public void emptyPromotionMessage() {
+        void emptyPromotionMessage() {
             authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
 
             ResponseEntity<WorkspaceDiff> diff = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
@@ -100,7 +100,7 @@ class PromotionControllerIntTest extends IntegrationTestBase {
         }
 
         @Test
-        public void nullPromotionMessage() {
+        void nullPromotionMessage() {
             authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
 
             ResponseEntity<WorkspaceDiff> diff = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);
@@ -117,7 +117,7 @@ class PromotionControllerIntTest extends IntegrationTestBase {
         }
 
         @Test
-        public void conflictingPromotion() {
+        void conflictingPromotion() {
             authRest.exchange("/api/v1/files/src/file.yml", HttpMethod.PUT, null, Void.class);
 
             ResponseEntity<WorkspaceDiff> diff = authRest.getForEntity("/api/v1/configuration/promotions", WorkspaceDiff.class);

@@ -12,10 +12,10 @@ import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class ThreadMetricsSysTest extends MetricsSysTestBase {
+class ThreadMetricsSysTest extends MetricsSysTestBase {
 
     @Test
-    public void testThreadMetricsCapturing() {
+    void testThreadMetricsCapturing() {
         await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
 
             LongPointData liveData = (LongPointData) MetricTestUtils.getDataForView("jvm_threads_live", emptyMap());

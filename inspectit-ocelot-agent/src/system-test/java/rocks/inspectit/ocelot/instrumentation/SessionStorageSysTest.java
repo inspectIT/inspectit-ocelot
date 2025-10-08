@@ -23,14 +23,14 @@ import static org.awaitility.Awaitility.await;
  * 5. When calling {@code thirdMethod} without any assigned session-id, the data tag cannot be used.
  *    Thus, the {@code thirdView} will not contain the data tag.
  */
-public class SessionStorageSysTest extends InstrumentationSysTestBase {
+class SessionStorageSysTest extends InstrumentationSysTestBase {
 
-    private static final String firstView = "first-session-call";
-    private static final String secondView = "second-session-call";
-    private static final String thirdView = "third-session-call";
+    static final String firstView = "first-session-call";
+    static final String secondView = "second-session-call";
+    static final String thirdView = "third-session-call";
 
-    private static final String dataKey = "session-storage-sys-test-key";
-    private static final String dataValue = "session-storage-sys-test-value";
+    static final String dataKey = "session-storage-sys-test-key";
+    static final String dataValue = "session-storage-sys-test-value";
 
     // Calling with session-id, setting data tag and using data tag
     void firstMethod() {}

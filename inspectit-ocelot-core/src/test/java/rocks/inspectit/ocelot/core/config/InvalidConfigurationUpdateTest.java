@@ -7,14 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import rocks.inspectit.ocelot.core.SpringTestBase;
 
-public class InvalidConfigurationUpdateTest extends SpringTestBase {
+class InvalidConfigurationUpdateTest extends SpringTestBase {
 
     @Autowired
     InspectitEnvironment env;
 
     @Test
     @DirtiesContext
-    public void testPreviousConfigMaintainedOnInvalidUpdate() {
+    void testPreviousConfigMaintainedOnInvalidUpdate() {
         updateProperties(mp -> {
             mp.setProperty("inspectit.service-name", "ConfA");
         });

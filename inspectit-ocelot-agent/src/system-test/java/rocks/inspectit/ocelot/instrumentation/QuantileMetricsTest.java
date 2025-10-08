@@ -12,12 +12,12 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class QuantileMetricsTest extends InstrumentationSysTestBase {
+class QuantileMetricsTest extends InstrumentationSysTestBase {
 
     /**
      * Instrumented, see the QuantileMetricsTest.yml config file
      */
-    private static void record(double value, String tag) {}
+    static void record(double value, String tag) {}
 
     @BeforeAll
     static void waitForClassInstrumentation() {

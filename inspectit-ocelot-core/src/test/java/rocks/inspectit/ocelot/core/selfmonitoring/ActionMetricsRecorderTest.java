@@ -18,14 +18,14 @@ import static org.mockito.Mockito.*;
  * Tests the {@link ActionMetricsRecorder}
  */
 @ExtendWith(MockitoExtension.class)
-public class ActionMetricsRecorderTest extends SpringTestBase {
+class ActionMetricsRecorderTest extends SpringTestBase {
 
     @Mock
-    private SelfMonitoringService selfMonitoringService;
+    SelfMonitoringService selfMonitoringService;
 
     @Autowired
     @InjectMocks
-    private ActionMetricsRecorder recorder;
+    ActionMetricsRecorder recorder;
 
     @Nested
     class ActionMetrics extends SpringTestBase {
@@ -41,7 +41,7 @@ public class ActionMetricsRecorderTest extends SpringTestBase {
 
         @Test
         @DirtiesContext
-        public void testExecutionTime() {
+        void testExecutionTime() {
             assertThat(recorder.isEnabled()).isFalse();
 
             // make sure that the execution time metrics is enabled
@@ -63,7 +63,7 @@ public class ActionMetricsRecorderTest extends SpringTestBase {
 
         @Test
         @DirtiesContext
-        public void testAllMetrics() {
+        void testAllMetrics() {
             assertThat(recorder.isEnabled()).isFalse();
             // enable all metrics
             enableAllMetrics();

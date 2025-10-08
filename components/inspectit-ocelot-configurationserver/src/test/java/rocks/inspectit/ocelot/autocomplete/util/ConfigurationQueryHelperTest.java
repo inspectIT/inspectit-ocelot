@@ -13,19 +13,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ConfigurationQueryHelperTest {
+class ConfigurationQueryHelperTest {
 
     @Mock
-    private ConfigurationFilesCache configurationFilesCache;
+    ConfigurationFilesCache configurationFilesCache;
 
     @InjectMocks
-    private ConfigurationQueryHelper configurationQueryHelper;
+    ConfigurationQueryHelper configurationQueryHelper;
 
     @Nested
-    public class GetKeysForPath {
+    class GetKeysForPath {
 
         @Test
-        public void getScopeSuggestion() {
+        void getScopeSuggestion() {
             List<String> propertyPath = Arrays.asList("inspectit", "instrumentation", "scopes");
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
@@ -47,7 +47,7 @@ public class ConfigurationQueryHelperTest {
         }
 
         @Test
-        public void getNonScopeSuggestion() {
+        void getNonScopeSuggestion() {
             List<String> propertyPath = Arrays.asList("inspectit", "metrics");
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
@@ -68,7 +68,7 @@ public class ConfigurationQueryHelperTest {
         }
 
         @Test
-        public void noScopeDefined() {
+        void noScopeDefined() {
             List<String> propertyPath = Arrays.asList("inspectit", "instrumentation", "scopes");
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
@@ -88,7 +88,7 @@ public class ConfigurationQueryHelperTest {
         }
 
         @Test
-        public void withWildCard() {
+        void withWildCard() {
             List<String> propertyPath = Arrays.asList("inspectit", "*");
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
@@ -119,7 +119,7 @@ public class ConfigurationQueryHelperTest {
         }
 
         @Test
-        public void throughList() {
+        void throughList() {
             List<String> propertyPath = Arrays.asList("inspectit", "exampleList", "0");
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
@@ -136,7 +136,7 @@ public class ConfigurationQueryHelperTest {
         }
 
         @Test
-        public void wildcardThroughList() {
+        void wildcardThroughList() {
             List<String> propertyPath = Arrays.asList("inspectit", "exampleList", "*");
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
@@ -154,7 +154,7 @@ public class ConfigurationQueryHelperTest {
         }
 
         @Test
-        public void nonNumberListIndex() {
+        void nonNumberListIndex() {
             List<String> propertyPath = Arrays.asList("inspectit", "exampleList", "iShouldNotBeHere");
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
@@ -170,7 +170,7 @@ public class ConfigurationQueryHelperTest {
         }
 
         @Test
-        public void indexTooSmall() {
+        void indexTooSmall() {
             List<String> propertyPath = Arrays.asList("inspectit", "exampleList", "-5");
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();
@@ -186,7 +186,7 @@ public class ConfigurationQueryHelperTest {
         }
 
         @Test
-        public void indexTooBig() {
+        void indexTooBig() {
             List<String> propertyPath = Arrays.asList("inspectit", "exampleList", "50000");
             HashMap<String, Object> topLevelMap = new HashMap<>();
             HashMap<String, Object> inspectit = new HashMap<>();

@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class FileContentSearchEngineTest {
+class FileContentSearchEngineTest {
 
     @InjectMocks
     FileContentSearchEngine searchEngine;

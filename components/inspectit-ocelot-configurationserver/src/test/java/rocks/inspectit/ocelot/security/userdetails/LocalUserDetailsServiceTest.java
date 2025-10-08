@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class LocalUserDetailsServiceTest {
+class LocalUserDetailsServiceTest {
 
     @InjectMocks
     LocalUserDetailsService detailsService;
@@ -27,9 +27,10 @@ public class LocalUserDetailsServiceTest {
     UserService userService;
 
     @Nested
-    public class LoadUserByUsername {
+    class LoadUserByUsername {
+
         @Test
-        public void successfullyFindUser() {
+        void successfullyFindUser() {
             User user = User.builder().username("username").passwordHash("hash").isLdapUser(false).build();
             when(userService.getUserByName("username")).thenReturn(Optional.of(user));
 
@@ -45,7 +46,7 @@ public class LocalUserDetailsServiceTest {
         }
 
         @Test
-        public void userDoesNotExist() {
+        void userDoesNotExist() {
             when(userService.getUserByName(anyString())).thenReturn(Optional.empty());
 
             assertThatExceptionOfType(UsernameNotFoundException.class)
@@ -57,7 +58,7 @@ public class LocalUserDetailsServiceTest {
         }
 
         @Test
-        public void userIsLdapUser() {
+        void userIsLdapUser() {
             User user = User.builder().username("username").passwordHash("hash").isLdapUser(true).build();
             when(userService.getUserByName("username")).thenReturn(Optional.of(user));
 

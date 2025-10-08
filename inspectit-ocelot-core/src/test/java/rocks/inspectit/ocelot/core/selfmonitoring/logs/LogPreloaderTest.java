@@ -23,11 +23,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests @{@link LogPreloader}
  */
 @ExtendWith(MockitoExtension.class)
-public class LogPreloaderTest {
+class LogPreloaderTest {
 
-    private static final int DEFAULT_BUFFER_SIZE = 10;
+    static final int DEFAULT_BUFFER_SIZE = 10;
 
-    private LogPreloader logPreloader;
+    LogPreloader logPreloader;
 
     @BeforeEach
     void setupPreloader() {
@@ -46,9 +46,9 @@ public class LogPreloaderTest {
     @Nested
     class Record {
 
-        private ILoggingEvent warnEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.WARN, "Dummy Info", new Throwable(), new String[]{});
+        ILoggingEvent warnEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.WARN, "Dummy Info", new Throwable(), new String[]{});
 
-        private ILoggingEvent errorEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.ERROR, "Dummy Info", new Throwable(), new String[]{});
+        ILoggingEvent errorEvent = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.ERROR, "Dummy Info", new Throwable(), new String[]{});
 
         @Test
         void readWhenEmpty() {
@@ -106,7 +106,5 @@ public class LogPreloaderTest {
             assertThat(StreamSupport.stream(logPreloader.getPreloadedLogs().spliterator(), false)
                     .map(ILoggingEvent::getFormattedMessage)).allMatch(s -> s.contains("Dummy") || s.contains("Instrumentation configuration changed!"));
         }
-
     }
-
 }

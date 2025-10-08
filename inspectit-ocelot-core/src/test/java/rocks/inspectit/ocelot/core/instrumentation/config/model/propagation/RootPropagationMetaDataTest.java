@@ -6,7 +6,7 @@ import rocks.inspectit.ocelot.config.model.instrumentation.data.PropagationMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RootPropagationMetaDataTest {
+class RootPropagationMetaDataTest {
 
     @Nested
     class Copy {

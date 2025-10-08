@@ -28,20 +28,20 @@ import static org.awaitility.Awaitility.await;
 /**
  * uses global-propagation-tests.yml
  */
-public class HttpOutMetricTest extends InstrumentationSysTestBase {
+class HttpOutMetricTest extends InstrumentationSysTestBase {
 
-    private static final String PATH_200 = "/test";
+    static final String PATH_200 = "/test";
 
-    private static final String PATH_500 = "/error";
+    static final String PATH_500 = "/error";
 
-    private static String WIREMOCK_HOST_PORT;
+    static String WIREMOCK_HOST_PORT;
 
-    private static String WIREMOCK_URL;
+    static String WIREMOCK_URL;
 
-    private static WireMockServer wireMockServer;
+    static WireMockServer wireMockServer;
 
     @BeforeAll
-    public static void setupWiremock() {
+    static void setupWiremock() {
         wireMockServer = new WireMockServer(options().dynamicPort());
 
         wireMockServer.start();
@@ -59,7 +59,7 @@ public class HttpOutMetricTest extends InstrumentationSysTestBase {
     }
 
     @AfterAll
-    public static void cleanup() {
+    static void cleanup() {
         wireMockServer.stop();
     }
 

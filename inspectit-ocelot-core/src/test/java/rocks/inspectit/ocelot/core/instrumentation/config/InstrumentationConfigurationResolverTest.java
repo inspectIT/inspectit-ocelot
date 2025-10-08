@@ -35,19 +35,19 @@ import static org.mockito.Mockito.*;
 class InstrumentationConfigurationResolverTest {
 
     @Mock
-    private List<SpecialSensor> specialSensors;
+    List<SpecialSensor> specialSensors;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private InspectitEnvironment env;
+    InspectitEnvironment env;
 
     @Mock
-    private Instrumentation instrumentation;
+    Instrumentation instrumentation;
 
     @Mock
     MethodHookConfigurationResolver hookResolver;
 
     @InjectMocks
-    private InstrumentationConfigurationResolver resolver;
+    InstrumentationConfigurationResolver resolver;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     InstrumentationSettings settings;
@@ -66,7 +66,7 @@ class InstrumentationConfigurationResolverTest {
     }
 
     @Nested
-    public class GetClassInstrumentationConfiguration {
+    class GetClassInstrumentationConfiguration {
 
         @Test
         public void emptyRules() throws IllegalAccessException {
@@ -399,7 +399,6 @@ class InstrumentationConfigurationResolverTest {
             assertThat(resolver.isIgnoredClass(TypeDescriptionWithClassLoader.of(copied), config)).isTrue();
         }
     }
-
 }
 
 class IgnoredDummyClassLoader extends DummyClassLoader implements DoNotInstrumentMarker {
@@ -411,17 +410,11 @@ class IgnoredDummyClassLoader extends DummyClassLoader implements DoNotInstrumen
 
 class TestCase {
 
-    void methodA() {
-    }
+    void methodA() {}
 
-    void methodB() {
-    }
+    void methodB() {}
 }
 
-class IgnoredClass implements DoNotInstrumentMarker {
+class IgnoredClass implements DoNotInstrumentMarker {}
 
-}
-
-class NotIgnoredClass {
-
-}
+class NotIgnoredClass {}

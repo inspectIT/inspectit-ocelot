@@ -18,8 +18,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-
-public class ConfigurationSchemaProviderTest {
+class ConfigurationSchemaProviderTest {
 
     ConfigurationSchemaProvider provider = new ConfigurationSchemaProvider();
 
@@ -33,9 +32,7 @@ public class ConfigurationSchemaProviderTest {
     private class NestedProp {
         private String simple;
 
-        public void setSimple(String str) {
-        }
-
+        public void setSimple(String str) {}
     }
 
     @Nested
@@ -49,8 +46,7 @@ public class ConfigurationSchemaProviderTest {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
                     private int simple;
 
-                    public void setSimple(int i) {
-                    }
+                    public void setSimple(int i) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -66,8 +62,7 @@ public class ConfigurationSchemaProviderTest {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
                     private int notSoSimple;
 
-                    public void setNotSoSimple(int i) {
-                    }
+                    public void setNotSoSimple(int i) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -84,8 +79,7 @@ public class ConfigurationSchemaProviderTest {
                     @UISettings(name = "custom NAME")
                     private int simple;
 
-                    public void setSimple(int i) {
-                    }
+                    public void setSimple(int i) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -102,8 +96,7 @@ public class ConfigurationSchemaProviderTest {
                     private int simple;
 
                     @UISettings(name = "custom NAME")
-                    public void setSimple(int i) {
-                    }
+                    public void setSimple(int i) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -124,8 +117,7 @@ public class ConfigurationSchemaProviderTest {
                     @UISettings(exclude = true)
                     private int simple;
 
-                    public void setSimple(int i) {
-                    }
+                    public void setSimple(int i) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -138,8 +130,7 @@ public class ConfigurationSchemaProviderTest {
                     private int simple;
 
                     @UISettings(exclude = true)
-                    public void setSimple(int i) {
-                    }
+                    public void setSimple(int i) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -152,8 +143,7 @@ public class ConfigurationSchemaProviderTest {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
                     private Map<String, String> simple;
 
-                    public void setSimple(Map<String, String> map) {
-                    }
+                    public void setSimple(Map<String, String> map) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -165,8 +155,7 @@ public class ConfigurationSchemaProviderTest {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
                     private List<String> simple;
 
-                    public void setSimple(List<String> list) {
-                    }
+                    public void setSimple(List<String> list) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -180,8 +169,7 @@ public class ConfigurationSchemaProviderTest {
             @Test
             void compositeType() {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
-                    public void setComp(NestedProp p) {
-                    }
+                    public void setComp(NestedProp p) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -202,8 +190,7 @@ public class ConfigurationSchemaProviderTest {
             @Test
             void simpleType() {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
-                    public void setMyInt(short i) {
-                    }
+                    public void setMyInt(short i) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -221,8 +208,7 @@ public class ConfigurationSchemaProviderTest {
             @Test
             void primitiveNutNullable() {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
-                    public void setMyInt(short i) {
-                    }
+                    public void setMyInt(short i) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -235,8 +221,7 @@ public class ConfigurationSchemaProviderTest {
             @Test
             void compositeNullable() {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
-                    public void setComp(NestedProp p) {
-                    }
+                    public void setComp(NestedProp p) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -249,8 +234,7 @@ public class ConfigurationSchemaProviderTest {
             @Test
             void wrapperNullable() {
                 PropertyDescriptor prop = getFirstProperty(new Object() {
-                    public void setProp(Boolean b) {
-                    }
+                    public void setProp(Boolean b) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -266,8 +250,7 @@ public class ConfigurationSchemaProviderTest {
                     @NotNull
                     Boolean prop;
 
-                    public void setProp(Boolean b) {
-                    }
+                    public void setProp(Boolean b) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -283,8 +266,7 @@ public class ConfigurationSchemaProviderTest {
                     @NotBlank
                     String prop;
 
-                    public void setProp(String b) {
-                    }
+                    public void setProp(String b) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -301,8 +283,7 @@ public class ConfigurationSchemaProviderTest {
                     @NotEmpty
                     String prop;
 
-                    public void setProp(String b) {
-                    }
+                    public void setProp(String b) {}
                 });
 
                 Optional<ConfigurationPropertyDescription> result = provider.toDescription(prop);
@@ -377,7 +358,5 @@ public class ConfigurationSchemaProviderTest {
 
             assertThat(result.getType()).isEqualTo(ConfigurationPropertyType.DURATION);
         }
-
     }
-
 }

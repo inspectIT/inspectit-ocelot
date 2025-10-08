@@ -12,16 +12,16 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class ObjectAttachmentsTest extends InstrumentationSysTestBase {
+class ObjectAttachmentsTest extends InstrumentationSysTestBase {
 
     @BeforeAll
     static void waitForClassInstrumentation() {
         TestUtils.waitForClassInstrumentation(ObjectAttachmentsTest.class, true, 15, TimeUnit.SECONDS);
     }
 
-    public void writeAttachments(String obj, String firstAttachment, String secondAttachment) {}
+    void writeAttachments(String obj, String firstAttachment, String secondAttachment) {}
 
-    public void readAttachments(String obj) {}
+    void readAttachments(String obj) {}
 
     @Test
     void writeReadTest() {

@@ -13,11 +13,11 @@ import rocks.inspectit.ocelot.events.WorkspaceChangedEvent;
 import rocks.inspectit.ocelot.file.FileManager;
 import rocks.inspectit.ocelot.file.accessor.git.RevisionAccess;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ExternalChangeDetectorTest {
+class ExternalChangeDetectorTest {
 
     @Mock
     FileManager fileManager;
@@ -96,6 +96,5 @@ public class ExternalChangeDetectorTest {
             PromotionEvent event = eventCaptor.getValue();
             assertThat(event.getLiveRevision()).isSameAs(liveRevision);
         }
-
     }
 }

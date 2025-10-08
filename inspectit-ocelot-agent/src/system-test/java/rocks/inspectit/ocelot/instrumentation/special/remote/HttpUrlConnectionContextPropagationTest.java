@@ -22,15 +22,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * uses global-propagation-tests.yml
  */
-public class HttpUrlConnectionContextPropagationTest {
+class HttpUrlConnectionContextPropagationTest {
 
-    public static final int PORT = 9999;
+    static final int PORT = 9999;
 
-    public static final String TEST_URL = "http://localhost:" + PORT + "/test";
+    static final String TEST_URL = "http://localhost:" + PORT + "/test";
 
-    private WireMockServer wireMockServer;
+    WireMockServer wireMockServer;
 
-    private final Map<String, Object> dataToPropagate = new HashMap<>();
+    final Map<String, Object> dataToPropagate = new HashMap<>();
 
     @BeforeAll
     static void waitForInstrumentation() throws Exception {

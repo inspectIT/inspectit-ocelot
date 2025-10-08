@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
+class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
     private ExecutorService executorService;
 
@@ -22,12 +22,12 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
     private static final String attrValue = "test_value";
 
     @BeforeAll
-    public static void beforeAll() {
+    static void beforeAll() {
         TestUtils.waitForClassInstrumentations(ThreadPoolExecutor.class, TestRunnable.class, TestCallable.class);
     }
 
     @BeforeEach
-    public void beforeEach() throws ExecutionException, InterruptedException {
+    void beforeEach() throws ExecutionException, InterruptedException {
         // warmup the executor - if this is not be done, the first call to the executor will always be correlated
         // because a thread is started, thus, it is correlated due to the Thread.start correlation
         executorService = Executors.newSingleThreadExecutor();
@@ -35,15 +35,15 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
     }
 
     @AfterEach
-    public void afterEach() {
+    void afterEach() {
         executorService.shutdown();
     }
 
     @Nested
-    public class Submit_runnable {
+    class Submit_runnable {
 
         @Test
-        public void correlateRunnable_lambda() throws Exception {
+        void correlateRunnable_lambda() throws Exception {
             AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
             Runnable runnable = HelperClasses.getRunnableAsLambda(refBaggage);
@@ -63,7 +63,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
         }
 
         @Test
-        public void correlateRunnable_anonymous() throws Exception {
+        void correlateRunnable_anonymous() throws Exception {
             AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
             Runnable runnable = HelperClasses.getRunnableAsAnonymous(refBaggage);
@@ -83,7 +83,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
         }
 
         @Test
-        public void correlateRunnable_named() throws Exception {
+        void correlateRunnable_named() throws Exception {
             AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
             Runnable runnable = HelperClasses.getRunnableAsNamed(refBaggage);
@@ -103,10 +103,10 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
     }
 
     @Nested
-    public class Execute_runnable {
+    class Execute_runnable {
 
         @Test
-        public void correlateRunnable_lambda() throws Exception {
+        void correlateRunnable_lambda() throws Exception {
             AtomicReference<Baggage> refBaggage = new AtomicReference<>();
             CountDownLatch latch = new CountDownLatch(1);
 
@@ -129,7 +129,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
         }
 
         @Test
-        public void correlateRunnable_anonymous() throws Exception {
+        void correlateRunnable_anonymous() throws Exception {
             AtomicReference<Baggage> refBaggage = new AtomicReference<>();
             CountDownLatch latch = new CountDownLatch(1);
 
@@ -156,7 +156,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
         }
 
         @Test
-        public void correlateRunnable_named() throws Exception {
+        void correlateRunnable_named() throws Exception {
             AtomicReference<Baggage> refBaggage = new AtomicReference<>();
             CountDownLatch latch = new CountDownLatch(1);
 
@@ -180,10 +180,10 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
     }
 
     @Nested
-    public class Submit_callable {
+    class Submit_callable {
 
         @Test
-        public void submitCallable_lambda() throws Exception {
+        void submitCallable_lambda() throws Exception {
             Callable<Baggage> callable = HelperClasses.getCallableAsLambda();
 
             Future<Baggage> result;
@@ -199,7 +199,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
         }
 
         @Test
-        public void submitCallable_anonymous() throws Exception {
+        void submitCallable_anonymous() throws Exception {
             Callable<Baggage> callable = HelperClasses.getCallableAsAnonymous();
             TestUtils.waitForClassInstrumentations(callable.getClass());
 
@@ -216,7 +216,7 @@ public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
         }
 
         @Test
-        public void submitCallable_named() throws Exception {
+        void submitCallable_named() throws Exception {
             Callable<Baggage> callable = HelperClasses.getCallableAsNamed();
 
             Future<Baggage> result;

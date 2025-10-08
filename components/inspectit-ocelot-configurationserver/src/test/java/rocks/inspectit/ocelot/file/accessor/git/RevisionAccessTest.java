@@ -15,13 +15,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 @ExtendWith(MockitoExtension.class)
 class RevisionAccessTest {
 
-    private RevisionAccess revisionAccess;
+    RevisionAccess revisionAccess;
 
     @Mock
-    private Repository repository;
+    Repository repository;
 
     @Mock
-    private RevCommit revCommit;
+    RevCommit revCommit;
 
     @BeforeEach
     void init() {
@@ -32,39 +32,38 @@ class RevisionAccessTest {
     class VerifyPath {
 
         @Test
-        public void validPath() {
+        void validPath() {
             String result = revisionAccess.verifyPath("files", "test");
 
             assertThat(result).isEqualTo("files/test");
         }
 
         @Test
-        public void emptyBase() {
+        void emptyBase() {
             String result = revisionAccess.verifyPath("", "dir/..");
 
             assertThat(result).isEmpty();
         }
 
         @Test
-        public void nullBase() {
+        void nullBase() {
             String result = revisionAccess.verifyPath("", "dir/..");
 
             assertThat(result).isEmpty();
         }
 
         @Test
-        public void invalidPath() {
+        void invalidPath() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> revisionAccess.verifyPath("files", "../test/"))
                     .withMessage("User path escapes the base path: ../test/");
         }
 
         @Test
-        public void backslashPath() {
+        void backslashPath() {
             String result = revisionAccess.verifyPath("files", "test\\skywalker");
 
             assertThat(result).isEqualTo("files/test/skywalker");
         }
     }
-
 }

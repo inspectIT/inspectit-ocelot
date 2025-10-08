@@ -11,9 +11,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static rocks.inspectit.ocelot.agentconfiguration.DocsObjectsLoader.OCELOT_DEFAULT_CONFIG_PREFIX;
 
-public class DocsObjectsLoaderTest {
+class DocsObjectsLoaderTest {
 
-    private final String srcYamlWithDocsObject = """
+    final String srcYamlWithDocsObject = """
             inspectit:
               instrumentation:
                 scopes:
@@ -24,7 +24,7 @@ public class DocsObjectsLoaderTest {
                       - name: execute
             """;
 
-    private final String srcYamlWithoutDocsObjects = """
+    final String srcYamlWithoutDocsObjects = """
             inspectit:
               metrics:
                 disk:
@@ -35,6 +35,7 @@ public class DocsObjectsLoaderTest {
 
     @Nested
     class LoadObjects {
+
         @Test
         void verifyLoadObjectsSuccessful() throws IOException {
             Set<String> objects = DocsObjectsLoader.loadObjects(srcYamlWithDocsObject);

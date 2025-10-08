@@ -13,7 +13,7 @@ import rocks.inspectit.ocelot.core.utils.OpenTelemetryUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CustomSpanBuilderTest {
+class CustomSpanBuilderTest {
 
     @Nested
     class Timestamps extends SpringTestBase {
@@ -48,5 +48,4 @@ public class CustomSpanBuilderTest {
             System.out.println("elapsed: " + (clockNow - OcelotAnchoredClockUtils.getNow(anchoredClock)));
         }
     }
-
 }

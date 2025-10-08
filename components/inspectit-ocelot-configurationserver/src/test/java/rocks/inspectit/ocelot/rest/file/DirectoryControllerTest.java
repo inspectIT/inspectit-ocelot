@@ -23,25 +23,25 @@ import static org.mockito.Mockito.*;
 class DirectoryControllerTest {
 
     @Mock
-    private FileManager fileManager;
+    FileManager fileManager;
 
     @Mock
-    private WorkingDirectoryAccessor wdAccessor;
+    WorkingDirectoryAccessor wdAccessor;
 
     @Mock
-    private RevisionAccess revisionAccess;
+    RevisionAccess revisionAccess;
 
     @Mock
-    private WorkingDirectoryAccessor accessor;
+    WorkingDirectoryAccessor accessor;
 
     @InjectMocks
-    private DirectoryController controller;
+    DirectoryController controller;
 
     @Nested
     class ListContents {
 
         @Test
-        public void nullResult() {
+        void nullResult() {
             when(fileManager.getWorkingDirectory()).thenReturn(accessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
@@ -55,7 +55,7 @@ class DirectoryControllerTest {
         }
 
         @Test
-        public void emptyResult() {
+        void emptyResult() {
             when(fileManager.getWorkingDirectory()).thenReturn(accessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
@@ -69,7 +69,7 @@ class DirectoryControllerTest {
         }
 
         @Test
-        public void validResponse() {
+        void validResponse() {
             when(fileManager.getWorkingDirectory()).thenReturn(accessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
@@ -85,7 +85,7 @@ class DirectoryControllerTest {
         }
 
         @Test
-        public void listLiveVersion() {
+        void listLiveVersion() {
             when(fileManager.getLiveRevision()).thenReturn(revisionAccess);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
@@ -101,7 +101,7 @@ class DirectoryControllerTest {
         }
 
         @Test
-        public void idResponse() {
+        void idResponse() {
             when(fileManager.getCommitWithId("123")).thenReturn(revisionAccess);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
@@ -121,7 +121,7 @@ class DirectoryControllerTest {
     class CreateNewDirectory {
 
         @Test
-        public void successful() throws IOException {
+        void successful() throws IOException {
             when(fileManager.getWorkingDirectory()).thenReturn(wdAccessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");
@@ -137,7 +137,7 @@ class DirectoryControllerTest {
     class DeleteDirectory {
 
         @Test
-        public void successful() throws IOException {
+        void successful() throws IOException {
             when(fileManager.getWorkingDirectory()).thenReturn(wdAccessor);
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getAttribute(anyString())).thenReturn("/api/target", "/api/**");

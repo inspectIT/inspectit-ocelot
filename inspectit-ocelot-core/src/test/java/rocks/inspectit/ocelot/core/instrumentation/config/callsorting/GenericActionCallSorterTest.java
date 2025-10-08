@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class GenericActionCallSorterTest {
+class GenericActionCallSorterTest {
 
-    private GenericActionCallSorter scheduler = new GenericActionCallSorter();
+    GenericActionCallSorter scheduler = new GenericActionCallSorter();
 
 
     private static class TestCallBuilder {
@@ -236,6 +236,5 @@ public class GenericActionCallSorterTest {
             List<String> result = getNames(scheduler.orderActionCalls(input));
             assertThat(result).containsExactly("read_propagated", "http_path", "A_parametrize_http", "B_parametrize_http", "read_parametrized");
         }
-
     }
 }

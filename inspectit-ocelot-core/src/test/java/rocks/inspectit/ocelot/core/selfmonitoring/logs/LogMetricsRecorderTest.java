@@ -22,10 +22,10 @@ import static org.mockito.Mockito.*;
 public class LogMetricsRecorderTest {
 
     @Mock
-    private SelfMonitoringService selfMonitoringService;
+    SelfMonitoringService selfMonitoringService;
 
     @InjectMocks
-    private LogMetricsRecorder logMetricsRecorder;
+    LogMetricsRecorder logMetricsRecorder;
 
     @Nested
     class Increment {

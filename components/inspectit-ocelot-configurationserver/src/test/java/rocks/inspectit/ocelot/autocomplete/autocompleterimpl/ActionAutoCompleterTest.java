@@ -18,7 +18,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ActionAutoCompleterTest {
+class ActionAutoCompleterTest {
 
     @InjectMocks
     ActionAutoCompleter actionAutoCompleter;
@@ -27,9 +27,10 @@ public class ActionAutoCompleterTest {
     ConfigurationQueryHelper configurationQueryHelper;
 
     @Nested
-    public class GetSuggestions {
+    class GetSuggestions {
+
         @Test
-        public void hasActions() {
+        void hasActions() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "actions");
             doReturn(Arrays.asList("test", "test2")).when(configurationQueryHelper).getKeysForPath(any());
 
@@ -41,7 +42,7 @@ public class ActionAutoCompleterTest {
         }
 
         @Test
-        public void noPaths() {
+        void noPaths() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "actions");
             when(configurationQueryHelper.getKeysForPath(any())).thenReturn(Collections.emptyList());
 
@@ -51,7 +52,7 @@ public class ActionAutoCompleterTest {
         }
 
         @Test
-        public void wrongPath() {
+        void wrongPath() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "rules");
 
             List<String> output = actionAutoCompleter.getSuggestions(path);

@@ -14,20 +14,20 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @ExtendWith(MockitoExtension.class)
 class MatcherChainBuilderTest {
 
-    private MatcherChainBuilder<Object> builder;
+    MatcherChainBuilder<Object> builder;
 
-    private ElementMatcher.Junction<Object> anyMatcher = ElementMatchers.any();
+    ElementMatcher.Junction<Object> anyMatcher = ElementMatchers.any();
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         builder = new MatcherChainBuilder<>();
     }
 
     @Nested
-    public class Or {
+    class Or {
 
         @Test
-        public void nullMatcher() {
+        void nullMatcher() {
             builder.or(null);
 
             assertThat(builder.build()).isNull();
@@ -35,7 +35,7 @@ class MatcherChainBuilderTest {
         }
 
         @Test
-        public void singleMatcher() {
+        void singleMatcher() {
             builder.or(anyMatcher);
 
             assertThat(builder.build()).isEqualTo(anyMatcher);
@@ -43,7 +43,7 @@ class MatcherChainBuilderTest {
         }
 
         @Test
-        public void multipleMatcher() {
+        void multipleMatcher() {
             builder.or(anyMatcher);
             builder.or(anyMatcher);
 
@@ -51,7 +51,7 @@ class MatcherChainBuilderTest {
         }
 
         @Test
-        public void nullOnNotEmpty() {
+        void nullOnNotEmpty() {
             builder.or(anyMatcher);
             builder.or(null);
 
@@ -60,10 +60,10 @@ class MatcherChainBuilderTest {
     }
 
     @Nested
-    public class And {
+    class And {
 
         @Test
-        public void nullMatcher() {
+        void nullMatcher() {
             builder.and(null);
 
             assertThat(builder.build()).isNull();
@@ -71,7 +71,7 @@ class MatcherChainBuilderTest {
         }
 
         @Test
-        public void singleMatcher() {
+        void singleMatcher() {
             builder.and(anyMatcher);
 
             assertThat(builder.build()).isEqualTo(anyMatcher);
@@ -79,7 +79,7 @@ class MatcherChainBuilderTest {
         }
 
         @Test
-        public void multipleMatcher() {
+        void multipleMatcher() {
             builder.and(anyMatcher);
             builder.and(anyMatcher);
 
@@ -87,7 +87,7 @@ class MatcherChainBuilderTest {
         }
 
         @Test
-        public void nullOnNotEmpty() {
+        void nullOnNotEmpty() {
             builder.and(anyMatcher);
             builder.and(null);
 
@@ -95,21 +95,21 @@ class MatcherChainBuilderTest {
         }
 
         @Test
-        public void conditionalTrue() {
+        void conditionalTrue() {
             builder.and(true, anyMatcher);
 
             assertThat(builder.build()).isEqualTo(anyMatcher);
         }
 
         @Test
-        public void conditionalFalse() {
+        void conditionalFalse() {
             builder.and(false, anyMatcher);
 
             assertThat(builder.build()).isEqualTo(not(anyMatcher));
         }
 
         @Test
-        public void conditionalFalseOnNotEmppty() {
+        void conditionalFalseOnNotEmppty() {
             builder.and(anyMatcher);
             builder.and(false, anyMatcher);
 
@@ -118,17 +118,17 @@ class MatcherChainBuilderTest {
     }
 
     @Nested
-    public class IsEmpty {
+    class IsEmpty {
 
         @Test
-        public void empty() {
+        void empty() {
             boolean result = builder.isEmpty();
 
             assertThat(result).isTrue();
         }
 
         @Test
-        public void notEmpty() {
+        void notEmpty() {
             builder.and(ElementMatchers.any());
 
             boolean result = builder.isEmpty();

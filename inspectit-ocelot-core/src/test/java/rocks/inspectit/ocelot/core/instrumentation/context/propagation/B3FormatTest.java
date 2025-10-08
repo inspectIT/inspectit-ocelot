@@ -8,17 +8,17 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class B3FormatTest {
+class B3FormatTest {
 
     @Test
-    public void nullMap() {
+    void nullMap() {
         String result = B3Format.INSTANCE.getB3HeadersAsString(null);
 
         assertThat(result).isEqualTo("[]");
     }
 
     @Test
-    public void emptyMap() {
+    void emptyMap() {
         Map<String, String> data = Collections.emptyMap();
 
         String result = B3Format.INSTANCE.getB3HeadersAsString(data);
@@ -27,7 +27,7 @@ public class B3FormatTest {
     }
 
     @Test
-    public void mapWithoutB3() {
+    void mapWithoutB3() {
         Map<String, String> data = ImmutableMap.of("key-one", "value-one");
 
         String result = B3Format.INSTANCE.getB3HeadersAsString(data);
@@ -36,7 +36,7 @@ public class B3FormatTest {
     }
 
     @Test
-    public void singleB3Header() {
+    void singleB3Header() {
         Map<String, String> data = ImmutableMap.of("key-one", "value-one", "X-B3-TraceId", "traceId");
 
         String result = B3Format.INSTANCE.getB3HeadersAsString(data);
@@ -45,7 +45,7 @@ public class B3FormatTest {
     }
 
     @Test
-    public void multipleB3Header() {
+    void multipleB3Header() {
         Map<String, String> data = ImmutableMap.of("key-one", "value-one", "X-B3-TraceId", "traceId", "X-B3-SpanId", "spanId");
 
         String result = B3Format.INSTANCE.getB3HeadersAsString(data);

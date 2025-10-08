@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class ConfigDirWatchingIntTest {
+class ConfigDirWatchingIntTest {
 
     static final String tmpDir = "tmpconf_int_test";
 
@@ -46,7 +46,7 @@ public class ConfigDirWatchingIntTest {
         InspectitEnvironment env;
 
         @Test
-        public void testNewFilesDetected() throws Exception {
+        void testNewFilesDetected() throws Exception {
             FileUtils.write(new File(tmpDir + "/A.properties"), "inspectit.service-name=FromAproperties", Charset.defaultCharset());
             await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("FromAproperties")
@@ -55,7 +55,7 @@ public class ConfigDirWatchingIntTest {
 
 
         @Test
-        public void testFileChangesDetected() throws Exception {
+        void testFileChangesDetected() throws Exception {
             FileUtils.write(new File(tmpDir + "/A.yml"), "inspectit.service-name: FromAproperties", Charset.defaultCharset());
             await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("FromAproperties")
@@ -67,7 +67,7 @@ public class ConfigDirWatchingIntTest {
         }
 
         @Test
-        public void testFileDeleted() throws Exception {
+        void testFileDeleted() throws Exception {
             FileUtils.write(new File(tmpDir + "/A.yml"), "inspectit.service-name: FromAproperties", Charset.defaultCharset());
             await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
                     assertThat(env.getCurrentConfig().getServiceName()).isEqualTo("FromAproperties")
@@ -79,6 +79,4 @@ public class ConfigDirWatchingIntTest {
             );
         }
     }
-
-
 }

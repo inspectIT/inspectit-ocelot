@@ -19,12 +19,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
-public class LogHealthMonitorTest {
+class LogHealthMonitorTest {
 
     @InjectMocks
-    private LogHealthMonitor healthMonitor;
+    LogHealthMonitor healthMonitor;
+
     @Mock
-    private AgentHealthManager healthManager;
+    AgentHealthManager healthManager;
 
     private ILoggingEvent createLoggingEvent(Class<?> loggedClass, Level logLevel) {
         return new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(loggedClass), logLevel, "Dummy Info", new Throwable(), new String[]{});

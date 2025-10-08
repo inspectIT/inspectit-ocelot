@@ -7,9 +7,9 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InspectitRegexImplTest {
+class InspectitRegexImplTest {
 
-    private InspectitRegexImpl regex;
+    InspectitRegexImpl regex;
 
     @BeforeEach
     void beforeEach() {

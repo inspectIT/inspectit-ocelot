@@ -27,16 +27,16 @@ import static org.mockito.Mockito.*;
  * Test class for {@link DirectoryPropertySource}
  */
 @ExtendWith(MockitoExtension.class)
-public class DirectoryPropertySourceTest {
+class DirectoryPropertySourceTest {
 
-    private static final String testPropertySourceName = "test";
+    static final String testPropertySourceName = "test";
 
-    private static Path testDirectory;
+    static Path testDirectory;
 
-    private DirectoryPropertySource source;
+    DirectoryPropertySource source;
 
     @Mock
-    private MutablePropertySources psContainer;
+    MutablePropertySources psContainer;
 
     ArgumentCaptor<PropertySource> captor = ArgumentCaptor.forClass(PropertySource.class);
 
@@ -71,7 +71,7 @@ public class DirectoryPropertySourceTest {
     class Reload {
 
         @Test
-        public void reloadConfigurations() throws IOException {
+        void reloadConfigurations() throws IOException {
             Files.createFile(testDirectory.resolve("first.yaml"));
             Files.createFile(testDirectory.resolve("second.properties"));
             Files.createFile(testDirectory.resolve("third.json"));
@@ -87,7 +87,7 @@ public class DirectoryPropertySourceTest {
         }
 
         @Test
-        public void reloadWithExceptions() throws IOException {
+        void reloadWithExceptions() throws IOException {
             Files.createFile(testDirectory.resolve("a_third.json")); // invalid JSON/JSON file
             Files.write(testDirectory.resolve("a_third.json"), "{,,,}".getBytes()); // invalid YAML/JSON
 
@@ -115,8 +115,6 @@ public class DirectoryPropertySourceTest {
 
         /**
          * Tests that JSON configurations are successfully read
-         *
-         * @throws IOException
          */
         @DirtiesContext
         @Test
@@ -127,8 +125,6 @@ public class DirectoryPropertySourceTest {
 
         /**
          * Tests that YAML configurations are successfully read
-         *
-         * @throws IOException
          */
         @DirtiesContext
         @Test
@@ -142,9 +138,7 @@ public class DirectoryPropertySourceTest {
          *
          * @param fileName    the name of the temporary file to write to
          * @param data        the data to write
-         * @param serviceName the expected service name
-         *
-         * @throws IOException
+         * @param serviceName the expected service namen
          */
         private void writeConfigurationAndAssertServiceName(String fileName, String data, String serviceName) throws IOException {
             // write data to the file
@@ -164,5 +158,3 @@ public class DirectoryPropertySourceTest {
         }
     }
 }
-
-

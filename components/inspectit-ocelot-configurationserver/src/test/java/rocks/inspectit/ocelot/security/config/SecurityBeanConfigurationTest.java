@@ -18,13 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SecurityBeanConfigurationTest {
 
     @InjectMocks
-    private SecurityBeanConfiguration configuration;
+    SecurityBeanConfiguration configuration;
 
     @Nested
-    public class PasswordEncoderBean {
+    class PasswordEncoderBean {
 
         @Test
-        public void initBean() {
+        void initBean() {
             PasswordEncoder result = configuration.passwordEncoder();
 
             assertThat(result).isNotNull();

@@ -11,10 +11,10 @@ import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class ClassLoaderMetricsSysTest extends MetricsSysTestBase {
+class ClassLoaderMetricsSysTest extends MetricsSysTestBase {
 
     @Test
-    public void testClassLoaderMetricCapturing() {
+    void testClassLoaderMetricCapturing() {
         await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
             LongPointData loadedData = (LongPointData) MetricTestUtils.getDataForView("jvm_classes_loaded", emptyMap());
             LongPointData unloadedData = (LongPointData) MetricTestUtils.getDataForView("jvm_classes_unloaded", emptyMap());

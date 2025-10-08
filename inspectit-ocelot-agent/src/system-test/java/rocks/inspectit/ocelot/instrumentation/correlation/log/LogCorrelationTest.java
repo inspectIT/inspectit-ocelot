@@ -19,15 +19,15 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class LogCorrelationTest {
+class LogCorrelationTest {
 
-    public static final String MDC_KEY = "traceid";
+    static final String MDC_KEY = "traceid";
 
-    private ExecutorService executorService;
+    ExecutorService executorService;
 
-    private ScheduledExecutorService scheduledExecutorService;
+    ScheduledExecutorService scheduledExecutorService;
 
-    private static Function<String, String> getTestMdc;
+    static Function<String, String> getTestMdc;
 
     /**
      * Simulates the case where a class loader is isolated (e.g. in JBoss module system) and does not have access
@@ -556,5 +556,4 @@ public class LogCorrelationTest {
             assertThat(deque).extracting(Boolean::booleanValue).containsOnly(true);
         }
     }
-
 }

@@ -8,7 +8,7 @@ import rocks.inspectit.ocelot.core.SpringTestBase;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DiskMetricsRecorderConfigTest extends SpringTestBase {
+class DiskMetricsRecorderConfigTest extends SpringTestBase {
 
     @Autowired
     DiskMetricsRecorder recorder;

@@ -20,9 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AgentStatusManagerTest {
+class AgentStatusManagerTest {
 
-    public static final String HEADER_AGENT_ID = "x-ocelot-agent-id";
+    static final String HEADER_AGENT_ID = "x-ocelot-agent-id";
 
     @InjectMocks
     AgentStatusManager manager;

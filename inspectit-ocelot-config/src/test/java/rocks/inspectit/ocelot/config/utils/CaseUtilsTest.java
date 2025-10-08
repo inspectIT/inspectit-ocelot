@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CaseUtilsTest {
+class CaseUtilsTest {
 
     @Nested
-    public class CamelCaseToKebabCase {
+    class CamelCaseToKebabCase {
 
         @Test
         void twoLiteralTest() {
@@ -37,7 +37,7 @@ public class CaseUtilsTest {
     }
 
     @Nested
-    public class KebabCaseToCamelCase {
+    class KebabCaseToCamelCase {
 
         @Test
         void twoLiteralTest() {
@@ -61,7 +61,7 @@ public class CaseUtilsTest {
     }
 
     @Nested
-    public class CompareIgnoreCamelOrKebabCase {
+    class CompareIgnoreCamelOrKebabCase {
 
         @Test
         void twoLiteralTest() {

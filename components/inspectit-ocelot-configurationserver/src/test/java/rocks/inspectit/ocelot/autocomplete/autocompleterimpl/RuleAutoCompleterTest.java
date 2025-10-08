@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class RuleAutoCompleterTest {
+class RuleAutoCompleterTest {
 
     @InjectMocks
     RuleAutoCompleter ruleAutoCompleter;
@@ -27,9 +27,10 @@ public class RuleAutoCompleterTest {
 
 
     @Nested
-    public class GetSuggestions {
+    class GetSuggestions {
+
         @Test
-        public void wrongPath() {
+        void wrongPath() {
             List<String> path = Arrays.asList("inspectit", "metrics", "processor");
 
             List<String> output = ruleAutoCompleter.getSuggestions(path);
@@ -39,7 +40,7 @@ public class RuleAutoCompleterTest {
         }
 
         @Test
-        public void correctPath() {
+        void correctPath() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "rules");
             List<String> mockOutput = Arrays.asList("my_rule", "another_rule");
             when(configurationQueryHelper.getKeysForPath(eq(path))).thenReturn(mockOutput);
@@ -52,7 +53,7 @@ public class RuleAutoCompleterTest {
         }
 
         @Test
-        public void correctPathNothingDefined() {
+        void correctPathNothingDefined() {
             List<String> path = Arrays.asList("inspectit", "instrumentation", "rules");
 
             List<String> output = ruleAutoCompleter.getSuggestions(path);

@@ -24,24 +24,24 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class RemoteConfigurationManagerTest {
+class RemoteConfigurationManagerTest {
 
-    private RemoteConfigurationManager manager;
+    RemoteConfigurationManager manager;
 
-    private Git gitLocal;
+    Git gitLocal;
 
-    private Git gitRemote;
+    Git gitRemote;
 
-    private RemoteConfigurationsSettings remoteSettings;
+    RemoteConfigurationsSettings remoteSettings;
 
-    private InspectitServerSettings settings;
+    InspectitServerSettings settings;
 
-    private Path tempDirectoryLocal;
+    Path tempDirectoryLocal;
 
-    private Path tempDirectoryRemote;
+    Path tempDirectoryRemote;
 
     @BeforeEach
-    public void beforeEach() throws IOException, GitAPIException, URISyntaxException {
+    void beforeEach() throws IOException, GitAPIException, URISyntaxException {
         tempDirectoryLocal = Files.createTempDirectory("git-test-local");
         tempDirectoryRemote = Files.createTempDirectory("git-test-remote");
 
@@ -63,7 +63,7 @@ public class RemoteConfigurationManagerTest {
     }
 
     @AfterEach
-    public void afterEach() throws IOException {
+    void afterEach() throws IOException {
         gitLocal.close();
         gitRemote.close();
 
@@ -72,10 +72,10 @@ public class RemoteConfigurationManagerTest {
     }
 
     @Nested
-    public class UpdateRemoteRefs {
+    class UpdateRemoteRefs {
 
         @Test
-        public void initRef() throws GitAPIException {
+        void initRef() throws GitAPIException {
             manager = new RemoteConfigurationManager(settings, gitLocal);
 
             assertThat(gitLocal.remoteList().call()).isEmpty();
@@ -87,7 +87,7 @@ public class RemoteConfigurationManagerTest {
         }
 
         @Test
-        public void updateRef() throws GitAPIException, URISyntaxException {
+        void updateRef() throws GitAPIException, URISyntaxException {
             gitLocal.remoteAdd()
                     .setName(remoteSettings.getPushRepository().getRemoteName())
                     .setUri(new URIish("https://example.org"))
@@ -108,10 +108,10 @@ public class RemoteConfigurationManagerTest {
     }
 
     @Nested
-    public class PushBranch {
+    class PushBranch {
 
         @Test
-        public void pushBranch() throws GitAPIException, IOException {
+        void pushBranch() throws GitAPIException, IOException {
             File testFile = new File(tempDirectoryLocal.toFile(), "test.file");
             testFile.createNewFile();
 
@@ -130,10 +130,10 @@ public class RemoteConfigurationManagerTest {
     }
 
     @Nested
-    public class FetchSourceBranch {
+    class FetchSourceBranch {
 
         @Test
-        public void successful() throws GitAPIException, URISyntaxException {
+        void successful() throws GitAPIException, URISyntaxException {
             RemoteRepositorySettings sourceRepository = RemoteRepositorySettings.builder()
                     .remoteName("source-remote")
                     .branchName("branch")
@@ -151,7 +151,7 @@ public class RemoteConfigurationManagerTest {
         }
 
         @Test
-        public void sourceBranchMissing() throws GitAPIException, URISyntaxException {
+        void sourceBranchMissing() throws GitAPIException, URISyntaxException {
             RemoteRepositorySettings sourceRepository = RemoteRepositorySettings.builder()
                     .remoteName("source-remote")
                     .branchName("branch")

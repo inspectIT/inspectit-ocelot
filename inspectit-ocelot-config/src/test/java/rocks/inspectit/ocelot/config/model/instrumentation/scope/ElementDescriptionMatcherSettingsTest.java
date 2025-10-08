@@ -10,10 +10,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class ElementDescriptionMatcherSettingsTest {
 
     @Nested
-    public class IsAnyMatcher {
+    class IsAnyMatcher {
 
         @Test
-        public void emptySettings() {
+        void emptySettings() {
             ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setMatcherMode(MatcherMode.STARTS_WITH);
 
@@ -23,7 +23,7 @@ class ElementDescriptionMatcherSettingsTest {
         }
 
         @Test
-        public void specificAnnotationMatcher() {
+        void specificAnnotationMatcher() {
             ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setMatcherMode(MatcherMode.STARTS_WITH);
             NameMatcherSettings matcher = new NameMatcherSettings();
@@ -36,7 +36,7 @@ class ElementDescriptionMatcherSettingsTest {
         }
 
         @Test
-        public void allAnnotationMatcher() {
+        void allAnnotationMatcher() {
             ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setMatcherMode(MatcherMode.STARTS_WITH);
             NameMatcherSettings matcher = new NameMatcherSettings();
@@ -49,7 +49,7 @@ class ElementDescriptionMatcherSettingsTest {
         }
 
         @Test
-        public void allAnnotationMatcherButSpecificClassMatcher() {
+        void allAnnotationMatcherButSpecificClassMatcher() {
             ElementDescriptionMatcherSettings settings = new ElementDescriptionMatcherSettings();
             settings.setName("class");
             NameMatcherSettings matcher = new NameMatcherSettings();
@@ -60,7 +60,5 @@ class ElementDescriptionMatcherSettingsTest {
 
             assertThat(result).isFalse();
         }
-
     }
-
 }

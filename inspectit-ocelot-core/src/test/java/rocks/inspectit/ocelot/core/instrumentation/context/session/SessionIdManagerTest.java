@@ -12,7 +12,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class SessionIdManagerTest {
+class SessionIdManagerTest {
 
     @InjectMocks
     SessionIdManager sessionIdManager;

@@ -1,12 +1,11 @@
 package rocks.inspectit.ocelot.configschema;
 
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ConfigurationPropertyDescriptionTest {
+class ConfigurationPropertyDescriptionTest {
 
     @Nested
     class Constructor {
@@ -52,6 +51,5 @@ public class ConfigurationPropertyDescriptionTest {
 
             assertThat(enumProp.getEnumValues()).containsExactly("A", "B", "C");
         }
-
     }
 }

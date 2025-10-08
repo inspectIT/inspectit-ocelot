@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AgentControllerTest {
+class AgentControllerTest {
 
     @InjectMocks
     AgentController controller;
@@ -47,12 +47,12 @@ public class AgentControllerTest {
     AgentCallbackManager agentCallbackManager;
 
     @Nested
-    public class FetchConfiguration {
+    class FetchConfiguration {
 
         String srcYaml = "foo : bar";
 
         @Test
-        public void noMappingFound() {
+        void noMappingFound() {
             doReturn(null).when(configManager).getConfiguration(anyMap());
 
             HashMap<String, String> attributes = new HashMap<>();
@@ -63,7 +63,7 @@ public class AgentControllerTest {
         }
 
         @Test
-        public void mappingFound() {
+        void mappingFound() {
             doReturn(agentConfiguration).when(configManager).getConfiguration(anyMap());
             doReturn(srcYaml).when(agentConfiguration).getConfigYaml();
 
@@ -76,7 +76,7 @@ public class AgentControllerTest {
         }
 
         @Test
-        public void etagPresent() {
+        void etagPresent() {
             String hash = "1234";
             doReturn(agentConfiguration).when(configManager).getConfiguration(anyMap());
             doReturn(srcYaml).when(agentConfiguration).getConfigYaml();
@@ -95,10 +95,10 @@ public class AgentControllerTest {
     }
 
     @Nested
-    public class FetchCommand {
+    class FetchCommand {
 
         @Test
-        public void agentWithoutResponse() {
+        void agentWithoutResponse() {
             HashMap<String, String> headers = new HashMap<>();
             String agentTestId = "test-id";
             headers.put("x-ocelot-agent-id", agentTestId);
@@ -112,7 +112,7 @@ public class AgentControllerTest {
         }
 
         @Test
-        public void agentHasResponse() {
+        void agentHasResponse() {
             HashMap<String, String> headers = new HashMap<>();
             String agentTestId = "test-id";
             headers.put("x-ocelot-agent-id", agentTestId);

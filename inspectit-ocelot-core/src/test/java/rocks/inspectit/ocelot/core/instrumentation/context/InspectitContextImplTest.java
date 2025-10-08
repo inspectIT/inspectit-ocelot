@@ -39,7 +39,7 @@ import static rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext.
 
 
 @ExtendWith(MockitoExtension.class)
-public class InspectitContextImplTest extends SpringTestBase {
+class InspectitContextImplTest extends SpringTestBase {
 
     @Mock
     PropagationMetaData propagation;
@@ -55,7 +55,7 @@ public class InspectitContextImplTest extends SpringTestBase {
     }
 
     @Nested
-    public class GetAndClearCurrentRemoteSpanContext {
+    class GetAndClearCurrentRemoteSpanContext {
 
         @Test
         void verifyNullIfNoSpanSet() {
@@ -81,7 +81,7 @@ public class InspectitContextImplTest extends SpringTestBase {
     }
 
     @Nested
-    public class CreateRemoteParentContext {
+    class CreateRemoteParentContext {
 
         @Test
         void verifyTraceContextFormat() {
@@ -95,7 +95,7 @@ public class InspectitContextImplTest extends SpringTestBase {
     }
 
     @Nested
-    public class EnterSpan {
+    class EnterSpan {
 
         @Spy
         NoopLogTraceCorrelator traceCorrelator;
@@ -133,7 +133,7 @@ public class InspectitContextImplTest extends SpringTestBase {
     }
 
     @Nested
-    public class DownPropagation {
+    class DownPropagation {
 
         @Test
         void verifyCommonAttributesExtracted() {
@@ -362,7 +362,7 @@ public class InspectitContextImplTest extends SpringTestBase {
     }
 
     @Nested
-    public class UpPropagation {
+    class UpPropagation {
 
         @Test
         void verifyNewValuesPropagatedWhenConfigured() {
@@ -470,7 +470,7 @@ public class InspectitContextImplTest extends SpringTestBase {
     }
 
     @Nested
-    public class UpAndDownPropagation {
+    class UpAndDownPropagation {
 
         @Test
         void verifyComplexTracePropagation() {
@@ -625,7 +625,7 @@ public class InspectitContextImplTest extends SpringTestBase {
     }
 
     @Nested
-    public class BaggageDownPropagation {
+    class BaggageDownPropagation {
 
         @Test
         void verifyAttributesExtractedOnRoot() {
@@ -782,7 +782,7 @@ public class InspectitContextImplTest extends SpringTestBase {
     }
 
     @Nested
-    public class SpanActivation {
+    class SpanActivation {
 
         @Test
         void verifySpanAttachedAndDetached() {
@@ -803,18 +803,15 @@ public class InspectitContextImplTest extends SpringTestBase {
     }
 
     @Nested
-    public class SessionStorage {
+    class SessionStorage {
 
-        private static final String SESSION = "session";
-
-        private static final String KEY = "my-key";
-
-        private static final String VALUE = "my-value";
-
-        private static final String SESSION_VALUE = "my-session-value";
+        static final String SESSION = "session";
+        static final String KEY = "my-key";
+        static final String VALUE = "my-value";
+        static final String SESSION_VALUE = "my-session-value";
 
         @Mock
-        private PropagationDataStorage dataStorage;
+        PropagationDataStorage dataStorage;
 
         @Test
         void shouldReadDataFromSessionStorage() {;

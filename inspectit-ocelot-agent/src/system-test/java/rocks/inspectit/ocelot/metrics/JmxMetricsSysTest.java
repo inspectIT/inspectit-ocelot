@@ -11,10 +11,10 @@ import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class JmxMetricsSysTest extends MetricsSysTestBase {
+class JmxMetricsSysTest extends MetricsSysTestBase {
 
     @Test
-    public void uptime() {
+    void uptime() {
         await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
             LongPointData uptimeData = (LongPointData) MetricTestUtils.getDataForView("jvm_jmx_java_lang_runtime_uptime", emptyMap());
 

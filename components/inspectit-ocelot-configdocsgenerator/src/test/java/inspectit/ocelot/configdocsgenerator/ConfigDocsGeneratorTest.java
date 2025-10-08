@@ -19,24 +19,24 @@ import static org.mockito.Mockito.when;
 
 class ConfigDocsGeneratorTest {
 
-    private static ActionDocs actionWithDocInYaml;
+    static ActionDocs actionWithDocInYaml;
 
-    private static ActionDocs actionWithoutDocInYaml;
+    static ActionDocs actionWithoutDocInYaml;
 
-    private static BaseDocs scopeDoc;
+    static BaseDocs scopeDoc;
 
-    private static RuleDocs ruleDocChild;
+    static RuleDocs ruleDocChild;
 
-    private static RuleDocs ruleDocParent;
+    static RuleDocs ruleDocParent;
 
-    private static MetricDocs metricDoc;
+    static MetricDocs metricDoc;
 
-    private final static ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator();
+    final static ConfigDocsGenerator configDocsGenerator = new ConfigDocsGenerator();
 
     /**
      * Needed to create InspectitConfig Objects to use as input for DocObjectGenerator in tests.
      */
-    private final ConfigParser configParser = new ConfigParser();
+    final ConfigParser configParser = new ConfigParser();
 
     /**
      * Helper method to read Yaml from resources.

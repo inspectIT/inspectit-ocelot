@@ -12,13 +12,13 @@ import rocks.inspectit.ocelot.file.FileInfo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-public class FileControllerIntTest extends IntegrationTestBase {
+class FileControllerIntTest extends IntegrationTestBase {
 
     @Nested
     class ListContent {
 
         @Test
-        public void listFileFromWorkspace() {
+        void listFileFromWorkspace() {
             authRest.exchange("/api/v1/files/file.yml", HttpMethod.PUT, null, Void.class);
 
             ResponseEntity<FileInfo[]> result = authRest.getForEntity("/api/v1/directories/", FileInfo[].class);
@@ -37,7 +37,7 @@ public class FileControllerIntTest extends IntegrationTestBase {
         }
 
         @Test
-        public void listFileFromLiveWorkspace() {
+        void listFileFromLiveWorkspace() {
 
             authRest.exchange("/api/v1/files/file.yml", HttpMethod.PUT, null, Void.class);
 

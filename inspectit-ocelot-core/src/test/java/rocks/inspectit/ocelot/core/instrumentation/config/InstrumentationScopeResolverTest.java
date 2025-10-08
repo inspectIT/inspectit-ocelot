@@ -28,12 +28,12 @@ class InstrumentationScopeResolverTest {
     private InstrumentationScopeResolver scopeResolver;
 
     @Nested
-    public class Resolve {
+    class Resolve {
 
         private InstrumentationSettings settings;
 
         @BeforeEach
-        public void beforeEach() {
+        void beforeEach() {
             settings = new InstrumentationSettings();
         }
 
@@ -66,14 +66,14 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void nullRulesAndScopes() {
+        void nullRulesAndScopes() {
             Map<String, InstrumentationScope> result = scopeResolver.resolve(settings);
 
             assertThat(result).isEmpty();
         }
 
         @Test
-        public void emptyRulesAndScopes() {
+        void emptyRulesAndScopes() {
             settings.setRules(Collections.emptyMap());
             settings.setScopes(Collections.emptyMap());
 
@@ -83,7 +83,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void ruleWithNoScopes() {
+        void ruleWithNoScopes() {
             setRuleSettings("rule-key", true, null);
             settings.setScopes(Collections.emptyMap());
 
@@ -93,7 +93,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void ruleWithDisabledScopes() {
+        void ruleWithDisabledScopes() {
             setRuleSettings("rule-key", true, Collections.singletonMap("scope-key", false));
             settings.setScopes(Collections.emptyMap());
 
@@ -103,7 +103,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void ruleWithMissingScopes() {
+        void ruleWithMissingScopes() {
             setRuleSettings("rule-key", true, Collections.singletonMap("scope-key", true));
             settings.setScopes(Collections.emptyMap());
 
@@ -113,7 +113,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void ruleWithEmptyScope() {
+        void ruleWithEmptyScope() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             setScopeSettings(scopeKey, null, null, null, null, null);
@@ -124,7 +124,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void ruleWithScope_emptyTypeEmptyMethodEmptyAdvanced() {
+        void ruleWithScope_emptyTypeEmptyMethodEmptyAdvanced() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             ElementDescriptionMatcherSettings classMatcher = new ElementDescriptionMatcherSettings();
@@ -137,7 +137,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void ruleWithScope_emptyMethodEmptyAdvanced() {
+        void ruleWithScope_emptyMethodEmptyAdvanced() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings annotation = new NameMatcherSettings();
@@ -158,7 +158,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void ruleWithScope_emptyAdvanced() {
+        void ruleWithScope_emptyAdvanced() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             ElementDescriptionMatcherSettings classMatcher = new ElementDescriptionMatcherSettings();
@@ -178,7 +178,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void ruleWithScope_emptyAdvanced_excluded() {
+        void ruleWithScope_emptyAdvanced_excluded() {
             String scopeKeyA = "scope-a";
             String scopeKeyB = "scope-b";
 
@@ -233,7 +233,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void ruleWithScope() {
+        void ruleWithScope() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             ElementDescriptionMatcherSettings classMatcher = new ElementDescriptionMatcherSettings();
@@ -254,7 +254,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void methodMatcherProperties_normalMethod() {
+        void methodMatcherProperties_normalMethod() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
@@ -280,7 +280,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void methodMatcherProperties_constructor() {
+        void methodMatcherProperties_constructor() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             MethodMatcherSettings methodSettings = new MethodMatcherSettings();
@@ -305,7 +305,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void methodMatcherProperties_multipleMethods() {
+        void methodMatcherProperties_multipleMethods() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             MethodMatcherSettings methodSettingsA = new MethodMatcherSettings();
@@ -330,7 +330,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void methodMatcherProperties_onlyInherited() {
+        void methodMatcherProperties_onlyInherited() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             ElementDescriptionMatcherSettings superMatcher = new ElementDescriptionMatcherSettings();
@@ -362,7 +362,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void typeTargets_superclass() {
+        void typeTargets_superclass() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings annotation = new NameMatcherSettings();
@@ -383,7 +383,7 @@ class InstrumentationScopeResolverTest {
         }
 
         @Test
-        public void typeTargets_interfaces() {
+        void typeTargets_interfaces() {
             String scopeKey = "scope-key";
             setRuleSettings("rule-key", true, Collections.singletonMap(scopeKey, true));
             NameMatcherSettings annotation = new NameMatcherSettings();

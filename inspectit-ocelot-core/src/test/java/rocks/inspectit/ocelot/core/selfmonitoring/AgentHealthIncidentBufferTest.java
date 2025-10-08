@@ -19,22 +19,25 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AgentHealthIncidentBufferTest {
+class AgentHealthIncidentBufferTest {
 
     @InjectMocks
-    private AgentHealthIncidentBuffer incidentBuffer;
-    @Mock
-    private ApplicationContext ctx;
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private InspectitEnvironment env;
+    AgentHealthIncidentBuffer incidentBuffer;
 
-    private AgentHealthIncident incident;
+    @Mock
+    ApplicationContext ctx;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    InspectitEnvironment env;
+
+    AgentHealthIncident incident;
 
     @BeforeEach
     void setUp() {
         when(env.getCurrentConfig().getSelfMonitoring().getAgentHealth().getIncidentBufferSize()).thenReturn(2);
         incident = new AgentHealthIncident("2001-01-01", AgentHealth.WARNING, this.getClass().getCanonicalName(), "Mock message", true);
     }
+
     @Test
     void verifyBufferSize() {
         incidentBuffer.put(incident);

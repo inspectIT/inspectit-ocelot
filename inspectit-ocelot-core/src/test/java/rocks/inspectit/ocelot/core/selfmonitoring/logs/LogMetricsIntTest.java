@@ -27,15 +27,15 @@ import static org.mockito.Mockito.*;
  * Tests the functionality of the {@link InternalProcessingAppender} and {@link LogMetricsRecorder} against the {@link SelfMonitoringService}.
  */
 @ExtendWith(MockitoExtension.class)
-public class LogMetricsIntTest {
+class LogMetricsIntTest {
 
     @InjectMocks
-    private LogMetricsRecorder recorder;
+    LogMetricsRecorder recorder;
 
     @Mock
-    private SelfMonitoringService monitoringService;
+    SelfMonitoringService monitoringService;
 
-    private InternalProcessingAppender appender;
+    InternalProcessingAppender appender;
 
     private LoggingEvent createLoggingEvent(Level level, String message) {
         Logger logger = LoggerFactory.getLogger(LogMetricsIntTest.class);
@@ -54,7 +54,7 @@ public class LogMetricsIntTest {
     }
 
     @BeforeEach
-    public void before() {
+    void before() {
         try {
             Field field = InternalProcessingAppender.class.getDeclaredField("observers");
             field.setAccessible(true);
@@ -67,7 +67,7 @@ public class LogMetricsIntTest {
     }
 
     @Test
-    public void appendLogEvents() {
+    void appendLogEvents() {
         // append log message without registered recorder
         appendEvent(createLoggingEvent(Level.INFO, "info_test"));
         appendEvent(createLoggingEvent(Level.INFO, "info_test"));

@@ -22,7 +22,7 @@ class ExtrasAttributesProviderIntTest {
         ExtrasCommonAttributesProvider provider;
 
         @Test
-        public void happyPath() {
+        void happyPath() {
             assertThat(provider.getAttributes(env.getCurrentConfig())).isEmpty();
         }
 
@@ -43,7 +43,7 @@ class ExtrasAttributesProviderIntTest {
         ExtrasCommonAttributesProvider provider;
 
         @Test
-        public void happyPath() {
+        void happyPath() {
             assertThat(provider.getAttributes(env.getCurrentConfig()))
                     .hasSize(2)
                     .containsEntry("key1", "value1")
@@ -67,7 +67,7 @@ class ExtrasAttributesProviderIntTest {
         ExtrasCommonAttributesProvider provider;
 
         @Test
-        public void happyPath() {
+        void happyPath() {
             updateProperties(properties -> properties.withProperty("inspectit.attributes.extra.key1", "updatedValue"));
 
             assertThat(provider.getAttributes(env.getCurrentConfig()))

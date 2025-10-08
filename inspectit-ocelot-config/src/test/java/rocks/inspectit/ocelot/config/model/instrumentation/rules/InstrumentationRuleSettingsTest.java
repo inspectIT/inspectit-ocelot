@@ -23,8 +23,7 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
-
-public class InstrumentationRuleSettingsTest {
+class InstrumentationRuleSettingsTest {
 
     InspectitConfig root;
 
@@ -52,7 +51,6 @@ public class InstrumentationRuleSettingsTest {
         root.setInstrumentation(instr);
         root.setMetrics(metrics);
     }
-
 
     @Nested
     class PerformValidation {
@@ -141,5 +139,4 @@ public class InstrumentationRuleSettingsTest {
             verify(postExitCall).performValidation(same(instr), any());
         }
     }
-
 }

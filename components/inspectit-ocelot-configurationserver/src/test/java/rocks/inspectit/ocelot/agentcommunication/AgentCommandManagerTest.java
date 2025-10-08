@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AgentCommandManagerTest {
+class AgentCommandManagerTest {
 
     @InjectMocks
     AgentCommandManager agentCommandManager;
@@ -31,7 +31,7 @@ public class AgentCommandManagerTest {
     InspectitServerSettings configuration;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         when(configuration.getAgentCommand().getCommandTimeout()).thenReturn(Duration.ofSeconds(5));
         when(configuration.getAgentCommand().getCommandQueueSize()).thenReturn(10);
 
@@ -42,7 +42,7 @@ public class AgentCommandManagerTest {
     class AddCommand {
 
         @Test
-        public void addCommandNewAgent() throws ExecutionException {
+        void addCommandNewAgent() throws ExecutionException {
             Command mockAgentCommand = mock(Command.class);
             String agentId = "test-agent";
 
@@ -55,7 +55,7 @@ public class AgentCommandManagerTest {
         }
 
         @Test
-        public void throwsExeptionOnNullId() throws ExecutionException {
+        void throwsExeptionOnNullId() throws ExecutionException {
             Command mockAgentCommand = mock(Command.class);
 
             try {
@@ -67,7 +67,7 @@ public class AgentCommandManagerTest {
         }
 
         @Test
-        public void ignoresNullCommand() throws ExecutionException {
+        void ignoresNullCommand() throws ExecutionException {
             String agentId = "test-agent";
 
             agentCommandManager.addCommand(agentId, null);
@@ -81,7 +81,7 @@ public class AgentCommandManagerTest {
     class GetCommand {
 
         @Test
-        public void noCommandPresent() {
+        void noCommandPresent() {
             String agentId = "test-agent";
 
             Command result = agentCommandManager.getCommand(agentId, false);
@@ -90,7 +90,7 @@ public class AgentCommandManagerTest {
         }
 
         @Test
-        public void commandPresent() {
+        void commandPresent() {
             Command mockAgentCommand = mock(Command.class);
             String agentId = "test-agent";
             BlockingQueue<Command> list = new LinkedBlockingQueue<>();
@@ -106,7 +106,7 @@ public class AgentCommandManagerTest {
         }
 
         @Test
-        public void commandOfDifferentAgentPresent() {
+        void commandOfDifferentAgentPresent() {
             Command mockAgentCommand = mock(Command.class);
             String agentId = "not-the-test-agent";
             BlockingQueue<Command> list = new LinkedBlockingQueue<>();

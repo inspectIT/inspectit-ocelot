@@ -18,10 +18,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CustomLdapUserDetailsMapperTest {
 
-    private static CustomLdapUserDetailsMapper mapper;
+    static CustomLdapUserDetailsMapper mapper;
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         LdapSettings settings = LdapSettings.builder()
                 .url("url")
                 .userSearchBase("")
@@ -40,10 +40,10 @@ class CustomLdapUserDetailsMapperTest {
     }
 
     @Nested
-    public class MapAuthorities {
+    class MapAuthorities {
 
         @Test
-        public void hasNone() {
+        void hasNone() {
             List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_notMatching"));
 
             Collection<? extends GrantedAuthority> output = mapper.mapAuthorities(test_permission_set);
@@ -52,7 +52,7 @@ class CustomLdapUserDetailsMapperTest {
         }
 
         @Test
-        public void hasRead() {
+        void hasRead() {
             List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_read"));
 
             Collection<? extends GrantedAuthority> output = mapper.mapAuthorities(test_permission_set);
@@ -62,7 +62,7 @@ class CustomLdapUserDetailsMapperTest {
         }
 
         @Test
-        public void hasWrite() {
+        void hasWrite() {
             List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_write"));
 
             Collection<? extends GrantedAuthority> output = mapper.mapAuthorities(test_permission_set);
@@ -72,7 +72,7 @@ class CustomLdapUserDetailsMapperTest {
         }
 
         @Test
-        public void hasCommit() {
+        void hasCommit() {
             List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_promote"));
 
             Collection<? extends GrantedAuthority> output = mapper.mapAuthorities(test_permission_set);
@@ -82,7 +82,7 @@ class CustomLdapUserDetailsMapperTest {
         }
 
         @Test
-        public void hasAdmin() {
+        void hasAdmin() {
             List<SimpleGrantedAuthority> test_permission_set = Collections.singletonList(new SimpleGrantedAuthority("ROLE_admin"));
 
             Collection<? extends GrantedAuthority> output = mapper.mapAuthorities(test_permission_set);
@@ -92,7 +92,7 @@ class CustomLdapUserDetailsMapperTest {
         }
 
         @Test
-        public void hasMultiple() {
+        void hasMultiple() {
             List<SimpleGrantedAuthority> test_permission_set = Arrays.asList(new SimpleGrantedAuthority("ROLE_admin"), new SimpleGrantedAuthority("ROLE_read"));
 
             Collection<? extends GrantedAuthority> output = mapper.mapAuthorities(test_permission_set);

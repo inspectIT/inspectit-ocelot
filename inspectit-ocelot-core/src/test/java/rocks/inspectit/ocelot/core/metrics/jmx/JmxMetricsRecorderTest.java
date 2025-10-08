@@ -42,7 +42,7 @@ class JmxMetricsRecorderTest {
         ArgumentCaptor<Map<String, MetricDefinitionSettings>> definitionsCaptor;
 
         @Test
-        public void valueBasic() {
+        void valueBasic() {
             double value = 1.2565;
             String expectedMetricName = "jvm_jmx_my_domain_att";
             when(instrumentManager.isInstrumentRegistered(expectedMetricName)).thenReturn(true);
@@ -55,7 +55,7 @@ class JmxMetricsRecorderTest {
         }
 
         @Test
-        public void valueBasicBooleanTrue() {
+        void valueBasicBooleanTrue() {
             String expectedMetricName = "jvm_jmx_my_domain_attbool";
             when(instrumentManager.isInstrumentRegistered(expectedMetricName)).thenReturn(true);
 
@@ -66,7 +66,7 @@ class JmxMetricsRecorderTest {
         }
 
         @Test
-        public void valueBasicBooleanFalse() {
+        void valueBasicBooleanFalse() {
             String expectedMetricName = "jvm_jmx_my_domain_attbool";
             when(instrumentManager.isInstrumentRegistered(expectedMetricName)).thenReturn(true);
 
@@ -77,7 +77,7 @@ class JmxMetricsRecorderTest {
         }
 
         @Test
-        public void valueBasicMeasureDoesNotExists() {
+        void valueBasicMeasureDoesNotExists() {
             double value = 1.2565;
             String expectedMetricName = "jvm_jmx_my_domain_att";
             when(instrumentManager.isInstrumentRegistered(expectedMetricName)).thenReturn(false);
@@ -102,7 +102,7 @@ class JmxMetricsRecorderTest {
         }
 
         @Test
-        public void valueComplex() {
+        void valueComplex() {
             double value = 1.2565;
             LinkedList<String> attributes = new LinkedList<>(Arrays.asList("key1", "key2"));
             LinkedHashMap<String, String> beanProps = new LinkedHashMap<>();
@@ -123,14 +123,14 @@ class JmxMetricsRecorderTest {
         }
 
         @Test
-        public void valueNegative() {
+        void valueNegative() {
             jmxMetricsRecorder.recordBean(null, null, null, null, null, null, -1d);
 
             verifyNoMoreInteractions(instrumentManager, commonAttributesManager);
         }
 
         @Test
-        public void valueNotNumber() {
+        void valueNotNumber() {
             jmxMetricsRecorder.recordBean(null, null, null, null, null, null, "something");
 
             verifyNoMoreInteractions(instrumentManager, commonAttributesManager);
@@ -151,12 +151,12 @@ class JmxMetricsRecorderTest {
         ArgumentCaptor<LinkedHashMap<String, String>> beanPropsCaptor;
 
         @BeforeEach
-        public void init() {
+        void init() {
             when(settings.isForcePlatformServer()).thenReturn(true);
         }
 
         @Test
-        public void noObjectNames() {
+        void noObjectNames() {
             JmxScraper scraper = JmxMetricsRecorder.createScraper(settings, receiver);
             scraper.doScrape();
 
@@ -164,7 +164,7 @@ class JmxMetricsRecorderTest {
         }
 
         @Test
-        public void whiteListOnly() {
+        void whiteListOnly() {
             when(settings.getObjectNames()).thenReturn(Collections.singletonMap("java.lang:type=ClassLoading", true));
 
             JmxScraper scraper = JmxMetricsRecorder.createScraper(settings, receiver);
@@ -178,7 +178,7 @@ class JmxMetricsRecorderTest {
         }
 
         @Test
-        public void blackListOnly() {
+        void blackListOnly() {
             when(settings.getObjectNames()).thenReturn(Collections.singletonMap("java.lang:type=ClassLoading", false));
 
             JmxScraper scraper = JmxMetricsRecorder.createScraper(settings, receiver);
@@ -189,7 +189,7 @@ class JmxMetricsRecorderTest {
         }
 
         @Test
-        public void mixedLists() {
+        void mixedLists() {
             Map<String, Boolean> objectNames = new HashMap<>();
             objectNames.put("java.lang:*", true);
             objectNames.put("java.lang:type=Runtime,*", false);

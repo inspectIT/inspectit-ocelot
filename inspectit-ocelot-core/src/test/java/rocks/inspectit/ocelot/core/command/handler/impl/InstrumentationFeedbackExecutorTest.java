@@ -17,13 +17,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class InstrumentationFeedbackExecutorTest {
+class InstrumentationFeedbackExecutorTest {
 
     @InjectMocks
-    private InstrumentationFeedbackCommandExecutor executor;
+    InstrumentationFeedbackCommandExecutor executor;
 
     @Mock
-    private InstrumentationFeedbackService service;
+    InstrumentationFeedbackService service;
 
     @BeforeEach
     void setUp() {

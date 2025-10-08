@@ -24,23 +24,23 @@ import static org.mockito.Mockito.*;
 import static rocks.inspectit.ocelot.core.selfmonitoring.instrumentation.InstrumentationFeedbackService.NO_METHODS_PLACEHOLDER;
 
 @ExtendWith(MockitoExtension.class)
-public class InstrumentationFeedbackServiceTest {
+class InstrumentationFeedbackServiceTest {
 
     @InjectMocks
-    private InstrumentationFeedbackService service;
+    InstrumentationFeedbackService service;
 
     @Mock
-    private HookManager hookManager;
+    HookManager hookManager;
 
-    private static final ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(new PropertyNamingStrategies.KebabCaseStrategy());
+    static final ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(new PropertyNamingStrategies.KebabCaseStrategy());
 
-    private static final String method1 = "method1";
+    static final String method1 = "method1";
 
-    private static final String method2 = "method2";
+    static final String method2 = "method2";
 
-    private static List<String> rules1;
+    static List<String> rules1;
 
-    private static List<String> rules2;
+    static List<String> rules2;
 
     @BeforeEach
     void setup() {
@@ -130,7 +130,7 @@ public class InstrumentationFeedbackServiceTest {
      * @param resultString the instrumentation feedback as JSON string
      * @return the instrumentation feedback as Java object
      */
-    private static List<InstrumentationFeedbackService.ClassInstrumentation> deserialize(String resultString) throws JsonProcessingException {
+    static List<InstrumentationFeedbackService.ClassInstrumentation> deserialize(String resultString) throws JsonProcessingException {
         return mapper.readValue(
                 resultString,
                 new TypeReference<List<InstrumentationFeedbackService.ClassInstrumentation>>() {}

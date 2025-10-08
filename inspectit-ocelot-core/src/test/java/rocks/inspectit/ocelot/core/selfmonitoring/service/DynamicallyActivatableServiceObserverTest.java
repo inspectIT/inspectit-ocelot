@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for {@link DynamicallyActivatableServiceObserver}
  */
-public class DynamicallyActivatableServiceObserverTest {
+class DynamicallyActivatableServiceObserverTest {
     DynamicallyActivatableServiceObserver serviceObserver = new DynamicallyActivatableServiceObserver();
 
     @Nested
@@ -38,7 +38,7 @@ public class DynamicallyActivatableServiceObserverTest {
         }
 
         @Test
-        public void checkMap(){
+        void checkMap(){
             setupTest();
 
             Map<String, Boolean> resultMap = serviceObserver.getServiceStateMap();
@@ -58,7 +58,7 @@ public class DynamicallyActivatableServiceObserverTest {
 
         // Hello again ;)
         @Test
-        public void testAsJson() {
+        void testAsJson() {
             setupTest();
             String expectedJson = "{\"LoggingMetricExporterService\":false,\"MemoryMetricsRecorder\":true,\"HttpConfigurationPoller\":true,\"OtlpTraceExporterService\":false,\"DiskMetricsRecorder\":true,\"ActionMetricsRecorder\":false,\"PrometheusExporterService\":false,\"InstrumentationFeedbackService\":false,\"LoggingTraceExporterService\":false,\"GCMetricsRecorder\":true,\"OtlpMetricsExporterService\":false,\"JmxMetricsRecorder\":false,\"ProcessorMetricsRecorder\":true,\"ThreadMetricsRecorder\":true,\"AgentCommandService\":false,\"ConcurrentMetricsRecorder\":false,\"ConfigurationDirectoriesPoller\":false,\"LogPreloader\":false,\"ClassLoaderMetricsRecorder\":true,\"ZipkinExporterService\":false}";
 

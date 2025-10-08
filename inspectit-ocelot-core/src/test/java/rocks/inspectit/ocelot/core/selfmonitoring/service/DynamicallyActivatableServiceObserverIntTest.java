@@ -16,21 +16,21 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DynamicallyActivatableServiceObserverIntTest extends SpringTestBase {
+class DynamicallyActivatableServiceObserverIntTest extends SpringTestBase {
 
     @Autowired
-    private DynamicallyActivatableServiceObserver serviceObserver;
+    DynamicallyActivatableServiceObserver serviceObserver;
 
     @Autowired
-    private OtlpTraceExporterService otlpService;
+    OtlpTraceExporterService otlpService;
 
     @Autowired
-    private PrometheusExporterService prometheusExporterService;
+    PrometheusExporterService prometheusExporterService;
 
     @Autowired
-    private OtlpMetricsExporterService otlpMetricsExporterService;
+    OtlpMetricsExporterService otlpMetricsExporterService;
 
-    private Map<String, Boolean> expectedServiceStates;
+    Map<String, Boolean> expectedServiceStates;
 
     @BeforeEach
     void Setup() {

@@ -17,17 +17,17 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-public class FileInfoVisitorTest {
+class FileInfoVisitorTest {
 
-    private List<Path> testFiles;
+    List<Path> testFiles;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         testFiles = new LinkedList<>();
     }
 
     @AfterEach
-    public void afterEach() throws IOException {
+    void afterEach() throws IOException {
         for (Path file : testFiles) {
             Files.delete(file);
         }
@@ -46,7 +46,7 @@ public class FileInfoVisitorTest {
      * drwxr-xr-x 2 root root 4.0K Sep  1 12:15 ..2021_09_01_12_15_55.274058932
      * lrwxrwxrwx 1 root root   31 Sep  1 12:15 ..data -> ..2021_09_01_12_15_55.274058932
      * lrwxrwxrwx 1 root root   16 Sep  1 12:15 some_instrumentation.yml -> ..data/some_instrumentation.yml
-     *
+     * <p>
      * In words:
      * The folder ..2021_09_01_12_15_55.274058932 contains the some_instrumentation.yml
      * On the root path, the mysql.yml is a sym link to ..data/some_instrumentation.yml, whereby ..data itself is
@@ -86,7 +86,7 @@ public class FileInfoVisitorTest {
     class VisitFile {
 
         @Test
-        public void visitStandardFile() throws IOException {
+        void visitStandardFile() throws IOException {
             Path testFile = createTestFile("test");
             FileInfoVisitor visitor = new FileInfoVisitor();
 
@@ -101,7 +101,7 @@ public class FileInfoVisitorTest {
         }
 
         @Test
-        public void visitUiFile() throws IOException {
+        void visitUiFile() throws IOException {
             Path testFile = createTestFile("# {\"type\": \"method-configuration\"}");
             FileInfoVisitor visitor = new FileInfoVisitor();
 
@@ -116,7 +116,7 @@ public class FileInfoVisitorTest {
         }
 
         @Test
-        public void visitStandardFile_standardComment() throws IOException {
+        void visitStandardFile_standardComment() throws IOException {
             Path testFile = createTestFile("# hello");
             FileInfoVisitor visitor = new FileInfoVisitor();
 
@@ -131,7 +131,7 @@ public class FileInfoVisitorTest {
         }
 
         @Test
-        public void visitUiFile_emptyMap() throws IOException {
+        void visitUiFile_emptyMap() throws IOException {
             Path testFile = createTestFile("# {}");
             FileInfoVisitor visitor = new FileInfoVisitor();
 
@@ -146,7 +146,7 @@ public class FileInfoVisitorTest {
         }
 
         @Test
-        public void skipSubtreeIfHiddenFolder() throws IOException {
+        void skipSubtreeIfHiddenFolder() throws IOException {
             Path hiddenFolder = createTestFileInHiddenFolder();
             FileInfoVisitor visitor = new FileInfoVisitor();
 
@@ -156,7 +156,7 @@ public class FileInfoVisitorTest {
         }
 
         @Test
-        public void visitSymbolicLink() throws IOException {
+        void visitSymbolicLink() throws IOException {
             Path symbolicLink = createK8sConfigMapScenario("# {}");
             FileInfoVisitor visitor = new FileInfoVisitor();
 

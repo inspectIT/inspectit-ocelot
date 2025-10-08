@@ -19,15 +19,15 @@ import static org.mockito.Mockito.*;
  * Tests {@link InternalProcessingAppender}
  */
 @ExtendWith(MockitoExtension.class)
-public class InternalProcessingAppenderTest {
+class InternalProcessingAppenderTest {
 
-    private static final ILoggingEvent GENERAL_EVENT = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
+    static final ILoggingEvent GENERAL_EVENT = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(LogMetricsRecorderTest.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
 
-    private static final ILoggingEvent INSTRUMENTATION_EVENT = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(InstrumentationManager.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
+    static final ILoggingEvent INSTRUMENTATION_EVENT = new LoggingEvent("com.dummy.Method", (Logger) LoggerFactory.getLogger(InstrumentationManager.class), Level.INFO, "Dummy Info", new Throwable(), new String[]{});
 
-    private static InternalProcessingAppender.LogEventConsumer logEventConsumer;
+    static InternalProcessingAppender.LogEventConsumer logEventConsumer;
 
-    private InternalProcessingAppender appender;
+    InternalProcessingAppender appender;
 
     @BeforeAll
     static void setupLogEventConsumer() {

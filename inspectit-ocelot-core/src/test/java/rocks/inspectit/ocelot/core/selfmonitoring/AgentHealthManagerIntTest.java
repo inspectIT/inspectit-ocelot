@@ -15,17 +15,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @TestPropertySource(properties = "inspectit.self-monitoring.agent-health.validity-period:5s")
-public class AgentHealthManagerIntTest extends SpringTestBase {
+class AgentHealthManagerIntTest extends SpringTestBase {
 
     @Autowired
-    private AgentHealthManager healthManager;
+    AgentHealthManager healthManager;
+
     @Autowired
-    private HttpConfigurationPoller configurationPoller;
+    HttpConfigurationPoller configurationPoller;
 
     /**
      * Period how long a TimeOut AgentHealth is valid (+1s buffer)
      */
-    private final long validityPeriod = 6000;
+    final long validityPeriod = 6000;
 
     @Nested
     class InvalidatableHealth {

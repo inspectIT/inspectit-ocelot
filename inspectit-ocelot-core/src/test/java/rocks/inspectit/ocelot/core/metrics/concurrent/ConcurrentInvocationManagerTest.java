@@ -8,11 +8,11 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static rocks.inspectit.ocelot.core.metrics.concurrent.ConcurrentInvocationManager.DEFAULT_OPERATION;
 
-public class ConcurrentInvocationManagerTest {
+class ConcurrentInvocationManagerTest {
 
-    private ConcurrentInvocationManager manager;
+    ConcurrentInvocationManager manager;
 
-    private final String OPERATION = "operation-name";
+    final String OPERATION = "operation-name";
 
     @BeforeEach
     void beforeEach() {

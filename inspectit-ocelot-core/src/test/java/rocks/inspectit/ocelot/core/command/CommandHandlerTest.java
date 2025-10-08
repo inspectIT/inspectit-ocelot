@@ -32,31 +32,31 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CommandHandlerTest {
+class CommandHandlerTest {
 
     @InjectMocks
-    private CommandHandler handler;
+    CommandHandler handler;
 
     @Mock
-    private InspectitEnvironment environment;
+    InspectitEnvironment environment;
 
     @Mock
-    private HttpCommandFetcher commandFetcher;
+    HttpCommandFetcher commandFetcher;
 
     @Mock
-    private CommandDelegator commandDelegator;
+    CommandDelegator commandDelegator;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private ClassicHttpResponse httpResponse;
+    ClassicHttpResponse httpResponse;
 
     @Mock
-    private ObjectMapper objectMapper;
+    ObjectMapper objectMapper;
 
     @Captor
     ArgumentCaptor<CommandResponse> responseCaptor;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         handler.objectMapper = objectMapper;
         AgentCommandSettings agentCommands = new AgentCommandSettings();
 
@@ -67,10 +67,10 @@ public class CommandHandlerTest {
     }
 
     @Nested
-    public class NextCommand {
+    class NextCommand {
 
         @Test
-        public void noCommand() throws Exception {
+        void noCommand() throws Exception {
             when(httpResponse.getCode()).thenReturn(HttpStatus.SC_NO_CONTENT);
             when(commandFetcher.fetchCommand(any(), anyBoolean())).thenReturn(httpResponse);
 
@@ -80,7 +80,7 @@ public class CommandHandlerTest {
         }
 
         @Test
-        public void pingCommandSend() throws Exception {
+        void pingCommandSend() throws Exception {
             environment.getCurrentConfig().getAgentCommands().setLiveModeDuration(Duration.ZERO);
             PingCommand command = new PingCommand();
             PingCommand.Response pingResponse = new PingCommand.Response();

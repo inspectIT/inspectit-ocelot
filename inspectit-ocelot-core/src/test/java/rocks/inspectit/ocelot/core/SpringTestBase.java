@@ -151,5 +151,4 @@ public class SpringTestBase {
         assertThat(StaticAppender.getEvents()).filteredOn(event -> event.getMessage().contains(logMessage))
                 .hasSize(count);
     }
-
 }

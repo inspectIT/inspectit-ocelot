@@ -26,11 +26,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @TestPropertySource(properties = "inspectit.tracing.max-export-batch-size:2")
 @DirtiesContext
-public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
+class LoggingTraceExporterServiceIntTest extends SpringTestBase {
 
-    public static final String INSTRUMENTATION_NAME = "rocks.inspectit.ocelot.instrumentation";
+    static final String INSTRUMENTATION_NAME = "rocks.inspectit.ocelot.instrumentation";
 
-    public static final String INSTRUMENTATION_VERSION = "0.0.1";
+    static final String INSTRUMENTATION_VERSION = "0.0.1";
 
     @RegisterExtension
     LogCapturer spanLogs = LogCapturer.create().captureForType(LoggingSpanExporter.class);
@@ -167,6 +167,5 @@ public class LoggingTraceExporterServiceIntTest extends SpringTestBase {
             // make sure that no spans were exported
             assertThat(spanLogs.getEvents()).hasSize(0);
         }
-
     }
 }

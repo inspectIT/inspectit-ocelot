@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class UserControllerIntTest extends IntegrationTestBase {
+class UserControllerIntTest extends IntegrationTestBase {
 
     @Autowired
     UserService userService;

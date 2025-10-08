@@ -33,25 +33,25 @@ import static org.mockito.Mockito.*;
 class InstrumentationRuleResolverTest {
 
     @InjectMocks
-    private InstrumentationRuleResolver ruleResolver;
+    InstrumentationRuleResolver ruleResolver;
 
     @Mock
-    private InstrumentationScopeResolver scopeResolver;
+    InstrumentationScopeResolver scopeResolver;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private InspectitEnvironment environment;
+    InspectitEnvironment environment;
 
     @BeforeEach
-    public void setupEnvironment() {
+    void setupEnvironment() {
         lenient().when(environment.getCurrentConfig().getSelfMonitoring().getActionTracing())
                 .thenReturn(ActionTracingMode.ONLY_ENABLED);
     }
 
     @Nested
-    public class Resolve {
+    class Resolve {
 
         @Test
-        public void emptySettings() {
+        void emptySettings() {
             InstrumentationSettings settings = new InstrumentationSettings();
 
             Set<InstrumentationRule> result = ruleResolver.resolve(settings, Collections.emptyMap());
@@ -60,7 +60,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void resolveRulesNoScopes() {
+        void resolveRulesNoScopes() {
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
             ruleSettings.setScopes(Collections.singletonMap("scope-key", true));
             ruleSettings.setEnabled(true);
@@ -79,7 +79,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void resolveRules() {
+        void resolveRules() {
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
             ruleSettings.setScopes(Collections.singletonMap("scope-key", true));
             ruleSettings.setEnabled(true);
@@ -101,7 +101,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void resolveRulesDisabledScope() {
+        void resolveRulesDisabledScope() {
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
             ruleSettings.setScopes(Collections.singletonMap("scope-key", false));
             ruleSettings.setEnabled(true);
@@ -122,7 +122,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void verifyRuleIncludesPreserved() {
+        void verifyRuleIncludesPreserved() {
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
             ruleSettings.setEnabled(true);
             ruleSettings.setInclude(ImmutableMap.of("inc1", true, "inc2", true, "notinc", false));
@@ -138,7 +138,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void verifyPreEntryActionsPreserved() {
+        void verifyPreEntryActionsPreserved() {
             ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
             ActionCallSettings second = Mockito.mock(ActionCallSettings.class);
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
@@ -157,7 +157,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void verifyEntryActionsPreserved() {
+        void verifyEntryActionsPreserved() {
             ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
             ActionCallSettings second = Mockito.mock(ActionCallSettings.class);
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
@@ -176,7 +176,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void verifyPostEntryActionsPreserved() {
+        void verifyPostEntryActionsPreserved() {
             ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
             ActionCallSettings second = Mockito.mock(ActionCallSettings.class);
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
@@ -195,7 +195,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void verifyPreExitActionsPreserved() {
+        void verifyPreExitActionsPreserved() {
             ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
             ActionCallSettings second = Mockito.mock(ActionCallSettings.class);
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
@@ -214,7 +214,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void verifyExitActionsPreserved() {
+        void verifyExitActionsPreserved() {
             ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
             ActionCallSettings second = Mockito.mock(ActionCallSettings.class);
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
@@ -233,7 +233,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void verifyPostExitActionsPreserved() {
+        void verifyPostExitActionsPreserved() {
             ActionCallSettings first = Mockito.mock(ActionCallSettings.class);
             ActionCallSettings second = Mockito.mock(ActionCallSettings.class);
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
@@ -252,7 +252,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void verifyActionTracingEnabled() {
+        void verifyActionTracingEnabled() {
             InstrumentationRuleSettings ruleSettings = new InstrumentationRuleSettings();
             ruleSettings.setEnabled(true);
             ruleSettings.setEnableActionTracing(true);
@@ -266,7 +266,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void verifyActionTracingDisabled_Off() {
+        void verifyActionTracingDisabled_Off() {
             when(environment.getCurrentConfig()
                     .getSelfMonitoring()
                     .getActionTracing()).thenReturn(ActionTracingMode.OFF);
@@ -284,7 +284,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void verifyActionTracingEnabled_All() {
+        void verifyActionTracingEnabled_All() {
             when(environment.getCurrentConfig()
                     .getSelfMonitoring()
                     .getActionTracing()).thenReturn(ActionTracingMode.ALL_WITH_DEFAULT);
@@ -302,7 +302,7 @@ class InstrumentationRuleResolverTest {
         }
 
         @Test
-        public void verifyActionTracingDisabled_WithoutDefault() {
+        void verifyActionTracingDisabled_WithoutDefault() {
             when(environment.getCurrentConfig()
                     .getSelfMonitoring()
                     .getActionTracing()).thenReturn(ActionTracingMode.ALL_WITHOUT_DEFAULT);
@@ -420,9 +420,6 @@ class InstrumentationRuleResolverTest {
                 assertThat(catchThrowable(() -> settings.getConstantTags().clear())).isNotNull();
                 assertThat(catchThrowable(() -> settings.getDataTags().clear())).isNotNull();
             });
-
         }
-
     }
-
 }

@@ -23,9 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Integration test class for {@link DirectoryPropertySource}
  */
-public class DirectoryPropertySourceIntTest {
+class DirectoryPropertySourceIntTest {
 
-    private static Path TEMP_DIRECTORY;
+    static Path TEMP_DIRECTORY;
 
     @BeforeAll
     static void createConfigDir() throws IOException {
@@ -43,7 +43,7 @@ public class DirectoryPropertySourceIntTest {
     }
 
     /**
-     * Injection of test properties.
+     * Injection of test properties
      */
     static class ContextInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -69,8 +69,6 @@ public class DirectoryPropertySourceIntTest {
 
         /**
          * Tests that JSON configurations are successfully read
-         *
-         * @throws IOException
          */
         @DirtiesContext
         @Test
@@ -81,8 +79,6 @@ public class DirectoryPropertySourceIntTest {
 
         /**
          * Tests that YAML configurations are successfully read
-         *
-         * @throws IOException
          */
         @DirtiesContext
         @Test
@@ -97,8 +93,6 @@ public class DirectoryPropertySourceIntTest {
          * @param fileName    the name of the temporary file to write to
          * @param data        the data to write
          * @param serviceName the expected service name
-         *
-         * @throws IOException
          */
         private void writeConfigurationAndAssertServiceName(String fileName, String data, String serviceName) throws IOException {
             // write data to the file
@@ -112,5 +106,4 @@ public class DirectoryPropertySourceIntTest {
                             .getServiceName()));
         }
     }
-
 }

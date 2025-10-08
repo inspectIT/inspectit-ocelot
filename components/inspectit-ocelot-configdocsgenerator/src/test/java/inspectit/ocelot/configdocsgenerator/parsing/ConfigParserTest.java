@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ConfigParserTest {
 
-    private final ConfigParser configParser = new ConfigParser();
+    final ConfigParser configParser = new ConfigParser();
 
     /**
      * Helper method to read Yaml from resources.

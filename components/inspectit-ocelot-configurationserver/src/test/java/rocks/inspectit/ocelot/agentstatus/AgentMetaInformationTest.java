@@ -14,21 +14,21 @@ class AgentMetaInformationTest {
     class Of {
 
         @Test
-        public void nullMap() {
+        void nullMap() {
             AgentMetaInformation result = AgentMetaInformation.of(null);
 
             assertThat(result).isNull();
         }
 
         @Test
-        public void emptyMap() {
+        void emptyMap() {
             AgentMetaInformation result = AgentMetaInformation.of(Collections.emptyMap());
 
             assertThat(result).isNull();
         }
 
         @Test
-        public void noMatchingHeaders() {
+        void noMatchingHeaders() {
             Map<String, String> map = Collections.singletonMap("any", "value");
 
             AgentMetaInformation result = AgentMetaInformation.of(map);
@@ -37,7 +37,7 @@ class AgentMetaInformationTest {
         }
 
         @Test
-        public void matchingHeaders() {
+        void matchingHeaders() {
             Map<String, String> map = Collections.singletonMap("x-ocelot-agent-id", "id-123");
 
             AgentMetaInformation result = AgentMetaInformation.of(map);

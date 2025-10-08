@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ScheduledExecutorContextPropagationTest extends InstrumentationSysTestBase {
+class ScheduledExecutorContextPropagationTest extends InstrumentationSysTestBase {
 
     private ScheduledExecutorService executorService;
 
@@ -23,13 +23,13 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
     private static final String attrValue = "test_value";
 
     @BeforeAll
-    public static void beforeAll() {
+    static void beforeAll() {
         Executors.newSingleThreadScheduledExecutor().schedule(Math::random, 1, TimeUnit.MILLISECONDS);
         TestUtils.waitForClassInstrumentations(ScheduledThreadPoolExecutor.class, TestRunnable.class, TestCallable.class);
     }
 
     @BeforeEach
-    public void beforeEach() throws ExecutionException, InterruptedException {
+    void beforeEach() throws ExecutionException, InterruptedException {
         // warmup the executor - if this is not be done, the first call to the executor will always be correlated
         // because a thread is started, thus, it is correlated due to the Thread.start correlation
         executorService = Executors.newSingleThreadScheduledExecutor();
@@ -37,15 +37,15 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
     }
 
     @AfterEach
-    public void afterEach() {
+    void afterEach() {
         executorService.shutdown();
     }
 
     @Nested
-    public class Schedule_runnable {
+    class Schedule_runnable {
 
         @Test
-        public void verifyCtxPropagationViaScheduleRunnable_lambda() throws Exception {
+        void verifyCtxPropagationViaScheduleRunnable_lambda() throws Exception {
             AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
             Runnable runnable = HelperClasses.getRunnableAsLambda(refBaggage);
@@ -64,7 +64,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         }
 
         @Test
-        public void verifyCtxPropagationViaScheduleRunnable_anonymous() throws Exception {
+        void verifyCtxPropagationViaScheduleRunnable_anonymous() throws Exception {
             AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
             Runnable runnable = HelperClasses.getRunnableAsAnonymous(refBaggage);
@@ -84,7 +84,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         }
 
         @Test
-        public void verifyCtxPropagationViaScheduleRunnable_named() throws Exception {
+        void verifyCtxPropagationViaScheduleRunnable_named() throws Exception {
             AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
             Runnable runnable = HelperClasses.getRunnableAsNamed(refBaggage);
@@ -104,10 +104,10 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
     }
 
     @Nested
-    public class Schedule_callable {
+    class Schedule_callable {
 
         @Test
-        public void verifyCtxPropagationViaScheduleCallable_lambda() throws Exception {
+        void verifyCtxPropagationViaScheduleCallable_lambda() throws Exception {
             Callable<Baggage> callable = HelperClasses.getCallableAsLambda();
 
             ScheduledFuture<Baggage> future;
@@ -124,7 +124,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         }
 
         @Test
-        public void verifyCtxPropagationViaScheduleCallable_anonymous() throws Exception {
+        void verifyCtxPropagationViaScheduleCallable_anonymous() throws Exception {
             Callable<Baggage> callable = HelperClasses.getCallableAsAnonymous();
             TestUtils.waitForClassInstrumentations(callable.getClass());
 
@@ -142,7 +142,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         }
 
         @Test
-        public void verifyCtxPropagationViaScheduleCallable_named() throws Exception {
+        void verifyCtxPropagationViaScheduleCallable_named() throws Exception {
             Callable<Baggage> callable = HelperClasses.getCallableAsNamed();
 
             ScheduledFuture<Baggage> future;
@@ -160,10 +160,10 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
     }
 
     @Nested
-    public class ScheduleWithFixedDelay {
+    class ScheduleWithFixedDelay {
 
         @Test
-        public void verifyCtxPropagationViaScheduleFixedDelay_lambda() throws Exception {
+        void verifyCtxPropagationViaScheduleFixedDelay_lambda() throws Exception {
             int iterations = 5;
             CountDownLatch iterationCount = new CountDownLatch(iterations);
 
@@ -196,7 +196,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         }
 
         @Test
-        public void verifyCtxPropagationViaScheduleFixedDelay_anonymous() throws Exception {
+        void verifyCtxPropagationViaScheduleFixedDelay_anonymous() throws Exception {
             int iterations = 5;
             CountDownLatch iterationCount = new CountDownLatch(iterations);
 
@@ -233,7 +233,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         }
 
         @Test
-        public void verifyCtxPropagationViaScheduleFixedDelay_named() throws Exception {
+        void verifyCtxPropagationViaScheduleFixedDelay_named() throws Exception {
             int iterations = 5;
             CountDownLatch iterationCount = new CountDownLatch(iterations);
 
@@ -268,10 +268,10 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
     }
 
     @Nested
-    public class ScheduleAtFixedRate {
+    class ScheduleAtFixedRate {
 
         @Test
-        public void verifyCtxPropagationViaScheduleFixedRate_lambda() throws Exception {
+        void verifyCtxPropagationViaScheduleFixedRate_lambda() throws Exception {
             int iterations = 5;
             CountDownLatch iterationCount = new CountDownLatch(iterations);
 
@@ -304,7 +304,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         }
 
         @Test
-        public void verifyCtxPropagationViaScheduleFixedRate_anonymous() throws Exception {
+        void verifyCtxPropagationViaScheduleFixedRate_anonymous() throws Exception {
             int iterations = 5;
             CountDownLatch iterationCount = new CountDownLatch(iterations);
 
@@ -341,7 +341,7 @@ public class ScheduledExecutorContextPropagationTest extends InstrumentationSysT
         }
 
         @Test
-        public void verifyCtxPropagationViaScheduleFixedRate_named() throws Exception {
+        void verifyCtxPropagationViaScheduleFixedRate_named() throws Exception {
             int iterations = 5;
             CountDownLatch iterationCount = new CountDownLatch(iterations);
 

@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
  * Unit Test for the building process of the {@link rocks.inspectit.ocelot.rest.agent.AgentService.SupportArchiveData support archive} in the {@link AgentService}
  */
 @ExtendWith(MockitoExtension.class)
-public class AgentServiceTest {
+class AgentServiceTest {
 
     @InjectMocks
     AgentService cut;
@@ -45,7 +45,7 @@ public class AgentServiceTest {
     InspectitServerSettings configuration;
 
     @Nested
-    public class BuildSupportArchive {
+    class BuildSupportArchive {
 
         AgentService serviceSpy;
 
@@ -57,7 +57,7 @@ public class AgentServiceTest {
 
         AgentService.SupportArchiveData expectedResult;
 
-        public void setupTestData(boolean logPreloadingEnabled) {
+        void setupTestData(boolean logPreloadingEnabled) {
             serviceSpy = Mockito.spy(cut);
             String configYaml = String.format("inspectit.log-preloading: {enabled: %b}", logPreloadingEnabled);
 
@@ -87,7 +87,7 @@ public class AgentServiceTest {
             }};
         }
 
-        public void setupTestObject(boolean logPreloadingEnabled) throws ExecutionException {
+        void setupTestObject(boolean logPreloadingEnabled) throws ExecutionException {
             DeferredResult<ResponseEntity<?>> envResult = new DeferredResult<ResponseEntity<?>>() {{
                 setResult(ResponseEntity.ok().body(environmentDetail));
             }};
@@ -106,7 +106,7 @@ public class AgentServiceTest {
         }
 
         @Test
-        public void shouldBuildSupportArchive() throws ExecutionException {
+        void shouldBuildSupportArchive() throws ExecutionException {
             setupTestData(true);
             setupTestObject(true);
 
@@ -118,7 +118,7 @@ public class AgentServiceTest {
         }
 
         @Test
-        public void logPreloadingDisabled() throws ExecutionException {
+        void logPreloadingDisabled() throws ExecutionException {
             setupTestData(false);
             setupTestObject(false);
 

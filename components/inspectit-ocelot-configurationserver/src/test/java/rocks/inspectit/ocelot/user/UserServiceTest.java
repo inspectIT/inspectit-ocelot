@@ -72,10 +72,10 @@ class UserServiceTest {
     @Nested
     class AddDefaultUserIfRequired {
 
-        private Method testMethod = ReflectionUtils.findMethod(UserService.class, "addDefaultUserIfRequired").get();
+        Method testMethod = ReflectionUtils.findMethod(UserService.class, "addDefaultUserIfRequired").get();
 
         @Test
-        public void addDefaultUser() {
+        void addDefaultUser() {
             SecuritySettings securitySettings = SecuritySettings.builder().ldapAuthentication(false).build();
             DefaultUserSettings userSettings = DefaultUserSettings.builder().name("username").password("passwd").build();
             InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).defaultUser(userSettings).build();
@@ -96,7 +96,7 @@ class UserServiceTest {
         }
 
         @Test
-        public void doNothingIfUserPresent() {
+        void doNothingIfUserPresent() {
             SecuritySettings securitySettings = SecuritySettings.builder().ldapAuthentication(false).build();
             InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).build();
             userService.settings = settings;
@@ -110,7 +110,7 @@ class UserServiceTest {
 
 
         @Test
-        public void doNothingIfLdapUsed() {
+        void doNothingIfLdapUsed() {
             SecuritySettings securitySettings = SecuritySettings.builder().ldapAuthentication(true).build();
             InspectitServerSettings settings = InspectitServerSettings.builder().security(securitySettings).build();
             userService.settings = settings;
@@ -120,5 +120,4 @@ class UserServiceTest {
             verifyNoMoreInteractions(repository);
         }
     }
-
 }

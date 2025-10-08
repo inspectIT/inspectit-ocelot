@@ -28,7 +28,7 @@ class EnvironmentAttributesProviderIntTest {
         InspectitEnvironment env;
 
         @Test
-        public void happyPath() {
+        void happyPath() {
             assertThat(provider.getAttributes(env.getCurrentConfig()))
                     .hasSize(3)
                     .containsEntry("service.name", SERVICE_NAME)
@@ -52,7 +52,7 @@ class EnvironmentAttributesProviderIntTest {
         EnvironmentAttributesProvider provider;
 
         @Test
-        public void happyPath() {
+        void happyPath() {
             assertThat(provider.getAttributes(env.getCurrentConfig()))
                     .hasSize(1)
                     .containsKeys("service.name");
@@ -73,7 +73,7 @@ class EnvironmentAttributesProviderIntTest {
         EnvironmentAttributesProvider provider;
 
         @Test
-        public void happyPath() {
+        void happyPath() {
             assertThat(provider.getAttributes(env.getCurrentConfig())).isEmpty();
         }
     }
@@ -92,7 +92,7 @@ class EnvironmentAttributesProviderIntTest {
         InspectitEnvironment env;
 
         @Test
-        public void enable() {
+        void enable() {
             updateProperties(properties ->
                     properties.withProperty("inspectit.attributes.providers.environment.enabled", Boolean.TRUE)
             );
@@ -111,7 +111,7 @@ class EnvironmentAttributesProviderIntTest {
         EnvironmentAttributesProvider provider;
 
         @Test
-        public void happyPath() {
+        void happyPath() {
             updateProperties(
                     properties -> properties
                             .withProperty("inspectit.service-name", "updatedName")

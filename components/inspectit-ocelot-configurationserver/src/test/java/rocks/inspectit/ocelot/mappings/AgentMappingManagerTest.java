@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AgentMappingManagerTest {
+class AgentMappingManagerTest {
 
     @InjectMocks
     AgentMappingManager manager;
@@ -49,7 +49,7 @@ public class AgentMappingManagerTest {
     ApplicationEventPublisher publisher;
 
     @BeforeEach
-    public void init() throws IOException {
+    void init() throws IOException {
         lenient().doReturn(writeAccessor).when(fileManager).getWorkingDirectory();
         lenient().doReturn(readAccessor).when(fileManager).getWorkspaceRevision();
         when(readAccessor.agentMappingsExist()).thenReturn(true);
@@ -65,10 +65,10 @@ public class AgentMappingManagerTest {
     }
 
     @Nested
-    public class GetAgentMappings {
+    class GetAgentMappings {
 
         @Test
-        public void successfullyLoadAgentMappings() throws IOException {
+        void successfullyLoadAgentMappings() throws IOException {
             String mappingYaml = "- name: \"my-mapping\"\n" +
                     "  sources:\n" +
                     "  - \"/configs\"\n" +
@@ -86,7 +86,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void agentMappingsAreBroken() {
+        void agentMappingsAreBroken() {
             List<AgentMapping> agentMappings = manager.getAgentMappings();
 
             assertThat(agentMappings).isEmpty();
@@ -94,11 +94,11 @@ public class AgentMappingManagerTest {
     }
 
     @Nested
-    public class SetAgentMappings {
+    class SetAgentMappings {
 
         @Test
         @SuppressWarnings("unchecked")
-        public void successfullySetMappings() throws IOException {
+        void successfullySetMappings() throws IOException {
             AgentMapping mapping = AgentMapping.builder()
                     .name("my-mapping")
                     .attribute("attributeA", "valueA")
@@ -114,7 +114,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void writingMappingsFileFails() throws IOException {
+        void writingMappingsFileFails() throws IOException {
             AgentMapping mapping = AgentMapping.builder().name("mapping").build();
             doThrow(IOException.class).when(serializer).writeAgentMappings(any());
 
@@ -125,7 +125,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void setNull() {
+        void setNull() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.setAgentMappings(null))
                     .withMessage("The agent mappings should not be null");
@@ -135,10 +135,10 @@ public class AgentMappingManagerTest {
     }
 
     @Nested
-    public class GetAgentMapping {
+    class GetAgentMapping {
 
         @Test
-        public void getAgentMapping() {
+        void getAgentMapping() {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
@@ -152,7 +152,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void noMappingFound() {
+        void noMappingFound() {
             AgentMapping mapping = AgentMapping.builder().name("first").build();
 
             doReturn(Arrays.asList(mapping)).when(serializer).readCachedAgentMappings();
@@ -164,7 +164,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void getNullName() {
+        void getNullName() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.getAgentMapping(null))
                     .withMessage("The mapping name should not be empty or null");
@@ -173,7 +173,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void getEmptyName() {
+        void getEmptyName() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.getAgentMapping(""))
                     .withMessage("The mapping name should not be empty or null");
@@ -183,11 +183,11 @@ public class AgentMappingManagerTest {
     }
 
     @Nested
-    public class DeleteAgentMapping {
+    class DeleteAgentMapping {
 
         @Test
         @SuppressWarnings("unchecked")
-        public void successfullyDeleteMapping() throws IOException {
+        void successfullyDeleteMapping() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
@@ -205,7 +205,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void mappingDoesNotExist() throws IOException {
+        void mappingDoesNotExist() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
@@ -219,7 +219,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void lastMappingCannotBeDeleted() throws IOException {
+        void lastMappingCannotBeDeleted() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("last").build();
 
             doReturn(Collections.singletonList(mappingA)).when(serializer).readCachedAgentMappings();
@@ -232,7 +232,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void writingFileFails() throws IOException {
+        void writingFileFails() throws IOException {
             doThrow(IOException.class).when(serializer).writeAgentMappings(any());
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
@@ -247,7 +247,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void deleteNullMapping() {
+        void deleteNullMapping() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.deleteAgentMapping(null))
                     .withMessage("The mapping name should not be empty or null");
@@ -257,11 +257,11 @@ public class AgentMappingManagerTest {
     }
 
     @Nested
-    public class AddAgentMapping {
+    class AddAgentMapping {
 
         @Test
         @SuppressWarnings("unchecked")
-        public void addingAgentMapping() throws IOException {
+        void addingAgentMapping() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
 
             doReturn(Collections.emptyList()).when(serializer).readCachedAgentMappings();
@@ -278,7 +278,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void addingAgentMappingToExisting() throws IOException {
+        void addingAgentMappingToExisting() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
@@ -299,7 +299,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void addNullMapping() {
+        void addNullMapping() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.addAgentMapping(null))
                     .withMessage("The agent mapping should not be null");
@@ -308,7 +308,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void addingAgentMappingWithNullName() {
+        void addingAgentMappingWithNullName() {
             AgentMapping mappingA = AgentMapping.builder().name(null).build();
 
             assertThatExceptionOfType(IllegalArgumentException.class)
@@ -319,7 +319,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void addingAgentMappingWithEmptyName() {
+        void addingAgentMappingWithEmptyName() {
             AgentMapping mappingA = AgentMapping.builder().name("").build();
 
             assertThatExceptionOfType(IllegalArgumentException.class)
@@ -330,7 +330,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void updateMapping() throws IOException {
+        void updateMapping() throws IOException {
             AtomicReference<List<AgentMapping>> mappingsHolder = new AtomicReference<>(Collections.emptyList());
             doAnswer((rq) -> mappingsHolder.get()).when(serializer).readCachedAgentMappings();
             doAnswer((rq) -> {
@@ -356,11 +356,11 @@ public class AgentMappingManagerTest {
     }
 
     @Nested
-    public class AddAgentMappingBefore {
+    class AddAgentMappingBefore {
 
         @Test
         @SuppressWarnings("unchecked")
-        public void successfullyAddMappingBefore() throws IOException {
+        void successfullyAddMappingBefore() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
@@ -379,7 +379,7 @@ public class AgentMappingManagerTest {
 
         @Test
         @SuppressWarnings("unchecked")
-        public void addBeforeFirst() throws IOException {
+        void addBeforeFirst() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
@@ -398,7 +398,7 @@ public class AgentMappingManagerTest {
 
         @Test
         @SuppressWarnings("unchecked")
-        public void addBeforeItself() throws IOException {
+        void addBeforeItself() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
@@ -418,7 +418,7 @@ public class AgentMappingManagerTest {
 
         @Test
         @SuppressWarnings("unchecked")
-        public void moveExistingMapping() throws IOException {
+        void moveExistingMapping() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
@@ -438,7 +438,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void targetNotExists() {
+        void targetNotExists() {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
@@ -454,11 +454,11 @@ public class AgentMappingManagerTest {
     }
 
     @Nested
-    public class AddAgentMappingAfter {
+    class AddAgentMappingAfter {
 
         @Test
         @SuppressWarnings("unchecked")
-        public void successfullyAddMappingAfter() throws IOException {
+        void successfullyAddMappingAfter() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
@@ -477,7 +477,7 @@ public class AgentMappingManagerTest {
 
         @Test
         @SuppressWarnings("unchecked")
-        public void addAfterItself() throws IOException {
+        void addAfterItself() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
@@ -497,7 +497,7 @@ public class AgentMappingManagerTest {
 
         @Test
         @SuppressWarnings("unchecked")
-        public void moveExistingMapping() throws IOException {
+        void moveExistingMapping() throws IOException {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
             AgentMapping mappingC = AgentMapping.builder().name("third").build();
@@ -516,7 +516,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void targetNotExists() {
+        void targetNotExists() {
             AgentMapping mappingA = AgentMapping.builder().name("first").build();
             AgentMapping mappingB = AgentMapping.builder().name("second").build();
 
@@ -532,10 +532,10 @@ public class AgentMappingManagerTest {
     }
 
     @Nested
-    public class SetAgentMappingsSourceBranch {
+    class SetAgentMappingsSourceBranch {
 
         @Test
-        public void verifySourceBranchHasChanged() {
+        void verifySourceBranchHasChanged() {
             when(fileManager.getLiveRevision()).thenReturn(readAccessor);
             when(readAccessor.agentMappingsExist()).thenReturn(true);
 
@@ -547,7 +547,7 @@ public class AgentMappingManagerTest {
         }
 
         @Test
-        public void verifyThrowsExceptions()  {
+        void verifyThrowsExceptions()  {
             assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> manager.setSourceBranch(null))
                     .withMessage("The set source branch cannot be null");
             assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> manager.setSourceBranch("unknown"))

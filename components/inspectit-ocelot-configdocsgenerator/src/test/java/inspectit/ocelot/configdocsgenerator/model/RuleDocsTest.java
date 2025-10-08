@@ -11,35 +11,35 @@ import static org.mockito.Mockito.when;
 
 public class RuleDocsTest {
 
-    private static final String RULE_1_NAME = "testRule1";
+    static final String RULE_1_NAME = "testRule1";
 
-    private static final String RULE_2_NAME = "testRule2";
+    static final String RULE_2_NAME = "testRule2";
 
-    private static final String RULE_3_NAME = "testRule3";
+    static final String RULE_3_NAME = "testRule3";
 
-    private static final String RULE_4_NAME = "testRule4";
+    static final String RULE_4_NAME = "testRule4";
 
-    private static final String ACTION_FROM_RULE_1 = "a_1";
+    static final String ACTION_FROM_RULE_1 = "a_1";
 
-    private static final String ACTION_FROM_RULE_2 = "a_2";
+    static final String ACTION_FROM_RULE_2 = "a_2";
 
-    private static final String ACTION_FROM_RULE_3 = "a_3";
+    static final String ACTION_FROM_RULE_3 = "a_3";
 
-    private static final String ACTION_FROM_RULE_4 = "a_4";
+    static final String ACTION_FROM_RULE_4 = "a_4";
 
-    private static final String OVERWRITTEN_BY_1 = "overwritten_by_1";
+    static final String OVERWRITTEN_BY_1 = "overwritten_by_1";
 
-    private static final String OVERWRITTEN_BY_2 = "overwritten_by_2";
+    static final String OVERWRITTEN_BY_2 = "overwritten_by_2";
 
-    private static final String OVERWRITTEN_BY_1_AND_2 = "overwritten_by_1_and_2";
+    static final String OVERWRITTEN_BY_1_AND_2 = "overwritten_by_1_and_2";
 
-    private static final String CREATED_BY_3 = "created_by_3";
+    static final String CREATED_BY_3 = "created_by_3";
 
-    private static final String CREATED_BY_4 = "created_by_4";
+    static final String CREATED_BY_4 = "created_by_4";
 
-    private static final String ENTRY_KEY = "entry";
+    static final String ENTRY_KEY = "entry";
 
-    private static final String EXIT_KEY = "exit";
+    static final String EXIT_KEY = "exit";
 
     /**
      * Generate an actionCallsMap for a {@link RuleDocs} object with empty TreeMaps as values.
@@ -195,6 +195,5 @@ public class RuleDocsTest {
 
             assertThat(result).usingRecursiveComparison().isEqualTo(expected);
         }
-
     }
 }

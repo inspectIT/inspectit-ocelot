@@ -13,9 +13,9 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
-public class KapacitorEnabledControllerTest extends KapacitorControllerTestBase {
+class KapacitorEnabledControllerTest extends KapacitorControllerTestBase {
 
-    private KapacitorEnabledController controller;
+    KapacitorEnabledController controller;
 
     @BeforeEach
     void setup() {

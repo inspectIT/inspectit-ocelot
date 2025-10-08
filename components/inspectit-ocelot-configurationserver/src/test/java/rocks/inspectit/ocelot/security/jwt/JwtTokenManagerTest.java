@@ -32,22 +32,22 @@ import static org.mockito.Mockito.*;
 class JwtTokenManagerTest {
 
     @InjectMocks
-    private JwtTokenManager manager;
+    JwtTokenManager manager;
 
     @Mock
-    private UserDetailsService userDetailsService;
+    UserDetailsService userDetailsService;
 
     @BeforeEach
-    public void before() {
+    void before() {
         manager.services = new ArrayList<>();
         manager.services.add(userDetailsService);
     }
 
     @Nested
-    public class CreateToken {
+    class CreateToken {
 
         @Test
-        public void validToken() {
+        void validToken() {
             InspectitServerSettings settings = InspectitServerSettings.builder().tokenLifespan(Duration.ofMinutes(1)).build();
             manager.config = settings;
             SecretKey secret = Jwts.SIG.HS256.key().build();
@@ -63,14 +63,14 @@ class JwtTokenManagerTest {
         }
 
         @Test
-        public void emptyUsername() {
+        void emptyUsername() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.createToken(""))
                     .withMessage("Username must not be null or empty.");
         }
 
         @Test
-        public void nullUsername() {
+        void nullUsername() {
             assertThatExceptionOfType(IllegalArgumentException.class)
                     .isThrownBy(() -> manager.createToken(null))
                     .withMessage("Username must not be null or empty.");
@@ -78,13 +78,13 @@ class JwtTokenManagerTest {
     }
 
     @Nested
-    public class AuthenticateWithToken {
+    class AuthenticateWithToken {
 
         @Mock
         UserDetails userDetails;
 
         @Test
-        public void successfulAuthentication() {
+        void successfulAuthentication() {
             InspectitServerSettings settings = InspectitServerSettings.builder().tokenLifespan(Duration.ofMinutes(1)).build();
             manager.config = settings;
             String token = manager.createToken("username");
@@ -100,7 +100,7 @@ class JwtTokenManagerTest {
         }
 
         @Test
-        public void userNotFound() {
+        void userNotFound() {
             InspectitServerSettings settings = InspectitServerSettings.builder().tokenLifespan(Duration.ofMinutes(1)).build();
             manager.config = settings;
             String token = manager.createToken("username");
@@ -115,7 +115,7 @@ class JwtTokenManagerTest {
         }
 
         @Test
-        public void invalidJwtToken() {
+        void invalidJwtToken() {
             InspectitServerSettings settings = InspectitServerSettings.builder().tokenLifespan(Duration.ofMinutes(1)).build();
             manager.config = settings;
 
@@ -126,7 +126,7 @@ class JwtTokenManagerTest {
         }
 
         @Test
-        public void multipleUserDetailsServices() {
+        void multipleUserDetailsServices() {
             UserDetailsService mockService = mock(UserDetailsService.class);
             when(mockService.loadUserByUsername(anyString())).thenThrow(UsernameNotFoundException.class);
             manager.services.add(0, mockService);

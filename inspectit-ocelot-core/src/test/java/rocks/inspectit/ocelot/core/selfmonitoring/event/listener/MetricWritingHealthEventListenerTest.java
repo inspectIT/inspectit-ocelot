@@ -14,15 +14,15 @@ import java.util.HashMap;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class MetricWritingHealthEventListenerTest {
+class MetricWritingHealthEventListenerTest {
 
-    private static final String INITIAL_METRIC_MESSAGE = "Initial health metric sent";
+    static final String INITIAL_METRIC_MESSAGE = "Initial health metric sent";
 
     @InjectMocks
-    private MetricWritingHealthEventListener metricWritingHealthEventListener;
+    MetricWritingHealthEventListener metricWritingHealthEventListener;
 
     @Mock
-    private SelfMonitoringService selfMonitoringService;
+    SelfMonitoringService selfMonitoringService;
 
     @Test
     void sendInitialHealthMetric() {

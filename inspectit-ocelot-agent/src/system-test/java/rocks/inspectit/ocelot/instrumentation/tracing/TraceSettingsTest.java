@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TraceSettingsTest extends TraceTestBase {
+class TraceSettingsTest extends TraceTestBase {
 
     String attributesSetter() {
         return "Hello A!";
@@ -75,8 +75,7 @@ public class TraceSettingsTest extends TraceTestBase {
         nestedC();
     }
 
-    void nestedC() {
-    }
+    void nestedC() {}
 
     @Test
     void testConditionalSpanCreation() {
@@ -104,8 +103,7 @@ public class TraceSettingsTest extends TraceTestBase {
         namedB("second");
     }
 
-    void namedB(String name) {
-    }
+    void namedB(String name) {}
 
     @Test
     void testSpanNameCustomization() {
@@ -141,8 +139,7 @@ public class TraceSettingsTest extends TraceTestBase {
 
     static class AsyncTask {
 
-        void doAsync(String att1, String att2, String att3, boolean isFinished) {
-        }
+        void doAsync(String att1, String att2, String att3, boolean isFinished) {}
     }
 
     @Test
@@ -199,22 +196,18 @@ public class TraceSettingsTest extends TraceTestBase {
         });
     }
 
-    void samplingTestEndMarker(String id) {
-    }
+    void samplingTestEndMarker(String id) {}
 
-    void fixedSamplingRateTest(String id) {
-    }
+    void fixedSamplingRateTest(String id) {}
 
-    void dynamicSamplingRateTest(String id, Object rate) {
-    }
+    void dynamicSamplingRateTest(String id, Object rate) {}
 
     void nestedSamplingTestRoot(Double rootProbability, Double nestedProbability) {
         nestedSamplingTestNested(nestedProbability);
         nestedSamplingTestNestedDefault();
     }
 
-    void nestedSamplingTestNested(Double nestedProbability) {
-    }
+    void nestedSamplingTestNested(Double nestedProbability) {}
 
     /**
      * Runs with the default sample probability

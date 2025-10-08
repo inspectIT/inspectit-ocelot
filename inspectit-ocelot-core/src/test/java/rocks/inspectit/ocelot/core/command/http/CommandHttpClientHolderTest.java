@@ -10,7 +10,7 @@ import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CommandHttpClientHolderTest {
+class CommandHttpClientHolderTest {
 
     @Nested
     class Discovery {

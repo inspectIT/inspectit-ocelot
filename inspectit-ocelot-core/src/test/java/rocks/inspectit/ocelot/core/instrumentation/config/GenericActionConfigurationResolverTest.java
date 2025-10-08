@@ -13,16 +13,16 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class GenericActionConfigurationResolverTest {
+class GenericActionConfigurationResolverTest {
 
     @InjectMocks
-    private GenericActionConfigurationResolver resolver = new GenericActionConfigurationResolver();
+    GenericActionConfigurationResolver resolver = new GenericActionConfigurationResolver();
 
     @Nested
-    public class ResolveActions {
+    class ResolveActions {
 
-        private static final String ACTION_NAME = "My-Action1";
-        private static final String ACTION_VALUE_BODY = "return new Integer(42);";
+        static final String ACTION_NAME = "My-Action1";
+        static final String ACTION_VALUE_BODY = "return new Integer(42);";
 
         InstrumentationSettings config;
         GenericActionSettings inputAction;

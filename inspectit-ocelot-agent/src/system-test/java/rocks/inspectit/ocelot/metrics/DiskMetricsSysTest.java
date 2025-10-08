@@ -9,10 +9,10 @@ import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class DiskMetricsSysTest extends MetricsSysTestBase {
+class DiskMetricsSysTest extends MetricsSysTestBase {
 
     @Test
-    public void testDiskMetricCapturing() {
+    void testDiskMetricCapturing() {
         await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
 
             LongPointData freeDisk = (LongPointData) MetricTestUtils.getDataForView("disk_free", emptyMap());

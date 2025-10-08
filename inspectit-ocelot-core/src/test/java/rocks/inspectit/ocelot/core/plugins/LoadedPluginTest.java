@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class LoadedPluginTest {
+class LoadedPluginTest {
 
     @Mock
     ConfigurablePlugin<Object> plugin;
@@ -123,6 +123,5 @@ public class LoadedPluginTest {
             verify(plugin).start(same(confA), eq("foo"));
             verifyNoMoreInteractions(plugin);
         }
-
     }
 }

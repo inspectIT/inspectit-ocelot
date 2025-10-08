@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class PingCommandHandlerTest {
+class PingCommandHandlerTest {
 
     @InjectMocks
     PingCommandHandler pingCommandHandler;
@@ -32,7 +32,7 @@ public class PingCommandHandlerTest {
     class PrepareResponse {
 
         @Test
-        public void cantHandleCommand() {
+        void cantHandleCommand() {
             Command command = null;
             String agentId = "test-id";
 
@@ -45,7 +45,7 @@ public class PingCommandHandlerTest {
         }
 
         @Test
-        public void preparesResponse() {
+        void preparesResponse() {
             when(configuration.getAgentCommand().getResponseTimeout()).thenReturn(Duration.ofMinutes(1));
             PingCommand command = new PingCommand();
             String agentId = "test-id";
@@ -62,7 +62,7 @@ public class PingCommandHandlerTest {
     class HandleResponse {
 
         @Test
-        public void handlesResponse() {
+        void handlesResponse() {
             CommandResponse mockResponse = mock(CommandResponse.class);
             DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
 

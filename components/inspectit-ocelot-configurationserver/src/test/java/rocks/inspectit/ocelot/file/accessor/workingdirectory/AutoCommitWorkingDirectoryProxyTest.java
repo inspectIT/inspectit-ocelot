@@ -15,14 +15,14 @@ import static org.mockito.Mockito.*;
 
 class AutoCommitWorkingDirectoryProxyTest {
 
-    private AutoCommitWorkingDirectoryProxy accessor;
+    AutoCommitWorkingDirectoryProxy accessor;
 
-    private VersioningManager versioningManager;
+    VersioningManager versioningManager;
 
-    private WorkingDirectoryAccessor wdAccessor;
+    WorkingDirectoryAccessor wdAccessor;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         wdAccessor = mock(WorkingDirectoryAccessor.class);
         versioningManager = mock(VersioningManager.class);
 
@@ -35,7 +35,7 @@ class AutoCommitWorkingDirectoryProxyTest {
     class CreateDirectory {
 
         @Test
-        public void createDirectory() throws IOException, GitAPIException {
+        void createDirectory() throws IOException, GitAPIException {
             accessor.createDirectory("test");
 
             verify(wdAccessor).createDirectory("test");
@@ -45,7 +45,7 @@ class AutoCommitWorkingDirectoryProxyTest {
         }
 
         @Test
-        public void ioException() throws IOException, GitAPIException {
+        void ioException() throws IOException, GitAPIException {
             doThrow(IOException.class).when(wdAccessor).createDirectory(anyString());
 
             assertThatIOException()
@@ -57,7 +57,7 @@ class AutoCommitWorkingDirectoryProxyTest {
         }
 
         @Test
-        public void gitException() throws GitAPIException, IOException {
+        void gitException() throws GitAPIException, IOException {
             doThrow(CanceledException.class).when(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
 
             accessor.createDirectory("test");
@@ -73,7 +73,7 @@ class AutoCommitWorkingDirectoryProxyTest {
     class WriteFile {
 
         @Test
-        public void createDirectory() throws IOException, GitAPIException {
+        void createDirectory() throws IOException, GitAPIException {
             accessor.writeFile("path", "content");
 
             verify(wdAccessor).writeFile("path", "content");
@@ -83,7 +83,7 @@ class AutoCommitWorkingDirectoryProxyTest {
         }
 
         @Test
-        public void ioException() throws IOException, GitAPIException {
+        void ioException() throws IOException, GitAPIException {
             doThrow(IOException.class).when(wdAccessor).writeFile(anyString(), anyString());
 
             assertThatIOException()
@@ -95,7 +95,7 @@ class AutoCommitWorkingDirectoryProxyTest {
         }
 
         @Test
-        public void gitException() throws GitAPIException, IOException {
+        void gitException() throws GitAPIException, IOException {
             doThrow(CanceledException.class).when(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
 
             accessor.writeFile("path", "content");
@@ -111,7 +111,7 @@ class AutoCommitWorkingDirectoryProxyTest {
     class Move {
 
         @Test
-        public void createDirectory() throws IOException, GitAPIException {
+        void createDirectory() throws IOException, GitAPIException {
             accessor.move("src", "trgt");
 
             verify(wdAccessor).move("src", "trgt");
@@ -121,7 +121,7 @@ class AutoCommitWorkingDirectoryProxyTest {
         }
 
         @Test
-        public void ioException() throws IOException, GitAPIException {
+        void ioException() throws IOException, GitAPIException {
             doThrow(IOException.class).when(wdAccessor).move(anyString(), anyString());
 
             assertThatIOException()
@@ -133,7 +133,7 @@ class AutoCommitWorkingDirectoryProxyTest {
         }
 
         @Test
-        public void gitException() throws GitAPIException, IOException {
+        void gitException() throws GitAPIException, IOException {
             doThrow(CanceledException.class).when(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
 
             accessor.move("src", "trgt");
@@ -149,7 +149,7 @@ class AutoCommitWorkingDirectoryProxyTest {
     class Delete {
 
         @Test
-        public void createDirectory() throws IOException, GitAPIException {
+        void createDirectory() throws IOException, GitAPIException {
             accessor.delete("test");
 
             verify(wdAccessor).delete("test");
@@ -159,7 +159,7 @@ class AutoCommitWorkingDirectoryProxyTest {
         }
 
         @Test
-        public void ioException() throws IOException, GitAPIException {
+        void ioException() throws IOException, GitAPIException {
             doThrow(IOException.class).when(wdAccessor).delete(anyString());
 
             assertThatIOException()
@@ -171,7 +171,7 @@ class AutoCommitWorkingDirectoryProxyTest {
         }
 
         @Test
-        public void gitException() throws GitAPIException, IOException {
+        void gitException() throws GitAPIException, IOException {
             doThrow(CanceledException.class).when(versioningManager).commitAllChanges("Commit configuration file and agent mapping changes");
 
             accessor.delete("test");

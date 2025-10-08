@@ -27,9 +27,9 @@ import static org.awaitility.Awaitility.await;
 /**
  * uses global-propagation-tests.yml
  */
-public class HttpInMetricTest extends InstrumentationSysTestBase {
+class HttpInMetricTest extends InstrumentationSysTestBase {
 
-    private Server server;
+    Server server;
 
     void fireRequest(String url) {
         try {
@@ -42,7 +42,7 @@ public class HttpInMetricTest extends InstrumentationSysTestBase {
         }
     }
 
-    public static class TestServlet extends HttpServlet {
+    static class TestServlet extends HttpServlet {
 
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

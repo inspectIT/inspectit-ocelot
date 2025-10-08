@@ -21,7 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class InstrumentationFeedbackCommandHandlerTest {
+class InstrumentationFeedbackCommandHandlerTest {
 
     @InjectMocks
     InstrumentationFeedbackCommandHandler handler;
@@ -33,7 +33,7 @@ public class InstrumentationFeedbackCommandHandlerTest {
     class PrepareResponse {
 
         @Test
-        public void cantHandleCommand() {
+        void cantHandleCommand() {
             Command command = null;
             String agentId = "test-id";
 
@@ -45,7 +45,7 @@ public class InstrumentationFeedbackCommandHandlerTest {
         }
 
         @Test
-        public void preparesResponse() {
+        void preparesResponse() {
             when(configuration.getAgentCommand().getResponseTimeout()).thenReturn(Duration.ofMinutes(1));
             InstrumentationFeedbackCommand command = new InstrumentationFeedbackCommand();
             String agentId = "test-id";
@@ -60,7 +60,7 @@ public class InstrumentationFeedbackCommandHandlerTest {
     class HandleResponse {
 
         @Test
-        public void handlesResponse() {
+        void handlesResponse() {
             InstrumentationFeedbackCommand.Response mockResponse = mock(InstrumentationFeedbackCommand.Response.class);
             DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
 

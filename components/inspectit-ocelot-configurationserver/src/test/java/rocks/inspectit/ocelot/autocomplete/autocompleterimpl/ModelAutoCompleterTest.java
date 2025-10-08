@@ -11,17 +11,17 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ModelAutoCompleterTest {
+class ModelAutoCompleterTest {
 
     ModelAutoCompleter completer;
 
     @BeforeEach
-    public void setCompleter() {
+    void setCompleter() {
         completer = new ModelAutoCompleter();
     }
 
     @Nested
-    public class CheckPropertyExists {
+    class CheckPropertyExists {
 
         @Test
         void checkFirstLevel() {
@@ -146,7 +146,7 @@ public class ModelAutoCompleterTest {
     }
 
     @Nested
-    public class GetProperties {
+    class GetProperties {
 
         @Test
         void getPropertiesInspectit() {

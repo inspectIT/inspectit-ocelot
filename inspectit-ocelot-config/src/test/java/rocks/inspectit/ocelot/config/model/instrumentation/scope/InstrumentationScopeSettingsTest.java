@@ -15,8 +15,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-public class InstrumentationScopeSettingsTest {
+class InstrumentationScopeSettingsTest {
 
     InspectitConfig root;
 
@@ -209,8 +208,5 @@ public class InstrumentationScopeSettingsTest {
 
             assertThat(violations).hasSize(0);
         }
-
     }
-
 }
-

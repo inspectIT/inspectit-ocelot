@@ -8,7 +8,7 @@ import rocks.inspectit.ocelot.commons.models.info.AgentSystemInformation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SystemInfoCollectorTest {
+class SystemInfoCollectorTest {
 
     @Test
     void shouldBeSerializable() {

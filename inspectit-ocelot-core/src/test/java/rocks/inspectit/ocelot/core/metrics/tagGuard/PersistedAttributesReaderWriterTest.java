@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PersistedAttributesReaderWriterTest {
 
@@ -25,11 +26,10 @@ class PersistedAttributesReaderWriterTest {
     Map<String, Map<String, Set<String>>> tagValues;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         tempFileName = generateTempFilePath();
         tagValues = createTagValues();
     }
-
 
     @Test
     void ofWillReturnAValidInstanceIfFilenameIsValid() {
@@ -56,7 +56,7 @@ class PersistedAttributesReaderWriterTest {
         final Map<String, Map<String, Set<String>>> result = readerWriter.read();
 
         //THEN
-        Assertions.assertTrue(result.isEmpty());
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -69,7 +69,7 @@ class PersistedAttributesReaderWriterTest {
         final Map<String, Map<String, Set<String>>> result = readerWriter.read();
 
         //THEN
-        Assertions.assertTrue(result.isEmpty());
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -97,7 +97,7 @@ class PersistedAttributesReaderWriterTest {
         final Map<String, Map<String, Set<String>>> result = readerWriter.read();
 
         //THEN
-        Assertions.assertTrue(result.isEmpty());
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -112,7 +112,7 @@ class PersistedAttributesReaderWriterTest {
         final Map<String, Map<String, Set<String>>> result = readerWriterWrongPath.read();
 
         //THEN
-        Assertions.assertTrue(result.isEmpty());
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -126,7 +126,7 @@ class PersistedAttributesReaderWriterTest {
         final Map<String, Map<String, Set<String>>> result = readerWriter.read();
 
         //THEN
-        Assertions.assertTrue(result.isEmpty());
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -140,7 +140,7 @@ class PersistedAttributesReaderWriterTest {
         final Map<String, Map<String, Set<String>>> result = readerWriter.read();
 
         //THEN
-        Assertions.assertTrue(result.isEmpty());
+        assertTrue(result.isEmpty());
     }
 
 

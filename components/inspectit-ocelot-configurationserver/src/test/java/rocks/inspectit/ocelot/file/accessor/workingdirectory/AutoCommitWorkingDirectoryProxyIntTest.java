@@ -27,16 +27,16 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
      * For convenience: if this field is not null, it will used as working directory during tests.
      * Note: the specified directory is CLEANED before each run, thus, if you have files there, they will be gone ;)
      */
-    public static final String TEST_DIRECTORY = null;
+    static final String TEST_DIRECTORY = null;
 
-    private AutoCommitWorkingDirectoryProxy accessor;
+    AutoCommitWorkingDirectoryProxy accessor;
 
-    private ApplicationEventPublisher eventPublisher;
+    ApplicationEventPublisher eventPublisher;
 
-    private VersioningManager versioningManager;
+    VersioningManager versioningManager;
 
     @BeforeEach
-    public void beforeEach() throws IOException, GitAPIException {
+    void beforeEach() throws IOException, GitAPIException {
         if (TEST_DIRECTORY == null) {
             tempDirectory = Files.createTempDirectory("ocelot");
         } else {
@@ -61,7 +61,7 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
     }
 
     @AfterEach
-    public void afterEach() throws IOException {
+    void afterEach() throws IOException {
         if (TEST_DIRECTORY == null) {
             FileUtils.deleteDirectory(tempDirectory.toFile());
         }
@@ -71,7 +71,7 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
     class WriteFile {
 
         @Test
-        public void writeUntracked() throws IOException, GitAPIException {
+        void writeUntracked() throws IOException, GitAPIException {
             boolean first = versioningManager.isClean();
 
             accessor.writeFile("test.txt", "hello");
@@ -86,7 +86,7 @@ class AutoCommitWorkingDirectoryProxyIntTest extends FileTestBase {
         }
 
         @Test
-        public void modifyFile() throws IOException, GitAPIException {
+        void modifyFile() throws IOException, GitAPIException {
             boolean first = versioningManager.isClean();
 
             accessor.writeFile("files/file.yml", "hello");

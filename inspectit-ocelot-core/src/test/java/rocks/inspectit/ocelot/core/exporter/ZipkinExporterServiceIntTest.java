@@ -31,18 +31,16 @@ import static org.awaitility.Awaitility.await;
 
 @TestPropertySource(properties = {"inspectit.exporters.tracing.zipkin.endpoint=http://127.0.0.1:9411/api/v2/spans", "inspectit.tracing.max-export-batch-size=512", "inspectit.tracing.schedule-delay-millis=20000"})
 @DirtiesContext
-public class ZipkinExporterServiceIntTest extends SpringTestBase {
+class ZipkinExporterServiceIntTest extends SpringTestBase {
 
-    private static final Logger logger = LoggerFactory.getLogger(ZipkinExporterServiceIntTest.class);
+    static final int ZIPKIN_PORT = 9411;
 
-    private static final int ZIPKIN_PORT = 9411;
-
-    private static final String ZIPKIN_PATH = "/api/v2/spans";
+    static final String ZIPKIN_PATH = "/api/v2/spans";
 
     @RegisterExtension
     LogCapturer warnLogs = LogCapturer.create().captureForType(ZipkinExporterService.class, org.slf4j.event.Level.WARN);
 
-    private WireMockServer wireMockServer;
+    WireMockServer wireMockServer;
 
     @BeforeEach
     void setupWiremock() {

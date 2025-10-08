@@ -8,7 +8,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class ConfigUtilsTest {
+class ConfigUtilsTest {
 
     @Nested
     class LocateTypeWithinImports {

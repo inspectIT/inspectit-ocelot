@@ -6,9 +6,9 @@ import org.springframework.boot.convert.DurationStyle;
 
 import java.time.Duration;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class DurationUtilTest {
+class DurationUtilTest {
 
     @Nested
     class PrettyPrintDuration {
@@ -82,7 +82,5 @@ public class DurationUtilTest {
             assertThat(printed).isEqualTo("1234d");
             assertThat(DurationStyle.SIMPLE.parse(printed)).isEqualTo(dur);
         }
-
     }
-
 }

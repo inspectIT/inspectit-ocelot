@@ -21,16 +21,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class PollerWritingHealthEventListenerTest {
+class PollerWritingHealthEventListenerTest {
 
     @InjectMocks
-    private PollerWritingHealthEventListener pollerWritingHealthEventListener;
-    @Mock
-    private HttpConfigurationPoller httpConfigurationPoller;
-    @Mock
-    private AgentHealthManager agentHealthManager;
+    PollerWritingHealthEventListener pollerWritingHealthEventListener;
 
-    private List<AgentHealthIncident> lastIncidents;
+    @Mock
+    HttpConfigurationPoller httpConfigurationPoller;
+
+    @Mock
+    AgentHealthManager agentHealthManager;
+
+    List<AgentHealthIncident> lastIncidents;
 
     @BeforeEach
     void setUpIncidents() {

@@ -15,19 +15,19 @@ import rocks.inspectit.ocelot.utils.TestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class Log4JTraceIdAutoInjectorTest extends InstrumentationSysTestBase {
+class Log4JTraceIdAutoInjectorTest extends InstrumentationSysTestBase {
 
     private static final Logger LOGGER = Logger.getLogger(Log4JTraceIdAutoInjectorTest.class.getName());
 
-    private static final Tracer tracer = GlobalOpenTelemetry.getTracer("rocks.inspectit.ocelot.test", "0.0.1");
+    static final Tracer tracer = GlobalOpenTelemetry.getTracer("rocks.inspectit.ocelot.test", "0.0.1");
 
     @BeforeAll
-    public static void waitForClassInstrumentation() {
+    static void waitForClassInstrumentation() {
         TestUtils.waitForClassInstrumentations(Category.class);
     }
 
     @Test
-    public void traceExists() {
+    void traceExists() {
         Log4JLoggingRecorder.loggingEvents.clear();
         String message = "This is a test.";
         String traceId;
@@ -47,7 +47,7 @@ public class Log4JTraceIdAutoInjectorTest extends InstrumentationSysTestBase {
     }
 
     @Test
-    public void traceNotExists() {
+    void traceNotExists() {
         Log4JLoggingRecorder.loggingEvents.clear();
         String message = "This is a test.";
 

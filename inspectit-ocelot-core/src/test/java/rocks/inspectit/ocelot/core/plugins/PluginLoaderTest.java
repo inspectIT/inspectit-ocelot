@@ -26,19 +26,19 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class PluginLoaderTest {
+class PluginLoaderTest {
 
     @Mock
     InspectitEnvironment env;
 
     @InjectMocks
-    private PluginLoader loader = new PluginLoader();
+    PluginLoader loader = new PluginLoader();
 
     @Nested
     class UpdatePlugins {
 
         @Test
-        void ensureExceptionsCatched() {
+        void ensureExceptionsCaught() {
             LoadedPlugin myPlugin = Mockito.mock(LoadedPlugin.class);
             doThrow(RuntimeException.class).when(myPlugin).updateConfiguration(any());
             loader.plugins = Arrays.asList(myPlugin);
@@ -173,11 +173,9 @@ public class PluginLoaderTest {
     }
 
     @OcelotPlugin("")
-    public class HasAnnotation {
-    }
+    public class HasAnnotation {}
 
-    public class NoAnnotation {
-    }
+    public class NoAnnotation {}
 
     public class AnnotationOnMethod {
         @OcelotPlugin("")
@@ -189,18 +187,13 @@ public class PluginLoaderTest {
     @OcelotPlugin("pla")
     public static class PluginWithoutPublicDefaultConstructor implements ConfigurablePlugin {
 
-        PluginWithoutPublicDefaultConstructor() {
-        }
+        PluginWithoutPublicDefaultConstructor() {}
 
         @Override
-        public void start(InspectitConfig inspectitConfig, Object pluginConfig) {
-
-        }
+        public void start(InspectitConfig inspectitConfig, Object pluginConfig) {}
 
         @Override
-        public void update(InspectitConfig inspectitConfig, Object pluginConfig) {
-
-        }
+        public void update(InspectitConfig inspectitConfig, Object pluginConfig) {}
 
         @Override
         public Class getConfigurationClass() {
@@ -210,9 +203,7 @@ public class PluginLoaderTest {
 
 
     @OcelotPlugin("plb")
-    public static class PluginWithoutInterfaceImplementation {
-
-    }
+    public static class PluginWithoutInterfaceImplementation {}
 
 
     @OcelotPlugin(value = "pla", defaultConfig = "my-default.yml")
@@ -220,14 +211,10 @@ public class PluginLoaderTest {
 
 
         @Override
-        public void start(InspectitConfig inspectitConfig, Object pluginConfig) {
-
-        }
+        public void start(InspectitConfig inspectitConfig, Object pluginConfig) {}
 
         @Override
-        public void update(InspectitConfig inspectitConfig, Object pluginConfig) {
-
-        }
+        public void update(InspectitConfig inspectitConfig, Object pluginConfig) {}
 
         @Override
         public Class getConfigurationClass() {
@@ -244,14 +231,10 @@ public class PluginLoaderTest {
         }
 
         @Override
-        public void start(InspectitConfig inspectitConfig, Object pluginConfig) {
-
-        }
+        public void start(InspectitConfig inspectitConfig, Object pluginConfig) {}
 
         @Override
-        public void update(InspectitConfig inspectitConfig, Object pluginConfig) {
-
-        }
+        public void update(InspectitConfig inspectitConfig, Object pluginConfig) {}
 
         @Override
         public Class getConfigurationClass() {

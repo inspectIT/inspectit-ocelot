@@ -20,7 +20,7 @@ class DirectoryControllerIntTest extends IntegrationTestBase {
     class ListContents {
 
         @Test
-        public void emptyResponse() {
+        void emptyResponse() {
             ResponseEntity<FileInfo[]> result = authRest.getForEntity("/api/v1/directories/", FileInfo[].class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -28,7 +28,7 @@ class DirectoryControllerIntTest extends IntegrationTestBase {
         }
 
         @Test
-        public void validResponse() {
+        void validResponse() {
             // create test files
             authRest.exchange("/api/v1/files/file.yml", HttpMethod.PUT, null, Void.class);
 
@@ -46,14 +46,14 @@ class DirectoryControllerIntTest extends IntegrationTestBase {
     class CreateNewDirectory {
 
         @Test
-        public void noDirectorySpecified() {
+        void noDirectorySpecified() {
             ResponseEntity<Void> result = authRest.exchange("/api/v1/directories/", HttpMethod.PUT, null, Void.class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         @Test
-        public void createDirectory() {
+        void createDirectory() {
             ResponseEntity<Void> result = authRest.exchange("/api/v1/directories/new_dir", HttpMethod.PUT, null, Void.class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -67,14 +67,14 @@ class DirectoryControllerIntTest extends IntegrationTestBase {
     class DeleteDirectory {
 
         @Test
-        public void noDirectorySpecified() {
+        void noDirectorySpecified() {
             ResponseEntity<Void> result = authRest.exchange("/api/v1/directories/", HttpMethod.DELETE, null, Void.class);
 
             assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         @Test
-        public void deleteDirectory() {
+        void deleteDirectory() {
             // create test directory with files
             authRest.exchange("/api/v1/files/root/target_dir/file.yml", HttpMethod.PUT, null, Void.class);
 

@@ -2,5 +2,5 @@ i:
   am:
     a:
       basic: test-yml
-      in-a: subfolfder
+      in-a: subfolder
       in: another subfolder

@@ -43,7 +43,7 @@ class ObfuscationManagerTest {
     class Constructor {
 
         @Test
-        public void obfuscatoryNotNull() {
+        void obfuscatoryNotNull() {
             Supplier<IObfuscatory> obfuscatorySupplier = obfuscationManager.obfuscatorySupplier();
             assertThat(obfuscatorySupplier.get()).isNotNull().isInstanceOf(NoopObfuscatory.class);
         }
@@ -62,14 +62,14 @@ class ObfuscationManagerTest {
         ObfuscationSettings obfuscationSettings;
 
         @BeforeEach
-        public void init() {
+        void init() {
             when(privacySettings.getObfuscation()).thenReturn(obfuscationSettings);
             when(config.getPrivacy()).thenReturn(privacySettings);
             when(env.getCurrentConfig()).thenReturn(config);
         }
 
         @Test
-        public void notEnabled() {
+        void notEnabled() {
             when(obfuscationSettings.isEnabled()).thenReturn(false);
 
             obfuscationManager.update();
@@ -79,7 +79,7 @@ class ObfuscationManagerTest {
         }
 
         @Test
-        public void patternCompileError() {
+        void patternCompileError() {
             ObfuscationPattern obfuscationPattern = new ObfuscationPattern();
             obfuscationPattern.setPattern("[[a-z]");
 
@@ -93,7 +93,7 @@ class ObfuscationManagerTest {
         }
 
         @Test
-        public void happyPath() {
+        void happyPath() {
             ObfuscationPattern obfuscationPattern1 = new ObfuscationPattern();
             obfuscationPattern1.setPattern("[a-z]+");
             obfuscationPattern1.setCheckKey(true);
@@ -126,7 +126,7 @@ class ObfuscationManagerTest {
         }
 
         @Test
-        public void happyPathWithReplacementRegex() {
+        void happyPathWithReplacementRegex() {
             ObfuscationPattern obfuscationPattern = new ObfuscationPattern();
             obfuscationPattern.setPattern("[a-z]+");
             obfuscationPattern.setCheckKey(true);
@@ -156,7 +156,7 @@ class ObfuscationManagerTest {
         }
 
         @Test
-        public void happyPathCaseInsensitive() {
+        void happyPathCaseInsensitive() {
             ObfuscationPattern obfuscationPattern1 = new ObfuscationPattern();
             obfuscationPattern1.setPattern("[a-z]+");
             obfuscationPattern1.setCheckKey(true);
@@ -185,7 +185,7 @@ class ObfuscationManagerTest {
         }
 
         @Test
-        public void happyPathWithSelfMonitoring() {
+        void happyPathWithSelfMonitoring() {
             ObfuscationPattern obfuscationPattern1 = new ObfuscationPattern();
             obfuscationPattern1.setPattern("[a-z]+");
             obfuscationPattern1.setCheckKey(true);
@@ -224,7 +224,7 @@ class ObfuscationManagerTest {
         }
 
         @Test
-        public void testSupportedValues() {
+        void testSupportedValues() {
             ObfuscationPattern obfuscationPattern1 = new ObfuscationPattern();
             obfuscationPattern1.setPattern("username");
 

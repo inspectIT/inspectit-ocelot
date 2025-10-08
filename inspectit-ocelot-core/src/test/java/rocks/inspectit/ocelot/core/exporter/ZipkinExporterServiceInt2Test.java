@@ -13,9 +13,9 @@ import static org.awaitility.Awaitility.await;
 /**
  * Integration test for {@link ZipkinExporterService} using the {@link ExporterServiceIntegrationTestBase}
  */
-public class ZipkinExporterServiceInt2Test extends ExporterServiceIntegrationTestBase {
+class ZipkinExporterServiceInt2Test extends ExporterServiceIntegrationTestBase {
 
-    private static final String ZIPKIN_PATH = "/api/v2/spans";
+    static final String ZIPKIN_PATH = "/api/v2/spans";
 
     @Autowired
     ZipkinExporterService service;
@@ -33,9 +33,5 @@ public class ZipkinExporterServiceInt2Test extends ExporterServiceIntegrationTes
         makeSpansAndFlush("zipkin-parent", "zipkin-child");
 
         awaitSpansExported("zipkin-parent", "zipkin-child");
-
     }
-
 }
-
-

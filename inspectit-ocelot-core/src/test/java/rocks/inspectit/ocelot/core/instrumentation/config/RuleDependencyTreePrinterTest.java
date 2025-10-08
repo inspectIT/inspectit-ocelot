@@ -12,9 +12,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-public class RuleDependencyTreePrinterTest {
+class RuleDependencyTreePrinterTest {
 
-    private List<InstrumentationRule> generateRules() {
+    List<InstrumentationRule> generateRules() {
         InstrumentationScope dummyScope = new InstrumentationScope(null, null);
 
         // @formatter:off
@@ -58,10 +58,10 @@ public class RuleDependencyTreePrinterTest {
     }
 
     @Nested
-    public class ToRuleEntry {
+    class ToRuleEntry {
 
         @Test
-        public void toRuleEntry() {
+        void toRuleEntry() {
             List<InstrumentationRule> rules = generateRules();
 
             RuleDependencyTreePrinter tree = new RuleDependencyTreePrinter(rules);
@@ -75,10 +75,10 @@ public class RuleDependencyTreePrinterTest {
     }
 
     @Nested
-    public class GetScopedRules {
+    class GetScopedRules {
 
         @Test
-        public void getScopedRules() {
+        void getScopedRules() {
             RuleDependencyTreePrinter tree = new RuleDependencyTreePrinter(generateRules());
 
             List<InstrumentationRule> rules = tree.getScopedRules();
@@ -88,10 +88,10 @@ public class RuleDependencyTreePrinterTest {
     }
 
     @Nested
-    public class GetRuleByName {
+    class GetRuleByName {
 
         @Test
-        public void ruleExists() {
+        void ruleExists() {
             RuleDependencyTreePrinter tree = new RuleDependencyTreePrinter(generateRules());
 
             InstrumentationRule rule = tree.getRuleByName("rule_a");
@@ -100,7 +100,7 @@ public class RuleDependencyTreePrinterTest {
         }
 
         @Test
-        public void ruleDoesNotExist() {
+        void ruleDoesNotExist() {
             RuleDependencyTreePrinter tree = new RuleDependencyTreePrinter(generateRules());
 
             InstrumentationRule rule = tree.getRuleByName("not_existing");
@@ -110,10 +110,10 @@ public class RuleDependencyTreePrinterTest {
     }
 
     @Nested
-    public class ToString {
+    class ToString {
 
         @Test
-        public void printTree() {
+        void printTree() {
             RuleDependencyTreePrinter tree = new RuleDependencyTreePrinter(generateRules());
 
             // @formatter:off
