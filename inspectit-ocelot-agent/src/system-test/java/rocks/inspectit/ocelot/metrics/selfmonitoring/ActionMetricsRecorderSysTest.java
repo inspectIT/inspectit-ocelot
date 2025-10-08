@@ -1,15 +1,9 @@
 package rocks.inspectit.ocelot.metrics.selfmonitoring;
 
 import io.opentelemetry.sdk.metrics.data.HistogramPointData;
-import io.opentelemetry.sdk.metrics.data.LongPointData;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.metrics.MetricsSysTestBase;
 import rocks.inspectit.ocelot.utils.MetricTestUtils;
-
-import java.lang.management.ManagementFactory;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.emptyMap;

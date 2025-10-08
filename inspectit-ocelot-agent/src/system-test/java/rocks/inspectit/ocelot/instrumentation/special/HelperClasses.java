@@ -1,9 +1,7 @@
 package rocks.inspectit.ocelot.instrumentation.special;
 
 import io.opentelemetry.api.baggage.Baggage;
-import org.apache.commons.collections.Bag;
 
-import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;

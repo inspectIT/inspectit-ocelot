@@ -1,15 +1,12 @@
 package rocks.inspectit.ocelot.metrics.selfmonitoring;
 
 import io.opentelemetry.sdk.metrics.data.DoublePointData;
-import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.PointData;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.metrics.MetricsSysTestBase;
 import rocks.inspectit.ocelot.utils.MetricTestUtils;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;

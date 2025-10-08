@@ -2,11 +2,6 @@ package rocks.inspectit.ocelot.metrics;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-
 public class MemoryMetricsSysTest extends MetricsSysTestBase {
 
     /**

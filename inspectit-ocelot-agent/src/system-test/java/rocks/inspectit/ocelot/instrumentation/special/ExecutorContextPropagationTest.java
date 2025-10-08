@@ -8,12 +8,10 @@ import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestCallable
 import rocks.inspectit.ocelot.instrumentation.special.HelperClasses.TestRunnable;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
-import java.util.Iterator;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 public class ExecutorContextPropagationTest extends InstrumentationSysTestBase {
 

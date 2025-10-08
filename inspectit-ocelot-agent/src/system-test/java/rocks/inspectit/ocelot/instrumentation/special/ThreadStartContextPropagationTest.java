@@ -1,7 +1,6 @@
 package rocks.inspectit.ocelot.instrumentation.special;
 
 import io.opentelemetry.api.baggage.Baggage;
-import io.opentelemetry.api.baggage.BaggageEntry;
 import io.opentelemetry.context.Scope;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -9,13 +8,10 @@ import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 public class ThreadStartContextPropagationTest extends InstrumentationSysTestBase {
 
