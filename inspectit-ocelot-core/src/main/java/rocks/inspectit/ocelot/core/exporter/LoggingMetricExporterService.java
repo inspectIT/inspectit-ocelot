@@ -3,11 +3,11 @@ package rocks.inspectit.ocelot.core.exporter;
 import io.opentelemetry.exporter.logging.LoggingMetricExporter;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReaderBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.LoggingMetricsExporterSettings;
+import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 import javax.validation.Valid;
 
@@ -16,7 +16,7 @@ import javax.validation.Valid;
  */
 @Component
 @Slf4j
-public class LoggingMetricExporterService extends DynamicallyActivatableMetricsExporterService {
+public class LoggingMetricExporterService extends DynamicallyActivatableService {
 
     /**
      * The {@link LoggingMetricExporter} for exporting metrics to the log
@@ -24,9 +24,9 @@ public class LoggingMetricExporterService extends DynamicallyActivatableMetricsE
     private LoggingMetricExporter metricExporter;
 
     /**
-     * The {@link PeriodicMetricReaderBuilder} for reading metrics to the log
+     * The {@link PeriodicMetricReader} for reading metrics to the log
      */
-    private PeriodicMetricReaderBuilder metricReaderBuilder;
+    private MetricReader metricReader;
 
     public LoggingMetricExporterService() {
         super("exporters.metrics.logging", "metrics.enabled");
@@ -50,8 +50,10 @@ public class LoggingMetricExporterService extends DynamicallyActivatableMetricsE
     protected boolean doEnable(InspectitConfig configuration) {
         LoggingMetricsExporterSettings logging = configuration.getExporters().getMetrics().getLogging();
         try {
-            metricReaderBuilder = PeriodicMetricReader.builder(metricExporter).setInterval(logging.getExportInterval());
-            boolean success = openTelemetryController.registerMetricExporterService(this);
+            metricReader = PeriodicMetricReader.builder(metricExporter)
+                    .setInterval(logging.getExportInterval())
+                    .build();
+            boolean success = openTelemetryController.registerMetricReader(metricReader, getName());
             if (success) {
                 log.info("Starting {}", getName());
             } else {
@@ -68,16 +70,11 @@ public class LoggingMetricExporterService extends DynamicallyActivatableMetricsE
     protected boolean doDisable() {
         try {
             log.info("Stopping LoggingMetricExporter");
-            openTelemetryController.unregisterMetricExporterService(this);
+            openTelemetryController.unregisterMetricExporterService(getName());
             return true;
         } catch (Exception e) {
             log.error("Failed to stop LoggingMetricExporter", e);
             return false;
         }
-    }
-
-    @Override
-    public MetricReader getNewMetricReader() {
-        return metricReaderBuilder.build();
     }
 }

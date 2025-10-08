@@ -1,12 +1,16 @@
 package rocks.inspectit.ocelot.instrumentation;
 
-import io.opencensus.stats.AggregationData;
-import org.assertj.core.util.Maps;
+import com.google.common.collect.ImmutableMap;
+import io.opentelemetry.sdk.metrics.data.LongPointData;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 public class EntryPointDetectionTest extends InstrumentationSysTestBase {
 
@@ -14,28 +18,49 @@ public class EntryPointDetectionTest extends InstrumentationSysTestBase {
         methodB();
     }
 
-    static void methodB() {
+    static void methodB() {}
+
+    @BeforeAll
+    static void waitForClassInstrumentation() {
+        TestUtils.waitForClassInstrumentation(EntryPointDetectionTest.class, true, 30, TimeUnit.SECONDS);
     }
 
     @Test
     void verifyEntryPointsDetected() {
-        //methodA invokes methodB
-        //therefore methodA should be detected as entry point and not method B
+        // methodA invokes methodB
+        // therefore methodA should be detected as entry point and not method B
         methodA(null, null);
 
-        TestUtils.waitForOpenCensusQueueToBeProcessed();
-        assertThat(TestUtils.getDataForView("entrypoint/invocations", Maps.newHashMap("method_name", "methodA")))
-                .isInstanceOfSatisfying(AggregationData.CountData.class, data -> assertThat(data.getCount()).isEqualTo(1));
-        assertThat(TestUtils.getDataForView("entrypoint/invocations", Maps.newHashMap("method_name", "methodB")))
-                .isNull();
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+            assertThat(MetricTestUtils.getDataForView("entrypoint_invocations",
+                    ImmutableMap.of("method_name", "methodA")))
+                    .isNotNull()
+                    .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
+                            assertThat(pointData.getValue()).isEqualTo(1)
+                    );
 
-        //here methodB should be recognized as entry point
+            assertThat(MetricTestUtils.getDataForView("entrypoint_invocations",
+                    ImmutableMap.of("method_name", "methodB")))
+                    .isNull();
+        });
+
+        // here methodB should be recognized as entry point
         methodB();
 
-        TestUtils.waitForOpenCensusQueueToBeProcessed();
-        assertThat(TestUtils.getDataForView("entrypoint/invocations", Maps.newHashMap("method_name", "methodA")))
-                .isInstanceOfSatisfying(AggregationData.CountData.class, data -> assertThat(data.getCount()).isEqualTo(1));
-        assertThat(TestUtils.getDataForView("entrypoint/invocations", Maps.newHashMap("method_name", "methodB")))
-                .isInstanceOfSatisfying(AggregationData.CountData.class, data -> assertThat(data.getCount()).isEqualTo(1));
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+            assertThat(MetricTestUtils.getDataForView("entrypoint_invocations",
+                    ImmutableMap.of("method_name", "methodA")))
+                    .isNotNull()
+                    .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
+                            assertThat(pointData.getValue()).isEqualTo(1)
+                    );
+
+            assertThat(MetricTestUtils.getDataForView("entrypoint_invocations",
+                    ImmutableMap.of("method_name", "methodB")))
+                    .isNotNull()
+                    .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
+                            assertThat(pointData.getValue()).isEqualTo(1)
+                    );
+        });
     }
 }

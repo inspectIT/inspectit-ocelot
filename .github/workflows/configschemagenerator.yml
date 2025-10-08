@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - '3.0.0'
     paths:
       - 'components/inspectit-ocelot-configschemagenerator/**'
       - 'inspectit-ocelot-config/**'

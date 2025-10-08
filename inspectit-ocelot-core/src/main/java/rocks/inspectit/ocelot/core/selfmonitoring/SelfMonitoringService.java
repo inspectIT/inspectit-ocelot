@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SelfMonitoringService {
 
-    private static final String METRICS_PREFIX = "inspectit/self/";
+    private static final String METRICS_PREFIX = "inspectit_self_";
 
     private static final String DURATION_MEASURE_NAME = "duration";
 

@@ -18,19 +18,19 @@ public class ProcessorMetricsRecorder extends AbstractPollingMetricsRecorder {
 
     private static final String CPU_COUNT_METRIC_NAME = "count";
 
-    private static final String CPU_COUNT_METRIC_FULL_NAME = "system/cpu/count";
+    private static final String CPU_COUNT_METRIC_FULL_NAME = "system_cpu_count";
 
     private static final String AVERAGE_LOAD_METRIC_NAME = "system.average";
 
-    private static final String AVERAGE_LOAD_METRIC_FULL_NAME = "system/load/average/1m";
+    private static final String AVERAGE_LOAD_METRIC_FULL_NAME = "system_load_average_1m";
 
     private static final String SYSTEM_USAGE_METRIC_NAME = "system.usage";
 
-    private static final String SYSTEM_USAGE_METRIC_FULL_NAME = "system/cpu/usage";
+    private static final String SYSTEM_USAGE_METRIC_FULL_NAME = "system_cpu_usage";
 
     private static final String PROCESS_USAGE_METRIC_NAME = "process.usage";
 
-    private static final String PROCESS_USAGE_METRIC_FULL_NAME = "process/cpu/usage";
+    private static final String PROCESS_USAGE_METRIC_FULL_NAME = "process_cpu_usage";
 
     private static final String METRIC_UNAVAILABLE = "Metric '{}' will not be recorded because '{}' is unavailable";
 

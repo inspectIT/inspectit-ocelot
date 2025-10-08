@@ -70,7 +70,7 @@ public class ServletApiContextPropagationTest {
 
     public static class TestServlet extends HttpServlet {
 
-        public static Map<String, String> lastTags;
+        public static Map<String, String> lastAttributes;
 
         public static String writerResponse;
 
@@ -79,7 +79,7 @@ public class ServletApiContextPropagationTest {
         public static Object upPropagationValue;
 
         public static void reset() {
-            lastTags = null;
+            lastAttributes = null;
             writerResponse = null;
             outputStreamResponse = null;
             upPropagationValue = null;
@@ -87,7 +87,7 @@ public class ServletApiContextPropagationTest {
 
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
-            lastTags = TestUtils.getCurrentTagsAsMap();
+            lastAttributes = TestUtils.getCurrentAttributesAsMap();
 
             InternalInspectitContext ctx = null;
             try {
@@ -117,20 +117,18 @@ public class ServletApiContextPropagationTest {
                     ctx.close();
                 }
             }
-
         }
-
     }
 
     public static class TestFilter implements Filter {
 
-        public static Map<String, String> lastTags;
+        public static Map<String, String> lastAttributes;
 
-        public static Map<String, String> overrideTags;
+        public static Map<String, String> overrideAttributes;
 
         public static void reset() {
-            lastTags = null;
-            overrideTags = null;
+            lastAttributes = null;
+            overrideAttributes = null;
         }
 
         @Override
@@ -140,10 +138,10 @@ public class ServletApiContextPropagationTest {
 
         @Override
         public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-            lastTags = TestUtils.getCurrentTagsAsMap();
-            if (overrideTags != null) {
+            lastAttributes = TestUtils.getCurrentAttributesAsMap();
+            if (overrideAttributes != null) {
                 InternalInspectitContext ctx = Instances.contextManager.enterNewContext();
-                overrideTags.forEach(ctx::setData);
+                overrideAttributes.forEach(ctx::setData);
                 try {
                     ctx.makeActive();
                     chain.doFilter(request, response);
@@ -180,8 +178,8 @@ public class ServletApiContextPropagationTest {
             ctx.close();
 
             assertThat(code).isEqualTo(200);
-            assertThat(TestServlet.lastTags).containsEntry("down_propagated", "hello world");
-            assertThat(TestServlet.lastTags).containsEntry("down_propagated_2", "testPropagationViaServlet");
+            assertThat(TestServlet.lastAttributes).containsEntry("down_propagated", "hello world");
+            assertThat(TestServlet.lastAttributes).containsEntry("down_propagated_2", "testPropagationViaServlet");
         }
 
         @Test
@@ -193,7 +191,7 @@ public class ServletApiContextPropagationTest {
             TestServlet.reset();
             TestFilter.reset();
 
-            TestFilter.overrideTags = ImmutableMap.of("down_propagated_2", "overridden!");
+            TestFilter.overrideAttributes = ImmutableMap.of("down_propagated_2", "overridden!");
 
             HttpURLConnection urlConnection = (HttpURLConnection) new URL(TEST_URL).openConnection();
             urlConnection.setRequestMethod("GET");
@@ -205,11 +203,11 @@ public class ServletApiContextPropagationTest {
             ctx.close();
 
             assertThat(code).isEqualTo(200);
-            assertThat(TestFilter.lastTags).containsEntry("down_propagated", "hello world");
-            assertThat(TestFilter.lastTags).containsEntry("down_propagated_2", "testPropagationViaServlet");
+            assertThat(TestFilter.lastAttributes).containsEntry("down_propagated", "hello world");
+            assertThat(TestFilter.lastAttributes).containsEntry("down_propagated_2", "testPropagationViaServlet");
 
-            assertThat(TestServlet.lastTags).containsEntry("down_propagated", "hello world");
-            assertThat(TestServlet.lastTags).containsEntry("down_propagated_2", "overridden!");
+            assertThat(TestServlet.lastAttributes).containsEntry("down_propagated", "hello world");
+            assertThat(TestServlet.lastAttributes).containsEntry("down_propagated_2", "overridden!");
         }
     }
 

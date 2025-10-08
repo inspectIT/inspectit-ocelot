@@ -1,5 +1,4 @@
-
-#used by:
+# used by:
 # - HttpUrlConnectionContextPropagationTest
 # - ServletApiContextPropagationTest
 # - JmsApiContextPropagationTest
@@ -14,10 +13,7 @@ inspectit:
         down-propagation: JVM_LOCAL
       down_propagated:
         down-propagation: GLOBAL
-        is-tag: true
       down_propagated_2:
         down-propagation: GLOBAL
-        is-tag: true
       something:
         down-propagation: JVM_LOCAL
-        is-tag: true

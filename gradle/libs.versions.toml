@@ -9,9 +9,6 @@ comLinecorpArmeria = "1.31.3"
 # @pin 1.3.* is the last version to support java 8
 chQosLogback= "1.3.15"
 ioGithubNetmikeyLogunit = "2.0.0"
-ioGrpc = "1.75.0"
-# Ensure to adapt the netty version when changing the OpenCensus version
-ioOpencensus = "0.31.1"
 # If you rename this OTel variable or move it to another file, adjust the release-workflow
 ioOpentelemetry = "1.53.0"
 ioOpentelemetryAlpha = "1.53.0-alpha"
@@ -56,12 +53,6 @@ ioGithubNetmikeyLogunitLogunitCore = { module = "io.github.netmikey.logunit:logu
 ioGithubNetmikeyLogunitLogunitLogback = { module = "io.github.netmikey.logunit:logunit-logback", version.ref = "ioGithubNetmikeyLogunit" }
 ioGithubResilience4jResilience4jRetry = { module = "io.github.resilience4j:resilience4j-retry", version.ref = "ioGithubResilience4j" }
 ioGithubResilience4jResilience4jTimelimiter = { module = "io.github.resilience4j:resilience4j-timelimiter", version.ref = "ioGithubResilience4j" }
-ioGrpcGrpcNettyShaded = { module = "io.grpc:grpc-netty-shaded", version.ref = "ioGrpc" }
-ioGrpcGrpcStub = { module = "io.grpc:grpc-stub", version.ref = "ioGrpc" }
-# Ensure to adapt the netty version when changing the OpenCensus version
-ioOpencensusOpencensusApi = { module = "io.opencensus:opencensus-api", version.ref = "ioOpencensus" }
-ioOpencensusOpencensusImpl = { module = "io.opencensus:opencensus-impl", version.ref = "ioOpencensus" }
-ioOpencensusOpencensusTesting = { module = "io.opencensus:opencensus-testing", version.ref = "ioOpencensus" }
 ioOpentelemetryInstrumentationOpentelemetryResources = { module = "io.opentelemetry.instrumentation:opentelemetry-resources" , version.ref = "ioOpentelemetryInstrumentation"}
 ioOpentelemetryOpentelemetryApi = { module = "io.opentelemetry:opentelemetry-api", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryBom = { module = "io.opentelemetry:opentelemetry-bom", version.ref = "ioOpentelemetry" }
@@ -71,7 +62,6 @@ ioOpentelemetryOpentelemetryExporterOtlp = { module = "io.opentelemetry:opentele
 ioOpentelemetryOpentelemetryExporterPrometheus = { module = "io.opentelemetry:opentelemetry-exporter-prometheus", version.ref = "ioOpentelemetryAlpha" }
 ioOpentelemetryOpentelemetryExporterZipkin = { module = "io.opentelemetry:opentelemetry-exporter-zipkin", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetryExtensionTracePropagators = { module = "io.opentelemetry:opentelemetry-extension-trace-propagators", version.ref = "ioOpentelemetry" }
-ioOpentelemetryOpentelemetryOpencensusShim = { module = "io.opentelemetry:opentelemetry-opencensus-shim", version.ref = "ioOpentelemetryAlpha" }
 ioOpentelemetryOpentelemetryProto = { module = "io.opentelemetry.proto:opentelemetry-proto", version.ref = "ioOpentelemetryProto" }
 ioOpentelemetryOpentelemetrySdk = { module = "io.opentelemetry:opentelemetry-sdk", version.ref = "ioOpentelemetry" }
 ioOpentelemetryOpentelemetrySdkMetrics = { module = "io.opentelemetry:opentelemetry-sdk-metrics", version.ref = "ioOpentelemetry" }
@@ -99,7 +89,6 @@ orgAssertjAssertjGuava = "org.assertj:assertj-guava:3.27.4"
 orgAwaitility = "org.awaitility:awaitility:4.3.0"
 # @pin HibernateValidator 6.* is the last version to support java 8
 orgHibernateValidatorHibernateValidator = "org.hibernate.validator:hibernate-validator:6.2.5.Final"
-orgInfluxdbInfluxdbJava = "org.influxdb:influxdb-java:2.25"
 orgJavassist = "org.javassist:javassist:3.30.2-GA"
 orgJunitJupiterJunitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "orgJunitJupiter" }
 orgJunitJupiterJunitJupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "orgJunitJupiter" }
@@ -110,7 +99,6 @@ orgSlf4jJulToSlf4j = { module = "org.slf4j:jul-to-slf4j", version.ref = "orgSlf4
 orgSlf4jslf4jApi = { module = "org.slf4j:slf4j-api", version.ref = "orgSlf4j" }
 orgSpringframeworkBootSpringBoot = { module = "org.springframework.boot:spring-boot", version.ref = "orgSpringframeworkBoot" }
 orgSpringframeworkBootSpringBootTest = { module = "org.springframework.boot:spring-boot-test", version.ref = "orgSpringframeworkBoot" }
-orgSpringframeworkSpringJcl = { module = "org.springframework:spring-jcl", version.ref = "orgSpringframework" }
 orgSpringframeworkSpringTest = { module = "org.springframework:spring-test", version.ref = "orgSpringframework" }
 orgTestcontainers = { module = "org.testcontainers:testcontainers", version.ref = "orgTestcontainers" }
 orgTestcontainersJunitJupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "orgTestcontainers" }
@@ -122,7 +110,6 @@ piccolo = "piccolo:piccolo:1.0.3"
 [bundles]
 opentelemetry = [
     "ioOpentelemetryOpentelemetryApi",
-    "ioOpentelemetryOpentelemetryOpencensusShim",
     "ioOpentelemetryOpentelemetrySdk",
     "ioOpentelemetryOpentelemetrySdkMetrics",
 ]

@@ -30,5 +30,4 @@ public class RecursionInstrumentationTest extends InstrumentationSysTestBase {
         // two calls - one of the application and one (only!) due to the instrumentation
         assertThat(invocationCount.get()).isEqualTo(2);
     }
-
 }

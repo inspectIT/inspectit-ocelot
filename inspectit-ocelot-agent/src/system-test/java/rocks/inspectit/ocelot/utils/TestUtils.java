@@ -1,42 +1,42 @@
 package rocks.inspectit.ocelot.utils;
 
 import com.google.common.cache.Cache;
-import io.opencensus.impl.internal.DisruptorEventQueue;
-import io.opencensus.metrics.LabelKey;
-import io.opencensus.metrics.LabelValue;
-import io.opencensus.metrics.Metrics;
-import io.opencensus.metrics.export.TimeSeries;
-import io.opencensus.stats.*;
-import io.opencensus.tags.InternalUtils;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
-import io.opencensus.tags.Tags;
-import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
+import io.opentelemetry.api.baggage.Baggage;
 import org.awaitility.core.ConditionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rocks.inspectit.ocelot.bootstrap.AgentManager;
-import rocks.inspectit.ocelot.bootstrap.Instances;
-import rocks.inspectit.ocelot.bootstrap.opentelemetry.NoopOpenTelemetryController;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+/**
+ * We access data from inside the agent via reflection to check for specific events like
+ * instrumenting a class
+ */
 public class TestUtils {
+    private static final Logger logger = LoggerFactory.getLogger(TestUtils.class);
 
+    /**
+     * Active instrumentations from the {@code InstrumentationManager} in inspectit-ocelot-core
+     */
     private static Cache<Class<?>, Object> activeInstrumentations = null;
 
+    /**
+     * Stores for each class the time, when we have discovered its instrumentation
+     */
     public static ConcurrentHashMap<Class<?>, Long> instrumentationTimeStamp = new ConcurrentHashMap<>();
 
-    private static final Logger logger = LoggerFactory.getLogger(TestUtils.class);
+    /**
+     * Object used to access specific Class objects
+     */
+    public static Object sink;
 
     static {
         Thread poller = new Thread(() -> {
@@ -57,8 +57,6 @@ public class TestUtils {
         poller.setDaemon(true);
         poller.start();
     }
-
-    public static Object sink;
 
     private static Field getField(Class clazz, String fieldName) {
         try {
@@ -186,18 +184,16 @@ public class TestUtils {
     }
 
     /**
-     * OpenCensus internally manages a queue of events.
-     * We simply add an event to the queue and wait until it is processed.
+     * Checks, if we have instrumented classes and there are no classes in the instrumentation-queue left
      */
-    public static void waitForOpenCensusQueueToBeProcessed() {
-        CountDownLatch latch = new CountDownLatch(1);
-        // TODO: re-implement with OTel
-        DisruptorEventQueue.getInstance().enqueue(latch::countDown);
-        try {
-            latch.await(3, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public static void waitForInstrumentationToComplete() {
+        await().atMost(30, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
+            assertThat(MetricTestUtils.getInstrumentationClassesCount()).isGreaterThan(0);
+            assertThat(MetricTestUtils.getInstrumentationQueueSize()).isZero();
+            Thread.sleep(500); // to ensure that new-class-discovery has been executed
+            assertThat(MetricTestUtils.getInstrumentationQueueSize()).isZero();
+            Thread.sleep(500);
+        });
     }
 
     public static void waitForAgentInitialization() {
@@ -210,136 +206,37 @@ public class TestUtils {
         }
     }
 
-    @Deprecated
-    public static void waitForInstrumentationToComplete() {
-        await().atMost(30, TimeUnit.SECONDS).ignoreExceptions().untilAsserted(() -> {
-            assertThat(getInstrumentationClassesCount()).isGreaterThan(0);
-            assertThat(getInstrumentationQueueLength()).isZero();
-            Thread.sleep(200); //to ensure that new-class-discovery has been executed
-            waitForOpenCensusQueueToBeProcessed();
-            assertThat(getInstrumentationQueueLength()).isZero();
+    /**
+     * Waits until the {@code TimeWindowRecorder} has recorded all values
+     */
+    public static void waitForTimeWindowRecorder() {
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+            Collection<?> recordsQueue = getTimeWindowRecordsQueue();
+            assertThat(recordsQueue.isEmpty());
         });
     }
 
-    public static Map<String, String> getCurrentTagsAsMap() {
+    private static Collection<?> getTimeWindowRecordsQueue() {
+        waitForAgentInitialization();
+        try {
+            Object agentInstance = getField(AgentManager.class, "agentInstance").get(null);
+            Object ctx = getField(agentInstance.getClass(), "ctx").get(agentInstance);
+
+            Method getBean = ctx.getClass().getMethod("getBean", String.class);
+            getBean.setAccessible(true);
+            Object timeWindowRecorder = getBean.invoke(ctx, "timeWindowRecorder");
+
+            return (Collection<?>) getField(timeWindowRecorder.getClass(), "recordsQueue").get(timeWindowRecorder);
+
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public static Map<String, String> getCurrentAttributesAsMap() {
         Map<String, String> result = new HashMap<>();
-        InternalUtils.getTags(Tags.getTagger().getCurrentTagContext())
-                .forEachRemaining(t -> result.put(t.getKey().getName(), t.getValue().asString()));
+        Baggage current = Baggage.current();
+        current.asMap().forEach((key, valueEntry) -> result.put(key, valueEntry.getValue()));
         return result;
     }
-
-    /**
-     * Returns the first found value for the view with the given tag values.
-     *
-     * @param viewName the name of the views
-     * @param tags     the expected tag values
-     *
-     * @return the found aggregation data, null otherwise
-     */
-    public static AggregationData getDataForView(String viewName, Map<String, String> tags) {
-        ViewManager viewManager = Stats.getViewManager();
-        ViewData view = viewManager.getView(View.Name.create(viewName));
-        List<String> orderedTagKeys = view.getView()
-                .getColumns()
-                .stream()
-                .map(TagKey::getName)
-                .collect(Collectors.toList());
-        assertThat(orderedTagKeys).contains(tags.keySet().toArray(new String[]{}));
-        List<String> expectedTagValues = orderedTagKeys.stream().map(tags::get).collect(Collectors.toList());
-
-         List<Map.Entry<List<TagValue>, AggregationData>> entryList = view.getAggregationMap().entrySet().stream().filter(e -> {
-            List<TagValue> tagValues = e.getKey();
-            for (int i = 0; i < tagValues.size(); i++) {
-                String regex = expectedTagValues.get(i);
-                TagValue tagValue = tagValues.get(i);
-                if (regex != null && (tagValue == null || !tagValue.asString().matches(regex))) {
-                    return false;
-                }
-            }
-            return true;
-        }).collect(Collectors.toList());
-         return entryList.stream().map(Map.Entry::getValue).findFirst().orElse(null);
-    }
-
-    public static TimeSeries getTimeseries(String metricName, Map<String, String> tags) {
-        Optional<TimeSeries> series = Metrics.getExportComponent()
-                .getMetricProducerManager()
-                .getAllMetricProducer()
-                .stream()
-                .flatMap(mp -> mp.getMetrics().stream())
-                .filter(m -> m.getMetricDescriptor().getName().equals(metricName))
-                .flatMap(m -> {
-                    List<String> orderedTagKeys = m.getMetricDescriptor()
-                            .getLabelKeys()
-                            .stream()
-                            .map(LabelKey::getKey)
-                            .collect(Collectors.toList());
-                    assertThat(orderedTagKeys).contains(tags.keySet().toArray(new String[]{}));
-                    List<String> expectedTagValues = orderedTagKeys.stream()
-                            .map(tags::get)
-                            .collect(Collectors.toList());
-                    return m.getTimeSeriesList().stream().filter(ts -> {
-                        List<LabelValue> tagValues = ts.getLabelValues();
-                        for (int i = 0; i < tagValues.size(); i++) {
-                            String regex = expectedTagValues.get(i);
-                            LabelValue tagValue = tagValues.get(i);
-                            if (regex != null && (tagValue == null || !tagValue.getValue().matches(regex))) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    });
-                })
-                .findFirst();
-        assertThat(series).isNotEmpty();
-        return series.get();
-    }
-
-    static InMemorySpanExporter inMemorySpanExporter;
-
-    /**
-     * Initialize {@link io.opentelemetry.api.OpenTelemetry} with a {@link InMemorySpanExporter} so that we can access the exported {@link io.opentelemetry.api.trace.Span Spans}
-     *
-     * @return The {@link InMemorySpanExporter} that can be used to retrieve exported {@link io.opentelemetry.api.trace.Span Spans}
-     */
-    public static InMemorySpanExporter initializeOpenTelemetryForSystemTesting() {
-        // if OTEL was already initialized with the inMemorySpanExporter, just reset and return it
-        if (null != inMemorySpanExporter && NoopOpenTelemetryController.INSTANCE != Instances.openTelemetryController) {
-            inMemorySpanExporter.reset();
-            return inMemorySpanExporter;
-        }
-
-        // wait until OTEL is initialized
-        await().atMost(10, TimeUnit.SECONDS)
-                .pollInterval(100, TimeUnit.MILLISECONDS)
-                .until(() -> NoopOpenTelemetryController.INSTANCE != Instances.openTelemetryController);
-        // create an InMemorySpanExporter and register it with OTEL
-        inMemorySpanExporter = InMemorySpanExporter.create();
-        Instances.openTelemetryController.registerTraceExporterService(inMemorySpanExporter, "InMemorySpanExporterService");
-        return inMemorySpanExporter;
-    }
-
-    private static long getInstrumentationQueueLength() {
-        ViewManager viewManager = Stats.getViewManager();
-        AggregationData.LastValueDataLong queueSize = (AggregationData.LastValueDataLong) viewManager.getView(View.Name.create("inspectit/self/instrumentation-queue-size"))
-                .getAggregationMap()
-                .values()
-                .stream()
-                .findFirst()
-                .get();
-        return queueSize.getLastValue();
-    }
-
-    private static long getInstrumentationClassesCount() {
-        ViewManager viewManager = Stats.getViewManager();
-        AggregationData.LastValueDataLong queueSize = (AggregationData.LastValueDataLong) viewManager.getView(View.Name.create("inspectit/self/instrumented-classes"))
-                .getAggregationMap()
-                .values()
-                .stream()
-                .findFirst()
-                .get();
-        return queueSize.getLastValue();
-    }
-
 }
-

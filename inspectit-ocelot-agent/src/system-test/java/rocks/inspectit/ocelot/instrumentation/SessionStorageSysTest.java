@@ -1,14 +1,16 @@
 package rocks.inspectit.ocelot.instrumentation;
 
 import com.google.common.collect.ImmutableMap;
-import io.opencensus.stats.*;
-import io.opencensus.tags.TagValue;
+import io.opentelemetry.sdk.metrics.data.LongPointData;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 /**
  * Summary: <br>
@@ -39,38 +41,41 @@ public class SessionStorageSysTest extends InstrumentationSysTestBase {
     // Trying to use data tag without session-id
     void thirdMethod() {}
 
+    @BeforeAll
+    static void waitForClassInstrumentation() {
+        TestUtils.waitForClassInstrumentation(SessionStorageSysTest.class, true, 30, TimeUnit.SECONDS);
+    }
+
     @Test
     void shouldAccessDataStoredInSession() {
         firstMethod();
 
-        TestUtils.waitForOpenCensusQueueToBeProcessed();
-        assertThat(TestUtils.getDataForView(firstView, ImmutableMap.of(dataKey, dataValue)))
-                .isNotNull().isInstanceOfSatisfying(AggregationData.CountData.class, (c) ->
-                        assertThat(c.getCount()).isEqualTo(1)
-                );
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                assertThat(MetricTestUtils.getDataForView(firstView,
+                        ImmutableMap.of(dataKey, dataValue)))
+                        .isNotNull()
+                        .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
+                                assertThat(pointData.getValue()).isEqualTo(1)
+                        )
+        );
 
         secondMethod();
 
-        TestUtils.waitForOpenCensusQueueToBeProcessed();
-        assertThat(TestUtils.getDataForView(secondView, ImmutableMap.of(dataKey, dataValue)))
-                .isNotNull().isInstanceOfSatisfying(AggregationData.CountData.class, (c) ->
-                        assertThat(c.getCount()).isEqualTo(1)
-                );
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                assertThat(MetricTestUtils.getDataForView(secondView,
+                        ImmutableMap.of(dataKey, dataValue)))
+                        .isNotNull()
+                        .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
+                                assertThat(pointData.getValue()).isEqualTo(1)
+                        )
+        );
 
         thirdMethod();
 
-        TestUtils.waitForOpenCensusQueueToBeProcessed();
-        ViewData thirdViewData = Stats.getViewManager().getView(View.Name.create(thirdView));
-
-        assertThat(thirdViewData).isNotNull();
-        assertThat(thirdViewData.getAggregationMap()).isNotEmpty();
-
-        AggregationData.CountData countData = (AggregationData.CountData) thirdViewData.getAggregationMap()
-                .values().stream().findFirst().get();
-        List<TagValue> tagValues = thirdViewData.getAggregationMap()
-                .keySet().stream().findFirst().get();
-
-        assertThat(countData.getCount()).isEqualTo(1);
-        assertThat(tagValues).filteredOn(tagValue -> tagValue != null && tagValue.asString().equals(dataValue)).isEmpty();
+        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                assertThat(MetricTestUtils.getDataForView(thirdView,
+                        ImmutableMap.of(dataKey, dataValue)))
+                        .isNull()
+        );
     }
 }

@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.instrumentation.http;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import io.opencensus.stats.AggregationData;
+import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -9,6 +9,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.*;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
+import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import java.net.HttpURLConnection;
@@ -21,11 +23,12 @@ import java.util.concurrent.TimeUnit;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 /**
  * uses global-propagation-tests.yml
  */
-public class HttpOutMetricTest {
+public class HttpOutMetricTest extends InstrumentationSysTestBase {
 
     private static final String PATH_200 = "/test";
 
@@ -91,22 +94,22 @@ public class HttpOutMetricTest {
             client.execute(new HttpGet(WIREMOCK_URL + PATH_200 + "?x=32423"));
             ctx.close();
 
-            TestUtils.waitForOpenCensusQueueToBeProcessed();
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("service.name", "apache_client_test");
+            attributes.put("http_host", WIREMOCK_HOST_PORT);
+            attributes.put("http_path", PATH_200);
+            attributes.put("http_status", "200");
+            attributes.put("http_method", "GET");
+            attributes.put("error", "false");
 
-            Map<String, String> tags = new HashMap<>();
-            tags.put("service.name", "apache_client_test");
-            tags.put("http_host", WIREMOCK_HOST_PORT);
-            tags.put("http_path", PATH_200);
-            tags.put("http_status", "200");
-            tags.put("http_method", "GET");
-            tags.put("error", "false");
-
-            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
-                    .getSum();
-
-            assertThat(cnt).isEqualTo(1);
-            assertThat(respSum).isGreaterThan(0);
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                    assertThat(MetricTestUtils.getDataForHistogramView("http_out_responsetime", attributes))
+                            .isNotNull()
+                            .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                                assertThat(pointData.getCount()).isEqualTo(1);
+                                assertThat(pointData.getSum()).isGreaterThan(0);
+                            })
+            );
         }
 
         @Test
@@ -117,22 +120,22 @@ public class HttpOutMetricTest {
             client.execute(new HttpGet(WIREMOCK_URL + PATH_500 + "?x=32423"));
             ctx.close();
 
-            TestUtils.waitForOpenCensusQueueToBeProcessed();
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("service.name", "apache_client_test");
+            attributes.put("http_host", WIREMOCK_HOST_PORT);
+            attributes.put("http_path", PATH_500);
+            attributes.put("http_status", "500");
+            attributes.put("http_method", "GET");
+            attributes.put("error", "true");
 
-            Map<String, String> tags = new HashMap<>();
-            tags.put("service.name", "apache_client_test");
-            tags.put("http_host", WIREMOCK_HOST_PORT);
-            tags.put("http_path", PATH_500);
-            tags.put("http_status", "500");
-            tags.put("http_method", "GET");
-            tags.put("error", "true");
-
-            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
-                    .getSum();
-
-            assertThat(cnt).isEqualTo(1);
-            assertThat(respSum).isGreaterThan(0);
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                    assertThat(MetricTestUtils.getDataForHistogramView("http_out_responsetime", attributes))
+                            .isNotNull()
+                            .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                                assertThat(pointData.getCount()).isEqualTo(1);
+                                assertThat(pointData.getSum()).isGreaterThan(0);
+                            })
+            );
         }
 
         @Test
@@ -150,22 +153,22 @@ public class HttpOutMetricTest {
             }
             ctx.close();
 
-            TestUtils.waitForOpenCensusQueueToBeProcessed();
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("service.name", "apache_client_test");
+            attributes.put("http_host", "idontexist");
+            attributes.put("http_path", "");
+            attributes.put("http_status", caughtException.getClass().getSimpleName());
+            attributes.put("http_method", "GET");
+            attributes.put("error", "true");
 
-            Map<String, String> tags = new HashMap<>();
-            tags.put("service.name", "apache_client_test");
-            tags.put("http_host", "idontexist");
-            tags.put("http_path", "");
-            tags.put("http_status", caughtException.getClass().getSimpleName());
-            tags.put("http_method", "GET");
-            tags.put("error", "true");
-
-            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
-                    .getSum();
-
-            assertThat(cnt).isEqualTo(1);
-            assertThat(respSum).isGreaterThan(0);
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                    assertThat(MetricTestUtils.getDataForHistogramView("http_out_responsetime", attributes))
+                            .isNotNull()
+                            .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                                assertThat(pointData.getCount()).isEqualTo(1);
+                                assertThat(pointData.getSum()).isGreaterThan(0);
+                            })
+            );
         }
     }
 
@@ -188,22 +191,22 @@ public class HttpOutMetricTest {
 
             ctx.close();
 
-            TestUtils.waitForOpenCensusQueueToBeProcessed();
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("service.name", "urlconn_client_test");
+            attributes.put("http_host", WIREMOCK_HOST_PORT);
+            attributes.put("http_path", PATH_200);
+            attributes.put("http_status", "200");
+            attributes.put("http_method", "GET");
+            attributes.put("error", "false");
 
-            Map<String, String> tags = new HashMap<>();
-            tags.put("service.name", "urlconn_client_test");
-            tags.put("http_host", WIREMOCK_HOST_PORT);
-            tags.put("http_path", PATH_200);
-            tags.put("http_status", "200");
-            tags.put("http_method", "GET");
-            tags.put("error", "false");
-
-            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
-                    .getSum();
-
-            assertThat(cnt).isEqualTo(1);
-            assertThat(respSum).isGreaterThan(0);
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                    assertThat(MetricTestUtils.getDataForHistogramView("http_out_responsetime", attributes))
+                            .isNotNull()
+                            .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                                assertThat(pointData.getCount()).isEqualTo(1);
+                                assertThat(pointData.getSum()).isGreaterThan(0);
+                            })
+            );
         }
 
         @Test
@@ -217,22 +220,22 @@ public class HttpOutMetricTest {
 
             ctx.close();
 
-            TestUtils.waitForOpenCensusQueueToBeProcessed();
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("service.name", "urlconn_client_test");
+            attributes.put("http_host", WIREMOCK_HOST_PORT);
+            attributes.put("http_path", PATH_500);
+            attributes.put("http_status", "500");
+            attributes.put("http_method", "GET");
+            attributes.put("error", "true");
 
-            Map<String, String> tags = new HashMap<>();
-            tags.put("service.name", "urlconn_client_test");
-            tags.put("http_host", WIREMOCK_HOST_PORT);
-            tags.put("http_path", PATH_500);
-            tags.put("http_status", "500");
-            tags.put("http_method", "GET");
-            tags.put("error", "true");
-
-            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
-                    .getSum();
-
-            assertThat(cnt).isEqualTo(1);
-            assertThat(respSum).isGreaterThan(0);
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                    assertThat(MetricTestUtils.getDataForHistogramView("http_out_responsetime", attributes))
+                            .isNotNull()
+                            .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                                assertThat(pointData.getCount()).isEqualTo(1);
+                                assertThat(pointData.getSum()).isGreaterThan(0);
+                            })
+            );
         }
 
         @Test
@@ -252,22 +255,22 @@ public class HttpOutMetricTest {
 
             ctx.close();
 
-            TestUtils.waitForOpenCensusQueueToBeProcessed();
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("service.name", "urlconn_client_test");
+            attributes.put("http_host", "idontexist");
+            attributes.put("http_path", "");
+            attributes.put("http_status", caughtException.getClass().getSimpleName());
+            attributes.put("http_method", "GET");
+            attributes.put("error", "true");
 
-            Map<String, String> tags = new HashMap<>();
-            tags.put("service.name", "urlconn_client_test");
-            tags.put("http_host", "idontexist");
-            tags.put("http_path", "");
-            tags.put("http_status", caughtException.getClass().getSimpleName());
-            tags.put("http_method", "GET");
-            tags.put("error", "true");
-
-            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("http/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("http/out/responsetime/sum", tags))
-                    .getSum();
-
-            assertThat(cnt).isEqualTo(1);
-            assertThat(respSum).isGreaterThan(0);
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                    assertThat(MetricTestUtils.getDataForHistogramView("http_out_responsetime", attributes))
+                            .isNotNull()
+                            .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                                assertThat(pointData.getCount()).isEqualTo(1);
+                                assertThat(pointData.getSum()).isGreaterThan(0);
+                            })
+            );
         }
     }
 }

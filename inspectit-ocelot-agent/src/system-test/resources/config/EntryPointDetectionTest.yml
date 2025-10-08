@@ -2,12 +2,13 @@
 inspectit:
   metrics:
     definitions:
-      '[entrypoint/invocations]':
+      entrypoint_invocations:
         unit: invocations
+        instrument-type: COUNTER
         views:
-          '[entrypoint/invocations]':
-            aggregation: COUNT
-            tags: {method_name : true}
+          entrypoint_invocations:
+            aggregation: SUM
+            attributes: {method_name : true}
 
 
   instrumentation:
@@ -39,6 +40,6 @@ inspectit:
             action: a_assign_value
             constant-input: {value: 1}
         metrics:
-          '[entrypoint/invocations]':
+          entrypoint_invocations:
             value: is_entry_point
             data-tags: {method_name : method_name}

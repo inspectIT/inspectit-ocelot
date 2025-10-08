@@ -1,10 +1,8 @@
 package rocks.inspectit.ocelot.instrumentation.special.remote;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import io.opencensus.common.Scope;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
-import io.opencensus.tags.Tags;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.context.Scope;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIUtils;
@@ -93,9 +91,7 @@ public class ApacheHttpClientContextPropagationTest {
 
         @Test
         void propagationViaSimpleExecute() throws Exception {
-            try (Scope s = Tags.getTagger().emptyBuilder()
-                    .putLocal(TagKey.create("down_propagated"), TagValue.create("myvalue"))
-                    .buildScoped()) {
+            try (Scope s = Baggage.builder().put("down_propagated", "myvalue").build().makeCurrent()) {
                 client.execute(URIUtils.extractHost(URI.create(TEST_URL)), new HttpGet(TEST_URL));
             }
 
@@ -130,7 +126,5 @@ public class ApacheHttpClientContextPropagationTest {
             assertThat(myCtx.getData("up_propagated")).isEqualTo(Math.PI);
             assertThat(myCtx.getData("up_propagated2")).isEqualTo("Hello World");
         }
-
     }
-
 }

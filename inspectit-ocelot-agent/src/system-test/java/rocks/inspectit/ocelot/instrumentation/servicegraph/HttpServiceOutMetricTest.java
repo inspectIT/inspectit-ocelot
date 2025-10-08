@@ -1,7 +1,7 @@
 package rocks.inspectit.ocelot.instrumentation.servicegraph;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import io.opencensus.stats.AggregationData;
+import io.opentelemetry.sdk.metrics.data.HistogramPointData;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.http.client.config.RequestConfig;
@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.bootstrap.context.InternalInspectitContext;
+import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
 import javax.jms.*;
@@ -30,11 +32,12 @@ import java.util.concurrent.TimeUnit;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 /**
  * uses global-propagation-tests.yml
  */
-public class HttpServiceOutMetricTest {
+public class HttpServiceOutMetricTest extends InstrumentationSysTestBase {
 
     public static final int PORT = 9999;
 
@@ -49,7 +52,7 @@ public class HttpServiceOutMetricTest {
     public static String targetName;
 
     @BeforeEach
-    void setupWiremock() throws Exception {
+    void setupWiremock() {
         wireMockServer = new WireMockServer(options().port(PORT));
         wireMockServer.start();
         configureFor(wireMockServer.port());
@@ -63,7 +66,7 @@ public class HttpServiceOutMetricTest {
     }
 
     @AfterEach
-    void cleanup() throws Exception {
+    void cleanup() {
         wireMockServer.stop();
     }
 
@@ -88,19 +91,19 @@ public class HttpServiceOutMetricTest {
             client.close();
             serviceOverride.close();
 
-            TestUtils.waitForOpenCensusQueueToBeProcessed();
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("protocol", "http");
+            attributes.put("service.name", "apache_sg_test");
+            attributes.put("target_service", SERVICE_NAME);
 
-            Map<String, String> tags = new HashMap<>();
-            tags.put("protocol", "http");
-            tags.put("service.name", "apache_sg_test");
-            tags.put("target_service", SERVICE_NAME);
-
-            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags))
-                    .getSum();
-
-            assertThat(cnt).isEqualTo(1);
-            assertThat(respSum).isGreaterThan(0);
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                    assertThat(MetricTestUtils.getDataForHistogramView("service_out_responsetime", attributes))
+                            .isNotNull()
+                            .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                                assertThat(pointData.getCount()).isEqualTo(1);
+                                assertThat(pointData.getSum()).isGreaterThan(0);
+                            })
+            );
         }
     }
 
@@ -120,19 +123,19 @@ public class HttpServiceOutMetricTest {
             urlConnection.getResponseCode();
             serviceOverride.close();
 
-            TestUtils.waitForOpenCensusQueueToBeProcessed();
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("protocol", "http");
+            attributes.put("service.name", "httpurlconn_sg_test");
+            attributes.put("target_service", SERVICE_NAME);
 
-            Map<String, String> tags = new HashMap<>();
-            tags.put("protocol", "http");
-            tags.put("service.name", "httpurlconn_sg_test");
-            tags.put("target_service", SERVICE_NAME);
-
-            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags))
-                    .getSum();
-
-            assertThat(cnt).isEqualTo(1);
-            assertThat(respSum).isGreaterThan(0);
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                    assertThat(MetricTestUtils.getDataForHistogramView("service_out_responsetime", attributes))
+                            .isNotNull()
+                            .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                                assertThat(pointData.getCount()).isEqualTo(1);
+                                assertThat(pointData.getSum()).isGreaterThan(0);
+                            })
+            );
         }
     }
 
@@ -180,23 +183,23 @@ public class HttpServiceOutMetricTest {
 
             TextMessage message = session.createTextMessage("test");
             producer.send(message);
-
             serviceOverride.close();
 
-            TestUtils.waitForOpenCensusQueueToBeProcessed();
 
-            Map<String, String> tags = new HashMap<>();
-            tags.put("protocol", "jms");
-            tags.put("service.name", "jms_sg_test");
-            tags.put("target_external", QUEUE_NAME);
-            // no target_service tag, since we do receive an answer from the target because of message queue
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("protocol", "jms");
+            attributes.put("service.name", "jms_sg_test");
+            attributes.put("target_external", QUEUE_NAME);
+            // no target_service tag, since we do not receive an answer from the target because of message queue
 
-            long cnt = ((AggregationData.CountData) TestUtils.getDataForView("service/out/count", tags)).getCount();
-            double respSum = ((AggregationData.SumDataDouble) TestUtils.getDataForView("service/out/responsetime/sum", tags))
-                    .getSum();
-
-            assertThat(cnt).isEqualTo(1);
-            assertThat(respSum).isGreaterThan(0);
+            await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+                    assertThat(MetricTestUtils.getDataForHistogramView("service_out_responsetime", attributes))
+                            .isNotNull()
+                            .isInstanceOfSatisfying(HistogramPointData.class, (pointData) -> {
+                                assertThat(pointData.getCount()).isEqualTo(1);
+                                assertThat(pointData.getSum()).isGreaterThan(0);
+                            })
+            );
         }
     }
 }

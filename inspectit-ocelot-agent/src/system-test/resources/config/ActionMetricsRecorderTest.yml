@@ -1,7 +1,7 @@
 # dummy scopes, actions, and rules for the ActionMetricsRecorderTestAgent
 
 inspectit:
-  # enbale metrics
+  # enable metrics
   self-monitoring:
     action-metrics:
       enabled: true

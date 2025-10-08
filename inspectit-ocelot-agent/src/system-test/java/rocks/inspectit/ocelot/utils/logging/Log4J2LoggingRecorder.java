@@ -1,4 +1,4 @@
-package rocks.inspectit.ocelot.logging;
+package rocks.inspectit.ocelot.utils.logging;
 
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Core;

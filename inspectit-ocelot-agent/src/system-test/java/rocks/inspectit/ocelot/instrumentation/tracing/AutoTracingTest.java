@@ -1,6 +1,5 @@
 package rocks.inspectit.ocelot.instrumentation.tracing;
 
-import io.opentelemetry.sdk.trace.data.SpanData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import rocks.inspectit.ocelot.utils.TestUtils;

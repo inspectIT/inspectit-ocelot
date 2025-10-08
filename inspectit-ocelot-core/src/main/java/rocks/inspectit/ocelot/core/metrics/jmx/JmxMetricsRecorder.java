@@ -184,11 +184,12 @@ public class JmxMetricsRecorder extends AbstractPollingMetricsRecorder implement
         stringBuilder.append(attrName);
 
         String result = stringBuilder.toString();
+        String cleanedResult = result.replace(' ', METRIC_SEPARATOR).replace("'", "");
 
         if (lowerCaseMetricName) {
-            return result.toLowerCase();
+            return cleanedResult.toLowerCase();
         } else {
-            return result;
+            return cleanedResult;
         }
     }
 

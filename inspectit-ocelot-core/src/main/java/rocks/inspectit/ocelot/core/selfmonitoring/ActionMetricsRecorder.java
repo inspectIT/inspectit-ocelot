@@ -22,12 +22,12 @@ public class ActionMetricsRecorder extends DynamicallyActivatableService {
     /**
      * The prefix of the recorded metrics.
      */
-    private static final String METRIC_NAME_PREFIX = "action/";
+    private static final String METRIC_NAME_PREFIX = "action_";
 
     /**
      * The metric name for the execution time of an action.
      */
-    private static final String EXECUTION_TIME_METRIC_NAME = "execution-time";
+    private static final String EXECUTION_TIME_METRIC_NAME = "execution_time";
 
     /**
      * The measurement name used for recording.
@@ -54,13 +54,13 @@ public class ActionMetricsRecorder extends DynamicallyActivatableService {
             return;
         }
 
-        // create custom tags
-        HashMap<String, String> customTags = new HashMap<String, String>() {{
+        // create custom attributes
+        HashMap<String, String> customAttributes = new HashMap<String, String>() {{
             put(ACTION_NAME_KEY, actionName);
         }};
 
         // record the action's execution time
-        selfMonitoringService.recordMetric(MEASUREMENT_NAME, executionTimeMicros, customTags);
+        selfMonitoringService.recordMetric(MEASUREMENT_NAME, executionTimeMicros, customAttributes);
     }
 
     @Override

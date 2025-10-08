@@ -11,7 +11,7 @@ import java.time.Duration;
 @Service
 public class ClassLoaderMetricsRecorder extends AbstractPollingMetricsRecorder {
 
-    private static final String METRIC_NAME_PREFIX = "jvm/classes/";
+    private static final String METRIC_NAME_PREFIX = "jvm_classes_";
 
     private static final String LOADED_METRIC_NAME = "loaded";
 

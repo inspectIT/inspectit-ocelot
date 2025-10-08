@@ -1,12 +1,12 @@
 package rocks.inspectit.ocelot.core.exporter;
 
 import io.opentelemetry.exporter.prometheus.PrometheusHttpServer;
-import io.opentelemetry.exporter.prometheus.PrometheusHttpServerBuilder;
 import io.opentelemetry.sdk.metrics.export.MetricReader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import rocks.inspectit.ocelot.config.model.InspectitConfig;
 import rocks.inspectit.ocelot.config.model.exporters.metrics.PrometheusExporterSettings;
+import rocks.inspectit.ocelot.core.service.DynamicallyActivatableService;
 
 /**
  * Service for the Prometheus OpenTelemetry exporter.
@@ -14,9 +14,12 @@ import rocks.inspectit.ocelot.config.model.exporters.metrics.PrometheusExporterS
  */
 @Component
 @Slf4j
-public class PrometheusExporterService extends DynamicallyActivatableMetricsExporterService {
+public class PrometheusExporterService extends DynamicallyActivatableService {
 
-    private PrometheusHttpServerBuilder prometheusHttpServerBuilder;
+    /**
+     * The {@link PrometheusHttpServer} exposing recorded metrics
+     */
+    private MetricReader metricReader;
 
     public PrometheusExporterService() {
         super("exporters.metrics.prometheus", "metrics.enabled");
@@ -38,8 +41,12 @@ public class PrometheusExporterService extends DynamicallyActivatableMetricsExpo
         try {
             String host = config.getHost();
             int port = config.getPort();
-            prometheusHttpServerBuilder = PrometheusHttpServer.builder().setHost(host).setPort(port);
-            boolean success = openTelemetryController.registerMetricExporterService(this);
+            metricReader = PrometheusHttpServer.builder()
+                    .setHost(host)
+                    .setPort(port)
+                    .build();
+            boolean success = openTelemetryController.registerMetricReader(metricReader, getName());
+
             if (success) {
                 log.info("Starting Prometheus Exporter on {}:{}", host, port);
             } else {
@@ -55,12 +62,7 @@ public class PrometheusExporterService extends DynamicallyActivatableMetricsExpo
     @Override
     protected boolean doDisable() {
         log.info("Stopping Prometheus Exporter");
-        openTelemetryController.unregisterMetricExporterService(this);
+        openTelemetryController.unregisterMetricExporterService(getName());
         return true;
-    }
-
-    @Override
-    public MetricReader getNewMetricReader() {
-        return prometheusHttpServerBuilder.build();
     }
 }

@@ -3,10 +3,11 @@ inspectit:
     definitions:
       agentInfo:
         unit: calls
+        instrument-type: COUNTER
         views:
           agentInfo:
-            aggregation: COUNT
-            tags:
+            aggregation: SUM
+            attributes:
               agentVersion: true
               isSnapshot: true
 

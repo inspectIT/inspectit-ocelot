@@ -1,10 +1,9 @@
-
 inspectit:
   tracing:
     auto-tracing:
       frequency: 10ms
-  instrumentation:
 
+  instrumentation:
     scopes:
       AutoTracingTest-instrumentMe:
         type:

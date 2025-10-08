@@ -53,10 +53,9 @@ dependencies {
     // dependencies for opentelemetry-fat.jar
     opentelemetry(
             libs.ioOpentelemetryOpentelemetrySdk,
-            libs.ioOpentelemetryOpentelemetryOpencensusShim,
-            libs.ioOpencensusOpencensusImpl,
             libs.ioOpentelemetryOpentelemetrySemconv,
             libs.ioOpentelemetryInstrumentationOpentelemetryResources,
+            libs.ioOpentelemetryOpentelemetryExtensionTracePropagators,
             libs.comGoogleGuava
     )
 
@@ -153,15 +152,12 @@ dependencies {
             libs.ioOpentelemetryOpentelemetryApi,
             libs.ioOpentelemetryOpentelemetrySdk,
             libs.ioOpentelemetryInstrumentationOpentelemetryResources,
-            libs.ioOpentelemetryOpentelemetryOpencensusShim,
-            libs.ioOpencensusOpencensusImpl,
+            libs.ioOpentelemetryOpentelemetryExtensionTracePropagators,
 
             project(':inspectit-ocelot-bootstrap')
     )
 
     systemTestImplementation(
-            libs.ioOpencensusOpencensusTesting,
-            libs.ioOpencensusOpencensusApi,
             libs.comGoogleGuava,
 
             // for InMemorySpanExporter
@@ -171,6 +167,7 @@ dependencies {
             platform(libs.ioOpentelemetryOpentelemetryBomAlpha),
             libs.ioOpentelemetryOpentelemetrySemconv,
             libs.ioOpentelemetryInstrumentationOpentelemetryResources,
+            libs.ioOpentelemetryOpentelemetryExtensionTracePropagators,
 
             libs.orgJunitJupiterJunitJupiterEngine,
             libs.orgJunitJupiterJunitJupiterApi,

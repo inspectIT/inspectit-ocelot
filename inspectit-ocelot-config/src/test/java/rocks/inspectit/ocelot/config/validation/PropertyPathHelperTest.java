@@ -188,7 +188,7 @@ public class PropertyPathHelperTest {
 
         @Test
         void existingMap() {
-            List<String> list = Arrays.asList("metrics", "definitions", "jvm/gc/concurrent/phase/time", "description");
+            List<String> list = Arrays.asList("metrics", "definitions", "jvm_gc_concurrent_phase_time", "description");
             Type output = String.class;
 
             assertThat(PropertyPathHelper.getPathEndType(list, InspectitConfig.class)).isEqualTo(output);
@@ -196,7 +196,7 @@ public class PropertyPathHelperTest {
 
         @Test
         void readMethodIsNull() {
-            List<String> list = Arrays.asList("instrumentation", "data", "method_duration", "is-tag");
+            List<String> list = Arrays.asList("instrumentation", "data", "method_duration", "session-storage");
             Type output = Boolean.class;
 
             assertThat(PropertyPathHelper.getPathEndType(list, InspectitConfig.class)).isEqualTo(output);

@@ -3,10 +3,11 @@ inspectit:
     definitions:
       regexCache:
         unit: calls
+        instrument-type: COUNTER
         views:
           regexCache:
-            aggregation: COUNT
-            tags:
+            aggregation: SUM
+            attributes:
               isMatch: true
 
   instrumentation:

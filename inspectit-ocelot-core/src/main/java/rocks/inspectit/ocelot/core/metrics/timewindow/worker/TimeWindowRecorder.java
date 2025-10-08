@@ -38,7 +38,7 @@ public class TimeWindowRecorder {
     /**
      * The interval for processing the {@link #recordsQueue}
      */
-    private final Duration recordingInterval = Duration.ofMillis(50);
+    private final Duration recordingInterval = Duration.ofMillis(10);
 
     private Future<?> recordingTask;
 

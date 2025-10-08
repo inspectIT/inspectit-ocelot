@@ -3,16 +3,18 @@ inspectit:
     definitions:
       writeAttachment:
         unit: invocations
+        instrument-type: COUNTER
         views:
           writeAttachment:
-            aggregation: COUNT
-            tags: {target: true, firstVal: true, secondVal: true}
+            aggregation: SUM
+            attributes: {target: true, firstVal: true, secondVal: true}
       readAttachment:
         unit: invocations
+        instrument-type: COUNTER
         views:
           readAttachment:
-            aggregation: COUNT
-            tags: {target: true, firstVal: true, secondVal: true}
+            aggregation: SUM
+            attributes: {target: true, firstVal: true, secondVal: true}
 
   instrumentation:
     scopes:
@@ -22,8 +24,6 @@ inspectit:
       ObjectAttachmentsTest-readAttachments:
         type: { name: ObjectAttachmentsTest, matcher-mode: ENDS_WITH}
         methods: [{name: readAttachments}]
-
-
 
     rules:
       ObjectAttachmentsTest-writeAttachments:
@@ -36,7 +36,6 @@ inspectit:
             action: a_attachment_put
             constant-input: {key: "first"}
             data-input: {target: _arg0, value: _arg1}
-
           secondVal:
             action: a_attachment_put
             constant-input: {key: "second"}
@@ -45,7 +44,6 @@ inspectit:
           writeAttachment:
             value: 1
             data-tags: {target: target, firstVal: firstVal, secondVal: secondVal}
-
 
       ObjectAttachmentsTest-readAttachments:
         scopes: { ObjectAttachmentsTest-readAttachments: true }
@@ -57,7 +55,6 @@ inspectit:
             action: a_attachment_get
             constant-input: {key: "first"}
             data-input: {target: _arg0}
-
           secondVal:
             action: a_attachment_get
             constant-input: {key: "second"}

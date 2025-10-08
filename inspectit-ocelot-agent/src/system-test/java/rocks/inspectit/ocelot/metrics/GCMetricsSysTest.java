@@ -1,27 +1,26 @@
 package rocks.inspectit.ocelot.metrics;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
-import io.opencensus.stats.*;
-import io.opencensus.tags.TagValue;
+import io.opentelemetry.sdk.metrics.data.LongPointData;
+import io.opentelemetry.sdk.metrics.data.PointData;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
 
 import javax.management.NotificationEmitter;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 public class GCMetricsSysTest extends MetricsSysTestBase {
 
     private static final Logger log = LoggerFactory.getLogger(GCMetricsSysTest.class);
-
-    private static final ViewManager viewManager = Stats.getViewManager();
 
     public static List blackhole;
 
@@ -30,7 +29,7 @@ public class GCMetricsSysTest extends MetricsSysTestBase {
      */
     @Test
     public void testGCPauseCapturing() throws Exception {
-        //we try triggering a (non-concurrent) GC with stuff to do
+        // we try triggering a (non-concurrent) GC with stuff to do
         for (int i = 0; i < 1000000; i++) {
             blackhole = new ArrayList<>();
         }
@@ -68,20 +67,38 @@ public class GCMetricsSysTest extends MetricsSysTestBase {
         Thread.sleep(500);
         flushMetrics();
 
-        ViewData pauseData = viewManager.getView(View.Name.create("jvm/gc/pause"));
+        await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
+            Collection<PointData> gcData = MetricTestUtils.getAllDataForView("jvm_gc_pause");
 
-        assertThat(pauseData.getAggregationMap()).isNotEmpty();
+            assertThat(gcData).isNotEmpty();
+            assertThat(gcData.stream().findFirst().get().getAttributes().asMap()).isNotEmpty();
 
-        Map.Entry<List<TagValue>, AggregationData> minorTime = pauseData.getAggregationMap().entrySet().stream()
-                .filter(e -> e.getKey().stream().filter(tag -> tag.asString().contains("minor")).findFirst().isPresent())
-                .findFirst().get();
+            Optional<PointData> gcMinor = gcData.stream()
+                    .filter(point -> containsStringInAttributeValue(point, "minor"))
+                    .findFirst();
+            Optional<PointData> gcMajor = gcData.stream()
+                    .filter(point -> containsStringInAttributeValue(point, "major"))
+                    .findFirst();
 
-        Map.Entry<List<TagValue>, AggregationData> majorTime = pauseData.getAggregationMap().entrySet().stream()
-                .filter(e -> e.getKey().stream().filter(tag -> tag.asString().contains("major")).findFirst().isPresent())
-                .findFirst().get();
+            assertThat(gcMinor).isNotEmpty();
+            assertThat(gcMajor).isNotEmpty();
 
+            LongPointData gcMinorLong = (LongPointData) gcMinor.get();
+            LongPointData gcMajorLong = (LongPointData) gcMajor.get();
 
-        assertThat(((AggregationData.SumDataLong) minorTime.getValue()).getSum()).isGreaterThanOrEqualTo(0);
-        assertThat(((AggregationData.SumDataLong) majorTime.getValue()).getSum()).isGreaterThan(0);
+            assertThat(gcMinorLong.getValue()).isGreaterThanOrEqualTo(0);
+            assertThat(gcMajorLong.getValue()).isGreaterThan(0);
+        });
+    }
+
+    /**
+     * @return true, if the point data contains an attribute value with the searched string
+     */
+    private static boolean containsStringInAttributeValue(PointData pointData, String search) {
+        for (Object value : pointData.getAttributes().asMap().values()) {
+            String valueString = value.toString();
+            if (valueString.contains(search)) return true;
+        }
+        return false;
     }
 }

@@ -1,27 +1,23 @@
 package rocks.inspectit.ocelot.instrumentation.special;
 
-import io.opencensus.common.Scope;
-import io.opencensus.tags.*;
-import org.apache.logging.log4j.core.tools.picocli.CommandLine;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.context.Scope;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import rocks.inspectit.ocelot.bootstrap.Instances;
 import rocks.inspectit.ocelot.instrumentation.InstrumentationSysTestBase;
 import rocks.inspectit.ocelot.utils.TestUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 public class ThreadStartContextPropagationTest extends InstrumentationSysTestBase {
 
-    private static final Tagger tagger = Tags.getTagger();
+    private final static String attrKey = "test-key";
+
+    private final static String attrValue = "test-value";
 
     /**
      * Abstract thread class.
@@ -54,69 +50,69 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
     }
 
     @BeforeAll
-    static void waitForInstrumentation() {
+    static void waitForClassInstrumentation() {
         TestUtils.waitForClassInstrumentations(Arrays.asList(AbstractThread.class, Thread.class), false, 15, TimeUnit.SECONDS);
     }
 
     @Test
     public void verifyContextPropagationViaAbstractThreads() throws InterruptedException {
         long rand = System.nanoTime();
-        TagKey tagKey = TagKey.create("test-tag-key-" + rand);
-        TagValue tagValue = TagValue.create("test-tag-value-" + rand);
+        String attributeKey = attrKey + rand;
+        String attributeValue = attrValue + rand;
         CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+        AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
         Thread thread = new SubThread(() -> {
-            Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-            refTags.set(iter);
+            Baggage baggage = Baggage.current();
+            refBaggage.set(baggage);
             latch.countDown();
         });
 
-        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+        try (Scope s = Baggage.current().toBuilder().put(attributeKey, attributeValue).build().makeCurrent()) {
             thread.start();
         }
 
         latch.await(5, TimeUnit.SECONDS);
 
-        assertThat(refTags.get()).toIterable().hasSize(1)
-                .extracting("key", "value")
-                .contains(tuple(tagKey, tagValue));
+        assertThat(refBaggage.get().asMap()).hasSize(1)
+                .allSatisfy((key, valueEntry) -> {
+                    assertThat(key).isEqualTo(attributeKey);
+                    assertThat(valueEntry.getValue()).isEqualTo(attributeValue);
+                });
     }
 
     @Test
-    public void verifyContextProgapation() throws InterruptedException {
-        TagKey tagKey = TagKey.create("test-tag-key");
-        TagValue tagValue = TagValue.create("test-tag-value");
+    public void verifyContextPropagation() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+        AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
-        Thread thread = new Thread(() -> {
-            Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-            refTags.set(iter);
+        Thread thread = new SubThread(() -> {
+            Baggage baggage = Baggage.current();
+            refBaggage.set(baggage);
             latch.countDown();
         });
 
-        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+        try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
             thread.start();
         }
 
         latch.await(5, TimeUnit.SECONDS);
 
-        assertThat(refTags.get()).toIterable().hasSize(1)
-                .extracting("key", "value")
-                .contains(tuple(tagKey, tagValue));
+        assertThat(refBaggage.get().asMap()).hasSize(1)
+                .allSatisfy((key, valueEntry) -> {
+                    assertThat(key).isEqualTo(attrKey);
+                    assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                });
     }
 
     @Test
-    public void verifyContextProgapationUsingSubClasses() throws InterruptedException {
-        TagKey tagKey = TagKey.create("test-tag-key");
-        TagValue tagValue = TagValue.create("test-tag-value");
+    public void verifyContextPropagationUsingSubClasses() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+        AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
         Thread thread = new Thread(() -> {
-            Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-            refTags.set(iter);
+            Baggage baggage = Baggage.current();
+            refBaggage.set(baggage);
             latch.countDown();
         }) {
             @Override
@@ -125,30 +121,30 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
             }
         };
 
-        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+        try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
             thread.start();
         }
 
         latch.await(5, TimeUnit.SECONDS);
 
-        assertThat(refTags.get()).toIterable().hasSize(1)
-                .extracting("key", "value")
-                .contains(tuple(tagKey, tagValue));
+        assertThat(refBaggage.get().asMap()).hasSize(1)
+                .allSatisfy((key, valueEntry) -> {
+                    assertThat(key).isEqualTo(attrKey);
+                    assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                });
     }
 
     @Test
-    public void noContextProgapationViaConstructor() throws InterruptedException {
-        TagKey tagKey = TagKey.create("test-tag-key");
-        TagValue tagValue = TagValue.create("test-tag-value");
+    public void noContextPropagationViaConstructor() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<Iterator<Tag>> refTags = new AtomicReference<>();
+        AtomicReference<Baggage> refBaggage = new AtomicReference<>();
 
         Thread thread;
 
-        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+        try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
             thread = new Thread(() -> {
-                Iterator<Tag> iter = InternalUtils.getTags(tagger.getCurrentTagContext());
-                refTags.set(iter);
+                Baggage baggage = Baggage.current();
+                refBaggage.set(baggage);
                 latch.countDown();
             });
         }
@@ -157,31 +153,30 @@ public class ThreadStartContextPropagationTest extends InstrumentationSysTestBas
 
         latch.await(5, TimeUnit.SECONDS);
 
-        assertThat(refTags.get()).toIterable().hasSize(0);
+        assertThat(refBaggage.get().asMap()).isEmpty();
     }
 
     @Test
     public void noCorrelationInExecutor() throws Exception {
-        TagKey tagKey = TagKey.create("tag_key");
-        TagValue tagValue = TagValue.create("tag_value");
-
-        AtomicReference<Iterator<Tag>> refTagsInner = new AtomicReference<>();
-        Runnable runnable = HelperClasses.getRunnableAsNamed(refTagsInner);
+        AtomicReference<Baggage> refBaggageInner = new AtomicReference<>();
+        Runnable runnable = HelperClasses.getRunnableAsNamed(refBaggageInner);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-        try (Scope s = tagger.currentBuilder().putLocal(tagKey, tagValue).buildScoped()) {
+        try (Scope s = Baggage.current().toBuilder().put(attrKey, attrValue).build().makeCurrent()) {
             executorService.submit(runnable);
         }
 
-        AtomicReference<Iterator<Tag>> refTagsOuter = new AtomicReference<>();
-        Runnable runnableSecond = HelperClasses.getRunnableAsNamed(refTagsOuter);
+        AtomicReference<Baggage> refBaggageOuter = new AtomicReference<>();
+        Runnable runnableSecond = HelperClasses.getRunnableAsNamed(refBaggageOuter);
         Future<?> taskFuture = executorService.submit(runnableSecond); // have to be empty!
         taskFuture.get();
 
-        assertThat(refTagsInner.get()).toIterable().hasSize(1)
-                .extracting("key", "value")
-                .contains(tuple(tagKey, tagValue));
-        assertThat(refTagsOuter.get()).toIterable().isEmpty();
+        assertThat(refBaggageInner.get().asMap()).hasSize(1)
+                .allSatisfy((key, valueEntry) -> {
+                    assertThat(key).isEqualTo(attrKey);
+                    assertThat(valueEntry.getValue()).isEqualTo(attrValue);
+                });
+        assertThat(refBaggageOuter.get().asMap()).isEmpty();
     }
 }

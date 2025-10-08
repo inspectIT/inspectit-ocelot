@@ -1,9 +1,7 @@
 package rocks.inspectit.ocelot.instrumentation.special.remote;
 
-import io.opencensus.common.Scope;
-import io.opencensus.tags.TagKey;
-import io.opencensus.tags.TagValue;
-import io.opencensus.tags.Tags;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.context.Scope;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.BrokerService;
 import org.assertj.core.api.Assertions;
@@ -81,10 +79,7 @@ public class JmsApiContextPropagationTest {
 
         @Test
         void shouldWriteDownPropagatedData() throws Exception {
-            try (Scope s = Tags.getTagger().emptyBuilder()
-                    .putLocal(TagKey.create(key), TagValue.create(value))
-                    .buildScoped()
-            ) {
+            try (Scope s = Baggage.builder().put(key, value).build().makeCurrent()) {
                 TextMessage message = session.createTextMessage("test");
                 producer.send(message);
             }
@@ -108,10 +103,7 @@ public class JmsApiContextPropagationTest {
                 latch.countDown();
             });
 
-            try (Scope s = Tags.getTagger().emptyBuilder()
-                    .putLocal(TagKey.create(key), TagValue.create(value))
-                    .buildScoped()) {
-
+            try (Scope s = Baggage.builder().put(key, value).build().makeCurrent()) {
                 TextMessage message = session.createTextMessage("test");
                 producer.send(message);
             }
