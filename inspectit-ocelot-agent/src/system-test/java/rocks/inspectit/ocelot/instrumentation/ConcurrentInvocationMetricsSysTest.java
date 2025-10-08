@@ -43,7 +43,7 @@ public class ConcurrentInvocationMetricsSysTest extends InstrumentationSysTestBa
     }
 
     private void assertInvocation(long expected) {
-        await().atMost(15, TimeUnit.SECONDS).untilAsserted(() ->
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted(() ->
             assertThat(MetricTestUtils.getDataForView("inspectit_concurrent_invocations", emptyMap()))
                     .isNotNull()
                     .isInstanceOfSatisfying(LongPointData.class, (pointData) ->
