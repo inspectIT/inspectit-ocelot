@@ -141,9 +141,6 @@ dependencies {
             libs.orgAssertjAssertjGuava,
             libs.orgAwaitility,
             libs.comGithubTomakehurstWiremockJre8,
-            libs.ioGrpcGrpcNettyShaded,
-            libs.ioGrpcGrpcStub,
-            libs.orgInfluxdbInfluxdbJava,
 
             // for docker test containers
             libs.orgTestcontainers,
@@ -157,7 +154,7 @@ dependencies {
 
             // LogCapturer
             libs.ioGithubNetmikeyLogunitLogunitCore,
-            // jul-slf4j bridge needed to redirect OTEL logs using java.util.logging to logback
+            // jul-slf4j bridge needed to redirect OTel logs using java.util.logging to logback
             libs.orgSlf4jJulToSlf4j,
             libs.chQosLogbackLogbackClassic,
             libs.chQosLogbackLogbackCore,
