@@ -54,13 +54,13 @@ public class ActionMetricsRecorder extends DynamicallyActivatableService {
             return;
         }
 
-        // create custom tags
-        HashMap<String, String> customTags = new HashMap<String, String>() {{
+        // create custom attributes
+        HashMap<String, String> customAttributes = new HashMap<String, String>() {{
             put(ACTION_NAME_KEY, actionName);
         }};
 
         // record the action's execution time
-        selfMonitoringService.recordMetric(MEASUREMENT_NAME, executionTimeMicros, customTags);
+        selfMonitoringService.recordMetric(MEASUREMENT_NAME, executionTimeMicros, customAttributes);
     }
 
     @Override

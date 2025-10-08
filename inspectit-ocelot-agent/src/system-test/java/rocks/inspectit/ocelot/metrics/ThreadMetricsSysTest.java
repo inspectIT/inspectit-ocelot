@@ -1,49 +1,46 @@
 package rocks.inspectit.ocelot.metrics;
 
-import io.opencensus.stats.*;
-import io.opencensus.tags.TagValue;
+import io.opentelemetry.sdk.metrics.data.LongPointData;
+import io.opentelemetry.sdk.metrics.data.PointData;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 public class ThreadMetricsSysTest extends MetricsSysTestBase {
 
-    private static final ViewManager viewManager = Stats.getViewManager();
-
     @Test
     public void testThreadMetricsCapturing() {
         await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
-            ViewData liveData = viewManager.getView(View.Name.create("jvm/threads/live"));
-            ViewData peakData = viewManager.getView(View.Name.create("jvm/threads/peak"));
-            ViewData daemonData = viewManager.getView(View.Name.create("jvm/threads/daemon"));
-            ViewData stateData = viewManager.getView(View.Name.create("jvm/threads/states"));
+
+            LongPointData liveData = (LongPointData) MetricTestUtils.getDataForView("jvm_threads_live", emptyMap());
+            LongPointData peakData = (LongPointData) MetricTestUtils.getDataForView("jvm_threads_peak", emptyMap());
+            LongPointData daemonData = (LongPointData) MetricTestUtils.getDataForView("jvm_threads_daemon", emptyMap());
+            Collection<PointData> stateData = MetricTestUtils.getAllDataForView("jvm_threads_states");
 
             assertThat(liveData).isNotNull();
             assertThat(peakData).isNotNull();
             assertThat(daemonData).isNotNull();
-            assertThat(stateData).isNotNull();
+            assertThat(stateData).isNotEmpty();
 
-            assertThat(liveData.getAggregationMap()).isNotEmpty();
-            assertThat(peakData.getAggregationMap()).isNotEmpty();
-            assertThat(daemonData.getAggregationMap()).isNotEmpty();
-            assertThat(stateData.getAggregationMap()).isNotEmpty();
+            assertThat(liveData.getAttributes().asMap()).isNotEmpty();
+            assertThat(peakData.getAttributes().asMap()).isNotEmpty();
+            assertThat(daemonData.getAttributes().asMap()).isNotEmpty();
+            assertThat(stateData.stream().findFirst().get().getAttributes().asMap()).isNotEmpty();
 
-            Map.Entry<List<TagValue>, AggregationData> liveCount = liveData.getAggregationMap().entrySet().stream().findFirst().get();
-            long live = ((AggregationData.LastValueDataLong) liveCount.getValue()).getLastValue();
-            Map.Entry<List<TagValue>, AggregationData> peakCount = peakData.getAggregationMap().entrySet().stream().findFirst().get();
-            long peak = ((AggregationData.LastValueDataLong) peakCount.getValue()).getLastValue();
-            Map.Entry<List<TagValue>, AggregationData> daemonCount = daemonData.getAggregationMap().entrySet().stream().findFirst().get();
-            long daemon = ((AggregationData.LastValueDataLong) daemonCount.getValue()).getLastValue();
-
-            long statesCount =
-                    liveData.getAggregationMap().entrySet().stream().map(Map.Entry::getValue)
-                            .map(d -> (AggregationData.LastValueDataLong) d)
-                            .mapToLong(d -> d.getLastValue())
+            long live = liveData.getValue();
+            long peak = peakData.getValue();
+            long daemon = daemonData.getValue();
+            long statesCount = stateData.stream()
+                    .map((pointData -> (LongPointData) pointData))
+                            .mapToLong((LongPointData::getValue))
                             .sum();
 
             assertThat(live).isEqualTo(statesCount);

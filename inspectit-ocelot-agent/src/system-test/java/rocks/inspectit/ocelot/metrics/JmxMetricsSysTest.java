@@ -1,39 +1,32 @@
 package rocks.inspectit.ocelot.metrics;
 
-import io.opencensus.stats.*;
-import io.opencensus.tags.TagValue;
+import io.opentelemetry.sdk.metrics.data.LongPointData;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
 
 import java.lang.management.ManagementFactory;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 public class JmxMetricsSysTest extends MetricsSysTestBase {
 
-    private static final ViewManager viewManager = Stats.getViewManager();
-
     @Test
     public void uptime() {
         await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
-            ViewData uptimeViewData = viewManager.getView(View.Name.create("jvm/jmx/java/lang/runtime/uptime"));
+            LongPointData uptimeData = (LongPointData) MetricTestUtils.getDataForView("jvm_jmx_java_lang_runtime_uptime", emptyMap());
 
-            assertThat(uptimeViewData).isNotNull();
-            assertThat(uptimeViewData.getAggregationMap()).isNotEmpty();
+            assertThat(uptimeData).isNotNull();
 
-            Map.Entry<List<TagValue>, AggregationData> uptime = uptimeViewData.getAggregationMap().entrySet().stream().findFirst().get();
+            // ensure that attributes are present
+            assertThat(uptimeData.getAttributes().asMap()).isNotEmpty();
 
-            //ensure that tags are present
-            assertThat(uptime.getKey()).isNotEmpty();
+            // ensure that the values are sane
+            long loaded = uptimeData.getValue();
 
-            //ensure that the values are sane
-            double uptimeVal = ((AggregationData.LastValueDataDouble) uptime.getValue()).getLastValue();
-
-            assertThat(uptimeVal).isLessThanOrEqualTo(ManagementFactory.getRuntimeMXBean().getUptime());
+            assertThat(loaded).isLessThanOrEqualTo(ManagementFactory.getRuntimeMXBean().getUptime());
         });
     }
-
 }

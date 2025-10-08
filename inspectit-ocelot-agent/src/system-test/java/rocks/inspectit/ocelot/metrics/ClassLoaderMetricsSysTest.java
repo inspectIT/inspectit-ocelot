@@ -1,45 +1,39 @@
 package rocks.inspectit.ocelot.metrics;
 
-import io.opencensus.stats.*;
-import io.opencensus.tags.TagValue;
+import io.opentelemetry.sdk.metrics.data.LongPointData;
 import org.junit.jupiter.api.Test;
+import rocks.inspectit.ocelot.utils.MetricTestUtils;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 public class ClassLoaderMetricsSysTest extends MetricsSysTestBase {
 
-    private static final ViewManager viewManager = Stats.getViewManager();
-
     @Test
     public void testClassLoaderMetricCapturing() {
         await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
-            ViewData loadedData = viewManager.getView(View.Name.create("jvm/classes/loaded"));
-            ViewData unloadedData = viewManager.getView(View.Name.create("jvm/classes/unloaded"));
+            LongPointData loadedData = (LongPointData) MetricTestUtils.getDataForView("jvm_classes_loaded", emptyMap());
+            LongPointData unloadedData = (LongPointData) MetricTestUtils.getDataForView("jvm_classes_unloaded", emptyMap());
 
             assertThat(loadedData).isNotNull();
             assertThat(unloadedData).isNotNull();
-            assertThat(loadedData.getAggregationMap()).isNotEmpty();
-            assertThat(unloadedData.getAggregationMap()).isNotEmpty();
 
-            Map.Entry<List<TagValue>, AggregationData> loaded = loadedData.getAggregationMap().entrySet().stream().findFirst().get();
-            Map.Entry<List<TagValue>, AggregationData> unloaded = unloadedData.getAggregationMap().entrySet().stream().findFirst().get();
+            // ensure that attributes are present
+            assertThat(loadedData.getAttributes().asMap()).isNotEmpty();
+            assertThat(unloadedData.getAttributes().asMap()).isNotEmpty();
 
-            //ensure that tags are present
-            assertThat(loaded.getKey()).isNotEmpty();
-            assertThat(unloaded.getKey()).isNotEmpty();
+            // ensure that the values are sane
+            long loaded = loadedData.getValue();
+            long unloaded = unloadedData.getValue();
 
-            //ensure that the values are sane
-            long loadedVal = ((AggregationData.LastValueDataLong) loaded.getValue()).getLastValue();
-            long unloadedVal = ((AggregationData.LastValueDataLong) unloaded.getValue()).getLastValue();
-
-            assertThat(loadedVal).isLessThanOrEqualTo(ManagementFactory.getClassLoadingMXBean().getTotalLoadedClassCount());
-            assertThat(unloadedVal).isLessThanOrEqualTo(ManagementFactory.getClassLoadingMXBean().getUnloadedClassCount());
+            assertThat(loaded).isLessThanOrEqualTo(ManagementFactory.getClassLoadingMXBean().getTotalLoadedClassCount());
+            assertThat(unloaded).isLessThanOrEqualTo(ManagementFactory.getClassLoadingMXBean().getUnloadedClassCount());
         });
     }
 }

@@ -70,6 +70,17 @@ public class MetricTestUtils {
     }
 
     /**
+     * @return All point data for the gauge view (every time series)
+     */
+    public static Collection<PointData> getAllDataForView(String viewName) {
+        Collection<MetricData> filteredData = getFilteredData(viewName);
+
+        return filteredData.stream()
+                .flatMap(metricData -> metricData.getData().getPoints().stream())
+                .collect(Collectors.toList());
+    }
+
+    /**
      * @return The point data for the histogram view with the provided attributes
      */
     public static HistogramPointData getDataForHistogramView(String viewName, Map<String, String> attributes) {
