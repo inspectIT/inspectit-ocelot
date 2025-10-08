@@ -59,13 +59,12 @@ class ServiceInMetricTest extends InstrumentationSysTestBase {
         }
     }
 
-    static class TestServlet extends HttpServlet {
+    public static class TestServlet extends HttpServlet {
 
         @Override
-        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
             resp.setStatus(200);
         }
-
     }
 
     @Nested

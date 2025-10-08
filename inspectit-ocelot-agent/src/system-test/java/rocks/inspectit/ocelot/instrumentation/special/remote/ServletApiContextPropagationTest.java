@@ -68,7 +68,7 @@ class ServletApiContextPropagationTest {
         }
     }
 
-    static class TestServlet extends HttpServlet {
+    public static class TestServlet extends HttpServlet {
 
         static Map<String, String> lastAttributes;
 
@@ -120,7 +120,7 @@ class ServletApiContextPropagationTest {
         }
     }
 
-    static class TestFilter implements Filter {
+    public static class TestFilter implements Filter {
 
         static Map<String, String> lastAttributes;
 

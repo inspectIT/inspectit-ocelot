@@ -57,7 +57,7 @@ class HttpRemoteTracingTest extends TraceTestBase {
         server.stop();
     }
 
-    static class TracingServlet extends HttpServlet {
+    public static class TracingServlet extends HttpServlet {
 
         @Override
         public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {

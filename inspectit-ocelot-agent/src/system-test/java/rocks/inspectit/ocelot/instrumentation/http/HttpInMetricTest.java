@@ -42,10 +42,10 @@ class HttpInMetricTest extends InstrumentationSysTestBase {
         }
     }
 
-    static class TestServlet extends HttpServlet {
+    public static class TestServlet extends HttpServlet {
 
         @Override
-        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
             // 123 was not a valid status code and rejected by jdk 21
             resp.setStatus(200);
         }
